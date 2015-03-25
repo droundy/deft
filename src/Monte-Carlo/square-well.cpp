@@ -273,7 +273,6 @@ void sw_simulation::reset_histograms(){
 
   moves.total = 0;
   moves.working = 0;
-  iteration = 0;
 
   for(int i = 0; i < energy_levels; i++){
     energy_histogram[i] = 0;
@@ -645,7 +644,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
   }
 
   else if(end_condition == init_iter_limit){
-    return iteration > init_iters;
+    return iteration >= init_iters;
   }
 
   printf("We are asking whether we are finished initializing without "
@@ -742,11 +741,10 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     // If we have a minimum important energy, (effectively) don't allow going any lower
     if(min_important_energy) initialize_canonical(1e-5,min_important_energy);
 
-    for (int i=0; i < N*energy_levels || reached_iteration_cap(); i++) {
+    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
       move_a_ball();
       ln_energy_weights[energy] -= wl_factor;
     }
-    done = reached_iteration_cap();
 
     min_wl_energy = min_important_energy ? min_important_energy : min_energy_state;
 
@@ -795,12 +793,14 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
       // repeat until terminal condition is met,
       // and make sure we're not stuck at a newly introduced minimum energy state
-      if (wl_factor < wl_cutoff && energy != min_energy_state) {
+      if (wl_factor < wl_cutoff && energy != min_energy_state
+          && end_condition != init_iter_limit) {
         printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
                iteration, weight_updates);
         done = true;
       }
     }
+    if(end_condition == init_iter_limit) done = reached_iteration_cap();
   }
   initialize_canonical(min_T,min_wl_energy);
 }
@@ -815,7 +815,7 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
     reset_histograms();
 
     // simulate for a while
-    for(long i = 0; i < N*update_iters || reached_iteration_cap(); i++) move_a_ball();
+    for(long i = 0; i < N*update_iters && !reached_iteration_cap(); i++) move_a_ball();
 
     // Find the minimum energy we've seen in this iteration.
     int min_hist = energy_levels-1;
@@ -859,13 +859,12 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
 
 void sw_simulation::initialize_simple_flat(int flat_update_factor){
   int weight_updates = 0;
-  long num_iterations = min_samples*N*energy_levels;
+  long num_iterations = exp(1/min_T)*N*energy_levels;
   do {
     set_min_important_energy();
 
     // update weight array
-    for (int e = max_entropy_state;
-         e <= min_important_energy || reached_iteration_cap(); e++) {
+    for (int e = max_entropy_state; e <= min_important_energy; e++) {
       if (energy_histogram[e]) {
         ln_energy_weights[e] -= log(energy_histogram[e]);
       }
@@ -879,7 +878,7 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     // Now reset the calculation!
     reset_histograms();
 
-    for (long j = 0; j < num_iterations; j++) move_a_ball();
+    for (long j = 0; j < num_iterations && !reached_iteration_cap(); j++) move_a_ball();
 
     if (printing_allowed()) {
       printf("simple flat status update:\n");
@@ -939,10 +938,10 @@ void sw_simulation::update_weights_using_transitions() {
 
 // initialization with tmmc
 void sw_simulation::initialize_transitions() {
-  int check_how_often = min_samples*energy_levels; // avoid wasting time if we are done
+  int check_how_often = exp(1/min_T)*energy_levels; // avoid wasting time if we are done
   do {
-    for (int i = 0; i < check_how_often || reached_iteration_cap(); i++) move_a_ball(true);
-    check_how_often += min_samples*energy_levels; // try a little harder next time...
+    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball(true);
+    check_how_often += exp(1/min_T)*energy_levels; // try a little harder next time...
   } while(!finished_initializing(printing_allowed()));
 
   update_weights_using_transitions();

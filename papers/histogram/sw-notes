@@ -1,4 +1,4 @@
-run end condition tests
+make iterations vs initialization quality plot
 
 specify and energy range for wang landau when making comparisons to other methods
 optionally look for a minimum important energy to define the energy range
@@ -11,13 +11,13 @@ optimized_ensemble changes
  - what does it mean if df < 0 ?
 
 fractional_sample_error: what should we do if samples=0?
-simple_flat and tmmc scaling (without min_samples)
+simple_flat and tmmc scaling (exp(1/min_T) instead of min_samples)
 
+
+run end condition tests
 
 IF we have a problem with picking bad minimum energies, consider requiring
   a minimum histogram count of exp(1/min_T) at the minimum energy
-
-make iterations vs initialization quality plot
 
 
 make wang_landau and tmmc dump weight aray and histogram periodically?
