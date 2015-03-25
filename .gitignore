@@ -66,3 +66,4 @@ generate_*.hs
 *.tum
 movie.svg
 free-energy-monte-carlo-infinite-case
+version-identifier.h
