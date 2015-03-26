@@ -379,8 +379,8 @@ int main(int argc, const char *argv[]) {
   /* If we are going to optimized the ensemble after initializing via some other method,
      initialize "half way" each time */
   if(optimized_ensemble){
-    sw.min_samples /= 2;
-    sw.init_iters /= 2;
+    // sw.min_samples /= 2;
+    // sw.init_iters /= 2;
 
     if(sw.flatness){
       printf("It does not make sense to optimize the ensemble with a "
@@ -592,10 +592,6 @@ int main(int argc, const char *argv[]) {
   // Walker histograms
   sw.walkers_up = new long[sw.energy_levels]();
 
-  // a guess for the number of iterations for which to initially run
-  //   optimized ensemble initialization
-  int first_update_iterations = sw.N*sw.energy_levels;
-
   // ----------------------------------------------------------------------------
   // Define data arrays
   // ----------------------------------------------------------------------------
@@ -763,8 +759,15 @@ int main(int argc, const char *argv[]) {
   // If we wish to optimize the ensemble or set transition matrix weights, do so
   if (optimized_ensemble) {
     printf("\nOptimizing the ensemble!\n");
+    // We need to know the minimum important energy to get optimized_ensemble right.
+    sw.set_min_important_energy();
     sw.reset_histograms();
     sw.iteration = 0;
+
+    // a guess for the number of iterations for which to initially run
+    //   optimized ensemble initialization
+    int first_update_iterations = sw.N*sw.energy_levels;
+
     sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
   } else if(transition_override){
     printf("\nOverriding weight array with that generated from the transition matrix!\n");

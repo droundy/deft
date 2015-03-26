@@ -657,7 +657,7 @@ bool sw_simulation::reached_iteration_cap(){
 }
 
 int sw_simulation::initialize_max_entropy(double acceptance_goal) {
-  printf("Moving to most probable state and tuning translation distance.\n");
+  printf("Moving to most probable state.\n");
   int num_moves = 500;
   const double mean_allowance = 1.0;
   const int starting_iterations = iteration;
@@ -815,7 +815,22 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
     reset_histograms();
 
     // simulate for a while
-    for(long i = 0; i < N*update_iters && !reached_iteration_cap(); i++) move_a_ball();
+    while (pessimistic_samples[min_important_energy] < 2 && !reached_iteration_cap()) {
+      for(long i = 0; i < N*update_iters && !reached_iteration_cap(); i++) move_a_ball();
+
+      printf("Optimized ensemble sees %ld low-energy samples\n",
+             pessimistic_samples[min_important_energy]);
+      update_iters *= oe_update_factor; // simulate for longer next time
+    }
+
+    // There's no point doing updating our weights with a partial set
+    // of samples, since this could as easily make things worse as
+    // better.
+    if (reached_iteration_cap()) {
+      printf("Optimized ensemble is quitting after %d updates (mie: %d).\n",
+             weight_updates, min_important_energy);
+      return;
+    }
 
     // Find the minimum energy we've seen in this iteration.
     int min_hist = energy_levels-1;
@@ -852,8 +867,6 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
     }
     weight_updates++;
 
-    update_iters *= oe_update_factor; // simulate for longer next time
-
   } while(!finished_initializing());
 }
 
@@ -879,6 +892,15 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     reset_histograms();
 
     for (long j = 0; j < num_iterations && !reached_iteration_cap(); j++) move_a_ball();
+
+    // There's no point doing updating our weights with a partial set
+    // of samples, since this could as easily make things worse as
+    // better.
+    if (reached_iteration_cap()) {
+      printf("Simple flat is quitting after %d updates (mie: %d).\n",
+             weight_updates, min_important_energy);
+      return;
+    }
 
     if (printing_allowed()) {
       printf("simple flat status update:\n");
