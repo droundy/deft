@@ -328,7 +328,7 @@ for atom in ['Ne', 'Ar', 'Kr', 'Xe']:
 
 Alias('papers', env.PDF('papers/histogram/paper.tex'))
 
-T_sims = ['kT %g' %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]
+T_sims = ['kT %g' %kT for kT in [i*.1 for i in range(1,10)] + list(range(1,10))]
 hist_methods = ['simple_flat','wang_landau','tmmc','oetmmc']
 for i in range(len(hist_methods)):
     hist_methods.append(hist_methods[i]+'_oe')
