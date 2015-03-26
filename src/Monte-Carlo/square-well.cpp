@@ -814,12 +814,19 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
   do {
     reset_histograms();
 
+    const long started_at = iteration;
     // simulate for a while
     while (pessimistic_samples[min_important_energy] < 2 && !reached_iteration_cap()) {
       for(long i = 0; i < N*update_iters && !reached_iteration_cap(); i++) move_a_ball();
 
-      printf("Optimized ensemble sees %ld low-energy samples\n",
-             pessimistic_samples[min_important_energy]);
+      if (pessimistic_samples[min_important_energy]) {
+        printf("Optimized ensemble sees %ld samples (%.3g iters per sample)\n",
+               pessimistic_samples[min_important_energy],
+               (iteration-started_at)/double(pessimistic_samples[min_important_energy]));
+      } else {
+        printf("Optimized ensemble sees %ld low-energy samples\n",
+               pessimistic_samples[min_important_energy]);
+      }
       update_iters *= oe_update_factor; // simulate for longer next time
     }
 
