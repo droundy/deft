@@ -167,6 +167,8 @@ plt.title('Error in configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
 plt.legend(loc='best')
+plt.ylim(-.1,.1) # zoom in!
+plt.xlim(0, 1.5)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S_err.pdf" % (ww*100, ff*100, N))

@@ -557,6 +557,143 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
   return ln_dos;
 }
 
+double *sw_simulation::compute_walker_density_using_transitions(double *sample_rate) {
+  double *ln_downwalkers = new double[energy_levels]();
+
+  const int energies_observed = min_energy_state+1;
+  double *TD_over_D = new double[energies_observed];
+  double norm = 1, oldnorm = 0;
+
+  // initialize a flat density of states with unit norm
+  for (int i = 0; i < energies_observed; i++) {
+    ln_downwalkers[i] = 0;
+    TD_over_D[i] = 1.0/energies_observed;
+  }
+
+  // now find the eigenvector of our transition matrix via the power iteration method
+  bool done = false;
+  int iters = 0;
+  while(!done){
+    iters++;
+    // set D_n = T*D_{n-1}
+    double max_downwalker = -1e300;
+    for (int i = 0; i < energies_observed; i++) {
+      if (TD_over_D[i] > 0) ln_downwalkers[i] += log(TD_over_D[i]);
+      TD_over_D[i] = 0;
+      if (ln_downwalkers[i] > max_downwalker) max_downwalker = ln_downwalkers[i];
+    }
+    // Set the maximum value of downwalkers to 1 (set max
+    // ln_downwalkers to 0).  This is intended to reduce problems due
+    // to roundoff error which could accumulate if the mean value of
+    // the log drifts far from 0.
+    for (int i = 0; i < energies_observed; i++) {
+      ln_downwalkers[i] -= max_downwalker;
+    }
+
+    // compute T*D_n with energies less than min_important_energy set
+    // to zero, since we're only looking at downwalkers.
+    for (int i = 0; i < min_important_energy; i++) {
+      double norm = 0;
+      for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
+        if (i+de < energy_levels && i+de >= 0) {
+          if (de < 0 && ln_downwalkers[i] > ln_downwalkers[i+de]) {
+            norm += transitions(i, de)*exp(ln_energy_weights[i] - ln_energy_weights[i+de]);
+          } else {
+            norm += transitions(i, de);
+          }
+        }
+      }
+      if (norm) {
+        for (int de = max(-i, -biggest_energy_transition);
+             de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
+          if (transitions(i,de)) {
+            double change;
+            if (de < 0 && ln_downwalkers[i] > ln_downwalkers[i+de]) {
+              change = exp(ln_downwalkers[i] - ln_downwalkers[i+de]
+                           + ln_energy_weights[i] - ln_energy_weights[i+de])
+                *transitions(i,de)/norm;
+            } else {
+              change = exp(ln_downwalkers[i] - ln_downwalkers[i+de])
+                *transitions(i,de)/norm;
+            }
+            if (change != change) {
+              printf("ln_downwalkers[i] == %g\n", ln_downwalkers[i]);
+              printf("ln_downwalkers[i+de] == %g\n", ln_downwalkers[i+de]);
+              printf("ln_energy_weights[i] == %g\n", ln_energy_weights[i]);
+              printf("ln_energy_weights[i+de] == %g\n", ln_energy_weights[i+de]);
+              printf("norm == %g\n", norm);
+              printf("transitions(i,de) == %ld\n", transitions(i,de));
+              printf("change is nan at i=%d and de=%d\n", i, de);
+              exit(1);
+            }
+            TD_over_D[i+de] += change;
+          }
+        }
+      }
+    }
+
+    /* The following deals with the fact that we will not have a
+       normalized matrix since we eliminate transitions below the
+       min_important_energy. */
+    norm = 0;
+    double count = 0;
+    for (int i = 0; i < energies_observed; i++) {
+      if (energy_histogram[i]) {
+        norm += TD_over_D[i];
+        count += 1;
+      }
+    }
+    norm /= count;
+    if (norm != norm) {
+      for (int i=0; i<energies_observed;i++) {
+        printf("TD_over_D[%5d] = %10g ln_downwalkers[%5d] = %10g\n",
+               i, TD_over_D[i], i, ln_downwalkers[i]);
+      }
+      printf("nan in norm with count %g and norm %g\n", count, norm);
+      exit(1);
+    }
+    for (int i = 0; i < energies_observed; i++) {
+      TD_over_D[i] /= norm;
+    }
+
+    // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
+    done = true;
+    // If the norm is exactly the same as it was last time, then we
+    // have presumably reached equilibrium.
+    if (oldnorm != norm) {
+      for (int i = max_entropy_state+1; i <= min_important_energy; i++){
+        if (energy_histogram[i]) {
+          const double precision = fabs(TD_over_D[i] - 1);
+          if (precision > fractional_dos_precision){
+            done = false;
+            if(iters % 1000000 == 0){
+              printf("After %i iterations, failed at energy %i with value %.16g"
+                     " and newvalue %.16g and ratio %g and norm %g.\n",
+                     iters, i, ln_downwalkers[i],
+                     ln_downwalkers[i] + log(TD_over_D[i]),
+                     TD_over_D[i], norm);
+              fflush(stdout);
+            }
+            break;
+          }
+        }
+      }
+    }
+    oldnorm = norm;
+    if (iters > 1e7) {
+      printf("Eventually giving up at %d iters to avoid infinite loop\n", iters);
+      done = true;
+    }
+  }
+  if (norm == 1) {
+    printf("Found sample rate of infinity\n");
+    if (sample_rate) *sample_rate = 1e100;
+  } else {
+    printf("Found sample rate of %g from norm %.16g\n", 1.0/(1 - norm), norm);
+    if (sample_rate) *sample_rate = 1.0/(1 - norm);
+  }
+  return ln_downwalkers;
+}
 
 void sw_simulation::set_min_important_energy(){
 
@@ -922,38 +1059,24 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
   } while (!finished_initializing());
 }
 
-/* Update the weight array using the transition matrix to make the
-   downward rates equal, which should optimize the round-trip
-   time. */
-void sw_simulation::update_weights_using_transition_flux() {
-  double *wanted_n = new double[energy_levels];
-  for (int i = max_entropy_state; i <= min_energy_state; i++) {
-    wanted_n[i] = 1.0;
-    for (int j=i+1; j <= min_energy_state; j++) {
-      for (int k=max_entropy_state; k<i; k++) {
-        /* counting transitions from the high energy j to a lower
-           energy j.  Ignoring any transitions from energies above the
-           maximum entropy point.  It would be nice (in principle) to
-           include those, but I don't think it matters. */
-        wanted_n[i] -= transition_matrix(j, k)*wanted_n[k];
-      }
-    }
-    double norm = 0;
-    for (int j=i+1; j <= min_energy_state; j++) {
-      norm += transition_matrix(j, i);
-    }
-    wanted_n[i] /= norm;
+/* This method implements the optimized ensemble using the transition
+   matrix information.  This should give an identical set of weights
+   to the optimized_ensemble approach, provided each approach have
+   sufficient statistics. */
+void sw_simulation::optimize_weights_using_transitions() {
+  // Assume that we already *have* an accurate set of "flat" weights,
+  // and that we have already defined the min_important_energy.
+  double *ln_downwalkers = compute_walker_density_using_transitions();
+  // now update the weights to optimize the ensemble
+  double dfdE = 1;
+  for(int i = max_entropy_state+1; i < min_important_energy; i++) {
+    dfdE = exp(ln_downwalkers[i-1] - ln_downwalkers[i+1]) - 1;
+    if (dfdE > 0) ln_energy_weights[i] += 0.5*log(dfdE);
   }
-
-  update_weights_using_transitions();
-  for (int i=max_entropy_state; i<=min_energy_state;i++) {
-    /* Assuming we have already updated the weights for a flat
-       histogram, this should adjust the weights to give a flat
-       downward transition rate. */
-    ln_energy_weights[i] += log(wanted_n[i]);
-  }
-  set_min_important_energy();
-  initialize_canonical(min_T,min_important_energy);
+  // Shift the min_important_energy state the same as the previous one
+  // (since it doesn't have its own dfdE).
+  if (dfdE > 0) ln_energy_weights[min_important_energy] += 0.5*log(dfdE);
+  delete[] ln_downwalkers;
 }
 
 // update the weight array using transitions
@@ -980,88 +1103,22 @@ void sw_simulation::initialize_transitions() {
 }
 
 double sw_simulation::estimate_trip_time(int E1, int E2) {
-  double *pop = new double[energy_levels+biggest_energy_transition]();
-  double *pop_new = new double[energy_levels+biggest_energy_transition]();
-  pop[E1] = 1.0;
-  double probE2 = 0.0;
-  int iters = 0;
+  double oldmin = min_important_energy;
+  double oldmax = max_entropy_state;
 
-  const int Nde = 2*biggest_energy_transition+1;
-  /* first we fill up the transition matrix with raw integer counts */
-  double *T = new double[energy_levels*Nde]();
-  for (int i=0;i<energy_levels;i++) {
-    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-      T[i*Nde + de + biggest_energy_transition] = transitions(i,de);
-      //printf("T(%d, %d) = %g\n", i, de, T[i*Nde + de + biggest_energy_transition]);
-   }
+  if (E1 > E2) {
+    min_important_energy = E1;
+    max_entropy_state = E2;
+  } else {
+    min_important_energy = E2;
+    max_entropy_state = E1;
   }
-  /* now we take into account the weights */
-  for (int i=0;i<energy_levels;i++) {
-    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-      if (T[i*Nde + de + biggest_energy_transition]) {
+  double rate = 0;
+  delete[] compute_walker_density_using_transitions(&rate);
 
-        double w = exp(ln_energy_weights[i+de] - ln_energy_weights[i]);
-        double t = T[i*Nde + de + biggest_energy_transition];
-        if (w < 1) {
-          T[i*Nde + de + biggest_energy_transition] = t*w;
-          T[i*Nde + biggest_energy_transition] += t*(1-w);
-        }
-      }
-    }
-  }
-  /* zero out transitions to a dead-end state that we cannot
-     transition out of. */
-  for (int i=0;i<energy_levels;i++) {
-    double norm = 0;
-    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-      norm += T[i*Nde + de + biggest_energy_transition];
-    }
-    if (norm == 0) {
-      for (int j = max(0, i-biggest_energy_transition);
-           j < min(energy_levels, i+biggest_energy_transition+1); j++) {
-        T[j*Nde + (i-j) + biggest_energy_transition] = 0;
-      }
-    }
-  }
-  /* finally, normalize the transition matrix */
-  for (int i=0;i<energy_levels;i++) {
-    double norm = 0;
-    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-      norm += T[i*Nde + de + biggest_energy_transition];
-    }
-    if (norm) {
-      for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-        T[i*Nde + de + biggest_energy_transition] /= norm;
-      }
-    }
-  }
-  if (T[E1*Nde + biggest_energy_transition] == 0
-      || T[E2*Nde + biggest_energy_transition] == 0) {
-    return 1e100;
-  }
-
-  while (probE2 < 0.5 && iters < 1e9) {
-    iters++;
-    for (int i=0;i<energy_levels;i++) pop_new[i] = 0;
-    for (int i=0;i<=min_energy_state;i++) {
-      if (pop[i]) {
-        for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
-          if (i+de >= 0) pop_new[i+de] += pop[i]*T[i*Nde + de + biggest_energy_transition];
-        }
-      }
-    }
-    for (int i=0;i<energy_levels;i++) pop[i] = pop_new[i];
-    double tot = 0;
-    for (int i=0;i<energy_levels;i++) tot += pop[i];
-    for (int i=0;i<energy_levels;i++) pop[i] *= (1 - probE2)/tot; // renormalize!
-    probE2 += pop[E2];
-    if (printing_allowed()) {
-      printf("After %d moves probability is %g out of %g\n", iters, probE2, tot);
-      //for (int i=0;i<energy_levels;i++) if (pop[i]) printf("p[%3d] = %g\n", i, pop[i]);
-    }
-    pop[E2] = 0;
-  }
-  return iters;
+  min_important_energy = oldmin;
+  max_entropy_state = oldmax;
+  return rate;
 }
 
 bool sw_simulation::printing_allowed(){

@@ -171,12 +171,13 @@ struct sw_simulation {
   double fractional_dos_precision;
   void update_weights_using_transitions();
 
-  void update_weights_using_transition_flux();
+  void optimize_weights_using_transitions();
 
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
   double* compute_ln_dos(dos_types dos_type);
+  double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   void set_min_important_energy();
 
