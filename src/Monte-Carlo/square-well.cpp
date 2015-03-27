@@ -559,6 +559,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
 
 double *sw_simulation::compute_walker_density_using_transitions(double *sample_rate) {
   double *ln_downwalkers = new double[energy_levels]();
+  double *ln_dos = compute_ln_dos(transition_dos);
 
   const int energies_observed = min_energy_state+1;
   double *TD_over_D = new double[energies_observed];
@@ -590,9 +591,16 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
       ln_downwalkers[i] -= max_downwalker;
     }
 
+    for (int i = 0; i < max_entropy_state; i++) {
+      // For energies above the max_entropy_state, assume a flat set
+      // of weights, and compute the number of "downwalkers" relative
+      // to the number at the max_entropy_state using the density of
+      // states.
+      ln_downwalkers[i] = ln_downwalkers[max_entropy_state] + ln_dos[i] - ln_dos[max_entropy_state];
+    }
     // compute T*D_n with energies less than min_important_energy set
     // to zero, since we're only looking at downwalkers.
-    for (int i = 0; i < min_important_energy; i++) {
+    for (int i = max_entropy_state; i < min_important_energy; i++) {
       double norm = 0;
       for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
         if (i+de < energy_levels && i+de >= 0) {
@@ -661,7 +669,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
     // If the norm is exactly the same as it was last time, then we
     // have presumably reached equilibrium.
     if (oldnorm != norm) {
-      for (int i = max_entropy_state+1; i <= min_important_energy; i++){
+      for (int i = max_entropy_state+1; i < min_important_energy; i++){
         if (energy_histogram[i]) {
           const double precision = fabs(TD_over_D[i] - 1);
           if (precision > fractional_dos_precision){
@@ -692,6 +700,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
     printf("Found sample rate of %g from norm %.16g\n", 1.0/(1 - norm), norm);
     if (sample_rate) *sample_rate = 1.0/(1 - norm);
   }
+  delete[] ln_dos;
   return ln_downwalkers;
 }
 
