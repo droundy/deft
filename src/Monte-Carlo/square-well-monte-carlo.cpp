@@ -753,7 +753,7 @@ int main(int argc, const char *argv[]) {
     sw.initialize_transitions();
   } else if (oetmmc) {
     sw.initialize_transitions();
-    sw.update_weights_using_transition_flux();
+    sw.optimize_weights_using_transitions();
   }
 
   // If we wish to optimize the ensemble or set transition matrix weights, do so
@@ -761,6 +761,7 @@ int main(int argc, const char *argv[]) {
     printf("\nOptimizing the ensemble!\n");
     // We need to know the minimum important energy to get optimized_ensemble right.
     sw.set_min_important_energy();
+    delete[] sw.compute_walker_density_using_transitions(); // to print the sample rate
     sw.reset_histograms();
     sw.iteration = 0;
 
@@ -769,10 +770,12 @@ int main(int argc, const char *argv[]) {
     int first_update_iterations = sw.N*sw.energy_levels;
 
     sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
+    delete[] sw.compute_walker_density_using_transitions(); // to print the sample rate
   } else if(transition_override){
-    printf("\nOverriding weight array with that generated from the transition matrix!\n");
-    sw.update_weights_using_transitions();
-    took("Finding D");
+    printf("\nOptimizing the weight array using the transition matrix!\n");
+    sw.set_min_important_energy();
+    sw.optimize_weights_using_transitions();
+    took("Optimizing with tmmc");
   }
   sw.flush_weight_array();
 
