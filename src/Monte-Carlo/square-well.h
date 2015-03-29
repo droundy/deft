@@ -179,7 +179,7 @@ struct sw_simulation {
   double* compute_ln_dos(dos_types dos_type);
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
-  void set_min_important_energy();
+  int set_min_important_energy();
 
   // check whether we are done initializing
   bool finished_initializing(bool be_verbose = false);
@@ -189,6 +189,16 @@ struct sw_simulation {
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();
+
+  // manual minimum important energies for Wang-Landau
+  int default_min_e(){
+    if(min_T == 0.2){
+      if(N == 20) return 95;
+      if(N == 10) return 37; // not sure about this one yet; it's either 37 or 34
+      if(N == 5) return 10;
+    }
+    return min_energy_state;
+  }
 
   sw_simulation(){
     last_print_time = clock();
@@ -205,9 +215,8 @@ vector3d periodic_diff(const vector3d &a, const vector3d  &b,
 // Create and initialize the neighbor tables for all balls (p).
 // Returns the maximum number of neighbors that any ball has,
 // or -1 if that number is larger than max_neighbors.
-int initialize_neighbor_tables(ball *p, int N, double neighborR,
-                               int max_neighbors, const double len[3],
-                               int walls);
+int initialize_neighbor_tables(ball *p, int N, double neighborR, int max_neighbors,
+                               const double len[3], int walls);
 
 // Find's the neighbors of a by comparing a's position to the center of
 // everyone else's neighborsphere, where id is the index of a in p.
@@ -249,7 +258,7 @@ int count_all_interactions(ball *balls, int N, double interaction_scale,
 
 // Find index of max entropy point
 int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
-                      int energy_levels);
+                          int energy_levels);
 
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius

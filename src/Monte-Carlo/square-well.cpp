@@ -704,7 +704,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
   return ln_downwalkers;
 }
 
-void sw_simulation::set_min_important_energy(){
+int sw_simulation::set_min_important_energy(){
 
   const double *ln_dos = compute_ln_dos(sim_dos_type);
 
@@ -714,13 +714,14 @@ void sw_simulation::set_min_important_energy(){
       // ratcheting of min_important_energy is done here
       if(i >= min_important_energy) min_important_energy = i;
       delete[] ln_dos;
-      return;
+      return min_important_energy;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
   if(min_energy_state > min_important_energy) min_important_energy = min_energy_state;
 
   delete[] ln_dos;
+  return min_important_energy;
 }
 
 bool sw_simulation::finished_initializing(bool be_verbose) {
@@ -880,19 +881,17 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
-  int min_wl_energy = 0;
+  const int min_wl_energy = min_important_energy ? min_important_energy : default_min_e();
   bool done = false;
   while (!done) {
 
-    // If we have a minimum important energy, (effectively) don't allow going any lower
-    if(min_important_energy) initialize_canonical(1e-5,min_important_energy);
+    // If we know the minimum important energy, don't allow going lower
+    if(min_wl_energy != min_energy_state) initialize_canonical(-1e-2,min_wl_energy);
 
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
       move_a_ball();
       ln_energy_weights[energy] -= wl_factor;
     }
-
-    min_wl_energy = min_important_energy ? min_important_energy : min_energy_state;
 
     // compute variation in energy histogram
     int highest_hist_i = 0; // the most commonly visited energy

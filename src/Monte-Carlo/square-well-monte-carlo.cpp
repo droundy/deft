@@ -850,10 +850,11 @@ int main(int argc, const char *argv[]) {
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n"
           "# min_T: %g\n"
-          "# fractional_sample_error after initialization: %g\n\n",
+          "# fractional_sample_error after initialization: %g\n"
+          "# min_important_energy after initialization: %i\n\n",
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
           de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, sw.min_T,
-          fractional_sample_error);
+          fractional_sample_error, sw.set_min_important_energy());
 
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
@@ -1031,6 +1032,7 @@ int main(int argc, const char *argv[]) {
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
+      fprintf(e_out, "# min_important_energy: %i\n\n",sw.set_min_important_energy());
       fprintf(e_out, "# energy   counts\n");
       for(int i = 0; i < sw.energy_levels; i++){
         if(sw.energy_histogram[i] != 0)
