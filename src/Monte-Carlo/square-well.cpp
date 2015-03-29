@@ -881,12 +881,17 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff) {
   int weight_updates = 0;
-  const int min_wl_energy = min_important_energy ? min_important_energy : default_min_e();
   bool done = false;
+  if(!manual_min_e) min_important_energy = default_min_e();
   while (!done) {
 
-    // If we know the minimum important energy, don't allow going lower
-    if(min_wl_energy != min_energy_state) initialize_canonical(-1e-2,min_wl_energy);
+    if(manual_min_e){
+      // If we have a manually set minimum energy, don't allow going lower
+      initialize_canonical(-1e-2,min_important_energy);
+    } else {
+      // Otherwise, just use the minimum energy we've seen as the minimum important energy
+      min_important_energy = min_energy_state;
+    }
 
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
       move_a_ball();
@@ -899,7 +904,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     double highest_hist = 0; // highest histogram value
     double lowest_hist = 1e200; // lowest histogram value
     double total_counts = 0; // total counts in energy histogram
-    for(int i = max_entropy_state+1; i <= min_wl_energy; i++){
+    for(int i = max_entropy_state+1; i <= min_important_energy; i++){
       if(energy_histogram[i] > 0){
         total_counts += energy_histogram[i];
         if(energy_histogram[i] > highest_hist){
@@ -912,7 +917,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
         }
       }
     }
-    double hist_mean = (double)total_counts / (min_wl_energy - max_entropy_state);
+    double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
     const double variation = hist_mean/lowest_hist - 1;
 
     // print status text for testing purposes
@@ -947,7 +952,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     }
     if(end_condition == init_iter_limit) done = reached_iteration_cap();
   }
-  initialize_canonical(min_T,min_wl_energy);
+  initialize_canonical(min_T,min_important_energy);
 }
 
 // initialize the weight array using the optimized ensemble method.

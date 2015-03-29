@@ -389,7 +389,8 @@ int main(int argc, const char *argv[]) {
     }
   }
 
-  if(sw.min_important_energy && !wang_landau){
+  if(sw.min_important_energy) sw.manual_min_e = true;
+  if(sw.manual_min_e && !wang_landau){
     printf("Fixing a minimum important energy is not allowed for any method"
            " other than Wang-Landau\n");
     return 149;
@@ -760,7 +761,7 @@ int main(int argc, const char *argv[]) {
   if (optimized_ensemble) {
     printf("\nOptimizing the ensemble!\n");
     // We need to know the minimum important energy to get optimized_ensemble right.
-    sw.set_min_important_energy();
+    if(!sw.manual_min_e) sw.set_min_important_energy();
     delete[] sw.compute_walker_density_using_transitions(); // to print the sample rate
     sw.reset_histograms();
     sw.iteration = 0;
