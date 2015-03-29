@@ -688,7 +688,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
       }
     }
     oldnorm = norm;
-    if (iters > 1e7) {
+    if (iters > 1000000) {
       printf("Eventually giving up at %d iters to avoid infinite loop\n", iters);
       done = true;
     }
@@ -1073,19 +1073,64 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
    to the optimized_ensemble approach, provided each approach have
    sufficient statistics. */
 void sw_simulation::optimize_weights_using_transitions() {
-  // Assume that we already *have* an accurate set of "flat" weights,
-  // and that we have already defined the min_important_energy.
-  double *ln_downwalkers = compute_walker_density_using_transitions();
-  // now update the weights to optimize the ensemble
-  double dfdE = 1;
-  for(int i = max_entropy_state+1; i < min_important_energy; i++) {
-    dfdE = exp(ln_downwalkers[i-1] - ln_downwalkers[i+1]) - 1;
-    if (dfdE > 0) ln_energy_weights[i] += 0.5*log(dfdE);
+  // Assume that we already *have* a reasonable set of weights (with
+  // which to compute the diffusivity), and that we have already
+  // defined the min_important_energy.
+  const double *ln_dos = compute_ln_dos(transition_dos);
+
+  for (int attempt=0; attempt<10; attempt++) {
+
+    double *lnw = new double[energy_levels+2*biggest_energy_transition];
+    for (int i=0;i<energy_levels;i++) {
+      lnw[biggest_energy_transition+i] = ln_energy_weights[i];
+    }
+
+    double diffusivity = 1;
+    for(int i = max_entropy_state; i <= min_important_energy; i++) {
+      double norm = 0, mean_sqr_de = 0, mean_de = 0;
+      for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+        double T = transitions(i, de)*exp(lnw[biggest_energy_transition+i+de]
+                                          -lnw[biggest_energy_transition+i]);
+        norm += T;
+        mean_sqr_de += T*double(de)*de;
+        mean_de += T*double(de);
+      }
+      if (norm) {
+        mean_sqr_de /= norm;
+        mean_de /= norm;
+        //printf("%4d: <de> = %15g   <de^2> = %15g\n", i, mean_de, mean_sqr_de);
+        diffusivity = 1.0/fabs(mean_sqr_de - mean_de*mean_de);
+      } else {
+        printf("Craziness at energy %d!!!\n", i);
+      }
+      /* This is a different way of computing it than is done by Trebst,
+         Huse and Troyer, but uses the formula that they derived at the
+         end of Section IIA (and expressed in words).  The main
+         difference is that we compute the diffusivity here *directly*
+         rather than inferring it from the walker gradient.  */
+      ln_energy_weights[i] = -ln_dos[i] + 0.5*log(diffusivity);
+    }
+    initialize_canonical(min_T,min_important_energy);
+    double ln_max = ln_energy_weights[max_entropy_state];
+    for (int i=0;i<max_entropy_state;i++) {
+      ln_energy_weights[i] = 0;
+    }
+    for (int i=max_entropy_state;i<energy_levels;i++) {
+      ln_energy_weights[i] -= ln_max;
+    }
+    for (int i=max_entropy_state+1;i<min_important_energy;i++) {
+      double old_w = lnw[biggest_energy_transition+i]
+        - lnw[biggest_energy_transition+max_entropy_state];
+      double new_w = ln_energy_weights[i];
+      if (fabs(old_w - new_w) > 1e-4) {
+        printf("attempt %d:   lnw[%d] %15g -> %15g\n",
+               attempt, i, old_w, new_w);
+      }
+      fflush(stdout);
+    }
+    delete[] lnw;
   }
-  // Shift the min_important_energy state the same as the previous one
-  // (since it doesn't have its own dfdE).
-  if (dfdE > 0) ln_energy_weights[min_important_energy] += 0.5*log(dfdE);
-  delete[] ln_downwalkers;
+  delete[] ln_dos;
 }
 
 // update the weight array using transitions
