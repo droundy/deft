@@ -1,8 +1,10 @@
-make iterations vs initialization quality plot
+remove convergence runs? they seem obsolete
+simple_flat seems to be doing the best... comments?
 
-specify and energy range for wang landau when making comparisons to other methods
 optionally look for a minimum important energy to define the energy range
 make sure we're not breaking wang_landau by not specifying a minimum energy
+
+make iterations vs initialization quality plot
 
 optimized_ensemble changes
  - find df/dE by secant line in f(E)
@@ -14,13 +16,9 @@ fractional_sample_error: what should we do if samples=0?
 simple_flat and tmmc scaling (exp(1/min_T) instead of min_samples)
 
 
-run end condition tests
-
 IF we have a problem with picking bad minimum energies, consider requiring
   a minimum histogram count of exp(1/min_T) at the minimum energy
 
 
-make wang_landau and tmmc dump weight aray and histogram periodically?
-
-after figuring out what to do with end conditions, run sims with large Ns and various min_Ts
+run sims with large Ns and various min_Ts
 
