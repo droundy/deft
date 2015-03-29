@@ -70,6 +70,7 @@ struct sw_simulation {
      ln_energy_weights is a constant except during initialization. */
 
   int max_entropy_state, min_energy_state, min_important_energy;
+  bool manual_min_e = false;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -192,12 +193,14 @@ struct sw_simulation {
 
   // manual minimum important energies for Wang-Landau
   int default_min_e(){
+    manual_min_e = true;
     if(min_T == 0.2){
       if(N == 20) return 95;
       if(N == 10) return 37; // not sure about this one yet; it's either 37 or 34
       if(N == 5) return 10;
     }
-    return min_energy_state;
+    manual_min_e = false;
+    return min_energy_state; // if we don't know, default to the minimum observed energy
   }
 
   sw_simulation(){
