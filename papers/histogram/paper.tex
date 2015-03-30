@@ -51,10 +51,10 @@
   \caption{Inverse sampling rates from different methods.}
 \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-scaling}
-  \caption{Scaling.\label{fig:scaling}}
-\end{figure}
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-scaling}
+%   \caption{Scaling.\label{fig:scaling}}
+% \end{figure}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u}
@@ -82,7 +82,7 @@
 \end{figure}
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S_err}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-s_err}
   \caption{Error in specific heat entropy.\label{fig:Serr}}
 \end{figure}
 
@@ -101,10 +101,10 @@ running a simulation at a fixed temperature, it is possible to become
 frozen in a state that is far from the ground state, as happened in
 the $kT=0.1\epsilon$ simulation.
 
-\begin{table*}
-\input{figs/scaling-table-ww130-ff30}
-\caption{Scaling data}
-\end{table*}
+% \begin{table*}
+% \input{figs/scaling-table-ww130-ff30}
+% \caption{Scaling data}
+% \end{table*}
 
 \section{New ideas for algorithms}
 
@@ -149,7 +149,7 @@ certain where the maximum is, and how wide it is.
 \subsection{Tracking transitions}
 
 We can track the number of attempted transitions from each energy
-state to each other energy state.  This statistic has the advantage of
+eestate to each other energy state.  This statistic has the advantage of
 being approximately independent of the weighting function used
 (although it is highly dependent on the step size).  Thus we could
 continue to refine this statistic, even as we are updating the weight
@@ -220,44 +220,44 @@ does have detailed balance.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_errors}
-  \caption{Scaling.}
+  \caption{$u$ error scaling.}
   \label{fig:scaling-u_err}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_errors}
-  \caption{Scaling.}
+  \caption{$c_V$ error scaling.}
   \label{fig:scaling-cv_err}
 \end{figure}
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-S_errors}
-  \caption{Scaling.}
-  \label{fig:scaling-S_err}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_errors}
+  \caption{$s$ error scaling.}
+  \label{fig:scaling-s_err}
 \end{figure}
 
-\subsection{Convergence tests}
+% \subsection{Convergence tests}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-dos-conv-T10}
-  \caption{Convergence}
-  \label{fig:conv-dos}
-\end{figure}
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-dos-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-dos}
+% \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u-conv-T10}
-  \caption{Convergence}
-  \label{fig:conv-u}
-\end{figure}
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-u}
+% \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc-conv-T10}
-  \caption{Convergence}
-  \label{fig:conv-hc}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S-conv-T10}
-  \caption{Convergence}
-  \label{fig:conv-S}
-\end{figure}
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-hc}
+% \end{figure}
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-S}
+% \end{figure}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

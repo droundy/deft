@@ -28,15 +28,15 @@ def line(method):
 def title(method):
     titles = { 'nw': '$kT/\epsilon = \infty$ sim.',
                'wang_landau': 'Wang-Landau',
-               'simple_flat': 'simple flat',
-               'tmmc': 'tmmc',
-               'oetmmc': 'oetmmc',
+               'simple_flat': 'Simple Flat',
+               'tmmc': 'TMMC',
+               'oetmmc': 'OETMMC',
                'wang_landau_oe': 'Wang-Landau, OE',
-               'simple_flat_oe': 'simple flat, OE',
-               'tmmc_oe': 'tmmc, OE',
-               'oetmmc_oe': 'oetmmc, OE',
+               'simple_flat_oe': 'Simple Flat, OE',
+               'tmmc_oe': 'TMMC, OE',
+               'oetmmc_oe': 'OETMMC, OE',
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
-               'tmmc-golden': 'tmmc golden'}
+               'tmmc-golden': 'TMMC Golden'}
     if method in titles:
         return titles[method]
     if method[:2] == 'kT':

@@ -1,3 +1,5 @@
+manually run sims with various Ns and run plot-uhc to see scaling for those Ns
+
 remove convergence runs? they seem obsolete
 simple_flat seems to be doing the best... comments?
 
