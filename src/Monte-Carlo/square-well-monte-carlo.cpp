@@ -850,10 +850,11 @@ int main(int argc, const char *argv[]) {
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n"
           "# min_T: %g\n"
+          "# min_important_energy: %d\n"
           "# fractional_sample_error after initialization: %g\n\n",
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
           de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, sw.min_T,
-          fractional_sample_error);
+          sw.min_important_energy, fractional_sample_error);
 
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
