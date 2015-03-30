@@ -1154,7 +1154,7 @@ instance (Type a, Code a) => Code (Expression a) where
   latexPrec _ (F Signum _) = undefined
   latexPrec p (Product x _) | Map.size x == 1 && product2denominator x == 1 =
     case product2pairs x of
-      [(_,0)] -> showString "1" -- this shouldn't happen...
+      [(_,0)] -> error "shouldn't have power 0 here" -- showString "1" -- this shouldn't happen...
       [(_, n)] | n < 0 -> error "shouldn't have negative power here"
       [(e, 1)] ->   latexPrec p e
       [(e, 0.5)] -> showString "\\sqrt{" . latexPrec 0 e . showString "}"
@@ -1173,17 +1173,14 @@ instance (Type a, Code a) => Code (Expression a) where
           den = product2denominator p
   latexPrec p (Sum s _) = latexParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
-          addup "" (1,e) = latexPrec 6 e ""
-          addup "" (f,e) | f < 0 = "-" ++ addup "" (-f, e)
-          addup "" (f,e) = if e == 1
-                           then latexDouble f
-                           else latexDouble f ++ " " ++ latexPrec 6 e ""
-          addup ('-':rest) (1,e) = latexPrec 6 e (" - " ++ rest)
-          addup ('-':rest) (-1,e) = "-" ++ latexPrec 6 e (" - " ++ rest)
-          addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexPrec 7 e (showString " - " $ rest)
-          addup rest (-1,e) = "-" ++ latexPrec 6 e (" + " ++ rest)
-          addup rest (1,e) = latexPrec 6 e (" + " ++ rest)
-          addup rest (f,e) = latexDouble f ++ " " ++ latexPrec 7 e (showString " + " $ rest)
+          addup "" (f,e) = quick_prod f e
+          addup ('-':rest) (f,e) = quick_prod f e ++ " - " ++ rest
+          addup rest (-1,e) = rest ++ " - " ++ latexPrec 6 e ""
+          addup rest (f,e) | f < 0 = rest ++ " - " ++ quick_prod (-f) e
+          addup rest (f,e) = rest ++ " + " ++ quick_prod f e
+          quick_prod f e | e == 1 = latexDouble f
+          quick_prod f e | f == 1 = latexPrec 6 e ""
+          quick_prod f e = latexDouble f ++ " " ++ latexPrec 6 e ""
 
 latexParen :: Bool -> ShowS -> ShowS
 latexParen False x = x
