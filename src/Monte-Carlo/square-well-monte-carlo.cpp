@@ -389,7 +389,8 @@ int main(int argc, const char *argv[]) {
     }
   }
 
-  if(sw.min_important_energy && !wang_landau){
+  if(sw.min_important_energy) sw.manual_min_e = true;
+  if(sw.manual_min_e && !wang_landau){
     printf("Fixing a minimum important energy is not allowed for any method"
            " other than Wang-Landau\n");
     return 149;
@@ -760,7 +761,7 @@ int main(int argc, const char *argv[]) {
   if (optimized_ensemble) {
     printf("\nOptimizing the ensemble!\n");
     // We need to know the minimum important energy to get optimized_ensemble right.
-    sw.set_min_important_energy();
+    if(!sw.manual_min_e) sw.set_min_important_energy();
     delete[] sw.compute_walker_density_using_transitions(); // to print the sample rate
     sw.reset_histograms();
     sw.iteration = 0;
@@ -850,11 +851,11 @@ int main(int argc, const char *argv[]) {
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n"
           "# min_T: %g\n"
-          "# min_important_energy: %d\n"
-          "# fractional_sample_error after initialization: %g\n\n",
+          "# fractional_sample_error after initialization: %g\n"
+          "# min_important_energy after initialization: %i\n\n",
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
           de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, sw.min_T,
-          sw.min_important_energy, fractional_sample_error);
+          fractional_sample_error, sw.set_min_important_energy());
 
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
@@ -1032,6 +1033,7 @@ int main(int argc, const char *argv[]) {
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
+      fprintf(e_out, "# min_important_energy: %i\n\n",sw.set_min_important_energy());
       fprintf(e_out, "# energy   counts\n");
       for(int i = 0; i < sw.energy_levels; i++){
         if(sw.energy_histogram[i] != 0)
