@@ -1022,6 +1022,7 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
       printf("h[%3d] = %10ld,  ps[%3d] = %10ld,  lnw[%3d]: %g\n",
              e, energy_histogram[e], e, pessimistic_samples[e], e, ln_energy_weights[e]);
     }
+    fflush(stdout);
     weight_updates++;
 
   } while(!finished_initializing());
