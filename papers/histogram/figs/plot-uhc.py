@@ -31,7 +31,7 @@ methods = eval(sys.argv[4])
 
 reference = "tmmc-golden"
 
-max_T = 2
+max_T = 1.4
 T_bins = 1e3
 dT = max_T/T_bins
 T_range = numpy.arange(dT,max_T,dT)
@@ -147,6 +147,7 @@ plt.title('Error in specific internal energy for $\lambda=%g$, $\eta=%g$, and $N
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
 plt.legend(loc='best')
+plt.ylim(-.04,.04)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u_err.pdf" % (ww*100, ff*100, N))
@@ -157,6 +158,7 @@ plt.title('Error in specific heat capacity for $\lambda=%g$, $\eta=%g$, and $N=%
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta C_V/Nk$')
 plt.legend(loc='best')
+plt.ylim(-1.2,1.2)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc_err.pdf" % (ww*100, ff*100, N))
@@ -168,7 +170,6 @@ plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
 plt.legend(loc='best')
 plt.ylim(-.1,.1) # zoom in!
-plt.xlim(0, 1.5)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S_err.pdf" % (ww*100, ff*100, N))

@@ -6,8 +6,11 @@ import matplotlib.pyplot as plt
 import numpy, glob, re, string
 import styles
 
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+matplotlib.rc('text', usetex=True)
+
 if len(sys.argv) not in [5,6]:
-    print 'useage: %s ww ff N methods show' % sys.argv[0]
+    print 'useage: %s ww ff Ns methods show' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -31,11 +34,15 @@ plt.title('Scaling for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 init_iters = {}
 Emins = {}
 samples = {}
+Ns = {}
 for method in methods:
   init_iters[method] = []
   Emins[method] = []
   samples[method] = []
-  for N in all_Ns:
+  N_files = glob.glob("data/periodic-ww%04.2f-ff%04.2f-N*-%s-lnw.dat" % (ww, ff, method))
+  Ns[method] = [ int(N_file.split('-')[-3][1:]) for N_file in N_files ]
+  Ns[method].sort()
+  for N in Ns[method]:
     filename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, method)
     wildfilename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (ww, ff, N, method)
 
@@ -50,9 +57,10 @@ for method in methods:
     samples[method].append(sample_data[len(sample_data[:,1])-1, 1])
 
   plt.figure('iters')
-  plt.semilogy(all_Ns, init_iters[method], styles.color(method)+'.-', label=method)
+  plt.semilogy(Ns[method], init_iters[method], styles.color(method)+'.-',
+               label=styles.title(method))
   plt.figure('emin')
-  plt.plot(all_Ns, Emins[method], styles.color(method)+'.-', label=method)
+  plt.plot(Ns[method], Emins[method],styles.color(method)+'.-', label=styles.title(method))
 
 plt.figure('iters')
 plt.xlabel('$N$')
@@ -104,10 +112,13 @@ tex.write(r"""\end{tabular}
 cv_errors = {}
 S_errors = {}
 u_errors = {}
+min_Ts = []
 for N in all_Ns:
     f = open("figs/error-table-ww%02.0f-ff%02.0f-%i.dat"
              % (ww*100, ff*100, N))
     for line in f.read().split('\n'):
+        if 'min_T' in line:
+            min_Ts.append(float(line.split()[-1]))
         if len(line) > 0 and line[0] != '#':
             line = line.split()
             method = line[0]
@@ -128,13 +139,21 @@ for N in all_Ns:
                 S_errors[method] = numpy.vstack([S_errors[method],
                                                  numpy.array([[N, float(line[5])]])])
 
+min_T = max(min_Ts)
+if len(set(min_Ts)) > 1:
+    print('WARNING: There are minimum temperatures in error tables.')
+    print('         The maximum error scaling figures are not to be trusted!!!')
+    # fixme: do more than just spit out a warning.
+    #   Make one figure for each minimum temperature?
+
 plt.figure()
 for method in u_errors.keys():
     plt.plot(u_errors[method][:,0], u_errors[method][:,1],
-             '.'+styles.plot(method),label=method)
+             '.'+styles.plot(method),label=styles.title(method))
 
+plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
-plt.ylabel('error in $u$')
+plt.ylabel('$\\Delta U/N\epsilon$')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_errors.pdf" % (ww*100, ff*100))
@@ -142,10 +161,11 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_errors.pdf" % (ww*100, ff*100))
 plt.figure()
 for method in cv_errors.keys():
     plt.plot(cv_errors[method][:,0], cv_errors[method][:,1],
-             '.'+styles.plot(method),label=method)
+             '.'+styles.plot(method),label=styles.title(method))
 
+plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
-plt.ylabel('error in $c_v$')
+plt.ylabel('$\\Delta C_V/N\epsilon$')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
@@ -153,10 +173,11 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
 plt.figure()
 for method in S_errors.keys():
     plt.plot(S_errors[method][:,0], S_errors[method][:,1],
-             '.'+styles.plot(method),label=method)
+             '.'+styles.plot(method),label=styles.title(method))
 
+plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
-plt.ylabel('error in $s$')
+plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-S_errors.pdf" % (ww*100, ff*100))
