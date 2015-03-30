@@ -107,22 +107,25 @@ for i in range(len(all_Ns)):
 tex.write(r"""\end{tabular}
 """)
 
-# input: ["figs/error-table-ww%02.0f-ff%02.0f-%i.dat" % (ww*100, ff*100, N) for N in all_Ns]
+# input: ["figs/error-table-ww%02.0f-ff%02.0f-N%i.dat" % (ww*100, ff*100, N) for N in all_Ns]
 
-cv_errors = {}
-S_errors = {}
 u_errors = {}
+cv_errors = {}
+s_errors = {}
 min_Ts = []
-for N in all_Ns:
-    f = open("figs/error-table-ww%02.0f-ff%02.0f-%i.dat"
-             % (ww*100, ff*100, N))
+
+error_tables = glob.glob("figs/error-table-ww%02.0f-ff%02.0f-N*.dat" % (ww*100, ff*100))
+error_Ns = [ int(error_table.split('-')[-1][1:-4]) for error_table in error_tables ]
+error_Ns.sort()
+for N in error_Ns:
+    error_table  = [ table for table in error_tables if 'N%i.dat'%N in table ][0]
+    f = open(error_table)
     for line in f.read().split('\n'):
         if 'min_T' in line:
             min_Ts.append(float(line.split()[-1]))
         if len(line) > 0 and line[0] != '#':
             line = line.split()
             method = line[0]
-            print 'method', method, 'u_error', line[1]
             if method not in u_errors:
                 u_errors[method] = numpy.array([[N, float(line[1])]])
             else:
@@ -133,10 +136,10 @@ for N in all_Ns:
             else:
                 cv_errors[method] = numpy.vstack([cv_errors[method],
                                                   numpy.array([[N, float(line[3])]])])
-            if method not in S_errors:
-                S_errors[method] = numpy.array([[N, float(line[5])]])
+            if method not in s_errors:
+                s_errors[method] = numpy.array([[N, float(line[5])]])
             else:
-                S_errors[method] = numpy.vstack([S_errors[method],
+                s_errors[method] = numpy.vstack([s_errors[method],
                                                  numpy.array([[N, float(line[5])]])])
 
 min_T = max(min_Ts)
@@ -171,8 +174,8 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
-for method in S_errors.keys():
-    plt.plot(S_errors[method][:,0], S_errors[method][:,1],
+for method in s_errors.keys():
+    plt.plot(s_errors[method][:,0], s_errors[method][:,1],
              '.'+styles.plot(method),label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
@@ -180,4 +183,4 @@ plt.xlabel('$N$')
 plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-S_errors.pdf" % (ww*100, ff*100))
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-s_errors.pdf" % (ww*100, ff*100))

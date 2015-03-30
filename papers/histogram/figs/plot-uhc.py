@@ -20,9 +20,8 @@ ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 #arg ff = [0.3]
 
-# note: speficic HC should be independent of N, but we have to choose one
 N = float(sys.argv[3])
-#arg N = range(5,21)
+#arg N = range(5,31)
 
 methods = eval(sys.argv[4])
 #arg methods = [["tmmc-golden","wang_landau","simple_flat","tmmc","oetmmc","wang_landau_oe","simple_flat_oe","tmmc_oe","oetmmc_oe"]]
@@ -163,7 +162,7 @@ plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc_err.pdf" % (ww*100, ff*100, N))
 
-plt.figure('S_err')
+plt.figure('s_err')
 plt.title('Error in configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$'
           % (ww, ff, N))
 plt.xlabel('$kT/\epsilon$')
@@ -172,13 +171,13 @@ plt.legend(loc='best')
 plt.ylim(-.1,.1) # zoom in!
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S_err.pdf" % (ww*100, ff*100, N))
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-s_err.pdf" % (ww*100, ff*100, N))
 
 min_T_i = int(min_T/max_T*T_bins)
-error_data = open("figs/error-table-ww%02.0f-ff%02.0f-%i.dat" % (ww*100, ff*100, N), "w")
+error_data = open("figs/error-table-ww%02.0f-ff%02.0f-N%i.dat" % (ww*100, ff*100, N), "w")
 error_data.write("# min_T: %g\n" % min_T)
 error_data.write("# %18s %18s %18s %18s\n"
-                 % ('method', 'u_error (T)', 'cv_error (T)', 'S_error (T)'))
+                 % ('method', 'u_error (T)', 'cv_error (T)', 's_error (T)'))
 
 for method in methods:
 
