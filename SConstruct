@@ -189,6 +189,7 @@ for name, module, hsfunctional, inputs in [
     ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff",
            '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
     ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[]'),
+    ("SW_liquid", "SW_liquid", "sw_liquid_n", '[(ER $ r_var "n", ER 1)]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
     ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[]'),
@@ -211,6 +212,7 @@ main = createHeaderAndCppFiles %s %s "%s"
 
 for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispersion SaftFluid
                      SimpDispersion EntropySaftFluid GradDispersion JoinedGradDispersion
+                     SW_liquid
                      SimpGradDispersion SFMT """):
     generate.Functional(target = 'doc/' + pdf + '.pdf', source = 'src/haskell/latex-functionals.exe')
     Alias('pdf', 'doc/' + pdf + '.pdf')
@@ -239,7 +241,7 @@ all_sources = generic_sources + generated_sources
 env.AppendUnique(TARFLAGS = ['-c','-z'])
 # Here we have generic rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
-                       hard-sphere-free-energy
+                       hard-sphere-free-energy square-well-fluid
                        histogram polyhedra renormalization electrostatics """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
                 source = ['papers/' + paper + '/paper.tex'])
