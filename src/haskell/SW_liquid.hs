@@ -93,7 +93,7 @@ convolve_xi3phi_with :: Expression RealSpace -> Expression RealSpace
 convolve_xi3phi_with x = ifft ( xi3phik * fft x)
   where xi3phik = var "xi3phik" "\\tilde{\\xi_3\\phi}(k)" $
                -eps4piok*(ksig*(6*sin(ksig) 
-                                + (18-24*lambda*ksig**2*(lambda)**2*(4*lambda-1))*sin(lamksig))
+                                + (18-24*lambda+ksig**2*(lambda-1)**2*(4*lambda-1))*sin(lamksig))
                           + (6*ksig**2*(lambda-1)*(2*lambda-1)
                              - lamksig*ksig**3*(lambda-1)**3-24)*cos(lamksig)
                           + 24*cos(ksig))/(k**2*ksig**3)
@@ -101,8 +101,8 @@ convolve_xi3phi_with x = ifft ( xi3phik * fft x)
 convolve_xi4phi_with :: Expression RealSpace -> Expression RealSpace
 convolve_xi4phi_with x = ifft ( xi4phik * fft x)
   where xi4phik = var "xi4phik" "\\tilde{\\xi_4\\phi}(k)" $
-               -eps4piok * ((ksig**2*(lambda-1)*(36-60*lambda+ksig**2*(lambda-1)**2*(5*lambda-1))
-                             + 120)*sin(lamksig) 
+               -eps4piok * ((ksig**2*(lambda-1)*(36 - 60*lambda + ksig**2*(lambda-1)**2*(5*lambda-1))
+                             + 120)*sin(lamksig)*17
                             + ksig*(24*cos(ksig)-(24*(5*lambda-4)- 4*ksig**2*(lambda-1)**2*(5*lambda-2)
                                                   +lamksig*ksig**3*(lambda-1)**4)*cos(lamksig))
                             -120*sin(ksig))/(k**2*ksig**4)
