@@ -17,10 +17,10 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = int(sys.argv[3])
-#arg N = [10, 20, 100, 200, 1000]
+#arg N = range(5,21)+[100, 200, 1000]
 
 method1 = sys.argv[4]
-#arg method1 = ['wang_landau']
+#arg method1 = ['tmmc-golden']
 
 method2 = sys.argv[5]
 #arg method2 = ['tmmc']
@@ -30,7 +30,8 @@ bothdata = [0,0]
 data1 = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method1))
 data2 = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method2))
 
-de_values = numpy.linspace(12,-12.0,25)
+# FIXME the following should be taken from the data files themselves!
+de_values = numpy.linspace(42,-42.0,85)
 
 for method, data in [(method1, data1), (method2, data2)]:
     plt.figure()
@@ -93,5 +94,3 @@ plt.title('TM discrepancy between %s and %s\nfor $\lambda=%g$, $n^*=%g$, and $N=
 
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-%s-compare-transitions.pdf" % (ww*100, ff*100, N, method1, method2))
 
-if 'show' in sys.argv:
-    plt.show()

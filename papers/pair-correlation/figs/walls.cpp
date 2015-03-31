@@ -257,7 +257,7 @@ void run_walls(double eta, const char *name, Functional fhs, bool run_dadz) {
                            + ChemicalPotential(mu));
 
   Lattice lat(Cartesian(dw,0,0), Cartesian(0,dw,0), Cartesian(0,0,width+2*spacing));
-  GridDescription gd(lat, 0.001);
+  GridDescription gd(lat, 0.005); // should be 0.001 to reproduce results from paper
 
   Grid potential(gd);
   Grid constraint(gd);
@@ -432,8 +432,8 @@ void run_walls(double eta, const char *name, Functional fhs, bool run_dadz) {
         // Clark et al.  No need to user fischer here, since fischer is
         // only defined at contact.
         const double lambda=1.790;
-        double dz = 0.01;
-        const double dv = 0.01;
+        double dz = 0.05; // should be 0.01 to reproduce paper results
+        const double dv = 0.05; // should be 0.01 to reproduce paper results
         char *plotname_a = new char [4096];
         sprintf(plotname_a, "papers/pair-correlation/figs/walls/square-well-dadz-%s-%04.2f-%.3f.dat",
                 fun[version], eta, lambda);
@@ -469,8 +469,8 @@ void run_walls(double eta, const char *name, Functional fhs, bool run_dadz) {
         // Now we'll do an inverse r^6 test, as in London dispersion (at
         // long distance).  No need to user fischer here, since fischer
         // is only defined at contact.
-        double dz = 0.01;
-        const double dv = 0.01;
+        double dz = 0.05; // should be 0.01 to reproduce paper results
+        const double dv = 0.05; // should be 0.01 to reproduce paper results
         const double rmax = 5.0;
         char *plotname_a = new char [4096];
         sprintf(plotname_a,

@@ -1,15 +1,19 @@
+hist_methods = ['wang_landau','vanilla_wang_landau','simple_flat','tmmc','oetmmc']
+
 _colors = { 'nw': 'r',
-            'kT0.5': 'b',
             'kT0.4': 'c',
-            'kT1': 'b',
-            'kT2': 'c',
-            'kT0.1': 'g',
-            'tmmc': 'k',
+            'kT0.5': 'y',
+            'kT1': 'g',
             'wang_landau': 'g',
-            'vanilla_wang_landau': 'b',
-            'robustly_optimistic': 'r',
-            'gaussian': 'm',
-            'optimized_ensemble': 'y'}
+            'simple_flat': 'r',
+            'tmmc': 'k',
+            'oetmmc': 'm',
+            'wang_landau_oe': 'g',
+            'simple_flat_oe': 'r',
+            'tmmc_oe': 'k',
+            'oetmmc_oe': 'm',
+            'vanilla_wang_landau': 'y',
+            'tmmc-golden': 'b'}
 
 def color(method):
     if method in _colors:
@@ -17,22 +21,22 @@ def color(method):
     return 'b' # everything else blue
 
 def line(method):
-    lines = { 'nw': '--',
-              'tmmc': ':'}
-    if method[:2] == 'kT':
+    if method in ['nw'] + [ h+'_oe' for h in hist_methods ] or method[:2] == 'kT':
         return '--'
-    if method in lines:
-        return lines[method]
     return '-'
 
 def title(method):
     titles = { 'nw': '$kT/\epsilon = \infty$ sim.',
-               'tmmc': 'tmmc',
                'wang_landau': 'Wang-Landau',
+               'simple_flat': 'Simple Flat',
+               'tmmc': 'TMMC',
+               'oetmmc': 'OETMMC',
+               'wang_landau_oe': 'Wang-Landau, OE',
+               'simple_flat_oe': 'Simple Flat, OE',
+               'tmmc_oe': 'TMMC, OE',
+               'oetmmc_oe': 'OETMMC, OE',
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
-               'robustly_optimistic': 'robustly optimistic',
-               'gaussian': 'gaussian method',
-               'optimized_ensemble': 'optimized ensemble'}
+               'tmmc-golden': 'TMMC Golden'}
     if method in titles:
         return titles[method]
     if method[:2] == 'kT':
@@ -45,8 +49,10 @@ def plot(method):
     return line(method)
 
 def dots(method):
-    if method in ['wang_landau','vanilla_wang_landau','robustly_optimistic']:
+    if method in hist_methods:
         return color(method) + '+'
+    if method in [ h+'_oe' for h in hist_methods ]:
+        return color(method) + 'x'
     if method in _colors:
         return color(method) + '.'
     return '.'

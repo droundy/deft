@@ -7,7 +7,7 @@ import numpy
 import styles
 
 if len(sys.argv) not in [5,6]:
-    print 'useage: %s ww ff N versions show' % sys.argv[0]
+    print 'useage: %s ww ff N methods show' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -17,26 +17,26 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = int(sys.argv[3])
-#arg N = [10, 20, 100, 200, 1000]
+#arg N = range(5,21)+[100, 200, 1000]
 
-versions = eval(sys.argv[4])
-#arg versions = [["nw","wang_landau","robustly_optimistic","gaussian","optimized_ensemble", "kT0.4", "kT0.5", "tmmc"]]
+methods = eval(sys.argv[4])
+#arg methods = [["nw","wang_landau","simple_flat","tmmc","oetmmc","wang_landau_oe","simple_flat_oe","tmmc_oe","oetmmc_oe"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, version, data) for version in versions for data in ["E","lnw"]]
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
 minlog = 0
-for version in versions:
+for method in methods:
     e_hist = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, method))
     lnw = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, method))
     energy = -e_hist[:,0]/N
     log10w = lnw[e_hist[:,0].astype(int),1]*numpy.log10(numpy.exp(1))
     log10_dos = numpy.log10(e_hist[:,1]) - log10w
     log10_dos -= log10_dos.max()
     if log10_dos.min() < minlog:
         minlog = log10_dos.min()
-    plt.plot(energy, log10_dos, styles.dots(version),label=styles.title(version))
+    plt.plot(energy, log10_dos, styles.dots(method),label=styles.title(method))
 
 plt.ylim(minlog, 0)
 locs, labels = plt.yticks()
@@ -61,17 +61,17 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-dos.pdf" % (ww*100, ff*100, N))
 
 plt.figure() # weight functions
 minlog = 0
-for version in versions:
+for method in methods:
     e_hist = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, method))
     lnw = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, version))
+        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, method))
     energy = -e_hist[:,0]/N
     log10w = -lnw[e_hist[:,0].astype(int),1]*numpy.log10(numpy.exp(1))
     log10w -= log10w.max()
     if log10w.min() < minlog:
         minlog = log10w.min()
-    plt.plot(energy, log10w, styles.dots(version),label=styles.title(version))
+    plt.plot(energy, log10w, styles.dots(method),label=styles.title(method))
 plt.ylim(minlog, 0)
 locs, labels = plt.yticks()
 newlabels = [tentothe(n) for n in locs]
@@ -85,6 +85,3 @@ plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-weights.pdf" % (ww*100, ff*100, N))
 
-
-if 'show' in sys.argv:
-    plt.show()

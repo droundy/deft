@@ -154,12 +154,13 @@ savefig('figs/p-vs-n.pdf', bbox_inches=0)
 
 figure()
 
-for i in range(9,len(n_reduced[:,0]),10)[:10]:
+for i in range(9,len(n_reduced[:,0]),10)[:7]:
   plot(temperatures[i,:], pressures[i,:],
-       styles.density_color(n_reduced[i,0])+'-')
+       styles.density_color(n_reduced[i,0])+'-',
+       label='approximation $n^{*} = %g$' % n_reduced[i,0])
 
-# input: 'figs/mcwca-*-*.dat.prs'
-for rd in arange(1.0, 0.35, -0.1):
+# input: 'papers/fuzzy-fmt/figs/mcwca-*-*.dat.prs'
+for rd in arange(0.70, 0.35, -0.1):
   temps = []
   pressures = []
   print 'could use:', glob.glob('figs/mcwca-%.4f-*.dat.prs' % (rd))
@@ -173,13 +174,13 @@ for rd in arange(1.0, 0.35, -0.1):
       pressures.append(p*2.0**(5/2.0))
   if len(temps) > 0:
     plot(temps, pressures, styles.density_color(rd)+'--',
-         label='$n^{*} = %g$' % rd)
+         label='MC $n^{*} = %g$' % rd)
 
-# input: 'figs/mcfcc-*-*.dat.prs'
-for rd in arange(1.0, 0.35, -0.1):
+# input: 'papers/fuzzy-fmt/figs/mcfcc-*-*.dat.prs'
+for rd in arange(0.70, 0.25, -0.1):
   temps = []
   pressures = []
-  print 'could use:', glob.glob('figs/mcwca-%.4f-*.dat.prs' % (rd))
+  print 'could use:', glob.glob('figs/mcfcc-%.4f-*.dat.prs' % (rd))
   for temp in arange(0.05, 3.05, 0.05):
     fname = 'figs/mcfcc-%.4f-%.4f.dat.prs' % (rd, temp)
     if os.path.exists(fname):
@@ -192,9 +193,9 @@ for rd in arange(1.0, 0.35, -0.1):
     plot(temps, pressures, styles.density_color(rd)+'o:')
 
 xlim(xmin=0, xmax = 3)
-ylim(ymin=0, ymax = 22)
-xlabel('$T$')
-ylabel('$p$')
+ylim(ymin=0, ymax = 10)
+xlabel('$T^*$')
+ylabel('$p^*$')
 legend(loc='best')
 
 savefig('figs/p-vs-T.pdf', bbox_inches=0)

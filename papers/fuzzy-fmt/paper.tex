@@ -30,9 +30,14 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\fixme{ We examine a functional based on SFMT~\cite{schmidt2000fluid}.
-  We pick a slightly soft potential, and demonstrate that it gives
-  good results.}
+\fixme{ We will demonstrate a easy-to-implement variation on the Soft
+  Fundamental Measure Theory (SFMT) approach for treating fluids
+  having a soft repulsive potential.  We will show that over a wide
+  range of temperatures and densities our theory gives accurate
+  results, as tested by comparison with Monte Carlo simulation of a
+  fluid using a typical soft repulsive potential.  We will present
+  results for the homogeneous fluid, the radial distribution function,
+  and for inhomogeneous distributions at a fluid-solid interface. }
 \end{abstract}
 
 \maketitle
@@ -41,13 +46,21 @@
 \section{Introduction}
 
 The hard-sphere fluid is \emph{the} reference fluid for models of real
-liquids, such as water \fixme{citations?}. The hard sphere fluid is
-widely studied and well understood \fixme{citations}, but has the
-disadvantage of not being physical since it contains step and delta
-functions which are hard to use in computation. One way to deal with
-this difficulty is by ``smearing'' the functions so they are not
-discontinuous; another is to use a theory where the spheres themselves
-are not so hard.
+liquids, such as water~\cite{gil-villegas-1997-SAFT-VR,
+  clark2006developing, andersen1971relationship,
+  andersen1972optimized, kalos1974helium, chapman1990new,
+  barker1967perturbation}.  \fixme{See especially
+  \cite{andersen1971relationship} for a discussion of the use of hard
+  spheres to model realistic soft-sphere repulsive forces.  Note that
+  \cite{andersen1971relationship} uses a density-dependent hard-sphere
+  diameter, which is unsuitable for use in a density functional.} The
+hard sphere fluid is widely studied and well understood
+\fixme{citations}~\cite{mansoori1971equilibrium, roth2002whitebear,
+  rosenfeld1989, rosenfeld1997}, but has the disadvantage of not being
+physical since it contains step and delta functions which are hard to
+use in computation. One way to deal with this difficulty is by
+``smearing'' the functions so they are not discontinuous; another is
+to use a theory where the spheres themselves are not so hard.
 
 Fundamental Measure Theory~(FMT) is a classic density functional
 theory (cDFT) for the free energy of the hard-sphere fluid developed
@@ -56,6 +69,10 @@ hard-sphere portion of the total free energy which \fixme{citations}.
 While this has been used to some success to study the behavior of real
 liquids\fixme{citations}, it is not physical as the hard sphere cores
 are never allowed to penetrate.
+
+In his 2010 review of FMT, Roth states that the most important future
+developments in equilibrium DFT will involve treating soft repulsions
+and attractions~\cite{}.
 
 Schmidt introduced a Soft Fundamental Measure Theory~(SFMT) based on
 FMT~\cite{schmidt1999density} where the spheres can penetrate at a an
@@ -281,13 +298,13 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \label{fig:radial-distribution-50}
 \end{figure}
 
-%% \begin{figure}
-%% \begin{center}
-%% \includegraphics[width=3.5in]{figs/radial-distribution-60}
-%% \end{center}
-%% \caption{Radial distribution function with 0.6 reduced density.}
-%% \label{fig:radial-distribution-60}
-%% \end{figure}
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/radial-distribution-60}
+\end{center}
+\caption{Radial distribution function with 0.6 reduced density.}
+\label{fig:radial-distribution-60}
+\end{figure}
 
 \subsection{Soft spheres near a hard wall}
 

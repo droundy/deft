@@ -11,7 +11,7 @@ else:
     os.exit(1)
 
 documentclassre = re.compile(r'\\documentclass(\[[^\]]+\])?{')
-graphicre = re.compile(r'^\s*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MULTILINE)
+graphicre = re.compile(r'^[^%\n]*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MULTILINE)
 inputre = re.compile(r'\\input(\[[^\]]+\])?{([^}]+)}')
 
 for t in texfs:

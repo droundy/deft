@@ -1,0 +1,55 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{color}
+
+\newcommand{\fixme}[1]{{\bf\color{red}{[#1]}}}
+\newcommand{\rr}{\mathbf{r}}
+
+\begin{document}
+\title{Renormalization}
+
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
+
+\begin{abstract}
+  Here is an interesting way to look at GRG.
+\end{abstract}
+
+\maketitle
+
+
+Let's talk about how we would solve for the free energy precisely.
+\begin{align}
+  F(N, V, T) &= -kT\ln Z \\
+  Z(N, V, T) &= \sum_{i}^{\text{microstates}} e^{-\beta E_i}
+\end{align}
+This is our exact free energy, which requires that we specify an
+explicit volume $V$.  We typically assume that $N \gg 1$ and $V$ is a
+macroscopic volume.  An interesting option is to consider the
+possibility where $N$ is of arbitrary size, and $V$ likewise may be
+small.  In this case, we absolutely need to ask ourselves what the
+boundary conditions will be.  One option is to choose periodic
+boundary conditions, and a cubic cell with side length $L$, so that $V
+= L^3$.  This enables easy comparison with Monte Carlo simulations,
+and we can obtain the thermodynamic limit by taking the limit as
+$N\rightarrow \infty$ with the density held fixed.  The appeal of this
+approach is that it enables us to define a hierarchy of free energies
+$f_i$ that have lengths $L_i=2^i L_0$ which provide a physical meanint
+to the intermediate free energies obtained in a GRG computation.
+
+We define the $i^{th}$ free energy:
+\begin{align}
+  f_i(n) &\equiv -\frac{kT}{2^{3i}L_0^3}\ln \sum_{i}^{L_i} e^{-\beta E_i}
+\end{align}
+where the summation is over microstates with periodicity $L_i$.
+
+We now ask how $f_i$ relates to $f_{i-1}$.  Mathematically, the
+difference between these free energies is
+\begin{align}
+  f_i(n) - f_{i-1}(n) &\equiv \delta f_i \\
+  &= -\frac{kT}{2^{3i}L_0^3}\ln \sum_{i}^{L_i} e^{-\beta E_i}
+  +\frac{kT}{2^{3i}L_0^3}\ln \sum_{i}^{L_i} e^{-\beta E_i}
+\end{align}
+
+\end{document}

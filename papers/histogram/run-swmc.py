@@ -68,6 +68,8 @@ def run(args):
 
     command = "time %s/%s" %(projectdir, simname)
 
+    if not os.path.exists(jobdir):
+        os.makedirs(jobdir)
     script = open(scriptname,'w')
     script.write("#!/bin/bash\n")
     script.write("#SBATCH --mem-per-cpu=%i\n" % memory)

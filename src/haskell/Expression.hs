@@ -1079,12 +1079,13 @@ instance (Type a, Code a) => Code (Expression a) where
   codePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
   codePrec p (Sum s _) = showParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
-          addup "" (1,e) = codePrec 6 e ""
-          addup "" (f,e) = if e == 1
-                           then show f
-                           else show f ++ "*" ++ codePrec 7 e ""
-          addup rest (1,e) = codePrec 6 e (showString " + " $ rest)
-          addup rest (f,e) = show f ++ "*" ++ codePrec 7 e (showString " + " $ rest)
+          addup "" (f,e) = quick_prod f e
+          addup ('-':rest) (f,e) =  quick_prod f e ++ " - " ++ rest
+          addup rest (f,e) | f < 0 = rest ++ " - " ++ quick_prod (-f) e
+          addup rest (f,e) = rest ++ " + " ++ quick_prod f e
+          quick_prod f e | e == 1 = show f
+          quick_prod f e | f == 1 = codePrec 6 e ""
+          quick_prod f e = show f ++ "*" ++ codePrec 7 e ""
 
   newcodePrec _ (Var _ c _ _ Nothing) = showString c
   newcodePrec p (Var _ _ _ _ (Just e)) = newcodePrec p e
@@ -1125,18 +1126,13 @@ instance (Type a, Code a) => Code (Expression a) where
   newcodePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
   newcodePrec p (Sum s _) = showParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
-          addup "" (1,e) = newcodePrec 6 e ""
-          addup "" (-1,e) = "-" ++ newcodePrec 6 e ""
-          addup "" (f,e) = if e == 1
-                           then show f
-                           else case isConstant e of
-                                Just c -> show (f*c)
-                                Nothing -> show f ++ "*" ++ newcodePrec 7 e ""
-          addup rest (1,e) = newcodePrec 6 e (showString " + " $ rest)
-          addup rest (f,e) =
-             case isConstant e of
-             Nothing -> show f ++ "*" ++ newcodePrec 7 e (showString " + " $ rest)
-             Just c -> show (f*c) ++ (showString " + " rest)
+          addup "" (f,e) = quick_prod f e
+          addup ('-':rest) (f,e) =  quick_prod f e ++ " - " ++ rest
+          addup rest (f,e) | f < 0 = rest ++ " - " ++ quick_prod (-f) e
+          addup rest (f,e) = rest ++ " + " ++ quick_prod f e
+          quick_prod f e | e == 1 = show f
+          quick_prod f e | f == 1 = newcodePrec 6 e ""
+          quick_prod f e = show f ++ "*" ++ newcodePrec 7 e ""
   latexPrec p (Var _ _ "" "" (Just e)) = latexPrec p e
   latexPrec _ (Var _ _ c "" _) = showString c
   latexPrec _ (Var _ _ _ t _) = showString t
@@ -1180,7 +1176,7 @@ instance (Type a, Code a) => Code (Expression a) where
           addup rest (f,e) = rest ++ " + " ++ quick_prod f e
           quick_prod f e | e == 1 = latexDouble f
           quick_prod f e | f == 1 = latexPrec 6 e ""
-          quick_prod f e = latexDouble f ++ " " ++ latexPrec 6 e ""
+          quick_prod f e = latexDouble f ++ " " ++ latexPrec 7 e ""
 
 latexParen :: Bool -> ShowS -> ShowS
 latexParen False x = x

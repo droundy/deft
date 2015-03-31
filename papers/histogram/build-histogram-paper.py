@@ -43,16 +43,16 @@ for fig in ["histograms","dos","samples","uhc","scaling","transitions"]:
         Ns = get_field(script_name,"all_Ns")
 
     if fig != "transitions":
-        versions = [get_field(script_name,"versions")]
+        methods = [get_field(script_name,"methods")]
     else:
-        versions = [get_field(script_name,"method1").replace("'",""),
-                    get_field(script_name,"method2").replace("'","")]
+        methods = [get_field(script_name,"method1").replace("'",""),
+                   get_field(script_name,"method2").replace("'","")]
 
-    execute([script_env,script_name,str(ww),str(ff),Ns] + versions)
+    execute([script_env,script_name,str(ww),str(ff),Ns] + methods)
 
 # wait for all figure scripts to finish
 for p in ps:
     p.wait()
 
 # build histogram-paper.tex
-execute(["pdflatex","-interaction=nonstopmode","-recorder","histogram-paper.tex"])
+execute(["pdflatex","-interaction=nonstopmode","-recorder","paper.tex"])

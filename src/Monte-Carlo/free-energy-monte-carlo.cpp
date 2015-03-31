@@ -109,7 +109,7 @@ int main(int argc, const char *argv[]) {
   double R = 1;
   const double well_width = 1;
   double ff = 0.3;
-  double ff_small = 0.3;
+  double ff_small = -1;
   double neighbor_scale = 2;
   double de_g = 0.05;
   double max_rdf_radius = 10;
@@ -124,7 +124,9 @@ int main(int argc, const char *argv[]) {
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
     {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
      "cell dimensions are adjusted accordingly without changing the shape of "
-     "the cell"},
+     "the cell."},
+    {"ff_small", '\0', POPT_ARG_DOUBLE, &ff_small, 0, "Small filling fraction. If specified, "
+     "This sets the desired filling fraction of the shrunk cell. Otherwise it defaults to ff."},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
     {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
@@ -195,6 +197,11 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
+  if(ff_small != -1 && scaling_factor != 1.0){
+    printf("You can't specify both the small filling fraction and the scaling factor.");  
+    return 1;
+  }
+
 
   if (ff != 0) {
     // The user specified a filling fraction, so we must make it so!
@@ -232,8 +239,16 @@ int main(int argc, const char *argv[]) {
     }
   }
 
-  ff_small = (4*M_PI/3*R*R*R*sw.N)/
-    (sw.len[x]*sw.len[y]*sw.len[z]*scaling_factor*scaling_factor*scaling_factor);
+  // if the user didn't specifiy a small filling fraction, then we should get it.
+  if(ff_small == -1){
+      ff_small = (4*M_PI/3*R*R*R*sw.N)/
+        (sw.len[x]*sw.len[y]*sw.len[z]*scaling_factor*scaling_factor*scaling_factor);
+  }
+  // if they did, then we need to get the scale factor
+  else{
+    scaling_factor = std::cbrt(ff/ff_small);
+  }
+
 
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
@@ -465,6 +480,9 @@ int main(int argc, const char *argv[]) {
 
   sw.initialize_translation_distance();
 
+  // --------------------------------------------------------------------------
+  // end initilization routine.
+  // --------------------------------------------------------------------------
 
   // ----------------------------------------------------------------------------
   // Generate info to put in save files
@@ -522,8 +540,9 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
-    for(int i = 0; i < sw.N; i++)
+    for(int i = 0; i < sw.N; i++){
       sw.move_a_ball();
+    }
 
     // just hacking stuff in to see what works
     // do the small bit every 100 n^2 iterations for now
