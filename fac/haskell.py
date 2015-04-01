@@ -15,7 +15,7 @@ hsfiles = """
   C CodeGen Expression ExternalLennardJones ExternalPotentialTest
   FMT functionals HughesSaft IdealGas LatexDouble latex-functionals
   Latex LogN0 NewCode Optimize QuadraticGaussian Quadratic QuadraticN0
-  Rosenfeld SFMT Statement test WaterSaft WhiteBear
+  Rosenfeld SFMT Statement test WaterSaft WhiteBear SW_liquid
 """.split()
 
 all_objects = [x+'.o' for x in hsfiles]
@@ -26,6 +26,7 @@ generated_names = """
   LogN0 Phi1 Phi2 Phi3 QuadraticGaussian Quadratic QuadraticN0
   SFMTFluid SFMTFluidVeff
   SPhi1 SPhi2 SPhi3
+  SW_liquid
   WaterSaftByHand WaterSaft WhiteBearFluid WhiteBear
 """.split()
 
