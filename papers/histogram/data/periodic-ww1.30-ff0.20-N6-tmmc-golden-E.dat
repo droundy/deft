@@ -10,28 +10,32 @@
 # neighbor_scale: 2
 # energy_levels: 36
 # min_T: 0.1
-# fractional_sample_error after initialization: 0.00657425
+# fractional_sample_error after initialization: 0.00661024
+# min_important_energy after initialization: 15
 
 # histogram method: tmmc
-# pessimistic_min_samples: 10000
+# pessimistic_min_samples: 100000000
 # iterations: 100000000
-# working moves: 414443490
+# working moves: 412781533
 # total moves: 600000000
-# acceptance rate: 0.690739
+# acceptance rate: 0.687969
+
+# min_important_energy: 15
 
 # energy   counts
-1  232
-2  14337
-3  304800
-4  2921219
-5  13029812
-6  31783995
-7  46772631
-8  51985945
-9  56316633
-10  60167303
-11  62961380
-12  64662320
-13  67216271
-14  69478619
-15  72384503
+0  1
+1  207
+2  13562
+3  299838
+4  2870463
+5  12766743
+6  31087090
+7  45752546
+8  50880254
+9  55074768
+10  58649711
+11  62005880
+12  64891192
+13  68264710
+14  71681457
+15  75761578
