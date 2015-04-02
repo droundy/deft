@@ -629,11 +629,11 @@ expand _ (Scalar e) = Scalar e
 expand v (F Heaviside e) = heaviside e'
      where e' = expand v e
 expand v (F Cos e) = if setZero (mkExprn v) e == 0
-                     then 1 - e'**2/2 + e'**4/4/3/2
+                     then 1 - e'**2/2 + e'**4/4/3/2 - e'**6/6/5/4/3/2 + e'**8/8/7/6/5/4/3/2
                      else cos e'
      where e' = expand v e
 expand v (F Sin e) = if setZero (mkExprn v) e == 0
-                     then e' - e'**3/3/2
+                     then e' - e'**3/3/2 + e'**5/5/4/3/2 - e'**7/7/6/5/4/3/2
                      else sin e'
      where e' = expand v e
 expand v (F Erfi e) = if setZero (mkExprn v) e == 0
@@ -645,7 +645,7 @@ expand v (F Erf e) = if setZero (mkExprn v) e == 0
                      else erf e'
      where e' = expand v e
 expand v (F Exp e) = if setZero (mkExprn v) e == 0
-                     then 1 + e' + e'**2/2 + e'**3/3/2
+                     then 1 + e' + e'**2/2 + e'**3/3/2 + e'**4/4/3/2
                      else exp e'
      where e' = expand v e
 expand v (F Log e) = if setZero (mkExprn v) e == 1
