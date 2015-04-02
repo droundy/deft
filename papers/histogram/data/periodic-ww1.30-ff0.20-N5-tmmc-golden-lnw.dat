@@ -10,14 +10,15 @@
 # neighbor_scale: 2
 # energy_levels: 24
 # min_T: 0.1
-# fractional_sample_error after initialization: 0.0052786
+# fractional_sample_error after initialization: 0.00312138
+# min_important_energy after initialization: 10
 
 # histogram method: tmmc
-# pessimistic_min_samples: 10000
-# iterations: 2160000
-# working moves: 8036822
-# total moves: 10800000
-# acceptance rate: 0.74415
+# pessimistic_min_samples: 100000000
+# iterations: 100000000
+# working moves: 372545087
+# total moves: 500000000
+# acceptance rate: 0.74509
 
 # energy	ln(weight)
 0  0
@@ -27,20 +28,20 @@
 4  0
 5  0
 6  0
-7  0.582139
-8  1.8551
-9  3.90612
-10  7.00398
-11  17.004
-12  27.004
-13  37.004
-14  47.004
-15  57.004
-16  67.004
-17  77.004
-18  87.004
-19  97.004
-20  107.004
-21  117.004
-22  127.004
-23  137.004
+7  0.582843
+8  1.85458
+9  3.90248
+10  6.95305
+11  16.953
+12  26.953
+13  36.953
+14  46.953
+15  56.953
+16  66.953
+17  76.953
+18  86.953
+19  96.953
+20  106.953
+21  116.953
+22  126.953
+23  136.953

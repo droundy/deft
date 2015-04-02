@@ -1,6 +1,7 @@
 import HughesSaft ( saft_fluid, saft_entropy, saft_association, saft_dispersion )
 import WhiteBear ( whitebear, tensorwhitebear, whitebear_m2, gSigmaA, gSigmaS, gSigmaA_m2 )
 import SFMT ( sfmt )
+import SW_liquid ( sw_liquid_n )
 import Latex
 import Expression ( (===), grad, joinFFTs )
 import System.Environment ( getArgs )
@@ -21,6 +22,7 @@ main =
                    else return ()
      pdf "doc/WhiteBear.pdf" $ latexEasy $ whitebear
      pdf "doc/SFMT.pdf" $ latexEasy $ sfmt
+     pdf "doc/SW_liquid.pdf" $ latexEasy $ sw_liquid_n
      pdf "doc/TensorWhiteBear.pdf" $ latexEasy $ tensorwhitebear
      pdf "doc/GradTensorWhiteBear.pdf" $ latexEasy $ "grad" === (grad "x" tensorwhitebear)
      pdf "doc/WhiteBearMarkII.pdf" $ latexEasy $ whitebear_m2
