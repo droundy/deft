@@ -11,6 +11,8 @@
 #include "vector3d.h"
 #include "Monte-Carlo/square-well.h"
 
+#include "version-identifier.h"
+
 // ------------------------------------------------------------------------------
 // Notes on conventions and definitions use
 // ------------------------------------------------------------------------------
@@ -844,6 +846,7 @@ int main(int argc, const char *argv[]) {
 
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
+          "# version: %s\n"
           "# well_width: %g\n"
           "# ff: %g\n"
           "# N: %i\n"
@@ -858,6 +861,7 @@ int main(int argc, const char *argv[]) {
           "# min_T: %g\n"
           "# fractional_sample_error after initialization: %g\n"
           "# min_important_energy after initialization: %i\n\n",
+          version_identifier(),
           well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
           de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, sw.min_T,
           fractional_sample_error, sw.set_min_important_energy());
