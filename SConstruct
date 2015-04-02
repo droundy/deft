@@ -330,24 +330,6 @@ for atom in ['Ne', 'Ar', 'Kr', 'Xe']:
 
 Alias('papers', env.PDF('papers/histogram/paper.tex'))
 
-T_sims = ['kT %g' %kT for kT in [i*.1 for i in range(1,10)] + list(range(1,10))]
-hist_methods = ['simple_flat','wang_landau','tmmc','oetmmc']
-for i in range(len(hist_methods)):
-    hist_methods.append(hist_methods[i]+'_oe')
-
-# The following enables automagic monte-carlo generation of
-# low-quality data for simple plots
-for ff in [0.1, 0.2, 0.3, 0.4]:
-    datadir = "papers/histogram/data/"
-    for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
-        for N in range(5,21):
-            for method in ['nw'] + T_sims + hist_methods:
-                env.Command(target = [datadir+'periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat'
-                                      % (ww, ff, N, method.replace(' ',''), postfix)
-                                      for postfix in ['E','lnw','transitions','os','ps','g']],
-                            source = 'square-well-monte-carlo',
-                            action = './square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 3000000' % (method.replace('_oe',' --optimized_ensemble'), N, ff, ww))
-
 # #################### talks ##################################################
 
 
@@ -519,7 +501,7 @@ for mkdat in Split("""
 for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
     env.Command(target = "papers/fuzzy-fmt/figs/wallshard-%06.4f-%04.2f.dat" % (0.0, rho),
                 source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
-                action = '$SOURCE %g %g' % (rho, kT))
+                action = '$SOURCE %g %g' % (rho, 0.0))
     for kT in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
         env.Command(target = "papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%04.2f.dat" % (rho, kT),
                     source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
