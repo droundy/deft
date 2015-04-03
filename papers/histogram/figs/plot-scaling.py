@@ -5,6 +5,7 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy, glob, re, string
 import styles
+import readandcompute
 
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
@@ -107,47 +108,38 @@ for i in range(len(all_Ns)):
 tex.write(r"""\end{tabular}
 """)
 
-# input: ["figs/error-table-ww%02.0f-ff%02.0f-N%i.dat" % (ww*100, ff*100, N) for N in all_Ns]
+# input: "data/periodic-ww%04.2f-ff%04.2f-N*-tmmc-E.dat" % (ww, ff)
 
 u_errors = {}
 cv_errors = {}
 s_errors = {}
 min_Ts = []
 
-error_tables = glob.glob("figs/error-table-ww%02.0f-ff%02.0f-N*.dat" % (ww*100, ff*100))
-error_Ns = [ int(error_table.split('-')[-1][1:-4]) for error_table in error_tables ]
-error_Ns.sort()
-for N in error_Ns:
-    error_table  = [ table for table in error_tables if 'N%i.dat'%N in table ][0]
-    f = open(error_table)
-    for line in f.read().split('\n'):
-        if 'min_T' in line:
-            min_Ts.append(float(line.split()[-1]))
-        if len(line) > 0 and line[0] != '#':
-            line = line.split()
-            method = line[0]
-            if method not in u_errors:
-                u_errors[method] = numpy.array([[N, float(line[1])]])
-            else:
-                u_errors[method] = numpy.vstack([u_errors[method],
-                                                 numpy.array([[N, float(line[1])]])])
-            if method not in cv_errors:
-                cv_errors[method] = numpy.array([[N, float(line[3])]])
-            else:
-                cv_errors[method] = numpy.vstack([cv_errors[method],
-                                                  numpy.array([[N, float(line[3])]])])
-            if method not in s_errors:
-                s_errors[method] = numpy.array([[N, float(line[5])]])
-            else:
-                s_errors[method] = numpy.vstack([s_errors[method],
-                                                 numpy.array([[N, float(line[5])]])])
+reference = "tmmc-golden"
 
-min_T = max(min_Ts)
-if len(set(min_Ts)) > 1:
-    print('WARNING: There are minimum temperatures in error tables.')
-    print('         The maximum error scaling figures are not to be trusted!!!')
-    # fixme: do more than just spit out a warning.
-    #   Make one figure for each minimum temperature?
+for N in range(5, 101):
+    u_cv_s = readandcompute.u_cv_s(ww, ff, N, reference)
+    if u_cv_s != None:
+        for method in methods:
+            u_cv_s_method = readandcompute.u_cv_s(ww, ff, N, method)
+            if u_cv_s_method != None:
+                du = abs(u_cv_s_method[0]-u_cv_s[0]).max()
+                if method not in u_errors:
+                    u_errors[method] = numpy.array([[N, du]])
+                else:
+                    u_errors[method] = numpy.vstack([u_errors[method], [N, du]])
+                dcv = abs(u_cv_s_method[1]-u_cv_s[1]).max()
+                if method not in cv_errors:
+                    cv_errors[method] = numpy.array([[N, dcv]])
+                else:
+                    cv_errors[method] = numpy.vstack([u_errors[method], [N, dcv]])
+                ds = abs(u_cv_s_method[2]-u_cv_s[2]).max()
+                if method not in s_errors:
+                    s_errors[method] = numpy.array([[N, ds]])
+                else:
+                    s_errors[method] = numpy.vstack([u_errors[method], [N, ds]])
+
+min_T = 0.2 # FIXME maybe shouldn't hardcode this?
 
 plt.figure()
 for method in u_errors.keys():
