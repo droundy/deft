@@ -1,0 +1,28 @@
+# well_width: 1.3
+# ff: 0.3
+# N: 6
+# walls: 0
+# cell dimensions: (3.84833, 3.84833, 5.65685)
+# seed: 0
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 36
+# min_T: 0.2
+# fractional_sample_error after initialization: 0.130157
+# min_important_energy after initialization: 15
+
+# histogram method: tmmc
+# none: 3000000
+# iterations: 3000000
+# working moves: 11264722
+# total moves: 18000000
+# acceptance rate: 0.625818
+
+# energy	samples
+11  0
+12  204846
+13  57552
+14  15896
+15  80
