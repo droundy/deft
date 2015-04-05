@@ -1,7 +1,6 @@
 #!/usr/bin/python2
 import matplotlib, sys
-if 'show' not in sys.argv:
-    matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
 
@@ -11,8 +10,8 @@ matplotlib.rc('text', usetex=True)
 import styles
 import readandcompute
 
-if len(sys.argv) not in [5,6]:
-    print 'useage: %s ww ff N methods show' % sys.argv[0]
+if len(sys.argv) != 5:
+    print 'useage: %s ww ff N methods' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -60,7 +59,7 @@ for method in set(methods+[reference]):
     plt.figure('hc')
     plt.plot(T_range,CV[method]/N,styles.plot(method),label=styles.title(method))
 
-    plt.figure('S')
+    plt.figure('s')
     plt.plot(T_range,S[method]/N,styles.plot(method),label=styles.title(method))
 
 for method in methods:
@@ -73,7 +72,7 @@ for method in methods:
     plt.plot(T_range,(CV[method]-CV[reference])/N,
              styles.plot(method),label=styles.title(method))
 
-    plt.figure('S_err')
+    plt.figure('s_err')
     plt.plot(T_range,(S[method]-S[reference])/N,
              styles.plot(method),label=styles.title(method))
 
@@ -96,7 +95,7 @@ plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc.pdf" % (ww*100, ff*100, N))
 
-plt.figure('S')
+plt.figure('s')
 plt.title('Configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$S_{\textit{config}}/Nk$')

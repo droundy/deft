@@ -1,13 +1,12 @@
 #!/usr/bin/python2
 import matplotlib, sys
-if 'show' not in sys.argv:
-    matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
 import styles
 
-if len(sys.argv) not in [6,7]:
-    print 'useage: %s ww ff N show' % sys.argv[0]
+if len(sys.argv) != 6:
+    print 'useage: %s ww ff N' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])

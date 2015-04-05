@@ -1,7 +1,6 @@
 #!/usr/bin/python2
 import matplotlib, sys
-if 'show' not in sys.argv:
-    matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy, glob, re, string
 import styles
@@ -10,7 +9,7 @@ import readandcompute
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) not in [5,6]:
+if len(sys.argv) != 5:
     print 'useage: %s ww ff Ns methods show' % sys.argv[0]
     exit(1)
 

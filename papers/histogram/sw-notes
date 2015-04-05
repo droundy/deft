@@ -1,26 +1,18 @@
-manually run sims with various Ns and run plot-uhc to see scaling for those Ns
+mean/max errors for various N
+make optimized ensemble special
 
-remove convergence runs? they seem obsolete
-simple_flat seems to be doing the best... comments?
 
-optionally look for a minimum important energy to define the energy range
-make sure we're not breaking wang_landau by not specifying a minimum energy
+compare mean of max errors with different N and different seeds
 
-make iterations vs initialization quality plot
+
 
 optimized_ensemble changes
  - find df/dE by secant line in f(E)
    - secant line with 1/sqrt(e_hist[i]) up/down in f*e_hist[i]
    - average weights if we have an energy jump
- - what does it mean if df < 0 ?
+ - run longer if df<0
 
 fractional_sample_error: what should we do if samples=0?
-simple_flat and tmmc scaling (exp(1/min_T) instead of min_samples)
-
 
 IF we have a problem with picking bad minimum energies, consider requiring
   a minimum histogram count of exp(1/min_T) at the minimum energy
-
-
-run sims with large Ns and various min_Ts
-

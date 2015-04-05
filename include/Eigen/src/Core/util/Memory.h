@@ -27,6 +27,8 @@
 #ifndef EIGEN_MEMORY_H
 #define EIGEN_MEMORY_H
 
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+
 // FreeBSD 6 seems to have 16-byte aligned malloc
 // See http://svn.freebsd.org/viewvc/base/stable/6/lib/libc/stdlib/malloc.c?view=markup
 // FreeBSD 7 seems to have 16-byte aligned malloc except on ARM and MIPS architectures

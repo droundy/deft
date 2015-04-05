@@ -25,6 +25,8 @@
 #ifndef EIGEN_SPARSEPRODUCT_H
 #define EIGEN_SPARSEPRODUCT_H
 
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+
 template<typename Lhs, typename Rhs> struct ei_sparse_product_mode
 {
   enum {
