@@ -195,9 +195,32 @@ struct sw_simulation {
   int default_min_e(){
     manual_min_e = true;
     if(min_T == 0.2){
+      if(N == 5) return 3;
+      if(N == 6) return 15;
+      if(N == 7) return 20;
+      if(N == 8) return 26;
+      if(N == 9) return 28;
+      if(N == 10) return 37;
+      if(N == 11) return 42;
+      if(N == 12) return 45;
+      if(N == 13) return 58;
+      if(N == 14) return 65;
+      if(N == 15) return 72;
+      if(N == 16) return 76;
+      if(N == 17) return 80;
+      if(N == 18) return 90;
+      if(N == 19) return 88;
       if(N == 20) return 95;
-      if(N == 10) return 37; // not sure about this one yet; it's either 37 or 34
-      if(N == 5) return 10;
+      if(N == 21) return 102;
+      if(N == 22) return 108;
+      if(N == 23) return 114;
+      if(N == 24) return 116;
+      if(N == 25) return 123;
+      if(N == 26) return 129;
+      if(N == 27) return 132;
+      if(N == 28) return 136;
+      if(N == 29) return 144;
+      if(N == 30) return 155;
     }
     manual_min_e = false;
     return min_energy_state; // if we don't know, default to the minimum observed energy
