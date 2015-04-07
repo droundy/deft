@@ -97,6 +97,8 @@ int main(int argc, const char *argv[]) {
   int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
+  char *transitions_input_filename = new char[1024];
+  sprintf(transitions_input_filename, "none");
 
   // Tuning factors
   double wl_factor = 0.125;
@@ -127,6 +129,8 @@ int main(int argc, const char *argv[]) {
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.sticky_wall = 0;
+  sw.well_width = 1.3;
+  sw.filling_fraction = 0.3;
   sw.N = 200;
   sw.translation_scale = 0;
   sw.fractional_dos_precision = 1e-7;
@@ -143,14 +147,12 @@ int main(int argc, const char *argv[]) {
   char *data_dir = new char[1024];
   sprintf(data_dir, "papers/histogram/data");
   char *filename = new char[1024];
-  sprintf(filename, "default_filename");
+  sprintf(filename, "none");
   char *filename_suffix = new char[1024];
-  sprintf(filename_suffix, "default_filename_suffix");
+  sprintf(filename_suffix, "none");
   long simulation_iterations = 1e6;
   double acceptance_goal = .4;
   double R = 1;
-  double well_width = 1.3;
-  double ff = 0.3;
   double neighbor_scale = 2;
   double de_density = 0.1;
   double de_g = 0.05;
@@ -169,11 +171,10 @@ int main(int argc, const char *argv[]) {
     /*** FLUID IDENTITY ***/
 
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
-    {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &well_width, 0,
+    {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.well_width, 0,
      "Ratio of square well width to ball diameter", "DOUBLE"},
-    {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
-     "cell dimensions are adjusted accordingly without changing the shape of "
-     "the cell"},
+    {"ff", '\0', POPT_ARG_DOUBLE, &sw.filling_fraction, 0, "If specified, the "
+     "cell dimensions are adjusted accordingly without changing the shape of the cell"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
     {"sticky-wall", '\0', POPT_ARG_NONE, &sw.sticky_wall, 0, "Make one wall sticky", 0},
@@ -243,6 +244,9 @@ int main(int argc, const char *argv[]) {
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
      "Override initialized weights with weights generated from the transition matrix",
      "BOOLEAN"},
+    {"transitions_input_filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
+     &transitions_input_filename, 0, "File from which to read in transition matrix, "
+     "which will be used to generate a weight array in place of initialization", "STRING"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/
 
@@ -322,8 +326,8 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // Make sure we have a valid square-well fluid
-  if(well_width < 1){
-    printf("Interaction scale should be greater than (or equal to) 1.\n");
+  if(sw.well_width < 1){
+    printf("Well width should be >= 1 (but is %g).\n",sw.well_width);
     return 254;
   }
 
@@ -337,15 +341,18 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
+  const bool reading_in_transition_matrix = (strcmp(transitions_input_filename,"none") != 0);
+
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + bool(vanilla_wang_landau) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
-    printf("Exactly one histigram method must be selected!\n");
+     + bool(vanilla_wang_landau) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
+     + reading_in_transition_matrix != 1){
+    printf("Exactly one histogram method must be selected!\n");
     return 254;
   }
   // Check that no more than one secondary method is used
   if(bool(optimized_ensemble) + bool(transition_override) > 1){
-    printf("Cannot use more than one secondary histigram method!\n");
+    printf("Cannot use more than one secondary histogram method!\n");
     return 254;
   }
 
@@ -399,8 +406,8 @@ int main(int argc, const char *argv[]) {
   }
 
   // If the user specified a filling fraction, make it so!
-  if (ff != 0) {
-    const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
+  if (sw.filling_fraction != 0) {
+    const double volume = 4*M_PI/3*R*R*R*sw.N/sw.filling_fraction;
     const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
@@ -445,7 +452,7 @@ int main(int argc, const char *argv[]) {
   }
 
   if (sw.translation_scale == 0) {
-    const double dist_in_well = 2*R*(well_width-1);
+    const double dist_in_well = 2*R*(sw.well_width-1);
     if (dist_in_well > 0.2*R) {
       sw.translation_scale = 0.1*R;
     } else {
@@ -461,7 +468,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // If a filename was not selected, make a default
-  if (strcmp(filename, "default_filename") == 0) {
+  if (strcmp(filename, "none") == 0) {
     char *method_tag = new char[200];
     char *wall_tag = new char[100];
     if(sw.walls == 0) sprintf(wall_tag,"periodic");
@@ -489,7 +496,7 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "%s-%s", method_tag, end_condition_text);
 
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
-            wall_tag, well_width, eta, sw.N, method_tag);
+            wall_tag, sw.well_width, eta, sw.N, method_tag);
     if(optimized_ensemble){
       sprintf(filename, "%s_oe", filename);
     } else if(transition_override){
@@ -503,7 +510,7 @@ int main(int argc, const char *argv[]) {
     printf("\nUsing given file name: ");
 
   // If a filename suffix was specified, add it
-  if (strcmp(filename_suffix, "default_filename_suffix") != 0)
+  if (strcmp(filename_suffix, "none") != 0)
     sprintf(filename, "%s-%s", filename, filename_suffix);
   printf("%s\n",filename);
 
@@ -564,13 +571,13 @@ int main(int argc, const char *argv[]) {
   sw.translation_scale *= R;
 
   // neighbor radius should scale with radius and interaction scale
-  sw.neighbor_R = neighbor_scale*R*well_width;
+  sw.neighbor_R = neighbor_scale*R*sw.well_width;
 
   // Find the upper limit to the maximum number of neighbors a ball could have
-  sw.max_neighbors = max_balls_within(2+neighbor_scale*well_width);
+  sw.max_neighbors = max_balls_within(2+neighbor_scale*sw.well_width);
 
   // Energy histogram and weights
-  sw.interaction_distance = 2*R*well_width;
+  sw.interaction_distance = 2*R*sw.well_width;
   sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
   sw.energy_histogram = new long[sw.energy_levels]();
   sw.ln_energy_weights = new double[sw.energy_levels]();
@@ -757,6 +764,14 @@ int main(int argc, const char *argv[]) {
   } else if (oetmmc) {
     sw.initialize_transitions();
     sw.optimize_weights_using_transitions();
+  } else if (reading_in_transition_matrix){
+    sw.initialize_transitions_file(transitions_input_filename);
+
+    for(int e = 0; e < sw.energy_levels; e++){
+      printf("lnw[%i]: %g\n",e,sw.ln_energy_weights[e]);
+    }
+    printf("this method is not working yet.\n");
+    return 100;
   }
 
   // If we wish to optimize the ensemble or set transition matrix weights, do so
@@ -862,9 +877,10 @@ int main(int argc, const char *argv[]) {
           "# fractional_sample_error after initialization: %g\n"
           "# min_important_energy after initialization: %i\n\n",
           version_identifier(),
-          well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
-          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, sw.min_T,
-          fractional_sample_error, sw.set_min_important_energy());
+          sw.well_width, sw.filling_fraction, sw.N, sw.walls, sw.len[0], sw.len[1],
+          sw.len[2], seed, de_g, de_density, sw.translation_scale, neighbor_scale,
+          sw.energy_levels, sw.min_T, fractional_sample_error,
+          sw.set_min_important_energy());
 
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);

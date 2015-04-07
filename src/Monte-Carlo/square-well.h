@@ -48,6 +48,8 @@ struct sw_simulation {
   /* The following are constant parameters that describe the physical
      system, but do not change as we simulate. */
 
+  double well_width; // width of well in units of sphere radius
+  double filling_fraction; // proportion of space filled with spheres
   int N; // number of balls
   double len[3]; // the size of the cell
   int walls; // should this be an enum?
@@ -168,6 +170,8 @@ struct sw_simulation {
   void initialize_simple_flat(int flat_update_factor);
 
   void initialize_transitions();
+
+  void initialize_transitions_file(char *transitions_input_filename);
 
   double fractional_dos_precision;
   void update_weights_using_transitions();
