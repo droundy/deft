@@ -50,6 +50,10 @@ Alias('git configuration',
       env.Command(target = '.git/hooks/pre-commit',
                   source = 'git/pre-commit',
                   action = Copy("$TARGET", "$SOURCE")))
+Alias('git configuration',
+      env.Command(target = 'src/version-identifier.h',
+                  source = ['src/generate-version-identifier.py'],
+                  action = 'python3 $SOURCE > $TARGET'))
 Default('git configuration')
 
 haskell = Environment(tools=['haskell'],
@@ -141,7 +145,8 @@ AddMethod(Environment, SVG)
 for name in Split(""" monte-carlo soft-monte-carlo pair-monte-carlo
                       triplet-monte-carlo polyhedra-monte-carlo polyhedra-talk
                       square-well-monte-carlo
-                      radial-distribution-monte-carlo free-energy-monte-carlo"""):
+                      radial-distribution-monte-carlo free-energy-monte-carlo
+                      free-energy-monte-carlo-infinite-case"""):
     env.Program(
         target=name,
         source=["src/Monte-Carlo/" + name + ".cpp", 'src/utilities.cpp', 'src/Monte-Carlo/polyhedra.cpp', 'src/Monte-Carlo/square-well.cpp', 'src/vector3d.cpp'])
@@ -189,6 +194,7 @@ for name, module, hsfunctional, inputs in [
     ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff",
            '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
     ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[]'),
+    ("SW_liquid", "SW_liquid", "sw_liquid_n", '[(ER $ r_var "n", ER 1)]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
     ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[]'),
@@ -211,6 +217,7 @@ main = createHeaderAndCppFiles %s %s "%s"
 
 for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispersion SaftFluid
                      SimpDispersion EntropySaftFluid GradDispersion JoinedGradDispersion
+                     SW_liquid
                      SimpGradDispersion SFMT """):
     generate.Functional(target = 'doc/' + pdf + '.pdf', source = 'src/haskell/latex-functionals.exe')
     Alias('pdf', 'doc/' + pdf + '.pdf')
@@ -239,7 +246,8 @@ all_sources = generic_sources + generated_sources
 env.AppendUnique(TARFLAGS = ['-c','-z'])
 # Here we have generic rules for our papers
 for paper in Split(""" hughes-saft contact fuzzy-fmt pair-correlation water-saft
-                       square-well-liquid polyhedra renormalization electrostatics """):
+                       hard-sphere-free-energy square-well-fluid
+                       histogram polyhedra renormalization electrostatics """):
     p = env.PDF(target = 'papers/' + paper + '/paper.pdf',
                 source = ['papers/' + paper + '/paper.tex'])
     NoCache(p)
@@ -318,23 +326,9 @@ for atom in ['Ne', 'Ar', 'Kr', 'Xe']:
 
 # #################### papers/fuzzy-fmt ##################################################
 
-# #################### papers/square-well-liquid ##################################################
+# #################### papers/histogram ##############################
 
-Alias('papers', env.PDF('papers/square-well-liquid/histogram-paper.tex'))
-
-# The following enables automagic monte-carlo generation of
-# low-quality data for simple plots
-for ff in [0.1, 0.2, 0.3, 0.4]:
-    datadir = "papers/square-well-liquid/data/"
-    for ww in [1.1, 1.3, 1.5, 2.0, 3.0]:
-        for N in range(5,30)+range(30,50,5)+range(50,100,10)+range(100,201,20):
-            for method in ["nw","robustly_optimistic","gaussian","wang_landau","optimized_ensemble",'tmmc'] \
-                    + ["kT %g" %kT for kT in [i*.1 for i in range(1,10)] + range(1,10)]:
-                env.Command(target = [datadir+"periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat"
-                                      % (ww, ff, N, method.replace(' ',''), postfix)
-                                      for postfix in ['E','lnw','transitions','os','ps','g']],
-                            source = 'square-well-monte-carlo',
-                            action = './square-well-monte-carlo --%s --N %d --ff %g --ww %g --iterations 1000000' % (method, N, ff, ww))
+Alias('papers', env.PDF('papers/histogram/paper.tex'))
 
 # #################### talks ##################################################
 
@@ -507,7 +501,7 @@ for mkdat in Split("""
 for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
     env.Command(target = "papers/fuzzy-fmt/figs/wallshard-%06.4f-%04.2f.dat" % (0.0, rho),
                 source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
-                action = '$SOURCE %g %g' % (rho, kT))
+                action = '$SOURCE %g %g' % (rho, 0.0))
     for kT in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
         env.Command(target = "papers/fuzzy-fmt/figs/new-data/wall-%04.2f-%04.2f.dat" % (rho, kT),
                     source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],

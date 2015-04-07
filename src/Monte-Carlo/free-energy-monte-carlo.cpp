@@ -76,6 +76,10 @@ inline void print_bad(const ball *p, int N, double len[3], int walls);
 // Checks to make sure that every ball is his neighbor's neighbor.
 inline void check_neighbor_symmetry(const ball *p, int N);
 
+// Check whether it is a reasonable time to save data according to our
+// heuristic.
+bool time_to_save();
+
 int main(int argc, const char *argv[]) {
   took("Starting program");
   // ----------------------------------------------------------------------------
@@ -105,6 +109,7 @@ int main(int argc, const char *argv[]) {
   double R = 1;
   const double well_width = 1;
   double ff = 0.3;
+  double ff_small = -1;
   double neighbor_scale = 2;
   double de_g = 0.05;
   double max_rdf_radius = 10;
@@ -119,7 +124,9 @@ int main(int argc, const char *argv[]) {
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
     {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
      "cell dimensions are adjusted accordingly without changing the shape of "
-     "the cell"},
+     "the cell."},
+    {"ff_small", '\0', POPT_ARG_DOUBLE, &ff_small, 0, "Small filling fraction. If specified, "
+     "This sets the desired filling fraction of the shrunk cell. Otherwise it defaults to ff."},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
     {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
@@ -190,6 +197,11 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
+  if(ff_small != -1 && scaling_factor != 1.0){
+    printf("You can't specify both the small filling fraction and the scaling factor.");  
+    return 1;
+  }
+
 
   if (ff != 0) {
     // The user specified a filling fraction, so we must make it so!
@@ -227,8 +239,20 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  // if the user didn't specifiy a small filling fraction, then we should get it.
+  if(ff_small == -1){
+      ff_small = (4*M_PI/3*R*R*R*sw.N)/
+        (sw.len[x]*sw.len[y]*sw.len[z]*scaling_factor*scaling_factor*scaling_factor);
+  }
+  // if they did, then we need to get the scale factor
+  else{
+    scaling_factor = std::cbrt(ff/ff_small);
+  }
+
+
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
+  printf("\nFilling fraction of small cell is %g", ff_small);
   if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
       neighbor_scale <= 0 || sw.translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
@@ -456,6 +480,9 @@ int main(int argc, const char *argv[]) {
 
   sw.initialize_translation_distance();
 
+  // --------------------------------------------------------------------------
+  // end initilization routine.
+  // --------------------------------------------------------------------------
 
   // ----------------------------------------------------------------------------
   // Generate info to put in save files
@@ -474,9 +501,11 @@ int main(int argc, const char *argv[]) {
           "# well_width: %g\n"
           "# translation_scale: %g\n"
           "# neighbor_scale: %g\n"
-          "# scaling factor: %g\n",
+          "# scaling factor: %g\n"
+          "# ff: %g\n"
+          "# ff_small: %g\n",
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
-          well_width, sw.translation_scale, neighbor_scale, scaling_factor);
+          well_width, sw.translation_scale, neighbor_scale, scaling_factor, ff, ff_small);
 
   char *g_fname = new char[1024];
   sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
@@ -486,11 +515,6 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
-
-  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
-  // top out at one hour interval
-  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30;
-  clock_t last_output = clock(); // when we last output data
 
   sw.moves.total = 0;
   sw.moves.working = 0;
@@ -516,8 +540,9 @@ int main(int argc, const char *argv[]) {
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
-    for(int i = 0; i < sw.N; i++)
+    for(int i = 0; i < sw.N; i++){
       sw.move_a_ball();
+    }
 
     // just hacking stuff in to see what works
     // do the small bit every 100 n^2 iterations for now
@@ -564,13 +589,8 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
 
-    const clock_t now = clock();
-    if ((now - last_output > output_period) || sw.iteration == simulation_iterations) {
-      last_output = now;
-      assert(last_output);
-      if (output_period < max_output_period/2) output_period *= 2;
-      else if (output_period < max_output_period)
-        output_period = max_output_period;
+    if (time_to_save() || sw.iteration == simulation_iterations) {
+      const clock_t now = clock();
       const double secs_done = double(now)/CLOCKS_PER_SEC;
       const int seconds = int(secs_done) % 60;
       const int minutes = int(secs_done / 60) % 60;
@@ -590,7 +610,7 @@ int main(int argc, const char *argv[]) {
               "# longest valid run: %i\n"
               "# total checks of small cell: %i\n"
               "# total failed small checks: %i\n"
-              "# total valid small checks %i\n\n",
+              "# total valid small checks: %i\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total, longest_failed_run,
               longest_valid_run, total_checks_of_small_cell, total_failed_small_checks,
@@ -799,4 +819,34 @@ void save_locations(const ball *p, int N, const char *fname, const double len[3]
     fprintf(out, "\n");
   }
   fclose(out);
+}
+
+bool time_to_save() {
+  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every second
+  // top out at one hour interval
+  clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60;
+  static clock_t last_save_time = 0;
+
+  static int iterations = 0;
+  static int how_often = 1;
+  // clock can be expensive under fac, so this is a heuristic to
+  // reduce our use of it.
+  if (++iterations % how_often == 0) {
+    const clock_t time_now = clock();
+    if(time_now-last_save_time > output_period){
+
+      if (output_period < max_output_period/2) output_period *= 2;
+      else if (output_period < max_output_period)
+        output_period = max_output_period;
+
+      how_often = 1+ iterations/3; // our simple heuristic
+      last_save_time = time_now;
+      iterations = 0;
+      // flushing occasionally will be no problem and can be helpful
+      // if we forget.
+      fflush(stdout);
+      return true;
+    }
+  }
+  return false;
 }

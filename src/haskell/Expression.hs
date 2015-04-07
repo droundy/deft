@@ -629,11 +629,11 @@ expand _ (Scalar e) = Scalar e
 expand v (F Heaviside e) = heaviside e'
      where e' = expand v e
 expand v (F Cos e) = if setZero (mkExprn v) e == 0
-                     then 1 - e'**2/2 + e'**4/4/3/2
+                     then 1 - e'**2/2 + e'**4/4/3/2 - e'**6/6/5/4/3/2 + e'**8/8/7/6/5/4/3/2
                      else cos e'
      where e' = expand v e
 expand v (F Sin e) = if setZero (mkExprn v) e == 0
-                     then e' - e'**3/3/2
+                     then e' - e'**3/3/2 + e'**5/5/4/3/2 - e'**7/7/6/5/4/3/2
                      else sin e'
      where e' = expand v e
 expand v (F Erfi e) = if setZero (mkExprn v) e == 0
@@ -645,7 +645,7 @@ expand v (F Erf e) = if setZero (mkExprn v) e == 0
                      else erf e'
      where e' = expand v e
 expand v (F Exp e) = if setZero (mkExprn v) e == 0
-                     then 1 + e' + e'**2/2 + e'**3/3/2
+                     then 1 + e' + e'**2/2 + e'**3/3/2 + e'**4/4/3/2
                      else exp e'
      where e' = expand v e
 expand v (F Log e) = if setZero (mkExprn v) e == 1
@@ -1079,12 +1079,13 @@ instance (Type a, Code a) => Code (Expression a) where
   codePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
   codePrec p (Sum s _) = showParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
-          addup "" (1,e) = codePrec 6 e ""
-          addup "" (f,e) = if e == 1
-                           then show f
-                           else show f ++ "*" ++ codePrec 7 e ""
-          addup rest (1,e) = codePrec 6 e (showString " + " $ rest)
-          addup rest (f,e) = show f ++ "*" ++ codePrec 7 e (showString " + " $ rest)
+          addup "" (f,e) = quick_prod f e
+          addup ('-':rest) (f,e) =  quick_prod f e ++ " - " ++ rest
+          addup rest (f,e) | f < 0 = rest ++ " - " ++ quick_prod (-f) e
+          addup rest (f,e) = rest ++ " + " ++ quick_prod f e
+          quick_prod f e | e == 1 = show f
+          quick_prod f e | f == 1 = codePrec 6 e ""
+          quick_prod f e = show f ++ "*" ++ codePrec 7 e ""
 
   newcodePrec _ (Var _ c _ _ Nothing) = showString c
   newcodePrec p (Var _ _ _ _ (Just e)) = newcodePrec p e
@@ -1125,18 +1126,13 @@ instance (Type a, Code a) => Code (Expression a) where
   newcodePrec _ (Sum s i) | Sum s i == 0 = showString "0.0"
   newcodePrec p (Sum s _) = showParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
-          addup "" (1,e) = newcodePrec 6 e ""
-          addup "" (-1,e) = "-" ++ newcodePrec 6 e ""
-          addup "" (f,e) = if e == 1
-                           then show f
-                           else case isConstant e of
-                                Just c -> show (f*c)
-                                Nothing -> show f ++ "*" ++ newcodePrec 7 e ""
-          addup rest (1,e) = newcodePrec 6 e (showString " + " $ rest)
-          addup rest (f,e) =
-             case isConstant e of
-             Nothing -> show f ++ "*" ++ newcodePrec 7 e (showString " + " $ rest)
-             Just c -> show (f*c) ++ (showString " + " rest)
+          addup "" (f,e) = quick_prod f e
+          addup ('-':rest) (f,e) =  quick_prod f e ++ " - " ++ rest
+          addup rest (f,e) | f < 0 = rest ++ " - " ++ quick_prod (-f) e
+          addup rest (f,e) = rest ++ " + " ++ quick_prod f e
+          quick_prod f e | e == 1 = show f
+          quick_prod f e | f == 1 = newcodePrec 6 e ""
+          quick_prod f e = show f ++ "*" ++ newcodePrec 7 e ""
   latexPrec p (Var _ _ "" "" (Just e)) = latexPrec p e
   latexPrec _ (Var _ _ c "" _) = showString c
   latexPrec _ (Var _ _ _ t _) = showString t
@@ -1154,7 +1150,7 @@ instance (Type a, Code a) => Code (Expression a) where
   latexPrec _ (F Signum _) = undefined
   latexPrec p (Product x _) | Map.size x == 1 && product2denominator x == 1 =
     case product2pairs x of
-      [(_,0)] -> showString "1" -- this shouldn't happen...
+      [(_,0)] -> error "shouldn't have power 0 here" -- showString "1" -- this shouldn't happen...
       [(_, n)] | n < 0 -> error "shouldn't have negative power here"
       [(e, 1)] ->   latexPrec p e
       [(e, 0.5)] -> showString "\\sqrt{" . latexPrec 0 e . showString "}"
@@ -1173,17 +1169,14 @@ instance (Type a, Code a) => Code (Expression a) where
           den = product2denominator p
   latexPrec p (Sum s _) = latexParen (p > 6) (showString me)
     where me = foldl addup "" $ sum2pairs s
-          addup "" (1,e) = latexPrec 6 e ""
-          addup "" (f,e) | f < 0 = "-" ++ addup "" (-f, e)
-          addup "" (f,e) = if e == 1
-                           then latexDouble f
-                           else latexDouble f ++ " " ++ latexPrec 6 e ""
-          addup ('-':rest) (1,e) = latexPrec 6 e (" - " ++ rest)
-          addup ('-':rest) (-1,e) = "-" ++ latexPrec 6 e (" - " ++ rest)
-          addup ('-':rest) (f,e) = latexDouble f ++ " " ++ latexPrec 7 e (showString " - " $ rest)
-          addup rest (-1,e) = "-" ++ latexPrec 6 e (" + " ++ rest)
-          addup rest (1,e) = latexPrec 6 e (" + " ++ rest)
-          addup rest (f,e) = latexDouble f ++ " " ++ latexPrec 7 e (showString " + " $ rest)
+          addup "" (f,e) = quick_prod f e
+          addup ('-':rest) (f,e) = quick_prod f e ++ " - " ++ rest
+          addup rest (-1,e) = rest ++ " - " ++ latexPrec 6 e ""
+          addup rest (f,e) | f < 0 = rest ++ " - " ++ quick_prod (-f) e
+          addup rest (f,e) = rest ++ " + " ++ quick_prod f e
+          quick_prod f e | e == 1 = latexDouble f
+          quick_prod f e | f == 1 = latexPrec 6 e ""
+          quick_prod f e = latexDouble f ++ " " ++ latexPrec 7 e ""
 
 latexParen :: Bool -> ShowS -> ShowS
 latexParen False x = x

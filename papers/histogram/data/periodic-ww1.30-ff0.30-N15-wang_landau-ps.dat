@@ -1,0 +1,66 @@
+# well_width: 1.3
+# ff: 0.3
+# N: 15
+# walls: 0
+# cell dimensions: (5.93863, 5.93863, 5.93863)
+# seed: 0
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 84
+# min_T: 0.2
+# fractional_sample_error after initialization: 0.099245
+# min_important_energy after initialization: 74
+
+# histogram method: Wang-Landau
+# wl_factor: 0.125
+# wl_fmod: 2
+# wl_threshold: 3
+# wl_cutoff: 1e-06
+# none: 3000000
+# iterations: 3000000
+# working moves: 21519493
+# total moves: 45000000
+# acceptance rate: 0.478211
+
+# energy	samples
+36  0
+37  168951
+38  90837
+39  57022
+40  38157
+41  26463
+42  18929
+43  14025
+44  10544
+45  8105
+46  6248
+47  4981
+48  4034
+49  3268
+50  2661
+51  2222
+52  1864
+53  1564
+54  1318
+55  1139
+56  985
+57  852
+58  748
+59  644
+60  560
+61  478
+62  408
+63  339
+64  274
+65  228
+66  187
+67  167
+68  140
+69  107
+70  93
+71  77
+72  56
+73  35
+74  12

@@ -11,7 +11,7 @@ else:
     os.exit(1)
 
 documentclassre = re.compile(r'\\documentclass(\[[^\]]+\])?{')
-graphicre = re.compile(r'^\s*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MULTILINE)
+graphicre = re.compile(r'^[^%\n]*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MULTILINE)
 inputre = re.compile(r'\\input(\[[^\]]+\])?{([^}]+)}')
 
 for t in texfs:
@@ -21,7 +21,7 @@ for t in texfs:
     f = open(t, 'r')
     latex = f.read()
     inputs = {fname}
-    outputs = {fname[:-3]+'pdf', fname[:-3]+'bbl'}
+    outputs = {fname[:-3]+'pdf'}
 
     os.chdir(os.path.dirname(t)) # so we can look up figures easily
     def graphics_name(x):

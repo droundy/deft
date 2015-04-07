@@ -26,9 +26,10 @@ struct move_info {
 };
 
 enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
-                      optimistic_sample_error, pessimistic_sample_error, flat_histogram };
+                      optimistic_sample_error, pessimistic_sample_error, flat_histogram,
+                      init_iter_limit };
 
-enum dos_types { inv_weights_dos, transitions_dos, full_dos };
+enum dos_types { histogram_dos, transition_dos };
 
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
@@ -47,9 +48,12 @@ struct sw_simulation {
   /* The following are constant parameters that describe the physical
      system, but do not change as we simulate. */
 
+  double well_width; // width of well in units of sphere radius
+  double filling_fraction; // proportion of space filled with spheres
   int N; // number of balls
   double len[3]; // the size of the cell
   int walls; // should this be an enum?
+  int sticky_wall; // do we have an attractive region near one wall?
   double interaction_distance; // the distance over which balls interact
 
   /* The following are constant parameters that describe the details
@@ -67,7 +71,8 @@ struct sw_simulation {
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
 
-  int max_entropy_state, min_energy_state, min_important_energy=0;
+  int max_entropy_state, min_energy_state, min_important_energy;
+  bool manual_min_e = false;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -87,6 +92,7 @@ struct sw_simulation {
   int min_samples; // force some number of minimum energy samples
   double sample_error; // the maximum fractional sample error to achieve in initialization
   double flatness; // maximum allowable proportional deviation from mean histogram value
+  int init_iters; // number of iterations for which to initialize
 
   /* The following tracks how many transitions we have attempted from
      a given energy level to nearby energy levels.  The advantage of
@@ -104,15 +110,20 @@ struct sw_simulation {
     return transitions_table[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
-  /* "transition_matrix" is a read-only sloppy version of the matrix
-     also called "transitions" above, which is a little easier for me
-     to wrap my brains around.  DJR */
-  long transition_matrix(int to, int from) {
+  /* "transition_matrix" is a read-only sloppy and normalized version
+     of the matrix also called "transitions" above, which is a little
+     easier for me to wrap my brains around.  DJR */
+  double transition_matrix(int to, int from) {
     if (abs(to - from) > biggest_energy_transition ||
         to < 0 || from < 0 || to >= energy_levels || from >= energy_levels) {
       return 0;
     }
-    return transitions(from, to - from);
+    long norm = 0;
+    for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
+      norm += transitions(from, e);
+    }
+    if (norm == 0) return 0;
+    return transitions(from, to - from)/double(norm);
   };
 
   int max_interactions() const { // return the maximum observed number of interactions
@@ -123,6 +134,7 @@ struct sw_simulation {
   /* Up-moving walkers for optimized ensemble method */
   long *walkers_up;
 
+  void reset_histograms();
   void move_a_ball(bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(int energy_change); // updates to run if we've changed energy
@@ -132,7 +144,7 @@ struct sw_simulation {
 
   // iterate long enough to find the max entropy state and initialize
   // the translation distance. return most probable energy
-  int initialize_max_entropy_and_translation_distance(double acceptance_goal = 0.4);
+  int initialize_max_entropy(double acceptance_goal = 0.4);
 
   // initialize the translation distance. return most probable energy
   void initialize_translation_distance(double acceptance_goal = 0.4);
@@ -147,40 +159,76 @@ struct sw_simulation {
 
   /*** HISTOGRAM METHODS ***/
 
-  void initialize_canonical(double kT);
-
-  double initialize_gaussian(double scale); // returns width of gaussian used
+  // set canonical weights below some given energy
+  void initialize_canonical(double T, int reference=0);
 
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff);
 
-  void initialize_optimized_ensemble(int first_update_iterations);
+  void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
 
-  void initialize_robustly_optimistic(double robust_scale, double robust_cutoff);
-
-  void initialize_bubble_suppression(double bubble_scale, double bubble_cutoff);
+  void initialize_simple_flat(int flat_update_factor);
 
   void initialize_transitions();
+
+  void initialize_transitions_file(char *transitions_input_filename);
 
   double fractional_dos_precision;
   void update_weights_using_transitions();
 
-  void update_weights_using_transition_flux();
+  void optimize_weights_using_transitions();
 
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
   double* compute_ln_dos(dos_types dos_type);
+  double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
-  int find_min_important_energy(double T);
+  int set_min_important_energy();
 
   // check whether we are done initializing
-  bool finished_initializing();
+  bool finished_initializing(bool be_verbose = false);
+  bool reached_iteration_cap();
 
   double estimate_trip_time(int E1, int E2);
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();
+
+  // manual minimum important energies for Wang-Landau
+  int default_min_e(){
+    manual_min_e = true;
+    if(min_T == 0.2){
+      if(N == 5) return 3;
+      if(N == 6) return 15;
+      if(N == 7) return 20;
+      if(N == 8) return 26;
+      if(N == 9) return 28;
+      if(N == 10) return 37;
+      if(N == 11) return 42;
+      if(N == 12) return 45;
+      if(N == 13) return 58;
+      if(N == 14) return 65;
+      if(N == 15) return 72;
+      if(N == 16) return 76;
+      if(N == 17) return 80;
+      if(N == 18) return 90;
+      if(N == 19) return 88;
+      if(N == 20) return 95;
+      if(N == 21) return 102;
+      if(N == 22) return 108;
+      if(N == 23) return 114;
+      if(N == 24) return 116;
+      if(N == 25) return 123;
+      if(N == 26) return 129;
+      if(N == 27) return 132;
+      if(N == 28) return 136;
+      if(N == 29) return 144;
+      if(N == 30) return 155;
+    }
+    manual_min_e = false;
+    return min_energy_state; // if we don't know, default to the minimum observed energy
+  }
 
   sw_simulation(){
     last_print_time = clock();
@@ -197,9 +245,8 @@ vector3d periodic_diff(const vector3d &a, const vector3d  &b,
 // Create and initialize the neighbor tables for all balls (p).
 // Returns the maximum number of neighbors that any ball has,
 // or -1 if that number is larger than max_neighbors.
-int initialize_neighbor_tables(ball *p, int N, double neighborR,
-                               int max_neighbors, const double len[3],
-                               int walls);
+int initialize_neighbor_tables(ball *p, int N, double neighborR, int max_neighbors,
+                               const double len[3], int walls);
 
 // Find's the neighbors of a by comparing a's position to the center of
 // everyone else's neighborsphere, where id is the index of a in p.
@@ -241,7 +288,7 @@ int count_all_interactions(ball *balls, int N, double interaction_scale,
 
 // Find index of max entropy point
 int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
-                      int energy_levels);
+                          int energy_levels);
 
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius

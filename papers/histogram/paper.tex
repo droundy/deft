@@ -1,0 +1,264 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{color}
+
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\cyan}[1]{{\bf \color{cyan} #1}}
+
+\newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
+\newcommand{\mpsays}[1]{{\color{red} [\blue{Michael:} \emph{#1}]}}
+
+\begin{document}
+\title{Applying the optimized ensemble histogram method to the
+  square-well liquid}
+
+\author{Michael A. Perlin} \author{David Roundy}
+\affiliation{Department of Physics, Oregon State University,
+  Corvallis, OR 97331}
+
+\begin{abstract}
+  We have applied the clever histogram method to the square-well
+  liquid.
+\end{abstract}
+
+\maketitle
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-E}
+  \caption{A histogram plot demonstrating the difficulty of using
+    canonical Monte Carlo to simulate a system.  A simulation at a
+    give temperature only provides information fo a small number of
+    energy states.\label{fig:histograms}}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-weights}
+  \caption{The weight functions from different methods.}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-dos}
+  \caption{A density of states plot demonstrating the difficulty of
+    using canonical Monte Carlo to simulate a system.  A simulation at
+    a give temperature only provides information fo a small number of
+    energy states.\label{fig:dos}}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-sample-rate}
+  \caption{Inverse sampling rates from different methods.}
+\end{figure}
+
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-scaling}
+%   \caption{Scaling.\label{fig:scaling}}
+% \end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u}
+  \caption{Specific internal energy.\label{fig:u}}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc}
+  \caption{Specific heat capacity.\label{fig:hc}}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S}
+  \caption{Specific entropy.\label{fig:S}}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u_err}
+  \caption{Specific internal energy.\label{fig:u}}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc_err}
+  \caption{Specific heat capacity.\label{fig:hc}}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-s_err}
+  \caption{Error in specific entropy.\label{fig:Serr}}
+\end{figure}
+
+%% \begin{figure}
+%%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-rdf}
+%%   \caption{Radial distribution function.\label{fig:rdf}}
+%% \end{figure}
+
+As shown in Fig.~\ref{fig:histograms}, there are several difficulties
+encountered when running Monte Carlo simulations at a fixed
+temperature.  On the top plot, which shows three simulations run at
+$\lambda = 1.3$, it is apparent that each given canonical simulation
+only provides statistical information for a small number of energy
+states.  The bottom plot shows an even more serious issue: when
+running a simulation at a fixed temperature, it is possible to become
+frozen in a state that is far from the ground state, as happened in
+the $kT=0.1\epsilon$ simulation.
+
+% \begin{table*}
+% \input{figs/scaling-table-ww130-ff30}
+% \caption{Scaling data}
+% \end{table*}
+
+\section{New ideas for algorithms}
+
+\subsection{Finding maximum probability state}
+
+Technically maximum histogram or maximum entropy.
+
+Loop:
+
+run iterations until we see $N$ energy changes, counting the number of
+returns to the initial energy.  If there are sufficient returns, then
+we are at the maximum, where sufficient returns will be determined by
+a random walk (weighted?) where we compute the expected number of
+returns if the walk is not weighted.  We may want to correct to get
+all the way to the top.
+
+If we are not at the top yet, we try again.  Eventually we will be.
+
+\subsection{Finding variance of the histogram}
+
+I assume we first ran the max-entropy/histogram algorithm, which gives
+us a maximum value of $E_0$.  We then zero the histogram.
+
+We run for a short while, and then compute the mean and standard
+deviation of the energy from the histogram: $\bar E$ and $\sigma$.
+While doing this, we track the number of returns to the initial state
+$n$.  Now the uncertainty in the mean is given by
+\begin{equation}
+  \Delta \bar E \approx \frac{\sigma}{\sqrt{n}}
+\end{equation}
+if $\Delta \bar E \ll (E_0 - \bar E)$ then we can conclude that we are
+certain where the maximum is, and how wide it is.
+
+\begin{figure*}
+  \includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-transitions}\hfill%
+\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-transitions}\hfill%
+\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-tmmc-compare-transitions}
+  \caption{A plot showing the probability of energy transitions (with
+    no weighting) from given energy states.\label{fig:transitions}}
+\end{figure*}
+
+\subsection{Tracking transitions}
+
+We can track the number of attempted transitions from each energy
+eestate to each other energy state.  This statistic has the advantage of
+being approximately independent of the weighting function used
+(although it is highly dependent on the step size).  Thus we could
+continue to refine this statistic, even as we are updating the weight
+array.  Here are two papers that seem highly relevant to this
+method~\cite{wang1999transition, wang2002transition}, but I'm not sure
+if they're identical.
+
+The ratio of density of states at two energies should be proportional
+to the ratio of upgoing and downgoing transition rates between those
+two energies.  Thus these transitions give us information about
+$\Delta D$ (where $D$ is the density of states).
+
+Figure~\ref{fig:transitions} below shows the transition matrix for a
+20-sphere system, computed during initialization using the Wang-Landau
+algorithm.
+
+How can we use this?
+
+\subsubsection{Generating $w$ from the transition matrix}
+
+We should be able to generate a set of weighting functions directly
+from the transition matrix.  We could do this either by optimizing for
+a flat histogram, or by optimizing the round-trip rate.  Both would be
+interesting to implement.
+
+One natural approach would use linear algebra.  If the normalized
+transition matrix is $T$, then the density of states is given by
+\begin{equation}
+  D = TD
+\end{equation}
+By solving this equation for $D$, we could find a good approximation
+for $w$ to obtain a flat histogram.
+
+I expect that we could use similar math to the optimized ensemble
+folks to optimize the round-trip rate.
+
+\subsubsection{Initializing using the transition matrix directly}
+
+An alternative initialization algorithm involves using the transition
+matrix directly during initialization.  This process was proposed by
+Swendsen \emph{et al.} as a modification for their initialization
+procedure~\cite{swendsen1999transition}.  In this case, the transition
+matrix is continually updated, thus modifying the relative weighting
+of different energies as the simulation proceeds.  This strictly
+speaking no longer satisfies detailed balance, but as the simulation
+proceeds this violation will quickly become increasingly small.
+
+This raises the question of how to use the transition matrix to
+directly determine transition probabilities, since the self-consistent
+eigenvalue solution is unsuitable.  The key is to recognize that we do
+not require weights for each energy but only \emph{differences} of
+weights for on pair of energies at a time.  This is a much smaller
+problem.
+
+Swendsen \emph{et al.} find for a flat distribution, the acceptance
+rate for a given transition is equal to the ratio of that element in
+the transition matrix to the element corresponding to the reverse
+transition~\cite{swendsen1999transition}.  Naturally, for a different
+distribution, we can scale the acceptance ratios according to the
+ratio of occupations desired.  We modify this algorithm to always
+accept transitions to a lower energy, thus employing a broad histogram
+method that does not much sample energies above the maximum-entropy
+energy.
+
+Swendsen only uses this approach after a slightly hokey two-stage
+initialization.  It seems to work pretty well, and asymptotically it
+does have detailed balance.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_errors}
+  \caption{$u$ error scaling.}
+  \label{fig:scaling-u_err}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_errors}
+  \caption{$c_V$ error scaling.}
+  \label{fig:scaling-cv_err}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_errors}
+  \caption{$s$ error scaling.}
+  \label{fig:scaling-s_err}
+\end{figure}
+
+% \subsection{Convergence tests}
+
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-dos-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-dos}
+% \end{figure}
+
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-u}
+% \end{figure}
+
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-hc}
+% \end{figure}
+% \begin{figure}
+%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S-conv-T10}
+%   \caption{Convergence}
+%   \label{fig:conv-S}
+% \end{figure}
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}

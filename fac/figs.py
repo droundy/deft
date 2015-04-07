@@ -19,6 +19,8 @@ changing_loadtxt = re.compile(r"^[^\n#]*loadtxt\(['\"]([^'\"\*]*)['\"]\s*%\s*(\(
 changing_input = re.compile(r"input:\s*['\"]([^'\"\*]*)['\"]\s*%\s*(\(.*\))")
 list_comprehension_input = re.compile(r"input:\s*(\[\s*['\"][^'\"\*]*['\"].+for.*in.*\])\n")
 
+cache_files = re.compile(r"cache-suffix:\s+(\S+)\n")
+
 def friendly_eval(code, context, local = None):
     try:
         return eval(code, local)
@@ -48,6 +50,7 @@ for fname in pyfs:
     outputs = [x[0] for x in outputs]
     outputs += fixed_open.findall(contents) # add any files created with open(...)
     argvals = arguments.findall(contents)
+    cache_suffixes = cache_files.findall(contents)
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents) + open_changing_output.findall(contents)
         list_inputs = list_comprehension_input.findall(contents)
@@ -86,6 +89,8 @@ for fname in pyfs:
             for o in outputs + extraoutputs:
                 print '>', o
             print 'c .pyc'
+            for suf in cache_suffixes:
+                print 'c', suf
             print 'C %s/.matplotlib' % os.getenv('HOME')
             print
     else:
@@ -95,5 +100,7 @@ for fname in pyfs:
         for o in outputs:
             print '>', o
         print 'c .pyc'
+        for suf in cache_suffixes:
+            print 'c', suf
         print 'C %s/.matplotlib' % os.getenv('HOME')
         print

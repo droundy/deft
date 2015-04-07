@@ -1,0 +1,23 @@
+treat optimized ensemble separately
+- plot OE figures separately (don't plot for now)
+- inialize primary method, then initialize OE for ~10x longer
+
+rerun goden calculatoins for N in [5..30] with ff=0.2
+rerun all other data
+write code to read in weights from file and run simulation
+run simulations with converged weights from golden calculations (CW simulation)
+compare errors against CW
+
+
+
+
+optimized_ensemble changes
+ - find df/dE by secant line in f(E)
+   - secant line with 1/sqrt(e_hist[i]) up/down in f*e_hist[i]
+   - average weights if we have an energy jump
+ - run longer if df<0
+
+fractional_sample_error: what should we do if samples=0?
+
+IF we have a problem with picking bad minimum energies, consider requiring
+  a minimum histogram count of exp(1/min_T) at the minimum energy
