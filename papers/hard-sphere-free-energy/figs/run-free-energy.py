@@ -117,6 +117,7 @@ def check_triangles():
     for i, (start, end) in enumerate([(v1,v2), (v2,v3), (v1,v3)]):
         success_ratios = []
         ff = start
+        seed = i*10
         while (ff < end):
             filename = FILENAME %\
                 (ff, ff+step_size, N, sim_iterations, seed)
@@ -129,7 +130,8 @@ def check_triangles():
                     '--iterations', str(sim_iterations),
                     '--filename', filename,
                     '--data_dir', data_dir,
-                    #'--seed', str(seed),
+                    '--seed', str(seed),
+                    '--ff', str(ff),
                     '--ff_small', str(ff+step_size)
                     ]
 
