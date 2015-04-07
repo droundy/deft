@@ -1,8 +1,13 @@
-mean/max errors for various N
-make optimized ensemble special
+treat optimized ensemble separately
+- plot OE figures separately (don't plot for now)
+- inialize primary method, then initialize OE for ~10x longer
 
+rerun goden calculatoins for N in [5..30] with ff=0.2
+rerun all other data
+write code to read in weights from file and run simulation
+run simulations with converged weights from golden calculations (CW simulation)
+compare errors against CW
 
-compare mean of max errors with different N and different seeds
 
 
 
