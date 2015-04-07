@@ -13,9 +13,21 @@ import subprocess
 
 # cache-suffix: .dat
 
-FILENAME = ""
+FILENAME = "periodic-ff%g-ff_small%g-N%d-iterations%d-seed%d"
 
-def main():
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
+    if len(argv[1:]) == 0:
+        run_simulation()
+    elif argv[1] == 'triangles':
+        check_triangles()
+    else:
+        print "invalid option"
+
+
+def run_simulation():
     ffs = []
     success_ratios = []
     steps = 20
@@ -31,7 +43,7 @@ def main():
         if i != 0 and i % 4 == 0:
             step_size = step_size * 0.5
 
-        filename = "periodic-ff%g-ff_small%g-N%d-iterations%d-seed%d" %\
+        filename = FILENAME %\
             (ff, ff+step_size, N, sim_iterations, seed)
         filename_with_extension = filename+"-g.dat"
         filepath = os.path.join(data_dir, filename_with_extension)
@@ -84,6 +96,59 @@ def main():
     plt.savefig('rename-me-please.pdf')
     plt.show()
 
+
+def check_triangles():
+    print "checking that two shorter simulations reach the same conclusion as one longer one"
+
+    N = 10
+    step_size = 0.025
+    ffs = []
+    sim_iterations = 1000000
+    seed = 0
+    data_dir = 'data'
+
+    # filling fractions as vertices
+    v1 = .2
+    v2 = .25
+    v3 = .30
+
+    legs = [0] * 3
+
+    for i, (start, end) in enumerate([(v1,v2), (v2,v3), (v1,v3)]):
+        success_ratios = []
+        ff = start
+        while (ff < end):
+            filename = FILENAME %\
+                (ff, ff+step_size, N, sim_iterations, seed)
+            filename_with_extension = filename+"-g.dat"
+            filepath = os.path.join(data_dir, filename_with_extension)
+
+            if not os.path.isfile(filepath):
+                arg_list = [
+                    '../../free-energy-monte-carlo',
+                    '--iterations', str(sim_iterations),
+                    '--filename', filename,
+                    '--data_dir', data_dir,
+                    #'--seed', str(seed),
+                    '--ff_small', str(ff+step_size)
+                    ]
+
+                subprocess.call(arg_list)
+
+            data = read_data_file_to_dict(filepath)
+            next_ff = data['ff_small']
+            total_checks = data['total checks of small cell']
+            valid_checks = data['total valid small checks']
+            success_ratio = (valid_checks * 1.0)/total_checks
+
+            success_ratios.append(success_ratio)
+            ff = next_ff
+        print success_ratios
+        legs[i] =  -np.cumsum(map(math.log, success_ratios))/N
+
+    print legs
+    print legs[0][-1] + legs[1][-1]
+    print legs[2][-1]
 
 
 # I was awake when I wrote this part
