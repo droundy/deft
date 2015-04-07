@@ -13,6 +13,7 @@ filepath = os.path.abspath(__file__)
 deft_dir = re.sub('deft/.*','deft',filepath)
 paper_dir = re.sub('histogram/.*','histogram',filepath)
 data_dir = paper_dir+'/data'
+os.chdir(deft_dir)
 os.system('fac square-well-monte-carlo')
 
 def run_golden(ww, ff, N, min_T, method):
