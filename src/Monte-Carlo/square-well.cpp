@@ -1161,6 +1161,108 @@ void sw_simulation::initialize_transitions() {
   initialize_canonical(min_T,min_important_energy);
 }
 
+// initialize by reading transition matrix from file
+void sw_simulation::initialize_transitions_file(char *transitions_input_filename){
+  // open the transition matrix data file as read-only
+  FILE *transitions_infile = fopen(transitions_input_filename,"r");
+
+  // spit out an error and exist if the data file does not exist
+  if(transitions_infile == NULL){
+    printf("Cannot find transition matrix input file: %s\n",transitions_input_filename);
+    exit(254);
+  }
+
+  const int line_len = 1000;
+  char line[line_len];
+  int min_de;
+
+  // gather and verify metadata
+  while(fgets(line,line_len,transitions_infile) != NULL){
+    char *first_chars = new char[16];
+
+    /* check that the metadata in the transition matrix file
+       agrees with our simulation parameters */
+
+    // FIXME: what do we do if min_T disagrees?
+    // I am pretture sure (though not entirely so) that it doesn't matter
+
+    // check well width agreement
+    sprintf(first_chars,"%.13s",line);
+    if(strcmp(first_chars,"# well_width:") == 0){
+      char s1[1], s2[16];
+      double file_ww;
+      sscanf(line,"%s %s %lf",s1,s2,&file_ww);
+      if(file_ww != well_width){
+        printf("The well width in the transition matrix file metadata (%g) disagrees "
+               "with that requested for this simulation (%g)!\n", file_ww, well_width);
+        exit(232);
+      }
+    }
+
+    // check filling fraction agreement
+    sprintf(first_chars,"%.5s",line);
+    if(strcmp(first_chars,"# ff:") == 0){
+      char s1[1], s2[4];
+      double file_ff;
+      sscanf(line,"%s %s %lf",s1,s2,&file_ff);
+      if(file_ff != filling_fraction){
+        printf("The filling fraction in the transition matrix file metadata (%g) disagrees "
+               "with that requested for this simulation (%g)!\n", file_ff, filling_fraction);
+        exit(233);
+      }
+    }
+
+    // check N agreement
+    sprintf(first_chars,"%.5s",line);
+    if(strcmp(first_chars,"# N:") == 0){
+      char s1[1], s2[2];
+      int file_N;
+      sscanf(line,"%s %s %i",s1,s2,&file_N);
+      if(file_N != N){
+        printf("The number of spheres in the transition matrix file metadata (%i) disagrees "
+               "with that requested for this simulation (%i)!\n", file_N, N);
+        exit(234);
+      }
+    }
+
+    /* find the minimum de in the transition matrix as stored in the file.
+       the line we match here should be the last commented line in the data file,
+       so we break out of the metadata loop after storing min_de */
+    sprintf(first_chars,"%.9s",line);
+    if(strcmp(first_chars,"# energy\t") == 0){
+      char s1[1], s2[8];
+      sscanf(line,"%s %s %d",s1,s2,&min_de);
+      break;
+    }
+  }
+
+  // read in transition matrix
+  /* when we hit EOF, we won't know until after trying to scan past it,
+     so we loop while true and enforce a break condition */
+  int e;
+  while(true){
+    fscanf(transitions_infile,"%i",&e);
+    if(feof(transitions_infile)) break;
+    printf("e: %i",e);
+    for(int de = min_de; de <= -min_de; de++){
+      fscanf(transitions_infile,"%li",&transitions(e,de));
+      printf(" %li",transitions(e,de));
+    }
+    printf("\n");
+  }
+
+  // we are done with the data file
+  fclose(transitions_infile);
+
+  // now construct the actual weight array
+  /* FIXME: it appears that we are reading in the data file properly,
+     but for some reason we are still not getting proper weights */
+  update_weights_using_transitions();
+  flush_weight_array();
+  set_min_important_energy();
+  initialize_canonical(min_T,min_important_energy);
+}
+
 double sw_simulation::estimate_trip_time(int E1, int E2) {
   double oldmin = min_important_energy;
   double oldmax = max_entropy_state;

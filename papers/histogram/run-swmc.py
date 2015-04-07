@@ -43,22 +43,19 @@ def run(args):
     datadir = swdir+'/data'
     simname = 'square-well-monte-carlo'
 
-    hostname = socket.gethostname()
-
-    cores = 8 if hostname == 'quipu' else 4
-
-    # build scons
-    exitStatus = sp.call(["scons","-j%i"%cores,"-C",projectdir,simname],
+    # build SWMC
+    os.chdir(swdir)
+    exitStatus = sp.call(["fac",simname],
                          stdout = open(os.devnull,"w"),
                          stderr = open(os.devnull,"w"))
     if exitStatus != 0:
-        print "scons failed"
+        print "fac failed"
         exit(exitStatus)
 
     memory = 20*N # fixme: better guess
+    if 'optimized_ensemble' in toggle_params:
+        method += '_oe'
     jobname = 'periodic-ww%04.2f-ff%04.2f-N%i-%s' %(ww, ff, N, method)
-    if 'transition_override' in toggle_params:
-        jobname += '-to'
     if filename_suffix:
         jobname += '-'+filename_suffix
     basename = "%s/%s" %(jobdir, jobname)
@@ -66,7 +63,7 @@ def run(args):
     outname = basename + '.out'
     errname = basename + '.err'
 
-    command = "time %s/%s" %(projectdir, simname)
+    command = "time nice -19 %s/%s" %(projectdir, simname)
 
     if not os.path.exists(jobdir):
         os.makedirs(jobdir)
@@ -93,9 +90,8 @@ def run(args):
     script.close()
 
     # start simulation
-    if hostname == 'quipu':
-        sp.Popen(["sbatch", "-J", jobname, scriptname])
-        print "job %s started" %jobname
+    sp.Popen(["sbatch", "-J", jobname, scriptname])
+    print "job %s started" %jobname
 
 
 if __name__ == "__main__":

@@ -9,8 +9,8 @@ import readandcompute
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff Ns methods show' % sys.argv[0]
+if len(sys.argv) != 6:
+    print 'useage: %s ww ff Ns methods reference' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -24,6 +24,9 @@ all_Ns = eval(sys.argv[3])
 
 methods = eval(sys.argv[4])
 #arg methods = [["wang_landau","simple_flat","tmmc","oetmmc","wang_landau_oe","simple_flat_oe","tmmc_oe","oetmmc_oe"]]
+
+reference = sys.argv[5]
+#arg reference = ['tmmc-golden']
 
 # input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, dat) for method in methods for N in all_Ns for dat in ['ps', 'lnw', 'E']]
 
@@ -113,8 +116,6 @@ u_errors = {}
 cv_errors = {}
 s_errors = {}
 min_Ts = []
-
-reference = "tmmc-golden"
 
 for N in range(5, 101):
     u_cv_s = readandcompute.u_cv_s(ww, ff, N, reference)
