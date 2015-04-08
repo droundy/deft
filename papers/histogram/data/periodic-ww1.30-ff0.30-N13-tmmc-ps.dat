@@ -1,3 +1,4 @@
+# version: unknown
 # well_width: 1.3
 # ff: 0.3
 # N: 13
@@ -10,42 +11,42 @@
 # neighbor_scale: 2
 # energy_levels: 72
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.137429
+# fractional_sample_error after initialization: 0.0649933
 # min_important_energy after initialization: 58
 
 # histogram method: tmmc
-# pessimistic_min_samples: 3000000
-# iterations: 3000000
-# working moves: 20793090
-# total moves: 39000000
-# acceptance rate: 0.533156
+# init_iter_limit: 13000000
+# iterations: 13000000
+# working moves: 88416605
+# total moves: 169000000
+# acceptance rate: 0.523175
 
 # energy	samples
 31  0
-32  198534
-33  104474
-34  64418
-35  42082
-36  28725
-37  20292
-38  14668
-39  10809
-40  8156
-41  6203
-42  4816
-43  3734
-44  2957
-45  2350
-46  1893
-47  1519
-48  1273
-49  1045
-50  865
-51  700
-52  577
-53  471
-54  350
-55  253
-56  175
-57  114
-58  48
+32  776024
+33  407080
+34  250581
+35  164518
+36  112513
+37  79705
+38  57943
+39  42987
+40  32575
+41  24928
+42  19315
+43  15187
+44  12093
+45  9667
+46  7853
+47  6403
+48  5257
+49  4333
+50  3587
+51  2945
+52  2426
+53  1919
+54  1439
+55  1069
+56  740
+57  470
+58  199

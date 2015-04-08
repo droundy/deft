@@ -1,3 +1,4 @@
+# version: unknown
 # well_width: 1.3
 # ff: 0.3
 # N: 8
@@ -10,36 +11,37 @@
 # neighbor_scale: 2
 # energy_levels: 48
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.0338317
+# fractional_sample_error after initialization: 0.0214228
 # min_important_energy after initialization: 26
 
 # histogram method: oetmmc
-# pessimistic_min_samples: 3000000
-# iterations: 3000000
-# working moves: 13062577
-# total moves: 24000000
-# acceptance rate: 0.544274
+# init_iter_limit: 8000000
+# iterations: 8000000
+# working moves: 34862383
+# total moves: 64000000
+# acceptance rate: 0.544725
 
 # min_important_energy: 26
 
 # energy   counts
-8  22
-9  447
-10  3770
-11  21089
-12  80209
-13  240136
-14  564146
-15  1025021
-16  1422752
-17  1344321
-18  1344708
-19  1381261
-20  1406200
-21  1387372
-22  1418996
-23  1361690
-24  1118905
-25  1987481
-26  7711894
-27  179580
+7  1
+8  184
+9  1558
+10  11043
+11  55175
+12  216771
+13  644755
+14  1500856
+15  2733616
+16  3814842
+17  3582956
+18  3595862
+19  3709544
+20  3868364
+21  3998010
+22  3593548
+23  3161989
+24  3088831
+25  5324666
+26  20467088
+27  630341

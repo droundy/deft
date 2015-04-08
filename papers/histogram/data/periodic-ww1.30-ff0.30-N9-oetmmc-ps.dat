@@ -1,3 +1,4 @@
+# version: unknown
 # well_width: 1.3
 # ff: 0.3
 # N: 9
@@ -10,28 +11,28 @@
 # neighbor_scale: 2
 # energy_levels: 48
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.102451
+# fractional_sample_error after initialization: 0.0625012
 # min_important_energy after initialization: 28
 
 # histogram method: oetmmc
-# pessimistic_min_samples: 3000000
-# iterations: 3000000
-# working moves: 9307484
-# total moves: 27000000
-# acceptance rate: 0.344722
+# init_iter_limit: 9000000
+# iterations: 9000000
+# working moves: 30028460
+# total moves: 81000000
+# acceptance rate: 0.370722
 
 # energy	samples
 16  0
-17  56145
-18  19621
-19  7743
-20  3170
-21  1096
-22  381
-23  165
-24  116
-25  85
-26  61
-27  49
-28  44
-29  23
+17  206001
+18  71802
+19  28107
+20  11538
+21  4142
+22  1485
+23  600
+24  404
+25  303
+26  246
+27  188
+28  163
+29  69

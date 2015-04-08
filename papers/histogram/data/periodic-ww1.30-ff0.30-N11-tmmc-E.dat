@@ -1,3 +1,4 @@
+# version: unknown
 # well_width: 1.3
 # ff: 0.3
 # N: 11
@@ -10,48 +11,48 @@
 # neighbor_scale: 2
 # energy_levels: 60
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.12463
+# fractional_sample_error after initialization: 0.0695597
 # min_important_energy after initialization: 42
 
 # histogram method: tmmc
-# pessimistic_min_samples: 3000000
-# iterations: 3000000
-# working moves: 16141807
-# total moves: 33000000
-# acceptance rate: 0.489146
+# init_iter_limit: 11000000
+# iterations: 11000000
+# working moves: 61939823
+# total moves: 121000000
+# acceptance rate: 0.511899
 
 # min_important_energy: 42
 
 # energy   counts
-12  6
-13  48
-14  437
-15  2491
-16  11124
-17  43012
-18  131192
-19  316631
-20  607464
-21  936634
-22  1117231
-23  1119832
-24  1111882
-25  1108386
-26  1114613
-27  1130724
-28  1158565
-29  1191925
-30  1254993
-31  1325599
-32  1387168
-33  1430512
-34  1466753
-35  1517641
-36  1613403
-37  1663422
-38  1679743
-39  1833537
-40  1780094
-41  2072057
-42  2198212
-43  674669
+12  3
+13  165
+14  1345
+15  9394
+16  48189
+17  187247
+18  581610
+19  1430730
+20  2784585
+21  4275139
+22  5102929
+23  5091930
+24  5042176
+25  5033914
+26  5010585
+27  4957517
+28  4919811
+29  4908355
+30  4955147
+31  4989514
+32  4904640
+33  4840846
+34  4854030
+35  5022306
+36  5248512
+37  5453442
+38  5716746
+39  5874315
+40  5877417
+41  5652147
+42  6010887
+43  2214427
