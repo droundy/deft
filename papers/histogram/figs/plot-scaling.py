@@ -2,7 +2,7 @@
 import matplotlib, sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy, glob, re, string
+import numpy, re, string
 import styles
 import readandcompute
 
@@ -19,8 +19,9 @@ ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
+# fixme: include more Ns, namely all for which we have data in the repo
 all_Ns = eval(sys.argv[3])
-#arg all_Ns = [[5,10,20]]
+#arg all_Ns = [[5,10,15,20]]
 
 methods = eval(sys.argv[4])
 #arg methods = [["wang_landau","simple_flat","tmmc","oetmmc","wang_landau_oe","simple_flat_oe","tmmc_oe","oetmmc_oe"]]
@@ -42,7 +43,7 @@ for method in methods:
   init_iters[method] = []
   Emins[method] = []
   samples[method] = []
-  N_files = glob.glob("data/periodic-ww%04.2f-ff%04.2f-N*-%s-lnw.dat" % (ww, ff, method))
+  N_files = ["data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, method) for N in all_Ns ]
   Ns[method] = [ int(N_file.split('-')[-3][1:]) for N_file in N_files ]
   Ns[method].sort()
   for N in Ns[method]:
@@ -110,14 +111,12 @@ for i in range(len(all_Ns)):
 tex.write(r"""\end{tabular}
 """)
 
-# input: "data/periodic-ww%04.2f-ff%04.2f-N*-tmmc-E.dat" % (ww, ff)
-
 u_errors = {}
 cv_errors = {}
 s_errors = {}
 min_Ts = []
 
-for N in range(5, 101):
+for N in all_Ns:
     u_cv_s = readandcompute.u_cv_s(ww, ff, N, reference)
     if u_cv_s != None:
         for method in methods:
