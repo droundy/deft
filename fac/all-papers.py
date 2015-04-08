@@ -4,7 +4,7 @@ import os
 
 papers = """
    histogram pair-correlation contact hard-sphere-free-energy
-   fuzzy-fmt water-saft polyhedra electrostatics
+   fuzzy-fmt water-saft polyhedra electrostatics renormalization
 """.split()
 
 for paper in papers:
