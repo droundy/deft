@@ -669,7 +669,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
     // If the norm is exactly the same as it was last time, then we
     // have presumably reached equilibrium.
     if (oldnorm != norm) {
-      for (int i = max_entropy_state+1; i < min_important_energy; i++){
+      for (int i = max_entropy_state+1; i < energies_observed; i++){
         if (energy_histogram[i]) {
           const double precision = fabs(TD_over_D[i] - 1);
           if (precision > fractional_dos_precision){
@@ -1239,20 +1239,22 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
   // read in transition matrix
   /* when we hit EOF, we won't know until after trying to scan past it,
      so we loop while true and enforce a break condition */
-  int e;
+  int e, min_e = 0;
   while(true){
     fscanf(transitions_infile,"%i",&e);
+    if(!min_e) min_e = e;
     if(feof(transitions_infile)) break;
-    printf("e: %i",e);
     for(int de = min_de; de <= -min_de; de++){
       fscanf(transitions_infile,"%li",&transitions(e,de));
-      printf(" %li",transitions(e,de));
     }
-    printf("\n");
   }
+  min_energy_state = e;
 
   // we are done with the data file
   fclose(transitions_infile);
+
+  // pretend we have seen the energies for which we have transition data
+  for(int i = min_e; i <= min_energy_state; i++) energy_histogram[i] = 1;
 
   // now construct the actual weight array
   /* FIXME: it appears that we are reading in the data file properly,

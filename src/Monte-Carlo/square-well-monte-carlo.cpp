@@ -150,7 +150,7 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "none");
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "none");
-  long simulation_iterations = 1e6;
+  long simulation_iterations = 3*1e6;
   double acceptance_goal = .4;
   double R = 1;
   double neighbor_scale = 2;
@@ -489,19 +489,22 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wang_landau");
     } else if (vanilla_wang_landau) {
       sprintf(method_tag, "-vanilla_wang_landau");
+    } else if (reading_in_transition_matrix) {
+      sprintf(method_tag, "-cfw");
     } else {
-      method_tag[0] = 0; // set method_tag to the empty string
+      printf("We could not identify a method for a method tag.\n");
+      return 104;
     }
+    if(optimized_ensemble){
+      sprintf(method_tag, "%s_oe", method_tag);
+    } else if(transition_override){
+      sprintf(method_tag, "%s_to", method_tag);
+    }
+
     if(sw.end_condition != none)
       sprintf(method_tag, "%s-%s", method_tag, end_condition_text);
-
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, sw.well_width, eta, sw.N, method_tag);
-    if(optimized_ensemble){
-      sprintf(filename, "%s_oe", filename);
-    } else if(transition_override){
-      sprintf(filename, "%s_to", filename);
-    }
     printf("\nUsing default file name: ");
     delete[] method_tag;
     delete[] wall_tag;
@@ -522,7 +525,7 @@ int main(int argc, const char *argv[]) {
   }
 
   /* set end condition defaults */
-  if(sw.end_condition == none && !fix_kT && !no_weights){
+  if(sw.end_condition == none && !fix_kT && !no_weights && !reading_in_transition_matrix){
     // This is the default default, which may be overridden below by a
     // different default for given algorithms.
     //sw.end_condition = optimistic_min_samples;
@@ -766,12 +769,6 @@ int main(int argc, const char *argv[]) {
     sw.optimize_weights_using_transitions();
   } else if (reading_in_transition_matrix){
     sw.initialize_transitions_file(transitions_input_filename);
-
-    for(int e = 0; e < sw.energy_levels; e++){
-      printf("lnw[%i]: %g\n",e,sw.ln_energy_weights[e]);
-    }
-    printf("this method is not working yet.\n");
-    return 100;
   }
 
   // If we wish to optimize the ensemble or set transition matrix weights, do so
@@ -906,7 +903,11 @@ int main(int argc, const char *argv[]) {
             headerinfo);
   } else if (oetmmc){
     sprintf(headerinfo, "%s# histogram method: oetmmc\n", headerinfo);
+  } else if(reading_in_transition_matrix){
+    sprintf(headerinfo, "%s# transitions_input_filename: %s\n",
+            headerinfo, transitions_input_filename);
   }
+
   if(sw.end_condition != none){
     sprintf(headerinfo, "%s# %s:", headerinfo, end_condition_text);
     if(sw.end_condition == optimistic_min_samples ||
@@ -945,32 +946,6 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < sw.energy_levels; i++)
     fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
   fclose(w_out);
-
-  // Save transitions histogram
-  FILE *transitions_out = fopen((const char *)transitions_fname, "w");
-  if (!transitions_out) {
-    fprintf(stderr, "Unable to create %s!\n", transitions_fname);
-    exit(1);
-  }
-  fprintf(transitions_out, "%s", headerinfo);
-  fprintf(transitions_out, "%s", countinfo);
-  fprintf(transitions_out, "#       \tde\n");
-  fprintf(transitions_out, "# energy");
-  for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++)
-    fprintf(transitions_out, "\t%i", de);
-  fprintf(transitions_out, "\n");
-  for(int i = 0; i < sw.energy_levels; i++) {
-    bool have_i = false;
-    for (int de=-sw.biggest_energy_transition; de<=sw.biggest_energy_transition; de++)
-      if (sw.transitions(i,de)) have_i = true;
-    if (have_i){
-      fprintf(transitions_out, "%i", i);
-      for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++)
-        fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
-      fprintf(transitions_out, "\n");
-    }
-  }
-  fclose(transitions_out);
 
   delete[] countinfo;
 
@@ -1095,6 +1070,38 @@ int main(int argc, const char *argv[]) {
           fprintf(ps_out, "%i  %li\n", i, sw.pessimistic_samples[i]);
       }
       fclose(ps_out);
+
+      // Save transitions histogram
+      FILE *transitions_out = fopen((const char *)transitions_fname, "w");
+      if (!transitions_out) {
+        fprintf(stderr, "Unable to create %s!\n", transitions_fname);
+        exit(1);
+      }
+      fprintf(transitions_out, "%s", headerinfo);
+      fprintf(transitions_out, "%s", countinfo);
+      fprintf(transitions_out, "#       \tde\n");
+      fprintf(transitions_out, "# energy");
+      for (int de = -sw.biggest_energy_transition;
+           de <= sw.biggest_energy_transition; de++){
+        fprintf(transitions_out, "\t%i", de);
+      }
+      fprintf(transitions_out, "\n");
+      for(int i = 0; i < sw.energy_levels; i++) {
+        bool have_i = false;
+        for (int de = -sw.biggest_energy_transition;
+             de <= sw.biggest_energy_transition; de++){
+          if (sw.transitions(i,de)) have_i = true;
+        }
+        if (have_i){
+          fprintf(transitions_out, "%i", i);
+          for (int de = -sw.biggest_energy_transition;
+               de <= sw.biggest_energy_transition; de++){
+            fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
+          }
+          fprintf(transitions_out, "\n");
+        }
+      }
+      fclose(transitions_out);
 
       // Save RDF
       if(!sw.walls){
