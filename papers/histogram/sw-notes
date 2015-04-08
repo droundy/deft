@@ -1,14 +1,9 @@
+how long to run 'default' simulations?
+run cfw simulations
+
 treat optimized ensemble separately
 - plot OE figures separately (don't plot for now)
 - inialize primary method, then initialize OE for ~10x longer
-
-rerun goden calculations for N in [5..30] with ff=0.2
-rerun all other data
-run simulations with converged flat weights computed from golden transition matrices
- - (CFW simulation)
-compare errors against CFW
-
-
 
 
 optimized_ensemble changes

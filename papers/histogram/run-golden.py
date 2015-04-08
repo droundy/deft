@@ -16,8 +16,8 @@ os.system('fac square-well-monte-carlo')
 
 def run_golden(ww, ff, min_T, N, method):
     out_fname = 'golden-%s-N%d-ff%.0f-ww%.0f' % (method, N, ff*100, ww*100)
-    iterations = 10000000000
-    min_samples = 10000
+    iterations = 1e10
+    min_samples = 1e4
     cmd = ("srun --mem=600 -J %s time nice -19 ./square-well-monte-carlo --ww %g --ff %g --min_T %g --N %d --%s --iterations %d --min_samples %d --filename_suffix golden > %s.out 2>&1 &"
            % (out_fname, ww, ff, min_T, N, method, iterations, min_samples,
               data_dir+'/'+out_fname))

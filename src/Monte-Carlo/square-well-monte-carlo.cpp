@@ -362,29 +362,6 @@ int main(int argc, const char *argv[]) {
     return 157;
   }
 
-  // Set end condition
-  char *end_condition_text = new char[16];
-  if(sw.min_samples || sw.sample_error){
-    if(optimistic_sampling)
-      sprintf(end_condition_text,"optimistic");
-    else
-      sprintf(end_condition_text,"pessimistic");
-
-    if(sw.min_samples)
-      sprintf(end_condition_text,"%s_min_samples", end_condition_text);
-    else
-      sprintf(end_condition_text,"%s_sample_error", end_condition_text);
-  } else if(sw.flatness){
-    sw.end_condition = flat_histogram;
-    sprintf(end_condition_text,"flat_histogram");
-  } else if(sw.init_iters){
-    sw.end_condition = init_iter_limit;
-    sprintf(end_condition_text,"init_iter_limit");
-  } else {
-    sw.end_condition = none;
-    sprintf(end_condition_text,"none");
-  }
-
   /* If we are going to optimized the ensemble after initializing via some other method,
      initialize "half way" each time */
   if(optimized_ensemble){
@@ -467,6 +444,65 @@ int main(int argc, const char *argv[]) {
     return 1;
   }
 
+  // Choose necessary but unspecified parameters
+  if(tmmc || oetmmc){
+    sw.sim_dos_type = transition_dos;
+  } else{
+    sw.sim_dos_type = histogram_dos;
+  }
+
+  /* set end condition defaults */
+  if(sw.end_condition == none && !fix_kT && !no_weights && !reading_in_transition_matrix){
+    // This is the default default, which may be overridden below by a
+    // different default for given algorithms.
+    sw.end_condition = init_iter_limit;
+  }
+
+  // set unspecified end condition parameters
+  if (sw.end_condition == optimistic_min_samples && !sw.min_samples) {
+    sw.min_samples = default_optimistic_min_samples;
+    // different default for tmmc methods because they keep
+    // accumulating statistics without doing resets.
+    if (tmmc || oetmmc) sw.min_samples = tmmc_min_samples;
+    printf("Defaulting min_samples to %d\n", sw.min_samples);
+  } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
+    sw.min_samples = default_pessimistic_min_samples;
+  }
+  else if((sw.end_condition == optimistic_sample_error ||
+           sw.end_condition == pessimistic_sample_error) &&
+          !sw.sample_error){
+    sw.sample_error = optimistic_sampling ?
+      default_optimistic_sample_error : default_pessimistic_sample_error;
+  } else if(sw.end_condition == flat_histogram && !sw.flatness){
+    sw.flatness = default_flatness;
+  } else if(sw.end_condition == init_iter_limit && !sw.init_iters){
+    sw.init_iters = simulation_iterations;
+  }
+
+  // Set end condition text
+  char *end_condition_text = new char[16];
+  if(sw.min_samples || sw.sample_error){
+    if(optimistic_sampling)
+      sprintf(end_condition_text,"optimistic");
+    else
+      sprintf(end_condition_text,"pessimistic");
+
+    if(sw.min_samples)
+      sprintf(end_condition_text,"%s_min_samples", end_condition_text);
+    else
+      sprintf(end_condition_text,"%s_sample_error", end_condition_text);
+  } else if(sw.flatness){
+    sw.end_condition = flat_histogram;
+    sprintf(end_condition_text,"flat_histogram");
+  } else if(sw.init_iters){
+    sw.end_condition = init_iter_limit;
+    sprintf(end_condition_text,"init_iter_limit");
+  } else {
+    sw.end_condition = none;
+    sprintf(end_condition_text,"none");
+  }
+
+
   // If a filename was not selected, make a default
   if (strcmp(filename, "none") == 0) {
     char *method_tag = new char[200];
@@ -501,8 +537,6 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "%s_to", method_tag);
     }
 
-    if(sw.end_condition != none)
-      sprintf(method_tag, "%s-%s", method_tag, end_condition_text);
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, sw.well_width, eta, sw.N, method_tag);
     printf("\nUsing default file name: ");
@@ -516,43 +550,6 @@ int main(int argc, const char *argv[]) {
   if (strcmp(filename_suffix, "none") != 0)
     sprintf(filename, "%s-%s", filename, filename_suffix);
   printf("%s\n",filename);
-
-  // Choose necessary but unspecified parameters
-  if(tmmc || oetmmc){
-    sw.sim_dos_type = transition_dos;
-  } else{
-    sw.sim_dos_type = histogram_dos;
-  }
-
-  /* set end condition defaults */
-  if(sw.end_condition == none && !fix_kT && !no_weights && !reading_in_transition_matrix){
-    // This is the default default, which may be overridden below by a
-    // different default for given algorithms.
-    //sw.end_condition = optimistic_min_samples;
-    //optimistic_sampling = true;
-    sw.end_condition = init_iter_limit;
-  }
-
-  // set unspecified end condition parameters
-  if (sw.end_condition == optimistic_min_samples && !sw.min_samples) {
-    sw.min_samples = default_optimistic_min_samples;
-    // different default for tmmc methods because they keep
-    // accumulating statistics without doing resets.
-    if (tmmc || oetmmc) sw.min_samples = tmmc_min_samples;
-    printf("Defaulting min_samples to %d\n", sw.min_samples);
-  } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
-    sw.min_samples = default_pessimistic_min_samples;
-  }
-  else if((sw.end_condition == optimistic_sample_error ||
-           sw.end_condition == pessimistic_sample_error) &&
-          !sw.sample_error){
-    sw.sample_error = optimistic_sampling ?
-      default_optimistic_sample_error : default_pessimistic_sample_error;
-  } else if(sw.end_condition == flat_histogram && !sw.flatness){
-    sw.flatness = default_flatness;
-  } else if(sw.end_condition == init_iter_limit && !sw.init_iters){
-    sw.init_iters = simulation_iterations;
-  }
 
   // Initialize the random number generator with our seed
   random::seed(seed);
