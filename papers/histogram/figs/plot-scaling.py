@@ -2,15 +2,15 @@
 import matplotlib, sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy, re, string
+import numpy, re, string, os
 import styles
 import readandcompute
 
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) != 6:
-    print 'useage: %s ww ff Ns methods reference' % sys.argv[0]
+if len(sys.argv) != 5:
+    print 'useage: %s ww ff methods reference' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -19,19 +19,16 @@ ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
-# fixme: include more Ns, namely all for which we have data in the repo
-all_Ns = eval(sys.argv[3])
-#arg all_Ns = [[5,10,15,20]]
+methods = eval(sys.argv[3])
+#arg methods = [["wang_landau","simple_flat","tmmc","oetmmc"]]
 
-methods = eval(sys.argv[4])
-#arg methods = [["wang_landau","simple_flat","tmmc","oetmmc","wang_landau_oe","simple_flat_oe","tmmc_oe","oetmmc_oe"]]
-
-reference = sys.argv[5]
+reference = sys.argv[4]
 #arg reference = ['tmmc-golden']
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, dat) for method in methods for N in all_Ns for dat in ['ps', 'lnw', 'E']]
+all_Ns = os.popen("git ls-files | grep 'periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
+                  %(ww,ff)).readlines()
+all_Ns = numpy.sort([ int(N.split('-')[-4][1:]) for N in all_Ns ])
 
-N_regex = re.compile(r'-N([0-9]+)')
 initialization_iters_regex = re.compile(r'# iterations:\s+([0-9]+)')
 
 plt.title('Scaling for $\lambda=%g$, $\eta=%g$' % (ww, ff))
