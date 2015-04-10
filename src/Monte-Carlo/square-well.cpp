@@ -291,6 +291,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   ball temp = random_move(balls[id], translation_scale, len);
   // If we're out of the cell or we overlap, this is a bad move!
   if (!in_cell(temp, len, walls) || overlaps_with_any(temp, balls, len, walls)){
+    transitions(energy, 0) += 1; // update the transition histogram
     end_move_updates();
     return;
   }
@@ -313,6 +314,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
     if (overlaps_with_any(temp, balls, len, walls)) {
       // turns out we overlap after all.  :(
       delete[] temp.neighbors;
+      transitions(energy, 0) += 1; // update the transition histogram
       end_move_updates();
       return;
     }
@@ -1055,7 +1057,7 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     // of samples, since this could as easily make things worse as
     // better.
     if (reached_iteration_cap()) {
-      printf("Simple flat is quitting after %d updates (mie: %d).\n",
+      printf("Simple flat is quitting after %d updates (mine: %d).\n",
              weight_updates, min_important_energy);
       return;
     }
@@ -1071,6 +1073,10 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     num_iterations *= flat_update_factor;
 
   } while (!finished_initializing());
+
+  flush_weight_array();
+  set_min_important_energy();
+  initialize_canonical(min_T,min_important_energy);
 }
 
 /* This method implements the optimized ensemble using the transition
@@ -1178,17 +1184,12 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
 
   // gather and verify metadata
   while(fgets(line,line_len,transitions_infile) != NULL){
-    char *first_chars = new char[16];
 
     /* check that the metadata in the transition matrix file
        agrees with our simulation parameters */
 
-    // FIXME: what do we do if min_T disagrees?
-    // I am pretture sure (though not entirely so) that it doesn't matter
-
     // check well width agreement
-    sprintf(first_chars,"%.13s",line);
-    if(strcmp(first_chars,"# well_width:") == 0){
+    if(strstr(line,"# well_width:") != NULL){
       char s1[1], s2[16];
       double file_ww;
       sscanf(line,"%s %s %lf",s1,s2,&file_ww);
@@ -1200,8 +1201,7 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
     }
 
     // check filling fraction agreement
-    sprintf(first_chars,"%.5s",line);
-    if(strcmp(first_chars,"# ff:") == 0){
+    if(strstr(line,"# ff:") != NULL){
       char s1[1], s2[4];
       double file_ff;
       sscanf(line,"%s %s %lf",s1,s2,&file_ff);
@@ -1213,8 +1213,7 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
     }
 
     // check N agreement
-    sprintf(first_chars,"%.5s",line);
-    if(strcmp(first_chars,"# N:") == 0){
+    if(strstr(line,"# N:") != NULL){
       char s1[1], s2[2];
       int file_N;
       sscanf(line,"%s %s %i",s1,s2,&file_N);
@@ -1225,11 +1224,22 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
       }
     }
 
+    // check that we have a sufficiently small min_T in the data file
+    if(strstr(line,"# min_T:") != NULL){
+      char s1[1], s2[8];
+      double file_min_T;
+      sscanf(line,"%s %s %lf",s1,s2,&file_min_T);
+      if(file_min_T > min_T){
+        printf("The minimum temperature in the transition matrix file metadata (%g) is "
+               "larger than that requested for this simulation (%g)!\n", file_min_T, min_T);
+        exit(234);
+      }
+    }
+
     /* find the minimum de in the transition matrix as stored in the file.
        the line we match here should be the last commented line in the data file,
        so we break out of the metadata loop after storing min_de */
-    sprintf(first_chars,"%.9s",line);
-    if(strcmp(first_chars,"# energy\t") == 0){
+    if(strstr(line,"# energy\t") != NULL){
       char s1[1], s2[8];
       sscanf(line,"%s %s %d",s1,s2,&min_de);
       break;
