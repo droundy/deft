@@ -100,7 +100,7 @@ int main(int argc, const char *argv[]) {
 
   char *transitions_input_filename = new char[1024];
   sprintf(transitions_input_filename, "none");
-  int golden = true;
+  int golden = false;
 
   // Tuning factors
   double wl_factor = 0.125;
