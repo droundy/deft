@@ -18,7 +18,7 @@ hsfiles = """
   Rosenfeld SFMT Statement test WaterSaft WhiteBear SW_liquid
 """.split()
 
-all_objects = [x+'.o' for x in hsfiles]
+all_objects = sorted([x+'.o' for x in hsfiles])
 
 generated_names = """
   ExternalPotentialTest HomogeneousSFMTFluid HomogeneousWaterSaftByHand
@@ -62,8 +62,8 @@ while len(hsfiles) > 0:
                 break
         if isokay:
             haskell.rule('ghc -O2 -c %s.hs' % hsf,
-                         [x+'.hi' for x in imports[hsf]],
-                         [hsf+'.o', hsf+'.hi'])
+                         sorted([x+'.hi' for x in imports[hsf]]),
+                         sorted([hsf+'.o', hsf+'.hi']))
             hsfiles.remove(hsf)
 
 def all_dependencies(x):
@@ -76,12 +76,12 @@ def all_dependencies(x):
     return deps
 
 for main in mainfiles:
-    objects = [o+'.o' for o in all_dependencies(main)]
+    objects = sorted([o+'.o' for o in all_dependencies(main)])
     haskell.rule('ghc -O2 -package containers -package filepath -package directory -o %s.exe %s'
                  % (main, ' '.join(objects)), objects, [main+'.exe'])
 
 haskell.rule('python2 create_generators.py',
-             [], ['generate_%s.hs' % x for x in generated_names])
+             [], sorted(['generate_%s.hs' % x for x in generated_names]))
 
 os.chdir('../..')
 cxx = facfile.facfile('.generated-code.fac')
