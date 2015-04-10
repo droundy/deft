@@ -291,6 +291,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   ball temp = random_move(balls[id], translation_scale, len);
   // If we're out of the cell or we overlap, this is a bad move!
   if (!in_cell(temp, len, walls) || overlaps_with_any(temp, balls, len, walls)){
+    transitions(energy, 0) += 1; // update the transition histogram
     end_move_updates();
     return;
   }
@@ -313,6 +314,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
     if (overlaps_with_any(temp, balls, len, walls)) {
       // turns out we overlap after all.  :(
       delete[] temp.neighbors;
+      transitions(energy, 0) += 1; // update the transition histogram
       end_move_updates();
       return;
     }
@@ -669,7 +671,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
     // If the norm is exactly the same as it was last time, then we
     // have presumably reached equilibrium.
     if (oldnorm != norm) {
-      for (int i = max_entropy_state+1; i < min_important_energy; i++){
+      for (int i = max_entropy_state+1; i < energies_observed; i++){
         if (energy_histogram[i]) {
           const double precision = fabs(TD_over_D[i] - 1);
           if (precision > fractional_dos_precision){
@@ -1055,7 +1057,7 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     // of samples, since this could as easily make things worse as
     // better.
     if (reached_iteration_cap()) {
-      printf("Simple flat is quitting after %d updates (mie: %d).\n",
+      printf("Simple flat is quitting after %d updates (mine: %d).\n",
              weight_updates, min_important_energy);
       return;
     }
@@ -1071,6 +1073,10 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     num_iterations *= flat_update_factor;
 
   } while (!finished_initializing());
+
+  flush_weight_array();
+  set_min_important_energy();
+  initialize_canonical(min_T,min_important_energy);
 }
 
 /* This method implements the optimized ensemble using the transition
@@ -1155,6 +1161,114 @@ void sw_simulation::initialize_transitions() {
     check_how_often += exp(1/min_T)*energy_levels; // try a little harder next time...
   } while(!finished_initializing(printing_allowed()));
 
+  update_weights_using_transitions();
+  flush_weight_array();
+  set_min_important_energy();
+  initialize_canonical(min_T,min_important_energy);
+}
+
+// initialize by reading transition matrix from file
+void sw_simulation::initialize_transitions_file(char *transitions_input_filename){
+  // open the transition matrix data file as read-only
+  FILE *transitions_infile = fopen(transitions_input_filename,"r");
+
+  // spit out an error and exist if the data file does not exist
+  if(transitions_infile == NULL){
+    printf("Cannot find transition matrix input file: %s\n",transitions_input_filename);
+    exit(254);
+  }
+
+  const int line_len = 1000;
+  char line[line_len];
+  int min_de;
+
+  // gather and verify metadata
+  while(fgets(line,line_len,transitions_infile) != NULL){
+
+    /* check that the metadata in the transition matrix file
+       agrees with our simulation parameters */
+
+    // check well width agreement
+    if(strstr(line,"# well_width:") != NULL){
+      char s1[1], s2[16];
+      double file_ww;
+      sscanf(line,"%s %s %lf",s1,s2,&file_ww);
+      if(file_ww != well_width){
+        printf("The well width in the transition matrix file metadata (%g) disagrees "
+               "with that requested for this simulation (%g)!\n", file_ww, well_width);
+        exit(232);
+      }
+    }
+
+    // check filling fraction agreement
+    if(strstr(line,"# ff:") != NULL){
+      char s1[1], s2[4];
+      double file_ff;
+      sscanf(line,"%s %s %lf",s1,s2,&file_ff);
+      if(file_ff != filling_fraction){
+        printf("The filling fraction in the transition matrix file metadata (%g) disagrees "
+               "with that requested for this simulation (%g)!\n", file_ff, filling_fraction);
+        exit(233);
+      }
+    }
+
+    // check N agreement
+    if(strstr(line,"# N:") != NULL){
+      char s1[1], s2[2];
+      int file_N;
+      sscanf(line,"%s %s %i",s1,s2,&file_N);
+      if(file_N != N){
+        printf("The number of spheres in the transition matrix file metadata (%i) disagrees "
+               "with that requested for this simulation (%i)!\n", file_N, N);
+        exit(234);
+      }
+    }
+
+    // check that we have a sufficiently small min_T in the data file
+    if(strstr(line,"# min_T:") != NULL){
+      char s1[1], s2[8];
+      double file_min_T;
+      sscanf(line,"%s %s %lf",s1,s2,&file_min_T);
+      if(file_min_T > min_T){
+        printf("The minimum temperature in the transition matrix file metadata (%g) is "
+               "larger than that requested for this simulation (%g)!\n", file_min_T, min_T);
+        exit(234);
+      }
+    }
+
+    /* find the minimum de in the transition matrix as stored in the file.
+       the line we match here should be the last commented line in the data file,
+       so we break out of the metadata loop after storing min_de */
+    if(strstr(line,"# energy\t") != NULL){
+      char s1[1], s2[8];
+      sscanf(line,"%s %s %d",s1,s2,&min_de);
+      break;
+    }
+  }
+
+  // read in transition matrix
+  /* when we hit EOF, we won't know until after trying to scan past it,
+     so we loop while true and enforce a break condition */
+  int e, min_e = 0;
+  while(true){
+    fscanf(transitions_infile,"%i",&e);
+    if(!min_e) min_e = e;
+    if(feof(transitions_infile)) break;
+    for(int de = min_de; de <= -min_de; de++){
+      fscanf(transitions_infile,"%li",&transitions(e,de));
+    }
+  }
+  min_energy_state = e;
+
+  // we are done with the data file
+  fclose(transitions_infile);
+
+  // pretend we have seen the energies for which we have transition data
+  for(int i = min_e; i <= min_energy_state; i++) energy_histogram[i] = 1;
+
+  // now construct the actual weight array
+  /* FIXME: it appears that we are reading in the data file properly,
+     but for some reason we are still not getting proper weights */
   update_weights_using_transitions();
   flush_weight_array();
   set_min_important_energy();

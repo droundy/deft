@@ -210,10 +210,14 @@ main = createHeaderAndCppFiles %s %s "%s"
     f.close()
     haskell.HaskellMake(target = 'src/haskell/generate_%s.exe' % name,
                         source = 'src/haskell/generate_%s.hs' % name)
-    env.Command(target = ['src/new/%sFast.cpp' % name, 'src/new/%sFast.h' % name],
-                source = 'src/haskell/generate_%s.exe' % name,
-                action = './$SOURCE')
+    # the following "if" avoid automatically regenerating cpp code
+    # that takes a long long time to generate.
+    if name not in ['SW_liquid']:
+        env.Command(target = ['src/new/%sFast.cpp' % name, 'src/new/%sFast.h' % name],
+                    source = 'src/haskell/generate_%s.exe' % name,
+                    action = './$SOURCE')
     newgenerated_sources += ['src/new/%sFast.cpp' % name]
+
 
 for pdf in Split(""" Association WhiteBear TensorWhiteBear WhiteBearMarkII Dispersion SaftFluid
                      SimpDispersion EntropySaftFluid GradDispersion JoinedGradDispersion

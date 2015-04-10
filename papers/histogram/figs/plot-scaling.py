@@ -2,7 +2,7 @@
 import matplotlib, sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy, glob, re, string
+import numpy, re, string, os
 import styles
 import readandcompute
 
@@ -10,7 +10,7 @@ matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
 if len(sys.argv) != 5:
-    print 'useage: %s ww ff Ns methods show' % sys.argv[0]
+    print 'useage: %s ww ff methods reference' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -19,30 +19,28 @@ ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
-all_Ns = eval(sys.argv[3])
-#arg all_Ns = [[5,10,20]]
+methods = eval(sys.argv[3])
+#arg methods = [["wang_landau","simple_flat","tmmc","oetmmc"]]
 
-methods = eval(sys.argv[4])
-#arg methods = [["wang_landau","simple_flat","tmmc","oetmmc","wang_landau_oe","simple_flat_oe","tmmc_oe","oetmmc_oe"]]
+reference = sys.argv[4]
+#arg reference = ['tmmc-golden']
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, dat) for method in methods for N in all_Ns for dat in ['ps', 'lnw', 'E']]
+all_Ns = os.popen("git ls-files | grep 'periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
+                  %(ww,ff)).readlines()
+all_Ns = numpy.sort([ int(N.split('-')[-4][1:]) for N in all_Ns ])
 
-N_regex = re.compile(r'-N([0-9]+)')
 initialization_iters_regex = re.compile(r'# iterations:\s+([0-9]+)')
 
 plt.title('Scaling for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 init_iters = {}
 Emins = {}
 samples = {}
-Ns = {}
 for method in methods:
   init_iters[method] = []
   Emins[method] = []
   samples[method] = []
-  N_files = glob.glob("data/periodic-ww%04.2f-ff%04.2f-N*-%s-lnw.dat" % (ww, ff, method))
-  Ns[method] = [ int(N_file.split('-')[-3][1:]) for N_file in N_files ]
-  Ns[method].sort()
-  for N in Ns[method]:
+
+  for N in all_Ns:
     filename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, method)
     wildfilename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (ww, ff, N, method)
 
@@ -57,10 +55,10 @@ for method in methods:
     samples[method].append(sample_data[len(sample_data[:,1])-1, 1])
 
   plt.figure('iters')
-  plt.semilogy(Ns[method], init_iters[method], styles.color(method)+'.-',
+  plt.semilogy(all_Ns, init_iters[method], styles.color(method)+'.-',
                label=styles.title(method))
   plt.figure('emin')
-  plt.plot(Ns[method], Emins[method],styles.color(method)+'.-', label=styles.title(method))
+  plt.plot(all_Ns, Emins[method],styles.color(method)+'.-', label=styles.title(method))
 
 plt.figure('iters')
 plt.xlabel('$N$')
@@ -107,16 +105,11 @@ for i in range(len(all_Ns)):
 tex.write(r"""\end{tabular}
 """)
 
-# input: "data/periodic-ww%04.2f-ff%04.2f-N*-tmmc-E.dat" % (ww, ff)
-
 u_errors = {}
 cv_errors = {}
 s_errors = {}
-min_Ts = []
 
-reference = "tmmc-golden"
-
-for N in range(5, 101):
+for N in all_Ns:
     u_cv_s = readandcompute.u_cv_s(ww, ff, N, reference)
     if u_cv_s != None:
         for method in methods:
@@ -142,8 +135,8 @@ min_T = 0.2 # FIXME maybe shouldn't hardcode this?
 
 plt.figure()
 for method in u_errors.keys():
-    plt.plot(u_errors[method][:,0], u_errors[method][:,1],
-             '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(u_errors[method][:,0], u_errors[method][:,1],
+                 '.'+styles.plot(method),label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
@@ -154,8 +147,8 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
 for method in cv_errors.keys():
-    plt.plot(cv_errors[method][:,0], cv_errors[method][:,1],
-             '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(cv_errors[method][:,0], cv_errors[method][:,1],
+                 '.'+styles.plot(method),label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
@@ -166,8 +159,8 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
 for method in s_errors.keys():
-    plt.plot(s_errors[method][:,0], s_errors[method][:,1],
-             '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(s_errors[method][:,0], s_errors[method][:,1],
+                 '.'+styles.plot(method),label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')

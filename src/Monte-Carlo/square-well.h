@@ -48,6 +48,8 @@ struct sw_simulation {
   /* The following are constant parameters that describe the physical
      system, but do not change as we simulate. */
 
+  double well_width; // width of well in units of sphere radius
+  double filling_fraction; // proportion of space filled with spheres
   int N; // number of balls
   double len[3]; // the size of the cell
   int walls; // should this be an enum?
@@ -100,7 +102,8 @@ struct sw_simulation {
      sample all states of a given energy equally. */
   int biggest_energy_transition;
   long *transitions_table;
-  long &transitions(int energy, int energy_change) {
+  long &
+  transitions(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
@@ -117,8 +120,8 @@ struct sw_simulation {
       return 0;
     }
     long norm = 0;
-    for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
-      norm += transitions(from, e);
+    for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
+      norm += transitions(from, de);
     }
     if (norm == 0) return 0;
     return transitions(from, to - from)/double(norm);
@@ -168,6 +171,8 @@ struct sw_simulation {
   void initialize_simple_flat(int flat_update_factor);
 
   void initialize_transitions();
+
+  void initialize_transitions_file(char *transitions_input_filename);
 
   double fractional_dos_precision;
   void update_weights_using_transitions();

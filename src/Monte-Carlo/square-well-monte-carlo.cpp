@@ -98,6 +98,10 @@ int main(int argc, const char *argv[]) {
   int optimized_ensemble = false;
   int transition_override = false;
 
+  char *transitions_input_filename = new char[1024];
+  sprintf(transitions_input_filename, "none");
+  int golden = false;
+
   // Tuning factors
   double wl_factor = 0.125;
   double wl_fmod = 2;
@@ -127,6 +131,8 @@ int main(int argc, const char *argv[]) {
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.sticky_wall = 0;
+  sw.well_width = 1.3;
+  sw.filling_fraction = 0.3;
   sw.N = 200;
   sw.translation_scale = 0;
   sw.fractional_dos_precision = 1e-7;
@@ -143,14 +149,12 @@ int main(int argc, const char *argv[]) {
   char *data_dir = new char[1024];
   sprintf(data_dir, "papers/histogram/data");
   char *filename = new char[1024];
-  sprintf(filename, "default_filename");
+  sprintf(filename, "none");
   char *filename_suffix = new char[1024];
-  sprintf(filename_suffix, "default_filename_suffix");
-  long simulation_iterations = 1e6;
+  sprintf(filename_suffix, "none");
+  long simulation_iterations = 3*1e6;
   double acceptance_goal = .4;
   double R = 1;
-  double well_width = 1.3;
-  double ff = 0.3;
   double neighbor_scale = 2;
   double de_density = 0.1;
   double de_g = 0.05;
@@ -169,11 +173,10 @@ int main(int argc, const char *argv[]) {
     /*** FLUID IDENTITY ***/
 
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
-    {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &well_width, 0,
+    {"ww", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.well_width, 0,
      "Ratio of square well width to ball diameter", "DOUBLE"},
-    {"ff", '\0', POPT_ARG_DOUBLE, &ff, 0, "Filling fraction. If specified, the "
-     "cell dimensions are adjusted accordingly without changing the shape of "
-     "the cell"},
+    {"ff", '\0', POPT_ARG_DOUBLE, &sw.filling_fraction, 0, "If specified, the "
+     "cell dimensions are adjusted accordingly without changing the shape of the cell"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
     {"sticky-wall", '\0', POPT_ARG_NONE, &sw.sticky_wall, 0, "Make one wall sticky", 0},
@@ -243,6 +246,11 @@ int main(int argc, const char *argv[]) {
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
      "Override initialized weights with weights generated from the transition matrix",
      "BOOLEAN"},
+
+    {"transitions_input_filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
+     &transitions_input_filename, 0, "File from which to read in transition matrix, "
+     "which will be used to generate a weight array in place of initialization", "STRING"},
+    {"golden", '\0', POPT_ARG_NONE, &golden, 0, "Run gold standard calculation", "BOOLEAN"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/
 
@@ -322,8 +330,8 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // Make sure we have a valid square-well fluid
-  if(well_width < 1){
-    printf("Interaction scale should be greater than (or equal to) 1.\n");
+  if(sw.well_width < 1){
+    printf("Well width should be >= 1 (but is %g).\n",sw.well_width);
     return 254;
   }
 
@@ -337,45 +345,28 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
+  const bool reading_in_transition_matrix = (strcmp(transitions_input_filename,"none") != 0);
+
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + bool(vanilla_wang_landau) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0) != 1){
-    printf("Exactly one histigram method must be selected!\n");
+     + bool(vanilla_wang_landau) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
+     + reading_in_transition_matrix + bool(golden) != 1){
+    printf("Exactly one histogram method must be selected!\n");
     return 254;
   }
   // Check that no more than one secondary method is used
   if(bool(optimized_ensemble) + bool(transition_override) > 1){
-    printf("Cannot use more than one secondary histigram method!\n");
+    printf("Cannot use more than one secondary histogram method!\n");
     return 254;
   }
+
+  // use tmmc for golden calculations
+  if(golden) tmmc = true;
 
   // Check that we are only using one end condition
   if(sw.min_samples && sw.sample_error && sw.flatness){
     printf("Can only use one end condition!\n");
     return 157;
-  }
-
-  // Set end condition
-  char *end_condition_text = new char[16];
-  if(sw.min_samples || sw.sample_error){
-    if(optimistic_sampling)
-      sprintf(end_condition_text,"optimistic");
-    else
-      sprintf(end_condition_text,"pessimistic");
-
-    if(sw.min_samples)
-      sprintf(end_condition_text,"%s_min_samples", end_condition_text);
-    else
-      sprintf(end_condition_text,"%s_sample_error", end_condition_text);
-  } else if(sw.flatness){
-    sw.end_condition = flat_histogram;
-    sprintf(end_condition_text,"flat_histogram");
-  } else if(sw.init_iters){
-    sw.end_condition = init_iter_limit;
-    sprintf(end_condition_text,"init_iter_limit");
-  } else {
-    sw.end_condition = none;
-    sprintf(end_condition_text,"none");
   }
 
   /* If we are going to optimized the ensemble after initializing via some other method,
@@ -399,8 +390,8 @@ int main(int argc, const char *argv[]) {
   }
 
   // If the user specified a filling fraction, make it so!
-  if (ff != 0) {
-    const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
+  if (sw.filling_fraction != 0) {
+    const double volume = 4*M_PI/3*R*R*R*sw.N/sw.filling_fraction;
     const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
@@ -445,7 +436,7 @@ int main(int argc, const char *argv[]) {
   }
 
   if (sw.translation_scale == 0) {
-    const double dist_in_well = 2*R*(well_width-1);
+    const double dist_in_well = 2*R*(sw.well_width-1);
     if (dist_in_well > 0.2*R) {
       sw.translation_scale = 0.1*R;
     } else {
@@ -460,53 +451,6 @@ int main(int argc, const char *argv[]) {
     return 1;
   }
 
-  // If a filename was not selected, make a default
-  if (strcmp(filename, "default_filename") == 0) {
-    char *method_tag = new char[200];
-    char *wall_tag = new char[100];
-    if(sw.walls == 0) sprintf(wall_tag,"periodic");
-    else if(sw.walls == 1) sprintf(wall_tag,"wall");
-    else if(sw.walls == 2) sprintf(wall_tag,"tube");
-    else if(sw.walls == 3) sprintf(wall_tag,"box");
-    if (fix_kT) {
-      sprintf(method_tag, "-kT%g", fix_kT);
-    } else if (no_weights) {
-      sprintf(method_tag, "-nw");
-    } else if (simple_flat) {
-      sprintf(method_tag, "-simple_flat");
-    } else if (tmmc) {
-      sprintf(method_tag, "-tmmc");
-    } else if (oetmmc) {
-      sprintf(method_tag, "-oetmmc");
-    } else if (wang_landau) {
-      sprintf(method_tag, "-wang_landau");
-    } else if (vanilla_wang_landau) {
-      sprintf(method_tag, "-vanilla_wang_landau");
-    } else {
-      method_tag[0] = 0; // set method_tag to the empty string
-    }
-    if(sw.end_condition != none)
-      sprintf(method_tag, "%s-%s", method_tag, end_condition_text);
-
-    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
-            wall_tag, well_width, eta, sw.N, method_tag);
-    if(optimized_ensemble){
-      sprintf(filename, "%s_oe", filename);
-    } else if(transition_override){
-      sprintf(filename, "%s_to", filename);
-    }
-    printf("\nUsing default file name: ");
-    delete[] method_tag;
-    delete[] wall_tag;
-  }
-  else
-    printf("\nUsing given file name: ");
-
-  // If a filename suffix was specified, add it
-  if (strcmp(filename_suffix, "default_filename_suffix") != 0)
-    sprintf(filename, "%s-%s", filename, filename_suffix);
-  printf("%s\n",filename);
-
   // Choose necessary but unspecified parameters
   if(tmmc || oetmmc){
     sw.sim_dos_type = transition_dos;
@@ -515,11 +459,9 @@ int main(int argc, const char *argv[]) {
   }
 
   /* set end condition defaults */
-  if(sw.end_condition == none && !fix_kT && !no_weights){
+  if(sw.end_condition == none && !fix_kT && !no_weights && !reading_in_transition_matrix){
     // This is the default default, which may be overridden below by a
     // different default for given algorithms.
-    //sw.end_condition = optimistic_min_samples;
-    //optimistic_sampling = true;
     sw.end_condition = init_iter_limit;
   }
 
@@ -544,6 +486,81 @@ int main(int argc, const char *argv[]) {
     sw.init_iters = simulation_iterations;
   }
 
+  // Set end condition text
+  char *end_condition_text = new char[16];
+  if(sw.min_samples || sw.sample_error){
+    if(optimistic_sampling)
+      sprintf(end_condition_text,"optimistic");
+    else
+      sprintf(end_condition_text,"pessimistic");
+
+    if(sw.min_samples)
+      sprintf(end_condition_text,"%s_min_samples", end_condition_text);
+    else
+      sprintf(end_condition_text,"%s_sample_error", end_condition_text);
+  } else if(sw.flatness){
+    sw.end_condition = flat_histogram;
+    sprintf(end_condition_text,"flat_histogram");
+  } else if(sw.init_iters){
+    sw.end_condition = init_iter_limit;
+    sprintf(end_condition_text,"init_iter_limit");
+  } else {
+    sw.end_condition = none;
+    sprintf(end_condition_text,"none");
+  }
+
+
+  // If a filename was not selected, make a default
+  if (strcmp(filename, "none") == 0) {
+    char *method_tag = new char[200];
+    char *wall_tag = new char[100];
+    if(sw.walls == 0) sprintf(wall_tag,"periodic");
+    else if(sw.walls == 1) sprintf(wall_tag,"wall");
+    else if(sw.walls == 2) sprintf(wall_tag,"tube");
+    else if(sw.walls == 3) sprintf(wall_tag,"box");
+    if (fix_kT) {
+      sprintf(method_tag, "-kT%g", fix_kT);
+    } else if (no_weights) {
+      sprintf(method_tag, "-nw");
+    } else if (simple_flat) {
+      sprintf(method_tag, "-simple_flat");
+    } else if (tmmc) {
+      sprintf(method_tag, "-tmmc");
+    } else if (oetmmc) {
+      sprintf(method_tag, "-oetmmc");
+    } else if (wang_landau) {
+      sprintf(method_tag, "-wang_landau");
+    } else if (vanilla_wang_landau) {
+      sprintf(method_tag, "-vanilla_wang_landau");
+    } else if (reading_in_transition_matrix) {
+      sprintf(method_tag, "-cfw");
+    } else {
+      printf("We could not identify a method for a method tag.\n");
+      return 104;
+    }
+
+    if(optimized_ensemble){
+      sprintf(method_tag, "%s_oe", method_tag);
+    } else if(transition_override){
+      sprintf(method_tag, "%s_to", method_tag);
+    }
+
+    if (golden) sprintf(method_tag, "%s-golden", method_tag);
+
+    sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
+            wall_tag, sw.well_width, eta, sw.N, method_tag);
+    printf("\nUsing default file name: ");
+    delete[] method_tag;
+    delete[] wall_tag;
+  }
+  else
+    printf("\nUsing given file name: ");
+
+  // If a filename suffix was specified, add it
+  if (strcmp(filename_suffix, "none") != 0)
+    sprintf(filename, "%s-%s", filename, filename_suffix);
+  printf("%s\n",filename);
+
   // Initialize the random number generator with our seed
   random::seed(seed);
 
@@ -564,13 +581,13 @@ int main(int argc, const char *argv[]) {
   sw.translation_scale *= R;
 
   // neighbor radius should scale with radius and interaction scale
-  sw.neighbor_R = neighbor_scale*R*well_width;
+  sw.neighbor_R = neighbor_scale*R*sw.well_width;
 
   // Find the upper limit to the maximum number of neighbors a ball could have
-  sw.max_neighbors = max_balls_within(2+neighbor_scale*well_width);
+  sw.max_neighbors = max_balls_within(2+neighbor_scale*sw.well_width);
 
   // Energy histogram and weights
-  sw.interaction_distance = 2*R*well_width;
+  sw.interaction_distance = 2*R*sw.well_width;
   sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
   sw.energy_histogram = new long[sw.energy_levels]();
   sw.ln_energy_weights = new double[sw.energy_levels]();
@@ -743,7 +760,9 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
-  if (fix_kT) {
+  if (reading_in_transition_matrix){
+    sw.initialize_transitions_file(transitions_input_filename);
+  } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
     sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
@@ -862,9 +881,10 @@ int main(int argc, const char *argv[]) {
           "# fractional_sample_error after initialization: %g\n"
           "# min_important_energy after initialization: %i\n\n",
           version_identifier(),
-          well_width, ff, sw.N, sw.walls, sw.len[0], sw.len[1], sw.len[2], seed, de_g,
-          de_density, sw.translation_scale, neighbor_scale, sw.energy_levels, sw.min_T,
-          fractional_sample_error, sw.set_min_important_energy());
+          sw.well_width, sw.filling_fraction, sw.N, sw.walls, sw.len[0], sw.len[1],
+          sw.len[2], seed, de_g, de_density, sw.translation_scale, neighbor_scale,
+          sw.energy_levels, sw.min_T, fractional_sample_error,
+          sw.set_min_important_energy());
 
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
@@ -890,7 +910,11 @@ int main(int argc, const char *argv[]) {
             headerinfo);
   } else if (oetmmc){
     sprintf(headerinfo, "%s# histogram method: oetmmc\n", headerinfo);
+  } else if(reading_in_transition_matrix){
+    sprintf(headerinfo, "%s# transitions_input_filename: %s\n",
+            headerinfo, transitions_input_filename);
   }
+
   if(sw.end_condition != none){
     sprintf(headerinfo, "%s# %s:", headerinfo, end_condition_text);
     if(sw.end_condition == optimistic_min_samples ||
@@ -929,32 +953,6 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < sw.energy_levels; i++)
     fprintf(w_out, "%i  %g\n",i,sw.ln_energy_weights[i]);
   fclose(w_out);
-
-  // Save transitions histogram
-  FILE *transitions_out = fopen((const char *)transitions_fname, "w");
-  if (!transitions_out) {
-    fprintf(stderr, "Unable to create %s!\n", transitions_fname);
-    exit(1);
-  }
-  fprintf(transitions_out, "%s", headerinfo);
-  fprintf(transitions_out, "%s", countinfo);
-  fprintf(transitions_out, "#       \tde\n");
-  fprintf(transitions_out, "# energy");
-  for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++)
-    fprintf(transitions_out, "\t%i", de);
-  fprintf(transitions_out, "\n");
-  for(int i = 0; i < sw.energy_levels; i++) {
-    bool have_i = false;
-    for (int de=-sw.biggest_energy_transition; de<=sw.biggest_energy_transition; de++)
-      if (sw.transitions(i,de)) have_i = true;
-    if (have_i){
-      fprintf(transitions_out, "%i", i);
-      for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++)
-        fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
-      fprintf(transitions_out, "\n");
-    }
-  }
-  fclose(transitions_out);
 
   delete[] countinfo;
 
@@ -1079,6 +1077,38 @@ int main(int argc, const char *argv[]) {
           fprintf(ps_out, "%i  %li\n", i, sw.pessimistic_samples[i]);
       }
       fclose(ps_out);
+
+      // Save transitions histogram
+      FILE *transitions_out = fopen((const char *)transitions_fname, "w");
+      if (!transitions_out) {
+        fprintf(stderr, "Unable to create %s!\n", transitions_fname);
+        exit(1);
+      }
+      fprintf(transitions_out, "%s", headerinfo);
+      fprintf(transitions_out, "%s", countinfo);
+      fprintf(transitions_out, "#       \tde\n");
+      fprintf(transitions_out, "# energy");
+      for (int de = -sw.biggest_energy_transition;
+           de <= sw.biggest_energy_transition; de++){
+        fprintf(transitions_out, "\t%i", de);
+      }
+      fprintf(transitions_out, "\n");
+      for(int i = 0; i < sw.energy_levels; i++) {
+        bool have_i = false;
+        for (int de = -sw.biggest_energy_transition;
+             de <= sw.biggest_energy_transition; de++){
+          if (sw.transitions(i,de)) have_i = true;
+        }
+        if (have_i){
+          fprintf(transitions_out, "%i", i);
+          for (int de = -sw.biggest_energy_transition;
+               de <= sw.biggest_energy_transition; de++){
+            fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
+          }
+          fprintf(transitions_out, "\n");
+        }
+      }
+      fclose(transitions_out);
 
       // Save RDF
       if(!sw.walls){

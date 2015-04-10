@@ -1,3 +1,4 @@
+# version: 0.0.0-88-g616c435-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 10
@@ -10,44 +11,43 @@
 # neighbor_scale: 2
 # energy_levels: 60
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.180762
+# fractional_sample_error after initialization: 0.110364
 # min_important_energy after initialization: 34
 
 # histogram method: tmmc
-# pessimistic_min_samples: 3000000
-# iterations: 3000000
-# working moves: 10324860
-# total moves: 30000000
-# acceptance rate: 0.344162
+# init_iter_limit: 10000000
+# iterations: 10000000
+# working moves: 35218649
+# total moves: 100000000
+# acceptance rate: 0.352186
 
-# min_important_energy: 34
+# min_important_energy: 37
 
 # energy   counts
-10  1
-11  41
-12  198
-13  1590
-14  9712
-15  45083
-16  147904
-17  353788
-18  611588
-19  757761
-20  745652
-21  740605
-22  736154
-23  735431
-24  736174
-25  757486
-26  798097
-27  885643
-28  932557
-29  996072
-30  1062781
-31  1101343
-32  1123618
-33  1389922
-34  1568648
-35  1405556
-36  4974775
-37  7381820
+11  111
+12  912
+13  7242
+14  41190
+15  180596
+16  573091
+17  1345459
+18  2318323
+19  2877790
+20  2883774
+21  2886089
+22  2904345
+23  2912406
+24  2968411
+25  3012138
+26  2990130
+27  2936513
+28  2968594
+29  2992809
+30  3204949
+31  3336683
+32  3463044
+33  3328716
+34  3447244
+35  4087684
+36  16191015
+37  26140742

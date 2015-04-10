@@ -1,5 +1,5 @@
 module SW_liquid
-       (sw_liquid_n)
+       ( sw_liquid_n )
        where
 
 import Expression
@@ -21,8 +21,8 @@ lamksig = lambda*k*sigma
 lambda :: Type a => Expression a
 lambda = s_tex "lambda" "\\lambda"
 
-eps4piok :: Expression KSpace
-eps4piok = epsilon*4*pi/k
+eps4pi :: Expression KSpace
+eps4pi = epsilon*4*pi
 
 n :: Expression RealSpace
 n = r_var "n"
@@ -32,18 +32,31 @@ gsigma = substitute ("n" === r_var "x") n gSigmaA
 
 sw_liquid_n :: Expression Scalar
 sw_liquid_n = "ESW" === (substitute ("n" === r_var "x") (r_var "n") $
-                         sw + whitebear + idealgas + 
+                         sw + whitebear + idealgas +
                          ("external" === integrate (n * (r_var "Vext" - s_var "mu"))))
 
 sw :: Expression Scalar
-sw = var "sw" "F_{\\text{sw}}" $ epsilon * (0*sw0 + 0*sw1 + 0*sw2 + 0*sw3 + 0*sw4)
+sw = var "sw" "F_{\\text{sw}}" $ 
+     epsilon * (integrate $ 0.5*n*ifft (n_g_phi0 + n_g_phi1 +
+                                        n_g_phi2 + n_g_phi3 + n_g_phi4))
+{-
+sw = var "sw" "F_{\\text{sw}}" $ epsilon * (sw0 + sw1 + sw2 + sw3 + sw4)
   where sw0 = var "sw0" "\\Sigma_0" $ integrate $ 0.5*n*n_g_phi0
         sw1 = var "sw1" "\\Sigma_1" $ integrate $ 0.5*n*n_g_phi1
         sw2 = var "sw2" "\\Sigma_2" $ integrate $ 0.5*n*n_g_phi2
         sw3 = var "sw3" "\\Sigma_3" $ integrate $ 0.5*n*n_g_phi3
         sw4 = var "sw4" "\\Sigma_4" $ integrate $ 0.5*n*n_g_phi4
 
-n_g_phi0, n_g_phi1, n_g_phi2, n_g_phi3, n_g_phi4 :: Expression RealSpace
+All 22 tests already passed
+scons: done building targets.
+
+real	551m7.647s
+user	547m43.694s
+sys	1m1.000s
+
+-}
+
+n_g_phi0, n_g_phi1, n_g_phi2, n_g_phi3, n_g_phi4 :: Expression KSpace
 n_g_phi0 = "ngphi0" === convolve_xi0phi_with (n * gsigma)
 n_g_phi1 = "ngphi1" === convolve_xi1phi_with (n * (k11*(gsigma-1) + k21*(gsigma-1)**2 +
                                   k31*(gsigma-1)**3 + k41*(gsigma-1)**4))
@@ -69,46 +82,41 @@ n_g_phi4 = "ngphi4" === convolve_xi4phi_with (n * (k14*(gsigma-1) + k24*(gsigma-
         k24 = -0.164
         k34 = 0.324
         k44 = -0.162
-        
-convolve_xi0phi_with :: Expression RealSpace -> Expression RealSpace
-convolve_xi0phi_with x = ifft ( xi0phik * fft x)
-  where xi0phik = var "xi1phik" "\\tilde{\\xi_0\\phi}(k)" $
-               -eps4piok * (sin(lamksig)-lamksig*cos(lamksig)-sin(ksig)+ksig*cos(ksig))/k**2
 
-convolve_xi1phi_with :: Expression RealSpace -> Expression RealSpace
-convolve_xi1phi_with x = ifft ( xi1phik * fft x)
+convolve_xi0phi_with :: Expression RealSpace -> Expression KSpace
+convolve_xi0phi_with x = xi0phik * fft x
+  where xi0phik = var "xi0phik" "\\tilde{\\xi_0\\phi}(k)" $
+               -eps4pi * ((sin lamksig - sin ksig)/k**3 + (sigma*cos ksig - lambda*sigma*cos lamksig)/k**2)
+
+convolve_xi1phi_with :: Expression RealSpace -> Expression KSpace
+convolve_xi1phi_with x = xi1phik * fft x
   where xi1phik = var "xi1phik" "\\tilde{\\xi_1\\phi}(k)" $
-               -eps4piok * ((2-lamksig*ksig*(lambda-1))*cos(lamksig)
-                            -ksig*(sin(ksig)+(1-2*lambda)*sin(lamksig))-2*cos(ksig))/(k**2*ksig)
+               -eps4pi * ((2-lamksig*ksig*(lambda-1))*cos lamksig/(k**3*ksig)
+                          -ksig*(sin ksig + (1-2*lambda)*sin lamksig)/(k**3*ksig)-2*cos ksig/(k**3*ksig))
 
-convolve_xi2phi_with :: Expression RealSpace -> Expression RealSpace
-convolve_xi2phi_with x = ifft ( xi2phik * fft x)
+convolve_xi2phi_with :: Expression RealSpace -> Expression KSpace
+convolve_xi2phi_with x = xi2phik * fft x
   where xi2phik = var "xi2phik" "\\tilde{\\xi_2\\phi}(k)" $
-               -eps4piok * (6*sin(ksig) 
-                            + (ksig**2*(1-4*lambda+3*lambda**2)-6)*sin(lamksig)
-                            - ksig*(4+lambda*(ksig**2*(lambda-1)**2-6))*cos(lamksig)
-                            - 2*ksig*cos(ksig))/(k**2*ksig**2)
+               -eps4pi * (6*sin ksig/(k**3*ksig**2)
+                          + (ksig**2*(1-4*lambda+3*lambda**2)-6)*sin lamksig/(k**3*ksig**2)
+                          - ksig*(4+lambda*(ksig**2*(lambda-1)**2-6))*cos lamksig/(k**3*ksig**2)
+                          - 2*ksig*cos ksig/(k**3*ksig**2))
 
-convolve_xi3phi_with :: Expression RealSpace -> Expression RealSpace
-convolve_xi3phi_with x = ifft ( xi3phik * fft x)
+convolve_xi3phi_with :: Expression RealSpace -> Expression KSpace
+convolve_xi3phi_with x = xi3phik * fft x
   where xi3phik = var "xi3phik" "\\tilde{\\xi_3\\phi}(k)" $
-               -eps4piok*(ksig*(6*sin(ksig) 
-                                + (18-24*lambda+ksig**2*(lambda-1)**2*(4*lambda-1))*sin(lamksig))
-                          + (6*ksig**2*(lambda-1)*(2*lambda-1)
-                             - lamksig*ksig**3*(lambda-1)**3-24)*cos(lamksig)
-                          + 24*cos(ksig))/(k**2*ksig**3)
+               -eps4pi*(ksig*(6*sin ksig
+                              + (18-24*lambda+ksig**2*(lambda-1)**2*(4*lambda-1))*sin lamksig)/(k**3*ksig**3)
+                        + (6*ksig**2*(lambda-1)*(2*lambda-1)
+                           - lamksig*ksig**3*(lambda-1)**3-24)*cos lamksig/(k**3*ksig**3)
+                        + 24*cos ksig/(k**3*ksig**3))
 
-convolve_xi4phi_with :: Expression RealSpace -> Expression RealSpace
-convolve_xi4phi_with x = ifft ( xi4phik * fft x)
+convolve_xi4phi_with :: Expression RealSpace -> Expression KSpace
+convolve_xi4phi_with x = xi4phik * fft x
   where xi4phik = var "xi4phik" "\\tilde{\\xi_4\\phi}(k)" $
-               -eps4piok *(lambda*(36*sin lamksig/(k**2*ksig**2)
-                                   - 60*lambda*sin lamksig/(k**2*ksig**2)
-                                   + (lambda-1)**2*(5*lambda-1)*sin lamksig/k**2)
-                           - (36*sin lamksig/(k**2*ksig**2)
-                              - 60*lambda*sin lamksig/(k**2*ksig**2)
-                              + (lambda-1)**2*(5*lambda-1)*sin lamksig/k**2)
-                           + (120*sin lamksig - 120*sin ksig)/(k**2*ksig**4)
-                           + 24*cos ksig/(k**2*ksig**3)
-                           - 24*(5*lambda-4)*cos lamksig/(k**2*ksig**3)
-                           + 4*(lambda-1)**2*(5*lambda-2)*cos lamksig/(k**2*ksig)
-                           - lamksig*(lambda-1)**4*cos lamksig/(k**2))
+               -eps4pi*(ksig**2*(lambda-1)*(36 - 60*lambda
+                                            + ksig**2*(lambda-1)**2*(5*lambda-1))*sin lamksig/(k**3*ksig**4)
+                        + 120*(sin lamksig - sin ksig)/(k**3*ksig**4)
+                        + ksig*(24*cos ksig
+                                - (24*(5*lambda-4) - 4*ksig**2*(lambda-1)**2*(5*lambda-2)
+                                   + lamksig*ksig**3*(lambda-1)**4)*cos lamksig)/(k**3*ksig**4))

@@ -5,13 +5,14 @@
 #pragma once
 
 struct random {
-  static void seed(unsigned long seedval) { x = seedval; }
+  static void seed(unsigned long seedval) {
+    my_mtrand = MTRand(seedval);
+  }
   static double ran() {
-    //const long unsigned int x = 0;
-    static MTRand my_mtrand(x);
-    return my_mtrand.randExc(); }
+    return my_mtrand.randExc();
+  }
 private:
-  static long unsigned int x;
+  static MTRand my_mtrand;
 };
 
 class vector3d {
