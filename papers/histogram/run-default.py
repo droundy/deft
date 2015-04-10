@@ -10,17 +10,21 @@ if len(sys.argv) not in [6,7]:
 filepath = os.path.abspath(__file__)
 deft_dir = re.sub('deft/.*','deft',filepath)
 paper_dir = re.sub('histogram/.*','histogram',filepath)
-data_dir = paper_dir+'/data'
+data_dir = paper_dir+'/data/'
 os.chdir(deft_dir)
 os.system('fac square-well-monte-carlo')
 
-def run_default(ww, ff, min_T, N, method, method_option):
+def run_default(ww, ff, min_T, N, method):
     out_fname = '%s-N%d-ff%.0f-ww%.0f' % (method, N, ff*100, ww*100)
-    out_fname = out_fname.replace('transitions_input_filename','cfw')
     iterations = 1e5*N*N
-    cmd = ("srun --mem=600 -J %s time nice -19 ./square-well-monte-carlo --ww %g --ff %g --min_T %g --N %d --%s %s --iterations %d > %s.out 2>&1 &"
-           % (out_fname, ww, ff, min_T, N, method, method_option, iterations,
-              data_dir+'/'+out_fname))
+
+    if method == 'cfw':
+        method = 'transitions_input_filename ' + \
+                 os.path.abspath(data_dir + 'periodic-ww%.2f-ff%.2f-N%i'%(ww,ff,N) + \
+                                 '-tmmc-golden-transitions.dat')
+
+    cmd = ("srun --mem=600 -J %s time nice -19 ./square-well-monte-carlo --ww %g --ff %g --min_T %g --N %d --%s --iterations %d > %s.out 2>&1 &"
+           % (out_fname, ww, ff, min_T, N, method, iterations, data_dir+out_fname))
     print(cmd)
     os.system(cmd)
 
@@ -29,9 +33,5 @@ ff = float(sys.argv[2])
 min_T = float(sys.argv[3])
 N = int(sys.argv[4])
 method = sys.argv[5]
-try:
-    method_option = sys.argv[6]
-except:
-    method_option = ''
 
-run_default(ww, ff, min_T, N, method, method_option)
+run_default(ww, ff, min_T, N, method)
