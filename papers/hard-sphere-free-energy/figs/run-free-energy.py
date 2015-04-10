@@ -98,6 +98,44 @@ def run_simulation():
 
 
 def check_triangles():
+    N = 10
+    step_sizes = [0.02, 0.01, 0.03]
+    ffs = [0.3, 0.32, 0.3]
+    sim_iterations = 1000000
+    seed = 0
+    data_dir = 'data'
+    success_ratios = [0] * 3
+
+
+    for i in xrange(3):
+        filename = FILENAME %\
+            (ffs[i], ffs[i]+step_sizes[i], N, sim_iterations, seed)
+        filename_with_extension = filename+"-g.dat"
+        filepath = os.path.join(data_dir, filename_with_extension)
+
+        if not os.path.isfile(filepath):
+            arg_list = [
+                '../../free-energy-monte-carlo',
+                '--iterations', str(sim_iterations),
+                '--filename', filename,
+                '--data_dir', data_dir,
+                '--seed', str(seed),
+                '--ff', str(ffs[i]),
+                '--ff_small', str(ffs[i]+step_sizes[i])
+                ]
+
+            subprocess.call(arg_list)
+
+        data = read_data_file_to_dict(filepath)
+        total_checks = data['total checks of small cell']
+        valid_checks = data['total valid small checks']
+        success_ratio = (valid_checks * 1.0)/total_checks
+        success_ratios[i] = success_ratio
+
+    print success_ratios
+
+
+def check_triangles_wrong():
     print "checking that two shorter simulations reach the same conclusion as one longer one"
 
     N = 10
