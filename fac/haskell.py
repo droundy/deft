@@ -92,10 +92,15 @@ for name in generated_names:
                  ['generate_%s.hs' % name] + all_objects,
                  ['generate_%s.o' % name, 'generate_%s.hi' % name,
                   'generate_%s.exe' % name])
-    # command to generate C++ code
-    haskell.rule('cd ../.. && src/haskell/generate_%s.exe' % name,
-                 ['generate_%s.exe' % name],
-                 ['../new/%sFast.cpp' % name, '../new/%sFast.h' % name])
+
+    # the following "if" avoid automatically regenerating cpp code
+    # that takes a long long time to generate.
+    if name not in ['SW_liquid']:
+        # command to generate C++ code
+        haskell.rule('cd ../.. && src/haskell/generate_%s.exe' % name,
+                     ['generate_%s.exe' % name],
+                     ['../new/%sFast.cpp' % name, '../new/%sFast.h' % name])
+
     # command to compile C++ code
     cxx.compile('src/new/%sFast.cpp' % name)
 
