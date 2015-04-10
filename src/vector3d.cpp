@@ -1,3 +1,3 @@
 #include "vector3d.h"
 
-long unsigned int random::x = 0;
+MTRand random::my_mtrand = MTRand(MTRand::uint32(0));
