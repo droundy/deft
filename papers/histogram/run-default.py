@@ -16,6 +16,7 @@ os.system('fac square-well-monte-carlo')
 
 def run_default(ww, ff, min_T, N, method, method_option):
     out_fname = '%s-N%d-ff%.0f-ww%.0f' % (method, N, ff*100, ww*100)
+    out_fname = out_fname.replace('transitions_input_filename','cfw')
     iterations = 1e5*N*N
     cmd = ("srun --mem=600 -J %s time nice -19 ./square-well-monte-carlo --ww %g --ff %g --min_T %g --N %d --%s %s --iterations %d > %s.out 2>&1 &"
            % (out_fname, ww, ff, min_T, N, method, method_option, iterations,
