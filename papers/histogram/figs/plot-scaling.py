@@ -35,15 +35,12 @@ plt.title('Scaling for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 init_iters = {}
 Emins = {}
 samples = {}
-Ns = {}
 for method in methods:
   init_iters[method] = []
   Emins[method] = []
   samples[method] = []
-  N_files = ["data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, method) for N in all_Ns ]
-  Ns[method] = [ int(N_file.split('-')[-3][1:]) for N_file in N_files ]
-  Ns[method].sort()
-  for N in Ns[method]:
+
+  for N in all_Ns:
     filename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, method)
     wildfilename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (ww, ff, N, method)
 
@@ -58,10 +55,10 @@ for method in methods:
     samples[method].append(sample_data[len(sample_data[:,1])-1, 1])
 
   plt.figure('iters')
-  plt.semilogy(Ns[method], init_iters[method], styles.color(method)+'.-',
+  plt.semilogy(all_Ns, init_iters[method], styles.color(method)+'.-',
                label=styles.title(method))
   plt.figure('emin')
-  plt.plot(Ns[method], Emins[method],styles.color(method)+'.-', label=styles.title(method))
+  plt.plot(all_Ns, Emins[method],styles.color(method)+'.-', label=styles.title(method))
 
 plt.figure('iters')
 plt.xlabel('$N$')
