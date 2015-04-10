@@ -111,7 +111,6 @@ tex.write(r"""\end{tabular}
 u_errors = {}
 cv_errors = {}
 s_errors = {}
-min_Ts = []
 
 for N in all_Ns:
     u_cv_s = readandcompute.u_cv_s(ww, ff, N, reference)
@@ -139,8 +138,8 @@ min_T = 0.2 # FIXME maybe shouldn't hardcode this?
 
 plt.figure()
 for method in u_errors.keys():
-    plt.plot(u_errors[method][:,0], u_errors[method][:,1],
-             '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(u_errors[method][:,0], u_errors[method][:,1],
+                 '.'+styles.plot(method),label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
@@ -151,8 +150,8 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
 for method in cv_errors.keys():
-    plt.plot(cv_errors[method][:,0], cv_errors[method][:,1],
-             '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(cv_errors[method][:,0], cv_errors[method][:,1],
+                 '.'+styles.plot(method),label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
@@ -163,8 +162,8 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
 for method in s_errors.keys():
-    plt.plot(s_errors[method][:,0], s_errors[method][:,1],
-             '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(s_errors[method][:,0], s_errors[method][:,1],
+                 '.'+styles.plot(method),label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
