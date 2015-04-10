@@ -102,7 +102,8 @@ struct sw_simulation {
      sample all states of a given energy equally. */
   int biggest_energy_transition;
   long *transitions_table;
-  long &transitions(int energy, int energy_change) {
+  long &
+  transitions(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
@@ -119,8 +120,8 @@ struct sw_simulation {
       return 0;
     }
     long norm = 0;
-    for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
-      norm += transitions(from, e);
+    for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
+      norm += transitions(from, de);
     }
     if (norm == 0) return 0;
     return transitions(from, to - from)/double(norm);

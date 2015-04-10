@@ -1,5 +1,11 @@
-how long to run 'default' simulations?
-run cfw simulations
+rerun everything
+smaller step size?
+run more golden simulations
+
+after golden simulations:
+- get new min_important_energies; update them in square-well.cpp
+- rerun all wang_landau simulations
+- run cfw simulations
 
 treat optimized ensemble separately
 - plot OE figures separately (don't plot for now)

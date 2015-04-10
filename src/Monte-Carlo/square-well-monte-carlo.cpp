@@ -97,8 +97,10 @@ int main(int argc, const char *argv[]) {
   int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
+
   char *transitions_input_filename = new char[1024];
   sprintf(transitions_input_filename, "none");
+  int golden = true;
 
   // Tuning factors
   double wl_factor = 0.125;
@@ -244,9 +246,11 @@ int main(int argc, const char *argv[]) {
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
      "Override initialized weights with weights generated from the transition matrix",
      "BOOLEAN"},
+
     {"transitions_input_filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
      &transitions_input_filename, 0, "File from which to read in transition matrix, "
      "which will be used to generate a weight array in place of initialization", "STRING"},
+    {"golden", '\0', POPT_ARG_NONE, &golden, 0, "Run gold standard calculation", "BOOLEAN"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/
 
@@ -346,7 +350,7 @@ int main(int argc, const char *argv[]) {
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
      + bool(vanilla_wang_landau) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
-     + reading_in_transition_matrix != 1){
+     + reading_in_transition_matrix + bool(golden) != 1){
     printf("Exactly one histogram method must be selected!\n");
     return 254;
   }
@@ -355,6 +359,9 @@ int main(int argc, const char *argv[]) {
     printf("Cannot use more than one secondary histogram method!\n");
     return 254;
   }
+
+  // use tmmc for golden calculations
+  if(golden) tmmc = true;
 
   // Check that we are only using one end condition
   if(sw.min_samples && sw.sample_error && sw.flatness){
@@ -531,11 +538,14 @@ int main(int argc, const char *argv[]) {
       printf("We could not identify a method for a method tag.\n");
       return 104;
     }
+
     if(optimized_ensemble){
       sprintf(method_tag, "%s_oe", method_tag);
     } else if(transition_override){
       sprintf(method_tag, "%s_to", method_tag);
     }
+
+    if (golden) sprintf(method_tag, "%s-golden", method_tag);
 
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, sw.well_width, eta, sw.N, method_tag);
@@ -750,7 +760,9 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
-  if (fix_kT) {
+  if (reading_in_transition_matrix){
+    sw.initialize_transitions_file(transitions_input_filename);
+  } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau) {
     sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
@@ -764,8 +776,6 @@ int main(int argc, const char *argv[]) {
   } else if (oetmmc) {
     sw.initialize_transitions();
     sw.optimize_weights_using_transitions();
-  } else if (reading_in_transition_matrix){
-    sw.initialize_transitions_file(transitions_input_filename);
   }
 
   // If we wish to optimize the ensemble or set transition matrix weights, do so
