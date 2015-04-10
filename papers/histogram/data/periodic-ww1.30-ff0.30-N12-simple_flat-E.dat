@@ -1,4 +1,4 @@
-# version: unknown
+# version: 0.0.0-88-g616c435-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 12
@@ -11,52 +11,52 @@
 # neighbor_scale: 2
 # energy_levels: 72
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.258038
-# min_important_energy after initialization: 48
+# fractional_sample_error after initialization: 0.155168
+# min_important_energy after initialization: 46
 
 # histogram method: simple flat
-# init_iter_limit: 12000000
-# iterations: 12000000
-# working moves: 76413131
-# total moves: 144000000
-# acceptance rate: 0.530647
+# init_iter_limit: 14400000
+# iterations: 14400000
+# working moves: 90720345
+# total moves: 172800000
+# acceptance rate: 0.525002
 
 # min_important_energy: 48
 
 # energy   counts
-14  6
-15  78
-16  951
-17  5007
-18  23824
-19  91672
-20  295025
-21  788514
-22  1724504
-23  3097504
-24  4554229
-25  5460454
-26  5449071
-27  5434631
-28  5410769
-29  5420468
-30  5431072
-31  5437017
-32  5493076
-33  5437909
-34  5430733
-35  5428698
-36  5438091
-37  5473905
-38  5443249
-39  5396591
-40  5391094
-41  5420657
-42  5534504
-43  5780826
-44  5975322
-45  6112744
-46  5403308
-47  4373893
-48  6160853
-49  1679751
+14  1
+15  122
+16  1064
+17  5585
+18  26126
+19  103494
+20  335943
+21  900834
+22  1981616
+23  3561683
+24  5251246
+25  6308432
+26  6319834
+27  6307470
+28  6313813
+29  6345068
+30  6353228
+31  6390013
+32  6446607
+33  6384020
+34  6388797
+35  6412329
+36  6441478
+37  6486375
+38  6527394
+39  6559353
+40  6548200
+41  6561419
+42  6636488
+43  6893496
+44  7096007
+45  7272915
+46  6775468
+47  6031779
+48  8580473
+49  2251830

@@ -1,4 +1,4 @@
-# version: unknown
+# version: 0.0.0-88-g616c435-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 8
@@ -11,26 +11,26 @@
 # neighbor_scale: 2
 # energy_levels: 48
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.0789871
+# fractional_sample_error after initialization: 0.0358728
 # min_important_energy after initialization: 26
 
 # histogram method: simple flat
-# init_iter_limit: 8000000
-# iterations: 8000000
-# working moves: 38427850
-# total moves: 64000000
-# acceptance rate: 0.600435
+# init_iter_limit: 6400000
+# iterations: 6400000
+# working moves: 30626215
+# total moves: 51200000
+# acceptance rate: 0.598168
 
 # energy	samples
 16  0
-17  621747
-18  287654
-19  146438
-20  79047
-21  44582
-22  25831
-23  14949
-24  8640
-25  4587
-26  2026
-27  48
+17  489972
+18  226994
+19  115039
+20  61896
+21  35025
+22  20234
+23  11881
+24  6890
+25  3695
+26  1556
+27  44

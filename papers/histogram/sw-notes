@@ -1,4 +1,7 @@
-rerun everything
+plot-scaling.py: use all data in the git repo
+error vs. error plot
+print data periodically during initialization
+
 smaller step size?
 run more golden simulations
 
