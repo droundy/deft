@@ -10,7 +10,7 @@ if len(sys.argv) != 5:
 filepath = os.path.abspath(__file__)
 deft_dir = re.sub('deft/.*','deft',filepath)
 paper_dir = re.sub('histogram/.*','histogram',filepath)
-data_dir = paper_dir+'/data'
+data_dir = paper_dir+'/data/'
 os.chdir(deft_dir)
 os.system('fac square-well-monte-carlo')
 
@@ -21,7 +21,7 @@ def run_golden(ww, ff, min_T, N):
 
     cmd = ("srun --mem=600 -J %s time nice -19 ./square-well-monte-carlo --ww %g --ff %g --min_T %g --N %d --iterations %d --min_samples %d --golden > %s.out 2>&1 &"
            % (out_fname, ww, ff, min_T, N, iterations, min_samples,
-              data_dir+'/'+out_fname))
+              data_dir+out_fname))
     print(cmd)
     os.system(cmd)
 
