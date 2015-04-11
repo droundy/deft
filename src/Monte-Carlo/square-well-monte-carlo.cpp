@@ -133,7 +133,7 @@ int main(int argc, const char *argv[]) {
   sw.sticky_wall = 0;
   sw.well_width = 1.3;
   sw.filling_fraction = 0.3;
-  sw.N = 200;
+  sw.N = 10;
   sw.translation_scale = 0;
   sw.fractional_dos_precision = 1e-7;
   sw.end_condition = none;
@@ -343,6 +343,14 @@ int main(int argc, const char *argv[]) {
   if(sw.walls > 3){
     printf("You cannot have walls in more than three dimensions.\n");
     return 254;
+  }
+
+  if(seed){
+    if(seed > 999){
+      printf("Please choose a seed in the range 0 - 999.\n");
+      return 199;
+    }
+    sprintf(data_dir,"%s/s%.3li",data_dir,seed);
   }
 
   const bool reading_in_transition_matrix = (strcmp(transitions_input_filename,"none") != 0);
