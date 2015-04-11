@@ -117,7 +117,7 @@ int main(int argc, const char *argv[]) {
   double default_pessimistic_sample_error = 0.2;
   double default_optimistic_sample_error = 0.1;
   double default_flatness = 0.1;
-  bool optimistic_sampling = false;
+  bool optimistic_sampling = true;
 
   int tmmc_min_samples = 2000;
 
@@ -488,7 +488,7 @@ int main(int argc, const char *argv[]) {
     sw.end_condition = optimistic_min_samples;
     sprintf(end_condition_text,"optimistic_min_samples");
   } else if(sw.min_samples && !optimistic_sampling) {
-    sw.end_condition = optimistic_min_samples;
+    sw.end_condition = pessimistic_min_samples;
     sprintf(end_condition_text,"pessimmistic_min_samples");
   } else if(sw.sample_error && optimistic_sampling) {
     sw.end_condition = optimistic_sample_error;
@@ -757,6 +757,16 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
+  if (golden){
+    sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
+
+    FILE *transitions_infile = fopen(transitions_input_filename,"r");
+    if(transitions_infile != NULL){
+      fclose(transitions_infile);
+      sw.initialize_transitions_file(transitions_input_filename);
+    }
+  }
+
   if (reading_in_transition_matrix){
     sw.initialize_transitions_file(transitions_input_filename);
   } else if (fix_kT) {

@@ -200,7 +200,7 @@ struct sw_simulation {
   int default_min_e(){
     manual_min_e = true;
     if(min_T == 0.2){
-      if(N == 5) return 3;
+      if(N == 5) return 10;
       if(N == 6) return 15;
       if(N == 7) return 20;
       if(N == 8) return 26;

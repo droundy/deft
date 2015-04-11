@@ -1,3 +1,6 @@
+run N = 55 through 100 calculations
+different seeds
+
 print data periodically during initialization
 error vs. error plot
 
