@@ -65,7 +65,8 @@ class facfile:
                 except:
                     print('# instructions failed!', repr(i), file=self._f)
                     print('# instructions failed!', sys.exc_info()[1], file=self._f)
-        print('\n|', config.cxx, config.linkflags, '-o', exe, ' '.join(obj | objects), file=self._f)
+        print('\n|', config.cxx, config.linkflags, '-o', exe,
+              ' '.join(sorted(obj | objects)), file=self._f)
         print('>', exe, file=self._f)
         for o in obj | objects | headers:
             print('<', o, file=self._f)
