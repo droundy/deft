@@ -371,15 +371,10 @@ int main(int argc, const char *argv[]) {
 
   /* If we are going to optimized the ensemble after initializing via some other method,
      initialize "half way" each time */
-  if(optimized_ensemble){
-    // sw.min_samples /= 2;
-    // sw.init_iters /= 2;
-
-    if(sw.flatness){
-      printf("It does not make sense to optimize the ensemble with a "
-             "flat histogram end condition!\n");
-      return 175;
-    }
+  if(optimized_ensemble && sw.flatness){
+    printf("It does not make sense to optimize the ensemble with a "
+           "flat histogram end condition!\n");
+    return 175;
   }
 
   if(sw.min_important_energy) sw.manual_min_e = true;
@@ -488,16 +483,19 @@ int main(int argc, const char *argv[]) {
 
   // Set end condition text
   char *end_condition_text = new char[1024];
-  if(sw.min_samples || sw.sample_error){
-    if(optimistic_sampling)
-      sprintf(end_condition_text,"optimistic");
-    else
-      sprintf(end_condition_text,"pessimistic");
 
-    if(sw.min_samples)
-      sprintf(end_condition_text,"%s_min_samples", end_condition_text);
-    else
-      sprintf(end_condition_text,"%s_sample_error", end_condition_text);
+  if(sw.min_samples && optimistic_sampling){
+    sw.end_condition = optimistic_min_samples;
+    sprintf(end_condition_text,"optimistic_min_samples");
+  } else if(sw.min_samples && !optimistic_sampling) {
+    sw.end_condition = optimistic_min_samples;
+    sprintf(end_condition_text,"pessimmistic_min_samples");
+  } else if(sw.sample_error && optimistic_sampling) {
+    sw.end_condition = optimistic_sample_error;
+    sprintf(end_condition_text,"optimistic_sample_error");
+  } else if(sw.sample_error && !optimistic_sampling) {
+    sw.end_condition = pessimistic_sample_error;
+    sprintf(end_condition_text,"pessimistic_sample_error");
   } else if(sw.flatness){
     sw.end_condition = flat_histogram;
     sprintf(end_condition_text,"flat_histogram");
@@ -508,7 +506,6 @@ int main(int argc, const char *argv[]) {
     sw.end_condition = none;
     sprintf(end_condition_text,"none");
   }
-
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "none") == 0) {
@@ -886,6 +883,12 @@ int main(int argc, const char *argv[]) {
           sw.energy_levels, sw.min_T, fractional_sample_error,
           sw.set_min_important_energy());
 
+
+  if(reading_in_transition_matrix){
+    sprintf(headerinfo, "%s# transitions_input_filename: %s\n",
+            headerinfo, transitions_input_filename);
+  }
+
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
   } else if(fix_kT){
@@ -910,9 +913,6 @@ int main(int argc, const char *argv[]) {
             headerinfo);
   } else if (oetmmc){
     sprintf(headerinfo, "%s# histogram method: oetmmc\n", headerinfo);
-  } else if(reading_in_transition_matrix){
-    sprintf(headerinfo, "%s# transitions_input_filename: %s\n",
-            headerinfo, transitions_input_filename);
   }
 
   if(sw.end_condition != none){

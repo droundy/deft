@@ -11,6 +11,9 @@ treat optimized ensemble separately
 - inialize primary method, then initialize OE for ~10x longer
 
 
+fixed number of initialization iterations,
+  but quit early if we satisfy a given end condition
+
 optimized_ensemble changes
  - find df/dE by secant line in f(E)
    - secant line with 1/sqrt(e_hist[i]) up/down in f*e_hist[i]
