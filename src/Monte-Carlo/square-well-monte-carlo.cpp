@@ -487,7 +487,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Set end condition text
-  char *end_condition_text = new char[16];
+  char *end_condition_text = new char[1024];
   if(sw.min_samples || sw.sample_error){
     if(optimistic_sampling)
       sprintf(end_condition_text,"optimistic");
