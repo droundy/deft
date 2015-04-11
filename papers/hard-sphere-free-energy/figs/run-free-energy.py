@@ -68,7 +68,7 @@ def run_simulation():
                 '--ff_small', str(ff+step_size)
                 ])
 
-            subprocess.call(arg_list)
+            assert(not subprocess.call(arg_list))
 
         data = read_data_file_to_dict(filepath)
         next_ff = data['ff_small']
@@ -98,7 +98,7 @@ def run_simulation():
 
 
 def check_triangles():
-    N = 10
+    N = 20
     step_sizes = [0.02, 0.01, 0.03]
     ffs = [0.3, 0.32, 0.3]
     sim_iterations = 1000000
@@ -124,15 +124,20 @@ def check_triangles():
                 '--ff_small', str(ffs[i]+step_sizes[i])
                 ]
 
-            subprocess.call(arg_list)
+            assert(not subprocess.call(arg_list))
 
         data = read_data_file_to_dict(filepath)
         total_checks = data['total checks of small cell']
         valid_checks = data['total valid small checks']
         success_ratio = (valid_checks * 1.0)/total_checks
+        print ffs[i], 'gives valid_checks', valid_checks
+        print ffs[i], 'gives total_checks', total_checks
+        print ffs[i], 'gives longest valid run', data['longest valid run']
+        print ffs[i], 'gives longest failed run', data['longest failed run']
         success_ratios[i] = success_ratio
 
     print success_ratios
+    print success_ratios[0]*success_ratios[1], 'should be', success_ratios[2]
 
 
 def check_triangles_wrong():
@@ -173,7 +178,7 @@ def check_triangles_wrong():
                     '--ff_small', str(ff+step_size)
                     ]
 
-                subprocess.call(arg_list)
+                assert(not subprocess.call(arg_list))
 
             data = read_data_file_to_dict(filepath)
             next_ff = data['ff_small']
