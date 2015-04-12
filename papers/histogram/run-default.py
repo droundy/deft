@@ -14,7 +14,7 @@ data_dir = paper_dir+'/data/'
 os.chdir(deft_dir)
 os.system('fac square-well-monte-carlo')
 
-def run_default(ww, ff, min_T, N, method,seed):
+def run_default(ww, ff, min_T, N, method, seed):
     out_fname = '%s-N%d-ff%.0f-ww%.0f-s%.3i' % (method, N, ff*100, ww*100, seed)
     iterations = 1e5*N*N
 

@@ -1,4 +1,4 @@
-# version: 0.0.0-88-g616c435-dirty
+# version: 0.0.0-112-g79ba70e-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 29
@@ -11,7 +11,7 @@
 # neighbor_scale: 2
 # energy_levels: 168
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.157048
+# fractional_sample_error after initialization: 0.0127825
 # min_important_energy after initialization: 148
 
 # histogram method: simple flat

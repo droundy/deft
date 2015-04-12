@@ -7,8 +7,9 @@ ww=1.3
 min_T=0.2
 
 for N in `seq 5 30`; do
-  for seed in `seq 0 4`; do
-    echo '  working on N='$N
+  echo '    working on N='$N
+  for seed in 1; do
+    echo '  working on seed='$seed
     for method in simple_flat tmmc oetmmc; do
       #for method in cfw wang_landau; do
       echo working on $method
