@@ -36,47 +36,32 @@ sw_liquid_n = "ESW" === (substitute ("n" === r_var "x") (r_var "n") $
                          ("external" === integrate (n * (r_var "Vext" - s_var "mu"))))
 
 sw :: Expression Scalar
-sw = var "sw" "F_{\\text{sw}}" $ 
-     epsilon * (integrate $ 0.5*n*ifft (n_g_phi0 + n_g_phi1 +
-                                        n_g_phi2 + n_g_phi3 + n_g_phi4))
-{-
-sw = var "sw" "F_{\\text{sw}}" $ epsilon * (sw0 + sw1 + sw2 + sw3 + sw4)
-  where sw0 = var "sw0" "\\Sigma_0" $ integrate $ 0.5*n*n_g_phi0
-        sw1 = var "sw1" "\\Sigma_1" $ integrate $ 0.5*n*n_g_phi1
-        sw2 = var "sw2" "\\Sigma_2" $ integrate $ 0.5*n*n_g_phi2
-        sw3 = var "sw3" "\\Sigma_3" $ integrate $ 0.5*n*n_g_phi3
-        sw4 = var "sw4" "\\Sigma_4" $ integrate $ 0.5*n*n_g_phi4
-
-All 22 tests already passed
-scons: done building targets.
-
-real	551m7.647s
-user	547m43.694s
-sys	1m1.000s
-
--}
+sw = var "sw" "F_{\\text{sw}}" $
+     integrate $ var "swEdensity" "\\Phi_{SW}(r)" $
+           0.5*epsilon*n*ifft (n_g_phi0 + n_g_phi1 +
+                               n_g_phi2 + n_g_phi3 + n_g_phi4)
 
 n_g_phi0, n_g_phi1, n_g_phi2, n_g_phi3, n_g_phi4 :: Expression KSpace
-n_g_phi0 = "ngphi0" === convolve_xi0phi_with (n * gsigma)
-n_g_phi1 = "ngphi1" === convolve_xi1phi_with (n * (k11*(gsigma-1) + k21*(gsigma-1)**2 +
+n_g_phi0 = convolve_xi0phi_with (n * gsigma)
+n_g_phi1 = convolve_xi1phi_with (n * (k11*(gsigma-1) + k21*(gsigma-1)**2 +
                                   k31*(gsigma-1)**3 + k41*(gsigma-1)**4))
   where k11 = -1.754
         k21 = 0.027
         k31 = 0.838
         k41 = -0.178
-n_g_phi2 = "ngphi2" === convolve_xi2phi_with (n * (k12*(gsigma-1) + k22*(gsigma-1)**2 +
+n_g_phi2 = convolve_xi2phi_with (n * (k12*(gsigma-1) + k22*(gsigma-1)**2 +
                                   k32*(gsigma-1)**3 + k42*(gsigma-1)**4))
   where k12 = -2.243
         k22 = 4.403
         k32 = -2.48
         k42 = 0.363
-n_g_phi3 = "ngphi3" === convolve_xi3phi_with (n * (k13*(gsigma-1) + k23*(gsigma-1)**2 +
+n_g_phi3 = convolve_xi3phi_with (n * (k13*(gsigma-1) + k23*(gsigma-1)**2 +
                                   k33*(gsigma-1)**3 + k43*(gsigma-1)**4))
   where k13 = 0.207
         k23 = 0.712
         k33 = -1.952
         k43 = 1.046
-n_g_phi4 = "ngphi4" === convolve_xi4phi_with (n * (k14*(gsigma-1) + k24*(gsigma-1)**2 +
+n_g_phi4 = convolve_xi4phi_with (n * (k14*(gsigma-1) + k24*(gsigma-1)**2 +
                                   k34*(gsigma-1)**3 + k44*(gsigma-1)**4))
   where k14 = -0.002
         k24 = -0.164

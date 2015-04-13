@@ -439,11 +439,11 @@ double SW_liquid::true_energy() const {
 	ktemp51.free(); // KSpace
 	double 	s54 = 0;
 	for (int i=0; i<Nx*Ny*Nz; i++) {
-		s54 += dV*rtemp53[i]*n[i];
+		s54 += dV*(0.5*epsilon*rtemp53[i]*n[i]);
 	}
 
 	rtemp53.free(); // Realspace
-	sw = 0.5*epsilon*s54;
+	sw = s54;
 	double 	s55 = 0;
 	for (int i=0; i<Nx*Ny*Nz; i++) {
 		s55 += dV*kT*(-1.0*(7.957747154594767e-2*rtemp5[i]/(R*R))*log(1.0 - 1.0*n3[i]));
@@ -60625,11 +60625,11 @@ double SW_liquid::get_ESW() const {
 	ktemp51.free(); // KSpace
 	double 	s54 = 0;
 	for (int i=0; i<Nx*Ny*Nz; i++) {
-		s54 += dV*rtemp53[i]*n[i];
+		s54 += dV*(0.5*epsilon*rtemp53[i]*n[i]);
 	}
 
 	rtemp53.free(); // Realspace
-	sw = 0.5*epsilon*s54;
+	sw = s54;
 	double 	s55 = 0;
 	for (int i=0; i<Nx*Ny*Nz; i++) {
 		s55 += dV*kT*(-1.0*(7.957747154594767e-2*rtemp5[i]/(R*R))*log(1.0 - 1.0*n3[i]));
@@ -65820,1741 +65820,6 @@ Vector SW_liquid::get_n3() const {
 
 }
 
-ComplexVector SW_liquid::get_ngphi0() const {
-	int sofar = 0;
-	double Nx = data[sofar]; sofar += 1;
-	double Ny = data[sofar]; sofar += 1;
-	double Nz = data[sofar]; sofar += 1;
-	double R = data[sofar]; sofar += 1;
-	double a1 = data[sofar]; sofar += 1;
-	double a2 = data[sofar]; sofar += 1;
-	double a3 = data[sofar]; sofar += 1;
-	Vector Vext = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	Vector n = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	double epsilon = data[sofar]; sofar += 1;
-	double kT = data[sofar]; sofar += 1;
-	double lambda = data[sofar]; sofar += 1;
-	double mu = data[sofar]; sofar += 1;
-	double sigma = data[sofar]; sofar += 1;
-		volume = a1*a2*a3;
-	dV = volume/(Nx*Ny*Nz);
-	dr = pow(dV, 0.3333333333333333);
-	ComplexVector ktemp0(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp0 = fft(Nx,Ny,Nz,dV,n);
-
-	ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp1[0] = (12.566370614359172*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp1[i] = std::complex<double>((12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector n2(Nx*Ny*Nz); // RS
-	n2 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	Vector rtemp3(Nx*Ny*Nz); // RS
-	rtemp3 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	ktemp1.free(); // KSpace
-	ComplexVector ktemp4(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp4[0] = ktemp0[i]*(4.188790204786391*R*R*R);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp4[i] = std::complex<double>(ktemp0[i].real()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)),
-				ktemp0[i].imag()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)));
-	}
-
-	Vector n3(Nx*Ny*Nz); // RS
-	n3 = ifft(Nx,Ny,Nz,dV,ktemp4);
-
-	ktemp4.free(); // KSpace
-	Vector dphitot_by_dn1(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn1[i] = n2[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp7(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp7 = fft(Nx,Ny,Nz,dV,dphitot_by_dn1);
-
-	dphitot_by_dn1.free(); // Realspace
-	ComplexVector ktemp8(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp8[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp8[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vx(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vx = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	Vector rtemp10(Nx*Ny*Nz); // RS
-	rtemp10 = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	ktemp8.free(); // KSpace
-	Vector dphitot_by_dn2vx(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vx[i] = -7.957747154594767e-2*rtemp10[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp10[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp12(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp12 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vx);
-
-	dphitot_by_dn2vx.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vx[i] = -1.0*dn1v_dot_n2v_by_dn1vx[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp14(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp14 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vx);
-
-	dn1v_dot_n2v_by_dn1vx.free(); // Realspace
-	ComplexVector ktemp15(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp15[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp15[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vy(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vy = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	Vector rtemp17(Nx*Ny*Nz); // RS
-	rtemp17 = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	ktemp15.free(); // KSpace
-	Vector dphitot_by_dn2vy(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vy[i] = -7.957747154594767e-2*rtemp17[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp17[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp19(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp19 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vy);
-
-	dphitot_by_dn2vy.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vy[i] = -1.0*dn1v_dot_n2v_by_dn1vy[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp21(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp21 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vy);
-
-	dn1v_dot_n2v_by_dn1vy.free(); // Realspace
-	ComplexVector ktemp22(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp22[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp22[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vz(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vz = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	Vector rtemp24(Nx*Ny*Nz); // RS
-	rtemp24 = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	ktemp22.free(); // KSpace
-	Vector dphitot_by_dn3(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		const double t2 = rtemp10[i];
-		const double t3 = rtemp17[i];
-		const double t4 = rtemp24[i];
-		const double t5 = log(t1);
-		const double t6 = 1.0/t1;
-		const double t7 = 1.0/n3[i];
-		dphitot_by_dn3[i] = t6*t7*t7*n2[i]*(t6*(8.841941282883075e-3 + (1.768388256576615e-2*t6 - 1.768388256576615e-2*t7)*(n3[i] + t5/(t6*t6))) - 8.841941282883075e-3 - 1.768388256576615e-2*t5)*(n2[i]*n2[i] - 3.0*t4*t4 - 3.0*t3*t3 - 3.0*t2*t2) + 7.957747154594767e-2*t6*rtemp3[i]/(R*R) + t6*t6*(7.957747154594767e-2*n2[i]*rtemp3[i]/R - 7.957747154594767e-2*t4*rtemp24[i]/R - 7.957747154594767e-2*t3*rtemp17[i]/R - 7.957747154594767e-2*t2*rtemp10[i]/R);
-	}
-
-	ComplexVector ktemp26(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp26 = fft(Nx,Ny,Nz,dV,dphitot_by_dn3);
-
-	dphitot_by_dn3.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vz[i] = -1.0*dn1v_dot_n2v_by_dn1vz[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp28(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp28 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vz);
-
-	dn1v_dot_n2v_by_dn1vz.free(); // Realspace
-	Vector dphitot_by_dn0(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn0[i] = -1.0*log(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp30(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp30 = fft(Nx,Ny,Nz,dV,dphitot_by_dn0);
-
-	dphitot_by_dn0.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp17[i] = (n3[i] + t1*t1*log(t1))*(2.6525823848649224e-2*n2[i]*n2[i] - 2.6525823848649224e-2*rtemp10[i]*rtemp10[i] - 2.6525823848649224e-2*rtemp17[i]*rtemp17[i] - 2.6525823848649224e-2*rtemp24[i]*rtemp24[i])/(t1*t1*n3[i]*n3[i]) + 7.957747154594767e-2*rtemp3[i]/R/t1;
-	}
-
-	rtemp10.free(); // Realspace
-	rtemp3.free(); // Realspace
-	ComplexVector ktemp32(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp32 = fft(Nx,Ny,Nz,dV,rtemp17);
-
-	rtemp17.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp24[i] = -7.957747154594767e-2*rtemp24[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp24[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	n3.free(); // Realspace
-	n2.free(); // Realspace
-	ComplexVector ktemp34(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp34 = fft(Nx,Ny,Nz,dV,rtemp24);
-
-	rtemp24.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp34[0] = (((12.566370614359172*R*R)*(-0.15915494309189535*ktemp30[i]/R - 7.957747154594767e-2*ktemp7[i]) - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp30[i])/R - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp7[i])/R + (12.566370614359172*R*R)*ktemp26[i] - (-25.132741228718345*R)*ktemp32[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = 12.566370614359172*R*sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))*exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t2 = exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t3 = R*cos(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t5 = 12.566370614359172*t2*(-1.0*sin(R*sqrt(t4))/(sqrt(t4)) - 1.0*R*cos(R*sqrt(t4)));
-		double it6 = 12.566370614359172*R*k_i[0]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it7 = 12.566370614359172*R*k_i[1]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it8 = 12.566370614359172*R*k_i[2]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		ktemp34[i] = std::complex<double>(ktemp26[i].real()*t1 - 1.0*ktemp19[i].imag()*it7 - 1.0*ktemp12[i].imag()*it6 - ktemp32[i].real()*t5 - ktemp34[i].imag()*it8 + ((-7.957747154594767e-2*ktemp7[i].real()*t1 - 7.957747154594767e-2*ktemp30[i].real()*(t5 + 2.0*t1/R) - 1.0*ktemp28[i].imag()*k_i[2]*t2*t3/t4 - 1.0*ktemp21[i].imag()*k_i[1]*t2*t3/t4 - 1.0*ktemp14[i].imag()*k_i[0]*t2*t3/t4)/R - 7.957747154594767e-2*ktemp7[i].real()*t5 - 7.957747154594767e-2*ktemp28[i].imag()*it8 - 7.957747154594767e-2*ktemp21[i].imag()*it7 - 7.957747154594767e-2*ktemp14[i].imag()*it6)/R,
-				ktemp12[i].real()*it6 + ktemp19[i].real()*it7 + ktemp26[i].imag()*t1 - ktemp32[i].imag()*t5 + ktemp34[i].real()*it8 + (7.957747154594767e-2*ktemp14[i].real()*it6 + 7.957747154594767e-2*ktemp21[i].real()*it7 + 7.957747154594767e-2*ktemp28[i].real()*it8 - 7.957747154594767e-2*ktemp7[i].imag()*t5 + (ktemp14[i].real()*k_i[0]*t2*t3/t4 + ktemp21[i].real()*k_i[1]*t2*t3/t4 + ktemp28[i].real()*k_i[2]*t2*t3/t4 - 7.957747154594767e-2*ktemp30[i].imag()*(t5 + 2.0*t1/R) - 7.957747154594767e-2*ktemp7[i].imag()*t1)/R)/R);
-	}
-
-	ktemp32.free(); // KSpace
-	ktemp30.free(); // KSpace
-	ktemp28.free(); // KSpace
-	ktemp26.free(); // KSpace
-	ktemp21.free(); // KSpace
-	ktemp19.free(); // KSpace
-	ktemp14.free(); // KSpace
-	ktemp12.free(); // KSpace
-	ktemp7.free(); // KSpace
-	Vector rtemp36(Nx*Ny*Nz); // RS
-	rtemp36 = ifft(Nx,Ny,Nz,dV,ktemp34);
-
-	ktemp34.free(); // KSpace
-	{
-		const int i = 0;
-		ktemp0[0] = (50.26548245743669*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp0[i] = std::complex<double>((25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector rtemp38(Nx*Ny*Nz); // RS
-	rtemp38 = ifft(Nx,Ny,Nz,dV,ktemp0);
-
-	ktemp0.free(); // KSpace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp38[i] = kT*rtemp36[i]*n[i]/rtemp38[i];
-	}
-
-	rtemp36.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp38[i] = rtemp38[i]/kT;
-	}
-
-	ComplexVector ktemp41(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp41 = fft(Nx,Ny,Nz,dV,rtemp38);
-
-	rtemp38.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp41[0] = ktemp41[i]*epsilon*sigma*sigma*sigma*(4.188790204786391 - 4.188790204786391*lambda*lambda*lambda);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		const double t2 = lambda*t1;
-		const double t3 = 1.0/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		ktemp41[i] = std::complex<double>(ktemp41[i].real()*(-12.566370614359172*epsilon*t3*t3*(sigma*(cos(t1) - lambda*cos(t2)) + t3*(sin(t2) - 1.0*sin(t1)))),
-				ktemp41[i].imag()*(-12.566370614359172*epsilon*t3*t3*(sigma*(cos(t1) - lambda*cos(t2)) + t3*(sin(t2) - 1.0*sin(t1)))));
-	}
-
-	return ktemp41;
-
-}
-
-ComplexVector SW_liquid::get_ngphi1() const {
-	int sofar = 0;
-	double Nx = data[sofar]; sofar += 1;
-	double Ny = data[sofar]; sofar += 1;
-	double Nz = data[sofar]; sofar += 1;
-	double R = data[sofar]; sofar += 1;
-	double a1 = data[sofar]; sofar += 1;
-	double a2 = data[sofar]; sofar += 1;
-	double a3 = data[sofar]; sofar += 1;
-	Vector Vext = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	Vector n = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	double epsilon = data[sofar]; sofar += 1;
-	double kT = data[sofar]; sofar += 1;
-	double lambda = data[sofar]; sofar += 1;
-	double mu = data[sofar]; sofar += 1;
-	double sigma = data[sofar]; sofar += 1;
-		volume = a1*a2*a3;
-	dV = volume/(Nx*Ny*Nz);
-	dr = pow(dV, 0.3333333333333333);
-	ComplexVector ktemp0(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp0 = fft(Nx,Ny,Nz,dV,n);
-
-	ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp1[0] = (12.566370614359172*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp1[i] = std::complex<double>((12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector n2(Nx*Ny*Nz); // RS
-	n2 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	Vector rtemp3(Nx*Ny*Nz); // RS
-	rtemp3 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	ktemp1.free(); // KSpace
-	ComplexVector ktemp4(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp4[0] = ktemp0[i]*(4.188790204786391*R*R*R);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp4[i] = std::complex<double>(ktemp0[i].real()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)),
-				ktemp0[i].imag()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)));
-	}
-
-	Vector n3(Nx*Ny*Nz); // RS
-	n3 = ifft(Nx,Ny,Nz,dV,ktemp4);
-
-	ktemp4.free(); // KSpace
-	Vector dphitot_by_dn1(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn1[i] = n2[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp7(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp7 = fft(Nx,Ny,Nz,dV,dphitot_by_dn1);
-
-	dphitot_by_dn1.free(); // Realspace
-	ComplexVector ktemp8(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp8[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp8[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vx(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vx = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	Vector rtemp10(Nx*Ny*Nz); // RS
-	rtemp10 = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	ktemp8.free(); // KSpace
-	Vector dphitot_by_dn2vx(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vx[i] = -7.957747154594767e-2*rtemp10[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp10[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp12(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp12 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vx);
-
-	dphitot_by_dn2vx.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vx[i] = -1.0*dn1v_dot_n2v_by_dn1vx[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp14(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp14 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vx);
-
-	dn1v_dot_n2v_by_dn1vx.free(); // Realspace
-	ComplexVector ktemp15(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp15[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp15[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vy(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vy = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	Vector rtemp17(Nx*Ny*Nz); // RS
-	rtemp17 = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	ktemp15.free(); // KSpace
-	Vector dphitot_by_dn2vy(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vy[i] = -7.957747154594767e-2*rtemp17[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp17[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp19(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp19 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vy);
-
-	dphitot_by_dn2vy.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vy[i] = -1.0*dn1v_dot_n2v_by_dn1vy[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp21(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp21 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vy);
-
-	dn1v_dot_n2v_by_dn1vy.free(); // Realspace
-	ComplexVector ktemp22(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp22[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp22[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vz(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vz = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	Vector rtemp24(Nx*Ny*Nz); // RS
-	rtemp24 = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	ktemp22.free(); // KSpace
-	Vector dphitot_by_dn3(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		const double t2 = rtemp10[i];
-		const double t3 = rtemp17[i];
-		const double t4 = rtemp24[i];
-		const double t5 = log(t1);
-		const double t6 = 1.0/t1;
-		const double t7 = 1.0/n3[i];
-		dphitot_by_dn3[i] = t6*t7*t7*n2[i]*(t6*(8.841941282883075e-3 + (1.768388256576615e-2*t6 - 1.768388256576615e-2*t7)*(n3[i] + t5/(t6*t6))) - 8.841941282883075e-3 - 1.768388256576615e-2*t5)*(n2[i]*n2[i] - 3.0*t4*t4 - 3.0*t3*t3 - 3.0*t2*t2) + 7.957747154594767e-2*t6*rtemp3[i]/(R*R) + t6*t6*(7.957747154594767e-2*n2[i]*rtemp3[i]/R - 7.957747154594767e-2*t4*rtemp24[i]/R - 7.957747154594767e-2*t3*rtemp17[i]/R - 7.957747154594767e-2*t2*rtemp10[i]/R);
-	}
-
-	ComplexVector ktemp26(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp26 = fft(Nx,Ny,Nz,dV,dphitot_by_dn3);
-
-	dphitot_by_dn3.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vz[i] = -1.0*dn1v_dot_n2v_by_dn1vz[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp28(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp28 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vz);
-
-	dn1v_dot_n2v_by_dn1vz.free(); // Realspace
-	Vector dphitot_by_dn0(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn0[i] = -1.0*log(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp30(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp30 = fft(Nx,Ny,Nz,dV,dphitot_by_dn0);
-
-	dphitot_by_dn0.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp17[i] = (n3[i] + t1*t1*log(t1))*(2.6525823848649224e-2*n2[i]*n2[i] - 2.6525823848649224e-2*rtemp10[i]*rtemp10[i] - 2.6525823848649224e-2*rtemp17[i]*rtemp17[i] - 2.6525823848649224e-2*rtemp24[i]*rtemp24[i])/(t1*t1*n3[i]*n3[i]) + 7.957747154594767e-2*rtemp3[i]/R/t1;
-	}
-
-	rtemp10.free(); // Realspace
-	rtemp3.free(); // Realspace
-	ComplexVector ktemp32(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp32 = fft(Nx,Ny,Nz,dV,rtemp17);
-
-	rtemp17.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp24[i] = -7.957747154594767e-2*rtemp24[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp24[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	n3.free(); // Realspace
-	n2.free(); // Realspace
-	ComplexVector ktemp34(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp34 = fft(Nx,Ny,Nz,dV,rtemp24);
-
-	rtemp24.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp34[0] = (((12.566370614359172*R*R)*(-0.15915494309189535*ktemp30[i]/R - 7.957747154594767e-2*ktemp7[i]) - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp30[i])/R - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp7[i])/R + (12.566370614359172*R*R)*ktemp26[i] - (-25.132741228718345*R)*ktemp32[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = 12.566370614359172*R*sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))*exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t2 = exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t3 = R*cos(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t5 = 12.566370614359172*t2*(-1.0*sin(R*sqrt(t4))/(sqrt(t4)) - 1.0*R*cos(R*sqrt(t4)));
-		double it6 = 12.566370614359172*R*k_i[0]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it7 = 12.566370614359172*R*k_i[1]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it8 = 12.566370614359172*R*k_i[2]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		ktemp34[i] = std::complex<double>(ktemp26[i].real()*t1 - 1.0*ktemp19[i].imag()*it7 - 1.0*ktemp12[i].imag()*it6 - ktemp32[i].real()*t5 - ktemp34[i].imag()*it8 + ((-7.957747154594767e-2*ktemp7[i].real()*t1 - 7.957747154594767e-2*ktemp30[i].real()*(t5 + 2.0*t1/R) - 1.0*ktemp28[i].imag()*k_i[2]*t2*t3/t4 - 1.0*ktemp21[i].imag()*k_i[1]*t2*t3/t4 - 1.0*ktemp14[i].imag()*k_i[0]*t2*t3/t4)/R - 7.957747154594767e-2*ktemp7[i].real()*t5 - 7.957747154594767e-2*ktemp28[i].imag()*it8 - 7.957747154594767e-2*ktemp21[i].imag()*it7 - 7.957747154594767e-2*ktemp14[i].imag()*it6)/R,
-				ktemp12[i].real()*it6 + ktemp19[i].real()*it7 + ktemp26[i].imag()*t1 - ktemp32[i].imag()*t5 + ktemp34[i].real()*it8 + (7.957747154594767e-2*ktemp14[i].real()*it6 + 7.957747154594767e-2*ktemp21[i].real()*it7 + 7.957747154594767e-2*ktemp28[i].real()*it8 - 7.957747154594767e-2*ktemp7[i].imag()*t5 + (ktemp14[i].real()*k_i[0]*t2*t3/t4 + ktemp21[i].real()*k_i[1]*t2*t3/t4 + ktemp28[i].real()*k_i[2]*t2*t3/t4 - 7.957747154594767e-2*ktemp30[i].imag()*(t5 + 2.0*t1/R) - 7.957747154594767e-2*ktemp7[i].imag()*t1)/R)/R);
-	}
-
-	ktemp32.free(); // KSpace
-	ktemp30.free(); // KSpace
-	ktemp28.free(); // KSpace
-	ktemp26.free(); // KSpace
-	ktemp21.free(); // KSpace
-	ktemp19.free(); // KSpace
-	ktemp14.free(); // KSpace
-	ktemp12.free(); // KSpace
-	ktemp7.free(); // KSpace
-	Vector rtemp36(Nx*Ny*Nz); // RS
-	rtemp36 = ifft(Nx,Ny,Nz,dV,ktemp34);
-
-	ktemp34.free(); // KSpace
-	{
-		const int i = 0;
-		ktemp0[0] = (50.26548245743669*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp0[i] = std::complex<double>((25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector rtemp38(Nx*Ny*Nz); // RS
-	rtemp38 = ifft(Nx,Ny,Nz,dV,ktemp0);
-
-	ktemp0.free(); // KSpace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = kT*rtemp36[i]*n[i]/(kT*rtemp38[i]*n[i]);
-		const double t2 = t1 - 1.0;
-		rtemp38[i] = t2*(2.7e-2*t2 + t2*(0.838*t2 - 0.178*t2*t2)) - 1.754*t1;
-	}
-
-	rtemp36.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp38[i] = n[i]*(rtemp38[i] + 1.754);
-	}
-
-	ComplexVector ktemp41(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp41 = fft(Nx,Ny,Nz,dV,rtemp38);
-
-	rtemp38.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp41[0] = ktemp41[i]*epsilon*sigma*sigma*sigma*(lambda*lambda*lambda*(4.188790204786391 - 3.141592653589794*lambda) - 1.0471975511965976);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		const double t2 = lambda*t1;
-		const double t3 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		ktemp41[i] = std::complex<double>(ktemp41[i].real()*(-12.566370614359172*epsilon*((cos(t2)*(2.0 - lambda*t1*t1*(lambda - 1.0)) - 2.0*cos(t1))/(sigma*t3*t3) - (sin(t1) + sin(t2)*(1.0 - 2.0*lambda))/(sqrt(t3)*t3))),
-				ktemp41[i].imag()*(-12.566370614359172*epsilon*((cos(t2)*(2.0 - lambda*t1*t1*(lambda - 1.0)) - 2.0*cos(t1))/(sigma*t3*t3) - (sin(t1) + sin(t2)*(1.0 - 2.0*lambda))/(sqrt(t3)*t3))));
-	}
-
-	return ktemp41;
-
-}
-
-ComplexVector SW_liquid::get_ngphi2() const {
-	int sofar = 0;
-	double Nx = data[sofar]; sofar += 1;
-	double Ny = data[sofar]; sofar += 1;
-	double Nz = data[sofar]; sofar += 1;
-	double R = data[sofar]; sofar += 1;
-	double a1 = data[sofar]; sofar += 1;
-	double a2 = data[sofar]; sofar += 1;
-	double a3 = data[sofar]; sofar += 1;
-	Vector Vext = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	Vector n = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	double epsilon = data[sofar]; sofar += 1;
-	double kT = data[sofar]; sofar += 1;
-	double lambda = data[sofar]; sofar += 1;
-	double mu = data[sofar]; sofar += 1;
-	double sigma = data[sofar]; sofar += 1;
-		volume = a1*a2*a3;
-	dV = volume/(Nx*Ny*Nz);
-	dr = pow(dV, 0.3333333333333333);
-	ComplexVector ktemp0(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp0 = fft(Nx,Ny,Nz,dV,n);
-
-	ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp1[0] = (12.566370614359172*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp1[i] = std::complex<double>((12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector n2(Nx*Ny*Nz); // RS
-	n2 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	Vector rtemp3(Nx*Ny*Nz); // RS
-	rtemp3 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	ktemp1.free(); // KSpace
-	ComplexVector ktemp4(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp4[0] = ktemp0[i]*(4.188790204786391*R*R*R);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp4[i] = std::complex<double>(ktemp0[i].real()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)),
-				ktemp0[i].imag()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)));
-	}
-
-	Vector n3(Nx*Ny*Nz); // RS
-	n3 = ifft(Nx,Ny,Nz,dV,ktemp4);
-
-	ktemp4.free(); // KSpace
-	Vector dphitot_by_dn1(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn1[i] = n2[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp7(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp7 = fft(Nx,Ny,Nz,dV,dphitot_by_dn1);
-
-	dphitot_by_dn1.free(); // Realspace
-	ComplexVector ktemp8(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp8[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp8[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vx(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vx = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	Vector rtemp10(Nx*Ny*Nz); // RS
-	rtemp10 = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	ktemp8.free(); // KSpace
-	Vector dphitot_by_dn2vx(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vx[i] = -7.957747154594767e-2*rtemp10[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp10[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp12(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp12 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vx);
-
-	dphitot_by_dn2vx.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vx[i] = -1.0*dn1v_dot_n2v_by_dn1vx[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp14(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp14 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vx);
-
-	dn1v_dot_n2v_by_dn1vx.free(); // Realspace
-	ComplexVector ktemp15(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp15[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp15[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vy(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vy = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	Vector rtemp17(Nx*Ny*Nz); // RS
-	rtemp17 = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	ktemp15.free(); // KSpace
-	Vector dphitot_by_dn2vy(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vy[i] = -7.957747154594767e-2*rtemp17[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp17[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp19(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp19 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vy);
-
-	dphitot_by_dn2vy.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vy[i] = -1.0*dn1v_dot_n2v_by_dn1vy[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp21(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp21 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vy);
-
-	dn1v_dot_n2v_by_dn1vy.free(); // Realspace
-	ComplexVector ktemp22(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp22[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp22[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vz(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vz = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	Vector rtemp24(Nx*Ny*Nz); // RS
-	rtemp24 = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	ktemp22.free(); // KSpace
-	Vector dphitot_by_dn3(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		const double t2 = rtemp10[i];
-		const double t3 = rtemp17[i];
-		const double t4 = rtemp24[i];
-		const double t5 = log(t1);
-		const double t6 = 1.0/t1;
-		const double t7 = 1.0/n3[i];
-		dphitot_by_dn3[i] = t6*t7*t7*n2[i]*(t6*(8.841941282883075e-3 + (1.768388256576615e-2*t6 - 1.768388256576615e-2*t7)*(n3[i] + t5/(t6*t6))) - 8.841941282883075e-3 - 1.768388256576615e-2*t5)*(n2[i]*n2[i] - 3.0*t4*t4 - 3.0*t3*t3 - 3.0*t2*t2) + 7.957747154594767e-2*t6*rtemp3[i]/(R*R) + t6*t6*(7.957747154594767e-2*n2[i]*rtemp3[i]/R - 7.957747154594767e-2*t4*rtemp24[i]/R - 7.957747154594767e-2*t3*rtemp17[i]/R - 7.957747154594767e-2*t2*rtemp10[i]/R);
-	}
-
-	ComplexVector ktemp26(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp26 = fft(Nx,Ny,Nz,dV,dphitot_by_dn3);
-
-	dphitot_by_dn3.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vz[i] = -1.0*dn1v_dot_n2v_by_dn1vz[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp28(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp28 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vz);
-
-	dn1v_dot_n2v_by_dn1vz.free(); // Realspace
-	Vector dphitot_by_dn0(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn0[i] = -1.0*log(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp30(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp30 = fft(Nx,Ny,Nz,dV,dphitot_by_dn0);
-
-	dphitot_by_dn0.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp17[i] = (n3[i] + t1*t1*log(t1))*(2.6525823848649224e-2*n2[i]*n2[i] - 2.6525823848649224e-2*rtemp10[i]*rtemp10[i] - 2.6525823848649224e-2*rtemp17[i]*rtemp17[i] - 2.6525823848649224e-2*rtemp24[i]*rtemp24[i])/(t1*t1*n3[i]*n3[i]) + 7.957747154594767e-2*rtemp3[i]/R/t1;
-	}
-
-	rtemp10.free(); // Realspace
-	rtemp3.free(); // Realspace
-	ComplexVector ktemp32(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp32 = fft(Nx,Ny,Nz,dV,rtemp17);
-
-	rtemp17.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp24[i] = -7.957747154594767e-2*rtemp24[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp24[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	n3.free(); // Realspace
-	n2.free(); // Realspace
-	ComplexVector ktemp34(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp34 = fft(Nx,Ny,Nz,dV,rtemp24);
-
-	rtemp24.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp34[0] = (((12.566370614359172*R*R)*(-0.15915494309189535*ktemp30[i]/R - 7.957747154594767e-2*ktemp7[i]) - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp30[i])/R - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp7[i])/R + (12.566370614359172*R*R)*ktemp26[i] - (-25.132741228718345*R)*ktemp32[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = 12.566370614359172*R*sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))*exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t2 = exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t3 = R*cos(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t5 = 12.566370614359172*t2*(-1.0*sin(R*sqrt(t4))/(sqrt(t4)) - 1.0*R*cos(R*sqrt(t4)));
-		double it6 = 12.566370614359172*R*k_i[0]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it7 = 12.566370614359172*R*k_i[1]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it8 = 12.566370614359172*R*k_i[2]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		ktemp34[i] = std::complex<double>(ktemp26[i].real()*t1 - 1.0*ktemp19[i].imag()*it7 - 1.0*ktemp12[i].imag()*it6 - ktemp32[i].real()*t5 - ktemp34[i].imag()*it8 + ((-7.957747154594767e-2*ktemp7[i].real()*t1 - 7.957747154594767e-2*ktemp30[i].real()*(t5 + 2.0*t1/R) - 1.0*ktemp28[i].imag()*k_i[2]*t2*t3/t4 - 1.0*ktemp21[i].imag()*k_i[1]*t2*t3/t4 - 1.0*ktemp14[i].imag()*k_i[0]*t2*t3/t4)/R - 7.957747154594767e-2*ktemp7[i].real()*t5 - 7.957747154594767e-2*ktemp28[i].imag()*it8 - 7.957747154594767e-2*ktemp21[i].imag()*it7 - 7.957747154594767e-2*ktemp14[i].imag()*it6)/R,
-				ktemp12[i].real()*it6 + ktemp19[i].real()*it7 + ktemp26[i].imag()*t1 - ktemp32[i].imag()*t5 + ktemp34[i].real()*it8 + (7.957747154594767e-2*ktemp14[i].real()*it6 + 7.957747154594767e-2*ktemp21[i].real()*it7 + 7.957747154594767e-2*ktemp28[i].real()*it8 - 7.957747154594767e-2*ktemp7[i].imag()*t5 + (ktemp14[i].real()*k_i[0]*t2*t3/t4 + ktemp21[i].real()*k_i[1]*t2*t3/t4 + ktemp28[i].real()*k_i[2]*t2*t3/t4 - 7.957747154594767e-2*ktemp30[i].imag()*(t5 + 2.0*t1/R) - 7.957747154594767e-2*ktemp7[i].imag()*t1)/R)/R);
-	}
-
-	ktemp32.free(); // KSpace
-	ktemp30.free(); // KSpace
-	ktemp28.free(); // KSpace
-	ktemp26.free(); // KSpace
-	ktemp21.free(); // KSpace
-	ktemp19.free(); // KSpace
-	ktemp14.free(); // KSpace
-	ktemp12.free(); // KSpace
-	ktemp7.free(); // KSpace
-	Vector rtemp36(Nx*Ny*Nz); // RS
-	rtemp36 = ifft(Nx,Ny,Nz,dV,ktemp34);
-
-	ktemp34.free(); // KSpace
-	{
-		const int i = 0;
-		ktemp0[0] = (50.26548245743669*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp0[i] = std::complex<double>((25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector rtemp38(Nx*Ny*Nz); // RS
-	rtemp38 = ifft(Nx,Ny,Nz,dV,ktemp0);
-
-	ktemp0.free(); // KSpace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = kT*rtemp36[i]*n[i]/(kT*rtemp38[i]*n[i]);
-		const double t2 = t1 - 1.0;
-		rtemp38[i] = t2*(4.403*t2 + t2*(0.363*t2*t2 - 2.48*t2)) - 2.243*t1;
-	}
-
-	rtemp36.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp38[i] = n[i]*(rtemp38[i] + 2.243);
-	}
-
-	ComplexVector ktemp41(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp41 = fft(Nx,Ny,Nz,dV,rtemp38);
-
-	rtemp38.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp41[0] = ktemp41[i]*epsilon*sigma*sigma*sigma*(0.418879020478639 + lambda*lambda*lambda*(lambda*(6.283185307179588 - 2.513274122871834*lambda) - 4.188790204786391));
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = lambda*sigma*sqrt(t1);
-		const double t3 = sigma*sqrt(t1);
-		ktemp41[i] = std::complex<double>(ktemp41[i].real()*(-12.566370614359172*epsilon*((sin(t2)*(t3*t3*(1.0 + lambda*(3.0*lambda - 4.0)) - 6.0)/(sqrt(t1)) + 6.0*sin(t3)/(sqrt(t1)))/(sigma*t1*t1) + (-1.0*cos(t2)*(4.0 + lambda*(t3*t3*(lambda - 1.0)*(lambda - 1.0) - 6.0)) - 2.0*cos(t3))/(t1*t1))/sigma),
-				ktemp41[i].imag()*(-12.566370614359172*epsilon*((sin(t2)*(t3*t3*(1.0 + lambda*(3.0*lambda - 4.0)) - 6.0)/(sqrt(t1)) + 6.0*sin(t3)/(sqrt(t1)))/(sigma*t1*t1) + (-1.0*cos(t2)*(4.0 + lambda*(t3*t3*(lambda - 1.0)*(lambda - 1.0) - 6.0)) - 2.0*cos(t3))/(t1*t1))/sigma));
-	}
-
-	return ktemp41;
-
-}
-
-ComplexVector SW_liquid::get_ngphi3() const {
-	int sofar = 0;
-	double Nx = data[sofar]; sofar += 1;
-	double Ny = data[sofar]; sofar += 1;
-	double Nz = data[sofar]; sofar += 1;
-	double R = data[sofar]; sofar += 1;
-	double a1 = data[sofar]; sofar += 1;
-	double a2 = data[sofar]; sofar += 1;
-	double a3 = data[sofar]; sofar += 1;
-	Vector Vext = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	Vector n = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	double epsilon = data[sofar]; sofar += 1;
-	double kT = data[sofar]; sofar += 1;
-	double lambda = data[sofar]; sofar += 1;
-	double mu = data[sofar]; sofar += 1;
-	double sigma = data[sofar]; sofar += 1;
-		volume = a1*a2*a3;
-	dV = volume/(Nx*Ny*Nz);
-	dr = pow(dV, 0.3333333333333333);
-	ComplexVector ktemp0(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp0 = fft(Nx,Ny,Nz,dV,n);
-
-	ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp1[0] = (12.566370614359172*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp1[i] = std::complex<double>((12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector n2(Nx*Ny*Nz); // RS
-	n2 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	Vector rtemp3(Nx*Ny*Nz); // RS
-	rtemp3 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	ktemp1.free(); // KSpace
-	ComplexVector ktemp4(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp4[0] = ktemp0[i]*(4.188790204786391*R*R*R);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp4[i] = std::complex<double>(ktemp0[i].real()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)),
-				ktemp0[i].imag()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)));
-	}
-
-	Vector n3(Nx*Ny*Nz); // RS
-	n3 = ifft(Nx,Ny,Nz,dV,ktemp4);
-
-	ktemp4.free(); // KSpace
-	Vector dphitot_by_dn1(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn1[i] = n2[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp7(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp7 = fft(Nx,Ny,Nz,dV,dphitot_by_dn1);
-
-	dphitot_by_dn1.free(); // Realspace
-	ComplexVector ktemp8(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp8[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp8[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vx(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vx = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	Vector rtemp10(Nx*Ny*Nz); // RS
-	rtemp10 = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	ktemp8.free(); // KSpace
-	Vector dphitot_by_dn2vx(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vx[i] = -7.957747154594767e-2*rtemp10[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp10[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp12(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp12 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vx);
-
-	dphitot_by_dn2vx.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vx[i] = -1.0*dn1v_dot_n2v_by_dn1vx[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp14(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp14 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vx);
-
-	dn1v_dot_n2v_by_dn1vx.free(); // Realspace
-	ComplexVector ktemp15(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp15[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp15[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vy(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vy = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	Vector rtemp17(Nx*Ny*Nz); // RS
-	rtemp17 = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	ktemp15.free(); // KSpace
-	Vector dphitot_by_dn2vy(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vy[i] = -7.957747154594767e-2*rtemp17[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp17[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp19(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp19 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vy);
-
-	dphitot_by_dn2vy.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vy[i] = -1.0*dn1v_dot_n2v_by_dn1vy[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp21(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp21 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vy);
-
-	dn1v_dot_n2v_by_dn1vy.free(); // Realspace
-	ComplexVector ktemp22(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp22[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp22[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vz(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vz = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	Vector rtemp24(Nx*Ny*Nz); // RS
-	rtemp24 = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	ktemp22.free(); // KSpace
-	Vector dphitot_by_dn3(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		const double t2 = rtemp10[i];
-		const double t3 = rtemp17[i];
-		const double t4 = rtemp24[i];
-		const double t5 = log(t1);
-		const double t6 = 1.0/t1;
-		const double t7 = 1.0/n3[i];
-		dphitot_by_dn3[i] = t6*t7*t7*n2[i]*(t6*(8.841941282883075e-3 + (1.768388256576615e-2*t6 - 1.768388256576615e-2*t7)*(n3[i] + t5/(t6*t6))) - 8.841941282883075e-3 - 1.768388256576615e-2*t5)*(n2[i]*n2[i] - 3.0*t4*t4 - 3.0*t3*t3 - 3.0*t2*t2) + 7.957747154594767e-2*t6*rtemp3[i]/(R*R) + t6*t6*(7.957747154594767e-2*n2[i]*rtemp3[i]/R - 7.957747154594767e-2*t4*rtemp24[i]/R - 7.957747154594767e-2*t3*rtemp17[i]/R - 7.957747154594767e-2*t2*rtemp10[i]/R);
-	}
-
-	ComplexVector ktemp26(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp26 = fft(Nx,Ny,Nz,dV,dphitot_by_dn3);
-
-	dphitot_by_dn3.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vz[i] = -1.0*dn1v_dot_n2v_by_dn1vz[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp28(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp28 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vz);
-
-	dn1v_dot_n2v_by_dn1vz.free(); // Realspace
-	Vector dphitot_by_dn0(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn0[i] = -1.0*log(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp30(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp30 = fft(Nx,Ny,Nz,dV,dphitot_by_dn0);
-
-	dphitot_by_dn0.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp17[i] = (n3[i] + t1*t1*log(t1))*(2.6525823848649224e-2*n2[i]*n2[i] - 2.6525823848649224e-2*rtemp10[i]*rtemp10[i] - 2.6525823848649224e-2*rtemp17[i]*rtemp17[i] - 2.6525823848649224e-2*rtemp24[i]*rtemp24[i])/(t1*t1*n3[i]*n3[i]) + 7.957747154594767e-2*rtemp3[i]/R/t1;
-	}
-
-	rtemp10.free(); // Realspace
-	rtemp3.free(); // Realspace
-	ComplexVector ktemp32(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp32 = fft(Nx,Ny,Nz,dV,rtemp17);
-
-	rtemp17.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp24[i] = -7.957747154594767e-2*rtemp24[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp24[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	n3.free(); // Realspace
-	n2.free(); // Realspace
-	ComplexVector ktemp34(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp34 = fft(Nx,Ny,Nz,dV,rtemp24);
-
-	rtemp24.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp34[0] = (((12.566370614359172*R*R)*(-0.15915494309189535*ktemp30[i]/R - 7.957747154594767e-2*ktemp7[i]) - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp30[i])/R - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp7[i])/R + (12.566370614359172*R*R)*ktemp26[i] - (-25.132741228718345*R)*ktemp32[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = 12.566370614359172*R*sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))*exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t2 = exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t3 = R*cos(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t5 = 12.566370614359172*t2*(-1.0*sin(R*sqrt(t4))/(sqrt(t4)) - 1.0*R*cos(R*sqrt(t4)));
-		double it6 = 12.566370614359172*R*k_i[0]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it7 = 12.566370614359172*R*k_i[1]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it8 = 12.566370614359172*R*k_i[2]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		ktemp34[i] = std::complex<double>(ktemp26[i].real()*t1 - 1.0*ktemp19[i].imag()*it7 - 1.0*ktemp12[i].imag()*it6 - ktemp32[i].real()*t5 - ktemp34[i].imag()*it8 + ((-7.957747154594767e-2*ktemp7[i].real()*t1 - 7.957747154594767e-2*ktemp30[i].real()*(t5 + 2.0*t1/R) - 1.0*ktemp28[i].imag()*k_i[2]*t2*t3/t4 - 1.0*ktemp21[i].imag()*k_i[1]*t2*t3/t4 - 1.0*ktemp14[i].imag()*k_i[0]*t2*t3/t4)/R - 7.957747154594767e-2*ktemp7[i].real()*t5 - 7.957747154594767e-2*ktemp28[i].imag()*it8 - 7.957747154594767e-2*ktemp21[i].imag()*it7 - 7.957747154594767e-2*ktemp14[i].imag()*it6)/R,
-				ktemp12[i].real()*it6 + ktemp19[i].real()*it7 + ktemp26[i].imag()*t1 - ktemp32[i].imag()*t5 + ktemp34[i].real()*it8 + (7.957747154594767e-2*ktemp14[i].real()*it6 + 7.957747154594767e-2*ktemp21[i].real()*it7 + 7.957747154594767e-2*ktemp28[i].real()*it8 - 7.957747154594767e-2*ktemp7[i].imag()*t5 + (ktemp14[i].real()*k_i[0]*t2*t3/t4 + ktemp21[i].real()*k_i[1]*t2*t3/t4 + ktemp28[i].real()*k_i[2]*t2*t3/t4 - 7.957747154594767e-2*ktemp30[i].imag()*(t5 + 2.0*t1/R) - 7.957747154594767e-2*ktemp7[i].imag()*t1)/R)/R);
-	}
-
-	ktemp32.free(); // KSpace
-	ktemp30.free(); // KSpace
-	ktemp28.free(); // KSpace
-	ktemp26.free(); // KSpace
-	ktemp21.free(); // KSpace
-	ktemp19.free(); // KSpace
-	ktemp14.free(); // KSpace
-	ktemp12.free(); // KSpace
-	ktemp7.free(); // KSpace
-	Vector rtemp36(Nx*Ny*Nz); // RS
-	rtemp36 = ifft(Nx,Ny,Nz,dV,ktemp34);
-
-	ktemp34.free(); // KSpace
-	{
-		const int i = 0;
-		ktemp0[0] = (50.26548245743669*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp0[i] = std::complex<double>((25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector rtemp38(Nx*Ny*Nz); // RS
-	rtemp38 = ifft(Nx,Ny,Nz,dV,ktemp0);
-
-	ktemp0.free(); // KSpace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = kT*rtemp36[i]*n[i]/(kT*rtemp38[i]*n[i]);
-		const double t2 = t1 - 1.0;
-		rtemp38[i] = 0.207*t1 + t2*(0.712*t2 + t2*(1.046*t2*t2 - 1.952*t2));
-	}
-
-	rtemp36.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp38[i] = n[i]*(rtemp38[i] - 0.207);
-	}
-
-	ComplexVector ktemp41(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp41 = fft(Nx,Ny,Nz,dV,rtemp38);
-
-	rtemp38.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp41[0] = ktemp41[i]*epsilon*sigma*sigma*sigma*(lambda*lambda*lambda*(4.188790204786391 + lambda*(lambda*(7.539822368615504 - 2.0943951023931935*lambda) - 9.42477796076938)) - 0.20943951023931967);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		const double t2 = lambda*t1;
-		const double t3 = lambda - 1.0;
-		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		ktemp41[i] = std::complex<double>(ktemp41[i].real()*(-12.566370614359172*epsilon*((24.0*cos(t1) + cos(t2)*(t1*t1*t3*(12.0*lambda - 6.0 - lambda*t1*t1*t3*t3) - 24.0))/(sigma*t4*t4*t4) + (6.0*sin(t1) + sin(t2)*(18.0 - 24.0*lambda + t1*t1*t3*t3*(4.0*lambda - 1.0)))/(sqrt(t4)*t4*t4))/(sigma*sigma)),
-				ktemp41[i].imag()*(-12.566370614359172*epsilon*((24.0*cos(t1) + cos(t2)*(t1*t1*t3*(12.0*lambda - 6.0 - lambda*t1*t1*t3*t3) - 24.0))/(sigma*t4*t4*t4) + (6.0*sin(t1) + sin(t2)*(18.0 - 24.0*lambda + t1*t1*t3*t3*(4.0*lambda - 1.0)))/(sqrt(t4)*t4*t4))/(sigma*sigma)));
-	}
-
-	return ktemp41;
-
-}
-
-ComplexVector SW_liquid::get_ngphi4() const {
-	int sofar = 0;
-	double Nx = data[sofar]; sofar += 1;
-	double Ny = data[sofar]; sofar += 1;
-	double Nz = data[sofar]; sofar += 1;
-	double R = data[sofar]; sofar += 1;
-	double a1 = data[sofar]; sofar += 1;
-	double a2 = data[sofar]; sofar += 1;
-	double a3 = data[sofar]; sofar += 1;
-	Vector Vext = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	Vector n = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
-	double epsilon = data[sofar]; sofar += 1;
-	double kT = data[sofar]; sofar += 1;
-	double lambda = data[sofar]; sofar += 1;
-	double mu = data[sofar]; sofar += 1;
-	double sigma = data[sofar]; sofar += 1;
-		volume = a1*a2*a3;
-	dV = volume/(Nx*Ny*Nz);
-	dr = pow(dV, 0.3333333333333333);
-	ComplexVector ktemp0(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp0 = fft(Nx,Ny,Nz,dV,n);
-
-	ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp1[0] = (12.566370614359172*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp1[i] = std::complex<double>((12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector n2(Nx*Ny*Nz); // RS
-	n2 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	Vector rtemp3(Nx*Ny*Nz); // RS
-	rtemp3 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	ktemp1.free(); // KSpace
-	ComplexVector ktemp4(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp4[0] = ktemp0[i]*(4.188790204786391*R*R*R);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp4[i] = std::complex<double>(ktemp0[i].real()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)),
-				ktemp0[i].imag()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)));
-	}
-
-	Vector n3(Nx*Ny*Nz); // RS
-	n3 = ifft(Nx,Ny,Nz,dV,ktemp4);
-
-	ktemp4.free(); // KSpace
-	Vector dphitot_by_dn1(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn1[i] = n2[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp7(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp7 = fft(Nx,Ny,Nz,dV,dphitot_by_dn1);
-
-	dphitot_by_dn1.free(); // Realspace
-	ComplexVector ktemp8(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp8[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp8[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vx(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vx = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	Vector rtemp10(Nx*Ny*Nz); // RS
-	rtemp10 = ifft(Nx,Ny,Nz,dV,ktemp8);
-
-	ktemp8.free(); // KSpace
-	Vector dphitot_by_dn2vx(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vx[i] = -7.957747154594767e-2*rtemp10[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp10[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp12(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp12 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vx);
-
-	dphitot_by_dn2vx.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vx[i] = -1.0*dn1v_dot_n2v_by_dn1vx[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp14(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp14 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vx);
-
-	dn1v_dot_n2v_by_dn1vx.free(); // Realspace
-	ComplexVector ktemp15(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp15[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp15[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vy(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vy = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	Vector rtemp17(Nx*Ny*Nz); // RS
-	rtemp17 = ifft(Nx,Ny,Nz,dV,ktemp15);
-
-	ktemp15.free(); // KSpace
-	Vector dphitot_by_dn2vy(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		dphitot_by_dn2vy[i] = -7.957747154594767e-2*rtemp17[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp17[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	ComplexVector ktemp19(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp19 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vy);
-
-	dphitot_by_dn2vy.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vy[i] = -1.0*dn1v_dot_n2v_by_dn1vy[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp21(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp21 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vy);
-
-	dn1v_dot_n2v_by_dn1vy.free(); // Realspace
-	ComplexVector ktemp22(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp22[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp22[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector dn1v_dot_n2v_by_dn1vz(Nx*Ny*Nz); // RS
-	dn1v_dot_n2v_by_dn1vz = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	Vector rtemp24(Nx*Ny*Nz); // RS
-	rtemp24 = ifft(Nx,Ny,Nz,dV,ktemp22);
-
-	ktemp22.free(); // KSpace
-	Vector dphitot_by_dn3(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		const double t2 = rtemp10[i];
-		const double t3 = rtemp17[i];
-		const double t4 = rtemp24[i];
-		const double t5 = log(t1);
-		const double t6 = 1.0/t1;
-		const double t7 = 1.0/n3[i];
-		dphitot_by_dn3[i] = t6*t7*t7*n2[i]*(t6*(8.841941282883075e-3 + (1.768388256576615e-2*t6 - 1.768388256576615e-2*t7)*(n3[i] + t5/(t6*t6))) - 8.841941282883075e-3 - 1.768388256576615e-2*t5)*(n2[i]*n2[i] - 3.0*t4*t4 - 3.0*t3*t3 - 3.0*t2*t2) + 7.957747154594767e-2*t6*rtemp3[i]/(R*R) + t6*t6*(7.957747154594767e-2*n2[i]*rtemp3[i]/R - 7.957747154594767e-2*t4*rtemp24[i]/R - 7.957747154594767e-2*t3*rtemp17[i]/R - 7.957747154594767e-2*t2*rtemp10[i]/R);
-	}
-
-	ComplexVector ktemp26(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp26 = fft(Nx,Ny,Nz,dV,dphitot_by_dn3);
-
-	dphitot_by_dn3.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dn1v_dot_n2v_by_dn1vz[i] = -1.0*dn1v_dot_n2v_by_dn1vz[i]/(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp28(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp28 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vz);
-
-	dn1v_dot_n2v_by_dn1vz.free(); // Realspace
-	Vector dphitot_by_dn0(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		dphitot_by_dn0[i] = -1.0*log(1.0 - 1.0*n3[i]);
-	}
-
-	ComplexVector ktemp30(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp30 = fft(Nx,Ny,Nz,dV,dphitot_by_dn0);
-
-	dphitot_by_dn0.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp17[i] = (n3[i] + t1*t1*log(t1))*(2.6525823848649224e-2*n2[i]*n2[i] - 2.6525823848649224e-2*rtemp10[i]*rtemp10[i] - 2.6525823848649224e-2*rtemp17[i]*rtemp17[i] - 2.6525823848649224e-2*rtemp24[i]*rtemp24[i])/(t1*t1*n3[i]*n3[i]) + 7.957747154594767e-2*rtemp3[i]/R/t1;
-	}
-
-	rtemp10.free(); // Realspace
-	rtemp3.free(); // Realspace
-	ComplexVector ktemp32(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp32 = fft(Nx,Ny,Nz,dV,rtemp17);
-
-	rtemp17.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*n3[i];
-		rtemp24[i] = -7.957747154594767e-2*rtemp24[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp24[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
-	}
-
-	n3.free(); // Realspace
-	n2.free(); // Realspace
-	ComplexVector ktemp34(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp34 = fft(Nx,Ny,Nz,dV,rtemp24);
-
-	rtemp24.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp34[0] = (((12.566370614359172*R*R)*(-0.15915494309189535*ktemp30[i]/R - 7.957747154594767e-2*ktemp7[i]) - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp30[i])/R - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp7[i])/R + (12.566370614359172*R*R)*ktemp26[i] - (-25.132741228718345*R)*ktemp32[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = 12.566370614359172*R*sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))*exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t2 = exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t3 = R*cos(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t5 = 12.566370614359172*t2*(-1.0*sin(R*sqrt(t4))/(sqrt(t4)) - 1.0*R*cos(R*sqrt(t4)));
-		double it6 = 12.566370614359172*R*k_i[0]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it7 = 12.566370614359172*R*k_i[1]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		double it8 = 12.566370614359172*R*k_i[2]*t2*sin(R*sqrt(t4))/(sqrt(t4));
-		ktemp34[i] = std::complex<double>(ktemp26[i].real()*t1 - 1.0*ktemp19[i].imag()*it7 - 1.0*ktemp12[i].imag()*it6 - ktemp32[i].real()*t5 - ktemp34[i].imag()*it8 + ((-7.957747154594767e-2*ktemp7[i].real()*t1 - 7.957747154594767e-2*ktemp30[i].real()*(t5 + 2.0*t1/R) - 1.0*ktemp28[i].imag()*k_i[2]*t2*t3/t4 - 1.0*ktemp21[i].imag()*k_i[1]*t2*t3/t4 - 1.0*ktemp14[i].imag()*k_i[0]*t2*t3/t4)/R - 7.957747154594767e-2*ktemp7[i].real()*t5 - 7.957747154594767e-2*ktemp28[i].imag()*it8 - 7.957747154594767e-2*ktemp21[i].imag()*it7 - 7.957747154594767e-2*ktemp14[i].imag()*it6)/R,
-				ktemp12[i].real()*it6 + ktemp19[i].real()*it7 + ktemp26[i].imag()*t1 - ktemp32[i].imag()*t5 + ktemp34[i].real()*it8 + (7.957747154594767e-2*ktemp14[i].real()*it6 + 7.957747154594767e-2*ktemp21[i].real()*it7 + 7.957747154594767e-2*ktemp28[i].real()*it8 - 7.957747154594767e-2*ktemp7[i].imag()*t5 + (ktemp14[i].real()*k_i[0]*t2*t3/t4 + ktemp21[i].real()*k_i[1]*t2*t3/t4 + ktemp28[i].real()*k_i[2]*t2*t3/t4 - 7.957747154594767e-2*ktemp30[i].imag()*(t5 + 2.0*t1/R) - 7.957747154594767e-2*ktemp7[i].imag()*t1)/R)/R);
-	}
-
-	ktemp32.free(); // KSpace
-	ktemp30.free(); // KSpace
-	ktemp28.free(); // KSpace
-	ktemp26.free(); // KSpace
-	ktemp21.free(); // KSpace
-	ktemp19.free(); // KSpace
-	ktemp14.free(); // KSpace
-	ktemp12.free(); // KSpace
-	ktemp7.free(); // KSpace
-	Vector rtemp36(Nx*Ny*Nz); // RS
-	rtemp36 = ifft(Nx,Ny,Nz,dV,ktemp34);
-
-	ktemp34.free(); // KSpace
-	{
-		const int i = 0;
-		ktemp0[0] = (50.26548245743669*R*R)*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp0[i] = std::complex<double>((25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
-				(25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
-	}
-
-	Vector rtemp38(Nx*Ny*Nz); // RS
-	rtemp38 = ifft(Nx,Ny,Nz,dV,ktemp0);
-
-	ktemp0.free(); // KSpace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = kT*rtemp36[i]*n[i]/(kT*rtemp38[i]*n[i]);
-		const double t2 = t1 - 1.0;
-		rtemp38[i] = t2*(t2*(0.324*t2 - 0.162*t2*t2) - 0.164*t2) - 2.0e-3*t1;
-	}
-
-	rtemp36.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp38[i] = n[i]*(rtemp38[i] + 2.0e-3);
-	}
-
-	ComplexVector ktemp41(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp41 = fft(Nx,Ny,Nz,dV,rtemp38);
-
-	rtemp38.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp41[0] = ktemp41[i]*epsilon*sigma*sigma*sigma*(0.11967972013675394 + lambda*lambda*lambda*(lambda*(12.566370614359176 + lambda*(lambda*(8.377580409572774 - 1.7951958020513124*lambda) - 15.079644737231009)) - 4.188790204786391));
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		const double t2 = sin(lambda*t1);
-		const double t3 = lambda - 1.0;
-		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		ktemp41[i] = std::complex<double>(ktemp41[i].real()*(-12.566370614359172*epsilon*((24.0*cos(t1) + (120.0*t2 - 120.0*sin(t1))/t1 - cos(lambda*t1)*(lambda*(120.0 + (t1*t1)*(t1*t1)*(t3*t3)*(t3*t3)) - 96.0 - 4.0*t1*t1*t3*t3*(5.0*lambda - 2.0)))/(sigma*t4*t4*t4) + t2*t3*(36.0 - 60.0*lambda + t1*t1*t3*t3*(5.0*lambda - 1.0))/(sqrt(t4)*t4*t4))/(sigma*sigma)),
-				ktemp41[i].imag()*(-12.566370614359172*epsilon*((24.0*cos(t1) + (120.0*t2 - 120.0*sin(t1))/t1 - cos(lambda*t1)*(lambda*(120.0 + (t1*t1)*(t1*t1)*(t3*t3)*(t3*t3)) - 96.0 - 4.0*t1*t1*t3*t3*(5.0*lambda - 2.0)))/(sigma*t4*t4*t4) + t2*t3*(36.0 - 60.0*lambda + t1*t1*t3*t3*(5.0*lambda - 1.0))/(sqrt(t4)*t4*t4))/(sigma*sigma)));
-	}
-
-	return ktemp41;
-
-}
-
 Vector SW_liquid::get_phi1() const {
 	int sofar = 0;
 	double Nx = data[sofar]; sofar += 1;
@@ -68397,12 +66662,425 @@ double SW_liquid::get_sw() const {
 	ktemp49.free(); // KSpace
 	double 	s52 = 0;
 	for (int i=0; i<Nx*Ny*Nz; i++) {
-		s52 += dV*rtemp51[i]*n[i];
+		s52 += dV*(0.5*epsilon*rtemp51[i]*n[i]);
 	}
 
 	rtemp51.free(); // Realspace
-	sw = 0.5*epsilon*s52;
+	sw = s52;
 	return sw;
+
+}
+
+Vector SW_liquid::get_swEdensity() const {
+	int sofar = 0;
+	double Nx = data[sofar]; sofar += 1;
+	double Ny = data[sofar]; sofar += 1;
+	double Nz = data[sofar]; sofar += 1;
+	double R = data[sofar]; sofar += 1;
+	double a1 = data[sofar]; sofar += 1;
+	double a2 = data[sofar]; sofar += 1;
+	double a3 = data[sofar]; sofar += 1;
+	Vector Vext = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
+	Vector n = data.slice(sofar,Nx*Ny*Nz); sofar += Nx*Ny*Nz;
+	double epsilon = data[sofar]; sofar += 1;
+	double kT = data[sofar]; sofar += 1;
+	double lambda = data[sofar]; sofar += 1;
+	double mu = data[sofar]; sofar += 1;
+	double sigma = data[sofar]; sofar += 1;
+		volume = a1*a2*a3;
+	dV = volume/(Nx*Ny*Nz);
+	dr = pow(dV, 0.3333333333333333);
+	ComplexVector ktemp0(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp0 = fft(Nx,Ny,Nz,dV,n);
+
+	ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1)); // KS
+	{
+		const int i = 0;
+		ktemp1[0] = (12.566370614359172*R*R)*ktemp0[i];
+	}
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
+		ktemp1[i] = std::complex<double>((12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
+				(12.566370614359172*R*sin(R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
+	}
+
+	Vector n2(Nx*Ny*Nz); // RS
+	n2 = ifft(Nx,Ny,Nz,dV,ktemp1);
+
+	Vector rtemp3(Nx*Ny*Nz); // RS
+	rtemp3 = ifft(Nx,Ny,Nz,dV,ktemp1);
+
+	ktemp1.free(); // KSpace
+	ComplexVector ktemp4(Nx*Ny*(int(Nz)/2+1)); // KS
+	{
+		const int i = 0;
+		ktemp4[0] = ktemp0[i]*(4.188790204786391*R*R*R);
+	}
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
+		const double t2 = R*sqrt(t1);
+		ktemp4[i] = std::complex<double>(ktemp0[i].real()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)),
+				ktemp0[i].imag()*(12.566370614359172*exp(-6.0*dr*dr*t1)*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1)));
+	}
+
+	Vector n3(Nx*Ny*Nz); // RS
+	n3 = ifft(Nx,Ny,Nz,dV,ktemp4);
+
+	ktemp4.free(); // KSpace
+	Vector dphitot_by_dn1(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		dphitot_by_dn1[i] = n2[i]/(1.0 - 1.0*n3[i]);
+	}
+
+	ComplexVector ktemp7(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp7 = fft(Nx,Ny,Nz,dV,dphitot_by_dn1);
+
+	dphitot_by_dn1.free(); // Realspace
+	ComplexVector ktemp8(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp8[0] = 0;
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
+		const double t2 = R*sqrt(t1);
+		ktemp8[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
+				12.566370614359172*ktemp0[i].real()*k_i[0]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
+	}
+
+	Vector dn1v_dot_n2v_by_dn1vx(Nx*Ny*Nz); // RS
+	dn1v_dot_n2v_by_dn1vx = ifft(Nx,Ny,Nz,dV,ktemp8);
+
+	Vector rtemp10(Nx*Ny*Nz); // RS
+	rtemp10 = ifft(Nx,Ny,Nz,dV,ktemp8);
+
+	ktemp8.free(); // KSpace
+	Vector dphitot_by_dn2vx(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = 1.0 - 1.0*n3[i];
+		dphitot_by_dn2vx[i] = -7.957747154594767e-2*rtemp10[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp10[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
+	}
+
+	ComplexVector ktemp12(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp12 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vx);
+
+	dphitot_by_dn2vx.free(); // Realspace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		dn1v_dot_n2v_by_dn1vx[i] = -1.0*dn1v_dot_n2v_by_dn1vx[i]/(1.0 - 1.0*n3[i]);
+	}
+
+	ComplexVector ktemp14(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp14 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vx);
+
+	dn1v_dot_n2v_by_dn1vx.free(); // Realspace
+	ComplexVector ktemp15(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp15[0] = 0;
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
+		const double t2 = R*sqrt(t1);
+		ktemp15[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
+				12.566370614359172*ktemp0[i].real()*k_i[1]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
+	}
+
+	Vector dn1v_dot_n2v_by_dn1vy(Nx*Ny*Nz); // RS
+	dn1v_dot_n2v_by_dn1vy = ifft(Nx,Ny,Nz,dV,ktemp15);
+
+	Vector rtemp17(Nx*Ny*Nz); // RS
+	rtemp17 = ifft(Nx,Ny,Nz,dV,ktemp15);
+
+	ktemp15.free(); // KSpace
+	Vector dphitot_by_dn2vy(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = 1.0 - 1.0*n3[i];
+		dphitot_by_dn2vy[i] = -7.957747154594767e-2*rtemp17[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp17[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
+	}
+
+	ComplexVector ktemp19(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp19 = fft(Nx,Ny,Nz,dV,dphitot_by_dn2vy);
+
+	dphitot_by_dn2vy.free(); // Realspace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		dn1v_dot_n2v_by_dn1vy[i] = -1.0*dn1v_dot_n2v_by_dn1vy[i]/(1.0 - 1.0*n3[i]);
+	}
+
+	ComplexVector ktemp21(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp21 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vy);
+
+	dn1v_dot_n2v_by_dn1vy.free(); // Realspace
+	ComplexVector ktemp22(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp22[0] = 0;
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
+		const double t2 = R*sqrt(t1);
+		ktemp22[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
+				12.566370614359172*ktemp0[i].real()*k_i[2]*exp(-6.0*dr*dr*t1)*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
+	}
+
+	Vector dn1v_dot_n2v_by_dn1vz(Nx*Ny*Nz); // RS
+	dn1v_dot_n2v_by_dn1vz = ifft(Nx,Ny,Nz,dV,ktemp22);
+
+	Vector rtemp24(Nx*Ny*Nz); // RS
+	rtemp24 = ifft(Nx,Ny,Nz,dV,ktemp22);
+
+	ktemp22.free(); // KSpace
+	Vector dphitot_by_dn3(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = 1.0 - 1.0*n3[i];
+		const double t2 = rtemp10[i];
+		const double t3 = rtemp17[i];
+		const double t4 = rtemp24[i];
+		const double t5 = log(t1);
+		const double t6 = 1.0/t1;
+		const double t7 = 1.0/n3[i];
+		dphitot_by_dn3[i] = t6*t7*t7*n2[i]*(t6*(8.841941282883075e-3 + (1.768388256576615e-2*t6 - 1.768388256576615e-2*t7)*(n3[i] + t5/(t6*t6))) - 8.841941282883075e-3 - 1.768388256576615e-2*t5)*(n2[i]*n2[i] - 3.0*t4*t4 - 3.0*t3*t3 - 3.0*t2*t2) + 7.957747154594767e-2*t6*rtemp3[i]/(R*R) + t6*t6*(7.957747154594767e-2*n2[i]*rtemp3[i]/R - 7.957747154594767e-2*t4*rtemp24[i]/R - 7.957747154594767e-2*t3*rtemp17[i]/R - 7.957747154594767e-2*t2*rtemp10[i]/R);
+	}
+
+	ComplexVector ktemp26(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp26 = fft(Nx,Ny,Nz,dV,dphitot_by_dn3);
+
+	dphitot_by_dn3.free(); // Realspace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		dn1v_dot_n2v_by_dn1vz[i] = -1.0*dn1v_dot_n2v_by_dn1vz[i]/(1.0 - 1.0*n3[i]);
+	}
+
+	ComplexVector ktemp28(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp28 = fft(Nx,Ny,Nz,dV,dn1v_dot_n2v_by_dn1vz);
+
+	dn1v_dot_n2v_by_dn1vz.free(); // Realspace
+	Vector dphitot_by_dn0(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		dphitot_by_dn0[i] = -1.0*log(1.0 - 1.0*n3[i]);
+	}
+
+	ComplexVector ktemp30(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp30 = fft(Nx,Ny,Nz,dV,dphitot_by_dn0);
+
+	dphitot_by_dn0.free(); // Realspace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = 1.0 - 1.0*n3[i];
+		rtemp17[i] = (n3[i] + t1*t1*log(t1))*(2.6525823848649224e-2*n2[i]*n2[i] - 2.6525823848649224e-2*rtemp10[i]*rtemp10[i] - 2.6525823848649224e-2*rtemp17[i]*rtemp17[i] - 2.6525823848649224e-2*rtemp24[i]*rtemp24[i])/(t1*t1*n3[i]*n3[i]) + 7.957747154594767e-2*rtemp3[i]/R/t1;
+	}
+
+	rtemp10.free(); // Realspace
+	rtemp3.free(); // Realspace
+	ComplexVector ktemp32(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp32 = fft(Nx,Ny,Nz,dV,rtemp17);
+
+	rtemp17.free(); // Realspace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = 1.0 - 1.0*n3[i];
+		rtemp24[i] = -7.957747154594767e-2*rtemp24[i]/R/t1 - 5.305164769729845e-2*n2[i]*rtemp24[i]*(n3[i] + t1*t1*log(t1))/(t1*t1*n3[i]*n3[i]);
+	}
+
+	n3.free(); // Realspace
+	n2.free(); // Realspace
+	ComplexVector ktemp34(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp34 = fft(Nx,Ny,Nz,dV,rtemp24);
+
+	rtemp24.free(); // Realspace
+	{
+		const int i = 0;
+		ktemp34[0] = (((12.566370614359172*R*R)*(-0.15915494309189535*ktemp30[i]/R - 7.957747154594767e-2*ktemp7[i]) - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp30[i])/R - 7.957747154594767e-2*(-25.132741228718345*R)*ktemp7[i])/R + (12.566370614359172*R*R)*ktemp26[i] - (-25.132741228718345*R)*ktemp32[i];
+	}
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = 12.566370614359172*R*sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))*exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
+		const double t2 = exp(-6.0*dr*dr*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
+		const double t3 = R*cos(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
+		const double t4 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
+		const double t5 = 12.566370614359172*t2*(-1.0*sin(R*sqrt(t4))/(sqrt(t4)) - 1.0*R*cos(R*sqrt(t4)));
+		double it6 = 12.566370614359172*R*k_i[0]*t2*sin(R*sqrt(t4))/(sqrt(t4));
+		double it7 = 12.566370614359172*R*k_i[1]*t2*sin(R*sqrt(t4))/(sqrt(t4));
+		double it8 = 12.566370614359172*R*k_i[2]*t2*sin(R*sqrt(t4))/(sqrt(t4));
+		ktemp34[i] = std::complex<double>(ktemp26[i].real()*t1 - 1.0*ktemp19[i].imag()*it7 - 1.0*ktemp12[i].imag()*it6 - ktemp32[i].real()*t5 - ktemp34[i].imag()*it8 + ((-7.957747154594767e-2*ktemp7[i].real()*t1 - 7.957747154594767e-2*ktemp30[i].real()*(t5 + 2.0*t1/R) - 1.0*ktemp28[i].imag()*k_i[2]*t2*t3/t4 - 1.0*ktemp21[i].imag()*k_i[1]*t2*t3/t4 - 1.0*ktemp14[i].imag()*k_i[0]*t2*t3/t4)/R - 7.957747154594767e-2*ktemp7[i].real()*t5 - 7.957747154594767e-2*ktemp28[i].imag()*it8 - 7.957747154594767e-2*ktemp21[i].imag()*it7 - 7.957747154594767e-2*ktemp14[i].imag()*it6)/R,
+				ktemp12[i].real()*it6 + ktemp19[i].real()*it7 + ktemp26[i].imag()*t1 - ktemp32[i].imag()*t5 + ktemp34[i].real()*it8 + (7.957747154594767e-2*ktemp14[i].real()*it6 + 7.957747154594767e-2*ktemp21[i].real()*it7 + 7.957747154594767e-2*ktemp28[i].real()*it8 - 7.957747154594767e-2*ktemp7[i].imag()*t5 + (ktemp14[i].real()*k_i[0]*t2*t3/t4 + ktemp21[i].real()*k_i[1]*t2*t3/t4 + ktemp28[i].real()*k_i[2]*t2*t3/t4 - 7.957747154594767e-2*ktemp30[i].imag()*(t5 + 2.0*t1/R) - 7.957747154594767e-2*ktemp7[i].imag()*t1)/R)/R);
+	}
+
+	ktemp32.free(); // KSpace
+	ktemp30.free(); // KSpace
+	ktemp28.free(); // KSpace
+	ktemp26.free(); // KSpace
+	ktemp21.free(); // KSpace
+	ktemp19.free(); // KSpace
+	ktemp14.free(); // KSpace
+	ktemp12.free(); // KSpace
+	ktemp7.free(); // KSpace
+	Vector rtemp36(Nx*Ny*Nz); // RS
+	rtemp36 = ifft(Nx,Ny,Nz,dV,ktemp34);
+
+	ktemp34.free(); // KSpace
+	{
+		const int i = 0;
+		ktemp0[0] = (50.26548245743669*R*R)*ktemp0[i];
+	}
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
+		ktemp0[i] = std::complex<double>((25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].real(),
+				(25.132741228718345*R*sin(2.0*R*t1)*exp(-6.0*dr*dr*t1*t1)/t1)*ktemp0[i].imag());
+	}
+
+	Vector rtemp38(Nx*Ny*Nz); // RS
+	rtemp38 = ifft(Nx,Ny,Nz,dV,ktemp0);
+
+	ktemp0.free(); // KSpace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		rtemp38[i] = kT*rtemp36[i]*n[i]/rtemp38[i];
+	}
+
+	rtemp36.free(); // Realspace
+	Vector rtemp40(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		rtemp40[i] = rtemp38[i]/kT;
+	}
+
+	ComplexVector ktemp41(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp41 = fft(Nx,Ny,Nz,dV,rtemp40);
+
+	rtemp40.free(); // Realspace
+	Vector rtemp42(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = rtemp38[i]/(kT*n[i]);
+		const double t2 = t1 - 1.0;
+		rtemp42[i] = n[i]*(t2*(2.7e-2*t2 + t2*(0.838*t2 - 0.178*t2*t2)) - 1.754*t2);
+	}
+
+	ComplexVector ktemp43(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp43 = fft(Nx,Ny,Nz,dV,rtemp42);
+
+	rtemp42.free(); // Realspace
+	Vector rtemp44(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = rtemp38[i]/(kT*n[i]);
+		const double t2 = t1 - 1.0;
+		rtemp44[i] = n[i]*(t2*(4.403*t2 + t2*(0.363*t2*t2 - 2.48*t2)) - 2.243*t2);
+	}
+
+	ComplexVector ktemp45(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp45 = fft(Nx,Ny,Nz,dV,rtemp44);
+
+	rtemp44.free(); // Realspace
+	Vector rtemp46(Nx*Ny*Nz); // RS
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = rtemp38[i]/(kT*n[i]);
+		const double t2 = t1 - 1.0;
+		rtemp46[i] = n[i]*(0.207*t2 + t2*(0.712*t2 + t2*(1.046*t2*t2 - 1.952*t2)));
+	}
+
+	ComplexVector ktemp47(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp47 = fft(Nx,Ny,Nz,dV,rtemp46);
+
+	rtemp46.free(); // Realspace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		const double t1 = rtemp38[i]/(kT*n[i]);
+		const double t2 = t1 - 1.0;
+		rtemp38[i] = n[i]*(t2*(t2*(0.324*t2 - 0.162*t2*t2) - 0.164*t2) - 2.0e-3*t2);
+	}
+
+	ComplexVector ktemp49(Nx*Ny*(int(Nz)/2+1)); // KS
+	ktemp49 = fft(Nx,Ny,Nz,dV,rtemp38);
+
+	rtemp38.free(); // Realspace
+	{
+		const int i = 0;
+		ktemp49[0] = ktemp41[i]*epsilon*sigma*sigma*sigma*(4.188790204786391 - 4.188790204786391*lambda*lambda*lambda) + ktemp43[i]*epsilon*sigma*sigma*sigma*(lambda*lambda*lambda*(4.188790204786391 - 3.141592653589794*lambda) - 1.0471975511965976) + ktemp45[i]*epsilon*sigma*sigma*sigma*(0.418879020478639 + lambda*lambda*lambda*(lambda*(6.283185307179588 - 2.513274122871834*lambda) - 4.188790204786391)) + ktemp47[i]*epsilon*sigma*sigma*sigma*(lambda*lambda*lambda*(4.188790204786391 + lambda*(lambda*(7.539822368615504 - 2.0943951023931935*lambda) - 9.42477796076938)) - 0.20943951023931967) + ktemp49[i]*epsilon*sigma*sigma*sigma*(0.11967972013675394 + lambda*lambda*lambda*(lambda*(12.566370614359176 + lambda*(lambda*(8.377580409572774 - 1.7951958020513124*lambda) - 15.079644737231009)) - 4.188790204786391));
+	}
+	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
+		const int _z = i % (int(Nz)/2+1);
+		const int _n = (i-_z)/(int(Nz)/2+1);
+		int _y = _n % int(Ny);
+		int _x = (_n-_y)/int(Ny);
+		if (_x > int(Nx)/2) _x -= int(Nx);
+		if (_y > int(Ny)/2) _y -= int(Ny);
+		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
+		const double t1 = cos(sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
+		const double t2 = cos(lambda*sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
+		const double t3 = sin(lambda*sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - sin(sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
+		const double t4 = t3/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
+		const double t5 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
+		const double t6 = lambda - 1.0;
+		const double t7 = sin(sigma*sqrt(t5));
+		const double t8 = sin(lambda*sigma*sqrt(t5));
+		const double t9 = 1.0 - 2.0*lambda;
+		const double t10 = sigma*sigma*t5*t6*t6;
+		ktemp49[i] = std::complex<double>(ktemp41[i].real()*(-12.566370614359172*epsilon*(t4 + sigma*(t1 - lambda*t2))/t5) + ktemp43[i].real()*(-12.566370614359172*epsilon*((t2*(2.0 - lambda*sigma*sigma*t5*t6) - 2.0*t1)/(sigma*t5*t5) - (t7 + t8*t9)/(sqrt(t5)*t5))) + ktemp45[i].real()*(-12.566370614359172*epsilon*((6.0*t7/(sqrt(t5)) + t8*(sigma*sigma*t5*(1.0 + lambda*(3.0*lambda - 4.0)) - 6.0)/(sqrt(t5)))/(sigma*t5*t5) + (-1.0*t2*(4.0 + lambda*(t10 - 6.0)) - 2.0*t1)/(t5*t5))/sigma) + ktemp47[i].real()*(-12.566370614359172*epsilon*((24.0*t1 + t2*(sigma*sigma*t5*t6*(-1.0*lambda*t10 - 6.0*t9) - 24.0))/(sigma*t5*t5*t5) + (6.0*t7 + t8*(18.0 - 24.0*lambda + t10*(4.0*lambda - 1.0)))/(sqrt(t5)*t5*t5))/(sigma*sigma)) + ktemp49[i].real()*(-12.566370614359172*epsilon*((24.0*t1 + 120.0*t4/sigma - t2*(lambda*(120.0 + t10*t10) - 96.0 - 4.0*t10*(5.0*lambda - 2.0)))/(sigma*t5*t5*t5) + t6*t8*(36.0 - 60.0*lambda + t10*(5.0*lambda - 1.0))/(sqrt(t5)*t5*t5))/(sigma*sigma)),
+				ktemp41[i].imag()*(-12.566370614359172*epsilon*(t4 + sigma*(t1 - lambda*t2))/t5) + ktemp43[i].imag()*(-12.566370614359172*epsilon*((t2*(2.0 - lambda*sigma*sigma*t5*t6) - 2.0*t1)/(sigma*t5*t5) - (t7 + t8*t9)/(sqrt(t5)*t5))) + ktemp45[i].imag()*(-12.566370614359172*epsilon*((6.0*t7/(sqrt(t5)) + t8*(sigma*sigma*t5*(1.0 + lambda*(3.0*lambda - 4.0)) - 6.0)/(sqrt(t5)))/(sigma*t5*t5) + (-1.0*t2*(4.0 + lambda*(t10 - 6.0)) - 2.0*t1)/(t5*t5))/sigma) + ktemp47[i].imag()*(-12.566370614359172*epsilon*((24.0*t1 + t2*(sigma*sigma*t5*t6*(-1.0*lambda*t10 - 6.0*t9) - 24.0))/(sigma*t5*t5*t5) + (6.0*t7 + t8*(18.0 - 24.0*lambda + t10*(4.0*lambda - 1.0)))/(sqrt(t5)*t5*t5))/(sigma*sigma)) + ktemp49[i].imag()*(-12.566370614359172*epsilon*((24.0*t1 + 120.0*t4/sigma - t2*(lambda*(120.0 + t10*t10) - 96.0 - 4.0*t10*(5.0*lambda - 2.0)))/(sigma*t5*t5*t5) + t6*t8*(36.0 - 60.0*lambda + t10*(5.0*lambda - 1.0))/(sqrt(t5)*t5*t5))/(sigma*sigma)));
+	}
+
+	ktemp47.free(); // KSpace
+	ktemp45.free(); // KSpace
+	ktemp43.free(); // KSpace
+	ktemp41.free(); // KSpace
+	Vector rtemp51(Nx*Ny*Nz); // RS
+	rtemp51 = ifft(Nx,Ny,Nz,dV,ktemp49);
+
+	ktemp49.free(); // KSpace
+	for (int i=0; i<Nx*Ny*Nz; i++) {
+		// No vec r dependence!
+		rtemp51[i] = 0.5*epsilon*rtemp51[i]*n[i];
+	}
+
+	return rtemp51;
 
 }
 
@@ -68950,386 +67628,7 @@ double SW_liquid::d_by_depsilon() const {
 	double lambda = data[sofar]; sofar += 1;
 	double mu = data[sofar]; sofar += 1;
 	double sigma = data[sofar]; sofar += 1;
-		ComplexVector ktemp0(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp0 = fft(Nx,Ny,Nz,dV,n);
-
-	ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp1[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp1[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[0]*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[0]*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector rtemp2(Nx*Ny*Nz); // RS
-	rtemp2 = ifft(Nx,Ny,Nz,dV,ktemp1);
-
-	ktemp1.free(); // KSpace
-	ComplexVector ktemp3(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp3[0] = 4.188790204786391*R*R*R*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp3[i] = std::complex<double>(12.566370614359172*ktemp0[i].real()*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1),
-				12.566370614359172*ktemp0[i].imag()*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(sin(t2) - t2*cos(t2))/(sqrt(t1)*t1));
-	}
-
-	Vector rtemp4(Nx*Ny*Nz); // RS
-	rtemp4 = ifft(Nx,Ny,Nz,dV,ktemp3);
-
-	ktemp3.free(); // KSpace
-	Vector rtemp5(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp5[i] = -1.0*rtemp2[i]/(1.0 - 1.0*rtemp4[i]);
-	}
-
-	ComplexVector ktemp6(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp6 = fft(Nx,Ny,Nz,dV,rtemp5);
-
-	rtemp5.free(); // Realspace
-	ComplexVector ktemp7(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp7[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp7[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[1]*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[1]*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector rtemp8(Nx*Ny*Nz); // RS
-	rtemp8 = ifft(Nx,Ny,Nz,dV,ktemp7);
-
-	ktemp7.free(); // KSpace
-	Vector rtemp9(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp9[i] = -1.0*rtemp8[i]/(1.0 - 1.0*rtemp4[i]);
-	}
-
-	ComplexVector ktemp10(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp10 = fft(Nx,Ny,Nz,dV,rtemp9);
-
-	rtemp9.free(); // Realspace
-	ComplexVector ktemp11(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp11[0] = 0;
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t2 = R*sqrt(t1);
-		ktemp11[i] = std::complex<double>(-12.566370614359172*ktemp0[i].imag()*k_i[2]*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1,
-				12.566370614359172*ktemp0[i].real()*k_i[2]*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))*(R*cos(t2) - sin(t2)/(sqrt(t1)))/t1);
-	}
-
-	Vector rtemp12(Nx*Ny*Nz); // RS
-	rtemp12 = ifft(Nx,Ny,Nz,dV,ktemp11);
-
-	ktemp11.free(); // KSpace
-	Vector rtemp13(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp13[i] = -1.0*rtemp12[i]/(1.0 - 1.0*rtemp4[i]);
-	}
-
-	ComplexVector ktemp14(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp14 = fft(Nx,Ny,Nz,dV,rtemp13);
-
-	rtemp13.free(); // Realspace
-	Vector rtemp15(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp15[i] = -1.0*log(1.0 - 1.0*rtemp4[i]);
-	}
-
-	ComplexVector ktemp16(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp16 = fft(Nx,Ny,Nz,dV,rtemp15);
-
-	ComplexVector ktemp17(Nx*Ny*(int(Nz)/2+1)); // KS
-	{
-		const int i = 0;
-		ktemp17[0] = 12.566370614359172*R*R*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp17[i] = std::complex<double>(12.566370614359172*ktemp0[i].real()*R*sin(R*t1)*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))/t1,
-				12.566370614359172*ktemp0[i].imag()*R*sin(R*t1)*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))/t1);
-	}
-
-	Vector rtemp18(Nx*Ny*Nz); // RS
-	rtemp18 = ifft(Nx,Ny,Nz,dV,ktemp17);
-
-	ktemp17.free(); // KSpace
-	Vector rtemp19(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp19[i] = rtemp18[i]/(1.0 - 1.0*rtemp4[i]);
-	}
-
-	ComplexVector ktemp20(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp20 = fft(Nx,Ny,Nz,dV,rtemp19);
-
-	Vector rtemp21(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*rtemp4[i];
-		rtemp21[i] = rtemp2[i]*(-5.305164769729845e-2*rtemp19[i]*(rtemp4[i] + t1*t1*log(t1))/(rtemp4[i]*rtemp4[i]) - 7.957747154594767e-2*1.0/R)/t1;
-	}
-
-	ComplexVector ktemp22(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp22 = fft(Nx,Ny,Nz,dV,rtemp21);
-
-	rtemp21.free(); // Realspace
-	Vector rtemp23(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*rtemp4[i];
-		rtemp23[i] = rtemp8[i]*(-5.305164769729845e-2*rtemp19[i]*(rtemp4[i] + t1*t1*log(t1))/(rtemp4[i]*rtemp4[i]) - 7.957747154594767e-2*1.0/R)/t1;
-	}
-
-	ComplexVector ktemp24(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp24 = fft(Nx,Ny,Nz,dV,rtemp23);
-
-	rtemp23.free(); // Realspace
-	Vector rtemp25(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*rtemp4[i];
-		rtemp25[i] = rtemp12[i]*(-5.305164769729845e-2*rtemp19[i]*(rtemp4[i] + t1*t1*log(t1))/(rtemp4[i]*rtemp4[i]) - 7.957747154594767e-2*1.0/R)/t1;
-	}
-
-	ComplexVector ktemp26(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp26 = fft(Nx,Ny,Nz,dV,rtemp25);
-
-	rtemp25.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*rtemp4[i];
-		const double t2 = rtemp12[i]*rtemp12[i];
-		const double t3 = rtemp18[i]*rtemp18[i];
-		const double t4 = rtemp2[i]*rtemp2[i];
-		const double t5 = rtemp8[i]*rtemp8[i];
-		const double t6 = 1.0/t1;
-		const double t7 = 1.0/rtemp4[i];
-		rtemp19[i] = t6*(7.957747154594767e-2*rtemp18[i]/R + t6*(7.957747154594767e-2*t3 - 7.957747154594767e-2*t2 - 7.957747154594767e-2*t4 - 7.957747154594767e-2*t5))/R + t7*t7*rtemp19[i]*(t3 - 3.0*t2 - 3.0*t4 - 3.0*t5)*(1.768388256576615e-2*rtemp15[i] - 8.841941282883075e-3 + t6*(8.841941282883075e-3 + (1.768388256576615e-2*t6 - 1.768388256576615e-2*t7)*(rtemp4[i] + log(t1)/(t6*t6))));
-	}
-
-	rtemp15.free(); // Realspace
-	ComplexVector ktemp28(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp28 = fft(Nx,Ny,Nz,dV,rtemp19);
-
-	rtemp19.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = 1.0 - 1.0*rtemp4[i];
-		rtemp18[i] = (7.957747154594767e-2*rtemp18[i]/R + (rtemp4[i] + t1*t1*log(t1))*(2.6525823848649224e-2*rtemp18[i]*rtemp18[i] - 2.6525823848649224e-2*rtemp12[i]*rtemp12[i] - 2.6525823848649224e-2*rtemp2[i]*rtemp2[i] - 2.6525823848649224e-2*rtemp8[i]*rtemp8[i])/(t1*rtemp4[i]*rtemp4[i]))/t1;
-	}
-
-	rtemp12.free(); // Realspace
-	rtemp8.free(); // Realspace
-	rtemp4.free(); // Realspace
-	rtemp2.free(); // Realspace
-	ComplexVector ktemp30(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp30 = fft(Nx,Ny,Nz,dV,rtemp18);
-
-	rtemp18.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp30[0] = ktemp20[i] + R*(25.132741228718345*ktemp30[i] + 12.566370614359172*R*ktemp28[i]);
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)));
-		const double t2 = 12.566370614359172*sin(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]))/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - 12.566370614359172*R*cos(R*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		std::complex<double> t3 = std::complex<double>(ktemp10[i].real()*k_i[1], ktemp10[i].imag()*k_i[1]);
-		std::complex<double> t4 = std::complex<double>(ktemp14[i].real()*k_i[2], ktemp14[i].imag()*k_i[2]);
-		std::complex<double> t5 = std::complex<double>(ktemp6[i].real()*k_i[0], ktemp6[i].imag()*k_i[0]);
-		const double t6 = k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2];
-		const double t7 = cos(R*sqrt(t6));
-		const double t8 = sin(R*sqrt(t6));
-		const double t9 = R*t7;
-		const double t10 = t8/(sqrt(t6));
-		ktemp30[i] = std::complex<double>((ktemp20[i].real()*t1*t9 + t1*(6.332573977646112e-3*t2*(12.566370614359172*t3.imag() + 12.566370614359172*t4.imag() + 12.566370614359172*t5.imag())/t6 - 7.957747154594767e-2*ktemp16[i].real()*t2)/R - R*t1*t8*(t3.imag()/(sqrt(t6)) + t4.imag()/(sqrt(t6)) + t5.imag()/(sqrt(t6))))/R - 12.566370614359172*ktemp30[i].real()*t1*(-1.0*t9 - 1.0*t10) + R*(12.566370614359172*ktemp28[i].real()*t1*t10 - t1*t8*(12.566370614359172*ktemp22[i].imag()*k_i[0]/(sqrt(t6)) + 12.566370614359172*ktemp24[i].imag()*k_i[1]/(sqrt(t6)) + 12.566370614359172*ktemp26[i].imag()*k_i[2]/(sqrt(t6)))),
-				(ktemp20[i].imag()*t1*t9 + t1*(-6.332573977646112e-3*t2*(12.566370614359172*t3.real() + 12.566370614359172*t4.real() + 12.566370614359172*t5.real())/t6 - 7.957747154594767e-2*ktemp16[i].imag()*t2)/R + R*t1*t8*(t3.real()/(sqrt(t6)) + t4.real()/(sqrt(t6)) + t5.real()/(sqrt(t6))))/R - 12.566370614359172*ktemp30[i].imag()*t1*(-1.0*t9 - 1.0*t10) + R*(12.566370614359172*ktemp28[i].imag()*t1*t10 + t1*t8*(12.566370614359172*ktemp22[i].real()*k_i[0]/(sqrt(t6)) + 12.566370614359172*ktemp24[i].real()*k_i[1]/(sqrt(t6)) + 12.566370614359172*ktemp26[i].real()*k_i[2]/(sqrt(t6)))));
-	}
-
-	ktemp28.free(); // KSpace
-	ktemp26.free(); // KSpace
-	ktemp24.free(); // KSpace
-	ktemp22.free(); // KSpace
-	ktemp20.free(); // KSpace
-	ktemp16.free(); // KSpace
-	ktemp14.free(); // KSpace
-	ktemp10.free(); // KSpace
-	ktemp6.free(); // KSpace
-	Vector rtemp32(Nx*Ny*Nz); // RS
-	rtemp32 = ifft(Nx,Ny,Nz,dV,ktemp30);
-
-	ktemp30.free(); // KSpace
-	{
-		const int i = 0;
-		ktemp0[0] = 50.26548245743669*R*R*ktemp0[i];
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]);
-		ktemp0[i] = std::complex<double>(25.132741228718345*ktemp0[i].real()*R*sin(2.0*R*t1)*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))/t1,
-				25.132741228718345*ktemp0[i].imag()*R*sin(2.0*R*t1)*exp(-6.0*pow(a1, 0.6666666666666666)*pow(a2, 0.6666666666666666)*pow(a3, 0.6666666666666666)*t1*t1/(pow(Nx, 0.6666666666666666)*pow(Ny, 0.6666666666666666)*pow(Nz, 0.6666666666666666)))/t1);
-	}
-
-	Vector rtemp34(Nx*Ny*Nz); // RS
-	rtemp34 = ifft(Nx,Ny,Nz,dV,ktemp0);
-
-	ktemp0.free(); // KSpace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp34[i] = rtemp32[i]/rtemp34[i];
-	}
-
-	rtemp32.free(); // Realspace
-	Vector rtemp36(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = rtemp34[i] - 1.0;
-		rtemp36[i] = n[i]*(t1*(t1*(0.324*t1 - 0.162*t1*t1) - 0.164*t1) - 2.0e-3*t1);
-	}
-
-	ComplexVector ktemp37(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp37 = fft(Nx,Ny,Nz,dV,rtemp36);
-
-	rtemp36.free(); // Realspace
-	Vector rtemp38(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = rtemp34[i] - 1.0;
-		rtemp38[i] = n[i]*(0.207*t1 + t1*(0.712*t1 + t1*(1.046*t1*t1 - 1.952*t1)));
-	}
-
-	ComplexVector ktemp39(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp39 = fft(Nx,Ny,Nz,dV,rtemp38);
-
-	rtemp38.free(); // Realspace
-	Vector rtemp40(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = rtemp34[i] - 1.0;
-		rtemp40[i] = n[i]*(t1*(4.403*t1 + t1*(0.363*t1*t1 - 2.48*t1)) - 2.243*t1);
-	}
-
-	ComplexVector ktemp41(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp41 = fft(Nx,Ny,Nz,dV,rtemp40);
-
-	rtemp40.free(); // Realspace
-	Vector rtemp42(Nx*Ny*Nz); // RS
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		rtemp42[i] = rtemp34[i]*n[i];
-	}
-
-	ComplexVector ktemp43(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp43 = fft(Nx,Ny,Nz,dV,rtemp42);
-
-	rtemp42.free(); // Realspace
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		// No vec r dependence!
-		const double t1 = rtemp34[i] - 1.0;
-		rtemp34[i] = n[i]*(t1*(2.7e-2*t1 + t1*(0.838*t1 - 0.178*t1*t1)) - 1.754*t1);
-	}
-
-	ComplexVector ktemp45(Nx*Ny*(int(Nz)/2+1)); // KS
-	ktemp45 = fft(Nx,Ny,Nz,dV,rtemp34);
-
-	rtemp34.free(); // Realspace
-	{
-		const int i = 0;
-		ktemp45[0] = epsilon*sigma*sigma*sigma*(0.11967972013675394*ktemp37[i] - 0.20943951023931967*ktemp39[i] + 0.418879020478639*ktemp41[i] + 4.188790204786391*ktemp43[i] - 1.0471975511965976*ktemp45[i] + lambda*lambda*lambda*(4.188790204786391*ktemp39[i] - 4.188790204786391*ktemp37[i] - 4.188790204786391*ktemp41[i] - 4.188790204786391*ktemp43[i] + 4.188790204786391*ktemp45[i] + lambda*(12.566370614359176*ktemp37[i] - 9.42477796076938*ktemp39[i] + 6.283185307179588*ktemp41[i] - 3.141592653589794*ktemp45[i] + lambda*(7.539822368615504*ktemp39[i] - 15.079644737231009*ktemp37[i] - 2.513274122871834*ktemp41[i] + lambda*(8.377580409572774*ktemp37[i] - 2.0943951023931935*ktemp39[i] - 1.7951958020513124*lambda*ktemp37[i])))));
-	}
-	for (int i=1; i<Nx*Ny*(int(Nz)/2+1); i++) {
-		const int _z = i % (int(Nz)/2+1);
-		const int _n = (i-_z)/(int(Nz)/2+1);
-		int _y = _n % int(Ny);
-		int _x = (_n-_y)/int(Ny);
-		if (_x > int(Nx)/2) _x -= int(Nx);
-		if (_y > int(Ny)/2) _y -= int(Ny);
-		const Vector k_i = Vector(6.283185307179586*_x/a1, 6.283185307179586*_y/a2, 6.283185307179586*_z/a3);
-		const double t1 = cos(sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t2 = 120.0*sin(lambda*sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2])) - 120.0*sin(sigma*sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t3 = 1.0/(sqrt(k_i[0]*k_i[0] + k_i[1]*k_i[1] + k_i[2]*k_i[2]));
-		const double t4 = cos(lambda*sigma/t3);
-		const double t5 = lambda - 1.0;
-		const double t6 = sin(lambda*sigma/t3);
-		const double t7 = sin(sigma/t3);
-		const double t8 = sigma*sigma*t5*t5/(t3*t3);
-		const double t9 = t2*t3;
-		const double t10 = 1.0 - 2.0*lambda;
-		ktemp45[i] = std::complex<double>(epsilon*(((-12.566370614359172*ktemp39[i].real()*((t3*t3*t3)*(t3*t3*t3)*(24.0*t1 + t4*(sigma*sigma*t5*(-1.0*lambda*t8 - 6.0*t10)/(t3*t3) - 24.0))/sigma + t3*(t3*t3)*(t3*t3)*(6.0*t7 + t6*(18.0 - 24.0*lambda + t8*(4.0*lambda - 1.0)))) - 12.566370614359172*ktemp37[i].real()*((t3*t3*t3)*(t3*t3*t3)*(24.0*t1 + t9/sigma - t4*(lambda*(120.0 + t8*t8) - 96.0 - 4.0*t8*(5.0*lambda - 2.0)))/sigma + t3*(t3*t3)*(t3*t3)*t5*t6*(36.0 - 60.0*lambda + t8*(5.0*lambda - 1.0))))/sigma - 12.566370614359172*ktemp41[i].real()*((t3*t3)*(t3*t3)*(t3*t6*(sigma*sigma*(1.0 + lambda*(3.0*lambda - 4.0))/(t3*t3) - 6.0) + 6.0*t3*t7)/sigma + (t3*t3)*(t3*t3)*(-1.0*t4*(4.0 + lambda*(t8 - 6.0)) - 2.0*t1)))/sigma - 12.566370614359172*ktemp45[i].real()*((t3*t3)*(t3*t3)*(t4*(2.0 - lambda*sigma*sigma*t5/(t3*t3)) - 2.0*t1)/sigma - t3*t3*t3*(t7 + t10*t6)) - 12.566370614359172*ktemp43[i].real()*t3*t3*(8.333333333333333e-3*t9 + sigma*(t1 - lambda*t4))),
-				epsilon*(((-12.566370614359172*ktemp39[i].imag()*((t3*t3*t3)*(t3*t3*t3)*(24.0*t1 + t4*(sigma*sigma*t5*(-1.0*lambda*t8 - 6.0*t10)/(t3*t3) - 24.0))/sigma + t3*(t3*t3)*(t3*t3)*(6.0*t7 + t6*(18.0 - 24.0*lambda + t8*(4.0*lambda - 1.0)))) - 12.566370614359172*ktemp37[i].imag()*((t3*t3*t3)*(t3*t3*t3)*(24.0*t1 + t9/sigma - t4*(lambda*(120.0 + t8*t8) - 96.0 - 4.0*t8*(5.0*lambda - 2.0)))/sigma + t3*(t3*t3)*(t3*t3)*t5*t6*(36.0 - 60.0*lambda + t8*(5.0*lambda - 1.0))))/sigma - 12.566370614359172*ktemp41[i].imag()*((t3*t3)*(t3*t3)*(t3*t6*(sigma*sigma*(1.0 + lambda*(3.0*lambda - 4.0))/(t3*t3) - 6.0) + 6.0*t3*t7)/sigma + (t3*t3)*(t3*t3)*(-1.0*t4*(4.0 + lambda*(t8 - 6.0)) - 2.0*t1)))/sigma - 12.566370614359172*ktemp45[i].imag()*((t3*t3)*(t3*t3)*(t4*(2.0 - lambda*sigma*sigma*t5/(t3*t3)) - 2.0*t1)/sigma - t3*t3*t3*(t7 + t10*t6)) - 12.566370614359172*ktemp43[i].imag()*t3*t3*(8.333333333333333e-3*t9 + sigma*(t1 - lambda*t4))));
-	}
-
-	ktemp43.free(); // KSpace
-	ktemp41.free(); // KSpace
-	ktemp39.free(); // KSpace
-	ktemp37.free(); // KSpace
-	Vector rtemp47(Nx*Ny*Nz); // RS
-	rtemp47 = ifft(Nx,Ny,Nz,dV,ktemp45);
-
-	ktemp45.free(); // KSpace
-	double 	s48 = 0;
-	for (int i=0; i<Nx*Ny*Nz; i++) {
-		s48 += a1*a2*a3/(Nx*Ny*Nz)*rtemp47[i]*n[i];
-	}
-
-	rtemp47.free(); // Realspace
-	return 0.5*s48;
+		return 0.0;
 
 }
 
