@@ -345,14 +345,6 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
-  if(seed){
-    if(seed > 999){
-      printf("Please choose a seed in the range 0 - 999.\n");
-      return 199;
-    }
-    sprintf(data_dir,"%s/s%.3li",data_dir,seed);
-  }
-
   const bool reading_in_transition_matrix = (strcmp(transitions_input_filename,"none") != 0);
 
   // Check that only one histogram method is used
@@ -515,6 +507,18 @@ int main(int argc, const char *argv[]) {
     sprintf(end_condition_text,"none");
   }
 
+  // Set default data directory
+  if (strcmp(data_dir, "papers/histogram/data") == 0){
+    if(seed){
+      if(seed > 999){
+        printf("Please choose a seed in the range 0 - 999.\n");
+        return 199;
+      }
+      sprintf(data_dir,"%s/s%.3li",data_dir,seed);
+    }
+    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
+  }
+
   // If a filename was not selected, make a default
   if (strcmp(filename, "none") == 0) {
     char *method_tag = new char[200];
@@ -554,7 +558,7 @@ int main(int argc, const char *argv[]) {
 
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, sw.well_width, eta, sw.N, method_tag);
-    printf("\nUsing default file name: ");
+    printf("Using default file name: ");
     delete[] method_tag;
     delete[] wall_tag;
   }
@@ -564,7 +568,7 @@ int main(int argc, const char *argv[]) {
   // If a filename suffix was specified, add it
   if (strcmp(filename_suffix, "none") != 0)
     sprintf(filename, "%s-%s", filename, filename_suffix);
-  printf("%s\n",filename);
+  printf("%s\n\n",filename);
 
   // Initialize the random number generator with our seed
   random::seed(seed);
