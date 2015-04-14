@@ -1,19 +1,21 @@
-plot-scaling.py: use all data in the git repo
-error vs. error plot
+run N = 55 through 100 calculations
+different seeds
+
 print data periodically during initialization
+error vs. error plot
+
+get min important energies
+wang landau and cfw simulations
 
 smaller step size?
-run more golden simulations
-
-after golden simulations:
-- get new min_important_energies; update them in square-well.cpp
-- rerun all wang_landau simulations
-- run cfw simulations
 
 treat optimized ensemble separately
 - plot OE figures separately (don't plot for now)
 - inialize primary method, then initialize OE for ~10x longer
 
+
+fixed number of initialization iterations,
+  but quit early if we satisfy a given end condition
 
 optimized_ensemble changes
  - find df/dE by secant line in f(E)

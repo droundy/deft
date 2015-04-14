@@ -29,6 +29,9 @@ all_Ns = os.popen("git ls-files | grep 'periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
                   %(ww,ff)).readlines()
 all_Ns = numpy.sort([ int(N.split('-')[-4][1:]) for N in all_Ns ])
 
+if len(all_Ns) == 0:
+    all_Ns = [5, 10, 20]
+
 initialization_iters_regex = re.compile(r'# iterations:\s+([0-9]+)')
 
 plt.title('Scaling for $\lambda=%g$, $\eta=%g$' % (ww, ff))

@@ -792,7 +792,17 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
     return hist_min >= flatness*hist_mean && energy != most_weighted_energy;
   }
 
-  else if(end_condition == init_iter_limit){
+  else if(end_condition == init_iter_limit) {
+    if (be_verbose) {
+      static int last_percent = 0;
+      int percent = (100*iteration)/init_iters;
+      if (percent > last_percent) {
+        printf("%2d%% done (%ld/%ld iterations)\n",
+               percent, long(iteration), long(init_iters));
+        last_percent = percent;
+        fflush(stdout);
+      }
+    }
     return iteration >= init_iters;
   }
 

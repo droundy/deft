@@ -91,6 +91,7 @@ int main(int argc, const char *argv[]) {
 
   sw_simulation sw;
 
+  sw.sticky_wall = 0;
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.N = 10;
@@ -307,6 +308,7 @@ int main(int argc, const char *argv[]) {
   sw.max_entropy_state = 0;
   sw.min_energy_state = 0;
   sw.energy = 0;
+  sw.min_important_energy = 0;
 
   // translation distance should scale with ball radius
   sw.translation_scale *= R;
@@ -546,7 +548,7 @@ int main(int argc, const char *argv[]) {
 
     // just hacking stuff in to see what works
     // do the small bit every 100 n^2 iterations for now
-    if (sw.iteration % (100 * sw.N * sw.N) == 0) {
+    if (sw.iteration % ((1 * sw.N * sw.N)/10) == 0) {
       total_checks_of_small_cell++;
 
       if(overlap_in_small_cell(sw,  scaling_factor)){

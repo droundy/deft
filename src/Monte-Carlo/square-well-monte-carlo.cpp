@@ -117,7 +117,7 @@ int main(int argc, const char *argv[]) {
   double default_pessimistic_sample_error = 0.2;
   double default_optimistic_sample_error = 0.1;
   double default_flatness = 0.1;
-  bool optimistic_sampling = false;
+  bool optimistic_sampling = true;
 
   int tmmc_min_samples = 2000;
 
@@ -133,7 +133,7 @@ int main(int argc, const char *argv[]) {
   sw.sticky_wall = 0;
   sw.well_width = 1.3;
   sw.filling_fraction = 0.3;
-  sw.N = 200;
+  sw.N = 10;
   sw.translation_scale = 0;
   sw.fractional_dos_precision = 1e-7;
   sw.end_condition = none;
@@ -147,7 +147,9 @@ int main(int argc, const char *argv[]) {
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
-  sprintf(data_dir, "papers/histogram/data");
+  sprintf(data_dir,"none");
+  char *default_data_dir = new char[1024];
+  sprintf(default_data_dir, "papers/histogram/data");
   char *filename = new char[1024];
   sprintf(filename, "none");
   char *filename_suffix = new char[1024];
@@ -371,15 +373,10 @@ int main(int argc, const char *argv[]) {
 
   /* If we are going to optimized the ensemble after initializing via some other method,
      initialize "half way" each time */
-  if(optimized_ensemble){
-    // sw.min_samples /= 2;
-    // sw.init_iters /= 2;
-
-    if(sw.flatness){
-      printf("It does not make sense to optimize the ensemble with a "
-             "flat histogram end condition!\n");
-      return 175;
-    }
+  if(optimized_ensemble && sw.flatness){
+    printf("It does not make sense to optimize the ensemble with a "
+           "flat histogram end condition!\n");
+    return 175;
   }
 
   if(sw.min_important_energy) sw.manual_min_e = true;
@@ -487,17 +484,20 @@ int main(int argc, const char *argv[]) {
   }
 
   // Set end condition text
-  char *end_condition_text = new char[16];
-  if(sw.min_samples || sw.sample_error){
-    if(optimistic_sampling)
-      sprintf(end_condition_text,"optimistic");
-    else
-      sprintf(end_condition_text,"pessimistic");
+  char *end_condition_text = new char[1024];
 
-    if(sw.min_samples)
-      sprintf(end_condition_text,"%s_min_samples", end_condition_text);
-    else
-      sprintf(end_condition_text,"%s_sample_error", end_condition_text);
+  if(sw.min_samples && optimistic_sampling){
+    sw.end_condition = optimistic_min_samples;
+    sprintf(end_condition_text,"optimistic_min_samples");
+  } else if(sw.min_samples && !optimistic_sampling) {
+    sw.end_condition = pessimistic_min_samples;
+    sprintf(end_condition_text,"pessimmistic_min_samples");
+  } else if(sw.sample_error && optimistic_sampling) {
+    sw.end_condition = optimistic_sample_error;
+    sprintf(end_condition_text,"optimistic_sample_error");
+  } else if(sw.sample_error && !optimistic_sampling) {
+    sw.end_condition = pessimistic_sample_error;
+    sprintf(end_condition_text,"pessimistic_sample_error");
   } else if(sw.flatness){
     sw.end_condition = flat_histogram;
     sprintf(end_condition_text,"flat_histogram");
@@ -509,6 +509,18 @@ int main(int argc, const char *argv[]) {
     sprintf(end_condition_text,"none");
   }
 
+  // Set default data directory
+  if (strcmp(data_dir,"none") == 0){
+    sprintf(data_dir,"%s",default_data_dir);
+    if(seed){
+      if(seed > 999){
+        printf("Please choose a seed in the range 0 - 999.\n");
+        return 199;
+      }
+      sprintf(data_dir,"%s/s%.3li",data_dir,seed);
+    }
+    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
+  }
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "none") == 0) {
@@ -549,7 +561,7 @@ int main(int argc, const char *argv[]) {
 
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
             wall_tag, sw.well_width, eta, sw.N, method_tag);
-    printf("\nUsing default file name: ");
+    printf("Using default file name: ");
     delete[] method_tag;
     delete[] wall_tag;
   }
@@ -559,7 +571,7 @@ int main(int argc, const char *argv[]) {
   // If a filename suffix was specified, add it
   if (strcmp(filename_suffix, "none") != 0)
     sprintf(filename, "%s-%s", filename, filename_suffix);
-  printf("%s\n",filename);
+  printf("%s\n\n",filename);
 
   // Initialize the random number generator with our seed
   random::seed(seed);
@@ -760,6 +772,16 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
+  if (golden){
+    sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
+
+    FILE *transitions_infile = fopen(transitions_input_filename,"r");
+    if(transitions_infile != NULL){
+      fclose(transitions_infile);
+      sw.initialize_transitions_file(transitions_input_filename);
+    }
+  }
+
   if (reading_in_transition_matrix){
     sw.initialize_transitions_file(transitions_input_filename);
   } else if (fix_kT) {
@@ -886,6 +908,12 @@ int main(int argc, const char *argv[]) {
           sw.energy_levels, sw.min_T, fractional_sample_error,
           sw.set_min_important_energy());
 
+
+  if(reading_in_transition_matrix){
+    sprintf(headerinfo, "%s# transitions_input_filename: %s\n",
+            headerinfo, transitions_input_filename);
+  }
+
   if(no_weights){
     sprintf(headerinfo, "%s# histogram method: none\n\n", headerinfo);
   } else if(fix_kT){
@@ -910,9 +938,6 @@ int main(int argc, const char *argv[]) {
             headerinfo);
   } else if (oetmmc){
     sprintf(headerinfo, "%s# histogram method: oetmmc\n", headerinfo);
-  } else if(reading_in_transition_matrix){
-    sprintf(headerinfo, "%s# transitions_input_filename: %s\n",
-            headerinfo, transitions_input_filename);
   }
 
   if(sw.end_condition != none){

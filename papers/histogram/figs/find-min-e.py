@@ -43,7 +43,7 @@ for N in Ns:
     ln_dos = numpy.log(e_hist[:,1]) - lnw
 
     for i in range(len(ln_dos)-1):
-        if abs(ln_dos[i+1]-ln_dos[i]) >= 1/T:
+        if abs(ln_dos[i+1]-ln_dos[i]) >= 1/T and lnw[i] > 0:
             min_e[N] = int(e_hist[i,0])
             break
     if N not in min_e.keys():
