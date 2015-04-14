@@ -147,7 +147,9 @@ int main(int argc, const char *argv[]) {
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
-  sprintf(data_dir, "papers/histogram/data");
+  sprintf(data_dir,"none");
+  char *default_data_dir = new char[1024];
+  sprintf(default_data_dir, "papers/histogram/data");
   char *filename = new char[1024];
   sprintf(filename, "none");
   char *filename_suffix = new char[1024];
@@ -508,7 +510,8 @@ int main(int argc, const char *argv[]) {
   }
 
   // Set default data directory
-  if (strcmp(data_dir, "papers/histogram/data") == 0){
+  if (strcmp(data_dir,"none") == 0){
+    sprintf(data_dir,"%s",default_data_dir);
     if(seed){
       if(seed > 999){
         printf("Please choose a seed in the range 0 - 999.\n");
