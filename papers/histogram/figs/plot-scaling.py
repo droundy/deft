@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 import matplotlib, sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
 if len(sys.argv) != 5:
-    print 'useage: %s ww ff methods reference' % sys.argv[0]
+    print 'useage: %s ww ff methods golden' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -22,8 +22,8 @@ ff = float(sys.argv[2])
 methods = eval(sys.argv[3])
 #arg methods = [["wang_landau","simple_flat","tmmc","oetmmc"]]
 
-reference = sys.argv[4]
-#arg reference = ['tmmc-golden']
+golden = sys.argv[4]
+#arg golden = ['tmmc-golden']
 
 all_Ns = os.popen("git ls-files | grep 'periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
                   %(ww,ff)).readlines()
@@ -31,6 +31,10 @@ all_Ns = numpy.sort([ int(N.split('-')[-4][1:]) for N in all_Ns ])
 
 if len(all_Ns) == 0:
     all_Ns = [5, 10, 20]
+
+######################################################################
+# initialization scaling info
+######################################################################
 
 initialization_iters_regex = re.compile(r'# iterations:\s+([0-9]+)')
 
@@ -77,6 +81,10 @@ plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-scaling-emin.pdf" % (ww*100, ff*100))
 
+######################################################################
+# scaling info table
+######################################################################
+
 texmethods = [m.replace('_', ' ') for m in methods]
 
 tex = open("figs/scaling-table-ww%02.0f-ff%02.0f.tex" % (ww*100, ff*100), "w")
@@ -108,12 +116,16 @@ for i in range(len(all_Ns)):
 tex.write(r"""\end{tabular}
 """)
 
+######################################################################
+# error scaling figures
+######################################################################
+
 u_errors = {}
 cv_errors = {}
 s_errors = {}
 
 for N in all_Ns:
-    u_cv_s = readandcompute.u_cv_s(ww, ff, N, reference)
+    u_cv_s = readandcompute.u_cv_s(ww, ff, N, golden)
     if u_cv_s != None:
         for method in methods:
             u_cv_s_method = readandcompute.u_cv_s(ww, ff, N, method)
@@ -171,3 +183,60 @@ plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
 plt.legend(loc='best').get_frame().set_alpha(0.25)
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-s_errors.pdf" % (ww*100, ff*100))
+
+######################################################################
+# error vs reference error figures
+######################################################################
+
+if 'cfw' in methods:
+    reference = 'cfw'
+else:
+    reference = 'tmmc'
+
+comp_methods = s_errors.keys()
+comp_methods.remove(reference)
+
+plt.figure()
+for method in comp_methods:
+    plt.loglog(u_errors[reference][:,1], u_errors[method][:,1],
+               '.'+styles.color(method),label=styles.title(method))
+xmin,xmax = plt.xlim()
+ymin,ymax = plt.ylim()
+plt.plot([xmin,xmax],[ymin,ymax],'k:')
+
+plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
+plt.xlabel('%s $\\Delta U/N\epsilon$'%styles.title(reference))
+plt.ylabel('$\\Delta U/N\epsilon$')
+plt.legend(loc='best').get_frame().set_alpha(0.25)
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_error_comp.pdf" % (ww*100, ff*100))
+
+plt.figure()
+for method in comp_methods:
+    plt.loglog(cv_errors[reference][:,1], cv_errors[method][:,1],
+               '.'+styles.color(method),label=styles.title(method))
+xmin,xmax = plt.xlim()
+ymin,ymax = plt.ylim()
+plt.plot([xmin,xmax],[ymin,ymax],'k:')
+
+plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
+plt.xlabel('%s $\\Delta C_V/N\epsilon$'%styles.title(reference))
+plt.ylabel('$\\Delta C_V/N\epsilon$')
+plt.legend(loc='best').get_frame().set_alpha(0.25)
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_error_comp.pdf" % (ww*100, ff*100))
+
+plt.figure()
+for method in comp_methods:
+    plt.loglog(s_errors[reference][:,1], s_errors[method][:,1],
+               '.'+styles.color(method),label=styles.title(method))
+xmin,xmax = plt.xlim()
+ymin,ymax = plt.ylim()
+plt.plot([xmin,xmax],[ymin,ymax],'k:')
+
+plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
+plt.xlabel(r'%s $\Delta S_{\textit{config}}/Nk$'%styles.title(reference))
+plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
+plt.legend(loc='best').get_frame().set_alpha(0.25)
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-s_error_comp.pdf" % (ww*100, ff*100))

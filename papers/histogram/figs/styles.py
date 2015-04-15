@@ -13,7 +13,8 @@ _colors = { 'nw': 'r',
             'tmmc_oe': 'k',
             'oetmmc_oe': 'm',
             'vanilla_wang_landau': 'y',
-            'tmmc-golden': 'b'}
+            'tmmc-golden': 'b',
+            'cfw': 'c'}
 
 def color(method):
     if method in _colors:
@@ -36,7 +37,8 @@ def title(method):
                'tmmc_oe': 'TMMC, OE',
                'oetmmc_oe': 'OETMMC, OE',
                'vanilla_wang_landau': 'Vanilla Wang-Landau',
-               'tmmc-golden': 'TMMC Golden'}
+               'tmmc-golden': 'TMMC Golden',
+               'cfw': 'Converged Flat'}
     if method in titles:
         return titles[method]
     if method[:2] == 'kT':

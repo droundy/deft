@@ -1,13 +1,8 @@
-run N = 55 through 100 calculations
-different seeds
+run N = 35 through 100 calculations
 
 print data periodically during initialization
-error vs. error plot
 
-get min important energies
 wang landau and cfw simulations
-
-smaller step size?
 
 treat optimized ensemble separately
 - plot OE figures separately (don't plot for now)
