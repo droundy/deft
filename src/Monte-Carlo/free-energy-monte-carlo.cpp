@@ -116,6 +116,7 @@ int main(int argc, const char *argv[]) {
   double max_rdf_radius = 10;
   int totime = 0;
   double scaling_factor = 1.0;
+  int small_cell_check_period = (1 * sw.N * sw.N)/10;
 
   poptContext optCon;
   // ----------------------------------------------------------------------------
@@ -165,6 +166,8 @@ int main(int argc, const char *argv[]) {
     {"debug", '\0', POPT_ARG_NONE, &debug, 0, "Debug mode", "BOOLEAN"},
     {"sf", '\0', POPT_ARG_DOUBLE, &scaling_factor, 0,
       "Factor by which to scale the small cell", "DOUBLE"},
+    {"sc_period", '\0', POPT_ARG_INT, &small_cell_check_period, 0,
+     "Check the small cell every P iterations", "INT"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -530,6 +533,10 @@ int main(int argc, const char *argv[]) {
   int total_checks_of_small_cell = 0;
   int total_valid_small_checks = 0;
   int total_failed_small_checks = 0;
+  int valid_runs = 0;
+  int failed_runs = 0;
+  double average_valid_run = 0;
+  double average_failed_run = 0;
 
   // Reset energy histogram and sample counts
   for(int i = 0; i < sw.energy_levels; i++){
@@ -548,23 +555,37 @@ int main(int argc, const char *argv[]) {
 
     // just hacking stuff in to see what works
     // do the small bit every 100 n^2 iterations for now
-    if (sw.iteration % ((1 * sw.N * sw.N)/10) == 0) {
+    if (sw.iteration % small_cell_check_period == 0) {
       total_checks_of_small_cell++;
 
       if(overlap_in_small_cell(sw,  scaling_factor)){
         total_failed_small_checks++;
-        // see if the run we just ended was a new PR.
-        // (makes more sense to do this on run-end than while the run could still get longer)
-        if(current_valid_run > longest_valid_run){longest_valid_run = current_valid_run;}
-        current_valid_run = 0;
+        
+        if (current_failed_run == 0){
+          // then valid run just ended so record it
+          valid_runs++;
+          if(current_valid_run > longest_valid_run)
+            longest_valid_run = current_valid_run;
+          average_valid_run = average_valid_run + (current_valid_run - average_valid_run)/valid_runs;
+          current_valid_run = 0;
+        }
+
         current_failed_run++;
 
         if(debug){printf("%i - false\n", current_failed_run);}
       }
       else{
         total_valid_small_checks++;
-        if(current_failed_run > longest_failed_run){ longest_failed_run = current_failed_run;}
-        current_failed_run = 0;
+
+        if (current_valid_run == 0){
+          // then failed run just ended so record it
+          failed_runs++;
+          if(current_failed_run > longest_failed_run)
+            longest_failed_run = current_failed_run;
+          average_failed_run = average_failed_run + (current_failed_run - average_failed_run)/failed_runs;
+          current_failed_run = 0;
+        }
+
         current_valid_run++;
 
         if(debug){printf("%i - true\n", current_valid_run);}
@@ -612,11 +633,15 @@ int main(int argc, const char *argv[]) {
               "# longest valid run: %i\n"
               "# total checks of small cell: %i\n"
               "# total failed small checks: %i\n"
-              "# total valid small checks: %i\n\n",
+              "# total valid small checks: %i\n"
+              "# valid runs: %i\n"
+              "# failed runs: %i\n"
+              "# average valid run: %g\n"
+              "# average failed run: %g\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total, longest_failed_run,
               longest_valid_run, total_checks_of_small_cell, total_failed_small_checks,
-              total_valid_small_checks);
+              total_valid_small_checks, valid_runs, failed_runs, average_valid_run, average_failed_run);
 
       // Save RDF
       if(!sw.walls){
