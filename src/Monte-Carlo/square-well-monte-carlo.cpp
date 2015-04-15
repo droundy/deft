@@ -513,11 +513,7 @@ int main(int argc, const char *argv[]) {
   if (strcmp(data_dir,"none") == 0){
     sprintf(data_dir,"%s",default_data_dir);
     if(seed){
-      if(seed > 999){
-        printf("Please choose a seed in the range 0 - 999.\n");
-        return 199;
-      }
-      sprintf(data_dir,"%s/s%.3li",data_dir,seed);
+      sprintf(data_dir,"%s/s%03ld",data_dir,seed);
     }
     printf("\nUsing default data directory: [deft]/%s\n",data_dir);
   }
