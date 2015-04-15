@@ -207,23 +207,23 @@ struct sw_simulation {
       if(N == 9) return 28;
       if(N == 10) return 37;
       if(N == 11) return 42;
-      if(N == 12) return 45;
+      if(N == 12) return 51;
       if(N == 13) return 58;
       if(N == 14) return 65;
       if(N == 15) return 72;
       if(N == 16) return 76;
       if(N == 17) return 80;
-      if(N == 18) return 90;
+      if(N == 18) return 83;
       if(N == 19) return 88;
       if(N == 20) return 95;
       if(N == 21) return 102;
       if(N == 22) return 108;
-      if(N == 23) return 114;
+      if(N == 23) return 110;
       if(N == 24) return 116;
       if(N == 25) return 123;
-      if(N == 26) return 129;
+      if(N == 26) return 127;
       if(N == 27) return 132;
-      if(N == 28) return 136;
+      if(N == 28) return 138;
       if(N == 29) return 144;
       if(N == 30) return 155;
     }
