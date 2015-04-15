@@ -28,3 +28,5 @@ c .pyc
 c .pyc
 
 | python ../src/generate-version-identifier.py > ../src/version-identifier.h
+> ../src/version-identifier.h
+
