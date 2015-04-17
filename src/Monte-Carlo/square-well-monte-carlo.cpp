@@ -79,6 +79,7 @@ inline void check_neighbor_symmetry(const ball *p, int N);
 
 int main(int argc, const char *argv[]) {
   took("Starting program");
+  printf("version: %s\n",version_identifier());
   // ----------------------------------------------------------------------------
   // Define "Constants" -- set from arguments then unchanged
   // ----------------------------------------------------------------------------
