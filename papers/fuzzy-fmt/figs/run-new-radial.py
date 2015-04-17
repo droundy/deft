@@ -10,8 +10,8 @@ def srun(n_reduced, kT):
     return 'srun --mem=20000 -J name-%06.4f-%04.2f' % (kT, n_reduced)
 
 # always remember to build the executable before running it
-assert not os.system('fac papers/fuzzy-fmt/figs/new-radial-lj.mkdat')
-assert not os.system('fac papers/fuzzy-fmt/figs/new-radial-wca.mkdat')
+assert not os.system('scons papers/fuzzy-fmt/figs/new-radial-lj.mkdat')
+assert not os.system('scons papers/fuzzy-fmt/figs/new-radial-wca.mkdat')
 
 def runme(reduced_density, temperature):
     outfilename = figsdir+'/new-data/radial-lj-%06.4f-%04.2f.out' % (temperature, reduced_density)

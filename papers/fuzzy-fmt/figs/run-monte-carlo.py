@@ -6,12 +6,9 @@ import numpy
 
 figsdir = 'papers/fuzzy-fmt/figs/'
 bindir = '.'
-if os.path.isdir('figs'):
-    figsdir = 'figs/'
-    bindir = '../..'
 
 # always remember to build the executable before running it
-system('scons -U')
+system('scons soft-monte-carlo')
 
 def run_homogeneous(n_reduced, temperature, pot = ""):
     nspheres = round(n_reduced*2**(-5.0/2.0)*30**3)
@@ -69,9 +66,16 @@ def run_FCC(n_reduced, temperature, pot = ""):
 # run_test_particle(1.095,2.48,argon_sigma,argon_eps,"wca")
 # run_test_particle(1.096,2.48,argon_sigma/5,argon_eps/5,"wca")
 
-for temp in numpy.arange(0.5, 3.0001, 0.5):
-    run_FCC(0.5, temp, 'wca')
-    run_FCC(0.9, temp, 'wca')
+# for temp in numpy.arange(0.5, 3.0001, 0.5):
+#     run_FCC(0.5, temp, 'wca')
+#     run_FCC(0.9, temp, 'wca')
+
+for temp in [0.001, 0.01, 0.1, 1.0]:
+    run_FCC(0.1, temp, 'wca')
+    # run_FCC(0.3, temp, 'wca')
+    # run_FCC(0.5, temp, 'wca')
+    # run_FCC(0.6, temp, 'wca')
+    # run_FCC(0.8, temp, 'wca')
 
 #run_FCC(.76,2.5,"wca") 
 #run_FCC(.8,5,"wca")
