@@ -26,13 +26,24 @@ method2 = sys.argv[5]
 
 bothdata = [0,0]
 
-data1 = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method1))
-data2 = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method2))
+data1_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method1)
+data2_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method2)
 
-# FIXME the following should be taken from the data files themselves!
-de_values = numpy.linspace(42,-42.0,85)
+data1 = numpy.loadtxt(data1_file)
+data2 = numpy.loadtxt(data2_file)
 
-for method, data in [(method1, data1), (method2, data2)]:
+def get_de_vals(data_file):
+    with open(data_file) as f:
+        for line in f:
+            if '# energy\t' in line:
+                de_vals = [ int(val) for val in line.split()[2:] ]
+                break
+    return de_vals
+
+de_vals1 = get_de_vals(data1_file)
+de_vals2 = get_de_vals(data2_file)
+
+for method, data, de_vals in [(method1, data1, de_vals1), (method2, data2, de_vals2)]:
     plt.figure()
     plt.title('Energy transitions from %s for $\lambda=%g$, $n^*=%g$, and $N=%i$' % (method, ww, ff, N))
 
@@ -40,7 +51,7 @@ for method, data in [(method1, data1), (method2, data2)]:
     maxde = 0
     minde = 0
     transitions = data[:,1:]
-    de, e = numpy.meshgrid(de_values, energy)
+    de, e = numpy.meshgrid(de_vals, energy)
 
     for i in range(len(energy)):
         norm = transitions[i,:].sum()
@@ -73,7 +84,9 @@ else:
     data2 = data2[data1[0,0] - data2[0,0]:,:]
 
 energy = -data1[:,0]
-de, e = numpy.meshgrid(de_values, energy)
+
+# fixme: do reasonable things when de_vals1 != de_vals2 ?
+de, e = numpy.meshgrid(de_vals1, energy)
 
 cut2 = data1[:,0].min() - data2[:,0].min()
 
