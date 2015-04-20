@@ -495,6 +495,8 @@ for mkdat in Split("""
 	papers/fuzzy-fmt/figs/new-melting
 	papers/fuzzy-fmt/figs/new-walls
 	papers/fuzzy-fmt/figs/new-soft-wall
+	papers/fuzzy-fmt/figs/new-radial-lj
+	papers/fuzzy-fmt/figs/new-radial-wca
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
