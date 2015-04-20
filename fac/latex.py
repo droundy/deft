@@ -15,7 +15,7 @@ graphicre = re.compile(r'^[^%\n]*\\includegraphics(\[[^\]]+\])?{([^}]+)}', re.MU
 inputre = re.compile(r'\\input(\[[^\]]+\])?{([^}]+)}')
 
 for t in texfs:
-    fac = facfile.facfile(os.path.dirname(t)+'/.tex.fac')
+    fac = facfile.facfile(os.path.dirname(t)+'/.'+os.path.basename(t)+'.fac')
 
     fname = os.path.basename(t)
     f = open(t, 'r')

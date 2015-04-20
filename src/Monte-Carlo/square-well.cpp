@@ -1042,7 +1042,7 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
 
 void sw_simulation::initialize_simple_flat(int flat_update_factor){
   int weight_updates = 0;
-  long num_iterations = exp(1/min_T)*N*energy_levels;
+  long num_moves = exp(1/min_T)*N*energy_levels;
   do {
     set_min_important_energy();
 
@@ -1061,7 +1061,7 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     // Now reset the calculation!
     reset_histograms();
 
-    for (long j = 0; j < num_iterations && !reached_iteration_cap(); j++) move_a_ball();
+    for (long j = 0; j < num_moves && !reached_iteration_cap(); j++) move_a_ball();
 
     // There's no point doing updating our weights with a partial set
     // of samples, since this could as easily make things worse as
@@ -1080,7 +1080,7 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
       }
       printf("min_important_energy: %i\n",min_important_energy);
     }
-    num_iterations *= flat_update_factor;
+    num_moves *= flat_update_factor;
 
   } while (!finished_initializing());
 

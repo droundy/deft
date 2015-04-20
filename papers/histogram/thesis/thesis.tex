@@ -1,0 +1,793 @@
+\documentclass[11pt]{article}
+
+%%% standard header
+\usepackage[margin=1in]{geometry} % one inch margins
+\usepackage{fancyhdr} % easier header and footer management
+\pagestyle{fancyplain} % page formatting style
+\usepackage{hyperref} % for linking references
+\newcommand{\psl}{6pt} % store spacing as command for consistency
+\setlength{\parindent}{0cm} % don't indent new paragraphs...
+\parskip \psl % ... place a space between paragraphs instead
+\usepackage[inline]{enumitem} % include for \setlist{}, use below
+\frenchspacing % add a single space after a period
+\usepackage{lastpage} % for referencing last page
+\cfoot{\thepage~of \pageref{LastPage}} % "x of y" page labeling
+
+%%% physics
+\usepackage[boldvectors,braket]{physymb} % physics package
+\newcommand{\bk}{\Braket} % shorthand for braket notation
+
+%%% math
+\usepackage{amsmath} % math package
+\renewcommand{\t}{\text} % for text in math environment
+\newcommand{\f}[2]{\dfrac{#1}{#2}} % shorthand for fractions
+\newcommand{\p}[1]{\left(#1\right)} % parenthesis
+\renewcommand{\sp}[1]{\left[#1\right]} % square parenthesis
+\renewcommand{\set}[1]{\left\{#1\right\}} % curly parenthesis
+
+%%% figures
+\usepackage{graphicx,float,subcaption} % floats, etc.
+\usepackage{footnote} % for footnotes in floats
+\usepackage[font=small,labelfont=bf]{caption} % caption text options
+
+%%% bibliography, table of contents
+\usepackage[sort&compress,numbers]{natbib} % bibliography options
+\bibliographystyle{apsrev4-1}
+\usepackage[english]{babel} % allow editing bibliography title
+\addto\captionsenglish{ % set bibliography title
+  \renewcommand{\contentsname}{Table of Contents}
+  \renewcommand\refname{\bf References}}
+\usepackage{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+%%% algorithm float
+\floatstyle{plaintop}
+\newfloat{algorithm}{thb}{lop}
+\floatname{algorithm}{Algorithm}
+\newenvironment{alg}
+{\hrulefill\begin{enumerate}}
+{\end{enumerate}\hrulefill}
+
+\renewcommand{\title}{Optimizing Monte Carlo state space exploration
+  of the square-well fluid}
+\renewcommand{\author}{Michael A. Perlin}
+\newcommand{\institution}{Oregon State University}
+\newcommand{\department}{Department of Physics}
+\newcommand{\supervisor}{Dr. David Roundy}
+\renewcommand{\date}{19 April 2015}
+
+%%% notes, etc.
+\usepackage{color}
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\fixme}[1]{[\red{fixme:} \emph{#1}]}
+
+\fancypagestyle{abstract}{
+  \rhead{}
+  \lhead{}
+}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{titlepage}
+
+  \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+  \center
+
+  \textsc{\LARGE \institution}\\[1.5cm]
+  \textsc{\Large \department}\\[0.5cm]
+
+  \HRule \\[0.4cm]
+  { \huge \bfseries \title}\\[0.4cm]
+  \HRule \\[1.5cm]
+
+  \begin{minipage}{0.4\textwidth}
+    \begin{flushleft} \large
+      \emph{Author:}\\
+      \author
+    \end{flushleft}
+  \end{minipage}
+  ~
+  \begin{minipage}{0.4\textwidth}
+    \begin{flushright} \large
+      \emph{Supervisor:} \\
+      \supervisor
+    \end{flushright}
+  \end{minipage}\\[4cm]
+
+  {\large\date}
+
+  \vfill
+
+\end{titlepage}
+
+\thispagestyle{empty}
+
+\newpage
+
+\tableofcontents
+
+\thispagestyle{empty}
+
+\newpage
+
+\listof{figure}{\Large List of Figures}
+
+\listof{algorithm}{\Large List of Algorithms}
+
+\thispagestyle{empty}
+
+\newpage
+
+\setcounter{page}{1}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Abstract}
+\label{sec:abstract}
+
+\thispagestyle{abstract}
+
+We wish to identify and develop efficient numerical methods for
+determining thermodynamic properties of the square-well fluid, so as
+to test square-well density functional theories. The liquid-vapor
+phase interface is an interesting regime for testing density
+functional theories, but unbiased Monte Carlo simulations are
+incapable of sampling the low energy fluid states which dominate the
+partition function at low (i.e. liquid-state) temperatures. Several
+generic Monte Carlo ``histogram methods'' for collecting statistics on
+low energy system states have been developed, but little or no
+literature exists on their systematic comparison and their application
+to the square-well fluid. The square-well fluid in particular
+introduces application challenges not manifest in traditional models
+for testing and benchmarking such numerical techniques (e.g. the Ising
+model). We propose to implement these methods in Monte Carlo
+simulations of the square-well fluid, determine appropriate
+performance metrics for their comparison, and identify those methods
+which are most efficient and effective at sampling otherwise
+improbable system states.
+
+\fixme{Rewrite after the rest of the thesis is completed}
+
+\newpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Background}
+\label{sec:background}
+
+\subsection{Introduction}
+\label{sec:intro}
+
+A major challenge in the field of classical density functional theory
+is understanding critical point behavior of fluids, the study of which
+via simulations requires exploring the state space boundary between
+liquid and gaseous fluid phases. For a generic square-well fluid to be
+observed in a liquid state, the fluid must have a relatively localized
+distribution of the spheres which make up the fluid. Such a
+distribution implies a low energy fluid state; conversely, a low
+energy liquid state of a square-well fluid otherwise observable in
+both liquid and gaseous phases implies a localized distribution of
+spheres. The search for liquid states is thus equivalent to the search
+for low energy states. In unbiased Monte Carlo simulations, however,
+highly localized distributions of spheres are extremely unlikely to
+occur, making such simulations impractical for studying the
+square-well fluid.
+
+Several generic computational methods exist for dealing with such a
+problem; namely, that interesting regions of a system's state space
+cannot be sampled via unbiased Monte Carlo simulations in a reasonable
+amount of time. There is no consensus, however, on the relative
+efficacy of these methods. Furthermore, some methods, such as the
+Wang-Landau method\cite{wang_landau}, require tuning several free
+parameters that lack both ``obvious'' values and systematic means for
+assigning them. This work will thus attempt to quantify and compare
+the effectiveness of some such methods.
+
+\subsection{The square-well fluid}
+\label{sec:sw_fluid}
+
+\begin{figure}[!b]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figs/square-well.pdf}
+  \caption[The square-well pair potential]{The square-well pair
+    potential can be used to model short-range attractive forces to
+    first order. The infinite potential at $r<\sigma$ simply enforces
+    the condition that spheres cannot overlap. At $r>\lambda\sigma$,
+    the potential is null, and makes no contribution to the fluid's
+    internal energy.}
+  \label{fig:pair_potential}
+\end{figure}
+
+The square-well (SW) fluid is a model used in classical density
+functional theories to capture low order effects of short-range
+attractive forces, such as the van der Waals force. The fluid is
+composed of spheres with diameter $\sigma$ which have a pair potential
+\begin{align}
+  v_{sw}\p{\vec r}=\left\{
+    \begin{array}{ll}
+      \infty & \abs{\vec r}<\sigma \\
+      -\epsilon & \sigma<\abs{\vec r}<\lambda\sigma \\
+      0 & \abs{\vec r}>\lambda\sigma
+    \end{array}
+  \right., \label{eq:pair_potential}
+\end{align}
+also shown graphically in Figure \ref{fig:pair_potential}, where the
+parameters $\lambda$ and $\epsilon$ are referred to as the well width
+and depth, respectively. The first ($\abs{\vec r}<\sigma$) part of
+this potential forbids spheres from overlapping, whereas the second
+($\sigma<\abs{\vec r}<\lambda\sigma$) associates an energy $-\epsilon$
+with each pair of spheres whose centers are within distance of
+$\lambda\sigma$ of each other (where typically
+$\lambda\in\sp{1.05,3}$). The net potential energy of the square-well
+fluid is thus
+\begin{align}
+  E=\sum_{i<j}v_{sw}\p{\vec r_i-\vec r_j},
+  \label{eq:internal_energy}
+\end{align}
+where $\vec r_i$ is the position of the $i$-th sphere. As the
+potential energy $E$ is the primary form of energy concerning us in
+this paper, we will refer to $E$ as simply the ``energy'' of the
+fluid. An important feature of the square-well fluid is that its
+energy is always an integer multiple of the well depth. A homogeneous
+square-well fluid is thus uniquely identified by its well width
+$\lambda$ and filling fraction $\eta$ (i.e. the proportion of space
+filled by spheres; a dimensionless density), as all other properties
+can be normalized to the natural energy scale $\epsilon$ and length
+scale $\sigma$. In practice, our simulation codes use dimensionless
+energies $E/\epsilon$, temperatures $kT/\epsilon$, and distances
+$r/\sigma$.
+
+\subsection{Monte Carlo fluid simulations}
+\label{sec:MC_simulations}
+
+While model systems are powerful tools for understanding complex
+physical systems, they do not themselves exist in the real
+world. Consequently, direct experimental tests of model system
+theories (e.g. square-well density functional theories) are not
+possible. For this reason, model system theories are commonly tested
+against Monte Carlo simulations. Proper implementation of Monte Carlo
+methods to study completely characterized systems ensures that
+statistical results from simulations converge on the exact properties
+of the simulated system in the infinite simulation time
+limit\fixme{cite?}. Furthermore, uncertainties in quantities computed
+via Monte Carlo simulations are typically well-defined, monotonically
+decreasing functions of simulation time, allowing one to run
+simulations to the desired level of accuracy.
+
+\begin{algorithm}[!b]
+  \caption{Unbiased Monte Carlo fluid simulation}
+  \label{alg:MC}
+  \begin{alg}
+
+  \item Construct an initial ``typical'' fluid configuration.
+
+  \item Attempt to change the position of one sphere (in general, a
+    single fluid ``atom'' or ``molecule'') to a random location,
+    rejecting the change if it results in a forbidden fluid
+    configuration (e.g. two or more spheres overlap) and accepting the
+    change otherwise. Attempting to move a single sphere is referred
+    to as a move. \label{alg:MC_move}
+
+  \item Repeat step \ref{alg:MC_move} for every other sphere in the
+    fluid. Attempting to move every sphere once is referred to as an
+    iteration of the simulation.
+    \label{alg:MC_iteration}
+
+  \item Repeat step \ref{alg:MC_iteration} indefinitely, or until data
+    of sufficient quality has been generated, periodically collecting
+    and dumping statistics on fluid states (e.g. energy, pair
+    distribution histograms, etc.) to data files.
+
+  \end{alg}
+\end{algorithm}
+
+Algorithm \ref{alg:MC} provides a sketch of unbiased Monte Carlo fluid
+simulations. Such an algorithm is ``unbiased'' in the sense that it
+collects statistics (i.e. data) on all valid system
+configurations. Statistics whose collection time scales as $\mathcal
+O\p{1}$ with system size can be collected after every move (defined in
+the algorithm), while statistics whose collection time scales as
+$\mathcal O\p{N}$, where $N$ is the number of simulated elements
+(e.g. spheres), can be collected after each iteration. In general,
+collection with $\mathcal O\p{\chi}$ time scaling in $N$ should not
+occur more often than once every $\chi$ moves \fixme{explain better?},
+so as to ensure that scaling up simulations does not cause them to
+asymptotically spend all of their time collecting statistics, and no
+time actually simulating the fluid. Collected statistics determine
+thermodynamic properties of the simulated fluid.
+
+In this work, we are concerned with simulating the homogeneous
+square-well fluid. To avoid edge effects resulting from fluid behavior
+near a wall, we enforce periodic boundary conditions. These boundary
+conditions suppress all density fluctuations on scales larger than the
+dimensions of the simulated fluid cell, thereby introducing a source
+of error; addressing this error, however, is outside the scope of this
+work. \fixme{Anything else to add?}
+
+\subsection{Histogram methods}
+\label{sec:histogram_methods}
+
+Due to the fact that unbiased Monte Carlo simulations sample all of
+state space randomly and without preference, a histogram $H\p{X}$ of
+observations of some system property $X$ is directly proportional to
+the density of states $D\p{X}$ in $X$ \fixme{explain?}. It is
+sometimes the case, however, that the density of states in some region
+$R$ in the range of possible $X$ is so low that it is practically
+impossible to sufficiently sample $R$, that is, accumulate a
+statistically significant $H\p{R}$, in any reasonable amount of time.
+
+\subsubsection{Biased sampling}
+\label{sec:biased_sampling}
+
+Histogram methods provide a means to address unbiased Monte Carlo's
+inability to sufficiently sample regions of parameter space with a low
+density of states by introducing a bias into the otherwise random
+sampling of state space. A weighting function $w$ is introduced, whose
+domain is the value of some property $X\p{s}$ which depends on the
+system state $s$. An additional condition is then added to step
+\ref{alg:MC_move} of Algorithm \ref{alg:MC} in order to accept an
+attempted move: the weights $w\sp{X\p{s_i}}$ and $w\sp{X\p{s_f}}$ of
+the initial (pre-move) state $s_i$ and final (post-move) state $s_f$
+are used to determine the probability $P\p{s_i\to s_f}$ of accepting
+an otherwise valid move via
+\begin{align}
+  P\p{s_i\to s_f}=\min\set{\f{w\sp{X\p{s_f}}}{w\sp{X\p{s_i}}},1}.
+  \label{eq:move_prob}
+\end{align}
+This formula means that when $w\sp{X\p{s_f}}>w\sp{X\p{s_i}}$, the move
+$s_i\to s_f$ is accepted; when $w\sp{X\p{s_f}}<w\sp{X\p{s_i}}$, the
+ratio of these weights determines the probability of accepting the
+move. Due to the fact that only ratios of weights determine
+$P\p{s_i\to s_f}$, the weights $w\sp{X\p{s}}$ are scale-invariant,
+meaning that their effect on simulations is unchanged by scale factors
+that are constant with respect $X\p{s}$.
+
+\begin{algorithm}
+  \caption{Biased Monte Carlo fluid simulation}
+  \label{alg:biased_MC}
+  \begin{alg}
+
+  \item Construct an appropriate weight function $w\sp{X\p{s}}$, whose
+    argument is a system property $X\p{s}$ determined by the
+    microstate $s$.
+
+  \item Construct an initial ``typical'' fluid configuration.
+
+  \item Attempt to change the position of one sphere, rejecting the
+    change if
+    \begin{enumerate*}[label=\roman*)]
+    \item it results in a forbidden fluid configuration, or
+    \item a newly chosen random number on the interval $\sp{0,1}$ is
+      larger than the probability given by (\ref{eq:move_prob}).
+    \end{enumerate*}
+    \label{alg:biased_MC_move}
+
+  \item Repeat step \ref{alg:biased_MC_move} for every other sphere in
+    the fluid.
+    \label{alg:biased_MC_iteration}
+
+  \item Repeat step \ref{alg:biased_MC_iteration} until data of
+    sufficient quality has been generated.
+
+  \end{alg}
+\end{algorithm}
+
+Employing biased Monte Carlo simulations, sketched out in Algorithm
+\ref{alg:biased_MC}, allows one to construct weight functions that
+favor some region of state space over others, as transitions to states
+with higher weights are always accepted, whereas transitions to states
+with lower weights may be rejected, artificially preventing the
+simulated system from leaving interesting regions of state
+space. Crucially, the bias introduced by weights can be reversed when
+computing system properties from sampling statistics, as the weight of
+a particular state is directly proportional to the probability bias of
+that state; that is, a state with a weight of 2 will be sampled twice
+as often as it would have been with a weight of 1 (\fixme{include a
+  subsection on detailed balance? cite?}). If we wish to convert a
+histogram $H\p{X}$ of observations in a biased Monte Carlo simulation
+into a numerical unnormalized density of states $\tilde D\p{X}$ in
+$X$, we therefore point-wise divide the histogram by the corresponding
+weights $w\p{X}$, i.e.
+\begin{align}
+  \tilde D\p{X}=\f{H\p{X}}{w\p{X}}.
+  \label{eq:dos_unnormed}
+\end{align}
+The normalized density of states $D\p{X}$ in $X$ is then
+\begin{align}
+  D\p{X}=\f{\tilde D\p{X}}{\sum_X\tilde D\p{X}}
+  =\f{H\p{X}/w\p{X}}{\sum_XH\p{X}/w\p{X}}.
+  \label{eq:dos}
+\end{align}
+In general, the domain and shape of the weight function will depend on
+the desired yields (e.g.  density of states, heat capacity) of a
+simulation. A ``histogram method'' is an algorithm for determining a
+weight function appropriate for a particular simulation.
+
+In this paper, we will consider weights $w\p{E}$ which depend only on
+the energy $E$ of the system. Due to the fact that the square-well
+fluid can only have discrete energies $E=-n\epsilon$, where $n$ is a
+non-negative integer and $\epsilon$ is the well depth, in simulation
+we store the weight function as an array of values. We may therefore
+use the terms ``weight function,'' and ``weight array,'' and
+``weights'' interchangeably.
+
+\subsubsection{Broad energy sampling}
+\label{sec:broad_energy_sampling}
+
+The sort of Monte Carlo simulations described in this paper are only
+capable of collecting statistics on system microstates, and functions
+of microstates. For example, in simulation one might periodically
+compute both the energy $E\p{s}$ and some system property $X\p{s}$,
+both of which are determined by the system microstate $s$, in order to
+find the mean value of $X$ at any given energy $E$, i.e. $X\p{E}$. In
+the real world, however, information about a system's microstate and
+functions of microstates (e.g. the energy $E$) is generally is
+inaccessible. One therefore cannot measure $X\p{E}$ directly. Instead,
+one typically measures the dependence of thermodynamic properties on
+macroscopic state variables such as temperature, i.e. $X\p{T}$.
+
+The temperature dependence $X\p{T}$ can be expressed in terms of the
+density of states $D\p{E}$ and energy dependence $X\p{E}$ by
+\begin{align}
+  X\p{T}=\f1{Z\p{T}}\sum_EX\p{E}D\p{E}e^{-E/kT},
+  \label{eq:temp_dep_X_norm}
+\end{align}
+where the partition function $Z\p{T}$ is
+\begin{align}
+  Z\p{T}=\sum_ED\p{E}e^{-E/kT}.
+\end{align}
+To reduce redundant computations and numerical error in
+implementation, we will use an unnormalized partition function
+\begin{align}
+  \tilde Z\p{T}=\sum_E\tilde D\p{E}e^{-E/kT},
+\end{align}
+in terms of which
+\begin{align}
+  X\p{T}=\f1{\tilde Z\p{T}}\sum_EX\p{E}\tilde D\p{E}e^{-E/kT}.
+  \label{eq:temp_dep_X}
+\end{align}
+Sufficient accumulation of statistics on $X\p{E}$ at all available
+energies thus in principle allows one to determine $X\p{T}$ for any
+$T$. In practice, the density of states can fall off so quickly with
+energy that some range of allowable energies is practically
+inaccessible via Monte Carlo simulations, biased or otherwise. In such
+a case, computing $X\p{T}$ to a reasonable degree of accuracy requires
+sufficiently sampling the energies at which $\tilde D\p{E}e^{-E/kT}$
+dominates the sum in (\ref{eq:temp_dep_X_norm}).
+
+We will employ histogram methods in order to sample as broad of an
+energy range as possible in each simulation. Broad energy sampling
+will allow us to determine, for various square-well fluids,
+\begin{enumerate*}[label=\roman*)]
+\item the density of states (over energy), and
+\item the temperature dependence of various thermodynamic properties,
+  particularly at temperatures near the liquid-gas phase boundary.
+\end{enumerate*}
+
+% \subsubsection{Detailed balance}
+% \label{sec:detailed_balance}
+
+% \fixme{In this section I will explain why and how weights work as
+% advertised. Essentially, we will consider the effect of weights on a
+% two-state system (or on the transitions between two particular
+% states in an otherwise multi-state system), and convince ourselves
+% that the biasing effect of weights is the identical in an ensemble
+% of transitions between any number of states.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methods}
+\label{sec:methods}
+
+\fixme{Give an overview of the methods section}
+
+\subsection{Canonical (fixed temperature) weights}
+\label{sec:canonical_weights}
+
+A standard construction of the weight array $w\p{E}$ for what is
+called a canonical Monte Carlo simulation involves \fixme{better word}
+choosing a particular temperature $T_0$, and using weights
+proportional to the Boltzmann distribution at that temperature, i.e.
+\begin{align}
+  w\p{E}=e^{-E/kT_0},
+\end{align}
+where there is no reason to normalize $w\p{E}$ due to the fact that
+only ratios of weights, as per (\ref{eq:move_prob}), are ever used in
+simulation. The fact that only ratios of weights are used in
+simulation makes $w\p{E}$ scale-invariant.
+
+The partition function at $T=T_0$ for simulations with canonical
+weights is
+\begin{align}
+  \tilde Z\p{T_0}=\sum_E\tilde D\p{E}e^{-E/kT}
+  =\sum_EH\p{E}/w\p{E}~e^{-E/kT} =\sum_EH\p{E},
+  \label{Z_canonical}
+\end{align}
+and the value of a thermodynamic property $X\p{T_0}$
+\begin{align}
+  X\p{T_0}=\f1{\tilde Z\p{T_0}}\sum_EX\p{E}\tilde D\p{E}e^{-E/kT_0}
+  =\f{\sum_EX\p{E}H\p{E}}{\sum_EH\p{E}}.
+  \label{eq:X_canonical}
+\end{align}
+The simplifications in in (\ref{Z_canonical}) and
+(\ref{eq:X_canonical}), which have no explicit dependence on $T_0$,
+occur because canonical Monte Carlo simulations sample energies in
+proportion to the distribution (over energy) of microstates at a
+temperature of $T_0$.  Canonical Monte Carlo simulations can therefore
+fail to sufficiently sample energies which are important
+(i.e. energies with a non-negligible state probability density) at
+different temperatures. As a consequence, such simulations should not
+be used to determine properties $X\p{T\ne T_0}$, and are thus referred
+to as ``fixed temperature'' simulations.
+
+Though canonical Monte Carlo is simple to implement, its inability to
+investigate a system at more than one temperature at a time is a
+disadvantage for determining the temperature dependence of system
+properties. In order to find the behavior of $X\p{T}$, one must run
+many simulations at discrete temperature intervals; each such
+simulation will yield one sample (e.g. one data point) of $X\p{T}$.
+
+Sampling low energies, however, or understanding system behavior at
+low temperatures, is even more problematic with canonical
+weights. Using low temperature canonical weights will indeed force a
+simulated system down to low energies, but will also likely freeze the
+system into a local minimum of its energy landscape. Freezing into a
+state means that a simulation will sample only a small portion of the
+energy landscape, even though there may (and generally will) be many
+other states with the same energy.
+
+Due to these problems \fixme{be more explicit?}, we will not use
+canonical weights alone to study the square-well fluid. We will,
+however, use canonical weights for part of all weight arrays, as
+discussed in Section \ref{sec:min_energy}.
+
+\subsection{The multi-canonical (flat histogram) method}
+\label{sec:flat_historam}
+
+The multi-canonical histogram method assumes complete knowledge of the
+density of states $D\p E$ of the system in question, and solves
+(\ref{eq:dos_unnormed}) for a weight array $w\p{E}$ which should yield
+a flat energy histogram $H\p E=H_0$ to get
+\begin{align}
+  w\p E=\f1{D\p E},
+  \label{eq:flat_weights}
+\end{align}
+where we may neglect the constant scale factor $H_0$ and do not worry
+about normalization factor distinguishing $D\p{E}$ from $\tilde
+D\p{E}$ due to the scale-invariance of $w\p{E}$.
+
+For all but the most trivial or well-studied systems, however, the
+density of states $D\p{E}$ is not known prior to simulation, and is in
+fact one of the system properties which a simulation is intended to
+determine. Nonetheless, this toy method has pedagogical value by
+enabling discussion of ``optimal'' weights for generating a flat
+histogram. All algorithms to construct $w\p{E}$ with the aim of
+producing a flat histogram should therefore converge on the same
+weight array, given by (\ref{eq:flat_weights}).
+
+\fixme{Talk about a simple implementation of a flat histogram method
+  (essentially a single iteration of Simple Flat), and why one might
+  want to use it.}
+
+\subsection{The simple flat method}
+\label{sec:simple_flat}
+
+\fixme{Explain, provide algorithm. This method is our own.}
+
+\begin{algorithm}[H]
+  \caption{Simple flat initialization}
+  \label{alg:simple_flat}
+\end{algorithm}
+
+\subsection{The Wang-Landau (WL) method}
+\label{sec:wang_landau}
+
+\fixme{Explain the motivation behind the Wang-Landau method, and
+  provide the algorithm. Talk about the free parameters and roughly
+  what they control.}
+
+\begin{algorithm}[H]
+  \caption{Wang-Landau calculation of weights}
+  \label{alg:wang_landau}
+\end{algorithm}
+
+% \subsubsection{Modifications}
+% \label{sec:wang_landau_mod}
+
+% \fixme{Talk about our modifications to Wang-Landau made to adapt it
+% to the square-well fluid, as well as (if I have time) other research
+% groups' modifications.}
+
+\subsection{The optimized ensemble (OE) method}
+\label{sec:optimized_ensemble}
+
+\fixme{Explain, provide algorithm.}
+
+\begin{algorithm}[H]
+  \caption{Finding weights by optimizing energy walker currents}
+  \label{alg:optimized_ensemble}
+\end{algorithm}
+
+\subsection{The transition matrix Monte Carlo (TMMC) method}
+\label{sec:tmmc}
+
+\fixme{Explain, provide algorithm. This method is sort of our own, but
+  based on other work.}
+
+\begin{algorithm}[H]
+  \caption{Transition matrix Monte Carlo simulation}
+  \label{alg:tmmc}
+\end{algorithm}
+
+
+\subsection{The hybrid OE-TMMC method}
+\label{sec:oetmmc}
+
+\fixme{Explain, provide algorithm. This method is sort of our own, but
+  based on other work.}
+
+\begin{algorithm}[H]
+  \caption{Hybrid OE-TMMC simulation}
+  \label{alg:oetmmc}
+\end{algorithm}
+
+
+\subsection{Identifying the energy range of interest}
+\label{sec:energy_range}
+
+Histogram methods typically rely on knowledge of the minimum and
+maximum energies of the system in question \fixme{how?}, which are
+unknown for the square-well fluid. Worse still, some square-well fluid
+energies have such a low density of states that one cannot reasonably
+expect to ever observe them via Monte Carlo, biased or otherwise. As
+such, we need to identify an energy range of interest, bounded by
+minimum and maximum ``important'' energies. \fixme{Rewrite, expand}
+
+\subsubsection{State of maximal entropy}
+\label{sec:max_entropy}
+
+\fixme{The energy at which the density of states is maximal, i.e. the
+  state of maximal entropy, sets an upper bound for the energy range
+  in which appropriate weights are not obvious. Explain why.}
+
+\subsubsection{Minimum important energy}
+\label{sec:min_energy}
+
+\fixme{Determining the minimum important energy is considerably
+  trickier. Punchline: we have to choose a minimum temperature of
+  interest, $T_{\t{min}}$, and the minimum important energy is the
+  energy at which the slope of the density of states is
+  $\exp\p{kT_{\t{min}}/\epsilon}/\epsilon$. This condition for the
+  minimum important energy is directly related to canonical weights at
+  a temperature of $T_{\t{min}}$.}
+
+\subsubsection{Computing the density of states}
+\label{sec:dos}
+
+\fixme{This section might just become a part of the section on the
+  minimum important energy. (\ref{eq:density_of_states}) gives us an
+  explicit formula for the density of states if we are confident in
+  our energy histogram. We can also compute the density of states from
+  the transition matrix, which is sometimes more appropriate to do.}
+
+% \subsection{End conditions}
+% \label{sec:end_conditions}
+
+% \fixme{Talk about how we want method-independent end conditions, if
+% possible. Introduce the concept of statistically independent energy
+% samples, and explain two measures (one optimistic, and one
+% pessimistic) for determining the number of statistically independent
+% times we have samples a given energy.}
+
+% \fixme{Talk about two end conditions: a fixed number of times which
+% we require to independently sample the minimum important energy, and
+% an enforced fractional error in the number of times we have
+% independently sampled any energy (at a given minimum temperature).}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results and Discussion}
+\label{sec:results}
+
+\subsection{Implementation and overview}
+\label{sec:implementation}
+
+\fixme{Talk about the relative difficulty of implementing each method,
+  as well as the relative difficulty of optimizing or tuning each
+  method. Free parameters are generally bad, and especially so if they
+  come without ``obvious'' or prescribed values. Justify our
+  modifications to Wang-Landau by showing that we did not make it
+  worse. Include mention of how memory requirements for transition
+  matrix Monte Carlo scale poorly with system size, as well as energy
+  resolution for systems with continuous energies.}
+
+\subsection{Simulation results and errors}
+\label{sec:results_and_errors}
+
+\fixme{Talk about the energy histogram, weights, and density of states
+  yielded by the methods. These should all be fairly similar. Talk
+  about why this is so.}
+
+\begin{figure}[H]
+  \centering
+  \caption[Energy histograms]{Energy histograms}
+  \label{fig:histograms}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \caption[Energy weights]{Energy weights}
+  \label{fig:weights}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \caption[Normalized densities of states]{Normalized densities of
+    states}
+  \label{fig:density_of_states}
+\end{figure}
+
+\fixme{Talk about initialization times, and how they scale with system
+  size}
+
+\begin{figure}[H]
+  \centering
+  \caption[Initialization iterations vs. system size]{Initialization
+    iterations vs. system size}
+  \label{fig:scaling}
+\end{figure}
+
+\fixme{Discuss energy initialization times, sampling rates, and errors
+  in computed thermodynamic properties. Explain that errors are given
+  relative to a simulation which ran much longer, and talk about how
+  we ran that simulation (which method did we use?). Show that all
+  methods converge on the same answer as they simulate for longer.}
+
+\begin{figure}[H]
+  \centering
+  \caption[Optimistic energy sampling rates]{Optimistic energy
+    sampling rates}
+  \label{fig:opt_sample_rate}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \caption[Pessimistic energy sampling rates]{Pessimistic energy
+    sampling rates}
+  \label{fig:pes_sample_rate}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \caption[Initialization iterations vs. data quality]{Initialization
+    iterations vs. data quality}
+  \label{fig:quality}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \caption[Specific internal energy]{Specific internal energy}
+  \label{fig:internal_energy}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \caption[Specific heat capacity]{Specific heat capacity}
+  \label{fig:heat_capacity}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+\label{sec:conclusions}
+
+\fixme{What have we learned? What recommendations can we make? When is
+  it appropriate to use which histogram methods?}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\nocite{*} \bibliography{thesis}
+
+\end{document}

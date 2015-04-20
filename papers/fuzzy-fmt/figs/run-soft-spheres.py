@@ -7,14 +7,14 @@ from math import pi
 
 figsdir = 'papers/fuzzy-fmt/figs/'
 
-srun = lambda n_reduced, kT: 'srun --mem=10000 -J wca-%.4f-%.4f time nice -19 ' % (n_reduced, kT)
+srun = lambda n_reduced, kT: 'srun --mem=10000 -J oldwca-%.4f-%.4f time nice -19 ' % (n_reduced, kT)
 
 if os.getcwd()[:5] != '/home' or os.system('srun true') != 0:
     # We are definitely not running on the cluster
     srun = lambda n_reduced, kT: 'time nice -19 '
 
 # always remember to build the executable before running it
-system('scons -U')
+assert not system('fac papers/fuzzy-fmt/figs/radial-wca.mkdat')
 
 def run_soft_sphere(reduced_density, temperature):
     nspheres = round(reduced_density*2**(-5.0/2.0)*30**3)

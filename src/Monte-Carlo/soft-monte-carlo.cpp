@@ -717,20 +717,21 @@ int main(int argc, char *argv[]){
 
     // only write out the sphere positions after they've all had a
     // chance to move
-    if (j%N == 0) {
+    if (j%N == 0 && workingmoves > 20*iterations_per_pressure_check) {
       density_saved_count++;
       for (long s=0;s<N;s++) {
         shells[shell(spheres[s], div, radius, sections)]++;
 	if (FCC){
-	  for(long n=0;n<FCC_div2;n++){ 
-	    if (FCC_shells[n][0] <= spheres[s][0] && FCC_shells[n+1][0]  >= spheres[s][0] && FCC_shells[n][1] <= spheres[s][1] && FCC_shells[n+1][1]  >= spheres[s][1] ){ 
+	  for(long n=0;n<FCC_div2;n++){
+	    if (FCC_shells[n][0] <= spheres[s][0] &&
+                FCC_shells[n+1][0]  >= spheres[s][0] &&
+                FCC_shells[n][1] <= spheres[s][1] &&
+                FCC_shells[n+1][1]  >= spheres[s][1] ){
 	      FCC_shells[n][2] = FCC_shells[n][2]+1;
-	      printf("FOUND ONE FOUND ONE %ld %g \n",n, FCC_shells[n][2]);
 	      n=FCC_div2+2;
-	      //   printf("FCC_shells[n][0] %g spheres[s][0] %g FCC_shells[n+1][0]  %g spheres[s][0] %g FCC_shells[n][1] %g spheres[s][1] %g FCC_shells[n+1][1]  %g spheres[s][1] %g\n",FCC_shells[n][0] , spheres[s][0] , FCC_shells[n+1][0] , spheres[s][0] , FCC_shells[n][1] , spheres[s][1] , FCC_shells[n+1][1]  , spheres[s][1]);
-		}
-	      }
-	    }
+            }
+          }
+        }
 	for (long i=0; i<N; i++){
 	  for (long k=0; k<div; k++) {
 	    Vector3d vri = spheres[i]-spheres[s];
@@ -761,21 +762,21 @@ int main(int argc, char *argv[]){
     }
     
     
-    if(j % (iterations/100)==0 && j != 0){
+    if(j % (20*iterations_per_pressure_check/100)==0 && j < 20*iterations_per_pressure_check && j != 0){
       double secs_to_go = secs_per_iteration*(iterations - j);
       long mins_to_go = secs_to_go / 60;
       long hours_to_go = mins_to_go / 60;
       mins_to_go = mins_to_go % 60;
       if (hours_to_go > 5) {
-        printf("%.0f%% complete... (%ld hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
+        printf("%.0f%% to first data... (%ld hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
       } else if (mins_to_go < 1) {
-        printf("%.0f%% complete... (%.1f seconds to go)\n",j/(iterations*1.0)*100, secs_to_go);
+        printf("%.0f%% to first data... (%.1f seconds to go)\n",j/(iterations*1.0)*100, secs_to_go);
       } else if (hours_to_go < 1) {
-        printf("%.0f%% complete... (%ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+        printf("%.0f%% to first data... (%ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
       } else if (hours_to_go < 2) {
-        printf("%.0f%% complete... (1 hour, %ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+        printf("%.0f%% to first data... (1 hour, %ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
       } else {
-        printf("%.0f%% complete... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
+        printf("%.0f%% to first data... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
       }
       fflush(stdout);
     }
