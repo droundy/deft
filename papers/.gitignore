@@ -6,6 +6,8 @@
 *.pdf
 *.out
 *.aux
+*.lop
+*.lof
 *.eps
 *.ps
 *.snm

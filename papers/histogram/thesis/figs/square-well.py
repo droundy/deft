@@ -16,7 +16,6 @@ top = 0.3
 bottom = -1
 
 plot_size = (plot_dims[0]*plot_scale,plot_dims[1]*plot_scale)
-<<<<<<< HEAD
 plt.figure(figsize=plot_size)
 
 plt.plot([1,1,ww,ww,r_max],[v_max,bottom,bottom,top,top],'k')
