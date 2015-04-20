@@ -1,0 +1,8 @@
+
+| pdflatex thesis.tex && pdflatex thesis.tex && bibtex thesis && pdflatex thesis.tex
+< thesis.tex
+> thesis.pdf
+
+| python2 ../../../fac/figs.py figs/*.py > .figs.fac
+> .figs.fac
+c .pyc
