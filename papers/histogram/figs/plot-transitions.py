@@ -36,7 +36,7 @@ def get_de_vals(data_file):
     with open(data_file) as f:
         for line in f:
             if '# energy\t' in line:
-                de_vals = [ int(val) for val in line.split()[2:] ]
+                de_vals = [ -int(val) for val in line.split()[2:] ]
                 break
     return de_vals
 
