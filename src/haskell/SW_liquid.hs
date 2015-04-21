@@ -1,9 +1,9 @@
 module SW_liquid
-       ( sw_liquid_n )
+       ( sw_liquid_n, sw_liquid_Veff, homogeneous_sw_liquid )
        where
 
 import Expression
-import IdealGas ( idealgas )
+import IdealGas ( idealgas, kT )
 import WhiteBear ( gSigmaA, whitebear )
 
 sigma :: Type a => Expression a
@@ -30,10 +30,20 @@ n = r_var "n"
 gsigma :: Expression RealSpace
 gsigma = substitute ("n" === r_var "x") n gSigmaA
 
+homogeneous_sw_liquid :: Expression Scalar
+homogeneous_sw_liquid = makeHomogeneous $ substitute ("n" === r_var "x") (r_var "n") $
+                         sw + whitebear + idealgas - integrate (n * s_var "mu")
+
 sw_liquid_n :: Expression Scalar
 sw_liquid_n = "ESW" === (substitute ("n" === r_var "x") (r_var "n") $
                          sw + whitebear + idealgas +
                          ("external" === integrate (n * (r_var "Vext" - s_var "mu"))))
+
+sw_liquid_Veff :: Expression Scalar
+sw_liquid_Veff = substitute n ("n" === exp(- r_var "Veff"/kT)) $
+                 substitute ("n" === r_var "x") ("n" === exp(- r_var "Veff"/kT)) $
+                 sw + whitebear + idealgas +
+                 ("external" === integrate (n * (r_var "Vext" - s_var "mu")))
 
 sw :: Expression Scalar
 sw = var "sw" "F_{\\text{sw}}" $
