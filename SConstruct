@@ -199,6 +199,9 @@ for name, module, hsfunctional, inputs in [
            '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
     ("HomogeneousSFMTFluid", "SFMT", "homogeneous_sfmt_fluid", '[]'),
     ("SW_liquid", "SW_liquid", "sw_liquid_n", '[(ER $ r_var "n", ER 1)]'),
+    ("SW_liquidVeff", "SW_liquid", "sw_liquid_Veff",
+           '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
+    ("HomogeneousSW_liquid", "SW_liquid", "homogeneous_sw_liquid", '[]'),
     ("WaterSaft", "WaterSaft", "water_saft_n", '[]'), # no gradients:  for debugging!
     ("WaterSaftByHand", "WaterSaft", "water_saft_by_hand_n", '[]'), # no gradients:  for debugging!
     ("HomogeneousWaterSaft", "WaterSaft", "homogeneous_water_saft_n", '[]'),
