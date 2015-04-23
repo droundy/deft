@@ -36,7 +36,7 @@ def get_de_vals(data_file):
     with open(data_file) as f:
         for line in f:
             if '# energy\t' in line:
-                de_vals = [ int(val) for val in line.split()[2:] ]
+                de_vals = [ -int(val) for val in line.split()[2:] ]
                 break
     return de_vals
 
@@ -63,7 +63,7 @@ for method, data, de_vals in [(method1, data1, de_vals1), (method2, data2, de_va
                     minde = de[i,j]
                 if de[i,j] > maxde:
                     maxde = de[i,j]
-    c = plt.pcolor(de-0.5, e, transitions, vmin=0, vmax=1)
+    c = plt.pcolor(de+0.5, e, transitions, vmin=0, vmax=1)
     plt.colorbar(c)
     plt.xlim(minde,maxde)
     plt.ylim(e.min(), e.max())

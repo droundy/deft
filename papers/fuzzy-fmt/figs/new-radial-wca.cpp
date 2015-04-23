@@ -25,7 +25,7 @@
 #include "version-identifier.h"
 
 // Here we set up the lattice.
-double zmax = 16;
+double zmax = 20;
 double ymax = zmax;
 double xmax = zmax;
 double dx = 0.05;

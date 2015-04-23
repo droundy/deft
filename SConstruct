@@ -50,10 +50,14 @@ Alias('git configuration',
       env.Command(target = '.git/hooks/pre-commit',
                   source = 'git/pre-commit',
                   action = Copy("$TARGET", "$SOURCE")))
+
+gitmaster = ['.git/refs/heads/master']
+if not os.path.exists(gitmaster[0]):
+    gitmaster = []
 Alias('git configuration',
       env.Command(target = 'src/version-identifier.h',
-                  source = ['src/generate-version-identifier.py'],
-                  action = 'python3 $SOURCE > $TARGET'))
+                          source = ['src/generate-version-identifier.py']+gitmaster,
+                          action = 'python3 $SOURCE > $TARGET'))
 Default('git configuration')
 
 haskell = Environment(tools=['haskell'],

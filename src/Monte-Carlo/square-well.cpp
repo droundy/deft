@@ -352,7 +352,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
          we default towards allowing transitions, which can help avoid
          getting "stuck" at low energies, due to an incorrect first
          guess as to how probable the downward transition is. */
-      const double conservativeness = 0;
+      const double conservativeness = 16;
       const double tup = (transitions(energy, energy_change)+conservativeness)
                          / double(tup_norm+conservativeness);
       const double tdown = (transitions(energy+energy_change,-energy_change)+conservativeness)

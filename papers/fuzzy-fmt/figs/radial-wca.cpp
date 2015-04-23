@@ -22,6 +22,7 @@
 #include "ContactDensity.h"
 #include "utilities.h"
 #include "handymath.h"
+#include "version-identifier.h"
 
 /* --
 
@@ -76,6 +77,7 @@ void z_plot(const char *fname, const Grid &a) {
     // don't just abort?
     return;
   }
+  fprintf(out, "# version %s\n", version_identifier());
   const GridDescription gd = a.description();
   const int x = 0;
   const int y = 0;
@@ -149,6 +151,7 @@ double run_soft_sphere(double reduced_density, double temp) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("version %s\n", version_identifier());
   printf("dx = %g, xmax = %g\n", dx, xmax);
   if (argc != 3) {
     fprintf(stderr, "Usage: %s FILLINGFRACTION kT\n", argv[0]);
@@ -157,8 +160,8 @@ int main(int argc, char *argv[]) {
 
   double temp = 0;
   double reduced_density = 0;
-  sscanf(argv[2], " %lg", &temp);
   sscanf(argv[1], " %lg", &reduced_density);
+  sscanf(argv[2], " %lg", &temp);
 
   run_soft_sphere(reduced_density, temp);
   return 0;

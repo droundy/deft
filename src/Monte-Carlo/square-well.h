@@ -207,7 +207,7 @@ struct sw_simulation {
       if(N == 9) return 28;
       if(N == 10) return 37;
       if(N == 11) return 42;
-      if(N == 12) return 51;
+      if(N == 12) return 45;
       if(N == 13) return 58;
       if(N == 14) return 65;
       if(N == 15) return 72;
@@ -223,8 +223,8 @@ struct sw_simulation {
       if(N == 25) return 123;
       if(N == 26) return 127;
       if(N == 27) return 132;
-      if(N == 28) return 138;
-      if(N == 29) return 144;
+      if(N == 28) return 140;
+      if(N == 29) return 148;
       if(N == 30) return 155;
     }
     manual_min_e = false;
