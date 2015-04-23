@@ -54,7 +54,7 @@
 \newcommand{\institution}{Oregon State University}
 \newcommand{\department}{Department of Physics}
 \newcommand{\supervisor}{Dr. David Roundy}
-\renewcommand{\date}{19 April 2015}
+\renewcommand{\date}{21 April 2015}
 
 %%% notes, etc.
 \usepackage{color}
@@ -130,23 +130,23 @@
 \thispagestyle{abstract}
 
 We wish to identify and develop efficient numerical methods for
-determining thermodynamic properties of the square-well fluid, so as
+determining thermodynamic properties of the square-well fluid in order
 to test square-well density functional theories. The liquid-vapor
 phase interface is an interesting regime for testing density
 functional theories, but unbiased Monte Carlo simulations are
 incapable of sampling the low energy fluid states which dominate the
 partition function at low (i.e. liquid-state) temperatures. Several
 generic Monte Carlo ``histogram methods'' for collecting statistics on
-low energy system states have been developed, but little or no
-literature exists on their systematic comparison and their application
-to the square-well fluid. The square-well fluid in particular
-introduces application challenges not manifest in traditional models
-for testing and benchmarking such numerical techniques (e.g. the Ising
-model). We propose to implement these methods in Monte Carlo
-simulations of the square-well fluid, determine appropriate
-performance metrics for their comparison, and identify those methods
-which are most efficient and effective at sampling otherwise
-improbable system states.
+low energy system states have been developed \fixme{by whom?}, but
+little or no literature exists on their systematic comparison and
+their application to the square-well fluid. The square-well fluid in
+particular introduces application challenges not manifest in
+traditional models for testing and benchmarking such numerical
+techniques (e.g. the Ising model). We propose to implement these
+methods in Monte Carlo simulations of the square-well fluid, determine
+appropriate performance metrics for their comparison, and identify
+those methods which are most efficient and effective at sampling
+otherwise improbable system states.
 
 \fixme{Rewrite after the rest of the thesis is completed}
 
@@ -160,20 +160,25 @@ improbable system states.
 \subsection{Introduction}
 \label{sec:intro}
 
-A major challenge in the field of classical density functional theory
-is understanding critical point behavior of fluids, the study of which
-via simulations requires exploring the state space boundary between
-liquid and gaseous fluid phases. For a generic square-well fluid to be
-observed in a liquid state, the fluid must have a relatively localized
-distribution of the spheres which make up the fluid. Such a
-distribution implies a low energy fluid state; conversely, a low
-energy liquid state of a square-well fluid otherwise observable in
-both liquid and gaseous phases implies a localized distribution of
-spheres. The search for liquid states is thus equivalent to the search
-for low energy states. In unbiased Monte Carlo simulations, however,
-highly localized distributions of spheres are extremely unlikely to
-occur, making such simulations impractical for studying the
-square-well fluid.
+\fixme{Intro is confusing. Move these paragraphs in between sections
+  on SW fluid and biased sampling?}
+
+Understanding the behavior of fluids near the critical point, or the
+point at which the distinction between liquid and gas ceases to become
+well-defined, is a major challenge in the field of classical density
+functional theory. Studying the critical point of a fluid via
+simulations requires exploring the state space \fixme{remove words
+  ``state space''?}  boundary between its liquid and gaseous
+phases. For a generic square-well fluid to be observed in a liquid
+state, the fluid must have a relatively localized distribution of the
+spheres which make up the fluid. Such a distribution implies a low
+energy fluid state; conversely, a low energy liquid state of a
+square-well fluid otherwise observable in both liquid and gaseous
+phases implies a localized distribution of spheres. The search for
+liquid states is thus equivalent to the search for low energy
+states. In unbiased Monte Carlo simulations, however, highly localized
+distributions of spheres are extremely unlikely to occur, making such
+simulations impractical for studying the square-well fluid.
 
 Several generic computational methods exist for dealing with such a
 problem; namely, that interesting regions of a system's state space
@@ -192,15 +197,15 @@ the effectiveness of some such methods.
   \centering
   \includegraphics[width=0.45\textwidth]{figs/square-well.pdf}
   \caption[The square-well pair potential]{The square-well pair
-    potential can be used to model short-range attractive forces to
-    first order. The infinite potential at $r<\sigma$ simply enforces
-    the condition that spheres cannot overlap. At $r>\lambda\sigma$,
-    the potential is null, and makes no contribution to the fluid's
+    potential can be used to model short range forces to first
+    order. The infinite potential at $r<\sigma$ simply enforces the
+    condition that spheres cannot overlap. At $r>\lambda\sigma$, the
+    potential is zero, and makes no contribution to the fluid's
     internal energy.}
   \label{fig:pair_potential}
 \end{figure}
 
-The square-well (SW) fluid is a model used in classical density
+The square-well (SW) fluid is a simple model used in classical density
 functional theories to capture low order effects of short-range
 attractive forces, such as the van der Waals force. The fluid is
 composed of spheres with diameter $\sigma$ which have a pair potential
@@ -244,17 +249,17 @@ $r/\sigma$.
 
 While model systems are powerful tools for understanding complex
 physical systems, they do not themselves exist in the real
-world. Consequently, direct experimental tests of model system
-theories (e.g. square-well density functional theories) are not
+world. Consequently, direct experimental tests of theories for model
+system (e.g. square-well density functional theories) are not
 possible. For this reason, model system theories are commonly tested
 against Monte Carlo simulations. Proper implementation of Monte Carlo
 methods to study completely characterized systems ensures that
 statistical results from simulations converge on the exact properties
 of the simulated system in the infinite simulation time
-limit\fixme{cite?}. Furthermore, uncertainties in quantities computed
-via Monte Carlo simulations are typically well-defined, monotonically
-decreasing functions of simulation time, allowing one to run
-simulations to the desired level of accuracy.
+limit\fixme{explain. cite?}. Furthermore, uncertainties in quantities
+computed via Monte Carlo simulations are typically well-defined,
+monotonically decreasing functions of simulation time, allowing one to
+run simulations to the desired level of accuracy.
 
 \begin{algorithm}[!b]
   \caption{Unbiased Monte Carlo fluid simulation}
@@ -285,38 +290,41 @@ simulations to the desired level of accuracy.
 
 Algorithm \ref{alg:MC} provides a sketch of unbiased Monte Carlo fluid
 simulations. Such an algorithm is ``unbiased'' in the sense that it
-collects statistics (i.e. data) on all valid system
-configurations. Statistics whose collection time scales as $\mathcal
-O\p{1}$ with system size can be collected after every move (defined in
-the algorithm), while statistics whose collection time scales as
-$\mathcal O\p{N}$, where $N$ is the number of simulated elements
-(e.g. spheres), can be collected after each iteration. In general,
-collection with $\mathcal O\p{\chi}$ time scaling in $N$ should not
-occur more often than once every $\chi$ moves \fixme{explain better?},
-so as to ensure that scaling up simulations does not cause them to
-asymptotically spend all of their time collecting statistics, and no
-time actually simulating the fluid. Collected statistics determine
-thermodynamic properties of the simulated fluid.
+collects statistics (i.e. data) on all valid system configurations
+with equal probability. Statistics whose collection time scales as
+$\mathcal O\p{1}$ with system size can be collected after every move
+(defined in the algorithm), while statistics whose collection time
+scales as $\mathcal O\p{N}$, where $N$ is the number of simulated
+elements (e.g. spheres), can be collected after each iteration. In
+general, collection with $\mathcal O\p{\chi}$ time scaling in $N$
+should not occur more often than once every $\chi$ moves
+\fixme{explain better?}, so as to ensure that scaling up simulations
+does not cause them to asymptotically spend all of their time
+collecting statistics, and no time actually simulating the
+fluid. Collected statistics are used to find thermodynamic properties
+of the simulated fluid.
 
-In this work, we are concerned with simulating the homogeneous
+In this work, we are concerned with simulating the {\emph homogeneous}
 square-well fluid. To avoid edge effects resulting from fluid behavior
-near a wall, we enforce periodic boundary conditions. These boundary
-conditions suppress all density fluctuations on scales larger than the
-dimensions of the simulated fluid cell, thereby introducing a source
-of error; addressing this error, however, is outside the scope of this
-work. \fixme{Anything else to add?}
+near a wall, we employ periodic boundary conditions. The use of a
+finite cell with periodic boundary conditions suppresses all density
+fluctuations on scales larger than the dimensions of the simulated
+fluid cell, thereby introducing a source of error; addressing this
+error, however, is outside the scope of this work. \fixme{Add
+  feedback}
 
 \subsection{Histogram methods}
 \label{sec:histogram_methods}
 
 Due to the fact that unbiased Monte Carlo simulations sample all of
 state space randomly and without preference, a histogram $H\p{X}$ of
-observations of some system property $X$ is directly proportional to
-the density of states $D\p{X}$ in $X$ \fixme{explain?}. It is
-sometimes the case, however, that the density of states in some region
-$R$ in the range of possible $X$ is so low that it is practically
-impossible to sufficiently sample $R$, that is, accumulate a
-statistically significant $H\p{R}$, in any reasonable amount of time.
+observations of some system property $X$ (e.g. energy) \fixme{other
+  examples} is directly proportional to the density of states $D\p{X}$
+in $X$ \fixme{explain?}. It is sometimes the case, however, that the
+density of states in some region $R$ in the range of possible $X$ is
+so low that it is practically impossible to sufficiently sample $R$,
+that is, accumulate a statistically significant $H\p{R}$, in any
+reasonable amount of time.
 
 \subsubsection{Biased sampling}
 \label{sec:biased_sampling}
@@ -342,7 +350,7 @@ ratio of these weights determines the probability of accepting the
 move. Due to the fact that only ratios of weights determine
 $P\p{s_i\to s_f}$, the weights $w\sp{X\p{s}}$ are scale-invariant,
 meaning that their effect on simulations is unchanged by scale factors
-that are constant with respect $X\p{s}$.
+that are constant with respect to $X\p{s}$.
 
 \begin{algorithm}
   \caption{Biased Monte Carlo fluid simulation}
@@ -384,11 +392,10 @@ space. Crucially, the bias introduced by weights can be reversed when
 computing system properties from sampling statistics, as the weight of
 a particular state is directly proportional to the probability bias of
 that state; that is, a state with a weight of 2 will be sampled twice
-as often as it would have been with a weight of 1 (\fixme{include a
-  subsection on detailed balance? cite?}). If we wish to convert a
-histogram $H\p{X}$ of observations in a biased Monte Carlo simulation
-into a numerical unnormalized density of states $\tilde D\p{X}$ in
-$X$, we therefore point-wise divide the histogram by the corresponding
+as often as it would have been with a weight of 1. If we wish to
+convert a histogram $H\p{X}$ of observations in a biased Monte Carlo
+simulation into a numerical unnormalized density of states $\tilde
+D\p{X}$ in $X$, we therefore divide the histogram by the corresponding
 weights $w\p{X}$, i.e.
 \begin{align}
   \tilde D\p{X}=\f{H\p{X}}{w\p{X}}.
@@ -416,46 +423,51 @@ use the terms ``weight function,'' and ``weight array,'' and
 \subsubsection{Broad energy sampling}
 \label{sec:broad_energy_sampling}
 
+\fixme{Put canonical before this?}
+
 The sort of Monte Carlo simulations described in this paper are only
 capable of collecting statistics on system microstates, and functions
 of microstates. For example, in simulation one might periodically
 compute both the energy $E\p{s}$ and some system property $X\p{s}$,
 both of which are determined by the system microstate $s$, in order to
-find the mean value of $X$ at any given energy $E$, i.e. $X\p{E}$. In
-the real world, however, information about a system's microstate and
-functions of microstates (e.g. the energy $E$) is generally is
-inaccessible. One therefore cannot measure $X\p{E}$ directly. Instead,
-one typically measures the dependence of thermodynamic properties on
-macroscopic state variables such as temperature, i.e. $X\p{T}$.
+find the mean value of $X$ at any given energy $E$,
+i.e. $\bk{X}_E$. In the real world, however, information about a
+system's microstate and functions of microstates (e.g. the energy $E$)
+is generally is inaccessible. One therefore cannot measure $\bk{X}_E$
+directly. Instead, one typically measures the dependence of
+thermodynamic properties on macroscopic state variables such as
+temperature, i.e. $\bk{X}_T$.
 
-The temperature dependence $X\p{T}$ can be expressed in terms of the
-density of states $D\p{E}$ and energy dependence $X\p{E}$ by
+The temperature dependence of $\bk{X}_T$ can be expressed in terms of
+the density of states $D\p{E}$ and the expectation value $\bk{X}_E$ by
 \begin{align}
-  X\p{T}=\f1{Z\p{T}}\sum_EX\p{E}D\p{E}e^{-E/kT},
+  \bk{X}_T=\f1{Z\p{T}}\sum_E\bk{X}_ED\p{E}e^{-E/kT},
   \label{eq:temp_dep_X_norm}
 \end{align}
-where the partition function $Z\p{T}$ is
+where the partition function $Z\p{T}$ is simply a normalization
+factor, given by
 \begin{align}
   Z\p{T}=\sum_ED\p{E}e^{-E/kT}.
 \end{align}
 To reduce redundant computations and numerical error in
-implementation, we will use an unnormalized partition function
+implementation, we will use a partition function with an unnormalized
+density of states,
 \begin{align}
   \tilde Z\p{T}=\sum_E\tilde D\p{E}e^{-E/kT},
 \end{align}
 in terms of which
 \begin{align}
-  X\p{T}=\f1{\tilde Z\p{T}}\sum_EX\p{E}\tilde D\p{E}e^{-E/kT}.
+  \bk{X}_T=\f1{\tilde Z\p{T}}\sum_E\bk{X}_E\tilde D\p{E}e^{-E/kT}.
   \label{eq:temp_dep_X}
 \end{align}
-Sufficient accumulation of statistics on $X\p{E}$ at all available
-energies thus in principle allows one to determine $X\p{T}$ for any
+Sufficient accumulation of statistics on $\bk{X}_E$ at all available
+energies thus in principle allows one to determine $\bk{X}_T$ for any
 $T$. In practice, the density of states can fall off so quickly with
 energy that some range of allowable energies is practically
 inaccessible via Monte Carlo simulations, biased or otherwise. In such
-a case, computing $X\p{T}$ to a reasonable degree of accuracy requires
-sufficiently sampling the energies at which $\tilde D\p{E}e^{-E/kT}$
-dominates the sum in (\ref{eq:temp_dep_X_norm}).
+a case, computing $\bk{X}_T$ to a reasonable degree of accuracy
+requires sufficiently sampling the energies at which $\tilde
+D\p{E}e^{-E/kT}$ dominates the sum in (\ref{eq:temp_dep_X}).
 
 We will employ histogram methods in order to sample as broad of an
 energy range as possible in each simulation. Broad energy sampling
@@ -465,16 +477,6 @@ will allow us to determine, for various square-well fluids,
 \item the temperature dependence of various thermodynamic properties,
   particularly at temperatures near the liquid-gas phase boundary.
 \end{enumerate*}
-
-% \subsubsection{Detailed balance}
-% \label{sec:detailed_balance}
-
-% \fixme{In this section I will explain why and how weights work as
-% advertised. Essentially, we will consider the effect of weights on a
-% two-state system (or on the transitions between two particular
-% states in an otherwise multi-state system), and convince ourselves
-% that the biasing effect of weights is the identical in an ensemble
-% of transitions between any number of states.}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -489,7 +491,7 @@ will allow us to determine, for various square-well fluids,
 A standard construction of the weight array $w\p{E}$ for what is
 called a canonical Monte Carlo simulation involves \fixme{better word}
 choosing a particular temperature $T_0$, and using weights
-proportional to the Boltzmann distribution at that temperature, i.e.
+proportional to the Boltzmann factor at that temperature, i.e.
 \begin{align}
   w\p{E}=e^{-E/kT_0},
 \end{align}
@@ -507,8 +509,8 @@ weights is
 \end{align}
 and the value of a thermodynamic property $X\p{T_0}$
 \begin{align}
-  X\p{T_0}=\f1{\tilde Z\p{T_0}}\sum_EX\p{E}\tilde D\p{E}e^{-E/kT_0}
-  =\f{\sum_EX\p{E}H\p{E}}{\sum_EH\p{E}}.
+  X\p{T_0}=\f1{\tilde Z\p{T_0}}\sum_E\bk{X}_E\tilde D\p{E}e^{-E/kT_0}
+  =\f{\sum_E\bk{X}_EH\p{E}}{\sum_EH\p{E}}.
   \label{eq:X_canonical}
 \end{align}
 The simplifications in in (\ref{Z_canonical}) and
@@ -525,9 +527,9 @@ to as ``fixed temperature'' simulations.
 Though canonical Monte Carlo is simple to implement, its inability to
 investigate a system at more than one temperature at a time is a
 disadvantage for determining the temperature dependence of system
-properties. In order to find the behavior of $X\p{T}$, one must run
+properties. In order to find the behavior of $\bk{X}_T$, one must run
 many simulations at discrete temperature intervals; each such
-simulation will yield one sample (e.g. one data point) of $X\p{T}$.
+simulation will yield one sample (e.g. one data point) of $\bk{X}_T$.
 
 Sampling low energies, however, or understanding system behavior at
 low temperatures, is even more problematic with canonical
@@ -562,7 +564,7 @@ For all but the most trivial or well-studied systems, however, the
 density of states $D\p{E}$ is not known prior to simulation, and is in
 fact one of the system properties which a simulation is intended to
 determine. Nonetheless, this toy method has pedagogical value by
-enabling discussion of ``optimal'' weights for generating a flat
+enabling discussion of ``optimal'' weights generate a flat
 histogram. All algorithms to construct $w\p{E}$ with the aim of
 producing a flat histogram should therefore converge on the same
 weight array, given by (\ref{eq:flat_weights}).
@@ -609,7 +611,7 @@ weight array, given by (\ref{eq:flat_weights}).
   \caption{Finding weights by optimizing energy walker currents}
   \label{alg:optimized_ensemble}
 \end{algorithm}
-
+uu
 \subsection{The transition matrix Monte Carlo (TMMC) method}
 \label{sec:tmmc}
 
@@ -640,10 +642,11 @@ weight array, given by (\ref{eq:flat_weights}).
 Histogram methods typically rely on knowledge of the minimum and
 maximum energies of the system in question \fixme{how?}, which are
 unknown for the square-well fluid. Worse still, some square-well fluid
-energies have such a low density of states that one cannot reasonably
-expect to ever observe them via Monte Carlo, biased or otherwise. As
-such, we need to identify an energy range of interest, bounded by
-minimum and maximum ``important'' energies. \fixme{Rewrite, expand}
+energies have such an incredibly low density of states that one cannot
+reasonably expect to ever observe them via Monte Carlo, biased or
+otherwise. As such, we need to identify an energy range of interest,
+bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
+  expand}
 
 \subsubsection{State of maximal entropy}
 \label{sec:max_entropy}
