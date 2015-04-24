@@ -1,8 +1,12 @@
-run N = 35 through 100 calculations
+run simple_flat, tmmc, oetmmc for seed = 9
+run wang landau and cfw simulations for N = 5..25
+
+use other seeds in figures
 
 print data periodically during initialization
 
-wang landau and cfw simulations
+
+
 
 treat optimized ensemble separately
 - plot OE figures separately (don't plot for now)

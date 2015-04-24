@@ -1,4 +1,4 @@
-# version: 0.0.0-115-g9829181-dirty
+# version: 0.0.0-180-gcbcf83e-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 11
@@ -11,36 +11,36 @@
 # neighbor_scale: 2
 # energy_levels: 60
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.0100216
+# fractional_sample_error after initialization: 0.0123257
 # min_important_energy after initialization: 42
 
 # histogram method: tmmc
 # init_iter_limit: 12100000
 # iterations: 12100000
-# working moves: 68966677
+# working moves: 73146318
 # total moves: 133100000
-# acceptance rate: 0.518157
+# acceptance rate: 0.549559
 
 # energy	samples
 22  0
-23  587808
-24  269337
-25  142974
-26  80529
-27  47490
-28  28834
-29  17760
-30  10813
-31  6674
-32  4278
-33  2899
-34  2062
-35  1583
-36  1216
-37  941
-38  694
-39  514
-40  392
-41  233
-42  194
-43  140
+23  655454
+24  301721
+25  160105
+26  90602
+27  53701
+28  32786
+29  20175
+30  12611
+31  7890
+32  4988
+33  3284
+34  2360
+35  1819
+36  1405
+37  1078
+38  817
+39  598
+40  408
+41  199
+42  148
+43  79
