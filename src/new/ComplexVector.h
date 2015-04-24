@@ -66,7 +66,7 @@ public:
       *references_count += 1;
     } else {
       assert(size = a.size);
-      memcpy(data+offset, a.data+a.offset, size*sizeof(double)); // faster than manual loop?
+      memcpy(data+offset, a.data+a.offset, size*sizeof(std::complex<double>)); // faster than manual loop?
     }
   }
   void operator=(std::complex<double> x) {
