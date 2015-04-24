@@ -113,9 +113,22 @@ public:
     }
     return *last_energy;
   }
-  const Vector &grad() const {
+  const Vector &grad(Verbosity v = quiet) const {
     if (!last_grad.get_size()) {
+      /* We need to compute the gradient because we don't already have its value cached. */
+      const clock_t start = clock();
       last_grad = f->grad();
+      if (v >= louder(min_details)) { // we need to get really paranoid before we print each grad...
+        const clock_t end = clock();
+        if (end > start + 10) {
+          printf("\n\t\t\t=== Grad calculation #%d (took %g seconds) ===\n",
+                 num_grad_calcs, (end - double(start))/CLOCKS_PER_SEC);
+        } else {
+          // no point printing the time, since it probably isn't
+          // accurate anyhow...
+          printf("\n\t\t\t=== Grad calculation #%d ===\n", num_grad_calcs);
+        }
+      }
       num_grad_calcs++;
     }
     return last_grad;
@@ -144,7 +157,7 @@ public:
         last_grad = foo.grad;
         last_pgrad = foo.precond;
       } else {
-        grad();
+        grad(v);
         last_pgrad = last_grad;
       }
     }
@@ -157,6 +170,11 @@ public:
     last_pgrad.free();
     delete last_energy;
     last_energy = 0;
+  }
+  // The stepsize can be helpful in deciding the scale we want for a
+  // finite difference test.
+  double recent_stepsize() const {
+    return step;
   }
 private:
   NewFunctional *f;
