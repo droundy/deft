@@ -203,12 +203,12 @@ effectiveness of a few such methods.
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.45\textwidth]{figs/square-well.pdf}
+  \includegraphics[width=0.47\textwidth]{figs/square-well.pdf}
   \caption[The square-well pair potential]{The square-well pair
     potential can be used to model short range forces to first
     order. The infinite potential at $r<\sigma$ simply enforces the
     condition that spheres cannot overlap. At $r>\lambda\sigma$, the
-    potential is zero, and makes no contribution to the fluid's
+    potential is null, and makes no contribution to the fluid's
     internal energy.}
   \label{fig:pair_potential}
 \end{figure}
@@ -386,7 +386,7 @@ total number of states $s$ for which $X\p{s}=X_0$. It is sometimes the
 case, however, that the density of states in some region $R$ in the
 range of possible $X$ is so low that it is practically impossible (via
 unbiased Monte Carlo) to sufficiently sample $R$, that is, accumulate
-a statistically significant histogram $H\p{R}$, in any reasonable
+a statistically significant histogram $H\p{X\in R}$, in any reasonable
 amount of time.
 
 \subsubsection{Biased sampling}
@@ -555,7 +555,10 @@ energy that some range of allowable energies is practically
 inaccessible via Monte Carlo simulations, biased or otherwise. In such
 a case, computing $\bk{X}_T$ to a reasonable degree of accuracy
 requires sufficiently sampling the energies at which $\tilde
-D\p{E}e^{-E/kT}$ dominates the sum in (\ref{eq:XT}).
+D\p{E}e^{-E/kT}$ dominates the sum in (\ref{eq:XT}). Section
+\ref{sec:energy_range} provides more discussion on this subject,
+namely on identifying the energies which are important for computing
+system properties at a given temperature.
 
 We will employ histogram methods in order to sample as broad of an
 energy range as possible in each simulation. Broad energy sampling
@@ -574,13 +577,13 @@ will allow us to determine, for various square-well fluids,
 
 \fixme{Give an overview of the methods section}
 
-\subsection{The multi-canonical (flat histogram) method}
+\subsection{The flat histogram (multi-canonical) method}
 \label{sec:flat_historam}
 
-The multi-canonical histogram method assumes complete knowledge of the
-density of states $D\p E$ of the system in question, and solves
-(\ref{eq:dos}) for a weight array $w\p{E}$ which should yield a flat
-energy histogram $H\p E=H_0$ to get
+The flat histogram method, also called the multi-canonical method,
+assumes complete knowledge of the density of states $D\p{E}$ of the
+system in question, and solves (\ref{eq:dos}) for a weight array
+$w\p{E}$ which should yield a flat energy histogram $H\p E=H_0$ to get
 \begin{align}
   w\p E=\f1{D\p E},
   \label{eq:flat_weights}
@@ -592,18 +595,38 @@ D\p{E}$ due to the scale-invariance of $w\p{E}$.
 For all but the most trivial or well-studied systems, however, the
 density of states $D\p{E}$ is not known prior to simulation, and is in
 fact one of the system properties which a simulation is intended to
-determine. Nonetheless, this toy method has pedagogical value by
-enabling discussion of ``optimal'' weights generate a flat
-histogram. All algorithms to construct $w\p{E}$ with the aim of
-producing a flat histogram should therefore converge on the same
-weight array, given by (\ref{eq:flat_weights}).
+determine. A naive way to implement the flat histogram method without
+knowing a priori the density of states $D\p{E}$ involves first running
+a simulation without weights (or with constant weights $w\p{E}=w_0$)
+while collecting a histogram $H\p{E}$ of the observed energies
+$E$. After some time (loosely defined), the histogram $H\p{E}$ may be
+taken as an approximation of the density of states $\tilde D\p{E}$
+(see Section \ref{sec:histogram_methods}), and used via
+(\ref{eq:flat_weights}) to generate a weight array for an actual
+simulation.
 
-\fixme{Talk about a simple implementation of a flat histogram method
-  (essentially a single iteration of Simple Flat), and why one might
-  want to use it.}
+The problem with this implementation is that histogram methods are
+generally necessary when some range of energies $R$ is inaccessible
+via unbiased Monte Carlo simulations. In such a case, the energy
+histogram $H\p{E\in R}$ after simulating for any reasonable amount of
+time will be statistically insignificant or null, invalidating the
+approximation $H\p{E}\approx\tilde D\p{E}$. This method will therefore
+only ``flatten'' the histogram at energies $E$ which have been
+sufficiently sampled for $H\p{E}$ to be statistically significant. The
+end goal in implementing histogram methods, however, is precisely to
+sample those energies that cannot be sufficiently sampled without
+employing clever schemes to bias Monte Carlo simulations. The flat
+histogram method therefore does not directly help us study the
+square-well fluid. Nonetheless, the this method has pedagogical value
+by enabling discussion of an ``optimal'' weight array for generating a
+flat energy histogram in simulations. All algorithms to construct
+$w\p{E}$ with the aim of producing a flat energy histogram should
+converge on the same weight array, given by (\ref{eq:flat_weights}).
 
 \subsection{The simple flat method}
 \label{sec:simple_flat}
+
+
 
 \fixme{Explain, provide algorithm. This method is our own.}
 
