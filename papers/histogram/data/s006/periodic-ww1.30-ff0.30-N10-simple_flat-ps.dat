@@ -1,0 +1,43 @@
+# version: 0.0.0-176-g06e7d48-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 10
+# walls: 0
+# cell dimensions: (4.05649, 4.05649, 8.48528)
+# seed: 6
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 60
+# min_T: 0.2
+# fractional_sample_error after initialization: 0.0512612
+# min_important_energy after initialization: 37
+
+# histogram method: simple flat
+# init_iter_limit: 10000000
+# iterations: 10000000
+# working moves: 47097536
+# total moves: 100000000
+# acceptance rate: 0.470975
+
+# energy	samples
+19  0
+20  424841
+21  180329
+22  87059
+23  44437
+24  23480
+25  12357
+26  6512
+27  3486
+28  2058
+29  1444
+30  1041
+31  801
+32  634
+33  403
+34  287
+35  146
+36  115
+37  67
