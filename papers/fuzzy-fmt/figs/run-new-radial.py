@@ -7,11 +7,10 @@ from math import pi
 figsdir = 'papers/fuzzy-fmt/figs/'
 
 def srun(n_reduced, kT):
-    return 'srun --mem=20000 -J name-%06.4f-%04.2f' % (kT, n_reduced)
+    return 'srun --mem=10000 -J name-%06.4f-%04.2f nice -19' % (kT, n_reduced)
 
 # always remember to build the executable before running it
-assert not os.system('scons papers/fuzzy-fmt/figs/new-radial-lj.mkdat')
-assert not os.system('scons papers/fuzzy-fmt/figs/new-radial-wca.mkdat')
+assert not os.system('fac papers/fuzzy-fmt/figs/new-radial-lj.mkdat papers/fuzzy-fmt/figs/new-radial-wca.mkdat')
 
 def runme(reduced_density, temperature):
     outfilename = figsdir+'/new-data/radial-lj-%06.4f-%04.2f.out' % (temperature, reduced_density)
@@ -22,8 +21,10 @@ def runme(reduced_density, temperature):
 def run_wca(reduced_density, temperature):
     outfilename = figsdir+'/new-data/radial-wca-%06.4f-%04.2f.out' % (temperature, reduced_density)
     #system("%s %s/soft-sphere.mkdat %g %g > %s 2>&1 &" %
-    os.system("%s %s/new-radial-wca.mkdat %g %g > %s 2>&1 &" %
+    cmd = ("%s %s/new-radial-wca.mkdat %g %g > %s 2>&1 &" %
            (srun(reduced_density, temperature).replace('name','new-wca'), figsdir, reduced_density, temperature, outfilename))
+    print(cmd)
+    os.system(cmd)
 
 # runme(0.83890, 0.71)
 

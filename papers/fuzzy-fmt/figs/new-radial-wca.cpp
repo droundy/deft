@@ -25,16 +25,13 @@
 #include "version-identifier.h"
 
 // Here we set up the lattice.
-double zmax = 20;
+double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
 double dx = 0.05;
 const double epsilon = 1.0;
 const double radius = 1.0;
 const double sigma = radius*pow(2,5.0/6.0);
-
-const double external_epsilon = 1.0;
-const double external_sigma = radius*pow(2,5.0/6.0);
 
 static void took(const char *name) {
   static clock_t last_time = 0;
@@ -45,10 +42,10 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
+void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
-  min.set_maxiter(100);
+  min.set_maxiter(1000);
   min.set_miniter(9);
   min.precondition(true);
 
@@ -59,27 +56,30 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
-  while (min.improve_energy(verbose)) {
-    //f->run_finite_difference_test("SFMT");
+  do {
+    //f->run_finite_difference_test("SFMT", 0, 100*min.recent_stepsize());
 
     took("Doing the minimization step");
+
+    const int Nz = f->Nz();
+    Vector Vext = f->Vext();
+    Vector r = f->get_r();
+    Vector n = f->get_n();
+    f->get_Fideal(); // FIXME this is a hokey trick to make dV be defined
+    Vector n3 = f->get_n3();
 
     FILE *o = fopen(fname, "w");
     if (!o) {
       fprintf(stderr, "error creating file %s\n", fname);
       exit(1);
     }
-    const int Nz = f->Nz();
-    Vector Vext = f->Vext();
-    Vector r = f->get_r();
-    Vector n = f->get_n();
     for (int i=0;i<Nz/2;i++) {
-      fprintf(o, "%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i]);
+      fprintf(o, "%g\t%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i], n3[i]);
     }
     fclose(o);
 
     took("Outputting to file");
-  }
+  } while (min.improve_energy(gossipy));
   min.print_info();
   delete[] fname;
 }
@@ -125,13 +125,12 @@ int main(int argc, char **argv) {
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.Veff() = -temp*log(hf.n()); // start with a uniform density as a guess
-
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector r = f.get_r();
     for (int i=0; i<Ntot; i++) {
-      const double Vmax = 10*temp;
-      f.Vext()[i] = 4*external_epsilon*(uipow(external_sigma/r[i], 12) - uipow(external_sigma/r[i], 6)) + external_epsilon;
+      const double Vmax = 100*temp;
+      f.Vext()[i] = 4*epsilon*(uipow(sigma/r[i], 12) - uipow(sigma/r[i], 6)) + epsilon;
       if (r[i] > 2*radius) { f.Vext()[i] = 0; }
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
 
@@ -140,9 +139,9 @@ int main(int argc, char **argv) {
       }
     }
   }
-  printf("my energy is %g\n", f.energy());
-  took("Finding the energy a single time");
+  took("setting up the potential and Veff");
 
-  run_walls(reduced_density, &f, temp);
+  run_minimization(reduced_density, &f, temp);
+
   return 0;
 }
