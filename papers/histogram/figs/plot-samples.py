@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy
 import styles
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N methods' % sys.argv[0]
+if len(sys.argv) != 6:
+    print 'useage: %s ww ff N methods seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -21,11 +21,15 @@ N = int(sys.argv[3])
 methods = eval(sys.argv[4])
 #arg methods = [["nw","wang_landau","simple_flat","tmmc","oetmmc"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" % (ww, ff, N, method) for method in methods]
+seed = int(sys.argv[5])
+#arg seed = [0]
+
+# input: ["data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" % (seed, ww, ff, N, method) for method in methods]
 
 plt.title('Iterations per sample for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 for method in methods:
-    data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" % (ww, ff, N, method)
+    data_file = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" \
+                % (seed, ww, ff, N, method)
     with open(data_file,'r') as file_handle:
         for line in file_handle:
             entries = line.split()

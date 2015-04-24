@@ -10,8 +10,8 @@ matplotlib.rc('text', usetex=True)
 import styles
 import readandcompute
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N methods' % sys.argv[0]
+if len(sys.argv) != 6:
+    print 'useage: %s ww ff N methods seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -26,7 +26,10 @@ N = float(sys.argv[3])
 methods = eval(sys.argv[4])
 #arg methods = [["tmmc-golden","wang_landau","simple_flat","tmmc","oetmmc"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
+seed = int(sys.argv[5])
+#arg seed = [0]
+
+# input: ["data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
 reference = "tmmc-golden"
 

@@ -1,14 +1,14 @@
 #!/usr/bin/python2
 import numpy
 
-def u_cv_s(ww, ff, N, method):
+def u_cv_s(ww, ff, N, method, seed=0):
     max_T = 1.4
     T_bins = 1e3
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
     min_T = 0
     try:
-        with open("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, method)) as file:
+        with open("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (seed, ww, ff, N, method)) as file:
             for line in file:
                 if("min_T" in line):
                     this_min_T = float(line.split()[-1])
@@ -17,10 +17,10 @@ def u_cv_s(ww, ff, N, method):
                     break
         # energy histogram file; indexed by [-energy,counts]
         e_hist = numpy.loadtxt(
-            "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, method), ndmin=2)
+            "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (seed, ww, ff, N, method), ndmin=2)
         # weight histogram file; indexed by [-energy,ln(weight)]
         lnw_hist = numpy.loadtxt(
-            "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (ww, ff, N, method), ndmin=2)
+            "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (seed, ww, ff, N, method), ndmin=2)
     except:
         # the files must not exist
         return None

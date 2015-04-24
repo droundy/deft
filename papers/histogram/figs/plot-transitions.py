@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy
 import styles
 
-if len(sys.argv) != 6:
-    print 'useage: %s ww ff N' % sys.argv[0]
+if len(sys.argv) != 7:
+    print 'useage: %s ww ff N seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -18,32 +18,37 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = range(5,21)+[100, 200, 1000]
 
-method1 = sys.argv[4]
-#arg method1 = ['tmmc-golden']
+golden_method = sys.argv[4]
+#arg golden_method = ['tmmc-golden']
 
-method2 = sys.argv[5]
-#arg method2 = ['tmmc']
+method = sys.argv[5]
+#arg method = ['tmmc']
+
+seed = int(sys.argv[6])
+#arg seed = [0]
 
 bothdata = [0,0]
 
-data1_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method1)
-data2_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" % (ww, ff, N, method2)
+golden_data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" \
+                   % (ww, ff, N, golden_method)
+method_data_file = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" \
+                   % (seed, ww, ff, N, method)
 
-data1 = numpy.loadtxt(data1_file)
-data2 = numpy.loadtxt(data2_file)
+golden_data = numpy.loadtxt(golden_data_file)
+method_data = numpy.loadtxt(method_data_file)
 
-def get_de_vals(data_file):
+def get_de(data_file):
     with open(data_file) as f:
         for line in f:
             if '# energy\t' in line:
-                de_vals = [ -int(val) for val in line.split()[2:] ]
+                de = [ -int(val) for val in line.split()[2:] ]
                 break
-    return de_vals
+    return de
 
-de_vals1 = get_de_vals(data1_file)
-de_vals2 = get_de_vals(data2_file)
+de_golden = get_de(golden_data_file)
+de_method = get_de(method_data_file)
 
-for method, data, de_vals in [(method1, data1, de_vals1), (method2, data2, de_vals2)]:
+for method, data, de in [(golden_method, golden_data, de_golden), (method, method_data, de_method)]:
     plt.figure()
     plt.title('Energy transitions from %s for $\lambda=%g$, $n^*=%g$, and $N=%i$' % (method, ww, ff, N))
 
@@ -51,7 +56,7 @@ for method, data, de_vals in [(method1, data1, de_vals1), (method2, data2, de_va
     maxde = 0
     minde = 0
     transitions = data[:,1:]
-    de, e = numpy.meshgrid(de_vals, energy)
+    de, e = numpy.meshgrid(de, energy)
 
     for i in range(len(energy)):
         norm = transitions[i,:].sum()
@@ -71,38 +76,38 @@ for method, data, de_vals in [(method1, data1, de_vals1), (method2, data2, de_va
     plt.xlabel('$\Delta E/\epsilon$')
     plt.ylabel('$E/\epsilon$')
 
-    if method == method1:
-        plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-transitions.pdf" % (ww*100, ff*100, N, method1))
-    if method == method2:
-        plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-transitions.pdf" % (ww*100, ff*100, N, method2))
+    if method == golden_method:
+        plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-transitions.pdf" % (ww*100, ff*100, N, golden_method))
+    if method == method:
+        plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-transitions.pdf" % (ww*100, ff*100, N, method))
 
 plt.figure()
 
-if data1[0,0] < data2[0,0]:
-    data1 = data1[data2[0,0] - data1[0,0]:,:]
+if golden_data[0,0] < method_data[0,0]:
+    golden_data = golden_data[method_data[0,0] - golden_data[0,0]:,:]
 else:
-    data2 = data2[data1[0,0] - data2[0,0]:,:]
+    method_data = method_data[golden_data[0,0] - method_data[0,0]:,:]
 
-energy = -data1[:,0]
+energy = -golden_data[:,0]
 
-# fixme: do reasonable things when de_vals1 != de_vals2 ?
-de, e = numpy.meshgrid(de_vals1, energy)
+# fixme: do reasonable things when de_golden != de_method ?
+de, e = numpy.meshgrid(de_golden, energy)
 
-cut2 = data1[:,0].min() - data2[:,0].min()
+cut2 = golden_data[:,0].min() - method_data[:,0].min()
 
-for i in range(len(data1[:,0])):
-    if i < len(data2[:,0]):
-        for j in range(len(data1[1,:])):
-            data1[i,j] -= data2[i,j]
+for i in range(len(golden_data[:,0])):
+    if i < len(method_data[:,0]):
+        for j in range(len(golden_data[1,:])):
+            golden_data[i,j] -= method_data[i,j]
 
-c = plt.pcolor(de-0.5, e, data1[:,1:], cmap='RdBu', vmin=-0.05, vmax = 0.05)
+c = plt.pcolor(de-0.5, e, golden_data[:,1:], cmap='RdBu', vmin=-0.05, vmax = 0.05)
 plt.colorbar(c)
 plt.xlim(-8,8)
 plt.ylim(e.min(), e.max())
 plt.xlabel('$\Delta E/\epsilon$')
 plt.ylabel('$E/\epsilon$')
 
-plt.title('TM discrepancy between %s and %s\nfor $\lambda=%g$, $n^*=%g$, and $N=%i$' % (method1, method2, ww, ff, N))
+plt.title('TM discrepancy between %s and %s\nfor $\lambda=%g$, $n^*=%g$, and $N=%i$' % (golden_method, method, ww, ff, N))
 
-plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-%s-compare-transitions.pdf" % (ww*100, ff*100, N, method1, method2))
+plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-%s-%s-compare-transitions.pdf" % (ww*100, ff*100, N, golden_method, method))
 

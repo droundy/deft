@@ -9,8 +9,8 @@ import readandcompute
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff methods golden' % sys.argv[0]
+if len(sys.argv) != 6:
+    print 'useage: %s ww ff methods golden seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -20,10 +20,13 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 methods = eval(sys.argv[3])
-#arg methods = [["wang_landau","simple_flat","tmmc","oetmmc"]]
+#arg methods = [["simple_flat","tmmc","oetmmc"]]
 
 golden = sys.argv[4]
 #arg golden = ['tmmc-golden']
+
+seed = int(sys.argv[5])
+#arg seed = [0]
 
 all_Ns = os.popen("git ls-files | grep 'periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
                   %(ww,ff)).readlines()
@@ -48,8 +51,8 @@ for method in methods:
   samples[method] = []
 
   for N in all_Ns:
-    filename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (ww, ff, N, method)
-    wildfilename = "data/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (ww, ff, N, method)
+    filename = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (seed, ww, ff, N, method)
+    wildfilename = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (seed, ww, ff, N, method)
 
     with open(filename, 'r') as content_file:
         content = content_file.read()
@@ -128,7 +131,7 @@ for N in all_Ns:
     u_cv_s = readandcompute.u_cv_s(ww, ff, N, golden)
     if u_cv_s != None:
         for method in methods:
-            u_cv_s_method = readandcompute.u_cv_s(ww, ff, N, method)
+            u_cv_s_method = readandcompute.u_cv_s(ww, ff, N, method, seed)
             if u_cv_s_method != None:
                 du = abs(u_cv_s_method[0]-u_cv_s[0]).max()
                 if method not in u_errors:
