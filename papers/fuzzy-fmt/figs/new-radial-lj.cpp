@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector r = f.get_r();
     for (int i=0; i<Ntot; i++) {
-      const double Vmax = 10*temp;
+      const double Vmax = 100*temp;
       f.Vext()[i] = 4*external_epsilon*(uipow(external_sigma/r[i], 12) - uipow(external_sigma/r[i], 6));
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
 

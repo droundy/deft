@@ -26,17 +26,17 @@ def run_wca(reduced_density, temperature):
     print(cmd)
     os.system(cmd)
 
-# runme(0.83890, 0.71)
+runme(0.83890, 0.71)
 
-# runme(0.957, 2.48)
+runme(0.957, 2.48)
 
-# runme(0.5844, 1.235)
+runme(0.5844, 1.235)
 
-# runme(1.095, 2.48)
+runme(1.095, 2.48)
 
-for temp in [0.001, 0.01, 0.1, 1.0]:
-    run_wca(0.1, temp)
-    run_wca(0.3, temp)
-    run_wca(0.5, temp)
-    run_wca(0.6, temp)
-    run_wca(0.8, temp)
+# for temp in [0.001, 0.01, 0.1, 1.0]:
+#     run_wca(0.1, temp)
+#     run_wca(0.3, temp)
+#     run_wca(0.5, temp)
+#     run_wca(0.6, temp)
+#     run_wca(0.8, temp)
