@@ -750,15 +750,15 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
             if (i < highest_problem_energy) highest_problem_energy = i;
           }
         }
-        printf("[%9ld] Have %ld samples to go (at %ld energies)\n",
-               iteration, num_to_go, energies_unconverged);
-        printf("       <%d - %d> has samples <%ld - %ld>/%d (current energy %d) [%g vs %g]\n",
+        printf("[%9ld] Have %ld samples to go (at %ld energies; %ld ps at %d)\n",
+               iteration, num_to_go, energies_unconverged,
+               pessimistic_samples[min_important_energy], min_important_energy);
+        printf("       <%d - %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
                lowest_problem_energy, highest_problem_energy,
                optimistic_samples[lowest_problem_energy],
-               optimistic_samples[highest_problem_energy], min_samples, energy,
-               ln_energy_weights[lowest_problem_energy]
-                 - ln_energy_weights[lowest_problem_energy-1],
-               1.0/min_T);
+               pessimistic_samples[lowest_problem_energy],
+               optimistic_samples[highest_problem_energy],
+               pessimistic_samples[highest_problem_energy], min_samples, energy);
         fflush(stdout);
       }
       for(int i = min_important_energy; i > max_entropy_state; i--){
@@ -769,7 +769,21 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
       return true;
     } else { // if end_condition == pessimistic_min_samples
       if (be_verbose) {
-        printf("am using pessimistic code\n");
+        long energies_unconverged = 0;
+        int highest_problem_energy = min_energy_state;
+        for (int i = min_important_energy; i > max_entropy_state; i--){
+          if (pessimistic_samples[i] < min_samples) {
+            energies_unconverged += 1;
+            if (i < highest_problem_energy) highest_problem_energy = i;
+          }
+        }
+        printf("[%9ld] Have %ld energies to go\n", iteration, energies_unconverged);
+        printf("       <%d - %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
+               min_important_energy, highest_problem_energy,
+               pessimistic_samples[min_important_energy],
+               optimistic_samples[min_important_energy],
+               pessimistic_samples[highest_problem_energy],
+               optimistic_samples[highest_problem_energy], min_samples, energy);
         fflush(stdout);
       }
       return pessimistic_samples[min_important_energy] >= min_samples;

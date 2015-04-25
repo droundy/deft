@@ -118,7 +118,7 @@ int main(int argc, const char *argv[]) {
   double default_pessimistic_sample_error = 0.2;
   double default_optimistic_sample_error = 0.1;
   double default_flatness = 0.1;
-  bool optimistic_sampling = true;
+  int optimistic_sampling = true; // popt requires it to be an int, not a bool
 
   int tmmc_min_samples = 2000;
 
@@ -277,6 +277,8 @@ int main(int argc, const char *argv[]) {
 
     {"optimistic_sampling", '\0', POPT_ARG_NONE, &optimistic_sampling, 0,
      "Sample optimistically?", "BOOLEAN"},
+    {"pessimistic_sampling", '\0', POPT_ARG_VAL, &optimistic_sampling, 0,
+     "Sample pessimistically?", "BOOLEAN"},
     {"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
      "Number of times to sample mininum energy", "INT"},
     {"sample_error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.sample_error, 0,
