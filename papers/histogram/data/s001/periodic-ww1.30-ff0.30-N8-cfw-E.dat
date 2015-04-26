@@ -1,0 +1,46 @@
+# version: 0.0.0-205-g2032787-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 8
+# walls: 0
+# cell dimensions: (4.44366, 4.44366, 5.65685)
+# seed: 1
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 48
+# min_T: 0.2
+# fractional_sample_error after initialization: 1
+# min_important_energy after initialization: 28
+
+# transitions_input_filename: /home/perlinm/deft/papers/histogram/data/periodic-ww1.30-ff0.30-N8-tmmc-golden-transitions.dat
+# iterations: 6400000
+# working moves: 30615153
+# total moves: 51200000
+# acceptance rate: 0.597952
+
+# min_important_energy: 28
+
+# energy   counts
+7  1
+8  160
+9  1615
+10  10818
+11  57463
+12  223588
+13  665640
+14  1551950
+15  2815313
+16  3902791
+17  4098172
+18  4140770
+19  4182687
+20  4177376
+21  4187111
+22  4199541
+23  4206727
+24  4247577
+25  4224802
+26  4171810
+27  134088

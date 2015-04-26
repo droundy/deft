@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
 
-#set -ev
+set -ev
 
 ff=0.3
 ww=1.3
 min_T=0.1
 
-for N in 55 60 70 80 90 100; do
-    echo Working on N=$N
+for N in `seq 5 30`; do
+    echo "\nWorking on N=$N\n"
     python2 run-golden.py $ww $ff $min_T $N
 done
