@@ -112,9 +112,9 @@
 
 \newpage
 
-\listof{figure}{\Large List of Figures}
-
 \listof{algorithm}{\Large List of Algorithms}
+
+\listof{figure}{\Large List of Figures}
 
 \thispagestyle{empty}
 
@@ -133,20 +133,20 @@ We wish to identify and develop efficient numerical methods for
 determining thermodynamic properties of the square-well fluid in order
 to test square-well density functional theories. The liquid-vapor
 phase interface is an interesting regime for testing density
-functional theories, but unbiased Monte Carlo simulations are
-incapable of sampling the low energy fluid states which dominate the
-partition function at low (i.e. liquid-state) temperatures. Several
-generic Monte Carlo ``histogram methods'' for collecting statistics on
-low energy system states have been developed \fixme{by whom?}, but
-little or no literature exists on their systematic comparison and
-their application to the square-well fluid. The square-well fluid in
-particular introduces application challenges not manifest in
-traditional models for testing and benchmarking such numerical
-techniques (e.g. the Ising model). We propose to implement these
-methods in Monte Carlo simulations of the square-well fluid, determine
-appropriate performance metrics for their comparison, and identify
-those methods which are most efficient and effective at sampling
-otherwise improbable system states.
+functional theories, but unbiased (i.e. Metropolis) Monte Carlo
+simulations are incapable of sampling the low energy fluid states
+which dominate the partition function at low (i.e. liquid-state)
+temperatures. Several generic Monte Carlo ``histogram methods'' for
+collecting statistics on low energy system states have been developed
+\fixme{by whom?}, but little or no literature exists on their
+systematic comparison and their application to the square-well
+fluid. The square-well fluid in particular introduces application
+challenges not manifest in traditional models for testing and
+benchmarking such numerical techniques (e.g. the Ising model). We
+propose to implement these methods in Monte Carlo simulations of the
+square-well fluid, determine appropriate performance metrics for their
+comparison, and identify those methods which are most efficient and
+effective at sampling otherwise improbable system states.
 
 \fixme{Rewrite after the rest of the thesis is completed}
 
@@ -176,22 +176,22 @@ liquid and gaseous phases implies a localized distribution of
 spheres. The search for liquid states of the square-well fluid is thus
 equivalent to the search for low energy states.
 
-Monte Carlo simulations (Section \ref{sec:mc_sim}) are a standard
-method for studying the thermodynamic properties of a system. In the
-most straightforward implementation of Monte Carlo simulations,
-however, highly localized distributions of spheres are extremely
-unlikely to occur, making such simulations impractical for studying
-the critical point of the square-well fluid. Several generic
-computational methods, called histogram methods (Section
-\ref{sec:histogram_methods}), exist for dealing with such a problem;
-namely, that interesting regions of a system's state space cannot be
-sampled via standard Monte Carlo simulations in a reasonable amount of
-time. There is no consensus, however, on the relative efficacy of
-these methods. Furthermore, some methods, such as the Wang-Landau
-method\cite{wang_landau}, require tuning several free parameters that
-lack both ``obvious'' values and systematic means for assigning
-them. This work will thus attempt to quantify and compare the
-effectiveness of a few such methods.
+Monte Carlo simulations are a standard means for studying the
+thermodynamic properties of a system. In the most straightforward
+implementation of Monte Carlo fluid simulations (Section
+\ref{sec:mc_sim}), however, highly localized distributions of fluid
+elements are extremely unlikely to occur, making such simulations
+impractical for studying the critical point of the square-well
+fluid. Several generic computational methods, called histogram methods
+(Section \ref{sec:histogram_methods}), exist for dealing with such a
+problem; namely, that interesting regions of a system's state space
+cannot be sampled via standard Monte Carlo methods in a reasonable
+amount of time. There is no consensus, however, on the relative
+efficacy of these methods. Furthermore, some methods, such as the
+Wang-Landau method\cite{wang_landau}, require tuning several free
+parameters that lack both ``obvious'' values and systematic means for
+assigning them. This work will thus attempt to quantify and compare
+the effectiveness of a few such methods.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -272,11 +272,12 @@ desired level of accuracy.
 \label{sec:mc_implementation}
 
 \begin{algorithm}[tb]
-  \caption{Unbiased Monte Carlo fluid simulation}
+  \caption{Metropolis Monte Carlo fluid simulation}
   \label{alg:MC}
   \begin{alg}
 
-  \item Construct an initial ``typical'' fluid configuration.
+  \item Construct an initial ``typical'' (i.e. non-ordered) fluid
+    configuration. \fixme{explain how}
 
   \item Attempt to change the position of one sphere (in general, a
     single fluid ``atom'' or ``molecule'') to a random location,
@@ -298,23 +299,24 @@ desired level of accuracy.
   \end{alg}
 \end{algorithm}
 
-Algorithm \ref{alg:MC} provides a sketch of unbiased Monte Carlo fluid
-simulations. Such an algorithm is ``unbiased'' in the sense that it
-collects statistics (i.e. data) on all valid system configurations
-with equal probability. Statistics whose collection time scales as
-$\mathcal O\p{1}$ with system size, meaning that increasing the number
-of spheres $N$ in the simulation does not affect collection time, can
-be collected after every move (defined in the algorithm). Statistics
-whose collection time scales as $\mathcal O\p{N}$, meaning that
-doubling $N$ doubles collection time, can be collected after each
-iteration. In general, collection with $\mathcal O\sp{\chi\p{N}}$ time
-scaling should not occur more often than once every $\chi\p{N}$ moves
-(where $\chi\p{N}$ may be an arbitrary function of only $N$ void of
-constant prefactors, e.g. $N\log N$, or $2^N$). These collection rules
-ensure that scaling up simulations does not cause them to
-asymptotically spend all of their time collecting statistics, and no
-time actually simulating the fluid. Collected statistics are used to
-find thermodynamic properties of the simulated fluid.
+Algorithm \ref{alg:MC} provides a sketch of unbiased, Metropolis Monte
+Carlo fluid simulations. Such an algorithm is ``unbiased'' in the
+sense that it collects statistics (i.e. data) on all valid system
+configurations with equal probability. Statistics whose collection
+time scales as $\mathcal O\p{1}$ with system size, meaning that
+increasing the number of spheres $N$ in the simulation does not affect
+collection time, can be collected after every move (defined in the
+algorithm). Statistics whose collection time scales as $\mathcal
+O\p{N}$, meaning that doubling $N$ doubles collection time, can be
+collected after each iteration. In general, collection with $\mathcal
+O\sp{\chi\p{N}}$ time scaling should not occur more often than once
+every $\chi\p{N}$ moves (where $\chi\p{N}$ may be an arbitrary
+function of only $N$, void of constant prefactors, e.g. $N\log N$, or
+$2^N$). These collection rules ensure that scaling up simulations does
+not cause them to asymptotically spend all of their time collecting
+statistics, and no time actually simulating the fluid. Collected
+statistics are used to find thermodynamic properties of the simulated
+fluid.
 
 In this work, we are concerned with simulating the \emph{homogeneous}
 square-well fluid. To avoid edge effects resulting from fluid behavior
@@ -377,7 +379,7 @@ in terms of which
 \subsection{Histogram methods}
 \label{sec:histogram_methods}
 
-Due to the fact that unbiased Monte Carlo simulations sample all of
+Due to the fact that Metropolis Monte Carlo simulations sample all of
 state space randomly and without preference, a histogram $H\p{X}$ of
 observations of some system property $X$ is directly proportional to
 the density of states $D\p{X}$; that is, the number of observations
@@ -385,14 +387,14 @@ $H\p{X_0}$ of the system with $X\p{s}=X_0$ is proportional to the
 total number of states $s$ for which $X\p{s}=X_0$. It is sometimes the
 case, however, that the density of states in some region $R$ in the
 range of possible $X$ is so low that it is practically impossible (via
-unbiased Monte Carlo) to sufficiently sample $R$, that is, accumulate
-a statistically significant histogram $H\p{X\in R}$, in any reasonable
-amount of time.
+Metropolis Monte Carlo) to sufficiently sample $R$, that is,
+accumulate a statistically significant histogram $H\p{X\in R}$, in any
+reasonable amount of time.
 
 \subsubsection{Biased sampling}
 \label{sec:biased_sampling}
 
-Histogram methods provide a means to address unbiased Monte Carlo's
+Histogram methods provide a means to address Metropolis Monte Carlo's
 inability to sufficiently sample regions of parameter space with a low
 density of states by introducing a bias into the otherwise random
 sampling of state space. A weighting function $w$ is introduced, whose
@@ -424,7 +426,7 @@ that are constant with respect to $X\p{s}$.
     argument is a system property $X\p{s}$ determined by the
     microstate $s$.
 
-  \item Construct an initial ``typical'' fluid configuration.
+  \item Construct an initial typical fluid configuration.
 
   \item Attempt to change the position of one sphere, rejecting the
     change if
@@ -482,6 +484,9 @@ non-negative integer and $\epsilon$ is the well depth, in simulation
 we store the weight function as an array of values. We may therefore
 use the terms ``weight function,'' and ``weight array,'' and
 ``weights'' interchangeably.
+
+\fixme{mention that simulating with flat weights $w\p{E}=w_0$ is the
+  same as running a Metropolis MC simulation.}
 
 \subsubsection{Canonical weights}
 \label{sec:canonical_weights}
@@ -577,8 +582,12 @@ will allow us to determine, for various square-well fluids,
 
 \fixme{Give an overview of the methods section}
 
+\fixme{Make a note on storing the logarithm of weights and
+  periodically rescaling them (resetting the zero on $\ln w$) to
+  reduce numerical error.}
+
 \subsection{The flat histogram (multi-canonical) method}
-\label{sec:flat_historam}
+\label{sec:flat_histogram}
 
 The flat histogram method, also called the multi-canonical method,
 assumes complete knowledge of the density of states $D\p{E}$ of the
@@ -595,64 +604,207 @@ D\p{E}$ due to the scale-invariance of $w\p{E}$.
 For all but the most trivial or well-studied systems, however, the
 density of states $D\p{E}$ is not known prior to simulation, and is in
 fact one of the system properties which a simulation is intended to
-determine. A naive way to implement the flat histogram method without
-knowing a priori the density of states $D\p{E}$ involves first running
-a simulation without weights (or with constant weights $w\p{E}=w_0$)
-while collecting a histogram $H\p{E}$ of the observed energies
-$E$. After some time (loosely defined), the histogram $H\p{E}$ may be
-taken as an approximation of the density of states $\tilde D\p{E}$
-(see Section \ref{sec:histogram_methods}), and used via
-(\ref{eq:flat_weights}) to generate a weight array for an actual
-simulation.
-
-The problem with this implementation is that histogram methods are
-generally necessary when some range of energies $R$ is inaccessible
-via unbiased Monte Carlo simulations. In such a case, the energy
-histogram $H\p{E\in R}$ after simulating for any reasonable amount of
-time will be statistically insignificant or null, invalidating the
-approximation $H\p{E}\approx\tilde D\p{E}$. This method will therefore
-only ``flatten'' the histogram at energies $E$ which have been
-sufficiently sampled for $H\p{E}$ to be statistically significant. The
-end goal in implementing histogram methods, however, is precisely to
-sample those energies that cannot be sufficiently sampled without
-employing clever schemes to bias Monte Carlo simulations. The flat
-histogram method therefore does not directly help us study the
-square-well fluid. Nonetheless, the this method has pedagogical value
-by enabling discussion of an ``optimal'' weight array for generating a
+determine. Nonetheless, the this method has pedagogical value by
+enabling discussion of an ``optimal'' weight array for generating a
 flat energy histogram in simulations. All algorithms to construct
 $w\p{E}$ with the aim of producing a flat energy histogram should
 converge on the same weight array, given by (\ref{eq:flat_weights}).
 
+\begin{algorithm}[b]
+  \caption{A naive flat histogram method}
+  \label{alg:flat_histogram}
+  \begin{alg}
+
+  \item Construct an initial typical fluid configuration.
+
+  \item Simulate (without weights) for some time $\tau$, which may be
+    real time, computer time, or a number of simulation iterations,
+    collecting a histogram $H\p{E}$ of energy observations after every
+    move.
+
+  \item Set weights $w\p{E}=1/H\p{E}$. At energies with $H\p{E}=0$,
+    set $w\p{E}=1$.
+
+  \end{alg}
+\end{algorithm}
+
+Algorithm \ref{alg:flat_histogram} provides a naive way to implement
+the flat histogram method without knowing a priori the density of
+states $D\p{E}$. This algorithm involves first running a simulation
+without weights (or with constant weights $w\p{E}=w_0$) while
+collecting a histogram $H\p{E}$ of the observed energies $E$. After
+some time (loosely defined), the histogram $H\p{E}$ may be taken as an
+approximation of the density of states $\tilde D\p{E}$ (see Section
+\ref{sec:histogram_methods}), and used via (\ref{eq:flat_weights}) to
+generate a weight array for an actual simulation. Algorithm
+\ref{alg:flat_histogram} has one free parameter, which determines the
+amount of time for which to collect an energy histogram $H\p{E}$.
+
+The problem with this implementation of the flat histogram method is
+that histogram methods are generally necessary when some range of
+energies $R$ is inaccessible via Metropolis Monte Carlo
+simulations. In such a case, the energy histogram $H\p{E\in R}$ after
+simulating for any reasonable amount of time will be statistically
+insignificant or null, invalidating the approximation
+$H\p{E}\approx\tilde D\p{E}$. This method will therefore only
+``flatten'' the histogram at energies $E$ which have been sufficiently
+sampled for $H\p{E}$ to be statistically significant. The end goal in
+implementing histogram methods, however, is precisely to sample those
+energies that cannot be sufficiently sampled without employing clever
+schemes to bias Monte Carlo simulations. The flat histogram method
+therefore does not directly help us study the square-well fluid, but
+it does provide the basis for the method in Section
+\ref{sec:simple_flat}.
+
 \subsection{The simple flat method}
 \label{sec:simple_flat}
 
+The ``simple flat'' method, developed by ourselves, extends the
+implementation of the flat histogram method discussed in Section
+\ref{sec:flat_histogram} to an algorithm intended to be the simplest
+viable broad energy histogram method. While we do not expect this
+method to outperform other, more sophisticated methods, the simple
+flat method should provide a lower bar and a standard of comparison
+for the performance of other methods. Any nontrivial histogram method
+should, at a minimum, consistently outperform the simple flat method
+in order to be considered for any applications.
 
+The idea behind the simple flat method is such: after simulating for
+some time, the energy histogram $H\p{E}$ will have a peak, or some
+other uneven distribution of observations, in a region of energies $R$
+for which $H\p{E\in R}$ statistically significant. One can thus use
+the existing histogram to construct weights which should flatten
+$H\p{R}$. Subsequent simulations should then spend less time at
+energies with the highest state densities, and more time at energies
+with relatively low state densities. The energy histogram from such
+simulations should therefore be statistically significant in a larger
+range of energies, improving the available estimate for a density of
+states with which to compute flat histogram weights. One could then
+use the improved estimate to construct new weights, and repeat this
+simulation and updating process until simulations satisfy some end
+condition (in fact, all histograms will require end conditions, which
+is discussed in Section \ref{sec:end_conditions}).
 
-\fixme{Explain, provide algorithm. This method is our own.}
-
-\begin{algorithm}[H]
-  \caption{Simple flat initialization}
+\begin{algorithm}[!b]
+  \caption{The simple flat method}
   \label{alg:simple_flat}
+  \begin{alg}
+
+  \item Construct an initial typical fluid configuration.
+
+  \item Set $k=0$, set initial weights $w_0\p{E}=1$ for all $E$, and
+    choose an initial number of iterations $n_0$ for which to
+    simulate.
+
+  \item Simulate for $n_k$ iterations with weights $w_k\p{E}$,
+    collecting a histogram $H_k\p{E}$ of energy observations after
+    every move.
+    \label{alg:simple_flat_sim}
+
+  \item If some predetermined initialization end condition has
+    \emph{not} been met, then:
+    \begin{enumerate}
+    \item increment $k\leftarrow k+1$,
+    \item set $n_k=u\p{n_{k-1}}$ with a predetermined function
+      $u:u\p{n}\ge n$,
+      \label{alg:simple_flat_f}
+    \item update weights as $w_k\p{E}=w_{k-1}\p{E}/H_{k-1}\p{E}$ for
+      all $E$ at which $H_{k-1}\p{E}\ne0$,
+      \label{alg:simple_flat_weight_update}
+    \item return to step \ref{alg:simple_flat_sim}.
+    \end{enumerate}
+
+  \end{alg}
 \end{algorithm}
+
+Algorithm \ref{alg:simple_flat} provides an implementation of the
+simple flat method. This algorithm has two free ``parameters'': the
+initial number of iterations $n_0$ for which to simulate, and the
+function $u\p{n}$ used in step \ref{alg:simple_flat_f}. With an
+appropriate choice of the function $u\p{n}$, this algorithm should not
+be particularly sensitive to the value of $n_0$.
+
+The most interesting part of Algorithm \ref{alg:simple_flat} is step
+\ref{alg:simple_flat_weight_update}, which updates the weights as
+$w_k\p{E}=w_{k-1}\p{E}/H_{k-1}\p{E}$. The reasoning behind this step
+is such: say that for two energies $E_0$ and $E_b$ we have that
+$H\p{E_0}=\bk{H}_E$ and $H\p{E_b}=b\bk{H}_E$, where $\bk{H}_E$ is the
+mean histogram value over all energies. In this case, we wish to
+decrease the current simulation bias on $E_b$ by a factor of $b$ while
+keeping the bias on $E_0$ the same. As the weights $w\p{E}$ are
+proportional to the simulation bias on $E$, dividing the weights
+$w\p{E}$ by the current histogram $H\p{E}$ achieves the desired
+changes to the simulation biases. The factor $\bk{H}_E$ in this weight
+update does not affect results, and is in practice immediately scaled
+out of the weight array.
+
+In our implementation of the simple flat method, we chose $u\p{n}=2n$
+so that even if the choice of initial $n_0$ is too small, $n_k=2^kn_0$
+should quickly approach the appropriate scale for the system at
+hand. We also used $n_0=L\exp\p{\epsilon/kT_{\t{min}}}$, where $L$ is
+the number of energy levels in the given square-well fluid and
+$T_{\t{min}}$ is a minimum temperature of interest for the current
+simulation. The factor of $L$ appears because initialization time
+should scale with the range of energies of the simulated system. If we
+have twice the number of energies, we should explore energy space for
+twice as long. To estimate $L$, we multiplied the maximum number of
+spheres $M$ which fit within a radius of $\lambda\sigma$ of a single
+sphere on a face-centered cubic lattice (i.e. the maximum number of
+spheres with which a given sphere could interact) by the total number
+of spheres $N$, and divided the result by two so as to not
+double-count interactions between spheres (so $L=MN/2$). The
+exponential $\exp\p{\epsilon/kT_{\t{min}}}$, a Boltzmann factor for
+two adjacent energies, appears because lower minimum temperatures of
+interest warrant sampling lower energies, which in turn requires
+simulating for longer (in step \ref{alg:simple_flat_sim} of Algorithm
+\ref{alg:simple_flat}) because these energies have lower state
+densities. The introduction of a minimum temperature may seem ad-hoc,
+but all simulations in this paper require a choice of minimum
+temperature anyways (see Section \ref{sec:min_energy}). In this paper,
+we will always use $kT_{\t{min}}=0.2\epsilon$.
 
 \subsection{The Wang-Landau (WL) method}
 \label{sec:wang_landau}
 
+The Wang-Landau method is the first published histogram method we
+discuss, and is the standard method\fixme{cite} to achieve broad
+energy sampling in Monte Carlo simulations\cite{wang_landau,
+  wang_landau_analysis, wang_landau_mod}.
+
+
 \fixme{Explain the motivation behind the Wang-Landau method, and
-  provide the algorithm. Talk about the free parameters and roughly
-  what they control.}
+  explain/provide the algorithm.}
 
-\begin{algorithm}[H]
-  \caption{Wang-Landau calculation of weights}
+
+\begin{algorithm}[tb]
+  \caption{Wang-Landau initialization of weights}
   \label{alg:wang_landau}
+  \begin{alg}
+
+  \item Construct an initial typical fluid configuration
+
+  \item Set $k=0$, choose some factor $f_0>0$, and initialize
+    $w\p{E}=1$ for all $E$.
+
+  \item Simulate for $n$ iterations. After each move, increment the
+    histogram $H\p{E}$ of energy observations and update
+    $w\p{E}\leftarrow w\p{E}/f_k$, where $E$ is the current energy of
+    the system.
+    \label{alg:wang_landau_sim}
+
+  \item If the histogram $H\p{E}$ is sufficiently flat, i.e. if it
+    satisfies some predetermined ``flatness'' condition $C\sp{H}$,
+    then
+    \begin{enumerate}[label=(\alph*)]
+    \item increment $k\leftarrow k+1$,
+    \item set $f_k=u\p{f_{k-1}}$ with a predetermined function
+      $u:u\p{f}<f$,
+    \item if $f_k>c$ for some predetermined $c$, return to step
+      \ref{alg:wang_landau_sim}.
+    \end{enumerate}
+
+  \end{alg}
 \end{algorithm}
-
-% \subsubsection{Modifications}
-% \label{sec:wang_landau_mod}
-
-% \fixme{Talk about our modifications to Wang-Landau made to adapt it
-% to the square-well fluid, as well as (if I have time) other research
-% groups' modifications.}
 
 \subsection{The optimized ensemble (OE) method}
 \label{sec:optimized_ensemble}
@@ -660,10 +812,10 @@ converge on the same weight array, given by (\ref{eq:flat_weights}).
 \fixme{Explain, provide algorithm.}
 
 \begin{algorithm}[H]
-  \caption{Finding weights by optimizing energy walker currents}
+  \caption{Modifying weights via the optimized ensemble}
   \label{alg:optimized_ensemble}
 \end{algorithm}
-uu
+
 \subsection{The transition matrix Monte Carlo (TMMC) method}
 \label{sec:tmmc}
 
@@ -671,7 +823,7 @@ uu
   based on other work.}
 
 \begin{algorithm}[H]
-  \caption{Transition matrix Monte Carlo simulation}
+  \caption{Transition matrix Monte Carlo initialization}
   \label{alg:tmmc}
 \end{algorithm}
 
@@ -718,6 +870,14 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
   minimum important energy is directly related to canonical weights at
   a temperature of $T_{\t{min}}$.}
 
+\fixme{Mention that in all initializations which simulate for some
+  time with unchanging weights (i.e. simple flat), the weight array
+  should be set to canonical weights below the minimum important
+  energy, as soon as it is identified.}
+
+\fixme{Mention that weights should be set to canonical weights below
+  the minimum important energy after all initializations.}
+
 \subsubsection{Computing the density of states}
 \label{sec:dos}
 
@@ -727,8 +887,8 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
   our energy histogram. We can also compute the density of states from
   the transition matrix, which is sometimes more appropriate to do.}
 
-% \subsection{End conditions}
-% \label{sec:end_conditions}
+\subsection{End conditions}
+\label{sec:end_conditions}
 
 % \fixme{Talk about how we want method-independent end conditions, if
 % possible. Introduce the concept of statistically independent energy
