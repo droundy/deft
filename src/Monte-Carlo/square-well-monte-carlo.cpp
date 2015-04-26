@@ -514,10 +514,7 @@ int main(int argc, const char *argv[]) {
 
   // Set default data directory
   if (strcmp(data_dir,"none") == 0){
-    sprintf(data_dir,"%s",default_data_dir);
-    if(seed){
-      sprintf(data_dir,"%s/s%03ld",data_dir,seed);
-    }
+    sprintf(data_dir,"%s/s%03ld",default_data_dir,seed);
     printf("\nUsing default data directory: [deft]/%s\n",data_dir);
   }
 

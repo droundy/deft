@@ -9,8 +9,8 @@ matplotlib.rc('text', usetex=True)
 
 import styles
 
-if len(sys.argv) != 6:
-    print 'useage: %s ww ff N min_T methods' % sys.argv[0]
+if len(sys.argv) != 7:
+    print 'useage: %s ww ff N min_T methods seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -28,7 +28,10 @@ min_T = eval(sys.argv[4])
 methods = eval(sys.argv[5])
 #arg methods = [["wang_landau","simple_flat","tmmc","oetmmc"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-conv_T%g-%s.dat" % (ww, ff, N, method, min_T, data) for method in methods for data in ["E","lnw"]]
+seed = int(sys.argv[6])
+#arg seed = [0]
+
+# input: ["data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-conv_T%g-%s.dat" % (seed, ww, ff, N, method, min_T, data) for method in methods for data in ["E","lnw"]]
 
 max_T = 2
 T_bins = 1e3
@@ -43,10 +46,10 @@ S = {} # entropy
 minlog = 0
 for method in methods:
 
-    e_hist = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-conv_T%g-E.dat"
-                           % (ww, ff, N, method, min_T), ndmin=2)
-    lnw_hist = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-%s-conv_T%g-lnw.dat"
-                             % (ww, ff, N, method, min_T), ndmin=2)
+    e_hist = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-conv_T%g-E.dat"
+                           % (seed, ww, ff, N, method, min_T), ndmin=2)
+    lnw_hist = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-conv_T%g-lnw.dat"
+                             % (seed, ww, ff, N, method, min_T), ndmin=2)
 
     energy = -e_hist[:,0] # array of energies
     lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy

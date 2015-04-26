@@ -1,0 +1,73 @@
+# version: 0.0.0-180-gcbcf83e-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 19
+# walls: 0
+# cell dimensions: (6.4255, 6.4255, 6.4255)
+# seed: 0
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 108
+# min_T: 0.2
+# fractional_sample_error after initialization: 0.00881258
+# min_important_energy after initialization: 88
+
+# histogram method: tmmc
+# init_iter_limit: 36100000
+# iterations: 36100000
+# working moves: 348239348
+# total moves: 685900000
+# acceptance rate: 0.507712
+
+# energy	samples
+46  0
+47  2391499
+48  1288901
+49  832215
+50  576449
+51  414521
+52  305832
+53  230648
+54  177153
+55  138328
+56  109421
+57  87625
+58  70920
+59  58064
+60  47918
+61  39727
+62  33134
+63  27976
+64  23791
+65  20235
+66  17431
+67  14949
+68  12886
+69  11152
+70  9705
+71  8496
+72  7452
+73  6535
+74  5762
+75  5074
+76  4463
+77  3929
+78  3431
+79  2961
+80  2478
+81  2050
+82  1649
+83  1272
+84  961
+85  687
+86  490
+87  368
+88  234
+89  127
+90  72
+91  24
+92  6
+93  1
+94  1

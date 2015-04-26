@@ -99,7 +99,8 @@ public:
 
   // The following is for testing
   int run_finite_difference_test(const char *testname,
-                                 const Vector *direction = 0) const;
+                                 const Vector *direction = 0,
+                                 double stepsize = 0) const;
 protected:
   mutable double cached_energy; // store the energy here rather than
                                 // recompute it.  zero means invalid.

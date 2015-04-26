@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy
 import styles
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N methods' % sys.argv[0]
+if len(sys.argv) != 6:
+    print 'useage: %s ww ff N methods seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -21,13 +21,16 @@ N = int(sys.argv[3])
 methods = eval(sys.argv[4])
 #arg methods = [["nw","kT0.4","kT0.5","wang_landau","simple_flat","tmmc","oetmmc"]]
 
-# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version) for version in methods]
+seed = int(sys.argv[5])
+#arg seed = [0]
+
+# input: ["data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (seed, ww, ff, N, version) for version in methods]
 
 plt.title('Energy histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 
 for version in methods:
-    data = numpy.loadtxt(
-        "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (ww, ff, N, version))
+    data = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat"
+                         % (seed, ww, ff, N, version))
     energy = -data[:,0]/N
     DS = data[:,1]
     plt.semilogy(energy, DS, styles.dots(version), label=styles.title(version))

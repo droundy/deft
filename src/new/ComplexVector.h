@@ -66,7 +66,7 @@ public:
       *references_count += 1;
     } else {
       assert(size = a.size);
-      memcpy(data+offset, a.data+a.offset, size*sizeof(double)); // faster than manual loop?
+      memcpy(data+offset, a.data+a.offset, size*sizeof(std::complex<double>)); // faster than manual loop?
     }
   }
   void operator=(std::complex<double> x) {
@@ -190,6 +190,45 @@ public:
   int get_size() const {
     return size;
   }
+  std::complex<double> index3d(int Nx, int Ny, int Nz, int x, int y, int z) const {
+    return (*this)[x*Ny*(Nz/2+1) + y*(Nz/2+1) + z];
+  }
+  std::complex<double> &index3d(int Nx, int Ny, int Nz, int x, int y, int z) {
+    return (*this)[x*Ny*(Nz/2+1) + y*(Nz/2+1) + z];
+  }
+  void dumpSliceXR(const char *fname, int Nx, int Ny, int Nz, int x) const {
+    FILE *f = fopen(fname, "w");
+    for (int y= Ny/2; y<Ny; y++) {
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).real());
+      }
+      fprintf(f, "\n");
+    }
+    for (int y=0; y<=Ny/2; y++) {
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).real());
+      }
+      fprintf(f, "\n");
+    }
+    fclose(f);
+  }
+  void dumpSliceXI(const char *fname, int Nx, int Ny, int Nz, int x) const {
+    FILE *f = fopen(fname, "w");
+    for (int y= Ny/2; y<Ny; y++) {
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).imag());
+      }
+      fprintf(f, "\n");
+    }
+    for (int y=0; y<=Ny/2; y++) {
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).imag());
+      }
+      fprintf(f, "\n");
+    }
+    fclose(f);
+  }
+
 private:
   int size, offset;
   std::complex<double> *data;

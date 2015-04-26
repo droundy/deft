@@ -2,7 +2,8 @@
 #include <math.h>
 #include <float.h>
 
-int NewFunctional::run_finite_difference_test(const char *testname, const Vector *direction) const {
+int NewFunctional::run_finite_difference_test(const char *testname, const Vector *direction,
+                                              double stepsize) const {
   printf("\nRunning finite difference test on %s:\n", testname);
 
   int retval = 0;
@@ -25,10 +26,17 @@ int NewFunctional::run_finite_difference_test(const char *testname, const Vector
   // getting meaningful results:
   const double sigfigs_best = 1e-15;
   const double epsilon_max = 1e-15*fabs(Eold)/fabs(lderiv)/sigfigs_best;
-  const int min_p = (int) -floor(log10(epsilon_max) + 0.5);
+  int min_p = (int) -floor(log10(epsilon_max) + 0.5);
+  if (stepsize) {
+    const int old_min_p = min_p;
+    min_p = -floor(log10(stepsize*my_grad.norm()) + 0.5);
+    printf("user-specified delta of 1e%d instead of 1e%d from directional grad %g and energy %g\n",
+           -min_p, -old_min_p, lderiv, Eold);
+  } else {
+    printf("choosing delta of 1e%d based on directional grad %g and energy %g\n",
+           -min_p, lderiv, Eold);
+  }
   const int max_p = min_p + 7;
-  printf("choosing delta of 1e%d based on directional grad %g and energy %g\n",
-         -min_p, lderiv, Eold);
   double min = 1e300, best_ratio_error = 1.0;
   Vector grads(max_p + 1 - min_p);
   Vector diff_grads(max_p - min_p);

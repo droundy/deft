@@ -6,6 +6,7 @@
 #include <string.h>
 #include <math.h>
 #include <fftw3.h>
+#include <stdio.h>
 
 #include "ComplexVector.h"
 
@@ -218,6 +219,80 @@ public:
   }
   int get_size() const {
     return size;
+  }
+  double index3d(int Nx, int Ny, int Nz, int x, int y, int z) const {
+    return (*this)[x*Ny*Nz + y*Nz + z];
+    //return (*this)[x + y*Nx + z*Nx*Ny];
+  }
+  double &index3d(int Nx, int Ny, int Nz, int x, int y, int z) {
+    return (*this)[x*Ny*Nz + y*Nz + z];
+    //return (*this)[x + y*Nx + z*Nx*Ny];
+  }
+  void dumpSliceX(const char *fname, int Nx, int Ny, int Nz, int x) const {
+    FILE *f = fopen(fname, "w");
+    for (int y= Ny/2; y<Ny; y++) {
+      for (int z=Nz/2; z<Nz; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      fprintf(f, "\n");
+    }
+    for (int y=0; y<=Ny/2; y++) {
+      for (int z=Nz/2; z<Nz; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      fprintf(f, "\n");
+    }
+    fclose(f);
+  }
+  void dumpSliceY(const char *fname, int Nx, int Ny, int Nz, int y) const {
+    FILE *f = fopen(fname, "w");
+    for (int x= Nx/2; x<Nx; x++) {
+      for (int z=Nz/2; z<Nz; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      fprintf(f, "\n");
+    }
+    for (int x=0; x<=Nx/2; x++) {
+      for (int z=Nz/2; z<Nz; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      for (int z=0; z<=Nz/2; z++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      fprintf(f, "\n");
+    }
+    fclose(f);
+  }
+  void dumpSliceZ(const char *fname, int Nx, int Ny, int Nz, int z) const {
+    FILE *f = fopen(fname, "w");
+    for (int x= Nx/2; x<Nx; x++) {
+      for (int y=Ny/2; y<Ny; y++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      for (int y=0; y<=Ny/2; y++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      fprintf(f, "\n");
+    }
+    for (int x=0; x<=Nx/2; x++) {
+      for (int y=Ny/2; y<Ny; y++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      for (int y=0; y<=Ny/2; y++) {
+        fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
+      }
+      fprintf(f, "\n");
+    }
+    fclose(f);
   }
 private:
   int size, offset;

@@ -32,7 +32,7 @@ bool Minimize::improve_energy(Verbosity v) {
   double gdotd;
   {
     const Vector pg = pgrad(v);
-    const Vector g = grad();
+    const Vector g = grad(v);
     // Let's immediately free the cached gradient stored internally!
     invalidate_cache();
 
@@ -159,7 +159,7 @@ bool Minimize::improve_energy(Verbosity v) {
       printf("\t\tQuad: slope = %14.7g  curvature = %14.7g\n", slope, curvature);
       fflush(stdout);
     }
- 
+
     if (curvature <= 0.0) {
       if (v >= verbose) {
         printf("\t\tCurvature has wrong sign... %g\n", curvature);
@@ -221,13 +221,14 @@ bool Minimize::improve_energy(Verbosity v) {
         printf("\t\tQuad: s2 = %25.15g  E2 = %25.15g\n", step2, energy(v));
         fflush(stdout);
       }
-      
+
       // Check that the energy did indeed drop!  FIXME: this may do
       // extra energy calculations, since it's not necessarily shared
       // with the driver routine!
       if (better(E1, energy(v)) && better(E1, E0)) {
         // The first try was better, so let's go with that one!
         if (v >= verbose) printf("\t\tGoing back to the first try...\n");
+        fflush(stdout);
         invalidate_cache();
         *f -= (step2-step1)*direction;
         step = step1;
@@ -248,7 +249,7 @@ bool Minimize::improve_energy(Verbosity v) {
   // Finished with the line minimization!
 
   if (v >= verbose) {
-    pgrad(); // call pgrad here, since it might be more efficient to
+    pgrad(v); // call pgrad here, since it might be more efficient to
              // compute everything at once, rather than first
              // computing just the grad...
     printf("\t\tfinal stepsize: = %g\n", step);
@@ -262,7 +263,7 @@ bool Minimize::improve_energy(Verbosity v) {
   // being adequately converged.
   const double newE = energy(v);
   deltaE = newE - E0;
-  
+
   const double w = 0.01; // weighting for windowed average
   dEdn = (1-w)*dEdn + w*deltaE;
   dEdn = max(deltaE, old_deltaE);

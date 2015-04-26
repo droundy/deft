@@ -1,8 +1,12 @@
-run N = 35 through 100 calculations
+add seed = 9 data
+run nw, wang landau, cfw simulations for N = 5..26 for all seeds
+
+use other seeds in figures
 
 print data periodically during initialization
 
-wang landau and cfw simulations
+
+
 
 treat optimized ensemble separately
 - plot OE figures separately (don't plot for now)

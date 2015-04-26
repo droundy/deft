@@ -1,0 +1,72 @@
+# version: 0.0.0-135-ga62a855-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 9
+# walls: 0
+# cell dimensions: (3.84833, 3.84833, 8.48528)
+# seed: 1
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 48
+# min_T: 0.2
+# fractional_sample_error after initialization: 0.0399053
+# min_important_energy after initialization: 28
+
+# histogram method: simple flat
+# init_iter_limit: 8100000
+# iterations: 8100000
+# working moves: 3444512
+# total moves: 7311420
+# acceptance rate: 0.471114
+
+# energy	ln(weight)
+0  0
+1  0
+2  0
+3  0
+4  0
+5  0
+6  0
+7  0
+8  0
+9  0
+10  0
+11  0
+12  0
+13  0
+14  0
+15  0
+16  0
+17  0.222679
+18  0.996612
+19  2.38274
+20  4.41789
+21  7.17372
+22  10.223
+23  13.1785
+24  16.0531
+25  19.1016
+26  22.4669
+27  26.3443
+28  30.187
+29  35.187
+30  40.187
+31  45.187
+32  50.187
+33  55.187
+34  60.187
+35  65.187
+36  70.187
+37  75.187
+38  80.187
+39  85.187
+40  90.187
+41  95.187
+42  100.187
+43  105.187
+44  110.187
+45  115.187
+46  120.187
+47  125.187

@@ -4,8 +4,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
 
-if len(sys.argv) != 5:
-    print 'useage: %s ww ff N kTs' % sys.argv[0]
+if len(sys.argv) != 6:
+    print 'useage: %s ww ff N kTs seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -20,6 +20,9 @@ N = float(sys.argv[3])
 
 kTs = eval(sys.argv[4])
 #arg kTs = [[0.1, 1, 2]]
+
+seed = int(sys.argv[6])
+#arg seed = [0]
 
 # FIXME: make this an input?
 max_radius = 7
@@ -37,12 +40,15 @@ plt.title('Radial distribution function for $\lambda=%g$, $\eta=%g$, and $N=%i$'
 
 # FIXME: would it be better to use data from simulations with fixed kT?
 
-g_data = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-g.dat" % (ww, ff, N), ndmin=2)
+g_data = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-nw-g.dat"
+                       % (seed, ww, ff, N), ndmin=2)
 g_counts = g_data[:,0][::-1]
 gs = g_data[:,1:]
 
-e_hist = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-E.dat" % (ww, ff, N), ndmin=2)
-lnw_hist = numpy.loadtxt("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-lnw.dat" % (ww, ff, N), ndmin=2)
+e_hist = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-nw-E.dat"
+                       % (seed, ww, ff, N), ndmin=2)
+lnw_hist = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-nw-lnw.dat"
+                         % (seed, ww, ff, N), ndmin=2)
 counts = e_hist[:,0][::-1]
 use_counts = [ i for i in range(len(counts))
                if counts[i] in g_counts ]
@@ -53,8 +59,8 @@ dos_data = e_hist[:,1]*numpy.exp(-(lnw_hist[:,1] - lnw_mean))
 dos = dos_data[use_counts]
 dos /= sum(dos)
 
-with open("data/periodic-ww%04.2f-ff%04.2f-N%i-nw-g.dat"
-          % (ww, ff, N),'r') as stream:
+with open("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-nw-g.dat"
+          % (seed, ww, ff, N),'r') as stream:
     first_line = stream.readline().split(' ')
 for i in range(len(first_line)):
     if 'de_g' in first_line[i]:
