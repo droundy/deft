@@ -483,9 +483,6 @@ int main(int argc, char *argv[]){
     num_timed = num_timed + 1;
     if (num_timed > num_to_time || j==(iterations-1)) {
       num_timed = 0;
-      for(long i=0; i<div; i++){
-        //printf("Number of spheres in division %ld = %ld\n", i+1, shells[i]);
-      }
       fflush(stdout);
       ///////////////////////////////////////////start of print.dat
       const clock_t now = clock();
@@ -717,7 +714,8 @@ int main(int argc, char *argv[]){
 
     // only write out the sphere positions after they've all had a
     // chance to move
-    if (j%N == 0 && workingmoves > 20*iterations_per_pressure_check) {
+    const long first_data_iterations = 20*iterations_per_pressure_check;
+    if (j%N == 0 && workingmoves > first_data_iterations) {
       density_saved_count++;
       for (long s=0;s<N;s++) {
         shells[shell(spheres[s], div, radius, sections)]++;
@@ -745,7 +743,7 @@ int main(int argc, char *argv[]){
       }
     }
     //  printf("Iterations per pressure %ld working moves is %ld\n",iterations_per_pressure_check, workingmoves);
-    if (j%iterations_per_pressure_check == 0 && workingmoves > 20*iterations_per_pressure_check) {
+    if (j%iterations_per_pressure_check == 0 && workingmoves > first_data_iterations) {
       double newpress = calcPressure(spheres, N, volume);
       //const double excpress = newpress - (N/volume)*kT; // difference from ideal gas pressure
       if (newpress != newpress) {
@@ -761,8 +759,7 @@ int main(int argc, char *argv[]){
       num_pressures_in_sum += 1;
     }
     
-    const long first_data_iterations = 20*iterations_per_pressure_check;
-    if(j % (20*iterations_per_pressure_check/100)==0 && j < first_data_iterations && j != 0){
+    if(j % (first_data_iterations/100)==0 && j < first_data_iterations && j != 0){
       double secs_to_go = secs_per_iteration*(first_data_iterations - j);
       long mins_to_go = secs_to_go / 60;
       long hours_to_go = mins_to_go / 60;
