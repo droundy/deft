@@ -761,22 +761,23 @@ int main(int argc, char *argv[]){
       num_pressures_in_sum += 1;
     }
     
-    
-    if(j % (20*iterations_per_pressure_check/100)==0 && j < 20*iterations_per_pressure_check && j != 0){
-      double secs_to_go = secs_per_iteration*(iterations - j);
+    const long first_data_iterations = 20*iterations_per_pressure_check;
+    if(j % (20*iterations_per_pressure_check/100)==0 && j < first_data_iterations && j != 0){
+      double secs_to_go = secs_per_iteration*(first_data_iterations - j);
       long mins_to_go = secs_to_go / 60;
       long hours_to_go = mins_to_go / 60;
       mins_to_go = mins_to_go % 60;
       if (hours_to_go > 5) {
-        printf("%.0f%% to first data... (%ld hours to go)\n",j/(iterations*1.0)*100, hours_to_go);
+        printf("%.0f%% to first data... (%ld hours to go)\n",j/(first_data_iterations*1.0)*100, hours_to_go);
       } else if (mins_to_go < 1) {
-        printf("%.0f%% to first data... (%.1f seconds to go)\n",j/(iterations*1.0)*100, secs_to_go);
+        printf("%.0f%% to first data... (%.1f seconds to go)\n",j/(first_data_iterations*1.0)*100, secs_to_go);
       } else if (hours_to_go < 1) {
-        printf("%.0f%% to first data... (%ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+        printf("%.0f%% to first data... (%ld minutes to go)\n",j/(first_data_iterations*1.0)*100, mins_to_go);
       } else if (hours_to_go < 2) {
-        printf("%.0f%% to first data... (1 hour, %ld minutes to go)\n",j/(iterations*1.0)*100, mins_to_go);
+        printf("%.0f%% to first data... (1 hour, %ld minutes to go)\n",j/(first_data_iterations*1.0)*100, mins_to_go);
       } else {
-        printf("%.0f%% to first data... (%ld hours, %ld minutes to go)\n",j/(iterations*1.0)*100, hours_to_go, mins_to_go);
+        printf("%.0f%% to first data... (%ld hours, %ld minutes to go)\n",
+               j/(first_data_iterations*1.0)*100, hours_to_go, mins_to_go);
       }
       fflush(stdout);
     }
