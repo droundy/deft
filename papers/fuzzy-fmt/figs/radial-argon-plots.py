@@ -8,7 +8,7 @@ if 'show' not in sys.argv:
   matplotlib.use('Agg')
 from pylab import *
 
-sigma = 0.3506 #nm
+sigma = 0.3405 #nm
 sigma_over_R=2**(5/6)
 
 rmaxplot = 4 # upper limit of our plots
