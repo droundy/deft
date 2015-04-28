@@ -1,0 +1,59 @@
+# version: 0.0.0-207-gf4e294c-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 11
+# walls: 0
+# cell dimensions: (4.25448, 4.25448, 8.48528)
+# seed: 16
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 60
+# min_T: 0.2
+# fractional_sample_error after initialization: 0.0110707
+# min_important_energy after initialization: 42
+
+# histogram method: oetmmc
+# init_iter_limit: 12100000
+# iterations: 12100000
+# working moves: 73556235
+# total moves: 133100000
+# acceptance rate: 0.552639
+
+# min_important_energy: 42
+
+# energy   counts
+11  2
+12  19
+13  324
+14  2203
+15  14208
+16  65228
+17  255942
+18  793036
+19  1956498
+20  3795512
+21  5845994
+22  7018826
+23  6514373
+24  6581365
+25  6654380
+26  6704052
+27  6758149
+28  6731368
+29  6522406
+30  6908621
+31  7122075
+32  6629222
+33  6137469
+34  6455326
+35  9289299
+36  3298947
+37  6882862
+38  1566975
+39  4256078
+40  1765076
+41  3703417
+42  2089868
+43  780880
