@@ -150,7 +150,7 @@ int main(int argc, char *argv[]){
         testp = true;
         testp_r = pow(2,-6/2)*testp_sigma;
     } else if (strcmp(argv[a],"testp_eps")==0){
-	testp_eps = atof(argv[a+1]);
+        testp_eps = atof(argv[a+1]);
         printf("Testp is %d, sigma is %f, eps is %f, last thing is %s\n",testp, testp_sigma,testp_eps,argv[a+1]);
     } else if (strcmp(argv[a],"potential") == 0){
       if (strcmp(argv[a+1],"wca") == 0) {
@@ -160,18 +160,18 @@ int main(int argc, char *argv[]){
         printf("Using Weeks-Chandler-Andersen potential by default\n");
       }
     } else if (strcmp(argv[a],"fcc")==0){
-	FCC=true;
-	length_of_cavity = atof(argv[a+1]);
+        FCC=true;
+        length_of_cavity = atof(argv[a+1]);
         lenx = leny = lenz = length_of_cavity;
         rad = maxrad = lenx/2;
         periodic[0] = true;
         periodic[1] = true;
         periodic[2] = true;
-	printf("FCC is true length of cavity is %g\n", length_of_cavity);
+        printf("FCC is true length of cavity is %g\n", length_of_cavity);
     }  else {
       printf("Bad argumendat:  %s\n%d\n", argv[a],(strcmp(argv[a],"fcc")));
-	printf("%d" ,(strcmp(argv[a],"fcc")));
-	return 1;
+        printf("%d" ,(strcmp(argv[a],"fcc")));
+        return 1;
       }
   }
   fflush(stdout);
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]){
     //spherical_outer_wall, volume should be
     //4*M_PI*(1/3)*(rad*rad*rad)... Also add need to add a volume for when both
     //are true.  -Sam
-  } 
+  }
 
   const char *outfilename = argv[4];
 
@@ -266,33 +266,32 @@ int main(int argc, char *argv[]){
       spheres[k] = fixPeriodic(spheres[k]); // move sphere into the periodic cell
       x=x+1;
       if (x >= 7){//pow(double(numberOfCubes),(1.0/3.0))){
-	x=0;
-	y=y+1;
+        x=0;
+        y=y+1;
       }
       if (y >= 7){//pow(double(numberOfCubes),(1.0/3.0))){
-	y=0;
-	z=z+1;
+        y=0;
+        z=z+1;
       }
       if (z >= 7){
-	round = round + 1;
-	x=0;
-	y=0;
-	z=0;
-	if (round <= 1){
-	  x1=1;
-	  y1=1;
-	  z1=0;
-	  
-	}else if (round == 2){
-	  x1=1;
-	  y1=0;
-	  z1=1;
-	}else if (round == 3){
-	  x1=0;
-	  y1=1;
-	  z1=1;	  
-	}
-	//	assert(round<=3 || k == N-1);
+        round = round + 1;
+        x=0;
+        y=0;
+        z=0;
+        if (round <= 1){
+          x1=1;
+          y1=1;
+          z1=0;
+        }else if (round == 2){
+          x1=1;
+          y1=0;
+          z1=1;
+        }else if (round == 3){
+          x1=0;
+          y1=1;
+          z1=1;
+        }
+        //        assert(round<=3 || k == N-1);
       }
     }
 
@@ -303,25 +302,23 @@ int main(int argc, char *argv[]){
       printf("Error creating file %s\n", outfilename);
       return 1;
     }
-    for(long i=0;i<N;i++){
+    for (long i=0;i<N;i++) {
       fprintf(out, "%g\t%g\t%g\n", spheres[i][0], spheres[i][1], spheres[i][2]);
-    }	
+    }
     fclose(out);
     fflush(stdout);
-  
-  }else {
-    
-    for(long i=0; i<N; i++) { 
+  } else {
+    for(long i=0; i<N; i++) {
       spheres[i]=rad*ran3();
       if (spherical_outer_wall) {
-	while (spheres[i].norm() > rad) {
-	  spheres[i] *= 0.9;
-	}
+        while (spheres[i].norm() > rad) {
+          spheres[i] *= 0.9;
+        }
       }
       if (spherical_inner_wall) {
-	while (spheres[i].norm() < innerRad) {
-	  spheres[i] *= rad/innerRad;
-	}
+        while (spheres[i].norm() < innerRad) {
+          spheres[i] *= rad/innerRad;
+        }
       }
     }
 
@@ -335,34 +332,33 @@ int main(int argc, char *argv[]){
       long counter = 0;
       long iters_initializing = 0, successes_initializing = 0;
       do {
-	counter = counter + 1;
-	olderPE = oldPE;
-	oldPE = newPE;
-	for (int j=0;j<paranoia*iterations_per_pressure_check/N;j++) {
-	  for (int i=0;i<N;i++) {
-	    Vector3d temp = move(spheres[i],scale);
-	    if(!overlap(spheres, temp, N, R, i)){
-	      spheres[i]=temp;
-	      successes_initializing++;
-	    }
-	    iters_initializing++;
-	  }
-	}
-	newPE = potentialEnergy(spheres,N,R);
-	const double pressure = calcPressure(spheres, N, volume);
-	if (counter%1 == 0) {
-	  printf("Potential energy is %g and pressure is %g (my paranoia = %ld)\n",
-		 newPE, pressure, paranoia);
-	  fflush(stdout);
-	}
-	paranoia = long(paranoia*1.3); // get a little more paranoid each time...
-	
-	// We keep going until the energy increases twice.  This is a
-	// heuristic to try to avoid starting taking data before the
-	// system has reached equilibrium.
+        counter = counter + 1;
+        olderPE = oldPE;
+        oldPE = newPE;
+        for (int j=0;j<paranoia*iterations_per_pressure_check/N;j++) {
+          for (int i=0;i<N;i++) {
+            Vector3d temp = move(spheres[i],scale);
+            if(!overlap(spheres, temp, N, R, i)){
+              spheres[i]=temp;
+              successes_initializing++;
+            }
+            iters_initializing++;
+          }
+        }
+        newPE = potentialEnergy(spheres,N,R);
+        const double pressure = calcPressure(spheres, N, volume);
+        if (counter%1 == 0) {
+          printf("Potential energy is %g and pressure is %g (my paranoia = %ld)\n",
+                 newPE, pressure, paranoia);
+          fflush(stdout);
+        }
+        paranoia = long(paranoia*1.3); // get a little more paranoid each time...
+        // We keep going until the energy increases twice.  This is a
+        // heuristic to try to avoid starting taking data before the
+        // system has reached equilibrium.
       } while (olderPE > oldPE || oldPE > newPE);
       printf("olderPE %g  oldPE %g  newPE %g\n", olderPE, oldPE, newPE);
-      
+
       // At this stage, iters_initializing is the number of iterations
       // we spent trying to get the system into a decent starting state.
       // It seems risky to not run the simulation much more than we
@@ -412,11 +408,9 @@ int main(int argc, char *argv[]){
       FCC_shells[s][1] = note*length_of_cavity*(1/FCC_div);
       note1=note1+1;
       if (s>(note+1)*(FCC_div+1)){
-	//printf("true s is %ld note + 1 is %ld note1 is %ld\n", s, note+1, note1); 
-	note = note+1;
-	note1 = 0;
+        note = note+1;
+        note1 = 0;
       }
-      
     }
   }
   if (flat_div){
@@ -466,7 +460,7 @@ int main(int argc, char *argv[]){
   long num_pressures_in_sum=0;
   double pressure_sum = 0;
 
-	
+
   clock_t output_period = CLOCKS_PER_SEC*60; // start at outputting every minute
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // top out at one hour interval
   clock_t last_output = clock(); // when we last output data
@@ -585,9 +579,8 @@ int main(int argc, char *argv[]){
           }
           fclose(out);
         }
-	
-	if (FCC && false) { // DISABLE THIS OUTPUT FOR NOW!
-	  
+
+        if (FCC && false) { // DISABLE THIS OUTPUT FOR NOW!
           char *gfilename = new char[1000];
           sprintf(gfilename, "%s.fcc", outfilename);
           out = fopen(gfilename, "w");
@@ -596,12 +589,12 @@ int main(int argc, char *argv[]){
             return 1;
           }
           delete[] gfilename;
-	  //          fprintf(out, "%g\t%g\n", 0.0, radial_distribution[0]);
-	  for (long i=0; i<FCC_div2+1; i++) {
-	    fprintf(out, "%g\t%g\t%g\n",FCC_shells[i][0], FCC_shells[i][1], FCC_shells[i][2]);
-	  }
+          //          fprintf(out, "%g\t%g\n", 0.0, radial_distribution[0]);
+          for (long i=0; i<FCC_div2+1; i++) {
+            fprintf(out, "%g\t%g\t%g\n",FCC_shells[i][0], FCC_shells[i][1], FCC_shells[i][2]);
+          }
           fclose(out);
-	  printf("SAVED FCC\n");
+          printf("SAVED FCC\n");
         }
 
         fflush(stdout);
@@ -619,9 +612,7 @@ int main(int argc, char *argv[]){
         } else {
           printf("No pressure data yet after %ld iterations, compared with %ld\n",
                  j, iterations_per_pressure_check);
-          fflush(stdout);
         }
-        
         fflush(stdout);
       }
       ///////////////////////////////////////////end of print.dat
@@ -723,26 +714,26 @@ int main(int argc, char *argv[]){
         // density as a function of position.
         if (!FCC) shells[shell(spheres[s], div, radius, sections)]++;
         if (FCC && false) { // DISABLE THIS OUTPUT FOR NOW!
-	  for(long n=0;n<FCC_div2;n++){
-	    if (FCC_shells[n][0] <= spheres[s][0] &&
+          for(long n=0;n<FCC_div2;n++){
+            if (FCC_shells[n][0] <= spheres[s][0] &&
                 FCC_shells[n+1][0]  >= spheres[s][0] &&
                 FCC_shells[n][1] <= spheres[s][1] &&
                 FCC_shells[n+1][1]  >= spheres[s][1] ){
-	      FCC_shells[n][2] = FCC_shells[n][2]+1;
-	      n=FCC_div2+2;
+              FCC_shells[n][2] = FCC_shells[n][2]+1;
+              n=FCC_div2+2;
             }
           }
         }
-	for (long i=0; i<N; i++){
-	  for (long k=0; k<div; k++) {
-	    Vector3d vri = spheres[i]-spheres[s];
-	    vri = fixPeriodic(vri);
-	    const double ri = distance(vri,Vector3d(0,0,0));
-	    if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
-	      radial_distributon_histogram[k]++;
-	    }
-	  }
-	}
+        for (long i=0; i<N; i++){
+          for (long k=0; k<div; k++) {
+            Vector3d vri = spheres[i]-spheres[s];
+            vri = fixPeriodic(vri);
+            const double ri = distance(vri,Vector3d(0,0,0));
+            if (ri < shellsRadius[k+1] && ri > shellsRadius[k] && s != i) {
+              radial_distributon_histogram[k]++;
+            }
+          }
+        }
       }
     }
     //  printf("Iterations per pressure %ld working moves is %ld\n",iterations_per_pressure_check, workingmoves);
@@ -828,13 +819,13 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   if (spherical_inner_wall) {
     if (distance(v,Vector3d(0,0,0)) < innerRad) return true;
   }
-  if (has_x_wall){
+  if (has_x_wall) {
     if (v[0] > lenx/2 || v[0] < -lenx/2) return true;
   }
-  if (has_y_wall){ 
+  if (has_y_wall) {
     if (v[1] > leny/2 || v[1] < -leny/2) return true;
   }
-  if (has_z_wall){
+  if (has_z_wall) {
     if (v[2] > lenz/2 || v[2] < -lenz/2) return true;
   }
   bool amonborder[3] = {
@@ -850,14 +841,14 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
 
   // Energy before potential move
   if (testp){
-    double r0 = v.norm();	
+    double r0 = v.norm();
     energyOld += -(4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6)));
   }
   if (soft_wall) { energyOld += soft_wall_potential(spheres[s][2]); }
   for(long i = 0; i < n; i++){
     if (i != s) energyOld += potential(distance(spheres[i],spheres[s]));
   }
-  
+
   for (long k=0; k<3; k++) {
     if (periodic[k] && wasonborder[k]) {
       for(long i = 0; i < n; i++) {
@@ -896,8 +887,8 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     }
   }
   // Energy after potential move
-  if (testp){  
-    double r1 = spheres[s].norm();	
+  if (testp) {
+    double r1 = spheres[s].norm();
     energyNew += -(4*testp_eps*(pow(testp_sigma/r1,12) - pow(testp_sigma/r1,6)));
   }
   if (soft_wall) { energyNew += soft_wall_potential(v[2]); }
@@ -954,7 +945,7 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
   double potEnergy = 0.0;
   if (testp){
     for (long b=0;b<n;b++){
-      double magnitude = spheres[b].norm();	
+      double magnitude = spheres[b].norm();
       potEnergy += -(4*testp_eps*(pow(testp_sigma/magnitude,12) - pow(testp_sigma/magnitude,6)));
     }
   }
