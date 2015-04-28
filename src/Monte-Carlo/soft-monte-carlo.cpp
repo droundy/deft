@@ -586,7 +586,7 @@ int main(int argc, char *argv[]){
           fclose(out);
         }
 	
-	if (FCC) {
+	if (FCC && false) { // DISABLE THIS OUTPUT FOR NOW!
 	  
           char *gfilename = new char[1000];
           sprintf(gfilename, "%s.fcc", outfilename);
@@ -712,14 +712,17 @@ int main(int argc, char *argv[]){
       movieData = 0;
     }
 
-    // only write out the sphere positions after they've all had a
-    // chance to move
     const long first_data_iterations = 20*iterations_per_pressure_check;
-    if (j%N == 0 && workingmoves > first_data_iterations) {
+    // only write out the sphere positions every so often, since we
+    // don't want to spend all of our time putting things in bins to
+    // the exclusion of moving things around.
+    if (j%(N*div) == 0 && workingmoves > first_data_iterations) {
       density_saved_count++;
       for (long s=0;s<N;s++) {
-        shells[shell(spheres[s], div, radius, sections)]++;
-	if (FCC){
+        // If we are not using FCC conditions, we will want to store
+        // density as a function of position.
+        if (!FCC) shells[shell(spheres[s], div, radius, sections)]++;
+        if (FCC && false) { // DISABLE THIS OUTPUT FOR NOW!
 	  for(long n=0;n<FCC_div2;n++){
 	    if (FCC_shells[n][0] <= spheres[s][0] &&
                 FCC_shells[n+1][0]  >= spheres[s][0] &&
