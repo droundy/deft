@@ -62,7 +62,7 @@ data4 = loadtxt('figs/Mikolaj-X.dat')
 #nsig_3 = n*sigma**3
 plot(data4[:,0]/(sigma*10),data4[:,1], label='experiment')
 
-data_mc5 = loadtxt('figs/mcfcc-0.5800-1.2000.dat.gradial')
+data_mc5 = loadtxt('figs/mcfcc-0.5844-1.2350.dat.gradial')
 plot((1/sigma_over_R)*data_mc5[:,0], data_mc5[:,1], '--', label='MC')
 
 data_dft4 = loadtxt('figs/new-data/radial-lj-1.2350-0.58.dat')

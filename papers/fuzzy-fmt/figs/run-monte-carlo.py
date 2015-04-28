@@ -70,12 +70,14 @@ def run_FCC(n_reduced, temperature, pot = ""):
 #     run_FCC(0.5, temp, 'wca')
 #     run_FCC(0.9, temp, 'wca')
 
-for temp in [0.001, 0.01, 0.1, 1.0]:
-    run_FCC(0.1, temp, 'wca')
+# for temp in [0.001, 0.01, 0.1, 1.0]:
+    # run_FCC(0.1, temp, 'wca')
     # run_FCC(0.3, temp, 'wca')
     # run_FCC(0.5, temp, 'wca')
     # run_FCC(0.6, temp, 'wca')
     # run_FCC(0.8, temp, 'wca')
+
+run_FCC(0.5844,1.235,"wca")
 
 #run_FCC(.76,2.5,"wca") 
 #run_FCC(.8,5,"wca")
