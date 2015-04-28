@@ -28,7 +28,7 @@ golden = sys.argv[4]
 seed = int(sys.argv[5])
 #arg seed = [0]
 
-all_Ns = os.popen("git ls-files | grep 'periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
+all_Ns = os.popen("git ls-files | grep 'data/periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
                   %(ww,ff)).readlines()
 all_Ns = numpy.sort([ int(N.split('-')[-4][1:]) for N in all_Ns ])
 
@@ -51,8 +51,10 @@ for method in methods:
   samples[method] = []
 
   for N in all_Ns:
-    filename = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" % (seed, ww, ff, N, method)
-    wildfilename = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" % (seed, ww, ff, N, method)
+    filename = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%d-%s-lnw.dat" \
+               % (seed, ww, ff, N, method)
+    wildfilename = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%d-%s-%%s.dat" \
+                   % (seed, ww, ff, N, method)
 
     with open(filename, 'r') as content_file:
         content = content_file.read()
