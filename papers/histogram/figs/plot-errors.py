@@ -15,7 +15,7 @@ golden = 'tmmc-golden'
 
 methods = ['tmmc', 'oetmmc', 'simple_flat', 'wang_landau', 'vanilla_wang_landau']
 reference = 'cfw'
-seeds = range(0, 10)
+seeds = range(0, 30)
 
 ######################################################################
 # Make beautiful error plot
@@ -33,7 +33,7 @@ def mean_u_err(ww, ff, N, method, golden_u):
             toterr += du
             numseeds += 1
     if numseeds > 0:
-        return toterr/numseeds
+        return toterr/numseeds/N
     return None
 
 for golden_comp in all_goldens:
