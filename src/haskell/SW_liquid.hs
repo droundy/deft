@@ -5,9 +5,10 @@ module SW_liquid
 import Expression
 import IdealGas ( idealgas, kT )
 import WhiteBear ( gSigmaA, whitebear )
+import FMT ( rad )
 
 sigma :: Type a => Expression a
-sigma = s_tex "sigma" "\\sigma"
+sigma = 2*rad
 
 epsilon :: Type a => Expression a
 epsilon = s_tex "epsilon" "\\epsilon"

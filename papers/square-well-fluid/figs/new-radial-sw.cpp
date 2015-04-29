@@ -43,19 +43,29 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void run_sw_liquid(double eta, SW_liquidVeff *f, double kT) {
+void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
   min.set_maxiter(100);
-  min.set_miniter(9);
   min.precondition(true);
+
+  char *dumpname = new char[5000];
+  snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-X.dat",
+           kT, f->lambda(), ff);
+  f->get_rx().dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
+  snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-Y.dat",
+           kT, f->lambda(), ff);
+  f->get_ry().dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
+  snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-n.dat",
+           kT, f->lambda(), ff);
 
   char *fname = new char[5000];
   //mkdir("papers/squre-well-fluid/figs/new-data", 0777); // make sure the directory exists
-  snprintf(fname, 5000, "papers/square-well-fluid/figs/radial-sw-%06.4f-%04.2f.dat", kT, eta);
+  snprintf(fname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f.dat",
+           kT, f->lambda(), ff);
 
   printf("========================================\n");
-  printf("| Working on eta = %4g and kT = %4g |\n", eta, kT);
+  printf("| Working on ff = %4g, lambda = %4g and kT = %4g |\n", ff, f->lambda(), kT);
   printf("========================================\n");
   while (min.improve_energy(verbose)) {
 
@@ -71,53 +81,49 @@ void run_sw_liquid(double eta, SW_liquidVeff *f, double kT) {
     Vector r = f->get_r();
     Vector n = f->get_n();
     for (int i=0;i<Nz/2;i++) {
-      fprintf(o, "%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i]);
+      fprintf(o, "%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3)/6, Vext[i]);
     }
     fclose(o);
+
+    n.dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
 
     took("Outputting to file");
   }
   min.print_info();
   delete[] fname;
+  delete[] dumpname;
 }
 
-/* - -
-# To run this automagically in fac, remove spaces from the above line
-
-for kT in np.arange(0.1, 2.05, 0.1):
-  for rho in np.arange(0.1, 2.05, 0.1):
-    self.rule('%s %g %g' % (exe, rho, kT),
-              [exe],
-              ["papers/fuzzy-fmt/figs/new-data/radial-lj-%04.2f-%04.2f.dat" % (rho, kT)])
-
-- - */
-
 int main(int argc, char **argv) {
-  double eta, temp, lambda;
+  double ff, temp, lambda;
   if (argc != 4) {
-    printf("usage: %s eta lambda kT\n", argv[0]);
+    printf("usage: %s ff lambda kT\n", argv[0]);
     return 1;
   }
   printf("git version: %s\n", version_identifier());
 
-  sscanf(argv[1], "%lg", &eta);
+  sscanf(argv[1], "%lg", &ff);
   sscanf(argv[2], "%lg", &lambda);
   sscanf(argv[3], "%lg", &temp);
 
+  printf("ff %g lam %g temp %g\n", ff, lambda, temp);
+
   HomogeneousSW_liquid hf;
-  hf.sigma() = sigma;
+  hf.R() = radius;
   hf.epsilon() = epsilon;
   hf.kT() = temp;
   hf.lambda() = lambda;
-  hf.n() = eta;
+  hf.n() = ff*6/uipow(sigma, 3);
   hf.mu() = 0;
+  printf("n3 = %g comes from n = %g\n", hf.get_n3(), hf.n());
+  printf("bulk energy is not %g\n", hf.energy());
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*xmax*ymax*zmax);
 
   SW_liquidVeff f(xmax, ymax, zmax, dx);
-  f.sigma() = hf.sigma();
+  f.R() = hf.R();
   f.epsilon() = hf.epsilon();
   f.lambda() = hf.lambda();
   f.kT() = hf.kT();
@@ -130,15 +136,19 @@ int main(int argc, char **argv) {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector r = f.get_r();
     for (int i=0; i<Ntot; i++) {
-      const double Vmax = 10*temp;
+      const double Vmax = 100*temp;
       f.Vext()[i] = 0;
-      if (r[i] > sigma && r[i] < sigma*lambda) { f.Vext()[i] = -epsilon; }
-      if (r[i] <= sigma) { f.Vext()[i] = Vmax; }
+      if (r[i] > sigma && r[i] < sigma*lambda) {
+        f.Vext()[i] = -epsilon;
+      }
+      if (r[i] <= sigma) {
+        f.Vext()[i] = Vmax;
+      }
     }
   }
   printf("my energy is %g\n", f.energy());
   took("Finding the energy a single time");
 
-  run_sw_liquid(eta, &f, temp);
+  run_sw_liquid(ff, &f, temp);
   return 0;
 }
