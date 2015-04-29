@@ -1,0 +1,82 @@
+# version: 0.0.0-222-g56de6ba-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 17
+# walls: 0
+# cell dimensions: (6.19164, 6.19164, 6.19164)
+# seed: 27
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 96
+# min_T: 0.2
+# fractional_sample_error after initialization: 1
+# min_important_energy after initialization: 85
+
+# transitions_input_filename: /home/perlinm/deft/papers/histogram/data/periodic-ww1.30-ff0.30-N17-tmmc-golden-transitions.dat
+# iterations: 28900000
+# working moves: 235982400
+# total moves: 491300000
+# acceptance rate: 0.480322
+
+# min_important_energy: 85
+
+# energy   counts
+27  8
+28  95
+29  795
+30  4205
+31  18140
+32  64983
+33  203834
+34  551648
+35  1279923
+36  2583675
+37  4524532
+38  6911514
+39  9281598
+40  10973008
+41  11490645
+42  11497827
+43  11503274
+44  11526223
+45  11542886
+46  11541775
+47  11536698
+48  11519014
+49  11501968
+50  11478258
+51  11439549
+52  11443529
+53  11447815
+54  11383963
+55  11375005
+56  11323270
+57  11318573
+58  11349234
+59  11389894
+60  11397652
+61  11393052
+62  11401957
+63  11442284
+64  11430818
+65  11471392
+66  11528737
+67  11535857
+68  11592319
+69  11620227
+70  11662913
+71  11658960
+72  11566212
+73  11681835
+74  11808177
+75  11736983
+76  11290116
+77  10631758
+78  10173582
+79  9866576
+80  9918292
+81  435032
+82  43457
+83  4454
