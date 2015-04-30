@@ -47,12 +47,14 @@ def run_FCC(n_reduced, temperature, pot = ""):
     system("srun --mem=60 -J softfcc-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat kT %g potential '%s' fcc %.15g > %s.out 2>&1 &" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature, pot, length,  filename))
 
-
-
-#for reduced_density in [0.2, 0.5, 1.0, 1.5]:
-#  for reduced_temp in [0.2, 0.5, 1.0]:
-#      print 'hello %g %g' % (reduced_density, reduced_temp)
-#      run_walls(reduced_density, 0, reduced_temp)
+def run_FCC_walls(n_reduced, temperature, pot = ""):
+    nspheres = 4*7**3
+    n = n_reduced*(2.0**(-5.0/2.0))
+    total_volume = nspheres/n
+    length = total_volume**(1.0/3.0)
+    filename = '%s/mcfcc-walls-%.4f-%.4f' % (figsdir, n_reduced, temperature)
+    system("srun --mem=60 -J softfcc-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat kT %g potential '%s' fcc-walls %.15g > %s.out 2>&1 &" %
+           (n_reduced, temperature, bindir, nspheres, filename, temperature, pot, length,  filename))
 
 
 #argon_sigma=3.405
@@ -66,25 +68,21 @@ def run_FCC(n_reduced, temperature, pot = ""):
 # run_test_particle(1.095,2.48,argon_sigma,argon_eps,"wca")
 # run_test_particle(1.096,2.48,argon_sigma/5,argon_eps/5,"wca")
 
-# for temp in numpy.arange(0.5, 3.0001, 0.5):
-#     run_FCC(0.5, temp, 'wca')
-#     run_FCC(0.9, temp, 'wca')
 
-# for temp in [0.001, 0.01, 0.1, 1.0]:
-    # run_FCC(0.1, temp, 'wca')
-    # run_FCC(0.3, temp, 'wca')
-    # run_FCC(0.5, temp, 'wca')
-    # run_FCC(0.6, temp, 'wca')
-    # run_FCC(0.8, temp, 'wca')
+#run_FCC(0.5844,1.235,"wca")
 
-run_FCC(0.5844,1.235,"wca")
-
-#run_FCC(.76,2.5,"wca") 
-#run_FCC(.8,5,"wca")
-#run_FCC(.73,.2,"wca")
-#run_FCC(.7,.1,"wca")
 
 #for reduced_density in [0.1,.2,.4,.6]:
 #    for temp in [0.1,.5]:
 #        run_homogeneous(reduced_density, temp, "wca")
+
+run_FCC_walls(0.6, 10.0, "wca")
+run_FCC_walls(0.6, 5.0, "wca")
+run_FCC_walls(0.6, 2.5, "wca")
+run_FCC_walls(1.0, 1.0, "wca")
+run_FCC_walls(1.0, 0.5, "wca")
+run_FCC_walls(1.0, 2.5, "wca")
+run_FCC_walls(1.0, 5.0, "wca")
+run_FCC_walls(1.0, 10.0, "wca")
+run_FCC_walls(1.5, 2.5, "wca")
 
