@@ -960,7 +960,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     }
 
     // check whether our histogram is flat enough to update wl_factor
-    if (variation < wl_threshold) {
+    if (variation > 0 && variation < wl_threshold) {
       wl_factor /= wl_fmod;
       flush_weight_array();
       for (int i = 0; i < energy_levels; i++) {
