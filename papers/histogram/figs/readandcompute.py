@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 import numpy
 
-def u_cv_s(ww, ff, N, method, seed=0):
+def t_u_cv_s(ww, ff, N, method, seed=0):
     max_T = 1.4
     T_bins = 1e3
     dT = max_T/T_bins
@@ -51,4 +51,10 @@ def u_cv_s(ww, ff, N, method, seed=0):
         S[i] -= S_inf
         CV[i] = sum((energy/T_range[i])**2*dos_boltz)/Z[i] - \
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
-    return U, CV, S
+    return T_range, U, CV, S
+
+def u_cv_s(ww, ff, N, method, seed=0):
+    v = t_u_cv_s(ww, ff, N, method, seed)
+    if v == None:
+        return None
+    return v[1], v[2], v[3]
