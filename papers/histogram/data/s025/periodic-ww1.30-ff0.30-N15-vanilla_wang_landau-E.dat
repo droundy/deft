@@ -1,0 +1,82 @@
+# version: 0.0.0-227-g1ae6e13-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 15
+# walls: 0
+# cell dimensions: (5.93863, 5.93863, 5.93863)
+# seed: 25
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 84
+# min_T: 0.2
+# fractional_sample_error after initialization: 0.006409
+# min_important_energy after initialization: 72
+
+# histogram method: Wang-Landau
+# wl_factor: 0.125
+# wl_fmod: 2
+# wl_threshold: 3
+# wl_cutoff: 1e-06
+# init_iter_limit: 22500000
+# iterations: 22500000
+# working moves: 155035367
+# total moves: 337500000
+# acceptance rate: 0.459364
+
+# min_important_energy: 72
+
+# energy   counts
+23  18
+24  112
+25  903
+26  4753
+27  20775
+28  77499
+29  241493
+30  637934
+31  1420443
+32  2701981
+33  4412291
+34  6236436
+35  7617781
+36  8106990
+37  8127190
+38  8088120
+39  8118093
+40  8104800
+41  8104764
+42  8081301
+43  8050454
+44  8084496
+45  8064396
+46  8080349
+47  8048455
+48  8074702
+49  8105086
+50  8141491
+51  8154296
+52  8155405
+53  8209157
+54  8309928
+55  8288955
+56  8330112
+57  8297298
+58  8348378
+59  8312739
+60  8351914
+61  8332353
+62  8384540
+63  8416241
+64  8501254
+65  8513942
+66  8495535
+67  8504673
+68  8632188
+69  8811062
+70  8833955
+71  8628403
+72  7959674
+73  5867307
+74  2107585
