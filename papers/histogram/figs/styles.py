@@ -16,6 +16,13 @@ _colors = { 'nw': 'r',
             'tmmc-golden': 'b',
             'cfw': 'c'}
 
+_dots = { 'wang_landau': '+',
+          'simple_flat': '^',
+          'tmmc': 'o',
+          'oetmmc': 's',
+          'vanilla_wang_landau': 'h',
+          'cfw': '.'}
+
 def color(method):
     if method in _colors:
         return _colors[method]
@@ -51,6 +58,8 @@ def plot(method):
     return line(method)
 
 def dots(method):
+    if method in _dots:
+        return color(method) + _dots[method]
     if method in hist_methods:
         return color(method) + '+'
     if method in [ h+'_oe' for h in hist_methods ]:
