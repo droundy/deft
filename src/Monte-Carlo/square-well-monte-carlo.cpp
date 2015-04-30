@@ -125,7 +125,7 @@ int main(int argc, const char *argv[]) {
   // Do not change these! They are taken directly from the WL paper.
   const double vanilla_wl_factor = 1;
   const double vanilla_wl_fmod = 2;
-  const double vanilla_wl_threshold = 0.25;
+  const double vanilla_wl_threshold = 1/0.95-1;
   const double vanilla_wl_cutoff = 1e-8;
 
   // some miscellaneous default or dummy simulation parameters
