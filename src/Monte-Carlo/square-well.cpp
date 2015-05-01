@@ -108,7 +108,7 @@ int initialize_neighbor_tables(ball *p, int N, double neighbor_R, int max_neighb
 }
 
 void update_neighbors(ball &a, int n, const ball *bs, int N,
-                      double neighbor_R, const double len[3], int walls){
+                      double neighbor_R, const double len[3], int walls, int max_neighbors){
   a.num_neighbors = 0;
   for (int i = 0; i < N; i++){
     if ((i != n) &&
@@ -116,11 +116,12 @@ void update_neighbors(ball &a, int n, const ball *bs, int N,
          < sqr(a.R + bs[i].R + neighbor_R))){
       a.neighbors[a.num_neighbors] = i;
       a.num_neighbors++;
+      assert(a.num_neighbors < max_neighbors);
     }
   }
 }
 
-inline void add_neighbor(int new_n, ball *p, int id){
+inline void add_neighbor(int new_n, ball *p, int id, int max_neighbors){
   int i = p[id].num_neighbors;
   while (i > 0 && p[id].neighbors[i-1] > new_n){
     p[id].neighbors[i] = p[id].neighbors[i-1];
@@ -128,6 +129,7 @@ inline void add_neighbor(int new_n, ball *p, int id){
   }
   p[id].neighbors[i] = new_n;
   p[id].num_neighbors ++;
+  assert(p[id].num_neighbors < max_neighbors);
 }
 
 inline void remove_neighbor(int old_n, ball *p, int id){
@@ -142,7 +144,7 @@ inline void remove_neighbor(int old_n, ball *p, int id){
   p[id].num_neighbors --;
 }
 
-void inform_neighbors(const ball &new_p, const ball &old_p, ball *p, int n){
+void inform_neighbors(const ball &new_p, const ball &old_p, ball *p, int n, int max_neighbors){
   int new_index = 0, old_index = 0;
   while (true){
     if (new_index == new_p.num_neighbors){
@@ -151,12 +153,13 @@ void inform_neighbors(const ball &new_p, const ball &old_p, ball *p, int n){
       return;
     }
     if (old_index == old_p.num_neighbors){
-      for(int i = new_index; i < new_p.num_neighbors; i++)
-        add_neighbor(n, p, new_p.neighbors[i]);
+      for(int i = new_index; i < new_p.num_neighbors; i++) {
+        add_neighbor(n, p, new_p.neighbors[i], max_neighbors);
+      }
       return;
     }
     if (new_p.neighbors[new_index] < old_p.neighbors[old_index]){
-      add_neighbor(n, p, new_p.neighbors[new_index]);
+      add_neighbor(n, p, new_p.neighbors[new_index], max_neighbors);
       new_index ++;
     } else if (old_p.neighbors[old_index] < new_p.neighbors[new_index]){
       remove_neighbor(n, p, old_p.neighbors[old_index]);
@@ -304,7 +307,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
     // If we still don't overlap, then we'll have to update the tables
     // of our neighbors that have changed.
     temp.neighbors = new int[max_neighbors];
-    update_neighbors(temp, id, balls, N, neighbor_R, len, walls);
+    update_neighbors(temp, id, balls, N, neighbor_R, len, walls, max_neighbors);
     moves.updates++;
     // However, for this check (and this check only), we don't need to
     // look at all of our neighbors, only our new ones.
@@ -384,7 +387,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
     // Okay, we've checked twice, just like Santa Clause, so we're definitely
     // keeping this move and need to tell our neighbors where we are now.
     temp.neighbor_center = temp.pos;
-    inform_neighbors(temp, balls[id], balls, id);
+    inform_neighbors(temp, balls[id], balls, id, max_neighbors);
     moves.informs++;
     delete[] balls[id].neighbors;
   }
