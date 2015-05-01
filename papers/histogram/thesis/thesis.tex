@@ -48,13 +48,12 @@
 {\hrulefill\begin{enumerate}}
 {\end{enumerate}\hrulefill}
 
-\renewcommand{\title}{Optimizing Monte Carlo state space exploration
-  of the square-well fluid}
-\renewcommand{\author}{Michael A. Perlin}
+\renewcommand{\title}{Optimizing Monte Carlo simulation of the
+  square-well fluid} \renewcommand{\author}{Michael A. Perlin}
 \newcommand{\institution}{Oregon State University}
 \newcommand{\department}{Department of Physics}
-\newcommand{\supervisor}{Dr. David Roundy}
-\renewcommand{\date}{21 April 2015}
+\newcommand{\supervisor}{Dr. David Roundy} \renewcommand{\date}{21
+  April 2015}
 
 %%% notes, etc.
 \usepackage{color}
@@ -129,26 +128,27 @@
 
 \thispagestyle{abstract}
 
-We wish to identify and develop efficient numerical methods for
-determining thermodynamic properties of the square-well fluid in order
-to test square-well density functional theories. The liquid-vapor
-phase interface is an interesting regime for testing density
-functional theories, but unbiased (i.e. Metropolis) Monte Carlo
-simulations are incapable of sampling the low energy fluid states
-which dominate the partition function at low (i.e. liquid-state)
-temperatures. Previous works have developed several generic Monte
-Carlo histogram methods for collecting statistics on low energy system
-states, but little or no literature exists on these methods'
-systematic comparison, as well as their application to the square-well
-fluid. The square-well fluid in particular introduces application
-challenges not manifest in traditional models for testing and
-benchmarking such numerical techniques (e.g. the Ising model). We
-propose to implement these methods in Monte Carlo simulations of the
-square-well fluid, determine appropriate performance metrics for their
-comparison, and identify those methods which are most efficient and
-effective at sampling otherwise improbable system states.
+We identify and develop efficient numerical methods for determining
+thermodynamic properties of the square-well fluid in order to test
+square-well density functional theories. The liquid-vapor phase
+interface is an interesting regime for testing density functional
+theories, but unbiased Metropolis Monte Carlo simulations are
+incapable of sampling the low energy fluid states which dominate the
+partition function at low (i.e. liquid-state) temperatures. Previous
+works have developed several generic Monte Carlo histogram methods for
+collecting statistics on low energy system states, but little or no
+literature exists on these methods' systematic comparison, as well as
+their application to the square-well fluid. The square-well fluid in
+particular introduces application challenges not manifest in
+traditional models for testing and benchmarking such numerical
+techniques (e.g. the Ising model). We propose to implement these
+methods in Monte Carlo simulations of the square-well fluid, determine
+appropriate performance metrics for their comparison, and identify
+those methods which are most efficient and effective at sampling
+otherwise improbable system states.
 
 \fixme{Rewrite after the rest of the thesis is completed}
+
 
 \newpage
 
@@ -280,9 +280,9 @@ desired level of accuracy.
   \item Construct an initial ``typical'' (i.e. non-ordered) fluid
     configuration. \fixme{explain how}
 
-  \item Attempt to change the position of one sphere (in general, a
-    single fluid ``atom'' or ``molecule'') to a random location,
-    rejecting the change if it results in a forbidden fluid
+  \item Randomly attempt to change the position of one sphere (in
+    general, a single fluid ``atom'' or ``molecule'') to another
+    location, rejecting the change if it results in a forbidden fluid
     configuration (e.g. two or more spheres overlap) and accepting the
     change otherwise. Attempting to move a single sphere is referred
     to as a move. \label{alg:mc_move}
@@ -431,12 +431,13 @@ that are constant with respect to $X\p{s}$.
 
   \item Construct an initial typical fluid configuration.
 
-  \item Attempt to change the position of one sphere, rejecting the
-    change if
+  \item Randomly attempt to change the position of one sphere,
+    rejecting the change if
     \begin{enumerate*}[label=\roman*)]
     \item it results in a forbidden fluid configuration, or
     \item a newly chosen random number on the interval $\sp{0,1}$ is
-      larger than the probability given by (\ref{eq:move_prob}).
+      larger than the probability determined by (\ref{eq:move_prob})
+      for the initial and final states $s_i$ and $s_f$, respectively.
     \end{enumerate*}
     \label{alg:biased_mc_move}
 
@@ -655,9 +656,10 @@ sampled for $H\p{E}$ to be statistically significant. The end goal in
 implementing histogram methods, however, is precisely to sample those
 energies that cannot be sufficiently sampled without employing clever
 schemes to bias Monte Carlo simulations. The flat histogram method
-therefore does not directly help us study the square-well fluid, but
-it does provide the basis for the method in Section
-\ref{sec:simple_flat}.
+therefore does not directly help us study the square-well fluid. This
+method does, however, motivate the method in Section
+\ref{sec:simple_flat}, and provides some of the theory behind the
+methods in Sections \ref{sec:tmmc} and \ref{sec:oetmmc}.
 
 \subsection{The simple flat method}
 \label{sec:simple_flat}
@@ -764,8 +766,11 @@ this paper, we will always use $kT_{\t{min}}=0.2\epsilon$.
 \subsection{The Wang-Landau (WL) method}
 \label{sec:wang_landau}
 
+\fixme{find more sources to cite for some of the claims made in this
+  section}
+
 The Wang-Landau method is the first published histogram method we
-discuss\cite{wang_landau, wang_landau_analysis, wang_landau_mod}. This
+discuss\cite{wang_landau, wang_landau_mod, wang_landau_analysis}. This
 method has been used to study a wide variety of systems\fixme{which
   systems? cite}, and is the standard method\fixme{cite} to achieve
 broad energy sampling via Monte Carlo simulations. \fixme{more intro
@@ -795,22 +800,6 @@ initialization process no longer makes any appreciable modifications
 to the weights $w\p{E}$, so that upon achieving a flat histogram one
 can be confident that a regular simulation which fixes the current
 weights will yield similar results.
-
-Interestingly, the flatness condition $C\sp{H}$ for updating $f$ and
-restarting the process should not be too stringent: if the histogram
-is completely flat, say $H\p{E}=H_0$ for all $E$, then the weights
-$w\p{E}$ have all been modified by the same factor of $f^{H_0}$.
-Remembering the scale-invariance of $w\p{E}$, this result would mean
-that the weights have not actually changed at all! Similarly, too lax
-of a flatness condition will prompt the initialization process to
-\begin{enumerate*}[label=\roman*)]
-\item reset and decrease $f$ too early, i.e. when the weight array
-  could still use some heavy handed adjustment, and
-\item quit before one has any reason to think that simulations might
-  yield a flat histogram.
-\end{enumerate*}
-Tuning the flatness condition is thus crucial to the success of the
-Wang-Landau method.
 
 \begin{algorithm}[!b]
   \caption{Wang-Landau initialization of weights}
@@ -850,16 +839,17 @@ factor $f_0$, the update factor $u$, the flatness condition $C\sp{H}$,
 and the cutoff $c$. The first of these parameters, $n$, controls how
 often to check the flatness condition $C\sp{H}$ and run updates, if
 necessary. The value of $n$ is not too important, so long as it is
-reasonable. Too small value of $n$ will waste computation time
-determining $C\sp{H}$, while too large of a value will waste time
-simulating when $C\sp{H}$ has already been satisfied. In general, $n$
-should be proportional to the computation time of $C\sp{H}$, which
-scales with energy range of the simulated system. We therefore use
-$n=L$, where $L$ is the number of energy levels for the given
-square-well fluid (as discussed in Section \ref{sec:simple_flat}).
-Papers in the literature typically neglect providing any heuristic or
-formula for $n$, reporting a system-independent $n=10^3$ or
-$10^5$\cite{wang_landau, wang_landau_mod}.
+reasonable for the system at hand. Too small value of $n$ will waste
+computation time determining $C\sp{H}$, while too large of a value
+will waste time simulating when $C\sp{H}$ has already been
+satisfied. In general, $n$ should be proportional to the computation
+time of $C\sp{H}$, which scales with energy range of the simulated
+system. We therefore use $n=L$, where $L$ is, as described in Section
+\ref{sec:simple_flat}, the number of energy levels for the given
+square-well fluid. Other works typically neglect providing any
+heuristic or formula for $n$, reporting a system-independent
+$n=10^3$\cite{wang_landau_mod} or $10^5$\cite{wang_landau}.
+\fixme{find more citations for this last claim}
 
 The next parameter, $f_0$, controls the initial amount by which to
 adjust the weight of the current energy after each move. As mentioned
@@ -867,12 +857,12 @@ in Algorithm \ref{alg:wang_landau}, one should always have $f_0>1$,
 but the appropriate value of $f_0$ will generally depend on the system
 at hand. Too large a value of $f_0$ will magnify stochastic error in
 initialization, while too small a value of $f_0$ will cause
-simulations to take an exceedingly long time to converge.  Lacking any
-heuristics for assigning $f_0$, literature typically suggests
-$f_0=e$\cite{wang_landau}; after some experimentation with the free
-parameters in the Wang-Landau method, we used $f_0=e^{1/8}$ (in
+simulations to take an exceedingly long time to converge. Lacking any
+heuristics for assigning $f_0$, literature typically suggests $f_0=e$
+\cite{wang_landau}. After some experimentation with the free
+parameters in the Wang-Landau method, we decided on $f_0=e^{1/8}$. In
 practice, one usually works with $\ln f$, making the commonly
-suggested value $\ln f_0=1$ and our own $\ln f_0=1/8$).
+suggested value $\ln f_0=1$ and our own $\ln f_0=1/8$.
 
 The factor $u$ appearing in step \ref{alg:wang_landau_update} of
 Algorithm \ref{alg:wang_landau} controls the amount by which to adjust
@@ -882,23 +872,133 @@ Algorithm \ref{alg:wang_landau} requires only $f_k<f_{k-1}$ to
 converge (assuming that $C\sp{H}$ can be satisfied) and
 $\lim_{k\to\infty}f_k=1$ to terminate. Taking the $u$-th root of $f$
 at each increment of $k$ is a natural and convenient iterative means
-to satisfy these requirements. Previous papers have used $u=2$, which
-we have adopted as well\cite{wang_landau, wang_landau_mod}.
+to satisfy these requirements. Previous works have reported using
+values such as $u=2$ \cite{wang_landau, wang_landau_mod} and $u=10$
+\cite{wang_landau_analysis}; we use the former, conservatively
+favoring more initialization iterations by decreasing $f$ by a smaller
+amount on each reset.
 
-\fixme{Walk through $C\sp{H}$ and $c$. Finish discussion of WL.}
+One might guess why the flatness condition $C\sp{H}$ for updating $f$
+and restarting the Wang-Landau initialization process should not be
+made too lax: doing so would prompt the initialization process to
+\begin{enumerate*}[label=\roman*)]
+\item reset and decrease $f$ too early, i.e. when the weight array
+  could still use some heavy handed adjustment, and
+\item quit before one has any reason to think that simulations might
+  yield a flat histogram.
+\end{enumerate*}
+Less obvious, however, is the fact that the flatness condition
+$C\sp{H}$ should not be made too stringent: if the histogram is
+completely flat, say $H\p{E}=H_0$ for all $E$, then the weights
+$w\p{E}$ have all been modified by the same factor of $f^{H_0}$.
+Remembering the scale-invariance of $w\p{E}$, this result would mean
+that the weights have not actually changed at all!
 
-\subsection{The optimized ensemble (OE) method}
-\label{sec:optimized_ensemble}
+The success of Wang-Landau thus relies on some degree of leniency in
+the flatness condition, which makes tuning $C\sp{H}$ crucial to the
+efficient and effective implementation of this method. Some previous
+works\cite{wang_landau} suggest that $C\sp{H}$ should be made as
+stringent as possible, cautioning only that some simulations might not
+satisfy too strict of a flatness condition in any reasonable amount of
+time. These works fail to recognize the reliance of Wang-Landau on the
+{\it failure} of $C\sp{H}$ to enforce a perfectly flat histogram. A
+commonly suggested flatness condition is that the minimum histogram
+value be at least some fixed proportion of the mean histogram value,
+i.e. $C\sp{H}:\min\sp{H\p{E}}\ge x\bk{H}_E$, and several papers report
+using $x=0.95$. We used the same condition with $x=0.25$.
 
-\fixme{Explain, provide algorithm.}
+The final free parameter in the Wang-Landau method is the cutoff $c$,
+which determines how small $f$ can get before the algorithm stops
+modifying the weight array. Too large of a value for $c$ will make
+Wang-Landau quit prematurely, whereas too small a value will cause the
+algorithm to waste time simulating after the weights $w\p{E}$ have
+essentially converged. One might imagine using an alternate end
+condition for Wang-Landau, which involves comparing the current
+weights $w_k\p{E}$ to those at the end of the previous cycle,
+$w_{k-1}\p{E}$, to check whether the initialization process is still
+making appreciable modifications to the weights, but such a check
+would require both a metric and a free parameter to define what an
+appreciable change is. For simplicity, we stuck with the standard end
+condition given in Algorithm \ref{alg:wang_landau}. As with the other
+free parameters in Wang-Landau, we are not aware of any heuristics for
+determining an appropriate value of $c$, but literature cites typical
+values of $\ln c=10^{-8}$; we used $\ln c=10^{-6}$.
 
-\begin{algorithm}[H]
-  \caption{Modifying weights via the optimized ensemble}
-  \label{alg:optimized_ensemble}
-\end{algorithm}
-
-\subsection{The transition matrix Monte Carlo (TMMC) method}
+\subsection{The transition matrix Monte Carlo method}
 \label{sec:tmmc}
+
+Unlike the previous histogram methods, the transition matrix Monte
+Carlo (TMMC) method does not use weights, and merely compute the
+density of states $D\p{E}$ of a system. The density of states can in
+turn be used via the flat histogram method (Section
+\ref{sec:flat_histogram}) to determine appropriate weights for
+subsequent Monte Carlo simulations. TMMC introduces a new object: the
+energy transition matrix, $T$, whose components $T_{ij}$ are the
+probabilities that a system will transition {\it to} a state with
+energy $E_i$ {\it from} a given state with energy $E_j$,
+i.e. $T_{ij}=P\p{E_j\to E_i}$.
+
+The transition matrix $T$ is trivially square and positive-definite,
+but it is not symmetric. Given that Metropolis Monte Carlo samples all
+of state-space randomly, meaning all possible system states are
+equally likely to occur during simulation, a transition $E_i\to E_f$
+from an energy with a low state density to one with a high state
+density, $D\p{E_i}<D\p{E_j}$, is more probable than the inverse
+transition $E_j\to E_i$ simply due to the fact that there are more
+states with energy $E_i$ than those with energy $E_j$. Thus
+$D\p{E_i}<D\p{E_j}$ implies $P\p{E_i\to E_j}>P\p{E_j\to E_i}$, which
+means $T_{ji}>T_{ij}$. Said otherwise, the asymmetry of the transition
+matrix is a direct consequence of the second law of thermodynamics:
+systems are exceedingly likely to evolve towards macroscopic states
+with higher accessible microstate densities.
+
+In principle, computationally determining the transition matrix of a
+system is straightforward. One need only simulate a system and collect
+a histogram $\tilde T\p{E_i,E_j}$ of the energy transitions after each
+move, directly after deciding whether to reject the move based on
+whether it resulted in an (in)valid system state. That is, transition
+data should be collected (only) on all moves as they would have been
+accepted by Metropolis Monte Carlo, i.e. before deciding whether to
+reject any given move for any reasons involving weights, or other
+biasing schemes.
+
+
+
+
+\vspace{3cm}
+
+\fixme{schemes for initializing to collect transition matrix}
+
+\fixme{normalizing transition matrix}
+
+\fixme{computing density of states via transition matrix}
+
+\fixme{storing transition matrix in the form $T\p{E,\Delta E}$}
+
+\vspace{3cm}
+
+
+For the square-well fluid, as with many systems, there is a maximum
+amount $\Delta_ME$ by which a single move can change the energy of the
+system. The transition matrix can therefore be stored in the form
+$T\p{E,\Delta E}$
+
+
+the transition matrix is band-diagonal because . In implementation,
+the transition matrix can therefore be stored in the form
+$T\p{E,\Delta E}$, making it an $L\times\Delta_ME$ matrix, where $L$
+is the number of energy levels in a given system. Given that $L$
+scales as $N\Delta_ME$, where $N$ is the number of spheres in the
+square-well fluid, the memory required to store the transition matrix
+therefore scales as $N\p{\Delta_ME}^2$, an improvement over the $N^2$
+growth of a transition matrix in the form $T\p{E_i,E_j}$.
+
+
+\newpage
+
+
+
+
 
 \fixme{Explain, provide algorithm. This method is sort of our own, but
   based on other work.}
@@ -909,11 +1009,17 @@ we have adopted as well\cite{wang_landau, wang_landau_mod}.
 \end{algorithm}
 
 
+\subsection{The optimized ensemble method}
+\label{sec:optimized_ensemble}
+
+\fixme{Explain briefly. No need to provide algorithm.}
+
+
 \subsection{The hybrid OE-TMMC method}
 \label{sec:oetmmc}
 
-\fixme{Explain, provide algorithm. This method is sort of our own, but
-  based on other work.}
+\fixme{Explain, provide algorithm. This method is our own synthesis of
+  other work.}
 
 \begin{algorithm}[H]
   \caption{Hybrid OE-TMMC simulation}
@@ -963,10 +1069,10 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
 \label{sec:dos}
 
 \fixme{This section might just become a part of the section on the
-  minimum important energy. (\ref{eq:density_of_states}) gives us an
-  explicit formula for the density of states if we are confident in
-  our energy histogram. We can also compute the density of states from
-  the transition matrix, which is sometimes more appropriate to do.}
+  minimum important energy. (\ref{eq:dos}) gives us an explicit
+  formula for the density of states if we are confident in our energy
+  histogram. We can also compute the density of states from the
+  transition matrix, which is sometimes more appropriate to do.}
 
 \subsection{End conditions}
 \label{sec:end_conditions}
