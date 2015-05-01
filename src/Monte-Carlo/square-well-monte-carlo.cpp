@@ -186,7 +186,6 @@ int main(int argc, const char *argv[]) {
 
     /*** RELATIVE SIZE OF CELL DIMENSIONS ***/
 
-    // fixme(?): these are currently ignored
     {"lenx", '\0', POPT_ARG_DOUBLE, &sw.len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
     {"leny", '\0', POPT_ARG_DOUBLE, &sw.len[y], 0,
