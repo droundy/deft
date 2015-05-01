@@ -250,7 +250,7 @@ vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
   return a*vector3d(n+x/2,m+y/2,l+z/2);
 }
 
-int max_balls_within(double distance){ // distances are all normalized to ball radius
+int max_balls_within(double distance){ // distances are in units of ball radius
   distance += 1e-10; // add a tiny, but necessary margin of error
   double a = 2*sqrt(2); // fcc lattice constant
   int c = int(ceil(distance/a)); // number of cubic fcc cells to go out from center
