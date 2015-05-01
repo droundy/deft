@@ -168,6 +168,23 @@ int main(int argc, char *argv[]){
         periodic[1] = true;
         periodic[2] = true;
         printf("FCC is true length of cavity is %g\n", length_of_cavity);
+    } else if (strcmp(argv[a],"fcc-walls")==0){
+      FCC=true;
+      length_of_cavity = atof(argv[a+1]);
+      lenx = leny = length_of_cavity;
+      lenz = length_of_cavity - 2*R; // this gives it a tight fit.
+      rad = maxrad = lenx/2;
+      periodic[0] = true;
+      periodic[1] = true;
+      periodic[2] = true;
+      printf("FCC is true length of cavity is %g\n", length_of_cavity);
+
+      has_z_wall = true;
+      flat_div = true; // we want flat divisions in the z directoin,
+                       // if we have a z wall.  In every other case we
+                       // use spherical divisions.
+      periodic[2] = false;
+      maxrad = max(maxrad, lenz);
     }  else {
       printf("Bad argumendat:  %s\n%d\n", argv[a],(strcmp(argv[a],"fcc")));
         printf("%d" ,(strcmp(argv[a],"fcc")));
@@ -248,7 +265,6 @@ int main(int argc, char *argv[]){
   // periodic cell!
 
   if (FCC == true) {
-    printf("testkljdfjak\n");
     iterations = 9999999999;
     //    int cubeLength = pow(double(N/4.0),1.0/3.0) + .5;
     //    int numberOfCubes = ceil(N/4);
@@ -712,7 +728,7 @@ int main(int argc, char *argv[]){
       for (long s=0;s<N;s++) {
         // If we are not using FCC conditions, we will want to store
         // density as a function of position.
-        if (!FCC) shells[shell(spheres[s], div, radius, sections)]++;
+        shells[shell(spheres[s], div, radius, sections)]++;
         if (FCC && false) { // DISABLE THIS OUTPUT FOR NOW!
           for(long n=0;n<FCC_div2;n++){
             if (FCC_shells[n][0] <= spheres[s][0] &&
