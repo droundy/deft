@@ -12,8 +12,8 @@ sigma = 0.3405 #nm
 sigma_over_R=2**(5/6)
 
 rmaxplot = 4 # upper limit of our plots
-
-figure()
+figure(figsize=(20,6))
+subplot(1, 3, 1)
 data = loadtxt('figs/YarnellArgon85K.dat')
 n =0.02125 # Angstrom^-3
 nsig_3 = n*(sigma*10)**3
@@ -25,9 +25,8 @@ plot(data_dft1[:,0],data_dft1[:,1]/nsig_3, label='DFT')
 xlabel(r'$r/\sigma$')
 xlim(0, rmaxplot)
 legend(loc='best')
-savefig('figs/Argon-vapor_pressure-85K.pdf')
 
-figure()
+subplot(1, 3, 2)
 data2 = loadtxt('figs/EggertArgon0.6GPaX.dat')
 n = 24.23 #atoms/nm^3
 nsig_3 = n*sigma**3
@@ -39,12 +38,10 @@ plot(data_dft2[:,0],data_dft2[:,1]/nsig_3, label='DFT')
 xlabel(r'$r/\sigma$')
 xlim(0, rmaxplot)
 legend(loc='best')
-savefig('figs/Argon-0_6GPa-RT.pdf')
 
-figure()
+subplot(1, 3, 3)
 data3 = loadtxt('figs/EggertArgon1.1GPaRAW.dat')
 n = 27.74 #atoms/nm^3
-
 nsig_3 = n*sigma**3
 plot(data3[:,0]/sigma,(data3[:,1]), label='experiment')
 data_mc3 = loadtxt('figs/mc_testp_wca-1.0950-2.4800.dat.gradial')
@@ -54,7 +51,7 @@ plot(data_dft3[:,0],data_dft3[:,1]/nsig_3, label='DFT')
 xlabel(r'$r/\sigma$')
 xlim(0, rmaxplot)
 legend(loc='best')
-savefig('figs/Argon-1_1GPa-RT.pdf')
+savefig('figs/argon-plots.pdf')
 
 figure()
 data4 = loadtxt('figs/Mikolaj-X.dat')

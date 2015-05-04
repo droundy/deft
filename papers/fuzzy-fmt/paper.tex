@@ -267,62 +267,30 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution-10}
-\end{center}
-\caption{Radial distribution function with 0.1 reduced density.}
-\label{fig:radial-distribution-10}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution-30}
-\end{center}
-\caption{Radial distribution function with 0.3 reduced density.}
-\label{fig:radial-distribution-30}
-\end{figure}
-
-%% \begin{figure}
-%% \begin{center}
-%% \includegraphics[width=3.5in]{figs/radial-distribution-40}
-%% \end{center}
-%% \caption{Radial distribution function with 0.4 packing
-%%   fraction.}
-%% \label{fig:radial-distribution-40}
-%% \end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution-50}
-\end{center}
-\caption{Radial distribution function with 0.5 reduced density.}
-\label{fig:radial-distribution-50}
-\end{figure}
-
-\begin{figure}
-\begin{center}
 \includegraphics[width=3.5in]{figs/radial-distribution-60}
 \end{center}
 \caption{Radial distribution function with 0.6 reduced density.}
 \label{fig:radial-distribution-60}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution-80}
-\end{center}
-\caption{Radial distribution function with 0.8 reduced density.}
-\label{fig:radial-distribution-60}
-\end{figure}
+%% \begin{figure}
+%% \begin{center}
+%% \includegraphics[width=3.5in]{figs/radial-distribution-80}
+%% \end{center}
+%% \caption{Radial distribution function with 0.8 reduced density.}
+%% \label{fig:radial-distribution-80}
+%% \end{figure}
+
+%% \begin{figure}
+%% \begin{center}
+%% \includegraphics[width=3.5in]{figs/radial-distribution-100}
+%% \end{center}
+%% \caption{Radial distribution function with 1.0 reduced density.}
+%% \label{fig:radial-distribution-100}
+%% \end{figure}
 
 \subsection{Soft spheres near a hard wall}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/walls-20}
-\end{center}
-\caption{Density distribution near a hard wall.}
-\label{fig:walls-20}
-\end{figure}
 
 \begin{figure}
 \begin{center}
@@ -340,59 +308,42 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \label{fig:walls-100}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/walls-150}
-\end{center}
-\caption{Density distribution near a hard wall.}
-\label{fig:walls-150}
-\end{figure}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Comparison with experiment}
 
 Lennard Jones data we will use will be from
 papers~\cite{mikolaj2004structure, eggert2002quantitative, yarnell1973structure}.
 For Lennard Jones Argon, $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon = 119.8$~K~\cite{verlet1967computer}.
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/Argon-vapor_pressure-85K}
-\end{center}
-\caption{Radial distribution function of Argon at 85 K and vapor
-  pressure.  The reduced density is $n^* = 0.83890$ and the reduced
-  temperature is $T^* = 0.71$ \fixme{Run MC and DFT simulations.}}
-\label{fig:argon-85K}
-\end{figure}
+\begin{widetext}[t]
+  \begin{figure}
+    \begin{center}
+      \includegraphics[width=8.5in]{figs/argon-plots}
+    \end{center}
+    \caption{Radial distribution function of Argon at 85 K and vapor
+      pressure.  The reduced density is $n^* = 0.83890$ and the reduced
+      temperature is $T^* = 0.71$ \fixme{Run MC and DFT simulations.}}
+    \label{fig:argon-plots}
+  \end{figure}
+  %% \begin{figure}
+  %%   \begin{center}
+  %%     \includegraphics[width=3.5in]{figs/Argon-1_1GPa-RT}
+  %%   \end{center}
+  %%   \caption{Radial distribution function of Argon at room temperature and
+  %%     1.1 GPa~\cite{eggert2002quantitative}.  The reduced density is $n^*
+  %%     = 1.095$ and the reduced temperature is $T^* = 2.48$.}
+  %%   \label{fig:argon-1.1GPa}
+  %% \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/Argon-0_6GPa-RT}
-\end{center}
-\caption{Radial distribution function of Argon at room temperature and
-  0.6 GPa~\cite{eggert2002quantitative}.  The reduced density is $n^*
-  = 0.957$ and the reduced temperature is $T^* = 2.48$.}
-\label{fig:argon-0.6GPa}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/Argon-1_1GPa-RT}
-\end{center}
-\caption{Radial distribution function of Argon at room temperature and
-  1.1 GPa~\cite{eggert2002quantitative}.  The reduced density is $n^*
-  = 1.095$ and the reduced temperature is $T^* = 2.48$.}
-\label{fig:argon-1.1GPa}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/Argon-9_919MPa-148K}
-\end{center}
-\caption{Radial distribution function of Argon 148 Kelvin and and
-9.919 MPa.  The reduced density is $n^* = 0.5844$ and the reduced
-temperature is $T^* = 1.235$.\fixme{Run MC and DFT simulations.}}
-\label{fig:argon-1.1GPa}
-\end{figure}
+  %% \begin{figure}
+  %%   \begin{center}
+  %%     \includegraphics[width=3.5in]{figs/Argon-9_919MPa-148K}
+  %%   \end{center}
+  %%   \caption{Radial distribution function of Argon 148 Kelvin and and
+  %%     9.919 MPa.  The reduced density is $n^* = 0.5844$ and the reduced
+  %%     temperature is $T^* = 1.235$.\fixme{Run MC and DFT simulations.}}
+  %%   \label{fig:argon-1.1GPa}
+  %% \end{figure}
+\end{widetext}
 
 \section{WCA wall potential derivation}
 
