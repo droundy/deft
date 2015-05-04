@@ -230,6 +230,10 @@ public:
   }
   void dumpSliceX(const char *fname, int Nx, int Ny, int Nz, int x) const {
     FILE *f = fopen(fname, "w");
+    if (!f) {
+      printf("unable to create file %s\n", fname);
+      return;
+    }
     for (int y= Ny/2; y<Ny; y++) {
       for (int z=Nz/2; z<Nz; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
@@ -252,6 +256,10 @@ public:
   }
   void dumpSliceY(const char *fname, int Nx, int Ny, int Nz, int y) const {
     FILE *f = fopen(fname, "w");
+    if (!f) {
+      printf("unable to create file %s\n", fname);
+      return;
+    }
     for (int x= Nx/2; x<Nx; x++) {
       for (int z=Nz/2; z<Nz; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
@@ -274,6 +282,10 @@ public:
   }
   void dumpSliceZ(const char *fname, int Nx, int Ny, int Nz, int z) const {
     FILE *f = fopen(fname, "w");
+    if (!f) {
+      printf("unable to create file %s\n", fname);
+      return;
+    }
     for (int x= Nx/2; x<Nx; x++) {
       for (int y=Ny/2; y<Ny; y++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z));
