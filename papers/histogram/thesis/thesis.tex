@@ -1170,12 +1170,12 @@ trip they first needed to get to $E_-$ ($E_+$). Denoting the total
 walker and down-going density at an energy $E$ respectively by
 $n\p{E}$ and $n_+\p{E}$, the ratio $f\p{E}=n_+\p{E}/n\p{E}$ gives the
 proportion of walkers at $E$ which are down-going. We also denote the
-down-going walker diffusivity at an energy $E$ by $\alpha_+\p{E}$.
+walker diffusivity at an energy $E$ by $\alpha\p{E}$.
 
 The down-going walker flux $j\p{E}$ is defined in terms of the
-diffusivity $\alpha_+\p{E}$ by
+diffusivity $\alpha\p{E}$ by
 \begin{align}
-  j=\alpha_+\f{dn_+}{dE}.
+  j=\alpha\f{dn_+}{dE}.
   \label{eq:walker_current_definition}
 \end{align}
 Computing
@@ -1192,14 +1192,14 @@ we can say that
 Substituting (\ref{eq:walker_gradient}) into
 (\ref{eq:walker_current_definition}) yields
 \begin{align}
-  j=\alpha_+\sp{n\f{df}{dE}+f\f{dn}{dE}}.
+  j=\alpha\sp{n\f{df}{dE}+f\f{dn}{dE}}.
   \label{eq:walker_current_full}
 \end{align}
 If the energy histogram does vary strongly with energy, e.g. because
 we are simulating with flat histogram weights, then $dn/dE\approx0$,
 which means
 \begin{align}
-  j=\alpha_+n\f{df}{dE}.
+  j=\alpha n\f{df}{dE}.
   \label{eq:walker_current}
 \end{align}
 To formalize the approximation made between
@@ -1211,22 +1211,22 @@ observe that
   =\p{\f{d\ln n_+}{d\ln n}-1}^{-1}.
   \label{eq:walker_current_intermediate_ratio}
 \end{align}
-For (\ref{eq:walker_current}) to be valid, we want the ratio in
+For (\ref{eq:walker_current}) to be a valid, we want the ratio in
 (\ref{eq:walker_current_intermediate_ratio}) to vanish. If the walker
 density $n$ varies weakly with energy, e.g. because we are simulating
 with flat histogram weights, then $\ln n$ varies even weaker
 still. The down-going walker density $n_+$, meanwhile must run from
-$n\p{E_-}=0$ to $n\p{E_+}=n\p{E_+}$ meaning $\ln n_+$ runs from $\ln
+$n\p{E_-}=0$ to $n_+\p{E_+}=n\p{E_+}$ meaning $\ln n_+$ runs from $\ln
 n\p{E_-}\to-\infty$ to a finite positive value $\ln n_+\p{E_+}=\ln
-n\p{E_+}$. It is therefore reasonable to assume that $d\ln n_+/d\ln
-n\gg 1$, which makes the ratio in
+n\p{E_+}$. It is therefore reasonable to assume that $\abs{d\ln
+  n_+/d\ln n}\gg 1$, which makes the ratio in
 \ref{eq:walker_current_intermediate_ratio} vanish.
 
 We can rearrange (\ref{eq:walker_current}) and integrate from the low
 energy state $E_-$, at which $f\p{E_-}=0$, to the high energy state
 $E_+$, at which $f\p{E_+}=1$, to say
 \begin{align}
-  \int_{f=0}^1\f{df}{j}=\int_{E=E_-}^{E_+}\f{dE}{\alpha_+n}.
+  \int_{f=0}^1\f{df}{j}=\int_{E=E_-}^{E_+}\f{dE}{\alpha n}.
   \label{eq:walker_current_setup}
 \end{align}
 At equilibrium, the walker flux $j\p{E}$ must be constant with respect
@@ -1236,7 +1236,7 @@ which would mean that the ensemble is not at equilibrium. We can
 therefore evaluate one of the integrals in
 (\ref{eq:walker_current_setup}) to get
 \begin{align}
-  \f1j=\int_{E=E_-}^{E_+}\f{dE}{\alpha_+n}.
+  \f1j=\int_{E=E_-}^{E_+}\f{dE}{\alpha n}.
   \label{eq:walker_current_integral}
 \end{align}
 
@@ -1248,7 +1248,7 @@ $\alpha\p{E}$ does not strongly depend on the weights $w\p{E}$, the
 authors of \cite{optimized_ensemble} find that the optimal walker
 density $n$ is
 \begin{align}
-  n_{\t{opt}}=\f1{\sqrt{\lambda\alpha_+}},
+  n_{\t{opt}}=\f1{\sqrt{\lambda\alpha}},
   \label{eq:optimal_walker_density}
 \end{align}
 where $\lambda$ is the Lagrange multiplier used in the minimization
@@ -1259,7 +1259,7 @@ observation of an ensemble of simulations, the walker density $n\p{E}$
 is proportional to the energy histogram $H\p{E}=\tilde D\p{E}w\p{E}$,
 which means
 \begin{align}
-  w_{\t{opt}}=\f1{D\sqrt{\alpha_+}},
+  w_{\t{opt}}=\f1{D\sqrt{\alpha}},
   \label{eq:optimized_weights}
 \end{align}
 where we neglect the distinction between $\tilde D$ and $D$, which has
@@ -1275,6 +1275,25 @@ motivating the hybrid OE-TMMC method in Section \ref{sec:oetmmc}.
 
 \subsection{The hybrid OE-TMMC method}
 \label{sec:oetmmc}
+
+
+\begin{align}
+  \bk{\Delta E}=\f{\sum_{\Delta E}\Delta E~\tilde T\p{E,\Delta E}
+    w\p{E+\Delta E}/w\p{E}}{\sum_{\Delta E'}\tilde T\p{E,\Delta E'}
+    w\p{E+\Delta E'}/w\p{E}}
+\end{align}
+
+\begin{align}
+  \bk{\Delta E^2}=\f{\sum_{\Delta E}\Delta E^2~\tilde T\p{E,\Delta E}
+    w\p{E+\Delta E}/w\p{E}}{\sum_{\Delta E'}\tilde T\p{E,\Delta E'}
+    w\p{E+\Delta E'}/w\p{E}}
+\end{align}
+
+\begin{align}
+  \alpha=\abs{\bk{\Delta E^2}-\bk{\Delta E}^2}
+\end{align}
+
+
 
 \fixme{Explain, provide algorithm. This method is our own synthesis of
   other work.}
