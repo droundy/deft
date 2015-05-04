@@ -198,6 +198,10 @@ public:
   }
   void dumpSliceXR(const char *fname, int Nx, int Ny, int Nz, int x) const {
     FILE *f = fopen(fname, "w");
+    if (!f) {
+      printf("unable to create file %s\n", fname);
+      return;
+    }
     for (int y= Ny/2; y<Ny; y++) {
       for (int z=0; z<=Nz/2; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).real());
@@ -214,6 +218,10 @@ public:
   }
   void dumpSliceXI(const char *fname, int Nx, int Ny, int Nz, int x) const {
     FILE *f = fopen(fname, "w");
+    if (!f) {
+      printf("unable to create file %s\n", fname);
+      return;
+    }
     for (int y= Ny/2; y<Ny; y++) {
       for (int z=0; z<=Nz/2; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).imag());

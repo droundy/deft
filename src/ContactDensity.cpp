@@ -25,44 +25,44 @@ static Functional VectorThirdTerm(double radius) {
   return n2*(sqr(n2) - 3*(sqr(n2x) + sqr(n2y) + sqr(n2z)));
 }
 
-static Functional TensorThirdTerm(double radius) {
-  Functional R(radius, "R");
-  Functional n2 = ShellConvolve(radius);
-  Functional n2x = xShellConvolve(radius);
-  Functional n2y = yShellConvolve(radius);
-  Functional n2z = zShellConvolve(radius);
-  Functional nTxx = xxShellConvolve(radius);
-  Functional nTyy = yyShellConvolve(radius);
-  Functional nTzz = zzShellConvolve(radius);
-  Functional nTxy = xyShellConvolve(radius);
-  Functional nTyz = yzShellConvolve(radius);
-  Functional nTzx = zxShellConvolve(radius);
-  Functional nTxz = nTzx, nTyx = nTxy, nTzy = nTyz;
-  /*
-  Functional trace_nT3 =
-    nTxx*nTxx*nTxx + nTxx*nTxy*nTyx + nTxx*nTxz*nTzx + // starting with nTxx
-    nTxy*nTyx*nTxx + nTxy*nTyy*nTyx + nTxy*nTyz*nTzx + // starting with nTxy
-    nTxz*nTzx*nTxx + nTxz*nTzy*nTyx + nTxz*nTzz*nTzx + // starting with nTxz
+// static Functional TensorThirdTerm(double radius) {
+//   Functional R(radius, "R");
+//   Functional n2 = ShellConvolve(radius);
+//   Functional n2x = xShellConvolve(radius);
+//   Functional n2y = yShellConvolve(radius);
+//   Functional n2z = zShellConvolve(radius);
+//   Functional nTxx = xxShellConvolve(radius);
+//   Functional nTyy = yyShellConvolve(radius);
+//   Functional nTzz = zzShellConvolve(radius);
+//   Functional nTxy = xyShellConvolve(radius);
+//   Functional nTyz = yzShellConvolve(radius);
+//   Functional nTzx = zxShellConvolve(radius);
+//   Functional nTxz = nTzx, nTyx = nTxy, nTzy = nTyz;
+//   /*
+//   Functional trace_nT3 =
+//     nTxx*nTxx*nTxx + nTxx*nTxy*nTyx + nTxx*nTxz*nTzx + // starting with nTxx
+//     nTxy*nTyx*nTxx + nTxy*nTyy*nTyx + nTxy*nTyz*nTzx + // starting with nTxy
+//     nTxz*nTzx*nTxx + nTxz*nTzy*nTyx + nTxz*nTzz*nTzx + // starting with nTxz
 
-    nTyx*nTxx*nTxy + nTyx*nTxy*nTyy + nTyx*nTxz*nTzy + // starting with nTyx
-    nTyy*nTyx*nTxy + nTyy*nTyy*nTyy + nTyy*nTyz*nTzy + // starting with nTyy
-    nTyz*nTzx*nTxy + nTyz*nTzy*nTyy + nTyz*nTzz*nTzy + // starting with nTyz
+//     nTyx*nTxx*nTxy + nTyx*nTxy*nTyy + nTyx*nTxz*nTzy + // starting with nTyx
+//     nTyy*nTyx*nTxy + nTyy*nTyy*nTyy + nTyy*nTyz*nTzy + // starting with nTyy
+//     nTyz*nTzx*nTxy + nTyz*nTzy*nTyy + nTyz*nTzz*nTzy + // starting with nTyz
 
-    nTzx*nTxx*nTxz + nTzx*nTxy*nTyz + nTzx*nTxz*nTzz + // starting with nTzx
-    nTzy*nTyx*nTxz + nTzy*nTyy*nTyz + nTzy*nTyz*nTzz + // starting with nTzy
-    nTzz*nTzx*nTxz + nTzz*nTzy*nTyz + nTzz*nTzz*nTzz; // starting with nTzz
-  */
-  Functional trace_nT3 =
-    6*nTxy*nTyz*nTzx +
-    nTxx*(  sqr(nTxx) + 3*sqr(nTxy) + 3*sqr(nTzx)) +
-    nTyy*(3*sqr(nTxy) +   sqr(nTyy) + 3*sqr(nTyz)) +
-    nTzz*(3*sqr(nTzx) + 3*sqr(nTzy) +   sqr(nTzz));
-  return (n2*sqr(n2) - 3*n2*(sqr(n2x) + sqr(n2y) + sqr(n2z))
-          +
-          9*(sqr(n2x)*nTxx + sqr(n2y)*nTyy + sqr(n2z)*nTzz
-             + 2*(n2x*n2y*nTxy + n2y*n2z*nTyz + n2z*n2x*nTzx)
-             - 0.5*trace_nT3));
-}
+//     nTzx*nTxx*nTxz + nTzx*nTxy*nTyz + nTzx*nTxz*nTzz + // starting with nTzx
+//     nTzy*nTyx*nTxz + nTzy*nTyy*nTyz + nTzy*nTyz*nTzz + // starting with nTzy
+//     nTzz*nTzx*nTxz + nTzz*nTzy*nTyz + nTzz*nTzz*nTzz; // starting with nTzz
+//   */
+//   Functional trace_nT3 =
+//     6*nTxy*nTyz*nTzx +
+//     nTxx*(  sqr(nTxx) + 3*sqr(nTxy) + 3*sqr(nTzx)) +
+//     nTyy*(3*sqr(nTxy) +   sqr(nTyy) + 3*sqr(nTyz)) +
+//     nTzz*(3*sqr(nTzx) + 3*sqr(nTzy) +   sqr(nTzz));
+//   return (n2*sqr(n2) - 3*n2*(sqr(n2x) + sqr(n2y) + sqr(n2z))
+//           +
+//           9*(sqr(n2x)*nTxx + sqr(n2y)*nTyy + sqr(n2z)*nTzz
+//              + 2*(n2x*n2y*nTxy + n2y*n2z*nTyz + n2z*n2x*nTzx)
+//              - 0.5*trace_nT3));
+// }
 
 static Functional n3(double radius) {
   return StepConvolve(radius);
@@ -131,14 +131,6 @@ Functional dWB_dn3(double radius) {
          - Functional(1)/(sqr(n3_)*sqr(omn3))
          - Functional(1)/(sqr(n3_)*omn3)
          - 2*log(omn3)/Pow(3)(n3_));
-  return n0(radius)/omn3 +
-    R*n22mnV22/sqr(omn3) +
-    // vtt*(Functional(1)/(n3_*Pow(3)(omn3))
-    //      - Functional(1)/(sqr(n3_)*sqr(omn3))
-    //      - Functional(1)/(sqr(n3_)*omn3)
-    //      - 2*log(omn3)/Pow(3)(n3_));
-    vtt*(Functional(1)/sqr(omn3) + 2*log(omn3)/(35*M_PI*sqr(n3_)*sqr(omn3)));
-  Functional ttt = TensorThirdTerm(radius);
 }
 
 
