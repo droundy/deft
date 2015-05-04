@@ -1217,10 +1217,12 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
 
     // check well width agreement
     if(strstr(line,"# well_width:") != NULL){
-      char s1[1], s2[16];
       double file_ww;
-      sscanf(line,"%s %s %lf",s1,s2,&file_ww);
-      if(file_ww != well_width){
+      if (sscanf(line,"%*s %*s %lf",&file_ww) != 1) {
+        printf("Unable to read well-width properly from \"%s\"\n", line);
+        exit(1);
+      }
+      if (file_ww != well_width) {
         printf("The well width in the transition matrix file metadata (%g) disagrees "
                "with that requested for this simulation (%g)!\n", file_ww, well_width);
         exit(232);
@@ -1229,9 +1231,11 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
 
     // check filling fraction agreement
     if(strstr(line,"# ff:") != NULL){
-      char s1[1], s2[4];
       double file_ff;
-      sscanf(line,"%s %s %lf",s1,s2,&file_ff);
+      if (sscanf(line,"%*s %*s %lf", &file_ff) != 1) {
+        printf("Unable to read ff properly from '%s'\n", line);
+        exit(1);
+      }
       if(file_ff != filling_fraction){
         printf("The filling fraction in the transition matrix file metadata (%g) disagrees "
                "with that requested for this simulation (%g)!\n", file_ff, filling_fraction);
@@ -1241,9 +1245,11 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
 
     // check N agreement
     if(strstr(line,"# N:") != NULL){
-      char s1[1], s2[2];
       int file_N;
-      sscanf(line,"%s %s %i",s1,s2,&file_N);
+      if (sscanf(line,"%*s %*s %i", &file_N) != 1) {
+        printf("Unable to read N properly from '%s'\n", line);
+        exit(1);
+      }
       if(file_N != N){
         printf("The number of spheres in the transition matrix file metadata (%i) disagrees "
                "with that requested for this simulation (%i)!\n", file_N, N);
@@ -1253,9 +1259,11 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
 
     // check that we have a sufficiently small min_T in the data file
     if(strstr(line,"# min_T:") != NULL){
-      char s1[1], s2[8];
       double file_min_T;
-      sscanf(line,"%s %s %lf",s1,s2,&file_min_T);
+      if (sscanf(line,"%*s %*s %lf", &file_min_T) != 1) {
+        printf("Unable to read min_T properly from '%s'\n", line);
+        exit(1);
+      }
       if(file_min_T > min_T){
         printf("The minimum temperature in the transition matrix file metadata (%g) is "
                "larger than that requested for this simulation (%g)!\n", file_min_T, min_T);
@@ -1267,8 +1275,10 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
        the line we match here should be the last commented line in the data file,
        so we break out of the metadata loop after storing min_de */
     if(strstr(line,"# energy\t") != NULL){
-      char s1[1], s2[8];
-      sscanf(line,"%s %s %d",s1,s2,&min_de);
+      if (sscanf(line,"%*s %*s %d", &min_de) != 1) {
+        printf("Unable to read min_de properly from '%s'\n", line);
+        exit(1);
+      }
       break;
     }
   }
@@ -1278,11 +1288,14 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
      so we loop while true and enforce a break condition */
   int e, min_e = 0;
   while(true){
-    fscanf(transitions_infile,"%i",&e);
-    if(!min_e) min_e = e;
-    if(feof(transitions_infile)) break;
+    if (fscanf(transitions_infile,"%i",&e) != 1) {
+      break;
+    }
+    if (!min_e) min_e = e;
     for(int de = min_de; de <= -min_de; de++){
-      fscanf(transitions_infile,"%li",&transitions(e,de));
+      if (fscanf(transitions_infile,"%li",&transitions(e,de)) != 1) {
+        break;
+      }
     }
   }
   min_energy_state = e;
