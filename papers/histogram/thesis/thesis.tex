@@ -1172,7 +1172,7 @@ $n\p{E}$ and $n_+\p{E}$, the ratio $f\p{E}=n_+\p{E}/n\p{E}$ gives the
 proportion of walkers at $E$ which are down-going. We also denote the
 walker diffusivity at an energy $E$ by $\alpha\p{E}$.
 
-The down-going walker flux $j\p{E}$ is defined in terms of the
+The down-going walker current $j\p{E}$ is defined in terms of the
 diffusivity $\alpha\p{E}$ by
 \begin{align}
   j=\alpha\f{dn_+}{dE}.
@@ -1193,48 +1193,54 @@ Substituting (\ref{eq:walker_gradient}) into
 (\ref{eq:walker_current_definition}) yields
 \begin{align}
   j=\alpha\sp{n\f{df}{dE}+f\f{dn}{dE}}.
+  \label{eq:walker_current_intermediate}
+\end{align}
+We can observe that
+\begin{align}
+  \f{f~dn/dE}{n~df/dE} =\p{\f{dn_+/dE-fdn/dE}{f~dn/dE}}^{-1}
+  =\p{\f1f\f{dn_+}{dn}-1}^{-1}.
+  \label{eq:walker_current_approx_ratio_setup}
+\end{align}
+Furthermore,
+\begin{align}
+  \p{\f1f\f{dn_+}{dn}-1}^{-1}
+  =\p{\f1f\f{d\p{fn}}{dn}-1}^{-1}
+  =\p{\f nf\f{df}{dn}+\f{dn}{dn}-1}^{-1}
+  =\p{\f nf\f{df}{dn}}^{-1}=\f nf\f{dn}{df}=\f{d\ln n}{d\ln f},
+  \label{eq:walker_current_approx_intermediate}
+\end{align}
+which means
+\begin{align}
+  \f{f~dn/dE}{n~df/dE}=\f{d\ln n}{d\ln f}.
+  \label{eq:walker_current_approx_ratio}
+\end{align}
+The walker current is therefore
+\begin{align}
+  j=\alpha n\f{df}{dE}\p{1+\f{d\ln n}{d\ln f}}.
   \label{eq:walker_current_full}
 \end{align}
-If the energy histogram does vary strongly with energy, e.g. because
-we are simulating with flat histogram weights, then $dn/dE\approx0$,
-which means
+We know that $f$ runs from $f\p{E_-}=0$ to $f\p{E_+}=1$ meaning $\ln
+f$ runs from $\ln f\p{E_-}\to-\infty$ to $\ln f\p{E_+}=0$. If the
+walker density $n$ varies weakly with energy, e.g. because we are
+simulating with flat histogram weights, then $\ln n$ varies even
+weaker still. We may therefore reasonably to assume that $\abs{d\ln
+  n/d\ln f}\ll 1$ and express
 \begin{align}
   j=\alpha n\f{df}{dE}.
   \label{eq:walker_current}
 \end{align}
-To formalize the approximation made between
-(\ref{eq:walker_current_full}) and (\ref{eq:walker_current}), we can
-observe that
-\begin{align}
-  \f{f~dn/dE}{n~df/dE}
-  =\p{\f{dn_+/dE-fdn/dE}{f~dn/dE}}^{-1}=\p{\f1f\f{dn_+}{dn}-1}^{-1}
-  =\p{\f{d\ln n_+}{d\ln n}-1}^{-1}.
-  \label{eq:walker_current_intermediate_ratio}
-\end{align}
-For (\ref{eq:walker_current}) to be a valid, we want the ratio in
-(\ref{eq:walker_current_intermediate_ratio}) to vanish. If the walker
-density $n$ varies weakly with energy, e.g. because we are simulating
-with flat histogram weights, then $\ln n$ varies even weaker
-still. The down-going walker density $n_+$, meanwhile must run from
-$n\p{E_-}=0$ to $n_+\p{E_+}=n\p{E_+}$ meaning $\ln n_+$ runs from $\ln
-n\p{E_-}\to-\infty$ to a finite positive value $\ln n_+\p{E_+}=\ln
-n\p{E_+}$. It is therefore reasonable to assume that $\abs{d\ln
-  n_+/d\ln n}\gg 1$, which makes the ratio in
-\ref{eq:walker_current_intermediate_ratio} vanish.
-
-We can rearrange (\ref{eq:walker_current}) and integrate from the low
-energy state $E_-$, at which $f\p{E_-}=0$, to the high energy state
-$E_+$, at which $f\p{E_+}=1$, to say
+We can rearrange (\ref{eq:walker_current}) and integrate over the
+energy range to say
 \begin{align}
   \int_{f=0}^1\f{df}{j}=\int_{E=E_-}^{E_+}\f{dE}{\alpha n}.
-  \label{eq:walker_current_setup}
+  \label{eq:walker_current_integral_setup}
 \end{align}
-At equilibrium, the walker flux $j\p{E}$ must be constant with respect
-to energy. If $j\p{E}$ is not constant with respect to energy, some
-energies would have either a net influx or net outflow of walkers,
-which would mean that the ensemble is not at equilibrium. We can
-therefore evaluate one of the integrals in
-(\ref{eq:walker_current_setup}) to get
+At equilibrium, the walker current $j\p{E}$ must be constant with
+respect to energy. If $j\p{E}$ is not constant with respect to energy,
+some energies would have either a net incurrent or net outflow of
+walkers, which would mean that the ensemble is not at equilibrium. We
+can therefore evaluate one of the integrals in
+(\ref{eq:walker_current_integral_setup}) to get
 \begin{align}
   \f1j=\int_{E=E_-}^{E_+}\f{dE}{\alpha n}.
   \label{eq:walker_current_integral}
@@ -1242,11 +1248,11 @@ therefore evaluate one of the integrals in
 
 The optimized ensemble method minimizes the integral in
 (\ref{eq:walker_current_integral}), thereby maximizing the down-going
-walker flux $j$, by varying the walker density $n$ with the constraint
-that $n$ must remain normalized. With the additional assumption that
-$\alpha\p{E}$ does not strongly depend on the weights $w\p{E}$, the
-authors of \cite{optimized_ensemble} find that the optimal walker
-density $n$ is
+walker current $j$, by varying the walker density $n$ with the
+constraint that $n$ must remain normalized. With the additional
+assumption that $\alpha\p{E}$ does not strongly depend on the weights
+$w\p{E}$, the authors of \cite{optimized_ensemble} find that the
+optimal walker density $n$ is
 \begin{align}
   n_{\t{opt}}=\f1{\sqrt{\lambda\alpha}},
   \label{eq:optimal_walker_density}
