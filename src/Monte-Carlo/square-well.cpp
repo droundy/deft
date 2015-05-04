@@ -343,9 +343,9 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
            *after* two stages of initialization. */
       long tup_norm = 0;
       long tdown_norm = 0;
-      for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
-        tup_norm += transitions(energy, e);
-        tdown_norm += transitions(energy+energy_change, e);
+      for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
+        tup_norm += transitions(energy, de);
+        tdown_norm += transitions(energy+energy_change, de);
       }
       /* The "conservativeness" parameter below allows us to adjust
          how soon the tmmc method becomes confident in its estimation
