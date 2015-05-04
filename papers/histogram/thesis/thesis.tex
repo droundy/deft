@@ -52,8 +52,8 @@
   square-well fluid} \renewcommand{\author}{Michael A. Perlin}
 \newcommand{\institution}{Oregon State University}
 \newcommand{\department}{Department of Physics}
-\newcommand{\supervisor}{Dr. David Roundy} \renewcommand{\date}{21
-  April 2015}
+\newcommand{\supervisor}{Dr. David Roundy}
+\renewcommand{\date}{08 May 2015}
 
 %%% notes, etc.
 \usepackage{color}
@@ -274,7 +274,7 @@ desired level of accuracy.
 
 \begin{algorithm}[tb]
   \caption{Metropolis Monte Carlo fluid simulation}
-  \label{alg:MC}
+  \label{alg:metropolis}
   \begin{alg}
 
   \item Construct an initial ``typical'' (i.e. non-ordered) fluid
@@ -285,37 +285,37 @@ desired level of accuracy.
     location, rejecting the change if it results in a forbidden fluid
     configuration (e.g. two or more spheres overlap) and accepting the
     change otherwise. Attempting to move a single sphere is referred
-    to as a move. \label{alg:mc_move}
+    to as a move. \label{alg:metropolis_move}
 
-  \item Repeat step \ref{alg:mc_move} for every other sphere in the
-    fluid. Attempting to move every sphere once is referred to as an
-    iteration of the simulation.
-    \label{alg:mc_iteration}
+  \item Repeat step \ref{alg:metropolis_move} for every other sphere
+    in the fluid. Attempting to move every sphere once is referred to
+    as an iteration of the simulation.
+    \label{alg:metropolis_iteration}
 
-  \item Repeat step \ref{alg:mc_iteration} indefinitely, or until data
-    of sufficient quality has been generated, periodically collecting
-    and dumping statistics on fluid states (e.g. energy, pair
-    distribution histograms, etc.) to data files.
+  \item Repeat step \ref{alg:metropolis_iteration} indefinitely, or
+    until data of sufficient quality has been generated, periodically
+    collecting and dumping statistics on fluid states (e.g. energy,
+    pair distribution histograms, etc.) to data files.
 
   \end{alg}
 \end{algorithm}
 
-Algorithm \ref{alg:MC} provides a sketch of unbiased, Metropolis Monte
-Carlo fluid simulations. Such an algorithm is ``unbiased'' in the
-sense that it collects statistics (i.e. data) on all valid system
-configurations with equal probability. Statistics whose collection
-time scales as $\mathcal O\p{1}$ with system size, meaning that
-increasing the number of spheres $N$ in the simulation does not affect
-collection time, can be collected after every move (defined in the
-algorithm). Statistics whose collection time scales as $\mathcal
-O\p{N}$, meaning that doubling $N$ doubles collection time, can be
-collected after each iteration. In general, collection with $\mathcal
-O\sp{\chi\p{N}}$ time scaling should not occur more often than once
-every $\chi\p{N}$ moves (where $\chi\p{N}$ may be an arbitrary
-function of $N$ void of constant prefactors, e.g. $N\log N$, or
-$2^N$). These collection rules ensure that scaling up simulations does
-not cause them to asymptotically spend all computation time collecting
-statistics, and no time actually simulating the fluid. Collected
+Algorithm \ref{alg:metropolis} provides a sketch of unbiased,
+Metropolis Monte Carlo fluid simulations. Such an algorithm is
+``unbiased'' in the sense that it collects statistics (i.e. data) on
+all valid system configurations with equal probability. Statistics
+whose collection time scales as $\mathcal O\p{1}$ with system size,
+meaning that increasing the number of spheres $N$ in the simulation
+does not affect collection time, can be collected after every move
+(defined in the algorithm). Statistics whose collection time scales as
+$\mathcal O\p{N}$, meaning that doubling $N$ doubles collection time,
+can be collected after each iteration. In general, collection with
+$\mathcal O\sp{\chi\p{N}}$ time scaling should not occur more often
+than once every $\chi\p{N}$ moves, where $\chi\p{N}$ may be an
+arbitrary function of $N$ void of constant prefactors, e.g. $N\log N$,
+or $2^N$. These collection rules ensure that scaling up simulations
+does not cause them to asymptotically spend all computation time only
+collecting statistics, or only simulating the fluid. Collected
 statistics are used to find thermodynamic properties of the simulated
 fluid.
 
@@ -340,11 +340,11 @@ simulation one might periodically compute both the energy $E\p{s}$ and
 some system property $X\p{s}$, both of which are determined by the
 microstate $s$, in order to find the mean value of $X$ at any given
 energy $E$, i.e. $\bk{X}_E$. In the real world, however, information
-about a system's microstates, and by extension functions of
-microstates (e.g. the energy $E$), is inaccessible. One therefore
-cannot measure $\bk{X}_E$ directly. Instead, one typically measures
-the dependence of thermodynamic properties on macroscopic state
-variables such as temperature, i.e. $\bk{X}_T$.
+about a system's microstates, and by extension information about
+functions of microstates (e.g. the energy $E$), is inaccessible. One
+therefore cannot measure $\bk{X}_E$ directly. Instead, one typically
+measures the dependence of thermodynamic properties on macroscopic
+state variables such as temperature, i.e. $\bk{X}_T$.
 
 To find $\bk{X}_T$, we first need to understand the concept of a
 density of states. Given an arbitrary system property $Y\p{s}$
@@ -390,33 +390,36 @@ $H\p{X_0}$ of the system with $X\p{s}=X_0$ is proportional to the
 total number of states $s$ for which $X\p{s}=X_0$. It is sometimes the
 case, however, that the density of states in some region $R$ in the
 range of possible $X$ is so low that it is practically impossible (via
-Metropolis Monte Carlo) to sufficiently sample $R$, that is,
+Metropolis Monte Carlo) to sufficiently sample $R$, that is, to
 accumulate a statistically significant histogram $H\p{X\in R}$, in any
-reasonable amount of time.
+reasonable amount of time. Given that the entropy $S\p{X}$ can be
+expressed in terms of the number of microstates $\Omega\p{X}$ as
+$S\p{X}=k\ln\Omega\p{X}\propto\ln D\p{X}$, we may refer to regions $R$
+low state densities $D\p{X\in R}$ as low entropy states.
 
 \subsubsection{Biased sampling}
 \label{sec:biased_sampling}
 
 Histogram methods provide a means to address Metropolis Monte Carlo's
-inability to sufficiently sample regions of parameter space with a low
-density of states by introducing a bias into the otherwise random
-sampling of state space. A weighting function $w$ is introduced, whose
-domain is the value of some property $X\p{s}$ which depends on the
-system state $s$. An additional condition is then added to step
-\ref{alg:mc_move} of Algorithm \ref{alg:MC} in order to accept an
-attempted move: the weights $w\sp{X\p{s_i}}$ and $w\sp{X\p{s_f}}$ of
-the initial (pre-move) state $s_i$ and final (post-move) state $s_f$
-are used to determine the probability $P\p{s_i\to s_f}$ of accepting
-an otherwise valid move via
+inability to sufficiently sample low entropy states by introducing a
+bias into the otherwise random sampling of state space. A weighting
+function $w$ is introduced, whose domain is the value of some property
+$X\p{s}$ which depends on the system state $s$. An additional
+condition is then added to step \ref{alg:metropolis_move} of Algorithm
+\ref{alg:metropolis} in order to accept an attempted move: the weights
+$w\sp{X\p{s_i}}$ and $w\sp{X\p{s_f}}$ of the initial (pre-move) state
+$s_i$ and final (post-move) state $s_f$ are used to determine the
+probability $P_m\p{s_i\to s_f}$ of accepting an otherwise valid move
+via
 \begin{align}
-  P\p{s_i\to s_f}=\min\set{\f{w\sp{X\p{s_f}}}{w\sp{X\p{s_i}}},1}.
+  P_m\p{s_i\to s_f}=\min\set{\f{w\sp{X\p{s_f}}}{w\sp{X\p{s_i}}},1}.
   \label{eq:move_prob}
 \end{align}
 This formula means that when $w\sp{X\p{s_f}}>w\sp{X\p{s_i}}$, the move
 $s_i\to s_f$ is accepted; when $w\sp{X\p{s_f}}<w\sp{X\p{s_i}}$, the
 ratio of these weights determines the probability of accepting the
 move. Due to the fact that only ratios of weights determine
-$P\p{s_i\to s_f}$, the weights $w\sp{X\p{s}}$ are scale-invariant,
+$P_m\p{s_i\to s_f}$, the weights $w\sp{X\p{s}}$ are scale-invariant,
 meaning that their effect on simulations is unchanged by scale factors
 that are constant with respect to $X\p{s}$.
 
@@ -441,12 +444,8 @@ that are constant with respect to $X\p{s}$.
     \end{enumerate*}
     \label{alg:biased_mc_move}
 
-  \item Repeat step \ref{alg:biased_mc_move} for every other sphere in
-    the fluid.
-    \label{alg:biased_mc_iteration}
-
-  \item Repeat step \ref{alg:biased_mc_iteration} until data of
-    sufficient quality has been generated.
+  \item Repeat step \ref{alg:biased_mc_move} the simulation produces
+    statistics of sufficient quality.
 
   \end{alg}
 \end{algorithm}
@@ -482,12 +481,12 @@ simulation. A histogram method is simply an algorithm or procedure for
 determining a weight function appropriate for a particular simulation.
 
 In this paper, we will consider weights $w\p{E}$ which depend only on
-the energy $E$ of the system. Due to the fact that the square-well
-fluid can only have discrete energies $E=-n\epsilon$, where $n$ is a
-non-negative integer and $\epsilon$ is the well depth, in simulation
-we store the weight function as an array of values. We may therefore
-use the terms ``weight function,'' and ``weight array,'' and
-``weights'' interchangeably.
+the energy $E$ of the square-well fluid. Due to the fact that the
+square-well fluid can only have discrete energies $E=-n\epsilon$,
+where $n$ is a non-negative integer and $\epsilon$ is the well depth,
+in simulation we store the weight function as an array of values. We
+may therefore use the terms ``weight function,'' and ``weight array,''
+and ``weights'' interchangeably.
 
 \fixme{mention that simulating with flat weights $w\p{E}=w_0$ is the
   same as running a Metropolis MC simulation.}
@@ -760,7 +759,7 @@ longer (in step \ref{alg:simple_flat_sim} of Algorithm
 \ref{alg:simple_flat}) because these energies have lower state
 densities. The introduction of a minimum temperature may seem ad-hoc,
 but all simulations in this paper require a choice of minimum
-temperature anyways (addressed in Section \ref{sec:energy_range}). In
+temperature anyways (discussed in Section \ref{sec:energy_range}). In
 this paper, we will always use $kT_{\t{min}}=0.2\epsilon$.
 
 \subsection{The Wang-Landau (WL) method}
@@ -927,102 +926,386 @@ values of $\ln c=10^{-8}$; we used $\ln c=10^{-6}$.
 \subsection{The transition matrix Monte Carlo method}
 \label{sec:tmmc}
 
+\fixme{add citations}
+
 Unlike the previous histogram methods, the transition matrix Monte
 Carlo (TMMC) method does not use weights, and merely compute the
-density of states $D\p{E}$ of a system. The density of states can in
-turn be used via the flat histogram method (Section
-\ref{sec:flat_histogram}) to determine appropriate weights for
-subsequent Monte Carlo simulations. TMMC introduces a new object: the
-energy transition matrix, $T$, whose components $T_{ij}$ are the
+density of states $D\p{E}$ of a system\cite{tmmc}. The density of
+states can in turn be used to determine flat histogram weights via
+(\ref{eq:flat_weights}). TMMC introduces a new object: the energy
+transition matrix, $T$, whose components $T_{ij}$ are the
 probabilities that a system will transition {\it to} a state with
 energy $E_i$ {\it from} a given state with energy $E_j$,
 i.e. $T_{ij}=P\p{E_j\to E_i}$.
 
-The transition matrix $T$ is trivially square and positive-definite,
-but it is not symmetric. Given that Metropolis Monte Carlo samples all
-of state-space randomly, meaning all possible system states are
-equally likely to occur during simulation, a transition $E_i\to E_f$
-from an energy with a low state density to one with a high state
-density, $D\p{E_i}<D\p{E_j}$, is more probable than the inverse
-transition $E_j\to E_i$ simply due to the fact that there are more
-states with energy $E_i$ than those with energy $E_j$. Thus
-$D\p{E_i}<D\p{E_j}$ implies $P\p{E_i\to E_j}>P\p{E_j\to E_i}$, which
-means $T_{ji}>T_{ij}$. Said otherwise, the asymmetry of the transition
-matrix is a direct consequence of the second law of thermodynamics:
-systems are exceedingly likely to evolve towards macroscopic states
-with higher accessible microstate densities.
+The transition matrix is trivially square and positive-definite, but
+it is not symmetric. Given that Metropolis Monte Carlo samples all of
+state-space randomly, meaning all possible system states are equally
+likely to occur during simulation, a transition $E_i\to E_f$ from an
+energy with a low state density to one with a high state density,
+$D\p{E_i}<D\p{E_j}$, is more probable than the inverse transition
+$E_j\to E_i$ simply due to the fact that there are more states with
+energy $E_i$ than those with energy $E_j$. Thus $D\p{E_i}<D\p{E_j}$
+implies $P\p{E_i\to E_j}>P\p{E_j\to E_i}$, which means
+$T_{ji}>T_{ij}$. The asymmetry of the transition matrix is precisely
+the origin of the second law of thermodynamics: systems are
+exceedingly likely to evolve towards macroscopic states with higher
+accessible microstate densities.
 
-In principle, computationally determining the transition matrix of a
-system is straightforward. One need only simulate a system and collect
-a histogram $\tilde T\p{E_i,E_j}$ of the energy transitions after each
-move, directly after deciding whether to reject the move based on
-whether it resulted in an (in)valid system state. That is, transition
-data should be collected (only) on all moves as they would have been
-accepted by Metropolis Monte Carlo, i.e. before deciding whether to
-reject any given move for any reasons involving weights, or other
-biasing schemes.
+Knowing the transition matrix of a system determines, among other
+properties, the system's density of states. Consider an ensemble of
+Metropolis Monte Carlo simulations with a distribution of energies at
+a time $t$ given by $\hat D^{t}\p{E}$, such that the probability of
+any given simulation to have an energy $E_i$ at a time $t$ is $\hat
+D_i^{t}=\hat D^{t}\p{E_i}$. The probability $\hat D_i^{t}$ can be
+expressed in terms of the distribution $\hat D^{t-1}\p{E}$ one time
+step (i.e. one Metropolis Monte Carlo move) prior by
+\begin{align}
+  \hat D_i^{t}=\sum_jP\p{E_i\to E_j}\hat D_j^{t-1} =\sum_j T_{ij}\hat
+  D_j^{t-1}.
+  \label{eq:transition_evolution}
+\end{align}
+At equilibrium, the probability distributions $\hat D^{t}=\hat
+D^{t-1}$. Furthermore, the distribution of states in an equilibrium
+ensemble of Metropolis Monte Carlo simulations is precisely the
+density of states $D\p{E}$\fixme{explain why?}, which means
+$D_i=T_{ij}D_j$. Simultaneously expressing this condition for all
+energies,
+\begin{align}
+  D=TD. \label{eq:dos_eigen}
+\end{align}
+Finding the density of states of a system can thus be reduced to
+finding the eigenvector of the transition matrix which has a
+corresponding unit eigenvalue\fixme{why is this eigenvector
+  unique?}. Once one has determined the density of states of a system,
+one can initialize weights via the flat histogram method,
+i.e. (\ref{eq:flat_weights}).
 
+Computationally determining the transition matrix of a system is
+straightforward: one need only simulate the system and collect a
+histogram $\tilde T_{ij}=\tilde T\p{E_i,E_j}$ of the energy
+transitions after each Metropolis Monte Carlo move, i.e. after step
+\ref{alg:metropolis_move} of Algorithm \ref{alg:metropolis}. A
+histogram of transitions $\tilde T\p{E_i,\bar E_j}_{}$ from a fixed
+energy $\bar E_j$ to energies $E_i$ is then proportional to the
+probability distribution of transitions from $\bar E_j$, i.e. the
+transition matrix $T\p{E_i,\bar E_j}$. Crucially, this proportionality
+does not depend on the history of a simulation, or on how the
+simulation got to be in the energy $\bar E_j$, so long as samples of
+the energy $\bar E_j$ are themselves void of systemic
+bias. Furthermore, one does not actually need to transition from $E_j$
+to $E_i$ in order to collect statistics on $T\p{E_i,E_j}$: after
+deciding whether to accept a move based on whether it results in a
+valid system state, one can increment $\tilde T\p{E_i,E_j}$ before
+deciding to reject the move for some other reason, e.g. because
+$w\p{E_j}\gg w\p{E_i}$, or even because one wishes to collect more
+statistics on $T\p{E_i,\bar E_j}$.
 
+The proportionality $\tilde T_{ij}\propto T_{ij}$ can be made explicit
+by enforcing that the probabilities of all transitions from an energy
+$E_j$ sum to unity, i.e.
+\begin{align}
+  \sum_iP\p{E_j\to E_i}=\sum_iT_{ij}=1,
+  \label{eq:transition_norm_condition}
+\end{align}
+which implies
+\begin{align}
+  T_{ij}=\f{\tilde T_{ij}}{\sum_i\tilde T_{ij}}.
+  \label{eq:transition_normalization}
+\end{align}
+To compute $T$ from $\tilde T$, one must therefore normalize each row
+of $\tilde T$ independently.
 
+If a system has $L$ energy levels, the transition histogram $\tilde
+T\p{E_i,E_j}$ is an $L\times L$ matrix. Given that $L$ is proportional
+to the system size $N$, the memory footprint of $\tilde T\p{E_i,E_j}$
+grows as $N^2$. For most systems, however, there will be a maximum
+energy $M$ independent of system size by which a single move can
+change the energy of the system. The transition histogram for such
+systems is therefore band-diagonal, which one can exploit to save
+memory. In particular, it is natural to store the transition histogram
+in the form $\tilde T_d\p{E,\Delta E}$, which gives the probability
+that a system will transition from the energy $E$ to the energy
+$E+\Delta E$ in a single move. One can convert between $\tilde
+T_d\p{E,\Delta E}$ and $\tilde T\p{E_i,E_j}$ using the relation
+\begin{align}
+  \tilde T\p{E_i,E_j}=\tilde T_d\p{E_j,E_i-E_i},
+\end{align}
+which means, from (\ref{eq:transition_normalization}),
+\begin{align}
+  T_{ij}=\f{\tilde T_d\p{E_j,E_i-E_j}}{\sum_i\tilde T_d\p{E_j,E_i-E_j}}
+  =\f{\tilde T_d\p{E_j,E_i-E_j}}
+  {\sum_{\Delta E}\tilde T_d\p{E_j,\Delta E}}.
+  \label{eq:transition_conversion}
+\end{align}
+Expressed in this form, the memory footprint of the transition
+histogram grows linearly with system size $N$ and the maximal energy
+difference $M$.
 
-\vspace{3cm}
+While one could imagine many initialization routines to determine the
+transition matrix $T$, we use Algorithm \ref{alg:tmmc}, which is a
+modified version of a routine provided in \cite{tmmc_prl}\fixme{is
+  this citation correct?}. The primary motivation behind this
+algorithm is such: as lower energies are always more difficult to
+sample than higher energies, transitions to lower energies should
+always be accepted, while transitions to higher energies should pass a
+probabilistic acceptance test. To understand the probability in step
+\ref{alg:tmmc_prob} of Algorithm \ref{alg:tmmc} of accepting a move
+$s_i\to s_f$ for which $E_f>E_i$, first consider the case of $c=0$ and
+$T_{\t{min}}\to0$, in which case the probability becomes
+\begin{align}
+  P_m\p{s_i\to s_f}=\f{\p{\tilde T_d\p{E_i,\Delta E}}\big/
+    \p{\sum_{\Delta E'}\tilde T_d\p{E_i,\Delta E'}}}
+  {\p{\tilde T_d\p{E_f,-\Delta E}}\big/
+    \p{\sum_{\Delta E'}\tilde T_d\p{E_f,\Delta E'}}}
+  =\f{T\p{E_i,\Delta E}}{T\p{E_f,-\Delta E}}
+  =\f{P\p{E_i\to E_f}}{P\p{E_f\to E_i}},
+  \label{eq:tmmc_prob_simplified}
+\end{align}
+where $\Delta E=E_f-E_i$ and $P\p{E_m\to E_n}$ is the unbiased
+probability of a transition from an energy $E_m$ to an energy
+$E_n$. The result in (\ref{eq:tmmc_prob_simplified}) is the
+probability of accepting moves $s_i\to s_f$ required for simulation
+via Algorithm \ref{alg:tmmc} to yield a flat energy
+histogram\cite{tmmc}. Unlike the previous histogram methods, we desire
+a flat histogram during initialization via Algorithm \ref{alg:tmmc}
+not because we are constructing weights $w\p{E}$, but because we wish
+to sample the transition histogram $\tilde T_d\p{E,\Delta E}$ equally
+at all energies $E$. \fixme{briefly explain
+  (\ref{eq:tmmc_prob_simplified}) by considering a two-level system,
+  and extending to larger systems}.
 
-\fixme{schemes for initializing to collect transition matrix}
+Aside from a minimum temperature $T_{\t{min}}$ and an end condition,
+Algorithm \ref{alg:tmmc} contains one free parameter, $c$, used in
+step \ref{alg:tmmc_prob} to modify (\ref{eq:tmmc_prob_simplified}).
+This parameter makes the rejection of transitions more conservative
+when there are too few statistics in the histogram $\tilde T_d$ to be
+confident in the current estimate of the transition matrix. In order
+to make the effects of $c$ negligible as $\tilde T_d$ collects more
+statistics throughout initialization, $c$ should be of order unity,
+though its optimal value is generally system-dependent. In our
+implementation of Algorithm \ref{alg:tmmc}, we use $c=16$.
 
-\fixme{normalizing transition matrix}
+The last interesting part of the probability in step
+\ref{alg:tmmc_prob} of Algorithm \ref{alg:tmmc} is the limit on
+$P_m\p{s_i\to s_f}$ to a minimum value of $\exp\p{-\Delta
+  E/kT_{\t{min}}}$. This limit caps the bias on energies to that
+introduced by canonical (fixed-temperature) weights at a temperature
+of $T_{\t{min}}$. As a result, Algorithm \ref{alg:tmmc} will not waste
+time oversampling energies which are unimportant for determining
+system properties at temperatures $T\ge T_{\t{min}}$.
 
-\fixme{computing density of states via transition matrix}
-
-\fixme{storing transition matrix in the form $T\p{E,\Delta E}$}
-
-\vspace{3cm}
-
-
-For the square-well fluid, as with many systems, there is a maximum
-amount $\Delta_ME$ by which a single move can change the energy of the
-system. The transition matrix can therefore be stored in the form
-$T\p{E,\Delta E}$
-
-
-the transition matrix is band-diagonal because . In implementation,
-the transition matrix can therefore be stored in the form
-$T\p{E,\Delta E}$, making it an $L\times\Delta_ME$ matrix, where $L$
-is the number of energy levels in a given system. Given that $L$
-scales as $N\Delta_ME$, where $N$ is the number of spheres in the
-square-well fluid, the memory required to store the transition matrix
-therefore scales as $N\p{\Delta_ME}^2$, an improvement over the $N^2$
-growth of a transition matrix in the form $T\p{E_i,E_j}$.
-
-
-\newpage
-
-
-
-
-
-\fixme{Explain, provide algorithm. This method is sort of our own, but
-  based on other work.}
-
-\begin{algorithm}[H]
+\begin{algorithm}[tb]
   \caption{Transition matrix Monte Carlo initialization}
   \label{alg:tmmc}
-\end{algorithm}
+  \begin{alg}
 
+  \item Construct an initial typical fluid configuration.
+
+  \item Initialize a transition histogram $\tilde T_d\p{E,\Delta E}=0$
+    for all $E$ and $\Delta E\in\sp{-M,M}$, where $M$ is the possible
+    maximum energy transition of a single move.
+
+  \item Randomly attempt to change the position of one sphere,
+    tentatively accepting the transition from state $s_i$ to state
+    $s_f$ if $s_f$ is not a forbidden fluid configuration.
+    \label{alg:tmmc_move}
+
+  \item Let $\Delta E=E_f-E_i$ and increment $\tilde
+    T_d\p{E_i,\Delta{E}}$, where $E_k$ is the energy of state $s_k$.
+
+  \item If $\Delta E<0$, accept the move. Otherwise
+    \begin{enumerate}
+    \item compute the normalization factor
+      \begin{align*}
+        n_k=\sum_{\Delta E'}\tilde T_d\p{E_k,\Delta E'}
+      \end{align*}
+      for $k\in\set{i,f}$, and
+
+    \item accept the move $s_i\to s_f$ with probability
+      \begin{align*}
+        P_m\p{s_i\to s_f}
+        =\max\set{\f{\p{\tilde T_d\p{E_i,\Delta E}+c}/\p{n_i+c}}
+          {\p{\tilde T_d\p{E_f,-\Delta E}+c}/\p{n_f+c}},
+          \exp\p{-\f{\Delta E}{kT_{\t{min}}}}}
+      \end{align*}
+      for a predetermined number $c$ and temperature $T_{\t{min}}$.
+      \label{alg:tmmc_prob}
+    \end{enumerate}
+
+  \item If some predetermined initialization end condition has
+    \emph{not} been met, return to step \ref{alg:tmmc_move}.
+
+  \end{alg}
+\end{algorithm}
 
 \subsection{The optimized ensemble method}
 \label{sec:optimized_ensemble}
 
-\fixme{Explain briefly. No need to provide algorithm.}
+All histogram methods introduced in this paper thus far have focused
+on determining a weight array $w\p{E}$ for a flat energy histogram
+$H\p{E}$, in order to sample and collect statistics on all energies
+equally. This motivation considers the quantity of statistics, but not
+their quality. Biased simulations collect statistics on low energy
+states by first getting into these states, and then rejecting moves
+which move the system into higher energy states. Statistics on low
+energy states will therefore generally be highly correlated, as they
+are based on many samples of only a few low energy regions of a
+system's energy landscape. The optimized ensemble
+(OE)\cite{optimized_ensemble} attempts to address the autocorrelation
+between low energy samples by finding weights to maximize the rate at
+which a simulation makes round trips between low and high energy
+states. Maximizing the round trip rate, in turn, maximizes the rate at
+which a simulation makes independent, uncorrelated samples of low
+energies.
 
+The optimized ensemble works by considering an ensemble of
+simulations, each of which defines the position of a ``walker'' in
+energy space. Given that we want walkers to move back and forth
+between two extrema $E_+$ and $E_-$ of some specified energy range, we
+label each walker by which extrema it has visited most recently. We
+can then identify ``down-going'' (``up-going'') walkers by those which
+more recently visited $E_+$ ($E_-$), which means that to make a round
+trip they first needed to get to $E_-$ ($E_+$). Denoting the total
+walker and down-going density at an energy $E$ respectively by
+$n\p{E}$ and $n_+\p{E}$, the ratio $f\p{E}=n_+\p{E}/n\p{E}$ gives the
+proportion of walkers at $E$ which are down-going. We also denote the
+walker diffusivity at an energy $E$ by $\alpha\p{E}$.
+
+The down-going walker current $j\p{E}$ is defined in terms of the
+diffusivity $\alpha\p{E}$ by
+\begin{align}
+  j=\alpha\f{dn_+}{dE}.
+  \label{eq:walker_current_definition}
+\end{align}
+Computing
+\begin{align}
+  n\f{df}{dE}=n\sp{\f1{n}\f{dn_+}{dE}-\f{n_+}{n^2}\f{dn}{dE}}
+  =\f{dn_+}{dE}-f\f{dn}{dE},
+  \label{eq:walker_intermediate}
+\end{align}
+we can say that
+\begin{align}
+  \f{dn_+}{dE}=n\f{df}{dE}+f\f{dn}{dE}.
+  \label{eq:walker_gradient}
+\end{align}
+Substituting (\ref{eq:walker_gradient}) into
+(\ref{eq:walker_current_definition}) yields
+\begin{align}
+  j=\alpha\sp{n\f{df}{dE}+f\f{dn}{dE}}.
+  \label{eq:walker_current_intermediate}
+\end{align}
+We can observe that
+\begin{align}
+  \f{f~dn/dE}{n~df/dE} =\p{\f{dn_+/dE-fdn/dE}{f~dn/dE}}^{-1}
+  =\p{\f1f\f{dn_+}{dn}-1}^{-1}.
+  \label{eq:walker_current_approx_ratio_setup}
+\end{align}
+Furthermore,
+\begin{align}
+  \p{\f1f\f{dn_+}{dn}-1}^{-1}
+  =\p{\f1f\f{d\p{fn}}{dn}-1}^{-1}
+  =\p{\f nf\f{df}{dn}+\f{dn}{dn}-1}^{-1}
+  =\p{\f nf\f{df}{dn}}^{-1}=\f nf\f{dn}{df}=\f{d\ln n}{d\ln f},
+  \label{eq:walker_current_approx_intermediate}
+\end{align}
+which means
+\begin{align}
+  \f{f~dn/dE}{n~df/dE}=\f{d\ln n}{d\ln f}.
+  \label{eq:walker_current_approx_ratio}
+\end{align}
+The walker current is therefore
+\begin{align}
+  j=\alpha n\f{df}{dE}\p{1+\f{d\ln n}{d\ln f}}.
+  \label{eq:walker_current_full}
+\end{align}
+We know that $f$ runs from $f\p{E_-}=0$ to $f\p{E_+}=1$ meaning $\ln
+f$ runs from $\ln f\p{E_-}\to-\infty$ to $\ln f\p{E_+}=0$. If the
+walker density $n$ varies weakly with energy, e.g. because we are
+simulating with flat histogram weights, then $\ln n$ varies even
+weaker still. We may therefore reasonably to assume that $\abs{d\ln
+  n/d\ln f}\ll 1$ and express
+\begin{align}
+  j=\alpha n\f{df}{dE}.
+  \label{eq:walker_current}
+\end{align}
+We can rearrange (\ref{eq:walker_current}) and integrate over the
+energy range to say
+\begin{align}
+  \int_{f=0}^1\f{df}{j}=\int_{E=E_-}^{E_+}\f{dE}{\alpha n}.
+  \label{eq:walker_current_integral_setup}
+\end{align}
+At equilibrium, the walker current $j\p{E}$ must be constant with
+respect to energy. If $j\p{E}$ is not constant with respect to energy,
+some energies would have either a net incurrent or net outflow of
+walkers, which would mean that the ensemble is not at equilibrium. We
+can therefore evaluate one of the integrals in
+(\ref{eq:walker_current_integral_setup}) to get
+\begin{align}
+  \f1j=\int_{E=E_-}^{E_+}\f{dE}{\alpha n}.
+  \label{eq:walker_current_integral}
+\end{align}
+
+The optimized ensemble method minimizes the integral in
+(\ref{eq:walker_current_integral}), thereby maximizing the down-going
+walker current $j$, by varying the walker density $n$ with the
+constraint that $n$ must remain normalized. With the additional
+assumption that $\alpha\p{E}$ does not strongly depend on the weights
+$w\p{E}$, the authors of \cite{optimized_ensemble} find that the
+optimal walker density $n$ is
+\begin{align}
+  n_{\t{opt}}=\f1{\sqrt{\lambda\alpha}},
+  \label{eq:optimal_walker_density}
+\end{align}
+where $\lambda$ is the Lagrange multiplier used in the minimization
+process, and here acts merely as a normalization factor.
+
+Equating the set of observations in a single simulation with a single
+observation of an ensemble of simulations, the walker density $n\p{E}$
+is proportional to the energy histogram $H\p{E}=\tilde D\p{E}w\p{E}$,
+which means
+\begin{align}
+  w_{\t{opt}}=\f1{D\sqrt{\alpha}},
+  \label{eq:optimized_weights}
+\end{align}
+where we neglect the distinction between $\tilde D$ and $D$, which has
+no effect on the weights $w$.
+
+The algorithm provided in \cite{optimized_ensemble} to determine and
+construct weights given by \ref{eq:optimized_weights} involves
+simulating with and iteratively modifying flat histogram weights. This
+algorithm is not meant to construct weights from scratch, but rather
+to optimize them. We therefore will not be comparing the optimized
+ensemble to other methods. We do, however, credit this method for
+motivating the hybrid OE-TMMC method in Section \ref{sec:oetmmc}.
 
 \subsection{The hybrid OE-TMMC method}
 \label{sec:oetmmc}
+
+
+\begin{align}
+  \bk{\Delta E}=\f{\sum_{\Delta E}\Delta E~\tilde T\p{E,\Delta E}
+    w\p{E+\Delta E}/w\p{E}}{\sum_{\Delta E'}\tilde T\p{E,\Delta E'}
+    w\p{E+\Delta E'}/w\p{E}}
+\end{align}
+
+\begin{align}
+  \bk{\Delta E^2}=\f{\sum_{\Delta E}\Delta E^2~\tilde T\p{E,\Delta E}
+    w\p{E+\Delta E}/w\p{E}}{\sum_{\Delta E'}\tilde T\p{E,\Delta E'}
+    w\p{E+\Delta E'}/w\p{E}}
+\end{align}
+
+\begin{align}
+  \alpha=\abs{\bk{\Delta E^2}-\bk{\Delta E}^2}
+\end{align}
+
+
 
 \fixme{Explain, provide algorithm. This method is our own synthesis of
   other work.}
 
 \begin{algorithm}[H]
-  \caption{Hybrid OE-TMMC simulation}
+  \caption{Modifying transition weights via the optimized ensemble}
   \label{alg:oetmmc}
 \end{algorithm}
 

@@ -1,10 +1,7 @@
-add seed = 9 data
-run nw, wang landau, cfw simulations for N = 5..26 for all seeds
-
-use other seeds in figures
+[vanilla] wang landau, cfw simulations:
+  run N = 27..30 for all seeds
 
 print data periodically during initialization
-
 
 
 

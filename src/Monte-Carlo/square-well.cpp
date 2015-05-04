@@ -343,9 +343,9 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
            *after* two stages of initialization. */
       long tup_norm = 0;
       long tdown_norm = 0;
-      for (int e=-biggest_energy_transition; e<=biggest_energy_transition; e++) {
-        tup_norm += transitions(energy, e);
-        tdown_norm += transitions(energy+energy_change, e);
+      for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
+        tup_norm += transitions(energy, de);
+        tdown_norm += transitions(energy+energy_change, de);
       }
       /* The "conservativeness" parameter below allows us to adjust
          how soon the tmmc method becomes confident in its estimation
@@ -1123,7 +1123,7 @@ void sw_simulation::optimize_weights_using_transitions() {
       lnw[biggest_energy_transition+i] = ln_energy_weights[i];
     }
 
-    double diffusivity = 1;
+    double inv_diffusivity = 1;
     for(int i = max_entropy_state; i <= min_important_energy; i++) {
       double norm = 0, mean_sqr_de = 0, mean_de = 0;
       for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
@@ -1137,7 +1137,7 @@ void sw_simulation::optimize_weights_using_transitions() {
         mean_sqr_de /= norm;
         mean_de /= norm;
         //printf("%4d: <de> = %15g   <de^2> = %15g\n", i, mean_de, mean_sqr_de);
-        diffusivity = 1.0/fabs(mean_sqr_de - mean_de*mean_de);
+        inv_diffusivity = 1.0/fabs(mean_sqr_de - mean_de*mean_de);
       } else {
         printf("Craziness at energy %d!!!\n", i);
       }
@@ -1146,7 +1146,7 @@ void sw_simulation::optimize_weights_using_transitions() {
          end of Section IIA (and expressed in words).  The main
          difference is that we compute the diffusivity here *directly*
          rather than inferring it from the walker gradient.  */
-      ln_energy_weights[i] = -ln_dos[i] + 0.5*log(diffusivity);
+      ln_energy_weights[i] = -ln_dos[i] + 0.5*log(inv_diffusivity);
     }
     initialize_canonical(min_T,min_important_energy);
     double ln_max = ln_energy_weights[max_entropy_state];
