@@ -129,7 +129,7 @@ int main(int argc, const char *argv[]) {
   const double vanilla_wl_cutoff = 1e-8;
 
   // some miscellaneous default or dummy simulation parameters
-  sw.len[0] = sw.len[1] = sw.len[2] = 1;
+  sw.len[0] = sw.len[1] = sw.len[2] = 0;
   sw.walls = 0;
   sw.sticky_wall = 0;
   sw.well_width = 1.3;
@@ -186,7 +186,6 @@ int main(int argc, const char *argv[]) {
 
     /*** RELATIVE SIZE OF CELL DIMENSIONS ***/
 
-    // fixme(?): these are currently ignored
     {"lenx", '\0', POPT_ARG_DOUBLE, &sw.len[x], 0,
      "Relative cell size in x dimension", "DOUBLE"},
     {"leny", '\0', POPT_ARG_DOUBLE, &sw.len[y], 0,
@@ -389,8 +388,12 @@ int main(int argc, const char *argv[]) {
     return 149;
   }
 
-  // If the user specified a filling fraction, make it so!
-  if (sw.filling_fraction != 0) {
+  if (sw.len[x]<0 || sw.len[y]<0 || sw.len[x]<0){
+    printf("Cell dimensions cannot be negative.\n");
+    return 124;
+  }
+
+  if (sw.len[x] + sw.len[y] + sw.len[z] == 0) {
     const double volume = 4*M_PI/3*R*R*R*sw.N/sw.filling_fraction;
     const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
     const int numcells = (sw.N+3)/4; // number of unit cells we need
@@ -422,6 +425,11 @@ int main(int argc, const char *argv[]) {
       printf("Using lopsided %d x %d x %d cell (total goal %d)\n",
              xcells, ycells, zcells, numcells);
     }
+  } else if (sw.len[x]==0 || sw.len[y]==0 || sw.len[x]==0){
+    printf("Must specify either filling fraction or ALL cell dimensions.\n");
+    return 44;
+  } else {
+    sw.filling_fraction = (4*M_PI/3*R*R*R*sw.N)/(sw.len[x]*sw.len[y]*sw.len[z]);
   }
 
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
