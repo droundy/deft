@@ -1174,9 +1174,9 @@ net and down-going walker diffusivity at an energy $E$ respectively by
 $\alpha\p{E}$ and $\alpha_+\p{E}$.
 
 We can meaningfully discuss a down-going walker flux $j\p{E}$, which
-is defined by
+is defined in terms of the diffusivity $\alpha_+\p{E}$ by
 \begin{align}
-  j=\f{dn_+}{dt}=\alpha_+\f{dn_+}{dE}=f\alpha\f{dn_+}{dE}.
+  j=\alpha_+\f{dn_+}{dE}=f\alpha\f{dn_+}{dE}.
   \label{eq:walker_current_definition}
 \end{align}
 Computing
@@ -1230,8 +1230,12 @@ $E_+$, at which $f\p{E_+}=1$, to say
   \int_{f=0}^1\f{df}{j}=\int_{E=E_-}^{E_+}\f{dE}{f\alpha n}.
   \label{eq:walker_current_setup}
 \end{align}
-At equilibrium, $j=dn_+/dt$ is constant, which means we can evaluate
-one of the integrals in (\ref{eq:walker_current_setup})
+At equilibrium, the walker flux $j\p{E}$ must be constant with respect
+to energy. If $j\p{E}$ is not constant with respect to energy, some
+energies would have either a net influx or net outflow of walkers,
+which would mean that the ensemble is not at equilibrium. We can
+therefore evaluate one of the integrals in
+(\ref{eq:walker_current_setup}) to get
 \begin{align}
   \f1j=\int_{E=E_-}^{E_+}\f{dE}{f\alpha n}.
   \label{eq:walker_current_integral}
@@ -1239,11 +1243,11 @@ one of the integrals in (\ref{eq:walker_current_setup})
 
 The optimized ensemble method minimizes the integral in
 (\ref{eq:walker_current_integral}), thereby maximizing the down-going
-walker current $j$, by varying the walker density $n$ with the
-constraint that $n$ must remain normalized. With the additional
-assumption that $\alpha\p{E}$ does not strongly depend on the weights
-$w\p{E}$, the authors of \cite{optimized_ensemble} find that the
-optimal walker density $n$ is
+walker flux $j$, by varying the walker density $n$ with the constraint
+that $n$ must remain normalized. With the additional assumption that
+$\alpha\p{E}$ does not strongly depend on the weights $w\p{E}$, the
+authors of \cite{optimized_ensemble} find that the optimal walker
+density $n$ is
 \begin{align}
   n_{\t{opt}}=\f1{\sqrt{\lambda\alpha}},
   \label{eq:optimal_walker_density}
