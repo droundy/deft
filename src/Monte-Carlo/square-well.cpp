@@ -1123,12 +1123,13 @@ void sw_simulation::optimize_weights_using_transitions() {
       lnw[biggest_energy_transition+i] = ln_energy_weights[i];
     }
 
-    double inv_diffusivity = 1;
+    double diffusivity = 1;
     for(int i = max_entropy_state; i <= min_important_energy; i++) {
       double norm = 0, mean_sqr_de = 0, mean_de = 0;
       for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-        double T = transitions(i, de)*exp(lnw[biggest_energy_transition+i+de]
-                                          -lnw[biggest_energy_transition+i]);
+        // cap the ratio of weights at 1
+        double T = transitions(i, de)*exp(max(0,lnw[biggest_energy_transition+i+de]
+                                              -lnw[biggest_energy_transition+i]));
         norm += T;
         mean_sqr_de += T*double(de)*de;
         mean_de += T*double(de);
@@ -1137,7 +1138,7 @@ void sw_simulation::optimize_weights_using_transitions() {
         mean_sqr_de /= norm;
         mean_de /= norm;
         //printf("%4d: <de> = %15g   <de^2> = %15g\n", i, mean_de, mean_sqr_de);
-        inv_diffusivity = 1.0/fabs(mean_sqr_de - mean_de*mean_de);
+        diffusivity = fabs(mean_sqr_de - mean_de*mean_de);
       } else {
         printf("Craziness at energy %d!!!\n", i);
       }
@@ -1146,7 +1147,7 @@ void sw_simulation::optimize_weights_using_transitions() {
          end of Section IIA (and expressed in words).  The main
          difference is that we compute the diffusivity here *directly*
          rather than inferring it from the walker gradient.  */
-      ln_energy_weights[i] = -ln_dos[i] + 0.5*log(inv_diffusivity);
+      ln_energy_weights[i] = -ln_dos[i] - 0.5*log(diffusivity);
     }
     initialize_canonical(min_T,min_important_energy);
     double ln_max = ln_energy_weights[max_entropy_state];
