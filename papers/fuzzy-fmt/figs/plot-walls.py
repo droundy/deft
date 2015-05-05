@@ -1,82 +1,59 @@
 #!/usr/bin/python
 
+from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
-from __future__ import division
-import matplotlib, sys
-if not "show" in sys.argv:
-    matplotlib.use('Agg')
-
-import pylab, numpy, os, glob
-from pylab import pi
+import matplotlib
+matplotlib.use('Agg')
+from pylab import *
+from scipy.special import erf
+import matplotlib.lines as mlines
+import os
 
 import styles
 
-if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + ' filling-fraction')
-    exit(1)
+def plot_walls(reduced_density, temps):
+    figure()
+    sigma_over_R=2**(5/6)
+    have_labelled_dft = False
+    for temp in temps:
+        fname = 'figs/new-data/wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
+        data = loadtxt(fname)
+        z = data[:,0]
+        nreduced_density = data[:,1]
+        if have_labelled_dft:
+            plot(z, nreduced_density, styles.new_dft_code(temp))
+        else:
+            plot(z, nreduced_density, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
+            have_labelled_dft = True
+        
+        fname = 'figs/mcfcc-walls-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
+        data = loadtxt(fname)
+        zmin = data[:,0].min()
+        plot((data[:,0]-zmin)/sigma_over_R, data[:,1]*sigma_over_R**3,
+             styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
-n_reduced = float(sys.argv[1])
-#arg n_reduced = [0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.5, 2.0]
+    title('Hard walls with bulk $n^* = %g$' % (reduced_density/100))
+    xlabel(r'$z/\sigma$')
+    ylabel('$n^*(r)$')
+    legend()
+    xlim(-0.2, 3)
+    outputname = 'figs/walls-%02d.pdf' % (reduced_density)
+    savefig(outputname, bbox_inches=0)
+    print('figs/walls-%02d.pdf' % (reduced_density))
 
-def smooth(x, N):
-    '''
-    smooth(x,N) takes a 2D array x that has many columns, and averages
-    out N nearby points.
-    '''
-    n0 = len(x[:,0])
-    n = n0 - n0 % N
-    x = x[:n,:]
-    y = numpy.zeros_like(x[0::N,:])
-    for i in range(N):
-        y += x[i::N, :]
-    return y/N
 
-pylab.figure()
-data = []
-names = []
-lines = []
-# eventually we will want to include this loadtx("figs/walls.dat") # just so things get rebuilt
+# input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5]]
+# input: ['figs/new-data/wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5]]
+# savefig('figs/walls-60.pdf')
+plot_walls(60, [10.0, 5.0, 2.5])
 
-kTs = [0.2, 1.0]
+# input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
+# input: ['figs/new-data/wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
+# savefig('figs/walls-100.pdf')
+plot_walls(100, [10.0, 5.0, 2.5]) # 1.0 could work?
 
-for kT in kTs:
-    # input: ["figs/mcwalls-%.4f-%.4f-*.dat" % (n_reduced, kT) for kT in [0.2, 0.5, 1.0]]
-    print 'looking for', 'figs/mcwalls-%.4f-%.4f*.dat' % (n_reduced, kT)
-    for fname in glob.glob('figs/mcwalls-%.4f-%.4f*.dat' % (n_reduced, kT)):
-        print 'examining', fname
-        d = numpy.loadtxt(fname)
-        d = smooth(d, 1)
-        pylab.plot(15-abs(d[:,0]), d[:,1]/2.0**(-5.0/2.0), styles.mc[kT],
-                   label=r'MC $kT/\epsilon=%g$'% kT)
-
-# names.append('DFT kT = 0')
-# data.append(numpy.loadtxt("figs/wallshard-%.4f-%.2f.dat" % (0.0, n_reduced)))
-# lines.append(styles.dft[0])
-
-for kT in kTs:
-    # input: ["figs/new-data/wall-%04.2f-%04.2f.dat" % (n_reduced, kT) for kT in [0.2, 0.5, 1.0]]
-    names.append(r'approximate $kT/\epsilon = %g$' % kT)
-    fname = "figs/new-data/wall-%04.2f-%04.2f.dat" % (n_reduced, kT)
-    data.append(numpy.loadtxt(fname))
-    lines.append(styles.new_dft_code[kT])
-
-# for kT in kTs:
-#     # input: ["figs/wallssoft-%06.4f-%04.2f.dat" % (kT, n_reduced) for kT in [0.2, 0.5, 1.0]]
-#     names.append('kT = %g' % kT)
-#     fname = "figs/wallssoft-%6.4f-%04.2f.dat" % (kT, n_reduced)
-#     data.append(numpy.loadtxt(fname))
-#     lines.append(styles.dftwca[kT])
-
-for i in range(len(data)):
-    print 'plotting', names[i]
-    pylab.plot(data[i][:,0], data[i][:,1], lines[i], label=names[i])
-
-pylab.title('Reduced Density = %g' % (n_reduced))
-pylab.xlabel('$z/R$')
-pylab.ylabel('Reduced density')
-pylab.legend(loc = 'best')
-pylab.xlim(-0.1, 4)
-#pylab.ylim(.25, .6)
-pylab.savefig('figs/walls-%02.0f.pdf' % (n_reduced*100))
-pylab.show()
+# input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (1.5, temp) for temp in [2.5]]
+# input: ['figs/new-data/wall-%.2f-%.2f.dat' % (1.5, temp) for temp in [2.5]]
+# savefig('figs/walls-150.pdf')
+plot_walls(150, [2.5])

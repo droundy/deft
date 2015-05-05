@@ -10,7 +10,7 @@ def srun(n_reduced, kT):
     return 'srun --mem=10000 -J name-%06.4f-%04.2f nice -19' % (kT, n_reduced)
 
 # always remember to build the executable before running it
-assert not os.system('fac papers/fuzzy-fmt/figs/new-radial-lj.mkdat papers/fuzzy-fmt/figs/new-radial-wca.mkdat')
+assert not os.system('scons papers/fuzzy-fmt/figs/new-radial-lj.mkdat papers/fuzzy-fmt/figs/new-radial-wca.mkdat')
 
 def runme(reduced_density, temperature):
     outfilename = figsdir+'/new-data/radial-lj-%06.4f-%04.2f.out' % (temperature, reduced_density)
@@ -26,14 +26,24 @@ def run_wca(reduced_density, temperature):
     print(cmd)
     os.system(cmd)
 
-runme(0.83890, 0.71)
+# runme(0.83890, 0.71)
 
-runme(0.957, 2.48)
+# runme(0.957, 2.48)
 
-runme(0.5844, 1.235)
+# runme(0.5844, 1.235)
 
-runme(1.095, 2.48)
+# runme(1.095, 2.48)
+run_wca(0.6, 10.0)
+run_wca(0.6, 5.0)
+run_wca(0.6, 2.5)
 
+run_wca(1.0, 1.0)
+run_wca(1.0, 0.5)
+run_wca(1.0, 2.5)
+run_wca(1.0, 5.0)
+run_wca(1.0, 10.0)
+
+run_wca(1.5, 2.5)
 # for temp in [0.001, 0.01, 0.1, 1.0]:
 #     run_wca(0.1, temp)
 #     run_wca(0.3, temp)

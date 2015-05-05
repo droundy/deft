@@ -76,13 +76,13 @@ def run_FCC_walls(n_reduced, temperature, pot = ""):
 #    for temp in [0.1,.5]:
 #        run_homogeneous(reduced_density, temp, "wca")
 
-run_FCC_walls(0.6, 10.0, "wca")
-run_FCC_walls(0.6, 5.0, "wca")
-run_FCC_walls(0.6, 2.5, "wca")
-run_FCC_walls(1.0, 1.0, "wca")
-run_FCC_walls(1.0, 0.5, "wca")
-run_FCC_walls(1.0, 2.5, "wca")
-run_FCC_walls(1.0, 5.0, "wca")
-run_FCC_walls(1.0, 10.0, "wca")
-run_FCC_walls(1.5, 2.5, "wca")
+run_FCC(0.6, 10.0, "wca")
+run_FCC(0.6, 5.0, "wca")
+run_FCC(0.6, 2.5, "wca")
+run_FCC(1.0, 1.0, "wca")
+run_FCC(1.0, 0.5, "wca")
+run_FCC(1.0, 2.5, "wca")
+run_FCC(1.0, 5.0, "wca")
+run_FCC(1.0, 10.0, "wca")
+run_FCC(1.5, 2.5, "wca")
 

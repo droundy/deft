@@ -12,97 +12,47 @@ import os
 
 import styles
 
-if len(sys.argv) != 3:
-    print("Usage:  " + sys.argv[0] + ' filling-fraction temperatures')
-    exit(1)
-
-reduced_density = float(sys.argv[1])
-#arg reduced_density = [10, 20, 30, 40, 50, 60, 70, 80, 90]
-
-all_temperatures = eval(sys.argv[2])
-#arg all_temperatures = [[1.0, 0.1, 0.01]]
-
-print 'all_temperatures are', all_temperatures
-
-#Constants and variables
-#k_b = 8.6173324*10**(-5) # in eV
-dT = .001
-#Temp_max = 600 #in Kelvin
-#Temp = arange(.001, .1 + dT/2, dT)
-V0 = 1
-#betaV0 = V0/Temp
-R = 1# in Angstroms
-density = arange(0, .8 - .001/2, .001)/(4*pi/3)
-#gamma = 2*((sqrt(pi*betaV0)+sqrt(pi*betaV0-16*sqrt(betaV0)))/8)**2
-#sg = sqrt(gamma)
-
-eta = density*4*pi/3
-#P_cs = density*.001*(1+eta+eta**2-eta**3)/(1-eta)**3
-P_cs = density*(1+eta+eta**2)/(1-eta)**3
-#plot(eta,P_cs/.001, 'k',linewidth=2, label = 'Hard spheres')
-
-
-density = (reduced_density/100)/(4*pi/3)
-phs = density*(1+(reduced_density/100)+(reduced_density/100)**2)/(1-(reduced_density/100))**3
-
-mysymbol_names = []
-mysymbol_lines = []
-
-mylines = []
-
-sigma_over_R=2**(5/6)
-
-for temp in all_temperatures:
-  # input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0) for temp in all_temperatures]
-  fname = 'figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
-  data = loadtxt(fname)
-  r = data[:,0]
-  nreduced_density = data[:,1]
-  g = nreduced_density/(reduced_density/100.0)
-  line = plot(r, g, styles.new_dft_code[temp])
-  mylines += line
-  if temp == all_temperatures[-1]:
-      mysymbol_lines += line
-      mysymbol_names += ['WCA DFT (new code)']
-  #xlim(xmax=floor(max(g[:,0])))
-
-if reduced_density < 80:
-    for temp in all_temperatures:
-        # input: ['figs/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0) for temp in all_temperatures if reduced_density < 80]
-        fname = 'figs/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
+def plot_radial(reduced_density, temps):
+    figure()
+    sigma_over_R=2**(5/6)
+    have_labelled_dft = False
+    for temp in temps:
+        fname = 'figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
         data = loadtxt(fname)
         r = data[:,0]
         nreduced_density = data[:,1]
         g = nreduced_density/(reduced_density/100.0)
-        line = plot(r/sigma_over_R, g, styles.dftwca[temp])#, label='WCA DFT $kT/V_{max}$ = %g' % temp)
-        if temp == all_temperatures[-1]:
-            mysymbol_lines += line
-            mysymbol_names += ['WCA DFT']
+        if have_labelled_dft:
+            plot(r, g, styles.new_dft_code(temp))
+        else:
+            plot(r, g, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
+            have_labelled_dft = True
+        
+        fname = 'figs/mcfcc-%04.4f-%.4f.dat.gradial' % (reduced_density/100.0, temp)
+        g = loadtxt(fname)
+        plot(g[:,0]/sigma_over_R, g[:,1], styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
-for temp in all_temperatures:
-  # input: ['figs/mcfcc-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp) for temp in all_temperatures]
-  fname = 'figs/mcfcc-0.%02d00-%.4f.dat.gradial' % (reduced_density, temp)
-  if os.path.exists(fname):
-    print 'found', fname
-    g = loadtxt(fname)
-    line = plot(g[:,0]/sigma_over_R, g[:,1], styles.mcwca[temp])#, label = 'WCA MC $kT/?$ = %g' % temp)
-    #xlim(xmax=floor(max(g[:,0])))
-    xlim(xmax=4)
-    if temp == all_temperatures[-1]:
-        mysymbol_lines += line
-        mysymbol_names += ['WCA MC']
-  else:
-    print 'could not find', fname
+    title('Radial distribution function at $n^* = %g$' % (reduced_density/100))
+    xlabel(r'$r/\sigma$')
+    ylabel('$g(r)$')
+    legend()
+    xlim(0, 3)
+    outputname = 'figs/radial-distribution-%02d.pdf' % (reduced_density)
+    savefig(outputname, bbox_inches=0)
+    print('figs/radial-distribution-%02d.pdf' % (reduced_density))
 
-title('Radial distribution function at $n^* = %g$' % (reduced_density/100))
-xlabel(r'$r/\sigma$')
-ylabel('$g(r)$')
-blue_line = mlines.Line2D([], [], color='blue', marker='*',
-                          markersize=15, label='Blue stars')
-legend(mylines + mysymbol_lines,
-       ['$T^* = %g$' % t for t in all_temperatures] + mysymbol_names,
-       loc = 'best')
-savefig('figs/radial-distribution-%02d.pdf' % (reduced_density), bbox_inches=0)
-print('figs/radial-distribution-%02d.pdf' % (reduced_density))
 
-show()
+# input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
+# input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 0.6) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
+# savefig('figs/radial-distribution-60.pdf')
+plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
+
+# input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (1.0, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
+# input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5, 1.0]]
+# savefig('figs/radial-distribution-100.pdf')
+plot_radial(100, [10.0, 5.0, 2.5, 1.0]) # 1.0 could work?
+
+# input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (1.5, temp) for temp in [2.5]]
+# input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.5) for temp in [2.5]]
+# savefig('figs/radial-distribution-150.pdf')
+plot_radial(150, [2.5])

@@ -69,7 +69,7 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   Vector rz = f->get_rz();
   Vector n = f->get_n();
   for (int i=0;i<Nz/2;i++) {
-    fprintf(o, "%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0));
+    fprintf(o, "%g\t%g\n", (rz[i] - spacing)/f->sigma(), n[i]*uipow(f->sigma(), 3));
   }
   fclose(o);
 }
@@ -120,10 +120,9 @@ int main(int argc, char **argv) {
     const Vector rz = f.get_rz();
     for (int i=0; i<Ntot; i++) {
       if (fabs(rz[i]) < spacing) {
-        const double tiny = 1e-8;
-        f.Vext()[i] = -temp*log(tiny); // this is "infinity" for our wall
-        f.Veff()[i] = -temp*log(tiny*hf.n());
-        //f.n()[i] = tiny*hf.n();
+        const double Vmax = 500*temp;
+        f.Vext()[i] = Vmax; // this is "infinity" for our wall
+        f.Veff()[i] = Vmax;
       } else {
         f.Vext()[i] = 0;
       }

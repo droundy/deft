@@ -86,6 +86,8 @@ def Matplotlib(env, source, py_chdir = ""):
     inputs = fixed_input.findall(contents)
     inputs += fixed_open_input.findall(contents)
 
+    list_inputs = list_comprehension_input.findall(contents)
+
     imports = import_re.findall(contents)
     for i in imports:
         ipath = os.path.join(os.path.dirname(source), i+'.py')
@@ -98,7 +100,6 @@ def Matplotlib(env, source, py_chdir = ""):
     argvals = arguments.findall(contents)
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents) + open_changing_output.findall(contents)
-        list_inputs = list_comprehension_input.findall(contents)
         cinputs = changing_input.findall(contents)
         cinputs += changing_loadtxt.findall(contents)
         cinputs += changing_loadtxt_noparens.findall(contents)
@@ -134,6 +135,8 @@ def Matplotlib(env, source, py_chdir = ""):
                 extraoutputs.append(fname)
             runpython(env, source, aa, inputs + extrainputs, outputs + extraoutputs, py_chdir)
     else:
+        for i in list_inputs:
+            inputs += friendly_eval(i, source, {})
         runpython(env, source, "", inputs, outputs, py_chdir)
 
 def generate(env):
