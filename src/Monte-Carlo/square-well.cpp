@@ -1129,7 +1129,7 @@ void sw_simulation::optimize_weights_using_transitions() {
       for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
         // cap the ratio of weights at 1
         double T = transitions(i, de)*exp(max(0,lnw[biggest_energy_transition+i+de]
-                                              -lnw[biggest_energy_transition+i])));
+                                              -lnw[biggest_energy_transition+i]));
         norm += T;
         mean_sqr_de += T*double(de)*de;
         mean_de += T*double(de);
