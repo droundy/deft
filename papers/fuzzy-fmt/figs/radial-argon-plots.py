@@ -12,8 +12,9 @@ sigma = 0.3405 #nm
 sigma_over_R=2**(5/6)
 
 rmaxplot = 4 # upper limit of our plots
-
-figure()
+figure(figsize=(24,6))
+subplot(1, 3, 1)
+title('$n^*=0.8389$, $T^*=0.71$')
 data = loadtxt('figs/YarnellArgon85K.dat')
 n =0.02125 # Angstrom^-3
 nsig_3 = n*(sigma*10)**3
@@ -25,9 +26,9 @@ plot(data_dft1[:,0],data_dft1[:,1]/nsig_3, label='DFT')
 xlabel(r'$r/\sigma$')
 xlim(0, rmaxplot)
 legend(loc='best')
-savefig('figs/Argon-vapor_pressure-85K.pdf')
 
-figure()
+subplot(1, 3, 2)
+title('$n^*=0.9570$, $T*=2.48$')
 data2 = loadtxt('figs/EggertArgon0.6GPaX.dat')
 n = 24.23 #atoms/nm^3
 nsig_3 = n*sigma**3
@@ -39,24 +40,22 @@ plot(data_dft2[:,0],data_dft2[:,1]/nsig_3, label='DFT')
 xlabel(r'$r/\sigma$')
 xlim(0, rmaxplot)
 legend(loc='best')
-savefig('figs/Argon-0_6GPa-RT.pdf')
 
-figure()
-data3 = loadtxt('figs/EggertArgon1.1GPaRAW.dat')
-n = 27.74 #atoms/nm^3
+# data3 = loadtxt('figs/EggertArgon1.1GPaRAW.dat')
+# n = 27.74 #atoms/nm^3
+# nsig_3 = n*sigma**3
+# plot(data3[:,0]/sigma,(data3[:,1]), label='experiment')
+# data_mc3 = loadtxt('figs/mc_testp_wca-1.0950-2.4800.dat.gradial')
+# plot((1/sigma_over_R)*data_mc3[:,0], data_mc3[:,1], '--', label='MC')
+# data_dft3 = loadtxt('figs/new-data/radial-lj-2.4800-1.09.dat')
+# plot(data_dft3[:,0],data_dft3[:,1]/nsig_3, label='DFT')
+# xlabel(r'$r/\sigma$')
+# xlim(0, rmaxplot)
+# legend(loc='best')
+# savefig('figs/argon-plots.pdf')
 
-nsig_3 = n*sigma**3
-plot(data3[:,0]/sigma,(data3[:,1]), label='experiment')
-data_mc3 = loadtxt('figs/mc_testp_wca-1.0950-2.4800.dat.gradial')
-plot((1/sigma_over_R)*data_mc3[:,0], data_mc3[:,1], '--', label='MC')
-data_dft3 = loadtxt('figs/new-data/radial-lj-2.4800-1.09.dat')
-plot(data_dft3[:,0],data_dft3[:,1]/nsig_3, label='DFT')
-xlabel(r'$r/\sigma$')
-xlim(0, rmaxplot)
-legend(loc='best')
-savefig('figs/Argon-1_1GPa-RT.pdf')
-
-figure()
+subplot(1, 3, 3)
+title('$n^*=0.5488$, $T^*=1.235$')
 data4 = loadtxt('figs/Mikolaj-X.dat')
 #n = 27.74 #atoms/nm^3
 #nsig_3 = n*sigma**3
@@ -77,6 +76,6 @@ xlim(0, rmaxplot)
 # axvline(2**(1.0/6.0))
 legend(loc='best')
 
-savefig('figs/Argon-9_919MPa-148K.pdf')
+savefig('figs/argon-plots.pdf',bbox_inches='tight')
 
 show()

@@ -599,8 +599,11 @@ int main(int argc, const char *argv[]) {
   // neighbor radius should scale with radius and interaction scale
   sw.neighbor_R = neighbor_scale*R*sw.well_width;
 
-  // Find the upper limit to the maximum number of neighbors a ball could have
-  sw.max_neighbors = max_balls_within(2+neighbor_scale*sw.well_width);
+  // Find the upper limit to the maximum number of neighbors a ball
+  // could have.  Then double it, because we might not yet realize
+  // that some of our neighbors move out of range, and then find we
+  // have even more neighbors when another ball comes into range.
+  sw.max_neighbors = 2*max_balls_within(2+neighbor_scale*sw.well_width);
 
   // Energy histogram and weights
   sw.interaction_distance = 2*R*sw.well_width;

@@ -28,7 +28,7 @@
 double zmax = 20;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.05;
+double dx = 0.5;
 const double epsilon = 1.0;
 const double radius = 1.0;
 const double sigma = 2*radius;
@@ -52,7 +52,10 @@ void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
   char *dumpname = new char[5000];
   snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-X.dat",
            kT, f->lambda(), ff);
-  f->get_rx().dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
+  {
+    Vector rx = f->get_rx();
+    rx.dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
+  }
   snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-Y.dat",
            kT, f->lambda(), ff);
   f->get_ry().dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
@@ -64,9 +67,9 @@ void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
   snprintf(fname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f.dat",
            kT, f->lambda(), ff);
 
-  printf("========================================\n");
+  printf("=====================================================\n");
   printf("| Working on ff = %4g, lambda = %4g and kT = %4g |\n", ff, f->lambda(), kT);
-  printf("========================================\n");
+  printf("=====================================================\n");
   while (min.improve_energy(verbose)) {
 
     took("Doing the minimization step");
