@@ -149,6 +149,9 @@ otherwise improbable system states.
 
 \fixme{Rewrite after the rest of the thesis is completed}
 
+\fixme{Make all mention of what we do in present, rather than past
+  tense}
+
 
 \newpage
 
@@ -551,7 +554,16 @@ sample energies which are important (i.e. energies with a
 non-negligible state probability density) at different
 temperatures. As a consequence, such simulations should not be used to
 determine properties $X\p{T\ne T_0}$, and are thus referred to as
-``fixed temperature'' simulations.
+``fixed temperature'' simulations. Incidentally, Metropolis Monte
+Carlo simulations can be thought of as infinite-temperature
+simulations, as they are equivalent to simulations with canonical
+weights
+\begin{align}
+  w\p{E}=\lim_{T\to\infty}e^{-E/kT}=1.
+  \label{eq:inf_temp_weights}
+\end{align}
+This observation will be used in Section \ref{sec:min_energy} to
+identify a maximum energy of interest.
 
 Though canonical Monte Carlo is simple to implement, its inability to
 investigate a system at more than one temperature at a time is a
@@ -572,7 +584,7 @@ will) be many other states with the same energy.
 Due to these problems, we will not use canonical weights alone to
 study the square-well fluid. We will, however, use canonical weights
 for portions of all weight arrays, which we discuss in Section
-\ref{sec:energy_range}.
+\ref{sec:min_energy}.
 
 \subsubsection{Broad energy sampling}
 \label{sec:broad_energy_sampling}
@@ -586,9 +598,8 @@ inaccessible via Monte Carlo simulations, biased or otherwise. In such
 a case, computing $\bk{X}_T$ to a reasonable degree of accuracy
 requires sufficiently sampling the energies at which $\tilde
 D\p{E}e^{-E/kT}$ dominates the sum in (\ref{eq:XT}). Section
-\ref{sec:energy_range} provides more discussion on this subject,
-namely on identifying the energies which are important for computing
-system properties at a given temperature.
+\ref{sec:min_energy} discusses identifying the energies which are
+important for computing system properties at a given temperature.
 
 We will employ histogram methods in order to sample as broad of an
 energy range as possible in each simulation. Broad energy sampling
@@ -781,7 +792,7 @@ longer (in step \ref{alg:simple_flat_sim} of Algorithm
 \ref{alg:simple_flat}) because these energies have lower state
 densities. The introduction of a minimum temperature may seem ad-hoc,
 but all simulations in this paper require a choice of minimum
-temperature anyways (discussed in Section \ref{sec:energy_range}). In
+temperature anyways (discussed in Section \ref{sec:min_energy}). In
 this paper, we will always use $kT_{\t{min}}=0.2\epsilon$.
 
 \subsection{The Wang-Landau (WL) method}
@@ -928,9 +939,12 @@ satisfy too strict of a flatness condition in any reasonable amount of
 time. These works fail to recognize the reliance of Wang-Landau on the
 {\it failure} of $C\sp{H}$ to enforce a perfectly flat histogram. A
 commonly suggested flatness condition is that the minimum histogram
-value be at least some fixed proportion of the mean histogram value,
-i.e. $C\sp{H}:\min\sp{H\p{E}}\ge x\bk{H}_E$, and several papers report
-using $x=0.95$. We used the same condition with $x=0.25$.
+value in some specified range of energies be at least some fixed
+proportion of the mean histogram value, i.e.
+$C\sp{H}:\min\sp{H\p{E}}\ge x\bk{H}_E$, and several papers report
+using $x=0.95$. We used the same condition with $x=0.25$. Determining
+the range of energies over which to evaluate $C\sp{H}$ is the subject
+of Section \ref{sec:min_energy}.
 
 The final free parameter in the Wang-Landau method is the cutoff $c$,
 which determines how small $f$ can get before the algorithm stops
@@ -1219,7 +1233,7 @@ proportion of walkers at $E$ which are down-going. We also denote the
 walker diffusivity at an energy $E$ by $\alpha\p{E}$.
 
 At equilibrium with a flat histogram, meaning $n$ is constant, the
-down-going walker current $j\p{E}$ is defined in terms of the
+down-going walker current $j\p{E}$ can be expressed in terms of the
 diffusivity $\alpha\p{E}$ by
 \begin{align}
   j=-\alpha\f{dn_+}{dE}.
@@ -1232,7 +1246,7 @@ given walker. Substituting $n_+=fn$,
   j=-\alpha\p{n\f{df}{dE}+f\f{dn}{dE}}=-\alpha n\f{df}{dE},
   \label{eq:walker_current}
 \end{align}
-where a constant $n$ means $dn/dE=0$. We can rearrange
+where a constant $n$ implies $dn/dE=0$. We can rearrange
 (\ref{eq:walker_current}) and integrate over the energy range as
 \begin{align}
   \int_{f=f\p{E_-}}^{f\p{E_+}}\f{df}{j}=-\int_{E=E_-}^{E_+}\f{dE}{\alpha
@@ -1346,13 +1360,20 @@ straightforward to implement and compare to other histogram methods.
 \label{sec:loose_ends}
 
 Throughout the discussion and development of histogram methods, we
-have thus far neglected three subjects: initialization end conditions
-(i.e. the means by which we decide when an algorithm to construct
-weights is finished), the energy range about which we care, and the
-minimum temperature $T_{\t{min}}$ which we sometimes make reference
-to. The last two of these subjects turn out to be related, as the
+have thus far neglected a few important subjects:
+\begin{enumerate*}
+\item initialization end conditions i.e. the means by which we decide
+  when an algorithm to construct weights is finished,
+\item the minimum temperature $T_{\t{min}}$ which we have sometimes
+  mentioned,
+\item the energy range over which we are interested in, and
+\item what to do with the weight array outside of the energy range of
+  interest, or at in which it is not defined.
+\end{enumerate*}
+The last three of these subjects turn out to be related, as the
 minimum temperature $T_{\t{min}}$ chosen for any given simulation
-determines the minimum energy of interest.
+determines the minimum energy $E_-$ of interest, as well as the
+weights $w\p{E}$ at energies $E<E_-$.
 
 \subsubsection{End conditions}
 \label{sec:end_conditions}
@@ -1390,86 +1411,114 @@ any energy $E>E_0$, where the density of states may be only marginally
 larger, between each sample.
 
 In general, any initialization routine should sample the entire range
-$R=\sp{E_-,E_+}$ before terminating. Furthermore, samples at the end
-of initialization should be numerous enough to be statistically
-significant.\fixme{include mean sample error?} Given that any samples
-of $E_-$ necessarily require first sampling all other energies in $R$
-on the way down from $E_+$, this energy ($E_-$) will generally have
-the fewest number of samples. As an end condition, one can therefore
-enforce some minimum number of optimistic or pessimistic samples at
-$E_-$, i.e. $s_o\p{E_-}$ or $s_p\p{E_-}$. A more sophisticated end
-condition would be to enforce some minimum value to the mean
-fractional error $\bk{\delta_s}_{E,T_{\t{tmin}}}$ in either of the
-sample counts $s_o\p{E}$ or $s_p\p{E}$ at the minimum temperature
-$T_{\t{min}}$. These mean errors are
+$R=\sp{E_-,E_+}$ of interest for simulation before terminating.
+Furthermore, samples at the end of initialization should be numerous
+enough to be statistically significant. Given that any samples of
+$E_-$ necessarily require first sampling all other energies in $R$ on
+the way down from $E_+$, this energy ($E_-$) will generally have the
+fewest number of samples. As an end condition, therefore, one can
+simply enforce some minimum number of optimistic or pessimistic
+samples at $E_-$, i.e. $s_o\p{E_-}$ or $s_p\p{E_-}$. A more
+sophisticated end condition would be to choose a minimum temperature
+of interest $T_{\t{min}}$ and initialize until the mean fractional
+error $\bk{\delta_s}_{E,T_{\t{tmin}}}$ in either of the sample counts
+$s_o\p{E}$ or $s_p\p{E}$ reaches some minimum value. These mean errors
+are
 \begin{align}
-  \bk{\delta_s}_{E,T_{\t{tmin}}}=\bk{s^{-1/2}}_{E,T_{\t{min}}}
-  =\sum_Es\p{E}^{-1/2}P\p{E,T_{\t{min}}}
-  =\f{\sum_Es\p{E}^{-1/2}D\p{E}e^{-E/kT_{\t{min}}}}
-  {\sum_{E'}D\p{E'}e^{-E'/kT_{\t{min}}}},
+  \bk{\delta_s}_{E,T}=\bk{s^{-1/2}}_{E,T}=\sum_Es\p{E}^{-1/2}P\p{E,T}
+  =\f{\sum_Es\p{E}^{-1/2}D\p{E}e^{-E/kT}}{\sum_{E'}D\p{E'}e^{-E'/kT}},
+  \label{eq:fractional_sample_error}
 \end{align}
 where we use the fact that the fractional error $\delta_G$ in any
 histogram $G$ collected via random Monte Carlo sampling is $G^{-1/2}$.
 
-\subsubsection{Determining the energy range of interest}
-\label{sec:energy_range}
+\subsubsection{The energy range of interest}
+\label{sec:min_energy}
 
-While some particular systems, such as the Ising model, have
-well-defined and easily determined minimum and maximum energies, the
-same is not true of all systems in general.
+Using histogram methods generally requires knowing the energy range of
+interest for the system at hand. The Wang-Landau method, for example,
+periodically checks a flatness condition $C\sp{H}$ on the energy
+histogram $H\p{E}$. In order for such a condition to be well-defined,
+it needs have a specified energy range over which to check the
+flatness of $H$. While some systems, such as the Ising model, have
+well-defined and easily computable energy range, the same is not true
+of most systems. In the case of the square-well fluid, not only is the
+minimum energy unknown, some energies have such an incredibly low
+state density $D\p{E}$ that one cannot reasonably expect to ever
+observe them via Monte Carlo, biased or otherwise. We therefore need
+to identify an energy range of interest, specified by a maximum and
+minimum energies of interest.
 
-Histogram methods typically rely on knowledge of the minimum and
-maximum energies of the system in question \fixme{how?}, which are
-unknown for the square-well fluid. Worse still, some square-well fluid
-energies have such an incredibly low density of states that one cannot
-reasonably expect to ever observe them via Monte Carlo, biased or
-otherwise. As such, we need to identify an energy range of interest,
-bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
-  expand}
+Identifying a maximum energy of interest is straightforward: this is
+simply the energy $E_+$ at which the density of states $D\p{E}$ is
+maximal. Though high energies become more important for determining
+system properties $\bk{X}_T$ at higher temperatures, the relative
+importance of energies $E>E_+$ to the energy $E_+$ approaches a
+maximum as $T\to\infty$. There is therefore a maximum weight $w\p{E}$
+which is appropriate to assign energies $E>E_+$ relative to the weight
+$w\p{E_+}$, which is namely the ratio of these weights as
+$T\to\infty$. As observed in (\ref{eq:inf_temp_weights}), the weight
+array becomes flat as $T\to\infty$, which means that the ratio of
+$w\p{E>E_+}$ to $w\p{E}$ appropriate for any given temperature $T$
+maximally approaches unity. We can therefore always set
+$w\p{E>E_+}=w\p{E_+}$, which will ensure that energies $E>E_+$ are not
+sampled any more than is necessary for any positive temperature. The
+maximum of $D\p{E}$ can be found by simulating without weights for a
+short while, after which the energy histogram $H\p{E}$ should be
+maximal at $E_+$.
 
-\fixme{The energy at which the density of states is maximal, i.e. the
-  state of maximal entropy, sets an upper bound for the energy range
-  in which appropriate weights are not obvious. Explain why.}
+The minimum important energy $E_-$ for a system is less obvious than
+$E_+$. Just as finding $E_+$ naturally required using a ``maximal''
+temperature $T\to\infty$, determining $E_-$ requires a choice of some
+minimum temperature $T_{\t{min}}$. The minimum important energy $E_-$
+is then the energy at which the partition function terms
+$D\p{E}e^{-E/kT_{\t{min}}}$ are maximal. Lower energy terms grow
+increasingly less important with decreasing energy, and are
+sufficiently sampled with canonical weights
+$w\p{E<E_-}=e^{-E/kT_{\t{min}}}$ to determine any property
+$\bk{X}_{T\ge T_{\t{min}}}$. To maximize $D\p{E}e^{-E/kT_{\t{min}}}$,
+we need
+\begin{align}
+  \f{d}{dE}\p{De^{-E/kT_{\t{min}}}}
+  =\f{dD}{dE}e^{-E/kT_{\t{min}}}+De^{-E/kT_{\t{min}}}\p{-\f{1}{kT_{\t{min}}}}=0,
+  \label{eq:min_E_setup}
+\end{align}
+which means
+\begin{align}
+  \f1{D}\f{dD}{dE}=\f{d\ln D}{dE}=\f{1}{kT_{\t{min}}}.
+  \label{eq:min_E_condition}
+\end{align}
+Though we do not always know the density of states $D\p{E}$, in
+practice we compute the best available estimate $D\p{E}$ every time we
+need to know $E_-$. If we do not find any energy satisfying
+(\ref{eq:min_E_condition}), we use the minimum energy the simulation
+has ever observed in place of $E_-$ to define our energy range of
+interest.
 
-\fixme{Determining the minimum important energy is considerably
-  trickier. Punchline: we have to choose a minimum temperature of
-  interest, $T_{\t{min}}$, and the minimum important energy is the
-  energy at which the slope of the density of states is
-  $\exp\p{kT_{\t{min}}/\epsilon}/\epsilon$. This condition for the
-  minimum important energy is directly related to canonical weights at
-  a temperature of $T_{\t{min}}$.}
-
-\fixme{Mention that in all initializations which simulate for some
-  time with unchanging weights (i.e. simple flat), the weight array
-  should be set to canonical weights below the minimum important
-  energy, as soon as it is identified.}
-
-\fixme{Mention that weights should be set to canonical weights below
-  the minimum important energy after all initializations.}
+Once we identify an energy $E_-$ satisfying (\ref{eq:min_E_condition})
+in an initialization routine for any histogram method, we effectively
+forbid transitions to energies $E<E_-$ by tentatively setting weights
+$w\p{E<E_-}=e^{-\p{E-E_-}/kT}$ for some temperature $T\ll
+T_{\t{min}}$. These weights prevent the initialization routine from
+wasting time on energies at which we will override the weight array
+after initialization anyways. A special case was made for Wang-Landau,
+which was designed assuming knowledge of the energy range of interest
+a priori. In order to fairly compare Wang-Landau to other methods, we
+therefore identified $E_-$ for each simulated system using other
+methods, and hard-coded the minimum important energies for each system
+into the Wang-Landau initialization routines\fixme{talk about how bad
+  this is}. We always set $w\p{E<E_-}=e^{-\p{E-E_-}/kT}$ after
+initialization of all histogram method.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and Discussion}
 \label{sec:results}
 
-\subsection{Implementation and overview}
-\label{sec:implementation}
+\subsection{Histograms and arrays}
 
-\fixme{Talk about the relative difficulty of implementing each method,
-  as well as the relative difficulty of optimizing or tuning each
-  method. Free parameters are generally bad, and especially so if they
-  come without ``obvious'' or prescribed values. Justify our
-  modifications to Wang-Landau by showing that we did not make it
-  worse. Include mention of how memory requirements for transition
-  matrix Monte Carlo scale poorly with system size, as well as energy
-  resolution for systems with continuous energies.}
-
-\subsection{Simulation results and errors}
-\label{sec:results_and_errors}
-
-\fixme{Talk about the energy histogram, weights, and density of states
-  yielded by the methods. These should all be fairly similar. Talk
-  about why this is so.}
+\fixme{Give examples of energy histograms for one system, density of
+  states for several $N$, and perhaps a weight array.}
 
 \begin{figure}[H]
   \centering
@@ -1479,32 +1528,20 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
 
 \begin{figure}[H]
   \centering
+  \caption[Density of states]{Density of states}
+  \label{fig:density_of_states}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
   \caption[Energy weights]{Energy weights}
   \label{fig:weights}
 \end{figure}
 
-\begin{figure}[H]
-  \centering
-  \caption[Normalized densities of states]{Normalized densities of
-    states}
-  \label{fig:density_of_states}
-\end{figure}
+\subsection{Sample rates}
 
 \fixme{Talk about initialization times, and how they scale with system
   size}
-
-\begin{figure}[H]
-  \centering
-  \caption[Initialization iterations vs. system size]{Initialization
-    iterations vs. system size}
-  \label{fig:scaling}
-\end{figure}
-
-\fixme{Discuss energy initialization times, sampling rates, and errors
-  in computed thermodynamic properties. Explain that errors are given
-  relative to a simulation which ran much longer, and talk about how
-  we ran that simulation (which method did we use?). Show that all
-  methods converge on the same answer as they simulate for longer.}
 
 \begin{figure}[H]
   \centering
@@ -1520,23 +1557,28 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
   \label{fig:pes_sample_rate}
 \end{figure}
 
+\subsection{Errors in $u$, $c_V$, and $s_{\t{config}}$}
+
+\fixme{Discuss errors in computed thermodynamic properties. Introduce
+  Converged flat weights.}
+
 \begin{figure}[H]
   \centering
-  \caption[Initialization iterations vs. data quality]{Initialization
-    iterations vs. data quality}
-  \label{fig:quality}
+  \caption[Internal energy]{Specific internal energy}
+  \label{fig:u_error}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \caption[Specific internal energy]{Specific internal energy}
-  \label{fig:internal_energy}
+  \caption[Heat capacity]{Specific heat capacity}
+  \label{fig:cv_error}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \caption[Specific heat capacity]{Specific heat capacity}
-  \label{fig:heat_capacity}
+  \caption[Configurational entropy]{Specific configurational
+    entropy}
+  \label{fig:s_error}
 \end{figure}
 
 
@@ -1549,6 +1591,6 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nocite{*} \bibliography{thesis}
+\bibliography{thesis}
 
 \end{document}
