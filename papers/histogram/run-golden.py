@@ -12,15 +12,16 @@ deft_dir = re.sub('deft/.*','deft',filepath)
 paper_dir = re.sub('histogram/.*','histogram',filepath)
 data_dir = paper_dir+'/data/'
 os.chdir(deft_dir)
-os.system('fac square-well-monte-carlo')
+assert not os.system('fac square-well-monte-carlo')
 
 def run_golden(ww, ff, min_T, N):
     out_fname = 'golden-N%d-ff%.0f-ww%.0f' % (N, ff*100, ww*100)
     iterations = 1e10
     min_samples = 1e4
+    mem_estimate = 10 + 2*N # it actually also depends on ww, but I'm ignoring that for now.
 
-    cmd = ("srun --mem=600 -J %s time nice -19 ./square-well-monte-carlo --ww %g --ff %g --min_T %g --N %d --iterations %d --min_samples %d --golden > %s.out 2>&1 &"
-           % (out_fname, ww, ff, min_T, N, iterations, min_samples,
+    cmd = ("srun --mem=%d -J %s time nice -19 ./square-well-monte-carlo --ww %g --ff %g --min_T %g --N %d --iterations %d --min_samples %d --golden > %s.out 2>&1 &"
+           % (mem_estimate, out_fname, ww, ff, min_T, N, iterations, min_samples,
               data_dir+out_fname))
     print(cmd)
     os.system(cmd)
