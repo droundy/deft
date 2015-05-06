@@ -40,6 +40,8 @@ for fname in pyfs:
     inputs = fixed_input.findall(contents)
     inputs += fixed_open_input.findall(contents)
 
+    list_inputs = list_comprehension_input.findall(contents)
+
     imports = import_re.findall(contents)
     for i in imports:
         ipath = os.path.join(os.path.dirname(fname), i+'.py')
@@ -53,7 +55,6 @@ for fname in pyfs:
     cache_suffixes = cache_files.findall(contents)
     if len(argvals) > 0:
         coutputs = changing_output.findall(contents) + open_changing_output.findall(contents)
-        list_inputs = list_comprehension_input.findall(contents)
         cinputs = changing_input.findall(contents)
         cinputs += changing_loadtxt.findall(contents)
         cinputs += changing_loadtxt_noparens.findall(contents)
@@ -96,6 +97,8 @@ for fname in pyfs:
             print
     else:
         print '? python2', fname
+        for i in list_inputs:
+            inputs += friendly_eval(i, fname, {})
         for i in inputs:
             print '<', i
         for o in outputs:
