@@ -145,9 +145,13 @@ techniques (e.g. the Ising model). We propose to implement these
 methods in Monte Carlo simulations of the square-well fluid, determine
 appropriate performance metrics for their comparison, and identify
 those methods which are most efficient and effective at sampling
-otherwise improbable system states.
+otherwise improbable system states.\fixme{make this an abstract,
+  rather than a proposal...}
 
 \fixme{Rewrite after the rest of the thesis is completed}
+
+\fixme{Always talk about what we do in our own code in present, rather
+  than past tense}
 
 
 \newpage
@@ -388,14 +392,35 @@ observations of some system property $X$ is directly proportional to
 the density of states $D\p{X}$; that is, the number of observations
 $H\p{X_0}$ of the system with $X\p{s}=X_0$ is proportional to the
 total number of states $s$ for which $X\p{s}=X_0$. It is sometimes the
-case, however, that the density of states in some region $R$ in the
-range of possible $X$ is so low that it is practically impossible (via
+case, however, that the density of states in some range $R$ of
+possible $X$ is so low that it is practically impossible (via
 Metropolis Monte Carlo) to sufficiently sample $R$, that is, to
 accumulate a statistically significant histogram $H\p{X\in R}$, in any
 reasonable amount of time. Given that the entropy $S\p{X}$ can be
 expressed in terms of the number of microstates $\Omega\p{X}$ as
-$S\p{X}=k\ln\Omega\p{X}\propto\ln D\p{X}$, we may refer to regions $R$
-low state densities $D\p{X\in R}$ as low entropy states.
+$S\p{X}=k\ln\Omega\p{X}\propto\ln D\p{X}$, we may refer to regions
+with low state densities $D\p{X}$ as low entropy states.
+
+Figure \ref{fig:dos_sample} provides an example of an unnormalized
+density of states $\tilde D\p{E}$ in energy for a particular
+square-well fluid. The density of states has been ``normalized'' to
+have a maximum value of $1$ in order to emphasize the logarithmic span
+of $D\p{E}$. This logarithmic span ($\sim10^{45}$) is proportional to
+the number of moves which one must simulate via Metropolis Monte Carlo
+in order to observe the energies with the lowest state densities. For
+reference, the world's current fastest supercomputers can perform
+$\sim10^{16}$ floating-point operations per second.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{figs/dos-sample.pdf}
+  \caption[Sample density of states]{Sample density of states for
+    square-well fluid with a well width $\lambda=1.3$, filling
+    fraction $\eta=0.3$, and $N=20$ spheres, as computed by several
+    histogram methods. The density of states has been normalized to
+    have a maximum value of $1$.}
+  \label{fig:dos_sample}
+\end{figure}
 
 \subsubsection{Biased sampling}
 \label{sec:biased_sampling}
@@ -407,48 +432,23 @@ function $w$ is introduced, whose domain is the value of some property
 $X\p{s}$ which depends on the system state $s$. An additional
 condition is then added to step \ref{alg:metropolis_move} of Algorithm
 \ref{alg:metropolis} in order to accept an attempted move: the weights
-$w\sp{X\p{s_i}}$ and $w\sp{X\p{s_f}}$ of the initial (pre-move) state
-$s_i$ and final (post-move) state $s_f$ are used to determine the
+$w\p{X_i}$ and $w\p{X_f}$ of the initial (pre-move) state $s_i$ and
+final (post-move) state $s_f$, respectively, are used to determine the
 probability $P_m\p{s_i\to s_f}$ of accepting an otherwise valid move
 via
 \begin{align}
-  P_m\p{s_i\to s_f}=\min\set{\f{w\sp{X\p{s_f}}}{w\sp{X\p{s_i}}},1}.
+  P_m\p{s_i\to s_f}=\min\set{\f{w\p{X_f}}{w\p{X_i}},1}.
   \label{eq:move_prob}
 \end{align}
-This formula means that when $w\sp{X\p{s_f}}>w\sp{X\p{s_i}}$, the move
-$s_i\to s_f$ is accepted; when $w\sp{X\p{s_f}}<w\sp{X\p{s_i}}$, the
-ratio of these weights determines the probability of accepting the
-move. Due to the fact that only ratios of weights determine
-$P_m\p{s_i\to s_f}$, the weights $w\sp{X\p{s}}$ are scale-invariant,
-meaning that their effect on simulations is unchanged by scale factors
-that are constant with respect to $X\p{s}$.
-
-\begin{algorithm}[tb]
-  \caption{Biased Monte Carlo fluid simulation}
-  \label{alg:biased_MC}
-  \begin{alg}
-
-  \item Construct an appropriate weight function $w\sp{X\p{s}}$, whose
-    argument is a system property $X\p{s}$ determined by the
-    microstate $s$.
-
-  \item Construct an initial typical fluid configuration.
-
-  \item Randomly attempt to change the position of one sphere,
-    rejecting the change if
-    \begin{enumerate*}[label=\roman*)]
-    \item it results in a forbidden fluid configuration, or
-    \item a newly chosen random number on the interval $\sp{0,1}$ is
-      larger than the probability determined by (\ref{eq:move_prob})
-      for the initial and final states $s_i$ and $s_f$, respectively.
-    \end{enumerate*}
-    \label{alg:biased_mc_move}
-
-  \item Repeat step \ref{alg:biased_mc_move} the simulation produces
-    statistics of sufficient quality.
-
-  \end{alg}
-\end{algorithm}
+This formula means that when $w\p{X_f}>w\p{X_i}$, the move $s_i\to
+s_f$ is accepted; when $w\p{X_f}<w\p{X_i}$, the ratio of these weights
+determines the probability of accepting the move. Due to the fact that
+only ratios of weights determine $P_m\p{s_i\to s_f}$, the weights
+$w\p{X}$ are scale-invariant, meaning that their effect on simulations
+is unchanged by scale factors that are constant with respect to
+$X\p{s}$. Furthermore, simulating with flat weights $w\p{X}=w_0$ for
+all $X$ is equivalent to simulating without weights, as the
+probability $P_m\p{s_i\to s_f}$ will always equal 1.
 
 Employing biased Monte Carlo simulations, sketched out in Algorithm
 \ref{alg:biased_MC}, allows one to construct weight functions that
@@ -480,16 +480,41 @@ the desired yields (e.g.  density of states, heat capacity) of a
 simulation. A histogram method is simply an algorithm or procedure for
 determining a weight function appropriate for a particular simulation.
 
-In this paper, we will consider weights $w\p{E}$ which depend only on
-the energy $E$ of the square-well fluid. Due to the fact that the
-square-well fluid can only have discrete energies $E=-n\epsilon$,
-where $n$ is a non-negative integer and $\epsilon$ is the well depth,
-in simulation we store the weight function as an array of values. We
-may therefore use the terms ``weight function,'' and ``weight array,''
-and ``weights'' interchangeably.
+\begin{algorithm}[tb]
+  \caption{Biased Monte Carlo fluid simulation}
+  \label{alg:biased_MC}
+  \begin{alg}
 
-\fixme{mention that simulating with flat weights $w\p{E}=w_0$ is the
-  same as running a Metropolis MC simulation.}
+  \item Construct an appropriate weight function $w\sp{X\p{s}}$, whose
+    argument is a system property $X\p{s}$ determined by the
+    microstate $s$.
+
+  \item Construct an initial typical fluid configuration.
+
+  \item Randomly attempt to change the position of one sphere,
+    rejecting the change if
+    \begin{enumerate*}[label=\roman*)]
+    \item it results in a forbidden fluid configuration, or
+    \item a newly chosen random number on the interval $\sp{0,1}$ is
+      larger than the probability determined by (\ref{eq:move_prob})
+      for the initial and final states $s_i$ and $s_f$, respectively.
+    \end{enumerate*}
+    \label{alg:biased_mc_move}
+
+  \item Repeat step \ref{alg:biased_mc_move} the simulation produces
+    statistics of sufficient quality.
+
+  \end{alg}
+\end{algorithm}
+
+In this paper, we will use a histogram $H\p{E}$, weights $w\p{E}$, and
+density of states $D\p{E}$ which are functions of the square-well
+fluid's energy $E$. Due to the fact that the square-well fluid can
+only have discrete energies $E=-n\epsilon$, where $n$ is a
+non-negative integer and $\epsilon$ is the well depth, in simulation
+we store the weight function as an array of values. We will therefore
+generally refer to the weight function as a ``weight array,'' or
+simply ``weights.''
 
 \subsubsection{Canonical weights}
 \label{sec:canonical_weights}
@@ -517,39 +542,49 @@ weights is
 and the value of a thermodynamic property $X\p{T_0}$
 \begin{align}
   X\p{T_0}=\f1{\tilde Z\p{T_0}}\sum_E\bk{X}_E\tilde D\p{E}e^{-E/kT_0}
-  =\f{\sum_E\bk{X}_EH\p{E}}{\sum_EH\p{E}}.
+  =\f{\sum_E\bk{X}_EH\p{E}}{\sum_EH\p{E}},
   \label{eq:X_canonical}
 \end{align}
-The simplifications in in (\ref{Z_canonical}) and
-(\ref{eq:X_canonical}), which have no explicit dependence on $T_0$,
-occur because canonical Monte Carlo simulations sample energies in
-proportion to the distribution (over energy) of microstates at a
-temperature of $T_0$.  Canonical Monte Carlo simulations can therefore
-fail to sufficiently sample energies which are important
-(i.e. energies with a non-negligible state probability density) at
-different temperatures. As a consequence, such simulations should not
-be used to determine properties $X\p{T\ne T_0}$, and are thus referred
-to as ``fixed temperature'' simulations.
+where $\bk{X}_E$ is the mean value of $X$ at the energy $E$. The
+simplifications in in (\ref{Z_canonical}) and (\ref{eq:X_canonical}),
+which have no explicit dependence on $T_0$, occur because canonical
+Monte Carlo simulations sample energies in proportion to the
+distribution (over energy) of microstates at a temperature of $T_0$.
+Canonical Monte Carlo simulations can therefore fail to sufficiently
+sample energies which are important (i.e. energies with a
+non-negligible state probability density) at different
+temperatures. As a consequence, such simulations should not be used to
+determine properties $X\p{T\ne T_0}$, and are thus referred to as
+``fixed temperature'' simulations. Incidentally, Metropolis Monte
+Carlo simulations can be thought of as infinite-temperature
+simulations, as they are equivalent to simulations with canonical
+weights
+\begin{align}
+  w\p{E}=\lim_{T\to\infty}e^{-E/kT}=1.
+  \label{eq:inf_temp_weights}
+\end{align}
+This observation will be used in Section \ref{sec:min_energy} to
+identify a maximum energy of interest.
 
 Though canonical Monte Carlo is simple to implement, its inability to
 investigate a system at more than one temperature at a time is a
 disadvantage for determining the temperature dependence of system
 properties. In order to find the behavior of $\bk{X}_T$, one must run
 many simulations at discrete temperature intervals; each such
-simulation will yield one sample (e.g. one data point) of $\bk{X}_T$.
+simulation will yield one data point on $\bk{X}_T$.
 
 Sampling low energies, however, or understanding system behavior at
 low temperatures, is even more problematic with canonical
 weights. Using low temperature canonical weights will indeed force a
 simulated system down to low energies, but will also likely freeze the
 system into a local minimum of its energy landscape. Freezing into a
-state means that a simulation will sample only a small portion of the
-energy landscape, even though there may (and generally will) be many
-other states with the same energy.
+state in this manner will limit a simulation to sampling only a small
+portion of the energy landscape, even though there may (and generally
+will) be many other states with the same energy.
 
 Due to these problems, we will not use canonical weights alone to
 study the square-well fluid. We will, however, use canonical weights
-for part of all weight arrays, as discussed in Section
+for portions of all weight arrays, which we discuss in Section
 \ref{sec:min_energy}.
 
 \subsubsection{Broad energy sampling}
@@ -564,9 +599,8 @@ inaccessible via Monte Carlo simulations, biased or otherwise. In such
 a case, computing $\bk{X}_T$ to a reasonable degree of accuracy
 requires sufficiently sampling the energies at which $\tilde
 D\p{E}e^{-E/kT}$ dominates the sum in (\ref{eq:XT}). Section
-\ref{sec:energy_range} provides more discussion on this subject,
-namely on identifying the energies which are important for computing
-system properties at a given temperature.
+\ref{sec:min_energy} discusses identifying the energies which are
+important for computing system properties at a given temperature.
 
 We will employ histogram methods in order to sample as broad of an
 energy range as possible in each simulation. Broad energy sampling
@@ -583,11 +617,10 @@ will allow us to determine, for various square-well fluids,
 \section{Methods}
 \label{sec:methods}
 
-\fixme{Give an overview of the methods section}
-
-\fixme{Make a note on storing the logarithm of weights and
-  periodically rescaling them (resetting the zero on $\ln w$) to
-  reduce numerical error.}
+Having covered the basics of the square-well fluid as well as
+Metropolis and biased Monte Carlo simulations, we can now discuss
+several histogram methods for constructing energy weights.\fixme{more
+  overview of the methods section?}
 
 \subsection{The flat histogram (multi-canonical) method}
 \label{sec:flat_histogram}
@@ -634,31 +667,31 @@ converge on the same weight array, given by (\ref{eq:flat_weights}).
 Algorithm \ref{alg:flat_histogram} provides a naive way to implement
 the flat histogram method without knowing a priori the density of
 states $D\p{E}$. This algorithm involves first running a simulation
-without weights (or with constant weights $w\p{E}=w_0$) while
-collecting a histogram $H\p{E}$ of the observed energies $E$. After
-some time (loosely defined), the histogram $H\p{E}$ may be taken as an
-approximation of the density of states $\tilde D\p{E}$ (see Section
-\ref{sec:histogram_methods}), and used via (\ref{eq:flat_weights}) to
-generate a weight array for an actual simulation. Algorithm
-\ref{alg:flat_histogram} has one free parameter, which determines the
-amount of time for which to collect an energy histogram $H\p{E}$.
+without weights (or with constant weights $w\p{E}=1$) while collecting
+a histogram $H\p{E}$ of the observed energies $E$. After some time
+(loosely defined), the histogram $H\p{E}$ may be taken as an
+approximation of the density of states $\tilde D\p{E}$, and used via
+(\ref{eq:flat_weights}) to generate a weight array for an actual
+simulation. Algorithm \ref{alg:flat_histogram} has one free parameter,
+which determines the amount of time for which to collect an energy
+histogram $H\p{E}$.
 
 The problem with this implementation of the flat histogram method is
 that histogram methods are generally necessary when some range of
 energies $R$ is inaccessible via Metropolis Monte Carlo
 simulations. In such a case, the energy histogram $H\p{E\in R}$ after
 simulating for any reasonable amount of time will be statistically
-insignificant or null, invalidating the approximation
-$H\p{E}\approx\tilde D\p{E}$. This method will therefore only
-``flatten'' the histogram at energies $E$ which have been sufficiently
-sampled for $H\p{E}$ to be statistically significant. The end goal in
-implementing histogram methods, however, is precisely to sample those
-energies that cannot be sufficiently sampled without employing clever
-schemes to bias Monte Carlo simulations. The flat histogram method
-therefore does not directly help us study the square-well fluid. This
-method does, however, motivate the method in Section
-\ref{sec:simple_flat}, and provides some of the theory behind the
-methods in Sections \ref{sec:tmmc} and \ref{sec:oetmmc}.
+insignificant or null, invalidating the proportionality $H\p{E}\propto
+D\p{E}$. This method will therefore only ``flatten'' the histogram at
+energies $E$ which have been sufficiently sampled for $H\p{E}$ to be
+statistically significant. The end goal in implementing histogram
+methods, however, is precisely to sample those energies that cannot be
+sufficiently sampled without employing clever schemes to bias Monte
+Carlo simulations. Therefore, this method does not directly help us
+study the square-well fluid. This method does, however, motivate the
+method in Section \ref{sec:simple_flat}, and provides some of the
+theory behind the methods in Sections \ref{sec:tmmc} and
+\ref{sec:oetmmc}.
 
 \subsection{The simple flat method}
 \label{sec:simple_flat}
@@ -689,7 +722,7 @@ simulation and updating process until simulations satisfy some end
 condition (in fact, most histogram methods will require end
 conditions, which is discussed in Section \ref{sec:end_conditions}).
 
-\begin{algorithm}[!t]
+\begin{algorithm}[!b]
   \caption{The simple flat method}
   \label{alg:simple_flat}
   \begin{alg}
@@ -759,7 +792,7 @@ longer (in step \ref{alg:simple_flat_sim} of Algorithm
 \ref{alg:simple_flat}) because these energies have lower state
 densities. The introduction of a minimum temperature may seem ad-hoc,
 but all simulations in this paper require a choice of minimum
-temperature anyways (discussed in Section \ref{sec:energy_range}). In
+temperature anyways (discussed in Section \ref{sec:min_energy}). In
 this paper, we will always use $kT_{\t{min}}=0.2\epsilon$.
 
 \subsection{The Wang-Landau (WL) method}
@@ -800,7 +833,7 @@ to the weights $w\p{E}$, so that upon achieving a flat histogram one
 can be confident that a regular simulation which fixes the current
 weights will yield similar results.
 
-\begin{algorithm}[!b]
+\begin{algorithm}[tb]
   \caption{Wang-Landau initialization of weights}
   \label{alg:wang_landau}
   \begin{alg}
@@ -826,29 +859,33 @@ weights will yield similar results.
       \label{alg:wang_landau_update}
     \item if $f_k\ge c$ for some predetermined $c$, return to step
       \ref{alg:wang_landau_sim}.
+      \label{alg:wang_landau_end}
     \end{enumerate}
 
   \end{alg}
 \end{algorithm}
 
 Algorithm \ref{alg:wang_landau} spells out the Wang-Landau
-initialization process, which has five free parameters: the number of
-iterations $n$ to run in step \ref{alg:wang_landau_sim}, the initial
-factor $f_0$, the update factor $u$, the flatness condition $C\sp{H}$,
-and the cutoff $c$. The first of these parameters, $n$, controls how
-often to check the flatness condition $C\sp{H}$ and run updates, if
-necessary. The value of $n$ is not too important, so long as it is
-reasonable for the system at hand. Too small value of $n$ will waste
-computation time determining $C\sp{H}$, while too large of a value
-will waste time simulating when $C\sp{H}$ has already been
-satisfied. In general, $n$ should be proportional to the computation
-time of $C\sp{H}$, which scales with energy range of the simulated
-system. We therefore use $n=L$, where $L$ is, as described in Section
-\ref{sec:simple_flat}, the number of energy levels for the given
-square-well fluid. Other works typically neglect providing any
-heuristic or formula for $n$, reporting a system-independent
-$n=10^3$\cite{wang_landau_mod} or $10^5$\cite{wang_landau}.
-\fixme{find more citations for this last claim}
+method. This algorithm includes four free parameters which affect
+initialization process: the number of iterations $n$ to run in step
+\ref{alg:wang_landau_sim}, the initial factor $f_0$, the update factor
+$u$, and the flatness condition $C\sp{H}$. The cutoff $c$ determines
+the condition for Algorithm \ref{alg:wang_landau} to terminate.
+
+The first of these parameters, $n$, controls how often to check the
+flatness condition $C\sp{H}$ and run updates, if necessary. The value
+of $n$ is not too important, so long as it is reasonable for the
+system at hand. Too small value of $n$ will waste computation time
+determining $C\sp{H}$, while too large of a value will waste time
+simulating when $C\sp{H}$ has already been satisfied. In general, $n$
+should be proportional to the computation time of $C\sp{H}$, which
+scales with energy range of the simulated system. We therefore use
+$n=L$, where $L$ is, as described in Section \ref{sec:simple_flat},
+the number of energy levels for the given square-well fluid. Other
+works typically neglect providing any heuristic or formula for $n$,
+reporting a system-independent $n=10^3$\cite{wang_landau_mod} or
+$10^5$\cite{wang_landau}.  \fixme{find more citations for this last
+  claim}
 
 The next parameter, $f_0$, controls the initial amount by which to
 adjust the weight of the current energy after each move. As mentioned
@@ -902,9 +939,12 @@ satisfy too strict of a flatness condition in any reasonable amount of
 time. These works fail to recognize the reliance of Wang-Landau on the
 {\it failure} of $C\sp{H}$ to enforce a perfectly flat histogram. A
 commonly suggested flatness condition is that the minimum histogram
-value be at least some fixed proportion of the mean histogram value,
-i.e. $C\sp{H}:\min\sp{H\p{E}}\ge x\bk{H}_E$, and several papers report
-using $x=0.95$. We used the same condition with $x=0.25$.
+value in some specified range of energies be at least some fixed
+proportion of the mean histogram value, i.e.
+$C\sp{H}:\min\sp{H\p{E}}\ge x\bk{H}_E$, and several papers report
+using $x=0.95$. We used the same condition with $x=0.25$. Determining
+the range of energies over which to evaluate $C\sp{H}$ is the subject
+of Section \ref{sec:min_energy}.
 
 The final free parameter in the Wang-Landau method is the cutoff $c$,
 which determines how small $f$ can get before the algorithm stops
@@ -921,17 +961,19 @@ appreciable change is. For simplicity, we stuck with the standard end
 condition given in Algorithm \ref{alg:wang_landau}. As with the other
 free parameters in Wang-Landau, we are not aware of any heuristics for
 determining an appropriate value of $c$, but literature cites typical
-values of $\ln c=10^{-8}$; we used $\ln c=10^{-6}$.
+values of $\ln c=10^{-8}$. In order to compare different histogram
+methods fairly, we used an alternate end condition in step
+\ref{alg:wang_landau_end} of Algorithm \ref{alg:wang_landau}
+(discussed in Section \ref{sec:end_conditions}), and therefore did not
+need to choose a value of $c$.
 
-\subsection{The transition matrix Monte Carlo method}
+\subsection{The transition matrix Monte Carlo (TMMC) method}
 \label{sec:tmmc}
 
-\fixme{add citations}
-
 Unlike the previous histogram methods, the transition matrix Monte
-Carlo (TMMC) method does not use weights, and merely compute the
-density of states $D\p{E}$ of a system\cite{tmmc}. The density of
-states can in turn be used to determine flat histogram weights via
+Carlo method does not use weights, and merely compute the density of
+states $D\p{E}$ of a system\cite{tmmc}. The density of states can in
+turn be used to determine flat histogram weights via
 (\ref{eq:flat_weights}). TMMC introduces a new object: the energy
 transition matrix, $T$, whose components $T_{ij}$ are the
 probabilities that a system will transition {\it to} a state with
@@ -965,11 +1007,11 @@ step (i.e. one Metropolis Monte Carlo move) prior by
   D_j^{t-1}.
   \label{eq:transition_evolution}
 \end{align}
-At equilibrium, the probability distributions $\hat D^{t}=\hat
-D^{t-1}$. Furthermore, the distribution of states in an equilibrium
-ensemble of Metropolis Monte Carlo simulations is precisely the
-density of states $D\p{E}$\fixme{explain why?}, which means
-$D_i=T_{ij}D_j$. Simultaneously expressing this condition for all
+At equilibrium, the probability distributions do not vary with time,
+meaning $\hat D^{t}=\hat D^{t-1}$. Furthermore, the distribution of
+states in an equilibrium ensemble of Metropolis Monte Carlo
+simulations is precisely the density of states $D\p{E}$, which means
+$D_i=T_{ij}D_j$.  Simultaneously expressing this condition for all
 energies,
 \begin{align}
   D=TD. \label{eq:dos_eigen}
@@ -986,7 +1028,7 @@ straightforward: one need only simulate the system and collect a
 histogram $\tilde T_{ij}=\tilde T\p{E_i,E_j}$ of the energy
 transitions after each Metropolis Monte Carlo move, i.e. after step
 \ref{alg:metropolis_move} of Algorithm \ref{alg:metropolis}. A
-histogram of transitions $\tilde T\p{E_i,\bar E_j}_{}$ from a fixed
+histogram of transitions $\tilde T\p{E_i,\bar E_j}$ from a fixed
 energy $\bar E_j$ to energies $E_i$ is then proportional to the
 probability distribution of transitions from $\bar E_j$, i.e. the
 transition matrix $T\p{E_i,\bar E_j}$. Crucially, this proportionality
@@ -1033,14 +1075,77 @@ T_d\p{E,\Delta E}$ and $\tilde T\p{E_i,E_j}$ using the relation
 \end{align}
 which means, from (\ref{eq:transition_normalization}),
 \begin{align}
-  T_{ij}=\f{\tilde T_d\p{E_j,E_i-E_j}}{\sum_i\tilde T_d\p{E_j,E_i-E_j}}
-  =\f{\tilde T_d\p{E_j,E_i-E_j}}
-  {\sum_{\Delta E}\tilde T_d\p{E_j,\Delta E}}.
+  T_{ij}=\f{\tilde T_d\p{E_j,E_i-E_j}}{\sum_i\tilde
+    T_d\p{E_j,E_i-E_j}} =\f{\tilde T_d\p{E_j,E_i-E_j}} {\sum_{\Delta
+      E}\tilde T_d\p{E_j,\Delta E}}.
   \label{eq:transition_conversion}
 \end{align}
 Expressed in this form, the memory footprint of the transition
 histogram grows linearly with system size $N$ and the maximal energy
 difference $M$.
+
+\begin{algorithm}[!b]
+  \caption{Transition matrix Monte Carlo initialization}
+  \label{alg:tmmc}
+  \begin{alg}
+
+  \item Construct an initial typical fluid configuration.
+
+  \item Initialize a transition histogram $\tilde T_d\p{E,\Delta E}=0$
+    for all $E$ and $\Delta E\in\sp{-M,M}$, where $M$ is the possible
+    maximum energy transition of a single move.
+
+  \item Randomly attempt to change the position of one sphere,
+    tentatively accepting the transition from state $s_i$ to state
+    $s_f$ if $s_f$ is not a forbidden fluid configuration.
+    \label{alg:tmmc_move}
+
+  \item Let $\Delta E=E_f-E_i$ and increment $\tilde
+    T_d\p{E_i,\Delta{E}}$, where $E_k$ is the energy of state $s_k$.
+
+  \item If $\Delta E<0$, accept the move. Otherwise
+    \begin{enumerate}
+    \item compute the normalization factor
+      \begin{align*}
+        n_k=\sum_{\Delta E'}\tilde T_d\p{E_k,\Delta E'}
+      \end{align*}
+      for $k\in\set{i,f}$, and
+
+    \item accept the move $s_i\to s_f$ with probability
+      \begin{align*}
+        P_m\p{s_i\to s_f} =\max\set{\f{\p{\tilde T_d\p{E_i,\Delta
+                E}+c}/\p{n_i+c}} {\p{\tilde T_d\p{E_f,-\Delta
+                E}+c}/\p{n_f+c}}, \exp\p{-\f{\Delta E}{kT_{\t{min}}}}}
+      \end{align*}
+      for a predetermined number $c$ and temperature $T_{\t{min}}$.
+      \label{alg:tmmc_prob}
+    \end{enumerate}
+
+  \item If some predetermined initialization end condition has
+    \emph{not} been met, return to step
+    \ref{alg:tmmc_move}. Otherwise, compute the density of states
+    $D\p{E}$ by solving (\ref{eq:dos_eigen}), and set weights
+    $w\p{E}=1/D\p{E}$.
+
+  \end{alg}
+\end{algorithm}
+
+Figure \ref{fig:transitions_sample} provides an example of a
+transition matrix $T_d\p{E,\Delta E}$ for a particular square-well
+fluid. The yellow band at $\Delta E=0$ indicates that most moves
+transition from an energy to itself. Low energies are more likely to
+transition up in energy, with $\Delta E>0$, than down in energy, with
+$\Delta E<0$. The high energies which are more likely to transition
+down in energy than up are those above the state of maximum entropy.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{figs/transitions-sample.pdf}
+  \caption[Sample transition matrix]{Sample transition matrix
+    $T_d\p{E,\Delta E}$ for square-well fluid with a well width
+    $\lambda=1.3$, filling fraction $\eta=0.3$, and $N=20$ spheres.}
+  \label{fig:transitions_sample}
+\end{figure}
 
 While one could imagine many initialization routines to determine the
 transition matrix $T$, we use Algorithm \ref{alg:tmmc}, which is a
@@ -1055,11 +1160,10 @@ $s_i\to s_f$ for which $E_f>E_i$, first consider the case of $c=0$ and
 $T_{\t{min}}\to0$, in which case the probability becomes
 \begin{align}
   P_m\p{s_i\to s_f}=\f{\p{\tilde T_d\p{E_i,\Delta E}}\big/
-    \p{\sum_{\Delta E'}\tilde T_d\p{E_i,\Delta E'}}}
-  {\p{\tilde T_d\p{E_f,-\Delta E}}\big/
-    \p{\sum_{\Delta E'}\tilde T_d\p{E_f,\Delta E'}}}
-  =\f{T\p{E_i,\Delta E}}{T\p{E_f,-\Delta E}}
-  =\f{P\p{E_i\to E_f}}{P\p{E_f\to E_i}},
+    \p{\sum_{\Delta E'}\tilde T_d\p{E_i,\Delta E'}}} {\p{\tilde
+      T_d\p{E_f,-\Delta E}}\big/ \p{\sum_{\Delta E'}\tilde
+      T_d\p{E_f,\Delta E'}}} =\f{T_d\p{E_i,\Delta
+      E}}{T_d\p{E_f,-\Delta E}} =\f{P\p{E_i\to E_f}}{P\p{E_f\to E_i}},
   \label{eq:tmmc_prob_simplified}
 \end{align}
 where $\Delta E=E_f-E_i$ and $P\p{E_m\to E_n}$ is the unbiased
@@ -1095,51 +1199,7 @@ of $T_{\t{min}}$. As a result, Algorithm \ref{alg:tmmc} will not waste
 time oversampling energies which are unimportant for determining
 system properties at temperatures $T\ge T_{\t{min}}$.
 
-\begin{algorithm}[tb]
-  \caption{Transition matrix Monte Carlo initialization}
-  \label{alg:tmmc}
-  \begin{alg}
-
-  \item Construct an initial typical fluid configuration.
-
-  \item Initialize a transition histogram $\tilde T_d\p{E,\Delta E}=0$
-    for all $E$ and $\Delta E\in\sp{-M,M}$, where $M$ is the possible
-    maximum energy transition of a single move.
-
-  \item Randomly attempt to change the position of one sphere,
-    tentatively accepting the transition from state $s_i$ to state
-    $s_f$ if $s_f$ is not a forbidden fluid configuration.
-    \label{alg:tmmc_move}
-
-  \item Let $\Delta E=E_f-E_i$ and increment $\tilde
-    T_d\p{E_i,\Delta{E}}$, where $E_k$ is the energy of state $s_k$.
-
-  \item If $\Delta E<0$, accept the move. Otherwise
-    \begin{enumerate}
-    \item compute the normalization factor
-      \begin{align*}
-        n_k=\sum_{\Delta E'}\tilde T_d\p{E_k,\Delta E'}
-      \end{align*}
-      for $k\in\set{i,f}$, and
-
-    \item accept the move $s_i\to s_f$ with probability
-      \begin{align*}
-        P_m\p{s_i\to s_f}
-        =\max\set{\f{\p{\tilde T_d\p{E_i,\Delta E}+c}/\p{n_i+c}}
-          {\p{\tilde T_d\p{E_f,-\Delta E}+c}/\p{n_f+c}},
-          \exp\p{-\f{\Delta E}{kT_{\t{min}}}}}
-      \end{align*}
-      for a predetermined number $c$ and temperature $T_{\t{min}}$.
-      \label{alg:tmmc_prob}
-    \end{enumerate}
-
-  \item If some predetermined initialization end condition has
-    \emph{not} been met, return to step \ref{alg:tmmc_move}.
-
-  \end{alg}
-\end{algorithm}
-
-\subsection{The optimized ensemble method}
+\subsection{The optimized ensemble (OE) method}
 \label{sec:optimized_ensemble}
 
 All histogram methods introduced in this paper thus far have focused
@@ -1151,13 +1211,13 @@ states by first getting into these states, and then rejecting moves
 which move the system into higher energy states. Statistics on low
 energy states will therefore generally be highly correlated, as they
 are based on many samples of only a few low energy regions of a
-system's energy landscape. The optimized ensemble
-(OE)\cite{optimized_ensemble} attempts to address the autocorrelation
-between low energy samples by finding weights to maximize the rate at
-which a simulation makes round trips between low and high energy
-states. Maximizing the round trip rate, in turn, maximizes the rate at
-which a simulation makes independent, uncorrelated samples of low
-energies.
+system's energy landscape. The optimized
+ensemble\cite{optimized_ensemble} attempts to address the
+autocorrelation between low energy samples by finding weights to
+maximize the rate at which a simulation makes round trips between low
+and high energy states. Maximizing the round trip rate, in turn,
+maximizes the rate at which a simulation makes independent,
+uncorrelated samples of low energies.
 
 The optimized ensemble works by considering an ensemble of
 simulations, each of which defines the position of a ``walker'' in
@@ -1173,7 +1233,7 @@ proportion of walkers at $E$ which are down-going. We also denote the
 walker diffusivity at an energy $E$ by $\alpha\p{E}$.
 
 At equilibrium with a flat histogram, meaning $n$ is constant, the
-down-going walker current $j\p{E}$ is defined in terms of the
+down-going walker current $j\p{E}$ can be expressed in terms of the
 diffusivity $\alpha\p{E}$ by
 \begin{align}
   j=-\alpha\f{dn_+}{dE}.
@@ -1186,10 +1246,11 @@ given walker. Substituting $n_+=fn$,
   j=-\alpha\p{n\f{df}{dE}+f\f{dn}{dE}}=-\alpha n\f{df}{dE},
   \label{eq:walker_current}
 \end{align}
-where a constant $n$ means $dn/dE=0$. We can rearrange
+where a constant $n$ implies $dn/dE=0$. We can rearrange
 (\ref{eq:walker_current}) and integrate over the energy range as
 \begin{align}
-  \int_{f=f\p{E_-}}^{f\p{E_+}}\f{df}{j}=-\int_{E=E_-}^{E_+}\f{dE}{\alpha n}.
+  \int_{f=f\p{E_-}}^{f\p{E_+}}\f{df}{j}=-\int_{E=E_-}^{E_+}\f{dE}{\alpha
+    n}.
   \label{eq:walker_current_integral_setup}
 \end{align}
 At equilibrium, the number of down-going walkers $n_+\p{E}$ at any
@@ -1227,143 +1288,242 @@ which means
 where we neglect the distinction between $\tilde D$ and $D$, which has
 no effect on the weights $w$.
 
-The algorithm provided in \cite{optimized_ensemble} to determine and
-construct weights given by \ref{eq:optimized_weights} involves
-simulating with and iteratively modifying flat histogram weights. This
-algorithm is not meant to construct weights from scratch, but rather
-to optimize them. We therefore will not be comparing the optimized
-ensemble to other methods. We do, however, credit this method for
-motivating the hybrid OE-TMMC method in Section \ref{sec:oetmmc}.
+The algorithm provided in \cite{optimized_ensemble} to construct
+weights given by (\ref{eq:optimized_weights}) finds the diffusivity
+$\alpha$ by solving for it in
+(\ref{eq:walker_current_definition}). This procedure accepts flat
+histogram weights, or equivalently the density of states, as an input,
+and is not meant to construct weights from scratch. We therefore will
+not be comparing the optimized ensemble to other methods in this
+paper. We do, however, credit \cite{optimized_ensemble} for motivating
+the hybrid OE-TMMC method in Section \ref{sec:oetmmc}.
 
 \subsection{The hybrid OE-TMMC method}
 \label{sec:oetmmc}
 
-By the central limit theorem, the probability distribution $P\p{E\to
-  E+\Delta E}$ of Monte Carlo moves which changes the energy of a
-system by $\Delta E$ is
+As well as the density of states, the transition matrix $T\p{E_i,E_j}$
+determines the local diffusivity $\alpha\p{E}$ for any given weights
+$w\p{E}$. Denoting by $P_b\p{E_i\to E_j}$ the actual, biased
+probability of transitioning from $E_i$ to $E_j$ in a single Monte
+Carlo move, we can say that
 \begin{align}
-  P\p{E\to E+\Delta E}=\f1{\sqrt{2\pi\sigma^2}}
-  \exp\p{-\f{\Delta E^2}{2\sigma^2}}
+  P_b\p{E_i\to E_f}=P\p{E_i\to E_f}P_m\p{E_i\to E_f}
+  =T_{ji}\max\set{\f{w\p{E_f}}{w\p{E_i}},1},
 \end{align}
-for some variance
+where $P\p{E_i\to E_j}$ is the probability of attempting the move
+$E_i\to E_j$ and $P_m\p{E_i\to E_j}$ is the probability of accepting
+that move, should it occur. In terms of a transition histogram $\tilde
+T\p{E,\Delta E}$ with $E=E_i$ and $\Delta E=E_f-E_i$,
 \begin{align}
-  \sigma^2=\sigma_E\p{\Delta E}^2=\bk{\Delta E^2}_E-\bk{\Delta E}_E
+  P_b\p{E\to E+\Delta E} =\f{\tilde T_d\p{E,\Delta E}w\p{E+\Delta
+      E}/w\p{E}} {\sum_{\Delta E'}\tilde T_d\p{E,\Delta
+      E'}w\p{E+\Delta E'}/w\p{E}}.
+  \label{eq:actual_transition_prob}
 \end{align}
-which generally depends on the energy $E$.
-
-\vspace{3cm}
-
+We now define
 \begin{align}
-  \bk{\Delta E}_E=\f{\sum_{\Delta E}\Delta E~\tilde T\p{E,\Delta E}
-    w\p{E+\Delta E}/w\p{E}}{\sum_{\Delta E'}\tilde T\p{E,\Delta E'}
-    w\p{E+\Delta E'}/w\p{E}}
+  \bk{\Delta E}_E=\sum_{\Delta E}\Delta E P_b\p{E\to E+\Delta E}
+  =\f{\sum_{\Delta E}\Delta E~\tilde T_d\p{E,\Delta E}
+    \max\set{w\p{E+\Delta E}/w\p{E},1}} {\sum_{\Delta E'}\tilde
+    T_d\p{E,\Delta E'} \max\set{w\p{E+\Delta E'}/w\p{E},1}}
+  \label{eq:<de>}
 \end{align}
-
+and
 \begin{align}
-  \bk{\Delta E^2}_E=\f{\sum_{\Delta E}\Delta E^2~\tilde T\p{E,\Delta E}
-    w\p{E+\Delta E}/w\p{E}}{\sum_{\Delta E'}\tilde T\p{E,\Delta E'}
-    w\p{E+\Delta E'}/w\p{E}}
+  \bk{\Delta E^2}_E=\sum_{\Delta E}\Delta E^2 P_b\p{E\to E+\Delta E}
+  =\f{\sum_{\Delta E}\Delta E~\tilde T_d\p{E,\Delta E}
+    \max\set{w\p{E+\Delta E}/w\p{E},1}} {\sum_{\Delta E'}\tilde
+    T_d\p{E,\Delta E'} \max\set{w\p{E+\Delta E'}/w\p{E},1}},
+  \label{eq:<de^2>}
 \end{align}
-
+in terms of which the diffusivity $\alpha\p{E}$ is
 \begin{align}
-  \alpha=\bk{\Delta E^2}_E-\bk{\Delta E}_E^2=\sigma\p{E}^2
+  \alpha\p{E}=\bk{\Delta E^2}_E -\bk{\Delta E}_E^2.
+  \label{eq:microscopic_diffusitivy}
 \end{align}
+Diffusivity $\alpha\p{E}$ is thus the variance of the change in energy
+$\Delta E$ from as single move out of $E$. Reconciling this definition
+with that we provide in (\ref{eq:walker_current_definition}) is
+considered outside the scope of this paper.
 
+The hybrid OE-TMMC method thus first runs Algorithm \ref{alg:tmmc} to
+collect a transition histogram and compute flat histogram weights,
+then computes the diffusivity $\alpha\p{E}$ via
+(\ref{eq:<de>})-(\ref{eq:microscopic_diffusitivy}), and finally
+computes optimized weights as given by
+(\ref{eq:optimized_weights}). Unlike the optimized ensemble, OE-TMMC
+does not require any extra simulation routines, and is therefore
+straightforward to implement and compare to other histogram methods.
+\fixme{provide iterative algorithm?}
 
+\subsection{Loose ends}
+\label{sec:loose_ends}
 
-\fixme{Explain, provide algorithm. This method is our own synthesis of
-  other work.}
+Throughout the discussion and development of histogram methods, we
+have thus far neglected a few important subjects:
+\begin{enumerate*}
+\item initialization end conditions i.e. the means by which we decide
+  when an algorithm to construct weights is finished,
+\item the minimum temperature $T_{\t{min}}$ which we have sometimes
+  mentioned,
+\item the energy range over which we are interested in, and
+\item what to do with the weight array outside of the energy range of
+  interest, or at in which it is not defined.
+\end{enumerate*}
+The last three of these subjects turn out to be related, as the
+minimum temperature $T_{\t{min}}$ chosen for any given simulation
+determines the minimum energy $E_-$ of interest, as well as the
+weights $w\p{E}$ at energies $E<E_-$.
 
-\begin{algorithm}[H]
-  \caption{Modifying transition weights via the optimized ensemble}
-  \label{alg:oetmmc}
-\end{algorithm}
-
-
-\subsection{Identifying the energy range of interest}
-\label{sec:energy_range}
-
-Histogram methods typically rely on knowledge of the minimum and
-maximum energies of the system in question \fixme{how?}, which are
-unknown for the square-well fluid. Worse still, some square-well fluid
-energies have such an incredibly low density of states that one cannot
-reasonably expect to ever observe them via Monte Carlo, biased or
-otherwise. As such, we need to identify an energy range of interest,
-bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
-  expand}
-
-\subsubsection{State of maximal entropy}
-\label{sec:max_entropy}
-
-\fixme{The energy at which the density of states is maximal, i.e. the
-  state of maximal entropy, sets an upper bound for the energy range
-  in which appropriate weights are not obvious. Explain why.}
-
-\subsubsection{Minimum important energy}
-\label{sec:min_energy}
-
-\fixme{Determining the minimum important energy is considerably
-  trickier. Punchline: we have to choose a minimum temperature of
-  interest, $T_{\t{min}}$, and the minimum important energy is the
-  energy at which the slope of the density of states is
-  $\exp\p{kT_{\t{min}}/\epsilon}/\epsilon$. This condition for the
-  minimum important energy is directly related to canonical weights at
-  a temperature of $T_{\t{min}}$.}
-
-\fixme{Mention that in all initializations which simulate for some
-  time with unchanging weights (i.e. simple flat), the weight array
-  should be set to canonical weights below the minimum important
-  energy, as soon as it is identified.}
-
-\fixme{Mention that weights should be set to canonical weights below
-  the minimum important energy after all initializations.}
-
-\subsubsection{Computing the density of states}
-\label{sec:dos}
-
-\fixme{This section might just become a part of the section on the
-  minimum important energy. (\ref{eq:dos}) gives us an explicit
-  formula for the density of states if we are confident in our energy
-  histogram. We can also compute the density of states from the
-  transition matrix, which is sometimes more appropriate to do.}
-
-\subsection{End conditions}
+\subsubsection{End conditions}
 \label{sec:end_conditions}
 
-% \fixme{Talk about how we want method-independent end conditions, if
-% possible. Introduce the concept of statistically independent energy
-% samples, and explain two measures (one optimistic, and one
-% pessimistic) for determining the number of statistically independent
-% times we have samples a given energy.}
+While the Wang-Landau method comes equipped with an end condition of
+its own, most histogram methods require some external means of
+deciding when they are finished initializing. Wang-Landau's
+``natural'' end condition does not advantage it over other methods,
+however, as the WL end condition makes use of a free parameter, which
+any end condition will require. In order to compare all methods
+fairly, we need a method-independent end condition. The most
+straightforward of such end conditions is to simply to stop
+initializing after some fixed number of Monte Carlo iterations, and
+appropriately finish up any other calculations in the algorithm before
+terminating it. We thus initialize systems of $N$ spheres for
+$10^5N^2$ iterations; the choice of $10^5N^2$ we will address in
+Section \ref{sec:results}\fixme{address in results section}. In
+general, however, one might want an end condition which is independent
+of system size. We came up with a four such end conditions as
+examples, though we do not use these end conditions in this paper.
 
-% \fixme{Talk about two end conditions: a fixed number of times which
-% we require to independently sample the minimum important energy, and
-% an enforced fractional error in the number of times we have
-% independently sampled any energy (at a given minimum temperature).}
+Let $E_+$ be the energy at which the density of states $D\p{E}$ and
+entropy $S\p{E}$ are maximal, and let $E_-$ be the minimum energy of
+interest. We define the pessimistic sample count $s_p\p{E_0}$ as the
+number of times which a system has traveled from $E_+$ to $E_0$, in
+any number of moves. This count represents the most pessimistic
+estimate of the number of independent, uncorrelated observations of
+the energy $E_0$, as going to the state of maximal entropy between
+samples wipes all correlations between them. We similarly define an
+optimistic sample count $s_o\p{E_0}$ as the number of times which the
+system has transitioned into $E_0$ from any energy $E>E_0$. This count
+represents the most optimistic estimate of the number of independent
+observations of the energy $E_0$, as the system had merely to go to
+any energy $E>E_0$, where the density of states may be only marginally
+larger, between each sample.
+
+In general, any initialization routine should sample the entire range
+$R=\sp{E_-,E_+}$ of interest for simulation before terminating.
+Furthermore, samples at the end of initialization should be numerous
+enough to be statistically significant. Given that any samples of
+$E_-$ necessarily require first sampling all other energies in $R$ on
+the way down from $E_+$, this energy ($E_-$) will generally have the
+fewest number of samples. As an end condition, therefore, one can
+simply enforce some minimum number of optimistic or pessimistic
+samples at $E_-$, i.e. $s_o\p{E_-}$ or $s_p\p{E_-}$. A more
+sophisticated end condition would be to choose a minimum temperature
+of interest $T_{\t{min}}$ and initialize until the mean fractional
+error $\bk{\delta_s}_{E,T_{\t{tmin}}}$ in either of the sample counts
+$s_o\p{E}$ or $s_p\p{E}$ reaches some minimum value. These mean errors
+are
+\begin{align}
+  \bk{\delta_s}_{E,T}=\bk{s^{-1/2}}_{E,T}=\sum_Es\p{E}^{-1/2}P\p{E,T}
+  =\f{\sum_Es\p{E}^{-1/2}D\p{E}e^{-E/kT}}{\sum_{E'}D\p{E'}e^{-E'/kT}},
+  \label{eq:fractional_sample_error}
+\end{align}
+where we use the fact that the fractional error $\delta_G$ in any
+histogram $G$ collected via random Monte Carlo sampling is $G^{-1/2}$.
+
+\subsubsection{The energy range of interest}
+\label{sec:min_energy}
+
+Using histogram methods generally requires knowing the energy range of
+interest for the system at hand. The Wang-Landau method, for example,
+periodically checks a flatness condition $C\sp{H}$ on the energy
+histogram $H\p{E}$. In order for such a condition to be well-defined,
+it needs have a specified energy range over which to check the
+flatness of $H$. While some systems, such as the Ising model, have
+well-defined and easily computable energy range, the same is not true
+of most systems. In the case of the square-well fluid, not only is the
+minimum energy unknown, some energies have such an incredibly low
+state density $D\p{E}$ that one cannot reasonably expect to ever
+observe them via Monte Carlo, biased or otherwise. We therefore need
+to identify an energy range of interest, specified by a maximum and
+minimum energies of interest.
+
+Identifying a maximum energy of interest is straightforward: this is
+simply the energy $E_+$ at which the density of states $D\p{E}$ is
+maximal. Though high energies become more important for determining
+system properties $\bk{X}_T$ at higher temperatures, the relative
+importance of energies $E>E_+$ to the energy $E_+$ approaches a
+maximum as $T\to\infty$. There is therefore a maximum weight $w\p{E}$
+which is appropriate to assign energies $E>E_+$ relative to the weight
+$w\p{E_+}$, which is namely the ratio of these weights as
+$T\to\infty$. As observed in (\ref{eq:inf_temp_weights}), the weight
+array becomes flat as $T\to\infty$, which means that the ratio of
+$w\p{E>E_+}$ to $w\p{E}$ appropriate for any given temperature $T$
+maximally approaches unity. We can therefore always set
+$w\p{E>E_+}=w\p{E_+}$, which will ensure that energies $E>E_+$ are not
+sampled any more than is necessary for any positive temperature. The
+maximum of $D\p{E}$ can be found by simulating without weights for a
+short while, after which the energy histogram $H\p{E}$ should be
+maximal at $E_+$.
+
+The minimum important energy $E_-$ for a system is less obvious than
+$E_+$. Just as finding $E_+$ naturally required using a ``maximal''
+temperature $T\to\infty$, determining $E_-$ requires a choice of some
+minimum temperature $T_{\t{min}}$. The minimum important energy $E_-$
+is then the energy at which the partition function terms
+$D\p{E}e^{-E/kT_{\t{min}}}$ are maximal. Lower energy terms grow
+increasingly less important with decreasing energy, and are
+sufficiently sampled with canonical weights
+$w\p{E<E_-}=e^{-E/kT_{\t{min}}}$ to determine any property
+$\bk{X}_{T\ge T_{\t{min}}}$. To maximize $D\p{E}e^{-E/kT_{\t{min}}}$,
+we need
+\begin{align}
+  \f{d}{dE}\p{De^{-E/kT_{\t{min}}}}
+  =\f{dD}{dE}e^{-E/kT_{\t{min}}}+De^{-E/kT_{\t{min}}}\p{-\f{1}{kT_{\t{min}}}}=0,
+  \label{eq:min_E_setup}
+\end{align}
+which means
+\begin{align}
+  \f1{D}\f{dD}{dE}=\f{d\ln D}{dE}=\f{1}{kT_{\t{min}}}.
+  \label{eq:min_E_condition}
+\end{align}
+Though we do not always know the density of states $D\p{E}$, in
+practice we compute the best available estimate $D\p{E}$ every time we
+need to know $E_-$. If we do not find any energy satisfying
+(\ref{eq:min_E_condition}), we use the minimum energy the simulation
+has ever observed in place of $E_-$ to define our energy range of
+interest.
+
+Once we identify an energy $E_-$ satisfying (\ref{eq:min_E_condition})
+in an initialization routine for any histogram method, we effectively
+forbid transitions to energies $E<E_-$ by tentatively setting weights
+$w\p{E<E_-}=e^{-\p{E-E_-}/kT}$ for some temperature $T\ll
+T_{\t{min}}$. These weights prevent the initialization routine from
+wasting time on energies at which we will override the weight array
+after initialization anyways. A special case was made for Wang-Landau,
+as the design of this method assumes knowledge of the energy range of
+interest a priori. In order to fairly compare Wang-Landau to other
+methods, we therefore identified $E_-$ for each simulated system using
+other methods, and hard-coded the minimum important energies for each
+system into the Wang-Landau initialization routines\fixme{talk about
+  how bad this is}. We always set
+$w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ after initialization of all
+histogram methods with $kT_{\t{min}}=0.2\epsilon$. We chose this
+temperature because it seems to be right below the temperature at
+which the square-well fluid condenses from a gas into a
+liquid (see Section \ref{sec:errors}). \fixme{what about pressure?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and Discussion}
 \label{sec:results}
 
-\subsection{Implementation and overview}
-\label{sec:implementation}
+\subsection{Histograms and arrays}
+\label{sec:histograms}
 
-\fixme{Talk about the relative difficulty of implementing each method,
-  as well as the relative difficulty of optimizing or tuning each
-  method. Free parameters are generally bad, and especially so if they
-  come without ``obvious'' or prescribed values. Justify our
-  modifications to Wang-Landau by showing that we did not make it
-  worse. Include mention of how memory requirements for transition
-  matrix Monte Carlo scale poorly with system size, as well as energy
-  resolution for systems with continuous energies.}
-
-\subsection{Simulation results and errors}
-\label{sec:results_and_errors}
-
-\fixme{Talk about the energy histogram, weights, and density of states
-  yielded by the methods. These should all be fairly similar. Talk
-  about why this is so.}
+\fixme{Give examples of energy histograms for one system, density of
+  states for several $N$, and perhaps a weight array.}
 
 \begin{figure}[H]
   \centering
@@ -1373,32 +1533,18 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
 
 \begin{figure}[H]
   \centering
+  \caption[Density of states]{Density of states}
+  \label{fig:density_of_states}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
   \caption[Energy weights]{Energy weights}
   \label{fig:weights}
 \end{figure}
 
-\begin{figure}[H]
-  \centering
-  \caption[Normalized densities of states]{Normalized densities of
-    states}
-  \label{fig:density_of_states}
-\end{figure}
-
-\fixme{Talk about initialization times, and how they scale with system
-  size}
-
-\begin{figure}[H]
-  \centering
-  \caption[Initialization iterations vs. system size]{Initialization
-    iterations vs. system size}
-  \label{fig:scaling}
-\end{figure}
-
-\fixme{Discuss energy initialization times, sampling rates, and errors
-  in computed thermodynamic properties. Explain that errors are given
-  relative to a simulation which ran much longer, and talk about how
-  we ran that simulation (which method did we use?). Show that all
-  methods converge on the same answer as they simulate for longer.}
+\subsection{Sampling rates}
+\label{sec:sampling_rates}
 
 \begin{figure}[H]
   \centering
@@ -1414,23 +1560,29 @@ bounded by minimum and maximum ``important'' energies. \fixme{Rewrite,
   \label{fig:pes_sample_rate}
 \end{figure}
 
+\subsection{Errors in $u$, $c_V$, and $s_{\t{config}}$}
+\label{sec:errors}
+
+\fixme{Discuss errors in computed thermodynamic properties. Introduce
+  converged flat weights.}
+
 \begin{figure}[H]
   \centering
-  \caption[Initialization iterations vs. data quality]{Initialization
-    iterations vs. data quality}
-  \label{fig:quality}
+  \caption[Internal energy]{Specific internal energy}
+  \label{fig:u_error}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \caption[Specific internal energy]{Specific internal energy}
-  \label{fig:internal_energy}
+  \caption[Heat capacity]{Specific heat capacity}
+  \label{fig:cv_error}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \caption[Specific heat capacity]{Specific heat capacity}
-  \label{fig:heat_capacity}
+  \caption[Configurational entropy]{Specific configurational
+    entropy}
+  \label{fig:s_error}
 \end{figure}
 
 
