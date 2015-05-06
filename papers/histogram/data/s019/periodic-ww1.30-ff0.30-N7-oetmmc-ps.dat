@@ -1,4 +1,4 @@
-# version: 0.0.0-207-gf4e294c-dirty
+# version: 0.0.0-273-g79ef90c-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 7
@@ -17,16 +17,16 @@
 # histogram method: oetmmc
 # init_iter_limit: 4900000
 # iterations: 4900000
-# working moves: 18399805
+# working moves: 20636682
 # total moves: 34300000
-# acceptance rate: 0.536437
+# acceptance rate: 0.601653
 
 # energy	samples
 14  0
-15  215137
-16  78329
-17  32737
-18  11478
-19  3457
-20  1032
-21  134
+15  349200
+16  121875
+17  46468
+18  17435
+19  5786
+20  1527
+21  69
