@@ -145,12 +145,13 @@ techniques (e.g. the Ising model). We propose to implement these
 methods in Monte Carlo simulations of the square-well fluid, determine
 appropriate performance metrics for their comparison, and identify
 those methods which are most efficient and effective at sampling
-otherwise improbable system states.
+otherwise improbable system states.\fixme{make this an abstract,
+  rather than a proposal...}
 
 \fixme{Rewrite after the rest of the thesis is completed}
 
-\fixme{Make all mention of what we do in present, rather than past
-  tense}
+\fixme{Always talk about what we do in our own code in present, rather
+  than past tense}
 
 
 \newpage
@@ -616,11 +617,10 @@ will allow us to determine, for various square-well fluids,
 \section{Methods}
 \label{sec:methods}
 
-\fixme{Give an overview of the methods section}
-
-\fixme{Make a note on storing the logarithm of weights and
-  periodically rescaling them (resetting the zero on $\ln w$) to
-  reduce numerical error.}
+Having covered the basics of the square-well fluid as well as
+Metropolis and biased Monte Carlo simulations, we can now discuss
+several histogram methods for constructing energy weights.\fixme{more
+  overview of the methods section?}
 
 \subsection{The flat histogram (multi-canonical) method}
 \label{sec:flat_histogram}
@@ -1502,13 +1502,17 @@ $w\p{E<E_-}=e^{-\p{E-E_-}/kT}$ for some temperature $T\ll
 T_{\t{min}}$. These weights prevent the initialization routine from
 wasting time on energies at which we will override the weight array
 after initialization anyways. A special case was made for Wang-Landau,
-which was designed assuming knowledge of the energy range of interest
-a priori. In order to fairly compare Wang-Landau to other methods, we
-therefore identified $E_-$ for each simulated system using other
-methods, and hard-coded the minimum important energies for each system
-into the Wang-Landau initialization routines\fixme{talk about how bad
-  this is}. We always set $w\p{E<E_-}=e^{-\p{E-E_-}/kT}$ after
-initialization of all histogram method.
+as the design of this method assumes knowledge of the energy range of
+interest a priori. In order to fairly compare Wang-Landau to other
+methods, we therefore identified $E_-$ for each simulated system using
+other methods, and hard-coded the minimum important energies for each
+system into the Wang-Landau initialization routines\fixme{talk about
+  how bad this is}. We always set
+$w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ after initialization of all
+histogram methods with $kT_{\t{min}}=0.2\epsilon$. We chose this
+temperature because it seems to be right below the temperature at
+which the square-well fluid condenses from a gas into a
+liquid (see Section \ref{sec:errors}). \fixme{what about pressure?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1516,6 +1520,7 @@ initialization of all histogram method.
 \label{sec:results}
 
 \subsection{Histograms and arrays}
+\label{sec:histograms}
 
 \fixme{Give examples of energy histograms for one system, density of
   states for several $N$, and perhaps a weight array.}
@@ -1538,10 +1543,8 @@ initialization of all histogram method.
   \label{fig:weights}
 \end{figure}
 
-\subsection{Sample rates}
-
-\fixme{Talk about initialization times, and how they scale with system
-  size}
+\subsection{Sampling rates}
+\label{sec:sampling_rates}
 
 \begin{figure}[H]
   \centering
@@ -1558,9 +1561,10 @@ initialization of all histogram method.
 \end{figure}
 
 \subsection{Errors in $u$, $c_V$, and $s_{\t{config}}$}
+\label{sec:errors}
 
 \fixme{Discuss errors in computed thermodynamic properties. Introduce
-  Converged flat weights.}
+  converged flat weights.}
 
 \begin{figure}[H]
   \centering
@@ -1591,6 +1595,6 @@ initialization of all histogram method.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibliography{thesis}
+\nocite{*} \bibliography{thesis}
 
 \end{document}
