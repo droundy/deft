@@ -21,7 +21,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.3]
 
 N = int(sys.argv[3])
-#arg N = [20]
+#arg N = [25]
 
 method = sys.argv[4]
 #arg method = ['tmmc-golden']
@@ -68,4 +68,4 @@ plt.xlabel('$\Delta E/\epsilon$')
 plt.ylabel('$E/\epsilon$')
 
 plt.tight_layout()
-plt.savefig("figs/transitions-sample.pdf")
+plt.savefig("figs/transitions-example.pdf")

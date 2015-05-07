@@ -405,7 +405,7 @@ Figure \ref{fig:dos_sample} provides an example of an unnormalized
 density of states $\tilde D\p{E}$ in energy for a particular
 square-well fluid. The density of states has been ``normalized'' to
 have a maximum value of $1$ in order to emphasize the logarithmic span
-of $D\p{E}$. This logarithmic span ($\sim10^{45}$) is proportional to
+of $D\p{E}$. This logarithmic span ($\sim10^{60}$) is proportional to
 the number of moves which one must simulate via Metropolis Monte Carlo
 in order to observe the energies with the lowest state densities. For
 reference, the world's current fastest supercomputers can perform
@@ -413,10 +413,10 @@ $\sim10^{16}$ floating-point operations per second.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.6\textwidth]{figs/dos-sample.pdf}
+  \includegraphics[width=0.6\textwidth]{figs/dos-example.pdf}
   \caption[Density of states]{Sample density of states for square-well
     fluid with a well width $\lambda=1.3$, filling fraction
-    $\eta=0.3$, and $N=20$ spheres, as computed by several histogram
+    $\eta=0.3$, and $N=25$ spheres, as computed by several histogram
     methods. The density of states has been normalized to have a
     maximum value of $1$.}
   \label{fig:dos_sample}
@@ -1152,10 +1152,10 @@ energy than up are those above the state of maximum entropy.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.6\textwidth]{figs/transitions-sample.pdf}
+  \includegraphics[width=0.6\textwidth]{figs/transitions-example.pdf}
   \caption[Transition matrix]{Sample transition matrix $T_d\p{E,\Delta
       E}$ for square-well fluid with a well width $\lambda=1.3$,
-    filling fraction $\eta=0.3$, and $N=20$ spheres.  The band at
+    filling fraction $\eta=0.3$, and $N=25$ spheres.  The band at
     $\Delta E=0$ indicates that any given state is most likely to
     transition into another state with the same energy.}
   \label{fig:transitions_sample}
@@ -1540,37 +1540,30 @@ results from simulating with these methods.
 \subsection{Histograms and arrays}
 \label{sec:histograms}
 
-
-
 \fixme{Give examples of energy histograms for one system, density of
   states for several $N$, and perhaps a weight array.}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{figs/array-samples.pdf}
-  \caption[Sample arrays]{Sample arrays computed by various histogram
-    methods for a square-well fluid with a well width $\lambda=1.3$,
-    filling fraction $\eta=0.3$, and $N=20$ spheres after simulating
-    for $10^5N^2$ iterations: (top left) energy histogram, (top right)
-    weight array, (bottom left) density of states.}
+  \includegraphics[width=\textwidth]{figs/array-example.pdf}
+  \caption[Example arrays]{Example arrays computed by various
+    histogram methods for a square-well fluid with a well width
+    $\lambda=1.3$, filling fraction $\eta=0.3$, and $N=25$ spheres
+    after simulating for $10^5N^2$ iterations: (top left) energy
+    histogram, (top right) weight array, (bottom left) density of
+    states.}
   \label{fig:arrays}
 \end{figure}
 
-\subsection{Sampling rates}
-\label{sec:sampling_rates}
-
 \begin{figure}[H]
   \centering
-  \caption[Optimistic energy sampling rates]{Optimistic energy
-    sampling rates}
-  \label{fig:opt_sample_rate}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \caption[Pessimistic energy sampling rates]{Pessimistic energy
-    sampling rates}
-  \label{fig:pes_sample_rate}
+  \includegraphics[width=0.75\textwidth]{figs/sample-rate-example.pdf}
+  \caption[Example energy sampling rates]{Example pessimistic energy
+    sampling rates computed by various histogram methods for a
+    square-well fluid with a well width $\lambda=1.3$, filling
+    fraction $\eta=0.3$, and $N=25$ spheres after simulating for
+    $10^5N^2$ iterations.}
+  \label{fig:sample_rates}
 \end{figure}
 
 \subsection{Errors in $u$, $c_V$, and $s_{\t{config}}$}

@@ -1,0 +1,65 @@
+# version: 0.0.0-268-g7043c7d-dirty
+# well_width: 1.3
+# ff: 0.3
+# N: 25
+# walls: 0
+# cell dimensions: (7.04102, 7.04102, 7.04102)
+# seed: 0
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 144
+# min_T: 0.2
+# fractional_sample_error after initialization: -nan
+# min_important_energy after initialization: 116
+
+# histogram method: none
+
+# iterations: 3000000
+# working moves: 53404699
+# total moves: 75000000
+# acceptance rate: 0.712063
+
+# min_important_energy: 116
+
+# energy   counts
+41  3
+42  26
+43  69
+44  323
+45  980
+46  3506
+47  10443
+48  29385
+49  77816
+50  184972
+51  404216
+52  799772
+53  1446936
+54  2404295
+55  3653159
+56  5109384
+57  6546294
+58  7722333
+59  8382833
+60  8385848
+61  7754443
+62  6632097
+63  5249115
+64  3848822
+65  2621669
+66  1664544
+67  985725
+68  549552
+69  283871
+70  139060
+71  63518
+72  27261
+73  11301
+74  4200
+75  1491
+76  516
+77  167
+78  51
+79  4
