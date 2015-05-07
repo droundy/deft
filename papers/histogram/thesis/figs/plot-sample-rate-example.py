@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 import matplotlib, sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -51,10 +51,10 @@ for method in methods:
     samples = samples[samples != 0]
     if sum(samples) > 0:
         plt.semilogy(energy, iterations/samples, styles.dots(method),
-                       label=styles.title(method))
+                     markerfacecolor='none', markeredgecolor=styles.color(method),
+                     label=styles.title(method))
 
 plt.xlabel('$E/\epsilon$')
 plt.ylabel('$s_p(E)$')
-
 ax.legend(loc='upper right',bbox_to_anchor=(1.65,0.95))
 plt.savefig("figs/sample-rate-example.pdf")

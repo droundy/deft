@@ -57,12 +57,20 @@ for method in methods:
         minlog = log10_dos.min()
 
     plt.figure('dos')
-    plt.plot(energy, log10_dos, styles.dots(method), label=styles.title(method))
-    ax_dos.plot(energy, log10_dos, styles.dots(method), label=styles.title(method))
+    plt.plot(energy, log10_dos, styles.dots(method),
+             markerfacecolor='none', markeredgecolor=styles.color(method),
+             label=styles.title(method))
+    ax_dos.plot(energy, log10_dos, styles.dots(method),
+                markerfacecolor='none', markeredgecolor=styles.color(method),
+                label=styles.title(method))
 
-    ax_hist.semilogy(energy, e_hist[:,1], styles.dots(method), label=styles.title(method))
+    ax_hist.semilogy(energy, e_hist[:,1], styles.dots(method),
+                     markerfacecolor='none', markeredgecolor=styles.color(method),
+                     label=styles.title(method))
 
-    ax_lnw.plot(energy, log10w, styles.dots(method), label=styles.title(method))
+    ax_lnw.plot(energy, log10w, styles.dots(method),
+                     markerfacecolor='none', markeredgecolor=styles.color(method),
+                     label=styles.title(method))
 
 def tentothe(n):
     if int(n) == n:

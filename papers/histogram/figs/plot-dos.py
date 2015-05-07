@@ -65,7 +65,7 @@ newlabels = [tentothe(n) for n in locs]
 plt.yticks(locs, newlabels)
 plt.ylim(minlog, 0)
 
-plt.xlabel('$U/N\epsilon$')
+plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$DoS$')
 plt.title('Density of states for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.legend(loc='best')
@@ -80,7 +80,7 @@ newlabels = [tentothe(n) for n in locs]
 plt.yticks(locs, newlabels)
 plt.ylim(minlog, 0)
 
-plt.xlabel('$U/N\epsilon$')
+plt.xlabel('$E/N\epsilon$')
 plt.ylabel('$1/w$')
 plt.title('Weighting functions for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, N))
 plt.legend(loc='best')

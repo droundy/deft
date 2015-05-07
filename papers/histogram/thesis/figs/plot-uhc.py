@@ -1,11 +1,8 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 import matplotlib, sys, os
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
-
-matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-matplotlib.rc('text', usetex=True)
 
 sys.path.append('../figs')
 import styles
@@ -13,6 +10,10 @@ import readandcompute
 
 thesis_dir = os.getcwd()
 os.chdir('../')
+
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+matplotlib.rc('text', usetex=True)
+
 
 if len(sys.argv) != 6:
     print 'useage: %s ww ff N methods seed' % sys.argv[0]
