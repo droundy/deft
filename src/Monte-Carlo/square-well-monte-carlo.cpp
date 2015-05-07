@@ -889,9 +889,6 @@ int main(int argc, const char *argv[]) {
   char *density_fname = new char[1024];
   sprintf(density_fname, "%s/%s-density.dat", data_dir, filename);
 
-  char *g_fname = new char[1024];
-  sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
-
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
           "# version: %s\n"
@@ -1145,7 +1142,39 @@ int main(int argc, const char *argv[]) {
 
       // Save RDF
       if(!sw.walls){
+        char *g_fname = new char[1024];
+        sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
         FILE *g_out = fopen((const char *)g_fname, "w");
+        if (!g_out) {
+          printf("Unable to create file %s\n", g_fname);
+          exit(1);
+        }
+        sprintf(g_fname, "%s/%s-gr.dat", data_dir, filename);
+        FILE *gr_out = fopen((const char *)g_fname, "w");
+        if (!gr_out) {
+          printf("Unable to create file %s\n", g_fname);
+          exit(1);
+        }
+        sprintf(g_fname, "%s/%s-gE.dat", data_dir, filename);
+        FILE *gE_out = fopen((const char *)g_fname, "w");
+        if (!gE_out) {
+          printf("Unable to create file %s\n", g_fname);
+          exit(1);
+        }
+        sprintf(g_fname, "%s/%s-glnw.dat", data_dir, filename);
+        FILE *glnw_out = fopen((const char *)g_fname, "w");
+        if (!glnw_out) {
+          printf("Unable to create file %s\n", g_fname);
+          exit(1);
+        }
+        sprintf(g_fname, "%s/%s-gEhist.dat", data_dir, filename);
+        FILE *gEhist_out = fopen((const char *)g_fname, "w");
+        if (!gEhist_out) {
+          printf("Unable to create file %s\n", g_fname);
+          exit(1);
+        }
+        delete[] g_fname;
+
         fprintf(g_out, "%s", headerinfo);
         fprintf(g_out, "%s", countinfo);
         fprintf(g_out, "# data table containing values of g "
@@ -1154,24 +1183,27 @@ int main(int argc, const char *argv[]) {
                 "# column number r_n (starting from the second column, "
                 "counting from zero) corresponds to radius r given by "
                 "r = (r_n + 0.5) * de_g\n");
-        const double density = sw.N/sw.len[x]/sw.len[y]/sw.len[z];
-        const double total_vol = sw.len[x]*sw.len[y]*sw.len[z];
         for(int i = 0; i < sw.energy_levels; i++){
-          if(g_histogram[i][g_bins-1] > 0){ // if we have RDF data at this energy
-            fprintf(g_out, "\n%i",i);
+          if (sw.energy_histogram[i] > 0){ // if we have RDF data at this energy
             for(int r_i = 0; r_i < g_bins; r_i++) {
-              const double probability = (double)g_histogram[i][r_i]
-                / g_energy_histogram[i];
-              const double r = (r_i + 0.5) * de_g;
-              const double shell_vol =
-                4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
-              const double n2 = probability/total_vol/shell_vol;
-              const double g = n2/sqr(density);
-              fprintf(g_out, " %8.5f", g);
+              fprintf(g_out, "%ld ", g_histogram[i][r_i]);
+              fprintf(gr_out, "%.10g ", (r_i+0.5)*de_g);
+              fprintf(gE_out, "%d ", -i);
+              fprintf(glnw_out, "%.10g ", sw.ln_energy_weights[i]);
+              fprintf(gEhist_out, "%ld ", sw.energy_histogram[i]);
             }
+            fprintf(g_out, "\n");
+            fprintf(gr_out, "\n");
+            fprintf(gE_out, "\n");
+            fprintf(glnw_out, "\n");
+            fprintf(gEhist_out, "\n");
           }
         }
         fclose(g_out);
+        fclose(gr_out);
+        fclose(gE_out);
+        fclose(glnw_out);
+        fclose(gEhist_out);
       }
 
       // Saving density data
@@ -1234,7 +1266,6 @@ int main(int argc, const char *argv[]) {
   delete[] os_fname;
   delete[] ps_fname;
   delete[] density_fname;
-  delete[] g_fname;
 
   delete[] data_dir;
   delete[] filename;
