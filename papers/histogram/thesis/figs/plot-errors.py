@@ -49,7 +49,7 @@ figs = ['u','cv','s']
 
 Tmax = 0.2
 
-def mean_errs(ww, ff, N, method, golden_u):
+def mean_errs(ww, ff, N, method, golden_data):
     u_err = 0.0
     cv_err = 0.0
     s_err = 0.0
@@ -57,9 +57,9 @@ def mean_errs(ww, ff, N, method, golden_u):
     for seed in seeds:
         t_u_cv_s_method = readandcompute.t_u_cv_s(ww, ff, N, method, seed)
         if t_u_cv_s_method != None:
-            du = abs((t_u_cv_s_method[1]-golden_u)[t_u_cv_s_method[0] > Tmax]).max()
-            dcv = abs((t_u_cv_s_method[2]-golden_u)[t_u_cv_s_method[0] > Tmax]).max()
-            ds = abs((t_u_cv_s_method[3]-golden_u)[t_u_cv_s_method[0] > Tmax]).max()
+            du = abs((t_u_cv_s_method[1]-golden_data[1])[t_u_cv_s_method[0] > Tmax]).max()
+            dcv = abs((t_u_cv_s_method[2]-golden_data[2])[t_u_cv_s_method[0] > Tmax]).max()
+            ds = abs((t_u_cv_s_method[3]-golden_data[3])[t_u_cv_s_method[0] > Tmax]).max()
             u_err += du
             cv_err += dcv
             s_err += ds
@@ -70,19 +70,18 @@ def mean_errs(ww, ff, N, method, golden_u):
 
 for N in Ns:
     t_u_cv_s = readandcompute.t_u_cv_s(ww, ff, N, golden)
-    if t_u_cv_s != None:
-        golden_u = t_u_cv_s[1]
-        reference_error = mean_errs(ww, ff, N, reference, golden_u)
-        print ' N',N
-        for method in methods:
-            method_err = mean_errs(ww, ff, N, method, golden_u)
-            print '  ',method
-            print '   ',method_err
-            for i in range(len(figs)):
-                plt.figure(figs[i])
-                plt.loglog(reference_error[i], method_err[i], styles.dots(method),
-                           markerfacecolor='none', markeredgecolor=styles.color(method),
-                           label=styles.title(method))
+    golden_data = t_u_cv_s
+    reference_error = mean_errs(ww, ff, N, reference, golden_data)
+    print ' N',N
+    for method in methods:
+        method_err = mean_errs(ww, ff, N, method, golden_data)
+        print '  ',method
+        print '   ',method_err
+        for i in range(len(figs)):
+            plt.figure(figs[i])
+            plt.loglog(reference_error[i], method_err[i], styles.dots(method),
+                       markerfacecolor='none', markeredgecolor=styles.color(method),
+                       label=styles.title(method))
 
 os.chdir(thesis_dir)
 
@@ -109,14 +108,12 @@ plt.ylabel(r'$\Delta U/N\epsilon$')
 plt.savefig("figs/internal-energy-comps.pdf")
 
 plt.figure('cv')
-plt.axis('equal')
 plt.legend(handle_list, label_list,loc='lower right',bbox_to_anchor=(1.25,0))
 plt.xlabel(r'%s $\Delta C_V/Nk$'%styles.title(reference))
 plt.ylabel(r'$\Delta C_V/Nk$')
 plt.savefig("figs/heat-capacity-comps.pdf")
 
 plt.figure('s')
-plt.axis('equal')
 plt.legend(handle_list, label_list,loc='lower right',bbox_to_anchor=(1.25,0))
 plt.xlabel(r'%s $\Delta S_{\textrm{config}}/Nk$'%styles.title(reference))
 plt.ylabel(r'$\Delta S_{\textrm{config}}/Nk$')

@@ -1,29 +1,43 @@
 #!/usr/bin/python2
-import numpy
+import numpy, os
+
+def get_hists(basename):
+    min_T = 0
+    with open(basename+"-E.dat") as file:
+        for line in file:
+            if("min_T" in line):
+                this_min_T = float(line.split()[-1])
+                if this_min_T > min_T:
+                    min_T = this_min_T
+                break
+    # energy histogram file; indexed by [-energy,counts]
+    e_hist = numpy.loadtxt(basename+"-E.dat", ndmin=2)
+    # weight histogram file; indexed by [-energy,ln(weight)]
+    lnw_hist = numpy.loadtxt(basename+"-lnw.dat", ndmin=2)
+    return e_hist, lnw_hist, min_T
+
 
 def t_u_cv_s(ww, ff, N, method, seed=0):
     max_T = 1.4
     T_bins = 1e3
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
-    min_T = 0
-    try:
-        with open("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (seed, ww, ff, N, method)) as file:
-            for line in file:
-                if("min_T" in line):
-                    this_min_T = float(line.split()[-1])
-                    if this_min_T > min_T:
-                        min_T = this_min_T
-                    break
-        # energy histogram file; indexed by [-energy,counts]
-        e_hist = numpy.loadtxt(
-            "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat" % (seed, ww, ff, N, method), ndmin=2)
-        # weight histogram file; indexed by [-energy,ln(weight)]
-        lnw_hist = numpy.loadtxt(
-            "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat" % (seed, ww, ff, N, method), ndmin=2)
-    except:
-        # the files must not exist
+
+    basedir = 'data/'
+    fname = "periodic-ww%04.2f-ff%04.2f-N%i-%s" % (ww, ff, N, method)
+
+    # look for golden, nw, and kT sims in correct place
+    if 'golden' in method:
+        basename = basedir+fname
+    elif method == 'nw' or 'kT' in method:
+        basename = basedir+'s000/'+fname
+    else:
+        basename = basedir+'s%03d/'%seed+fname
+
+    if not os.path.isfile(basename+'-E.dat'):
         return None
+
+    e_hist, lnw_hist, min_T = get_hists(basename)
 
     energy = -e_hist[:,0] # array of energies
     lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy

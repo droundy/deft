@@ -16,7 +16,7 @@ matplotlib.rc('text', usetex=True)
 
 
 if len(sys.argv) != 6:
-    print 'useage: %s ww ff N methods seed' % sys.argv[0]
+    print 'useage: %s ww ff N methods seeds' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -29,14 +29,14 @@ N = float(sys.argv[3])
 #arg N = [25]
 
 methods = eval(sys.argv[4])
-#arg methods = [["tmmc-golden","cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
+#arg methods = [["cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
-seed = int(sys.argv[5])
-#arg seed = [0]
+seeds = eval(sys.argv[5])
+#arg seeds = [range(1)]
 
-# input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
+# input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for seed in seeds for data in ["E","lnw"]]
 
-reference = "tmmc-golden"
+golden = "tmmc-golden"
 
 max_T = 1.4
 T_bins = 1e3
@@ -49,9 +49,9 @@ U = {} # internal energy
 CV = {} # heat capacity
 S = {} # entropy
 
-# we want to keep our methods distinct from our reference
-if reference in methods:
-    methods.remove(reference)
+# we want to keep our methods distinct from our golden
+if golden in methods:
+    methods.remove(golden)
 
 fig_u = plt.figure('u',figsize=(6,4))
 ax_u = fig_u.add_axes([0.15, 0.1, 0.67, 0.8])
@@ -71,13 +71,21 @@ ax_hc_err = fig_hc_err.add_axes([0.15, 0.1, 0.75, 0.7])
 fig_s_err = plt.figure('s_err',figsize=(6,5))
 ax_s_err = fig_s_err.add_axes([0.15, 0.1, 0.8, 0.7])
 
-for method in [reference]+methods:
+array_len = len(readandcompute.u_cv_s(ww, ff, N, methods[0], seeds[0])[0])
 
-    u_cv_s = readandcompute.u_cv_s(ww, ff, N, method)
-    if u_cv_s != None:
-        U[method] = u_cv_s[0] # internal energy
-        CV[method] = u_cv_s[1] # heat capacity
-        S[method] = u_cv_s[2] # entropy
+for method in [golden]+methods:
+
+    U[method] = numpy.zeros(array_len)
+    CV[method] = numpy.zeros(array_len)
+    S[method] = numpy.zeros(array_len)
+    for seed in seeds:
+        u_cv_s = readandcompute.u_cv_s(ww, ff, N, method, seed)
+        U[method] += u_cv_s[0] # internal energy
+        CV[method] += u_cv_s[1] # heat capacity
+        S[method] += u_cv_s[2] # entropy
+    U[method] /= len(seeds)
+    CV[method] /= len(seeds)
+    S[method] /= len(seeds)
 
     plt.figure('u')
     plt.plot(T_range,U[method]/N,styles.plot(method),label=styles.title(method))
@@ -91,15 +99,15 @@ for method in [reference]+methods:
 for method in methods:
 
     plt.figure('u_err')
-    plt.plot(T_range,(U[method]-U[reference])/N,
+    plt.plot(T_range,(U[method]-U[golden])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('hc_err')
-    plt.plot(T_range,(CV[method]-CV[reference])/N,
+    plt.plot(T_range,(CV[method]-CV[golden])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('s_err')
-    plt.plot(T_range,(S[method]-S[reference])/N,
+    plt.plot(T_range,(S[method]-S[golden])/N,
              styles.plot(method),label=styles.title(method))
 
 os.chdir(thesis_dir)
@@ -115,7 +123,7 @@ plt.figure('hc')
 plt.ylim(0)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
-plt.legend(loc='top right',bbox_to_anchor=(1.2,1))
+plt.legend(loc='upper right',bbox_to_anchor=(1.2,1))
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/heat-capacity.pdf")
 
@@ -145,7 +153,7 @@ plt.savefig("figs/heat-capacity-err.pdf")
 plt.figure('s_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textrm{config}}/Nk$')
-plt.legend(loc='top right',bbox_to_anchor=(1,1.05))
+plt.legend(loc='upper right',bbox_to_anchor=(1,1.05))
 plt.ylim(-.1,.1)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/config-entropy-err.pdf")
