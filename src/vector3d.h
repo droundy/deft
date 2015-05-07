@@ -1,6 +1,7 @@
 #include <math.h>
 #include "MersenneTwister.h"
 #include <cassert>
+#include <stdio.h>
 
 #pragma once
 
@@ -10,6 +11,15 @@ struct random {
   }
   static double ran() {
     return my_mtrand.randExc();
+  }
+  static unsigned long seed_randomly() {
+    unsigned long seedval = clock(); // in case reading /dev/urandom fails?
+    FILE *f = fopen("/dev/urandom", "r");
+    if (f) {
+      fread(&seedval, sizeof(unsigned long), 1, f);
+      fclose(f);
+    }
+    return seedval;
   }
 private:
   static MTRand my_mtrand;

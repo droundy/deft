@@ -786,6 +786,7 @@ int main(int argc, const char *argv[]) {
     if(transitions_infile != NULL){
       fclose(transitions_infile);
       sw.initialize_transitions_file(transitions_input_filename);
+      seed = random::seed_randomly();
     }
   }
 
