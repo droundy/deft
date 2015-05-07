@@ -104,13 +104,16 @@ int main(int argc, const char *argv[]) {
   int golden = false;
 
   // Tuning factors
-  double wl_factor = 0.125;
-  double wl_fmod = 2;
-  double wl_threshold = 3;
-  double wl_cutoff = 1e-6;
   int oe_update_factor = 2;
   int flat_update_factor = 2;
   sw.min_important_energy = 0;
+
+  /* Do not change these here! They are taken directly from the WL paper.
+     If you want to change the WL parameters, run this code with appropriate arguments */
+  double wl_factor = 1;
+  double wl_fmod = 2;
+  double wl_threshold = 1/0.95-1;
+  double wl_cutoff = 1e-8;
 
   // end conditions
   int default_pessimistic_min_samples = 10;
@@ -121,12 +124,6 @@ int main(int argc, const char *argv[]) {
   int optimistic_sampling = true; // popt requires it to be an int, not a bool
 
   int tmmc_min_samples = 2000;
-
-  // Do not change these! They are taken directly from the WL paper.
-  const double vanilla_wl_factor = 1;
-  const double vanilla_wl_fmod = 2;
-  const double vanilla_wl_threshold = 1/0.95-1;
-  const double vanilla_wl_cutoff = 1e-8;
 
   // some miscellaneous default or dummy simulation parameters
   sw.len[0] = sw.len[1] = sw.len[2] = 0;
@@ -379,13 +376,6 @@ int main(int argc, const char *argv[]) {
     printf("It does not make sense to optimize the ensemble with a "
            "flat histogram end condition!\n");
     return 175;
-  }
-
-  if(sw.min_important_energy) sw.manual_min_e = true;
-  if(sw.manual_min_e && !wang_landau){
-    printf("Fixing a minimum important energy is not allowed for any method"
-           " other than Wang-Landau\n");
-    return 149;
   }
 
   if (sw.len[x]<0 || sw.len[y]<0 || sw.len[x]<0){
@@ -794,11 +784,9 @@ int main(int argc, const char *argv[]) {
     sw.initialize_transitions_file(transitions_input_filename);
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
-  } else if (wang_landau) {
-    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
-  } else if (vanilla_wang_landau) {
-    sw.initialize_wang_landau(vanilla_wl_factor, vanilla_wl_fmod,
-                              vanilla_wl_threshold, vanilla_wl_cutoff);
+  } else if (wang_landau || vanilla_wang_landau) {
+    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff,
+                              vanilla_wang_landau);
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmmc) {
@@ -812,7 +800,7 @@ int main(int argc, const char *argv[]) {
   if (optimized_ensemble) {
     printf("\nOptimizing the ensemble!\n");
     // We need to know the minimum important energy to get optimized_ensemble right.
-    if(!sw.manual_min_e) sw.set_min_important_energy();
+    if(!vanilla_wang_landau) sw.set_min_important_energy(); // because vanilla fixes min_e
     delete[] sw.compute_walker_density_using_transitions(); // to print the sample rate
     sw.reset_histograms();
     sw.iteration = 0;
@@ -926,9 +914,17 @@ int main(int argc, const char *argv[]) {
             "%s# histogram method: canonical (fixed temperature)\n"
             "# kT: %g\n",
             headerinfo, fix_kT);
-  } else if(wang_landau || vanilla_wang_landau){
+  } else if(wang_landau){
     sprintf(headerinfo,
             "%s# histogram method: Wang-Landau\n"
+            "# wl_factor: %g\n"
+            "# wl_fmod: %g\n"
+            "# wl_threshold: %g\n"
+            "# wl_cutoff: %g\n",
+            headerinfo, wl_factor, wl_fmod, wl_threshold, wl_cutoff);
+  } else if(vanilla_wang_landau){
+    sprintf(headerinfo,
+            "%s# histogram method: Vanilla Wang-Landau\n"
             "# wl_factor: %g\n"
             "# wl_fmod: %g\n"
             "# wl_threshold: %g\n"

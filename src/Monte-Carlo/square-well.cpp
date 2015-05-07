@@ -933,14 +933,15 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 
 // initialize the weight array using the Wang-Landau method.
 void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
-                                           double wl_threshold, double wl_cutoff) {
+                                           double wl_threshold, double wl_cutoff,
+                                           bool fixed_energy_range) {
   int weight_updates = 0;
   bool done = false;
-  if(!manual_min_e) min_important_energy = default_min_e();
+  if(fixed_energy_range) min_important_energy = default_min_e();
   while (!done) {
 
-    if(manual_min_e){
-      // If we have a manually set minimum energy, don't allow going lower
+    if(fixed_energy_range){
+      // If we have a fixed energy range, don't allow going below it
       initialize_canonical(-1e-2,min_important_energy);
     } else {
       // Otherwise, just use the minimum energy we've seen as the minimum important energy
