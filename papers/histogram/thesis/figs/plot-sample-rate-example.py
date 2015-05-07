@@ -56,5 +56,5 @@ for method in methods:
 plt.xlabel('$E/\epsilon$')
 plt.ylabel('$s_p(E)$')
 
-ax.legend(loc='upper right',bbox_to_anchor=(1.6,0.95), borderaxespad=0.)
+ax.legend(loc='upper right',bbox_to_anchor=(1.65,0.95))
 plt.savefig("figs/sample-rate-example.pdf")

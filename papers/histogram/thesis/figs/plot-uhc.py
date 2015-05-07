@@ -14,8 +14,6 @@ import readandcompute
 thesis_dir = os.getcwd()
 os.chdir('../')
 
-fig_size = numpy.array([5,4])
-
 if len(sys.argv) != 6:
     print 'useage: %s ww ff N methods seed' % sys.argv[0]
     exit(1)
@@ -54,12 +52,23 @@ S = {} # entropy
 if reference in methods:
     methods.remove(reference)
 
-plt.figure('u',figsize=fig_size)
-plt.figure('hc',figsize=fig_size)
-plt.figure('s',figsize=fig_size)
-plt.figure('u_err',figsize=fig_size)
-plt.figure('hc_err',figsize=fig_size)
-plt.figure('s_err',figsize=fig_size)
+fig_u = plt.figure('u',figsize=(6,4))
+ax_u = fig_u.add_axes([0.15, 0.1, 0.67, 0.8])
+
+fig_hc = plt.figure('hc',figsize=(6,4))
+ax_hc = fig_hc.add_axes([0.1, 0.1, 0.67, 0.8])
+
+fig_s = plt.figure('s',figsize=(5.5,4.5))
+ax_s = fig_s.add_axes([0.15, 0.1, 0.8, 0.8])
+
+fig_u_err = plt.figure('u_err',figsize=(6.25,4))
+ax_u_err = fig_u_err.add_axes([0.2, 0.1, 0.75, 0.8])
+
+fig_hc_err = plt.figure('hc_err',figsize=(6,5))
+ax_hc_err = fig_hc_err.add_axes([0.15, 0.1, 0.75, 0.7])
+
+fig_s_err = plt.figure('s_err',figsize=(6,5))
+ax_s_err = fig_s_err.add_axes([0.15, 0.1, 0.8, 0.7])
 
 for method in [reference]+methods:
 
@@ -97,51 +106,45 @@ os.chdir(thesis_dir)
 plt.figure('u')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
-plt.legend(loc='best')
+plt.legend(loc='lower right',bbox_to_anchor=(1.2,0))
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
-plt.tight_layout(pad=0.2)
 plt.savefig("figs/internal-energy.pdf")
 
 plt.figure('hc')
 plt.ylim(0)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
-plt.legend(loc='best')
+plt.legend(loc='top right',bbox_to_anchor=(1.2,1))
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
-plt.tight_layout(pad=0.2)
 plt.savefig("figs/heat-capacity.pdf")
 
 plt.figure('s')
 plt.xlabel(r'$kT/\epsilon$')
-plt.ylabel(r'$S_{\textit{config}}/Nk$')
+plt.ylabel(r'$S_{\textrm{config}}/Nk$')
 plt.legend(loc='best')
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
-plt.tight_layout(pad=0.2)
 plt.savefig("figs/config-entropy.pdf")
 
 plt.figure('u_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
-plt.legend(loc='best')
-plt.ylim(-.04,.04)
+plt.legend(loc='upper right',bbox_to_anchor=(1,1.15))
+plt.ylim(-.03,.03)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
-plt.tight_layout(pad=0.2)
 plt.savefig("figs/internal-energy-err.pdf")
 
 plt.figure('hc_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta C_V/Nk$')
-plt.legend(loc='best')
-plt.ylim(-1.2,1.2)
+plt.legend(loc='lower right')
+plt.ylim(-1.4,1.2)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
-plt.tight_layout(pad=0.2)
 plt.savefig("figs/heat-capacity-err.pdf")
 
 plt.figure('s_err')
 plt.xlabel('$kT/\epsilon$')
-plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
-plt.legend(loc='best')
-plt.ylim(-.1,.1) # zoom in!
+plt.ylabel(r'$\Delta S_{\textrm{config}}/Nk$')
+plt.legend(loc='top right',bbox_to_anchor=(1,1.05))
+plt.ylim(-.1,.1)
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
-plt.tight_layout(pad=0.2)
 plt.savefig("figs/config-entropy-err.pdf")
