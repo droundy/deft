@@ -637,8 +637,8 @@ int main(int argc, const char *argv[]) {
 
   // Radial distribution function (RDF) histogram
   long *g_energy_histogram = new long[sw.energy_levels]();
-  const int g_bins = round(min(min(min(sw.len[y],sw.len[z]),sw.len[x]),max_rdf_radius)
-                           / de_g / 2);
+  const int g_bins = round(min(min(min(sw.len[y],sw.len[z]),sw.len[x])/2,max_rdf_radius)
+                           / de_g);
   long **g_histogram = new long*[sw.energy_levels];
   for(int i = 0; i < sw.energy_levels; i++)
     g_histogram[i] = new long[g_bins]();
