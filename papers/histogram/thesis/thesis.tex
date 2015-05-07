@@ -414,11 +414,11 @@ $\sim10^{16}$ floating-point operations per second.
 \begin{figure}
   \centering
   \includegraphics[width=0.6\textwidth]{figs/dos-sample.pdf}
-  \caption[Sample density of states]{Sample density of states for
-    square-well fluid with a well width $\lambda=1.3$, filling
-    fraction $\eta=0.3$, and $N=20$ spheres, as computed by several
-    histogram methods. The density of states has been normalized to
-    have a maximum value of $1$.}
+  \caption[Density of states]{Sample density of states for square-well
+    fluid with a well width $\lambda=1.3$, filling fraction
+    $\eta=0.3$, and $N=20$ spheres, as computed by several histogram
+    methods. The density of states has been normalized to have a
+    maximum value of $1$.}
   \label{fig:dos_sample}
 \end{figure}
 
@@ -619,8 +619,23 @@ will allow us to determine, for various square-well fluids,
 
 Having covered the basics of the square-well fluid as well as
 Metropolis and biased Monte Carlo simulations, we can now discuss
-several histogram methods for constructing energy weights.\fixme{more
-  overview of the methods section?}
+several histogram methods for constructing energy weights. In Section
+\ref{sec:flat_histogram}, we will introduce the flat histogram method,
+which is not directly applicable to the study of most systems, but
+which forms the basis of many other methods. We will then introduce,
+in Section \ref{sec:simple_flat}, the ``simple flat'' method, which we
+designed to be the simplest viable histogram method, and against which
+we can compare more complicated methods. Next, in Sections
+\ref{sec:wang_landau}--\ref{sec:optimized_ensemble} we introduce three
+published methods: Wang-Landau, transition matrix Monte Carlo, and the
+optimized ensemble. The last of these methods we will not actually
+implement and analyze because, unlike most histogram methods, it was
+designed to optimize weights rather than construct them. We will,
+however, borrow ideas from the optimized ensemble to design a
+histogram method of our own, a hybrid of the optimized ensemble and
+transition matrix Monte Carlo, in Section \ref{sec:oetmmc}. Finally,
+we will cover some general implementation details and loose ends in
+Section \ref{sec:loose_ends}
 
 \subsection{The flat histogram (multi-canonical) method}
 \label{sec:flat_histogram}
@@ -722,7 +737,7 @@ simulation and updating process until simulations satisfy some end
 condition (in fact, most histogram methods will require end
 conditions, which is discussed in Section \ref{sec:end_conditions}).
 
-\begin{algorithm}[!b]
+\begin{algorithm}[tb]
   \caption{The simple flat method}
   \label{alg:simple_flat}
   \begin{alg}
@@ -797,9 +812,6 @@ this paper, we will always use $kT_{\t{min}}=0.2\epsilon$.
 
 \subsection{The Wang-Landau (WL) method}
 \label{sec:wang_landau}
-
-\fixme{find more sources to cite for some of the claims made in this
-  section}
 
 The Wang-Landau method is the first published histogram method we
 discuss\cite{wang_landau, wang_landau_mod, wang_landau_analysis}. This
@@ -1055,7 +1067,7 @@ which implies
   T_{ij}=\f{\tilde T_{ij}}{\sum_i\tilde T_{ij}}.
   \label{eq:transition_normalization}
 \end{align}
-To compute $T$ from $\tilde T$, one must therefore normalize each row
+Computing $T$ from $\tilde T$ therefore requires normalizing each row
 of $\tilde T$ independently.
 
 If a system has $L$ energy levels, the transition histogram $\tilde
@@ -1084,7 +1096,7 @@ Expressed in this form, the memory footprint of the transition
 histogram grows linearly with system size $N$ and the maximal energy
 difference $M$.
 
-\begin{algorithm}[!b]
+\begin{algorithm}[tb]
   \caption{Transition matrix Monte Carlo initialization}
   \label{alg:tmmc}
   \begin{alg}
@@ -1132,18 +1144,20 @@ difference $M$.
 
 Figure \ref{fig:transitions_sample} provides an example of a
 transition matrix $T_d\p{E,\Delta E}$ for a particular square-well
-fluid. The yellow band at $\Delta E=0$ indicates that most moves
-transition from an energy to itself. Low energies are more likely to
-transition up in energy, with $\Delta E>0$, than down in energy, with
-$\Delta E<0$. The high energies which are more likely to transition
-down in energy than up are those above the state of maximum entropy.
+fluid. The band at $\Delta E=0$ indicates that most moves transition
+from an energy to itself. Low energies are more likely to transition
+up in energy, with $\Delta E>0$, than down in energy, with $\Delta
+E<0$. The high energies which are more likely to transition down in
+energy than up are those above the state of maximum entropy.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.6\textwidth]{figs/transitions-sample.pdf}
-  \caption[Sample transition matrix]{Sample transition matrix
-    $T_d\p{E,\Delta E}$ for square-well fluid with a well width
-    $\lambda=1.3$, filling fraction $\eta=0.3$, and $N=20$ spheres.}
+  \caption[Transition matrix]{Sample transition matrix $T_d\p{E,\Delta
+      E}$ for square-well fluid with a well width $\lambda=1.3$,
+    filling fraction $\eta=0.3$, and $N=20$ spheres.  The band at
+    $\Delta E=0$ indicates that any given state is most likely to
+    transition into another state with the same energy.}
   \label{fig:transitions_sample}
 \end{figure}
 
@@ -1510,37 +1524,36 @@ system into the Wang-Landau initialization routines\fixme{talk about
   how bad this is}. We always set
 $w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ after initialization of all
 histogram methods with $kT_{\t{min}}=0.2\epsilon$. We chose this
-temperature because it seems to be right below the temperature at
-which the square-well fluid condenses from a gas into a
-liquid (see Section \ref{sec:errors}). \fixme{what about pressure?}
+temperature because it is right below the temperature at which the
+square-well fluid condenses from a gas into a liquid (see Section
+\ref{sec:errors}). \fixme{what about pressure?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and Discussion}
 \label{sec:results}
 
+Having developed and implemented all of the histogram methods
+discussed in Section \ref{sec:methods}, we will now look at the
+results from simulating with these methods.
+
 \subsection{Histograms and arrays}
 \label{sec:histograms}
+
+
 
 \fixme{Give examples of energy histograms for one system, density of
   states for several $N$, and perhaps a weight array.}
 
 \begin{figure}[H]
   \centering
-  \caption[Energy histograms]{Energy histograms}
-  \label{fig:histograms}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \caption[Density of states]{Density of states}
-  \label{fig:density_of_states}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \caption[Energy weights]{Energy weights}
-  \label{fig:weights}
+  \includegraphics[width=\textwidth]{figs/array-samples.pdf}
+  \caption[Sample arrays]{Sample arrays computed by various histogram
+    methods for a square-well fluid with a well width $\lambda=1.3$,
+    filling fraction $\eta=0.3$, and $N=20$ spheres after simulating
+    for $10^5N^2$ iterations: (top left) energy histogram, (top right)
+    weight array, (bottom left) density of states.}
+  \label{fig:arrays}
 \end{figure}
 
 \subsection{Sampling rates}
