@@ -10,8 +10,8 @@ matplotlib.rc('text', usetex=True)
 import styles
 import readandcompute
 
-if len(sys.argv) != 6:
-    print 'useage: %s ww ff N methods seed' % sys.argv[0]
+if len(sys.argv) != 7:
+    print 'useage: %s ww ff N methods golden seed' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -24,14 +24,17 @@ N = float(sys.argv[3])
 #arg N = range(5,31)
 
 methods = eval(sys.argv[4])
-#arg methods = [["tmmc-golden","wang_landau","simple_flat","tmmc","oetmmc"]]
+#arg methods = [["wang_landau","simple_flat","tmmc","oetmmc"]]
 
-seed = int(sys.argv[5])
+golden = sys.argv[5]
+#arg golden = ["tmmc-golden"]
+
+seed = int(sys.argv[6])
 #arg seed = [0]
 
 # input: ["data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
-reference = "tmmc-golden"
+# input: ["data/periodic-ww%04.2f-ff%04.2f-N%i-tmmc-golden-%s.dat" % (ww, ff, N, data) for data in ["E","lnw"]]
 
 max_T = 1.4
 T_bins = 1e3
@@ -44,11 +47,7 @@ U = {} # internal energy
 CV = {} # heat capacity
 S = {} # entropy
 
-# we want to keep our methods distinct from our reference
-if reference in methods:
-    methods.remove(reference)
-
-for method in set(methods+[reference]):
+for method in set(methods+[golden]):
 
     u_cv_s = readandcompute.u_cv_s(ww, ff, N, method)
     if u_cv_s != None:
@@ -68,15 +67,15 @@ for method in set(methods+[reference]):
 for method in methods:
 
     plt.figure('u_err')
-    plt.plot(T_range,(U[method]-U[reference])/N,
+    plt.plot(T_range,(U[method]-U[golden])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('hc_err')
-    plt.plot(T_range,(CV[method]-CV[reference])/N,
+    plt.plot(T_range,(CV[method]-CV[golden])/N,
              styles.plot(method),label=styles.title(method))
 
     plt.figure('s_err')
-    plt.plot(T_range,(S[method]-S[reference])/N,
+    plt.plot(T_range,(S[method]-S[golden])/N,
              styles.plot(method),label=styles.title(method))
 
 plt.figure('u')
