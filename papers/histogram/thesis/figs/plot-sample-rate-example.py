@@ -28,7 +28,7 @@ seed = int(sys.argv[4])
 #arg seed = [0]
 
 methods = eval(sys.argv[5])
-#arg methods = [["nw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc","cfw"]]
+#arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
 # input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" % (seed, ww, ff, N, method) for method in methods]
 
