@@ -60,7 +60,8 @@ for i in range(len(energy)):
                 maxde = de[i,j]
 c = plt.pcolor((de+0.5), e, transitions, vmin=0, vmax=1)
 plt.colorbar(c)
-plt.xlim(minde,maxde)
+lim = min(abs(minde),abs(maxde))
+plt.xlim(-lim,lim)
 plt.ylim(e.min(), e.max())
 
 plt.xlabel('$\Delta E/\epsilon$')
