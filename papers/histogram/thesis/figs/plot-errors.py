@@ -31,7 +31,7 @@ seeds = eval(sys.argv[4])
 #arg seeds = [range(30)]
 
 methods = eval(sys.argv[5])
-#arg methods = [["simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
+#arg methods = [["simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
 
 golden = sys.argv[6]
 #arg golden = ['tmmc-golden']
@@ -84,7 +84,7 @@ for N in Ns:
             plt.figure(figs[i])
             plt.loglog(reference_error[i], method_err[i], styles.dots(method),
                        markerfacecolor='none', markeredgecolor=styles.color(method),
-                       label=styles.title(method))
+                       label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
 os.chdir(thesis_dir)
 

@@ -29,7 +29,7 @@ N = float(sys.argv[3])
 #arg N = [25]
 
 methods = eval(sys.argv[4])
-#arg methods = [["cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
+#arg methods = [["cfw","simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
 
 seeds = eval(sys.argv[5])
 #arg seeds = [range(1)]
@@ -42,7 +42,6 @@ max_T = 1.4
 T_bins = 1e3
 dT = max_T/T_bins
 T_range = numpy.arange(dT,max_T,dT)
-min_T = 0 # we will adjust this
 
 # make dictionaries which we can index by method name
 U = {} # internal energy
@@ -88,27 +87,30 @@ for method in [golden]+methods:
     S[method] /= len(seeds)
 
     plt.figure('u')
-    plt.plot(T_range,U[method]/N,styles.plot(method),label=styles.title(method))
+    plt.plot(T_range,U[method]/N, styles.plot(method),
+             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
     plt.figure('hc')
-    plt.plot(T_range,CV[method]/N,styles.plot(method),label=styles.title(method))
+    plt.plot(T_range,CV[method]/N, styles.plot(method),
+             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
     plt.figure('s')
-    plt.plot(T_range,S[method]/N,styles.plot(method),label=styles.title(method))
+    plt.plot(T_range,S[method]/N, styles.plot(method),
+             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
 for method in methods:
 
     plt.figure('u_err')
-    plt.plot(T_range,(U[method]-U[golden])/N,
-             styles.plot(method),label=styles.title(method))
+    plt.plot(T_range,(U[method]-U[golden])/N, styles.plot(method),
+             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
     plt.figure('hc_err')
-    plt.plot(T_range,(CV[method]-CV[golden])/N,
-             styles.plot(method),label=styles.title(method))
+    plt.plot(T_range,(CV[method]-CV[golden])/N, styles.plot(method),
+             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
     plt.figure('s_err')
-    plt.plot(T_range,(S[method]-S[golden])/N,
-             styles.plot(method),label=styles.title(method))
+    plt.plot(T_range,(S[method]-S[golden])/N, styles.plot(method),
+             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
 os.chdir(thesis_dir)
 
@@ -116,7 +118,6 @@ plt.figure('u')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
 plt.legend(loc='lower right',bbox_to_anchor=(1.2,0))
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/internal-energy.pdf")
 
 plt.figure('hc')
@@ -124,14 +125,12 @@ plt.ylim(0)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='upper right',bbox_to_anchor=(1.2,1))
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/heat-capacity.pdf")
 
 plt.figure('s')
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$S_{\textrm{config}}/Nk$')
 plt.legend(loc='best')
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/config-entropy.pdf")
 
 plt.figure('u_err')
@@ -139,7 +138,6 @@ plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
 plt.legend(loc='upper right',bbox_to_anchor=(1,1.15))
 plt.ylim(-.03,.03)
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/internal-energy-err.pdf")
 
 plt.figure('hc_err')
@@ -147,7 +145,6 @@ plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta C_V/Nk$')
 plt.legend(loc='lower right')
 plt.ylim(-1.4,1.2)
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/heat-capacity-err.pdf")
 
 plt.figure('s_err')
@@ -155,5 +152,4 @@ plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textrm{config}}/Nk$')
 plt.legend(loc='upper right',bbox_to_anchor=(1,1.05))
 plt.ylim(-.1,.1)
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.savefig("figs/config-entropy-err.pdf")
