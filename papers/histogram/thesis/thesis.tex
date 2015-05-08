@@ -1030,9 +1030,9 @@ energies,
 \end{align}
 Finding the density of states of a system can thus be reduced to
 finding the eigenvector of the transition matrix which has a
-corresponding unit eigenvalue\fixme{why is this eigenvector
-  unique?}. Once one has determined the density of states of a system,
-one can initialize weights via the flat histogram method,
+corresponding unit eigenvalue. \fixme{why is this eigenvector unique?}
+Once one has determined the density of states of a system, one can
+initialize weights via the flat histogram method,
 i.e. (\ref{eq:flat_weights}).
 
 Computationally determining the transition matrix of a system is
@@ -1164,11 +1164,11 @@ energy than up are those above the state of maximum entropy.
 
 While one could imagine many initialization routines to determine the
 transition matrix $T$, we use Algorithm \ref{alg:tmmc}, which is a
-modified version of a routine provided in \cite{tmmc_prl}\fixme{is
-  this citation correct?}. The primary motivation behind this
-algorithm is such: as lower energies are always more difficult to
-sample than higher energies, transitions to lower energies should
-always be accepted, while transitions to higher energies should pass a
+modified version of a routine provided in \cite{tmmc_prl}. \fixme{is
+  this citation correct?} The primary motivation behind this algorithm
+is such: as lower energies are always more difficult to sample than
+higher energies, transitions to lower energies should always be
+accepted, while transitions to higher energies should pass a
 probabilistic acceptance test. To understand the probability in step
 \ref{alg:tmmc_prob} of Algorithm \ref{alg:tmmc} of accepting a move
 $s_i\to s_f$ for which $E_f>E_i$, first consider the case of $c=0$ and
@@ -1405,7 +1405,7 @@ initializing after some fixed number of Monte Carlo iterations, and
 appropriately finish up any other calculations in the algorithm before
 terminating it. We thus initialize systems of $N$ spheres for
 $10^5N^2$ iterations; the choice of $10^5N^2$ we will address in
-Section \ref{sec:results}\fixme{address in results section}. In
+Section \ref{sec:results}. \fixme{address in results section} In
 general, however, one might want an end condition which is independent
 of system size. We came up with a four such end conditions as
 examples, though we do not use these end conditions in this paper.
@@ -1521,13 +1521,13 @@ as the design of this method assumes knowledge of the energy range of
 interest a priori. In order to fairly compare Wang-Landau to other
 methods, we therefore identified $E_-$ for each simulated system using
 other methods, and hard-coded the minimum important energies for each
-system into the Wang-Landau initialization routines\fixme{talk about
-  how bad this is}. We always set
+system into the Wang-Landau initialization routines. \fixme{talk about
+  how bad this is} We always set
 $w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ after initialization of all
 histogram methods with $kT_{\t{min}}=0.2\epsilon$. We chose this
 temperature because it is right below the temperature at which the
 square-well fluid condenses from a gas into a liquid (see Section
-\ref{sec:errors}). \fixme{what about pressure?}
+\ref{sec:properties}). \fixme{what about pressure?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1536,11 +1536,20 @@ square-well fluid condenses from a gas into a liquid (see Section
 
 Having developed and implemented all of the histogram methods
 discussed in Section \ref{sec:methods}, we will now look at the
-results from simulating with these methods.
+results from simulating with these methods. Due to time constraints,
+we simulated only one system: the well width $\lambda=1.3$ and filling
+fraction $\eta=0.3$ square-well fluid, for all sizes (i.e. number of
+spheres) $N\in\sp{5,25}$. We initialized histogram methods for
+$10^5N^2$ iterations ($10^5N^3$ moves), and simulated for just as long
+afterwards. To check for consistency in simulation results, we
+simulated each combination of histogram method and system size for 30
+different random number generator seeds.
 
 \subsection{Histograms and arrays}
 \label{sec:histograms}
 
+Three arrays contain the raw data for all analysis performed in this
+paper:
 
 
 \fixme{Give examples of energy histograms for one system, density of
@@ -1558,6 +1567,10 @@ results from simulating with these methods.
   \label{fig:arrays}
 \end{figure}
 
+
+\subsection{Sample rates}
+\label{sec:sample_rates}
+
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{figs/sample-rate-example.pdf}
@@ -1565,15 +1578,20 @@ results from simulating with these methods.
   {Example pessimistic energy sampling rates computed by various
     histogram methods for a square-well fluid with a well width
     $\lambda=1.3$, filling fraction $\eta=0.3$, and $N=25$ spheres
-    after simulating for $10^5N^2$ iterations.}
+    after simulating for $10^5N^2$ iterations. Sample rates for each
+    method are averaged over 30 simulations with different random
+    number seeds.}
   \label{fig:sample_rates}
 \end{figure}
 
 \subsection{Thermodynamic properties and errors}
-\label{sec:errors}
+\label{sec:properties}
 
 \fixme{Discuss errors in computed thermodynamic properties. Introduce
   converged flat weights.}
+
+\subsubsection{Example curves}
+\label{sec:property_examples}
 
 \begin{figure}[H]
   \centering
@@ -1623,6 +1641,35 @@ results from simulating with these methods.
   {Errors in specific configurational entropy}
   \label{fig:config_entropy_err}
 \end{figure}
+
+\subsubsection{Error scaling and comparisons}
+\label{sec:errors}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.7\textwidth]{figs/u-scaling.pdf}
+  \caption[Internal energy error scaling]
+  {Specific internal energy error scaling}
+  \label{fig:u_scaling}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{figs/cv-scaling.pdf}
+  \caption[Heat capacity error scaling]
+  {Specific heat capacity error scaling}
+  \label{fig:cv_scaling}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{figs/s-scaling.pdf}
+  \caption[Configurational entropy error scaling]
+  {Specific configurational entropy error scaling}
+  \label{fig:s_scaling}
+\end{figure}
+
+
 
 \begin{figure}[H]
   \centering
