@@ -14,8 +14,8 @@ os.chdir('../')
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) != 6:
-    print 'useage: %s ww ff Ns seeds methods' % sys.argv[0]
+if len(sys.argv) != 8:
+    print 'useage: %s ww ff Ns seeds methods golden reference' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -31,10 +31,13 @@ seeds = eval(sys.argv[4])
 #arg seeds = [range(30)]
 
 methods = eval(sys.argv[5])
-#arg methods = [["cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
+#arg methods = [["simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
-golden = 'tmmc-golden'
-reference = 'cfw'
+golden = sys.argv[6]
+#arg golden = ['tmmc-golden']
+
+reference = sys.argv[8]
+#arg reference = ['cfw']
 
 fig_u = plt.figure('u',figsize=(6.3,4))
 ax_u = fig_u.add_axes([0.12, 0.12, 0.7, 0.85])
