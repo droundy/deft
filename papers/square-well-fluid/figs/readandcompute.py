@@ -3,7 +3,7 @@ from __future__ import division
 import numpy
 
 def T_u_cv_s_minT(fbase):
-    max_T = 50.0
+    max_T = 20.0
     T_bins = 1e3
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
