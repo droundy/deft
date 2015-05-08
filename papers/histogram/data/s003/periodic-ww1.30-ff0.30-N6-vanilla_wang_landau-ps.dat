@@ -1,4 +1,4 @@
-# version: 0.0.0-227-g1ae6e13-dirty
+# version: 0.0.0-296-gced568d-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 6
@@ -14,11 +14,11 @@
 # fractional_sample_error after initialization: 0.00656595
 # min_important_energy after initialization: 15
 
-# histogram method: Wang-Landau
-# wl_factor: 0.125
+# histogram method: Vanilla Wang-Landau
+# wl_factor: 1
 # wl_fmod: 2
-# wl_threshold: 3
-# wl_cutoff: 1e-06
+# wl_threshold: 0.0526316
+# wl_cutoff: 1e-08
 # init_iter_limit: 3600000
 # iterations: 3600000
 # working moves: 13055072
