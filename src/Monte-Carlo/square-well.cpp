@@ -494,7 +494,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
     // now find the eigenvector of our transition matrix via the power iteration method
     bool done = false;
     int iters = 0;
-    while(!done && iters < max(1000, init_iters/biggest_energy_transition)) {
+    while(!done && iters < max(1000, init_iters/(2*biggest_energy_transition))) {
       iters++;
       // set D_n = T*D_{n-1}
       for (int i = 0; i < energies_observed; i++) {
@@ -543,7 +543,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
           const double precision = fabs(TD_over_D[i] - 1);
           if (precision > fractional_dos_precision){
             done = false;
-            if((iters % 100) == 0 && printing_allowed()){
+            if((iters % 10000) == 0 && printing_allowed()){
               printf("After %i iterations, failed at energy %i with value %.16g and "
                      "newvalue %.16g and ratio %g and norm %g.\n",
                      iters, i, ln_dos[i], ln_dos[i] + log(TD_over_D[i]), TD_over_D[i], norm);
@@ -823,7 +823,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
            min_T. */
         int min_maybe_important_energy = min_energy_state;
         for (int i=min_energy_state; i>max_entropy_state;i--) {
-          if (energy_histogram[i] && energy_histogram[i-1] &&
+          if (pessimistic_samples[i] && pessimistic_samples[i-1] &&
               energy_histogram[i]/double(energy_histogram[i-1]) > exp(-1.0/min_T)) {
             min_maybe_important_energy = i-1;
             break;
@@ -836,12 +836,12 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
             if (i < highest_problem_energy) highest_problem_energy = i;
           }
         }
-        printf("       energies <%d - %d> have samples <%ld(%ld) - %ld(%ld)> (current energy %d)\n",
-               lowest_problem_energy, highest_problem_energy,
+        printf("       energies <%g to %g> have samples <%ld(%ld) to %ld(%ld)> (current energy %g)\n",
+               -lowest_problem_energy/double(N), -highest_problem_energy/double(N),
                optimistic_samples[lowest_problem_energy],
                pessimistic_samples[lowest_problem_energy],
                optimistic_samples[highest_problem_energy],
-               pessimistic_samples[highest_problem_energy], energy);
+               pessimistic_samples[highest_problem_energy], -energy/double(N));
         fflush(stdout);
       }
     }

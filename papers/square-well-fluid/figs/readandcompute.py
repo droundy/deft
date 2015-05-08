@@ -3,7 +3,7 @@ from __future__ import division
 import numpy
 
 def T_u_cv_s_minT(fbase):
-    max_T = 1.4
+    max_T = 20.0
     T_bins = 1e3
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
@@ -52,7 +52,7 @@ def minT(fbase):
                 break
     return min_T
 
-def g_r(fbase, ff, T):
+def g_r(fbase, ff, T, N):
     E = numpy.loadtxt(fbase+"-gE.dat", ndmin=2)
     lnw = numpy.loadtxt(fbase+"-glnw.dat", ndmin=2)
     r = numpy.loadtxt(fbase+"-gr.dat", ndmin=2)
@@ -66,6 +66,7 @@ def g_r(fbase, ff, T):
 
     ln_dos_boltz = ln_dos - E/T
     dos_boltz = numpy.exp(ln_dos_boltz - ln_dos_boltz.max())
+    dos_boltz[hist == 0] = 0
 
     # now let's normalize the density of states
     for i in xrange(n_r):
@@ -73,11 +74,18 @@ def g_r(fbase, ff, T):
 
     dr = r[0,1] - r[0,0]
     dV = (4/3)*numpy.pi*((r+dr/2)**3 - (r-dr/2)**3)
-    g_of_E = ghist/dV/hist
+    n = ff/(4/3*numpy.pi)
+    g_of_E = ghist/dV/hist/n/N
 
     g = numpy.zeros(n_r)
 
+    counts = 0
     for i in xrange(n_E):
-        g += dos_boltz[i,:]*g_of_E[i,:]
+        if hist[i,0]:
+            g += dos_boltz[i,:]*g_of_E[i,:]
+            counts += dos_boltz[i,0]*hist[i,0]
+            if dos_boltz[i,0] > 0.0001:
+                print 'hist %d at energy %d with weight %g' % (hist[i,0], i, dos_boltz[i,0])
 
+    print 'with N %d we have counts %g' % (N, counts)
     return g, r[0,:]
