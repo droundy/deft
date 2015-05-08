@@ -25,12 +25,19 @@ mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring tha
 datadir = 'papers/square-well-fluid/data/mc'
 fname = 'ww%.2f-ff%.2f-N%d' % (ww, ff, N)
 
-cmd = "srun --mem=%d -J %s time nice -19 ./square-well-monte-carlo" % (mem_estimate, fname)
-#cmd = "time nice -19 ./square-well-monte-carlo"
+os.system('mkdir -p ' + datadir)
+
+if os.system('which srun'):
+    # srun doesn't exist so just run on this machine
+    cmd = "time nice -19 ./square-well-monte-carlo"
+else:
+    cmd = "srun --mem=%d -J %s time nice -19 ./square-well-monte-carlo" % (mem_estimate, fname)
 
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
 cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations)
+
+cmd += ' --de_g 0.01' # nice high-resolution radial distribution function data
 
 cmd += ' --data_dir %s --filename %s' % (datadir, fname)
 

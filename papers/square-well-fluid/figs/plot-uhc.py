@@ -36,7 +36,7 @@ plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 
 for N in Ns:
     T, U, CV, S, minT = readandcompute.T_u_cv_s_minT("data/mc/ww%.2f-ff%.2f-N%d" % (ww, ff, N))
-    plt.plot(T,U/N,'-', label='$N=%d' % N)
+    plt.semilogx(T,U/N,'-', label='$N=%d$' % N)
 
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
