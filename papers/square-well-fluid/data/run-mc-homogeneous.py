@@ -19,7 +19,7 @@ N = int(sys.argv[3])
 
 
 min_T = 0.1
-iterations = 1e7
+iterations = 1e6
 mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/square-well-fluid/data/mc'
@@ -30,7 +30,7 @@ cmd = "srun --mem=%d -J %s time nice -19 ./square-well-monte-carlo" % (mem_estim
 
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
-cmd += " --iterations %d --init_iters %d --golden" % (iterations, int(iterations/100))
+cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations)
 
 cmd += ' --data_dir %s --filename %s' % (datadir, fname)
 

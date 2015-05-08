@@ -3,7 +3,7 @@ from __future__ import division
 import numpy
 
 def T_u_cv_s_minT(fbase):
-    max_T = 100.0
+    max_T = 50.0
     T_bins = 1e3
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
@@ -79,8 +79,13 @@ def g_r(fbase, ff, T, N):
 
     g = numpy.zeros(n_r)
 
+    counts = 0
     for i in xrange(n_E):
         if hist[i,0]:
             g += dos_boltz[i,:]*g_of_E[i,:]
+            counts += dos_boltz[i,0]*hist[i,0]
+            if dos_boltz[i,0] > 0.0001:
+                print 'hist %d at energy %d with weight %g' % (hist[i,0], i, dos_boltz[i,0])
 
+    print 'with N %d we have counts %g' % (N, counts)
     return g, r[0,:]
