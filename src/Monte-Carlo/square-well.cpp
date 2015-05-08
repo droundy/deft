@@ -944,8 +944,8 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
       // If we have a fixed energy range, don't allow going below it
       initialize_canonical(-1e-2,min_important_energy);
     } else {
-      // Otherwise, just use the minimum energy we've seen as the minimum important energy
-      min_important_energy = min_energy_state;
+      // Otherwise, find and set the minimum important energy
+      set_min_important_energy();
     }
 
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
