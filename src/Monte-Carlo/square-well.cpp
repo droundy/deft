@@ -823,7 +823,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
            min_T. */
         int min_maybe_important_energy = min_energy_state;
         for (int i=min_energy_state; i>max_entropy_state;i--) {
-          if (energy_histogram[i] && energy_histogram[i-1] &&
+          if (pessimistic_samples[i] && pessimistic_samples[i-1] &&
               energy_histogram[i]/double(energy_histogram[i-1]) > exp(-1.0/min_T)) {
             min_maybe_important_energy = i-1;
             break;
