@@ -66,6 +66,7 @@ def g_r(fbase, ff, T, N):
 
     ln_dos_boltz = ln_dos - E/T
     dos_boltz = numpy.exp(ln_dos_boltz - ln_dos_boltz.max())
+    dos_boltz[hist == 0] = 0
 
     # now let's normalize the density of states
     for i in xrange(n_r):
@@ -74,11 +75,12 @@ def g_r(fbase, ff, T, N):
     dr = r[0,1] - r[0,0]
     dV = (4/3)*numpy.pi*((r+dr/2)**3 - (r-dr/2)**3)
     n = ff/(4/3*numpy.pi)
-    g_of_E = ghist/dV/hist/n
+    g_of_E = ghist/dV/hist/n/N
 
     g = numpy.zeros(n_r)
 
     for i in xrange(n_E):
-        g += dos_boltz[i,:]*g_of_E[i,:]
+        if hist[i,0]:
+            g += dos_boltz[i,:]*g_of_E[i,:]
 
     return g, r[0,:]
