@@ -36,7 +36,7 @@ methods = eval(sys.argv[5])
 golden = sys.argv[6]
 #arg golden = ['tmmc-golden']
 
-reference = sys.argv[8]
+reference = sys.argv[7]
 #arg reference = ['cfw']
 
 fig_u = plt.figure('u',figsize=(6.3,4))

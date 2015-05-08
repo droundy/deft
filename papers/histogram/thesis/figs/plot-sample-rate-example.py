@@ -30,8 +30,6 @@ seeds = eval(sys.argv[4])
 methods = eval(sys.argv[5])
 #arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
-# input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" % (seed, ww, ff, N, method) for method in methods for seed in seeds ]
-
 fig = plt.figure('ps',figsize=(6.6,4))
 ax = fig.add_axes([0.1, 0.1, 0.55, 0.85])
 
