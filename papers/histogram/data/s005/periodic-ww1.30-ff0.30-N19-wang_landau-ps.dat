@@ -1,4 +1,4 @@
-# version: 0.0.0-205-g2032787-dirty
+# version: 0.0.0-296-gced568d-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 19
@@ -11,67 +11,48 @@
 # neighbor_scale: 2
 # energy_levels: 108
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.00238997
-# min_important_energy after initialization: 88
+# fractional_sample_error after initialization: 0.0022418
+# min_important_energy after initialization: 95
 
 # histogram method: Wang-Landau
-# wl_factor: 0.125
+# wl_factor: 1
 # wl_fmod: 2
-# wl_threshold: 3
-# wl_cutoff: 1e-06
+# wl_threshold: 0.0526316
+# wl_cutoff: 1e-08
 # init_iter_limit: 36100000
 # iterations: 36100000
-# working moves: 315813386
+# working moves: 46282124
 # total moves: 685900000
-# acceptance rate: 0.460436
+# acceptance rate: 0.0674765
 
 # energy	samples
-46  0
-47  1889112
-48  1017198
-49  654678
-50  453860
-51  325295
-52  239990
-53  180972
-54  139199
-55  108984
-56  86503
-57  69363
-58  56257
-59  46095
-60  37981
-61  31547
-62  26475
-63  22341
-64  18964
-65  16099
-66  13773
-67  11778
-68  10261
-69  8884
-70  7731
-71  6711
-72  5823
-73  5068
-74  4435
-75  3901
-76  3411
-77  2966
-78  2549
-79  2194
-80  1828
-81  1568
-82  1278
-83  1016
-84  779
-85  602
-86  444
-87  341
-88  251
-89  186
-90  161
-91  131
-92  68
-93  15
-94  1
+58  1
+59  1
+60  1
+61  1
+62  1
+63  1
+64  1
+65  1
+66  1
+67  1
+68  1
+69  1
+70  1
+71  1
+72  1
+73  1
+74  1
+75  1
+76  1
+77  1
+78  1
+79  1
+80  1
+81  1
+82  1
+83  1
+84  1
+85  1
+86  1
+87  1
