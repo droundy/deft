@@ -29,10 +29,10 @@ N = float(sys.argv[3])
 #arg N = [25]
 
 methods = eval(sys.argv[4])
-#arg methods = [["cfw","simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
+#arg methods = [["cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
 seeds = eval(sys.argv[5])
-#arg seeds = [range(1)]
+#arg seeds = [range(10,21)]
 
 # input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for seed in seeds for data in ["E","lnw"]]
 
@@ -52,23 +52,13 @@ S = {} # entropy
 if golden in methods:
     methods.remove(golden)
 
-fig_u = plt.figure('u',figsize=(6,4))
-ax_u = fig_u.add_axes([0.15, 0.1, 0.67, 0.8])
-
-fig_hc = plt.figure('hc',figsize=(6,4))
-ax_hc = fig_hc.add_axes([0.1, 0.1, 0.67, 0.8])
-
-fig_s = plt.figure('s',figsize=(5.5,4.5))
-ax_s = fig_s.add_axes([0.15, 0.1, 0.8, 0.8])
-
-fig_u_err = plt.figure('u_err',figsize=(6.25,4))
-ax_u_err = fig_u_err.add_axes([0.2, 0.1, 0.75, 0.8])
-
-fig_hc_err = plt.figure('hc_err',figsize=(6,5))
-ax_hc_err = fig_hc_err.add_axes([0.15, 0.1, 0.75, 0.7])
-
-fig_s_err = plt.figure('s_err',figsize=(6,5))
-ax_s_err = fig_s_err.add_axes([0.15, 0.1, 0.8, 0.7])
+fig_size = (6,4.5)
+plt.figure('u',figsize=fig_size)
+plt.figure('hc',figsize=fig_size)
+plt.figure('s',figsize=fig_size)
+plt.figure('u_err',figsize=fig_size)
+plt.figure('hc_err',figsize=fig_size)
+plt.figure('s_err',figsize=fig_size)
 
 array_len = len(readandcompute.u_cv_s(ww, ff, N, methods[0], seeds[0])[0])
 
@@ -87,69 +77,76 @@ for method in [golden]+methods:
     S[method] /= len(seeds)
 
     plt.figure('u')
-    plt.plot(T_range,U[method]/N, styles.plot(method),
-             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+    plt.plot(T_range,U[method]/N, styles.plot(method), label=styles.title(method))
 
-    plt.figure('hc')
-    plt.plot(T_range,CV[method]/N, styles.plot(method),
-             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+    if method != 'wang_landau':
+        plt.figure('hc')
+        plt.plot(T_range,CV[method]/N, styles.plot(method), label=styles.title(method))
 
     plt.figure('s')
-    plt.plot(T_range,S[method]/N, styles.plot(method),
-             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+    plt.plot(T_range,S[method]/N, styles.plot(method), label=styles.title(method))
+
+methods.remove('wang_landau')
 
 for method in methods:
 
     plt.figure('u_err')
     plt.plot(T_range,(U[method]-U[golden])/N, styles.plot(method),
-             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+             label=styles.title(method))
 
     plt.figure('hc_err')
     plt.plot(T_range,(CV[method]-CV[golden])/N, styles.plot(method),
-             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+             label=styles.title(method))
 
     plt.figure('s_err')
     plt.plot(T_range,(S[method]-S[golden])/N, styles.plot(method),
-             label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+             label=styles.title(method))
 
 os.chdir(thesis_dir)
 
 plt.figure('u')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
-plt.legend(loc='lower right',bbox_to_anchor=(1.2,0))
+plt.legend(loc='lower right')
+plt.tight_layout()
 plt.savefig("figs/internal-energy.pdf")
 
 plt.figure('hc')
 plt.ylim(0)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
-plt.legend(loc='upper right',bbox_to_anchor=(1.2,1))
+plt.legend(loc='upper right')
+plt.tight_layout()
 plt.savefig("figs/heat-capacity.pdf")
 
 plt.figure('s')
+plt.ylim(-7,0)
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$S_{\textrm{config}}/Nk$')
-plt.legend(loc='best')
+plt.legend(loc='lower right')
+plt.tight_layout()
 plt.savefig("figs/config-entropy.pdf")
 
 plt.figure('u_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
-plt.legend(loc='upper right',bbox_to_anchor=(1,1.15))
+plt.legend(loc='upper right')
 plt.ylim(-.03,.03)
-plt.savefig("figs/internal-energy-err.pdf")
+plt.tight_layout()
+plt.savefig("figs/u-err.pdf")
 
 plt.figure('hc_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta C_V/Nk$')
-plt.legend(loc='lower right')
-plt.ylim(-1.4,1.2)
-plt.savefig("figs/heat-capacity-err.pdf")
+plt.legend(loc='upper right')
+plt.ylim(-0.5,0.5)
+plt.tight_layout()
+plt.savefig("figs/cv-err.pdf")
 
 plt.figure('s_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textrm{config}}/Nk$')
-plt.legend(loc='upper right',bbox_to_anchor=(1,1.05))
+plt.legend(loc='upper right')
 plt.ylim(-.1,.1)
-plt.savefig("figs/config-entropy-err.pdf")
+plt.tight_layout()
+plt.savefig("figs/s-err.pdf")

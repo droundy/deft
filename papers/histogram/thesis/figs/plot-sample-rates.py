@@ -29,7 +29,7 @@ min_e = int(sys.argv[4])
 #arg min_e = [-123]
 
 seeds = eval(sys.argv[5])
-#arg seeds = [range(30)]
+#arg seeds = [range(10,21)]
 
 methods = eval(sys.argv[6])
 #arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]

@@ -35,7 +35,7 @@ seed = int(sys.argv[5])
 #arg seed = [0]
 
 methods = eval(sys.argv[6])
-#arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
+#arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
 # input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
@@ -43,6 +43,8 @@ plt.figure('dos',figsize=fig_size)
 
 all_figs, ((ax_hist, ax_lnw),(ax_dos, ax_legend)) \
           = plt.subplots(2,2,figsize=panel_size_ratio*fig_size)
+
+cap = 60
 
 for method in methods:
 
@@ -56,15 +58,13 @@ for method in methods:
     log10_dos = numpy.log10(e_hist[:,1]) - log10w
     log10_dos -= log10_dos.max()
 
-    minlog = 0
-    if log10_dos.min() < minlog:
-        minlog = log10_dos.min()
 
-    plt.figure('dos')
-    plt.plot(energy, log10_dos, styles.dots(method),
-             markerfacecolor='none', markeredgecolor=styles.color(method),
-             label=styles.title(method))
-    ax_dos.plot(energy, log10_dos, styles.dots(method),
+    if method != 'wang_landau':
+        plt.figure('dos')
+        plt.plot(energy, log10_dos, styles.dots(method),
+                 markerfacecolor='none', markeredgecolor=styles.color(method),
+                 label=styles.title(method))
+    ax_dos.plot(energy[log10_dos > -cap], log10_dos[log10_dos > -cap], styles.dots(method),
                 markerfacecolor='none', markeredgecolor=styles.color(method),
                 label=styles.title(method))
 
@@ -72,9 +72,9 @@ for method in methods:
                      markerfacecolor='none', markeredgecolor=styles.color(method),
                      label=styles.title(method))
 
-    ax_lnw.plot(energy, log10w, styles.dots(method),
-                     markerfacecolor='none', markeredgecolor=styles.color(method),
-                     label=styles.title(method))
+    ax_lnw.plot(energy[log10w < cap], log10w[log10w < cap], styles.dots(method),
+                markerfacecolor='none', markeredgecolor=styles.color(method),
+                label=styles.title(method))
 
 def tentothe(n):
     if int(n) == n:
@@ -84,7 +84,6 @@ def tentothe(n):
 ### density of states
 plt.figure('dos')
 
-plt.ylim(minlog, 0)
 ylocs, ylabels = plt.yticks()
 newylabels = [tentothe(n) for n in ylocs]
 plt.yticks(ylocs, newylabels)
@@ -104,7 +103,6 @@ for ax in [ ax_lnw, ax_dos, ax_hist ]:
     ax.set_xlabel('$E/\epsilon$')
 ax_hist.set_ylabel('$H(E)$')
 
-ax_dos.set_ylim(minlog, 0)
 for ax in [ ax_lnw, ax_dos ]:
     ylabels = [ int(item.get_text().encode('ascii')[1:-1])
                 for item in ax.get_yticklabels() ]

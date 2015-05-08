@@ -14,8 +14,8 @@ os.chdir('../')
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) != 8:
-    print 'useage: %s ww ff Ns seeds methods golden reference' % sys.argv[0]
+if len(sys.argv) != 9:
+    print 'useage: %s ww ff Ns min_T methods golden reference seeds' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -27,11 +27,11 @@ ff = float(sys.argv[2])
 Ns = eval(sys.argv[3])
 #arg Ns = [range(5,26)]
 
-seeds = eval(sys.argv[4])
-#arg seeds = [range(30)]
+min_T = float(sys.argv[4])
+#arg min_T = [0.2]
 
 methods = eval(sys.argv[5])
-#arg methods = [["simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
+#arg methods = [["cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
 golden = sys.argv[6]
 #arg golden = ['tmmc-golden']
@@ -39,62 +39,103 @@ golden = sys.argv[6]
 reference = sys.argv[7]
 #arg reference = ['cfw']
 
-fig_u = plt.figure('u',figsize=(6.3,4))
-ax_u = fig_u.add_axes([0.12, 0.12, 0.7, 0.85])
+seeds = eval(sys.argv[8])
+#arg seeds = [range(10,21)]
 
-fig_cv = plt.figure('cv',figsize=(6.3,4))
-ax_cv = fig_cv.add_axes([0.1, 0.13, 0.7, 0.83])
+u_errors = {}
+cv_errors = {}
+s_errors = {}
+for method in methods:
+    u_errors[method] = numpy.zeros(len(Ns))
+    cv_errors[method] = numpy.zeros(len(Ns))
+    s_errors[method] = numpy.zeros(len(Ns))
 
-fig_s = plt.figure('s',figsize=(6.3,4))
-ax_s = fig_s.add_axes([0.1, 0.13, 0.73, 0.85])
-
-figs = ['u','cv','s']
-
-Tmax = 0.2
-
-def mean_errs(ww, ff, N, method, golden_data):
-    u_err = 0.0
-    cv_err = 0.0
-    s_err = 0.0
-    numseeds = 0
-    for seed in seeds:
-        t_u_cv_s_method = readandcompute.t_u_cv_s(ww, ff, N, method, seed)
-        if t_u_cv_s_method != None:
-            du = abs((t_u_cv_s_method[1]-golden_data[1])[t_u_cv_s_method[0] > Tmax]).max()
-            dcv = abs((t_u_cv_s_method[2]-golden_data[2])[t_u_cv_s_method[0] > Tmax]).max()
-            ds = abs((t_u_cv_s_method[3]-golden_data[3])[t_u_cv_s_method[0] > Tmax]).max()
-            u_err += du
-            cv_err += dcv
-            s_err += ds
-            numseeds += 1
-    if numseeds > 0:
-        return numpy.array([u_err,cv_err,s_err])/numseeds/N
-    return None
-
-for N in Ns:
-    t_u_cv_s = readandcompute.t_u_cv_s(ww, ff, N, golden)
-    golden_data = t_u_cv_s
-    reference_error = mean_errs(ww, ff, N, reference, golden_data)
-    print ' N',N
+for n in range(len(Ns)):
+    golden_data = readandcompute.t_u_cv_s(ww, ff, Ns[n], golden)
     for method in methods:
-        method_err = mean_errs(ww, ff, N, method, golden_data)
-        print '  ',method
-        print '   ',method_err
-        for i in range(len(figs)):
-            plt.figure(figs[i])
-            plt.loglog(reference_error[i], method_err[i], styles.dots(method),
-                       markerfacecolor='none', markeredgecolor=styles.color(method),
-                       label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+        for seed in seeds:
+            t_u_cv_s_method = readandcompute.t_u_cv_s(ww, ff, Ns[n], method, seed)
+            du = abs((t_u_cv_s_method[1]-golden_data[1])[t_u_cv_s_method[0] > min_T]).max()
+            dcv = abs((t_u_cv_s_method[2]-golden_data[2])[t_u_cv_s_method[0] > min_T]).max()
+            ds = abs((t_u_cv_s_method[3]-golden_data[3])[t_u_cv_s_method[0] > min_T]).max()
+
+            u_errors[method][n] += du
+            cv_errors[method][n] += dcv
+            s_errors[method][n] += ds
+
+        u_errors[method][n] /= len(seeds)
+        cv_errors[method][n] /= len(seeds)
+        s_errors[method][n] /= len(seeds)
 
 os.chdir(thesis_dir)
 
-for fig in figs:
+
+### scaling figures
+fig_size = (6,5)
+
+plt.figure(figsize=fig_size)
+for method in methods:
+    plt.semilogy(Ns, u_errors[method],'.'+styles.plot(method),
+                 label=styles.title(method))
+
+plt.xlabel('$N$')
+plt.ylabel('$\\Delta U/N\epsilon$')
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/u-scaling.pdf")
+
+
+plt.figure(figsize=fig_size)
+for method in methods:
+    plt.semilogy(Ns, cv_errors[method],'.'+styles.plot(method),
+                 label=styles.title(method))
+
+plt.xlabel('$N$')
+plt.ylabel('$\\Delta C_V/N\epsilon$')
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/cv-scaling.pdf")
+
+plt.figure(figsize=fig_size)
+for method in methods:
+    plt.semilogy(Ns, s_errors[method],'.'+styles.plot(method),
+                 label=styles.title(method))
+
+plt.xlabel('$N$')
+plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+plt.savefig("figs/s-scaling.pdf")
+
+### error vs error figures
+
+methods.remove(reference)
+
+plt.figure('u',figsize=fig_size)
+plt.figure('cv',figsize=fig_size)
+plt.figure('s',figsize=fig_size)
+
+for n in range(len(Ns)):
+    for method in methods:
+        plt.figure('u')
+        plt.loglog(u_errors[reference][n], u_errors[method][n], styles.dots(method),
+                   markerfacecolor='none', markeredgecolor=styles.color(method),
+                   label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+        plt.figure('cv')
+        plt.loglog(cv_errors[reference][n], cv_errors[method][n], styles.dots(method),
+                   markerfacecolor='none', markeredgecolor=styles.color(method),
+                   label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+        plt.figure('s')
+        plt.loglog(s_errors[reference][n], s_errors[method][n], styles.dots(method),
+                   markerfacecolor='none', markeredgecolor=styles.color(method),
+                   label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+
+for fig in ['u','cv','s']:
     plt.figure(fig)
     xmin,xmax = plt.xlim()
     ymin,ymax = plt.ylim()
     plt.axis('equal')
     plt.loglog([min(xmin,ymin),max(xmax,ymax)],[min(xmin,ymin),max(xmax,ymax)],'k:')
-
 
 plt.figure('u')
 
@@ -104,21 +145,21 @@ for handle, label in zip(handles, labels):
     if label not in label_list:
         handle_list.append(handle)
         label_list.append(label)
-plt.legend(handle_list, label_list,loc='lower right',bbox_to_anchor=(1.25,0))
+plt.legend(handle_list, label_list,loc='lower right')
 
 plt.xlabel(r'%s $\Delta U/N\epsilon$'%styles.title(reference))
 plt.ylabel(r'$\Delta U/N\epsilon$')
-plt.savefig("figs/internal-energy-comps.pdf")
+plt.savefig("figs/u-comps.pdf")
 
 plt.figure('cv')
-plt.legend(handle_list, label_list,loc='lower right',bbox_to_anchor=(1.25,0))
+plt.legend(handle_list, label_list,loc='lower right')
 plt.xlabel(r'%s $\Delta C_V/Nk$'%styles.title(reference))
 plt.ylabel(r'$\Delta C_V/Nk$')
-plt.savefig("figs/heat-capacity-comps.pdf")
+plt.savefig("figs/cv-comps.pdf")
 
 plt.figure('s')
-plt.legend(handle_list, label_list,loc='lower right',bbox_to_anchor=(1.25,0))
+plt.legend(handle_list, label_list,loc='lower right')
 plt.xlabel(r'%s $\Delta S_{\textrm{config}}/Nk$'%styles.title(reference))
 plt.ylabel(r'$\Delta S_{\textrm{config}}/Nk$')
-plt.savefig("figs/config-entropy-comps.pdf")
+plt.savefig("figs/s-comps.pdf")
 
