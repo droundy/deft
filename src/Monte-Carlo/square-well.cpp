@@ -494,7 +494,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
     // now find the eigenvector of our transition matrix via the power iteration method
     bool done = false;
     int iters = 0;
-    while(!done && iters < max(1000, init_iters/biggest_energy_transition)) {
+    while(!done && iters < max(1000, init_iters/(2*biggest_energy_transition))) {
       iters++;
       // set D_n = T*D_{n-1}
       for (int i = 0; i < energies_observed; i++) {
@@ -543,7 +543,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
           const double precision = fabs(TD_over_D[i] - 1);
           if (precision > fractional_dos_precision){
             done = false;
-            if((iters % 100) == 0 && printing_allowed()){
+            if((iters % 1000) == 0 && printing_allowed()){
               printf("After %i iterations, failed at energy %i with value %.16g and "
                      "newvalue %.16g and ratio %g and norm %g.\n",
                      iters, i, ln_dos[i], ln_dos[i] + log(TD_over_D[i]), TD_over_D[i], norm);

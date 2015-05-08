@@ -6,6 +6,9 @@ if len(sys.argv) != 4:
     print "usage:  python2 %s ww ff N" % sys.argv[0]
     exit(1)
 
+if os.path.exists('paper.tex'):
+    os.chdir('../..')
+
 assert os.path.exists('SConstruct')
 # switch to deft project directory and build SWMC
 assert not os.system('fac square-well-monte-carlo')
@@ -16,7 +19,7 @@ N = int(sys.argv[3])
 
 
 min_T = 0.1
-iterations = 1e6
+iterations = 1e7
 mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/square-well-fluid/data/mc'

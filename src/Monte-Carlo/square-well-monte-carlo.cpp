@@ -1017,7 +1017,7 @@ int main(int argc, const char *argv[]) {
     }
 
     // RDF
-    if(!sw.walls){
+    if (!sw.walls && sw.iteration % sw.N == 0) {
       g_energy_histogram[sw.energy]++;
       for(int i = 0; i < sw.N; i++){
         for(int j = 0; j < sw.N; j++){
@@ -1067,7 +1067,8 @@ int main(int argc, const char *argv[]) {
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
-      fprintf(e_out, "# min_important_energy: %i\n\n",sw.set_min_important_energy());
+      fprintf(e_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
+      // fprintf(e_out, "# min_important_energy: %i\n\n",sw.set_min_important_energy());
       fprintf(e_out, "# energy   counts\n");
       for(int i = 0; i < sw.energy_levels; i++){
         if(sw.energy_histogram[i] != 0)
@@ -1187,7 +1188,7 @@ int main(int argc, const char *argv[]) {
               fprintf(gr_out, "%.10g ", (r_i+0.5)*de_g);
               fprintf(gE_out, "%d ", -i);
               fprintf(glnw_out, "%.10g ", sw.ln_energy_weights[i]);
-              fprintf(gEhist_out, "%ld ", sw.energy_histogram[i]);
+              fprintf(gEhist_out, "%ld ", g_energy_histogram[i]);
             }
             fprintf(g_out, "\n");
             fprintf(gr_out, "\n");

@@ -14,21 +14,23 @@ ww = float(sys.argv[1])
 #arg ww = [1.3]
 ff = float(sys.argv[2])
 #arg ff = [0.3]
-N = int(sys.argv[3])
-#arg N = [30]
+Ns = eval(sys.argv[3])
+#arg Ns = [[500, 1372, 400]]
 T = float(sys.argv[4])
 #arg T = [1.0]
 
 plt.figure()
 
-g, r = readandcompute.g_r('data/mc/ww%.2f-ff%.2f-N%d' % (ww,ff,N), ff, T)
+for N in Ns:
+    g, r = readandcompute.g_r('data/mc/ww%.2f-ff%.2f-N%d' % (ww,ff,N), ff, T, N)
+    plt.plot(r/2, g, '-', label='$N=%d$' % N)
 
-plt.plot(r/2, g)
+plt.legend(loc='best')
 plt.xlabel(r'$r/\sigma$')
 plt.ylabel(r'$g(r)$ not properly normalized')
-plt.title(r'$g(r)$ with $\lambda = %g$, $\eta=%g$, $N = %d$, and $T/\epsilon = %g$'
-          % (ww, ff, N, T))
+plt.title(r'$g(r)$ with $\lambda = %g$, $\eta=%g$, and $T/\epsilon = %g$'
+          % (ww, ff, T))
 
-plt.savefig('radial-distribution-ww%.2f-ff%.2f-N%d-T%.2g.pdf' % (ww,ff,N,T))
+plt.savefig('radial-distribution-ww%.2f-ff%.2f-T%.2g.pdf' % (ww,ff,T))
 
 plt.show()
