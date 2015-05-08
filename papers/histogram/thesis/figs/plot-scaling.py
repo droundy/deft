@@ -14,8 +14,8 @@ os.chdir('../')
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) != 7:
-    print 'useage: %s ww ff Ns methods golden seed' % sys.argv[0]
+if len(sys.argv) != 8:
+    print 'useage: %s ww ff Ns min_T methods golden seeds' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -27,49 +27,50 @@ ff = float(sys.argv[2])
 Ns = eval(sys.argv[3])
 #arg Ns = [range(5,26)]
 
-methods = eval(sys.argv[4])
-#arg methods = [["cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
+min_T = float(sys.argv[4])
+#arg min_T = [0.2]
 
-golden = sys.argv[5]
+methods = eval(sys.argv[5])
+#arg methods = [["cfw","simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
+
+golden = sys.argv[6]
 #arg golden = ['tmmc-golden']
 
-seed = int(sys.argv[6])
-#arg seed = [0]
+seeds = eval(sys.argv[7])
+#arg seeds = [range(1)]
 
 u_errors = {}
 cv_errors = {}
 s_errors = {}
+for method in methods:
+    u_errors[method] = numpy.zeros(len(Ns))
+    cv_errors[method] = numpy.zeros(len(Ns))
+    s_errors[method] = numpy.zeros(len(Ns))
 
-for N in Ns:
-    u_cv_s = readandcompute.u_cv_s(ww, ff, N, golden)
-    if u_cv_s != None:
-        for method in methods:
-            u_cv_s_method = readandcompute.u_cv_s(ww, ff, N, method, seed)
-            if u_cv_s_method != None:
-                du = abs(u_cv_s_method[0]-u_cv_s[0]).max()
-                if method not in u_errors:
-                    u_errors[method] = numpy.array([[N, du]])
-                else:
-                    u_errors[method] = numpy.vstack([u_errors[method], [N, du]])
-                dcv = abs(u_cv_s_method[1]-u_cv_s[1]).max()
-                if method not in cv_errors:
-                    cv_errors[method] = numpy.array([[N, dcv]])
-                else:
-                    cv_errors[method] = numpy.vstack([u_errors[method], [N, dcv]])
-                ds = abs(u_cv_s_method[2]-u_cv_s[2]).max()
-                if method not in s_errors:
-                    s_errors[method] = numpy.array([[N, ds]])
-                else:
-                    s_errors[method] = numpy.vstack([u_errors[method], [N, ds]])
+for n in range(len(Ns)):
+    golden_data = readandcompute.t_u_cv_s(ww, ff, Ns[n], golden)
+    for method in methods:
+        for seed in seeds:
+            t_u_cv_s_method = readandcompute.t_u_cv_s(ww, ff, Ns[n], method, seed)
+            du = abs((t_u_cv_s_method[1]-golden_data[1])[t_u_cv_s_method[0] > min_T]).max()
+            dcv = abs((t_u_cv_s_method[2]-golden_data[2])[t_u_cv_s_method[0] > min_T]).max()
+            ds = abs((t_u_cv_s_method[3]-golden_data[3])[t_u_cv_s_method[0] > min_T]).max()
+
+            u_errors[method][n] += du
+            cv_errors[method][n] += dcv
+            s_errors[method][n] += ds
+
+        u_errors[method][n] /= len(seeds)
+        cv_errors[method][n] /= len(seeds)
+        s_errors[method][n] /= len(seeds)
+
 
 os.chdir(thesis_dir)
 
-min_T = 0.2 # FIXME maybe shouldn't hardcode this?
-
 plt.figure(figsize=(6,5))
 for method in methods:
-    plt.semilogy(u_errors[method][:,0], u_errors[method][:,1],
-                 '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(Ns, u_errors[method],'.'+styles.plot(method),
+                 label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
 plt.xlabel('$N$')
 plt.ylabel('$\\Delta U/N\epsilon$')
@@ -79,8 +80,8 @@ plt.savefig("figs/u-scaling.pdf")
 
 plt.figure(figsize=(6,5))
 for method in methods:
-    plt.semilogy(cv_errors[method][:,0], cv_errors[method][:,1],
-                 '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(Ns, cv_errors[method],'.'+styles.plot(method),
+                 label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
 plt.xlabel('$N$')
 plt.ylabel('$\\Delta C_V/N\epsilon$')
@@ -90,8 +91,8 @@ plt.savefig("figs/cv-scaling.pdf")
 
 plt.figure(figsize=(6,5))
 for method in methods:
-    plt.semilogy(s_errors[method][:,0], s_errors[method][:,1],
-                 '.'+styles.plot(method),label=styles.title(method))
+    plt.semilogy(Ns, s_errors[method],'.'+styles.plot(method),
+                 label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
 plt.xlabel('$N$')
 plt.ylabel(r'$\Delta S_{\textit{config}}/Nk$')

@@ -11,8 +11,8 @@ import styles
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
-if len(sys.argv) != 6:
-    print 'useage: %s ww ff N seeds method' % sys.argv[0]
+if len(sys.argv) != 7:
+    print 'useage: %s ww ff N min_e seeds method' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -24,11 +24,15 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = [25]
 
-seeds = eval(sys.argv[4])
+# fixme: read from file, instead of taking as input
+min_e = int(sys.argv[4])
+#arg min_e = [-123]
+
+seeds = eval(sys.argv[5])
 #arg seeds = [range(30)]
 
-methods = eval(sys.argv[5])
-#arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
+methods = eval(sys.argv[6])
+#arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
 
 fig = plt.figure('ps',figsize=(6.6,4))
 ax = fig.add_axes([0.1, 0.1, 0.55, 0.85])
@@ -82,9 +86,10 @@ for method in methods:
 for method in methods:
     plt.semilogy(energy[method], net_rate[method], styles.dots(method),
                  markerfacecolor='none', markeredgecolor=styles.color(method),
-                 label=styles.title(method))
+                 label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
 
+plt.axvline(min_e,linewidth=1,color='k',linestyle=':')
 plt.xlabel('$E/\epsilon$')
-plt.ylabel('$s_p(E)$')
+plt.ylabel('$r_p(E)$')
 ax.legend(loc='upper right',bbox_to_anchor=(1.65,0.95))
-plt.savefig("figs/sample-rate-example.pdf")
+plt.savefig("figs/sample-rates.pdf")

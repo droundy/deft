@@ -370,12 +370,14 @@ where the partition function $Z\p{T}$ is simply a normalization
 factor, given by
 \begin{align}
   Z\p{T}=\sum_ED\p{E}e^{-E/kT}.
+  \label{eq:Z_norm}
 \end{align}
 To reduce redundant computations and numerical error in
 implementation, we will generally use a partition function with an
 unnormalized density of states $\tilde D\p{E}$, i.e.
 \begin{align}
   \tilde Z\p{T}=\sum_E\tilde D\p{E}e^{-E/kT},
+  \label{eq:Z}
 \end{align}
 in terms of which
 \begin{align}
@@ -539,10 +541,10 @@ weights is
   =\sum_E\f{H\p{E}}{e^{-E/kT_0}}~e^{-E/kT_0}=\sum_EH\p{E},
   \label{Z_canonical}
 \end{align}
-and the value of a thermodynamic property $X\p{T_0}$
+and the value of a thermodynamic property $\bk{X}_{T_0}$
 \begin{align}
-  X\p{T_0}=\f1{\tilde Z\p{T_0}}\sum_E\bk{X}_E\tilde D\p{E}e^{-E/kT_0}
-  =\f{\sum_E\bk{X}_EH\p{E}}{\sum_EH\p{E}},
+  \bk{X}_{T_0}=\f1{\tilde Z\p{T_0}}\sum_E\bk{X}_E\tilde
+  D\p{E}e^{-E/kT_0} =\f{\sum_E\bk{X}_EH\p{E}}{\sum_EH\p{E}},
   \label{eq:X_canonical}
 \end{align}
 where $\bk{X}_E$ is the mean value of $X$ at the energy $E$. The
@@ -554,7 +556,7 @@ Canonical Monte Carlo simulations can therefore fail to sufficiently
 sample energies which are important (i.e. energies with a
 non-negligible state probability density) at different
 temperatures. As a consequence, such simulations should not be used to
-determine properties $X\p{T\ne T_0}$, and are thus referred to as
+determine properties $\bk{X}_{T\ne T_0}$, and are thus referred to as
 ``fixed temperature'' simulations. Incidentally, Metropolis Monte
 Carlo simulations can be thought of as infinite-temperature
 simulations, as they are equivalent to simulations with canonical
@@ -896,8 +898,7 @@ $n=L$, where $L$ is, as described in Section \ref{sec:simple_flat},
 the number of energy levels for the given square-well fluid. Other
 works typically neglect providing any heuristic or formula for $n$,
 reporting a system-independent $n=10^3$\cite{wang_landau_mod} or
-$10^5$\cite{wang_landau}.  \fixme{find more citations for this last
-  claim}
+$10^5$\cite{wang_landau}.
 
 The next parameter, $f_0$, controls the initial amount by which to
 adjust the weight of the current energy after each move. As mentioned
@@ -906,11 +907,8 @@ but the appropriate value of $f_0$ will generally depend on the system
 at hand. Too large a value of $f_0$ will magnify stochastic error in
 initialization, while too small a value of $f_0$ will cause
 simulations to take an exceedingly long time to converge. Lacking any
-heuristics for assigning $f_0$, literature typically suggests $f_0=e$
-\cite{wang_landau}. After some experimentation with the free
-parameters in the Wang-Landau method, we decided on $f_0=e^{1/8}$. In
-practice, one usually works with $\ln f$, making the commonly
-suggested value $\ln f_0=1$ and our own $\ln f_0=1/8$.
+heuristics for assigning $f_0$, we use $f_0=e$ (more precisely, $\ln
+f_0=1$), a value commonly suggested by literature\cite{wang_landau}.
 
 The factor $u$ appearing in step \ref{alg:wang_landau_update} of
 Algorithm \ref{alg:wang_landau} controls the amount by which to adjust
@@ -922,9 +920,7 @@ $\lim_{k\to\infty}f_k=1$ to terminate. Taking the $u$-th root of $f$
 at each increment of $k$ is a natural and convenient iterative means
 to satisfy these requirements. Previous works have reported using
 values such as $u=2$ \cite{wang_landau, wang_landau_mod} and $u=10$
-\cite{wang_landau_analysis}; we use the former, conservatively
-favoring more initialization iterations by decreasing $f$ by a smaller
-amount on each reset.
+\cite{wang_landau_analysis}; we use the former value.
 
 One might guess why the flatness condition $C\sp{H}$ for updating $f$
 and restarting the Wang-Landau initialization process should not be
@@ -954,9 +950,9 @@ commonly suggested flatness condition is that the minimum histogram
 value in some specified range of energies be at least some fixed
 proportion of the mean histogram value, i.e.
 $C\sp{H}:\min\sp{H\p{E}}\ge x\bk{H}_E$, and several papers report
-using $x=0.95$. We used the same condition with $x=0.25$. Determining
-the range of energies over which to evaluate $C\sp{H}$ is the subject
-of Section \ref{sec:min_energy}.
+using $x=0.95$. We use this condition with the same value of
+$x$. Determining the range of energies over which to evaluate
+$C\sp{H}$ is the subject of Section \ref{sec:min_energy}.
 
 The final free parameter in the Wang-Landau method is the cutoff $c$,
 which determines how small $f$ can get before the algorithm stops
@@ -1521,13 +1517,13 @@ as the design of this method assumes knowledge of the energy range of
 interest a priori. In order to fairly compare Wang-Landau to other
 methods, we therefore identified $E_-$ for each simulated system using
 other methods, and hard-coded the minimum important energies for each
-system into the Wang-Landau initialization routines. \fixme{talk about
-  how bad this is} We always set
+system into the Wang-Landau initialization routines\fixme{talk about
+  how bad this is}. We always set
 $w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ after initialization of all
 histogram methods with $kT_{\t{min}}=0.2\epsilon$. We chose this
 temperature because it is right below the temperature at which the
 square-well fluid condenses from a gas into a liquid (see Section
-\ref{sec:properties}). \fixme{what about pressure?}
+\ref{sec:errors}). \fixme{what about pressure?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1537,25 +1533,40 @@ square-well fluid condenses from a gas into a liquid (see Section
 Having developed and implemented all of the histogram methods
 discussed in Section \ref{sec:methods}, we will now look at the
 results from simulating with these methods. Due to time constraints,
-we simulated only one system: the well width $\lambda=1.3$ and filling
-fraction $\eta=0.3$ square-well fluid, for all sizes (i.e. number of
-spheres) $N\in\sp{5,25}$. We initialized histogram methods for
+we simulated only one system, the square-well fluid with well width
+$\lambda=1.3$ and filling fraction $\eta=0.3$, for sizes (i.e. number
+of spheres) $N\in\sp{5,25}$. We initialized histogram methods for
 $10^5N^2$ iterations ($10^5N^3$ moves), and simulated for just as long
 afterwards. To check for consistency in simulation results, we
 simulated each combination of histogram method and system size for 30
 different random number generator seeds.
 
+\subsection{Controls}
+\label{sec:controls}
+
+Our analysis will involve comparing errors in system properties
+computed from simulation results. As we do not know the true values of
+these system properties, we will compare standard simulation results
+against those from ``gold standard'' simulations, which run for
+significantly longer than the standard $10^5N^2$ iterations. For our
+gold standard simulations, we use the TMMC method and initialize until
+it collects $10^4$ optimistic samples of the minimum important energy
+(i.e. until $s_o\p{E_-}\ge 10^4$). To increase confidence in
+low-temperature gold standard results, we initialized them with
+$kT_{\t{min}}=0.1\epsilon$. After initialization, the gold standard
+runs simulate for $10^{10}$ iterations ($10^{10}N$ moves). While the
+entire initialization and simulation process takes around two hours
+for the largest regular simulations, the largest golden simulations
+initialize for $\sim11$ hours, and simulate for a week. To control for
+iteration number in the quality of results, we compare against a
+``converged flat'' simulation. Converged flat simulations use the
+golden (flat histogram) weight array, but simulates for the same
+number of iterations as the standard simulations.
+
 \subsection{Histograms and arrays}
 \label{sec:histograms}
 
-Three arrays contain the raw data for all analysis performed in this
-paper:
-
-
-\fixme{Give examples of energy histograms for one system, density of
-  states for several $N$, and perhaps a weight array.}
-
-\begin{figure}[H]
+\begin{figure}[!b]
   \centering
   \includegraphics[width=\textwidth]{figs/array-example.pdf}
   \caption[Example arrays]
@@ -1563,115 +1574,187 @@ paper:
     square-well fluid with a well width $\lambda=1.3$, filling
     fraction $\eta=0.3$, and $N=25$ spheres after simulating for
     $10^5N^2$ iterations: (top left) energy histogram, (top right)
-    weight array, (bottom left) density of states.}
+    weight array, (bottom left) density of states. Vertical reference
+    lines denote the minimum important energy $E_-$.}
   \label{fig:arrays}
 \end{figure}
 
+Most of our analysis will use quantities computed from two arrays
+given by simulations: the energy histogram $H\p{E}$ and the weights
+$w\p{E}$. To get a sense of what these arrays look like, Figure
+\ref{fig:arrays} shows the energy histogram and weights from an $N=25$
+simulation, along with the density of states computed via $\tilde
+D=H/w$ and normalized to have a maximum value of 1. The vertical
+reference line in these plots denotes the minimum important energy
+$E_-$. These plots demonstrate that, as expected, different methods
+can accumulate different histograms $H$ and weights $w$, yet agree on
+system properties such as the density of states $D$.
 
-\subsection{Sample rates}
-\label{sec:sample_rates}
+Though high energy histogram counts at low energies mean that a
+simulation has collected many statistics on these energies, the energy
+histogram says nothing about how correlated different energy
+observations are. To determine how effective different simulations are
+at collecting uncorrelated statistics, we can look at the pessimistic
+sample rate $r_p\p{E}$, which is the mean number of simulation
+iterations required to sample a given energy $E$. This rate is given
+in terms of the number of iterations $I$ in a simulation (where we
+always have $I=10^5N^2$) and the pessimistic sample rate $s_p\p{E}$ by
+$r_p\p{E}=I/s_p\p{E}$. Figure \ref{fig:sample_rates} shows pessimistic
+sample rates for all methods averaged over 30 random number seeds for
+$N=25$ simulations. Lower pessimistic sample rates mean that a
+simulation takes less time to collect statistics which are guaranteed
+to be uncorrelated.
 
-\begin{figure}[H]
+\fixme{talk about plots}
+
+\begin{figure}[!b]
   \centering
-  \includegraphics[width=0.8\textwidth]{figs/sample-rate-example.pdf}
+  \includegraphics[width=0.8\textwidth]{figs/sample-rates.pdf}
   \caption[Example energy sampling rates]
   {Example pessimistic energy sampling rates computed by various
-    histogram methods for a square-well fluid with a well width
-    $\lambda=1.3$, filling fraction $\eta=0.3$, and $N=25$ spheres
-    after simulating for $10^5N^2$ iterations. Sample rates for each
-    method are averaged over 30 simulations with different random
-    number seeds.}
+    histogram methods. Sample rates for each method are averaged over
+    30 simulations with different random number seeds. The vertical
+    reference line denotes the minimum important energy $E_-$.}
   \label{fig:sample_rates}
 \end{figure}
+
+\newpage
 
 \subsection{Thermodynamic properties and errors}
 \label{sec:properties}
 
-\fixme{Discuss errors in computed thermodynamic properties. Introduce
-  converged flat weights.}
+We can use the formula in (\ref{eq:XT}) to compute the temperature
+dependence of a few system properties directly from the density of
+states, such as the internal energy
+\begin{align}
+  U=\bk{E}_T,
+  \label{eq:U}
+\end{align}
+the heat capacity
+\begin{align}
+  C_V\p{T}=\f{\partial U}{\partial T}
+  =\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2,
+  \label{eq:CV}
+\end{align}
+and the configurational entropy\fixme{how is this different from
+  regular entropy?}
+\begin{align}
+  S_{\t{config}}\p{T}=k\bk{\f{E}{kT}+\ln Z}_T.
+  \label{eq:S}
+\end{align}
+Figures \ref{fig:internal_energy}--\ref{fig:config_entropy} show these
+properties as computed via all methods for a single $N=25$ simulation
+each. When looking at these figures, one should remember that results
+are only trusted down to $kT=0.2\epsilon$ for regular simulations, and
+$kT=0.1\epsilon$ for golden ones. As with the density of states, all
+histogram methods agree fairly well on the physical properties of the
+square-well fluid. Though Figures
+\ref{fig:internal_energy}--\ref{fig:config_entropy} are interesting
+for studying the square-well fluid, they do not help us resolve the
+efficacy of different histogram methods. These figures do, however,
+show that the square-well fluid has a phase transition around
+$kT\approx0.5\epsilon$, which justifies our choice of
+$kT_{\t{min}}=0.2\epsilon$ and ensures that the histogram methods are
+performing the nontrivial task of exploring the liquid-gas
+phase boundary of the square-well fluid. For the purposes of this
+paper, we will neglect to demonstrate that this phase transition is
+indeed between liquid and gas, and take this fact as given.
 
-\subsubsection{Example curves}
-\label{sec:property_examples}
+Having a sense of how $U$, $C_V$ and $S_{\t{config}}$ depend on
+temperature, we can now look at the how the errors $\Delta U$, $\Delta
+C_V$ and $\Delta S_{\t{config}}$ relative to the TMMC golden
+calculations. These are shown for a single $N=25$ simulation in
+Figures \ref{fig:internal_energy_err}--\ref{fig:config_entropy_err}.
 
-\begin{figure}[H]
+\begin{figure}[b]
   \centering
-    \includegraphics[width=0.7\textwidth]{figs/internal-energy.pdf}
+  \includegraphics[width=0.7\textwidth]{figs/internal-energy.pdf}
   \caption[Internal energy]
-  {Specific internal energy}
+  {Specific internal energy curves from single $N=25$ simulations.}
   \label{fig:internal_energy}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.75\textwidth]{figs/heat-capacity.pdf}
   \caption[Heat capacity]
-  {Specific heat capacity}
+  {Specific heat capacity curves from single $N=25$ simulations.}
   \label{fig:heat_capacity}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.7\textwidth]{figs/config-entropy.pdf}
   \caption[Configurational entropy]
-  {Specific configurational entropy}
+  {Specific configurational entropy curves from single $N=25$
+    simulations.}
   \label{fig:config_entropy}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.7\textwidth]
   {figs/internal-energy-err.pdf}
-  \caption[Errors in internal energy]
-  {Errors in specific internal energy}
+  \caption[Internal energy error scaling]
+  {Errors in specific internal energy from single $N=25$ simulations.}
   \label{fig:internal_energy_err}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.7\textwidth]{figs/heat-capacity-err.pdf}
-  \caption[Errors in heat capacity]
-  {Errors in specific heat capacity}
+  \caption[Heat capacity error scaling]
+  {Errors in specific heat capacity from single $N=25$ simulations.}
   \label{fig:heat_capacity_err}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.7\textwidth]{figs/config-entropy-err.pdf}
-  \caption[Errors in configurational entropy]
-  {Errors in specific configurational entropy}
+  \caption[Configurational entropy error scaling]
+  {Errors in specific configurational entropy from single $N=25$
+    simulations.}
   \label{fig:config_entropy_err}
 \end{figure}
 
-\subsubsection{Error scaling and comparisons}
-\label{sec:errors}
+\subsubsection{Error scaling}
+\label{sec:scaling}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
-    \includegraphics[width=0.7\textwidth]{figs/u-scaling.pdf}
+  \includegraphics[width=0.7\textwidth]{figs/u-scaling.pdf}
   \caption[Internal energy error scaling]
-  {Specific internal energy error scaling}
+  {Errors in internal energy as computed by various histogram methods,
+    each averaged over 30 simulations with different random number
+    seeds.}
   \label{fig:u_scaling}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.75\textwidth]{figs/cv-scaling.pdf}
   \caption[Heat capacity error scaling]
-  {Specific heat capacity error scaling}
+  {Errors in specific heat capacity as computed by various histogram
+    methods, each averaged over 30 simulations with different random
+    number seeds.}
   \label{fig:cv_scaling}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.7\textwidth]{figs/s-scaling.pdf}
   \caption[Configurational entropy error scaling]
-  {Specific configurational entropy error scaling}
+  {Errors in specific configurational entropy as computed by various
+    histogram methods, each averaged over 30 simulations with
+    different random number seeds.}
   \label{fig:s_scaling}
 \end{figure}
 
 
+\subsubsection{Error comparisons}
+\label{sec:errors}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.75\textwidth]
   {figs/internal-energy-comps.pdf}
@@ -1680,7 +1763,7 @@ paper:
   \label{fig:u_comps}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.75\textwidth]{figs/heat-capacity-comps.pdf}
   \caption[Heat capacity error comparisons]
@@ -1688,7 +1771,7 @@ paper:
   \label{fig:u_comps}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
   \centering
   \includegraphics[width=0.75\textwidth]{figs/config-entropy-comps.pdf}
   \caption[Configurational entropy error comparisons]

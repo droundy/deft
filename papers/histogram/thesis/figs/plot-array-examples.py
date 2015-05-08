@@ -14,8 +14,8 @@ matplotlib.rc('text', usetex=True)
 fig_size = numpy.array([5,4])
 panel_size_ratio = 1.75
 
-if len(sys.argv) != 6:
-    print 'useage: %s ww ff N seed method' % sys.argv[0]
+if len(sys.argv) != 7:
+    print 'useage: %s ww ff N min_e seed method' % sys.argv[0]
     exit(1)
 
 ww = float(sys.argv[1])
@@ -27,11 +27,15 @@ ff = float(sys.argv[2])
 N = int(sys.argv[3])
 #arg N = [25]
 
-seed = int(sys.argv[4])
+# fixme: read from file, instead of taking as input
+min_e = int(sys.argv[4])
+#arg min_e = [-123]
+
+seed = int(sys.argv[5])
 #arg seed = [0]
 
-methods = eval(sys.argv[5])
-#arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
+methods = eval(sys.argv[6])
+#arg methods = [["nw","cfw","simple_flat","vanilla_wang_landau","tmmc","oetmmc"]]
 
 # input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
@@ -85,6 +89,7 @@ ylocs, ylabels = plt.yticks()
 newylabels = [tentothe(n) for n in ylocs]
 plt.yticks(ylocs, newylabels)
 
+plt.axvline(min_e,linewidth=1,color='k',linestyle=':')
 plt.xlabel('$E/\epsilon$')
 plt.ylabel('$\\tilde D(E)$')
 plt.legend(loc='best')
@@ -95,6 +100,7 @@ plt.savefig("figs/dos-example.pdf")
 all_figs.canvas.draw()
 
 for ax in [ ax_lnw, ax_dos, ax_hist ]:
+    ax.axvline(min_e,linewidth=1,color='k',linestyle=':')
     ax.set_xlabel('$E/\epsilon$')
 ax_hist.set_ylabel('$H(E)$')
 
