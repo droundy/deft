@@ -49,7 +49,8 @@
 {\end{enumerate}\hrulefill}
 
 \renewcommand{\title}{Optimizing Monte Carlo simulation of the
-  square-well fluid} \renewcommand{\author}{Michael A. Perlin}
+  square-well fluid}
+\renewcommand{\author}{Michael A. Perlin}
 \newcommand{\institution}{Oregon State University}
 \newcommand{\department}{Department of Physics}
 \newcommand{\supervisor}{Dr. David Roundy}
@@ -147,13 +148,15 @@ own. The first of our methods is novel, while the second is a hybrid
 of two published methods (transition matrix Monte Carlo and the
 optimized ensemble).
 
-We find that Wang-Landau is capable of performing the best of all
-methods, but fails catastrophically without a predefined energy range
-for the square-well fluid. Our first method gives results comparable
-to successful Wang-Landau simulations, but with some anomalous
-cases. Our implementation of the optimized ensemble using a transition
-matrix results in worse performance over the straightforward
-transition matrix Monte Carlo method.
+We find that Wang-Landau potentially performs better than other
+histogram methods, but fails catastrophically without a predefined
+energy range for the square-well fluid. Our first method gives results
+comparable to successful Wang-Landau simulations, but can have
+anomalous cases with large error. The transition matrix Monte Carlo
+consistently yields results whose quality is marginally worse than
+functional Wang-Landau. Finally, our implementation of the optimized
+ensemble using a transition matrix results in worse performance over
+the straightforward transition matrix Monte Carlo method.
 
 \fixme{edit when I'm awake}
 
@@ -1510,27 +1513,23 @@ has ever observed in place of $E_-$ to define our energy range of
 interest.
 
 Once we identify an energy $E_-$ satisfying (\ref{eq:min_E_condition})
-in an initialization routine for any histogram method, we effectively
-forbid transitions to energies $E<E_-$ by tentatively setting weights
-$w\p{E<E_-}=e^{-\p{E-E_-}/kT}$ for some temperature $T\ll
-T_{\t{min}}$. These weights prevent the initialization routine from
-wasting time on energies at which we will override the weight array
-after initialization anyways. We always set
-$w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ after initialization of all
-histogram methods with $kT_{\t{min}}/\epsilon=0.2$. We chose this
-temperature because it is right below the temperature at which the
+in an initialization routine for any histogram method, we set weights
+$w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ with a temperature
+$kT_{\t{min}}/\epsilon=0.2$. These weights prevent the initialization
+routine from wasting time on energies at which we will override the
+weight array after initialization anyways. We chose this temperature
+because it is comfortably below the temperature at which the
 square-well fluid condenses from a gas into a liquid (see Section
 \ref{sec:properties}). \fixme{what about pressure?}
 
-We made a special case for Wang-Landau, as the design of this method
-assumes knowledge of the energy range of interest a priori. In order
-to more fairly compare Wang-Landau to other methods, we therefore
-simulated two cases: one in which the minimum important energy $E_-$
-is identified via other methods and hard-coded into the Wang-Landau
-initialization routine, and one in which Wang-Landau simply assumes
-that the lowest energy a given simulation has ever observed is the
-minimum important energy. The simulations in which $E_-$ is hard-coded
-we will refer to as ``vanilla Wang-Landau'' simulations.
+We made a special case for Wang-Landau treatment of the energy range
+of interest in, as the design of this method assumes a priori
+knowledge of $E_-$. In order to more fairly compare Wang-Landau to
+other methods, we therefore also determined the appropriate energy
+$E_-$ for each system size $N$ using other histogram methods, and
+simulated via Wang-Landau with the a lower energy bound hard-coded. We
+will distinguish the two sets of Wang-Landau simulations by referring
+to those in which $E_-$ is hard-coded as ``vanilla Wang-Landau.''
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

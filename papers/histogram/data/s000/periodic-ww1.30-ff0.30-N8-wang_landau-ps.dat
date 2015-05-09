@@ -1,4 +1,4 @@
-# version: 0.0.0-296-gced568d-dirty
+# version: 0.0.0-311-gfa31720-dirty
 # well_width: 1.3
 # ff: 0.3
 # N: 8
@@ -11,8 +11,8 @@
 # neighbor_scale: 2
 # energy_levels: 48
 # min_T: 0.2
-# fractional_sample_error after initialization: 0.037896
-# min_important_energy after initialization: 27
+# fractional_sample_error after initialization: 0.00761669
+# min_important_energy after initialization: 26
 
 # histogram method: Wang-Landau
 # wl_factor: 1
@@ -21,9 +21,20 @@
 # wl_cutoff: 1e-08
 # init_iter_limit: 6400000
 # iterations: 6400000
-# working moves: 15958374
+# working moves: 30796835
 # total moves: 51200000
-# acceptance rate: 0.311687
+# acceptance rate: 0.601501
 
 # energy	samples
-27  0
+16  0
+17  498535
+18  231089
+19  117978
+20  63728
+21  36110
+22  20990
+23  12147
+24  6902
+25  3705
+26  1586
+27  33
