@@ -338,7 +338,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   if (use_transition_matrix) {
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
       const double betamax = 1.0/min_T;
-      const double Pmin = exp(energy_change*betamax);
+      double Pmin = exp(energy_change*betamax);
       /* I note that Swendson 1999 uses essentially this method
            *after* two stages of initialization. */
       long tup_norm = 0;
@@ -347,28 +347,15 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
         tup_norm += transitions(energy, de);
         tdown_norm += transitions(energy+energy_change, de);
       }
-      /* The "conservativeness" parameter below allows us to adjust
-         how soon the tmmc method becomes confident in its estimation
-         of the transition matrix.  We add "conservativeness" to the
-         number of times that we think we have seen the system go
-         either up or down.  This means when we have poor statistics,
-         we default towards allowing transitions, which can help avoid
-         getting "stuck" at low energies, due to an incorrect first
-         guess as to how probable the downward transition is. */
-      const double conservativeness = 16;
-      const double tup = (transitions(energy, energy_change)+conservativeness)
-                         / double(tup_norm+conservativeness);
-      const double tdown = (transitions(energy+energy_change,-energy_change)+conservativeness)
-                           / double(tdown_norm+conservativeness);
+      double tup = transitions(energy, energy_change)/double(tup_norm);
+      double tdown = transitions(energy+energy_change,-energy_change)/double(tdown_norm);
       if (tdown < tup) {
+        const double Pconfidence = 1.0/sqrt(transitions(energy+energy_change,-energy_change));
         Pmove = tdown/tup;
-        if (!(Pmove > Pmin)) Pmove = Pmin;
+        if (!(Pmove > Pconfidence)) Pmove = Pconfidence;
+        if (Pmove < Pmin) Pmove = Pmin;
       }
     }
-    // printf("Pmove %g  with E %d and dE %d   from (%ld, %ld)\n",
-    //        Pmove, energy, energy_change,
-    //        transitions(energy+energy_change, -energy_change),
-    //        transitions(energy, energy_change));
   } else {
     const double lnPmove =
       ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
