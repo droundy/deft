@@ -836,13 +836,20 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
             if (i < highest_problem_energy) highest_problem_energy = i;
           }
         }
-        printf("       energies <%g to %g> have samples <%ld(%ld) to %ld(%ld)> (current energy %g)\n",
-               -lowest_problem_energy/double(N), -highest_problem_energy/double(N),
-               optimistic_samples[lowest_problem_energy],
-               pessimistic_samples[lowest_problem_energy],
-               optimistic_samples[highest_problem_energy],
-               pessimistic_samples[highest_problem_energy], -energy/double(N));
+        if (lowest_problem_energy < min_maybe_important_energy) {
+          lowest_problem_energy = min_maybe_important_energy;
+          printf("       min important energy <%g> has samples <%ld(%ld)> (current energy %g)\n",
+                 -lowest_problem_energy/double(N), optimistic_samples[lowest_problem_energy],
+                 pessimistic_samples[lowest_problem_energy], -energy/double(N));
+        } else {
+          printf("       energies <%g to %g> have samples <%ld(%ld) to %ld(%ld)> (current energy %g)\n",
+                 -lowest_problem_energy/double(N), -highest_problem_energy/double(N),
+                 optimistic_samples[lowest_problem_energy],
+                 pessimistic_samples[lowest_problem_energy],
+                 optimistic_samples[highest_problem_energy],
+                 pessimistic_samples[highest_problem_energy], -energy/double(N));
         fflush(stdout);
+        }
       }
     }
     return iteration >= init_iters;
@@ -1294,7 +1301,6 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
       if(file_min_T > min_T){
         printf("The minimum temperature in the transition matrix file metadata (%g) is "
                "larger than that requested for this simulation (%g)!\n", file_min_T, min_T);
-        exit(234);
       }
     }
 
