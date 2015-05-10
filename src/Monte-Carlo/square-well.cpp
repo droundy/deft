@@ -950,14 +950,18 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     if(fixed_energy_range){
       // If we have a fixed energy range, don't allow going below it
       initialize_canonical(-1e-2,min_important_energy);
-    } else {
-      // Otherwise, find and set the minimum important energy
-      set_min_important_energy();
     }
+
 
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
       move_a_ball();
       ln_energy_weights[energy] -= wl_factor;
+    }
+
+    if(!fixed_energy_range){
+      // Find and set the minimum important energy, as well as canonical weights below it
+      set_min_important_energy();
+      initialize_canonical(min_T,min_important_energy);
     }
 
     // compute variation in energy histogram

@@ -49,7 +49,8 @@
 {\end{enumerate}\hrulefill}
 
 \renewcommand{\title}{Optimizing Monte Carlo simulation of the
-  square-well fluid} \renewcommand{\author}{Michael A. Perlin}
+  square-well fluid}
+\renewcommand{\author}{Michael A. Perlin}
 \newcommand{\institution}{Oregon State University}
 \newcommand{\department}{Department of Physics}
 \newcommand{\supervisor}{Dr. David Roundy}
@@ -147,13 +148,15 @@ own. The first of our methods is novel, while the second is a hybrid
 of two published methods (transition matrix Monte Carlo and the
 optimized ensemble).
 
-We find that Wang-Landau is capable of performing the best of all
-methods, but fails catastrophically without a predefined energy range
-for the square-well fluid. Our first method gives results comparable
-to successful Wang-Landau simulations, but with some anomalous
-cases. Our implementation of the optimized ensemble using a transition
-matrix results in worse performance over the straightforward
-transition matrix Monte Carlo method.
+We find that Wang-Landau potentially performs better than other
+histogram methods, but fails catastrophically without a predefined
+energy range for the square-well fluid. Our first method gives results
+comparable to successful Wang-Landau simulations, but can have
+anomalous cases with large error. The transition matrix Monte Carlo
+consistently yields results whose quality is marginally worse than
+functional Wang-Landau. Finally, our implementation of the optimized
+ensemble using a transition matrix results in worse performance over
+the straightforward transition matrix Monte Carlo method.
 
 \fixme{edit when I'm awake}
 
@@ -1374,15 +1377,15 @@ straightforward to implement and compare to other histogram methods.
 \label{sec:loose_ends}
 
 Throughout the discussion and development of histogram methods, we
-have thus far neglected a few important subjects:
-\begin{enumerate*}
+have thus far neglected expanding on a few important subjects:
+\begin{enumerate*}[label=\roman*)]
 \item initialization end conditions i.e. the means by which we decide
   when an algorithm to construct weights is finished,
 \item the minimum temperature $T_{\t{min}}$ which we have sometimes
   mentioned,
 \item the energy range over which we are interested in, and
 \item what to do with the weight array outside of the energy range of
-  interest, or at in which it is not defined.
+  interest, or at energies where it is not defined.
 \end{enumerate*}
 The last three of these subjects turn out to be related, as the
 minimum temperature $T_{\t{min}}$ chosen for any given simulation
@@ -1396,51 +1399,55 @@ While the Wang-Landau method comes equipped with an end condition of
 its own, most histogram methods require some external means of
 deciding when they are finished initializing. Wang-Landau's
 ``natural'' end condition does not advantage it over other methods,
-however, as the WL end condition makes use of a free parameter, which
-any end condition will require. In order to compare all methods
-fairly, we need a method-independent end condition. The most
-straightforward of such end conditions is to simply to stop
-initializing after some fixed number of Monte Carlo iterations, and
-appropriately finish up any other calculations in the algorithm before
-terminating it. We thus initialize systems of $N$ spheres for
-$10^5N^2$ iterations; the choice of $10^5N^2$ we will address in
-Section \ref{sec:results}. \fixme{address in results section} In
-general, however, one might want an end condition which is independent
-of system size. We came up with a four such end conditions as
-examples, though we do not use these end conditions in this paper.
+however, as the WL end condition makes use of a free parameter (the
+cutoff $c$), which any end condition will require. In order to compare
+all methods fairly, we need a method-independent end condition to
+initialization. The most straightforward of such end conditions is to
+simply to stop initializing after some fixed number of Monte Carlo
+iterations, and finish up any other calculations in the algorithm if
+appropriate. We thus initialize systems of $N$ spheres for $10^5N^2$
+iterations; the choice of $10^5N^2$ we address in Section
+\ref{sec:results}. In general, however, one might want an end
+condition which is independent of system size. We came up with a four
+such end conditions as examples, though we do not use them in
+simulations analyzed in this paper.
 
-Let $E_+$ be the energy at which the density of states $D\p{E}$ and
-entropy $S\p{E}$ are maximal, and let $E_-$ be the minimum energy of
-interest. We define the pessimistic sample count $s_p\p{E_0}$ as the
-number of times which a system has traveled from $E_+$ to $E_0$, in
-any number of moves. This count represents the most pessimistic
-estimate of the number of independent, uncorrelated observations of
-the energy $E_0$, as going to the state of maximal entropy between
-samples wipes all correlations between them. We similarly define an
-optimistic sample count $s_o\p{E_0}$ as the number of times which the
-system has transitioned into $E_0$ from any energy $E>E_0$. This count
-represents the most optimistic estimate of the number of independent
-observations of the energy $E_0$, as the system had merely to go to
-any energy $E>E_0$, where the density of states may be only marginally
-larger, between each sample.
+Our end conditions require knowledge of the minimum and maximum
+energies of interest, which we denote respectively by $E_-$ and $E_+$.
+We define the pessimistic sample count $s_p\p{E_0}$ as the number of
+times which a system has traveled from $E_+$ to $E_0$. The trip from
+$E_+$ to $E_0$ may be made in any number of moves, but cannot include
+intermediate visits to $E_-$ or $E_0$. The count $s_p\p{E_0}$ provides
+the most pessimistic estimate for the number of independent,
+uncorrelated observations of the energy $E_0$, assuming that a visit
+to $E_+$ wipes all correlations between samples of any other energy;
+this assumption will be justified by our definition of $E_+$ as the
+energy at which the density of states $D\p{E}$, and by extension the
+entropy $S\p{E}$, is maximal. We similarly define an optimistic sample
+count $s_o\p{E_0}$ as the number of times which the system has
+transitioned into $E_0$ from any energy $E>E_0$ in a single move. This
+count represents an optimistic estimate of the number of independent
+observations of $E_0$, as the system had merely to go to any energy
+$E>E_0$, where the density of states may be only marginally larger,
+between each sample.
 
 In general, any initialization routine should sample the entire range
-$R=\sp{E_-,E_+}$ of interest for simulation before terminating.
-Furthermore, samples at the end of initialization should be numerous
-enough to be statistically significant. Given that any samples of
-$E_-$ necessarily require first sampling all other energies in $R$ on
+$R=\sp{E_-,E_+}$ of interest for a given simulation before
+terminating. Furthermore, samples at the end of initialization should
+be numerous enough to be statistically significant. Given that any
+samples of $E_-$ require first sampling all other energies in $R$ on
 the way down from $E_+$, this energy ($E_-$) will generally have the
 fewest number of samples. As an end condition, therefore, one can
 simply enforce some minimum number of optimistic or pessimistic
-samples at $E_-$, i.e. $s_o\p{E_-}$ or $s_p\p{E_-}$. A more
-sophisticated end condition would be to choose a minimum temperature
-of interest $T_{\t{min}}$ and initialize until the mean fractional
-error $\bk{\delta_s}_{E,T_{\t{tmin}}}$ in either of the sample counts
-$s_o\p{E}$ or $s_p\p{E}$ reaches some minimum value. These mean errors
-are
+samples at $E_-$, i.e. minimum values of $s_o\p{E_-}$ or
+$s_p\p{E_-}$. A more sophisticated end condition would be to choose a
+minimum temperature of interest $T_{\t{min}}$ and initialize until the
+mean fractional error $\bk{\delta_s}_{E,T_{\t{tmin}}}$ in one of the
+sample counts reaches some minimum value. These mean errors are
 \begin{align}
   \bk{\delta_s}_{E,T}=\bk{s^{-1/2}}_{E,T}=\sum_Es\p{E}^{-1/2}P\p{E,T}
-  =\f{\sum_Es\p{E}^{-1/2}D\p{E}e^{-E/kT}}{\sum_{E'}D\p{E'}e^{-E'/kT}},
+  =\f{\sum_Es\p{E}^{-1/2}\tilde D\p{E}e^{-E/kT}}{\sum_{E'}\tilde
+    D\p{E'}e^{-E'/kT}},
   \label{eq:fractional_sample_error}
 \end{align}
 where we use the fact that the fractional error $\delta_G$ in any
@@ -1449,28 +1456,28 @@ histogram $G$ collected via random Monte Carlo sampling is $G^{-1/2}$.
 \subsubsection{The energy range of interest}
 \label{sec:min_energy}
 
-Using histogram methods generally requires knowing the energy range of
-interest for the system at hand. The Wang-Landau method, for example,
-periodically checks a flatness condition $C\sp{H}$ on the energy
-histogram $H\p{E}$. In order for such a condition to be well-defined,
-it needs have a specified energy range over which to check the
-flatness of $H$. While some systems, such as the Ising model, have
-well-defined and easily computable energy range, the same is not true
-of most systems. In the case of the square-well fluid, not only is the
-minimum energy unknown, some energies have such an incredibly low
-state density $D\p{E}$ that one cannot reasonably expect to ever
-observe them via Monte Carlo, biased or otherwise. We therefore need
-to identify an energy range of interest, specified by a maximum and
-minimum energies of interest.
+Using histogram methods generally requires specifying, whether
+explicitly or implicitly, the energy range of interest for a given
+simulation. The Wang-Landau method, for example, periodically checks a
+flatness condition $C\sp{H}$ on the energy histogram $H\p{E}$. In
+order for such a condition to be well-defined, it needs have a
+specified energy range over which to evaluate $C\sp{H}$. While some
+systems, such as the Ising model, have a well-defined and easily
+computable energy range, the same is not true of most systems. In the
+case of the square-well fluid, not only is the minimum energy unknown,
+but some energies have such an incredibly low state density $D\p{E}$
+that one cannot reasonably expect to ever observe them via Monte
+Carlo, biased or otherwise. We therefore need to identify an energy
+range of interest, bounded by a minimum $E_-$ and maximum $E_+$.
 
-Identifying a maximum energy of interest is straightforward: this is
-simply the energy $E_+$ at which the density of states $D\p{E}$ is
+Identifying a maximum energy $E_+$ of interest is straightforward:
+this is simply the energy at which the density of states $D\p{E}$ is
 maximal. Though high energies become more important for determining
 system properties $\bk{X}_T$ at higher temperatures, the relative
-importance of energies $E>E_+$ to the energy $E_+$ approaches a
-maximum as $T\to\infty$. There is therefore a maximum weight $w\p{E}$
-which is appropriate to assign energies $E>E_+$ relative to the weight
-$w\p{E_+}$, which is namely the ratio of these weights as
+importance of energies $E>E_+$ to that of the energy $E_+$ approaches
+a maximum as $T\to\infty$. There is therefore a maximum weight
+$w\p{E}$ which is appropriate to assign energies $E>E_+$ relative to
+the weight $w\p{E_+}$, which is given by the ratio of these weights as
 $T\to\infty$. As observed in (\ref{eq:inf_temp_weights}), the weight
 array becomes flat as $T\to\infty$, which means that the ratio of
 $w\p{E>E_+}$ to $w\p{E}$ appropriate for any given temperature $T$
@@ -1482,16 +1489,16 @@ short while, after which the energy histogram $H\p{E}$ should be
 maximal at $E_+$.
 
 The minimum important energy $E_-$ for a system is less obvious than
-$E_+$. Just as finding $E_+$ naturally required using a ``maximal''
+$E_+$. Just as determining $E_+$ involved reference to a ``maximal''
 temperature $T\to\infty$, determining $E_-$ requires a choice of some
 minimum temperature $T_{\t{min}}$. The minimum important energy $E_-$
-is then the energy at which the partition function terms
-$D\p{E}e^{-E/kT_{\t{min}}}$ are maximal. Lower energy terms grow
-increasingly less important with decreasing energy, and are
-sufficiently sampled with canonical weights
-$w\p{E<E_-}=e^{-E/kT_{\t{min}}}$ to determine any property
-$\bk{X}_{T\ge T_{\t{min}}}$. To maximize $D\p{E}e^{-E/kT_{\t{min}}}$,
-we need
+is then the energy at which the term $D\p{E}e^{-E/kT_{\t{min}}}$ in
+the partition function is maximal. Lower energy terms in the partition
+function grow increasingly less important as the distance
+$\abs{E-E_-}$ grows, and are sufficiently sampled with canonical
+weights $w\p{E<E_-}=w\p{E_-}e^{-E/kT_{\t{min}}}$ to determine any
+property $\bk{X}_{T\ge T_{\t{min}}}$. To maximize
+$D\p{E}e^{-E/kT_{\t{min}}}$, we need
 \begin{align}
   \f{d}{dE}\p{De^{-E/kT_{\t{min}}}}
   =\f{dD}{dE}e^{-E/kT_{\t{min}}}+De^{-E/kT_{\t{min}}}\p{-\f{1}{kT_{\t{min}}}}=0,
@@ -1503,34 +1510,30 @@ which means
   \label{eq:min_E_condition}
 \end{align}
 Though we do not always know the density of states $D\p{E}$, in
-practice we compute the best available estimate $D\p{E}$ every time we
-need to know $E_-$. If we do not find any energy satisfying
+practice we compute the best available estimate of $D\p{E}$ every time
+we need to know $E_-$. If we do not find any energy satisfying
 (\ref{eq:min_E_condition}), we use the minimum energy the simulation
 has ever observed in place of $E_-$ to define our energy range of
 interest.
 
 Once we identify an energy $E_-$ satisfying (\ref{eq:min_E_condition})
-in an initialization routine for any histogram method, we effectively
-forbid transitions to energies $E<E_-$ by tentatively setting weights
-$w\p{E<E_-}=e^{-\p{E-E_-}/kT}$ for some temperature $T\ll
-T_{\t{min}}$. These weights prevent the initialization routine from
-wasting time on energies at which we will override the weight array
-after initialization anyways. We always set
-$w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ after initialization of all
-histogram methods with $kT_{\t{min}}/\epsilon=0.2$. We chose this
-temperature because it is right below the temperature at which the
+in an initialization routine for any histogram method, we set weights
+$w\p{E<E_-}=e^{-\p{E-E_-}/kT_{\t{min}}}$ with a temperature
+$kT_{\t{min}}=0.2\epsilon$. These weights prevent the initialization
+routine from wasting time on energies at which we will override the
+weight array after initialization anyways. We chose this temperature
+because it is comfortably below the temperature at which the
 square-well fluid condenses from a gas into a liquid (see Section
 \ref{sec:properties}). \fixme{what about pressure?}
 
-We made a special case for Wang-Landau, as the design of this method
-assumes knowledge of the energy range of interest a priori. In order
-to more fairly compare Wang-Landau to other methods, we therefore
-simulated two cases: one in which the minimum important energy $E_-$
-is identified via other methods and hard-coded into the Wang-Landau
-initialization routine, and one in which Wang-Landau simply assumes
-that the lowest energy a given simulation has ever observed is the
-minimum important energy. The simulations in which $E_-$ is hard-coded
-we will refer to as ``vanilla Wang-Landau'' simulations.
+We made a special case for Wang-Landau treatment of the energy range
+of interest, as the design of this method assumes knowledge of the
+energy range over which to evaluate $C\sp{H}$. In order to more fairly
+compare Wang-Landau to other methods, as well as having Wang-Landau
+determine $E_-$ in the manner described above, we also simulated via
+Wang-Landau with $E_-$ hard-coded for each system size $N$. We will
+distinguish the two sets of Wang-Landau simulations by referring to
+those in which $E_-$ is hard-coded as ``vanilla Wang-Landau.''
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1541,11 +1544,11 @@ Having developed and implemented all of the histogram methods
 discussed in Section \ref{sec:methods}, we will now look at the
 results from simulating with these methods. Due to time constraints,
 we simulated only one system, the square-well fluid with well width
-$\lambda=1.3$ and filling fraction $\eta=0.3$, for sizes (i.e. number
-of spheres) $N\in\sp{5,25}$. We initialized histogram methods for
+$\lambda=1.3$ and filling fraction $\eta=0.3$, for sizes (number of
+spheres) $N\in\sp{5,25}$. We initialized histogram methods for
 $10^5N^2$ iterations ($10^5N^3$ moves), and simulated for just as long
 afterwards. To check for consistency in simulation results, we
-simulated each combination of histogram method and system size for 30
+simulated each combination of histogram method and system size with 30
 different random number generator seeds.
 
 \subsection{Controls}
@@ -1560,68 +1563,69 @@ gold standard simulations, we use the TMMC method and initialize until
 it collects $10^4$ optimistic samples of the minimum important energy
 (i.e. until $s_o\p{E_-}\ge 10^4$). \fixme{why TMMC?} To increase
 confidence in low-temperature gold standard results, we initialized
-them with $kT_{\t{min}}/\epsilon=0.1$. After initialization, the gold
+them with $kT_{\t{min}}=0.1\epsilon$. After initialization, the gold
 standard runs simulate for $10^{10}$ iterations ($10^{10}N$
 moves). While the entire initialization and simulation process takes
 around two hours for the largest regular simulations, the largest
 golden simulations initialize for $\sim11$ hours, and simulate for a
 week. To control for iteration number in the quality of results, we
 compare against ``converged flat'' simulations. Converged flat
-simulations read in the transition matrix from golden simulations
-(which accumulates statistics in both during and after initialization)
-to construct a weight array, but simulate for the same number of
+simulations read in the transition matrix from golden simulations to
+construct a weight array, and simulate for the same number of
 iterations as the standard simulations.
 
 \subsection{Histograms and arrays}
 \label{sec:histograms}
 
-Most of our analysis will use quantities computed from two arrays
-given by simulations: the energy histogram $H\p{E}$ and the weights
-$w\p{E}$. To get a sense of what these arrays look like, Figure
-\ref{fig:arrays} shows the energy histogram and weights from an $N=25$
-simulation, along with the density of states computed via $\tilde
-D=H/w$ and normalized to have a maximum value of 1. The vertical
-reference line in these plots denotes the minimum important energy
-$E_-$. For reference, we also provide the histogram produced by an
-infinite temperature (no weights) simulation.
+Most of our analysis will use quantities computed from two arrays: the
+energy histogram $H\p{E}$ and the weights $w\p{E}$. To get a sense of
+what these arrays look like, Figure \ref{fig:arrays} shows the energy
+histogram and weights from $N=25$ simulations, along with the density
+of states computed via $\tilde D=H/w$ and normalized to have a maximum
+value of 1. The vertical reference line in these plots denotes the
+minimum important energy $E_-$. For reference, we also provide the
+histogram produced by an infinite temperature (no weights) simulation.
 
 The most immediate observation in these plots is the failure of
 Wang-Landau to produce meaningful results without a predefined energy
 range. This failure occurs because the Wang-Landau algorithm does not
 have a mechanism for properly setting and adjusting weights on newly
 observed energies. After several reset cycles of the Wang-Landau
-algorithm, the weight-modifying factor $f_k$ gets exceedingly small,
-causing Wang-Landau to get stuck at newly encountered low energies
-trying to fix their weights with a factor $f_k$ whose magnitude is
+algorithm, the weight-modifying factor $f_k$ gets exceedingly small
+relative to its initial value. When Wang-Landau finds new low
+energies, therefore, the simulation gets stuck trying to fix the
+weights at these energies with a factor $f_k$ whose magnitude is
 appropriate for fine tuning, rather than heavy adjustment. If
 Wang-Landau knows the energy range of interest to begin with, it will
 not decrease $f_k$ until it has observed all important energies, and
 adjusted their weights to some reasonable value. Due to the drastic
-failure of Wang-Landau, will omit its results, which are nonsensical,
-from many figures.
+failure of Wang-Landau, will omit its nonsensical results from some
+figures. \fixme{which figures?}
 
 The energy histogram in Figure \ref{fig:arrays} shows that TMMC and
 OE-TMMC spend considerably less time at important low energies than
 the simple flat and vanilla Wang-Landau methods. At face value, this
-behavior of TMMC and OE-TMMC is undesirable.
+behavior of TMMC and OE-TMMC is undesirable, as these are the most
+interesting energies for low temperatures, and the most difficult
+energies to sample.
 
 High energy histogram counts at low energies mean that a simulation
 has collected many statistics on these energies, but the energy
-histogram contains no information about how correlated different
-energy observations are. To determine how effective different
-simulations are at collecting uncorrelated statistics, we can look at
-the pessimistic sample rate $r_p\p{E}$, which is the mean number of
-simulation iterations required to sample a given energy $E$. This rate
-is given in terms of the number of iterations $I$ in a simulation
-(where we always have $I=10^5N^2$) and the pessimistic sample rate
-$s_p\p{E}$ by $r_p\p{E}=I/s_p\p{E}$. Figure \ref{fig:sample_rates}
-shows pessimistic sample rates for all methods except Wang-Landau
-averaged over 30 random number generator seeds for $N=25$
-simulations. Lower pessimistic sample rates mean that a simulation
-takes less time to collect statistics which are guaranteed to be
-uncorrelated. By this metric, TMMC and OE-TMMC again perform worse
-than simple flat and vanilla Wang-Landau.\fixme{comment on OETMMC
-  doing worse than TMMC}
+histogram contains no information about how correlated these
+statistics are. To determine how effective different simulations are
+at collecting uncorrelated statistics, we can look at the pessimistic
+sample rate $r_p\p{E}$, which is the mean number of simulation
+iterations required to sample a given energy $E$. This rate is roughly
+equal to the number of iterations $I$ in a simulation and the
+pessimistic sample rate $s_p\p{E}$ by $r_p\p{E}=I/s_p\p{E}$; the
+greater the number of iterations $I$, the better this
+approximation. Figure \ref{fig:sample_rates} shows pessimistic sample
+rates averaged over 30 simulations with $N=25$. Lower pessimistic
+sample rates mean that a simulation takes less time to collect
+statistics which are guaranteed to be uncorrelated. By this metric,
+TMMC and OE-TMMC again perform worse than simple flat and vanilla
+Wang-Landau.\fixme{comment on why it is interesting that OETMMC doing
+  worse than TMMC?}
 
 \begin{figure}
   \centering
@@ -1651,10 +1655,10 @@ than simple flat and vanilla Wang-Landau.\fixme{comment on OETMMC
 \label{sec:properties}
 
 Histograms and sampling rates let us speculate about the quality of a
-simulations, but the most important task for any simulation is to
-yield accurate physical results. We therefore compute, via the formula
-in (\ref{eq:XT}), the temperature dependence of the square-well
-fluid's potential energy
+simulations, but the most important deliverable of any simulation is
+accurate physical results. We therefore compute, via the formula in
+(\ref{eq:XT}), the temperature dependence of the square-well fluid's
+potential energy
 \begin{align}
   U=\bk{E}_T,
   \label{eq:U}
@@ -1665,8 +1669,7 @@ the heat capacity
   =\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2,
   \label{eq:CV}
 \end{align}
-and the configurational entropy\fixme{how is this different from
-  regular entropy?}
+and the configurational entropy \fixme{is this correct?}
 \begin{align}
   S_{\t{config}}\p{T}=k\bk{\f{E}{kT}+\ln Z}_T
   -k\bk{\f{E}{kT}+\ln Z}_{T\to\infty}.
@@ -1675,23 +1678,24 @@ and the configurational entropy\fixme{how is this different from
 All of these properties are directly computable from the density of
 states $D\p{E}$, and are shown in Figures
 \ref{fig:internal_energy}--\ref{fig:config_entropy} for $N=25$
-simulations, averaged over 30 random number generator seeds. When
-looking at these figures, one should remember that we are only
-confident in results down to $kT/\epsilon=0.2$ for regular
-simulations, and $kT/\epsilon=0.1$ for golden ones. With the exception
-of Wang-Landau, which has a heavy low-energy bias, all simulations
-agree fairly well on these properties of the square-well fluid.
+simulations, averaged over 30 simulations. When looking at these
+figures, one should remember that we are only confident in results
+down to $kT=0.2\epsilon$ for regular simulations, and $kT=0.1\epsilon$
+for golden ones. With the exception of Wang-Landau, which has a heavy
+low-energy bias, all simulations agree fairly well on these properties
+of the square-well fluid.
 
 Though Figures \ref{fig:internal_energy}--\ref{fig:config_entropy} are
 interesting for studying the square-well fluid, they do not help us
 resolve the efficacy of different histogram methods. These figures do,
 however, show that the square-well fluid has a phase transition around
-$kT/\epsilon\approx0.5$, which justifies our choice of
-$kT_{\t{min}}/\epsilon=0.2$ and ensures that the histogram methods are
+$kT\approx0.5\epsilon$, which justifies our choice of
+$kT_{\t{min}}=0.2\epsilon$ and ensures that the histogram methods are
 indeed performing the nontrivial task of exploring the liquid-gas
 phase boundary of the square-well fluid. For the purposes of this
 paper, we will neglect to demonstrate that this phase transition is
-indeed between liquid and gas phases, and take this fact as given.
+indeed between liquid and gas phases, and take this fact as
+given. \fixme{cite instead of stating as fact?}
 
 \begin{figure}[!b]
   \centering
@@ -1749,21 +1753,22 @@ indeed between liquid and gas phases, and take this fact as given.
 Having a sense of how $U$, $C_V$ and $S_{\t{config}}$ behave with
 respect to temperature, we can now look at the how the errors $\Delta
 U$, $\Delta C_V$ and $\Delta S_{\t{config}}$ relative to the TMMC
-golden calculations for each method (except Wang-Landau). Figures
-\ref{fig:internal_energy_err}--\ref{fig:config_entropy_err} show these
-errors. Much like the arrays in Figure \ref{fig:arrays}, we provide
-these figures only for a sense of how error curves behave. Errors (at
-$kT/\epsilon\ge0.2$) typically peak near the phase transition at
-$kT/\epsilon\approx0.5$, and drop back down.
+golden calculations, shown in Figures
+\ref{fig:internal_energy_err}--\ref{fig:config_entropy_err}. Much like
+the arrays in Figure \ref{fig:arrays}, we provide these figures for a
+sense of how error curves behave. Errors (at $kT\ge0.2\epsilon$)
+typically peak near the phase transition at $kT\approx0.5\epsilon$,
+and drop back down.
 
 Figures \ref{fig:u_scaling}--\ref{fig:s_scaling} provide a more
 comprehensive picture of errors from each method. These figures show
-the average maximum error in $U$, $C_V$, and $S$ for different system
-sizes. Though errors jump around considerably in these figures, the
-fact that they are roughly level between $N=15$ to $25$ justifies the
-choice $N^2$ scaling for our number of initialization iterations.
-Future studies of larger systems might use this scaling for initial
-estimates of initialization times.
+the average maximum error in $U$, $C_V$, and $S_{\t{config}}$ for
+different system sizes. Though errors jump around considerably in
+these figures, the fact that they are roughly stable (logarithmically)
+between $N=15$ to $25$ justifies the choice $N^2$ scaling for our
+number of initialization iterations.  Future studies might use this
+scaling to estimate appropriate initialization time for larger
+systems.
 
 \begin{figure}[p]
   \centering
@@ -1817,27 +1822,28 @@ estimates of initialization times.
   \label{fig:s_comps}
 \end{figure}
 
-
-It is more meaningful to compare errors against errors, rather than
-system size. \fixme{wording} Figures
-\ref{fig:u_comps}--\ref{fig:s_comps} show the errors of each method
-plotted against errors of the converged flat histogram weight
+Figures \ref{fig:u_comps}--\ref{fig:s_comps} provide a different
+visualization of the same information as in Figures
+\ref{fig:u_scaling}--\ref{fig:s_scaling}, plotting the errors of all
+histogram methods against those of converged flat histogram weight
 simulations. The fact that some points fall below the diagonal
 reference line is strange, and indicates that some regular simulations
 are outperforming the converged flat ones. We do not understand why
 such events occur, as converged flat simulations should be using
 high-quality golden data to construct weight arrays, and should
-therefore outperform all standard simulations. These events are thus
-worthwhile looking into in more detail.
+therefore outperform all standard simulations. \fixme{comment on why
+  some methods might do better than CFW?}
 
-Figures \ref{fig:u_scaling}--\ref{fig:s_comps} make clear, again, the
+As with the arrays, the error comparison figures demonstrate the
 inability of Wang-Landau to sample a system without a predefined
-energy range. These figures also show that the performances of simple
-flat method, vanilla Wang Landau, and TMMC are about the same, except
-for an anomalous case with $N=21$ in which simple flat yields
-simulation results with large errors. We do not know the reason for
-this anomalous case, which might be worth investigating. Finally,
-these error figures further confirm earlier suspicions of OE-TMMC's
+energy range. The simple flat method, vanilla Wang Landau, and TMMC
+seem to give comparable errors, except for some anomalous cases with
+$N=18$ and $N=21$ in which simple flat has large errors. We do not
+know the reason for these anomalies, but they could occur if the
+method terminates before finding energies near $E_-$, in which case it
+would get stuck in simulation at low energies with canonical weights
+for the minimum temperature $kT_{\t{min}}=0.2\epsilon$. Finally, these
+error figures further confirm earlier suspicions of OE-TMMC's
 underperformance relative to TMMC, despite the fact that it is
 supposed to provide an improvement over the TMMC weight array.
 
@@ -1846,27 +1852,26 @@ supposed to provide an improvement over the TMMC weight array.
 \section{Conclusions}
 \label{sec:conclusions}
 
-While the results in this paper are not strongly conclusive, they may
-be used as guidelines for future studies of histogram methods,
-especially as applied to the square-well fluid. After implementing
-several histogram methods and applying them to the $\lambda=1.3$,
-$\eta=0.3$ square-well fluid, we found that Wang-Landau, together with
-a predefined energy range, consistently yields the smallest errors and
-highest low-energy sampling rates. Without prior knowledge of the
-minimum important energy of a system, however, Wang-Landau can get
-stuck at low energies, and is incapable of recovering. Wang-Landau is
-therefore most appropriate for studying systems in which the entire
-energy range is known a priori, or in which only a given energy range
-is of particular interest.
+After implementing several histogram methods and applying them to the
+$\lambda=1.3$, $\eta=0.3$ square-well fluid, we found that
+Wang-Landau, if given a predefined energy range, consistently yields
+some of the smallest errors and highest low-energy sampling rates of
+all histogram methods, with comparable results from TMMC and the
+simple flat method. Without prior knowledge of the minimum important
+energy of a system, however, Wang-Landau can get stuck at low
+energies, and is incapable of recovering. Wang-Landau is therefore
+most appropriate for studying systems in which the entire energy range
+is known a priori, or in which only a given energy range is of
+particular interest. The simple flat method also sometimes fails to
+initialize; if gone unnoticed, such failures can be costly in terms of
+computation time and resources. Our implementation of the optimized
+ensemble using the transition matrix resulted in lower sampling rates
+and higher errors than the flat histogram TMMC weights. We suspect
+that the optimized ensemble is failing to improve TMMC because its
+theory neglects the discretization of energies, which may be
+non-negligible for the systems we simulated.
 
-The simple flat method and TMMC methods seem to perform roughly on par
-with vanilla Wang-Landau (i.e. Wang-Landau with a specified energy
-range), except an anomalous case of failure worth investigating on the
-part of simple flat. Our implementation of the optimized ensemble
-using a transition matrix, which is meant to improve the TMMC weight
-array, seemed to only make the weight array worse.
-
-\fixme{fix when I'm awake}
+\fixme{make the conclusion more satisfying?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
