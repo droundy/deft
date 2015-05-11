@@ -46,10 +46,8 @@ all_figs, ((ax_hist, ax_lnw),(ax_dos, ax_legend)) \
 
 cap = 60
 
-for method in methods:
+def get_arrays(wildfilename):
 
-    wildfilename = "../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%%s.dat" \
-                   % (seed, ww, ff, N, method)
     e_hist = numpy.loadtxt(wildfilename%'E')
     lnw = numpy.loadtxt(wildfilename%'lnw')
     energy = -e_hist[:,0]
@@ -58,12 +56,16 @@ for method in methods:
     log10_dos = numpy.log10(e_hist[:,1]) - log10w
     log10_dos -= log10_dos.max()
 
+    return energy, e_hist, log10w, log10_dos
 
-    if method != 'wang_landau':
-        plt.figure('dos')
-        plt.plot(energy, log10_dos, styles.dots(method),
-                 markerfacecolor='none', markeredgecolor=styles.color(method),
-                 label=styles.title(method))
+
+for method in methods:
+
+    wildfilename = "../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%%s.dat" \
+                   % (seed, ww, ff, N, method)
+
+    energy, e_hist, log10w, log10_dos = get_arrays(wildfilename)
+
     ax_dos.plot(energy[log10_dos > -cap], log10_dos[log10_dos > -cap], styles.dots(method),
                 markerfacecolor='none', markeredgecolor=styles.color(method),
                 label=styles.title(method))
@@ -75,6 +77,14 @@ for method in methods:
     ax_lnw.plot(energy[log10w < cap], log10w[log10w < cap], styles.dots(method),
                 markerfacecolor='none', markeredgecolor=styles.color(method),
                 label=styles.title(method))
+
+# input: ["../data/periodic-ww1.30-ff0.10-N100-tmmc-golden-%s.dat" % data for data in ["E","lnw"]]
+
+wildfilename = "../data/periodic-ww1.30-ff0.10-N100-tmmc-golden-%s.dat"
+energy, e_hist, log10w, log10_dos = get_arrays(wildfilename)
+
+plt.figure('dos')
+plt.plot(energy, log10_dos,'k.')
 
 def tentothe(n):
     if int(n) == n:
@@ -88,10 +98,9 @@ ylocs, ylabels = plt.yticks()
 newylabels = [tentothe(n) for n in ylocs]
 plt.yticks(ylocs, newylabels)
 
-plt.axvline(min_e,linewidth=1,color='k',linestyle=':')
 plt.xlabel('$E/\epsilon$')
 plt.ylabel('$\\tilde D(E)$')
-plt.legend(loc='best')
+# plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/dos-example.pdf")
 

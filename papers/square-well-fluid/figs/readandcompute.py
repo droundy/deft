@@ -52,17 +52,28 @@ def minT(fbase):
                 break
     return min_T
 
+def dr_g(fbase):
+    with open(fbase+"-E.dat") as file:
+        for line in file:
+            if "de_g" in line:
+                return float(line.split()[-1])
+
 def g_r(fbase, ff, T, N):
-    E = numpy.loadtxt(fbase+"-gE.dat", ndmin=2)
-    lnw = numpy.loadtxt(fbase+"-glnw.dat", ndmin=2)
-    r = numpy.loadtxt(fbase+"-gr.dat", ndmin=2)
-    hist = numpy.loadtxt(fbase+"-gEhist.dat", ndmin=2)
-    ghist = numpy.loadtxt(fbase+"-g.dat", ndmin=2)
+    data = numpy.loadtxt(fbase+"-g.dat", ndmin=2)
+    ghist = data[1:,3:]
+    dr = dr_g(fbase)
+    r_1d = data[0,3:]
+    E_1d = data[1:,0]
+    hist_1d = data[1:,1]
+    lnw_1d = data[1:,2]
+    n_E = len(E_1d)
+    n_r = len(r_1d)
+    r, E = numpy.meshgrid(r_1d, E_1d)
+    r, lnw = numpy.meshgrid(r_1d, lnw_1d)
+    r, hist = numpy.meshgrid(r_1d, hist_1d)
 
     ln_dos = numpy.log(hist) - lnw
 
-    n_E = len(E[:,0])
-    n_r = len(E[0,:])
 
     ln_dos_boltz = ln_dos - E/T
     dos_boltz = numpy.exp(ln_dos_boltz - ln_dos_boltz.max())
@@ -85,7 +96,7 @@ def g_r(fbase, ff, T, N):
             g += dos_boltz[i,:]*g_of_E[i,:]
             counts += dos_boltz[i,0]*hist[i,0]
             if dos_boltz[i,0] > 0.0001:
-                print 'hist %d at energy %d with weight %g' % (hist[i,0], i, dos_boltz[i,0])
+                print 'hist %d at energy %d with weight %g' % (hist[i,0], E[i,0], dos_boltz[i,0])
 
     print 'with N %d we have counts %g' % (N, counts)
     return g, r[0,:]

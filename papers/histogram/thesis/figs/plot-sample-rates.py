@@ -86,7 +86,7 @@ for method in methods:
 for method in methods:
     plt.semilogy(energy[method], net_rate[method], styles.dots(method),
                  markerfacecolor='none', markeredgecolor=styles.color(method),
-                 label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+                 label=styles.title(method))
 
 plt.axvline(min_e,linewidth=1,color='k',linestyle=':')
 plt.xlabel('$E/\epsilon$')

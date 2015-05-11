@@ -120,15 +120,15 @@ for n in range(len(Ns)):
         plt.figure('u')
         plt.loglog(u_errors[reference][n], u_errors[method][n], styles.dots(method),
                    markerfacecolor='none', markeredgecolor=styles.color(method),
-                   label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+                   label=styles.title(method))
         plt.figure('cv')
         plt.loglog(cv_errors[reference][n], cv_errors[method][n], styles.dots(method),
                    markerfacecolor='none', markeredgecolor=styles.color(method),
-                   label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+                   label=styles.title(method))
         plt.figure('s')
         plt.loglog(s_errors[reference][n], s_errors[method][n], styles.dots(method),
                    markerfacecolor='none', markeredgecolor=styles.color(method),
-                   label=styles.title(method).replace('Vanilla Wang-Landau','Wang-Landau'))
+                   label=styles.title(method))
 
 for fig in ['u','cv','s']:
     plt.figure(fig)

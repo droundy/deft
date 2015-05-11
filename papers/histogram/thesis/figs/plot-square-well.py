@@ -16,7 +16,10 @@ top = 0.3
 bottom = -1
 
 plot_size = (plot_dims[0]*plot_scale,plot_dims[1]*plot_scale)
-plt.figure(figsize=plot_size)
+
+fig = plt.figure(figsize=plot_size)
+ax = fig.add_axes([0.15, 0.15, 0.83, 0.83])
+
 
 plt.plot([1,1,ww,ww,r_max],[v_max,bottom,bottom,top,top],'k')
 plt.xlim(0,r_max)
@@ -26,7 +29,6 @@ plt.xticks([0,1,ww],['$0$','$\\sigma$','$\\lambda\\sigma$'])
 plt.yticks([top,bottom],['$0$','$-\epsilon$'])
 plt.xlabel('$r$')
 plt.ylabel('$v_{sw}$')
-plt.tight_layout()
 
 plt.savefig('figs/square-well.pdf')
 

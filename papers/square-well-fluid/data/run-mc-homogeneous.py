@@ -19,7 +19,7 @@ N = int(sys.argv[3])
 
 
 min_T = 0.1
-iterations = 1e6
+iterations = 1e8
 mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/square-well-fluid/data/mc'
@@ -35,9 +35,11 @@ else:
 
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
-cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations)
+cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations*10)
 
 cmd += ' --de_g 0.01' # nice high-resolution radial distribution function data
+
+cmd += ' --min_T %g' % min_T
 
 cmd += ' --data_dir %s --filename %s' % (datadir, fname)
 

@@ -886,7 +886,7 @@ int main(int argc, const char *argv[]) {
           "# N: %i\n"
           "# walls: %i\n"
           "# cell dimensions: (%g, %g, %g)\n"
-          "# seed: %li\n"
+          "# seed: %lu\n"
           "# de_g: %g\n"
           "# de_density: %g\n"
           "# translation_scale: %g\n"
@@ -894,11 +894,13 @@ int main(int argc, const char *argv[]) {
           "# energy_levels: %i\n"
           "# min_T: %g\n"
           "# fractional_sample_error after initialization: %g\n"
+          "# max_entropy_state: %d\n"
           "# min_important_energy after initialization: %i\n\n",
           version_identifier(),
           sw.well_width, sw.filling_fraction, sw.N, sw.walls, sw.len[0], sw.len[1],
           sw.len[2], seed, de_g, de_density, sw.translation_scale, neighbor_scale,
           sw.energy_levels, sw.min_T, fractional_sample_error,
+          sw.max_entropy_state,
           sw.set_min_important_energy());
 
 
@@ -1068,6 +1070,7 @@ int main(int argc, const char *argv[]) {
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
       fprintf(e_out, "%s", countinfo);
+      fprintf(e_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
       fprintf(e_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
       // fprintf(e_out, "# min_important_energy: %i\n\n",sw.set_min_important_energy());
       fprintf(e_out, "# energy   counts\n");
@@ -1148,61 +1151,27 @@ int main(int argc, const char *argv[]) {
           printf("Unable to create file %s\n", g_fname);
           exit(1);
         }
-        sprintf(g_fname, "%s/%s-gr.dat", data_dir, filename);
-        FILE *gr_out = fopen((const char *)g_fname, "w");
-        if (!gr_out) {
-          printf("Unable to create file %s\n", g_fname);
-          exit(1);
-        }
-        sprintf(g_fname, "%s/%s-gE.dat", data_dir, filename);
-        FILE *gE_out = fopen((const char *)g_fname, "w");
-        if (!gE_out) {
-          printf("Unable to create file %s\n", g_fname);
-          exit(1);
-        }
-        sprintf(g_fname, "%s/%s-glnw.dat", data_dir, filename);
-        FILE *glnw_out = fopen((const char *)g_fname, "w");
-        if (!glnw_out) {
-          printf("Unable to create file %s\n", g_fname);
-          exit(1);
-        }
-        sprintf(g_fname, "%s/%s-gEhist.dat", data_dir, filename);
-        FILE *gEhist_out = fopen((const char *)g_fname, "w");
-        if (!gEhist_out) {
-          printf("Unable to create file %s\n", g_fname);
-          exit(1);
-        }
         delete[] g_fname;
 
         fprintf(g_out, "%s", headerinfo);
         fprintf(g_out, "%s", countinfo);
-        fprintf(g_out, "# data table containing values of g "
-                "(i.e. radial distribution function)\n"
-                "# first column reserved for specifying energy level\n"
-                "# column number r_n (starting from the second column, "
-                "counting from zero) corresponds to radius r given by "
-                "r = (r_n + 0.5) * de_g\n");
+        fprintf(g_out, "# E total_counts lnw r=%g r=%g etc\n", de_g*0.5, de_g*1.5);
+        fprintf(g_out, "0\t0\t0\t");
+        for(int r_i = 0; r_i < g_bins; r_i++) {
+          fprintf(g_out, "%g ", de_g*(r_i+0.5));
+        }
+        fprintf(g_out, "\n");
         for(int i = 0; i < sw.energy_levels; i++){
-          if (sw.energy_histogram[i] > 0){ // if we have RDF data at this energy
+          if (g_energy_histogram[i] > 0){ // if we have RDF data at this energy
+            fprintf(g_out, "%d\t%ld\t%g\t",
+                    -i, g_energy_histogram[i], sw.ln_energy_weights[i]);
             for(int r_i = 0; r_i < g_bins; r_i++) {
               fprintf(g_out, "%ld ", g_histogram[i][r_i]);
-              fprintf(gr_out, "%.10g ", (r_i+0.5)*de_g);
-              fprintf(gE_out, "%d ", -i);
-              fprintf(glnw_out, "%.10g ", sw.ln_energy_weights[i]);
-              fprintf(gEhist_out, "%ld ", g_energy_histogram[i]);
             }
             fprintf(g_out, "\n");
-            fprintf(gr_out, "\n");
-            fprintf(gE_out, "\n");
-            fprintf(glnw_out, "\n");
-            fprintf(gEhist_out, "\n");
           }
         }
         fclose(g_out);
-        fclose(gr_out);
-        fclose(gE_out);
-        fclose(glnw_out);
-        fclose(gEhist_out);
       }
 
       // Saving density data

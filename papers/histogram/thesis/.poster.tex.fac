@@ -1,0 +1,5 @@
+
+| pdflatex poster.tex && pdflatex poster.tex
+< figs/square-well.pdf
+< figs/phase-diagram.pdf
+> poster.pdf
