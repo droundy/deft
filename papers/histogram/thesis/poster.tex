@@ -183,11 +183,10 @@ fontscale=0.27,margin=0.75in]{baposter}
       \centering
       \includegraphics[width=0.5\columnwidth]{figs/dos-example.pdf}
       \caption{Sample density of states of a particular square-well
-        fluid ($\lambda=1.3$, $\eta=0.3$), as computed using several
-        methods. The logarithmic span of the density of states is
-        proportional to the number of moves one must simulate via
-        standard Monte Carlo in order to observe the energies with the
-        lowest state densities.}
+        fluid ($\lambda=1.3$, $\eta=0.3$). The logarithmic span of the
+        density of states is proportional to the number of moves one
+        must simulate via standard Monte Carlo in order to observe the
+        energies with the lowest state densities.}
       \label{fig:dos}
     \end{figure}
 
@@ -209,8 +208,9 @@ fontscale=0.27,margin=0.75in]{baposter}
     % literature exists on these methods' systematic comparison, or on
     % their application to the square-well fluid. We implement several
     % methods, including Wang-Landau, transition matrix Monte Carlo, and
-    % a modified version of the so-called optimized ensemble, and
-    % determine several metrics for their comparison.
+    % a modified version of the so-called optimized ensemble. We compare
+    % low energy sampling rates for all methods, as well as relative
+    % errors in thermodynamic properties computed via each method.
 
     \begin{itemize}
     \item Means for biasing Monte Carlo simulations in favor of lower
@@ -224,30 +224,35 @@ fontscale=0.27,margin=0.75in]{baposter}
     \item We implement several methods: our own ``simple flat''
       method, Wang-Landau, transition matrix Monte Carlo (TMMC), and a
       hybrid of TMMC with a so-called ``optimized ensemble'' method
+    \item Comparison metrics: low energy sampling rates, and relative
+      errors in thermodynamic properties computed using results from
+      simulating via each method
     \end{itemize}
 
   }
 
-  \headerbox{Comparison}
-  {name=comparison,column=2}{%
+  \headerbox{Results}
+  {name=results,column=2}{%
 
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.5\columnwidth]{figs/sample-rates.pdf}
-      \caption{Sample rates}
+      \includegraphics[width=0.6\columnwidth]{figs/sample-rates.pdf}
+      \caption{Iterations per statistically independent energy
+        sample.}
       \label{fig:sample_rates}
     \end{figure}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.5\columnwidth]{figs/u-comps.pdf}
-      \caption{Errors}
+      \includegraphics[width=0.6\columnwidth]{figs/u-comps.pdf}
+      \caption{Maximum errors in a set of simulations, relative to a
+        method which controls for system size and simulation time.}
       \label{fig:errors}
     \end{figure}
 
   }
 
   \headerbox{Conclusions}
-  {name=conclusions,column=2,below=comparison}{%
+  {name=conclusions,column=2,below=results}{%
 
 
 
