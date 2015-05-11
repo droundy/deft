@@ -882,7 +882,7 @@ int main(int argc, const char *argv[]) {
   sprintf(headerinfo,
           "# version: %s\n"
           "# well_width: %g\n"
-          "# ff: %g\n"
+          "# ff: %.16g\n"
           "# N: %i\n"
           "# walls: %i\n"
           "# cell dimensions: (%g, %g, %g)\n"
