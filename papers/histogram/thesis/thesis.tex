@@ -144,19 +144,18 @@ particular introduces application challenges not manifest in
 traditional models for testing and benchmarking such numerical
 techniques (e.g. the Ising model). We implement the Wang-Landau
 method, transition matrix Monte Carlo, as well as two methods of our
-own. The first of our methods is novel, while the second is a hybrid
-of two published methods (transition matrix Monte Carlo and the
-optimized ensemble).
+own. The first of our methods, the simple flat method, is novel, while
+the second is a hybrid of two published methods (transition matrix
+Monte Carlo and the optimized ensemble).
 
 We find that Wang-Landau potentially performs better than other
 histogram methods, but fails catastrophically without a predefined
-energy range for the square-well fluid. Our first method gives results
-comparable to successful Wang-Landau simulations, but can have
-anomalous cases with large error. The transition matrix Monte Carlo
-consistently yields results whose quality is marginally worse than
-functional Wang-Landau. Finally, our implementation of the optimized
-ensemble using a transition matrix results in worse performance over
-the straightforward transition matrix Monte Carlo method.
+energy range for the square-well fluid. The simple flat method and
+transition matrix Monte Carlo give results comparable to successful
+Wang-Landau simulations, but simple flat has some anomalous cases with
+large errors. Finally, our implementation of the optimized ensemble
+using a transition matrix results in worse performance over the
+straightforward transition matrix Monte Carlo method.
 
 \fixme{edit when I'm awake}
 
@@ -263,22 +262,22 @@ scale $\sigma$. In practice, our simulation codes use dimensionless
 energies $E/\epsilon$, temperatures $kT/\epsilon$, and distances
 $r/\sigma$.
 
-\subsection{Monte Carlo fluid simulations}
+\subsection{Monte Carlo fluid simulation}
 \label{sec:mc_sim}
 
-While model systems are powerful tools for understanding complex
-physical systems, they do not themselves exist in the real
-world. Consequently, direct experimental tests of theories for model
-system (e.g. square-well density functional theories) are not
-possible. For this reason, model system theories are commonly tested
-against Monte Carlo simulations. Proper implementation of Monte Carlo
-methods to study completely characterized systems ensures that
-statistical results from simulations converge on the exact properties
-of the simulated system in the infinite simulation time
-limit. Furthermore, uncertainties in quantities computed via Monte
-Carlo simulations are typically well-defined, monotonically decreasing
-functions of simulation time, allowing one to run simulations to the
-desired level of accuracy.
+Model systems such as the square-well fluid are powerful tools for
+understanding complex physical systems, but they do not themselves
+exist in the real world. Consequently, direct experimental tests of
+theories for model system (e.g. square-well density functional
+theories) are not possible. For this reason, model system theories are
+commonly tested against Monte Carlo simulations. Proper implementation
+of Monte Carlo methods to study completely characterized systems
+ensures that statistical results from simulations converge on the
+exact properties of the simulated system in the infinite simulation
+time limit. Furthermore, uncertainties in quantities computed via
+Monte Carlo simulations are typically well-defined, monotonically
+decreasing functions of simulation time, allowing one to run
+simulations to the desired level of accuracy.
 
 \subsubsection{Implementation}
 \label{sec:mc_implementation}
@@ -312,7 +311,7 @@ desired level of accuracy.
 \end{algorithm}
 
 Algorithm \ref{alg:metropolis} provides a sketch of unbiased,
-Metropolis Monte Carlo fluid simulations. Such an algorithm is
+Metropolis Monte Carlo fluid simulation. Such an algorithm is
 ``unbiased'' in the sense that it collects statistics (i.e. data) on
 all valid system configurations with equal probability. Statistics
 whose collection time scales as $\mathcal O\p{1}$ with system size,
@@ -1330,7 +1329,7 @@ Carlo move, we can say that
 where $P\p{E_i\to E_j}$ is the probability of attempting the move
 $E_i\to E_j$ and $P_m\p{E_i\to E_j}$ is the probability of accepting
 that move, should it occur. In terms of a transition histogram $\tilde
-T\p{E,\Delta E}$ with $E=E_i$ and $\Delta E=E_f-E_i$,
+T_d\p{E,\Delta E}$ with $E=E_i$ and $\Delta E=E_f-E_i$,
 \begin{align}
   P_b\p{E\to E+\Delta E} =\f{\tilde T_d\p{E,\Delta E}w\p{E+\Delta
       E}/w\p{E}} {\sum_{\Delta E'}\tilde T_d\p{E,\Delta
@@ -1358,10 +1357,11 @@ in terms of which the diffusivity $\alpha\p{E}$ is
   \alpha\p{E}=\bk{\Delta E^2}_E -\bk{\Delta E}_E^2.
   \label{eq:microscopic_diffusitivy}
 \end{align}
-Diffusivity $\alpha\p{E}$ is thus the variance of the change in energy
-$\Delta E$ from as single move out of $E$. Reconciling this definition
-with that we provide in (\ref{eq:walker_current_definition}) is
-considered outside the scope of this paper.
+The diffusivity $\alpha\p{E}$ is thus the variance of the change in
+energy $\Delta E$ from as single move out of $E$. Reconciling this
+definition with that we provide in
+(\ref{eq:walker_current_definition}) is considered outside the scope
+of this paper. \fixme{say something more convincing? cite?}
 
 The hybrid OE-TMMC method thus first runs Algorithm \ref{alg:tmmc} to
 collect a transition histogram and compute flat histogram weights,
@@ -1872,6 +1872,21 @@ theory neglects the discretization of energies, which may be
 non-negligible for the systems we simulated.
 
 \fixme{make the conclusion more satisfying?}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Acknowledgments}
+\label{sec:acknowledgements}
+
+I wish to thank, first and foremost, my advisor Dr. David Roundy, for
+mentoring me and providing me a wealth of knowledge and expertise in
+various subjects of physics, numerical methods, and programming
+nuances. I would also like thank Paho Lurie-Gregg, with whom I
+frequently exchange and discuss codes and ideas, and whose hard
+polyhedra Monte Carlo simulations I used as the template for my own
+codes. Lastly, I would like to thank thank Eva Morgun, who prompted me
+to {\it act} on my textbook enthusiasm for physics, and get involved
+in the fun and interesting world of scientific research.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
