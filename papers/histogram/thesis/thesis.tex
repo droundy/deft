@@ -413,37 +413,41 @@ Figure \ref{fig:dos_sample} provides an example of an unnormalized
 density of states $\tilde D\p{E}$ in energy for a particular
 square-well fluid. The density of states has been ``normalized'' to
 have a maximum value of $1$ in order to emphasize the logarithmic span
-of $D\p{E}$. This logarithmic span ($\sim10^{60}$) is proportional to
+of $D\p{E}$. This logarithmic span ($\sim10^{300}$) is proportional to
 the number of moves which one must simulate via Metropolis Monte Carlo
 in order to observe the energies with the lowest state densities. For
-reference, the world's current fastest supercomputers can perform
-$\sim10^{16}$ floating-point operations per second.
+reference, there are approximately $10^{80}$ atoms in the observable
+universe, and the world's current fastest supercomputers can perform
+about $10^{16}$ floating-point operations per second.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.6\textwidth]{figs/dos-example.pdf}
   \caption[Density of states]
   {Sample density of states for square-well fluid with a well width
-    $\lambda=1.3$, filling fraction $\eta=0.3$, and $N=25$ spheres, as
-    computed by several histogram methods. The density of states has
-    been normalized to have a maximum value of $1$.}
+    $\lambda=1.3$, filling fraction $\eta=0.1$, and $N=100$ spheres,
+    computed via the transition matrix Monte Carlo method. The density
+    of states has been normalized to have a maximum value of $1$.}
   \label{fig:dos_sample}
 \end{figure}
 
 \subsubsection{Biased sampling}
 \label{sec:biased_sampling}
 
-Histogram methods provide a means to address Metropolis Monte Carlo's
-inability to sufficiently sample low entropy states by introducing a
-bias into the otherwise random sampling of state space. A weighting
-function $w$ is introduced, whose domain is the value of some property
-$X\p{s}$ which depends on the system state $s$. An additional
-condition is then added to step \ref{alg:metropolis_move} of Algorithm
-\ref{alg:metropolis} in order to accept an attempted move: the weights
-$w\p{X_i}$ and $w\p{X_f}$ of the initial (pre-move) state $s_i$ and
-final (post-move) state $s_f$, respectively, are used to determine the
-probability $P_m\p{s_i\to s_f}$ of accepting an otherwise valid move
-via
+We do not have time to count all of the atoms in the observable
+universe, and we certainly do not have time to wait for Metropolis
+Monte Carlo to sample (and worse, collect decent statistics on) low
+energy square-well fluid states. Histogram methods provide a means to
+address Metropolis Monte Carlo's inability to sufficiently sample low
+energy states by introducing a bias into the otherwise random
+sampling of state space. A weighting function $w$ is introduced, whose
+domain is the value of some property $X\p{s}$ which depends on the
+system state $s$. An additional condition is then added to step
+\ref{alg:metropolis_move} of Algorithm \ref{alg:metropolis} in order
+to accept an attempted move: the weights $w\p{X_i}$ and $w\p{X_f}$ of
+the initial (pre-move) state $s_i$ and final (post-move) state $s_f$,
+respectively, are used to determine the probability $P_m\p{s_i\to
+  s_f}$ of accepting an otherwise valid move via
 \begin{align}
   P_m\p{s_i\to s_f}=\min\set{\f{w\p{X_f}}{w\p{X_i}},1}.
   \label{eq:move_prob}
@@ -1149,7 +1153,8 @@ fluid. The band at $\Delta E=0$ indicates that most moves transition
 from an energy to itself. Low energies are more likely to transition
 up in energy, with $\Delta E>0$, than down in energy, with $\Delta
 E<0$. The high energies which are more likely to transition down in
-energy than up are those above the state of maximum entropy.
+energy than up are those above the state of maximum entropy, i.e. the
+state at which $D\p{E}$ is maximal.
 
 \begin{figure}
   \centering
@@ -1886,7 +1891,8 @@ frequently exchange and discuss codes and ideas, and whose hard
 polyhedra Monte Carlo simulations I used as the template for my own
 codes. Lastly, I would like to thank thank Eva Morgun, who prompted me
 to {\it act} on my textbook enthusiasm for physics, and get involved
-in the fun and interesting world of scientific research.
+in the fun and interesting world of scientific research. \fixme{Thank
+  Jansen and McIntyre}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
