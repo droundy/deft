@@ -2,7 +2,7 @@
 from __future__ import division
 import os, numpy, sys, re
 
-if len(sys.argv) != 5:
+if len(sys.argv) != 6:
     print "usage:  python2 %s ww ff lenxy lenz" % sys.argv[0]
     exit(1)
 
@@ -17,9 +17,9 @@ ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 lenxy = float(sys.argv[3])
 lenz = float(sys.argv[4])
+iterations = round(float(sys.argv[5]))
 
 min_T = 0.1
-iterations = 1e7
 n = ff/(4*numpy.pi/3)
 N = round(n*lenxy*lenxy*lenz)
 mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
