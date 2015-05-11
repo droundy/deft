@@ -107,4 +107,5 @@ for fname in pyfs:
         for suf in cache_suffixes:
             print 'c', suf
         print 'C %s/.matplotlib' % os.getenv('HOME')
+        print 'C %s/.cache' % os.getenv('HOME')
         print
