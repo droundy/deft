@@ -1,11 +1,11 @@
 \documentclass[paperwidth=48in,paperheight=36in,
 fontscale=0.27,margin=0.75in]{baposter}
 
-\definecolor{bordercol}{RGB}{40,40,40}
-\definecolor{headercol1}{RGB}{186,215,230}
-\definecolor{headercol2}{RGB}{80,80,80}
-\definecolor{headerfontcol}{RGB}{0,0,0}
-\definecolor{boxcolor}{RGB}{186,215,230}
+\definecolor{border_color}{RGB}{40,40,40}
+\definecolor{header_color_left}{RGB}{186,215,230}
+\definecolor{header_color_right}{RGB}{80,80,80}
+\definecolor{header_font_color}{RGB}{0,0,0}
+\definecolor{box_color}{RGB}{186,215,230}
 
 \frenchspacing
 
@@ -38,11 +38,11 @@ fontscale=0.27,margin=0.75in]{baposter}
 \begin{poster}{
 % options
     %% colors and appearance
-    borderColor=bordercol, %
-    headerColorOne=headercol1, %
-    headerColorTwo=headercol2, %
-    headerFontColor=headerfontcol, %
-    boxColorOne=boxcolor, %
+    borderColor=border_color, %
+    headerColorOne=header_color_left, %
+    headerColorTwo=header_color_right, %
+    headerFontColor=header_font_color, %
+    boxColorOne=box_color, %
     textborder=rectangle, %
     headerborder=open, %
     background=none, %
@@ -166,10 +166,9 @@ fontscale=0.27,margin=0.75in]{baposter}
     \begin{itemize}
     \item Model systems are powerful tools for understanding complex
       physical systems, but they do not exist in the real world
-    \item Direct experimental tests are not possible, so we test
-      theories against Monte Carlo simulations instead
+    \item Theories tested against Monte Carlo simulations
     \item Monte Carlo fluid simulations: moving spheres randomly to
-      collect statistics on properties (e.g. internal energy, density,
+      collect statistics on properties (e.g. potential energy, density,
       etc.) of valid fluid configurations
     \item Studying critical point requires sampling states with highly
       localized distribution of spheres, which is unlikely to occur by

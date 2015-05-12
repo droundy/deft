@@ -186,7 +186,7 @@ int overlaps_with_any(const ball &a, const ball *p, const double len[3], int wal
 
 bool in_cell(const ball &p, const double len[3], const int walls){
   for (int i = 0; i < walls; i++){
-    if (p.pos[i]-p.R < 0.0 || p.pos[i]+p.R > len[i])
+    if (p.pos[i] < 0.0 || p.pos[i] > len[i])
       return false;
   }
   return true;
