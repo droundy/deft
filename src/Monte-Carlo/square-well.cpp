@@ -186,7 +186,7 @@ int overlaps_with_any(const ball &a, const ball *p, const double len[3], int wal
 
 bool in_cell(const ball &p, const double len[3], const int walls){
   for (int i = 0; i < walls; i++){
-    if (p.pos[i]-p.R < 0.0 || p.pos[i]+p.R > len[i])
+    if (p.pos[i] < 0.0 || p.pos[i] > len[i])
       return false;
   }
   return true;
@@ -1261,7 +1261,7 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
         printf("Unable to read ff properly from '%s'\n", line);
         exit(1);
       }
-      if(file_ff != filling_fraction){
+      if (fabs(file_ff - filling_fraction)/filling_fraction > 0.01/N) {
         printf("The filling fraction in the transition matrix file metadata (%g) disagrees "
                "with that requested for this simulation (%g)!\n", file_ff, filling_fraction);
         exit(233);

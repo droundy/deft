@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 
 import matplotlib.patches as patches
 
-matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+matplotlib.rc('font', **{'family': 'serif',
+                         'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
 plot_dims = (5,4)
@@ -20,7 +21,8 @@ ax = fig.add_axes([0.15, 0.16, 0.8, 0.8])
 def draw(start,end,coeffs,color):
     xs = numpy.linspace(0,1)
     ys = coeffs[0]*xs*xs + coeffs[1]*xs
-    plt.plot(xs*(end[0]-start[0])+start[0],ys*(end[1]-start[1])+start[1],color)
+    plt.plot(xs*(end[0]-start[0])+start[0],
+             ys*(end[1]-start[1])+start[1],color)
 
 sg_start = (0,0)
 sg_end = (0.3,0.3)
@@ -35,8 +37,8 @@ sl_end = (sg_end[0]+0.1,1)
 sl_coeffs = (2,2)
 draw(sg_end,sl_end,sl_coeffs,'b')
 
-plt.plot(sg_end[0],sg_end[1],'ko')
-plt.plot(lg_end[0],lg_end[1],'ko')
+plt.plot(sg_end[0],sg_end[1],'k.')
+plt.plot(lg_end[0],lg_end[1],'k.')
 
 def add_text(x,y,text):
     ax.text(x,y,text,ha='center',va='center',
@@ -49,11 +51,9 @@ add_text(0.7,0.2,'gas')
 add_text(0.75,0.75,'supercritical\nfluid')
 
 cp_offset = (0.13,0)
-add_text(lg_end[0]+cp_offset[0],lg_end[1]+cp_offset[1],
-         text='critical\npoint')
+add_text(lg_end[0]+cp_offset[0],lg_end[1]+cp_offset[1],'critical\npoint')
 tp_offset = (0.1,-0.1)
-add_text(sg_end[0]+tp_offset[0],sg_end[1]+tp_offset[1],
-         text='triple\npoint')
+add_text(sg_end[0]+tp_offset[0],sg_end[1]+tp_offset[1],'triple\npoint')
 
 plt.xlim(0,1)
 plt.ylim(0,1)
@@ -63,3 +63,5 @@ plt.xlabel('Temperature')
 plt.ylabel('Pressure')
 plt.savefig('figs/phase-diagram.pdf')
 
+plt.plot(lg_end[0],lg_end[1],'ro')
+plt.savefig('figs/phase-diagram-critical-point.pdf')
