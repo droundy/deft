@@ -14,19 +14,11 @@ fontscale=0.27,margin=0.75in]{baposter}
 \setlist{nolistsep} % more compact spacing between environments
 \setlist[itemize]{leftmargin=*} % nice margins for itemize ...
 
-%%% math and physics
-\usepackage{amsmath} % math packages
-\renewcommand{\t}{\text} % for text in math environment
-\usepackage[boldvectors,braket]{physymb} % physics packages
-\renewcommand{\v}{\vec} % bold vectors
-\newcommand{\p}[1]{\left(#1\right)} % bold vectors
+%%% math and figures
+\usepackage{amsmath,graphicx,float}
 
-%%% figures
-\usepackage{graphicx,grffile,float,subcaption} % floats, etc.
-\usepackage{multirow} % for multirow entries in tables
-
-%% misc.
-\usepackage[font=normalsize,labelfont=bf]{caption} % caption text
+%% caption text
+\usepackage[font=normalsize,labelfont=bf]{caption}
 
 \renewcommand{\title}{Optimizing Monte Carlo Simulation of the
   Square-Well Fluid}
@@ -36,7 +28,7 @@ fontscale=0.27,margin=0.75in]{baposter}
 \begin{document}
 
 \begin{poster}{
-% options
+% poster options
     %% colors and appearance
     borderColor=border_color, %
     headerColorOne=header_color_left, %
@@ -119,11 +111,10 @@ fontscale=0.27,margin=0.75in]{baposter}
       potential given in Figure \ref{fig:pair_potential}
     \item $\lambda$ is called the well width, and $\epsilon$ the well
       depth
-    % \item Natural distance scale $\sigma$ and energy scale $\epsilon$
-    \item First part of potential, $v_{sw}\p{r<\sigma}=\infty$,
+    \item First part of potential, $v_{sw}(r<\sigma)=\infty$,
       forbids spheres from overlapping
     \item Second part of potential,
-      $v_{sw}\p{r:\sigma<r<\lambda\sigma}=-\epsilon$, associates an
+      $v_{sw}(r:\sigma<r<\lambda\sigma)=-\epsilon$, associates an
       energy $-\epsilon$ with each pair of spheres whose centers are
       within distance of $\lambda\sigma$ of each other
     \item Spheres whose centers are more than $\lambda\sigma$ apart do
@@ -166,26 +157,29 @@ fontscale=0.27,margin=0.75in]{baposter}
     \begin{itemize}
     \item Model systems are powerful tools for understanding complex
       physical systems, but they do not exist in the real world
-    \item Theories tested against Monte Carlo simulations
-    \item Monte Carlo fluid simulations: moving spheres randomly to
-      collect statistics on properties (e.g. potential energy, density,
-      etc.) of valid fluid configurations
-    \item Studying critical point requires sampling states with highly
-      localized distribution of spheres, which is unlikely to occur by
-      randomly sampling of all possible fluid configurations (second
-      law of thermodynamics)
+    \item Theories of model systems are tested against Monte Carlo
+      simulations
+    \item Metropolis Monte Carlo fluid simulations: random walk in
+      configuration space
+    \item Collect histograms of observed system properties
+      (e.g. potential energy,
+    \item Critical point: highly localized distributions of spheres;
+      unlikely to be observed in random samples of all possible fluid
+      configurations (second law of thermodynamics)
     \item For the square-well fluid, localized distribution of spheres
-      is synonymous with a low energy state
+      implies a low energy
     \end{itemize}
 
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.5\columnwidth]{figs/dos-example.pdf}
+      \includegraphics[width=0.55\columnwidth]
+      {figs/dos-poster-example.pdf}
       \caption{Sample density of states of a particular square-well
-        fluid ($\lambda=1.3$, $\eta=0.3$). The logarithmic span of the
-        density of states is proportional to the number of moves one
-        must simulate via standard Monte Carlo in order to observe the
-        energies with the lowest state densities.}
+        fluid ($\lambda=1.3$, $\eta=0.3$), as computed via several
+        methods. The logarithmic span of the density of states is
+        proportional to the number of moves one must simulate via
+        standard Monte Carlo in order to observe the energies with the
+        lowest state densities.}
       \label{fig:dos}
     \end{figure}
 
@@ -217,15 +211,18 @@ fontscale=0.27,margin=0.75in]{baposter}
     \item Accept all moves in simulation which lower the system's
       energy, probabilistically reject moves to higher energy
     \item Details of rejection process define a histogram method
-    \item There are several published histogram methods, but little to
-      no literature on their systematic comparison, or their
-      application to the square-well fluid
+    \item Little to no literature on systematic comparison of
+      published histogram methods, or on application to the
+      square-well fluid
     \item We implement several methods: our own ``simple flat''
       method, Wang-Landau, transition matrix Monte Carlo (TMMC), and a
       hybrid of TMMC with a so-called ``optimized ensemble'' method
-    \item Comparison metrics: low energy sampling rates, and relative
-      errors in thermodynamic properties computed using results from
-      simulating via each method
+    \item Comparison metrics:
+      \begin{itemize}
+      \item low energy sampling rates
+      \item errors in fluid properties computed from simulation
+        results
+      \end{itemize}
     \end{itemize}
 
   }
@@ -233,34 +230,52 @@ fontscale=0.27,margin=0.75in]{baposter}
   \headerbox{Results}
   {name=results,column=2}{%
 
+    \begin{itemize}
+    \item Errors computed relative to long, ``gold standard''
+      simulations
+    \end{itemize}
+
     \begin{figure}[H]
       \centering
       \includegraphics[width=0.6\columnwidth]{figs/sample-rates.pdf}
-      \caption{Iterations per statistically independent energy
-        sample.}
+      \caption{Simulation iterations per independent energy sample.}
       \label{fig:sample_rates}
     \end{figure}
     \begin{figure}[H]
       \centering
-      \includegraphics[width=0.6\columnwidth]{figs/u-comps.pdf}
-      \caption{Maximum errors in a set of simulations, relative to a
-        method which controls for system size and simulation time.}
+      \includegraphics[width=0.5\columnwidth]{figs/u-comps.pdf}
+      \caption{Maximum errors in a series of simulations, relative to
+        a method which controls for system size and simulation time.}
       \label{fig:errors}
     \end{figure}
+
+    \begin{itemize}
+    \item Simple flat method: performs decently in most cases, but has
+      a few outlying cases of failure
+    \item Wang-Landau: performs well if provided with a predefined
+      energy range, otherwise fails catastrophically
+    \item TMMC: decent performance; no failures; does not require
+      predefined energy range
+    \item Optimized ensemble applied to TMMC: worsens performance (by
+      all metrics)
+    \end{itemize}
 
   }
 
   \headerbox{Conclusions}
-  {name=conclusions,column=2,below=results}{%
+  {name=conclusions,column=2,below=results,above=bottom}{%
 
-
-
-  }
-
-  \headerbox{Acknowledgments}
-  {name=thanks,column=2,below=conclusions,above=bottom}{%
-
-
+    \begin{itemize}
+    \item Simple flat method possibly unreliable, though may be worth
+      investigating further (current algorithm is minimalistic)
+    \item For systems with a known energy range, or a particular
+      energy range of interest, Wang-Landau is best for exploring all
+      energies
+    \item TMMC: most reliable for systems without a known energy range
+    \item Optimized ensemble: designed to optimize standard strategy
+      for histogram methods, but only did damage; this strange result
+      is worth further investigation
+    \end{itemize}
 
   }
 

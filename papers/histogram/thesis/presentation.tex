@@ -1,0 +1,138 @@
+\documentclass[xcolor=dvipsnames]{beamer}
+\usepackage{beamerthemelined}
+\usepackage{pstricks}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+
+\usepackage{caption}
+\captionsetup{textfont={small,bf,color=BlueViolet}}
+\captionsetup{labelformat=empty}
+
+%%% physics and math
+\usepackage[boldvectors,braket]{physymb}
+\newcommand{\bk}{\Braket} % shorthand for braket notation
+\usepackage{amsmath}
+\newcommand{\p}[1]{\left(#1\right)} % parenthesis
+\renewcommand{\sp}[1]{\left[#1\right]} % square parenthesis
+\renewcommand{\set}[1]{\left\{#1\right\}} % curly parenthesis
+\newcommand{\f}[2]{\dfrac{#1}{#2}}
+\renewcommand{\d}{\partial}
+
+\let\olditem\item
+\renewcommand{\item}{\setlength{\itemsep}{6pt}\olditem}
+\usepackage{graphicx}
+
+\title[Optimizing MC Simulation of the SW Fluid]
+{Optimizing Monte Carlo Simulation of the Square-Well Fluid}
+\author[M. A. Perlin]{Michael A. Perlin}
+\institute{\bf Department of Physics, Oregon State University}
+\date{02 June 2015}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\begin{frame}
+  \frametitle{Phase transitions}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]
+    <1>{figs/phase-diagram.pdf}
+    \includegraphics[width=0.5\textwidth]
+    <2>{figs/phase-diagram-critical-point.pdf}
+    \caption{A generic phase diagram}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Square-well fluid}
+  \begin{itemize}
+  \item Simplest system with a liquid-vapor phase transition
+  \item Spheres with pair potential
+  \begin{align*}
+    v_{sw}\p{r}=\left\{
+      \begin{array}{ll}
+        \infty & r<\sigma \\
+        -\epsilon & \sigma<r<\lambda\sigma \\
+        0 & r>\sigma
+      \end{array}
+    \right.
+  \end{align*}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Square-well fluid}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]<1>{figs/square-well.pdf}
+    \includegraphics[width=0.5\textwidth]<2>{figs/square-well-v1.pdf}
+    \includegraphics[width=0.5\textwidth]<3>{figs/square-well-v2.pdf}
+    \includegraphics[width=0.5\textwidth]<4>{figs/square-well-v3.pdf}
+    \caption{Pair potential of the square-well fluid}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Monte Carlo fluid simulation}
+  \begin{itemize}
+  \item Model systems and the real world; theory testing
+  \item Dynamic vs equilibrium simulation
+  \item Metropolis Monte Carlo: random walk in configuration space
+  \item Histogram $H\p{E}$ of observed energies is proportional to the
+    density of states $D\p{E}$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Thermodynamic properties}
+  \begin{align*}
+    Z\p{T}=\sum_se^{-E_s/kT}=\sum_ED\p{E}e^{-E/kT}
+  \end{align*}
+  \begin{align*}
+    \bk{X}_T=\sum_EX\p{E}P\p{E}=\f1{Z\p{T}}\sum_EX\p{E}D\p{E}e^{-E/kT}
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Thermodynamic properties}
+  \begin{align*}
+    U\p{T}=\bk{E}_T
+  \end{align*}
+  \begin{align*}
+    C_V\p{T}=\p{\f{\d U}{\d T}}_V
+    =\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Density of states}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]
+    <1>{figs/dos-poster-example.pdf}
+    \includegraphics[width=0.5\textwidth]
+    <2>{figs/dos-thesis-example.pdf}
+    \caption{Sample density of states for a particular square-well
+      fluid}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Histogram methods}
+  \begin{itemize}
+  \item {\it Biased} walk in configuration space
+  \item To each energy $E$, assign a weight $w\p{E}$
+  \item Accept Monte Carlo moves with probability
+    \begin{align*}
+      P\p{s_i\to s_f}=\min\set{\f{w\p{E_f}}{w\p{E_i}},1}
+    \end{align*}
+  \item $w\p{E}$ is proportional to the bias on states with energy $E$
+  \item Histogram method: an algorithm for finding $w\p{E}$
+  \end{itemize}
+\end{frame}
+
+\end{document}

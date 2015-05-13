@@ -3,6 +3,7 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import copy
 
 plot_dims = (5,4)
 plot_scale = 0.7
@@ -17,18 +18,33 @@ bottom = -1
 
 plot_size = (plot_dims[0]*plot_scale,plot_dims[1]*plot_scale)
 
-fig = plt.figure(figsize=plot_size)
-ax = fig.add_axes([0.15, 0.15, 0.83, 0.83])
+axis_dimensions = [0.15, 0.15, 0.83, 0.83]
 
+def make_sw_plot():
 
-plt.plot([1,1,ww,ww,r_max],[v_max,bottom,bottom,top,top],'k')
-plt.xlim(0,r_max)
-plt.ylim(v_min,v_max)
+    fig = plt.figure(figsize=plot_size)
+    ax = fig.add_axes(axis_dimensions)
 
-plt.xticks([0,1,ww],['$0$','$\\sigma$','$\\lambda\\sigma$'])
-plt.yticks([top,bottom],['$0$','$-\epsilon$'])
-plt.xlabel('$r$')
-plt.ylabel('$v_{sw}$')
+    plt.plot([1,1,ww,ww,r_max],[v_max,bottom,bottom,top,top],'k')
+    plt.xlim(0,r_max)
+    plt.ylim(v_min,v_max)
 
+    plt.xticks([0,1,ww],['$0$','$\\sigma$','$\\lambda\\sigma$'])
+    plt.yticks([top,bottom],['$0$','$-\epsilon$'])
+    plt.xlabel('$r$')
+    plt.ylabel('$v_{sw}$')
+
+make_sw_plot()
 plt.savefig('figs/square-well.pdf')
 
+make_sw_plot()
+plt.plot([1,1],[v_max,top],'r',linewidth=2)
+plt.savefig('figs/square-well-v1.pdf')
+
+make_sw_plot()
+plt.plot([1,1,ww,ww],[top,bottom,bottom,top],'r',linewidth=2)
+plt.savefig('figs/square-well-v2.pdf')
+
+make_sw_plot()
+plt.plot([ww,r_max],[top,top],'r',linewidth=2)
+plt.savefig('figs/square-well-v3.pdf')
