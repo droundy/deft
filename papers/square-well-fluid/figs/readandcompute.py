@@ -58,7 +58,25 @@ def dr_g(fbase):
             if "de_g" in line:
                 return float(line.split()[-1])
 
-def g_r(fbase, ff, T, N):
+def dimensions(fbase):
+    with open(fbase+"-E.dat") as file:
+        for line in file:
+            if "dimensions" in line:
+                return eval(line.split(': ')[-1])
+
+def read_N(fbase):
+    with open(fbase+"-E.dat") as file:
+        for line in file:
+            if "N" in line:
+                return int(line.split(': ')[-1])
+
+def read_ff(fbase):
+    with open(fbase+"-E.dat") as file:
+        for line in file:
+            if "ff" in line:
+                return float(line.split(': ')[-1])
+
+def g_r(fbase, T):
     data = numpy.loadtxt(fbase+"-g.dat", ndmin=2)
     ghist = data[1:,3:]
     dr = dr_g(fbase)
@@ -85,7 +103,9 @@ def g_r(fbase, ff, T, N):
 
     dr = r[0,1] - r[0,0]
     dV = (4/3)*numpy.pi*((r+dr/2)**3 - (r-dr/2)**3)
+    ff = read_ff(fbase)
     n = ff/(4/3*numpy.pi)
+    N = read_N(fbase)
     g_of_E = ghist/dV/hist/n/N
 
     g = numpy.zeros(n_r)
@@ -100,3 +120,48 @@ def g_r(fbase, ff, T, N):
 
     print 'with N %d we have counts %g' % (N, counts)
     return g, r[0,:]
+
+
+def density_x(fbase, T):
+    data = numpy.loadtxt(fbase+"-density.dat")
+    denshist = data[1:,2:]
+    x_1d = data[0,2:]
+    dx = x_1d[1] - x_1d[0]
+    E_1d = data[1:,0]
+    lnw_1d = data[1:,1]
+    hist_1d = numpy.zeros_like(lnw_1d)
+    n_E = len(E_1d)
+    n_x = len(x_1d)
+    N = read_N(fbase)
+    for i in xrange(n_E):
+        hist_1d[i] = sum(denshist[i,:])/N
+    x, E = numpy.meshgrid(x_1d, E_1d)
+    x, lnw = numpy.meshgrid(x_1d, lnw_1d)
+    x, hist = numpy.meshgrid(x_1d, hist_1d)
+
+    ln_dos_1d = numpy.log(hist_1d) - lnw_1d
+
+    ln_dos_boltz_1d = ln_dos_1d - E_1d/T
+    dos_boltz_1d = numpy.exp(ln_dos_boltz_1d - ln_dos_boltz_1d.max())
+    dos_boltz_1d[hist_1d == 0] = 0
+
+    # now let's normalize the density of states
+    dos_boltz_1d /= sum(dos_boltz_1d)
+
+    # note:  what w
+    lenx, leny, lenz = dimensions(fbase)
+    density_of_E = denshist/(dx*leny*lenz*hist)*(4*numpy.pi/3)
+
+    density = numpy.zeros(n_x)
+
+    counts = 0
+    for i in xrange(n_E):
+        if hist_1d[i]:
+            density += dos_boltz_1d[i]*density_of_E[i,:]
+            counts += dos_boltz_1d[i]*hist_1d[i]
+            if dos_boltz_1d[i] > 0.0001:
+                print 'hist %d at energy %d with weight %g' % (hist_1d[i], E_1d[i], dos_boltz_1d[i])
+
+    print 'we have counts %g with element dimensions %gx%gx%g' % (counts, dx, leny, lenz)
+    print 'sum', sum(hist_1d), sum(sum(denshist))
+    return density, x_1d
