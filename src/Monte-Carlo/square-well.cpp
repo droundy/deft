@@ -1262,7 +1262,7 @@ void sw_simulation::initialize_transitions_file(char *transitions_input_filename
         printf("Unable to read ff properly from '%s'\n", line);
         exit(1);
       }
-      if(file_ff != filling_fraction){
+      if (fabs(file_ff - filling_fraction)/filling_fraction > 0.01/N) {
         printf("The filling fraction in the transition matrix file metadata (%g) disagrees "
                "with that requested for this simulation (%g)!\n", file_ff, filling_fraction);
         exit(233);
