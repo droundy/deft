@@ -39,7 +39,8 @@ methods = eval(sys.argv[6])
 
 # input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for data in ["E","lnw"]]
 
-plt.figure('dos',figsize=fig_size)
+plt.figure('dos-thesis',figsize=fig_size)
+plt.figure('dos-poster',figsize=fig_size)
 
 all_figs, ((ax_hist, ax_lnw),(ax_dos, ax_legend)) \
           = plt.subplots(2,2,figsize=panel_size_ratio*fig_size)
@@ -66,6 +67,12 @@ for method in methods:
 
     energy, e_hist, log10w, log10_dos = get_arrays(wildfilename)
 
+    if method != 'wang_landau':
+        plt.figure('dos-poster')
+        plt.plot(energy, log10_dos, styles.dots(method),
+                 markerfacecolor='none', markeredgecolor=styles.color(method),
+                 label=styles.title(method))
+
     ax_dos.plot(energy[log10_dos > -cap], log10_dos[log10_dos > -cap], styles.dots(method),
                 markerfacecolor='none', markeredgecolor=styles.color(method),
                 label=styles.title(method))
@@ -83,7 +90,7 @@ for method in methods:
 wildfilename = "../data/periodic-ww1.30-ff0.10-N100-tmmc-golden-%s.dat"
 energy, e_hist, log10w, log10_dos = get_arrays(wildfilename)
 
-plt.figure('dos')
+plt.figure('dos-thesis')
 plt.plot(energy, log10_dos,'k.')
 
 def tentothe(n):
@@ -92,17 +99,23 @@ def tentothe(n):
     return r'$10^{%g}$' % n
 
 ### density of states
-plt.figure('dos')
+for dos_plot in ['dos-thesis','dos-poster']:
+    plt.figure(dos_plot)
 
-ylocs, ylabels = plt.yticks()
-newylabels = [tentothe(n) for n in ylocs]
-plt.yticks(ylocs, newylabels)
+    ylocs, ylabels = plt.yticks()
+    newylabels = [tentothe(n) for n in ylocs]
+    plt.yticks(ylocs, newylabels)
 
-plt.xlabel('$E/\epsilon$')
-plt.ylabel('$\\tilde D(E)$')
-# plt.legend(loc='best')
-plt.tight_layout(pad=0.2)
-plt.savefig("figs/dos-example.pdf")
+    plt.xlabel('$E/\epsilon$')
+    plt.ylabel('$\\tilde D(E)$')
+    plt.tight_layout(pad=0.2)
+
+plt.figure('dos-thesis')
+plt.savefig("figs/dos-thesis-example.pdf")
+
+plt.figure('dos-poster')
+plt.legend(loc='best')
+plt.savefig("figs/dos-poster-example.pdf")
 
 ### all figures
 all_figs.canvas.draw()
