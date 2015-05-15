@@ -455,26 +455,14 @@ int main(int argc, const char *argv[]) {
   // Make sure initial placement is valid
   // ----------------------------------------------------------------------------
 
-  bool error = false, error_cell = false;
   for(int i = 0; i < sw.N; i++) {
-    if (!in_cell(sw.balls[i], sw.len, sw.walls)) {
-      error_cell = true;
-      error = true;
-    }
     for(int j = 0; j < i; j++) {
       if (overlap(sw.balls[i], sw.balls[j], sw.len, sw.walls)) {
-        error = true;
-        break;
+        print_bad(sw.balls, sw.N, sw.len, sw.walls);
+        printf("Error in initial placement: balls are overlapping.\n");
+        return 253;
       }
     }
-    if (error) break;
-  }
-  if (error){
-    print_bad(sw.balls, sw.N, sw.len, sw.walls);
-    printf("Error in initial placement: ");
-    if(error_cell) printf("balls placed outside of cell.\n");
-    else printf("balls are overlapping.\n");
-    return 253;
   }
 
   fflush(stdout);
@@ -775,28 +763,21 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
 
 inline void print_bad(const ball *p, int N, double len[3], int walls) {
   for (int i = 0; i < N; i++) {
-    bool incell = in_cell(p[i], len, walls);
-    bool overlaps = false;
     for (int j = 0; j < i; j++) {
       if (overlap(p[i], p[j], len, walls)) {
-        overlaps = true;
+        char *pos = new char[1024];
+        p[i].pos.tostr(pos);
+        printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
+        for (int j = 0; j < i; j++) {
+          if (overlap(p[i], p[j], len, walls)) {
+            p[j].pos.tostr(pos);
+            printf("\t  Overlaps with %i", j);
+            printf(": %s\n", pos);
+          }
+        }
+        delete[] pos;
         break;
       }
-    }
-    if (!incell || overlaps) {
-      char *pos = new char[1024];
-      p[i].pos.tostr(pos);
-      printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
-      if (!incell)
-        printf("\t  Outside cell!\n");
-      for (int j = 0; j < i; j++) {
-        if (overlap(p[i], p[j], len, walls)) {
-          p[j].pos.tostr(pos);
-          printf("\t  Overlaps with %i", j);
-          printf(": %s\n", pos);
-        }
-      }
-      delete[] pos;
     }
   }
   fflush(stdout);

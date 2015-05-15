@@ -282,11 +282,11 @@ ball random_move(const ball &original, double size, const double len[3]);
 
 // Count the number of interactions a given ball has
 int count_interactions(int id, ball *p, double interaction_scale,
-                       double len[3], int walls);
+                       double len[3], int walls, int sticky_wall);
 
 // Count the interactions of all the balls
 int count_all_interactions(ball *balls, int N, double interaction_scale,
-                           double len[3], int walls);
+                           double len[3], int walls, int sticky_wall);
 
 // Find index of max entropy point
 int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
