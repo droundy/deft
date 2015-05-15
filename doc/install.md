@@ -39,6 +39,7 @@ You need ...
     gnuplot
     python-matplotlib
     python-scipy
+    python-sympy
     python-markdown # for the documentation
     inkscape # for the documentation
 
