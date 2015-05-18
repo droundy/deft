@@ -184,19 +184,13 @@ int overlaps_with_any(const ball &a, const ball *p, const double len[3], int wal
   return false;
 }
 
-bool in_cell(const ball &p, const double len[3], const int walls){
-  for (int i = 0; i < walls; i++){
-    if (p.pos[i] < 0.0 || p.pos[i] > len[i])
-      return false;
-  }
-  return true;
-}
-
 ball random_move(const ball &p, double move_scale, const double len[3]){
   ball temp = p;
   temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(move_scale), len);
   return temp;
 }
+
+static const int wall_stickiness = 2;
 
 int count_interactions(int id, ball *p, double interaction_distance,
                        double len[3], int walls, int sticky_wall){
@@ -209,14 +203,14 @@ int count_interactions(int id, ball *p, double interaction_distance,
   }
   // if sticky_wall is true, then there is an attractive slab right
   // near the -z wall.
-  if (sticky_wall && p[id].pos.z < -0.5*len[2] + p[id].R) {
-    interactions++;
+  if (sticky_wall && p[id].pos.x < p[id].R) {
+    interactions += wall_stickiness;
   }
   return interactions;
 }
 
 int count_all_interactions(ball *balls, int N, double interaction_distance,
-                           double len[3], int walls) {
+                           double len[3], int walls, int sticky_wall) {
   // Count initial number of interactions
   // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
   int interactions = 0;
@@ -228,6 +222,11 @@ int count_all_interactions(ball *balls, int N, double interaction_distance,
                           len, walls).norm()
          <= interaction_distance)
         interactions++;
+    }
+    // if sticky_wall is true, then there is an attractive slab right
+    // near the -z wall.
+    if (sticky_wall && balls[i].pos.x < balls[i].R) {
+      interactions += wall_stickiness;
     }
   }
   return interactions;
@@ -292,8 +291,10 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   const int old_interaction_count =
     count_interactions(id, balls, interaction_distance, len, walls, sticky_wall);
   ball temp = random_move(balls[id], translation_scale, len);
-  // If we're out of the cell or we overlap, this is a bad move!
-  if (!in_cell(temp, len, walls) || overlaps_with_any(temp, balls, len, walls)){
+  // If we overlap, this is a bad move! Because random_move always
+  // calls sw_fix_periodic, we need not worry about moving out of the
+  // cell.
+  if (overlaps_with_any(temp, balls, len, walls)){
     transitions(energy, 0) += 1; // update the transition histogram
     end_move_updates();
     return;

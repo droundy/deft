@@ -22,7 +22,7 @@ T = float(sys.argv[4])
 plt.figure()
 
 for N in Ns:
-    g, r = readandcompute.g_r('data/mc/ww%.2f-ff%.2f-N%d' % (ww,ff,N), ff, T, N)
+    g, r = readandcompute.g_r('data/mc/ww%.2f-ff%.2f-N%d' % (ww,ff,N), T)
     plt.plot(r/2, g, '-', label='$N=%d$' % N)
 
 plt.legend(loc='best')
@@ -31,6 +31,6 @@ plt.ylabel(r'$g(r)$ not properly normalized')
 plt.title(r'$g(r)$ with $\lambda = %g$, $\eta=%g$, and $T/\epsilon = %g$'
           % (ww, ff, T))
 
-plt.savefig('radial-distribution-ww%.2f-ff%.2f-T%.2g.pdf' % (ww,ff,T))
+plt.savefig('figs/radial-distribution-ww%.2f-ff%.2f-T%.2g.pdf' % (ww,ff,T))
 
 plt.show()

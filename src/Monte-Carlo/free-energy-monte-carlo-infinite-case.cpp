@@ -69,10 +69,6 @@ inline void print_all(const ball *p, int N, double len[3]);
 inline void print_one(const ball &a, int id, const ball *p, int N,
                       double len[3], int walls);
 
-// Only print those balls that overlap or are outside the cell
-// Also prints those they overlap with
-inline void print_bad(const ball *p, int N, double len[3], int walls);
-
 // Checks to make sure that every ball is his neighbor's neighbor.
 inline void check_neighbor_symmetry(const ball *p, int N);
 
@@ -666,35 +662,6 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
   }
   delete[] pos;
   printf("\n");
-  fflush(stdout);
-}
-
-inline void print_bad(const ball *p, int N, double len[3], int walls) {
-  for (int i = 0; i < N; i++) {
-    bool incell = in_cell(p[i], len, walls);
-    bool overlaps = false;
-    for (int j = 0; j < i; j++) {
-      if (overlap(p[i], p[j], len, walls)) {
-        overlaps = true;
-        break;
-      }
-    }
-    if (!incell || overlaps) {
-      char *pos = new char[1024];
-      p[i].pos.tostr(pos);
-      printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
-      if (!incell)
-        printf("\t  Outside cell!\n");
-      for (int j = 0; j < i; j++) {
-        if (overlap(p[i], p[j], len, walls)) {
-          p[j].pos.tostr(pos);
-          printf("\t  Overlaps with %i", j);
-          printf(": %s\n", pos);
-        }
-      }
-      delete[] pos;
-    }
-  }
   fflush(stdout);
 }
 

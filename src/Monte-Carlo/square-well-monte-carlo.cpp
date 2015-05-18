@@ -141,7 +141,7 @@ int main(int argc, const char *argv[]) {
   sw.flatness = 0;
   sw.init_iters = 0;
 
-  int wall_dim = 0;
+  const int wall_dim = 0; // this is hard-coded all over the place:  you can't change it!
   unsigned long int seed = 0;
 
   char *data_dir = new char[1024];
@@ -635,7 +635,6 @@ int main(int argc, const char *argv[]) {
 
   // Density histogram
   const int density_bins = round(sw.len[wall_dim]/de_density);
-  const double bin_volume = sw.len[x]*sw.len[y]*sw.len[z]/sw.len[wall_dim]*de_density;
   long **density_histogram = new long*[sw.energy_levels];
   for(int i = 0; i < sw.energy_levels; i++)
     density_histogram[i] = new long[density_bins]();
@@ -732,26 +731,14 @@ int main(int argc, const char *argv[]) {
   // Make sure initial placement is valid
   // ----------------------------------------------------------------------------
 
-  bool error = false, error_cell = false;
   for(int i = 0; i < sw.N; i++) {
-    if (!in_cell(sw.balls[i], sw.len, sw.walls)) {
-      error_cell = true;
-      error = true;
-    }
     for(int j = 0; j < i; j++) {
       if (overlap(sw.balls[i], sw.balls[j], sw.len, sw.walls)) {
-        error = true;
-        break;
+        print_bad(sw.balls, sw.N, sw.len, sw.walls);
+        printf("Error in initial placement: balls are overlapping.\n");
+        return 253;
       }
     }
-    if (error) break;
-  }
-  if (error){
-    print_bad(sw.balls, sw.N, sw.len, sw.walls);
-    printf("Error in initial placement: ");
-    if(error_cell) printf("balls placed outside of cell.\n");
-    else printf("balls are overlapping.\n");
-    return 253;
   }
 
   fflush(stdout);
@@ -761,7 +748,8 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   sw.energy =
-    count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len, sw.walls);
+    count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
+                           sw.walls, sw.sticky_wall);
 
   // First, let us figure out what the max entropy point is (and move to it)
   sw.max_entropy_state = sw.initialize_max_entropy(acceptance_goal);
@@ -1002,9 +990,11 @@ int main(int argc, const char *argv[]) {
 
     for(int i = 0; i < sw.N; i++) sw.move_a_ball();
 
-    assert(sw.energy ==
-           count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
-                                  sw.walls));
+    if (sw.iteration % (sw.N*sw.N) == 0) {
+      assert(sw.energy ==
+             count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
+                                    sw.walls, sw.sticky_wall));
+    }
 
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
@@ -1182,16 +1172,22 @@ int main(int argc, const char *argv[]) {
         fprintf(densityout, "\n# data table containing densities in slabs "
                 "(bins) of thickness de_density away from a wall");
         fprintf(densityout, "\n# row number corresponds to energy level");
-        fprintf(densityout, "\n# column number dn (counting from zero) "
-                "corresponds to distance d from wall given by "
-                "d = (dn + 0.5) * de_density");
+
+        fprintf(densityout, "# E total_counts lnw z=%g z=%g etc\n",
+                de_density*0.5, de_density*1.5);
+        fprintf(densityout, "0\t0\t");
+        for(int x_i = 0; x_i < density_bins; x_i++) {
+          fprintf(densityout, "%g ", de_density*(x_i+0.5));
+        }
+        fprintf(densityout, "\n");
         for(int i = 0; i < sw.energy_levels; i++){
-          fprintf(densityout, "\n");
-          for(int r_i = 0; r_i < density_bins; r_i++) {
-            const double bin_density =
-              (double)density_histogram[i][r_i]
-              *sw.N/sw.energy_histogram[i]/bin_volume;
-            fprintf(densityout, "%8.5f ", bin_density);
+          if (sw.energy_histogram[i]) {
+            fprintf(densityout, "%d\t%g",
+                    -i, sw.ln_energy_weights[i]);
+            for(int x_i = 0; x_i < density_bins; x_i++) {
+              fprintf(densityout, "\t%ld", density_histogram[i][x_i]);
+            }
+            fprintf(densityout, "\n");
           }
         }
         fclose(densityout);
@@ -1285,7 +1281,6 @@ inline void print_one(const ball &a, int id, const ball *p, int N,
 
 inline void print_bad(const ball *p, int N, double len[3], int walls) {
   for (int i = 0; i < N; i++) {
-    bool incell = in_cell(p[i], len, walls);
     bool overlaps = false;
     for (int j = 0; j < i; j++) {
       if (overlap(p[i], p[j], len, walls)) {
@@ -1293,12 +1288,10 @@ inline void print_bad(const ball *p, int N, double len[3], int walls) {
         break;
       }
     }
-    if (!incell || overlaps) {
+    if (overlaps) {
       char *pos = new char[1024];
       p[i].pos.tostr(pos);
       printf("%4i: %s R: %4.2f\n", i, pos, p[i].R);
-      if (!incell)
-        printf("\t  Outside cell!\n");
       for (int j = 0; j < i; j++) {
         if (overlap(p[i], p[j], len, walls)) {
           p[j].pos.tostr(pos);

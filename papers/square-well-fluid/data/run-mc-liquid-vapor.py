@@ -2,8 +2,8 @@
 from __future__ import division
 import os, numpy, sys, re
 
-if len(sys.argv) != 6:
-    print "usage:  python2 %s ww ff lenxy lenz" % sys.argv[0]
+if len(sys.argv) != 7:
+    print "usage:  python2 %s ww ff lenx lenyz min_T iterations" % sys.argv[0]
     exit(1)
 
 if os.path.exists('paper.tex'):
@@ -15,17 +15,17 @@ assert not os.system('fac square-well-monte-carlo')
 
 ww = float(sys.argv[1])
 ff = float(sys.argv[2])
-lenxy = float(sys.argv[3])
-lenz = float(sys.argv[4])
-iterations = round(float(sys.argv[5]))
+lenx = float(sys.argv[3])
+lenyz = float(sys.argv[4])
+min_T = float(sys.argv[5])
+iterations = round(float(sys.argv[6]))
 
-min_T = 0.1
 n = ff/(4*numpy.pi/3)
-N = round(n*lenxy*lenxy*lenz)
+N = round(n*lenyz*lenyz*lenx)
 mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/square-well-fluid/data/lv'
-fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenxy, lenz)
+fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenyz, lenx)
 
 os.system('mkdir -p ' + datadir)
 
@@ -37,9 +37,9 @@ else:
 
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
-cmd += ' --sticky-wall --lenx %g --leny %g --lenz %g' % (lenxy, lenxy, lenz)
+cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)
 
-cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations*10)
+cmd += " --iterations %d --init_iters %d --golden" % (iterations, 10*iterations)
 
 cmd += ' --de_g 0.01' # nice high-resolution radial distribution function data
 

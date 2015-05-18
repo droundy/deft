@@ -2,8 +2,8 @@
 from __future__ import division
 import os, numpy, sys, re
 
-if len(sys.argv) != 4:
-    print "usage:  python2 %s ww ff N" % sys.argv[0]
+if len(sys.argv) != 6:
+    print "usage:  python2 %s ww ff N minT iterations" % sys.argv[0]
     exit(1)
 
 if os.path.exists('paper.tex'):
@@ -16,10 +16,9 @@ assert not os.system('fac square-well-monte-carlo')
 ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 N = int(sys.argv[3])
+min_T = float(sys.argv[4])
+iterations = int(sys.argv[5])
 
-
-min_T = 0.1
-iterations = 1e7
 mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/square-well-fluid/data/mc'

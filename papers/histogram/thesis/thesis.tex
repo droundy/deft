@@ -54,7 +54,7 @@
 \newcommand{\institution}{Oregon State University}
 \newcommand{\department}{Department of Physics}
 \newcommand{\supervisor}{Dr. David Roundy}
-\renewcommand{\date}{08 May 2015}
+\renewcommand{\date}{15 May 2015}
 
 %%% notes, etc.
 \usepackage{color}
@@ -135,30 +135,29 @@ square-well density functional theories. The liquid-vapor phase
 interface is an interesting regime for testing density functional
 theories, but unbiased Metropolis Monte Carlo simulations are
 incapable of sampling the low energy fluid states which dominate the
-partition function at low (i.e. liquid-state) temperatures. Previous
-works have developed several generic Monte Carlo histogram methods for
+partition function at low liquid-state temperatures. Previous works
+have developed several generic Monte Carlo histogram methods for
 collecting statistics on low energy system states, but little or no
 literature exists on these methods' systematic comparison, as well as
 their application to the square-well fluid. The square-well fluid in
 particular introduces application challenges not manifest in
 traditional models for testing and benchmarking such numerical
-techniques (e.g. the Ising model). We implement the Wang-Landau
-method, transition matrix Monte Carlo, as well as two methods of our
-own. The first of our methods, the simple flat method, is novel, while
-the second is a hybrid of two published methods (transition matrix
-Monte Carlo and the optimized ensemble).
+techniques (e.g. the Ising model).
 
-We find that Wang-Landau potentially performs better than other
-histogram methods, but fails catastrophically without a predefined
-energy range for the square-well fluid. The simple flat method and
-transition matrix Monte Carlo give results comparable to successful
-Wang-Landau simulations, but simple flat has some anomalous cases with
-large errors. Finally, our implementation of the optimized ensemble
-using a transition matrix results in worse performance over the
+We implement our own ``simple flat'' method, the Wang-Landau method,
+transition matrix Monte Carlo, and a modified version of the optimized
+ensemble. Performance of each method is determined by low energy
+sampling rates and maximum errors in several computed system
+properties. We find that Wang-Landau potentially performs better than
+other histogram methods, but fails catastrophically without a
+predetermined energy range. The simple flat method and transition
+matrix Monte Carlo give results comparable to successful Wang-Landau
+simulations, but simple flat has some anomalous cases with large
+errors. Finally, our implementation of the optimized ensemble using a
+transition matrix results in worse performance over the
 straightforward transition matrix Monte Carlo method.
 
-\fixme{edit when I'm awake}
-
+\fixme{edit}
 
 \newpage
 
@@ -167,42 +166,59 @@ straightforward transition matrix Monte Carlo method.
 \section{Introduction}
 \label{sec:intro}
 
-\fixme{give more intro about phase transitions and the critical
-  point?}
-
-Understanding the behavior of fluids near the critical point, or the
-point at which the distinction between liquid and gas ceases to become
-well-defined, is a major challenge in the field of classical density
-functional theory. Studying the critical point of a fluid via
-simulations requires exploring the boundary between its liquid and
-gaseous phases. The square-well fluid is the simplest system with a
+The critical point of a system is the point in phase space at which
+the distinction between liquid and gaseous phases ceases to be
+well-defined. As shown in Figure \ref{fig:phase_diagram}, a fluid need
+not boil or condense to transition between liquid to gaseous phases:
+it can smoothly transition between the two by circumventing the
+critical point. Understanding the behavior of fluids near the critical
+point is a major challenge in the field of classical density
+functional theory. The square-well fluid is the simplest system with a
 liquid-vapor phase transition, and is therefore of interest for
-studying the critical point of fluids. For a generic square-well fluid
-to be observed in a liquid state, it must have a localized
-distribution of the spheres which make up the fluid. Such a
-distribution implies a low energy fluid state, as all interactions
-between spheres are attractive. Conversely, a low energy liquid state
-of a square-well fluid otherwise observable in both liquid and gaseous
-phases implies a localized distribution of spheres. The search for
-liquid states of the square-well fluid is thus equivalent to the
-search for low energy states.
+studying the critical point. For a generic square-well fluid to be
+observed in a liquid state, it must have a localized distribution of
+the spheres which make up the fluid. Such a distribution implies a low
+energy fluid state, as all interactions between spheres are
+attractive. Conversely, a low energy liquid state of a square-well
+fluid otherwise observable in both liquid and gaseous phases implies a
+localized distribution of spheres. The search for liquid states of the
+square-well fluid is thus equivalent to the search for low energy
+states.
 
 Monte Carlo simulations are a standard means for studying the
 equilibrium thermodynamic properties of a system. In the most
 straightforward implementation of Monte Carlo fluid simulations,
-however, highly localized distributions of fluid elements are
-extremely unlikely to occur, making such simulations impractical for
-studying the critical point of the square-well fluid. Several generic
+however, highly localized distributions of spheres are extremely
+unlikely to occur, making such simulations impractical for studying
+the critical point of the square-well fluid. Several generic
 computational methods, called histogram methods, exist for dealing
 with such a problem; namely, that interesting regions of a system's
 state space cannot be sampled via standard Monte Carlo methods in a
-reasonable amount of time. There is no common consensus, however, on
-the relative efficacy of these methods. Furthermore, some methods,
-such as the Wang-Landau method\cite{wang_landau}, require tuning
-several free parameters that lack both ``obvious'' values and
-systematic means for assigning them. This work will thus attempt to
-quantify and compare the effectiveness of a few such methods as
-applied to the square-well fluid.
+reasonable amount of time. There is little consensus, however, on the
+relative efficacy of these methods, and few have applied them to
+simulation of the square-well fluid.
+
+In this paper, we first review what the square-well fluid is, as well
+as how to simulate it via standard (Metropolis) Monte Carlo (Sections
+\ref{sec:sw_fluid}--\ref{sec:monte_carlo}). We then address the
+shortcomings of this means to study the square-well fluid, and
+consider how one can modify simulations to overcome these shortcomings
+in Section \ref{sec:histogram_methods}. We develop a thorough
+understanding of several histogram methods in Sections
+\ref{sec:flat_histogram}--\ref{sec:oetmmc}, and discuss some details
+pertinent to the actual implementation of these methods in Section
+\ref{sec:loose_ends}. Finally, in Section \ref{sec:results} we analyze
+the performance of a few histogram methods in simulations of a
+particular square-well fluid.
+
+\begin{figure}[!b]
+  \centering
+  \includegraphics[width=0.47\textwidth]{figs/phase-diagram.pdf}
+  \caption[Phase diagram]
+  {A generic phase diagram showing the boundaries between solid,
+    liquid, and gaseous phases.}
+  \label{fig:phase_diagram}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -211,18 +227,6 @@ applied to the square-well fluid.
 
 \subsection{The square-well fluid}
 \label{sec:sw_fluid}
-
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=0.47\textwidth]{figs/square-well.pdf}
-  \caption[The square-well pair potential]
-  {The square-well pair potential can be used to model short range
-    forces to first order. The infinite potential at $r<\sigma$ simply
-    enforces the condition that spheres cannot overlap. At
-    $r>\lambda\sigma$, the potential is null, and makes no
-    contribution to the fluid's internal energy.}
-  \label{fig:pair_potential}
-\end{figure}
 
 The square-well (SW) fluid is a simple model used in classical density
 functional theories to capture low order effects of short-range
@@ -262,10 +266,22 @@ scale $\sigma$. In practice, our simulation codes use dimensionless
 energies $E/\epsilon$, temperatures $kT/\epsilon$, and distances
 $r/\sigma$.
 
-\subsection{Monte Carlo fluid simulation}
-\label{sec:mc_sim}
+\begin{figure}[!b]
+  \centering
+  \includegraphics[width=0.47\textwidth]{figs/square-well.pdf}
+  \caption[The square-well pair potential]
+  {The square-well pair potential can be used to model short range
+    forces to first order. The infinite potential at $r<\sigma$ simply
+    enforces the condition that spheres cannot overlap. At
+    $r>\lambda\sigma$, the potential is null, and makes no
+    contribution to the fluid's internal energy.}
+  \label{fig:pair_potential}
+\end{figure}
 
-Model systems such as the square-well fluid are powerful tools for
+\subsection{Monte Carlo fluid simulation}
+\label{sec:monte_carlo}
+
+Model systems, such as the square-well fluid, are powerful tools for
 understanding complex physical systems, but they do not themselves
 exist in the real world. Consequently, direct experimental tests of
 theories for model system (e.g. square-well density functional
@@ -282,13 +298,13 @@ simulations to the desired level of accuracy.
 \subsubsection{Implementation}
 \label{sec:mc_implementation}
 
-\begin{algorithm}[tb]
+\begin{algorithm}[!b]
   \caption{Metropolis Monte Carlo fluid simulation}
   \label{alg:metropolis}
   \begin{alg}
 
   \item Construct an initial ``typical'' (i.e. non-ordered) fluid
-    configuration. \fixme{explain how}
+    configuration. \fixme{explain how?}
 
   \item Randomly attempt to change the position of one sphere (in
     general, a single fluid ``atom'' or ``molecule'') to another
@@ -322,12 +338,11 @@ $\mathcal O\p{N}$, meaning that doubling $N$ doubles collection time,
 can be collected after each iteration. In general, collection with
 $\mathcal O\sp{\chi\p{N}}$ time scaling should not occur more often
 than once every $\chi\p{N}$ moves, where $\chi\p{N}$ may be an
-arbitrary function of $N$ void of constant prefactors, e.g. $N\log N$,
-or $2^N$. These collection rules ensure that scaling up simulations
-does not cause them to asymptotically spend all computation time only
-collecting statistics, or only simulating the fluid. Collected
-statistics are used to find thermodynamic properties of the simulated
-fluid.
+arbitrary function of $N$, e.g. $N\log N$, or $2^N$. These collection
+rules ensure that scaling up simulations does not cause them to
+asymptotically spend all computation time only collecting statistics,
+or only simulating the fluid. Collected statistics are used to find
+thermodynamic properties of the simulated fluid.
 
 In this work, we are concerned with simulating the \emph{homogeneous}
 square-well fluid. To avoid edge effects resulting from fluid behavior
@@ -576,7 +591,7 @@ weights
   \label{eq:inf_temp_weights}
 \end{align}
 This observation will be used in Section \ref{sec:min_energy} to
-identify a maximum energy of interest.
+identify a maximum energy of interest in simulations.
 
 Though canonical Monte Carlo is simple to implement, its inability to
 investigate a system at more than one temperature at a time is a
@@ -828,8 +843,7 @@ The Wang-Landau method is the first published histogram method we
 discuss\cite{wang_landau, wang_landau_mod, wang_landau_analysis}. This
 method has been used to study a wide variety of systems\fixme{which
   systems? cite}, and is the standard method\fixme{cite} to achieve
-broad energy sampling via Monte Carlo simulations. \fixme{more intro
-  on WL}
+broad energy sampling via Monte Carlo simulations.
 
 Unlike the simple flat method, the Wang-Landau method modifies the
 weight array on the fly. After every move during initialization
@@ -1193,12 +1207,10 @@ $E_n$. The result in (\ref{eq:tmmc_prob_simplified}) is the
 probability of accepting moves $s_i\to s_f$ required for simulation
 via Algorithm \ref{alg:tmmc} to yield a flat energy
 histogram\cite{tmmc}. Unlike the previous histogram methods, we desire
-a flat histogram during initialization via Algorithm \ref{alg:tmmc}
-not because we are constructing weights $w\p{E}$, but because we wish
-to sample the transition histogram $\tilde T_d\p{E,\Delta E}$ equally
-at all energies $E$. \fixme{briefly explain
-  (\ref{eq:tmmc_prob_simplified}) by considering a two-level system,
-  and extending to larger systems}.
+a flat histogram during initialization via Algorithm \ref{alg:tmmc} in
+order to broadly sample the transition histogram $\tilde
+T_d\p{E,\Delta E}$, rather than to construct weights $w\p{E}$
+directly.
 
 Aside from a minimum temperature $T_{\t{min}}$ and an end condition,
 Algorithm \ref{alg:tmmc} contains one free parameter, $c$, used in
@@ -1376,7 +1388,6 @@ computes optimized weights as given by
 (\ref{eq:optimized_weights}). Unlike the optimized ensemble, OE-TMMC
 does not require any extra simulation routines, and is therefore
 straightforward to implement and compare to other histogram methods.
-\fixme{provide iterative algorithm?}
 
 \subsection{Loose ends}
 \label{sec:loose_ends}
@@ -1573,11 +1584,11 @@ standard runs simulate for $10^{10}$ iterations ($10^{10}N$
 moves). While the entire initialization and simulation process takes
 around two hours for the largest regular simulations, the largest
 golden simulations initialize for $\sim11$ hours, and simulate for a
-week. To control for iteration number in the quality of results, we
-compare against ``converged flat'' simulations. Converged flat
-simulations read in the transition matrix from golden simulations to
-construct a weight array, and simulate for the same number of
-iterations as the standard simulations.
+week. To control for iteration number in the results from any given
+set of simulations, we compare against ``converged flat''
+simulations. Converged flat simulations read in the transition matrix
+from golden simulations to construct a weight array, and simulate for
+the same number of iterations as the standard simulations.
 
 \subsection{Histograms and arrays}
 \label{sec:histograms}
@@ -1605,7 +1616,8 @@ Wang-Landau knows the energy range of interest to begin with, it will
 not decrease $f_k$ until it has observed all important energies, and
 adjusted their weights to some reasonable value. Due to the drastic
 failure of Wang-Landau, will omit its nonsensical results from some
-figures. \fixme{which figures?}
+figures, as these results are distracting and unfit for drawing any
+conclusions.
 
 The energy histogram in Figure \ref{fig:arrays} shows that TMMC and
 OE-TMMC spend considerably less time at important low energies than
@@ -1629,8 +1641,7 @@ rates averaged over 30 simulations with $N=25$. Lower pessimistic
 sample rates mean that a simulation takes less time to collect
 statistics which are guaranteed to be uncorrelated. By this metric,
 TMMC and OE-TMMC again perform worse than simple flat and vanilla
-Wang-Landau.\fixme{comment on why it is interesting that OETMMC doing
-  worse than TMMC?}
+Wang-Landau.
 
 \begin{figure}
   \centering
@@ -1698,9 +1709,9 @@ $kT\approx0.5\epsilon$, which justifies our choice of
 $kT_{\t{min}}=0.2\epsilon$ and ensures that the histogram methods are
 indeed performing the nontrivial task of exploring the liquid-gas
 phase boundary of the square-well fluid. For the purposes of this
-paper, we will neglect to demonstrate that this phase transition is
-indeed between liquid and gas phases, and take this fact as
-given. \fixme{cite instead of stating as fact?}
+paper, we will neglect to prove that this phase transition is indeed
+between liquid and gas phases, and take this fact as given. \fixme{say
+  more convincingly}
 
 \begin{figure}[!b]
   \centering
@@ -1857,26 +1868,26 @@ supposed to provide an improvement over the TMMC weight array.
 \section{Conclusions}
 \label{sec:conclusions}
 
-After implementing several histogram methods and applying them to the
-$\lambda=1.3$, $\eta=0.3$ square-well fluid, we found that
-Wang-Landau, if given a predefined energy range, consistently yields
-some of the smallest errors and highest low-energy sampling rates of
-all histogram methods, with comparable results from TMMC and the
-simple flat method. Without prior knowledge of the minimum important
-energy of a system, however, Wang-Landau can get stuck at low
-energies, and is incapable of recovering. Wang-Landau is therefore
-most appropriate for studying systems in which the entire energy range
-is known a priori, or in which only a given energy range is of
-particular interest. The simple flat method also sometimes fails to
-initialize; if gone unnoticed, such failures can be costly in terms of
+After implementing several histogram methods and applying them to
+simulation of the $\lambda=1.3$, $\eta=0.3$ square-well fluid, we
+found that Wang-Landau, if given a predefined energy range,
+consistently yields some of the smallest errors and highest low-energy
+sampling rates of all histogram methods, with comparable results from
+TMMC and the simple flat method. Without prior knowledge of the
+minimum important energy of a system, however, Wang-Landau can get
+stuck at low energies, in which case it is incapable of
+recovering. Wang-Landau is therefore most appropriate for studying
+systems in which the entire energy range is known a priori, or in
+which only a given energy range is of particular interest. The simple
+flat method, while generally performing well, sometimes fails to
+initialize. If gone unnoticed, such failures can be costly in terms of
 computation time and resources. Our implementation of the optimized
 ensemble using the transition matrix resulted in lower sampling rates
 and higher errors than the flat histogram TMMC weights. We suspect
-that the optimized ensemble is failing to improve TMMC because its
-theory neglects the discretization of energies, which may be
-non-negligible for the systems we simulated.
+that the optimized ensemble is failing to improve TMMC because the
+theory behind it neglects the discretization of energies.
 
-\fixme{make the conclusion more satisfying?}
+\fixme{make conclusions more satisfying?}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
