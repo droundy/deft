@@ -191,8 +191,11 @@ for name, module, hsfunctional, inputs in [
     ("SPhi3", "SFMT", "phi3", '[(ER $ r_var "x", ER 1)]'),
     # The rest are "real" functionals of sorts
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
+    ("HomogeneousWhiteBearFluid", "WhiteBear", "homogeneous_whitebear_fluid", '[]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[(ER $ r_var "n", ER 1)]'),
     ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[(ER $ r_var "n", ER 1)]'),
+    ("WhiteBearFluidVeff", "WhiteBear", "whitebear_fluid_Veff",
+           '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
     #("SW_dispersion", "SW_liquid", "sw_dispersion", '[(ER $ r_var "n", ER 1)]'),
     ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[(ER $ r_var "n", ER 1)]'),
     ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff",
@@ -500,6 +503,7 @@ for mkdat in Split("""
 for mkdat in Split("""
 	papers/fuzzy-fmt/figs/new-melting
 	papers/fuzzy-fmt/figs/new-walls
+	papers/fuzzy-fmt/figs/new-bh-walls
 	papers/fuzzy-fmt/figs/new-soft-wall
 	papers/fuzzy-fmt/figs/new-radial-lj
 	papers/fuzzy-fmt/figs/new-radial-wca
@@ -511,6 +515,8 @@ for mkdat in Split("""
                       ['src/new/SFMTFluidFast.cpp',
                        'src/new/SFMTFluidVeffFast.cpp', 'src/new/HomogeneousSFMTFluidFast.cpp',
                        'src/new/SW_liquidFast.cpp', 'src/new/SW_liquidVeffFast.cpp',
+                       'src/new/WhiteBearFluidVeffFast.cpp',
+                       'src/new/HomogeneousWhiteBearFluidFast.cpp',
                        'src/new/HomogeneousSW_liquidFast.cpp']))
 # rules for how to run fuzzy-fmt/figs/new-walls.mkdat:
 for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
@@ -520,6 +526,9 @@ for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2
     for kT in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.5, 5.0, 10.0]:
         env.Command(target = "papers/fuzzy-fmt/figs/new-data/wall-%.2f-%.2f.dat" % (rho, kT),
                     source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
+                    action = '$SOURCE %g %g' % (rho, kT))
+        env.Command(target = "papers/fuzzy-fmt/figs/new-data/bh-wall-%.2f-%.2f.dat" % (rho, kT),
+                    source = ['papers/fuzzy-fmt/figs/new-bh-walls.mkdat'],
                     action = '$SOURCE %g %g' % (rho, kT))
         env.Command(target = "papers/fuzzy-fmt/figs/new-data/soft-wall-%04.2f-%04.2f.dat" % (rho, kT),
                     source = ['papers/fuzzy-fmt/figs/new-soft-wall.mkdat'],

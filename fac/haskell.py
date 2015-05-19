@@ -22,7 +22,8 @@ all_objects = sorted([x+'.o' for x in hsfiles])
 
 generated_names = """
   ExternalPotentialTest HomogeneousSFMTFluid HomogeneousWaterSaftByHand
-  HomogeneousWaterSaft HomogeneousWhiteBear
+  HomogeneousWaterSaft HomogeneousWhiteBear HomogeneousWhiteBearFluid
+  WhiteBearFluidVeff
   LogN0 Phi1 Phi2 Phi3 QuadraticGaussian Quadratic QuadraticN0
   SFMTFluid SFMTFluidVeff
   SPhi1 SPhi2 SPhi3

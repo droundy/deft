@@ -15,8 +15,11 @@ for name, module, hsfunctional, inputs in [
     ("SPhi3", "SFMT", "phi3", '[(ER $ r_var "x", ER 1)]'),
     # The rest are "real" functionals of sorts
     ("HomogeneousWhiteBear", "WhiteBear", "homogeneous_whitebear", '[]'),
+    ("HomogeneousWhiteBearFluid", "WhiteBear", "homogeneous_whitebear_fluid", '[]'),
     ("WhiteBear", "WhiteBear", "whitebear_n", '[(ER $ r_var "n", ER 1)]'),
     ("WhiteBearFluid", "WhiteBear", "whitebear_fluid_n", '[(ER $ r_var "n", ER 1)]'),
+    ("WhiteBearFluidVeff", "WhiteBear", "whitebear_fluid_Veff",
+           '[(ER $ r_var "Veff", ER (exp(-r_var "Veff"/s_var "kT")))]'),
     #("SW_dispersion", "SW_liquid", "sw_dispersion", '[(ER $ r_var "n", ER 1)]'),
     ("SFMTFluid", "SFMT", "sfmt_fluid_n", '[(ER $ r_var "n", ER 1)]'),
     ("SFMTFluidVeff", "SFMT", "sfmt_fluid_Veff",
