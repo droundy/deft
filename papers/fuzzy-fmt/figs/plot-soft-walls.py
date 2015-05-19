@@ -1,23 +1,17 @@
 #!/usr/bin/python
 
+from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
-from __future__ import division
-import matplotlib, sys
-if not "show" in sys.argv:
-    matplotlib.use('Agg')
-
-import pylab, numpy, os, glob
-from pylab import pi
+import matplotlib
+matplotlib.use('Agg')
+from pylab import *
+from scipy.special import erf
+import matplotlib.lines as mlines
+import os
+import numpy
 
 import styles
-
-if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + ' filling-fraction')
-    exit(1)
-
-rho = int(sys.argv[1])
-#arg rho = [10, 20, 30, 40, 50, 60, 70, 80, 90]
 
 def smooth(x, N):
     '''
@@ -36,51 +30,42 @@ def average_positive_and_negative(data):
     for i in range(len(data)//2):
         data[i,1] = data[abs(data[:,0]) == abs(data[i,0]),1].mean()
     return data[:len(data)//2, :]
-    
 
-pylab.figure()
-data = []
-names = []
-lines = []
-# eventually we will want to include this loadtx("figs/walls.dat") # just so things get rebuilt
+def plot_soft_walls(reduced_density, temps):
+    figure()
+    sigma_over_R=2**(5/6)
+    have_labelled_dft = False
+    NUM = 2
+    for temp in temps:
+        fname = 'figs/new-data/soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
+        data = loadtxt(fname)
+        z = data[:,0]
+        nreduced_density = data[:,1]
+        if have_labelled_dft:
+            plot(z, nreduced_density, styles.new_dft_code(temp))
+        else:
+            plot(z, nreduced_density, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
+            have_labelled_dft = True
+        
+        fname = 'figs/mc-soft-wall-%04.4f-%.4f-2700.dat' % (reduced_density/100.0, temp)
+        data = loadtxt(fname)
+        zmin = data[:,0].min()
+        plot(smooth(data[:,0]-zmin,NUM), smooth(data[:,1],NUM)/2**(-5.0/2.0),
+             styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
-for kT in [0.2, 1.0]:
-    # input: ["figs/new-data/soft-wall-%04.2f-%04.2f.dat" % (rho*0.01, kT) for kT in [0.2, 1.0]]
-    names.append('new kT = %g' % kT)
-    fname = "figs/new-data/soft-wall-%04.2f-%04.2f.dat" % (rho*0.01, kT)
-    data.append(numpy.loadtxt(fname))
-    lines.append('--')
+    #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
 
-pylab.plot(data[0][:,0], data[0][:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
-for i in range(len(data)):
-    print 'plotting', names[i]
-    pylab.plot(data[i][:,0], data[i][:,1], lines[i], label=names[i])
-
-N = 1
-# softwall = numpy.loadtxt('figs/mc-soft-wall-0.5000-0.0100-2218.dat')
-# pylab.plot(smooth(15-abs(softwall[:,0]),N), smooth(softwall[:,1]/2**(-5.0/2.0),N))
-
-softwall = average_positive_and_negative(numpy.loadtxt('figs/mc-soft-wall-0.5000-0.2000-2195.dat'))
-pylab.plot(smooth(15-abs(softwall[:,0]),N), smooth(softwall[:,1]/2**(-5.0/2.0),N), 'b-')
-# softwall = average_positive_and_negative(numpy.loadtxt('figs/mc-soft-wall-0.5000-0.2000-2218.dat'))
-# pylab.plot(smooth(15-abs(softwall[:,0]),N), smooth(softwall[:,1]/2**(-5.0/2.0),N), 'b-')
-#softwall = numpy.loadtxt('figs/mc-soft-wall-0.5000-0.2000-2195.dat')
-#pylab.plot(smooth(15-abs(softwall[:,0]),N), smooth(softwall[:,1]/2**(-5.0/2.0),N), 'b:')
+    title('Soft walls with bulk $n^* = %g$' % (reduced_density/100))
+    xlabel(r'$z/\sigma$')
+    ylabel('$n^*(r)$')
+    legend()
+    xlim(-0.2, 15)
+    outputname = 'figs/soft-walls-%02d.pdf' % (reduced_density)
+    savefig(outputname, bbox_inches=0)
+    print('figs/walls-%02d.pdf' % (reduced_density))
 
 
-# softwall = numpy.loadtxt('figs/mc-soft-wall-0.5000-0.5000-2218.dat')
-# pylab.plot(smooth(15-abs(softwall[:,0]),N), smooth(softwall[:,1]/2**(-5.0/2.0),N))
-softwall = average_positive_and_negative(numpy.loadtxt('figs/mc-soft-wall-0.5000-1.0000-2218.dat'))
-pylab.plot(smooth(15-abs(softwall[:,0]),N), smooth(softwall[:,1]/2**(-5.0/2.0),N), 'g-')
-# softwall = numpy.loadtxt('figs/mc-soft-wall-0.5000-2.5000-2218.dat')
-# pylab.plot(smooth(15-abs(softwall[:,0]),N), smooth(softwall[:,1]/2**(-5.0/2.0),N))
-
-pylab.title('reduced density = %g' % (rho/100.0))
-pylab.xlabel('$z/R$')
-pylab.ylabel('reduced density')
-pylab.legend(loc = 'best')
-
-pylab.xlim(0, 5)
-
-pylab.savefig('figs/soft-walls-%02d.pdf' % (rho))
-pylab.show()
+# input: ['figs/mc-soft-wall-%04.4f-%.4f-2700.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
+# input: ['figs/new-data/soft-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
+# savefig('figs/soft-walls-60.pdf')
+plot_soft_walls(60, [10.0, 5.0, 2.5, 1.0, 0.1])
