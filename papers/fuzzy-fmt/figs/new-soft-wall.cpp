@@ -110,7 +110,7 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
 
 /*--
 
-for kT in np.arange(0.1, 2.05, 0.1):
+for kT in np.arange(0.1, 10.05, 0.1):
   for rho in np.arange(0.1, 2.05, 0.1):
     self.rule('%s %g %g' % (exe, rho, kT),
               [exe],
