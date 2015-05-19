@@ -74,16 +74,25 @@ In his 2010 review of FMT, Roth states that the most important future
 developments in equilibrium DFT will involve treating soft repulsions
 and attractions~\cite{}.
 
-Schmidt introduced a Soft Fundamental Measure Theory~(SFMT) based on
-FMT~\cite{schmidt1999density} where the spheres can penetrate at a an
-energy cost determined by a pair potential. Schmidt tested SFTM for a
-mixture of soft and hard spheres as well as for star
-polymers~\cite{schmidt2000density, groh2001density}. SFMT was also
-tested in a number of other papers~\cite{rosenfeld2000fluid}
-\fixme{more citations} but not the soft fluid with a harmonic
-potential.
+\section{Soft Fundamental Measure Theory}
 
-\section{Fundamental-Measure Theory}
+Schmidt introduced Soft Fundamental Measure Theory~(SFMT) based on
+FMT~\cite{schmidt1999density} where spheres can penetrate at an
+energy cost determined by a pair potential. SFMT was created to
+generalize the weight functions of FMT while keeping the range of
+the weight functions at the soft sphere radius. Schmidt gives three
+criteria for the weight functions: they will deconvolve the Mayer
+function, yield the exact zero-dimensional single cavity limit, and
+they give a reasonable approximation fo the multi-cavity
+limit~\cite{schmidt1999density}.
+
+Schmidt tested SFTM for a mixture of soft and hard spheres as well as
+for star polymers~\cite{schmidt2000density, groh2001density}. SFMT was
+also tested in a number of other papers~\cite{rosenfeld2000fluid}
+\fixme{more citations}.
+
+
+\section{Theory}
 
 We use the White Bear version of the Fundamental-Measure Theory~(FMT)
 functional published in reference~\cite{roth2002whitebear}.  The FMT
@@ -289,14 +298,6 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \label{fig:radial-distribution-100}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution-150}
-\end{center}
-\caption{Radial distribution function with 1.5 reduced density.}
-\label{fig:radial-distribution-150}
-\end{figure}
-
 \subsection{Soft spheres near a hard wall}
 
 
@@ -314,14 +315,6 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \end{center}
 \caption{Density distribution near a hard wall.}
 \label{fig:walls-100}
-\end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/walls-150}
-\end{center}
-\caption{Density distribution near a hard wall.}
-\label{fig:walls-150}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -375,7 +368,7 @@ V_{SW}(0 < z \leq R_0) &= 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
 \end{align}
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/soft-walls-50}
+  \includegraphics[width=\columnwidth]{figs/soft-walls-60}
   \caption{Soft walls plot, generated with new code generator.}
 \end{figure}
 
