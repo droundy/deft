@@ -17,7 +17,7 @@ ww = float(sys.argv[1])
 ff = float(sys.argv[2])
 N = int(sys.argv[3])
 min_T = float(sys.argv[4])
-iterations = int(sys.argv[5])
+iterations = int(float(sys.argv[5]))
 
 mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
 
