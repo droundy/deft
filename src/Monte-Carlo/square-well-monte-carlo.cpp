@@ -597,7 +597,7 @@ int main(int argc, const char *argv[]) {
 
   // Energy histogram and weights
   sw.interaction_distance = 2*R*sw.well_width;
-  sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
+  sw.energy_levels = sw.N*max_balls_within(sw.interaction_distance*1.1)/2 + 1; // the 1.1 is a fudge factor
   sw.energy_histogram = new long[sw.energy_levels]();
   sw.ln_energy_weights = new double[sw.energy_levels]();
 
