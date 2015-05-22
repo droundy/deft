@@ -61,7 +61,7 @@ def dr_g(fbase):
 def dimensions(fbase):
     with open(fbase+"-E.dat") as file:
         for line in file:
-            if "dimensions" in line:
+            if "# cell dimensions: " in line:
                 return eval(line.split(': ')[-1])
 
 def read_N(fbase):

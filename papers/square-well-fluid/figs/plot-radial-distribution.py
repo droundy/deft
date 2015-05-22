@@ -27,7 +27,7 @@ for N in Ns:
 
 plt.legend(loc='best')
 plt.xlabel(r'$r/\sigma$')
-plt.ylabel(r'$g(r)$ not properly normalized')
+plt.ylabel(r'$g(r)$')
 plt.title(r'$g(r)$ with $\lambda = %g$, $\eta=%g$, and $T/\epsilon = %g$'
           % (ww, ff, T))
 

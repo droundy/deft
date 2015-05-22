@@ -26,6 +26,7 @@ plt.figure()
 density, x = readandcompute.density_x('data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenyz,lenx), T)
 plt.plot(x/2, density)
 
+plt.ylim(0)
 plt.xlabel(r'$z/\sigma$')
 plt.ylabel(r'$\eta$')
 plt.title(r'$\eta(z)$ with $\lambda = %g$, $\eta=%g$, and $T/\epsilon = %g$'
