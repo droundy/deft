@@ -39,11 +39,9 @@ cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
 cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)
 
-cmd += " --iterations %d --init_iters %d --golden" % (iterations, 10*iterations)
+cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations)
 
-cmd += ' --de_g 0.01' # nice high-resolution radial distribution function data
-
-cmd += ' --min_T %g' % min_T
+cmd += ' --min_T %g --translation_scale 0.05' % min_T
 
 cmd += ' --data_dir %s --filename %s' % (datadir, fname)
 
