@@ -389,7 +389,7 @@ int main(int argc, const char *argv[]) {
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
       = pow(volume/min_cell_width/min_cell_width/min_cell_width, 1.0/3);
-    if (max_cubic_width*max_cubic_width*max_cubic_width > numcells) {
+    if (max_cubic_width*max_cubic_width*max_cubic_width >= numcells) {
       // We can get away with a cubic cell, so let's do so.
       sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
     } else {
@@ -597,7 +597,7 @@ int main(int argc, const char *argv[]) {
 
   // Energy histogram and weights
   sw.interaction_distance = 2*R*sw.well_width;
-  sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
+  sw.energy_levels = sw.N*max_balls_within(sw.interaction_distance*1.1)/2 + 1; // the 1.1 is a fudge factor
   sw.energy_histogram = new long[sw.energy_levels]();
   sw.ln_energy_weights = new double[sw.energy_levels]();
 
@@ -657,7 +657,7 @@ int main(int argc, const char *argv[]) {
   double cell_width[3];
   for(int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
 
-  // If we made our cells to small, return with error
+  // If we made our cells too small, return with error
   for(int i = 0; i < 3; i++){
     if(cell_width[i] < min_cell_width){
       printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
@@ -736,6 +736,9 @@ int main(int argc, const char *argv[]) {
       if (overlap(sw.balls[i], sw.balls[j], sw.len, sw.walls)) {
         print_bad(sw.balls, sw.N, sw.len, sw.walls);
         printf("Error in initial placement: balls are overlapping.\n");
+        printf("min_cell_width = %g\n", min_cell_width);
+        printf("cells = %d x %d x %d\n", cells[0], cells[1], cells[2]);
+        printf("len = %g x %g x %g\n", sw.len[0], sw.len[1], sw.len[2]);
         return 253;
       }
     }
