@@ -22,7 +22,7 @@ iterations = round(float(sys.argv[6]))
 
 n = ff/(4*numpy.pi/3)
 N = round(n*lenyz*lenyz*lenx)
-mem_estimate = 10 + 0.1*N # it actually also depends on ww, but I'm ignoring that for now.
+mem_estimate = 10 + 0.15*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/square-well-fluid/data/lv'
 fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenyz, lenx)
