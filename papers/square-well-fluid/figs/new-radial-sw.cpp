@@ -25,10 +25,10 @@
 #include "version-identifier.h"
 
 // Here we set up the lattice.
-double zmax = 20;
+double zmax = 18;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.5;
+double dx = 0.1;
 const double epsilon = 1.0;
 const double radius = 1.0;
 const double sigma = 2*radius;
@@ -46,7 +46,7 @@ static void took(const char *name) {
 void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
-  min.set_maxiter(100);
+  min.set_maxiter(500);
   min.precondition(true);
 
   char *dumpname = new char[5000];
@@ -91,7 +91,7 @@ void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
     n.dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
 
     took("Outputting to file");
-  }
+    }
   min.print_info();
   delete[] fname;
   delete[] dumpname;
@@ -139,13 +139,14 @@ int main(int argc, char **argv) {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector r = f.get_r();
     for (int i=0; i<Ntot; i++) {
-      const double Vmax = 100*temp;
+      const double Vmax = 400*temp;
       f.Vext()[i] = 0;
       if (r[i] > sigma && r[i] < sigma*lambda) {
         f.Vext()[i] = -epsilon;
       }
       if (r[i] <= sigma) {
         f.Vext()[i] = Vmax;
+        f.Veff()[i] += f.Vext()[i];
       }
     }
   }
