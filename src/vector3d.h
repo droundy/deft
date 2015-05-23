@@ -110,6 +110,10 @@ class vector3d {
   }
 
   static vector3d ran(double scale);
+  // expran generates a random vector with an exponential probability
+  // distribution in radius, which thus has a diverging probability
+  // per volume at zero distance.  The mean length is 1.
+  static vector3d expran();
 };
 
 

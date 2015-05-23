@@ -29,3 +29,15 @@ vector3d vector3d::ran(double scale) {
   return out;
 }
 
+vector3d vector3d::expran() {
+  double x, y, z, r2;
+  do {
+    x = 2*random::ran() - 1;
+    y = 2*random::ran() - 1;
+    z = 2*random::ran() - 1;
+    r2 = x*x + y*y + z*z;
+  } while(r2 >= 1 || r2 == 0);
+  double invdistance = -sqrt(r2)/log(random::ran());
+  return vector3d(x*invdistance, y*invdistance, z*invdistance);
+}
+
