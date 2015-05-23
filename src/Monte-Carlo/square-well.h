@@ -186,6 +186,7 @@ struct sw_simulation {
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy();
+  void set_max_entropy_energy();
 
   // check whether we are done initializing
   bool finished_initializing(bool be_verbose = false);
@@ -237,9 +238,6 @@ struct sw_simulation {
   };
 };
 
-// Modulates v to within the periodic boundaries of the cell
-vector3d sw_fix_periodic(vector3d v, const double len[3]);
-
 // Return the vector pointing from a to b, accounting for periodic boundaries
 vector3d periodic_diff(const vector3d &a, const vector3d  &b,
                           const double len[3], int walls);
@@ -272,13 +270,6 @@ bool overlap(const ball &a, const ball &b, const double len[3], int walls);
 // If count is true, it will return the total number of overlaps, otherwise constant
 // it returns 1 if there is at least one overlap, 0 if there are none.
 int overlaps_with_any(const ball &a, const ball *p, const double len[3], int walls);
-
-// Return true if p doesn't intersect walls
-bool in_cell(const ball &p, const double len[3], const int walls);
-
-// Move the ball by a random amount, in a gaussian distribution with
-// respective standard deviations dist and angwidth
-ball random_move(const ball &original, double size, const double len[3]);
 
 // Count the number of interactions a given ball has
 int count_interactions(int id, ball *p, double interaction_scale,

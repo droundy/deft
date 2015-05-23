@@ -37,19 +37,12 @@ move_info::move_info(){
   informs = 0;
 }
 
-vector3d sw_fix_periodic(vector3d v, const double len[3]){
-  // for (int i = 0; i < 3; i++){
-  //   while (v[i] > len[i])
-  //     v[i] -= len[i];
-  //   while (v[i] < 0.0)
-  //     v[i] += len[i];
-  // }
-  if (v.x > len[0]) v.x -= len[0];
-  else if (v.x < 0) v.x += len[0];
-  if (v.y > len[1]) v.y -= len[1];
-  else if (v.y < 0) v.y += len[1];
-  if (v.z > len[2]) v.z -= len[2];
-  else if (v.z < 0) v.z += len[2];
+// Modulates v to within the periodic boundaries of the cell
+static inline vector3d sw_fix_periodic(vector3d v, const double len[3]){
+  for (int i = 0; i < 3; i++) {
+    while (v[i] > len[i]) v[i] -= len[i];
+    while (v[i] < 0.0) v[i] += len[i];
+  }
   return v;
 }
 
@@ -184,12 +177,6 @@ int overlaps_with_any(const ball &a, const ball *p, const double len[3], int wal
   return false;
 }
 
-ball random_move(const ball &p, double move_scale, const double len[3]){
-  ball temp = p;
-  temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(move_scale), len);
-  return temp;
-}
-
 static const int wall_stickiness = 2;
 
 int count_interactions(int id, ball *p, double interaction_distance,
@@ -290,7 +277,9 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   moves.total++;
   const int old_interaction_count =
     count_interactions(id, balls, interaction_distance, len, walls, sticky_wall);
-  ball temp = random_move(balls[id], translation_scale, len);
+
+  ball temp = balls[id];
+  temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(translation_scale), len);
   // If we overlap, this is a bad move! Because random_move always
   // calls sw_fix_periodic, we need not worry about moving out of the
   // cell.
@@ -717,7 +706,21 @@ int sw_simulation::set_min_important_energy(){
   return min_important_energy;
 }
 
+void sw_simulation::set_max_entropy_energy() {
+  for (int i=energy_levels-1; i >= 0; i--) {
+    long ups_minus_downs = 0;
+    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+      ups_minus_downs += transitions(i, de)*de;
+    }
+    if (ups_minus_downs > 0) {
+      max_entropy_state = i+1;
+      return;
+    }
+  }
+}
+
 bool sw_simulation::finished_initializing(bool be_verbose) {
+  set_max_entropy_energy();
 
   if(end_condition == optimistic_sample_error
      || end_condition == pessimistic_sample_error){
@@ -819,7 +822,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
         }
         int lowest_problem_energy = 0, highest_problem_energy = min_energy_state;
         for (int i = min_maybe_important_energy; i > max_entropy_state; i--){
-          if (optimistic_samples[i] < 10000 && energy_histogram[i]) {
+          if (pessimistic_samples[i] < 5 && energy_histogram[i]) {
             if (i > lowest_problem_energy) lowest_problem_energy = i;
             if (i < highest_problem_energy) highest_problem_energy = i;
           }
