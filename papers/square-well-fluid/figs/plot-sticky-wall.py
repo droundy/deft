@@ -13,17 +13,17 @@ import readandcompute
 ww = float(sys.argv[1])
 #arg ww = [1.3]
 ff = float(sys.argv[2])
-#arg ff = [0.3]
+#arg ff = [0.1]
 lenx = float(sys.argv[3])
-#arg lenx = [50]
+#arg lenx = [50,100]
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 T = float(sys.argv[5])
-#arg T = [1.0]
+#arg T = [1.0,10.0]
 
 plt.figure()
 
-density, x = readandcompute.density_x('data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenyz,lenx), T)
+density, x = readandcompute.density_x('data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz), T)
 plt.plot(x/2, density)
 
 plt.ylim(0)
@@ -32,6 +32,6 @@ plt.ylabel(r'$\eta$')
 plt.title(r'$\eta(z)$ with $\lambda = %g$, $\eta=%g$, and $T/\epsilon = %g$'
           % (ww, ff, T))
 
-plt.savefig('figs/liquid-vapor-ww%.2f-ff%.2f-%gx%g-T%.2g.pdf' % (ww,ff,lenyz,lenx,T))
+plt.savefig('figs/liquid-vapor-ww%.2f-ff%.2f-%gx%g-T%.2g.pdf' % (ww,ff,lenx,lenyz,T))
 
 plt.show()
