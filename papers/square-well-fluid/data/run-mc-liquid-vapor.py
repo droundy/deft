@@ -25,7 +25,7 @@ N = round(n*lenyz*lenyz*lenx)
 mem_estimate = 10 + 0.15*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/square-well-fluid/data/lv'
-fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenyz, lenx)
+fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenx, lenyz)
 
 os.system('mkdir -p ' + datadir)
 
@@ -33,7 +33,7 @@ if os.system('which srun'):
     # srun doesn't exist so just run on this machine
     cmd = "time nice -19 ./square-well-monte-carlo"
 else:
-    cmd = "srun --mem=%d -J %s time nice -19 ./square-well-monte-carlo" % (mem_estimate, fname)
+    cmd = "srun --mem=%d -J lv:%s time nice -19 ./square-well-monte-carlo" % (mem_estimate, fname)
 
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
