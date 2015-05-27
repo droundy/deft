@@ -226,6 +226,7 @@ int main(int argc, char *argv[]){
   const double dx_goal = atof(argv[2]);
   const double uncertainty_goal = atof(argv[3]);
   long density_saved_count = 0;
+  long rdf_saved_count = 0;
 
   Vector3d *spheres = new Vector3d[N];
   const int num_frames = 100;
@@ -265,7 +266,7 @@ int main(int argc, char *argv[]){
   // periodic cell!
 
   if (FCC == true) {
-    iterations = 9999999999;
+    iterations = 99999999999;
     //    int cubeLength = pow(double(N/4.0),1.0/3.0) + .5;
     //    int numberOfCubes = ceil(N/4);
     int x = 0;
@@ -536,7 +537,7 @@ int main(int argc, char *argv[]){
         }
         for (long i=0; i<div; i++) {
           const double Vi = (shellsRadius[i+1]*shellsRadius[i+1]*shellsRadius[i+1]-shellsRadius[i]*shellsRadius[i]*shellsRadius[i])*(4/3.*M_PI);
-          radial_distribution[i] = radial_distributon_histogram[i]*volume/(Vi*density_saved_count*N*(N-1));
+          radial_distribution[i] = radial_distributon_histogram[i]*volume/(Vi*rdf_saved_count*N*(N-1));
         }
         if (!flat_div){
           for(long i=0; i<div; i++){
@@ -720,15 +721,20 @@ int main(int argc, char *argv[]){
     }
 
     const long first_data_iterations = 20*iterations_per_pressure_check;
-    // only write out the sphere positions every so often, since we
-    // don't want to spend all of our time putting things in bins to
-    // the exclusion of moving things around.
-    if (j%(N*div) == 0 && workingmoves > first_data_iterations) {
+    if (workingmoves > first_data_iterations) {
       density_saved_count++;
       for (long s=0;s<N;s++) {
-        // If we are not using FCC conditions, we will want to store
-        // density as a function of position.
+        // Here we store density as a function of position.
         shells[shell(spheres[s], div, radius, sections)]++;
+      }
+    }
+    // only write out radial distribution function every so often,
+    // since it is much more expensive than the density, and we don't
+    // want to spend all of our time putting things in bins to the
+    // exclusion of moving things around.
+    if (j%(N*div) == 0 && workingmoves > first_data_iterations) {
+      rdf_saved_count++;
+      for (long s=0;s<N;s++) {
         if (FCC && false) { // DISABLE THIS OUTPUT FOR NOW!
           for(long n=0;n<FCC_div2;n++){
             if (FCC_shells[n][0] <= spheres[s][0] &&
