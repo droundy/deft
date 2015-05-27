@@ -132,12 +132,12 @@ thermodynamic properties of the square-well fluid in order to test
 square-well density functional theories. The liquid-vapor phase
 interface is an interesting regime for testing density functional
 theories, but unbiased Monte Carlo simulations are incapable of
-sampling the low energy fluid states which dominate the partition
-function at low liquid-state temperatures. Previous works have
-developed several generic Monte Carlo histogram methods for collecting
-statistics on low energy system states, but little or no literature
-exists on these methods' systematic comparison, as well as their
-application to the square-well fluid. The square-well fluid in
+effectively sampling the low energy fluid states which dominate the
+partition function at low liquid-state temperatures. Previous works
+have developed several generic Monte Carlo histogram methods for
+collecting statistics on low energy system states, but little or no
+literature exists on these methods' systematic comparison, as well as
+their application to the square-well fluid. The square-well fluid in
 particular introduces application challenges not manifest in
 traditional models for testing and benchmarking such numerical
 techniques (e.g. the Ising model).
@@ -473,29 +473,30 @@ $X\p{s}$. Furthermore, simulating with flat weights $w\p{X}=w_0$ for
 all $X$ is equivalent to simulating without weights, as the
 probability $P_m\p{s_i\to s_f}$ will always equal 1.
 
-Employing biased Monte Carlo simulations, sketched out in Algorithm
-\ref{alg:biased_MC}, allows one to construct weight functions that
-favor some region of state space over others, as transitions to states
-with higher weights are always accepted, whereas transitions to states
-with lower weights may be rejected, artificially preventing the
-simulated system from leaving interesting regions of state
-space. Crucially, the bias introduced by weights can be reversed when
-computing system properties from sampling statistics, as the weight of
-a particular state is directly proportional to the probability bias of
-that state; that is, a state with a weight of 2 will be sampled twice
-as often as it would have been with a weight of 1. If we wish to
-convert a histogram $H\p{X}$ of observations in a biased Monte Carlo
-simulation into a numerical unnormalized density of states $\tilde
-D\p{X}$ in $X$, we therefore divide the histogram by the corresponding
-weights $w\p{X}$, i.e.
+This sort of biased simulation is called Metropolis-Hastings Monte
+Carlo sampling. Employing Metropolis-Hastings Monte Carlo simulations,
+sketched out in Algorithm \ref{alg:biased_MC}, allows one to construct
+weight functions that favor some region of state space over others, as
+transitions to states with higher weights are always accepted, whereas
+transitions to states with lower weights may be rejected, artificially
+preventing the simulated system from leaving interesting regions of
+state space. Crucially, the bias introduced by weights can be reversed
+when computing system properties from sampling statistics, as the
+weight of a particular state is directly proportional to the
+probability bias of that state; that is, a state with a weight of 2
+will be sampled twice as often as it would have been with a weight of
+1. If we wish to convert a histogram $H\p{X}$ of observations in a
+Metropolis-Hastings Monte Carlo simulation into a numerical
+unnormalized density of states $\tilde D\p{X}$ in $X$, we therefore
+divide the histogram by the corresponding weights $w\p{X}$, i.e.
 \begin{align}
   \tilde D\p{X}=\f{H\p{X}}{w\p{X}}.
   \label{eq:dos}
 \end{align}
 The normalized density of states $D\p{X}$ in $X$ is then
 \begin{align}
-  D\p{X}=\f{\tilde D\p{X}}{\sum_X\tilde D\p{X}}
-  =\f{H\p{X}/w\p{X}}{\sum_XH\p{X}/w\p{X}}.
+  D\p{X}=\f{\tilde D\p{X}}{\sum_{X'}\tilde D\p{X'}}
+  =\f{H\p{X}/w\p{X}}{\sum_{X'}H\p{X'}/w\p{X'}}.
   \label{eq:dos_norm}
 \end{align}
 In general, the domain and shape of the weight function will depend on
@@ -504,7 +505,7 @@ simulation. A histogram method is simply an algorithm or procedure for
 determining a weight function appropriate for a particular simulation.
 
 \begin{algorithm}[tb]
-  \caption{Biased Monte Carlo fluid simulation}
+  \caption{Metropolis-Hastings Monte Carlo fluid simulation}
   \label{alg:biased_MC}
   \begin{alg}
 
@@ -543,9 +544,9 @@ simply ``weights.''
 \label{sec:canonical_weights}
 
 The most common weight array $w\p{E}$ used by physicists for what is
-called a canonical Monte Carlo simulation involves choosing a
-particular temperature $T_0$, and using weights proportional to the
-Boltzmann factor at that temperature, i.e.
+called a canonical (or Metropolis) Monte Carlo simulation involves
+choosing a particular temperature $T_0$, and using weights
+proportional to the Boltzmann factor at that temperature, i.e.
 \begin{align}
   w\p{E}=e^{-E/kT_0},
 \end{align}
@@ -639,25 +640,25 @@ will allow us to determine, for various square-well fluids,
 \section{Methods}
 \label{sec:methods}
 
-Having covered the basics of the square-well fluid as well as unbiased
-and biased Monte Carlo simulations, we can now discuss several
-histogram methods for constructing energy weights. In Section
-\ref{sec:flat_histogram}, we will introduce the flat histogram method,
-which is not directly applicable to the study of most systems, but
-which forms the basis of many other methods. We will then introduce,
-in Section \ref{sec:simple_flat}, the ``simple flat'' method, which we
-designed to be the simplest viable histogram method, and against which
-we can compare more complicated methods. Next, in Sections
+Having covered the basics of the square-well fluid as well as Monte
+Carlo fluid simulation, we can now discuss several histogram methods
+for constructing energy weights. In Section \ref{sec:flat_histogram},
+we will introduce the flat histogram method, which is not directly
+applicable to the study of most systems, but which forms the basis of
+many other methods. We will then introduce, in Section
+\ref{sec:simple_flat}, the ``simple flat'' method, which we designed
+to be the simplest viable histogram method, and against which we can
+compare more complicated methods. Next, in Sections
 \ref{sec:wang_landau}--\ref{sec:optimized_ensemble} we introduce three
 published methods: Wang-Landau, transition matrix Monte Carlo, and the
 optimized ensemble. The last of these methods we will not actually
 implement and analyze because, unlike most histogram methods, it was
-designed to optimize weights rather than construct them. We will,
-however, borrow ideas from the optimized ensemble to design a
-histogram method of our own, a hybrid of the optimized ensemble and
-transition matrix Monte Carlo, in Section \ref{sec:oetmmc}. Finally,
-we will cover some general implementation details and loose ends in
-Section \ref{sec:loose_ends}
+designed to optimize pre-existing weights rather than construct
+them. We will, however, borrow ideas from the optimized ensemble to
+design a histogram method of our own, a hybrid of the optimized
+ensemble and transition matrix Monte Carlo, in Section
+\ref{sec:oetmmc}. Finally, we will cover some general implementation
+details and loose ends in Section \ref{sec:loose_ends}
 
 \subsection{The flat histogram (multi-canonical) method}
 \label{sec:flat_histogram}
@@ -996,7 +997,7 @@ need to choose a value of $c$.
 \label{sec:tmmc}
 
 Unlike the previous histogram methods, the transition matrix Monte
-Carlo method does not use weights, and merely compute the density of
+Carlo method does not use weights, and merely computes the density of
 states $D\p{E}$ of a system\cite{tmmc}. The density of states can in
 turn be used to determine flat histogram weights via
 (\ref{eq:flat_weights}). TMMC introduces a new object: the energy
@@ -1043,10 +1044,9 @@ with a state density vector $D$ and transition matrix $T$,
 \end{align}
 Finding the density of states of a system can thus be reduced to
 finding the eigenvector of the transition matrix which has a
-corresponding unit eigenvalue. \fixme{why is this eigenvector unique?}
-Once one has determined the density of states of a system, one can
-initialize weights via the flat histogram method,
-i.e. (\ref{eq:flat_weights}).
+corresponding unit eigenvalue. Once one has determined the density of
+states of a system, one can initialize weights via the flat histogram
+method, i.e. (\ref{eq:flat_weights}).
 
 Computationally determining the transition matrix of a system is
 straightforward: one need only simulate the system and collect a
@@ -1233,12 +1233,12 @@ All histogram methods introduced in this paper thus far have focused
 on determining a weight array $w\p{E}$ for a flat energy histogram
 $H\p{E}$, in order to sample and collect statistics on all energies
 equally. This motivation considers the quantity of statistics, but not
-their quality. Biased simulations collect statistics on low energy
-states by first getting into these states, and then rejecting moves
-which move the system into higher energy states. Statistics on low
-energy states will therefore generally be highly correlated, as they
-are based on many samples of only a few low energy regions of a
-system's energy landscape. The optimized
+their quality. Metropolis-Hastings Monte Carlo simulations collect
+statistics on low energy states by first getting into these states,
+and then rejecting moves which move the system into higher energy
+states. Statistics on low energy states will therefore generally be
+highly correlated, as they are based on many samples of only a few low
+energy regions of a system's energy landscape. The optimized
 ensemble\cite{optimized_ensemble} attempts to address the
 autocorrelation between low energy samples by finding weights to
 maximize the rate at which a simulation makes round trips between low
@@ -1323,9 +1323,10 @@ histogram weights, or equivalently the density of states, as an input,
 and is not meant to construct weights from scratch. We therefore will
 not be comparing the optimized ensemble to other methods in this
 paper. We do, however, credit \cite{optimized_ensemble} for motivating
-the hybrid OE-TMMC method in Section \ref{sec:oetmmc}.
+the hybrid DOTMMC method in Section \ref{sec:oetmmc}.
 
-\subsection{The hybrid OE-TMMC method}
+\subsection{The diffusion-optimized transition matrix Monte Carlo
+  (DOTMMC) method}
 \label{sec:oetmmc}
 
 As well as the density of states, the transition matrix $T\p{E_i,E_j}$
@@ -1374,12 +1375,13 @@ definition with that we provide in
 (\ref{eq:walker_current_definition}) is considered outside the scope
 of this paper. \fixme{say something more convincing? cite?}
 
-The hybrid OE-TMMC method thus first runs Algorithm \ref{alg:tmmc} to
-collect a transition histogram and compute flat histogram weights,
-then computes the diffusivity $\alpha\p{E}$ via
+The diffusion-optimized transition matrix Monte Carlo (DOTMMC) method,
+a hybrid of TMMC and the optimized ensemble, thus first runs Algorithm
+\ref{alg:tmmc} to collect a transition histogram and compute flat
+histogram weights, then computes the diffusivity $\alpha\p{E}$ via
 (\ref{eq:<de>})-(\ref{eq:microscopic_diffusitivy}), and finally
 computes optimized weights as given by
-(\ref{eq:optimized_weights}). Unlike the optimized ensemble, OE-TMMC
+(\ref{eq:optimized_weights}). Unlike the optimized ensemble, DOTMMC
 does not require any extra simulation routines, and is therefore
 straightforward to implement and compare to other histogram methods.
 
@@ -1571,18 +1573,18 @@ against those from ``gold standard'' simulations, which run for
 significantly longer than the standard $10^5N^2$ iterations. For our
 gold standard simulations, we use the TMMC method and initialize until
 it collects $10^4$ optimistic samples of the minimum important energy
-(i.e. until $s_o\p{E_-}\ge 10^4$). \fixme{why TMMC?} To increase
-confidence in low-temperature gold standard results, we initialized
-them with $kT_{\t{min}}=0.1\epsilon$. After initialization, the gold
-standard runs simulate for $10^{10}$ iterations ($10^{10}N$
-moves). While the entire initialization and simulation process takes
-around two hours for the largest regular simulations, the largest
-golden simulations initialize for $\sim11$ hours, and simulate for a
-week. To control for iteration number in the results from any given
-set of simulations, we compare against ``converged flat''
-simulations. Converged flat simulations read in the transition matrix
-from golden simulations to construct a weight array, and simulate for
-the same number of iterations as the standard simulations.
+(i.e. until $s_o\p{E_-}\ge 10^4$). To increase confidence in
+low-temperature gold standard results, we initialized them with
+$kT_{\t{min}}=0.1\epsilon$. After initialization, the gold standard
+runs simulate for $10^{10}$ iterations ($10^{10}N$ moves). While the
+entire initialization and simulation process takes around two hours
+for the largest regular simulations, the largest golden simulations
+initialize for $\sim11$ hours, and simulate for a week. To control for
+iteration number in the results from any given set of simulations, we
+compare against ``converged flat'' simulations. Converged flat
+simulations read in the transition matrix from golden simulations to
+construct a weight array, and simulate for the same number of
+iterations as the standard simulations.
 
 \subsection{Histograms and arrays}
 \label{sec:histograms}
@@ -1614,9 +1616,9 @@ figures, as these results are distracting and unfit for drawing any
 conclusions.
 
 The energy histogram in Figure \ref{fig:arrays} shows that TMMC and
-OE-TMMC spend considerably less time at important low energies than
+DOTMMC spend considerably less time at important low energies than
 the simple flat and vanilla Wang-Landau methods. At face value, this
-behavior of TMMC and OE-TMMC is undesirable, as these are the most
+behavior of TMMC and DOTMMC is undesirable, as these are the most
 interesting energies for low temperatures, and the most difficult
 energies to sample.
 
@@ -1634,7 +1636,7 @@ approximation. Figure \ref{fig:sample_rates} shows pessimistic sample
 rates averaged over 30 simulations with $N=25$. Lower pessimistic
 sample rates mean that a simulation takes less time to collect
 statistics which are guaranteed to be uncorrelated. By this metric,
-TMMC and OE-TMMC again perform worse than simple flat and vanilla
+TMMC and DOTMMC again perform worse than simple flat and vanilla
 Wang-Landau.
 
 \begin{figure}
@@ -1679,10 +1681,10 @@ the heat capacity
   =\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2,
   \label{eq:CV}
 \end{align}
-and the configurational entropy \fixme{is this correct?}
+and the configurational entropy
 \begin{align}
-  S_{\t{config}}\p{T}=k\bk{\f{E}{kT}+\ln Z}_T
-  -k\bk{\f{E}{kT}+\ln Z}_{T\to\infty}.
+  S_{\t{config}}\p{T}=S\p{T}-S\p{T\to\infty}
+  =k\bk{\f{E}{kT}+\ln Z}_T-k\bk{\f{E}{kT}+\ln Z}_{T\to\infty}.
   \label{eq:S}
 \end{align}
 All of these properties are directly computable from the density of
@@ -1704,10 +1706,9 @@ $kT_{\t{min}}=0.2\epsilon$ and ensures that the histogram methods are
 indeed performing the nontrivial task of exploring the liquid-gas
 phase boundary of the square-well fluid. For the purposes of this
 paper, we will neglect to prove that this phase transition is indeed
-between liquid and gas phases, and take this fact as given. \fixme{say
-  more convincingly}
+between liquid and gas phases, and take this fact as given.
 
-\begin{figure}[!b]
+\begin{figure}[p]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/internal-energy.pdf}
   \caption[Internal energy]
@@ -1716,7 +1717,7 @@ between liquid and gas phases, and take this fact as given. \fixme{say
   \label{fig:internal_energy}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/heat-capacity.pdf}
   \caption[Heat capacity]
@@ -1724,7 +1725,7 @@ between liquid and gas phases, and take this fact as given. \fixme{say
   \label{fig:heat_capacity}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/config-entropy.pdf}
   \caption[Configurational entropy]
@@ -1733,7 +1734,17 @@ between liquid and gas phases, and take this fact as given. \fixme{say
   \label{fig:config_entropy}
 \end{figure}
 
-\begin{figure}
+Having a sense of how $U$, $C_V$ and $S_{\t{config}}$ behave with
+respect to temperature, we can now look at the how the errors $\Delta
+U$, $\Delta C_V$ and $\Delta S_{\t{config}}$ relative to the TMMC
+golden calculations, shown in Figures
+\ref{fig:internal_energy_err}--\ref{fig:config_entropy_err}. Much like
+the arrays in Figure \ref{fig:arrays}, we provide these figures for a
+sense of how error curves behave. Errors (at $kT\ge0.2\epsilon$)
+typically peak near the phase transition at $kT\approx0.5\epsilon$,
+and drop back down.
+
+\begin{figure}[!b]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/u-err.pdf}
   \caption[Internal energy error scaling]
@@ -1759,16 +1770,6 @@ between liquid and gas phases, and take this fact as given. \fixme{say
     simulations.}
   \label{fig:config_entropy_err}
 \end{figure}
-
-Having a sense of how $U$, $C_V$ and $S_{\t{config}}$ behave with
-respect to temperature, we can now look at the how the errors $\Delta
-U$, $\Delta C_V$ and $\Delta S_{\t{config}}$ relative to the TMMC
-golden calculations, shown in Figures
-\ref{fig:internal_energy_err}--\ref{fig:config_entropy_err}. Much like
-the arrays in Figure \ref{fig:arrays}, we provide these figures for a
-sense of how error curves behave. Errors (at $kT\ge0.2\epsilon$)
-typically peak near the phase transition at $kT\approx0.5\epsilon$,
-and drop back down.
 
 Figures \ref{fig:u_scaling}--\ref{fig:s_scaling} provide a more
 comprehensive picture of errors from each method. These figures show
@@ -1804,7 +1805,6 @@ systems.
   \label{fig:s_scaling}
 \end{figure}
 
-
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/u-comps.pdf}
@@ -1823,7 +1823,7 @@ systems.
   \label{fig:cv_comps}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
   \centering
   \includegraphics[width=0.7\textwidth]{figs/s-comps.pdf}
   \caption[Configurational entropy error comparisons]
@@ -1841,8 +1841,7 @@ reference line is strange, and indicates that some regular simulations
 are outperforming the converged flat ones. We do not understand why
 such events occur, as converged flat simulations should be using
 high-quality golden data to construct weight arrays, and should
-therefore outperform all standard simulations. \fixme{comment on why
-  some methods might do better than CFW?}
+therefore outperform all standard simulations.
 
 As with the arrays, the error comparison figures demonstrate the
 inability of Wang-Landau to sample a system without a predefined
@@ -1853,7 +1852,7 @@ know the reason for these anomalies, but they could occur if the
 method terminates before finding energies near $E_-$, in which case it
 would get stuck in simulation at low energies with canonical weights
 for the minimum temperature $kT_{\t{min}}=0.2\epsilon$. Finally, these
-error figures further confirm earlier suspicions of OE-TMMC's
+error figures further confirm earlier suspicions of DOTMMC's
 underperformance relative to TMMC, despite the fact that it is
 supposed to provide an improvement over the TMMC weight array.
 
@@ -1876,28 +1875,39 @@ which only a given energy range is of particular interest. The simple
 flat method, while generally performing well, sometimes fails to
 initialize. If gone unnoticed, such failures can be costly in terms of
 computation time and resources. Our implementation of the optimized
-ensemble using the transition matrix resulted in lower sampling rates
-and higher errors than the flat histogram TMMC weights. We suspect
-that the optimized ensemble is failing to improve TMMC because the
-theory behind it neglects the discretization of energies.
-
-\fixme{make conclusions more satisfying?}
+ensemble using the transition matrix, i.e. DOTMMC, resulted in lower
+sampling rates and higher errors than the flat histogram TMMC
+weights. Though we have not completely ruled out that our
+implementation of DOTMMC contains bugs, we suspect that the optimized
+ensemble is failing to improve TMMC either because
+\begin{enumerate*}[label=\roman*)]
+\item the theory behind the optimized ensemble neglects the
+  discretization of energies, or
+\item DOTMMC is highly sensitive to sampling error in the transition
+  matrix.
+\end{enumerate*}
+The first of these suspicions can be tested by simulating larger
+systems with a denser specific energy spectrum, and for which
+discretization should become asymptotically negligible; the second
+suspicion can be tested simply by initializing via TMMC for longer,
+thereby reducing errors in the transition matrix, before computing
+diffusion-optimized weights.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Acknowledgments}
 \label{sec:acknowledgements}
 
-I wish to thank, first and foremost, my advisor Dr. David Roundy, for
+I wish to thank, first and foremost my advisor, David Roundy, for
 mentoring me and providing me a wealth of knowledge and expertise in
 various subjects of physics, numerical methods, and programming
 nuances. I would also like thank Paho Lurie-Gregg, with whom I
 frequently exchange and discuss codes and ideas, and whose hard
 polyhedra Monte Carlo simulations I used as the template for my own
-codes. Lastly, I would like to thank thank Eva Morgun, who prompted me
-to {\it act} on my textbook enthusiasm for physics, and get involved
-in the fun and interesting world of scientific research. \fixme{Thank
-  Jansen and McIntyre}
+square-well codes. Lastly, I would like to thank thank Eva Morgun, who
+prompted me to {\it act} on my textbook enthusiasm for physics, and
+get involved in the fun and interesting world of scientific
+research. \fixme{Thank Jansen and McIntyre}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
