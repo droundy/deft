@@ -40,7 +40,7 @@ reference = sys.argv[7]
 #arg reference = ['cfw']
 
 seeds = eval(sys.argv[8])
-#arg seeds = [range(10,21)]
+#arg seeds = [range(30)]
 
 u_errors = {}
 cv_errors = {}

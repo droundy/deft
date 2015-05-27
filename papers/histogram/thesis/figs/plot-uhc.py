@@ -32,7 +32,7 @@ methods = eval(sys.argv[4])
 #arg methods = [["cfw","simple_flat","vanilla_wang_landau","wang_landau","tmmc","oetmmc"]]
 
 seeds = eval(sys.argv[5])
-#arg seeds = [range(10,21)]
+#arg seeds = [range(30)]
 
 # input: ["../data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-%s.dat" % (seed, ww, ff, N, method, data) for method in methods for seed in seeds for data in ["E","lnw"]]
 
@@ -131,7 +131,7 @@ plt.figure('u_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta U/N\epsilon$')
 plt.legend(loc='upper right')
-plt.ylim(-.03,.03)
+plt.ylim(-.01,.02)
 plt.tight_layout()
 plt.savefig("figs/u-err.pdf")
 
@@ -139,7 +139,7 @@ plt.figure('hc_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$\\Delta C_V/Nk$')
 plt.legend(loc='upper right')
-plt.ylim(-0.5,0.5)
+plt.ylim(-0.2,0.2)
 plt.tight_layout()
 plt.savefig("figs/cv-err.pdf")
 
@@ -147,6 +147,6 @@ plt.figure('s_err')
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel(r'$\Delta S_{\textrm{config}}/Nk$')
 plt.legend(loc='upper right')
-plt.ylim(-.1,.1)
+plt.ylim(-.04,.04)
 plt.tight_layout()
 plt.savefig("figs/s-err.pdf")

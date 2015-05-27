@@ -25,7 +25,8 @@
 
 \title[Optimizing MC Simulation of the SW Fluid]
 {Optimizing Monte Carlo Simulation of the Square-Well Fluid}
-\author[M. A. Perlin]{Michael A. Perlin}
+\author[M. A. Perlin, D. Roundy]
+{Michael A. Perlin\\Advisor: David Roundy}
 \institute{\bf Department of Physics, Oregon State University}
 \date{02 June 2015}
 
@@ -80,32 +81,42 @@
   \frametitle{Monte Carlo fluid simulation}
   \begin{itemize}
   \item Model systems and the real world; theory testing
-  \item Dynamic vs equilibrium simulation
-  \item Metropolis Monte Carlo: random walk in configuration space
-  \item Histogram $H\p{E}$ of observed energies is proportional to the
-    density of states $D\p{E}$
+  \item<2-> Unbiased Monte Carlo: random walk in configuration space
+  \item<3> Histogram $H\p{E}$ of observed energies is proportional to
+    the density of states $D\p{E}$
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Thermodynamic properties}
-  \begin{align*}
-    Z\p{T}=\sum_se^{-E_s/kT}=\sum_ED\p{E}e^{-E/kT}
-  \end{align*}
-  \begin{align*}
-    \bk{X}_T=\sum_EX\p{E}P\p{E}=\f1{Z\p{T}}\sum_EX\p{E}D\p{E}e^{-E/kT}
-  \end{align*}
+  \begin{itemize}
+  \item Partition function
+    \begin{align*}
+      Z\p{T}=\sum_se^{-E_s/kT}=\sum_ED\p{E}e^{-E/kT}
+    \end{align*}
+
+  \item Temperature dependence of observable properties
+    \begin{align*}
+      \bk{X}_T=\sum_EX\p{E}P\p{E,T}=\f1{Z\p{T}}\sum_EX\p{E}D\p{E}e^{-E/kT}
+    \end{align*}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Thermodynamic properties}
-  \begin{align*}
-    U\p{T}=\bk{E}_T
-  \end{align*}
-  \begin{align*}
-    C_V\p{T}=\p{\f{\d U}{\d T}}_V
-    =\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2
-  \end{align*}
+  \begin{itemize}
+  \item Internal energy
+    \begin{align*}
+      U\p{T}=\bk{E}_T
+    \end{align*}
+
+  \item Heat capacity
+    \begin{align*}
+      C_V\p{T}=\p{\f{\d U}{\d T}}_V
+      =\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2
+    \end{align*}
+
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -125,14 +136,84 @@
   \frametitle{Histogram methods}
   \begin{itemize}
   \item {\it Biased} walk in configuration space
-  \item To each energy $E$, assign a weight $w\p{E}$
-  \item Accept Monte Carlo moves with probability
-    \begin{align*}
-      P\p{s_i\to s_f}=\min\set{\f{w\p{E_f}}{w\p{E_i}},1}
-    \end{align*}
-  \item $w\p{E}$ is proportional to the bias on states with energy $E$
-  \item Histogram method: an algorithm for finding $w\p{E}$
+    \begin{itemize}
+    \item<2-> To each energy $E$, assign a weight $w\p{E}$
+    \item<2-> Accept Monte Carlo moves with probability
+      \begin{align*}
+        P\p{s_i\to s_f}=\min\set{\f{w\p{E_f}}{w\p{E_i}},1}
+      \end{align*}
+    \end{itemize}
+
+  \item<3-> $w\p{E}$ is proportional to the bias on states with energy
+    $E$
+  \item<4> Histogram method: an algorithm for finding $w\p{E}$
   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Flat histogram}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Simple flat method}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Wang-Landau}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Transition matrix Monte Carlo (TMMC)}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Optimized ensemble}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Gold standard}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Converged flat weights}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Thermodynamic properties}
+  \begin{align*}
+    U\p{T}=\bk{E}_T
+  \end{align*}
+  \begin{align*}
+    C_V\p{T}=\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2
+  \end{align*}
+  \begin{align*}
+    S_{\text{config}}\p{T} =k\bk{\f{E}{kT}+\ln Z}_T
+    -k\bk{\f{E}{kT}+\ln Z}_{T\to\infty}
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Histograms and arrays}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Properties and errors}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Error scaling}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Error comparisons}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Summary}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Acknowledgments}
 \end{frame}
 
 \end{document}
