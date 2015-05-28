@@ -831,7 +831,7 @@ densities. The introduction of a minimum temperature may seem ad-hoc,
 but all simulations in this paper require a choice of minimum
 temperature anyways (discussed in Section \ref{sec:min_energy}).
 
-\subsection{The Wang-Landau (WL) method}
+\subsection{The Wang-Landau method}
 \label{sec:wang_landau}
 
 The Wang-Landau method is the first published histogram method we
@@ -1138,9 +1138,9 @@ difference $M$.
 
     \item accept the move $s_i\to s_f$ with probability
       \begin{align*}
-        P_m\p{s_i\to s_f} =\max\set{\f{\p{\tilde T_d\p{E_i,\Delta
-                E}+c}/\p{n_i+c}} {\p{\tilde T_d\p{E_f,-\Delta
-                E}+c}/\p{n_f+c}}, \exp\p{-\f{\Delta E}{kT_{\t{min}}}}}
+        P_m\p{s_i\to s_f}=\max\set{\f{\p{\tilde T_d\p{E_i,\Delta E}+c}
+            /\p{n_i+c}} {\p{\tilde T_d\p{E_f,-\Delta E}+c}/\p{n_f+c}},
+          \exp\p{-\f{\Delta E}{kT_{\t{min}}}}}
       \end{align*}
       for a predetermined number $c$ and temperature $T_{\t{min}}$.
       \label{alg:tmmc_prob}
@@ -1209,13 +1209,17 @@ directly.
 Aside from a minimum temperature $T_{\t{min}}$ and an end condition,
 Algorithm \ref{alg:tmmc} contains one free parameter, $c$, used in
 step \ref{alg:tmmc_prob} to modify (\ref{eq:tmmc_prob_simplified}).
-This parameter makes the rejection of transitions more conservative
-when there are too few statistics in the histogram $\tilde T_d$ to be
-confident in the current estimate of the transition matrix. In order
-to make the effects of $c$ negligible as $\tilde T_d$ collects more
-statistics throughout initialization, $c$ should be of order unity,
-though its optimal value is generally system-dependent. In our
-implementation of Algorithm \ref{alg:tmmc}, we use $c=16$.
+This parameter, which is our own addition to the algorithm provided in
+\cite{tmmc}, makes the rejection of transitions more conservative when
+there are too few statistics in the histogram $\tilde T_d$ to be
+confident in the current estimate of the transition matrix. Without
+this parameter, the TMMC initialization routine can get stuck at
+energies which, due to poor collection of statistics in $\tilde T_d$,
+appear to be more important than they actually are. In order to make
+the effects of $c$ negligible as $\tilde T_d$ collects more statistics
+throughout initialization, $c$ should be of order unity, though its
+optimal value is generally system-dependent. In our implementation of
+Algorithm \ref{alg:tmmc}, we use $c=16$.
 
 The last interesting part of the probability in step
 \ref{alg:tmmc_prob} of Algorithm \ref{alg:tmmc} is the limit on
@@ -1411,15 +1415,15 @@ While the Wang-Landau method comes equipped with an end condition of
 its own, most histogram methods require some external means of
 deciding when they are finished initializing. Wang-Landau's
 ``natural'' end condition does not advantage it over other methods,
-however, as the WL end condition makes use of a free parameter (the
-cutoff $c$), which any end condition will require. In order to compare
-all methods fairly, we need a method-independent end condition to
-initialization. The most straightforward of such end conditions is to
-simply to stop initializing after some fixed number of Monte Carlo
-iterations, and finish up any other calculations in the algorithm if
-appropriate. We thus initialize systems of $N$ spheres for $10^5N^2$
-iterations; the choice of $10^5N^2$ we address in Section
-\ref{sec:results}. In general, however, one might want an end
+however, as the Wang-Landau end condition makes use of a free
+parameter (the cutoff $c$), which any end condition will require. In
+order to compare all methods fairly, we need a method-independent end
+condition to initialization. The most straightforward of such end
+conditions is to simply to stop initializing after some fixed number
+of Monte Carlo iterations, and finish up any other calculations in the
+algorithm if appropriate. We thus initialize systems of $N$ spheres
+for $10^5N^2$ iterations; the choice of $10^5N^2$ we address in
+Section \ref{sec:results}. In general, however, one might want an end
 condition which is independent of system size. We came up with a four
 such end conditions as examples, though we do not use them in
 simulations analyzed in this paper.
@@ -1589,6 +1593,30 @@ iterations as the standard simulations.
 \subsection{Histograms and arrays}
 \label{sec:histograms}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{figs/array-example.pdf}
+  \caption[Example arrays]
+  {Example arrays computed by various histogram methods for a
+    square-well fluid with a well width $\lambda=1.3$, filling
+    fraction $\eta=0.3$, and $N=25$ spheres after simulating for
+    $10^5N^2$ iterations: (top left) energy histogram, (top right)
+    weight array, (bottom left) density of states. Vertical reference
+    lines denote the minimum important energy $E_-$.}
+  \label{fig:arrays}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figs/sample-rates.pdf}
+  \caption[Example energy sampling rates]
+  {Example pessimistic energy sampling rates computed by various
+    histogram methods. Sample rates for each method are averaged over
+    30 simulations with different random number seeds. The vertical
+    reference line denotes the minimum important energy $E_-$.}
+  \label{fig:sample_rates}
+\end{figure}
+
 Most of our analysis will use quantities computed from two arrays: the
 energy histogram $H\p{E}$ and the weights $w\p{E}$. To get a sense of
 what these arrays look like, Figure \ref{fig:arrays} shows the energy
@@ -1639,30 +1667,6 @@ statistics which are guaranteed to be uncorrelated. By this metric,
 TMMC and DOTMMC again perform worse than simple flat and vanilla
 Wang-Landau.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=\textwidth]{figs/array-example.pdf}
-  \caption[Example arrays]
-  {Example arrays computed by various histogram methods for a
-    square-well fluid with a well width $\lambda=1.3$, filling
-    fraction $\eta=0.3$, and $N=25$ spheres after simulating for
-    $10^5N^2$ iterations: (top left) energy histogram, (top right)
-    weight array, (bottom left) density of states. Vertical reference
-    lines denote the minimum important energy $E_-$.}
-  \label{fig:arrays}
-\end{figure}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{figs/sample-rates.pdf}
-  \caption[Example energy sampling rates]
-  {Example pessimistic energy sampling rates computed by various
-    histogram methods. Sample rates for each method are averaged over
-    30 simulations with different random number seeds. The vertical
-    reference line denotes the minimum important energy $E_-$.}
-  \label{fig:sample_rates}
-\end{figure}
-
 \subsection{Thermodynamic properties and errors}
 \label{sec:properties}
 
@@ -1697,18 +1701,7 @@ for golden ones. With the exception of Wang-Landau, which has a heavy
 low-energy bias, all simulations agree fairly well on these properties
 of the square-well fluid.
 
-Though Figures \ref{fig:internal_energy}--\ref{fig:config_entropy} are
-interesting for studying the square-well fluid, they do not help us
-resolve the efficacy of different histogram methods. These figures do,
-however, show that the square-well fluid has a phase transition around
-$kT\approx0.5\epsilon$, which justifies our choice of
-$kT_{\t{min}}=0.2\epsilon$ and ensures that the histogram methods are
-indeed performing the nontrivial task of exploring the liquid-gas
-phase boundary of the square-well fluid. For the purposes of this
-paper, we will neglect to prove that this phase transition is indeed
-between liquid and gas phases, and take this fact as given.
-
-\begin{figure}[p]
+\begin{figure}[!b]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/internal-energy.pdf}
   \caption[Internal energy]
@@ -1733,6 +1726,17 @@ between liquid and gas phases, and take this fact as given.
     simulations.}
   \label{fig:config_entropy}
 \end{figure}
+
+Though Figures \ref{fig:internal_energy}--\ref{fig:config_entropy} are
+interesting for studying the square-well fluid, they do not help us
+resolve the efficacy of different histogram methods. These figures do,
+however, show that the square-well fluid has a phase transition around
+$kT\approx0.5\epsilon$, which justifies our choice of
+$kT_{\t{min}}=0.2\epsilon$ and ensures that the histogram methods are
+indeed performing the nontrivial task of exploring the liquid-gas
+phase boundary of the square-well fluid. For the purposes of this
+paper, we will neglect to prove that this phase transition is indeed
+between liquid and gas phases, and take this fact as given.
 
 Having a sense of how $U$, $C_V$ and $S_{\t{config}}$ behave with
 respect to temperature, we can now look at the how the errors $\Delta
@@ -1781,7 +1785,7 @@ number of initialization iterations.  Future studies might use this
 scaling to estimate appropriate initialization time for larger
 systems.
 
-\begin{figure}[p]
+\begin{figure}[!p]
   \centering
   \includegraphics[width=0.7\textwidth]{figs/u-scaling.pdf}
   \caption[Internal energy error scaling]
@@ -1789,7 +1793,7 @@ systems.
   \label{fig:u_scaling}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[!p]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/cv-scaling.pdf}
   \caption[Heat capacity error scaling]
@@ -1797,7 +1801,7 @@ systems.
   \label{fig:cv_scaling}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[!p]
   \centering
   \includegraphics[width=0.7\textwidth]{figs/s-scaling.pdf}
   \caption[Configurational entropy error scaling]
@@ -1805,7 +1809,7 @@ systems.
   \label{fig:s_scaling}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[!p]
   \centering
   \includegraphics[width=0.75\textwidth]{figs/u-comps.pdf}
   \caption[Internal energy error comparisons]
@@ -1814,7 +1818,7 @@ systems.
   \label{fig:u_comps}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[!p]
   \centering
   \includegraphics[width=0.7\textwidth]{figs/cv-comps.pdf}
   \caption[Heat capacity error comparisons]
@@ -1823,7 +1827,7 @@ systems.
   \label{fig:cv_comps}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[!p]
   \centering
   \includegraphics[width=0.7\textwidth]{figs/s-comps.pdf}
   \caption[Configurational entropy error comparisons]
@@ -1839,9 +1843,9 @@ histogram methods against those of converged flat histogram weight
 simulations. The fact that some points fall below the diagonal
 reference line is strange, and indicates that some regular simulations
 are outperforming the converged flat ones. We do not understand why
-such events occur, as converged flat simulations should be using
-high-quality golden data to construct weight arrays, and should
-therefore outperform all standard simulations.
+such events occur, as converged flat simulations should be using high
+quality golden data to construct weight arrays, and should therefore
+outperform all standard simulations.
 
 As with the arrays, the error comparison figures demonstrate the
 inability of Wang-Landau to sample a system without a predefined
