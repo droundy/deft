@@ -8,7 +8,7 @@ from math import pi
 figsdir = 'papers/square-well-fluid/figs/'
 
 def srun(density, lam, kT):
-    return 'srun --mem=20000 -J sw-fluid-%.2f-%.2f-%.2f time nice -19 ' % (density, lam,  kT)
+    return 'srun --mem=5000 -J sw-fluid-%.2f-%.2f-%.2f time nice -19 ' % (density, lam,  kT)
 
 if os.getcwd()[:5] != '/home' or os.system('srun true') != 0:
     # We are definitely not running on the cluster
@@ -24,5 +24,5 @@ def run_sw_fluid(density, lam, temperature):
            (srun(density, lam, temperature), figsdir, density, lam, temperature, outfilename))
 
 for kT in [1, 2.0, 3.0, 4.0, 5.0, 10.0]:
-    for density in [0.3]:
+    for density in [0.2]:
         run_sw_fluid(density, 1.3, kT)
