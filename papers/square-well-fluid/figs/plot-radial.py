@@ -56,5 +56,5 @@ plot_sw(30, [10.0, 5.0, 3.0, 1.0])
 # gradial = loadtxt('radial-sw-1.00-1.30-0.30-n.dat')
 # contourf(X,Y,gradial,100)
 # colorbar()
-# savefig('contour-square-well.pdf')
+# sa vefig('contour-square-well.pdf')
 
