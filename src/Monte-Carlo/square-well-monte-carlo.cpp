@@ -1082,7 +1082,7 @@ int main(int argc, const char *argv[]) {
       fprintf(os_out, "%s", headerinfo);
       fprintf(os_out, "%s", countinfo);
       fprintf(os_out, "# energy\tsamples\n");
-      for(int i = sw.max_entropy_state; i < sw.energy_levels; i++) {
+      for(int i = 0; i < sw.energy_levels; i++) {
         if (sw.energy_histogram[i] != 0)
           fprintf(os_out, "%i  %li\n", i, sw.optimistic_samples[i]);
       }
