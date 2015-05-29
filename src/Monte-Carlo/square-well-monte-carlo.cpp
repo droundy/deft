@@ -764,10 +764,15 @@ int main(int argc, const char *argv[]) {
     sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
 
     FILE *transitions_infile = fopen(transitions_input_filename,"r");
-    if(transitions_infile != NULL){
+    if (transitions_infile != NULL) {
       fclose(transitions_infile);
       sw.initialize_transitions_file(transitions_input_filename);
       seed = random::seed_randomly();
+      printf("Initializing from transitions file '%s' and using random seed %ld\n",
+             transitions_input_filename, seed);
+    } else {
+      printf("NOT initializing from transitions file '%s', since it doesn't seem to exist\n",
+             transitions_input_filename);
     }
   }
 
