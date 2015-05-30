@@ -825,6 +825,8 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
           if (pessimistic_samples[i] < 5 && energy_histogram[i]) {
             if (i > lowest_problem_energy) lowest_problem_energy = i;
             if (i < highest_problem_energy) highest_problem_energy = i;
+          } else if (pessimistic_samples[i] > 5) {
+            break;
           }
         }
         if (lowest_problem_energy < min_maybe_important_energy) {
@@ -839,7 +841,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                  pessimistic_samples[lowest_problem_energy],
                  optimistic_samples[highest_problem_energy],
                  pessimistic_samples[highest_problem_energy], -energy/double(N));
-        fflush(stdout);
+          fflush(stdout);
         }
       }
     }

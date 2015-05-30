@@ -764,10 +764,15 @@ int main(int argc, const char *argv[]) {
     sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
 
     FILE *transitions_infile = fopen(transitions_input_filename,"r");
-    if(transitions_infile != NULL){
+    if (transitions_infile != NULL) {
       fclose(transitions_infile);
       sw.initialize_transitions_file(transitions_input_filename);
       seed = random::seed_randomly();
+      printf("Initializing from transitions file '%s' and using random seed %ld\n",
+             transitions_input_filename, seed);
+    } else {
+      printf("NOT initializing from transitions file '%s', since it doesn't seem to exist\n",
+             transitions_input_filename);
     }
   }
 
@@ -1082,7 +1087,7 @@ int main(int argc, const char *argv[]) {
       fprintf(os_out, "%s", headerinfo);
       fprintf(os_out, "%s", countinfo);
       fprintf(os_out, "# energy\tsamples\n");
-      for(int i = sw.max_entropy_state; i < sw.energy_levels; i++) {
+      for(int i = 0; i < sw.energy_levels; i++) {
         if (sw.energy_histogram[i] != 0)
           fprintf(os_out, "%i  %li\n", i, sw.optimistic_samples[i]);
       }
