@@ -34,7 +34,7 @@
 \usepackage[english]{babel} % allow editing bibliography title
 \addto\captionsenglish{ % set bibliography title
   \renewcommand{\contentsname}{Table of Contents}
-  \renewcommand\refname{\bf References}}
+  \renewcommand\refname{References}}
 \usepackage{tocloft}
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
 
@@ -46,61 +46,173 @@
 {\hrulefill\begin{enumerate}}
 {\end{enumerate}\hrulefill}
 
+\usepackage{xspace}
+
 \renewcommand{\title}{Optimizing Monte Carlo simulation of the
-  square-well fluid}
-\renewcommand{\author}{Michael A. Perlin}
-\newcommand{\institution}{Oregon State University}
-\newcommand{\department}{Department of Physics}
-\newcommand{\supervisor}{Dr. David Roundy}
-\renewcommand{\date}{15 May 2015}
+  square-well fluid\xspace}
+\renewcommand{\author}{Michael A. Perlin\xspace}
+\newcommand{\degree}{Honors Baccalaureate of Science
+  in Physics\xspace}
+\renewcommand{\date}{02 June 2015\xspace}
+\newcommand{\email}{\href{mailto:mika.perlin@gmail.com}{mika.perlin@gmail.com}\xspace}
 
 %%% notes, etc.
 \usepackage{color}
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\fixme}[1]{[\red{fixme:} \emph{#1}]}
 
-\fancypagestyle{abstract}{
-  \rhead{}
-  \lhead{}
+\renewcommand{\titlepage}{
+  { \centering
+
+    \title \\
+    ~\\~\\
+    by \\
+    \author \\
+    ~\\~\\~\\~\\~\\~\\~\\~\\
+    A PROJECT \\
+    ~\\~\\
+    submitted to \\
+    ~\\
+    Oregon State University \\
+    ~\\
+    University Honors College \\
+    ~\\~\\~\\~\\~\\~\\
+    in partial fulfillment of \\
+    the requirements for the \\
+    degree of \\
+    ~\\~\\
+    \degree \\
+    (Honors Scholar) \\
+    ~\\~\\~\\~\\~\\
+    Presented \date \\
+    Commencement June 2015 \\
+  }
+  \newpage
 }
 
 \begin{document}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{titlepage}
+\setlength\parindent{0mm}
+\pagestyle{empty}
 
-  \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\titlepage
 
-  \center
+~\newpage
 
-  \textsc{\LARGE \institution}\\[1.5cm]
-  \textsc{\Large \department}\\[0.5cm]
+\begin{center}
+  AN ABSTRACT OF THE THESIS OF
+\end{center}
 
-  \HRule \\[0.4cm]
-  { \huge \bfseries \title}\\[0.4cm]
-  \HRule \\[1.5cm]
+\author for the degree of \underline{\degree} presented on
+\date. Title: \underline{\title}.
 
-  \begin{minipage}{0.4\textwidth}
-    \begin{flushleft} \large
-      \emph{Author:}\\
-      \author
-    \end{flushleft}
-  \end{minipage}
-  ~
-  \begin{minipage}{0.4\textwidth}
-    \begin{flushright} \large
-      \emph{Supervisor:} \\
-      \supervisor
-    \end{flushright}
-  \end{minipage}\\[4cm]
+~\\~\\~\\~\\
 
-  {\large\date}
+Abstract approved:
 
-  \vfill
+~\\
+\hrule
+\begin{center}
+  David Roundy
+\end{center}
 
-\end{titlepage}
+~\\
 
-\thispagestyle{empty}
+We identify and develop efficient numerical methods for determining
+thermodynamic properties of the square-well fluid in order to test
+square-well density functional theories. The liquid-vapor phase
+interface is an interesting regime for testing density functional
+theories, but unbiased Monte Carlo simulations are incapable of
+effectively sampling the low energy fluid states which dominate the
+partition function at low liquid-state temperatures. Previous works
+have developed several generic Monte Carlo histogram methods for
+collecting statistics on low energy system states, but little or no
+literature exists on these methods' systematic comparison, as well as
+their application to the square-well fluid. The square-well fluid in
+particular introduces application challenges not manifest in
+traditional models for testing and benchmarking such numerical
+techniques (e.g. the Ising model).
+
+~
+
+We implement our own ``simple flat'' method, the Wang-Landau method,
+transition matrix Monte Carlo, and a modified version of the optimized
+ensemble. Performance of each method is determined by low energy
+sampling rates and maximum errors in several computed system
+properties. We find that Wang-Landau potentially performs better than
+other histogram methods, but fails catastrophically without a
+predetermined energy range. The simple flat method and transition
+matrix Monte Carlo give results comparable to successful Wang-Landau
+simulations, but simple flat has some anomalous cases with large
+errors. Finally, our implementation of the optimized ensemble using a
+transition matrix results in worse performance over the
+straightforward transition matrix Monte Carlo method.
+
+~\\
+
+Key words: Monte Carlo methods, Square-well fluid, histogram methods
+
+~
+
+Corresponding e-mail address: \email
+
+\newpage
+
+~\vspace{3cm}
+
+\begin{center}
+  \textcopyright Copyright by \author
+
+  \date
+
+  All Rights Reserved
+\end{center}
+
+\newpage
+
+\titlepage
+
+\underline{\degree} project of \author presented on \date.
+
+\vspace{2cm}
+
+APPROVED:
+
+\vspace{2cm}
+
+\hrule ~\\
+David Roundy, Mentor, representing the Department of Physics
+
+\vspace{1.5cm}
+
+\hrule ~\\
+Henri J. F. Jansen, Committee Member, representing the Department of
+Physics
+
+\vspace{1.5cm}
+
+\hrule ~\\
+David H. McIntyre, Committee Member, representing the Department of
+Physics
+
+\vspace{2.5cm}
+
+\hrule ~\\
+Toni Doolen, Dean, University Honors College
+
+\vspace{3cm}
+
+I understand that my project will become part of the permanent
+collection of Oregon State University, University Honors College.  My
+signature below authorizes release of my project to any reader upon
+request.
+
+\vspace{2cm}
+
+\hrule
+\begin{center}
+  \author, Author
+\end{center}
 
 \newpage
 
@@ -118,45 +230,9 @@
 
 \newpage
 
+\pagestyle{fancy}
+\setlength\parindent{5mm}
 \setcounter{page}{1}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Abstract}
-\label{sec:abstract}
-
-\thispagestyle{abstract}
-
-We identify and develop efficient numerical methods for determining
-thermodynamic properties of the square-well fluid in order to test
-square-well density functional theories. The liquid-vapor phase
-interface is an interesting regime for testing density functional
-theories, but unbiased Monte Carlo simulations are incapable of
-effectively sampling the low energy fluid states which dominate the
-partition function at low liquid-state temperatures. Previous works
-have developed several generic Monte Carlo histogram methods for
-collecting statistics on low energy system states, but little or no
-literature exists on these methods' systematic comparison, as well as
-their application to the square-well fluid. The square-well fluid in
-particular introduces application challenges not manifest in
-traditional models for testing and benchmarking such numerical
-techniques (e.g. the Ising model).
-
-We implement our own ``simple flat'' method, the Wang-Landau method,
-transition matrix Monte Carlo, and a modified version of the optimized
-ensemble. Performance of each method is determined by low energy
-sampling rates and maximum errors in several computed system
-properties. We find that Wang-Landau potentially performs better than
-other histogram methods, but fails catastrophically without a
-predetermined energy range. The simple flat method and transition
-matrix Monte Carlo give results comparable to successful Wang-Landau
-simulations, but simple flat has some anomalous cases with large
-errors. Finally, our implementation of the optimized ensemble using a
-transition matrix results in worse performance over the
-straightforward transition matrix Monte Carlo method.
-
-\newpage
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -300,7 +376,7 @@ simulations to the desired level of accuracy.
   \begin{alg}
 
   \item Construct an initial ``typical'' (i.e. non-ordered) fluid
-    configuration. \fixme{explain how?}
+    configuration.
 
   \item Randomly attempt to change the position of one sphere (in
     general, a single fluid ``atom'' or ``molecule'') to another
@@ -835,10 +911,12 @@ temperature anyways (discussed in Section \ref{sec:min_energy}).
 \label{sec:wang_landau}
 
 The Wang-Landau method is the first published histogram method we
-discuss\cite{wang_landau, wang_landau_mod, wang_landau_analysis}. This
-method has been used to study a wide variety of systems\fixme{which
-  systems? cite}, and is the standard method\fixme{cite} to achieve
-broad energy sampling via Monte Carlo simulations.
+discuss\cite{wang2001determining, belardinelli2007fast,
+  zhou2005understanding, landau2004new}. This method has been used to
+study a wide variety of systems, and is the standard method to compute
+the density of states of a system via Monte Carlo
+simulations\cite{landau2004new, yamaguchi2001three,
+  parsons2006globule, parsons2006off}.
 
 Unlike the simple flat method, the Wang-Landau method modifies the
 weight array on the fly. After every move during initialization
@@ -915,8 +993,8 @@ scales with energy range of the simulated system. We therefore use
 $n=L$, where $L$ is, as described in Section \ref{sec:simple_flat},
 the number of energy levels for the given square-well fluid. Other
 works typically neglect providing any heuristic or formula for $n$,
-reporting a system-independent $n=10^3$\cite{wang_landau_mod} or
-$10^5$\cite{wang_landau}.
+reporting a system-independent $n=10^3$\cite{belardinelli2007fast} or
+$10^5$\cite{wang2001determining}.
 
 The next parameter, $f_0$, controls the initial amount by which to
 adjust the weight of the current energy after each move. As mentioned
@@ -926,7 +1004,8 @@ at hand. Too large a value of $f_0$ will magnify stochastic error in
 initialization, while too small a value of $f_0$ will cause
 simulations to take an exceedingly long time to converge. Lacking any
 heuristics for assigning $f_0$, we use $f_0=e$ (more precisely, $\ln
-f_0=1$), a value commonly suggested by literature\cite{wang_landau}.
+f_0=1$), a value commonly suggested by
+literature\cite{wang2001determining}.
 
 The factor $u$ appearing in step \ref{alg:wang_landau_update} of
 Algorithm \ref{alg:wang_landau} controls the amount by which to adjust
@@ -937,8 +1016,8 @@ converge (assuming that $C\sp{H}$ can be satisfied) and
 $\lim_{k\to\infty}f_k=1$ to terminate. Taking the $u$-th root of $f$
 at each increment of $k$ is a natural and convenient iterative means
 to satisfy these requirements. Previous works have reported using
-values such as $u=2$ \cite{wang_landau, wang_landau_mod} and $u=10$
-\cite{wang_landau_analysis}; we use the former value.
+values such as $u=2$ \cite{wang2001determining, belardinelli2007fast}
+and $u=10$ \cite{zhou2005understanding}; we use the former value.
 
 One might guess why the flatness condition $C\sp{H}$ for updating $f$
 and restarting the Wang-Landau initialization process should not be
@@ -959,14 +1038,14 @@ that the weights have not actually changed at all!
 The success of Wang-Landau thus relies on some degree of leniency in
 the flatness condition, which makes tuning $C\sp{H}$ crucial to the
 efficient and effective implementation of this method. Some previous
-works\cite{wang_landau} suggest that $C\sp{H}$ should be made as
-stringent as possible, cautioning only that some simulations might not
-satisfy too strict of a flatness condition in any reasonable amount of
-time. These works fail to recognize the reliance of Wang-Landau on the
-{\it failure} of $C\sp{H}$ to enforce a perfectly flat histogram. A
-commonly suggested flatness condition is that the minimum histogram
-value in some specified range of energies be at least some fixed
-proportion of the mean histogram value, i.e.
+works\cite{wang2001determining} suggest that $C\sp{H}$ should be made
+as stringent as possible, cautioning only that some simulations might
+not satisfy too strict of a flatness condition in any reasonable
+amount of time. These works fail to recognize the reliance of
+Wang-Landau on the {\it failure} of $C\sp{H}$ to enforce a perfectly
+flat histogram. A commonly suggested flatness condition is that the
+minimum histogram value in some specified range of energies be at
+least some fixed proportion of the mean histogram value, i.e.
 $C\sp{H}:\min\sp{H\p{E}}\ge x\bk{H}_E$, and several papers report
 using $x=0.95$. We use this condition with the same value of
 $x$. Determining the range of energies over which to evaluate
@@ -998,8 +1077,8 @@ need to choose a value of $c$.
 
 Unlike the previous histogram methods, the transition matrix Monte
 Carlo method does not use weights, and merely computes the density of
-states $D\p{E}$ of a system\cite{tmmc}. The density of states can in
-turn be used to determine flat histogram weights via
+states $D\p{E}$ of a system\cite{wang2002transition}. The density of
+states can in turn be used to determine flat histogram weights via
 (\ref{eq:flat_weights}). TMMC introduces a new object: the energy
 transition matrix, $T$, whose components $T_{ij}$ are the
 probabilities that a system will transition {\it to} a state with
@@ -1178,15 +1257,15 @@ state at which $D\p{E}$ is maximal.
 
 While one could imagine many initialization routines to determine the
 transition matrix $T$, we use Algorithm \ref{alg:tmmc}, which is a
-modified version of a routine provided in \cite{tmmc}. The primary
-motivation behind this algorithm is such: as lower energies are always
-more difficult to sample than higher energies, transitions to lower
-energies should always be accepted, while transitions to higher
-energies should pass a probabilistic acceptance test. To understand
-the probability in step \ref{alg:tmmc_prob} of Algorithm
-\ref{alg:tmmc} of accepting a move $s_i\to s_f$ for which $E_f>E_i$,
-first consider the case of $c=0$ and $T_{\t{min}}\to0$, in which case
-the probability becomes
+modified version of a routine provided in
+\cite{wang2002transition}. The primary motivation behind this
+algorithm is such: as lower energies are always more difficult to
+sample than higher energies, transitions to lower energies should
+always be accepted, while transitions to higher energies should pass a
+probabilistic acceptance test. To understand the probability in step
+\ref{alg:tmmc_prob} of Algorithm \ref{alg:tmmc} of accepting a move
+$s_i\to s_f$ for which $E_f>E_i$, first consider the case of $c=0$ and
+$T_{\t{min}}\to0$, in which case the probability becomes
 \begin{align}
   P_m\p{s_i\to s_f}=\f{\p{\tilde T_d\p{E_i,\Delta E}}\big/
     \p{\sum_{\Delta E'}\tilde T_d\p{E_i,\Delta E'}}} {\p{\tilde
@@ -1200,26 +1279,26 @@ probability of a transition from an energy $E_m$ to an energy
 $E_n$. The result in (\ref{eq:tmmc_prob_simplified}) is the
 probability of accepting moves $s_i\to s_f$ required for simulation
 via Algorithm \ref{alg:tmmc} to yield a flat energy
-histogram\cite{tmmc}. Unlike the previous histogram methods, we desire
-a flat histogram during initialization via Algorithm \ref{alg:tmmc} in
-order to broadly sample the transition histogram $\tilde
-T_d\p{E,\Delta E}$, rather than to construct weights $w\p{E}$
-directly.
+histogram\cite{wang2002transition}. Unlike the previous histogram
+methods, we desire a flat histogram during initialization via
+Algorithm \ref{alg:tmmc} in order to broadly sample the transition
+histogram $\tilde T_d\p{E,\Delta E}$, rather than to construct weights
+$w\p{E}$ directly.
 
 Aside from a minimum temperature $T_{\t{min}}$ and an end condition,
 Algorithm \ref{alg:tmmc} contains one free parameter, $c$, used in
 step \ref{alg:tmmc_prob} to modify (\ref{eq:tmmc_prob_simplified}).
 This parameter, which is our own addition to the algorithm provided in
-\cite{tmmc}, makes the rejection of transitions more conservative when
-there are too few statistics in the histogram $\tilde T_d$ to be
-confident in the current estimate of the transition matrix. Without
-this parameter, the TMMC initialization routine can get stuck at
-energies which, due to poor collection of statistics in $\tilde T_d$,
-appear to be more important than they actually are. In order to make
-the effects of $c$ negligible as $\tilde T_d$ collects more statistics
-throughout initialization, $c$ should be of order unity, though its
-optimal value is generally system-dependent. In our implementation of
-Algorithm \ref{alg:tmmc}, we use $c=16$.
+\cite{wang2002transition}, makes the rejection of transitions more
+conservative when there are too few statistics in the histogram
+$\tilde T_d$ to be confident in the current estimate of the transition
+matrix. Without this parameter, the TMMC initialization routine can
+get stuck at energies which, due to poor collection of statistics in
+$\tilde T_d$, appear to be more important than they actually are. In
+order to make the effects of $c$ negligible as $\tilde T_d$ collects
+more statistics throughout initialization, $c$ should be of order
+unity, though its optimal value is generally system-dependent. In our
+implementation of Algorithm \ref{alg:tmmc}, we use $c=16$.
 
 The last interesting part of the probability in step
 \ref{alg:tmmc_prob} of Algorithm \ref{alg:tmmc} is the limit on
@@ -1243,7 +1322,7 @@ and then rejecting moves which move the system into higher energy
 states. Statistics on low energy states will therefore generally be
 highly correlated, as they are based on many samples of only a few low
 energy regions of a system's energy landscape. The optimized
-ensemble\cite{optimized_ensemble} attempts to address the
+ensemble\cite{trebst2004optimizing} attempts to address the
 autocorrelation between low energy samples by finding weights to
 maximize the rate at which a simulation makes round trips between low
 and high energy states. Maximizing the round trip rate, in turn,
@@ -1299,7 +1378,7 @@ The optimized ensemble method minimizes the integral in
 walker current $\abs{j}$, by varying the walker density $n$ with the
 constraint that $n$ must remain normalized. With the additional
 assumption that $\alpha\p{E}$ does not strongly depend on the weights
-$w\p{E}$, the authors of \cite{optimized_ensemble} find that the
+$w\p{E}$, the authors of \cite{trebst2004optimizing} find that the
 optimal walker density $n$ is
 \begin{align}
   n_{\t{opt}}\propto\f1{\sqrt{\alpha}},
@@ -1319,18 +1398,17 @@ which means
 where we neglect the distinction between $\tilde D$ and $D$, which has
 no effect on the weights $w$.
 
-The algorithm provided in \cite{optimized_ensemble} to construct
+The algorithm provided in \cite{trebst2004optimizing} to construct
 weights given by (\ref{eq:optimized_weights}) finds the diffusivity
 $\alpha$ by solving for it in
 (\ref{eq:walker_current_definition}). This procedure accepts flat
 histogram weights, or equivalently the density of states, as an input,
 and is not meant to construct weights from scratch. We therefore will
 not be comparing the optimized ensemble to other methods in this
-paper. We do, however, credit \cite{optimized_ensemble} for motivating
-the hybrid DOTMMC method in Section \ref{sec:oetmmc}.
+paper. We do, however, credit \cite{trebst2004optimizing} for
+motivating the hybrid OETMMC method in Section \ref{sec:oetmmc}.
 
-\subsection{The diffusion-optimized transition matrix Monte Carlo
-  (DOTMMC) method}
+\subsection{The hybrid OETMMC method}
 \label{sec:oetmmc}
 
 As well as the density of states, the transition matrix $T\p{E_i,E_j}$
@@ -1377,15 +1455,14 @@ The diffusivity $\alpha\p{E}$ is thus the variance of the change in
 energy $\Delta E$ from as single move out of $E$. Reconciling this
 definition with that we provide in
 (\ref{eq:walker_current_definition}) is considered outside the scope
-of this paper. \fixme{say something more convincing? cite?}
+of this paper.
 
-The diffusion-optimized transition matrix Monte Carlo (DOTMMC) method,
-a hybrid of TMMC and the optimized ensemble, thus first runs Algorithm
-\ref{alg:tmmc} to collect a transition histogram and compute flat
-histogram weights, then computes the diffusivity $\alpha\p{E}$ via
-(\ref{eq:<de>})-(\ref{eq:microscopic_diffusitivy}), and finally
-computes optimized weights as given by
-(\ref{eq:optimized_weights}). Unlike the optimized ensemble, DOTMMC
+The OETMMC method, a hybrid of TMMC and the optimized ensemble, first
+runs Algorithm \ref{alg:tmmc} to collect a transition histogram and
+compute flat histogram weights, then computes the diffusivity
+$\alpha\p{E}$ via (\ref{eq:<de>})-(\ref{eq:microscopic_diffusitivy}),
+and finally computes optimized weights as given by
+(\ref{eq:optimized_weights}). Unlike the optimized ensemble, OETMMC
 does not require any extra simulation routines, and is therefore
 straightforward to implement and compare to other histogram methods.
 
@@ -1539,8 +1616,8 @@ $kT_{\t{min}}=0.2\epsilon$. These weights prevent the initialization
 routine from wasting time on energies at which we will override the
 weight array after initialization anyways. We chose this temperature
 because it is comfortably below the temperature at which the
-square-well fluid condenses from a gas into a liquid (see Section
-\ref{sec:properties}). \fixme{what about pressure?}
+square-well fluid condenses from a gas into a liquid in simulation
+(see Section \ref{sec:properties}).
 
 We made a special case for Wang-Landau treatment of the energy range
 of interest, as the design of this method assumes knowledge of the
@@ -1644,9 +1721,9 @@ figures, as these results are distracting and unfit for drawing any
 conclusions.
 
 The energy histogram in Figure \ref{fig:arrays} shows that TMMC and
-DOTMMC spend considerably less time at important low energies than
-the simple flat and vanilla Wang-Landau methods. At face value, this
-behavior of TMMC and DOTMMC is undesirable, as these are the most
+OETMMC spend considerably less time at important low energies than the
+simple flat and vanilla Wang-Landau methods. At face value, this
+behavior of TMMC and OETMMC is undesirable, as these are the most
 interesting energies for low temperatures, and the most difficult
 energies to sample.
 
@@ -1664,7 +1741,7 @@ approximation. Figure \ref{fig:sample_rates} shows pessimistic sample
 rates averaged over 30 simulations with $N=25$. Lower pessimistic
 sample rates mean that a simulation takes less time to collect
 statistics which are guaranteed to be uncorrelated. By this metric,
-TMMC and DOTMMC again perform worse than simple flat and vanilla
+TMMC and OETMMC again perform worse than simple flat and vanilla
 Wang-Landau.
 
 \subsection{Thermodynamic properties and errors}
@@ -1687,8 +1764,8 @@ the heat capacity
 \end{align}
 and the configurational entropy
 \begin{align}
-  S_{\t{config}}\p{T}=S\p{T}-S\p{T\to\infty}
-  =k\bk{\f{E}{kT}+\ln Z}_T-k\bk{\f{E}{kT}+\ln Z}_{T\to\infty}.
+  S_{\t{config}}\p{T}=S\p{T}-S\p{T\to\infty} =k\bk{\f{E}{kT}+\ln
+    Z}_T-k\bk{\f{E}{kT}+\ln Z}_{T\to\infty}.
   \label{eq:S}
 \end{align}
 All of these properties are directly computable from the density of
@@ -1856,7 +1933,7 @@ know the reason for these anomalies, but they could occur if the
 method terminates before finding energies near $E_-$, in which case it
 would get stuck in simulation at low energies with canonical weights
 for the minimum temperature $kT_{\t{min}}=0.2\epsilon$. Finally, these
-error figures further confirm earlier suspicions of DOTMMC's
+error figures further confirm earlier suspicions of OETMMC's
 underperformance relative to TMMC, despite the fact that it is
 supposed to provide an improvement over the TMMC weight array.
 
@@ -1879,15 +1956,15 @@ which only a given energy range is of particular interest. The simple
 flat method, while generally performing well, sometimes fails to
 initialize. If gone unnoticed, such failures can be costly in terms of
 computation time and resources. Our implementation of the optimized
-ensemble using the transition matrix, i.e. DOTMMC, resulted in lower
+ensemble using the transition matrix, i.e. OETMMC, resulted in lower
 sampling rates and higher errors than the flat histogram TMMC
 weights. Though we have not completely ruled out that our
-implementation of DOTMMC contains bugs, we suspect that the optimized
+implementation of OETMMC contains bugs, we suspect that the optimized
 ensemble is failing to improve TMMC either because
 \begin{enumerate*}[label=\roman*)]
 \item the theory behind the optimized ensemble neglects the
   discretization of energies, or
-\item DOTMMC is highly sensitive to sampling error in the transition
+\item OETMMC is highly sensitive to sampling error in the transition
   matrix.
 \end{enumerate*}
 The first of these suspicions can be tested by simulating larger
@@ -1911,10 +1988,10 @@ polyhedra Monte Carlo simulations I used as the template for my own
 square-well codes. Lastly, I would like to thank thank Eva Morgun, who
 prompted me to {\it act} on my textbook enthusiasm for physics, and
 get involved in the fun and interesting world of scientific
-research. \fixme{Thank Jansen and McIntyre}
+research.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\nocite{apsrev41Control} \bibliography{thesis}
+\nocite{apsrev41Control} \bibliography{thesis} \lhead{}
 
 \end{document}
