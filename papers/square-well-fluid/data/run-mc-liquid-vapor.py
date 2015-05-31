@@ -45,7 +45,8 @@ cmd += ' --min_T %g --translation_scale 0.05' % min_T
 
 cmd += ' --data_dir %s --filename %s' % (datadir, fname)
 
-cmd += " > %s/%s.out 2>&1 &" % (datadir, fname)
+cmd += " >> %s/%s.out 2>&1 &" % (datadir, fname)
 
 print(cmd)
+os.system('echo %s > %s/%s.out' % (cmd, datadir, fname))
 os.system(cmd)

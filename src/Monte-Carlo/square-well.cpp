@@ -708,11 +708,12 @@ int sw_simulation::set_min_important_energy(){
 
 void sw_simulation::set_max_entropy_energy() {
   for (int i=energy_levels-1; i >= 0; i--) {
+    if (optimistic_samples[i] < 10000) continue;
     long ups_minus_downs = 0;
     for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
       ups_minus_downs += transitions(i, de)*de;
     }
-    if (ups_minus_downs > 0) {
+    if (ups_minus_downs > sqrt(optimistic_samples[i])) {
       max_entropy_state = i+1;
       return;
     }
@@ -829,20 +830,13 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
             break;
           }
         }
-        if (lowest_problem_energy < min_maybe_important_energy) {
-          lowest_problem_energy = min_maybe_important_energy;
-          printf("       min important energy <%g> has samples <%ld(%ld)> (current energy %g)\n",
-                 -lowest_problem_energy/double(N), optimistic_samples[lowest_problem_energy],
-                 pessimistic_samples[lowest_problem_energy], -energy/double(N));
-        } else {
-          printf("       energies <%g to %g> have samples <%ld(%ld) to %ld(%ld)> (current energy %g)\n",
-                 -lowest_problem_energy/double(N), -highest_problem_energy/double(N),
-                 optimistic_samples[lowest_problem_energy],
-                 pessimistic_samples[lowest_problem_energy],
-                 optimistic_samples[highest_problem_energy],
-                 pessimistic_samples[highest_problem_energy], -energy/double(N));
-          fflush(stdout);
-        }
+        printf("       energies <%g to %g> have samples <%ld(%ld) to %ld(%ld)> (current energy %g)\n",
+               -lowest_problem_energy/double(N), -highest_problem_energy/double(N),
+               optimistic_samples[lowest_problem_energy],
+               pessimistic_samples[lowest_problem_energy],
+               optimistic_samples[highest_problem_energy],
+               pessimistic_samples[highest_problem_energy], -energy/double(N));
+        fflush(stdout);
       }
     }
     return iteration >= init_iters;
