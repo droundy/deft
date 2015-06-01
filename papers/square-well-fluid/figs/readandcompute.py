@@ -76,6 +76,18 @@ def read_ff(fbase):
             if "ff" in line:
                 return float(line.split(': ')[-1])
 
+def min_important_energy(fbase):
+    with open(fbase+"-E.dat") as file:
+        for line in file:
+            if("min_important_energy" in line):
+                return float(line.split()[-1])
+
+def max_entropy_state(fbase):
+    with open(fbase+"-E.dat") as file:
+        for line in file:
+            if("max_entropy_state" in line):
+                return float(line.split()[-1])
+
 def g_r(fbase, T):
     data = numpy.loadtxt(fbase+"-g.dat", ndmin=2)
     ghist = data[1:,3:]
@@ -165,3 +177,31 @@ def density_x(fbase, T):
     print 'we have counts %g with element dimensions %gx%gx%g' % (counts, dx, leny, lenz)
     print 'sum', sum(hist_1d), sum(sum(denshist))
     return density, x_1d
+
+def e_de_transitions(basename):
+    trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
+    with open(basename+"-transitions.dat") as f:
+        for line in f:
+            if '# energy\t' in line:
+                de = numpy.array([ -float(val) for val in line.split()[2:] ])
+                break
+    N = read_N(basename)
+    e = -trans[:,0]/N
+    de /= -N
+    trans = trans[:,1:]
+    for i in xrange(len(e)):
+        trans[i,:] /= sum(trans[i,:])
+    e,de = numpy.meshgrid(e, de)
+    return e, de, trans
+
+def e_diffusion_estimate(basename):
+    e, de, trans = e_de_transitions(basename)
+    e = e[0,:]
+    de = de[:,0]
+    diffusion = numpy.zeros_like(e)
+    for i in xrange(len(e)):
+        meane = sum(de*trans[i,:])/len(de)
+        meane2 = sum(de**2*trans[i,:])/len(de)
+        norm = sum(trans[i,:])
+        diffusion[i] = numpy.sqrt(meane2 - meane**2)
+    return e, diffusion
