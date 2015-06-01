@@ -35,6 +35,9 @@ for ff in ffs:
     axT.set_ylim(0, 10)
     axT.axhline(minT, color='r', linestyle=':')
 
+axT.spines['right'].set_color('red')
+axT.tick_params(axis='y', colors='red')
+axT.yaxis.label.set_color('red')
 
 axD.legend()
 plt.xlabel(r'$E_{tot}$')
