@@ -19,20 +19,28 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
-plt.figure()
+fig, axD = plt.subplots()
+axT = plt.twinx()
 
 for ff in ffs:
     basename = 'data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
     e, diff = readandcompute.e_diffusion_estimate(basename)
     N = readandcompute.read_N(basename);
-    plt.plot(e, diff, label=r'$\eta = %g$' % ff)
-    plt.axvline(-readandcompute.max_entropy_state(basename)/N, linestyle=':')
-    plt.axvline(-readandcompute.min_important_energy(basename)/N, linestyle='--')
+    axD.plot(e, diff, label=r'$\eta = %g$' % ff)
+    axD.axvline(-readandcompute.max_entropy_state(basename)/N, linestyle=':')
+    axD.axvline(-readandcompute.min_important_energy(basename)/N, linestyle='--')
 
-plt.legend()
+    T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
+    axT.plot(u/N, T, 'r-')
+    axT.set_ylim(0, 10)
+    axT.axhline(minT, color='r', linestyle=':')
+
+
+axD.legend()
 plt.xlabel(r'$E_{tot}$')
-plt.ylabel(r'Estimated diffusion constant (actually RMS energy change)')
-plt.ylim(ymin=0)
+axD.set_ylabel(r'Estimated diffusion constant (actually RMS energy change)')
+axD.set_ylim(ymin=0)
+axT.set_ylabel(r'$T$')
 plt.title(r'RMS $\Delta E$ with $\lambda = %g$' % (ww))
 
 plt.savefig('figs/liquid-vapor-ww%.2f-%gx%g-diffusion.pdf' % (ww,lenx,lenyz))
