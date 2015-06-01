@@ -35,7 +35,7 @@ def plot_soft_walls(reduced_density, temps):
     figure()
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
-    NUM = 2
+    NUM = 1
     for temp in temps:
         fname = 'figs/new-data/soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
@@ -59,7 +59,7 @@ def plot_soft_walls(reduced_density, temps):
     xlabel(r'$z/\sigma$')
     ylabel('$n^*(r)$')
     legend()
-    xlim(-0.2, 15)
+    xlim(-0.2, 6)
     outputname = 'figs/soft-walls-%02d.pdf' % (reduced_density)
     savefig(outputname, bbox_inches=0)
     print('figs/walls-%02d.pdf' % (reduced_density))
