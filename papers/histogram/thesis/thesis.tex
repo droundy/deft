@@ -103,8 +103,8 @@
   AN ABSTRACT OF THE THESIS OF
 \end{center}
 
-\author for the degree of \underline{\degree} presented on
-\date. Title: \underline{\title}.
+\underline{\author} for the degree of \underline{\degree} presented on
+\underline{\date}. Title: \underline{\title}.
 
 ~\\~\\~\\~\\
 
@@ -118,39 +118,34 @@ Abstract approved:
 
 ~\\
 
-We identify and develop efficient numerical methods for determining
+We identify and develop efficient Monte Carlo methods for determining
 thermodynamic properties of the square-well fluid in order to test
-square-well density functional theories. The liquid-vapor phase
-interface is an interesting regime for testing density functional
-theories, but unbiased Monte Carlo simulations are incapable of
-effectively sampling the low energy fluid states which dominate the
-partition function at low liquid-state temperatures. Previous works
-have developed several generic Monte Carlo histogram methods for
-collecting statistics on low energy system states, but little or no
-literature exists on these methods' systematic comparison, as well as
-their application to the square-well fluid. The square-well fluid in
-particular introduces application challenges not manifest in
-traditional models for testing and benchmarking such numerical
-techniques (e.g. the Ising model).
+square-well density functional theories near the critical
+point. Previous works have developed generic so-called histogram
+methods for collecting statistics on low energy system states, but
+little or no literature exists on these methods' systematic
+comparison, as well as their application to the square-well fluid. The
+square-well fluid in particular introduces application challenges not
+manifest in traditional models for testing and benchmarking such
+numerical techniques (e.g. the Ising model).
 
 ~
 
 We implement our own ``simple flat'' method, the Wang-Landau method,
-transition matrix Monte Carlo, and a modified version of the optimized
-ensemble. Performance of each method is determined by low energy
-sampling rates and maximum errors in several computed system
+transition matrix Monte Carlo (TMMC), and a modified version of the
+optimized ensemble. The performance of each method is measured by low
+energy sampling rates and maximum errors in computed system
 properties. We find that Wang-Landau potentially performs better than
 other histogram methods, but fails catastrophically without a
-predetermined energy range. The simple flat method and transition
-matrix Monte Carlo give results comparable to successful Wang-Landau
-simulations, but simple flat has some anomalous cases with large
-errors. Finally, our implementation of the optimized ensemble using a
-transition matrix results in worse performance over the
-straightforward transition matrix Monte Carlo method.
+predetermined energy range. The simple flat method and TMMC give
+results comparable to successful Wang-Landau simulations, but simple
+flat has some anomalous cases with large errors. Finally, our
+implementation of the optimized ensemble using a transition matrix
+results in worse performance over the straightforward TMMC.
 
 ~\\
 
-Key words: Monte Carlo methods, Square-well fluid, histogram methods
+Key words: Monte Carlo methods, Square-well fluid, Histogram methods
 
 ~
 
@@ -172,7 +167,8 @@ Corresponding e-mail address: \email
 
 \titlepage
 
-\underline{\degree} project of \author presented on \date.
+\underline{\degree} project of \underline{\author} presented on
+\underline{\date}.
 
 \vspace{2cm}
 
@@ -181,19 +177,17 @@ APPROVED:
 \vspace{2cm}
 
 \hrule ~\\
-David Roundy, Mentor, representing the Department of Physics
+David Roundy, Mentor, representing Physics
 
 \vspace{1.5cm}
 
 \hrule ~\\
-Henri J. F. Jansen, Committee Member, representing the Department of
-Physics
+Henri J. F. Jansen, Committee Member, representing Physics
 
 \vspace{1.5cm}
 
 \hrule ~\\
-David H. McIntyre, Committee Member, representing the Department of
-Physics
+David H. McIntyre, Committee Member, representing Physics
 
 \vspace{2.5cm}
 
@@ -222,9 +216,9 @@ request.
 
 \newpage
 
-\listof{algorithm}{\Large List of Algorithms}
-
 \listof{figure}{\Large List of Figures}
+
+\listof{algorithm}{\Large List of Algorithms}
 
 \thispagestyle{empty}
 
@@ -975,12 +969,13 @@ weights will yield similar results.
   \end{alg}
 \end{algorithm}
 
-Algorithm \ref{alg:wang_landau} spells out the Wang-Landau
-method. This algorithm includes four free parameters which affect
-initialization process: the number of iterations $n$ to run in step
-\ref{alg:wang_landau_sim}, the initial factor $f_0$, the update factor
-$u$, and the flatness condition $C\sp{H}$. The cutoff $c$ determines
-the condition for Algorithm \ref{alg:wang_landau} to terminate.
+Algorithm \ref{alg:wang_landau} walks through the Wang-Landau
+initialization procedure. This algorithm includes four free parameters
+which affect initialization process: the number of iterations $n$ to
+run in step \ref{alg:wang_landau_sim}, the initial factor $f_0$, the
+update factor $u$, and the flatness condition $C\sp{H}$. The cutoff
+$c$ determines the condition for Algorithm \ref{alg:wang_landau} to
+terminate.
 
 The first of these parameters, $n$, controls how often to check the
 flatness condition $C\sp{H}$ and run updates, if necessary. The value
