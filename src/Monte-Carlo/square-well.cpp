@@ -531,6 +531,9 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
         }
       }
     }
+    if (!done) {
+      printf("Quitting after %d iterations without converging density of states.  :(\n", iters);
+    }
   }
   else {
     printf("We don't know what dos type we have!\n");
