@@ -32,8 +32,11 @@ for ff in ffs:
 
     T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
     axT.plot(u/N, T, 'r-')
-    axT.set_ylim(0, 10)
+    axT.set_ylim(0, 3)
     axT.axhline(minT, color='r', linestyle=':')
+
+    e, hist = readandcompute.e_hist(basename)
+    axT.plot(e/N, 2.5*hist/hist.max(), 'k:')
 
 axT.spines['right'].set_color('red')
 axT.tick_params(axis='y', colors='red')

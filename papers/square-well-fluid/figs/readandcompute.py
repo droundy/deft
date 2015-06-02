@@ -2,6 +2,14 @@
 from __future__ import division
 import numpy
 
+def e_hist(fbase):
+    # energy histogram file; indexed by [-energy,counts]
+    e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2, dtype=numpy.float)
+
+    energy = -e_hist[:,0] # array of energies
+    hist = e_hist[:,1]
+    return energy, hist
+
 def T_u_cv_s_minT(fbase):
     max_T = 20.0
     T_bins = 1e3
