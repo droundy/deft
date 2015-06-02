@@ -37,14 +37,17 @@ def make_sw_plot():
 make_sw_plot()
 plt.savefig('figs/square-well.pdf')
 
+line_width = 4
+color = 'r'
+
 make_sw_plot()
-plt.plot([1,1],[v_max,top],'r',linewidth=2)
+plt.plot([1,1],[v_max,top], color, linewidth=line_width)
 plt.savefig('figs/square-well-v1.pdf')
 
 make_sw_plot()
-plt.plot([1,1,ww,ww],[top,bottom,bottom,top],'r',linewidth=2)
+plt.plot([1,1,ww,ww],[top,bottom,bottom,top], color, linewidth=line_width)
 plt.savefig('figs/square-well-v2.pdf')
 
 make_sw_plot()
-plt.plot([ww,r_max],[top,top],'r',linewidth=2)
+plt.plot([ww,r_max],[top,top], color, linewidth=line_width)
 plt.savefig('figs/square-well-v3.pdf')

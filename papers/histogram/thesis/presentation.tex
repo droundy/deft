@@ -3,6 +3,12 @@
 \usepackage{pstricks}
 
 \setbeamertemplate{navigation symbols}{}
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
 \setbeamertemplate{caption}[numbered]
 
 \usepackage{caption}
@@ -37,6 +43,19 @@
 
 \begin{frame}
   \maketitle
+\end{frame}
+
+\begin{frame}
+  \frametitle{Preview}
+  \begin{itemize}
+  \item Square-well fluid
+  \item Monte Carlo fluid simulation
+  \item Histogram methods
+  \item Simulation results
+    \begin{itemize}
+    \item Method comparison
+    \end{itemize}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -83,9 +102,9 @@
   \frametitle{Monte Carlo fluid simulation}
   \begin{itemize}
   \item Model systems vs. the real world
-  \item<2-> Unbiased Monte Carlo: random walk in configuration space
-  \item<3> Histogram $H\p{E}$ of observed energies is proportional to
-    the density of states $D\p{E}$
+  \item Unbiased Monte Carlo: random walk in configuration space
+  \item Histogram $H\p{E}$ of observed energies is proportional to the
+    density of states $D\p{E}$
   \end{itemize}
 \end{frame}
 
@@ -96,7 +115,7 @@
     \begin{align*}
       Z\p{T}=\sum_se^{-E_s/kT}=\sum_E{\color{red}D\p{E}}e^{-E/kT}
     \end{align*}
-  \item<2> Temperature dependence of observable properties
+  \item Temperature dependence of observable properties
     \begin{align*}
       \bk{X}_T=\sum_E{\color{red} X\p{E}}P\p{E,T}
       =\f1{Z\p{T}}\sum_E{\color{red}X\p{E}D\p{E}}e^{-E/kT}
@@ -126,7 +145,8 @@
   \frametitle{Density of states}
   \begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{figs/dos-poster-example.pdf}
+    \includegraphics[height=0.75\textheight]
+    {figs/dos-poster-example.pdf}
     \caption{Sample density of states ($N=25$, $\eta=0.3$)}
   \end{figure}
 \end{frame}
@@ -135,7 +155,8 @@
   \frametitle{Density of states}
   \begin{figure}
     \centering
-    \includegraphics[width=0.5\textwidth]{figs/dos-thesis-example.pdf}
+    \includegraphics[height=0.75\textheight]
+    {figs/dos-thesis-example.pdf}
     \caption{Sample density of states ($N=100$, $\eta=0.1$)}
   \end{figure}
 \end{frame}
@@ -145,15 +166,14 @@
   \begin{itemize}
   \item {\it Biased} walk in configuration space
     \begin{itemize}
-    \item<2-> To each energy $E$, assign a weight $w\p{E}$
-    \item<2-> Accept Monte Carlo moves $s_i\to s_f$ with probability
+    \item To each energy $E$, assign a weight $w\p{E}$
+    \item Accept Monte Carlo moves $s_i\to s_f$ with probability
       \begin{align*}
         P\p{s_i\to s_f}=\min\set{\f{w\p{E_f}}{w\p{E_i}},1}
       \end{align*}
     \end{itemize}
-  \item<3-> $w\p{E}$ is proportional to the bias on states with energy
-    $E$
-  \item<4> Histogram method: an algorithm for finding $w\p{E}$
+  \item $w\p{E}$ is proportional to the bias on states with energy $E$
+  \item Histogram method: an algorithm for finding $w\p{E}$
   \end{itemize}
 \end{frame}
 
@@ -161,11 +181,8 @@
   \frametitle{Canonical weights}
   \begin{itemize}
   \item Boltzmann distribution: $w\p{E}=e^{-E/kT_0}$
-  \item<2-> ``Fixed-temperature'' simulation with $T=T_0$
-    \begin{align*}
-      Z=\sum_EH\p{E} && \bk{X}_{T_0}=\f1Z\sum_EX\p{E}H\p{E}
-    \end{align*}
-  \item<3> Temperature limitations, autocorrelation problems
+  \item ``Fixed-temperature'' simulation with $T=T_0$
+  \item Temperature limitations, autocorrelation problems
   \end{itemize}
 \end{frame}
 
@@ -173,10 +190,10 @@
   \frametitle{Flat histogram}
   \begin{itemize}
   \item Broad energy sampling: flat energy histogram $H\p{E}$
-  \item<2-> Weights $w\p{E}=1/D\p{E}$
-  \item<3-> Assumes knowledge of $D\p{E}$
-  \item<4-> Na\"ive implementation
-  \item<5> ``Optimal'' weights for a flat energy histogram
+  \item Weights $w\p{E}=1/D\p{E}$
+  \item ``Optimal'' weights for a flat energy histogram
+  \item Assumes knowledge of $D\p{E}$
+  \item Na\"ive implementation
   \end{itemize}
 \end{frame}
 
@@ -184,8 +201,8 @@
   \frametitle{Simple flat method}
   \begin{itemize}
   \item ``Simplest viable'' histogram method
-  \item<2-> Iterate flat histogram initialization procedure
-  \item<3> Standard of comparison
+  \item Iterate flat histogram initialization procedure
+  \item Standard of comparison
   \end{itemize}
 \end{frame}
 
@@ -193,34 +210,26 @@
   \frametitle{Wang-Landau}
   \begin{itemize}
   \item Standard histogram method
-  \item<2-> Weight adjustment on-the-fly
-  \item<3-> Four free parameters
-  \item<4> Requires specifying an energy range
+  \item Weight adjustment on-the-fly
+  \item Four free parameters
+  \item Requires specifying an energy range
+    \begin{itemize}
+    \item ``Vanilla'' Wang-Landau
+    \end{itemize}
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Transition matrix Monte Carlo (TMMC)}
   \begin{itemize}
-  \item Transition matrix $T\p{E_i\to E_j}$: probability of a transition
-    $E_i\to E_j$ in one MC move
-  \item<2-> Ensemble of simulations at equilibrium satisfy
+  \item Transition matrix $T\p{E_i\to E_j}$: probability of a
+    transition $E_i\to E_j$ in one Monte Carlo move
+  \item Ensemble of simulations at equilibrium satisfy
     \begin{align*}
       D\p{E_j}=\sum_iT\p{E_i\to E_j}D\p{E_i}
     \end{align*}
-  \item<3> Data on $T\p{E_i\to E_j}$ is easy to collect
+  \item Data on $T\p{E_i\to E_j}$ is easy to collect
   \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Transition matrix Monte Carlo (TMMC)}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]
-    {figs/transitions-example.pdf}
-    \caption{Sample transition matrix  $T\p{E\to E+\Delta E}$ ($N=25$,
-      $\eta=0.3$)}
-  \end{figure}
 \end{frame}
 
 \begin{frame}
@@ -230,11 +239,12 @@
     \begin{align*}
       P\p{E_i\to E_f}\approx\f{T\p{E_i\to E_f}}{T\p{E_f\to E_i}}
     \end{align*}
-  \item<2-> Flat energy histogram
+  \item One free parameter
+  \item Flat energy histogram
     \begin{itemize}
-    \item For sampling $T\p{E_i\to E_f}$
+    \item Initialization: for sampling $T\p{E_i\to E_f}$
+    \item Simulation: via $w\p{E}=1/D\p{E}$
     \end{itemize}
-  \item<3> One free parameter
   \end{itemize}
 \end{frame}
 
@@ -242,32 +252,10 @@
   \frametitle{Optimized ensemble}
   \begin{itemize}
   \item Motivation: reduce autocorrelation of low energy statistics
-  \item<2-> Optimize time for ``round trip'' in energy range
-  \item<3-> Weights $w\p{E}=\f1{D\p{E}\alpha\p{E}}$
-  \item<4-> Modifies existing flat histogram weight array
-  \item<5> OE-TMMC hybrid: compute $\alpha\p{E}$ from transition matrix
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Comparison}
-  \begin{itemize}
-  \item $\lambda=1.3$, $\eta=0.3$ square-well fluid
-  \item Minimum temperature of interest $T_{\t{min}}$ $\to$ minimum
-    energy of interest $E_{\t{min}}$
-    \begin{align*}
-      \f{d\ln D}{dE}\bigg|_{E=E_{\t{min}}}=\f1{kT_{\t{min}}}
-    \end{align*}
-  \item Wang-Landau vs vanilla Wang-Landau
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Controls}
-  \begin{itemize}
-  \item Fixed initialization time
-  \item ``Gold standard'' simulation
-  \item ``Converged flat'' weights
+  \item Optimize time for ``round trip'' in energy range
+  \item Weights $w\p{E}=\f1{D\p{E}\alpha\p{E}}$
+  \item Tricky multi-step initialization procedure
+  \item OE-TMMC hybrid: compute $\alpha\p{E}$ from transition matrix
   \end{itemize}
 \end{frame}
 
@@ -284,43 +272,17 @@
   \frametitle{Histograms and arrays}
   \begin{figure}
     \centering
-    \includegraphics[height=0.75\textheight]{figs/lnw-example.pdf}
-    \caption{Example weight arrays ($N=25$, $\eta=0.3$)}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Histograms and arrays}
-  \begin{figure}
-    \centering
     \includegraphics[height=0.75\textheight]{figs/dos-example.pdf}
     \caption{Example densities of states ($N=25$, $\eta=0.3$)}
   \end{figure}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Histograms and arrays}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/sample-rates.pdf}
-    \caption{Example sample rates ($N=25$, $\eta=0.3$)}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Thermodynamic properties}
+  \frametitle{Comparison and controls}
   \begin{itemize}
-  \item Internal energy $U\p{T}=\bk{E}_T$
-  \item Heat capacity
-    \begin{align*}
-      C_V\p{T}=\p{\f{\d U}{\d T}}_V
-      =\bk{\p{\f{E}{kT}}^2}_T-\bk{\f{E}{kT}}_T^2
-    \end{align*}
-  \item Configurational entropy
-  \begin{align*}
-    S_{\text{config}}\p{T} =k\bk{\f{E}{kT}+\ln Z}_T
-    -k\bk{\f{E}{kT}+\ln Z}_{T\to\infty}
-  \end{align*}
+  \item Thermodynamics properties of the $\eta=0.3$ square-well fluid
+  \item ``Gold standard'' simulations
+  \item ``Converged flat'' weight simulations
   \end{itemize}
 \end{frame}
 
@@ -329,25 +291,7 @@
   \begin{figure}
     \centering
     \includegraphics[height=0.75\textheight]{figs/internal-energy.pdf}
-    \caption{Specific internal energy}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Thermodynamic properties}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/heat-capacity.pdf}
-    \caption{Specific heat capacity}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Thermodynamic properties}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/config-entropy.pdf}
-    \caption{Specific configurational entropy}
+    \caption{Specific internal energy ($N=25$)}
   \end{figure}
 \end{frame}
 
@@ -356,52 +300,7 @@
   \begin{figure}
     \centering
     \includegraphics[height=0.75\textheight]{figs/u-err.pdf}
-    \caption{Error in specific internal energy}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Errors}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/cv-err.pdf}
-    \caption{Error in specific heat capacity}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Errors}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/s-err.pdf}
-    \caption{Error in specific configurational entropy}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Error scaling}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/u-scaling.pdf}
-    \caption{Error scaling in specific internal energy}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Error scaling}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/cv-scaling.pdf}
-    \caption{Error scaling in specific heat capacity}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Error scaling}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/s-scaling.pdf}
-    \caption{Error scaling in specific configurational entropy}
+    \caption{Error in specific internal energy ($N=25$)}
   \end{figure}
 \end{frame}
 
@@ -415,32 +314,15 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Error comparisons}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/cv-comps.pdf}
-    \caption{Error comparisons in specific heat capacity}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Error comparisons}
-  \begin{figure}
-    \centering
-    \includegraphics[height=0.75\textheight]{figs/s-comps.pdf}
-    \caption{Error comparisons in specific configurational entropy}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
   \frametitle{Summary}
   \begin{itemize}
   \item Wang-Landau best, but requires specified energy range
-  \item Simple flat decent, but inconsistent
+  \item Simple flat surprisingly decent, but unreliable
   \item OETMMC worse than TMMC
     \begin{itemize}
     \item Worth further investigation
     \end{itemize}
+  \item TMMC best bet for square-well fluid
   \end{itemize}
 \end{frame}
 
@@ -449,7 +331,6 @@
   \begin{itemize}
   \item David Roundy
   \item Paho Lurie-Gregg
-  \item Austin Valeske
   \item David McIntyre
   \item Henri Jansen
   \end{itemize}
