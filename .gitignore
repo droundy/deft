@@ -68,3 +68,5 @@ movie.svg
 free-energy-monte-carlo-infinite-case
 version-identifier.h
 *.synctex.gz
+*.gif
+log/
