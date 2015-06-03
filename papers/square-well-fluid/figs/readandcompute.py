@@ -60,6 +60,12 @@ def minT(fbase):
                 break
     return min_T
 
+def iterations(fbase):
+    with open(fbase+"-E.dat") as file:
+        for line in file:
+            if "iterations:" in line:
+                return int(line.split()[-1])
+
 def dr_g(fbase):
     with open(fbase+"-E.dat") as file:
         for line in file:
