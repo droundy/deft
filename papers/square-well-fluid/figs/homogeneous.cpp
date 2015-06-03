@@ -27,9 +27,9 @@
 // homogeneous.dat file.
 /*--
 
-for kT in [1, 10, 100]:
+for kT in range(1,11)+[100]:
     for ww in [1.3]:
-        self.rule(exe, [exe,ww,kT],
+        self.rule('%s %g %g' % (exe,ww,kT), [exe],
                   [os.path.dirname(exe)[:-3]+'/homogeneous/ww%g-kT%g.dat' % (ww,kT)])
 
 --*/

@@ -27,7 +27,7 @@ generated_names = """
   LogN0 Phi1 Phi2 Phi3 QuadraticGaussian Quadratic QuadraticN0
   SFMTFluid SFMTFluidVeff
   SPhi1 SPhi2 SPhi3
-  SW_liquid
+  SW_liquid SW_liquidVeff HomogeneousSW_liquid
   WaterSaftByHand WaterSaft WhiteBearFluid WhiteBear
 """.split()
 
