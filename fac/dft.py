@@ -41,6 +41,9 @@ mkdats = """
   papers/fuzzy-fmt/figs/new-bh-walls
   papers/fuzzy-fmt/figs/soft-sphere
 
+  papers/square-well-fluid/figs/new-radial-sw
+  papers/square-well-fluid/figs/homogeneous
+
   papers/water-saft/figs/surface-tension
   papers/water-saft/figs/equation-of-state
   papers/water-saft/figs/four-rods-in-water
