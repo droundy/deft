@@ -43,7 +43,7 @@ axT.tick_params(axis='y', colors='red')
 axT.yaxis.label.set_color('red')
 
 axD.legend()
-plt.xlabel(r'$E_{tot}$')
+axD.set_xlabel(r'$E/N$')
 axD.set_ylabel(r'Estimated diffusion constant (actually RMS energy change)')
 axD.set_ylim(ymin=0)
 axT.set_ylabel(r'$T$')

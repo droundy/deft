@@ -455,9 +455,21 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
       }
       else ln_dos[i] = -DBL_MAX;
     }
-  }
-
-  else if(dos_type == transition_dos){
+  } else if(dos_type == transition_dos) {
+    ln_dos[0] = 0;
+    for (int i=1; i<energy_levels; i++) {
+      ln_dos[i] = ln_dos[i-1];
+      double down_to_here = 0;
+      double up_from_here = 0;
+      for (int j=0; j<i; j++) {
+        down_to_here += exp(ln_dos[j] - ln_dos[i])*transition_matrix(i, j);
+        up_from_here += transition_matrix(j, i);
+      }
+      if (down_to_here > 0 && up_from_here > 0) {
+        ln_dos[i] += log(down_to_here/up_from_here);
+      }
+    }
+  } else if(dos_type == transition_dos) { // FIXME this is made redundant by the above...
 
     const int energies_observed = min_energy_state+1;
     double *TD_over_D = new double[energies_observed];
