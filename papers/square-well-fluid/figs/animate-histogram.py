@@ -48,7 +48,7 @@ for frame in xrange(100000):
 
         e, hist = readandcompute.e_hist(basename)
         iterations = readandcompute.iterations(basename)
-        ax.plot(e/N, 2.5*hist/hist.max(), colors[ff]+'-', label=r'$\nu = %g$, %7e iterations' % (ff, iterations))
+        ax.plot(e/N, 2.5*hist/hist.max(), colors[ff]+'-', label=r'$\eta = %g$, %7e iterations' % (ff, iterations))
 
     ax.set_xlabel(r'$E/N$')
     ax.set_ylim(ymin=0)
