@@ -825,15 +825,6 @@ int main(int argc, const char *argv[]) {
     sw.set_min_important_energy();
     printf("Using canonical energies below %d\n", sw.min_important_energy);
     sw.initialize_canonical(sw.min_T,sw.min_important_energy);
-  } else if (!fix_kT && false){
-    /* FIXME: under what circumstances do we want to override the
-       initialization and flatten the weights below the
-       min_energy_state? It seems like this is always wrong, so I am
-       disabling it.  DJR. */
-
-    /* Flatten the weight array at unseen energies */
-    for(int i = sw.min_energy_state+1; i < sw.energy_levels; i++)
-      sw.ln_energy_weights[i] = sw.ln_energy_weights[sw.min_energy_state];
   }
 
   if (false) {
