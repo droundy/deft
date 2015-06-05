@@ -817,10 +817,7 @@ int main(int argc, const char *argv[]) {
 
   took("Actual initialization");
 
-  if(sw.end_condition == optimistic_min_samples ||
-     sw.end_condition == pessimistic_min_samples ||
-     sw.end_condition == optimistic_sample_error ||
-     sw.end_condition == pessimistic_sample_error){
+  if (!fix_kT && sw.min_T > 0) {
     /* Force canonical weights at low energies */
     sw.set_min_important_energy();
     printf("Using canonical energies below %d\n", sw.min_important_energy);
