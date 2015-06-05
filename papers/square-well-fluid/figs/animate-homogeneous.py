@@ -11,56 +11,55 @@ matplotlib.rc('text', usetex=True)
 import readandcompute
 
 ww = float(sys.argv[1])
-ffs = eval(sys.argv[2])
-Ns = eval(sys.argv[3])
+#arg ww = [1.3]
+ff = float(sys.argv[2])
+#arg ff = [0.1,0.2,0.3,0.4,0.5]
+N = int(sys.argv[3])
+#arg N = [500]
+
+moviedir = 'figs/movies/ww%.2f-ff%.2f-N%d' % (ww, ff, N)
+os.system('rm -rf ' + moviedir)
+assert not os.system('mkdir -p ' + moviedir)
 
 fig, ax = plt.subplots()
 
-os.system('rm -f figs/movie-ww%.2f-frame*.png' % (ww))
-
-all_colors = ['b', 'r', 'g', 'k', 'c', 'm', 'y']
-colors = {}
-for i in xrange(len(ffs)):
-    colors[ffs[i]] = all_colors[i]
-
-sleeptime = 1 # second
-maxsleeptime = 30*60 # 30 minutes
+sleeptime = 30*60 # 30 minutes
 
 for frame in xrange(100000):
     plt.cla()
-    for ff in ffs:
-        for N in Ns:
-            basename = 'data/mc/ww%.2f-ff%.2f-N%d' % (ww,ff,N)
-            e, diff = readandcompute.e_diffusion_estimate(basename)
 
-            T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
-            ax.plot(u/N, T, 'k-')
-            ax.set_ylim(0, 3)
-            ax.axhline(minT, color='r', linestyle=':')
+    basename = 'data/mc/ww%.2f-ff%.2f-N%d' % (ww,ff,N)
+    e, diff = readandcompute.e_diffusion_estimate(basename)
 
-            ax.axvline(-readandcompute.max_entropy_state(basename)/N, color=colors[ff], linestyle=':')
-            ax.axvline(-readandcompute.min_important_energy(basename)/N, color=colors[ff], linestyle='--')
+    try:
+        ax.axvline(-readandcompute.max_entropy_state(basename)/N, color='r', linestyle=':')
+        ax.axvline(-readandcompute.min_important_energy(basename)/N, color='b', linestyle=':')
 
-            e, hist = readandcompute.e_hist(basename)
-            iterations = readandcompute.iterations(basename)
-            ax.plot(e/N, 2.5*hist/hist.max(), colors[ff]+'-',
-                    label=r'$\eta = %g$, $N=%d$, %.0e iterations' % (ff, N, iterations))
+        T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
+        ax.plot(u/N, T, 'k-')
+        ax.set_ylim(0, 3)
+        ax.axhline(minT, color='r', linestyle=':')
+
+        e, hist = readandcompute.e_hist(basename)
+        iterations = readandcompute.iterations(basename)
+        ax.plot(e/N, 2.5*hist/hist.max(), 'k-', label=r'%e iterations' % (iterations))
+    except:
+        pass
+
+    e, init_hist = readandcompute.e_and_total_init_histogram(basename)
+    ax.plot(e, 2.5*init_hist/init_hist.max(), 'b-',
+            label=r'%e initialization iterations' % (sum(init_hist)))
 
     ax.set_xlabel(r'$E/N$')
     ax.set_ylim(ymin=0)
     ax.set_ylabel(r'$T$')
     ax.legend(loc='best').get_frame().set_alpha(0.25)
-    plt.title(r'Histogram and internal energy movie with $\lambda = %g$' % (ww))
+    plt.title(r'Histogram movie with $\lambda = %g$, $\eta = %g$, $N=%d$' % (ww, ff, N))
 
-    fname = 'figs/movie-ww%.2f-frame%06d.png' % (ww, frame)
-    print 'saving', fname
+    fname = '%s/frame%03d.png' % (moviedir, frame)
     plt.savefig(fname)
-    os.system("convert -delay 100 figs/movie-ww%.2f-frame*.png figs/movie-ww%.2f.gif"
-              % (ww, ww)) # make the movie
+    os.system("convert  -delay 50 %s/frame*.png %s/movie.gif" % (moviedir, moviedir)) # make the movie
 
     time.sleep(sleeptime)
-    sleeptime *= 2
-    if sleeptime > maxsleeptime:
-        sleeptime = maxsleeptime
 
 plt.show()

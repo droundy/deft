@@ -38,6 +38,11 @@ for ff in ffs:
     e, hist = readandcompute.e_hist(basename)
     axT.plot(e/N, 2.5*hist/hist.max(), 'k:')
 
+    e, init_hist = readandcompute.e_and_total_init_histogram(basename)
+    for i in xrange(len(e)):
+        print e[i], (2.5*init_hist/init_hist.max())[i]
+    axT.plot(e, 2.5*init_hist/init_hist.max(), 'c--')
+
 axT.spines['right'].set_color('red')
 axT.tick_params(axis='y', colors='red')
 axT.yaxis.label.set_color('red')
@@ -47,7 +52,8 @@ axD.set_xlabel(r'$E/N$')
 axD.set_ylabel(r'Estimated diffusion constant (actually RMS energy change)')
 axD.set_ylim(ymin=0)
 axT.set_ylabel(r'$T$')
-plt.title(r'RMS $\Delta E$ with $\lambda = %g$' % (ww))
+plt.title(r'RMS $\Delta E$ with $\lambda = %g$  %.1g initialization iterations'
+          % (ww, readandcompute.total_init_iterations(basename)))
 
 plt.savefig('figs/liquid-vapor-ww%.2f-%gx%g-diffusion.pdf' % (ww,lenx,lenyz))
 
