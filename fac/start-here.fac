@@ -27,6 +27,6 @@ c .pyc
 > ../.svg.fac
 c .pyc
 
-| python ../src/generate-version-identifier.py > ../src/version-identifier.h
+| python3 ../src/generate-version-identifier.py ../src/version-identifier.h
 > ../src/version-identifier.h
 

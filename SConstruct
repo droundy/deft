@@ -57,7 +57,7 @@ if not os.path.exists(gitmaster[0]):
 Alias('git configuration',
       env.Command(target = 'src/version-identifier.h',
                           source = ['src/generate-version-identifier.py']+gitmaster,
-                          action = 'python3 $SOURCE > $TARGET'))
+                          action = 'python3 $SOURCE $TARGET'))
 Default('git configuration')
 
 haskell = Environment(tools=['haskell'],
