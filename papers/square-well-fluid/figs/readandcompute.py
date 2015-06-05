@@ -208,6 +208,18 @@ def e_de_transitions(basename):
     e,de = numpy.meshgrid(e, de)
     return e, de, trans
 
+def total_init_iterations(basename):
+    trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
+    trans = trans[:,1:]
+    return numpy.sum(trans)/read_N(basename)
+
+def e_and_total_init_histogram(basename):
+    trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
+    N = read_N(basename)
+    e = -trans[:,0]/N
+    trans = trans[:,1:]
+    return e, numpy.sum(trans, axis=1)
+
 def e_diffusion_estimate(basename):
     e, de, trans = e_de_transitions(basename)
     e = e[0,:]
