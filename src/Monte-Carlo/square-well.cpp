@@ -3,6 +3,8 @@
 #include "Monte-Carlo/square-well.h"
 #include "handymath.h"
 
+#include "version-identifier.h"
+
 ball::ball(){
   pos = vector3d();
   R = 1;
@@ -1222,11 +1224,17 @@ void sw_simulation::update_weights_using_transitions() {
 
 // initialization with tmmc
 void sw_simulation::initialize_transitions() {
-  int check_how_often = exp(1/min_T)*energy_levels; // avoid wasting time if we are done
+  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball(true);
-    check_how_often += exp(1/min_T)*energy_levels; // try a little harder next time...
-  } while(!finished_initializing(printing_allowed()));
+    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    verbose = printing_allowed();
+    if (verbose) {
+      set_min_important_energy();
+      write_transitions_file();
+    }
+  } while(!finished_initializing(verbose));
 
   update_weights_using_transitions();
   flush_weight_array();
@@ -1234,8 +1242,62 @@ void sw_simulation::initialize_transitions() {
   initialize_canonical(min_T,min_important_energy);
 }
 
+void sw_simulation::write_transitions_file() const {
+  if (!transitions_filename) return; // silently do not save if there is not file name
+  FILE *f = fopen(transitions_filename,"w");
+  if (!f) {
+    printf("Unable to create file %s!\n", transitions_filename);
+    exit(1);
+  }
+  write_header(f);
+  fprintf(f, "#       \tde\n");
+  fprintf(f, "# energy");
+  for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
+    fprintf(f, "\t%d", de);
+  }
+  fprintf(f, "\n");
+  for(int i = 0; i < energy_levels; i++) {
+    bool have_i = false;
+    for (int de = -biggest_energy_transition;
+         de <= biggest_energy_transition; de++){
+      if (transitions(i,de)) have_i = true;
+    }
+    if (have_i){
+      fprintf(f, "%d", i);
+      for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
+        fprintf(f, "\t%ld", transitions(i, de));
+      }
+      fprintf(f, "\n");
+    }
+  }
+  fclose(f);
+}
+
+void sw_simulation::write_header(FILE *f) const {
+  fprintf(f, "# version: %s\n", version_identifier());
+  fprintf(f, "# well_width: %g\n", well_width);
+  fprintf(f, "# ff: %.16g\n", filling_fraction);
+  fprintf(f, "# N: %d\n", N);
+  fprintf(f, "# walls: %d\n", walls);
+  fprintf(f, "# cell dimensions: (%g, %g, %g)\n", len[0], len[1], len[2]);
+  fprintf(f, "# translation_scale: %g\n", translation_scale);
+  fprintf(f, "# energy_levels: %d\n", energy_levels);
+  fprintf(f, "# min_T: %g\n", min_T);
+  fprintf(f, "# max_entropy_state: %d\n", max_entropy_state);
+  fprintf(f, "# min_important_energy: %d\n", min_important_energy);
+
+  fprintf(f, "\n");
+
+  fprintf(f, "# iterations: %ld\n", iteration);
+  fprintf(f, "# working moves: %ld\n", moves.working);
+  fprintf(f, "# total moves: %ld\n", moves.total);
+  fprintf(f, "# acceptance rate: %g\n", double(moves.working)/moves.total);
+
+  fprintf(f, "\n");
+}
+
 // initialize by reading transition matrix from file
-void sw_simulation::initialize_transitions_file(char *transitions_input_filename){
+void sw_simulation::initialize_transitions_file(const char *transitions_input_filename){
   // open the transition matrix data file as read-only
   FILE *transitions_infile = fopen(transitions_input_filename,"r");
 
@@ -1374,7 +1436,8 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
 }
 
 bool sw_simulation::printing_allowed(){
-  const double time_skip = 3; // seconds
+  const double max_time_skip = 30*60; // 30 minutes
+  double time_skip = 3; // seconds
   static int every_so_often = 0;
   static int how_often = 1;
   // clock can be expensive, so this is a heuristic to reduce our use of it.
@@ -1385,6 +1448,7 @@ bool sw_simulation::printing_allowed(){
       last_print_time = time_now;
       every_so_often = 0;
       fflush(stdout); // flushing once a second will be no problem and can be helpful
+      time_skip = max(2*time_skip, max_time_skip);
       return true;
     }
   }

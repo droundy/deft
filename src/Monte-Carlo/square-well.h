@@ -93,6 +93,9 @@ struct sw_simulation {
   double flatness; // maximum allowable proportional deviation from mean histogram value
   int init_iters; // number of iterations for which to initialize
 
+  /* Finally, the following define file names for output files. */
+  const char *transitions_filename;
+
   /* The following tracks how many transitions we have attempted from
      a given energy level to nearby energy levels.  The advantage of
      this metric is that we can (hopefully) get away without resetting
@@ -101,8 +104,15 @@ struct sw_simulation {
      sample all states of a given energy equally. */
   int biggest_energy_transition;
   long *transitions_table;
-  long &
-  transitions(int energy, int energy_change) {
+  long &transitions(int energy, int energy_change) {
+    assert(energy_change >= -biggest_energy_transition);
+    assert(energy_change <= biggest_energy_transition);
+    assert(energy >= 0);
+    assert(energy < energy_levels);
+    return transitions_table[energy*(2*biggest_energy_transition+1)
+                             + energy_change+biggest_energy_transition];
+  };
+  long transitions(int energy, int energy_change) const {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
@@ -172,7 +182,9 @@ struct sw_simulation {
 
   void initialize_transitions();
 
-  void initialize_transitions_file(char *transitions_input_filename);
+  void initialize_transitions_file(const char *transitions_input_filename);
+  void write_transitions_file() const;
+  void write_header(FILE *f) const;
 
   double fractional_dos_precision;
   void update_weights_using_transitions();
@@ -235,6 +247,7 @@ struct sw_simulation {
 
   sw_simulation(){
     last_print_time = clock();
+    transitions_filename = 0; // default to NULL pointer here for safety.
   };
 };
 

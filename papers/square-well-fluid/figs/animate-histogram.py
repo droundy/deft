@@ -19,17 +19,18 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
-fig, ax = plt.subplots()
+moviedir = 'figs/movies/ww%.2f-%gx%g' % (ww,lenx,lenyz)
+os.system('rm -rf ' + moviedir)
+assert not os.system('mkdir -p ' + moviedir)
 
-os.system('rm -f figs/movie-ww%.2f-%gx%g-frame*.png' % (ww,lenx,lenyz))
+fig, ax = plt.subplots()
 
 all_colors = ['b', 'r', 'g', 'k']
 colors = {}
 for i in xrange(len(ffs)):
     colors[ffs[i]] = all_colors[i]
 
-sleeptime = 1 # second
-maxsleeptime = 30*60 # 30 minutes
+sleeptime = 30*60 # 30 minutes
 
 for frame in xrange(100000):
     plt.cla()
@@ -38,33 +39,35 @@ for frame in xrange(100000):
         e, diff = readandcompute.e_diffusion_estimate(basename)
 
         N = readandcompute.read_N(basename);
-        T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
-        ax.plot(u/N, T, 'k-')
-        ax.set_ylim(0, 3)
-        ax.axhline(minT, color='r', linestyle=':')
+        try:
+            ax.axvline(-readandcompute.max_entropy_state(basename)/N, color=colors[ff], linestyle=':')
+            ax.axvline(-readandcompute.min_important_energy(basename)/N, color=colors[ff], linestyle=':')
 
-        ax.axvline(-readandcompute.max_entropy_state(basename)/N, color=colors[ff], linestyle=':')
-        ax.axvline(-readandcompute.min_important_energy(basename)/N, color=colors[ff], linestyle='--')
+            T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
+            ax.plot(u/N, T, 'k-')
+            ax.set_ylim(0, 3)
+            ax.axhline(minT, color='r', linestyle=':')
 
-        e, hist = readandcompute.e_hist(basename)
-        iterations = readandcompute.iterations(basename)
-        ax.plot(e/N, 2.5*hist/hist.max(), colors[ff]+'-', label=r'$\eta = %g$, %e iterations' % (ff, iterations))
+            e, hist = readandcompute.e_hist(basename)
+            iterations = readandcompute.iterations(basename)
+            ax.plot(e/N, 2.5*hist/hist.max(), colors[ff]+'-', label=r'$\eta = %g$, %e iterations' % (ff, iterations))
+        except:
+            pass
+
+        e, init_hist = readandcompute.e_and_total_init_histogram(basename)
+        ax.plot(e, 2.5*init_hist/init_hist.max(), colors[ff]+'--',
+                label=r'$\eta = %g$, %e initialization iterations' % (ff, sum(init_hist)))
 
     ax.set_xlabel(r'$E/N$')
     ax.set_ylim(ymin=0)
     ax.set_ylabel(r'$T$')
-    ax.legend(loc='best')
+    ax.legend(loc='best').get_frame().set_alpha(0.25)
     plt.title(r'Histogram and internal energy movie with $\lambda = %g$' % (ww))
 
-    fname = 'figs/movie-ww%.2f-%gx%g-frame%03d.png' % (ww,lenx,lenyz, frame)
-    print 'saving', fname
+    fname = '%s/frame%03d.png' % (moviedir, frame)
     plt.savefig(fname)
-    os.system("convert  -delay 50 figs/movie-ww%.2f-%gx%g-frame*.png figs/movie-ww%.2f-%gx%g.gif"
-              % (ww,lenx,lenyz, ww,lenx,lenyz)) # make the movie
+    os.system("convert  -delay 50 %s/frame*.png %s/movie.gif" % (moviedir, moviedir)) # make the movie
 
     time.sleep(sleeptime)
-    sleeptime *= 2
-    if sleeptime > maxsleeptime:
-        sleeptime = maxsleeptime
 
 plt.show()

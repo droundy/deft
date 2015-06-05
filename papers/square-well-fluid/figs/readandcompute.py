@@ -79,7 +79,7 @@ def dimensions(fbase):
                 return eval(line.split(': ')[-1])
 
 def read_N(fbase):
-    with open(fbase+"-E.dat") as file:
+    with open(fbase+"-transitions.dat") as file:
         for line in file:
             if "N" in line:
                 return int(line.split(': ')[-1])
@@ -91,13 +91,13 @@ def read_ff(fbase):
                 return float(line.split(': ')[-1])
 
 def min_important_energy(fbase):
-    with open(fbase+"-E.dat") as file:
+    with open(fbase+"-transitions.dat") as file:
         for line in file:
             if("min_important_energy" in line):
                 return float(line.split()[-1])
 
 def max_entropy_state(fbase):
-    with open(fbase+"-E.dat") as file:
+    with open(fbase+"-transitions.dat") as file:
         for line in file:
             if("max_entropy_state" in line):
                 return float(line.split()[-1])

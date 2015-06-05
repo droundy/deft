@@ -639,6 +639,10 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < sw.energy_levels; i++)
     density_histogram[i] = new long[density_bins]();
 
+  /* Set the transitions filename so we can use it during initialization! */
+  sw.transitions_filename = new char[1024];
+  sprintf((char *)sw.transitions_filename, "%s/%s-transitions.dat", data_dir, filename);
+
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------
@@ -849,9 +853,6 @@ int main(int argc, const char *argv[]) {
 
   char *w_fname = new char[1024];
   sprintf(w_fname, "%s/%s-lnw.dat", data_dir, filename);
-
-  char *transitions_fname = new char[1024];
-  sprintf(transitions_fname, "%s/%s-transitions.dat", data_dir, filename);
 
   char *os_fname = new char[1024];
   sprintf(os_fname, "%s/%s-os.dat", data_dir, filename);
@@ -1097,9 +1098,9 @@ int main(int argc, const char *argv[]) {
       fclose(ps_out);
 
       // Save transitions histogram
-      FILE *transitions_out = fopen((const char *)transitions_fname, "w");
+      FILE *transitions_out = fopen(sw.transitions_filename, "w");
       if (!transitions_out) {
-        fprintf(stderr, "Unable to create %s!\n", transitions_fname);
+        fprintf(stderr, "Unable to create %s!\n", sw.transitions_filename);
         exit(1);
       }
       fprintf(transitions_out, "%s", headerinfo);
@@ -1222,7 +1223,7 @@ int main(int argc, const char *argv[]) {
   delete[] headerinfo;
   delete[] e_fname;
   delete[] w_fname;
-  delete[] transitions_fname;
+  delete[] sw.transitions_filename;
   delete[] os_fname;
   delete[] ps_fname;
   delete[] density_fname;
