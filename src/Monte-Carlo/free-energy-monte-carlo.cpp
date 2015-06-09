@@ -714,7 +714,8 @@ static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor){
     for (int j=i+1; j<sw.N; j++) {
       // copy pasting from overlap() in square-well.cpp for now
       // contemplated adding a scaling parametor to overlap(), but decided on this for now.
-      const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos, scaled_len, sw.walls);
+      const vector3d ab = periodic_diff(scaling_factor * sw.balls[i].pos, scaling_factor * sw.balls[j].pos,
+                                        scaled_len, sw.walls);
       if (ab.normsquared() < sqr(sw.balls[i].R + sw.balls[j].R)) {
         return true;
       }
