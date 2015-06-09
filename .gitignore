@@ -70,3 +70,4 @@ version-identifier.h
 *.synctex.gz
 *.gif
 log/
+*.mp4

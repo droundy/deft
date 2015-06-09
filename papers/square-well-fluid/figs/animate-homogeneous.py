@@ -48,7 +48,7 @@ for frame in xrange(100000):
 
     e, init_hist = readandcompute.e_and_total_init_histogram(basename)
     ax.plot(e, 2.5*init_hist/init_hist.max(), 'b-',
-            label=r'%e initialization iterations' % (sum(init_hist)))
+            label=r'%e initialization iterations' % (sum(init_hist)/float(N)))
 
     ax.set_xlabel(r'$E/N$')
     ax.set_ylim(ymin=0)
@@ -59,6 +59,7 @@ for frame in xrange(100000):
     fname = '%s/frame%03d.png' % (moviedir, frame)
     plt.savefig(fname)
     os.system("convert  -delay 50 %s/frame*.png %s/movie.gif" % (moviedir, moviedir)) # make the movie
+    os.system("avconv -y -r 10 -i %s/frame%03d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
 
     time.sleep(sleeptime)
 

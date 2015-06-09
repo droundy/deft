@@ -67,6 +67,7 @@ for frame in xrange(100000):
     fname = '%s/frame%03d.png' % (moviedir, frame)
     plt.savefig(fname)
     os.system("convert  -delay 50 %s/frame*.png %s/movie.gif" % (moviedir, moviedir)) # make the movie
+    os.system("avconv -y -r 10 -i %s/frame%03d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
 
     time.sleep(sleeptime)
 
