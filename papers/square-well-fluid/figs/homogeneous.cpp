@@ -20,7 +20,6 @@
 #include <sys/types.h>
 
 #include "new/HomogeneousSW_liquidFast.h"
-#include "version-identifier.h"
 #include "handymath.h"
 
 // The following tells fac how to run the executable to generate a
@@ -43,7 +42,6 @@ int main(int argc, char **argv) {
     printf("usage: %s lambda kT\n", argv[0]);
     return 1;
   }
-  printf("git version: %s\n", version_identifier());
 
   sscanf(argv[1], "%lg", &lambda);
   sscanf(argv[2], "%lg", &temp);
