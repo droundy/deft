@@ -509,6 +509,7 @@ for mkdat in Split("""
 	papers/fuzzy-fmt/figs/new-radial-wca
 	papers/square-well-fluid/figs/new-radial-sw
 	papers/square-well-fluid/figs/homogeneous
+	papers/square-well-fluid/figs/coexistence
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
@@ -538,12 +539,16 @@ for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2
                     source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
                     action = '$SOURCE %g %g' % (rho, kT))
 
-for kT in [1, 2,3,4,5,6,7,8,9,10, 100]:
-    for ww in [1.3]:
+for ww in [1.3]:
+    env.Command(target = "papers/square-well-fluid/data/coexistence/ww%g.dat" % ww,
+                source = ['papers/square-well-fluid/figs/coexistence.mkdat'],
+                action = '$SOURCE %g' % ww)
+    for kT in [1, 2,3,4,5,6,7,8,9,10, 100]:
         env.Command(target = "papers/square-well-fluid/data/homogeneous/ww%g-kT%g.dat"
                     % (ww, kT),
                     source = ['papers/square-well-fluid/figs/homogeneous.mkdat'],
                     action = '$SOURCE %g %g' % (ww, kT))
+
 env.Command(target = ['papers/contact/figs/walls.dat',
                       'papers/contact/figs/wallsWB-0.10.dat',
                       'papers/contact/figs/wallsWB-0.20.dat',

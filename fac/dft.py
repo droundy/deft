@@ -43,6 +43,7 @@ mkdats = """
 
   papers/square-well-fluid/figs/new-radial-sw
   papers/square-well-fluid/figs/homogeneous
+  papers/square-well-fluid/figs/coexistence
 
   papers/water-saft/figs/surface-tension
   papers/water-saft/figs/equation-of-state
