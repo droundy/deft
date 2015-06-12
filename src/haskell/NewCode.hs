@@ -199,7 +199,7 @@ createInput ee = error ("unhandled type in NewCode scalarClass: " ++ show ee)
 createAnydMethods :: Expression Scalar -> [(Exprn, Exprn)] -> String -> [CFunction]
 createAnydMethods e variables n =
   [CFunction {
-      name = n++"::true_energy",
+      name = n++"::energy",
       returnType = Double,
       constness = "const",
       args = [],

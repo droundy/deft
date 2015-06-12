@@ -27,20 +27,16 @@ struct EnergyGradAndPrecond {
 class NewFunctional {
 public:
   NewFunctional() {
-    cached_energy = 0;
     data = Vector();
   }
-  NewFunctional(const NewFunctional &o) : cached_energy(o.cached_energy), data(o.data) {}
+  NewFunctional(const NewFunctional &o) : data(o.data) {}
   void operator=(const NewFunctional &o) {
-    cached_energy = o.cached_energy;
     data = o.data;
   }
   void operator+=(const Vector &o) {
-    invalidate_cache();
     data += o;
   }
   void operator-=(const Vector &o) {
-    invalidate_cache();
     data -= o;
   }
   double operator*(const Vector &o) {
@@ -50,26 +46,9 @@ public:
     return data*d;
   }
 
-  // Use invalidate_cache any time you manually modify the input to
-  // the functional.
-  void invalidate_cache() const {
-    cached_energy = 0;
-  }
-
-  // The following is how you should actually find the energy, since
-  // it allows us to avoid recomputing the energy when we haven't
-  // changed our input.
-  double energy() const {
-    if (!cached_energy) cached_energy = true_energy();
-    return cached_energy;
-  }
-
-  // The following is the "true_energy" function, which must be defined by
-  // any real functionals.
-  virtual double true_energy() const = 0;
-
-  // The following handles the "homeogeneous" case.
-  //virtual double energy_per_volume() const = 0;
+  // The following is the "energy" function, which must be defined by
+  // all functionals.
+  virtual double energy() const = 0;
 
   // grad is the gradient.  The input "grad_these allows cases where
   // we may want to compute a gradient with regard to just *some* of
@@ -102,8 +81,6 @@ public:
                                  const Vector *direction = 0,
                                  double stepsize = 0) const;
 protected:
-  mutable double cached_energy; // store the energy here rather than
-                                // recompute it.  zero means invalid.
   mutable Vector data; // yuck, this shouldn't be mutable, but it's a
                        // workaround for the haskell code which is not
                        // yet set up to create non-cost methods.

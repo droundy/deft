@@ -53,7 +53,6 @@ static inline bool is_improvement(enum direction d, double eold, double enew) {
 
 static inline double energy(const HomogeneousSW_liquid &f, double n) {
   f.n() = n;
-  f.invalidate_cache();
   return f.energy();
 }
 
