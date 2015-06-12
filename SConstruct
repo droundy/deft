@@ -503,7 +503,6 @@ for mkdat in Split("""
 for mkdat in Split("""
 	papers/fuzzy-fmt/figs/new-melting
 	papers/fuzzy-fmt/figs/new-walls
-	papers/fuzzy-fmt/figs/new-bh-walls
 	papers/fuzzy-fmt/figs/new-soft-wall
 	papers/fuzzy-fmt/figs/new-radial-lj
 	papers/fuzzy-fmt/figs/new-radial-wca
@@ -520,6 +519,15 @@ for mkdat in Split("""
                        'src/new/WhiteBearFluidVeffFast.cpp',
                        'src/new/HomogeneousWhiteBearFluidFast.cpp',
                        'src/new/HomogeneousSW_liquidFast.cpp']))
+
+for mkdat in Split("""
+	papers/fuzzy-fmt/figs/new-bh-walls
+      """):
+    Alias('executables',
+          env.Program(target = mkdat + '.mkdat',
+                      source = [mkdat + '.cpp'] + generic_sources + newgeneric_sources +
+                      ['src/new/WhiteBearFluidVeffFast.cpp',
+                       'src/new/HomogeneousWhiteBearFluidFast.cpp']))
 # rules for how to run fuzzy-fmt/figs/new-walls.mkdat:
 for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
     env.Command(target = "papers/fuzzy-fmt/figs/wallshard-%06.4f-%04.2f.dat" % (0.0, rho),
