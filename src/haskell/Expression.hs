@@ -990,7 +990,7 @@ product2pairs s = Map.assocs s
 -- map2sum converts a Map to a product.  It handles the case of a
 -- singleton map properly.  It also appropriately combines any
 -- constant values in the product, and eliminates any terms with a
--- zero power (which are thus one).  Unline pairs2product, map2product
+-- zero power (which are thus one).  Unlike pairs2product, map2product
 -- *doesn't* need to check for a given expression occurring more than
 -- once, which makes it a bit simpler.
 map2product :: Type a => Map.Map (Expression a) Double -> Expression a
@@ -1017,6 +1017,15 @@ pairs2product :: Type a => [(Expression a, Double)] -> Expression a
 pairs2product = map2product . fl (Map.empty)
   where fl a [] = a
         fl a ((_,0):xs) = fl a xs
+        -- The following handles the case where we see a "sum" that
+        -- might actually be a product, which might have additional
+        -- Products inside that we will need to break up (via the next
+        -- pattern match).
+        fl a ((Sum x _,n):xs) | [(f',x')] <- sum2pairs x,
+                                Nothing <- isConstant x' = fl a ((toExpression (f'**n),1):(x',n):xs)
+        -- The following normalizes the case where we are seeing a
+        -- Product of Products, since we don't want to have this
+        -- nested case, which can impede handling of cancellations.
         fl a ((Product p _, n):xs) = fl a (map tonpower (product2pairs p) ++ xs)
             where tonpower (e,n') = (e, n'*n)
         fl a ((x,n):xs) = case Map.lookup x a of
@@ -1374,6 +1383,8 @@ instance Type a => Num (Expression a) where
   signum = undefined
 
 instance Type a => Fractional (Expression a) where
+  Sum x _ / y | [(f,a)] <- sum2pairs x = pairs2sum [(f, a/y)]
+  y / Sum x _ | [(f,a)] <- sum2pairs x = pairs2sum [(1/f, y/a)]
   x / y | Just yy <- isConstant y = x * toExpression (1/yy)
   x / Product y i = x * Product (Map.map negate y) i
   x / y = x * pairs2product [(y, -1)]
