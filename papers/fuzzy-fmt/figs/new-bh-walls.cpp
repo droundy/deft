@@ -147,8 +147,7 @@ int main(int argc, char **argv) {
   for (double rd = 0.50; rd < 0.63; rd += 0.01) {
     hf.n() = rd/uipow(sigma,3);
     f.Veff() = -temp*log(hf.n());
-    f.invalidate_cache();
-    printf("  %g\t%g\t%g\n", rd, f.true_energy(), hf.true_energy()*dw*dw*width);
+    printf("  %g\t%g\t%g\n", rd, f.energy(), hf.energy()*dw*dw*width);
   }
 
   printf("my energy is %g\n", f.energy());
