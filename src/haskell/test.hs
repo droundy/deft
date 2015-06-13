@@ -12,8 +12,8 @@ codeTests :: Test
 codeTests = TestList [t "x[i]" x,
                       t "0.0" (0 :: Expression RealSpace),
                       t "sqrt(x[i])" (sqrt x),
-                      t "x[i] + -3.0*(x[i]*x[i]*x[i] + x[i]*x[i])" foo,
-                      t "-3.0*x[i]*x[i]*x[i] + -3.0*x[i]*x[i] + x[i]" (cleanvars foo),
+                      t "x[i] - 3.0*(x[i]*x[i] + x[i]*x[i]*x[i])" foo,
+                      t "x[i] - 3.0*x[i]*x[i] - 3.0*x[i]*x[i]*x[i]" (cleanvars foo),
                       t "x[i]*x[i]" (x**2),
                       t "1.0/(x[i]*x[i])" (1/x**2),
                       t "y*y/(x[i]*x[i])" (y**2/x**2),
@@ -128,6 +128,33 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
                     t "makeHomogeneous (sin kr / k)" 1 (makeHomogeneous (sin kr/kr)),
                     t "makeHomogeneous (x+y) == x + y" (s_var "x"+s_var "y") (makeHomogeneous (x+y)),
                     t "makeHomogeneous (x**2) == x**2" (s_var "x"**2) (makeHomogeneous (x**2)),
+                    -- t "hello world"
+                    --    (-2*(1/(0.5*kk*xxx) - 1)/kk/xxx**2 - 4/kk**2/xxx**3)
+                    --    (derive xxx 1 (2*(1/(0.5*kk*xxx) - 1)/(kk*xxx))),
+                    t "without scalar"
+                       (-(1/(0.5*kk*xxx) - 1)/kk/xxx**2 - 2/kk**2/xxx**3)
+                       (derive xxx 1 ((1/(0.5*kk*xxx) - 1)/(kk*xxx))),
+                    t "just first bit"
+                       (-2/kk/xxx**2)
+                       (derive xxx 1 (1/(0.5*kk*xxx) - 1)),
+                    t "simple division"
+                       (2/xxx)
+                       (1/(0.5*kk*xxx)*kk),
+                    t "simple division"
+                       (6/xxx)
+                       ((3*kk)/(0.5*kk*xxx)),
+                    t "simple multiplication"
+                       (kk*xxx)
+                       ((0.5*kk)*(2*xxx)),
+                    t "simplified phi3"
+                       (-(0.2/(0.5*kk*xxx) - 0.2)/kk/xxx**2 - 0.2*2/kk**2/xxx**3)
+                       (derive xxx 1 (1 + 0.2*(1/(0.5*kk*xxx) - 1)/(kk*xxx))),
+                    t "division with cleanallvars"
+                       (0.25/(rad**3*n))
+                       (cleanallvars $ 1.0/("stupid" === 4*rad**3*n)),
+                    t "product with cleanallvars"
+                       (20*rad**3*n**2)
+                       (cleanallvars $ 5.0*n*("stupid" === 4*rad**3*n)),
                     t "x+0 == x" (x+0) x]
   where t :: Type a => String -> Expression a -> Expression a -> Test
         --t str e1 e2 = TestCase $ assertEqual str (latex e1) (latex e2)
@@ -139,6 +166,7 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
         b = r_var "b"
         kk = s_var "k" :: Expression RealSpace
         kr = k*r
+        xxx = s_var "x" :: Expression RealSpace
         r = s_var "r" :: Expression KSpace
         n2 = ifft ( smear * (4*pi) * r * (sin kr / k) * fft x)
         n2x = ifft ( smear * (4*pi) * i * kx*(r * cos kr - sin kr/k)/k**2 * fft x)
@@ -148,6 +176,8 @@ eqTests = TestList [t "x*x == x**2" (x ** 2) (x*x),
         smear = exp (-6.0*kdr*kdr)
         kdr = k*s_var "dr"
         i = s_var "complex(0,1)"
+        n = s_var "n" :: Expression Scalar
+        rad = s_var "r" :: Expression Scalar
 
 fftTests :: Test
 fftTests = TestList [t "countFFT x = 0" 0 x,

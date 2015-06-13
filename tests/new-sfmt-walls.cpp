@@ -90,7 +90,7 @@ void compare_functionals(double reduced_density, SFMTFluid *f, SFMTFluidVeff *fv
   }
 
   took("Doing the minimizations");
-  assert_same("f and veff minimum energies", f->energy(), fveff->energy(), 1e-9);
+  assert_same("f and veff minimum energies", f->energy(), fveff->energy(), 2e-9);
 }
 
 int main(int argc, char **argv) {
