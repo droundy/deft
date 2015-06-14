@@ -18,18 +18,18 @@ kTslices = eval(sys.argv[2])
 plt.figure()
 
 data = np.loadtxt('data/coexistence/ww%g.dat' % ww)
-plt.plot(data[:,0], data[:,1])
-plt.plot(data[:,0], data[:,2])
-plt.plot(data[:,0], data[:,3])
+plt.plot(data[:,0], data[:,1]*np.pi*4/3)
+plt.plot(data[:,0], data[:,2]*np.pi*4/3)
+plt.plot(data[:,0], data[:,3]*np.pi*4/3)
 
 #input: ['data/coexistence/ww%g-kT%g.dat' % (ww, kT) for kT in kTslices]
 for kT in kTslices:
     fname = 'data/coexistence/ww%g-kT%g.dat' % (ww, kT)
     ugh = np.loadtxt(fname)
-    plt.plot(kT + ugh[:,1] - ugh[:,1].min(), ugh[:,0], ':')
+    plt.plot(kT + ugh[:,1] - ugh[:,1].min(), ugh[:,0]*np.pi*4/3, ':')
 
 plt.xlabel(r'$T$')
-plt.ylabel(r'$n$')
+plt.ylabel(r'$\eta$')
 
 plt.savefig('figs/coexistence-ww%g.pdf' % (ww))
 

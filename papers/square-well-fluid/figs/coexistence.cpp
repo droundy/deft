@@ -43,7 +43,7 @@ const double naccuracy = 1e-5;
 enum direction { MINIMIZE, MAXIMIZE };
 
 static inline bool is_improvement(enum direction d, double eold, double enew) {
-  if (eold != eold) return true;
+  if (isnan(eold)) return true;
   if (d == MINIMIZE) {
     return enew < eold;
   } else {
