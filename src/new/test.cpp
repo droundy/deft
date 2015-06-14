@@ -11,7 +11,7 @@ public:
   SqrSum(Vector v) {
     data = v;
   }
-  double true_energy() const {
+  double energy() const {
     const int sz = data.get_size();
     double out = 0;
     for (int i=0; i<sz; i++) {

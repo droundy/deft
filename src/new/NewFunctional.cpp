@@ -46,9 +46,9 @@ int NewFunctional::run_finite_difference_test(const char *testname, const Vector
     const double epsilon = pow(eps_ratio, -p);
     // The following is a little wasteful of memory...
     data += epsilon*my_direction;
-    const double Eplus=true_energy();
+    const double Eplus=energy();
     data -= 2*epsilon*my_direction;
-    const double Eminus=true_energy();
+    const double Eminus=energy();
     data += epsilon*my_direction;
 
     printf("Eplus %g  Eminus %g\n", Eplus, Eminus);

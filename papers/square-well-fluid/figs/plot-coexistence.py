@@ -31,6 +31,6 @@ for kT in kTslices:
 plt.xlabel(r'$T$')
 plt.ylabel(r'$\eta$')
 
-plt.savefig('figs/coexistence-ww%g.pdf' % (ww))
+plt.savefig('figs/coexistence-ww%s.pdf' % (('%g'%ww).replace('.','_')) )
 
 plt.show()

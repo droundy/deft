@@ -28,9 +28,12 @@ static double width = 30;
 const double dx = 0.01;
 const double dw = 0.01;
 const double spacing = 3.0; // space on each side
+const int N = 1000000;
 
 double rad = 0;
-double sigma = 1.0; /* Let's define sigma == 1 for this one? */
+const double eps = 1.0;
+const double sigma = 1.0; /* Let's define sigma == 1 for this one? */
+const double R = sigma*pow(2.0,1.0/6.0);
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -42,19 +45,28 @@ static void took(const char *name) {
   last_time = t;
 }
 
+double R_BH(const double kT) {
+  double bh_diameter = 0;
+  const double dr = R/N;
+  const double beta = 1.0/kT;
+  for (double r_cur=dr/2; r_cur < R; r_cur += dr) {
+    bh_diameter += (1 - exp(-beta*(4*eps*(uipow(sigma/r_cur,12) - uipow(sigma/r_cur,6)) + eps)))*dr;
+  }
+  return bh_diameter/2;
+}
+
 void run_walls(double reduced_density, WhiteBearFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
-  min.set_maxiter(10000);
+  min.set_maxiter(100);
   min.set_miniter(9);
   min.precondition(true);
-  if (reduced_density == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243257584e-07);
 
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
   while (min.improve_energy(quiet)) {
-    //f->run_finite_difference_test("WhiteBear");
+    // f->run_finite_difference_test("WhiteBear");
   }
   took("Doing the minimization");
   min.print_info();
@@ -71,6 +83,7 @@ void run_walls(double reduced_density, WhiteBearFluidVeff *f, double kT) {
   const int Nz = f->Nz();
   Vector rz = f->get_rz();
   Vector n = f->get_n();
+  printf("multiplying by sigma = %g\n", sigma);
   for (int i=0;i<Nz/2;i++) {
     fprintf(o, "%g\t%g\n", (rz[i] - spacing)/sigma, n[i]*uipow(sigma, 3));
   }
@@ -98,15 +111,14 @@ int main(int argc, char **argv) {
 
   HomogeneousWhiteBearFluid hf;
 
-  // const double epsilon = 1;
-  // const double dz = 0.0001;
-  // for (double z = dz/2; z < sigma*pow(???); z += dz) {
-  //   rad += 0.5*(1 - exp(wca potential energy here /temp));
-  // }
+  rad = R_BH(temp);
+  printf("rad is %g\n", rad);
 
   hf.R() = rad;
   hf.kT() = temp;
-  hf.n() = reduced_density*pow(2,-5.0/2.0);
+  hf.n() = reduced_density/uipow(sigma,3);
+  printf("dividing by sigma = %g\n", sigma);
+  printf("eta is %g\n", hf.n()*uipow(rad,3)*M_PI*4/3);
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
@@ -124,14 +136,20 @@ int main(int argc, char **argv) {
     const Vector rz = f.get_rz();
     for (int i=0; i<Ntot; i++) {
       if (fabs(rz[i]) < spacing) {
-        const double Vmax = 500*temp;
-        f.Vext()[i] = Vmax; // this is "infinity" for our wall
-        f.Veff()[i] = Vmax;
+        // const double Vmax = 500*temp;
+        // f.Vext()[i] = Vmax; // this is "infinity" for our wall
+        // f.Veff()[i] = Vmax;
       } else {
         f.Vext()[i] = 0;
       }
     }
   }
+  for (double rd = 0.50; rd < 0.63; rd += 0.01) {
+    hf.n() = rd/uipow(sigma,3);
+    f.Veff() = -temp*log(hf.n());
+    printf("  %g\t%g\t%g\n", rd, f.energy(), hf.energy()*dw*dw*width);
+  }
+
   printf("my energy is %g\n", f.energy());
 
   run_walls(reduced_density, &f, temp);
