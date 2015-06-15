@@ -16,7 +16,10 @@ struct random {
     unsigned long seedval = clock(); // in case reading /dev/urandom fails?
     FILE *f = fopen("/dev/urandom", "r");
     if (f) {
-      fread(&seedval, sizeof(unsigned long), 1, f);
+      if (fread(&seedval, sizeof(unsigned long), 1, f) != sizeof(unsigned long)) {
+        seedval ^= (unsigned long)f; // not as good as a real random
+                                     // number, but may help.
+      }
       fclose(f);
     }
     return seedval;
