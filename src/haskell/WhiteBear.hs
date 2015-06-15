@@ -117,7 +117,8 @@ gSigmaA_by_hand = dAdR/(kT * n*shell_diam n )
 
 gSigmaA_helper :: Expression RealSpace -> Expression RealSpace
 gSigmaA_helper phit = dAdR/(kT * n*shell_diam n )
-    where dAdR = var "dAdR" "\\frac{dA}{dR}" $ factorize $
+    where dAdR = -- var "dAdR" "\\frac{dA}{dR}" $ 
+                 factorize $
                  kT*n*( shell (d n3)
                         - shellPrime (d n2)
                         - ( shellPrime (d n1) + (shell (d n1))/rad ) / (4*pi*rad)

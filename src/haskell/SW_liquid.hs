@@ -3,7 +3,7 @@ module SW_liquid
        where
 
 import Expression
-import IdealGas ( idealgas, kT )
+import IdealGas ( idealgas, idealgas_of_veff, kT )
 import WhiteBear ( gSigmaA, whitebear )
 import FMT ( rad )
 
@@ -43,7 +43,7 @@ sw_liquid_n = "ESW" === (substitute ("n" === r_var "x") (r_var "n") $
 sw_liquid_Veff :: Expression Scalar
 sw_liquid_Veff = substitute n ("n" === exp(- r_var "Veff"/kT)) $
                  substitute ("n" === r_var "x") ("n" === exp(- r_var "Veff"/kT)) $
-                 sw + whitebear + idealgas +
+                 sw + whitebear + idealgas_of_veff +
                  ("external" === integrate (n * (r_var "Vext" - s_var "mu")))
 
 sw :: Expression Scalar
