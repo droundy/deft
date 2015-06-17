@@ -55,8 +55,8 @@ plot_sw(30, [10.0, 5.0, 3.0])
 figure()
 #col=matplotlib.cm.get_cmap('spring')
 #col.set_under('w')
-X = loadtxt('data/radial-sw-1.00-1.30-0.20-X.dat')
-Y = loadtxt('data/radial-sw-1.00-1.30-0.20-Y.dat')
+X = loadtxt('data/radial-sw-3.00-1.30-0.20-X.dat')
+Y = loadtxt('data/radial-sw-3.00-1.30-0.20-Y.dat')
 gradial = loadtxt('data/radial-sw-3.00-1.30-0.20-eta.dat')
 gradial /= 0.20
 
