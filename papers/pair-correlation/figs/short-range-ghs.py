@@ -14,7 +14,6 @@ from matplotlib import rc
 
 import styles
 
-rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 
 sigma = 2
