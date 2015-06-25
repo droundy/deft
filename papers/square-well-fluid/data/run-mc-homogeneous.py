@@ -34,7 +34,7 @@ else:
 
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
-cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations*10)
+cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations)
 
 cmd += ' --de_g 0.01' # nice high-resolution radial distribution function data
 
