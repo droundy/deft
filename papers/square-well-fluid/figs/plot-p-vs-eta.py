@@ -6,7 +6,6 @@ if 'show' not in sys.argv:
 import matplotlib.pyplot as plt
 import numpy as np
 
-matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
 plt.figure()

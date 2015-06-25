@@ -13,7 +13,6 @@ import styles # our preferred line styles
 import matplotlib.patheffects
 from matplotlib import rc
 
-rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm

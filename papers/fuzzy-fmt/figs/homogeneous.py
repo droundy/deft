@@ -11,7 +11,6 @@ from scipy.special import erf
 import os, glob
 import styles
 
-matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
 #Constants and variables

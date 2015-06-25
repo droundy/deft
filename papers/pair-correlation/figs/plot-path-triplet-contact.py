@@ -13,7 +13,6 @@ import bracket # our handy bracket function
 import styles # our preferred line styles
 from matplotlib import rc
 
-rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
 
 from matplotlib.colors import NoNorm
