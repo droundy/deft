@@ -1708,7 +1708,7 @@ derive v@(Scalar (Var _ a b c _)) dda0 (Var t _ bb cc (Just e0))
         Just x -> toExpression x * dda
         Nothing ->
             if dda == 1 || not (hasExpressionInFFT v e)
-            then dda*(Var t ("d" ++ bb ++ "_by_d" ++ a) ("d" ++ bb ++ "_by_d" ++ b)
+            then dda*(Var t ("s_d" ++ bb ++ "_by_d" ++ a) ("s_d" ++ bb ++ "_by_d" ++ b)
                       ("\\frac{\\partial "++cc ++"}{\\partial "++c++"}") $ Just $
                       (derive v 1 e))
             else derive v dda e
