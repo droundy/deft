@@ -283,7 +283,7 @@ createAnydMethods e variables n =
                      -- the same variable name.  I expect there exists
                      -- a better solution, but this is the one that I
                      -- came up with.
-                     [newcodeStatements (eval_scalar_derivative $ derive v 1 $ cleanallvars e)]
+                     [newcodeStatements (eval_scalar_derivative $ derive v 1 e)]
       }]
       getScalarDerivative _ = [] -- not a scalar
       createInputAndGrad ee@(ES _) = ["double " ++ nameE ee ++ " = data[sofar];",
