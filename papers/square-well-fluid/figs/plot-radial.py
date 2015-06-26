@@ -9,20 +9,13 @@ if not 'show' in sys.argv:
 from pylab import *
 from scipy.special import erf
 import matplotlib.lines as mlines
-import os
+import os, readandcompute
 
-def smooth(x, N):
-    '''
-    smooth(x,N) takes a 2D array x that has many columns, and averages
-    out N nearby points.
-    '''
-    n0 = len(x)
-    n = n0 - n0 % N
-    x = x[:n]
-    y = zeros_like(x[0::N])
-    for i in range(N):
-        y += x[i::N]
-    return y/N
+colordict = { 3.0: 'b', 5.0: 'g', 10.0: 'r' }
+def color(T):
+    if T in colordict.keys():
+        return colordict[T]
+    return 'k'
 
 def plot_sw(ff, temps):
     figure()
@@ -31,7 +24,13 @@ def plot_sw(ff, temps):
         data = loadtxt(fname)
         r = data[:,0]
         filling_fraction = data[:,1]
-        plot(r, filling_fraction/(ff/100.0), label = 'T = %.2f' %(temp))
+        plot(r, filling_fraction/(ff/100.0), color(temp)+'-',
+             label = 'T = %.2f' %(temp))
+
+        N = 500
+        ww = 1.3
+        g, r = readandcompute.g_r('data/mc/ww%.2f-ff%.2f-N%d' % (ww,ff/100.0,N), temp)
+        plt.plot(r/2, g, color(temp)+':')
 
     title('Radial distribution function ff = %g' % (ff/100))
     xlabel(r'$r$')
@@ -39,6 +38,7 @@ def plot_sw(ff, temps):
     legend()
     xlim(-0.2, 4)
     #ylim(0, 4)
+
     outputname = 'figs/radial-sw-%02d.pdf' % (ff)
     savefig(outputname, bbox_inches=0)
     print('figs/radial-sw-%02d.pdf' % (ff))
