@@ -35,6 +35,17 @@ class facfile:
         print('\n|', config.cxx, config.cxxflags, '-c', '-o', obj, cpp, file=self._f)
         print('<', cpp, file=self._f)
         print('>', obj, file=self._f)
+    def compile_big_file(self, cpp):
+        obj = cpp[:-3]+'o'
+        slow_flags = ['-flto', '-O3', '-g']
+        add_flags = ['-O1']
+        print('\n|', config.cxx,
+              ' '.join(add_flags+
+                       [f for f in config.cxxflags.split()
+                        if f not in slow_flags]),
+              '-c', '-o', obj, cpp, file=self._f)
+        print('<', cpp, file=self._f)
+        print('>', obj, file=self._f)
     def link(self, maincpp, exe, objects=set([]), extra_requirements=set([])):
         obj = {maincpp[:-3]+'o'}
         headers = set([])

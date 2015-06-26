@@ -40,6 +40,9 @@ old_generated = """
   HardFluidFast HardRosenfeldFluidFast WaterXFast HughesXFast
 """.split()
 
+slow_to_compile = """
+  SW_liquid SW_liquidVeff
+""".split()
 
 imports = {}
 mainfiles = []
@@ -103,7 +106,10 @@ for name in generated_names:
                      ['../new/%sFast.cpp' % name, '../new/%sFast.h' % name])
 
     # command to compile C++ code
-    cxx.compile('src/new/%sFast.cpp' % name)
+    if name in slow_to_compile:
+        cxx.compile_big_file('src/new/%sFast.cpp' % name)
+    else:
+        cxx.compile('src/new/%sFast.cpp' % name)
 
 for name in old_generated:
     # command to generate C++ code
@@ -111,5 +117,8 @@ for name in old_generated:
                  ['functionals.exe'],
                  ['../%s.cpp' % name])
     # command to compile C++ code
-    cxx.compile('src/%s.cpp' % name)
+    if name in slow_to_compile:
+        cxx.compile_big_file('src/%s.cpp' % name)
+    else:
+        cxx.compile('src/%s.cpp' % name)
 
