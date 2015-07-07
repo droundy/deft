@@ -147,7 +147,7 @@ def run_simulation():
         ffs.insert(0, 0)
         ffs = np.array(ffs)
         plt.scatter(ffs, energy, label='Simulation', c='k')
-        plt.errorbar(ffs, energy, yerr=error_bars, fmt=None, c='k', ecolor='k')
+        plt.errorbar(ffs, energy, yerr=error_bars, fmt='none', c='k', ecolor='k')
 
 
         plt.plot(ffs, (4*ffs - 3*ffs**2)/(1-ffs)**2, '-', label='Carnahan-Starling')
@@ -156,7 +156,6 @@ def run_simulation():
         plt.ylabel('$F^C/NkT$')
         plt.xlabel(r'$\eta$')
         plt.legend(loc=2)
-        #plt.savefig('rename-me-please.pdf')
         plt.show()
 
 
