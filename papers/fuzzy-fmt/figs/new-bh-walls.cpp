@@ -136,9 +136,9 @@ int main(int argc, char **argv) {
     const Vector rz = f.get_rz();
     for (int i=0; i<Ntot; i++) {
       if (fabs(rz[i]) < spacing) {
-        // const double Vmax = 500*temp;
-        // f.Vext()[i] = Vmax; // this is "infinity" for our wall
-        // f.Veff()[i] = Vmax;
+        const double Vmax = 500*temp;
+        f.Vext()[i] = Vmax; // this is "infinity" for our wall
+        f.Veff()[i] = Vmax;
       } else {
         f.Vext()[i] = 0;
       }
