@@ -40,7 +40,7 @@ positive_variables = ['kappa_11', 'kappa_12', 'kappa_13', 'kappa_14',
 
 stupidconstant = 0.25
 
-def scalefunction(hsig):
+def scalefunction(hsig): # ~1 at 0.494, and ~0 at 0.545
   return 1.0/(1 + (stupidconstant*v['h_sigma'])**4)
 
 expressions = [
