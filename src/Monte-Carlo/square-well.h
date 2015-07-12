@@ -93,6 +93,11 @@ struct sw_simulation {
   double flatness; // maximum allowable proportional deviation from mean histogram value
   int init_iters; // number of iterations for which to initialize
 
+  /* The following define file names for periodic output files that
+     are dumped every so often.  It should contain a single %d style format. */
+  const char *transitions_movie_filename_format;
+  mutable int transitions_movie_count;
+  long transitions_movie_last_count;
   /* Finally, the following define file names for output files. */
   const char *transitions_filename;
 
@@ -248,6 +253,7 @@ struct sw_simulation {
   sw_simulation(){
     last_print_time = clock();
     transitions_filename = 0; // default to NULL pointer here for safety.
+    transitions_movie_filename_format = 0; // default to NULL pointer here for safety.
   };
 };
 

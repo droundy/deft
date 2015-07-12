@@ -643,6 +643,12 @@ int main(int argc, const char *argv[]) {
   sw.transitions_filename = new char[1024];
   sprintf((char *)sw.transitions_filename, "%s/%s-transitions.dat", data_dir, filename);
 
+  sw.transitions_movie_filename_format = new char[1024];
+  sprintf((char *)sw.transitions_movie_filename_format, "%s/%s-movie", data_dir, filename);
+  mkdir(sw.transitions_movie_filename_format, 0777);
+  sprintf((char *)sw.transitions_movie_filename_format,
+          "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
+
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------

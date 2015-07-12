@@ -1242,35 +1242,46 @@ void sw_simulation::initialize_transitions() {
   initialize_canonical(min_T,min_important_energy);
 }
 
-void sw_simulation::write_transitions_file() const {
-  if (!transitions_filename) return; // silently do not save if there is not file name
-  FILE *f = fopen(transitions_filename,"w");
+static void write_t_file(const sw_simulation &sw, const char *fname) {
+  FILE *f = fopen(fname,"w");
   if (!f) {
-    printf("Unable to create file %s!\n", transitions_filename);
+    printf("Unable to create file %s!\n", fname);
     exit(1);
   }
-  write_header(f);
+  sw.write_header(f);
   fprintf(f, "#       \tde\n");
   fprintf(f, "# energy");
-  for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
+  for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++) {
     fprintf(f, "\t%d", de);
   }
   fprintf(f, "\n");
-  for(int i = 0; i < energy_levels; i++) {
+  for(int i = 0; i < sw.energy_levels; i++) {
     bool have_i = false;
-    for (int de = -biggest_energy_transition;
-         de <= biggest_energy_transition; de++){
-      if (transitions(i,de)) have_i = true;
+    for (int de = -sw.biggest_energy_transition;
+         de <= sw.biggest_energy_transition; de++){
+      if (sw.transitions(i,de)) have_i = true;
     }
     if (have_i){
       fprintf(f, "%d", i);
-      for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
-        fprintf(f, "\t%ld", transitions(i, de));
+      for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++) {
+        fprintf(f, "\t%ld", sw.transitions(i, de));
       }
       fprintf(f, "\n");
     }
   }
   fclose(f);
+}
+
+void sw_simulation::write_transitions_file() const {
+  // silently do not save if there is not file name
+  if (transitions_filename) write_t_file(*this, transitions_filename);
+
+  if (transitions_movie_filename_format) {
+    char *fname = new char[4096];
+    sprintf(fname, transitions_movie_filename_format, transitions_movie_count++);
+    write_t_file(*this, fname);
+    delete[] fname;
+  }
 }
 
 void sw_simulation::write_header(FILE *f) const {
