@@ -408,6 +408,11 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
   while (num_moved < num_moves) {
     int old_energy = energy;
     move_a_ball();
+    if (moves.total > init_iters && init_iters > 0){
+      // Need to end initialization early, took too many iterations;
+      // negative value indicates error
+      return -1;
+    } 
     if (energy != old_energy) {
       num_moved++;
       if (energy > old_energy) num_up++;
@@ -881,7 +886,11 @@ int sw_simulation::initialize_max_entropy(double acceptance_goal) {
          attempts_to_go >= 0) {
     attempts_to_go -= 1;
     last_energy = energy;
-    simulate_energy_changes(num_moves);
+    if (simulate_energy_changes(num_moves) < 0){
+      // Negative return value indicates we've used up our init_iters
+      // already; so returns a "guess"
+      return energy;
+    }
     mean = 0;
     counted_in_mean = 0;
     for (int i = 0; i < energy_levels; i++) {
