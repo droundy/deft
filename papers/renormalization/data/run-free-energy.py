@@ -6,6 +6,8 @@
 #   
 #   It needs a refactor badly.
 #   I'm really sorry.
+#
+#   I'm sorry too, trust me
 ##########
 
 import numpy as np
@@ -26,8 +28,8 @@ import subprocess
 
 # cache-suffix: .dat
 
-FILENAME = "periodic-ff%g-ff_small%g-N%d-iterations%d-seed%d-sc_period%d"
-data_dir = 'data'
+FILENAME = "absolute-ww%4.2f-L%04.2f-N%03d"
+data_dir = 'scrunched/i%01d/N%03d'
 
 def main(argv=None):
     if argv is None:
@@ -36,26 +38,30 @@ def main(argv=None):
     if 'show' in argv:
         argv.remove('show')
 
-    if len(argv[1:]) == 0:
-        run_simulation()
-    elif argv[1] == 'triangles':
-        check_triangles()
-    elif argv[1] == 'dir':
-        plot_from_directory(argv[2])
+    if len(argv[1:]) == 5:
+        i = eval(argv[1])
+        ww = float(argv[2])
+        L = float(eval(argv[3]))
+        N = eval(argv[4])
+        run_simulation(i,ww,L,N)
+#    elif argv[1] == 'triangles':
+#        check_triangles()
+#    elif argv[1] == 'dir':
+#        plot_from_directory(argv[2])
     else:
         print "invalid option"
 
 
-def run_simulation():
+def run_simulation(i,ww,L,_N):
     plot = True
     ffs = []
     success_ratios = []
     all_total_checks = []
     all_valid_checks = []
     steps = 20
-    ff = 0
+    ff = N/ L**3
     step_size = 0.05
-    N = 10
+    N = _N
     sim_iterations = 1000000
     seed = 0
     sc_period = max(10, (1 * N * N)/10)
@@ -66,7 +72,7 @@ def run_simulation():
             step_size = step_size * 0.5
 
         filename = FILENAME %\
-            (ff, ff+step_size, N, sim_iterations, seed, sc_period)
+            (ww, L, N)
         filename_with_extension = filename+"-g.dat"
         filepath = os.path.join(data_dir, filename_with_extension)
 

@@ -8,7 +8,7 @@ i = eval(sys.argv[1])
 ww = float(sys.argv[2])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
 
-L = float(sys.argv[3])
+L = float(eval((sys.argv[3])))
 #arg L = [5.0]
 
 Ns = eval(sys.argv[4])
