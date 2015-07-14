@@ -30,7 +30,7 @@ for t in texfs:
         return x+'.pdf'
     inputs |= set([graphics_name(x[1]) for x in graphicre.findall(latex)])
     inputs |= set([x[1]+'.tex' for x in inputre.findall(latex)])
-    fac.default('pdflatex %s && pdflatex %s && bibtex %s && pdflatex %s'
-                % (fname, fname, fname[:-4], fname), inputs, outputs)
+    fac.default('pdflatex %s && pdflatex %s && bibtex %s && pdflatex %s && pdflatex %s'
+                % (fname, fname, fname[:-4], fname, fname), inputs, outputs)
 
 

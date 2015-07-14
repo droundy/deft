@@ -40,8 +40,14 @@ positive_variables = ['kappa_11', 'kappa_12', 'kappa_13', 'kappa_14',
 
 stupidconstant = 0.25
 
+def cs_hsigma(eta):
+  return pylab.around((1-eta/2)/(1-eta)**3 - 1, 2)
+
+start = 0.494
+stop = 0.545
 def scalefunction(hsig): # ~1 at 0.494, and ~0 at 0.545
-  return 1.0/(1 + (stupidconstant*v['h_sigma'])**4)
+  x = (hsig - cs_hsigma(stop))/(cs_hsigma(stop)-cs_hsigma(start))
+  return 0.5 - sympy.tanh(4*x)/2
 
 expressions = [
   ('g_HS', lambda:
@@ -394,6 +400,14 @@ outfile.write(r"""
 }
 \newcommand\alphaval{%(alpha)g}
 """ % locals())
+outfile.write(r"""
+
+\newcommand\hsigmastart{%g}
+\newcommand\hsigmastop{%g}
+\newcommand\etastart{%g}
+\newcommand\etastop{%g}
+
+""" % (cs_hsigma(start), cs_hsigma(stop), start, stop ))
 outfile.close()
 
 

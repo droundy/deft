@@ -2,6 +2,9 @@
 \usepackage{graphicx}% Include figure files
 \usepackage{color}
 
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
 \newcommand\kk{\mathbf{k}}
 \newcommand\xx{\mathbf{x}}
 \newcommand\rr{\mathbf{r}}
@@ -52,6 +55,62 @@ SAFT-VR\cite{gil-villegas-1997-SAFT-VR}.
   \caption{g(r) fit.}
   \label{fig:gr}
 \end{figure}
+
+We have found a problem with the pair distribution function developed
+in reference~\citenum{lurie2014approach}, which is that this pair
+distribution function can diverge as the contact value of the pair
+distribution function $g_\sigma$ diverges, as happens at high
+densities.  While the published pair distribution function does
+provide a good approximation at reasonable densities, this divergence
+causes functionals constructed with it to exhibit non-physical
+densities.  We have fixed this problem by modifying the
+pair distribution function at densities at which the hard-sphere fluid
+is crystalline.
+
+\input{figs/short-range-fit-parameters}
+
+\begin{table}
+  \begin{align*}
+    \kappa &= \kappatable
+  \end{align*}
+  \caption{The fitted $\kappa_{ij}$ matrix.  Note that the first
+    column of $\kappa$ corresponds to $j=1$ while the first row
+    corresponds to $i=1$ in Eq.~\ref{eq:kappa-defined}.  }\label{tab:kappa}
+\end{table}
+
+I should write more about the form of the fit, or move this where
+appropriate.  We have performed a modified fit to the Monte Carlo
+radial distribution function using the following functional form
+\begin{align}
+  g_S(r;g_\sigma) &=  1 + \sum_i \gamma_i(g_\sigma) \left(\frac{r}{\sigma}-1\right)^i,
+  \label{eq:new-fit-form}
+\end{align}
+where the polynomial coefficients in $g_S(r;g_\sigma)$ have the
+following dependency on $g_\sigma$:
+\begin{equation}
+  \gamma_i(g_\sigma) = f(g_\sigma)
+  \begin{cases}
+    \displaystyle
+    g_\sigma - 1 & i = 0 \\
+    \displaystyle
+    \sum_{j=1}^{4} (g_\sigma
+    - 1)^j \kappa_{ji} & i > 0 \label{eq:kappa-defined}
+  \end{cases}
+\end{equation}
+with
+\begin{equation}
+  f(g_\sigma) = \frac{1 - \tanh(4 \frac{h_\sigma -
+      \hsigmastop}{\hsigmastop - \hsigmastart})}{2}
+\end{equation}
+This function is constructed to quickly approach 1 in the fluid for
+where $\eta < \etastart$ and to approach 0 in the crystalline form
+where $\eta > \etastop$.  The largest error in this fit (an error of
+$\maxerr$) is at the maximum density considered with $\eta =
+\etamaxerr$, and is at a distance $r = \rmaxerr R$.  As is
+Ref.~\citenum{lurie2014approach}, we constrained our fit to radii less
+than $\maxrfit R$, so the maximum error appears at close to the
+maximum allowed distance.  We show the fitted values of $\kappa_{ji}$
+in Table~\ref{tab:kappa}.
 
 \subsection{Thermodynamic perturbation theory}
 
