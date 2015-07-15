@@ -1,0 +1,14 @@
+Debugging what is wrong:
+
+1. Attempt test-particle computation (maybe with no potential?) and
+   find out what we saw went wrong before.  Then debug that.
+
+2. Look up (or find analytically) the k=0 limit of weighting
+   functions, and implement the homogeneous functional in python.
+   Compare with the C++ generated values, in case we have a bug in the
+   generated code.
+
+3. Look into getting the second-order correction with local
+   compressibility approximation.  (Maybe this will fix the
+   coexistence curve?)  Could test this out with the python code from
+   #2.

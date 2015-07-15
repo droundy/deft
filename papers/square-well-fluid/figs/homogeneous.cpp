@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   delete[] fname;
 
   const double dff = 0.01;
-  for (double ff = dff; ff < 0.7; ff += dff) {
+  for (double ff = dff; ff < 1.0; ff += dff) {
     HomogeneousSW_liquid hf;
     hf.R() = radius;
     hf.epsilon() = epsilon;
@@ -68,8 +68,11 @@ int main(int argc, char **argv) {
     hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
 
     double pressure = hf.n()*hf.d_by_dn() - hf.energy();
-    printf("%10g %10g %10g\n", ff, hf.energy(), pressure);
-    fprintf(out, "%g\t%g\n", ff, pressure);
+    printf("%10g %10g %10g\n", ff, pressure, hf.energy());
+
+    hf.mu() = 0;
+    hf.energy();
+    fprintf(out, "%g\t%g\t%g\t%g\t%g\n", ff, pressure, hf.energy(), hf.get_sw(), hf.get_whitebear());
     // hf.printme("\t\t");
   }
 
