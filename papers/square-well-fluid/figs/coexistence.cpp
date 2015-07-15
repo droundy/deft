@@ -61,9 +61,9 @@ static inline double energy(const HomogeneousSW_liquid &f, double n) {
 // also saves writing two very separate cases.
 double optimize(const HomogeneousSW_liquid &hf, enum direction d, double nlo, double nmid) {
   if (d == MINIMIZE) {
-    printf("\n\nI am minimizing between %g and %g\n", nlo, nmid);
+    printf("\n\nI am minimizing from %g to %g\n", nlo, nmid);
   } else {
-    printf("\n\nI am maximizing between %g and %g\n", nlo, nmid);
+    printf("\n\nI am maximizing from %g to %g\n", nlo, nmid);
   }
   double nhi, emid, elo, ehi;
   elo = energy(hf, nlo);
@@ -128,6 +128,59 @@ double optimize(const HomogeneousSW_liquid &hf, enum direction d, double nlo, do
       }
     }
   } while (fabs(nhi - nlo) > naccuracy);
+  printf("Final n: %10g (%g to %g)\n", nmid, nlo, nhi);
+  printf(" energy: %10g\n", energy(hf, nmid));
+
+  return nmid;
+}
+
+// Note: we don't assume that nlo < nmid.  Rather, nlo is the fixed
+// border, and nmid is a flexible estimate.  It's confusing, but it
+// also saves writing two very separate cases.
+double optimize_between(const HomogeneousSW_liquid &hf, enum direction d,
+                        double nlo, double nhi) {
+  if (d == MINIMIZE) {
+    printf("\n\nI am minimizing between %g and %g\n", nlo, nhi);
+  } else {
+    printf("\n\nI am maximizing between %g and %g\n", nlo, nhi);
+  }
+  double nmid = 0.55*nlo + 0.45*nhi;
+  double emid = energy(hf, nmid);
+  double elo = energy(hf, nlo);
+  double ehi = energy(hf, nhi);
+  if (!is_improvement(d, elo, emid) || !is_improvement(d, ehi, emid)) {
+    printf("Failed to find an improvement between these!\n");
+    exit(1);
+  }
+  printf("n bracketed: %10g %10g %10g\n", nlo, nmid, nhi);
+  printf("   energies: %10g %10g %10g\n", elo, emid, ehi);
+  do {
+    if (nmid < 0.5*(nhi+nlo)) {
+      const double nnew = 0.6*nhi + 0.4*nlo;
+      const double enew = energy(hf, nnew);
+      if (is_improvement(d, emid, enew)) {
+        elo = emid;
+        nlo = nmid;
+        emid = enew;
+        nmid = nnew;
+      } else {
+        ehi = enew;
+        nhi = nnew;
+      }
+    } else {
+      const double nnew = 0.6*nlo + 0.4*nhi;
+      const double enew = energy(hf, nnew);
+      if (is_improvement(d, emid, enew)) {
+        ehi = emid;
+        nhi = nmid;
+        emid = enew;
+        nmid = nnew;
+      } else {
+        elo = enew;
+        nlo = nnew;
+      }
+    }
+  } while (fabs(nhi - nlo) > naccuracy);
   printf("Final n: %10g\n", 0.5*(nhi+nlo));
   printf(" energy: %10g\n", energy(hf, 0.5*(nhi+nlo)));
 
@@ -153,12 +206,15 @@ void identify_liquid_vapor(const HomogeneousSW_liquid &hf,
     el = energy(hf, *nl);
     printf("  got nl: %10g\n", *nl);
     printf("  energy: %10g\n", el);
+    hf.n() = *nl;
+    printf("I see %g\n", hf.energy());
+    hf.printme("hello");
     // Adjust the chemical potential to make the free energies at the
     // two minima equal.
     hf.mu() += (ev - el)/(*nv - *nl);
     // Now we find the new middle point that maximizes the free
     // energy.
-    *middlen = optimize(hf, MAXIMIZE, *nl, *middlen);
+    *middlen = optimize_between(hf, MAXIMIZE, *nl, *middlen);
     emid = energy(hf, *middlen);
     printf("  got nm: %10g\n", *middlen);
     printf("  energy: %10g\n", emid);
@@ -202,7 +258,7 @@ int main(int argc, char **argv) {
     printf("**********************************************\n");
     if (isnan(n_middle) || n_middle < nv || n_middle > nl) {
       printf("Got craziness, I am quitting now.\n");
-      exit(0);
+      exit(1);
     }
     fprintf(out, "%g\t%g\t%g\t%g\n", temp, nl, n_middle, nv);
     fflush(out);
