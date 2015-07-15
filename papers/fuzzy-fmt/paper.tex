@@ -77,6 +77,14 @@ In his 2010 review of FMT, Roth states that the most important future
 developments in equilibrium DFT will involve treating soft repulsions
 and attractions~\cite{}.
 
+\section{Barker-Henderson hard sphere}
+
+\fixme{There's probably a better place for this.}Another approach to account for the temperature dependence of realistic fluids is the from Barker-Herson's approach. Their theory is a model for taking any general repulsive pair potential and creating a hard sphere reference fluid with a temperature dependent diameter along with higher order repulsive terms. Their had sphere diameter is
+\begin{align}
+  d = \int_0^\sigma\left( 1 - e^{\beta V(r)} \right)\mathrm{dr}
+\end{align} 
+where $\beta = \frac{1}{kT}$, V(r) is the pair potential, and $\sigma$ is the radius which V(r) goes to zero. We use this result in a White Bear hard sphere DFT to compare against our approximation of SFMT. In our case, $\sigma \to \infty$.
+ 
 \section{Soft Fundamental Measure Theory}
 
 Schmidt introduced Soft Fundamental Measure Theory~(SFMT) based on
