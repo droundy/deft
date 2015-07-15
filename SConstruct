@@ -550,7 +550,7 @@ for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2
 for ww in [1.3]:
     env.Command(target = ["papers/square-well-fluid/data/coexistence/ww%g.dat" % ww]
                           + ['papers/square-well-fluid/data/coexistence/ww%g-kT%g.dat'
-                             % (ww, kT) for kT in [1,2,3,4]],
+                             % (ww, kT) for kT in [1,2,3,4,5,6,7]],
                 source = ['papers/square-well-fluid/figs/coexistence.mkdat'],
                 action = '$SOURCE %g' % ww)
     for kT in [1, 2,3,4,5,6,7,8,9,10, 100]:
