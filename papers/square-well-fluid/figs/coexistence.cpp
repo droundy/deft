@@ -38,7 +38,7 @@ const double epsilon = 1.0;
 const double radius = 1.0;
 const double sigma = 2*radius;
 
-const double naccuracy = 1e-5;
+const double naccuracy = 1e-7;
 
 enum direction { MINIMIZE, MAXIMIZE };
 
@@ -88,9 +88,9 @@ double optimize(const HomogeneousSW_liquid &hf, enum direction d, double nlo, do
       nhi = nmid;
       printf("n is between: %10g %10g\n", nlo, nhi);
       printf("    energies: %10g %10g\n", elo, ehi);
-      nmid = 0.7*nlo + 0.3*nmid;
+      nmid = nlo + 0.3*(nmid-nlo);
       emid = energy(hf, nmid);
-    } while (is_improvement(d, emid, elo));
+    } while (is_improvement(d, emid, elo) && nmid != nlo);
   }
   // at this point our minimum should be bracketed between nlo, nhi
   // and nmid, and we reorder lo and hi to be in the right order.
@@ -139,6 +139,9 @@ double optimize(const HomogeneousSW_liquid &hf, enum direction d, double nlo, do
 // also saves writing two very separate cases.
 double optimize_between(const HomogeneousSW_liquid &hf, enum direction d,
                         double nlo, double nhi) {
+  if (nlo > nhi) {
+    double temp = nlo; nlo = nhi; nhi = temp;
+  }
   if (d == MINIMIZE) {
     printf("\n\nI am minimizing between %g and %g\n", nlo, nhi);
   } else {
@@ -149,11 +152,37 @@ double optimize_between(const HomogeneousSW_liquid &hf, enum direction d,
   double elo = energy(hf, nlo);
   double ehi = energy(hf, nhi);
   if (!is_improvement(d, elo, emid) || !is_improvement(d, ehi, emid)) {
-    printf("Failed to find an improvement between these!\n");
-    exit(1);
+    printf("Failed to find a trivially easy improvement between these!\n");
+    printf("  midpoint %g is worse than one of %g or %g\n", emid, ehi, elo);
+    if (is_improvement(d, elo, ehi)) {
+      // want to try values closer to nhi
+      do {
+        nlo = nmid;
+        elo = emid;
+        nmid = nmid+(nhi-nmid)/2;
+        emid = energy(hf, nmid);
+        printf("    %g %g\n", nmid, emid);
+        fflush(stdout);
+      } while (!is_improvement(d, ehi, emid) && nhi != nmid);
+    } else {
+      // want to try values closer to nlo
+      do {
+        nhi = nmid;
+        ehi = emid;
+        nmid = nmid+(nlo-nmid)/2;
+        emid = energy(hf, nmid);
+        printf("    %g %g\n", nmid, emid);
+        fflush(stdout);
+      } while (!is_improvement(d, elo, emid) && nlo != nmid);
+    }
+    if (!is_improvement(d, elo, emid) || !is_improvement(d, ehi, emid)) {
+      printf("Failed to find a challenging improvement between these!\n");
+      printf("  best point %g is worse than one of %g or %g\n", emid, ehi, elo);
+      exit(1);
+    }
   }
-  printf("n bracketed: %10g %10g %10g\n", nlo, nmid, nhi);
-  printf("   energies: %10g %10g %10g\n", elo, emid, ehi);
+  printf("n bracketed: %16.13g %16.13g %16.13g\n", nlo, nmid, nhi);
+  printf("   energies: %16.13g %16.13g %16.13g\n", elo, emid, ehi);
   do {
     if (nmid < 0.5*(nhi+nlo)) {
       const double nnew = 0.6*nhi + 0.4*nlo;
@@ -208,13 +237,13 @@ void identify_liquid_vapor(const HomogeneousSW_liquid &hf,
     printf("  energy: %10g\n", el);
     hf.n() = *nl;
     printf("I see %g\n", hf.energy());
-    hf.printme("hello");
+    // hf.printme("hello");
     // Adjust the chemical potential to make the free energies at the
     // two minima equal.
     hf.mu() += (ev - el)/(*nv - *nl);
     // Now we find the new middle point that maximizes the free
     // energy.
-    *middlen = optimize_between(hf, MAXIMIZE, *nl, *middlen);
+    *middlen = optimize_between(hf, MAXIMIZE, *nv, *nl);
     emid = energy(hf, *middlen);
     printf("  got nm: %10g\n", *middlen);
     printf("  energy: %10g\n", emid);
@@ -245,7 +274,7 @@ int main(int argc, char **argv) {
 
   double eta_middle = 0.3;
   double n_middle = eta_middle/(M_PI*uipow(sigma, 3)/6);
-  for (double temp = dT; temp < 5; temp += dT) {
+  for (double temp = dT; temp < 7; temp += dT) {
     HomogeneousSW_liquid hf;
     hf.R() = radius;
     hf.epsilon() = epsilon;

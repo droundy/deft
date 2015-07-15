@@ -13,7 +13,7 @@ import readandcompute
 ww = float(sys.argv[1])
 #arg ww = [1.3]
 kTslices = eval(sys.argv[2])
-#arg kTslices = [[1,2,3,4]]
+#arg kTslices = [[1,2,3,4,5,6]]
 
 plt.figure()
 
