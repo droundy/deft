@@ -2,6 +2,7 @@
 #include <float.h>
 #include "Monte-Carlo/square-well.h"
 #include "handymath.h"
+#include <sys/stat.h> // for seeing if the movie data file already exists.
 
 #include "version-identifier.h"
 
@@ -1287,7 +1288,13 @@ void sw_simulation::write_transitions_file() const {
 
   if (transitions_movie_filename_format) {
     char *fname = new char[4096];
-    sprintf(fname, transitions_movie_filename_format, transitions_movie_count++);
+    struct stat st;
+    do {
+      // This loop increments transitions_movie_count until it reaches
+      // an unused file name.  The idea is to enable two or more
+      // simulations to contribute together to a single movie.
+      sprintf(fname, transitions_movie_filename_format, transitions_movie_count++);
+    } while (!stat(fname, &st));
     write_t_file(*this, fname);
     delete[] fname;
   }
