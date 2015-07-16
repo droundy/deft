@@ -162,7 +162,6 @@ double optimize_between(const HomogeneousSW_liquid &hf, enum direction d,
         nmid = nmid+(nhi-nmid)/2;
         emid = energy(hf, nmid);
         printf("    %g %g\n", nmid, emid);
-        fflush(stdout);
       } while (!is_improvement(d, ehi, emid) && nhi != nmid);
     } else {
       // want to try values closer to nlo
@@ -172,7 +171,6 @@ double optimize_between(const HomogeneousSW_liquid &hf, enum direction d,
         nmid = nmid+(nlo-nmid)/2;
         emid = energy(hf, nmid);
         printf("    %g %g\n", nmid, emid);
-        fflush(stdout);
       } while (!is_improvement(d, elo, emid) && nlo != nmid);
     }
     if (!is_improvement(d, elo, emid) || !is_improvement(d, ehi, emid)) {
