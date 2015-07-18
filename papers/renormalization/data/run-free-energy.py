@@ -79,9 +79,12 @@ def run_simulation(i,ww,L,_N):
         if not os.path.isfile(filepath):
             # then run simulation
             # add args for infinite/regular case, then everything else
-            arg_list = []
+#            arg_list = []
             if ff == 0:
-                arg_list.extend(['../../free-energy-monte-carlo-infinite-case'])
+                # Not utilizing this yet, will be added at a later date (if needed)
+                # arg_list.extend(['../../free-energy-monte-carlo-infinite-case'])
+                print("Infinite case not enabled; please specify a filling fraction.")
+                break
             else:
                 arg_list.extend([
                     '../../free-energy-monte-carlo',

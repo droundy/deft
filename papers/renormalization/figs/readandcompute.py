@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 import numpy
 import math
+import string
 
 def T_u_cv_s_minT(fbase):
     max_T = 1.4
@@ -16,14 +17,17 @@ def T_u_cv_s_minT(fbase):
     e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2)
     # weight histogram file; indexed by [-energy,ln(weight)]
     lnw_hist = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2)
-
+      
 
     with open(fbase+"-E.dat") as file:
         for line in file:
+            line = line.translate(cleanse)
             if("dimensions" in line):
-                V = (float(line.split()[-1]))**3
+                V = line.split()[1]
+                print V
             if(" N: " in line):
                 N = float(line.split()[-1])
+                print N
             break
         
 
@@ -54,7 +58,7 @@ def T_u_cv_s_minT(fbase):
         S[i] -= S_inf
         CV[i] = sum((energy/T_range[i])**2*dos_boltz)/Z[i] - \
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
-    return T_range, U, CV, S, min_T
+   # return T_range, U, CV, S, min_T
 
 def minT(fbase):
     min_T = 0
