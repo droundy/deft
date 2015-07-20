@@ -31,6 +31,12 @@ import subprocess
 FILENAME = "absolute-ww%4.2f-L%04.2f-N%03d"
 data_dir = 'scrunched/i%01d/N%03d'
 
+# Default values for parameters specified from command line
+i = 0     
+ww = 1.3 
+L = 5
+N = 10
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv
@@ -38,18 +44,18 @@ def main(argv=None):
     if 'show' in argv:
         argv.remove('show')
 
-    if len(argv[1:]) == 5:
+    if len(argv[1:]) == 4:
         i = eval(argv[1])
         ww = float(argv[2])
         L = float(eval(argv[3]))
         N = eval(argv[4])
         run_simulation(i,ww,L,N)
-#    elif argv[1] == 'triangles':
-#        check_triangles()
-#    elif argv[1] == 'dir':
-#        plot_from_directory(argv[2])
+##    elif argv[1] == 'triangles':
+##        check_triangles()
+##    elif argv[1] == 'dir':
+##        plot_from_directory(argv[2])
     else:
-        print "invalid option"
+        print "invalid option "
 
 
 def run_simulation(i,ww,L,_N):
@@ -58,10 +64,10 @@ def run_simulation(i,ww,L,_N):
     success_ratios = []
     all_total_checks = []
     all_valid_checks = []
+    N = _N
     steps = 20
     ff = N/ L**3
     step_size = 0.05
-    N = _N
     sim_iterations = 1000000
     seed = 0
     sc_period = max(10, (1 * N * N)/10)
@@ -79,9 +85,9 @@ def run_simulation(i,ww,L,_N):
         if not os.path.isfile(filepath):
             # then run simulation
             # add args for infinite/regular case, then everything else
-#            arg_list = []
+            arg_list = []
             if ff == 0:
-                # Not utilizing this yet, will be added at a later date (if needed)
+                ## Not utilizing this yet, will be added at a later date (if needed)
                 # arg_list.extend(['../../free-energy-monte-carlo-infinite-case'])
                 print("Infinite case not enabled; please specify a filling fraction.")
                 break
@@ -96,7 +102,7 @@ def run_simulation(i,ww,L,_N):
                 '--iterations', str(sim_iterations),
                 '--filename', filename,
                 '--data_dir', data_dir,
-                #'--seed', str(seed),
+                '--seed', str(seed),
                 '--ff_small', str(ff+step_size),
                 '--N', str(N),
                 ])
