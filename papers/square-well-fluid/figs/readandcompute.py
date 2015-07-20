@@ -60,6 +60,17 @@ def minT(fbase):
                 break
     return min_T
 
+def minT_from_transitions(fbase):
+    min_T = 0
+    with open(fbase+"-transitions.dat") as file:
+        for line in file:
+            if "min_T" in line:
+                this_min_T = float(line.split()[-1])
+                if this_min_T > min_T:
+                    min_T = this_min_T
+                break
+    return min_T
+
 def iterations(fbase):
     with open(fbase+"-E.dat") as file:
         for line in file:

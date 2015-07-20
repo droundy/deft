@@ -46,11 +46,15 @@ print 'minhist', minhist
 print 'maxhist', maxhist
 print 'numframes', numframes
 
+min_T = None
+
 for frame in xrange(numframes):
     print 'working on frame', frame
     plt.cla()
 
     basename = 'data/mc/ww%.2f-ff%.2f-N%d-movie/%06d' % (ww,ff,N,frame)
+    old_min_T = min_T
+    min_T = readandcompute.minT_from_transitions(basename)
     # e, diff = readandcompute.e_diffusion_estimate(basename)
 
     try:
@@ -69,8 +73,25 @@ for frame in xrange(numframes):
     #     ax.plot(e/N, 2.5*hist/hist.max(), 'k-', label=r'%e iterations' % (iterations))
 
     e, init_hist = readandcompute.e_and_total_init_histogram(basename)
+    if min_T != old_min_T:
+        print 'min_T goes from', old_min_T, 'to', min_T
+        baseline_init_hist = init_hist
+        baseline_e = e
     ax.plot(e, init_hist, 'b-',
             label=r'%e initialization iterations' % (sum(init_hist)/float(N)))
+    # newstuff below is init_hist - baseline_init_hist, but takes into
+    # account the fact that these arrays might not be the same size.
+    # So we look up the element with the corresponding energy.
+    if len(e) != len(baseline_e):
+        newstuff = 1.0*init_hist
+        for i in xrange(len(e)):
+            theindex = numpy.where(baseline_e == e[i])
+            if len(theindex) > 0:
+                newstuff[i] -= baseline_init_hist[theindex[0]]
+    else:
+        newstuff = init_hist - baseline_init_hist
+    ax.plot(e, newstuff, 'k-',
+            label=r'%e additional iterations' % ((sum(init_hist) - sum(baseline_init_hist))/float(N)))
 
     ax.set_xlabel(r'$E/N$')
     ax.set_ylim(0, maxhist)
