@@ -6,19 +6,21 @@
 #pragma once
 
 struct random {
-  static void seed(unsigned long seedval) {
+  static unsigned long seedval;
+  static void seed(unsigned long seedme) {
+    seedval = seedme;
     my_mtrand = MTRand(seedval);
   }
   static double ran() {
     return my_mtrand.randExc();
   }
   static unsigned long seed_randomly() {
-    unsigned long seedval = clock(); // in case reading /dev/urandom fails?
+    seedval = clock(); // in case reading /dev/urandom fails?
     FILE *f = fopen("/dev/urandom", "r");
     if (f) {
       if (fread(&seedval, sizeof(unsigned long), 1, f) != sizeof(unsigned long)) {
         seedval ^= (unsigned long)f; // not as good as a real random
-                                     // number, but may help.
+                                  // number, but may help.
       }
       fclose(f);
     }

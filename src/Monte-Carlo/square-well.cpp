@@ -1302,6 +1302,7 @@ void sw_simulation::write_transitions_file() const {
 
 void sw_simulation::write_header(FILE *f) const {
   fprintf(f, "# version: %s\n", version_identifier());
+  fprintf(f, "# seed: %ld\n", random::seedval);
   fprintf(f, "# well_width: %g\n", well_width);
   fprintf(f, "# ff: %.16g\n", filling_fraction);
   fprintf(f, "# N: %d\n", N);
