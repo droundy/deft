@@ -12,3 +12,11 @@ Debugging what is wrong:
    compressibility approximation.  (Maybe this will fix the
    coexistence curve?)  Could test this out with the python code from
    #2.
+
+To run several homogeneous MC simulatinos:
+
+for tff in `seq 1 6`; do python data/run-mc-homogeneous.py 1.3 0.6 500 0.1 1e9; done
+
+To generate animations from the above simulations:
+
+for tff in `seq 1 6`; do echo 0.$tff; time python figs/animate-homogeneous.py 1.3 0.$tff 500; done
