@@ -1463,7 +1463,7 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
 }
 
 bool sw_simulation::printing_allowed(){
-  const double max_time_skip = 30*60; // 30 minutes
+  const double max_time_skip = 60*60; // 1 hour
   double time_skip = 3; // seconds
   static int every_so_often = 0;
   static int how_often = 1;
