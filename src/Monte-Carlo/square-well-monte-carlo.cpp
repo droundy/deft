@@ -650,6 +650,10 @@ int main(int argc, const char *argv[]) {
   sprintf((char *)sw.transitions_movie_filename_format,
           "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
 
+  char *histogram_movie_filename_format = new char[1024];
+  sprintf(histogram_movie_filename_format,
+          "%s/%s-movie/%%06d-E.dat", data_dir, filename);
+
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
   // ----------------------------------------------------------------------------
@@ -1060,6 +1064,11 @@ int main(int argc, const char *argv[]) {
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total);
 
+      // Save transitions histogram.  This also sets the
+      // transitions_movie_count to one beyond the current frame
+      // number.
+      sw.write_transitions_file();
+
       // Save energy histogram
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
@@ -1073,6 +1082,24 @@ int main(int argc, const char *argv[]) {
           fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
       }
       fclose(e_out);
+
+      if (histogram_movie_filename_format && sw.transitions_movie_filename_format) {
+        char *fname = new char[4096];
+        sprintf(fname, histogram_movie_filename_format, sw.transitions_movie_count - 1);
+        FILE *e_out = fopen(fname, "w");
+        fprintf(e_out, "%s", headerinfo);
+        fprintf(e_out, "%s", countinfo);
+        fprintf(e_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
+        fprintf(e_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
+        // fprintf(e_out, "# min_important_energy: %i\n\n",sw.set_min_important_energy());
+        fprintf(e_out, "# energy   counts\n");
+        for(int i = 0; i < sw.energy_levels; i++){
+          if(sw.energy_histogram[i] != 0)
+            fprintf(e_out, "%i  %ld\n",i,sw.energy_histogram[i]);
+        }
+        fclose(e_out);
+        delete[] fname;
+      }
 
       // Save optimistic sample counts
       FILE *os_out = fopen(os_fname, "w");
@@ -1103,38 +1130,6 @@ int main(int argc, const char *argv[]) {
           fprintf(ps_out, "%i  %li\n", i, sw.pessimistic_samples[i]);
       }
       fclose(ps_out);
-
-      // Save transitions histogram
-      FILE *transitions_out = fopen(sw.transitions_filename, "w");
-      if (!transitions_out) {
-        fprintf(stderr, "Unable to create %s!\n", sw.transitions_filename);
-        exit(1);
-      }
-      fprintf(transitions_out, "%s", headerinfo);
-      fprintf(transitions_out, "%s", countinfo);
-      fprintf(transitions_out, "#       \tde\n");
-      fprintf(transitions_out, "# energy");
-      for (int de = -sw.biggest_energy_transition;
-           de <= sw.biggest_energy_transition; de++){
-        fprintf(transitions_out, "\t%i", de);
-      }
-      fprintf(transitions_out, "\n");
-      for(int i = 0; i < sw.energy_levels; i++) {
-        bool have_i = false;
-        for (int de = -sw.biggest_energy_transition;
-             de <= sw.biggest_energy_transition; de++){
-          if (sw.transitions(i,de)) have_i = true;
-        }
-        if (have_i){
-          fprintf(transitions_out, "%i", i);
-          for (int de = -sw.biggest_energy_transition;
-               de <= sw.biggest_energy_transition; de++){
-            fprintf(transitions_out, "\t%ld", sw.transitions(i, de));
-          }
-          fprintf(transitions_out, "\n");
-        }
-      }
-      fclose(transitions_out);
 
       // Save RDF
       if(!sw.walls){
