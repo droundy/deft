@@ -49,7 +49,8 @@ print 'numframes', numframes
 min_T = None
 
 for frame in xrange(numframes):
-    print 'working on frame', frame
+    if frame % 10 == 0:
+        print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
 
     basename = 'data/mc/ww%.2f-ff%.2f-N%d-movie/%06d' % (ww,ff,N,frame)
@@ -85,7 +86,7 @@ for frame in xrange(numframes):
     if len(e) != len(baseline_e):
         newstuff = 1.0*init_hist
         for i in xrange(len(e)):
-            theindex = numpy.where(baseline_e == e[i])
+            theindex = numpy.nonzero(baseline_e == e[i])[0]
             if len(theindex) > 0:
                 newstuff[i] -= baseline_init_hist[theindex[0]]
     else:
