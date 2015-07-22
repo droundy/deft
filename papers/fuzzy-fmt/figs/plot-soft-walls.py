@@ -56,7 +56,7 @@ def plot_soft_walls(reduced_density, temps):
         fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
         z = data[:,0]
-        plot(z, data[:,1])
+        plot(z, data[:,1], styles.bh_dft(temp))
 
     #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
 

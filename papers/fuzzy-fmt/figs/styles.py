@@ -16,7 +16,7 @@ def density_color(rd):
 color = { 100.0: 'k',
           10.0: 'c',
           5.0: 'g',
-          2.5: 'r',
+          2.5: 'k',
           2.0: 'g',
           1.5: 'k',
           1.0: 'b',
@@ -55,3 +55,8 @@ def mcwca(kT):
     if kT in color:
         return color[kT] + '--'
     return '--'
+
+def bh_dft(kT):
+    if kT in color:
+        return color[kT] + ':'
+    return ':'
