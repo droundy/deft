@@ -522,6 +522,7 @@ for mkdat in Split("""
 
 for mkdat in Split("""
 	papers/fuzzy-fmt/figs/new-bh-walls
+        papers/fuzzy-fmt/figs/new-bh-soft-walls
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
@@ -534,6 +535,9 @@ for rho in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2
                 source = ['papers/fuzzy-fmt/figs/walls.mkdat'],
                 action = '$SOURCE %g %g' % (rho, 0.0))
     for kT in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.5, 5.0, 10.0]:
+        env.Command(target = "papers/fuzzy-fmt/figs/new-data/bh-soft-wall-%.2f-%.2f.dat" % (rho, kT),
+                    source = ['papers/fuzzy-fmt/figs/new-bh-soft-walls.mkdat'],
+                    action = '$SOURCE %g %g' % (rho, kT))
         env.Command(target = "papers/fuzzy-fmt/figs/new-data/wall-%.2f-%.2f.dat" % (rho, kT),
                     source = ['papers/fuzzy-fmt/figs/new-walls.mkdat'],
                     action = '$SOURCE %g %g' % (rho, kT))
