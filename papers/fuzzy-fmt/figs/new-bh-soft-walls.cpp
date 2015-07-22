@@ -88,7 +88,7 @@ void run_soft_walls(double reduced_density, WhiteBearFluidVeff *f, double kT, do
   Vector n = f->get_n();
   printf("multiplying by sigma = %g\n", sigma);
   for (int i=0;i<Nz/2;i++) {
-    fprintf(o, "%g\t%g\n", (rz[i] + R + rad_bh - spacing)/sigma, n[i]*uipow(sigma, 3));
+    fprintf(o, "%g\t%g\n", (rz[i] - spacing + R)/sigma, n[i]*uipow(sigma, 3));
   }
   fclose(o);
 }
@@ -137,34 +137,34 @@ int main(int argc, char **argv) {
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector rz = f.get_rz();
+    const double Vmax = 500*temp;
     for (int i=0; i<Ntot; i++) {
-      if (fabs(rz[i]) < spacing) {
-        double dist = spacing - fabs(rz[i]);
+      if ( fabs(rz[i]) <= spacing ) {
+        f.Vext()[i] = Vmax;
+      } else if ( fabs(rz[i]) < spacing + rad) {
+        double dist = fabs(rz[i]) - spacing;
         double dist3 = dist*dist*dist;
-        const double Vmax = 500*temp;
         double Vsw = 2*M_PI*rho*eps*((dist3-rad*rad*rad)/6
-				    + 2*sig6*(1/uipow(dist, 9) - 1/uipow(rad,9))/45
-				    + (rad - dist)*(rad*rad/2 + sig6/uipow(rad,4) 
-						  - 2*sig12/5/uipow(rad,10))
-				    + sig6*(1/(rad*rad*rad) - 1/(dist3)));
-
-        //printf("!Vsw is %g\n", double(!Vsw));
-        if (!Vsw) {
-          f.Vext()[i] = Vmax; // this is the cutoff so we can avoid nans
+                                     + 2*sig12*(1/uipow(dist, 9) - 1/uipow(rad,9))/45
+                                     + (rad - dist)*(rad*rad/2 + sig6/uipow(rad,4) 
+                                                     - 2*sig12/5/uipow(rad,10))
+                                     + sig6*(1/(rad*rad*rad) - 1/(dist3))/3);
+        if (Vsw > Vmax) {
+          f.Vext()[i] = Vmax; // this is "infinity" for us
         } else {
           f.Vext()[i] = Vsw; 
-          printf("V_sw is %g\n", Vsw);
+          printf("At distance %g, V_sw is %g\n", dist, Vsw);
         }
       } else {
         f.Vext()[i] = 0;
       }
     }
   }
-  for (double rd = 0.50; rd < 0.63; rd += 0.01) {
+  /* for (double rd = 0.50; rd < 0.63; rd += 0.01) {
     hf.n() = rd/uipow(sigma,3);
     f.Veff() = -temp*log(hf.n());
     printf("  %g\t%g\t%g\n", rd, f.energy(), hf.energy()*dw*dw*width);
-  }
+    }*/
 
   printf("my energy is %g\n", f.energy());
 
