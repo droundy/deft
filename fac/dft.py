@@ -39,6 +39,7 @@ mkdats = """
   papers/fuzzy-fmt/figs/walls
   papers/fuzzy-fmt/figs/new-walls
   papers/fuzzy-fmt/figs/new-bh-walls
+  papers/fuzzy-fmt/figs/new-bh-soft-walls
   papers/fuzzy-fmt/figs/soft-sphere
 
   papers/square-well-fluid/figs/new-radial-sw
