@@ -53,6 +53,11 @@ def plot_soft_walls(reduced_density, temps):
         plot(smooth(data[:,0]-zmin,NUM), smooth(data[:,1],NUM)/2**(-5.0/2.0),
              styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
+        fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
+        data = loadtxt(fname)
+        z = data[:,0]
+        plot(z, data[:,1])
+
     #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
 
     title('Soft walls with bulk $n^* = %g$' % (reduced_density/100))
@@ -67,5 +72,6 @@ def plot_soft_walls(reduced_density, temps):
 
 # input: ['figs/mc-soft-wall-%04.4f-%.4f-2700.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
 # input: ['figs/new-data/soft-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
+# input: ['figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
 # savefig('figs/soft-walls-60.pdf')
 plot_soft_walls(60, [10.0, 5.0, 2.5, 1.0, 0.1])
