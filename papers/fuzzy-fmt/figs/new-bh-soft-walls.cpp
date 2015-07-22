@@ -30,12 +30,10 @@ const double dw = 0.01;
 const double spacing = 3.0; // space on each side
 const int N = 1000000;
 
-double rad = 0;
+double rad = 1;
 const double rho = 1.0;
-const double eps = 1.0;
-const double sigma = 1.0; /* Let's define sigma == 1 for this one? */
-const double sig6 = uipow(sigma,6);
-const double sig12 = uipow(sig6,2);
+const double epsilon = 1.0;
+const double sigma = rad*pow(2,5.0/6.0);
 const double R = sigma*pow(2.0,1.0/6.0);
 
 static void took(const char *name) {
@@ -53,15 +51,43 @@ double R_BH(const double kT) {
   const double dr = R/N;
   const double beta = 1.0/kT;
   for (double r_cur=dr/2; r_cur < R; r_cur += dr) {
-    bh_diameter += (1 - exp(-beta*(4*eps*(uipow(sigma/r_cur,12) - uipow(sigma/r_cur,6)) + eps)))*dr;
+    bh_diameter += (1 - exp(-beta*(4*epsilon*(uipow(sigma/r_cur,12)
+                                              - uipow(sigma/r_cur,6)) + epsilon)))*dr;
   }
   return bh_diameter/2;
 }
 
-void run_soft_walls(double reduced_density, WhiteBearFluidVeff *f, double kT, double rad_bh) {
+double soft_wall_potential(double z, double Vcutoff) {
+  const double R_0 = 2*rad;
+  const double rho = 1.0; // wall density
+  z = fabs(z);
+
+  if (z >= (spacing + R_0)) return 0;
+  if ( z < spacing ) return Vcutoff;
+
+  z = z - spacing; // now we set z=0 to be overlap with the wall (and infinite potential)
+
+  const double sig = rad*pow(2,5.0/6.0);
+  const double sig6 = pow(sig,6);
+  const double sig12 = pow(sig,12);
+  const double z3 = pow(z,3);
+  const double z9 = pow(z,9);
+  const double R3 = pow(R_0,3);
+  const double R9 = pow(R_0,9);
+
+  double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
+                                       + 2*sig12*(1/z9 - 1/R9)/45
+                                       + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4)
+                                                    - 2*sig12/5/pow(R_0,10))
+                                       + sig6*(1/R3-1/z3)/3);
+  if (potential < Vcutoff) return potential;
+  return Vcutoff;
+}
+
+void run_soft_walls(double reduced_density, WhiteBearFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
-  min.set_maxiter(100);
+  min.set_maxiter(400);
   min.set_miniter(9);
   min.precondition(true);
 
@@ -84,11 +110,15 @@ void run_soft_walls(double reduced_density, WhiteBearFluidVeff *f, double kT, do
   }
   delete[] fname;
   const int Nz = f->Nz();
+  Vector Vext = f->Vext();
   Vector rz = f->get_rz();
   Vector n = f->get_n();
-  printf("multiplying by sigma = %g\n", sigma);
+  Vector n3 = f->get_n3();
+  for (int i=Nz/2+1;i<Nz;i++) {
+    fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
+  }
   for (int i=0;i<Nz/2;i++) {
-    fprintf(o, "%g\t%g\n", (rz[i] - spacing + R)/sigma, n[i]*uipow(sigma, 3));
+    fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
   }
   fclose(o);
 }
@@ -114,14 +144,14 @@ int main(int argc, char **argv) {
 
   HomogeneousWhiteBearFluid hf;
 
-  rad = R_BH(temp);
+  double rad_bh = R_BH(temp);
   printf("rad is %g\n", rad);
 
-  hf.R() = rad;
+  hf.R() = rad_bh;
   hf.kT() = temp;
-  hf.n() = reduced_density/uipow(sigma,3);
+  hf.n() = reduced_density*pow(2,-5.0/2.0);
   printf("dividing by sigma = %g\n", sigma);
-  printf("eta is %g\n", hf.n()*uipow(rad,3)*M_PI*4/3);
+  printf("eta is %g\n", hf.n()*uipow(rad_bh,3)*M_PI*4/3);
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
@@ -137,37 +167,20 @@ int main(int argc, char **argv) {
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector rz = f.get_rz();
-    const double Vmax = 500*temp;
     for (int i=0; i<Ntot; i++) {
-      if ( fabs(rz[i]) <= spacing ) {
-        f.Vext()[i] = Vmax;
-      } else if ( fabs(rz[i]) < spacing + rad) {
-        double dist = fabs(rz[i]) - spacing;
-        double dist3 = dist*dist*dist;
-        double Vsw = 2*M_PI*rho*eps*((dist3-rad*rad*rad)/6
-                                     + 2*sig12*(1/uipow(dist, 9) - 1/uipow(rad,9))/45
-                                     + (rad - dist)*(rad*rad/2 + sig6/uipow(rad,4) 
-                                                     - 2*sig12/5/uipow(rad,10))
-                                     + sig6*(1/(rad*rad*rad) - 1/(dist3))/3);
-        if (Vsw > Vmax) {
-          f.Vext()[i] = Vmax; // this is "infinity" for us
-        } else {
-          f.Vext()[i] = Vsw; 
-          printf("At distance %g, V_sw is %g\n", dist, Vsw);
-        }
+      f.Vext()[i] = soft_wall_potential(rz[i], 20*temp);
+      if (fabs(rz[i]) < spacing) {
+        f.Veff()[i] = -temp*log(0.01*hf.n());
+        //f.n()[i] = 0.01*hf.n();
       } else {
-        f.Vext()[i] = 0;
+        f.Veff()[i] = -temp*log(hf.n());
+        //f.n()[i] = hf.n();
       }
     }
   }
-  /* for (double rd = 0.50; rd < 0.63; rd += 0.01) {
-    hf.n() = rd/uipow(sigma,3);
-    f.Veff() = -temp*log(hf.n());
-    printf("  %g\t%g\t%g\n", rd, f.energy(), hf.energy()*dw*dw*width);
-    }*/
 
   printf("my energy is %g\n", f.energy());
 
-  run_soft_walls(reduced_density, &f, temp, rad);
+  run_soft_walls(reduced_density, &f, temp);
   return 0;
 }
