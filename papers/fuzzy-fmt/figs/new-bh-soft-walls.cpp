@@ -139,22 +139,22 @@ int main(int argc, char **argv) {
     const Vector rz = f.get_rz();
     for (int i=0; i<Ntot; i++) {
       if (fabs(rz[i]) < spacing) {
-	double dist = spacing - fabs(rz[i]);
-	double dist3 = dist*dist*dist;
+        double dist = spacing - fabs(rz[i]);
+        double dist3 = dist*dist*dist;
         const double Vmax = 500*temp;
-	double Vsw = 2*M_PI*rho*eps*((dist3-rad*rad*rad)/6
+        double Vsw = 2*M_PI*rho*eps*((dist3-rad*rad*rad)/6
 				    + 2*sig6*(1/uipow(dist, 9) - 1/uipow(rad,9))/45
 				    + (rad - dist)*(rad*rad/2 + sig6/uipow(rad,4) 
 						  - 2*sig12/5/uipow(rad,10))
 				    + sig6*(1/(rad*rad*rad) - 1/(dist3)));
 
-	//printf("!Vsw is %g\n", double(!Vsw));
-	if (!Vsw) {
-	  f.Vext()[i] = Vmax; // this is the cutoff so we can avoid nans
-	} else {
-	  f.Vext()[i] = Vsw; 
-	  printf("V_sw is %g\n", Vsw);
-	}
+        //printf("!Vsw is %g\n", double(!Vsw));
+        if (!Vsw) {
+          f.Vext()[i] = Vmax; // this is the cutoff so we can avoid nans
+        } else {
+          f.Vext()[i] = Vsw; 
+          printf("V_sw is %g\n", Vsw);
+        }
       } else {
         f.Vext()[i] = 0;
       }
