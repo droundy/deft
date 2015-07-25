@@ -32,6 +32,13 @@ def plot_radial(reduced_density, temps):
         g = loadtxt(fname)
         plot(g[:,0]/sigma_over_R, g[:,1], styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
+        fname = 'figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
+        data = loadtxt(fname)
+        r = data[:,0]
+        nreduced_density = data[:,1]
+        g = nreduced_density/(reduced_density/100.0)
+        plot(r, g, styles.bh_dft(temp))
+            
     title('Radial distribution function at $n^* = %g$' % (reduced_density/100))
     xlabel(r'$r/\sigma$')
     ylabel('$g(r)$')
@@ -44,15 +51,12 @@ def plot_radial(reduced_density, temps):
 
 # input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
 # input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 0.6) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
+# input: ['figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, 0.6) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
 # savefig('figs/radial-distribution-60.pdf')
 plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
 
-# input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (1.0, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
-# input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5, 1.0]]
+# input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
+# input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
+# input: ['figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
 # savefig('figs/radial-distribution-100.pdf')
-plot_radial(100, [10.0, 5.0, 2.5, 1.0]) # 1.0 could work?
-
-# input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (1.5, temp) for temp in [2.5]]
-# input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.5) for temp in [2.5]]
-# savefig('figs/radial-distribution-150.pdf')
-plot_radial(150, [2.5])
+plot_radial(100, [10.0, 5.0, 2.5])

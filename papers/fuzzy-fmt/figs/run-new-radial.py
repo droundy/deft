@@ -26,6 +26,14 @@ def run_wca(reduced_density, temperature):
     print(cmd)
     os.system(cmd)
 
+def run_bh_wca(reduced_density, temperature):
+    outfilename = figsdir+'/new-data/radial-bh-wca-%06.4f-%04.2f.out' % (temperature, reduced_density)
+    #system("%s %s/soft-sphere.mkdat %g %g > %s 2>&1 &" %
+    cmd = ("%s %s/new-bh-radial-wca.mkdat %g %g > %s 2>&1 &" %
+           (srun(reduced_density, temperature).replace('name','new-bh-wca'), figsdir, reduced_density, temperature, outfilename))
+    print(cmd)
+    os.system(cmd)
+
 # runme(0.83890, 0.71)
 
 # runme(0.957, 2.48)
@@ -33,20 +41,11 @@ def run_wca(reduced_density, temperature):
 # runme(0.5844, 1.235)
 
 # runme(1.095, 2.48)
-run_wca(0.6, 10.0)
-run_wca(0.6, 5.0)
-run_wca(0.6, 2.5)
+# run_wca(0.6, 10.0)
+# run_wca(0.6, 5.0)
+# run_wca(0.6, 2.5)
 
-run_wca(1.0, 1.0)
-run_wca(1.0, 0.5)
-run_wca(1.0, 2.5)
-run_wca(1.0, 5.0)
-run_wca(1.0, 10.0)
+for temp in [10.0, 5.0, 2.5, 1.0, 0.1]:
+    run_bh_wca(0.6, temp)
+    run_bh_wca(1.0, temp)
 
-run_wca(1.5, 2.5)
-# for temp in [0.001, 0.01, 0.1, 1.0]:
-#     run_wca(0.1, temp)
-#     run_wca(0.3, temp)
-#     run_wca(0.5, temp)
-#     run_wca(0.6, temp)
-#     run_wca(0.8, temp)
