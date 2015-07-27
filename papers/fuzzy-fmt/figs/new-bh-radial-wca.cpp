@@ -31,7 +31,8 @@ double xmax = zmax;
 double dx = 0.1;
 const double epsilon = 1.0;
 const double radius = 1.0;
-const double sigma = radius*pow(2,5.0/6.0);
+const double R = 2*radius;
+const double sigma = R*pow(2,-1.0/6.0);
 const int N = 1000000;
 
 static void took(const char *name) {
@@ -44,10 +45,12 @@ static void took(const char *name) {
 }
 
 double R_BH(const double kT) {
+  printf("kT for R_BH is %g.\n", kT);
   double bh_diameter = 0;
-  const double dr = radius/N;
+  const double dr = R/N;
   const double beta = 1.0/kT;
-  for (double r_cur=dr/2; r_cur < radius; r_cur += dr) {
+  printf("Beta is %g.\n", beta);
+  for (double r_cur=dr/2; r_cur < R; r_cur += dr) {
     bh_diameter += (1 - exp(-beta*(4*epsilon*(uipow(sigma/r_cur,12)
                                               - uipow(sigma/r_cur,6)) + epsilon)))*dr;
   }
@@ -127,7 +130,7 @@ int main(int argc, char **argv) {
   hf.kT() = temp;
   hf.n() = reduced_density*pow(2,-5.0/2.0);
   printf("dividing by sigma = %g\n", sigma);
-  printf("eta is %g\n", hf.n()*uipow(rad_bh,3)*M_PI*4/3);
+  printf("eta is %g\n", hf.n()*uipow(radius,3)*M_PI*4/3);
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
@@ -146,7 +149,7 @@ int main(int argc, char **argv) {
     for (int i=0; i<Ntot; i++) {
       const double Vmax = 100*temp;
       f.Vext()[i] = 4*epsilon*(uipow(sigma/r[i], 12) - uipow(sigma/r[i], 6)) + epsilon;
-      if (r[i] > 2*radius) { f.Vext()[i] = 0; }
+      if (r[i] > R) { f.Vext()[i] = 0; }
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
 
       if (f.Vext()[i] > 0) {
