@@ -45,7 +45,10 @@ def run_bh_wca(reduced_density, temperature):
 # run_wca(0.6, 5.0)
 # run_wca(0.6, 2.5)
 
-for temp in [10.0, 5.0, 2.5, 1.0, 0.1]:
+for temp in [10.0, 5.0, 2.5]:
     run_bh_wca(0.6, temp)
     run_bh_wca(1.0, temp)
+    
+run_bh_wca(0.6, 1.0)
+run_bh_wca(0.6, 0.1)
 

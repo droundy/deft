@@ -28,7 +28,7 @@
 double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.1;
+double dx = 0.05;
 const double epsilon = 1.0;
 const double radius = 1.0;
 const double R = 2*radius;
@@ -122,6 +122,7 @@ int main(int argc, char **argv) {
   sscanf(argv[2], "%lg", &temp);
 
   HomogeneousWhiteBearFluid hf;
+  printf("dx is %g\n", dx);
 
   double rad_bh = R_BH(temp);
   printf("rad is %g\n", rad_bh);
