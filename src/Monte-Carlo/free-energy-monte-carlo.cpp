@@ -324,7 +324,7 @@ int main(int argc, const char *argv[]) {
 
   // Energy histogram and weights
   sw.interaction_distance = 2*R*well_width;
-  sw.energy_levels = sw.N/2*max_balls_within(sw.interaction_distance);
+  sw.energy_levels = 1; // hard spheres can only have one energy!
   sw.energy_histogram = new long[sw.energy_levels]();
   sw.ln_energy_weights = new double[sw.energy_levels]();
 
