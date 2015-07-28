@@ -32,7 +32,8 @@ FILENAME = "absolute-ww%4.2f-L%04.2f-N%03d"
 data_dir = 'scrunched/i%01d/N%03d'
 
 # Default values for parameters specified from command line
-i = 0     
+i = 0
+# For loops done with i, need to modify something here 
 ww = 1.3 
 L = 5
 N = 10
@@ -49,7 +50,7 @@ def main(argv=None):
         ww = float(argv[2])
         L = float(eval(argv[3]))
         N = eval(argv[4])
-        run_simulation(i,ww,L,N)
+        run_simulation(ww,L,N)
 ##    elif argv[1] == 'triangles':
 ##        check_triangles()
 ##    elif argv[1] == 'dir':
@@ -58,7 +59,7 @@ def main(argv=None):
         print "invalid option "
 
 
-def run_simulation(i,ww,L,_N):
+def run_simulation(ww,L,_N):
     plot = True
     ffs = []
     success_ratios = []
@@ -70,7 +71,7 @@ def run_simulation(i,ww,L,_N):
     step_size = 0.05
     sim_iterations = 1000000
     seed = 0
-    sc_period = max(10, (1 * N * N)/10)
+    sc_period = int(max(10, (1 * N * N)/10))
 
     for i in xrange(steps):
         # hacky way to reduce step size as we approach a smaller cell
