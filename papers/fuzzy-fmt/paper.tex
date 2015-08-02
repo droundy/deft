@@ -97,17 +97,17 @@ also tested in a number of other papers~\cite{rosenfeld2000fluid}
 \section{Barker-Henderson hard sphere}
 
 Another approach to account for the temperature dependence of
-realistic fluids is the from Barker-Herson's approach. Their theory is
-a model for taking any general repulsive pair potential and creating a
-hard sphere reference fluid with a temperature dependent diameter
-along with higher order repulsive terms. Their had sphere diameter is
+realistic fluids is the from Barker-Herson's
+approach\cite{barker1967perturbation}. Their theory is a model for
+taking any general repulsive pair potential and creating a hard sphere
+reference fluid with a temperature dependent diameter along with
+higher order repulsive terms. The had sphere diameter is
 \begin{align}
   d = \int_0^\sigma\left( 1 - e^{\beta V(r)} \right)\mathrm{dr}
 \end{align} 
-where $\beta = \frac{1}{kT}$, V(r) is the pair potential, and $\sigma$
-is the radius which V(r) goes to zero. We use this result in a White
-Bear hard sphere DFT to compare against our approximation of SFMT. In
-our case, $\sigma \to \infty$.
+where $\beta = \frac{1}{kT}$, $V(r)$ is the pair potential, and $\sigma$
+is the radius for which $V(r)$ goes to zero. We use this result in a White
+Bear hard sphere DFT to compare against our approximation of SFMT.
 
 
 \section{Theory}
@@ -330,13 +330,16 @@ exact radial distribution function.
 \end{figure}
 
 In Figure \ref{fig:radial-distribution-100}, we plot the results for a
-reduced density of $n^*=1.0$ for three different tempreatures. Whole
+reduced density of $n^*=1.0$ for three different tempreatures. While
 both Barker-Henderson hard spheres and our DFT both overstimate the
 density at contact, ours is marginally worse at the lowest temperature
 shown here. For the density oscillations, our DFT's error is as good
-as the Barker-Henerson results.
+as the Barker-Henderson results.
 
 \subsection{Soft spheres near a hard wall}
+
+As a test for one dimensional behavior, we will look at the density
+profile for the soft sphere fluid near a hard wall.
 
 
 \begin{figure}
