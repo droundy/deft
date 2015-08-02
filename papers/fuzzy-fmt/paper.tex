@@ -355,6 +355,39 @@ as the Barker-Henerson results.
 \label{fig:walls-100}
 \end{figure}
 
+\subsection{Soft spheres near a soft wall}
+
+If we construct a soft wall of WCA particles that obey the WCA potential
+with particle density $\rho$, we find that the potential at a distance
+z from the wall is
+
+\begin{align}
+V_{SW}(0 < z \leq R_0) &= 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
+  \frac{2\sigma_W^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{R_0^9}\right)
+  \notag \\
+  &+ \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
+  \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
+  \notag \\
+  &\hspace{2cm}+\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3}
+  \right) \Bigg].
+\label{eq:soft-wall-potential}
+\end{align}
+
+In Figure \ref{fig:soft-walls-60}, we compare our soft sphere DFT
+against MC simulation and a Barker-Henerson fluid near a soft wall
+with the potential given in Equation \ref{eq:soft-wall-potential}. We
+plot the reduced density versus reduced distance from the surface of
+the wall for $n^*=0.6$ at different temperatures. Again, the results
+of our soft sphere fluid is as good as the Barker-Henderson(BH) fluid
+overall.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/soft-walls-60}
+  \caption{Soft walls plot, generated with new code generator.}
+\label{fig:soft-walls-60}
+\end{figure}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Comparison with experiment}
 
@@ -387,28 +420,6 @@ For Lennard Jones Argon, $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon = 119.8$~K
   %%     temperature is $T^* = 1.235$.\fixme{Run MC and DFT simulations.}}
   %%   \label{fig:argon-1.1GPa}
   %% \end{figure}
-
-\section{WCA wall potential derivation}
-
-If we construct a soft wall of WCA particles that obey the WCA potential
-with particle density $\rho$, we find that the potential at a distance
-z from the wall is
-
-\begin{align}
-V_{SW}(0 < z \leq R_0) &= 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
-  \frac{2\sigma_W^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{R_0^9}\right)
-  \notag \\
-  &+ \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
-  \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
-  \notag \\
-  &\hspace{2cm}+\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3}
-  \right) \Bigg].
-\end{align}
-
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/soft-walls-60}
-  \caption{Soft walls plot, generated with new code generator.}
-\end{figure}
 
 \section{Conclusion}
 
