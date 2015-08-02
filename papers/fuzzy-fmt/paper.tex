@@ -273,13 +273,18 @@ $\tilde{w}_2(k)$.
   \tilde{w}_0(k) &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
       \sigma}\tilde{w}_2(k) \right]
 \end{align}
+ 
+\section{Comparison with simulation}
 
 \subsection{Homogeneous limit}
 
 As a simple test for the equation of state, we compare the theory for
-a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
- 
-\section{Comparison with simulation}
+a homogeneous soft-sphere fluid and compare to Monte-Carlo (MC)
+simulation. The results show very good agreement for lower densities
+across all temperatures shown in Figure \ref{fig:p-vs-packing}, and at
+higher temperatures not shown. Differences between the DFT and MC results
+become quite apparent at $n^*=0.6$ and above which includes fluid to solid
+transitions starting at $n^*=0.8$ that are not predicted by our DFT.
 
 \begin{figure}
 \begin{center}
@@ -292,34 +297,10 @@ a homogeneous soft-sphere fluid and compate to Monte-Carlo (MC) simulation.
 \label{fig:p-vs-packing}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution-60}
-\end{center}
-\caption{Radial distribution function with 0.6 reduced density.}
-\label{fig:radial-distribution-60}
-\end{figure}
-
-%% \begin{figure}
-%% \begin{center}
-%% \includegraphics[width=3.5in]{figs/radial-distribution-80}
-%% \end{center}
-%% \caption{Radial distribution function with 0.8 reduced density.}
-%% \label{fig:radial-distribution-80}
-%% \end{figure}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution-100}
-\end{center}
-\caption{Radial distribution function with 1.0 reduced density.}
-\label{fig:radial-distribution-100}
-\end{figure}
-
 \subsection{Soft spheres radial distribution function}
 
-We start by discussing the soft sphere radial distribution
-function. Results for reduced densitied below $n^* = 0.60$ have been
+For three dimensional comparisons, we plot radial distribution
+funtions.  Results for reduced densitied below $n^* = 0.60$ have been
 ommitted as they were exact over temperature ranges from $T^*=0.01$ to
 $T^*=10$. Figure \ref{fig:radial-distribution-60} shows the radial
 distribution for a range of temperatures at a redued density of $n^* =
@@ -328,9 +309,25 @@ simulation at this reduced density. Our DFT's behaviour at higher
 temperatures are in almost exact agreement, while the lower
 temperatures have slight disagreement just after the first peak at
 contact and in the subsequent oscillations where it
-\fixme{underestimate} the peaks. Comparison with the
-Barker-Henderson results shows our DFT to have similar error to the
+\fixme{underestimate} the peaks. Comparison with the Barker-Henderson
+results shows our DFT to have a similar magnitude of error to the
 exact radial distribution function.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/radial-distribution-60}
+\end{center}
+\caption{Radial distribution function with 0.6 reduced density.}
+\label{fig:radial-distribution-60}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=3.5in]{figs/radial-distribution-100}
+\end{center}
+\caption{Radial distribution function with 1.0 reduced density.}
+\label{fig:radial-distribution-100}
+\end{figure}
 
 In Figure \ref{fig:radial-distribution-100}, we plot the results for a
 reduced density of $n^*=1.0$ for three different tempreatures. Whole
