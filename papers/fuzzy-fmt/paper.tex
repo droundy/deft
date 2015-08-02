@@ -357,9 +357,8 @@ as the Barker-Henerson results.
 
 \subsection{Soft spheres near a soft wall}
 
-If we construct a soft wall of WCA particles that obey the WCA potential
-with particle density $\rho$, we find that the potential at a distance
-z from the wall is
+If we construct a wall of WCA spheres of density $rho$, we
+find that the potential at a distance z from the wall is
 
 \begin{align}
 V_{SW}(0 < z \leq R_0) &= 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
@@ -372,6 +371,10 @@ V_{SW}(0 < z \leq R_0) &= 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
   \right) \Bigg].
 \label{eq:soft-wall-potential}
 \end{align}
+The distance $R_0$ is equal to $R_W + R_f$, where $R_W$ is the radius of a
+sphere which makes up the wall and $R_f$ is the radius of a sphere
+from the fluid. Both $\epsilon$ and $\sigma_W$ are Lennard-Jones
+parameters between the wall and the fluid.
 
 In Figure \ref{fig:soft-walls-60}, we compare our soft sphere DFT
 against MC simulation and a Barker-Henerson fluid near a soft wall
