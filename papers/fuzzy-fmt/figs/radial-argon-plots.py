@@ -12,7 +12,7 @@ sigma = 0.3405 #nm
 sigma_over_R=2**(5/6)
 
 rmaxplot = 4 # upper limit of our plots
-figure(figsize=(24,6))
+figure(figsize=(18,4.5))
 subplot(1, 3, 1)
 title('$n^*=0.8389$, $T^*=0.71$')
 data = loadtxt('figs/YarnellArgon85K.dat')
@@ -42,7 +42,7 @@ subplot(1, 3, 2)
 # xlim(0, rmaxplot)
 # legend(loc='best')
 
-title('$n^*=1.0950$, $T*=2.48$')
+title('$n^*=1.0950$, $T^*=2.48$')
 data3 = loadtxt('figs/EggertArgon1.1GPaRAW.dat')
 n = 27.74 #atoms/nm^3
 nsig_3 = n*sigma**3
