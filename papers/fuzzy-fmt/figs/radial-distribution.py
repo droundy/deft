@@ -13,7 +13,6 @@ import os
 import styles
 
 def plot_radial(reduced_density, temps):
-    figure()
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
     for temp in temps:
@@ -44,19 +43,22 @@ def plot_radial(reduced_density, temps):
     ylabel('$g(r)$')
     legend()
     xlim(0, 3)
-    outputname = 'figs/radial-distribution-%02d.pdf' % (reduced_density)
-    savefig(outputname, bbox_inches=0)
-    print('figs/radial-distribution-%02d.pdf' % (reduced_density))
-
 
 # input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
 # input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 0.6) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
 # input: ['figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, 0.6) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
-# savefig('figs/radial-distribution-60.pdf')
-plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
-
 # input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
-# savefig('figs/radial-distribution-100.pdf')
+# savefig('figs/radial-distribution.pdf')
+figure(figsize=(6,11))
+subplot(2, 1, 1)
+plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
+
+subplot(2, 1, 2)
 plot_radial(100, [10.0, 5.0, 2.5])
+
+outputname = 'figs/radial-distribution.pdf'
+savefig(outputname, bbox_inches=0)
+print('figs/radial-distribution.pdf')
+

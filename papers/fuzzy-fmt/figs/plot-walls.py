@@ -27,7 +27,6 @@ def smooth(x, N):
 
 def plot_walls(reduced_density, temps):
     num = 1
-    figure()
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
     have_labelled_bh = False
@@ -63,19 +62,22 @@ def plot_walls(reduced_density, temps):
     ylabel('$n^*(r)$')
     legend()
     xlim(-0.2, 4)
-    outputname = 'figs/walls-%02d.pdf' % (reduced_density)
-    savefig(outputname, bbox_inches=0)
-    print('figs/walls-%02d.pdf' % (reduced_density))
-
 
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 2.5, 0.1]]
 # input: ['figs/new-data/wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5, 0.1]]
 # input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5, 0.1]]
-# savefig('figs/walls-60.pdf')
-plot_walls(60, [10.0, 2.5, 0.1])
-
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
-# savefig('figs/walls-100.pdf')
+# savefig('figs/hard-walls.pdf')
+figure(figsize=(6,11))
+
+subplot(2, 1, 1)
+plot_walls(60, [10.0, 2.5, 0.1])
+
+subplot(2, 1, 2)
 plot_walls(100, [10.0, 5.0, 2.5]) # 1.0 could work?
+
+outputname = 'figs/hard-walls.pdf'
+savefig(outputname, bbox_inches=0)
+print('figs/hard-walls.pdf')
