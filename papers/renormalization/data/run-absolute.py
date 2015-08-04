@@ -21,13 +21,16 @@ Ns = list(xrange(0,2))
 #arg Ns = [range(2,10)]
 
 Overwrite = False
-if "--O" in sys.argv:  # Check for overwrite flag in arguments
-    Overwrite == True
+if '-Q' in sys.argv:  # Check for overwrite flag in arguments
+    Overwrite = True
 
     
 for N in Ns:
     dirname = 'scrunched/i%01d/N%03d/absolute' % (i,N)
     os.system('mkdir -p '+dirname)
+    if Overwrite == True:
+        os.system('rm -r '+dirname)
+        
     filename = 'absolute-ww%4.2f-L%04.2f-N%03d' % (ww,L,N)
     
     ffs = []
@@ -41,8 +44,8 @@ for N in Ns:
     sim_iters = 1000000
     sc_period = int(max(10, 1*N*N/10))
     
-    if (not os.path.isfile(dirname+'/'+filename+'-g.dat'))  or \
-       all(os.path.isfile(dirname+'/'+filename+'-g.dat'), Overwrite == True):
+    if (Overwrite == True) or \
+       (not os.path.isfile(dirname+'/'+filename+'-g.dat')):
         for j in xrange(steps):
             if j!= 0 and j % 4 == 0:
                 step_size = step_size * 0.5
@@ -60,3 +63,5 @@ for N in Ns:
                 os.system(cmd)
                 # cmd = ("../../../free-energy-monte-carlo --ff %g --sc_period %d --iterations %d --filename %s --data_dir %s --ff_small %g --N %d > %s/%s.out 2>&1" %
                 #       (ff,sc_period,sim_iters,filename,dirname,(ff+step_size), N, dirname, filename)
+    else:
+        print("You're trying to overwrite files, use the flag -Q in order to do so.")
