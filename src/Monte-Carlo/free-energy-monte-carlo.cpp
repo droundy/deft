@@ -501,7 +501,7 @@ int main(int argc, const char *argv[]) {
           well_width, sw.translation_scale, neighbor_scale, scaling_factor, ff, ff_small);
 
   char *g_fname = new char[1024];
-  sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
+  sprintf(g_fname, "%s/%s.dat", data_dir, filename);
 
   took("Initialization");
 
