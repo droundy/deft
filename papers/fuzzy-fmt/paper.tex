@@ -20,7 +20,8 @@
 \newcommand{\fixme}[1]{\red{[#1]}}
 
 \begin{document}
-\title{Smoothing the Fundamental Measure Theory Functional for Hard Spheres}
+\title{Soft Fundamental Measure Theory Functional for the
+  Weeks-Chandler-Anderson Repulsive Potential}
 
 \author{Eric J. Krebs}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
@@ -48,35 +49,50 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
 \section{Introduction}
 
-The hard-sphere fluid is \emph{the} reference fluid for models of real
-liquids, such as water~\cite{gil-villegas-1997-SAFT-VR,
-  clark2006developing, andersen1971relationship,
-  andersen1972optimized, kalos1974helium, chapman1990new,
-  barker1967perturbation}.  \fixme{See especially
-  \cite{andersen1971relationship} for a discussion of the use of hard
-  spheres to model realistic soft-sphere repulsive forces.  Note that
-  \cite{andersen1971relationship} uses a density-dependent hard-sphere
-  diameter, which is unsuitable for use in a density functional.} The
-hard sphere fluid is widely studied and well understood
-\fixme{citations}~\cite{mansoori1971equilibrium, roth2002whitebear,
-  rosenfeld1989, rosenfeld1997}, but has the disadvantage of not being
-physical since it contains step and delta functions which are hard to
-use in computation. One way to deal with this difficulty is by
-``smearing'' the functions so they are not discontinuous; another is
-to use a theory where the spheres themselves are not so hard.
+The idea of liquids as composed of hard spheres dates back over two
+millenia~\cite{lucretius}.  In the 20th century, we came to understand
+atoms as inherently soft, but it was shown that their repulsion could
+still be accurately described using a hard-sphere model, provided the
+radius is chosen to be temperature
+dependent~\cite{rowlinson1964statistical, barker1967perturbation,
+  andersen1971relationship}.  These works cemented the hard-sphere
+model as the reference system of choice for the theory of
+liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
+  lafitte2013accurate}.  One reason for the wide use of the
+hard-sphere fluid hard sphere fluid as a reference system is that it
+is widely studied and well understood, but only for the homogeneous
+fluid~\cite{carnahan1969equation}, but also in the more challenging
+case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
+  roth2002whitebear}.  However, the hard-sphere fluid remains a
+non-physical model, which is also numerically inconvenient in its use
+of delta functions.
 
-Fundamental Measure Theory~(FMT) is a classic density functional
-theory (cDFT) for the free energy of the hard-sphere fluid developed
-by Rosenfeld~\cite{rosenfeld1989}.  FMT is often used for the
-hard-sphere portion of the total free energy which \fixme{citations}.
-While this has been used to some success to study the behavior of real
-liquids\fixme{citations}, it is not physical as the hard sphere cores
-are never allowed to penetrate.
+Fundamental Measure Theory~(FMT) is a classical density functional
+theory for the free energy of the hard-sphere fluid developed by
+Rosenfeld~\cite{rosenfeld1989}.  Due to its combination of
+computational efficiency with accuracy, FMT has since been used as the
+basis for a wide variety of classical density
+functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
+  marechal2013density}.
+%
+In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
+(SFMT)~\cite{schmidt1999density}, which directly treats soft repulsive
+potentials in a framework based on the highly successful FMT developed
+by Rosenfeld~\cite{rosenfeld1989}.  SFMT has been used to describe the
+behavior of a star polymer in solution~\cite{schmidt2000density,
+  groh2001density, kim2001adsorption, sweatman2002fundamental}, as
+well as repulsive potentials applicable to
+atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 
-In his 2010 review of FMT, Roth states that the most important future
-developments in equilibrium DFT will involve treating soft repulsions
-and attractions~\cite{}.
- 
+%% In his 2010 review of FMT, Roth states that the most important future
+%% developments in equilibrium DFT will involve treating soft repulsions
+%% and attractions~\cite{}.
+
+In this paper, we will apply SFMT to study the Weeks-Chandler-Anderson
+repulsive potential~\cite{weeks1971}.  This potential reproduces the repulsive force of
+a Lennard-Jones interaction, which makes it an ideal model for
+interatomic repulsion.
+
 \section{Soft Fundamental Measure Theory}
 
 Schmidt introduced Soft Fundamental Measure Theory~(SFMT) based on
