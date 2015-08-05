@@ -4,7 +4,7 @@ from __future__ import division
 import os
 from math import pi
 
-figsdir = 'papers/fuzzy-fmt/figs/'
+figsdir = 'papers/fuzzy-fmt/figs'
 
 def srun(n_reduced, kT):
     return 'srun --mem=10000 -J name-%06.4f-%04.2f nice -19' % (kT, n_reduced)
@@ -40,6 +40,7 @@ def run_bh_lj(reduced_density, temperature):
     cmd = ("%s %s/new-bh-radial-lj.mkdat %g %g > %s 2>&1 &" %
            (srun(reduced_density, temperature).replace('name','new-bh-lj'), figsdir, reduced_density, temperature, outfilename))
     print(cmd)
+    os.system(cmd)
 
 # runme(0.83890, 0.71)
 
@@ -60,6 +61,6 @@ def run_bh_lj(reduced_density, temperature):
 #run_bh_wca(0.6, 0.1)
 
 run_bh_lj(0.83890, 0.71)
-run_bh_lj(0.957, 2.48)
+run_bh_lj(1.095, 2.48)
 run_bh_lj(0.5844, 1.235)
 
