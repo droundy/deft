@@ -47,12 +47,14 @@ def run_FCC(n_reduced, temperature, pot = ""):
     system("srun --mem=60 -J softfcc-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat kT %g potential '%s' fcc %.15g > %s.out 2>&1 &" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature, pot, length,  filename))
 
-def run_FCC_walls(n_reduced, temperature, pot = ""):
+def run_FCC_walls(n_reduced, temperature, tweak_density = 1, pot = "wca"):
     nspheres = 4*7**3
-    n = n_reduced*(2.0**(-5.0/2.0))
+    n = n_reduced*(2.0**(-5.0/2.0))*tweak_density
     total_volume = nspheres/n
     length = total_volume**(1.0/3.0)
     filename = '%s/mcfcc-walls-%.4f-%.4f' % (figsdir, n_reduced, temperature)
+    if tweak_density != 1:
+        filename = filename + '-tweaked-%.10g' % tweak_density
     system("srun --mem=60 -J softfcc-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat kT %g potential '%s' fcc-walls %.15g > %s.out 2>&1 &" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature, pot, length,  filename))
 
@@ -72,17 +74,36 @@ def run_FCC_walls(n_reduced, temperature, pot = ""):
 #run_FCC(0.5844,1.235,"wca")
 
 
-#for reduced_density in [0.1,.2,.4,.6]:
-#    for temp in [0.1,.5]:
-#        run_homogeneous(reduced_density, temp, "wca")
+# for reduced_density in [0.8, 1.0]:
+#    for temp in [0.1,.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0]:
+#        run_FCC(reduced_density, temp, "wca")
 
-run_FCC(0.6, 10.0, "wca")
-run_FCC(0.6, 5.0, "wca")
-run_FCC(0.6, 2.5, "wca")
-run_FCC(1.0, 1.0, "wca")
-run_FCC(1.0, 0.5, "wca")
-run_FCC(1.0, 2.5, "wca")
-run_FCC(1.0, 5.0, "wca")
-run_FCC(1.0, 10.0, "wca")
-run_FCC(1.5, 2.5, "wca")
+# run_FCC(0.9, 0.55, 'wca')
+# run_FCC(0.9, 0.6, 'wca')
+# run_FCC(0.9, 0.65, 'wca')
+# run_FCC(0.9, 0.7, 'wca')
+
+# run_FCC(1.0, 2.5, 'wca')
+# run_FCC(1.0, 1.55, 'wca')
+# run_FCC(1.0, 1.5, 'wca')
+# run_FCC(1.0, 1.45, 'wca')
+# run_FCC(0.8, 0.33, 'wca')
+# run_FCC(0.8, 0.35, 'wca')
+# run_FCC(0.8, 0.37, 'wca')
+
+run_soft_walls(1.0, 0, 10.0)
+run_soft_walls(1.0, 0, 5.0)
+run_soft_walls(1.0, 0, 2.5)
+run_soft_walls(1.0, 0, 1.0)
+run_soft_walls(1.0, 0, 0.1)
+
+# run_FCC_walls(0.6, 10.0, 0.95044, "wca")
+# run_FCC_walls(0.6, 2.5, 0.9577, "wca")
+# run_FCC_walls(0.6, 0.1, 0.9740, "wca")
+#run_FCC(1.0, 1.0, "wca")
+#run_FCC(1.0, 0.5, "wca")
+#run_FCC(1.0, 2.5, "wca")
+#run_FCC(1.0, 5.0, "wca")
+#run_FCC(1.0, 10.0, "wca")
+#run_FCC(1.5, 2.5, "wca")
 
