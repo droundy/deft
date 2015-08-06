@@ -28,7 +28,7 @@
 double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.025;
+double dx = 0.05;
 const double epsilon = 1.0;
 const double radius = 1.0;
 const double R = 2*radius;
