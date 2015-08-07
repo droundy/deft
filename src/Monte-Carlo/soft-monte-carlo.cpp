@@ -219,8 +219,15 @@ int main(int argc, char *argv[]){
   const char *outfilename = argv[4];
 
   long N = atol(argv[1]);
+  long fcc_cube_size = 7;
   if (FCC == true){
-    N = 4*7*7*7;
+    for (int i=1; i<20; i++) {
+      if (N <= 4*i*i*i) {
+        fcc_cube_size = i;
+        break;
+      }
+    }
+    N = 4*fcc_cube_size*fcc_cube_size*fcc_cube_size;
   }
   printf("firs ttime N is %ld\n",N);
   const double dx_goal = atof(argv[2]);
@@ -277,20 +284,23 @@ int main(int argc, char *argv[]){
     int z1 = 0;
     int round = 0;
     for(long k=0;k<N;k++){
-      spheres[k][0]=x*(length_of_cavity/7.0) + x1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
-      spheres[k][1]=y*(length_of_cavity/7.0) + y1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
-      spheres[k][2]=z*(length_of_cavity/7.0) + z1*(1.0/2.0)*(length_of_cavity)*(1.0/7.0);
+      spheres[k][0]= x*(length_of_cavity/double(fcc_cube_size))
+                   + x1*(1.0/2.0)*(length_of_cavity)*(1.0/double(fcc_cube_size));
+      spheres[k][1]= y*(length_of_cavity/double(fcc_cube_size))
+                   + y1*(1.0/2.0)*(length_of_cavity)*(1.0/double(fcc_cube_size));
+      spheres[k][2]= z*(length_of_cavity/double(fcc_cube_size))
+                   + z1*(1.0/2.0)*(length_of_cavity)*(1.0/double(fcc_cube_size));
       spheres[k] = fixPeriodic(spheres[k]); // move sphere into the periodic cell
       x=x+1;
-      if (x >= 7){//pow(double(numberOfCubes),(1.0/3.0))){
+      if (x >= fcc_cube_size){//pow(double(numberOfCubes),(1.0/3.0))){
         x=0;
         y=y+1;
       }
-      if (y >= 7){//pow(double(numberOfCubes),(1.0/3.0))){
+      if (y >= fcc_cube_size){//pow(double(numberOfCubes),(1.0/3.0))){
         y=0;
         z=z+1;
       }
-      if (z >= 7){
+      if (z >= fcc_cube_size){
         round = round + 1;
         x=0;
         y=0;
