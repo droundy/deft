@@ -428,49 +428,7 @@ For Lennard Jones Argon, $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon = 119.8$~K
 
 \section{Conclusion}
 
-\appendix
-
-\section{Soft Fundamental-Measure Theory}
-
-We follow the Soft Fundamental-Measure Theory introduced by
-Schmidt~\cite{schmidt2000fluid}.  Here I will derive the fundamental
-measures for a hard-sphere fluid, so we can see how this works.
-Schmidt defines the relationship between the weighting functions as:
-\begin{align}
-  w_2(r) &= -\frac{\partial w_3(r)}{\partial r} \\
-  \mathbf{w}_{v2}(\rr) &= w_2(r)\frac{\rr}{r} \\
-  \mathbf{w}_{m2}(\rr) &= w_2(r)\left( \frac{\rr \rr}{r^2}
-                              - \frac{\mathbf{\hat{1}}}{3} \right) \\
-  w_1(r) &= \frac{w_2(r)}{4\pi r} \\
-  \mathbf{w}_{v1}(\rr) &= w_1(r) \frac{\rr}{r} \\
-  w_0(r) &= \frac{w_1(r)}{r}
-\end{align}
-The weighting functions are themselves given by a deconvolution of the
-Mayer $f$ function:
-\begin{align}
-  f(r) &= \exp\left(-\frac{V(r)}{k_BT}\right) - 1 \\
-  &= w_0 * w_3 + w_1 * w_2 - \mathbf{w}_{v1} * \mathbf{w}_{v2}
-\end{align}
-where the $*$ operator denotes a three-dimensional convolution, and a
-scalar product between vectors.  Schmidt explains that there is a
-simple relationship in fourier space between the Mayer $f$ function
-and the weighting function $w_2$:
-\begin{align}
-  \tilde{w}_2(k) &= \pm \sqrt{ik\tilde{f}(k)}
-  \label{eq:w2fromf}
-\end{align}
-where the tilde denotes a \emph{one-dimensional} Fourier transform:
-\begin{align}
-  \tilde{f}(k) &= \int_{-\infty}^\infty f(r) e^{ikr} dr
-\end{align}
-
-I am writing this section to explore this formula, and to help me to
-understand how to deal with this branch cut (i.e. the sign in
-Equation~\ref{eq:w2fromf}).  One interesting challenge here is that
-$\tilde{w}_2(k)$ is \emph{not} actually the function that we will use
-in our convolutions, which are three-dimensional convolutions.  So we
-will still have to go into real space and back again to get our
-convolution kernel.  $\ddot\frown$
+In conclusion, our theory is \fixme{pretty awesome}.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
