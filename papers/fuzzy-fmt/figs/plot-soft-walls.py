@@ -76,7 +76,7 @@ def plot_soft_walls(reduced_density, temps):
 # input: ['figs/new-data/soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # savefig('figs/soft-walls.pdf')
-figure(figsize=(9,16.5))
+figure(figsize=(9,15.5))
 subplot(2, 1, 1)
 plot_soft_walls(60, [10.0, 5.0, 2.5, 1.0, 0.1])
 
