@@ -89,11 +89,25 @@ atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 %% and attractions~\cite{}.
 
 In this paper, we will apply SFMT to study the Weeks-Chandler-Anderson
-repulsive potential~\cite{weeks1971}.  This potential reproduces the repulsive force of
-a Lennard-Jones interaction, which makes it an ideal model for
-interatomic repulsion.
+(WCA) repulsive potential~\cite{weeks1971}.  This potential reproduces
+the repulsive force of a Lennard-Jones interaction, which makes it an
+ideal model for interatomic repulsion.  Mathematically, the WCA
+pair potential is given by
+\begin{align}
+  V_{wca}(r) =
+  \begin{cases}
+    4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
+    \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
+    0, & \textrm{otherwise}.
+  \end{cases}
+\end{align}
+where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters.
+In this paper we will used the dimensionless reduced density $n^*
+\equiv n \sigma^3$ and reduced temperature $T^* \equiv k_BT/\epsilon$.
 
-\section{Soft Fundamental Measure Theory}
+\section{Methods}
+
+\subsection{Soft Fundamental Measure Theory}
 
 Schmidt introduced Soft Fundamental Measure Theory~(SFMT) based on
 FMT~\cite{schmidt1999density} where spheres can penetrate at an
@@ -110,7 +124,7 @@ for star polymers~\cite{schmidt2000density, groh2001density}. SFMT was
 also tested in a number of other papers~\cite{rosenfeld2000fluid}
 \fixme{more citations}.
 
-\section{Barker-Henderson hard sphere}
+\subsection{Barker-Henderson hard sphere}
 
 Another approach to account for the temperature dependence of
 realistic fluids is the from Barker-Herson's
@@ -126,7 +140,7 @@ is the radius for which $V(r)$ goes to zero. We use this result in a White
 Bear hard sphere DFT to compare against our approximation of SFMT.
 
 
-\section{Theory}
+\subsection{Our Theory}
 
 We use the White Bear version of the Fundamental-Measure Theory~(FMT)
 functional published in reference~\cite{roth2002whitebear}.  The FMT
@@ -158,7 +172,7 @@ using the weighted densities
   n_0 = \frac{n_2}{4\pi R^2}
 \end{align}
 
-\section{Theory}
+\subsection{Our Theory Again?!}
 
 Soft Fundamental-Measure Theory~(SFMT) is a generalization of FMT to
 soft potentials. In SFMT, the weight functions are modified but retain:
@@ -290,7 +304,7 @@ $\tilde{w}_2(k)$.
       \sigma}\tilde{w}_2(k) \right]
 \end{align}
  
-\section{Comparison with simulation}
+\section{Results}
 
 \subsection{Homogeneous limit}
 
@@ -394,7 +408,7 @@ overall.
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Comparison with experiment}
+\subsection{Argon}
 
 We compare our theory and BH data with experimental data for Argon. In
 Figure~\ref{fig:argon-plots} we plot the radial distribution function
