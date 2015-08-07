@@ -10,6 +10,8 @@ USING_PART_OF_NAMESPACE_EIGEN
 #include <stdlib.h>
 #include <string.h>
 
+#include "version-identifier.h"
+
 double ran();
 Vector3d ran3();
 
@@ -62,6 +64,7 @@ int main(int argc, char *argv[]){
     printf("usage:  %s Nspheres dx uncertainty_goal filename \n there will be more!\n", argv[0]);
     return 1;
   }
+  printf("version: %s\n",version_identifier());
 
 
   printf("Command line: ");
@@ -568,6 +571,7 @@ int main(int argc, char *argv[]){
           printf("Error creating file %s\n", outfilename);
           return 1;
         }
+        fprintf(out, "# %s\n", version_identifier());
         if (flat_div){
           fprintf(out, "%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0]);
         } else if (spherical_inner_wall || testp) {
