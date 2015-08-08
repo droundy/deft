@@ -110,23 +110,28 @@ temperature $T^* \equiv k_BT/\epsilon$.
 
 \subsection{Soft Fundamental Measure Theory}
 
-SFMT is a generalization of FMT to soft interactions and \fixme{
-  Schmidt chose because the range of the weighted densities is at a
-  distance of one sphere radius}. The weight functions are modified
-but retain: the direct correlation in the low-density limit, the exact
-free energy in the zero-dimensional cavity limit, and relation to the
-generating weight function $w_3(\rr)$~\cite{schmidt1999density}. The
-new weight functions are also made to deconvolve the Mayer function
+SFMT is a generalization of FMT to soft interactions. \fixme{An
+  advantage of FMT, as Schmidt points outs, is that the range of the
+  weighted densities is at a distance of one sphere radius}. In SFMT,
+the weight functions are modified but retain: the direct correlation
+in the low-density limit, the exact free energy in the
+zero-dimensional cavity limit, and relation to the generating weight
+function $w_3(\rr)$~\cite{schmidt1999density}. The new weight
+functions are also made to deconvolve the Mayer function,
 \begin{equation}
   f(r) = \exp (-\beta V(r)) - 1
 \end{equation}
-but retain the same relationships as in FMT\fixme{redundant?}
+(where $\beta = 1/k_BT$), and retain the same weight function
+dependencies from FMT\fixme{redundant?}
 \begin{align}
   \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 , \quad
-  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{4\pi R} \\
+  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{4\pi R}
+  \label{eq:n-vectors}\\
   n_1 &= \frac{n_2}{4\pi R} , \quad
-  n_0 = \frac{n_2}{4\pi R^2} \\
+  n_0 = \frac{n_2}{4\pi R^2} 
+  \label{eq:n-0-1}\\
   &\hspace{0.5 cm} n_3 = -\int n_2 ~\textrm{d}r.
+  \label{eq:n-3}
 \end{align}
 
 Furthermore, Schmidt shows~\cite{schmidt2000fluid} that $n_2$ is
@@ -134,31 +139,25 @@ related to the Mayer function by
 \begin{equation}\label{eq:mayerandw2}
   \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
 \end{equation}
-This gives two options for constructing a theory from SFMT: choose a
-pair potential and solve for $w_2$(difficult) or construct a $w_2$ and
-find the pair potential(easier). Schmidt tested SFTM for a mixture of
-soft and hard spheres as well as for star
-polymers~\cite{schmidt2000density, groh2001density}. SFMT was also
-tested in a number of other papers~\cite{rosenfeld2000fluid}
-\fixme{more citations}.
+This gives two options for constructing a theory directly using SFMT:
+choose a pair potential and solve for $w_2$(difficult) or construct a
+$w_2$ and verify that the pair potential is reasonable.
 
 \subsection{Barker-Henderson hard sphere}
 
 Another approach to account for the temperature dependence of
 realistic fluids is Barker-Herson's
 approach\cite{barker1967perturbation}. This theory takes any general
-repulsive pair potential and creates a hard sphere reference fluid
+repulsive pair potential, $V(r)$, and creates a hard sphere reference fluid
 with a temperature dependent diameter and higher order repulsive
 terms. The hard sphere diameter is
 \begin{align}
   d = \int_0^{\sigma_{BH}}\left( 1 - e^{\beta V(r)} \right)\mathrm{dr}
 \end{align} 
-where $\beta = \frac{1}{kT}$, $V(r)$ is the pair potential, and
-$\sigma_{BH}$ is the radius for which $V(r)$ goes to zero. We utilize
-this variable diameter and create a White Bear hard sphere DFT to
-compare its behavior with the soft sphere DFT we construct in this
-paper.
-
+where $\sigma_{BH}$ is the radius for which $V(r)$ goes to zero. We
+utilize this variable diameter to create a White
+Bear~\cite{roth2002whitebear} hard sphere DFT and compare its behavior
+with the soft sphere DFT we construct in this paper.
 
 \subsection{Our Theory}
 
@@ -184,10 +183,13 @@ using the weighted densities
 \begin{align}
   n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - R) d\rr' \\
   n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - R) d\rr'
+  \label{eq:white-bear-n2}
 \end{align}
 
-\subsection{Our Theory Again?!}
-
+In this paper, we will modify $n_2(\rr)$ to approximate the SFMT
+relation in Equation~\ref{eq:mayerandw2}, and utilize the relations in
+Equations~\ref{eq:n-vectors}-\ref{eq:n-3} to construct a new free
+energy functional.
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/potential-plot}
@@ -203,34 +205,35 @@ using the weighted densities
 \caption{plot of potential.}
 \label{fig:w2-comparison}
 \end{figure}
-
-We use a WCA (Weeks-Chandler-Anderson) pair potential\cite{weeks1971},
-which is the Lennard-Jones potential with the attractive portion
-removed. We approximate the Mayer function as
+First, we approximate the Mayer function as an error function in order
+to deconvolve analytically similar to Schmidt~\cite{schmidt2000fluid}
 \begin{align}
-  f(r) \approx \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right)
+  f(r) \approx \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right).
 \end{align}
-then
+The pair potential for this function is given by
 \begin{align}
-  V_{erf}(r) \approx -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
+  V_{erf}(r) = -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].
 \end{align}
-Expanding $V_{erf}(r)$ in a power series gives the approximation
+where $\alpha$ and $\Xi$ are fitting parameters that will be used to
+match $V_{erf}$ to the WCA potential. Expanding $V_{erf}(r)$ in a
+power series gives the approximation ar $r=\alpha$
 \begin{align}
   V_{erf}(\alpha) &\approx k_BT \ln 2.
 \end{align}
-Setting $V_{wca}$ and and the approximate $V_{erf}$ equal at $r=\alpha$, we solve
-for $\alpha$ and find that
+Setting $V_{wca}(alpha) = V_{erf}(alpha)$, we solve for $\alpha$ and
+find that
 \begin{align}
   \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         \ln 2}} \right)^{\frac{1}{6}}.
 \end{align}
-Next, we set $V_{wca}$ and both potential's slopes equal at $r = \alpha$ and find that
+Next, we set both potential's slopes equal at $r = \alpha$ and solve
+for $\Xi$ to find
 \begin{align}
   \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
       2} + \ln 2 \right)}
 \end{align}
-
+We plot the results of this approximation in Figures~\ref{fig:potential-plot} and \ref{fig:w2-comparison}.
 The approximate weight functions from the erf model are
 \begin{align}
   w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}} \\
@@ -241,8 +244,8 @@ as in FMT.
 
 \subsection{Weighting functions in fourier space}
 
-We Fourier transform our weight functions because simulations are
-carried out in Fourier space.  We find that
+We Fourier transform our weight functions to perform simulations in
+Fourier space.  We find that
 \begin{align}
   \tilde{w}_3(k) &= \frac{4\pi}{k} \int_0^\infty r w_3(r) \sin(kr) dr \\ 
   &= \frac{4\sqrt{\pi}}{k^3}\int_{-\sigma/2a}^\infty \left[
