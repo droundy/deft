@@ -101,9 +101,10 @@ pair potential is given by
     0, & \textrm{otherwise}.
   \end{cases}
 \end{align}
-where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters.
-In this paper we will used the dimensionless reduced density $n^*
-\equiv n \sigma^3$ and reduced temperature $T^* \equiv k_BT/\epsilon$.
+where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
+and $R$ is a single sphere radius.  In this paper we will used the
+dimensionless reduced density $n^* \equiv n \sigma^3$ and reduced
+temperature $T^* \equiv k_BT/\epsilon$.
 
 \section{Methods}
 
@@ -184,12 +185,6 @@ using the weighted densities
   n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - R) d\rr' \\
   n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - R) d\rr'
 \end{align}
-\begin{align}
-  \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 , \quad
-  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{4\pi R} \\
-  n_1 &= \frac{n_2}{4\pi R} , \quad
-  n_0 = \frac{n_2}{4\pi R^2}
-\end{align}
 
 \subsection{Our Theory Again?!}
 
@@ -209,18 +204,9 @@ using the weighted densities
 \label{fig:w2-comparison}
 \end{figure}
 
-We use a WCA (Weeks-Chandler-Anderson) pair
-potential\cite{weeks1971}, which is the Lennard-Jones potential
-with the attractive portion removed:
-\begin{align}
-  V_{wca}(r) =
-  \begin{cases}
-    4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
-    \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
-    0, & \textrm{otherwise}.
-  \end{cases}
-\end{align}
-We approximate the Mayer function as
+We use a WCA (Weeks-Chandler-Anderson) pair potential\cite{weeks1971},
+which is the Lennard-Jones potential with the attractive portion
+removed. We approximate the Mayer function as
 \begin{align}
   f(r) \approx \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right)
 \end{align}
