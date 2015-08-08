@@ -51,7 +51,7 @@ def plot_radial(reduced_density, temps):
 # input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
 # savefig('figs/radial-distribution.pdf')
-figure(figsize=(9,15.5))
+figure(figsize=(9,14.5))
 subplot(2, 1, 1)
 plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
 
