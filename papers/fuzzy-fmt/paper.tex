@@ -109,15 +109,20 @@ In this paper we will used the dimensionless reduced density $n^*
 
 \subsection{Soft Fundamental Measure Theory}
 
-Schmidt introduced Soft Fundamental Measure Theory~(SFMT) based on
-FMT~\cite{schmidt1999density} where spheres can penetrate at an
-energy cost determined by a pair potential. SFMT was created to
-generalize the weight functions of FMT while keeping the range of
-the weight functions at the soft sphere radius. Schmidt gives three
-criteria for the weight functions: they will deconvolve the Mayer
-function, yield the exact zero-dimensional single cavity limit, and
-they give a reasonable approximation fo the multi-cavity
-limit~\cite{schmidt1999density}.
+SFMT was created to generalize the weight functions of FMT to soft
+interactions while keeping the range of the weighted densities at a
+distance of one sphere radius. Schmidt gives three criteria for the
+weight functions: they will deconvolve the Mayer function, yield the
+exact zero-dimensional single cavity limit, and give a reasonable
+approximation for the multi-cavity limit~\cite{schmidt1999density}.  A
+key feature of SFMT is that the weighted densities retain the same
+relationship as in FMT:
+\begin{align}
+  \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 , \quad
+  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{4\pi R} \\
+  n_1 &= \frac{n_2}{4\pi R} , \quad
+  n_0 = \frac{n_2}{4\pi R^2}
+\end{align}
 
 Schmidt tested SFTM for a mixture of soft and hard spheres as well as
 for star polymers~\cite{schmidt2000density, groh2001density}. SFMT was
@@ -127,17 +132,19 @@ also tested in a number of other papers~\cite{rosenfeld2000fluid}
 \subsection{Barker-Henderson hard sphere}
 
 Another approach to account for the temperature dependence of
-realistic fluids is the from Barker-Herson's
-approach\cite{barker1967perturbation}. Their theory is a model for
+realistic fluids is Barker-Herson's
+approach\cite{barker1967perturbation}. This theory is a model for
 taking any general repulsive pair potential and creating a hard sphere
 reference fluid with a temperature dependent diameter along with
 higher order repulsive terms. The hard sphere diameter is
 \begin{align}
-  d = \int_0^\sigma\left( 1 - e^{\beta V(r)} \right)\mathrm{dr}
+  d = \int_0^{\sigma_{BH}}\left( 1 - e^{\beta V(r)} \right)\mathrm{dr}
 \end{align} 
-where $\beta = \frac{1}{kT}$, $V(r)$ is the pair potential, and $\sigma$
-is the radius for which $V(r)$ goes to zero. We use this result in a White
-Bear hard sphere DFT to compare against our approximation of SFMT.
+where $\beta = \frac{1}{kT}$, $V(r)$ is the pair potential, and
+$\sigma_{BH}$ is the radius for which $V(r)$ goes to zero. We utilize
+this variable diameter and create a White Bear hard sphere DFT to
+compare its behavior with the soft sphere DFT we construct in this
+paper.
 
 
 \subsection{Our Theory}
