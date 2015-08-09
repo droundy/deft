@@ -48,7 +48,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
 \section{Introduction}
-
 The idea of liquids as composed of hard spheres dates back over two
 millenia~\cite{lucretius}.  In the 20th century, we came to understand
 atoms as inherently soft, but it was shown that their repulsion could
@@ -153,6 +152,7 @@ with a temperature dependent diameter and higher order repulsive
 terms. The hard sphere diameter is
 \begin{align}
   d = \int_0^{\sigma_{BH}}\left( 1 - e^{\beta V(r)} \right)\mathrm{dr}
+  \label{eq:bh-diameter}
 \end{align} 
 where $\sigma_{BH}$ is the radius for which $V(r)$ goes to zero. We
 utilize this variable diameter to create a White
@@ -186,8 +186,8 @@ using the weighted densities
   \label{eq:white-bear-n2}
 \end{align}
 
-In this paper, we will modify $n_2(\rr)$ to approximate the SFMT
-relation in Equation~\ref{eq:mayerandw2}, and utilize the relations in
+We modify $n_2(\rr)$ to approximate the SFMT relation in
+Equation~\ref{eq:mayerandw2}, and utilize the relations in
 Equations~\ref{eq:n-vectors}-\ref{eq:n-3} to construct a new free
 energy functional.
 \begin{figure}
@@ -217,7 +217,7 @@ The pair potential for this function is given by
     \alpha}{\Xi} \right) + 1 \right) \right].
 \end{align}
 where $\alpha$ and $\Xi$ are fitting parameters that will be used to
-match $V_{erf}$ to the WCA potential. Expanding $V_{erf}(r)$ in a
+\fixme{match} $V_{erf}$ to the WCA potential. Expanding $V_{erf}(r)$ in a
 power series gives the approximation ar $r=\alpha$
 \begin{align}
   V_{erf}(\alpha) &\approx k_BT \ln 2.
@@ -228,8 +228,8 @@ find that
   \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         \ln 2}} \right)^{\frac{1}{6}}.
 \end{align}
-Next, we set both potential's slopes equal at $r = \alpha$ and solve
-for $\Xi$ to find
+We then evalueate the slope of both potentials at $r = \alpha$ and set
+them equal. This yields the other fitting parameter
 \begin{align}
   \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
       2} + \ln 2 \right)}
@@ -315,15 +315,23 @@ $\tilde{w}_2(k)$.
  
 \section{Results}
 
+For all of our simulations, we construct a Barker-Henderson hard
+sphere fluid with a diameter determined by Eq.~\ref{eq:bh-diameter}
+using the WCA potential as the pair potential. The BH fluid is known
+to give good restuls, so we use it as a reference for our DFT.
+
 \subsection{Homogeneous limit}
 
 As a simple test for the equation of state, we compare the theory for
-a homogeneous soft-sphere fluid and compare to Monte-Carlo (MC)
-simulation. The results show very good agreement for lower densities
-across all temperatures shown in Figure \ref{fig:p-vs-packing}, and at
-higher temperatures not shown. Differences between the DFT and MC results
-become quite apparent at $n^*=0.6$ and above which includes fluid to solid
-transitions starting at $n^*=0.8$ that are not predicted by our DFT.
+a homogeneous soft-sphere fluid to MC simulation. The results
+shown in Figure~\ref{fig:p-vs-packing} display very good agreement for
+lower densities across all temperatures shown in Figure and at higher
+temperatures which are not shown. Differences between the DFT(solid
+lines) and MC results(dotted lines) become quite apparent at $n^*=0.6$
+and above which includes fluid to solid transitions starting at
+$n^*=0.8$ that are not predicted by our DFT in the pressure. Our
+theory consistently predicts higher pressure which suggests
+\fixme{something?}.
 
 \begin{figure}
 \begin{center}
@@ -363,14 +371,18 @@ exact radial distribution function.
 In Figure \ref{fig:radial-distribution}(bottom), we plot the results
 for a reduced density of $n^*=1.0$ for three different
 tempreatures. While both Barker-Henderson hard spheres and our DFT
-both overstimate the density at contact, ours is marginally worse at
+both overstimate the density at contact, our theory differs more at
 the lowest temperature shown here. For the density oscillations, our
 DFT's error is as good as the Barker-Henderson results.
 
 \subsection{Soft spheres near a hard wall}
 
 As a test for one dimensional behavior, we will look at the density
-profile for the soft sphere fluid near a hard wall.
+profile for the soft sphere fluid near a hard wall in
+Figure~\ref{fig:hard-walls}. The top plot shows density profiles for
+$n^*=0.6$ and the bottom for $n^*=1.0$. We see that lower densities
+and higher temperatures produce almost exact results, while lower
+temperatures and higher densities reveal disagreement.
 
 
 \begin{figure}
@@ -383,7 +395,7 @@ profile for the soft sphere fluid near a hard wall.
 
 \subsection{Soft spheres near a soft wall}
 
-If we construct a wall of WCA spheres of density $rho$, we
+If we construct a wall of WCA spheres of density $\rho$, we
 find that the potential at a distance z from the wall is
 
 \begin{align}
@@ -397,17 +409,17 @@ V_{SW}(0 < z \leq R_0) &= 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
   \right) \Bigg].
 \label{eq:soft-wall-potential}
 \end{align}
-The distance $R_0$ is equal to $R_W + R_f$, where $R_W$ is the radius of a
-sphere which makes up the wall and $R_f$ is the radius of a sphere
-from the fluid. Both $\epsilon$ and $\sigma_W$ are Lennard-Jones
-parameters between the wall and the fluid.
+The distance $R_0$ is equal to a radius of a sphere which makes up the
+wall plus the radius of a sphere in the fluid. Both $\epsilon$ and
+$\sigma_W$ are Lennard-Jones parameters between the wall and the
+fluid.
 
 In Figure \ref{fig:soft-walls}, we compare our soft sphere DFT
-against MC simulation and a Barker-Henerson fluid near a soft wall
+against MC simulation and a BH fluid near a soft wall
 with the potential given in Equation \ref{eq:soft-wall-potential}. We
 plot the reduced density versus reduced distance from the surface of
 the wall for $n^*=0.6$ at different temperatures. Again, the results
-of our soft sphere fluid is as good as the Barker-Henderson(BH) fluid
+of our soft sphere fluid is as good as the BH fluid
 overall.
 
 \begin{figure}
