@@ -209,6 +209,7 @@ First, we approximate the Mayer function as an error function in order
 to deconvolve analytically similar to Schmidt~\cite{schmidt2000fluid}
 \begin{align}
   f(r) \approx \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right).
+  \label{eq:mayer-approx}
 \end{align}
 The pair potential for this function is given by
 \begin{align}
@@ -221,7 +222,7 @@ power series gives the approximation ar $r=\alpha$
 \begin{align}
   V_{erf}(\alpha) &\approx k_BT \ln 2.
 \end{align}
-Setting $V_{wca}(alpha) = V_{erf}(alpha)$, we solve for $\alpha$ and
+Setting $V_{wca}(\alpha) = V_{erf}(\alpha)$, we solve for $\alpha$ and
 find that
 \begin{align}
   \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
@@ -233,7 +234,24 @@ for $\Xi$ to find
   \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
       2} + \ln 2 \right)}
 \end{align}
-We plot the results of this approximation in Figures~\ref{fig:potential-plot} and \ref{fig:w2-comparison}.
+We plot the results of this approximation in
+Figures~\ref{fig:potential-plot} and \ref{fig:w2-comparison}. In
+Figure~\ref{fig:potential-plot} we see the temperature dependence of
+the approximation in comparison to the WCA potential. Vertical dotted
+lines show the $\alpha$ at which $V_{erf}$ and $V_{wca}$ are matched.
+
+Figure~\ref{fig:w2-comparison} compares the dervative of the Mayer
+function with a WCA pair potential to the derivative of our
+approximate $f(r)$ from Equation~\ref{eq:mayer-approx}. The two
+leftmost verticle lines show the $\alpha$ where the potential
+functions have been matched, and the rightmost shows where the WCA
+potential, and thus f', goes to zero. Our approximation does exist
+slightly past the WCA cutoff for both temperatures but quickly go to
+zero in a reasonable interval. The lower temperature is more peaked
+and closer to the cutoff which produces more disagreement. This is
+demonstrated within our results where we find lower temperatures to be
+less accurate.
+
 The approximate weight functions from the erf model are
 \begin{align}
   w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}} \\
