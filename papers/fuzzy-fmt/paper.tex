@@ -311,8 +311,14 @@ $\tilde{w}_2(k)$.
 \begin{align}
   \tilde{w}_0(k) &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
       \sigma}\tilde{w}_2(k) \right]
+  \label{eq:w0-k}
 \end{align}
- 
+This results in another approximation we must make. In real space we modify $n_0$ to agree with Equation~\ref{eq:w0-k}. So
+\begin{align} 
+ n_0(\rr) \approx \frac{2}{\alpha} \left[2 n_1(\rr) - \frac{1}{2
+     \pi \alpha} n_2(\rr) \right]
+\end{align}
+
 \section{Results}
 
 For all of our simulations, we construct a Barker-Henderson hard
@@ -450,7 +456,12 @@ overestimate density at contact.
 
 \section{Conclusion}
 
-In conclusion, our theory is \fixme{pretty awesome}.
+In conclusion, our theory is \fixme{pretty awesome}. The theory
+presented in this paper is as good as a Barker-Henderson hard sphere
+fluid for a range of densities and temperatures. The advantage of our
+theory is that we can use it \emph{as is} rather than needing to
+accomodate for discontinuities and delta functions of hard sphere
+fluids.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
