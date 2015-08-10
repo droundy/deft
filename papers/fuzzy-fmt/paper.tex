@@ -92,8 +92,11 @@ In this paper, we will apply SFMT to study the Weeks-Chandler-Anderson
 the repulsive force of a Lennard-Jones interaction, which makes it an
 ideal model for interatomic repulsion.  Mathematically, the WCA
 pair potential is given by
+\newcommand\erf{\mathrm{erf}}
+\newcommand\Vwca{V_{\mathrm{wca}}}
+\newcommand\Verf{V_{\erf}}
 \begin{align}
-  V_{wca}(r) =
+  \Vwca(r) =
   \begin{cases}
     4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
     \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
@@ -109,38 +112,106 @@ temperature $T^* \equiv k_BT/\epsilon$.
 
 \subsection{Soft Fundamental Measure Theory}
 
-SFMT is a generalization of FMT to soft interactions. \fixme{An
-  advantage of FMT, as Schmidt points outs, is that the range of the
-  weighted densities is at a distance of one sphere radius}. In SFMT,
-the weight functions are modified but retain: the direct correlation
-in the low-density limit, the exact free energy in the
-zero-dimensional cavity limit, and relation to the generating weight
-function $w_3(\rr)$~\cite{schmidt1999density}. The new weight
-functions are also made to deconvolve the Mayer function,
+Soft fundamental measure theory (SFMT) is a generalization of FMT to
+soft interactions developed by
+Schmidt~\cite{schmidt1999density}. \fixme{An advantage of FMT, as
+  Schmidt points outs, is that the range of the weighted densities is
+  at a distance of one sphere radius}.  Like Rosenfeld's
+FMT~\cite{rosenfeld1989}, the free energy is written as an integral of
+functions of a set of weighted densities known as \emph{fundamental
+  measures}:
+\begin{equation}
+A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
+\Phi_3(\rr)\right) d\rr \; ,
+\end{equation}
+with integrands
+\begin{align}
+\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
+\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
+\Phi_3 &= \frac{n_2^3/3 - n2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}^2}{8*\pi*(1-n_3)^2}
+\end{align}
+which is derived from dimensional crossover from the exact free energy
+in the zero-dimensional cavity limit.  The fundamental measures
+\begin{equation}
+  n_{i}(\textbf{r}) = \int
+  n(\textbf{r}')w_i(|\textbf{r}-\textbf{r}'|) d\textbf{r}'
+  \label{eq:n-convolution}
+\end{equation}
+are defined as convolutions with weight functions similar to those of
+hard-sphere FMT. Like hard-sphere fundamental measures, the new weight
+functions are constructed so as to deconvolve the Mayer function,
 \begin{equation}
   f(r) = \exp (-\beta V(r)) - 1
 \end{equation}
-(where $\beta = 1/k_BT$), and retain the same weight function
-dependencies from FMT\fixme{redundant?}
+where $\beta = 1/k_BT$.  The weighting functions are related by
 \begin{align}
-  \mathbf{n}_{V2} &= \mathbf{\nabla} n_3 , \quad
-  \mathbf{n}_{V1} = \frac{\mathbf{n}_{V2}}{4\pi R}
+  \mathbf{w}_{V2} &= w_2\frac{\textbf{r}}{r} &
+  \mathbf{w}_{V1} &= w_1\frac{\textbf{r}}{r}
   \label{eq:n-vectors}\\
-  n_1 &= \frac{n_2}{4\pi R} , \quad
-  n_0 = \frac{n_2}{4\pi R^2} 
-  \label{eq:n-0-1}\\
-  &\hspace{0.5 cm} n_3 = -\int n_2 ~\textrm{d}r.
-  \label{eq:n-3}
+  w_1 &= \frac{w_2}{4\pi R} &
+  w_0 &= \frac{w_2}{4\pi R^2}
+  \label{eq:n-0-1}
 \end{align}
-
-Furthermore, Schmidt shows~\cite{schmidt2000fluid} that $n_2$ is
-related to the Mayer function by
-\begin{equation}\label{eq:mayerandw2}
-  \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
+\begin{equation}
+   w_3(r) = \int_{r}^{\infty} w_2(r') dr',
+  \label{eq:n-3}
 \end{equation}
-This gives two options for constructing a theory directly using SFMT:
-choose a pair potential and solve for $w_2$(difficult) or construct a
-$w_2$ and verify that the pair potential is reasonable.
+where it is helpful to note that the integral in Eq.~\ref{eq:n-3} is
+a one-dimentional integral over radius.
+
+Furthermore, Schmidt proves that SFMT produces the exact functional in
+the low-density limit, provided the weighting function that defines
+$n_2$ is related to the Mayer function by a convolution
+\begin{equation}\label{eq:mayerandw2}
+  \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r'),
+\end{equation}
+with the other weighting functions given by the equations
+above~\cite{schmidt2000fluid}.  We note that these equations are
+satisfied by traditional hard-sphere FMT as well as SFMT, for the same
+reason: they are needed in order to ensure the correct low-density
+behavior.  Equation~\ref{eq:mayerandw2} is the challenge point for
+SFMT: deconvolving the Mayer $f$ function for a realistic potential is
+challenging, which has limited the number of applications of this
+theory to simple liquids.
+
+There are two options for constructing a theory directly using SFMT:
+either one must choose a pair potential and deconvolve the Mayer
+function to solve for $w_2$---which is difficult---or one can
+construct a $w_2$ and solve for the pair potential that weighting
+function represents.  Both approaches are used in the original papers
+introducing SFMT, where the latter is exemplified by the ``erf
+potential''~\cite{schmidt1999density, schmidt2000fluid}. \fixme{From
+  home I don't have ready access to these papers, so please check that
+  what I'm writing is true, and adjust the terminology for ``erf
+  potential'' to match what Schmidt writes.  Better if we can restrict
+  ourselves to citing the first paper here, which was actually
+  original.}
+
+The ``erf potential'' introduced in Ref.~\citenum{schmidt1999density}
+corresponds to a Gaussian form for the weighting function $w_2$
+The approximate weight functions from the erf model are
+\begin{align}
+  w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}}
+  \label{eq:gaussianw2}
+\end{align}
+where $\Xi$ and $\alpha$ are parameters with dimensions of length.
+This choice for $w_2$ results in a form containing an error function
+for the $w_3$ weighting function, the Mayer $f$ function, and the pair
+potential:
+\begin{align}
+  w_3(r) &= \tfrac12 \left( 1 - \mathrm{erf}\left(\frac{r-\alpha/2}{\Xi}\right) \right) \\
+  f(r) &= \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right)
+  \label{eq:mayer-approx} \\
+  \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
+    \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
+\end{align}
+The ``erf potential'' is shown in Fig.~\ref{fig:potential-plot}, and
+the first derivative of the Mayer $f$ function corresponding to this
+potential is shown in Fig.~\ref{fig:w2-comparison}.  Sadly, as is
+evident from Eq.~\ref{eq:Verf}, this simple functional relationship
+only holds for one chosen temperature.  At other temperatures, the
+same potential leads to an entirely different form for $f$ and $w_2$,
+which is not analytically tractable.
 
 \subsection{Barker-Henderson hard sphere}
 
@@ -153,19 +224,18 @@ terms. The hard sphere diameter is
 \begin{align}
   d = \int_0^{\sigma_{BH}}\left( 1 - e^{\beta V(r)} \right)\mathrm{dr}
   \label{eq:bh-diameter}
-\end{align} 
-where $\sigma_{BH}$ is the radius for which $V(r)$ goes to zero. We
+\end{align}
+where $\sigma_{BH}$ is the radius for which $V(r)$ goes to zero.  We
 utilize this variable diameter to create a White
 Bear~\cite{roth2002whitebear} hard sphere DFT and compare its behavior
 with the soft sphere DFT we construct in this paper.
 
-\subsection{Our Theory}
-
 We use the White Bear version of the Fundamental-Measure Theory~(FMT)
-functional published in reference~\cite{roth2002whitebear}.  The FMT
-functional describes the excess free energy of a hard-sphere fluid.
-This particular FMT reduces to the Carnahan-Starling equation of state
-for homogeneous systems.
+functional~\cite{roth2002whitebear}, which describes the excess free
+energy of an inhomogeneous hard-sphere fluid.  The White Bear
+functional reduces to the Carnahan-Starling free energy for
+homogeneous systems, and has been found to be accurate under a wide
+range of inhomogeneous configurations.
 \begin{equation}
 A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
 \end{equation}
@@ -179,145 +249,93 @@ with integrands
   36\pi n_3^2\left( 1 - n_3 \right)^2
 } ,
 \end{align}
-using the weighted densities
+using the weighted density
 \begin{align}
-  n_3(\rr) &= \int n(\rr') \Theta(\left|\rr - \rr'\right| - R) d\rr' \\
-  n_2(\rr) &= \int n(\rr') \delta(\left|\rr - \rr'\right| - R) d\rr'
+  n_2(\rr) &= \int n(\rr') w_2(\left|\rr - \rr'\right| - R) d\rr' \\
+           &= \int n(\rr') \delta(\left|\rr - \rr'\right| - R) d\rr'
   \label{eq:white-bear-n2}
 \end{align}
+where the remaining weighted densities are given by
+Eqs.~\ref{eq:n-convolution} through~\ref{eq:n-3}.
 
-We modify $n_2(\rr)$ to approximate the SFMT relation in
-Equation~\ref{eq:mayerandw2}, and utilize the relations in
-Equations~\ref{eq:n-vectors}-\ref{eq:n-3} to construct a new free
-energy functional.
+\subsection{Soft FMT for the WCA fluid}
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/potential-plot}
 \end{center}
-\caption{plot of potential.}
+\caption{The WCA potential, and approximations to this potential
+  constructed for two different temperatures.}
 \label{fig:potential-plot}
 \end{figure}
+
+Our approach to model the WCA fluid is to approximate the WCA
+potential by using the erf potential with temperature-dependent
+parameters.  We select the parameters $\Xi$ and $\alpha$ to match the
+value and derivative of $\Verf(r)$ and $\Vwca(r)$ at the distance
+$\alpha$, corresponding to the maximum slope of the Mayer $f$
+function.  In essence, this is similar to the Barker-Henderson
+approach, in which a hard-sphere potential with temperature-dependent
+diameter is used to model a soft repulsive fluid.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/w2-comparison}
 \end{center}
-\caption{plot of potential.}
+\caption{The derivative of the Mayer $f$ function from the WCA
+  potential, and the convolution of the fitted Gaussian $w_2$ with
+  itself at two different temperatures.  According to
+  Eq.~\ref{eq:mayerandw2} these should be identical in order to
+  accurately reproduce the low-density behavior of the fluid.}
 \label{fig:w2-comparison}
 \end{figure}
-First, we approximate the Mayer function as an error function in order
-to deconvolve analytically similar to Schmidt~\cite{schmidt2000fluid}
-\begin{align}
-  f(r) \approx \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right).
-  \label{eq:mayer-approx}
-\end{align}
-The pair potential for this function is given by
-\begin{align}
-  V_{erf}(r) = -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
-    \alpha}{\Xi} \right) + 1 \right) \right].
-\end{align}
-where $\alpha$ and $\Xi$ are fitting parameters that will be used to
-\fixme{match} $V_{erf}$ to the WCA potential. Expanding $V_{erf}(r)$ in a
-power series gives the approximation ar $r=\alpha$
-\begin{align}
-  V_{erf}(\alpha) &\approx k_BT \ln 2.
-\end{align}
-Setting $V_{wca}(\alpha) = V_{erf}(\alpha)$, we solve for $\alpha$ and
-find that
+
+We begin by equating the values of the potentials at distance $\alpha$
+tells us that the $\alpha$ parameter must be given by
 \begin{align}
   \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         \ln 2}} \right)^{\frac{1}{6}}.
 \end{align}
-We then evalueate the slope of both potentials at $r = \alpha$ and set
-them equal. This yields the other fitting parameter
+The alpha parameter roughly measures the length-scale of the
+interaction, and like the Barker-Henderson diameter, decreases with
+increasing temperature.  Finally, equating the slope of both
+potentials at $r = \alpha$ yields the other parameter
 \begin{align}
   \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
-      2} + \ln 2 \right)}
+      2} + \ln 2 \right)},
 \end{align}
-We plot the results of this approximation in
-Figures~\ref{fig:potential-plot} and \ref{fig:w2-comparison}. In
-Figure~\ref{fig:potential-plot} we see the temperature dependence of
-the approximation in comparison to the WCA potential. Vertical dotted
-lines show the $\alpha$ at which $V_{erf}$ and $V_{wca}$ are matched.
+which is a measure of the effective softness of the interaction, and
+increases with the temperature.  We show the resulting approximation
+for the potential in Figures~\ref{fig:potential-plot} for two
+different temperatures.  We see the temperature dependence of the
+approximation in comparison to the WCA potential, with the
+approximation at higher temperatures being more accurate for smaller
+differences. Vertical dotted lines show the values of $\alpha$ at
+which $\Verf$ and $\Vwca$ are matched, a solid black vertical line
+represents the distance at which the WCA force goes to zero, and the
+horizontal dotted lines illustrate the two temperatures.  At both
+temperatures, the largest deviations are seen at very small distances,
+and thus very high potential energies.
 
-Figure~\ref{fig:w2-comparison} compares the dervative of the Mayer
-function with a WCA pair potential to the derivative of our
-approximate $f(r)$ from Equation~\ref{eq:mayer-approx}. The two
-leftmost verticle lines show the $\alpha$ where the potential
-functions have been matched, and the rightmost shows where the WCA
-potential, and thus f', goes to zero. Our approximation does exist
-slightly past the WCA cutoff for both temperatures but quickly go to
-zero in a reasonable interval. The lower temperature is more peaked
-and closer to the cutoff which produces more disagreement. This is
-demonstrated within our results where we find lower temperatures to be
-less accurate.
+Figure~\ref{fig:w2-comparison} compares the dervative of the Mayer $f$
+function corresponding to the WCA pair potential with convolution of
+the the fitted Gaussian $w_2$ from Eq.~\ref{eq:gaussianw2} with
+itself, as in Eq.~\ref{eq:mayerandw2}.  The two vertical dotted lines
+show the $\alpha$ where the potential functions have been matched, and
+the the solid vertical line shows where the WCA force, and potential,
+and thus $f'_{\mathrm{wca}}$, goes to zero. The erf result extends
+slightly past the cutoff at which $f'_{\mathrm{wca}}$ vanishes for
+both temperatures, but does quickly go to zero. At lower lower
+temperatures $w_2$ and $f'$are more peaked and approach the cutoff, as
+the system approaches hard-sphere behavior in which these functions
+are Dirac $\delta$ functions.
 
-The approximate weight functions from the erf model are
-\begin{align}
-  w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}} \\
-  w_3(r) &= \tfrac12 ( 1 - \mathrm{erf}((r-\alpha/2)/\Xi) ).
-\end{align}
-with all other weight functions retaining their relation to $w_2(r)$
-as in FMT.
-
-\subsection{Weighting functions in fourier space}
-
-We Fourier transform our weight functions to perform simulations in
-Fourier space.  We find that
-\begin{align}
-  \tilde{w}_3(k) &= \frac{4\pi}{k} \int_0^\infty r w_3(r) \sin(kr) dr \\ 
-  &= \frac{4\sqrt{\pi}}{k^3}\int_{-\sigma/2a}^\infty \left[
-    \sin(k(au+\frac{\sigma}{2})) - k(au + \frac{\sigma}{2})
-    \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du.
-\end{align}
-This is not an analytic function, but we assume that we are working at
-low enough temperatures so that our function reduces to zero by $u=
--\frac{\sigma}{2a}$. We extend the lower limit to $-\infty$ then
-\begin{align}
-  \tilde{w}_3(k) &\approx
-  \frac{4\pi}{k^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 +
-    \frac{a^2k^2}{2} \right) \sin\left(\frac{k\sigma}{2}\right) -
-    \frac{k}{2} \sigma\cos\left(\frac{k \sigma}{2}\right) \right]
-\end{align}
-
-We apply the same method to the other weight functions. These are
-\begin{align}
-  \tilde{w}_2(k) &=\frac{2\pi}{k} e^{-\left(\frac{ak}{2} \right)^2}
-  \bigg(a^2 k \cos\left(\frac{k\sigma}{2}\right) \notag \\
-  & \hspace{8em}+\sigma \sin\left(\frac{k\sigma}{2}\right) \bigg) \\ 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \tilde{w}_1(k) &=
-  \frac{1}{k}e^{-\left(\frac{ak}{2} \right)^2}
-  \sin\left(\frac{k\sigma}{2}\right) \\
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \tilde{\mathbf{w}}_{2V}(\kk) &=
-  \frac{i \pi}{k} e^{-\left(\frac{ak}{2} \right)^2}\bigg[ \left(\sigma^2 - a^4k^2\right)
-    \cos\left(\frac{k\sigma}{2}\right) \notag\\ 
-    & \hspace{5em}- 2\sigma \left(a^2k + \frac{1}{k}
-    \right)\sin\left(\frac{k\sigma}{2}\right) \bigg]
-  \mathbf{\hat{k}} \\ 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \mathbf{\tilde{w}}_{1V}(k)&= \frac{i}{k}
-   e^{-\left(\frac{ak}{2} \right)^2} \bigg[ \frac{\sigma}{2}
-    \cos\left(\frac{k\sigma}{2}\right) \notag\\
-    & \hspace{6em}- \left( \frac{a^2k}{2} +
-    \frac{1}{k} \right) \sin\left(\frac{k\sigma}{2}\right) \bigg]
-  \mathbf{\hat{k}}
-\end{align}
-$\tilde{w}_0(k)$ contains a $\frac{1}{r}$ term that expands the
-integrand  as an infinite series. The first two terms were kept and
-could be expressed in terms of $\tilde{w}_1(k)$ and
-$\tilde{w}_2(k)$.
-\begin{align}
-  \tilde{w}_0(k) &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
-      \sigma}\tilde{w}_2(k) \right]
-  \label{eq:w0-k}
-\end{align}
-This results in another approximation we must make. In real space we modify $n_0$ to agree with Equation~\ref{eq:w0-k}. So
-\begin{align} 
- n_0(\rr) \approx \frac{2}{\alpha} \left[2 n_1(\rr) - \frac{1}{2
-     \pi \alpha} n_2(\rr) \right]
-\end{align}
+In Appendix~\ref{sec:fourier} we provide analytical expressions for
+the Fourier transforms of each of the weighting functions.  In this
+step, we make one additional approximation beyond the erf
+approximation, which is to approximate $w_0$ as a linear combination
+of $w_1$ and $w_2$, which results from a power series approximation
+valid in the low-temperature limit, when $\Xi\ll\alpha$.
 
 \section{Results}
 
@@ -463,6 +481,68 @@ theory is that we can use it \emph{as is} rather than needing to
 accomodate for discontinuities and delta functions of hard sphere
 fluids.
 
+\appendix
+
+\section{Weighting functions in Fourier space}\label{sec:fourier}
+
+We Fourier transform our weight functions to perform simulations in
+Fourier space.  We find that
+\begin{align}
+  \tilde{w}_3(k) &= \frac{4\pi}{k} \int_0^\infty r w_3(r) \sin(kr) dr \\ 
+  &= \frac{4\sqrt{\pi}}{k^3}\int_{-\sigma/2a}^\infty \left[
+    \sin(k(au+\frac{\sigma}{2})) - k(au + \frac{\sigma}{2})
+    \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du.
+\end{align}
+This is not an analytic function, but we assume that we are working at
+low enough temperatures so that our function reduces to zero by $u=
+-\frac{\sigma}{2a}$. We extend the lower limit to $-\infty$ then
+\begin{align}
+  \tilde{w}_3(k) &\approx
+  \frac{4\pi}{k^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 +
+    \frac{a^2k^2}{2} \right) \sin\left(\frac{k\sigma}{2}\right) -
+    \frac{k}{2} \sigma\cos\left(\frac{k \sigma}{2}\right) \right]
+\end{align}
+
+We apply the same method to the other weight functions. These are
+\begin{align}
+  \tilde{w}_2(k) &=\frac{2\pi}{k} e^{-\left(\frac{ak}{2} \right)^2}
+  \bigg(a^2 k \cos\left(\frac{k\sigma}{2}\right) \notag \\
+  & \hspace{8em}+\sigma \sin\left(\frac{k\sigma}{2}\right) \bigg) \\ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \tilde{w}_1(k) &=
+  \frac{1}{k}e^{-\left(\frac{ak}{2} \right)^2}
+  \sin\left(\frac{k\sigma}{2}\right) \\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \tilde{\mathbf{w}}_{2V}(\kk) &=
+  \frac{i \pi}{k} e^{-\left(\frac{ak}{2} \right)^2}\bigg[ \left(\sigma^2 - a^4k^2\right)
+    \cos\left(\frac{k\sigma}{2}\right) \notag\\ 
+    & \hspace{5em}- 2\sigma \left(a^2k + \frac{1}{k}
+    \right)\sin\left(\frac{k\sigma}{2}\right) \bigg]
+  \mathbf{\hat{k}} \\ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \mathbf{\tilde{w}}_{1V}(k)&= \frac{i}{k}
+   e^{-\left(\frac{ak}{2} \right)^2} \bigg[ \frac{\sigma}{2}
+    \cos\left(\frac{k\sigma}{2}\right) \notag\\
+    & \hspace{6em}- \left( \frac{a^2k}{2} +
+    \frac{1}{k} \right) \sin\left(\frac{k\sigma}{2}\right) \bigg]
+  \mathbf{\hat{k}}
+\end{align}
+$\tilde{w}_0(k)$ contains a $\frac{1}{r}$ term that expands the
+integrand  as an infinite series. The first two terms were kept and
+could be expressed in terms of $\tilde{w}_1(k)$ and
+$\tilde{w}_2(k)$.
+\begin{align}
+  \tilde{w}_0(k) &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
+      \sigma}\tilde{w}_2(k) \right]
+  \label{eq:w0-k}
+\end{align}
+This results in another approximation we must make. In real space we modify $n_0$ to agree with Equation~\ref{eq:w0-k}. So
+\begin{align} 
+ n_0(\rr) \approx \frac{2}{\alpha} \left[2 n_1(\rr) - \frac{1}{2
+     \pi \alpha} n_2(\rr) \right]
+\end{align}
+
 \bibliography{paper}% Produces the bibliography via BibTeX.
+
 
 \end{document}
