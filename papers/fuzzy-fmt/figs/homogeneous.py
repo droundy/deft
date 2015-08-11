@@ -40,7 +40,6 @@ erfnred = erfdata[1:,0]
 pressures = erfdata[1:, 1:]
 mynans = pressures != pressures
 pressures[mynans] = 1e30
-print pressures
 
 temperatures, n_reduced = meshgrid(erftemp, erfnred)
 
@@ -153,10 +152,24 @@ savefig('figs/p-vs-n.pdf', bbox_inches=0)
 
 figure()
 
+Nlabel = []
+Tlabel = []
+Plabel = []
+MCPlabel = []
+
 for i in range(9,len(n_reduced[:,0]),10)[:10]:
   plot(temperatures[i,:], pressures[i,:],
-       styles.density_color(n_reduced[i,0])+'-',
-       label='approximation $n^{*} = %g$' % n_reduced[i,0])
+       styles.density_color(n_reduced[i,0])+'-')
+  if i > 9:
+    Nlabel.append(n_reduced[i,0])
+    Tlabel.append(2.75 - 2.7*(n_reduced[i,0] - 0.2)**0.9)
+    Plabel.append(pressures[i,:][temperatures[i,:] >= Tlabel[-1]][0])
+    MCPlabel.append(0.0)
+
+Nlabel = np.array(Nlabel)
+Tlabel = np.array(Tlabel)
+Plabel = np.array(Plabel)
+MCPlabel = np.array(MCPlabel)
 
 # input: 'papers/fuzzy-fmt/figs/mcwca-*-*.dat.prs'
 # for rd in arange(0.70, 0.35, -0.1):
@@ -184,7 +197,7 @@ for i in range(9,len(n_reduced[:,0]),10)[:10]:
 for rd in arange(1.00, 0.25, -0.1):
   temps = []
   pressures = []
-  print 'could use:', glob.glob('figs/mcfcc-%.4f-*.dat.prs' % (rd))
+  # print 'could use:', glob.glob('figs/mcfcc-%.4f-*.dat.prs' % (rd))
   for temp in arange(0.05, 3.05, 0.05):
     fname = 'figs/mcfcc-%.4f-%.4f.dat.prs' % (rd, temp)
     if os.path.exists(fname):
@@ -194,13 +207,33 @@ for rd in arange(1.00, 0.25, -0.1):
       # out a reduced pressure, so we need to do a conversion.
       pressures.append(p*2.0**(5/2.0))
   if len(temps) > 0:
-    plot(temps, pressures, styles.density_color(rd)+'o:')
+    plot(temps, pressures, styles.density_color(rd)+':')
+    if len(np.argwhere(np.abs(Nlabel - rd) < 0.001)) == 1:
+      print 'We have MC for rd', rd
+      pressures = np.array(pressures)
+      temps = np.array(temps)
+      i = np.argwhere(np.abs(Nlabel - rd) < 0.001)[0][0]
+      j = np.argwhere(temps > Tlabel[i])[0][0]
+      MCPlabel[i] = pressures[j]
+
+print 'mcplabel', MCPlabel
+
+for i in range(0,len(Tlabel)):
+  if MCPlabel[i] == 0:
+    MCPlabel[i] = Plabel[i]
+  text(Tlabel[i], 0.5*(Plabel[i] + MCPlabel[i]), '$n^{*} = %g$' % Nlabel[i],
+       color=styles.density_color(Nlabel[i]),
+       backgroundcolor='w',
+       va="center", ha="center")
 
 xlim(xmin=0, xmax = 3)
 ylim(ymin=0, ymax = 25)
 xlabel('$T^*$')
 ylabel('$p^*$')
-legend(loc='best').get_frame().set_alpha(0.25)
+
+plot([],[], 'k-', label='SFMT theory')
+plot([],[], 'k:', label='Monte Carlo')
+legend(loc='best', frameon=False)
 
 savefig('figs/p-vs-T.pdf', bbox_inches=0)
 

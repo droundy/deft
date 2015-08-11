@@ -1,5 +1,6 @@
 def density_color(rd):
     dc = { 0.1: 'k',
+           0.2: 'y',
            0.3: 'g',
            0.4: 'r',
            0.5: 'm',
@@ -11,7 +12,7 @@ def density_color(rd):
         }
     if float(str(rd)) in dc:
         return dc[float(str(rd))]
-    return ''
+    return 'k'
 
 color = { 100.0: 'k',
           10.0: 'c',
