@@ -207,7 +207,7 @@ for rd in arange(1.00, 0.25, -0.1):
       # out a reduced pressure, so we need to do a conversion.
       pressures.append(p*2.0**(5/2.0))
   if len(temps) > 0:
-    plot(temps, pressures, styles.density_color(rd)+':')
+    plot(temps, pressures, styles.density_color(rd)+'--')
     if len(np.argwhere(np.abs(Nlabel - rd) < 0.001)) == 1:
       print 'We have MC for rd', rd
       pressures = np.array(pressures)
