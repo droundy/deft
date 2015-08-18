@@ -1,4 +1,4 @@
-#/usr/bin/python2
+#!/usr/bin/python
 
 from __future__ import division
 from math import pi       # REALLY don't need all of math
@@ -21,12 +21,16 @@ Ns = list(xrange(0,4))
 #arg Ns = [range(2,10)]
 
 Overwrite = False
-if '-Q' in sys.argv:  # Check for overwrite flag in arguments
+if '-O' in sys.argv:  # Check for overwrite flag in arguments
     Overwrite = True
 
 def free_energy_over_kT_to_ff(free_energy):
     # bisection?
-    ff = np.sqrt(free_energy) # This is not TRUE!! Or approximate!
+    n = 0
+    while n < 1000: #better value?
+        ff = np.sqrt(free_energy) # This is not TRUE!! Or approximate!
+        # C-S: (4*ff - 3*ff**2)/(1-ff)**2 = F  
+        if 
     return ff
 
 for N in Ns:
@@ -73,4 +77,4 @@ for N in Ns:
             print("Running with command: %s" % cmd)
             os.system(cmd)
         else:
-            print("You're trying to overwrite files, use the flag -Q in order to do so.")
+            print("You're trying to overwrite files, use the flag -O in order to do so.")
