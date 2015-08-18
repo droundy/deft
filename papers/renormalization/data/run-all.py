@@ -14,10 +14,10 @@ L = float(eval((sys.argv[3])))
 Ns = eval(sys.argv[4])
 #arg Ns = [range(2,10)]
 
-cmd_fe = 'python run-absolute.py %d %g %d %s' % (i,ww,L,Ns)
+cmd_fe = 'python run-absolute.py %d %g %d "%s"' % (i,ww,L,Ns)
 print(cmd_fe)
 os.system(cmd_fe)
 
-cmd_mc = 'python run-monte-carlo.py %d %g %d %s' %(i,ww,L,Ns)
+cmd_mc = "python run-monte-carlo.py %d %g %d '%s'" %(i,ww,L,Ns)
 print(cmd_mc)
 os.system(cmd_mc)
