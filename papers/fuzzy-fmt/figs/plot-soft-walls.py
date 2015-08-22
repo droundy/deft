@@ -32,6 +32,7 @@ def average_positive_and_negative(data):
     return data[:len(data)//2, :]
 
 def plot_soft_walls(reduced_density, temps):
+    have_labelled_bh = False
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
     NUM = 1
@@ -45,17 +46,23 @@ def plot_soft_walls(reduced_density, temps):
         else:
             plot(z, nreduced_density, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
             have_labelled_dft = True
+
+        fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
+        data = loadtxt(fname)
+        z = data[:,0]
+        nreduced_density = data[:,1]
+        if have_labelled_bh:
+            plot(z, nreduced_density, styles.color[temp]+':')
+        else:
+            plot(z, nreduced_density, styles.color[temp]+':', label = 'BH $T^* = %g$' % temp)
+            have_labelled_bh = True
+        plot(z, nreduced_density, styles.bh_dft(temp))
         
         fname = 'figs/mc-soft-wall-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
         zmin = data[:,0].min()
         plot(smooth(data[:,0]-zmin,NUM), smooth(data[:,1],NUM)/2**(-5.0/2.0),
              styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
-
-        fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
-        data = loadtxt(fname)
-        z = data[:,0]
-        plot(z, data[:,1], styles.bh_dft(temp))
 
     #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
 
