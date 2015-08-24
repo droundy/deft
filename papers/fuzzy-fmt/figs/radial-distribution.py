@@ -13,6 +13,7 @@ import os
 import styles
 
 def plot_radial(reduced_density, temps):
+    have_labelled_bh = False
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
     for temp in temps:
@@ -26,17 +27,22 @@ def plot_radial(reduced_density, temps):
         else:
             plot(r, g, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
             have_labelled_dft = True
-        
-        fname = 'figs/mcfcc-%04.4f-%.4f.dat.gradial' % (reduced_density/100.0, temp)
-        g = loadtxt(fname)
-        plot(g[:,0]/sigma_over_R, g[:,1], styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
         fname = 'figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)
         data = loadtxt(fname)
         r = data[:,0]
         nreduced_density = data[:,1]
         g = nreduced_density/(reduced_density/100.0)
-        plot(r, g, styles.bh_dft(temp))
+        if have_labelled_bh:
+            plot(r, g, styles.color[temp]+':')
+        else:
+            plot(r, g, styles.color[temp]+':', label = 'BH $T^* = %g$' % temp)
+            have_labelled_bh = True
+        #plot(r, g, styles.bh_dft(temp))
+        
+        fname = 'figs/mcfcc-%04.4f-%.4f.dat.gradial' % (reduced_density/100.0, temp)
+        g = loadtxt(fname)
+        plot(g[:,0]/sigma_over_R, g[:,1], styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
             
     title('Radial distribution function at $n^* = %g$' % (reduced_density/100))
     xlabel(r'$r/\sigma$')
