@@ -214,7 +214,7 @@ int main(int argc, const char *argv[]) {
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
       = pow(volume/min_cell_width/min_cell_width/min_cell_width, 1.0/3);
-    if (max_cubic_width*max_cubic_width*max_cubic_width > numcells) {
+    if (max_cubic_width*max_cubic_width*max_cubic_width >= numcells) {
       // We can get away with a cubic cell, so let's do so.  Cubic
       // cells are nice and comfortable!
       sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
