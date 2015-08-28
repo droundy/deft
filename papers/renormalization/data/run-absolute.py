@@ -2,9 +2,9 @@
 
 from __future__ import division
 from math import pi       # REALLY don't need all of math
-import os, numpy, sys
+import os, numpy as np, sys
 
-os.system("fac ../../../free-energy-monte-carlo")
+#os.system("fac ../../../free-energy-monte-carlo")
 
 R=1
 
@@ -17,22 +17,35 @@ ww=1.3
 L=5
 #arg L = [5.0]
 
-Ns = list(xrange(0,4))
+Ns = list(xrange(0,2))
 #arg Ns = [range(2,10)]
 
 Overwrite = False
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     Overwrite = True
 
-def free_energy_over_kT_to_ff(free_energy):
-    # bisection?
+def free_energy_over_kT_to_ff(free_energy): # Find an ff that corresponds to given free energy
+    # bisection
     n = 0
-    while n < 1000: #better value?
-        ff = np.sqrt(free_energy) # This is not TRUE!! Or approximate!
-        # C-S: (4*ff - 3*ff**2)/(1-ff)**2 = F  
-        if 
+    low,high = 0,1
+    resolution = 1E-8
+    while n < 500: #better value?
+        ff_guess = (low+high)/2
+        free_energy_next =  (4*ff_guess - 3*ff_guess**2)/(1-ff_guess)**2
+        if abs(free_energy_next - free_energy) < resolution:
+            return ff_guess
+        elif free_energy_next > free_energy:
+            high = (high+low)/2
+        else:
+            low = (high +low)/2
+        n+=1
     return ff
 
+approximate_free_energies = np.arange(np.log(2), 20, np.log(2))
+ffs = np.zeros_like(approximate_free_energies)
+for k in xrange(len(ffs)):
+    ffs[k] = free_energy_over_kT_to_ff(approximate_free_energies[k])
+   
 for N in Ns:
     dirname = 'scrunched-ww%4.2f-L%04.2f/i%01d/N%03d/absolute' % (ww,L,i,N)
     os.system('mkdir -p '+dirname)
@@ -48,23 +61,19 @@ for N in Ns:
     sim_iters = 1000000
     sc_period = int(max(10, 1*N*N/10))
 
-    ffs = np.zeros(steps+1)
-    ffs[0] = (4/3.0)*pi*R**3/L**3
-    for j in xrange(steps):
-        if j!= 0 and j % 4 == 0:
-            step_size = step_size * 0.5
-        ffs[j+1] = ffs[j] + step_size
+    # ffs = np.zeros(steps+1)
+    # ffs[0] = (4/3.0)*pi*R**3/L**3                # Deprecated; kept for posterity.
+    # for j in xrange(steps):
+    #     if j!= 0 and j % 4 == 0:
+    #         step_size = step_size * 0.5
+    #     ffs[j+1] = ffs[j] + step_size
 
-    # approximate_free_energies = np.arange(np.log(2), 100, np.log(2))
-    # ffs = np.zeros_like(approximate_free_energies)
-    # for i in xrange(len(ffs)):
-    #     ffs[i] = free_energy_over_kT_to_ff(approximate_free_energies[i])
-
+   
     for j in xrange(len(ffs)-1):
         filename = '%05d' % (j)
 
         if not os.path.isfile(dirname+'/'+filename+'.dat'):
-            #cmd = 'srun -J %s' % filename
+           # cmd = 'srun -J %s' % filename
             cmd = ' ../../../free-energy-monte-carlo'
             cmd += ' --ff %g' % ffs[j]
             cmd += ' --sc_period %d' % sc_period
