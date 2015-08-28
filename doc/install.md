@@ -38,7 +38,7 @@ You need ...
     texlive-full
     gnuplot
     python-matplotlib
-    python-scipy
+    python-scipy python3-scipy
     python-sympy
     python-markdown # for the documentation
     inkscape # for the documentation
