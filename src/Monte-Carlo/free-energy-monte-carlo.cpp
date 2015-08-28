@@ -219,6 +219,12 @@ int main(int argc, const char *argv[]) {
       // cells are nice and comfortable!
       sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
     } else {
+      printf("N = %d\n", sw.N);
+      printf("ff = %g\n", ff);
+      printf("min_cell_width = %g\n", min_cell_width);
+      printf("volume**1/3 = %g\n", pow(volume, 1.0/3));
+      printf("max_cubic_width**3 = %d, numcells = %d\n",
+             max_cubic_width*max_cubic_width*max_cubic_width, numcells);
       // A cubic cell won't work with our initialization routine, so
       // let's go with a lopsided cell that should give us something
       // that will work.
@@ -342,16 +348,8 @@ int main(int argc, const char *argv[]) {
   sw.walkers_up = new long[sw.energy_levels]();
 
 
-  // Radial distribution function (RDF) histogram
-  long *g_energy_histogram = new long[sw.energy_levels]();
-  const int g_bins = round(min(min(min(sw.len[y],sw.len[z]),sw.len[x]),max_rdf_radius)
-                           / de_g / 2);
-  long **g_histogram = new long*[sw.energy_levels];
-  for(int i = 0; i < sw.energy_levels; i++)
-    g_histogram[i] = new long[g_bins]();
-
   printf("memory use estimate = %.2g G\n\n",
-         8*double((6 + g_bins)*sw.energy_levels)/1024/1024/1024);
+         8*double(6*sw.energy_levels)/1024/1024/1024);
 
   sw.balls = new ball[sw.N];
 
@@ -581,22 +579,6 @@ int main(int argc, const char *argv[]) {
     }
 
     // ---------------------------------------------------------------
-    // Add data to RDF histogram
-    // ---------------------------------------------------------------
-    if(!sw.walls){
-      g_energy_histogram[0]++;
-      for(int i = 0; i < sw.N; i++){
-        for(int j = 0; j < sw.N; j++){
-          if(i != j){
-            const vector3d r = periodic_diff(sw.balls[i].pos, sw.balls[j].pos, sw.len,
-                                             sw.walls);
-            const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[0][r_i]++;
-          }
-        }
-      }
-    }
-    // ---------------------------------------------------------------
     // Save to file
     // ---------------------------------------------------------------
 
@@ -631,34 +613,11 @@ int main(int argc, const char *argv[]) {
               longest_valid_run, total_checks_of_small_cell, total_failed_small_checks,
               total_valid_small_checks, valid_runs, failed_runs, average_valid_run, average_failed_run);
 
-      // Save RDF
+      // Save data
       if(!sw.walls){
         FILE *g_out = fopen((const char *)g_fname, "w");
         fprintf(g_out, "%s", headerinfo);
         fprintf(g_out, "%s", countinfo);
-        fprintf(g_out, "# data table containing values of g "
-                "(i.e. radial distribution function)\n"
-                "# first column reserved for specifying energy level\n"
-                "# column number r_n (starting from the second column, "
-                "counting from zero) corresponds to radius r given by "
-                "r = (r_n + 0.5) * de_g\n");
-        const double density = sw.N/sw.len[x]/sw.len[y]/sw.len[z];
-        const double total_vol = sw.len[x]*sw.len[y]*sw.len[z];
-        for(int i = 0; i < sw.energy_levels; i++){
-          if(g_histogram[i][g_bins-1] > 0){ // if we have RDF data at this energy
-            fprintf(g_out, "\n%i",i);
-            for(int r_i = 0; r_i < g_bins; r_i++) {
-              const double probability = (double)g_histogram[i][r_i]
-                / g_energy_histogram[i];
-              const double r = (r_i + 0.5) * de_g;
-              const double shell_vol =
-                4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
-              const double n2 = probability/total_vol/shell_vol;
-              const double g = n2/sqr(density);
-              fprintf(g_out, " %8.5f", g);
-            }
-          }
-        }
         fclose(g_out);
       }
 
@@ -683,12 +642,6 @@ int main(int argc, const char *argv[]) {
   delete[] sw.pessimistic_observation;
   delete[] sw.pessimistic_samples;
   delete[] sw.optimistic_samples;
-
-  for (int i = 0; i < sw.energy_levels; i++) {
-    delete[] g_histogram[i];
-  }
-  delete[] g_histogram;
-  delete[] g_energy_histogram;
 
   delete[] headerinfo;
   delete[] g_fname;

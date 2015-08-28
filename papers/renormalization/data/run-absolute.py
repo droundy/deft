@@ -17,7 +17,7 @@ ww=1.3
 L=5
 #arg L = [5.0]
 
-Ns = list(xrange(0,2))
+Ns = list(xrange(0,4))
 #arg Ns = [range(2,10)]
 
 Overwrite = False
@@ -48,9 +48,10 @@ for k in xrange(len(ffs)):
    
 for N in Ns:
     dirname = 'scrunched-ww%4.2f-L%04.2f/i%01d/N%03d/absolute' % (ww,L,i,N)
-    os.system('mkdir -p '+dirname)
     if Overwrite:
-        os.system('rm -r '+dirname)
+        os.system('rm -rf '+dirname)
+    print('mkdir -p '+dirname)
+    os.system('mkdir -p '+dirname)
 
     success_ratios = []
     all_total_checks = []
@@ -61,6 +62,8 @@ for N in Ns:
     sim_iters = 1000000
     sc_period = int(max(10, 1*N*N/10))
 
+    ff_goal = (4*np.pi/3*R**3)*N/L**3 # this is the density 
+
     # ffs = np.zeros(steps+1)
     # ffs[0] = (4/3.0)*pi*R**3/L**3                # Deprecated; kept for posterity.
     # for j in xrange(steps):
@@ -68,22 +71,29 @@ for N in Ns:
     #         step_size = step_size * 0.5
     #     ffs[j+1] = ffs[j] + step_size
 
-   
-    for j in xrange(len(ffs)-1):
+    for j in xrange(len(ffs)-2):
         filename = '%05d' % (j)
+        ff = ffs[j]
+        ff_next = ffs[j+1]
+        if ffs[j+2] > ff_goal:
+            ff_next = ff_goal
 
         if not os.path.isfile(dirname+'/'+filename+'.dat'):
            # cmd = 'srun -J %s' % filename
             cmd = ' ../../../free-energy-monte-carlo'
-            cmd += ' --ff %g' % ffs[j]
+            cmd += ' --ff %g' % ff_next
             cmd += ' --sc_period %d' % sc_period
             cmd += ' --iterations %d' % sim_iters
             cmd += ' --filename %s' % filename
             cmd += ' --data_dir %s' % dirname
-            cmd += ' --ff_small %g' % ffs[j+1]
+            cmd += ' --ff_small %g' % ff
             cmd += ' --N %d' % N
             cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
             print("Running with command: %s" % cmd)
             os.system(cmd)
         else:
             print("You're trying to overwrite files, use the flag -O in order to do so.")
+
+        if ffs[j+2] > ff_goal:
+            # We are all done now!
+            break
