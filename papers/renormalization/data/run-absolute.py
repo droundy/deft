@@ -4,20 +4,20 @@ from __future__ import division
 from math import pi       # REALLY don't need all of math
 import os, numpy as np, sys
 
-#os.system("fac ../../../free-energy-monte-carlo")
+os.system("fac ../../../free-energy-monte-carlo")
 
 R=1
 
-i= 0
-# RG recursion level
+i = eval(sys.argv[1])
+#RG recursion level
 
-ww=1.3
+ww = float(sys.argv[2])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
 
-L=5
+L = float((sys.argv[3]))
 #arg L = [5.0]
 
-Ns = list(xrange(0,4))
+Ns = eval(sys.argv[4])
 #arg Ns = [range(2,10)]
 
 Overwrite = False
