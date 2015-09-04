@@ -29,6 +29,7 @@ for x in generic_sources:
 mkdats = """
 
   papers/fuzzy-fmt/figs/homogeneous
+  papers/fuzzy-fmt/figs/homogeneous-bh
   papers/fuzzy-fmt/figs/radial-wca
   papers/fuzzy-fmt/figs/radial-lj
   papers/fuzzy-fmt/figs/new-radial-lj

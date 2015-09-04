@@ -16,22 +16,38 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "new/HomogeneousSFMTFluidFast.h"
+#include "new/HomogeneousWhiteBearFluidFast.h"
 #include "equation-of-state.h"
 #include "utilities.h"
 #include "handymath.h"
 
 // The following tells fac how to run the executable to generate a
-// homogeneous.dat file.
+// homogeneous-bh.dat file.
 /*--
 
-self.rule(exe, [exe], [os.path.dirname(exe)+'/homogeneous.dat'])
+self.rule(exe, [exe], [os.path.dirname(exe)+'/homogeneous-bh.dat'])
 
 --*/
 
+const double eps = 1.0;
+const double sigma = 1.0; /* Let's define sigma == 1 for this one? */
+const double R = sigma*pow(2.0,1.0/6.0);
+const int N = 10000;
+
+double R_BH(const double kT) {
+  double bh_diameter = 0;
+  const double dr = R/N;
+  const double beta = 1.0/kT;
+  for (double r_cur=dr/2; r_cur < R; r_cur += dr) {
+    const double s6 = uipow(sigma/r_cur, 6);
+    bh_diameter += (1 - exp(-beta*(4*eps*(s6*s6 - s6) + eps)))*dr;
+  }
+  return bh_diameter/2;
+}
+
 int main(int, char **) {
-  FILE *out = fopen("papers/fuzzy-fmt/figs/homogeneous.dat", "w");
-  const double Tmax = 10.0, dT = 0.01, Tmin = dT;
+  FILE *out = fopen("papers/fuzzy-fmt/figs/homogeneous-bh.dat", "w");
+  const double Tmax = 3.1, dT = 0.01, Tmin = dT;
   fprintf(out, "# n_reduced");
   for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
     fprintf(out, "\tp(kT=%g)/nkT", T);
@@ -45,15 +61,18 @@ int main(int, char **) {
   const double dn = 0.01, nmax = 2.5;
   for (double n_reduced = dn; n_reduced <= nmax; n_reduced += dn) {
     fprintf(out, "%g", n_reduced);
+    printf("n_reduced == %g\n", n_reduced);
     for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
       const double temp = T;
 
-      HomogeneousSFMTFluid hf;
-      hf.sigma() = 1; // for this computation we will use sigma as our
-                      // unit of distance to keep things simple.
-      hf.epsilon() = 1;
+      HomogeneousWhiteBearFluid hf;
+
+      hf.R() = R_BH(temp);
+      //printf("rad is %g\n", hf.R());
       hf.kT() = temp;
-      hf.n() = n_reduced;
+      hf.n() = n_reduced/uipow(sigma,3);
+      //printf("dividing by sigma = %g\n", sigma);
+      //printf("eta is %g\n", hf.n()*uipow(hf.R(),3)*M_PI*4/3);
       hf.mu() = 0;
       hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
 

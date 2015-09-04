@@ -446,7 +446,6 @@ for mkdat in Split("""
 	papers/hughes-saft/figs/pressure-with-isotherms
 	papers/contact/figs/gHS-vs-n
 	papers/contact/figs/free-energy
-        papers/fuzzy-fmt/figs/homogeneous
       """):
     Alias('executables',
           env.Program(target = mkdat + '.mkdat',
@@ -508,6 +507,8 @@ for mkdat in Split("""
 	papers/fuzzy-fmt/figs/new-radial-wca
 	papers/fuzzy-fmt/figs/new-bh-radial-wca
 	papers/fuzzy-fmt/figs/new-bh-radial-lj
+        papers/fuzzy-fmt/figs/homogeneous
+        papers/fuzzy-fmt/figs/homogeneous-bh
 	papers/square-well-fluid/figs/new-radial-sw
 	papers/square-well-fluid/figs/homogeneous
 	papers/square-well-fluid/figs/coexistence
@@ -521,6 +522,11 @@ for mkdat in Split("""
                        'src/new/WhiteBearFluidVeffFast.cpp',
                        'src/new/HomogeneousWhiteBearFluidFast.cpp',
                        'src/new/HomogeneousSW_liquidFast.cpp']))
+for mkdat in  Split("""
+        papers/fuzzy-fmt/figs/homogeneous
+        papers/fuzzy-fmt/figs/homogeneous-bh
+      """):
+    env.Command(mkdat+'.dat', mkdat+'.mkdat', './$SOURCE')
 
 for mkdat in Split("""
 	papers/fuzzy-fmt/figs/new-bh-walls

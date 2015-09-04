@@ -33,6 +33,13 @@ eta = density*4*pi/3
 P_cs = density*(1+eta+eta**2)/(1-eta)**3
 P_cs = density
 
+bhdata = loadtxt('figs/homogeneous-bh.dat')
+bhtemp = bhdata[0,1:]
+bhnred = bhdata[1:,0]
+bhpressures = bhdata[1:, 1:]
+bhnans = bhpressures != bhpressures
+bhpressures[bhnans] = 1e30
+
 erfdata = loadtxt('figs/homogeneous.dat')
 erftemp = erfdata[0,1:]
 erfnred = erfdata[1:,0]
@@ -42,6 +49,8 @@ mynans = pressures != pressures
 pressures[mynans] = 1e30
 
 temperatures, n_reduced = meshgrid(erftemp, erfnred)
+
+bhtemperatures, bhn_reduced = meshgrid(bhtemp, bhnred)
 
 # for j in arange(1,len(erfdata[0,:])):
 #   erfpressure = erfdata[:,j]
@@ -160,6 +169,8 @@ MCPlabel = []
 for i in range(9,len(n_reduced[:,0]),10)[:10]:
   plot(temperatures[i,:], pressures[i,:],
        styles.density_color(n_reduced[i,0])+'-')
+  plot(bhtemperatures[i,:], bhpressures[i,:],
+       styles.density_color(n_reduced[i,0])+':')
   if i > 9:
     Nlabel.append(n_reduced[i,0])
     Tlabel.append(2.75 - 2.7*(n_reduced[i,0] - 0.2)**0.9)
@@ -216,7 +227,6 @@ for rd in arange(1.00, 0.25, -0.1):
       j = np.argwhere(temps > Tlabel[i])[0][0]
       MCPlabel[i] = pressures[j]
 
-print 'mcplabel', MCPlabel
 
 for i in range(0,len(Tlabel)):
   if MCPlabel[i] == 0:
@@ -232,7 +242,8 @@ xlabel('$T^*$')
 ylabel('$p^*$')
 
 plot([],[], 'k-', label='SFMT theory')
-plot([],[], 'k:', label='Monte Carlo')
+plot([],[], 'k--', label='Monte Carlo')
+plot([],[], 'k:', label='BH')
 legend(loc='best', frameon=False)
 
 savefig('figs/p-vs-T.pdf', bbox_inches=0)
