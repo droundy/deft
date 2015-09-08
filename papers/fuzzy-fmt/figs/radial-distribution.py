@@ -64,6 +64,7 @@ plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
 subplot(2, 1, 2)
 plot_radial(100, [10.0, 5.0, 2.5])
 
+plt.tight_layout();
 outputname = 'figs/radial-distribution.pdf'
 savefig(outputname, bbox_inches=0)
 print('figs/radial-distribution.pdf')

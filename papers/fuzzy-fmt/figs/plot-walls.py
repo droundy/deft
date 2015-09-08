@@ -78,6 +78,7 @@ plot_walls(60, [10.0, 2.5, 0.1])
 subplot(2, 1, 2)
 plot_walls(100, [10.0, 5.0, 2.5]) # 1.0 could work?
 
+plt.tight_layout();
 outputname = 'figs/hard-walls.pdf'
 savefig(outputname, bbox_inches=0)
 print('figs/hard-walls.pdf')

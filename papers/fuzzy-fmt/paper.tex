@@ -59,7 +59,7 @@ model as the reference system of choice for the theory of
 liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
   lafitte2013accurate}.  One reason for the wide use of the
 hard-sphere fluid hard sphere fluid as a reference system is that it
-is widely studied and well understood, but only for the homogeneous
+is widely studied and well understood, not only for the homogeneous
 fluid~\cite{carnahan1969equation}, but also in the more challenging
 case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
   roth2002whitebear}.  However, the hard-sphere fluid remains a
@@ -72,7 +72,8 @@ Rosenfeld~\cite{rosenfeld1989}.  Due to its combination of
 computational efficiency with accuracy, FMT has since been used as the
 basis for a wide variety of classical density
 functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
-  marechal2013density}.
+  marechal2013density, hughes2013classical, krebs2014improved},
+including those in the previous two chapters.
 %
 In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
 (SFMT)~\cite{schmidt1999density}, which directly treats soft repulsive
@@ -104,9 +105,10 @@ pair potential is given by
   \end{cases}
 \end{align}
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
-and $R$ is a single sphere radius.  In this paper we will used the
-dimensionless reduced density $n^* \equiv n \sigma^3$ and reduced
-temperature $T^* \equiv k_BT/\epsilon$.
+and $R$ is a single sphere radius which is related by $\sigma =
+2^{5/6} R$. In this paper we will used the dimensionless reduced
+density $n^* \equiv n \sigma^3$ and reduced temperature $T^* \equiv
+k_BT/\epsilon$.
 
 \section{Methods}
 
@@ -128,7 +130,7 @@ with integrands
 \Phi_3 &= \frac{n_2^3 - 3 n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}^2}{24\pi(1-n_3)^2}
 \end{align}
 which is derived from dimensional crossover from the exact free energy
-in the zero-dimensional cavity limit.  The fundamental measures
+in the zero-dimensional cavity limit~\cite{schmidt1999density}.  The fundamental measures
 \begin{equation}
   n_{i}(\textbf{r}) = \int
   n(\textbf{r}')w_i(|\textbf{r}-\textbf{r}'|) d\textbf{r}'
@@ -154,11 +156,12 @@ where $\beta = 1/k_BT$.  The weighting functions are related by
   \label{eq:n-3}
 \end{equation}
 where it is helpful to note that the integral in Eq.~\ref{eq:n-3} is
-a one-dimentional integral over radius.
+a one-dimensional integral over radius.
 
 Furthermore, Schmidt proves that SFMT produces the exact functional in
 the low-density limit, provided the weighting function that defines
-$n_2$ is related to the Mayer function by a convolution
+$n_2$ is related to the slope of the Mayer function by a convolution
+with itself
 \begin{equation}\label{eq:mayerandw2}
   \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r'),
 \end{equation}
@@ -187,7 +190,7 @@ between molecules.  Here we will discuss the \emph{error function model}
 Ref.~\citenum{schmidt2000fluid}.
 
 The erf model corresponds to a Gaussian form for the weighting
-function $w_2$ The approximate weight functions from the erf model are
+function $w_2$ The weight function for the erf model is
 \begin{align}
   w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}}
   \label{eq:gaussianw2}
@@ -214,17 +217,16 @@ which is not analytically tractable.
 \subsection{Barker-Henderson hard sphere}
 
 Another approach to account for the temperature dependence of
-realistic fluids is Barker-Herson's
+realistic fluids is Barker-Henderson's
 approach\cite{barker1967perturbation}. This theory takes any general
-repulsive pair potential, $V(r)$, and creates a hard sphere reference fluid
-with a temperature dependent diameter and higher order repulsive
+repulsive pair potential, $V(r)$, and creates a hard sphere reference
+fluid with a temperature dependent diameter and higher order repulsive
 terms. The hard sphere diameter is
 \begin{align}
-  d = \int_0^{\sigma_{BH}}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}
+  d = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
 \end{align}
-where $\sigma_{BH}$ is the radius for which $V(r)$ goes to zero.  We
-utilize this variable diameter to create a White
+We utilize this variable diameter to create a White
 Bear~\cite{roth2002whitebear} hard sphere DFT and compare its behavior
 with the soft sphere DFT we construct in this paper.
 
@@ -288,8 +290,8 @@ diameter is used to model a soft repulsive fluid.
 \label{fig:w2-comparison}
 \end{figure}
 
-We begin by equating the values of the potentials at distance $\alpha$
-tells us that the $\alpha$ parameter must be given by
+We begin by equating the values of the potentials at distance
+$\alpha$, which tells us that the $\alpha$ parameter must be given by
 \begin{align}
   \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         \ln 2}} \right)^{\frac{1}{6}}.
@@ -315,7 +317,7 @@ horizontal dotted lines illustrate the two temperatures.  At both
 temperatures, the largest deviations are seen at very small distances,
 and thus very high potential energies.
 
-Figure~\ref{fig:w2-comparison} compares the dervative of the Mayer $f$
+Figure~\ref{fig:w2-comparison} compares the derivative of the Mayer $f$
 function corresponding to the WCA pair potential with convolution of
 the the fitted Gaussian $w_2$ from Eq.~\ref{eq:gaussianw2} with
 itself, as in Eq.~\ref{eq:mayerandw2}.  The two vertical dotted lines
@@ -324,7 +326,7 @@ the the solid vertical line shows where the WCA force, and potential,
 and thus $f'_{\mathrm{wca}}$, goes to zero. The erf result extends
 slightly past the cutoff at which $f'_{\mathrm{wca}}$ vanishes for
 both temperatures, but does quickly go to zero. At lower lower
-temperatures $w_2$ and $f'$are more peaked and approach the cutoff, as
+temperatures $w_2$ and $f'$ are more peaked and approach the cutoff, as
 the system approaches hard-sphere behavior in which these functions
 are Dirac $\delta$ functions.
 
@@ -340,7 +342,7 @@ valid in the low-temperature limit, when $\Xi\ll\alpha$.
 For all of our simulations, we construct a Barker-Henderson hard
 sphere fluid with a diameter determined by Eq.~\ref{eq:bh-diameter}
 using the WCA potential as the pair potential. The BH fluid is known
-to give good restuls, so we use it as a reference for our DFT.
+to give good results, so we use it as a reference for our DFT.
 
 \subsection{Homogeneous limit}
 
@@ -351,8 +353,7 @@ to give good restuls, so we use it as a reference for our DFT.
 \caption{Reduced pressure versus temperature.  The SFMT result is
   plotted as solid lines, with simulation results as dashed lines.
   The reduced pressure is defined in terms of the Lennard-Jones
-  parameters as $p^{*} \equiv p \sigma^3/\epsilon$. \fixme{Add
-    Barker-Henderson to this plot.}}
+  parameters as $p^{*} \equiv p \sigma^3/\epsilon$.}
 \label{fig:p-vs-T}
 \end{figure}
 
@@ -374,7 +375,7 @@ densities, and found that the agreement with simulation consistently
 improves as the density is decreased, and so we decided to focus on
 just these two interesting cases.  At a reduced density of 0.6, our
 functional is right on the brink of its discrepancy with simulation,
-as is evident from Fig.~\ref{p-vs-T}.  In contrast, the very high
+as is evident from Fig.~\ref{fig:p-vs-T}.  In contrast, the very high
 reduced density of 1.0 is well beyond the point where our SFMT has
 considerably broken down quantitatively, and can demonstrate how it
 fails.
@@ -383,13 +384,13 @@ fails.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=3.5in]{figs/hard-walls}
+  \includegraphics[width=\columnwidth]{figs/hard-walls}
 \end{center}
 \caption{Density distribution of WCA fluid near a hard wall.}
 \label{fig:hard-walls}
 \end{figure}
 
-We begin with the simplest test for inhomogeneous one dimensional
+To begin with the simplest test for inhomogeneous one dimensional
 behavior, we will look at the density profile for the soft sphere
 fluid near a hard wall. We note that a hard wall, in this context, is
 interpreted as a potential felt by our spheres that abruptly
@@ -410,28 +411,41 @@ to the Monte Carlo simulations.
 \subsection{Soft spheres near a soft wall}
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/soft-walls}
+  \begin{center}
+    \includegraphics[width=\columnwidth]{figs/soft-walls}
   \caption{Density distribution of a WCA fluid near a soft wall.}
-\label{fig:soft-walls}
+  \label{fig:soft-walls}
+  \end{center}
 \end{figure}
 
 As a second and more physical case, we construct a wall of made of a
 continuum of WCA spheres with density $\rho$.  The potential
 at a distance z from such a wall is
-\begin{multline}
-V_{SW}(0 < z \leq R_0) =\\ 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
+\begin{align}
+V_{SW}(0 < z \leq R_0) = 2\pi\rho\epsilon\Big[&
   \frac{2\sigma_W^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{R_0^9}\right)
-  \\
-  \quad\quad\quad\quad+ \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
+  +\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3}
+  \right) \notag \\
+  & + \frac{z^3-R_0^3}{6} + \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
   \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
-  \\
-  \hspace{2cm}+\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3}
-  \right) \Bigg].\label{eq:soft-wall-potential}
-\end{multline}
+  \Bigg].
+\label{eq:soft-wall-potential}
+\end{align}
+%% \begin{multline}
+%% V_{SW}(0 < z \leq R_0) =\\ 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
+%%   \frac{2\sigma_W^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{R_0^9}\right)
+%%   \\
+%%   \quad\quad\quad\quad+ \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
+%%   \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
+%%   \\
+%%   \hspace{2cm}+\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3}
+%%   \right) \Bigg].\label{eq:soft-wall-potential}
+%% \end{multline}
 The distance $R_0$ is equal to a radius of a sphere which makes up the
-wall plus the radius of a sphere in the fluid. Both $\epsilon$ and
+wall plus the radius of a sphere in the fluid. The potential is zero
+when $z>R_0$, and is infinite for $z\leq 0$. Both $\epsilon$ and
 $\sigma_W$ are Lennard-Jones parameters between the wall and the
-fluid.
+fluid. $R_0$ and $\sigma_W$ are related by $\sigma_W = 2^{5/6} R_0$.
 
 In Figure \ref{fig:soft-walls}, we compare our soft sphere DFT
 against MC simulation and a BH fluid near a soft wall
@@ -445,19 +459,24 @@ overall.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=3.5in]{figs/radial-distribution}
+  \includegraphics[width=\columnwidth]{figs/radial-distribution}
 \end{center}
-\caption{Radial distribution functions with 0.6(top) and 1.0(bottom) reduced densities.}
+\caption{Radial distribution functions with 0.6 (top) and 1.0 (bottom)
+  reduced densities. As in other figures, the solid lines give our
+  SDFT result, the dashed lines give Monte Carlo simulation results,
+  and the dotted line represents predictions using the
+  Barker-Henderson approach.}
 \label{fig:radial-distribution}
 \end{figure}
 
 For three dimensional comparisons, we plot radial distribution
-funtions.  Results for reduced densitied below $n^* = 0.6$ have been
-ommitted as they were exact over temperature ranges from $T^*=0.01$ to
-$T^*=10$. The top frame of Figure \ref{fig:radial-distribution}(top) shows
+functions computed using the test-particle approach.  Results for
+reduced densities below $n^* = 0.6$ have been
+omitted as they were exact over temperature ranges from $T^*=0.01$ to
+$T^*=10$. The top frame of Fig.~\ref{fig:radial-distribution} (top) shows
 the radial distribution for a range of temperatures at a reduced
 density of $n^* = 0.6$. We see very good agreement of our DFT with
-Monte-Carlo simulation at this reduced density. Our DFT's behaviour at
+Monte-Carlo simulation at this reduced density. Our DFT's behavior at
 higher temperatures are in almost exact agreement, while the lower
 temperatures have slight disagreement just after the first peak at
 contact and in the subsequent oscillations where it underestimates the
@@ -465,20 +484,20 @@ amplitude of oscillation. Comparison with the Barker-Henderson results
 shows our DFT to have a similar magnitude of error relative the exact
 radial distribution function.
 
-In Figure \ref{fig:radial-distribution}(bottom), we plot the results
+In Fig.~\ref{fig:radial-distribution} (bottom), we plot the results
 for a reduced density of $n^*=1.0$ for three different
 temperatures. While both Barker-Henderson hard spheres and our DFT
-both overstimate the density at contact, our theory differs more at
+both overestimate the density at contact, our theory differs more at
 the lowest temperature shown here. For the density oscillations, our
-DFT's error is as good as the Barker-Henderson results.
+DFT's error is comparable to that of the Barker-Henderson results.
 
 \begin{figure*}
   \begin{center}
     \includegraphics[width=7.0in]{figs/argon-plots}
   \end{center}
-  \caption{Radial distribution functions of Argon. \fixme{Add
-      description of the pressure and temperature in physical units
-      for each plot.}}
+  \caption{Radial distribution functions of Argon. From left to right
+    the experimental data was taken at 85 K and vapor pressure, at 293
+    K and 1.1 GPa, and at 48 K and 9.92 MPa.}
   \label{fig:argon-plots}
 \end{figure*}
 
@@ -490,12 +509,13 @@ distribution function of Argon by computing the radial distribution of
 a WCA fluid surrounding a single Lennard-Jones particle.  We consider
 three density/temperature pairs for which experimental data is
 available~\cite{mikolaj2004structure, eggert2002quantitative,
-  yarnell1973structure}, and which roughly span the range of reduced
-densities from 0.6 to 1.0.\fixme{Add some description of the pressures
-  and temperatures in physical units.}  For each system we compute the
-radial distribution function with Monte Carlo simulation, as well as
-SFMT and the Barker-Henderson approach.  For our WCA fluid and
-Lennard-Jones test particle, we used the Lennard-Jones parameters
+yarnell1973structure}, and which roughly span the range of reduced
+densities from 0.6 to 1.0. The three experimental results were
+performed at vapor pressure, 9.92 MPa, and 1.1 GPa; and at
+temperatures of 85 K, 48 K, and 293 K respectively. For each system we
+compute the radial distribution function with Monte Carlo simulation,
+as well as SFMT and the Barker-Henderson approach.  For our WCA fluid
+and Lennard-Jones test particle, we used the Lennard-Jones parameters
 developed by Verlet: $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon =
 119.8$~K~\cite{verlet1967computer}.
 
@@ -509,73 +529,11 @@ Barker-Henderson approach.  Both theories significantly overestimate
 the height of the first peak.
 \section{Conclusion}
 
-In conclusion, our theory is \fixme{pretty awesome}. The theory
-presented in this paper is as good as a Barker-Henderson hard sphere
-fluid for a range of densities and temperatures. The advantage of our
-theory is that we can use it \emph{as is} rather than needing to
-accomodate for discontinuities and delta functions of hard sphere
-fluids.
-
-\appendix
-
-\section{Weighting functions in Fourier space}\label{sec:fourier}
-
-We Fourier transform our weight functions to perform simulations in
-Fourier space.  We find that
-\begin{align}
-  \tilde{w}_3(k) &= \frac{4\pi}{k} \int_0^\infty r w_3(r) \sin(kr) dr \\ 
-  &= \frac{4\sqrt{\pi}}{k^3}\int_{-\sigma/2a}^\infty \left[
-    \sin(k(au+\frac{\sigma}{2})) - k(au + \frac{\sigma}{2})
-    \cos(k(au+\frac{\sigma}{2}))\right] e^{-u^2} du.
-\end{align}
-This is not an analytic function, but we assume that we are working at
-low enough temperatures so that our function reduces to zero by $u=
--\frac{\sigma}{2a}$. We extend the lower limit to $-\infty$ then
-\begin{align}
-  \tilde{w}_3(k) &\approx
-  \frac{4\pi}{k^3}e^{-\left(\frac{ak}{2}\right)^2}\left[ \left(1 +
-    \frac{a^2k^2}{2} \right) \sin\left(\frac{k\sigma}{2}\right) -
-    \frac{k}{2} \sigma\cos\left(\frac{k \sigma}{2}\right) \right]
-\end{align}
-
-We apply the same method to the other weight functions. These are
-\begin{align}
-  \tilde{w}_2(k) &=\frac{2\pi}{k} e^{-\left(\frac{ak}{2} \right)^2}
-  \bigg(a^2 k \cos\left(\frac{k\sigma}{2}\right) \notag \\
-  & \hspace{8em}+\sigma \sin\left(\frac{k\sigma}{2}\right) \bigg) \\ 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \tilde{w}_1(k) &=
-  \frac{1}{k}e^{-\left(\frac{ak}{2} \right)^2}
-  \sin\left(\frac{k\sigma}{2}\right) \\
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \tilde{\mathbf{w}}_{2V}(\kk) &=
-  \frac{i \pi}{k} e^{-\left(\frac{ak}{2} \right)^2}\bigg[ \left(\sigma^2 - a^4k^2\right)
-    \cos\left(\frac{k\sigma}{2}\right) \notag\\ 
-    & \hspace{5em}- 2\sigma \left(a^2k + \frac{1}{k}
-    \right)\sin\left(\frac{k\sigma}{2}\right) \bigg]
-  \mathbf{\hat{k}} \\ 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \mathbf{\tilde{w}}_{1V}(k)&= \frac{i}{k}
-   e^{-\left(\frac{ak}{2} \right)^2} \bigg[ \frac{\sigma}{2}
-    \cos\left(\frac{k\sigma}{2}\right) \notag\\
-    & \hspace{6em}- \left( \frac{a^2k}{2} +
-    \frac{1}{k} \right) \sin\left(\frac{k\sigma}{2}\right) \bigg]
-  \mathbf{\hat{k}}
-\end{align}
-$\tilde{w}_0(k)$ contains a $\frac{1}{r}$ term that expands the
-integrand  as an infinite series. The first two terms were kept and
-could be expressed in terms of $\tilde{w}_1(k)$ and
-$\tilde{w}_2(k)$.
-\begin{align}
-  \tilde{w}_0(k) &= \frac{2}{\sigma} \left[2\tilde{w}_1(k) - \frac{1}{2 \pi
-      \sigma}\tilde{w}_2(k) \right]
-  \label{eq:w0-k}
-\end{align}
-This results in another approximation we must make. In real space we modify $n_0$ to agree with Equation~\ref{eq:w0-k}. So
-\begin{align} 
- n_0(\rr) \approx \frac{2}{\alpha} \left[2 n_1(\rr) - \frac{1}{2
-     \pi \alpha} n_2(\rr) \right]
-\end{align}
+The theory presented in this paper is as good as a Barker-Henderson
+hard sphere fluid for a range of densities and temperatures. The
+advantage of our theory is that we can use it \emph{as is} rather than
+needing to accommodate for discontinuities and delta functions of hard
+sphere fluids.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 

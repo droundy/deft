@@ -246,6 +246,7 @@ plot([],[], 'k--', label='Monte Carlo')
 plot([],[], 'k:', label='BH')
 legend(loc='best', frameon=False)
 
+plt.tight_layout();
 savefig('figs/p-vs-T.pdf', bbox_inches=0)
 
 show()
