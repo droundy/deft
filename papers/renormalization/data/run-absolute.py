@@ -48,7 +48,11 @@ approximate_free_energies = np.arange(np.log(2), 20, np.log(2))
 ffs = np.zeros_like(approximate_free_energies)
 for k in xrange(len(ffs)):
     ffs[k] = free_energy_over_kT_to_ff(approximate_free_energies[k])
-   
+
+have_srun = os.system('srun true') == 0
+max_non_srun_jobs = 4
+jobs_submitted = 0
+
 for N in Ns:
     dirname = 'scrunched-ww%4.2f-L%04.2f/i%01d/N%03d/absolute' % (ww,L,i,N)
     if Overwrite:
@@ -65,7 +69,7 @@ for N in Ns:
     sim_iters = 1000000
     sc_period = int(max(10, 1*N*N/10))
 
-    ff_goal = (4*np.pi/3*R**3)*N/(L_i)**3 # this is the density 
+    ff_goal = (4*np.pi/3*R**3)*N/(L_i)**3 # this is the density
 
     # ffs = np.zeros(steps+1)
     # ffs[0] = (4/3.0)*pi*R**3/L**3                # Deprecated; kept for posterity.
@@ -77,23 +81,32 @@ for N in Ns:
     for j in xrange(len(ffs)-2):
         filename = '%05d' % (j)
         ff = ffs[j]
+        if ff >= ff_goal:
+            break
         ff_next = ffs[j+1]
         if ffs[j+2] > ff_goal:
             ff_next = ff_goal
 
         if not os.path.isfile(dirname+'/'+filename+'.dat'):
-           # cmd = 'srun -J %s' % filename
-            cmd = ' ../../../free-energy-monte-carlo'
-            cmd += ' --ff %g' % ff_next
+            if have_srun:
+                cmd = 'srun -J %s' % filename
+            else:
+                cmd = ''
+            cmd += ' ../../../free-energy-monte-carlo'
+            cmd += ' --ff %g' % ff
             cmd += ' --sc_period %d' % sc_period
             cmd += ' --iterations %d' % sim_iters
             cmd += ' --filename %s' % filename
             cmd += ' --data_dir %s' % dirname
-            cmd += ' --ff_small %g' % ff
+            cmd += ' --ff_small %g' % ff_next
             cmd += ' --N %d' % N
             cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
             print("Running with command: %s" % cmd)
             os.system(cmd)
+            jobs_submitted += 1
+            if not have_srun and jobs_submitted >= max_non_srun_jobs:
+                print("I think this is enough run-absolute processes for now.  No fork bombs!!!")
+                exit(0)
         else:
             print("You're trying to overwrite files, use the flag -O in order to do so.")
 

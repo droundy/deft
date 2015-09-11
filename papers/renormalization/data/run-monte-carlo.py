@@ -22,6 +22,10 @@ Overwrite = False
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     Overwrite = True
 
+have_srun = os.system('srun true') == 0
+max_non_srun_jobs = 4
+jobs_submitted = 0
+
 for N in Ns:
     dirname = 'scrunched-ww%4.2f-L%04.2f/i%01d/N%03d' % (ww,L,i,N)
     if Overwrite:
@@ -31,22 +35,33 @@ for N in Ns:
     filename = 'ww%4.2f-L%04.2f-N%03d' % ( ww, L, N)
     iterations = 1000000
 
-
-    #cmd = 'srun -J %s' % filename   
-    cmd = ' ../../../square-well-monte-carlo'
-    cmd += ' --filename %s' % filename
-    cmd += ' --N %d' % N
-    cmd += ' --min_T 0.1'
-    cmd += ' --data_dir %s' % dirname
-    cmd += ' --min_samples 10000'
-    cmd += ' --golden'
-    cmd += ' --ww %g' % ww
-    cmd += ' --iterations %d' %iterations
-    cmd += ' --lenx %g --leny %g --lenz %g' % (L_i,L_i,L_i) 
-    cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename) 
-    # cmd = ("../../../square-well-monte-carlo --filename %s --N %d --min_T 0.1 --min_samples 10000 --golden --ww %g --iterations %d --lenx %g --leny %g --lenz %g --data_dir .  > %s.out 2>&1 &" %
-    #        (filename, N, ww, iterations, L, L, L, filename))
-    print(cmd)
-    os.system(cmd)
+    output_file_path = dirname+'/'+filename+'-E.dat'
+    if not os.path.isfile(output_file_path):
+        print "Was checking for", output_file_path
+        if have_srun:
+            cmd = 'srun -J %s' % filename
+        else:
+            cmd = ''
+        cmd += ' ../../../square-well-monte-carlo'
+        cmd += ' --filename %s' % filename
+        cmd += ' --N %d' % N
+        cmd += ' --min_T 0.1'
+        cmd += ' --data_dir %s' % dirname
+        cmd += ' --min_samples 10000'
+        cmd += ' --golden'
+        cmd += ' --ww %g' % ww
+        cmd += ' --iterations %d' %iterations
+        cmd += ' --lenx %g --leny %g --lenz %g' % (L_i,L_i,L_i)
+        cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
+        # cmd = ("../../../square-well-monte-carlo --filename %s --N %d --min_T 0.1 --min_samples 10000 --golden --ww %g --iterations %d --lenx %g --leny %g --lenz %g --data_dir .  > %s.out 2>&1 &" %
+        #        (filename, N, ww, iterations, L, L, L, filename))
+        print(cmd)
+        os.system(cmd)
+        jobs_submitted += 1
+        if not have_srun and jobs_submitted >= max_non_srun_jobs:
+            print("I think this is enough run-monte-carlo processes for now.  No fork bombs!!!")
+            exit(0)
+    else:
+        print "You're trying to overwrite %s, use the flag -O in order to do so."% output_file_path
 
 

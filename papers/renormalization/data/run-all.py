@@ -11,20 +11,20 @@ ww = float(sys.argv[2])
 L = float((sys.argv[3]))
 #arg L = [5.0]
 
-if len(sys.argv) == 5:   # ERROR FIXME if override flag is present this doesn't work
+if len(sys.argv) >= 5 and sys.argv[4][0] == '[': # Hokey!!!
     Ns = eval(sys.argv[4])
     #arg Ns = [range(2,10)]
 else:
     Ns = range(0,4*(8**i)+1)
 
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
+    cmd_mc = "python run-monte-carlo.py %d %g %g '%s' -O" %(i,ww,L,Ns)
+    print(cmd_mc)
+    os.system(cmd_mc)
+
     cmd_fe = 'python run-absolute.py %d %g %g "%s" -O' % (i,ww,L,Ns)
     print(cmd_fe)
     os.system(cmd_fe)
-
-    cmd_mc = "python run-monte-carlo.py %d %g %g '%s'" %(i,ww,L,Ns)
-    print(cmd_mc)
-    os.system(cmd_mc)
 else:
     cmd_fe = 'python run-absolute.py %d %g %g "%s"' % (i,ww,L,Ns)
     print(cmd_fe)
