@@ -5,11 +5,15 @@ import os, numpy, sys
 
 i = eval(sys.argv[1])
 #RG recursion level
+
 ww = float(sys.argv[2])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
 
 L = float((sys.argv[3]))
 #arg L = [5.0]
+
+L_i = L*(2**i)
+#incorperation of RG parameter i
 
 Ns = eval(sys.argv[4])
 #arg Ns = [range(2,10)]
@@ -38,7 +42,7 @@ for N in Ns:
     cmd += ' --golden'
     cmd += ' --ww %g' % ww
     cmd += ' --iterations %d' %iterations
-    cmd += ' --lenx %g --leny %g --lenz %g' % (L,L,L) 
+    cmd += ' --lenx %g --leny %g --lenz %g' % (L_i,L_i,L_i) 
     cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename) 
     # cmd = ("../../../square-well-monte-carlo --filename %s --N %d --min_T 0.1 --min_samples 10000 --golden --ww %g --iterations %d --lenx %g --leny %g --lenz %g --data_dir .  > %s.out 2>&1 &" %
     #        (filename, N, ww, iterations, L, L, L, filename))

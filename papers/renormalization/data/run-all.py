@@ -8,14 +8,14 @@ i = eval(sys.argv[1])
 ww = float(sys.argv[2])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
 
-L = float((sys.argv[3]))*(2**i)
-#incorperation of recursion level i into length of cell
+L = float((sys.argv[3]))
 #arg L = [5.0]
 
-
-Ns = eval(sys.argv[4])
-#arg Ns = [range(2,10)]
-
+if len(sys.argv) == 5:   # ERROR FIXME if override flag is present this doesn't work
+    Ns = eval(sys.argv[4])
+    #arg Ns = [range(2,10)]
+else:
+    Ns = range(0,4*(8**i)+1)
 
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     cmd_fe = 'python run-absolute.py %d %g %g "%s" -O' % (i,ww,L,Ns)

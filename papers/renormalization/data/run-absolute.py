@@ -17,6 +17,9 @@ ww = float(sys.argv[2])
 L = float((sys.argv[3]))
 #arg L = [5.0]
 
+L_i = L*(2**i)
+#incorperation of RG parameter i
+
 Ns = eval(sys.argv[4])
 #arg Ns = [range(2,10)]
 
@@ -62,7 +65,7 @@ for N in Ns:
     sim_iters = 1000000
     sc_period = int(max(10, 1*N*N/10))
 
-    ff_goal = (4*np.pi/3*R**3)*N/L**3 # this is the density 
+    ff_goal = (4*np.pi/3*R**3)*N/(L_i)**3 # this is the density 
 
     # ffs = np.zeros(steps+1)
     # ffs[0] = (4/3.0)*pi*R**3/L**3                # Deprecated; kept for posterity.
