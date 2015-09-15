@@ -50,8 +50,9 @@ for k in xrange(len(ffs)):
     ffs[k] = free_energy_over_kT_to_ff(approximate_free_energies[k])
 
 have_srun = os.system('srun true') == 0
-max_non_srun_jobs = 4
+max_non_srun_jobs = 5
 jobs_submitted = 0
+infinite = False
 
 for N in Ns:
     dirname = 'scrunched-ww%4.2f-L%04.2f/i%01d/N%03d/absolute' % (ww,L,i,N)
@@ -81,8 +82,6 @@ for N in Ns:
     for j in xrange(len(ffs)-2):
         filename = '%05d' % (j)
         ff = ffs[j]
-        if ff >= ff_goal:
-            break
         ff_next = ffs[j+1]
         if ffs[j+2] > ff_goal:
             ff_next = ff_goal
@@ -92,13 +91,19 @@ for N in Ns:
                 cmd = 'srun -J %s' % filename
             else:
                 cmd = ''
-            cmd += ' ../../../free-energy-monte-carlo'
-            cmd += ' --ff %g' % ff
-            cmd += ' --sc_period %d' % sc_period
+            if ff >= ff_goal:
+                # if first free energy guess is too big, do the infinite case
+                cmd += ' ../../../free-energy-monte-carlo-infinite-case'
+                cmd += ' --ff_small %g' % ff_goal
+                infinite = True 
+            else:
+                cmd += ' ../../../free-energy-monte-carlo'
+                cmd += ' --ff_small %g' % ff_next
+                cmd += ' --ff %g' % ff
+                cmd += ' --sc_period %d' % sc_period
             cmd += ' --iterations %d' % sim_iters
             cmd += ' --filename %s' % filename
             cmd += ' --data_dir %s' % dirname
-            cmd += ' --ff_small %g' % ff_next
             cmd += ' --N %d' % N
             cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
             print("Running with command: %s" % cmd)
@@ -113,3 +118,6 @@ for N in Ns:
         if ffs[j+2] > ff_goal:
             # We are all done now!
             break
+        if infinite == True:
+            # don't loop again if infinite case is used
+            break     
