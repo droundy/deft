@@ -34,14 +34,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-\fixme{ We will demonstrate a easy-to-implement variation on the Soft
-  Fundamental Measure Theory (SFMT) approach for treating fluids
-  having a soft repulsive potential.  We will show that over a wide
-  range of temperatures and densities our theory gives accurate
-  results, as tested by comparison with Monte Carlo simulation of a
-  fluid using a typical soft repulsive potential.  We will present
-  results for the homogeneous fluid, the radial distribution function,
-  and for inhomogeneous distributions at a fluid-solid interface. }
+  We demonstrate a easy-to-implement variation on the Soft Fundamental
+  Measure Theory (SFMT) approach for the Weeks-Chandler-Anderson (WCA)
+  fluid.  This approach is readily extensible to other soft repulsive
+  potentials.  We demonstrate that this approach is comparable in
+  accuracy to the Barker-Henderson approach applied to the WCA fluid,
+  combined with Fundamental Measure Theory for the hard-sphere
+  fluid.
 \end{abstract}
 
 \maketitle
@@ -116,20 +115,22 @@ k_BT/\epsilon$.
 
 Soft fundamental measure theory (SFMT) is a generalization of FMT to
 soft interactions developed by Schmidt~\cite{schmidt1999density}.
-Like Rosenfeld's FMT~\cite{rosenfeld1989}, the free energy is written
-as an integral of functions of a set of weighted densities known as
-\emph{fundamental measures}:
+Like Rosenfeld's FMT~\cite{rosenfeld1989}, the excess free energy is
+written as an integral of functions of a set of weighted densities
+known as \emph{fundamental measures}:
 \begin{equation}
-A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
-\Phi_3(\rr)\right) d\rr \; ,
+A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
+\Phi_3(\rr)\right) d\rr \; , \label{eq:sfmt-excess-free}
 \end{equation}
 with integrands
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
-\Phi_3 &= \frac{n_2^3 - 3 n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}^2}{24\pi(1-n_3)^2}
+\Phi_3 &= \frac{n_2^3 - 3
+  n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}^2}{24\pi(1-n_3)^2}
+\label{eq:sfmt-phi3}
 \end{align}
-which is derived from dimensional crossover from the exact free energy
+which is derived using dimensional crossover from the exact free energy
 in the zero-dimensional cavity limit~\cite{schmidt1999density}.  The fundamental measures
 \begin{equation}
   n_{i}(\textbf{r}) = \int
@@ -142,23 +143,25 @@ functions are constructed so as to deconvolve the Mayer function,
 \begin{equation}
   f(r) = \exp (-\beta V(r)) - 1
 \end{equation}
-where $\beta = 1/k_BT$.  The weighting functions are related by
+where $\beta = 1/k_BT$, which in the case of hard spheres is just a
+step function.  The weighting functions are related by
 \begin{align}
-  \mathbf{w}_{V2} &= w_2\frac{\textbf{r}}{r} &
-  \mathbf{w}_{V1} &= w_1\frac{\textbf{r}}{r}
-  \label{eq:n-vectors}\\
   w_1 &= \frac{w_2}{4\pi R} &
   w_0 &= \frac{w_2}{4\pi R^2}
   \label{eq:n-0-1}
+  \\
+  \mathbf{w}_{V2} &= w_2\frac{\textbf{r}}{r} &
+  \mathbf{w}_{V1} &= w_1\frac{\textbf{r}}{r}
+  \label{eq:n-vectors}
 \end{align}
 \begin{equation}
    w_3(r) = \int_{r}^{\infty} w_2(r') dr',
   \label{eq:n-3}
 \end{equation}
-where it is helpful to note that the integral in Eq.~\ref{eq:n-3} is
-a one-dimensional integral over radius.
+where the integral in Eq.~\ref{eq:n-3} is a one-dimensional integral
+over radius.
 
-Furthermore, Schmidt proves that SFMT produces the exact functional in
+Schmidt proves that SFMT reproduces the exact functional in
 the low-density limit, provided the weighting function that defines
 $n_2$ is related to the slope of the Mayer function by a convolution
 with itself
@@ -184,19 +187,19 @@ proportional to temperature~\cite{schmidt1999density,
   schmidt2000fluid}.  While this proportionality is correct for purely
 entropic interactions, such as the star polymer in solution studied in
 several papers~\cite{schmidt1999density}, this assumption is not
-applicable to energetic interactions such as dominate repulsion
-between molecules.  Here we will discuss the \emph{error function model}
-(or \emph{erf model}) introduced by Schmidt in
-Ref.~\citenum{schmidt2000fluid}.
+applicable to energetic interactions such as dominate the repulsion
+between molecules.
 
-The erf model corresponds to a Gaussian form for the weighting
-function $w_2$ The weight function for the erf model is
+In this paper, we will make use of the \emph{error function model} (or
+\emph{erf model}) introduced by Schmidt in
+Ref.~\citenum{schmidt2000fluid}.  The erf model corresponds to a
+Gaussian form for the weighting function $w_2$:
 \begin{align}
   w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}}
   \label{eq:gaussianw2}
 \end{align}
 where $\Xi$ and $\alpha$ are parameters with dimensions of length.
-This choice for $w_2$ results in a form containing an error function
+This choice for $w_2$ results in forms containing an error function
 for the $w_3$ weighting function, the Mayer $f$ function, and the pair
 potential:
 \begin{align}
@@ -206,10 +209,10 @@ potential:
   \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
-The erf potential is shown in Fig.~\ref{fig:potential-plot}, and
-the first derivative of the Mayer $f$ function corresponding to this
-potential is shown in Fig.~\ref{fig:w2-comparison}.  Sadly, as is
-evident from Eq.~\ref{eq:Verf}, this simple functional relationship
+The erf potential is shown in Fig.~\ref{fig:potential-plot}, and the
+first derivative of the Mayer $f$ function corresponding to this
+potential is shown in Fig.~\ref{fig:w2-comparison}.  As is evident
+from Eq.~\ref{eq:Verf}, this simple functional relationship for $w_2$
 only holds for one chosen temperature.  At other temperatures, the
 same potential leads to an entirely different form for $f$ and $w_2$,
 which is not analytically tractable.
@@ -218,45 +221,39 @@ which is not analytically tractable.
 
 Another approach to account for the temperature dependence of
 realistic fluids is Barker-Henderson's
-approach\cite{barker1967perturbation}. This theory takes any general
-repulsive pair potential, $V(r)$, and creates a hard sphere reference
-fluid with a temperature dependent diameter and higher order repulsive
-terms. The hard sphere diameter is
+approach~\cite{barker1967perturbation}. This theory takes any general
+repulsive pair potential, $V(r)$, and constructs a corresponding hard
+sphere reference fluid with a temperature dependent diameter. The hard
+sphere diameter is given by
 \begin{align}
   d = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
 \end{align}
-We utilize this variable diameter to create a White
-Bear~\cite{roth2002whitebear} hard sphere DFT and compare its behavior
-with the soft sphere DFT we construct in this paper.
+We utilize this variable diameter with the White Bear FMT free energy
+functional for the hard sphere fluid~\cite{roth2002whitebear} as a
+comparison for the SFMT presented in this paper.
 
 We use the White Bear version of the Fundamental-Measure Theory~(FMT)
 functional~\cite{roth2002whitebear}, which describes the excess free
-energy of an inhomogeneous hard-sphere fluid.  The White Bear
-functional reduces to the Carnahan-Starling free energy for
-homogeneous systems, and has been found to be accurate under a wide
-range of inhomogeneous configurations.
-\begin{equation}
-A_\textit{HS}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) + \Phi_3(\rr)\right) d\rr \; ,
-\end{equation}
-with integrands
+energy of an inhomogeneous hard-sphere fluid.  This functional differs
+from the equations of SFMT presented in
+Equations~\ref{eq:sfmt-excess-free}-\ref{eq:n-3} only in replacing
+Eq.~\ref{eq:sfmt-phi3} with the following equation:
 \begin{align}
-\Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
-\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
 \Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
   n_3 + (1-n_3)^2 \ln(1-n_3)
 }{
   36\pi n_3^2\left( 1 - n_3 \right)^2
 } ,
 \end{align}
-using the weighted density
+which causes the functional to reduce to the Carnahan-Starling free
+energy rather than scaled-particle theory for homogeneous systems.  We
+note that the weighting function $w_2$ for a hard-sphere system is
+given by the Dirac $\delta$ function:
 \begin{align}
-  n_2(\rr) &= \int n(\rr') w_2(\left|\rr - \rr'\right| - R) d\rr' \\
-           &= \int n(\rr') \delta(\left|\rr - \rr'\right| - R) d\rr'
-  \label{eq:white-bear-n2}
+  w_2(r) = \delta(r - R),
 \end{align}
-where the remaining weighted densities are given by
-Eqs.~\ref{eq:n-convolution} through~\ref{eq:n-3}.
+where $R$ is the hard-sphere radius.
 
 \subsection{Soft FMT for the WCA fluid}
 
@@ -421,31 +418,23 @@ to the Monte Carlo simulations.
 As a second and more physical case, we construct a wall of made of a
 continuum of WCA spheres with density $\rho$.  The potential
 at a distance z from such a wall is
-\begin{align}
-V_{SW}(0 < z \leq R_0) = 2\pi\rho\epsilon\Big[&
-  \frac{2\sigma_W^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{R_0^9}\right)
-  +\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3}
-  \right) \notag \\
-  & + \frac{z^3-R_0^3}{6} + \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
-  \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
-  \Bigg].
+\begin{multline}
+  V_{SW}(0 < z \leq d) = \\
+  2\pi\rho\epsilon\Big[
+  \frac{2\sigma^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{d^9}\right)
+  +\frac{\sigma^6}{3}\left(\frac{1}{d^3}-\frac{1}{z^3}
+  \right) \\
+  + \frac{z^3-d^3}{6} + \left( d - z \right)\left(\frac{d^2}{2} +
+  \frac{\sigma^6}{d^4} - \frac{2\sigma^{12}}{5d^{10}}\right)
+  \Bigg],
 \label{eq:soft-wall-potential}
-\end{align}
-%% \begin{multline}
-%% V_{SW}(0 < z \leq R_0) =\\ 2\pi\rho\epsilon\Big[ \frac{z^3-R_0^3}{6} +
-%%   \frac{2\sigma_W^{12}}{45} \left(\frac{1}{z^9}-\frac{1}{R_0^9}\right)
-%%   \\
-%%   \quad\quad\quad\quad+ \left( R_0 - z \right)\left(\frac{R_0^2}{2} +
-%%   \frac{\sigma_W^6}{R_0^4} - \frac{2\sigma_W^{12}}{5R_0^{10}}\right)
-%%   \\
-%%   \hspace{2cm}+\frac{\sigma_W^6}{3}\left(\frac{1}{R_0^3}-\frac{1}{z^3}
-%%   \right) \Bigg].\label{eq:soft-wall-potential}
-%% \end{multline}
-The distance $R_0$ is equal to a radius of a sphere which makes up the
-wall plus the radius of a sphere in the fluid. The potential is zero
-when $z>R_0$, and is infinite for $z\leq 0$. Both $\epsilon$ and
-$\sigma_W$ are Lennard-Jones parameters between the wall and the
-fluid. $R_0$ and $\sigma_W$ are related by $\sigma_W = 2^{5/6} R_0$.
+\end{multline}
+where the distance $d$ is equal to the distance at which the
+interaction between WCA particles vanishes, which is given by $d =
+2^{-5/6}\sigma$, and $\epsilon$ and $\sigma$ are Lennard-Jones
+parameters between the wall and the fluid, which we take to be
+identical to those within the fluid. The potential is zero when $z>d$,
+and is infinite for $z\leq 0$.
 
 In Figure \ref{fig:soft-walls}, we compare our soft sphere DFT
 against MC simulation and a BH fluid near a soft wall
