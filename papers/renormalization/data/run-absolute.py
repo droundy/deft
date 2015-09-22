@@ -6,6 +6,8 @@ import os, numpy as np, sys
 
 os.system("fac ../../../free-energy-monte-carlo")
 
+
+
 R=1
 
 i = eval(sys.argv[1])
@@ -26,7 +28,10 @@ Ns = eval(sys.argv[4])
 Overwrite = False
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     Overwrite = True
+    
+print("\n----------------------FREE ENERGY MONTE CARLO------------------------------\n\n")
 
+      
 def free_energy_over_kT_to_ff(free_energy): # Find an ff that corresponds to given free energy
     # bisection
     n = 0
@@ -52,7 +57,7 @@ for k in xrange(len(ffs)):
 have_srun = os.system('srun true') == 0
 max_non_srun_jobs = 5
 jobs_submitted = 0
-infinite = False
+
 
 for N in Ns:
     dirname = 'scrunched-ww%4.2f-L%04.2f/i%01d/N%03d/absolute' % (ww,L,i,N)
@@ -85,17 +90,19 @@ for N in Ns:
         ff_next = ffs[j+1]
         if ffs[j+2] > ff_goal:
             ff_next = ff_goal
-
-        if not os.path.isfile(dirname+'/'+filename+'.dat'):
+            
+        output_file_path = dirname+'/'+filename+'.dat'
+        if not os.path.isfile(output_file_path):
+            print "Was checking for", output_file_path
             if have_srun:
                 cmd = 'srun -J %s' % filename
             else:
                 cmd = ''
-            if ff >= ff_goal:
-                # if first free energy guess is too big, do the infinite case
+                
+            if j==0:
                 cmd += ' ../../../free-energy-monte-carlo-infinite-case'
-                cmd += ' --ff_small %g' % ff_goal
-                infinite = True 
+                cmd += ' --ff_small %g' % ff
+                # do infinite case for first step always
             else:
                 cmd += ' ../../../free-energy-monte-carlo'
                 cmd += ' --ff_small %g' % ff_next
@@ -113,11 +120,9 @@ for N in Ns:
                 print("I think this is enough run-absolute processes for now.  No fork bombs!!!")
                 exit(0)
         else:
-            print("You're trying to overwrite files, use the flag -O in order to do so.")
+            print("You're trying to overwrite:\n %s \n Use the flag -O in order to do so.\n" % output_file_path)
 
         if ffs[j+2] > ff_goal:
             # We are all done now!
-            break
-        if infinite == True:
-            # don't loop again if infinite case is used
-            break     
+            # This automagically handles when ff > ff_goal!
+            break    

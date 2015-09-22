@@ -18,6 +18,8 @@ L_i = L*(2**i)
 Ns = eval(sys.argv[4])
 #arg Ns = [range(2,10)]
 
+print("\n----------------------SQUARE WELL MONTE CARLO------------------------------\n\n")
+
 Overwrite = False
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     Overwrite = True
@@ -62,6 +64,6 @@ for N in Ns:
             print("I think this is enough run-monte-carlo processes for now.  No fork bombs!!!")
             exit(0)
     else:
-        print "You're trying to overwrite %s, use the flag -O in order to do so."% output_file_path
+        print "You're trying to overwrite: \n %s \n Use the flag -O in order to do so.\n"% output_file_path
 
 
