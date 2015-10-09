@@ -10,17 +10,19 @@ matplotlib.rc('text', usetex=True)
 import styles
 import readandcompute
 
-if len(sys.argv) != 4:
-    print 'useage: %s ww L N methods' % sys.argv[0]
+if len(sys.argv) != 5:
+    print 'useage: %s i ww L N ' % sys.argv[0]
     exit(1)
 
-ww = float(sys.argv[1])
+i = float(sys.argv[1])
+
+ww = float(sys.argv[2])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
 
-L = float(sys.argv[2])
+L = float(sys.argv[3])
 #arg L = [5]
 
-N = float(sys.argv[3])
+N = float(sys.argv[4])
 #arg N = range(5,31)
 
 #methods = eval(sys.argv[4])
@@ -34,7 +36,7 @@ methods = ["tmmc", "oetmmc"]
 
 for method in set(methods):
 
-    T, U, CV, S, min_T = readandcompute.T_u_cv_s_minT('../data/ww%04.2f-L%04.2f-N%03d' % (ww, L, N))
+    T, U, CV, S, min_T = readandcompute.T_u_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d' % (ww, L,  i, N))
 
     plt.figure('u')
     plt.plot(T,U/N,styles.plot(method),label=styles.title(method))

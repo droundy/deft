@@ -1,15 +1,15 @@
 #!/usr/bin/python2
-import numpy
+import numpy as np
 import math
 import string
+import glob
 
 def T_u_cv_s_minT(fbase):
     max_T = 1.4
     T_bins = 1e3
     dT = max_T/T_bins
     m = .25   # Need an appropriate scale for this - look at size of epsilon and sigma
-    V = 1000.0
-    N = 10.0
+    
 
     T_range = numpy.arange(dT,max_T,dT)
     min_T = minT(fbase)
@@ -58,8 +58,37 @@ def T_u_cv_s_minT(fbase):
         S[i] -= S_inf
         CV[i] = sum((energy/T_range[i])**2*dos_boltz)/Z[i] - \
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
-   # return T_range, U, CV, S, min_T
+    return T_range, U, CV, S, min_T
 
+def absolute_f(fbase):
+    # find the partition function yielding the absolute free energy  using 'absolute/' data
+    num_files = len(glob.glob(fbase+'0*'))/2 - 1
+    successes = 0
+    total = 0
+    ratios = np.zeros(num_files)
+    absolute_f = 0
+    
+   
+    print("Num_files is: %s" % num_files)
+    for j in xrange(0,num_files):
+        
+        filename = fbase + '%05d' % (j+1)
+        with open(filename+".dat") as file:
+            for line in file:
+                if("working moves: " in line):
+                    successes = float(line.split()[-1])
+                if("total moves: " in line):
+                    total = float(line.split()[-1])
+                    break
+                
+        ratios[j] = successes/total
+        absolute_f += -np.log(ratios[j])
+
+    print("Ratios array is: %s" % ratios)
+    print("Calculated absolute_f is: %g" % absolute_f)
+    return absolute_f
+
+	
 def minT(fbase):
     min_T = 0
     with open(fbase+"-E.dat") as file:
