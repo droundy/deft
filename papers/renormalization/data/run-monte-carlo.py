@@ -34,7 +34,8 @@ for N in Ns:
         os.system('rm -rf ' + dirname)
     print('mkdir -p ' + dirname)
     os.system('mkdir -p '+ dirname)
-    filename = 'ww%4.2f-L%04.2f-N%03d' % ( ww, L, N)
+    #filename = 'ww%4.2f-L%04.2f-N%03d' % ( ww, L, N)
+    filename = 'data'
     iterations = 1000000
 
     output_file_path = dirname+'/'+filename+'-E.dat'

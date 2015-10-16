@@ -36,8 +36,9 @@ methods = ["tmmc", "oetmmc"]
 
 for method in set(methods):
 
-    T, U, CV, S, min_T = readandcompute.T_u_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d' % (ww, L,  i, N))
-
+    T, U, CV, S, min_T = readandcompute.T_u_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, N))
+    S -= readandcompute.absolute_f('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/absolute' % (ww, L,  i, N))
+    
     plt.figure('u')
     plt.plot(T,U/N,styles.plot(method),label=styles.title(method))
 
