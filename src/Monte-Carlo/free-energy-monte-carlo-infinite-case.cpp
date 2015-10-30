@@ -49,7 +49,7 @@ const int z = 2;
 // ------------------------------------------------------------------------------
 
 // Tests validity of a shrunken version of the cell
- static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor);
+static bool overlap_in_small_cell(sw_simulation &sw, double scaling_factor);
 
 // States how long it's been since last took call.
 static void took(const char *name);
@@ -87,6 +87,7 @@ int main(int argc, const char *argv[]) {
 
   sw_simulation sw;
 
+  sw.sticky_wall = 0;
   sw.len[0] = sw.len[1] = sw.len[2] = 1;
   sw.walls = 0;
   sw.N = 10;
@@ -186,6 +187,11 @@ int main(int argc, const char *argv[]) {
     return 254;
   }
 
+  if (ff_small == -1) {
+    printf("You must specify --ff_small!\n    Silly you!\n");
+    exit(1);
+  }
+
   if (ff_small != 0) {
     // The user specified a filling fraction, so we must make it so!
     const double volume = 4*M_PI/3*R*R*R*sw.N/ff_small;
@@ -193,7 +199,7 @@ int main(int argc, const char *argv[]) {
     const int numcells = (sw.N+3)/4; // number of unit cells we need
     const int max_cubic_width
       = pow(volume/min_cell_width/min_cell_width/min_cell_width, 1.0/3);
-    if (max_cubic_width*max_cubic_width*max_cubic_width > numcells) {
+    if (max_cubic_width*max_cubic_width*max_cubic_width >= numcells) {
       // We can get away with a cubic cell, so let's do so.  Cubic
       // cells are nice and comfortable!
       sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
