@@ -4,8 +4,7 @@ from __future__ import division
 from math import pi       # REALLY don't need all of math
 import os, numpy as np, sys
 
-os.system("fac ../../../free-energy-monte-carlo")
-
+os.system("fac ../../../free-energy-monte-carlo ../../../free-energy-monte-carlo-infinite-case")
 
 
 R=1
