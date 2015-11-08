@@ -64,7 +64,7 @@ def T_u_cv_s_minT(fbase):
 
 def absolute_f(fbase):
     # find the partition function yielding the absolute free energy  using 'absolute/' data
-    num_files = len(glob.glob(fbase+'*.dat'))
+    num_files = len(glob.glob(fbase+'*.dat')) # figure out how many files there are
     successes = 0
     total = 0
     ratios = np.zeros(num_files)
@@ -72,9 +72,11 @@ def absolute_f(fbase):
     
    
     print("Num_files is: %s" % num_files)
-    for j in xrange(0,num_files):
-        
-        filename = fbase + '%05d' % (j+1)
+    for j in xrange(-1,num_files):
+        if j==0:
+            filename = fbase+'%05d'+ '-g' % (j) 
+        else:
+            filename = fbase + '%05d' % (j)
         with open(filename+".dat") as file:
             for line in file:
                 if ("N: " in line):

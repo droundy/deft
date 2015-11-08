@@ -90,8 +90,8 @@ for N in Ns:
         if ffs[j+2] > ff_goal:
             ff_next = ff_goal
             
-        output_file_path = dirname+'/'+filename+'.dat'
-        if not os.path.isfile(output_file_path):
+        output_file_path = dirname+'/'+filename
+        if not os.path.isfile(output_file_path+'.dat') and not os.path.isfile(output_file_path+'-g.dat'):
             print "Was checking for", output_file_path
             if have_srun:
                 cmd = 'srun -J %s' % filename
