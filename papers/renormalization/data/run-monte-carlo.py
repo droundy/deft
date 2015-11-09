@@ -62,9 +62,14 @@ for N in Ns:
         os.system(cmd)
         jobs_submitted += 1
         if not have_srun and jobs_submitted >= max_non_srun_jobs:
-            print("I think this is enough run-monte-carlo processes for now.  No fork bombs!!!")
+            print("I think this is enough run-monte-carlo processes for now.  No fork bombs!!!\n")
             exit(0)
     else:
         print "You're trying to overwrite: \n %s \n Use the flag -O in order to do so.\n"% output_file_path
 
-
+if jobs_submitted == 0:
+    print "Nothing needs to be done from run-monte-carlo!"
+elif jobs_submitted == 1:
+    print "I submitted 1 run-monte-carlo job."
+else:
+    print "I submitted %d run-monte-carlo jobs." % jobs_submitted

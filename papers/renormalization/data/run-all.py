@@ -2,6 +2,10 @@
 
 import sys, os
 
+if len(sys.argv) < 4:
+    print "usage: %s RECURSION-LEVEL WELL-WIDTH LENGTH" % (sys.argv[0])
+    exit(1)
+
 i = eval(sys.argv[1])
 #RG recursion level
 

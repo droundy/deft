@@ -116,7 +116,7 @@ for N in Ns:
             os.system(cmd)
             jobs_submitted += 1
             if not have_srun and jobs_submitted >= max_non_srun_jobs:
-                print("I think this is enough run-absolute processes for now.  No fork bombs!!!")
+                print("I think this is enough run-absolute processes for now.  No fork bombs!!!\n")
                 exit(0)
         else:
             print("You're trying to overwrite:\n %s \n Use the flag -O in order to do so.\n" % output_file_path)
@@ -125,3 +125,10 @@ for N in Ns:
             # We are all done now!
             # This automagically handles when ff > ff_goal!
             break    
+
+if jobs_submitted == 0:
+    print "Nothing needs to be done from run-absolute!"
+elif jobs_submitted == 1:
+    print "I submitted 1 run-absolute job.\n"
+else:
+    print "I submitted %d run-absolute jobs.\n" % jobs_submitted
