@@ -153,6 +153,7 @@ int main(int argc, const char *argv[]) {
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "none");
   long simulation_iterations = 3*1e6;
+  long simulation_round_trips = 0;
   double acceptance_goal = .4;
   double R = 1;
   double neighbor_scale = 2;
@@ -194,6 +195,9 @@ int main(int argc, const char *argv[]) {
 
     {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
      0, "Number of iterations for which to run the simulation", "INT"},
+
+    {"round_trips", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_round_trips,
+     0, "Number of round trips (pessimistic samples) to run the simulation", "INT"},
 
     /*** MONTE CARLO OPTIMIZATION PARAMETERS ***/
 
@@ -442,7 +446,8 @@ int main(int argc, const char *argv[]) {
     }
   }
 
-  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
+  if (sw.N <= 0 || simulation_iterations < 0 ||
+      simulation_round_trips < 0 || R <= 0 ||
       neighbor_scale <= 0 || sw.translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
@@ -994,7 +999,8 @@ int main(int argc, const char *argv[]) {
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // save at least every 30m
   clock_t last_output = clock(); // when we last output data
 
-  while(sw.iteration <= simulation_iterations) {
+  while (sw.iteration <= simulation_iterations
+         || sw.pessimistic_samples[sw.min_important_energy] < simulation_round_trips) {
 
     for(int i = 0; i < sw.N; i++) sw.move_a_ball();
 
@@ -1038,12 +1044,21 @@ int main(int argc, const char *argv[]) {
     // clock() can be expensive, so let's only check the time every so
     // often:
     const clock_t now = (sw.iteration % 10000) ? last_output : clock();
-    if ((now - last_output > output_period) || sw.iteration == simulation_iterations) {
+    if ((now - last_output > output_period)
+        || sw.iteration == simulation_iterations
+        || (simulation_round_trips > 0
+            && sw.pessimistic_samples[sw.min_important_energy] == simulation_round_trips)) {
       last_output = now;
       assert(last_output);
       if (output_period < max_output_period/2) output_period *= 2;
       else if (output_period < max_output_period)
         output_period = max_output_period;
+      long fraction_done = 100*sw.iteration/simulation_iterations;
+      if (simulation_round_trips > 0) {
+        long pessimistic_fraction =
+          100*sw.pessimistic_samples[sw.min_important_energy]/simulation_round_trips;
+        if (pessimistic_fraction < fraction_done) fraction_done = pessimistic_fraction;
+      }
       const double secs_done = double(now)/CLOCKS_PER_SEC;
       const int seconds = int(secs_done) % 60;
       const int minutes = int(secs_done / 60) % 60;
@@ -1052,7 +1067,7 @@ int main(int argc, const char *argv[]) {
       printf("Saving data after %i days, %02i:%02i:%02i, %li iterations "
              " (%ld%%) complete, current energy %g.\n",
              days, hours, minutes, seconds, sw.iteration,
-             100*sw.iteration/simulation_iterations, -sw.energy/double(sw.N));
+             fraction_done, -sw.energy/double(sw.N));
       fflush(stdout);
 
       char *countinfo = new char[4096];

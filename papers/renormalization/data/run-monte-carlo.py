@@ -3,6 +3,8 @@
 from __future__ import division
 import os, numpy, sys
 
+assert(not os.system("fac ../../../square-well-monte-carlo"))
+
 i = eval(sys.argv[1])
 #RG recursion level
 
@@ -53,7 +55,8 @@ for N in Ns:
         cmd += ' --min_samples 10000'
         cmd += ' --golden'
         cmd += ' --ww %g' % ww
-        cmd += ' --iterations %d' %iterations
+        # cmd += ' --iterations %d' %iterations
+        cmd += ' --round_trips %d' % 1000
         cmd += ' --lenx %g --leny %g --lenz %g' % (L_i,L_i,L_i)
         cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
         # cmd = ("../../../square-well-monte-carlo --filename %s --N %d --min_T 0.1 --min_samples 10000 --golden --ww %g --iterations %d --lenx %g --leny %g --lenz %g --data_dir .  > %s.out 2>&1 &" %
