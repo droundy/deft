@@ -72,26 +72,29 @@ def absolute_f(fbase):
     
    
     print("Num_files is: %s" % num_files)
-    for j in xrange(-1,num_files):
+    for j in xrange(0,num_files):
         if j==0:
-            filename = fbase+'%05d'+ '-g' % (j) 
+            filename = fbase+'%05d-g' % (j)
         else:
             filename = fbase + '%05d' % (j)
+        print 'filename is "%s" and j is %d' % (filename, j)
         with open(filename+".dat") as file:
             for line in file:
                 if ("N: " in line):
                     N = int(line.split()[-1])
-                if("working moves: " in line):
+                if("ff_small: " in line):
+                    ff = float(line.split()[-1])
+                if("failed small checks: " in line):
                     successes = float(line.split()[-1])
-                if("total moves: " in line):
+                if("valid small checks: " in line):
                     total = float(line.split()[-1])
                     break
-                
         ratios[j] = successes/total
         absolute_f += -np.log(ratios[j])/N
 
     print("Ratios array is: %s" % ratios)
     print("Calculated absolute_f is: %g" % absolute_f)
+    print("Compare with: %g" % ((4*ff - 3*ff**2)/(1-ff)**2))
     return absolute_f
 
 	

@@ -19,7 +19,7 @@ if len(sys.argv) >= 5 and sys.argv[4][0] == '[': # Hokey!!!
     Ns = eval(sys.argv[4])
     #arg Ns = [range(2,10)]
 else:
-    Ns = range(0,4*(8**i)+1)
+    Ns = range(1,4*(8**i)+1)
 
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     cmd_mc = "python run-monte-carlo.py %d %g %g '%s' -O" %(i,ww,L,Ns)

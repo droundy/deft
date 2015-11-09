@@ -46,12 +46,7 @@ def free_energy_over_kT_to_ff(free_energy): # Find an ff that corresponds to giv
         else:
             low = (high +low)/2
         n+=1
-    return ff
-
-approximate_free_energies = np.arange(np.log(2), 20, np.log(2))
-ffs = np.zeros_like(approximate_free_energies)
-for k in xrange(len(ffs)):
-    ffs[k] = free_energy_over_kT_to_ff(approximate_free_energies[k])
+    return ff_guess
 
 have_srun = os.system('srun true') == 0
 max_non_srun_jobs = 5
@@ -59,6 +54,14 @@ jobs_submitted = 0
 
 
 for N in Ns:
+    # The maximum free energy is near the point where
+    # Carnahan-Starling predict a filling fraction of 0.7, which is
+    # not reasonable to simulate.
+    approximate_free_energies = np.arange(np.log(2), 3*N, np.log(2))/N
+    ffs = np.zeros_like(approximate_free_energies)
+    for k in xrange(len(ffs)):
+        ffs[k] = free_energy_over_kT_to_ff(approximate_free_energies[k])
+
     dirname = 'scrunched-ww%4.2f-L%04.2f/i%01d/N%03d/absolute' % (ww,L,i,N)
     if Overwrite:
         os.system('rm -rf '+dirname)
@@ -97,7 +100,7 @@ for N in Ns:
                 cmd = 'srun -J %s' % filename
             else:
                 cmd = ''
-                
+
             if j==0:
                 cmd += ' ../../../free-energy-monte-carlo-infinite-case'
                 cmd += ' --ff_small %g' % ff
@@ -107,10 +110,10 @@ for N in Ns:
                 cmd += ' --ff_small %g' % ff_next
                 cmd += ' --ff %g' % ff
                 cmd += ' --sc_period %d' % sc_period
+            cmd += ' --N %d' % N
             cmd += ' --iterations %d' % sim_iters
             cmd += ' --filename %s' % filename
             cmd += ' --data_dir %s' % dirname
-            cmd += ' --N %d' % N
             cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
             print("Running with command: %s" % cmd)
             os.system(cmd)
