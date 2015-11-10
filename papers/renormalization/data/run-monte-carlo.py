@@ -44,11 +44,12 @@ for N in Ns:
     if not os.path.isfile(output_file_path):
         print "Was checking for", output_file_path
         if have_srun:
-            cmd = 'srun -J %s' % filename
+            cmd = 'srun -J ww%4.2f-L%04.2f/i%01d/N%03d' % (ww,L,i,N)
         else:
             cmd = ''
+        cmd += ' nice -19' # don't hog the CPU
         cmd += ' ../../../square-well-monte-carlo'
-        cmd += ' --filename %s' % filename
+        cmd += ' --filename %s' % dirname
         cmd += ' --N %d' % N
         cmd += ' --min_T 0.1'
         cmd += ' --data_dir %s' % dirname

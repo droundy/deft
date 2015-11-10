@@ -97,10 +97,11 @@ for N in Ns:
         if not os.path.isfile(output_file_path+'.dat') and not os.path.isfile(output_file_path+'-g.dat'):
             print "Was checking for", output_file_path
             if have_srun:
-                cmd = 'srun -J %s' % filename
+                cmd = 'srun -J L%04.2f/i%01d/N%03d/abs/%s' % (L,i,N, filename)
             else:
                 cmd = ''
 
+            cmd += ' nice -19' # don't hog the CPU
             if j==0:
                 cmd += ' ../../../free-energy-monte-carlo-infinite-case'
                 cmd += ' --ff_small %g' % ff
