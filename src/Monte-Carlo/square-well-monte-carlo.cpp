@@ -275,10 +275,10 @@ int main(int argc, const char *argv[]) {
 
     /*** END CONDITION PARAMETERS ***/
 
-    {"optimistic_sampling", '\0', POPT_ARG_NONE, &optimistic_sampling, 0,
-     "Sample optimistically?", "BOOLEAN"},
+    {"optimistic_sampling", '\0', POPT_ARG_VAL, &optimistic_sampling, 1,
+     "Sample optimistically", 0},
     {"pessimistic_sampling", '\0', POPT_ARG_VAL, &optimistic_sampling, 0,
-     "Sample pessimistically?", "BOOLEAN"},
+     "Sample pessimistically", 0},
     {"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
      "Number of times to sample mininum energy", "INT"},
     {"sample_error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.sample_error, 0,
