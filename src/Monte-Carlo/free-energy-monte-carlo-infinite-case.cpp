@@ -718,7 +718,7 @@ void save_locations(const ball *p, int N, const char *fname, const double len[3]
 }
 
 bool time_to_save() {
-  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every second
+  static clock_t output_period = CLOCKS_PER_SEC; // start at outputting every second
   // top out at one hour interval
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*60;
   static clock_t last_save_time = 0;
