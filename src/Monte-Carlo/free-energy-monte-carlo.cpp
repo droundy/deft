@@ -589,8 +589,10 @@ int main(int argc, const char *argv[]) {
       const int minutes = int(secs_done / 60) % 60;
       const int hours = int(secs_done / 3600) % 24;
       const int days = int(secs_done / 86400);
-      printf("Saving data after %i days, %02i:%02i:%02i, %li iterations "
-             "complete.\n", days, hours, minutes, seconds, sw.iteration);
+      const long percent_done = 100*sw.iteration/simulation_iterations;
+      printf("Saving data after %i days, %02i:%02i:%02i, %li iterations (%ld%%) "
+             "complete.\n", days, hours, minutes, seconds, sw.iteration,
+             percent_done);
       fflush(stdout);
 
       char *countinfo = new char[4096];
