@@ -26,7 +26,7 @@ Overwrite = False
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     Overwrite = True
 
-have_srun = os.system('srun true') == 0
+have_srun = '--srun' in sys.argv
 max_non_srun_jobs = 4
 jobs_submitted = 0
 

@@ -48,7 +48,7 @@ def free_energy_over_kT_to_ff(free_energy): # Find an ff that corresponds to giv
         n+=1
     return ff_guess
 
-have_srun = os.system('srun true') == 0
+have_srun = '--srun' in sys.argv
 max_non_srun_jobs = 5
 jobs_submitted = 0
 
