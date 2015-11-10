@@ -67,7 +67,8 @@ while len(hsfiles) > 0:
         if isokay:
             haskell.rule('ghc -O2 -c %s.hs' % hsf,
                          sorted([x+'.hi' for x in imports[hsf]]),
-                         sorted([hsf+'.o', hsf+'.hi']))
+                         sorted([hsf+'.o', hsf+'.hi']),
+                         Caches = ['/var/lib/ghc/package.conf.d/package.cache'])
             hsfiles.remove(hsf)
 
 def all_dependencies(x):

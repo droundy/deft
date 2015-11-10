@@ -18,12 +18,16 @@ class facfile:
         self._facname = f
         self._f = open(f, 'w')
         self._dirname = os.path.dirname(f)
-    def rule(self, cmd, inputs, outputs):
+    def rule(self, cmd, inputs, outputs, Caches=[], caches=[]):
         print('\n?', cmd, file=self._f)
         for i in inputs:
             print('<', i, file=self._f)
         for o in outputs:
             print('>', o, file=self._f)
+        for C in Caches:
+            print('C', C, file=self._f)
+        for c in caches:
+            print('c', c, file=self._f)
     def default(self, cmd, inputs, outputs):
         print('\n|', cmd, file=self._f)
         for i in inputs:
@@ -72,6 +76,9 @@ class facfile:
                     headers |= {'src/'+i+'.h'}
             for i in instructions_re.findall(maincontents):
                 try:
+                    # Ideally we would like to add /etc/ld.so.cache as
+                    # cache when running code.  However, this would
+                    # require editing all our .cpp files.  :(
                     exec(i)
                 except:
                     print('# instructions failed for', maincpp, repr(i), file=self._f)
