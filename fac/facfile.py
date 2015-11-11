@@ -18,7 +18,7 @@ class facfile:
         self._facname = f
         self._f = open(f, 'w')
         self._dirname = os.path.dirname(f)
-    def rule(self, cmd, inputs, outputs, Caches=[], caches=[]):
+    def rule(self, cmd, inputs, outputs, Caches=['/etc/ld.so.cache'], caches=[]):
         print('\n?', cmd, file=self._f)
         for i in inputs:
             print('<', i, file=self._f)
