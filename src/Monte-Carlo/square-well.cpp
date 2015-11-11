@@ -714,16 +714,15 @@ int sw_simulation::set_min_important_energy(){
   const double *ln_dos = compute_ln_dos(sim_dos_type);
 
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for(int i = max_entropy_state+1; i < min_energy_state; i++){
-    if(ln_dos[i] - ln_dos[i+1] > 1.0/min_T){
-      // ratcheting of min_important_energy is done here
-      if(i >= min_important_energy) min_important_energy = i;
+  for (int i = min_energy_state-1; i > max_entropy_state; i--) {
+    if (ln_dos[i] - ln_dos[i+1] <= 1.0/min_T) {
+      min_important_energy = i+1;
       delete[] ln_dos;
       return min_important_energy;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
-  if(min_energy_state > min_important_energy) min_important_energy = min_energy_state;
+  min_important_energy = min_energy_state;
 
   delete[] ln_dos;
   return min_important_energy;
@@ -1465,7 +1464,7 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
 
 bool sw_simulation::printing_allowed(){
   const double max_time_skip = 60*60; // 1 hour
-  double time_skip = 3; // seconds
+  static double time_skip = 3; // seconds
   static int every_so_often = 0;
   static int how_often = 1;
   // clock can be expensive, so this is a heuristic to reduce our use of it.
@@ -1476,7 +1475,7 @@ bool sw_simulation::printing_allowed(){
       last_print_time = time_now;
       every_so_often = 0;
       fflush(stdout); // flushing once a second will be no problem and can be helpful
-      time_skip = max(2*time_skip, max_time_skip);
+      time_skip = min(1.3*time_skip, max_time_skip);
       return true;
     }
   }

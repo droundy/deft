@@ -53,10 +53,11 @@ for N in Ns:
         cmd += ' --N %d' % N
         cmd += ' --min_T 0.1'
         cmd += ' --data_dir %s' % dirname
-        cmd += ' --min_samples 10000'
+        cmd += ' --min_samples 1000'
+        cmd += ' --pessimistic_sampling'
         cmd += ' --golden'
         cmd += ' --ww %g' % ww
-        # cmd += ' --iterations %d' %iterations
+        cmd += ' --iterations %d' %iterations
         cmd += ' --round_trips %d' % 1000
         cmd += ' --lenx %g --leny %g --lenz %g' % (L_i,L_i,L_i)
         cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)

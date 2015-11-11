@@ -840,7 +840,8 @@ int main(int argc, const char *argv[]) {
   if (!fix_kT && sw.min_T > 0) {
     /* Force canonical weights at low energies */
     sw.set_min_important_energy();
-    printf("Using canonical energies below %d\n", sw.min_important_energy);
+    printf("Using canonical energies below %d (E/N = %g)\n",
+           sw.min_important_energy, -sw.min_important_energy/double(sw.N));
     sw.initialize_canonical(sw.min_T,sw.min_important_energy);
   }
 
@@ -1064,7 +1065,7 @@ int main(int argc, const char *argv[]) {
       const int minutes = int(secs_done / 60) % 60;
       const int hours = int(secs_done / 3600) % 24;
       const int days = int(secs_done / 86400);
-      printf("Saving data after %i days, %02i:%02i:%02i, %li iterations "
+      printf("Saving data after %i days, %02i:%02i:%02i, %li iterations"
              " (%ld%%) complete, current energy %g.\n",
              days, hours, minutes, seconds, sw.iteration,
              fraction_done, -sw.energy/double(sw.N));
