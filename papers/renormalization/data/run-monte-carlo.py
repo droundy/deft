@@ -49,7 +49,7 @@ for N in Ns:
             cmd = ''
         cmd += ' nice -19' # don't hog the CPU
         cmd += ' ../../../square-well-monte-carlo'
-        cmd += ' --filename %s' % dirname
+        cmd += ' --filename %s' % filename
         cmd += ' --N %d' % N
         cmd += ' --min_T 0.1'
         cmd += ' --data_dir %s' % dirname
