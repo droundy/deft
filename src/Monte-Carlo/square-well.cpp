@@ -713,16 +713,20 @@ int sw_simulation::set_min_important_energy(){
 
   const double *ln_dos = compute_ln_dos(sim_dos_type);
 
+  min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = min_energy_state-1; i > max_entropy_state; i--) {
-    if (ln_dos[i] - ln_dos[i+1] <= 1.0/min_T) {
-      min_important_energy = i+1;
+  for (int i = max_entropy_state; i < min_energy_state; i++) {
+    if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T) {
+      min_important_energy = i;
+    } else {
       delete[] ln_dos;
       return min_important_energy;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
-  min_important_energy = min_energy_state;
+  if (min_important_energy == 0) {
+    min_important_energy = min_energy_state;
+  }
 
   delete[] ln_dos;
   return min_important_energy;
