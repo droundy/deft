@@ -995,7 +995,7 @@ int main(int argc, const char *argv[]) {
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
 
-  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every minute
+  clock_t output_period = CLOCKS_PER_SEC; // start at outputting every second
   // top out at one hour interval
   clock_t max_output_period = clock_t(CLOCKS_PER_SEC)*60*30; // save at least every 30m
   clock_t last_output = clock(); // when we last output data
@@ -1046,14 +1046,13 @@ int main(int argc, const char *argv[]) {
     // often:
     const clock_t now = (sw.iteration % 10000) ? last_output : clock();
     if ((now - last_output > output_period)
-        || sw.iteration == simulation_iterations
-        || (simulation_round_trips > 0
-            && sw.pessimistic_samples[sw.min_important_energy] == simulation_round_trips)) {
+        || (sw.iteration >= simulation_iterations
+            && (simulation_round_trips == 0
+                || sw.pessimistic_samples[sw.min_important_energy] >= simulation_round_trips))) {
       last_output = now;
       assert(last_output);
-      if (output_period < max_output_period/2) output_period *= 2;
-      else if (output_period < max_output_period)
-        output_period = max_output_period;
+      output_period *= 2;
+      if (output_period > max_output_period) output_period = max_output_period;
       long fraction_done = 100*sw.iteration/simulation_iterations;
       if (simulation_round_trips > 0) {
         long pessimistic_fraction =
