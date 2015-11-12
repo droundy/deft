@@ -742,6 +742,19 @@ void sw_simulation::set_max_entropy_energy() {
   }
 }
 
+static void print_seconds_as_time(clock_t clocks) {
+  const double secs_done = double(clocks)/CLOCKS_PER_SEC;
+  const int seconds = int(secs_done) % 60;
+  const int minutes = int(secs_done / 60) % 60;
+  const int hours = int(secs_done / 3600) % 24;
+  const int days = int(secs_done / 86400);
+  if (days == 0) {
+    printf(" %02i:%02i:%02i ", hours, minutes, seconds);
+  } else {
+    printf(" %i days, %02i:%02i:%02i ", days, hours, minutes, seconds);
+  }
+}
+
 bool sw_simulation::finished_initializing(bool be_verbose) {
   set_max_entropy_energy();
 
@@ -800,6 +813,21 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                optimistic_samples[min_important_energy],
                pessimistic_samples[highest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy);
+        {
+          const clock_t now = clock();
+          printf("      ");
+          print_seconds_as_time(now);
+          long pess = pessimistic_samples[min_important_energy];
+          long percent_done = 100*pess/min_samples;
+          printf("(%ld%% done,", percent_done);
+          if (pess > 0) {
+            const clock_t clocks_remaining = now*(min_samples-pess)/pess;
+            print_seconds_as_time(clocks_remaining);
+            printf("remaining)\n");
+          } else {
+            printf(")\n");
+          }
+        }
         fflush(stdout);
       }
       return pessimistic_samples[min_important_energy] >= min_samples;
