@@ -457,7 +457,7 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(tmmc || oetmmc){
     sw.sim_dos_type = transition_dos;
-  } else{
+  } else {
     sw.sim_dos_type = histogram_dos;
   }
 

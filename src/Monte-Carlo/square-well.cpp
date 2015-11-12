@@ -222,19 +222,6 @@ int count_all_interactions(ball *balls, int N, double interaction_distance,
   return interactions;
 }
 
-int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
-                      int energy_levels){
-  int max_entropy_state = 0;
-  for (int i = 0; i < energy_levels; i++) {
-    if (log(energy_histogram[i]) - ln_energy_weights[i]
-        > (log(energy_histogram[max_entropy_state])
-           - ln_energy_weights[max_entropy_state])) {
-      max_entropy_state = i;
-    }
-  }
-  return max_entropy_state;
-}
-
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
   return a*vector3d(n+x/2,m+y/2,l+z/2);
 }
@@ -715,10 +702,11 @@ int sw_simulation::set_min_important_energy(){
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state; i < min_energy_state; i++) {
+  for (int i = max_entropy_state+1; i < min_energy_state; i++) {
     if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T) {
       min_important_energy = i;
     } else {
+      if (min_important_energy == 0) min_important_energy = max_entropy_state+1;
       delete[] ln_dos;
       return min_important_energy;
     }
@@ -733,17 +721,11 @@ int sw_simulation::set_min_important_energy(){
 }
 
 void sw_simulation::set_max_entropy_energy() {
+  const double *ln_dos = compute_ln_dos(sim_dos_type);
   for (int i=energy_levels-1; i >= 0; i--) {
-    if (optimistic_samples[i] < 10000) continue;
-    long ups_minus_downs = 0;
-    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-      ups_minus_downs += transitions(i, de)*de;
-    }
-    if (ups_minus_downs > sqrt(optimistic_samples[i])) {
-      max_entropy_state = i+1;
-      return;
-    }
+    if (ln_dos[i] > ln_dos[max_entropy_state]) max_entropy_state = i;
   }
+  delete[] ln_dos;
 }
 
 static void print_seconds_as_time(clock_t clocks) {
@@ -941,7 +923,10 @@ int sw_simulation::initialize_max_entropy(double acceptance_goal) {
   }
   printf("Took %ld iterations to find most probable state: %d with width %.2g\n",
          iteration - starting_iterations, max_entropy_state, sqrt(variance));
-  return int(mean + 0.5);
+  // here we use our preferred ln_dos function to find the max entropy
+  // state...
+  set_max_entropy_energy();
+  return max_entropy_state;
 }
 
 void sw_simulation::initialize_translation_distance(double acceptance_goal) {
