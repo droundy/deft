@@ -71,3 +71,4 @@ version-identifier.h
 *.gif
 log/
 *.mp4
+.vagrant
