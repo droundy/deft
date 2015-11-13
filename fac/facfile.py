@@ -28,12 +28,16 @@ class facfile:
             print('C', C, file=self._f)
         for c in caches:
             print('c', c, file=self._f)
-    def default(self, cmd, inputs, outputs):
+    def default(self, cmd, inputs, outputs, Caches=['/etc/ld.so.cache'], caches=[]):
         print('\n|', cmd, file=self._f)
         for i in inputs:
             print('<', i, file=self._f)
         for o in outputs:
             print('>', o, file=self._f)
+        for C in Caches:
+            print('C', C, file=self._f)
+        for c in caches:
+            print('c', c, file=self._f)
     def compile(self, cpp):
         obj = cpp[:-3]+'o'
         print('\n|', config.cxx, config.cxxflags, '-c', '-o', obj, cpp, file=self._f)
