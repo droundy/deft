@@ -1,0 +1,557 @@
+
+@import "normalize.scss";
+
+*, *:after, *:before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+$black: #000;
+$white: #fff;
+
+$highlight: #1f8dd6;
+$backhighlight: #cbe7f8;
+
+$hoverfocus: #f00;
+
+$menuback: #fff;
+$menuhoverback: #ddd;
+$menuhoverfore: #05d;
+$menucurrentfore: $highlight;
+$menufore: #444;
+$menuitem: #eee;
+$menushadow: #aaa;
+$menuwidth: 150px;
+$leftboxsize: 1.0em; /* actually circle in menu */
+
+$contentcolor: #555;
+
+$maintoc: #999;
+$secondtoc: #666;
+
+html { /* make scrollbar always visible to make spacing more predictable */
+overflow: -moz-scrollbars-vertical;
+overflow-y: scroll;
+}
+
+body { /* just define the font once! */
+    font:normal 1em Helvetica, Verdana, Arial, sans-serif;
+}
+
+@mixin border-radius($radius) {
+    -webkit-border-radius: $radius;
+    -moz-border-radius: $radius;
+    -ms-border-radius: $radius;
+    border-radius: $radius;
+}
+
+td {
+   padding: .2em;
+}
+
+/* The following is all for definition lists, which we draw with a
+little color and a box. */
+dl {
+  border: .2em double #ccc;
+  padding: 0.3em;
+}
+dt {
+  float: left;
+  clear: left;
+  width: 5.5em;
+  text-align: center;
+  font-weight: bold;
+  color: $highlight;
+}
+dt:after {
+  content: ":";
+}
+dd {
+  margin: 0 0 0 6em;
+  padding: 0 0 0em 0;
+}
+dd:after {
+  clear: left;
+  display: table;
+  content: "";
+}
+
+article {
+    max-width: 35em;
+    margin-bottom: 3em;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6em;
+    @media screen {
+      color: $contentcolor;
+    }
+    img {
+       height: auto;
+       display: block;
+       width: 80%;
+       float: none;
+       margin-left: auto;
+       margin-right: auto;
+    }
+    a {
+        color: $highlight;
+        text-decoration: none;
+    }
+    a:visited {
+        color: $black;
+    }
+    a:hover,
+    a:focus {
+        color: $hoverfocus;
+    }
+    a:active {
+        padding-top: 0.125em;
+    }
+
+    h1 {
+        font-weight: 300;
+        font-size: 1.6em;
+        text-align: center;
+        padding: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    h2 {
+        font-weight: 300;
+        font-size: 1.4em;
+        text-align: center;
+        padding: 0;
+        color: black;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    h3 {
+        font-weight: bold;
+        font-size: 1em;
+        padding: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    td {
+      h3 {
+          text-align: left;
+      }
+      p {
+        padding: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      ul li:before {
+        display:none;
+      }
+      ul {
+        margin-top: 0;
+      }
+      ul li li {
+        font-weight: normal;
+      }
+      ul li {
+        font-weight: bold;
+        margin-left: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    /* css list with circle background -------------- */
+    ol,
+    ul{
+        counter-reset: li;
+        list-style: none;
+        padding: 0;
+        margin-bottom: 0em;
+    }
+    ol ol{
+        margin: 0 0 0 2em;
+    }
+    ol li,
+    ul li{
+        position: relative;
+        display: block;
+        padding: .0em .0em .0em 1.1em;
+        margin-bottom: 0.8em;
+        margin-left: 1em;
+        background: $white;
+        text-decoration: none;
+        @include border-radius(.3em);
+    }
+   /* ol li:hover,
+    ul li:hover{
+        background: $backhighlight;
+    } */
+    ol li:before,
+    ul li:before{
+        position: absolute;
+        $circlediameter: 2.0em;
+        @media screen {
+        left: #{-$circlediameter/2};
+          color:$white;
+          top: 50%;
+          margin-top: #{-$circlediameter + 1.0em};
+          background: $highlight;
+          height: $circlediameter;
+          width: $circlediameter;
+          line-height: #{$circlediameter - 0.5em};
+          border: .3em solid $white;
+          text-align: center;
+          font-weight: bold;
+          font-size: 1em;
+          @include border-radius($circlediameter);
+        }
+        @media print {
+          left: #{-$circlediameter/5};
+        }
+    }
+    ul li:before{
+        content: ">";
+    }
+    ol li:before{
+        content: counter(li);
+        counter-increment: li;
+    }
+}
+
+code {
+    font-family:Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace;
+    font-size: 1.0em;
+    line-height: 1.0em;
+}
+
+pre{
+    margin:5px;
+    overflow:auto;
+    width:auto;
+    padding:0.5em;
+    background-color:#222222;
+    color:#ffee00;
+    padding-bottom:0.5em;
+}
+
+
+/* This is the table of contents for this page. */
+div.toc {
+    li {
+      list-style: none;
+      font-size: 0.9em;
+      padding-left: 0.5em;
+      a:hover,
+      a:focus {
+          color: $highlight;
+      }
+    }
+    ul li {
+        background: transparent;
+    }
+    ul li ul,
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+    }
+    h1 {
+      font-size: 1.2em;
+      margin-bottom: 0.1em;
+      margin-left: 0.2em;
+      color: $highlight;
+      margin-top: 0;
+    }
+
+    a {
+        display: block;
+        text-decoration: none;
+        color: $maintoc;
+        border: none;
+        padding-left: 0.8em;
+        padding-right: 0.8em;
+        padding-bottom: 0.3em;
+        padding-top: 0.1em;
+    }
+    ul li:before {
+        content: none;
+    }
+    ul li ul li a {
+        color: $secondtoc;
+        font-size: 0.9em;
+    }
+}
+div.toc.active {
+  ul {
+    display: none;
+  }
+}
+header {
+    background-color: $white;
+    text-align: center;
+    h1 {
+        margin: 0.2em 0;
+        font-size: 2em;
+        font-weight: 300;
+        @media screen {
+          color: $highlight;
+        }
+    }
+    h2 {
+        font-weight: 300;
+        @media screen {
+          color: $black;
+        }
+        padding: 0;
+        margin-top: 0;
+    }
+ }
+
+/* The nav is the sidebar, which is at the top for the mobile
+(small-screen) version, and on the left for other versions. */
+
+nav {
+    .menu-heading {
+        background: $highlight;
+    }
+    background: $menuback;
+
+    ul {
+        margin:0;
+        padding:0;list-style-type:none;display:block;
+        font-weight:bold;
+        line-height:1.9em;
+        width:100%;
+    }
+
+    ul li{margin:0;padding:0;border-top:.15em solid $menuback;
+          border-bottom:.15em solid $menushadow;}
+
+    ul li a{display:block;text-decoration:none;color:$menufore;
+background:$menuitem;padding:0 0 0 1.25em;width:100%;}
+
+    ul li a:hover{
+      background:$menuhoverback;
+      color:$menuhoverfore;
+    }
+
+    ul li a.current,
+    ul li a.current:hover{
+      background:$menuhoverback;
+      color:$menucurrentfore;
+    }
+    ul li a.current:before,
+    ul li a.current:hover:before{
+        content: "";
+        position: absolute;
+        margin-top: #{-0*$leftboxsize + 0.3em};
+        background: $highlight;
+        height: $leftboxsize;
+        width: $leftboxsize;
+        line-height: #{$leftboxsize};
+        text-align: center;
+        font-weight: bold;
+        font-size: 1em;
+        @include border-radius($leftboxsize);
+        color:$white;
+    }
+}
+
+@media print {
+
+  nav { display: none; }
+  div.toc { display: none; }
+  body { /* just define the font once! */
+      font:normal 10pt "Times New Roman", Times, serif;
+  }
+  main {
+    float: none;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+  article {
+    max-width: 40em;
+    width: 100%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  pre{
+      overflow:visible;
+      color:#000;
+  }
+}
+
+@media screen {
+    nav {
+        height: 2em;
+        min-width: 30em;
+        ul li{display:block;position:relative;float:left;margin:0;height:2em;}
+        ul li a{height:2em;padding-right:0.25em;padding-left:0.25em;
+           border-right:.1em solid $menushadow;
+           border-left:.2em solid $menuback;
+        }
+        ul li a.current:before,
+        ul li a.current:hover:before{
+            left: #{-$leftboxsize/2+0.1em};
+        }
+        img {
+           height: 2em;
+           display: none;
+           float: left;
+        }
+        @media screen and (min-width: 27em) {
+            img { display: block; }
+        }
+    
+    }
+    div.toc {
+    
+        padding-top: 0;
+        max-width: 30em;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        ul {
+          margin-left: 2em;
+        }
+        background-color: $white;
+        color: $black;
+    }
+    main {
+        width: auto;
+        margin-left: 0em;
+        margin-right: 0em;
+        float: none;
+        clear: none;
+        padding: 0 .5em;
+        display: block;
+        position: relative;
+    }
+}
+/* width 49 */@media screen and (min-width: 49em) {
+    nav {
+        z-index: 1000;
+        overflow-y: auto;
+        top: 0;
+        bottom: 0;
+        -webkit-overflow-scrolling: touch;
+        position: fixed;
+        width: 12em;
+        left: 0em;
+        display: block;
+    }
+    nav {
+        height: auto;
+        min-width: 0;
+        ul li{display:block;float:none;margin:0;height:auto;}
+        ul li a{height:auto;padding-left:1em;padding-right:0;}
+        .menu-heading {
+            width: 100%;
+        }
+        ul li a.current:before,
+        ul li a.current:hover:before{
+            left: 0;
+        }
+        img {
+           height: auto;
+           display: block;
+           float: none;
+        }
+    
+    }
+    div.toc {
+    
+        padding-top: 0;
+        max-width: 30em;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        ul {
+          margin-left: 2em;
+        }
+        background-color: $white;
+        color: $black;
+    
+    }
+    main {
+        width: auto;
+        margin-left: 12em;
+        margin-right: 0em;
+        float: none;
+        clear: none;
+        padding: 0 .5em;
+        display: block;
+        position: relative;
+    }
+}
+@media screen and (min-width: 64em) {
+    nav {
+        z-index: 1000;
+        overflow-y: auto;
+        top: 0;
+        bottom: 0;
+        -webkit-overflow-scrolling: touch;
+        position: fixed;
+        width: 12em;
+        left: 0em;
+        display: block;
+    }
+    nav {
+        height: auto;
+        min-width: 0;
+        ul li{display:block;float:none;margin:0;height:auto;}
+        ul li a{height:auto;padding-left:1em;padding-right:0;}
+        .menu-heading {
+            width: 100%;
+        }
+        ul li a.current:before,
+        ul li a.current:hover:before{
+            left: 0;
+        }
+        img {
+           height: auto;
+           display: block;
+           float: none;
+        }
+    }
+    div.toc {
+        z-index: 1000;
+        overflow-y: auto;
+        top: 0;
+        bottom: 0;
+        -webkit-overflow-scrolling: touch;
+        position: fixed;
+        width: 15em;
+        right: 0em;
+        display: block;
+    }
+    div.toc {
+        padding-top: 2em;
+        min-width: 0;
+        margin-left: 0.1em;
+        ul {
+          margin-left: .2em;
+        }
+        background-color: $menuback;
+        color: $white;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    
+    }
+    main {
+        width: auto;
+        margin-left: 12em;
+        margin-right: 15em;
+        float: none;
+        clear: none;
+        padding: 0 .5em;
+        display: block;
+        position: relative;
+    }
+}
+

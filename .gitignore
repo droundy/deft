@@ -72,3 +72,6 @@ version-identifier.h
 log/
 *.mp4
 .vagrant
+*.css
+*.css.map
+.sass-cache

@@ -1,4 +1,9 @@
-# Deft documentation
+# Deft home page
+
+[TOC]
+
+Deft is a classical density-functional theory code developed by the
+[Roundy research group](http://physics.oregonstate.edu/~roundyd).
 
 * First, you'll want to [install](install.html) it.
 * There's also a [FAQ](faq.html).

@@ -53,7 +53,7 @@ for N in Ns:
         cmd += ' --N %d' % N
         cmd += ' --min_T 0.1'
         cmd += ' --data_dir %s' % dirname
-        cmd += ' --min_samples 1000'
+        cmd += ' --min_samples 10000'
         cmd += ' --pessimistic_sampling'
         cmd += ' --golden'
         cmd += ' --ww %g' % ww
