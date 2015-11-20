@@ -622,17 +622,20 @@ int sw_simulation::set_min_important_energy(){
 
   // We always use the transition matrix to estimate the
   // min_important_energy, since it is more robust at the outset.
-  const double *ln_dos = compute_ln_dos(transition_dos);
+  double *ln_dos = compute_ln_dos(transition_dos);
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
   for (int i = max_entropy_state+1; i < min_energy_state; i++) {
-    if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T) {
+    if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T && energy_histogram[i+1] > 0) {
       min_important_energy = i;
     } else {
-      if (min_important_energy == 0) min_important_energy = max_entropy_state+1;
-      delete[] ln_dos;
-      return min_important_energy;
+      // Adjust ln_dos for the next state to match the "canonical"
+      // value.  This allows us to handle situations where there is a
+      // drop in the density of states followed by a peak that is
+      // large enough to warrant considering the lower energy
+      // important.
+      ln_dos[i+1] = ln_dos[i] - 1.0/min_T;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
