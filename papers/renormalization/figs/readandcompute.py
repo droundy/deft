@@ -5,7 +5,7 @@ import string
 import glob
 from string import maketrans
 
-def T_u_cv_s_minT(fbase):
+def T_u_F_cv_s_minT(fbase):
     max_T = 1.4
     T_bins = 1e3
     dT = max_T/T_bins
@@ -41,6 +41,7 @@ def T_u_cv_s_minT(fbase):
     U = np.zeros(len(T_range)) # internal energy
     CV = np.zeros(len(T_range)) # heat capacity
     S = np.zeros(len(T_range)) # entropy
+    F = np.zeros(len(T_range)) # Free energy
 
     Z_inf = sum(np.exp(ln_dos - ln_dos.max()))
     S_inf = sum(-np.exp(ln_dos - ln_dos.max())*(-ln_dos.max() - np.log(Z_inf))) / Z_inf
@@ -50,6 +51,8 @@ def T_u_cv_s_minT(fbase):
         dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
         Z[i] = sum(dos_boltz)
         U[i] = sum(energy*dos_boltz)/Z[i]
+       
+        F[i] = -T_range[i]*np.log(Z[i]) - #absolute_f(fbase)
         # S = \sum_i^{microstates} P_i \log P_i
         # S = \sum_E D(E) e^{-\beta E} \log\left(\frac{e^{-\beta E}}{\sum_{E'} D(E') e^{-\beta E'}}\right)
         S[i] = sum(-dos_boltz*(-energy/T_range[i] - ln_dos_boltz.max() \
@@ -60,7 +63,7 @@ def T_u_cv_s_minT(fbase):
         S[i] -= S_inf
         CV[i] = sum((energy/T_range[i])**2*dos_boltz)/Z[i] - \
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
-    return T_range, U, CV, S, min_T
+    return T_range, U, F, CV, S, min_T
 
 def absolute_f(fbase):
     # find the partition function yielding the absolute free energy  using 'absolute/' data
