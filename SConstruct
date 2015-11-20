@@ -287,9 +287,7 @@ Alias('papers', env.PDF('papers/pair-correlation/figs/ghs-analytics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/harmonics.tex'))
 Alias('papers', env.PDF('papers/polyhedra/wigner-properties.tex'))
 
-Depends('index.html', 'papers/pair-correlation/figs/pretty-4.svg')
-
-paper = Environment(tools=['gnuplot', 'matplotlib', 'mkdown'])
+paper = Environment(tools=['gnuplot', 'matplotlib'])
 for paperfile in Glob('papers/*/paper.tex') + Glob('papers/*/project.tex'):
     paperdir = os.path.dirname(str(paperfile))
     # first let's handle all gnuplot files
@@ -616,11 +614,6 @@ env.Command(target = ['papers/hughes-saft/figs/equation-of-state.dat',
                       'papers/hughes-saft/figs/experimental-equation-of-state.dat'],
             source = ['papers/hughes-saft/figs/equation-of-state.mkdat'],
             action = './$SOURCE')
-
-########################### Now let's build the website! ##################################
-
-Alias('webpage', paper.Markdown('index.md'))
-Default('webpage')
 
 # Here we have rules to build the haskell code
 

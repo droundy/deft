@@ -222,19 +222,6 @@ int count_all_interactions(ball *balls, int N, double interaction_distance,
   return interactions;
 }
 
-int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
-                      int energy_levels){
-  int max_entropy_state = 0;
-  for (int i = 0; i < energy_levels; i++) {
-    if (log(energy_histogram[i]) - ln_energy_weights[i]
-        > (log(energy_histogram[max_entropy_state])
-           - ln_energy_weights[max_entropy_state])) {
-      max_entropy_state = i;
-    }
-  }
-  return max_entropy_state;
-}
-
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
   return a*vector3d(n+x/2,m+y/2,l+z/2);
 }
@@ -477,85 +464,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
         ln_dos[i] += log(down_to_here/up_from_here);
       }
     }
-  } else if(dos_type == transition_dos) { // FIXME this is made redundant by the above...
-
-    const int energies_observed = min_energy_state+1;
-    double *TD_over_D = new double[energies_observed];
-
-    // initialize a flat density of states with unit norm
-    for (int i = 0; i < energies_observed; i++) {
-      ln_dos[i] = 0;
-      TD_over_D[i] = 1.0/energies_observed;
-    }
-
-    // now find the eigenvector of our transition matrix via the power iteration method
-    bool done = false;
-    int iters = 0;
-    while(!done && iters < max(1000, init_iters/(2*biggest_energy_transition))) {
-      iters++;
-      // set D_n = T*D_{n-1}
-      for (int i = 0; i < energies_observed; i++) {
-        if (TD_over_D[i] > 0) ln_dos[i] += log(TD_over_D[i]);
-        TD_over_D[i] = 0;
-      }
-
-      // compute T*D_n
-      for (int i = 0; i < energies_observed; i++) {
-        double norm = 0;
-        for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++)
-          norm += transitions(i, de);
-        if(norm){
-          for (int de = max(-i, -biggest_energy_transition);
-               de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
-            TD_over_D[i+de] += exp(ln_dos[i] - ln_dos[i+de])*transitions(i,de)/norm;
-          }
-        }
-      }
-
-      /* The following deals with the fact that we may not have a
-         perfectly normalized transition matrix.  I'm not sure why this
-         happens, but the net result is that at equilibrium all of the D
-         values drop by the same factor.  I deal with this by finding
-         the average ratio (which ought to be around 1) and then
-         dividing all TD_over_D factors by this ratio, which corresponds
-         to a normalization shift.  This enables the algorithm to work
-         with high precision, where an unnormalized T (for whatever
-         cause) could previously cause the algorithm to never converge.. */
-      double norm = 0, count = 0;
-      for (int i = 0; i < energies_observed; i++) {
-        if (energy_histogram[i]) {
-          norm += TD_over_D[i];
-          count += 1;
-        }
-      }
-      norm /= count;
-      for (int i = 0; i < energies_observed; i++) {
-        TD_over_D[i] /= norm;
-      }
-
-      // check whether T*D_n (i.e. D_{n+1}) is close enough to D_n for us to quit
-      done = true;
-      for (int i = max_entropy_state+1; i < energies_observed; i++){
-        if (energy_histogram[i]) {
-          const double precision = fabs(TD_over_D[i] - 1);
-          if (precision > fractional_dos_precision){
-            done = false;
-            if((iters % 10000) == 0 && printing_allowed()){
-              printf("After %i iterations, failed at energy %i with value %.16g and "
-                     "newvalue %.16g and ratio %g and norm %g.\n",
-                     iters, i, ln_dos[i], ln_dos[i] + log(TD_over_D[i]), TD_over_D[i], norm);
-              fflush(stdout);
-            }
-            break;
-          }
-        }
-      }
-    }
-    if (!done) {
-      printf("Quitting after %d iterations without converging density of states.  :(\n", iters);
-    }
-  }
-  else {
+  } else {
     printf("We don't know what dos type we have!\n");
     exit(1);
   }
@@ -711,14 +620,17 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
 
 int sw_simulation::set_min_important_energy(){
 
-  const double *ln_dos = compute_ln_dos(sim_dos_type);
+  // We always use the transition matrix to estimate the
+  // min_important_energy, since it is more robust at the outset.
+  const double *ln_dos = compute_ln_dos(transition_dos);
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state; i < min_energy_state; i++) {
+  for (int i = max_entropy_state+1; i < min_energy_state; i++) {
     if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T) {
       min_important_energy = i;
     } else {
+      if (min_important_energy == 0) min_important_energy = max_entropy_state+1;
       delete[] ln_dos;
       return min_important_energy;
     }
@@ -733,17 +645,12 @@ int sw_simulation::set_min_important_energy(){
 }
 
 void sw_simulation::set_max_entropy_energy() {
+  const double *ln_dos = compute_ln_dos(transition_dos);
+
   for (int i=energy_levels-1; i >= 0; i--) {
-    if (optimistic_samples[i] < 10000) continue;
-    long ups_minus_downs = 0;
-    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-      ups_minus_downs += transitions(i, de)*de;
-    }
-    if (ups_minus_downs > sqrt(optimistic_samples[i])) {
-      max_entropy_state = i+1;
-      return;
-    }
+    if (ln_dos[i] > ln_dos[max_entropy_state]) max_entropy_state = i;
   }
+  delete[] ln_dos;
 }
 
 static void print_seconds_as_time(clock_t clocks) {
@@ -811,8 +718,8 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
           }
         }
         printf("[%9ld] Have %ld energies to go\n", iteration, energies_unconverged);
-        printf("       <%d - %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
-               min_important_energy, highest_problem_energy,
+        printf("       <%d - %d vs %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
+               min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
                optimistic_samples[min_important_energy],
                pessimistic_samples[highest_problem_energy],
@@ -941,7 +848,10 @@ int sw_simulation::initialize_max_entropy(double acceptance_goal) {
   }
   printf("Took %ld iterations to find most probable state: %d with width %.2g\n",
          iteration - starting_iterations, max_entropy_state, sqrt(variance));
-  return int(mean + 0.5);
+  // here we use our preferred ln_dos function to find the max entropy
+  // state...
+  set_max_entropy_energy();
+  return max_entropy_state;
 }
 
 void sw_simulation::initialize_translation_distance(double acceptance_goal) {
@@ -987,9 +897,19 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
                                            double wl_threshold, double wl_cutoff,
                                            bool fixed_energy_range) {
+  const double original_wl_factor = wl_factor;
   int weight_updates = 0;
   bool done = false;
-  if(fixed_energy_range) min_important_energy = default_min_e();
+  if (fixed_energy_range) {
+    min_important_energy = default_min_e();
+  } else {
+    set_min_important_energy();
+  }
+  // I am implementing a new method (November 2015) that combines
+  // Wang-Landau to sample the energy space, with the transition
+  // matrix to figure out the density of states.
+  const bool use_transions_with_wl = true;
+  int old_min_important_energy = min_important_energy;
   while (!done) {
 
     if(fixed_energy_range){
@@ -1006,7 +926,23 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     if(!fixed_energy_range){
       // Find and set the minimum important energy, as well as canonical weights below it
       set_min_important_energy();
+      set_max_entropy_energy();
       initialize_canonical(min_T,min_important_energy);
+      if (min_important_energy > old_min_important_energy && wl_factor != original_wl_factor) {
+        printf("\nFound new energy states!\n");
+        printf("  min_important_energy goes from %d -> %d\n",
+               old_min_important_energy, min_important_energy);
+        printf("  wl_factor goes from %g -> %g\n",
+               wl_factor, original_wl_factor);
+        wl_factor = original_wl_factor;
+        old_min_important_energy = min_important_energy;
+        flush_weight_array();
+        for (int i = 0; i < energy_levels; i++) {
+          if (energy_histogram[i] > 0) energy_histogram[i] = 1;
+        }
+        continue; // don't even considering quitting when we just
+                  // discovered a new energy!
+      }
     }
 
     // compute variation in energy histogram
@@ -1015,8 +951,10 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     double highest_hist = 0; // highest histogram value
     double lowest_hist = 1e200; // lowest histogram value
     double total_counts = 0; // total counts in energy histogram
+    int num_nonzero = 0; // number of nonzero bins
     for(int i = max_entropy_state+1; i <= min_important_energy; i++){
       if(energy_histogram[i] > 0){
+        num_nonzero += 1;
         total_counts += energy_histogram[i];
         if(energy_histogram[i] > highest_hist){
           highest_hist = energy_histogram[i];
@@ -1030,18 +968,21 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
     }
     double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
     const double variation = hist_mean/lowest_hist - 1;
+    const double min_over_mean = lowest_hist/hist_mean;
 
     // print status text for testing purposes
-    if(printing_allowed()){
+    bool be_verbose = printing_allowed();
+    if (be_verbose) {
+      write_transitions_file(); // Just for the heck of it, save the transition matrix...
       printf("\nWL weight update: %i\n",weight_updates++);
       printf("  WL factor: %g\n",wl_factor);
-      printf("  count variation: %g\n", variation);
+      printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
       printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
              highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
-      printf("  minimum_energy_state: %d,  max_entropy_state: %d,  energies visited: %d\n",
-             min_energy_state, max_entropy_state, min_energy_state-max_entropy_state);
-      printf("  current energy: %d\n", energy);
-      printf("  hist_mean: %g,  total_counts: %g\n", hist_mean, total_counts);
+      // printf("  min_energy_state: %d,  max_entropy_state: %d,  min_important_energy %d, energies visited: %d\n",
+      //        min_energy_state, max_entropy_state, min_important_energy, num_nonzero);
+      // printf("  current energy: %d\n", energy);
+      // printf("  hist_mean: %g,  total_counts: %g\n", hist_mean, total_counts);
     }
 
     // check whether our histogram is flat enough to update wl_factor
@@ -1050,6 +991,12 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
       flush_weight_array();
       for (int i = 0; i < energy_levels; i++) {
         if (energy_histogram[i] > 0) energy_histogram[i] = 1;
+      }
+      if (use_transions_with_wl) {
+        // We throw away the weight array that we just accumulated,
+        // and replace it with one computed using the transition
+        // matrix we have so far accumulated.
+        update_weights_using_transitions();
       }
 
       // repeat until terminal condition is met,
@@ -1061,8 +1008,17 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
         done = true;
       }
     }
-    if(end_condition == init_iter_limit) done = reached_iteration_cap();
+    if(end_condition == init_iter_limit) done = done || reached_iteration_cap();
+    if (use_transions_with_wl && finished_initializing(be_verbose)) {
+      done = true;
+    }
   }
+
+  if (use_transions_with_wl) {
+    update_weights_using_transitions();
+    flush_weight_array();
+  }
+
   initialize_canonical(min_T,min_important_energy);
 }
 
@@ -1273,6 +1229,7 @@ void sw_simulation::initialize_transitions() {
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
+      set_max_entropy_energy();
       write_transitions_file();
     }
   } while(!finished_initializing(verbose));

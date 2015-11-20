@@ -457,7 +457,7 @@ int main(int argc, const char *argv[]) {
   // Choose necessary but unspecified parameters
   if(tmmc || oetmmc){
     sw.sim_dos_type = transition_dos;
-  } else{
+  } else {
     sw.sim_dos_type = histogram_dos;
   }
 
@@ -780,7 +780,7 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
-  if (golden){
+  if (golden || wang_landau) {
     sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
 
     FILE *transitions_infile = fopen(transitions_input_filename,"r");

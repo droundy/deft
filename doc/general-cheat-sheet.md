@@ -69,9 +69,8 @@ ssh into any computer that recognizes my new laptop's public key.
 
 ## This cheat sheet
 
-The `SConstruct` file in `deft` has a section which creates this
-webpage.  It uses the html file index.html, which uses doc/index.html,
-which uses doc/general-cheat-sheet.html, which is created from
-doc/general-cheat-sheet.md.  Editing doc/general-cheat-sheet.md and
-then running a scons from the deft directory will remake the websites'
-html that can in turn can be read by a browser.
+The `doc/website.fac` file in `deft` has the rule to create this
+webpage.  It uses python program `doc/mkdown.py` to generate html
+files from all the markdown files in `doc/`.  Editing
+`doc/general-cheat-sheet.md` and then running `fac` will remake the
+websites' html that can in turn can be read by a browser.

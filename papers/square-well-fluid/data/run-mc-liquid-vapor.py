@@ -2,12 +2,15 @@
 from __future__ import division
 import os, numpy, sys, re
 
-if len(sys.argv) != 7:
+if len(sys.argv) < 7:
     print "usage:  python2 %s ww ff lenx lenyz min_T iterations" % sys.argv[0]
     exit(1)
 
 if os.path.exists('paper.tex'):
     os.chdir('../..')
+
+if os.path.exists('run-mc-liquid-vapor.py'):
+    os.chdir('../../..')
 
 assert os.path.exists('SConstruct')
 # switch to deft project directory and build SWMC
@@ -18,7 +21,17 @@ ff = float(sys.argv[2])
 lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
-iterations = round(float(sys.argv[6]))
+if sys.argv[6] == 'pessimistic':
+    round_trips = 100
+    stop = " --round_trips %d --pessimistic_sampling --min_samples %d" % (round_trips, round_trips)
+else:
+    iterations = round(float(sys.argv[6]))
+    stop = " --iterations %d --init_iters %d" % (iterations, iterations)
+
+if 'wl' in sys.argv:
+    method = ' --wang_landau'
+else:
+    method = ' --golden'
 
 n = ff/(4*numpy.pi/3)
 N = round(n*lenyz*lenyz*lenx)
@@ -26,6 +39,8 @@ mem_estimate = 10 + 0.15*N # it actually also depends on ww, but I'm ignoring th
 
 datadir = 'papers/square-well-fluid/data/lv'
 fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenx, lenyz)
+if 'wl' in sys.argv:
+    fname = 'ww%.2f-ff%.2f-%gx%g-wl' % (ww, ff, lenx, lenyz)
 
 os.system('mkdir -p ' + datadir)
 
@@ -39,7 +54,9 @@ cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
 cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)
 
-cmd += " --iterations %d --init_iters %d --golden" % (iterations, iterations)
+cmd += stop
+
+cmd += method
 
 cmd += ' --min_T %g --translation_scale 0.05' % min_T
 

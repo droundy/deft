@@ -1,0 +1,15 @@
+*.mkdat
+*.dat
+*.test
+.git
+*.tum
+*~
+*.aux
+*.fls
+*.bbl
+*.log
+frame*.png
+*.eps
+*.o
+*.exe
+*.hi

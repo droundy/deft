@@ -82,7 +82,7 @@ def all_dependencies(x):
 
 for main in mainfiles:
     objects = sorted([o+'.o' for o in all_dependencies(main)])
-    haskell.rule('ghc -O2 -package containers -package filepath -package directory -o %s.exe %s'
+    haskell.rule('ghc -O2 -package process -package containers -package filepath -package directory -o %s.exe %s'
                  % (main, ' '.join(objects)), objects, [main+'.exe'])
 
 haskell.rule('python2 create_generators.py',
