@@ -6,10 +6,10 @@ pyfs = sys.argv[1:]
 
 import_re = re.compile(r"^import\s+(\w+)", re.M)
 
-fixed_open = re.compile(r"=\s*open\(['\"]([^'\"\*]*)['\"]\s*,\s*['\"]w['\"]\s*\)")
-open_changing_output = re.compile(r"open\(['\"]([^'\"\*]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*,\s*['\"]w['\"]\s*\)")
-fixed_output = re.compile(r"savefig\(['\"]([^'\"\*]*)['\"](\s*,[\w\s=]+)*\)")
-changing_output = re.compile(r"savefig\(['\"]([^'\"\*]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)")
+fixed_open = re.compile(r"^[^\n#]*=\s*open\(['\"]([^'\"\*]*)['\"]\s*,\s*['\"]w['\"]\s*\)", re.M)
+open_changing_output = re.compile(r"^[^\n#]*open\(['\"]([^'\"\*]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*,\s*['\"]w['\"]\s*\)", re.M)
+fixed_output = re.compile(r"^[^\n#]*savefig\(['\"]([^'\"\*]*)['\"](\s*,[\w\s=]+)*\)", re.M)
+changing_output = re.compile(r"^[^\n#]*savefig\(['\"]([^'\"\*]*)['\"]\s*%\s*(\(.*\))(\s*,[\w\s=]+)*\s*\)", re.M)
 arguments = re.compile(r"^#arg\s+(\w+)\s*=\s*(.*)$", re.M)
 
 fixed_open_input = re.compile(r"=\s*open\(['\"]([^'\"\*]*)['\"]\s*,\s*['\"]r['\"]\s*\)")
@@ -25,8 +25,9 @@ def friendly_eval(code, context, local = None):
     try:
         return eval(code, local)
     except:
-        print ("\nError evaluating '%s' from file %s" % (code, context))
-        raise
+        print ("\n# Error evaluating '%s' from file %s" % (code, context))
+        sys.stderr.write("\nError evaluating '%s' from file %s\n" % (code, context))
+        return None
 
 
 for fname in pyfs:

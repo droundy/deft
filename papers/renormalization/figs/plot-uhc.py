@@ -15,6 +15,7 @@ if len(sys.argv) != 5:
     exit(1)
 
 i = float(sys.argv[1])
+#arg i = [0,1,2]
 
 ww = float(sys.argv[2])
 #arg ww = [1.3, 1.5, 2.0, 3.0]
@@ -22,17 +23,10 @@ ww = float(sys.argv[2])
 L = float(sys.argv[3])
 #arg L = [5]
 
-N = eval(sys.argv[4])
-#arg N = range(5,31)
-
-#methods = eval(sys.argv[4])
 method = [["tmmc"]]
-#arg methods = [["tmmc"]]
 
 #seed = int(sys.argv[5])
 #arg seed = [0]
-
-# input: ["../data/ww%04.2f-L%04.2f-N%i-%s.dat" % (ww, L, N, data) for data in ["E","lnw"]]
 
 # for method in set(methods):
 #     T, U, F, CV, S, min_T = readandcompute.T_u_f_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, N))
