@@ -83,14 +83,18 @@ def dr_g(fbase):
             if "de_g" in line:
                 return float(line.split()[-1])
 
-def dimensions(fbase):
-    with open(fbase+"-E.dat") as file:
+def dimensions(f):
+    if not '.dat' in f:
+        f = f+"-E.dat"
+    with open(f) as file:
         for line in file:
             if "# cell dimensions: " in line:
                 return eval(line.split(': ')[-1])
 
-def read_N(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def read_N(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if "N" in line:
                 return int(line.split(': ')[-1])
@@ -160,7 +164,8 @@ def g_r(fbase, T):
 
 
 def density_x(fbase, T):
-    data = numpy.loadtxt(fbase+"-density.dat")
+    fdensity = fbase+"-density.dat"
+    data = numpy.loadtxt(fdensity)
     denshist = data[1:,2:]
     x_1d = data[0,2:]
     dx = x_1d[1] - x_1d[0]
@@ -169,7 +174,7 @@ def density_x(fbase, T):
     hist_1d = numpy.zeros_like(lnw_1d)
     n_E = len(E_1d)
     n_x = len(x_1d)
-    N = read_N(fbase)
+    N = read_N(fdensity)
     for i in xrange(n_E):
         hist_1d[i] = sum(denshist[i,:])/N
     x, E = numpy.meshgrid(x_1d, E_1d)
@@ -186,7 +191,7 @@ def density_x(fbase, T):
     dos_boltz_1d /= sum(dos_boltz_1d)
 
     # note:  what w
-    lenx, leny, lenz = dimensions(fbase)
+    lenx, leny, lenz = dimensions(fdensity)
     density_of_E = denshist/(dx*leny*lenz*hist)*(4*numpy.pi/3)
 
     density = numpy.zeros(n_x)
