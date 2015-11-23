@@ -49,9 +49,11 @@ def T_u_cv_s_minT(fbase):
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
     return T_range, U, CV, S, min_T
 
-def minT(fbase):
+def minT(f):
+    if not '.dat' in f:
+        f = f+"-E.dat"
     min_T = 0
-    with open(fbase+"-E.dat") as file:
+    with open(f) as file:
         for line in file:
             if("min_T" in line):
                 this_min_T = float(line.split()[-1])
@@ -61,15 +63,7 @@ def minT(fbase):
     return min_T
 
 def minT_from_transitions(fbase):
-    min_T = 0
-    with open(fbase+"-transitions.dat") as file:
-        for line in file:
-            if "min_T" in line:
-                this_min_T = float(line.split()[-1])
-                if this_min_T > min_T:
-                    min_T = this_min_T
-                break
-    return min_T
+    return minT(fbase+"-transitions.dat")
 
 def iterations(fbase):
     with open(fbase+"-E.dat") as file:

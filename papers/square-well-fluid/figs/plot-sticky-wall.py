@@ -13,25 +13,31 @@ import readandcompute
 ww = float(sys.argv[1])
 #arg ww = [1.3]
 ff = float(sys.argv[2])
-#arg ff = [0.1]
+#arg ff = [0.1, 0.2, 0.3]
 lenx = float(sys.argv[3])
-#arg lenx = [50,100]
+#arg lenx = [50, 80, 100]
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
-T = float(sys.argv[5])
-#arg T = [1.0,10.0]
 
 plt.figure()
 
-density, x = readandcompute.density_x('data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz), T)
-plt.plot(x/2, density)
+Ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 10.0]
+
+fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
+fname = fbase + '-density.dat'
+minT = readandcompute.minT(fname)
+
+for T in Ts:
+    if T >= minT:
+        density, x = readandcompute.density_x(fbase, T)
+        plt.plot(x/2, density, label='T=%g' % T)
 
 plt.ylim(0)
 plt.xlabel(r'$z/\sigma$')
 plt.ylabel(r'$\eta$')
-plt.title(r'$\eta(z)$ with $\lambda = %g$, $\eta=%g$, and $T/\epsilon = %g$'
-          % (ww, ff, T))
+plt.legend(loc='best')
+plt.title(r'$\eta(z)$ with $\lambda = %g$ and $\eta=%g$' % (ww, ff))
 
-plt.savefig('figs/liquid-vapor-ww%.2f-ff%.2f-%gx%g-T%.2g.pdf' % (ww,ff,lenx,lenyz,T))
+plt.savefig('figs/liquid-vapor-ww%.2f-ff%.2f-%gx%g.pdf' % (ww,ff,lenx,lenyz))
 
 plt.show()
