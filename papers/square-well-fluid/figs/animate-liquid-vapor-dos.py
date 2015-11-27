@@ -60,14 +60,17 @@ for frame in xrange(numframes):
 
     basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
 
+    e, lndos = readandcompute.e_lndos(basename)
+    min_T = readandcompute.minT_from_transitions(basename)
     try:
         N = readandcompute.read_N(basename)
         ax.axvline(-readandcompute.max_entropy_state(basename)/N, color='r', linestyle=':')
-        ax.axvline(-readandcompute.min_important_energy(basename)/N, color='b', linestyle=':')
+        min_important_energy = readandcompute.min_important_energy(basename)
+        ax.axvline(-min_important_energy/N, color='b', linestyle=':')
+        eforline = e + N
+        ax.plot(eforline/N - min_important_energy/N, eforline/min_T + lndos[min_important_energy], 'g--')
     except:
         pass
-
-    e, lndos = readandcompute.e_lndos(basename)
     ax.plot(e/N, lndos, 'k-')
 
     ax.set_xlabel(r'$E/N$')
@@ -81,5 +84,6 @@ for frame in xrange(numframes):
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
 
-os.system("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
-print("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
+avconv = "avconv -y -r 2 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)
+os.system(avconv) # make the movie
+print(avconv)
