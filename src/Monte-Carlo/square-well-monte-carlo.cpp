@@ -655,6 +655,10 @@ int main(int argc, const char *argv[]) {
   sprintf((char *)sw.transitions_movie_filename_format,
           "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
 
+  sw.dos_movie_filename_format = new char[1024];
+  sprintf((char *)sw.dos_movie_filename_format,
+          "%s/%s-movie/%%06d-lndos.dat", data_dir, filename);
+
   char *histogram_movie_filename_format = new char[1024];
   sprintf(histogram_movie_filename_format,
           "%s/%s-movie/%%06d-E.dat", data_dir, filename);

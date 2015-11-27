@@ -439,7 +439,7 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   return error_times_Z/Z;
 }
 
-double* sw_simulation::compute_ln_dos(dos_types dos_type){
+double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
 
   double *ln_dos = new double[energy_levels]();
 
@@ -1101,17 +1101,33 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
 void sw_simulation::initialize_simple_flat(int flat_update_factor){
   int weight_updates = 0;
   long num_moves = exp(1/min_T)*N*energy_levels;
+  bool am_verbose;
   do {
     set_min_important_energy();
+    set_max_entropy_energy();
 
-    // update weight array
-    for (int e = max_entropy_state; e <= min_important_energy; e++) {
+    // Update the weight array.
+    for (int e = max_entropy_state; e <= min_energy_state; e++) {
       if (energy_histogram[e]) {
         ln_energy_weights[e] -= log(energy_histogram[e]);
       }
     }
-    if(min_energy_state > min_important_energy){
-      initialize_canonical(min_T,min_important_energy);
+    // Now ensure that we never bias downward more strongly than at
+    // the minimum temperature.
+    for (int e = max_entropy_state+1; e <= min_energy_state; e++) {
+      if (ln_energy_weights[e] - ln_energy_weights[e-1] > 1.0/min_T) {
+        // Once we find the energy at which the minimum temperature
+        // gives the slope of the density of states, use this slope
+        // for all lower energies that we have explored.
+        for (int i=e; i<min_energy_state; i++) {
+          if (energy_histogram[i]) ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/min_T;
+        }
+        break;
+      }
+    }
+    // Make the weights above the max_entropy_state flat.
+    for (int e=0; e<max_entropy_state; e++) {
+      ln_energy_weights[e] = ln_energy_weights[max_entropy_state];
     }
     flush_weight_array();
     weight_updates++;
@@ -1130,17 +1146,24 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
       return;
     }
 
-    if (printing_allowed()) {
+    am_verbose = printing_allowed();
+    if (am_verbose) {
+      double *tmmc_dos = compute_ln_dos(transition_dos);
       printf("simple flat status update:\n");
       for (int e = max_entropy_state; e <= min_energy_state; e++) {
-        printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
-               e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);
+        if (energy_histogram[e]) {
+          printf("h[%3d] = %10ld,  os[%3d] = %10ld,  ps[%3d] = %10ld,  lnw[%3d]: %10g,  tmmc: %g\n",
+                 e, energy_histogram[e], e, optimistic_samples[e], e,
+                 pessimistic_samples[e], e, ln_energy_weights[e],
+                 -tmmc_dos[e] + tmmc_dos[max_entropy_state] + ln_energy_weights[max_entropy_state]);
+        }
       }
       printf("min_important_energy: %i\n",min_important_energy);
+      delete[] tmmc_dos;
     }
     num_moves *= flat_update_factor;
 
-  } while (!finished_initializing());
+  } while (!finished_initializing(am_verbose));
 
   flush_weight_array();
   set_min_important_energy();
@@ -1273,6 +1296,26 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
+static void write_d_file(const sw_simulation &sw, const char *fname) {
+  FILE *f = fopen(fname,"w");
+  if (!f) {
+    printf("Unable to create file %s!\n", fname);
+    exit(1);
+  }
+  sw.write_header(f);
+  fprintf(f, "# energy\tlndos\n");
+  double *lndos = sw.compute_ln_dos(transition_dos);
+  double maxdos = lndos[0];
+  for (int i = 0; i < sw.energy_levels; i++) {
+    if (maxdos < lndos[i]) maxdos = lndos[i];
+  }
+  for (int i = 0; i < sw.energy_levels; i++) {
+    fprintf(f, "%d\t%g\n", i, lndos[i] - maxdos);
+  }
+  fclose(f);
+  delete[] lndos;
+}
+
 void sw_simulation::write_transitions_file() const {
   // silently do not save if there is not file name
   if (transitions_filename) write_t_file(*this, transitions_filename);
@@ -1287,6 +1330,18 @@ void sw_simulation::write_transitions_file() const {
       sprintf(fname, transitions_movie_filename_format, transitions_movie_count++);
     } while (!stat(fname, &st));
     write_t_file(*this, fname);
+    delete[] fname;
+  }
+  if (dos_movie_filename_format) {
+    char *fname = new char[4096];
+    struct stat st;
+    do {
+      // This loop increments dos_movie_count until it reaches
+      // an unused file name.  The idea is to enable two or more
+      // simulations to contribute together to a single movie.
+      sprintf(fname, dos_movie_filename_format, dos_movie_count++);
+    } while (!stat(fname, &st));
+    write_d_file(*this, fname);
     delete[] fname;
   }
 }

@@ -10,6 +10,13 @@ def e_hist(fbase):
     hist = e_hist[:,1]
     return energy, hist
 
+def e_lndos(fbase):
+    e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
+
+    energy = -e_lndos[:,0] # array of energies
+    lndos = e_lndos[:,1]
+    return energy, lndos
+
 def T_u_cv_s_minT(fbase):
     max_T = 20.0
     T_bins = 1e3
