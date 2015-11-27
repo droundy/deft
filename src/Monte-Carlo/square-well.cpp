@@ -1019,7 +1019,6 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
   if (use_transions_with_wl) {
     update_weights_using_transitions();
-    flush_weight_array();
   }
 
   initialize_canonical(min_T,min_important_energy);
@@ -1238,11 +1237,34 @@ void sw_simulation::optimize_weights_using_transitions() {
 
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
-  const double *ln_dos = compute_ln_dos(transition_dos);
-  for(int i = 0; i < energy_levels; i++) {
+  double *ln_dos = compute_ln_dos(transition_dos);
+  for (int i = 0; i < max_entropy_state; i++) ln_dos[i] = ln_dos[max_entropy_state];
+  for (int i = min_important_energy+1; i < energy_levels; i++) {
+    ln_dos[i] = max(ln_dos[i-1] - 1.0/min_T, ln_dos[i]);
+  }
+  for (int i = 0; i < energy_levels; i++) {
     ln_energy_weights[i] = -ln_dos[i];
   }
   delete[] ln_dos;
+}
+
+// initialization with tmi
+void sw_simulation::initialize_tmi() {
+  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  bool verbose = false;
+  do {
+    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
+    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    verbose = printing_allowed();
+    if (verbose) {
+      set_min_important_energy();
+      set_max_entropy_energy();
+      write_transitions_file();
+    }
+
+    set_min_important_energy();
+    update_weights_using_transitions();
+  } while(!finished_initializing(verbose));
 }
 
 // initialization with tmmc
@@ -1261,9 +1283,7 @@ void sw_simulation::initialize_transitions() {
   } while(!finished_initializing(verbose));
 
   update_weights_using_transitions();
-  flush_weight_array();
   set_min_important_energy();
-  initialize_canonical(min_T,min_important_energy);
 }
 
 static void write_t_file(const sw_simulation &sw, const char *fname) {
@@ -1316,6 +1336,24 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
   delete[] lndos;
 }
 
+static void write_lnw_file(const sw_simulation &sw, const char *fname) {
+  FILE *f = fopen(fname,"w");
+  if (!f) {
+    printf("Unable to create file %s!\n", fname);
+    exit(1);
+  }
+  sw.write_header(f);
+  fprintf(f, "# energy\tlnw\n");
+  double minw = sw.ln_energy_weights[0];
+  for (int i = 0; i < sw.energy_levels; i++) {
+    if (minw > sw.ln_energy_weights[i]) minw = sw.ln_energy_weights[i];
+  }
+  for (int i = 0; i < sw.energy_levels; i++) {
+    fprintf(f, "%d\t%g\n", i, sw.ln_energy_weights[i] - minw);
+  }
+  fclose(f);
+}
+
 void sw_simulation::write_transitions_file() const {
   // silently do not save if there is not file name
   if (transitions_filename) write_t_file(*this, transitions_filename);
@@ -1342,6 +1380,18 @@ void sw_simulation::write_transitions_file() const {
       sprintf(fname, dos_movie_filename_format, dos_movie_count++);
     } while (!stat(fname, &st));
     write_d_file(*this, fname);
+    delete[] fname;
+  }
+  if (lnw_movie_filename_format) {
+    char *fname = new char[4096];
+    struct stat st;
+    do {
+      // This loop increments lnw_movie_count until it reaches
+      // an unused file name.  The idea is to enable two or more
+      // simulations to contribute together to a single movie.
+      sprintf(fname, lnw_movie_filename_format, lnw_movie_count++);
+    } while (!stat(fname, &st));
+    write_lnw_file(*this, fname);
     delete[] fname;
   }
 }

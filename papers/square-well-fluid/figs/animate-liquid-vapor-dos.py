@@ -31,8 +31,11 @@ minlndos = 1e100
 maxlndos = -1e100
 numframes = 0
 
+dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww,ff,lenx,lenyz)
+dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
+
 for frame in xrange(100000):
-    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
+    basename = dataformat % frame
     try:
         e, lndos = readandcompute.e_lndos(basename)
     except:
@@ -64,7 +67,7 @@ for frame in xrange(numframes):
         print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
 
-    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
+    basename = dataformat % frame
 
     e, lndos = readandcompute.e_lndos(basename)
     ax.plot(e, lndos, 'k-')

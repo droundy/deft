@@ -237,7 +237,7 @@ def total_init_iterations(basename):
 def e_and_total_init_histogram(basename):
     trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
     N = read_N(basename)
-    e = -trans[:,0]/N
+    e = -trans[:,0]
     trans = trans[:,1:]
     return e, numpy.sum(trans, axis=1)
 

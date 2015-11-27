@@ -30,8 +30,11 @@ minhist = 1e100
 maxhist = -1e100
 numframes = 0
 
+dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww,ff,lenx,lenyz)
+dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
+
 for frame in xrange(100000):
-    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
+    basename = dataformat % frame
     try:
         e, hist = readandcompute.e_and_total_init_histogram(basename)
     except:
@@ -55,15 +58,15 @@ for frame in xrange(numframes):
         print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
 
-    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
+    basename = dataformat % frame
     old_min_T = min_T
     min_T = readandcompute.minT_from_transitions(basename)
     # e, diff = readandcompute.e_diffusion_estimate(basename)
 
     try:
         N = readandcompute.read_N(basename)
-        ax.axvline(-readandcompute.max_entropy_state(basename)/N, color='r', linestyle=':')
-        ax.axvline(-readandcompute.min_important_energy(basename)/N, color='b', linestyle=':')
+        ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
+        ax.axvline(-readandcompute.min_important_energy(basename), color='b', linestyle=':')
     except:
         pass
 
@@ -97,7 +100,7 @@ for frame in xrange(numframes):
     ax.plot(e, newstuff, 'k-',
             label=r'%e additional iterations' % ((sum(init_hist) - sum(baseline_init_hist))/float(N)))
 
-    ax.set_xlabel(r'$E/N$')
+    ax.set_xlabel(r'$E$')
     ax.set_ylim(0, maxhist)
     ax.set_xlim(mine, maxe)
     ax.set_ylabel(r'histogram')
@@ -107,5 +110,6 @@ for frame in xrange(numframes):
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
 
-os.system("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
-print("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
+avconv = "avconv -y -r 1 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)
+os.system(avconv) # make the movie
+print(avconv)

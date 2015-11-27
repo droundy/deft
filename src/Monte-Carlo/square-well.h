@@ -99,6 +99,8 @@ struct sw_simulation {
   mutable int transitions_movie_count;
   const char *dos_movie_filename_format;
   mutable int dos_movie_count;
+  const char *lnw_movie_filename_format;
+  mutable int lnw_movie_count;
   /* Finally, the following define file names for output files. */
   const char *transitions_filename;
 
@@ -186,6 +188,7 @@ struct sw_simulation {
 
   void initialize_simple_flat(int flat_update_factor);
 
+  void initialize_tmi();
   void initialize_transitions();
 
   void initialize_transitions_file(const char *transitions_input_filename);
@@ -256,6 +259,7 @@ struct sw_simulation {
     transitions_filename = 0; // default to NULL pointer here for safety.
     transitions_movie_filename_format = 0; // default to NULL pointer here for safety.
     dos_movie_filename_format = 0; // default to NULL pointer here for safety.
+    lnw_movie_filename_format = 0; // default to NULL pointer here for safety.
   };
 };
 
