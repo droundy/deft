@@ -106,14 +106,18 @@ def read_ff(fbase):
             if "ff" in line:
                 return float(line.split(': ')[-1])
 
-def min_important_energy(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def min_important_energy(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if("min_important_energy" in line):
                 return float(line.split()[-1])
 
-def max_entropy_state(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def max_entropy_state(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if("max_entropy_state" in line):
                 return float(line.split()[-1])

@@ -40,12 +40,18 @@ for frame in xrange(100000):
     numframes = frame+1
     minlndos = min(minlndos, lndos.min())
     maxlndos = max(maxlndos, lndos.max())
-    try:
-        e, = readandcompute.e_hist(basename)
-        mine = min(mine, e.min())
-        maxe = max(maxe, e.max())
-    except:
-        continue
+    for i in range(len(lndos)-1):
+        if lndos[i] == lndos[i+1]:
+            pass
+        else:
+            maxe = max(maxe, e[i])
+            break
+    for i in range(len(lndos)-1, 1, -1):
+        if lndos[i-1] == lndos[i]:
+            pass
+        else:
+            mine = min(mine, e[i]-3)
+            break
 
 print 'mine', mine
 print 'maxe', maxe
@@ -61,29 +67,28 @@ for frame in xrange(numframes):
     basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
 
     e, lndos = readandcompute.e_lndos(basename)
-    min_T = readandcompute.minT_from_transitions(basename)
+    ax.plot(e, lndos, 'k-')
+    datname = basename+'-lndos.dat'
+    min_T = readandcompute.minT(datname)
     try:
-        N = readandcompute.read_N(basename)
-        ax.axvline(-readandcompute.max_entropy_state(basename)/N, color='r', linestyle=':')
+        ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
         min_important_energy = readandcompute.min_important_energy(basename)
-        ax.axvline(-min_important_energy/N, color='b', linestyle=':')
-        eforline = e + N
-        ax.plot(eforline/N - min_important_energy/N, eforline/min_T + lndos[min_important_energy], 'g--')
+        ax.axvline(-min_important_energy, color='b', linestyle=':')
+        ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], 'g--')
     except:
         pass
-    ax.plot(e/N, lndos, 'k-')
 
-    ax.set_xlabel(r'$E/N$')
+    ax.set_xlabel(r'$E$')
     ax.set_ylim(minlndos, maxlndos)
-    ax.set_xlim(-5, -0.3)
-    # ax.set_xlim(mine/N, maxe/N)
-    ax.set_ylabel(r'histogram')
+    # ax.set_xlim(-5, -0.3)
+    ax.set_xlim(mine, maxe)
+    ax.set_ylabel(r'$\ln DOS$')
     # ax.legend(loc='best').get_frame().set_alpha(0.25)
     plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$' % (ww, ff, lenx, lenyz))
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
 
-avconv = "avconv -y -r 2 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)
+avconv = "avconv -y -r 1 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)
 os.system(avconv) # make the movie
 print(avconv)
