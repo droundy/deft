@@ -23,7 +23,7 @@ lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
 if sys.argv[6] == 'pessimistic':
     round_trips = 100
-    stop = " --round_trips %d --pessimistic_sampling --min_samples %d" % (round_trips, round_trips)
+    stop = " --round_trips %d --pessimistic_sampling --min_samples %d" % (1000*round_trips, round_trips)
 else:
     iterations = round(float(sys.argv[6]))
     stop = " --iterations %d --init_iters %d" % (iterations, iterations)
