@@ -19,7 +19,10 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
-moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-dos' % (ww,ff,lenx,lenyz)
+if 'tmi' in sys.argv:
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi-dos' % (ww,ff,lenx,lenyz)
+else:
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-dos' % (ww,ff,lenx,lenyz)
 os.system('rm -rf ' + moviedir)
 assert not os.system('mkdir -p ' + moviedir)
 
@@ -32,7 +35,8 @@ maxlndos = -1e100
 numframes = 0
 
 dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww,ff,lenx,lenyz)
-dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
+if 'tmi' in sys.argv:
+    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
 
 for frame in xrange(100000):
     basename = dataformat % frame
@@ -53,8 +57,14 @@ for frame in xrange(100000):
         if lndos[i-1] == lndos[i]:
             pass
         else:
-            mine = min(mine, e[i]-3)
+            mine = min(mine, e[i]-20)
             break
+    try:
+        min_important_energy = readandcompute.min_important_energy(basename)
+        mine = min(mine, min_important_energy-20)
+    except:
+        pass
+
 
 print 'mine', mine
 print 'maxe', maxe
@@ -87,11 +97,16 @@ for frame in xrange(numframes):
     ax.set_xlim(mine, maxe)
     ax.set_ylabel(r'$\ln DOS$')
     # ax.legend(loc='best').get_frame().set_alpha(0.25)
-    plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$' % (ww, ff, lenx, lenyz))
+    if 'tmi' in sys.argv:
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ tmi' % (ww, ff, lenx, lenyz))
+    else:
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$' % (ww, ff, lenx, lenyz))
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
 
-avconv = "avconv -y -r 1 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)
+duration = 5.0 # seconds
+
+avconv = "avconv -y -r %g -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (numframes/duration, moviedir, moviedir)
 os.system(avconv) # make the movie
 print(avconv)
