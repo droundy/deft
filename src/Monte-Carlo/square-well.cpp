@@ -626,12 +626,16 @@ int sw_simulation::set_min_important_energy(){
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state+1; i < min_energy_state; i++) {
+  for (int i = max_entropy_state+1; i < min_energy_state-2; i++) {
     if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T
+        && ln_dos[i] != ln_dos[i+1]
         && transition_matrix(i,i+1) > 0 && transition_matrix(i,i) > 0 && transition_matrix(i+1,i) > 0) {
       // This is an important energy if the DOS is high enough, and we
       // have some decent statistics here.
       min_important_energy = i;
+    } else if (ln_dos[i+1] == ln_dos[i]) {
+      // We have probably reached the end of what we know about.
+      break;
     } else {
       // Adjust ln_dos for the next state to match the "canonical"
       // value.  This allows us to handle situations where there is a
@@ -1242,8 +1246,11 @@ void sw_simulation::optimize_weights_using_transitions() {
 void sw_simulation::update_weights_using_transitions() {
   double *ln_dos = compute_ln_dos(transition_dos);
   for (int i = 0; i < max_entropy_state; i++) ln_dos[i] = ln_dos[max_entropy_state];
-  for (int i = min_important_energy+1; i < energy_levels; i++) {
-    if (transition_matrix(i,i) == 0) {
+  for (int i = min_important_energy+1; i < energy_levels-1; i++) {
+    if (transition_matrix(i,i) == 0 ||
+        transition_matrix(i,i-1) == 0 ||
+        transition_matrix(i-1,i) ==0 ||
+        ln_dos[i] == ln_dos[i+1]) {
       // use canonical weights for any energies where we have
       // essentially no statistics.
       ln_dos[i] = ln_dos[i-1] - 1.0/min_T;
@@ -1251,6 +1258,7 @@ void sw_simulation::update_weights_using_transitions() {
       ln_dos[i] = max(ln_dos[i-1] - 1.0/min_T, ln_dos[i]);
     }
   }
+  ln_dos[energy_levels-1] = ln_dos[energy_levels-2];
   for (int i = 0; i < energy_levels; i++) {
     ln_energy_weights[i] = -ln_dos[i];
   }
