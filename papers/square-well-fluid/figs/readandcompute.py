@@ -10,6 +10,13 @@ def e_hist(fbase):
     hist = e_hist[:,1]
     return energy, hist
 
+def e_lndos(fbase):
+    e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
+
+    energy = -e_lndos[:,0] # array of energies
+    lndos = e_lndos[:,1]
+    return energy, lndos
+
 def T_u_cv_s_minT(fbase):
     max_T = 20.0
     T_bins = 1e3
@@ -49,9 +56,11 @@ def T_u_cv_s_minT(fbase):
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
     return T_range, U, CV, S, min_T
 
-def minT(fbase):
+def minT(f):
+    if not '.dat' in f:
+        f = f+"-E.dat"
     min_T = 0
-    with open(fbase+"-E.dat") as file:
+    with open(f) as file:
         for line in file:
             if("min_T" in line):
                 this_min_T = float(line.split()[-1])
@@ -61,15 +70,7 @@ def minT(fbase):
     return min_T
 
 def minT_from_transitions(fbase):
-    min_T = 0
-    with open(fbase+"-transitions.dat") as file:
-        for line in file:
-            if "min_T" in line:
-                this_min_T = float(line.split()[-1])
-                if this_min_T > min_T:
-                    min_T = this_min_T
-                break
-    return min_T
+    return minT(fbase+"-transitions.dat")
 
 def iterations(fbase):
     with open(fbase+"-E.dat") as file:
@@ -83,14 +84,18 @@ def dr_g(fbase):
             if "de_g" in line:
                 return float(line.split()[-1])
 
-def dimensions(fbase):
-    with open(fbase+"-E.dat") as file:
+def dimensions(f):
+    if not '.dat' in f:
+        f = f+"-E.dat"
+    with open(f) as file:
         for line in file:
             if "# cell dimensions: " in line:
                 return eval(line.split(': ')[-1])
 
-def read_N(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def read_N(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if "N" in line:
                 return int(line.split(': ')[-1])
@@ -101,14 +106,18 @@ def read_ff(fbase):
             if "ff" in line:
                 return float(line.split(': ')[-1])
 
-def min_important_energy(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def min_important_energy(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if("min_important_energy" in line):
                 return float(line.split()[-1])
 
-def max_entropy_state(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def max_entropy_state(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if("max_entropy_state" in line):
                 return float(line.split()[-1])
@@ -160,7 +169,8 @@ def g_r(fbase, T):
 
 
 def density_x(fbase, T):
-    data = numpy.loadtxt(fbase+"-density.dat")
+    fdensity = fbase+"-density.dat"
+    data = numpy.loadtxt(fdensity)
     denshist = data[1:,2:]
     x_1d = data[0,2:]
     dx = x_1d[1] - x_1d[0]
@@ -169,7 +179,7 @@ def density_x(fbase, T):
     hist_1d = numpy.zeros_like(lnw_1d)
     n_E = len(E_1d)
     n_x = len(x_1d)
-    N = read_N(fbase)
+    N = read_N(fdensity)
     for i in xrange(n_E):
         hist_1d[i] = sum(denshist[i,:])/N
     x, E = numpy.meshgrid(x_1d, E_1d)
@@ -186,7 +196,7 @@ def density_x(fbase, T):
     dos_boltz_1d /= sum(dos_boltz_1d)
 
     # note:  what w
-    lenx, leny, lenz = dimensions(fbase)
+    lenx, leny, lenz = dimensions(fdensity)
     density_of_E = denshist/(dx*leny*lenz*hist)*(4*numpy.pi/3)
 
     density = numpy.zeros(n_x)
@@ -227,7 +237,7 @@ def total_init_iterations(basename):
 def e_and_total_init_histogram(basename):
     trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
     N = read_N(basename)
-    e = -trans[:,0]/N
+    e = -trans[:,0]
     trans = trans[:,1:]
     return e, numpy.sum(trans, axis=1)
 

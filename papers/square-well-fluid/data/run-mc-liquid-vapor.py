@@ -30,6 +30,10 @@ else:
 
 if 'wl' in sys.argv:
     method = ' --wang_landau'
+elif 'simple' in sys.argv:
+    method = ' --simple_flat'
+elif 'tmi' in sys.argv:
+    method = ' --tmi'
 else:
     method = ' --golden'
 
@@ -41,6 +45,10 @@ datadir = 'papers/square-well-fluid/data/lv'
 fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenx, lenyz)
 if 'wl' in sys.argv:
     fname = 'ww%.2f-ff%.2f-%gx%g-wl' % (ww, ff, lenx, lenyz)
+elif 'simple' in sys.argv:
+    fname = 'ww%.2f-ff%.2f-%gx%g-simple' % (ww, ff, lenx, lenyz)
+elif 'tmi' in sys.argv:
+    fname = 'ww%.2f-ff%.2f-%gx%g-tmi' % (ww, ff, lenx, lenyz)
 
 os.system('mkdir -p ' + datadir)
 
