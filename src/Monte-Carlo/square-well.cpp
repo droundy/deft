@@ -1584,7 +1584,7 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
 
 bool sw_simulation::printing_allowed(){
   const double max_time_skip = 60*30; // 1/2 hour
-  static double time_skip = 3; // seconds
+  static double time_skip = 30; // seconds
   static int every_so_often = 0;
   static int how_often = 1;
   // clock can be expensive, so this is a heuristic to reduce our use of it.
