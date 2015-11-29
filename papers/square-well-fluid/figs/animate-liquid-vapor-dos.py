@@ -47,24 +47,13 @@ for frame in xrange(100000):
     numframes = frame+1
     minlndos = min(minlndos, lndos.min())
     maxlndos = max(maxlndos, lndos.max())
-    for i in range(len(lndos)-1):
-        if lndos[i] == lndos[i+1]:
-            pass
-        else:
-            maxe = max(maxe, e[i])
-            break
-    for i in range(len(lndos)-1, 1, -1):
-        if lndos[i-1] == lndos[i]:
-            pass
-        else:
-            mine = min(mine, e[i]-20)
-            break
-    try:
-        min_important_energy = readandcompute.min_important_energy(basename)
-        mine = min(mine, min_important_energy-20)
-    except:
-        pass
 
+    try:
+        e, hist = readandcompute.e_and_total_init_histogram(basename)
+    except:
+        break
+    mine = min(mine, e.min() - 20)
+    maxe = max(maxe, e.max())
 
 print 'mine', mine
 print 'maxe', maxe
@@ -90,9 +79,11 @@ for frame in xrange(numframes):
         ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], 'g--')
     except:
         pass
+    e, lnw = readandcompute.e_lnw(basename)
+    ax.plot(e, -lnw, 'r:')
 
     ax.set_xlabel(r'$E$')
-    ax.set_ylim(minlndos, maxlndos)
+    ax.set_ylim(1.1*minlndos, maxlndos)
     # ax.set_xlim(-5, -0.3)
     ax.set_xlim(mine, maxe)
     ax.set_ylabel(r'$\ln DOS$')

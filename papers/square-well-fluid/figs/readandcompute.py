@@ -17,6 +17,13 @@ def e_lndos(fbase):
     lndos = e_lndos[:,1]
     return energy, lndos
 
+def e_lnw(fbase):
+    e_lnw = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2, dtype=numpy.float)
+
+    energy = -e_lnw[:,0] # array of energies
+    lnw = e_lnw[:,1]
+    return energy, lnw
+
 def T_u_cv_s_minT(fbase):
     max_T = 20.0
     T_bins = 1e3
