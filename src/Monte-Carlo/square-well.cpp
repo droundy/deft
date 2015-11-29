@@ -457,7 +457,13 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       double down_to_here = 0;
       double up_from_here = 0;
       for (int j=0; j<i; j++) {
-        down_to_here += exp(ln_dos[j] - ln_dos[i])*transition_matrix(i, j);
+        const double tdown = transition_matrix(i, j);
+        if (tdown) {
+          // we are careful here not to take the exponential (which
+          // could give a NaN) unless we already know there is some
+          // probability of making this transition.
+          down_to_here += exp(ln_dos[j] - ln_dos[i])*tdown;
+        }
         up_from_here += transition_matrix(j, i);
       }
       if (down_to_here > 0 && up_from_here > 0) {
