@@ -27,26 +27,29 @@ L = float(sys.argv[3])
 
 Ns = eval(sys.argv[4])
 #arg Ns = [range(0,10)]
-#arg N = 10
 
 #seed = int(sys.argv[5])
 #arg seed = [0]
 
 
-Etas = map(lambda N: N*(4*np.pi/3*R**3/(L*2**i)**3), Ns) # works for i = 0,1
-
 for N in Ns:
-    T, U, F, CV, S, min_T = readandcompute.T_u_F_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, N))
-    eta = Etas[Ns.index(N)]
+    eta = N*(4*np.pi/3*R**3/(L*2**i)**3)
+    T, U, F, CV, S, min_T = readandcompute.T_u_F_cv_s_minT('data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data'
+                                                           % (ww, L,  i, N))
     # plot multiple F(T) at fixed i
     plt.figure('F-Fix_i')
-    plt.plot(F[750], eta, label="$T=%04.1f$" % T[750])
-    plt.plot(F[250], eta, label="$T=%04.1f$" % T[250])
-    
+    if N == Ns[0]:
+        plt.plot(eta, F[750], 'ro', label="$T=%04.1f$" % T[750])
+        plt.plot(eta, F[250], 'bx', label="$T=%04.1f$" % T[250])
+    else:
+        plt.plot(eta, F[750], 'ro')
+        plt.plot(eta, F[250], 'bx')
+
 plt.figure('F-Fix_i')
 plt.title('Absolute free energies for $\lambda=%g$, $L=%g$ and $i=%d$' % (ww, L, i))
 plt.xlabel('$\eta$')
 plt.ylabel('$F/N\epsilon$')
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
-plt.savefig("ww%02.0f-L%02.0f-F_i%01d_fixed_i.pdf" % (ww*100, L, i))
+output_filename = "figs/ww%02.0f-L%02.0f-F_i%01d_fixed_i.pdf" % (ww*100, L, i)
+plt.savefig(output_filename)

@@ -25,7 +25,6 @@ L = float(sys.argv[3])
 
 Ns = eval(sys.argv[4])
 #arg Ns = [range(0,10)]
-#arg N = 10
 
 method = "tmmc"
 
