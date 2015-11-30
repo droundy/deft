@@ -439,7 +439,7 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   return error_times_Z/Z;
 }
 
-double* sw_simulation::compute_ln_dos(dos_types dos_type){
+double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
 
   double *ln_dos = new double[energy_levels]();
 
@@ -457,7 +457,13 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type){
       double down_to_here = 0;
       double up_from_here = 0;
       for (int j=0; j<i; j++) {
-        down_to_here += exp(ln_dos[j] - ln_dos[i])*transition_matrix(i, j);
+        const double tdown = transition_matrix(i, j);
+        if (tdown) {
+          // we are careful here not to take the exponential (which
+          // could give a NaN) unless we already know there is some
+          // probability of making this transition.
+          down_to_here += exp(ln_dos[j] - ln_dos[i])*tdown;
+        }
         up_from_here += transition_matrix(j, i);
       }
       if (down_to_here > 0 && up_from_here > 0) {
@@ -626,9 +632,16 @@ int sw_simulation::set_min_important_energy(){
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state+1; i < min_energy_state; i++) {
-    if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T && energy_histogram[i+1] > 0) {
+  for (int i = max_entropy_state+1; i < min_energy_state-2; i++) {
+    if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T
+        && ln_dos[i] != ln_dos[i+1]
+        && transition_matrix(i,i+1) > 0 && transition_matrix(i,i) > 0 && transition_matrix(i+1,i) > 0) {
+      // This is an important energy if the DOS is high enough, and we
+      // have some decent statistics here.
       min_important_energy = i;
+    } else if (ln_dos[i+1] == ln_dos[i]) {
+      // We have probably reached the end of what we know about.
+      break;
     } else {
       // Adjust ln_dos for the next state to match the "canonical"
       // value.  This allows us to handle situations where there is a
@@ -1019,7 +1032,6 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
   if (use_transions_with_wl) {
     update_weights_using_transitions();
-    flush_weight_array();
   }
 
   initialize_canonical(min_T,min_important_energy);
@@ -1101,17 +1113,33 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
 void sw_simulation::initialize_simple_flat(int flat_update_factor){
   int weight_updates = 0;
   long num_moves = exp(1/min_T)*N*energy_levels;
+  bool am_verbose;
   do {
     set_min_important_energy();
+    set_max_entropy_energy();
 
-    // update weight array
-    for (int e = max_entropy_state; e <= min_important_energy; e++) {
+    // Update the weight array.
+    for (int e = max_entropy_state; e <= min_energy_state; e++) {
       if (energy_histogram[e]) {
         ln_energy_weights[e] -= log(energy_histogram[e]);
       }
     }
-    if(min_energy_state > min_important_energy){
-      initialize_canonical(min_T,min_important_energy);
+    // Now ensure that we never bias downward more strongly than at
+    // the minimum temperature.
+    for (int e = max_entropy_state+1; e <= min_energy_state; e++) {
+      if (ln_energy_weights[e] - ln_energy_weights[e-1] > 1.0/min_T) {
+        // Once we find the energy at which the minimum temperature
+        // gives the slope of the density of states, use this slope
+        // for all lower energies that we have explored.
+        for (int i=e; i<min_energy_state; i++) {
+          if (energy_histogram[i]) ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/min_T;
+        }
+        break;
+      }
+    }
+    // Make the weights above the max_entropy_state flat.
+    for (int e=0; e<max_entropy_state; e++) {
+      ln_energy_weights[e] = ln_energy_weights[max_entropy_state];
     }
     flush_weight_array();
     weight_updates++;
@@ -1130,17 +1158,24 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
       return;
     }
 
-    if (printing_allowed()) {
+    am_verbose = printing_allowed();
+    if (am_verbose) {
+      double *tmmc_dos = compute_ln_dos(transition_dos);
       printf("simple flat status update:\n");
       for (int e = max_entropy_state; e <= min_energy_state; e++) {
-        printf("h[%3d] = %10ld,  os[%3d] = %10ld,  lnw[%3d]: %g\n",
-               e, energy_histogram[e], e, optimistic_samples[e], e, ln_energy_weights[e]);
+        if (energy_histogram[e]) {
+          printf("h[%3d] = %10ld,  os[%3d] = %10ld,  ps[%3d] = %10ld,  lnw[%3d]: %10g,  tmmc: %g\n",
+                 e, energy_histogram[e], e, optimistic_samples[e], e,
+                 pessimistic_samples[e], e, ln_energy_weights[e],
+                 -tmmc_dos[e] + tmmc_dos[max_entropy_state] + ln_energy_weights[max_entropy_state]);
+        }
       }
       printf("min_important_energy: %i\n",min_important_energy);
+      delete[] tmmc_dos;
     }
     num_moves *= flat_update_factor;
 
-  } while (!finished_initializing());
+  } while (!finished_initializing(am_verbose));
 
   flush_weight_array();
   set_min_important_energy();
@@ -1215,11 +1250,44 @@ void sw_simulation::optimize_weights_using_transitions() {
 
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
-  const double *ln_dos = compute_ln_dos(transition_dos);
-  for(int i = 0; i < energy_levels; i++) {
+  double *ln_dos = compute_ln_dos(transition_dos);
+  for (int i = 0; i < max_entropy_state; i++) ln_dos[i] = ln_dos[max_entropy_state];
+  for (int i = min_important_energy+1; i < energy_levels-1; i++) {
+    if (transition_matrix(i,i) == 0 ||
+        transition_matrix(i,i-1) == 0 ||
+        transition_matrix(i-1,i) ==0 ||
+        ln_dos[i] == ln_dos[i+1]) {
+      // use canonical weights for any energies where we have
+      // essentially no statistics.
+      ln_dos[i] = ln_dos[i-1] - 1.0/min_T;
+    } else {
+      ln_dos[i] = max(ln_dos[i-1] - 1.0/min_T, ln_dos[i]);
+    }
+  }
+  ln_dos[energy_levels-1] = ln_dos[energy_levels-2];
+  for (int i = 0; i < energy_levels; i++) {
     ln_energy_weights[i] = -ln_dos[i];
   }
   delete[] ln_dos;
+}
+
+// initialization with tmi
+void sw_simulation::initialize_tmi() {
+  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  bool verbose = false;
+  do {
+    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
+    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    verbose = printing_allowed();
+    if (verbose) {
+      set_min_important_energy();
+      set_max_entropy_energy();
+      write_transitions_file();
+    }
+
+    set_min_important_energy();
+    update_weights_using_transitions();
+  } while(!finished_initializing(verbose));
 }
 
 // initialization with tmmc
@@ -1238,9 +1306,7 @@ void sw_simulation::initialize_transitions() {
   } while(!finished_initializing(verbose));
 
   update_weights_using_transitions();
-  flush_weight_array();
   set_min_important_energy();
-  initialize_canonical(min_T,min_important_energy);
 }
 
 static void write_t_file(const sw_simulation &sw, const char *fname) {
@@ -1273,6 +1339,44 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
+static void write_d_file(const sw_simulation &sw, const char *fname) {
+  FILE *f = fopen(fname,"w");
+  if (!f) {
+    printf("Unable to create file %s!\n", fname);
+    exit(1);
+  }
+  sw.write_header(f);
+  fprintf(f, "# energy\tlndos\n");
+  double *lndos = sw.compute_ln_dos(transition_dos);
+  double maxdos = lndos[0];
+  for (int i = 0; i < sw.energy_levels; i++) {
+    if (maxdos < lndos[i]) maxdos = lndos[i];
+  }
+  for (int i = 0; i < sw.energy_levels; i++) {
+    fprintf(f, "%d\t%g\n", i, lndos[i] - maxdos);
+  }
+  fclose(f);
+  delete[] lndos;
+}
+
+static void write_lnw_file(const sw_simulation &sw, const char *fname) {
+  FILE *f = fopen(fname,"w");
+  if (!f) {
+    printf("Unable to create file %s!\n", fname);
+    exit(1);
+  }
+  sw.write_header(f);
+  fprintf(f, "# energy\tlnw\n");
+  double minw = sw.ln_energy_weights[0];
+  for (int i = 0; i < sw.energy_levels; i++) {
+    if (minw > sw.ln_energy_weights[i]) minw = sw.ln_energy_weights[i];
+  }
+  for (int i = 0; i < sw.energy_levels; i++) {
+    fprintf(f, "%d\t%g\n", i, sw.ln_energy_weights[i] - minw);
+  }
+  fclose(f);
+}
+
 void sw_simulation::write_transitions_file() const {
   // silently do not save if there is not file name
   if (transitions_filename) write_t_file(*this, transitions_filename);
@@ -1287,6 +1391,30 @@ void sw_simulation::write_transitions_file() const {
       sprintf(fname, transitions_movie_filename_format, transitions_movie_count++);
     } while (!stat(fname, &st));
     write_t_file(*this, fname);
+    delete[] fname;
+  }
+  if (dos_movie_filename_format) {
+    char *fname = new char[4096];
+    struct stat st;
+    do {
+      // This loop increments dos_movie_count until it reaches
+      // an unused file name.  The idea is to enable two or more
+      // simulations to contribute together to a single movie.
+      sprintf(fname, dos_movie_filename_format, dos_movie_count++);
+    } while (!stat(fname, &st));
+    write_d_file(*this, fname);
+    delete[] fname;
+  }
+  if (lnw_movie_filename_format) {
+    char *fname = new char[4096];
+    struct stat st;
+    do {
+      // This loop increments lnw_movie_count until it reaches
+      // an unused file name.  The idea is to enable two or more
+      // simulations to contribute together to a single movie.
+      sprintf(fname, lnw_movie_filename_format, lnw_movie_count++);
+    } while (!stat(fname, &st));
+    write_lnw_file(*this, fname);
     delete[] fname;
   }
 }
@@ -1456,7 +1584,7 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
 
 bool sw_simulation::printing_allowed(){
   const double max_time_skip = 60*30; // 1/2 hour
-  static double time_skip = 3; // seconds
+  static double time_skip = 30; // seconds
   static int every_so_often = 0;
   static int how_often = 1;
   // clock can be expensive, so this is a heuristic to reduce our use of it.

@@ -18,7 +18,11 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
-moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
+if 'tmi' in sys.argv:
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi' % (ww,ff,lenx,lenyz)
+else:
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
+
 os.system('rm -rf ' + moviedir)
 assert not os.system('mkdir -p ' + moviedir)
 
@@ -30,14 +34,18 @@ minhist = 1e100
 maxhist = -1e100
 numframes = 0
 
+dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww,ff,lenx,lenyz)
+if 'tmi' in sys.argv:
+    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
+
 for frame in xrange(100000):
-    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
+    basename = dataformat % frame
     try:
         e, hist = readandcompute.e_and_total_init_histogram(basename)
     except:
         break
     numframes = frame+1
-    mine = min(mine, e.min())
+    mine = min(mine, e.min() - 20)
     maxe = max(maxe, e.max())
     minhist = min(minhist, hist.min())
     maxhist = max(maxhist, hist.max())
@@ -55,15 +63,15 @@ for frame in xrange(numframes):
         print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
 
-    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%06d' % (ww,ff,lenx,lenyz,frame)
+    basename = dataformat % frame
     old_min_T = min_T
     min_T = readandcompute.minT_from_transitions(basename)
     # e, diff = readandcompute.e_diffusion_estimate(basename)
 
     try:
         N = readandcompute.read_N(basename)
-        ax.axvline(-readandcompute.max_entropy_state(basename)/N, color='r', linestyle=':')
-        ax.axvline(-readandcompute.min_important_energy(basename)/N, color='b', linestyle=':')
+        ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
+        ax.axvline(-readandcompute.min_important_energy(basename), color='b', linestyle=':')
     except:
         pass
 
@@ -97,15 +105,21 @@ for frame in xrange(numframes):
     ax.plot(e, newstuff, 'k-',
             label=r'%e additional iterations' % ((sum(init_hist) - sum(baseline_init_hist))/float(N)))
 
-    ax.set_xlabel(r'$E/N$')
+    ax.set_xlabel(r'$E$')
     ax.set_ylim(0, maxhist)
     ax.set_xlim(mine, maxe)
     ax.set_ylabel(r'histogram')
     ax.legend(loc='best').get_frame().set_alpha(0.25)
-    plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$' % (ww, ff, lenx, lenyz))
+    if 'tmi' in sys.argv:
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ tmi' % (ww, ff, lenx, lenyz))
+    else:
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$' % (ww, ff, lenx, lenyz))
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
 
-os.system("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
-print("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
+duration = 5.0 # seconds
+
+avconv = "avconv -y -r %g -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (numframes/duration, moviedir, moviedir)
+os.system(avconv) # make the movie
+print(avconv)

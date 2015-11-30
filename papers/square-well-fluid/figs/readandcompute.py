@@ -10,6 +10,20 @@ def e_hist(fbase):
     hist = e_hist[:,1]
     return energy, hist
 
+def e_lndos(fbase):
+    e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
+
+    energy = -e_lndos[:,0] # array of energies
+    lndos = e_lndos[:,1]
+    return energy, lndos
+
+def e_lnw(fbase):
+    e_lnw = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2, dtype=numpy.float)
+
+    energy = -e_lnw[:,0] # array of energies
+    lnw = e_lnw[:,1]
+    return energy, lnw
+
 def T_u_cv_s_minT(fbase):
     max_T = 20.0
     T_bins = 1e3
@@ -99,14 +113,18 @@ def read_ff(fbase):
             if "ff" in line:
                 return float(line.split(': ')[-1])
 
-def min_important_energy(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def min_important_energy(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if("min_important_energy" in line):
                 return float(line.split()[-1])
 
-def max_entropy_state(fbase):
-    with open(fbase+"-transitions.dat") as file:
+def max_entropy_state(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    with open(f) as file:
         for line in file:
             if("max_entropy_state" in line):
                 return float(line.split()[-1])
@@ -226,7 +244,7 @@ def total_init_iterations(basename):
 def e_and_total_init_histogram(basename):
     trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
     N = read_N(basename)
-    e = -trans[:,0]/N
+    e = -trans[:,0]
     trans = trans[:,1:]
     return e, numpy.sum(trans, axis=1)
 

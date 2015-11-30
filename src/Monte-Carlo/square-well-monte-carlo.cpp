@@ -91,6 +91,7 @@ int main(int argc, const char *argv[]) {
 
   int no_weights = false;
   double fix_kT = 0;
+  int tmi = false;
   int tmmc = false;
   int oetmmc = false;
   int wang_landau = false;
@@ -234,6 +235,8 @@ int main(int argc, const char *argv[]) {
      "to get better statistics on low entropy states", "BOOLEAN"},
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
      " rather than adjusted weights", "DOUBLE"},
+    {"tmi", '\0', POPT_ARG_NONE, &tmi, 0,
+     "Use transition matrix initialization", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
     {"oetmmc", '\0', POPT_ARG_NONE, &oetmmc, 0,
@@ -354,7 +357,7 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + bool(vanilla_wang_landau) + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
+     + bool(vanilla_wang_landau) + tmi + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
      + reading_in_transition_matrix + bool(golden) != 1){
     printf("Exactly one histogram method must be selected!\n");
     return 254;
@@ -366,7 +369,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // use tmmc for golden calculations
-  if(golden) tmmc = true;
+  if (golden) tmmc = true;
 
   // Check that we are only using one end condition
   if(sw.min_samples && sw.sample_error && sw.flatness){
@@ -455,7 +458,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Choose necessary but unspecified parameters
-  if(tmmc || oetmmc){
+  if(tmmc || oetmmc | tmi){
     sw.sim_dos_type = transition_dos;
   } else {
     sw.sim_dos_type = histogram_dos;
@@ -535,6 +538,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-nw");
     } else if (simple_flat) {
       sprintf(method_tag, "-simple_flat");
+    } else if (tmi) {
+      sprintf(method_tag, "-tmi");
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (oetmmc) {
@@ -654,6 +659,14 @@ int main(int argc, const char *argv[]) {
   mkdir(sw.transitions_movie_filename_format, 0777);
   sprintf((char *)sw.transitions_movie_filename_format,
           "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
+
+  sw.dos_movie_filename_format = new char[1024];
+  sprintf((char *)sw.dos_movie_filename_format,
+          "%s/%s-movie/%%06d-lndos.dat", data_dir, filename);
+
+  sw.lnw_movie_filename_format = new char[1024];
+  sprintf((char *)sw.lnw_movie_filename_format,
+          "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
 
   char *histogram_movie_filename_format = new char[1024];
   sprintf(histogram_movie_filename_format,
@@ -780,7 +793,7 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
-  if (golden || wang_landau) {
+  if (tmi || golden || wang_landau) {
     sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
 
     FILE *transitions_infile = fopen(transitions_input_filename,"r");
@@ -805,6 +818,8 @@ int main(int argc, const char *argv[]) {
                               vanilla_wang_landau);
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
+  } else if (tmi) {
+    sw.initialize_tmi();
   } else if (tmmc) {
     sw.initialize_transitions();
   } else if (oetmmc) {

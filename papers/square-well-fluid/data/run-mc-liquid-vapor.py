@@ -23,13 +23,17 @@ lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
 if sys.argv[6] == 'pessimistic':
     round_trips = 100
-    stop = " --round_trips %d --pessimistic_sampling --min_samples %d" % (round_trips, round_trips)
+    stop = " --round_trips %d --pessimistic_sampling --min_samples %d" % (1000*round_trips, round_trips)
 else:
     iterations = round(float(sys.argv[6]))
     stop = " --iterations %d --init_iters %d" % (iterations, iterations)
 
 if 'wl' in sys.argv:
     method = ' --wang_landau'
+elif 'simple' in sys.argv:
+    method = ' --simple_flat'
+elif 'tmi' in sys.argv:
+    method = ' --tmi'
 else:
     method = ' --golden'
 
@@ -41,6 +45,10 @@ datadir = 'papers/square-well-fluid/data/lv'
 fname = 'ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenx, lenyz)
 if 'wl' in sys.argv:
     fname = 'ww%.2f-ff%.2f-%gx%g-wl' % (ww, ff, lenx, lenyz)
+elif 'simple' in sys.argv:
+    fname = 'ww%.2f-ff%.2f-%gx%g-simple' % (ww, ff, lenx, lenyz)
+elif 'tmi' in sys.argv:
+    fname = 'ww%.2f-ff%.2f-%gx%g-tmi' % (ww, ff, lenx, lenyz)
 
 os.system('mkdir -p ' + datadir)
 

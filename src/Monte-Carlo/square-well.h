@@ -97,7 +97,10 @@ struct sw_simulation {
      are dumped every so often.  It should contain a single %d style format. */
   const char *transitions_movie_filename_format;
   mutable int transitions_movie_count;
-  long transitions_movie_last_count;
+  const char *dos_movie_filename_format;
+  mutable int dos_movie_count;
+  const char *lnw_movie_filename_format;
+  mutable int lnw_movie_count;
   /* Finally, the following define file names for output files. */
   const char *transitions_filename;
 
@@ -128,7 +131,7 @@ struct sw_simulation {
   /* "transition_matrix" is a read-only sloppy and normalized version
      of the matrix also called "transitions" above, which is a little
      easier for me to wrap my brains around.  DJR */
-  double transition_matrix(int to, int from) {
+  double transition_matrix(int to, int from) const {
     if (abs(to - from) > biggest_energy_transition ||
         to < 0 || from < 0 || to >= energy_levels || from >= energy_levels) {
       return 0;
@@ -185,6 +188,7 @@ struct sw_simulation {
 
   void initialize_simple_flat(int flat_update_factor);
 
+  void initialize_tmi();
   void initialize_transitions();
 
   void initialize_transitions_file(const char *transitions_input_filename);
@@ -199,7 +203,7 @@ struct sw_simulation {
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
-  double* compute_ln_dos(dos_types dos_type);
+  double* compute_ln_dos(dos_types dos_type) const;
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy();
@@ -254,6 +258,8 @@ struct sw_simulation {
     last_print_time = clock();
     transitions_filename = 0; // default to NULL pointer here for safety.
     transitions_movie_filename_format = 0; // default to NULL pointer here for safety.
+    dos_movie_filename_format = 0; // default to NULL pointer here for safety.
+    lnw_movie_filename_format = 0; // default to NULL pointer here for safety.
   };
 };
 
