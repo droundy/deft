@@ -49,7 +49,7 @@ for N in Ns:
         T, U, F, CV, S, min_T = readandcompute.T_u_F_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, N))
         plt.figure('F-T')
         plt.plot(F, T,  label="$N=%d$" % N)
-    
+
 plt.figure('F-T')
 plt.title('Absolute free energies for $\lambda=%g$, $L=%g$ and $i=%d$' % (ww, L, i))
 plt.xlabel('$kT/\epsilon$')

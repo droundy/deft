@@ -91,6 +91,30 @@ def u_F_cv_s_minT(fbase, T):
     CV = sum((energy/T)**2*dos_boltz)/Z - (sum(energy/T*dos_boltz)/Z)**2
     return U, F, CV, S, min_T
 
+def eta_u_F_cv_s_minT(dbase, T):
+    U = []
+    F = []
+    cv = []
+    s = []
+    eta = []
+    minT = 1e100
+    for N in range(2,500):
+        fbase = '%s/N%03d/data' % (dbase, N)
+        try:
+            U0, F0, cv0, s0, minT0 = u_F_cv_s_minT(fbase, T)
+            U.append(U0)
+            F.append(F0)
+            cv.append(cv0)
+            s.append(s0)
+            minT = max(minT, minT0)
+            V = dimensions(fbase)[0]**3 # assuming it is cubic
+            N = read_N(fbase)
+            R = 1 # sphere radius
+            eta.append(N*(4*np.pi/3*R**3/V)
+        except:
+            pass
+    return np.array(eta), np.array(U), F, cv, S, minT
+
 def absolute_f(fbase):
     # find the partition function yielding the absolute free energy  using 'absolute/' data
     fbase = fbase[:-4]+ '/absolute/'

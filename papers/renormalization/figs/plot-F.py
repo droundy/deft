@@ -45,6 +45,9 @@ for N in Ns:
         plt.plot(eta, F[750], 'ro')
         plt.plot(eta, F[250], 'bx')
 
+eta, U, F, CV, S, min_T = readandcompute.eta_u_F_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d' % (ww, L,  i))
+
+
 plt.figure('F-Fix_i')
 plt.title('Absolute free energies for $\lambda=%g$, $L=%g$ and $i=%d$' % (ww, L, i))
 plt.xlabel('$\eta$')
