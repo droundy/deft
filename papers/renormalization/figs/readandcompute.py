@@ -45,14 +45,15 @@ def T_u_F_cv_s_minT(fbase):
 
     Z_inf = sum(np.exp(ln_dos - ln_dos.max()))
     S_inf = sum(-np.exp(ln_dos - ln_dos.max())*(-ln_dos.max() - np.log(Z_inf))) / Z_inf
-
+    f_abs = absolute_f(fbase)
+    
     for i in range(len(T_range)):
         ln_dos_boltz = ln_dos - energy/T_range[i]
         dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
         Z[i] = sum(dos_boltz)
         U[i] = sum(energy*dos_boltz)/Z[i]
        
-        F[i] = -T_range[i]*np.log(Z[i]) - #absolute_f(fbase)
+        F[i] = T_range[i]*np.log(Z[i]) - f_abs
         # S = \sum_i^{microstates} P_i \log P_i
         # S = \sum_E D(E) e^{-\beta E} \log\left(\frac{e^{-\beta E}}{\sum_{E'} D(E') e^{-\beta E'}}\right)
         S[i] = sum(-dos_boltz*(-energy/T_range[i] - ln_dos_boltz.max() \
@@ -67,6 +68,7 @@ def T_u_F_cv_s_minT(fbase):
 
 def absolute_f(fbase):
     # find the partition function yielding the absolute free energy  using 'absolute/' data
+    fbase = fbase[:-4]+ '/absolute/'
     num_files = len(glob.glob(fbase+'*.dat')) # figure out how many files there are
     successes = 0
     total = 0
@@ -97,7 +99,7 @@ def absolute_f(fbase):
 
     print("Ratios array is: %s" % ratios)
     print("Calculated absolute_f is: %g" % absolute_f)
-    print("Compare with: %g" % ((4*ff - 3*ff**2)/(1-ff)**2))
+    #print("Compare with: %g" % ((4*ff - 3*ff**2)/(1-ff)**2))
     return absolute_f
 
 	

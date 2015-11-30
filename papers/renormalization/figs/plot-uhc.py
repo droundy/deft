@@ -23,7 +23,11 @@ ww = float(sys.argv[2])
 L = float(sys.argv[3])
 #arg L = [5]
 
-method = [["tmmc"]]
+Ns = eval(sys.argv[4])
+#arg Ns = [range(0,10)]
+#arg N = 10
+
+method = "tmmc"
 
 #seed = int(sys.argv[5])
 #arg seed = [0]
@@ -42,21 +46,27 @@ method = [["tmmc"]]
 
 #     plt.figure('s')
 #     plt.plot(T,S/N,styles.plot(method),label=styles.title(method))
-
 for N in Ns:
-    T, U, F, CV, S, min_T = readandcompute.T_u_f_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, N))
-    plt.figure('F')
-    plt.plot(F, T, styles.plot(method), label=styles.title(method))
+        T, U, F, CV, S, min_T = readandcompute.T_u_F_cv_s_minT('../data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, N))
+        plt.figure('F-T')
+        plt.plot(F, T,  label="$N=%d$" % N)
     
-plt.figure('F')
-plt.title('Absolute free energies for $\lambda=%g$, $L=%g$ and $i=%d$' % (ww, i, L))
+plt.figure('F-T')
+plt.title('Absolute free energies for $\lambda=%g$, $L=%g$ and $i=%d$' % (ww, L, i))
 plt.xlabel('$kT/\epsilon$')
-plt.ylabel('$F/\epsilon$')
+plt.ylabel('$F/N\epsilon$')
 plt.legend(loc='best')
 plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("ww%02.0f-L%02.0f-i%i-F_eta.pdf" % (ww*100, L, i))
-        
+
+plt.figure('F-eta')
+plt.title('Absolute free energies for $\lambda=%g$, $L=%g$, and $i=%d$' % (ww,L,i))
+plt.xlabel('$\eta$')
+plt.ylabel('$F/N\epsilon$')
+plt.legend(loc='best')
+
+
 # plt.figure('u')
 # plt.title('Specific internal energy for $\lambda=%g$, $L=%g$, and $N=%i$' % (ww, L, n))
 # plt.xlabel('$kT/\epsilon$')
