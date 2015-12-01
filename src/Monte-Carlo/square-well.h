@@ -189,6 +189,7 @@ struct sw_simulation {
   void initialize_simple_flat(int flat_update_factor);
 
   void initialize_tmi();
+  void initialize_toe();
   void initialize_transitions();
 
   void initialize_transitions_file(const char *transitions_input_filename);

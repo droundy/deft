@@ -34,6 +34,8 @@ elif 'simple' in sys.argv:
     method = ' --simple_flat'
 elif 'tmi' in sys.argv:
     method = ' --tmi'
+elif 'toe' in sys.argv:
+    method = ' --toe'
 else:
     method = ' --golden'
 
@@ -49,6 +51,8 @@ elif 'simple' in sys.argv:
     fname = 'ww%.2f-ff%.2f-%gx%g-simple' % (ww, ff, lenx, lenyz)
 elif 'tmi' in sys.argv:
     fname = 'ww%.2f-ff%.2f-%gx%g-tmi' % (ww, ff, lenx, lenyz)
+elif 'toe' in sys.argv:
+    fname = 'ww%.2f-ff%.2f-%gx%g-toe' % (ww, ff, lenx, lenyz)
 
 os.system('mkdir -p ' + datadir)
 

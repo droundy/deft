@@ -92,6 +92,7 @@ int main(int argc, const char *argv[]) {
   int no_weights = false;
   double fix_kT = 0;
   int tmi = false;
+  int toe = false;
   int tmmc = false;
   int oetmmc = false;
   int wang_landau = false;
@@ -237,6 +238,8 @@ int main(int argc, const char *argv[]) {
      " rather than adjusted weights", "DOUBLE"},
     {"tmi", '\0', POPT_ARG_NONE, &tmi, 0,
      "Use transition matrix initialization", "BOOLEAN"},
+    {"toe", '\0', POPT_ARG_NONE, &toe, 0,
+     "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
     {"oetmmc", '\0', POPT_ARG_NONE, &oetmmc, 0,
@@ -357,7 +360,7 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + bool(vanilla_wang_landau) + tmi + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
+     + bool(vanilla_wang_landau) + tmi + toe + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
      + reading_in_transition_matrix + bool(golden) != 1){
     printf("Exactly one histogram method must be selected!\n");
     return 254;
@@ -458,7 +461,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Choose necessary but unspecified parameters
-  if(tmmc || oetmmc | tmi){
+  if(tmmc || oetmmc | tmi | toe){
     sw.sim_dos_type = transition_dos;
   } else {
     sw.sim_dos_type = histogram_dos;
@@ -540,6 +543,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-simple_flat");
     } else if (tmi) {
       sprintf(method_tag, "-tmi");
+    } else if (toe) {
+      sprintf(method_tag, "-toe");
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (oetmmc) {
@@ -793,7 +798,7 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
-  if (tmi || golden || wang_landau) {
+  if (toe || tmi || golden || wang_landau) {
     sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
 
     FILE *transitions_infile = fopen(transitions_input_filename,"r");
@@ -820,6 +825,8 @@ int main(int argc, const char *argv[]) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {
     sw.initialize_tmi();
+  } else if (toe) {
+    sw.initialize_toe();
   } else if (tmmc) {
     sw.initialize_transitions();
   } else if (oetmmc) {

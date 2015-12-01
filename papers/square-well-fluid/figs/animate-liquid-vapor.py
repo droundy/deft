@@ -20,6 +20,8 @@ lenyz = float(sys.argv[4])
 
 if 'tmi' in sys.argv:
     moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi' % (ww,ff,lenx,lenyz)
+elif 'toe' in sys.argv:
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-toe' % (ww,ff,lenx,lenyz)
 else:
     moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
 
@@ -37,6 +39,8 @@ numframes = 0
 dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww,ff,lenx,lenyz)
 if 'tmi' in sys.argv:
     dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
+if 'toe' in sys.argv:
+    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-toe-movie/%%06d' % (ww,ff,lenx,lenyz)
 
 for frame in xrange(100000):
     basename = dataformat % frame
@@ -112,6 +116,8 @@ for frame in xrange(numframes):
     ax.legend(loc='best').get_frame().set_alpha(0.25)
     if 'tmi' in sys.argv:
         plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ tmi' % (ww, ff, lenx, lenyz))
+    elif 'toe' in sys.argv:
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ toe' % (ww, ff, lenx, lenyz))
     else:
         plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$' % (ww, ff, lenx, lenyz))
 

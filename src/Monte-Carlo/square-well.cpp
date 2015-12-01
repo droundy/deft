@@ -1238,8 +1238,8 @@ void sw_simulation::optimize_weights_using_transitions() {
         - lnw[biggest_energy_transition+max_entropy_state];
       double new_w = ln_energy_weights[i];
       if (fabs(old_w - new_w) > 1e-4) {
-        printf("attempt %d:   lnw[%d] %15g -> %15g\n",
-               attempt, i, old_w, new_w);
+        // printf("attempt %d:   lnw[%d] %15g -> %15g\n",
+        //        attempt, i, old_w, new_w);
       }
       fflush(stdout);
     }
@@ -1287,6 +1287,25 @@ void sw_simulation::initialize_tmi() {
 
     set_min_important_energy();
     update_weights_using_transitions();
+  } while(!finished_initializing(verbose));
+}
+
+// initialization with tmi
+void sw_simulation::initialize_toe() {
+  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  bool verbose = false;
+  do {
+    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
+    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    verbose = printing_allowed();
+    if (verbose) {
+      set_min_important_energy();
+      set_max_entropy_energy();
+      write_transitions_file();
+    }
+
+    set_min_important_energy();
+    optimize_weights_using_transitions();
   } while(!finished_initializing(verbose));
 }
 
