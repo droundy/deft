@@ -1183,67 +1183,53 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
 }
 
 /* This method implements the optimized ensemble using the transition
-   matrix information.  This should give an identical set of weights
-   to the optimized_ensemble approach, provided each approach have
-   sufficient statistics. */
+   matrix information.  This should give a similar set of weights to
+   the optimized_ensemble approach. */
 void sw_simulation::optimize_weights_using_transitions() {
   // Assume that we already *have* a reasonable set of weights (with
   // which to compute the diffusivity), and that we have already
   // defined the min_important_energy.
   const double *ln_dos = compute_ln_dos(transition_dos);
 
-  for (int attempt=0; attempt<10; attempt++) {
-
-    double *lnw = new double[energy_levels+2*biggest_energy_transition];
-    for (int i=0;i<energy_levels;i++) {
-      lnw[biggest_energy_transition+i] = ln_energy_weights[i];
+  double diffusivity = 1;
+  for(int i = max_entropy_state; i <= min_important_energy; i++) {
+    double norm = 0, mean_sqr_de = 0, mean_de = 0;
+    for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
+      // cap the ratio of weights at 1
+      double T = transitions(i, de)*exp(max(0,ln_dos[biggest_energy_transition+i]
+                                            -ln_dos[biggest_energy_transition+i+de]));
+      norm += T;
+      mean_sqr_de += T*double(de)*de;
+      mean_de += T*double(de);
     }
-
-    double diffusivity = 1;
-    for(int i = max_entropy_state; i <= min_important_energy; i++) {
-      double norm = 0, mean_sqr_de = 0, mean_de = 0;
-      for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
-        // cap the ratio of weights at 1
-        double T = transitions(i, de)*exp(max(0,lnw[biggest_energy_transition+i+de]
-                                              -lnw[biggest_energy_transition+i]));
-        norm += T;
-        mean_sqr_de += T*double(de)*de;
-        mean_de += T*double(de);
-      }
-      if (norm) {
-        mean_sqr_de /= norm;
-        mean_de /= norm;
-        //printf("%4d: <de> = %15g   <de^2> = %15g\n", i, mean_de, mean_sqr_de);
-        diffusivity = fabs(mean_sqr_de - mean_de*mean_de);
-      } else {
-        printf("Craziness at energy %d!!!\n", i);
-      }
-      /* This is a different way of computing it than is done by Trebst,
-         Huse and Troyer, but uses the formula that they derived at the
-         end of Section IIA (and expressed in words).  The main
-         difference is that we compute the diffusivity here *directly*
-         rather than inferring it from the walker gradient.  */
-      ln_energy_weights[i] = -ln_dos[i] - 0.5*log(diffusivity);
+    if (norm) {
+      mean_sqr_de /= norm;
+      mean_de /= norm;
+      //printf("%4d: <de> = %15g   <de^2> = %15g\n", i, mean_de, mean_sqr_de);
+      diffusivity = fabs(mean_sqr_de - mean_de*mean_de);
+    } else {
+      printf("Craziness at energy %d!!!\n", i);
     }
-    initialize_canonical(min_T,min_important_energy);
-    double ln_max = ln_energy_weights[max_entropy_state];
-    for (int i=0;i<max_entropy_state;i++) {
-      ln_energy_weights[i] = 0;
-    }
-    for (int i=max_entropy_state;i<energy_levels;i++) {
-      ln_energy_weights[i] -= ln_max;
-    }
-    for (int i=max_entropy_state+1;i<min_important_energy;i++) {
-      double old_w = lnw[biggest_energy_transition+i]
-        - lnw[biggest_energy_transition+max_entropy_state];
-      double new_w = ln_energy_weights[i];
-      if (fabs(old_w - new_w) > 1e-4) {
-        // printf("attempt %d:   lnw[%d] %15g -> %15g\n",
-        //        attempt, i, old_w, new_w);
-      }
-      fflush(stdout);
-    }
-    delete[] lnw;
+    /* This is a different way of computing it than is done by Trebst,
+       Huse and Troyer, but uses the formula that they derived at the
+       end of Section IIA (and expressed in words).  The main
+       difference is that we compute the diffusivity here *directly*
+       rather than inferring it from the walker gradient.  */
+    ln_energy_weights[i] = -ln_dos[i] - 0.5*log(diffusivity);
+  }
+  for (int i=0; i<max_entropy_state; i++) {
+    ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
+  }
+  for (int i=min_important_energy; i<energy_levels; i++) {
+    ln_energy_weights[i] = ln_energy_weights[i-1] + 1/min_T;
+  }
+  initialize_canonical(min_T,min_important_energy);
+  double ln_max = ln_energy_weights[max_entropy_state];
+  for (int i=0;i<max_entropy_state;i++) {
+    ln_energy_weights[i] = 0;
+  }
+  for (int i=max_entropy_state;i<energy_levels;i++) {
+    ln_energy_weights[i] -= ln_max;
   }
   delete[] ln_dos;
 }
