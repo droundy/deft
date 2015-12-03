@@ -12,7 +12,7 @@ if os.path.exists('paper.tex'):
 if os.path.exists('run-mc-liquid-vapor.py'):
     os.chdir('../../..')
 
-assert os.path.exists('SConstruct')
+assert os.path.exists('papers')
 # switch to deft project directory and build SWMC
 assert not os.system('fac square-well-monte-carlo')
 
@@ -22,8 +22,8 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
 if sys.argv[6] == 'pessimistic':
-    round_trips = 100
-    stop = " --round_trips %d --pessimistic_sampling --min_samples %d" % (1000*round_trips, round_trips)
+    round_trips = 10
+    stop = " --round_trips %d --pessimistic_sampling --min_samples %d" % (100*round_trips, round_trips)
 else:
     iterations = round(float(sys.argv[6]))
     stop = " --iterations %d --init_iters %d" % (iterations, iterations)

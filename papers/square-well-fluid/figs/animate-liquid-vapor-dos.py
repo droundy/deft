@@ -93,11 +93,14 @@ for frame in xrange(numframes):
     ax.set_ylabel(r'$\ln DOS$')
     # ax.legend(loc='best').get_frame().set_alpha(0.25)
     if 'tmi' in sys.argv:
-        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ tmi' % (ww, ff, lenx, lenyz))
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ ($T_{min} = %g$) tmi'
+                  % (ww, ff, lenx, lenyz, min_T))
     elif 'toe' in sys.argv:
-        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ toe' % (ww, ff, lenx, lenyz))
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ ($T_{min} = %g$) toe'
+                  % (ww, ff, lenx, lenyz, min_T))
     else:
-        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$' % (ww, ff, lenx, lenyz))
+        plt.title(r'lv movie with $\lambda = %g$, $\eta = %g$, $%g\times %g$ ($T_{min} = %g$)'
+                  % (ww, ff, lenx, lenyz, min_T))
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)

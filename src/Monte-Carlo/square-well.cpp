@@ -1213,7 +1213,7 @@ void sw_simulation::optimize_weights_using_transitions() {
     /* This is a different way of computing it than is done by Trebst,
        Huse and Troyer, but uses the formula that they derived at the
        end of Section IIA (and expressed in words).  The main
-       difference is that we compute the diffusivity here *directly*
+op       difference is that we compute the diffusivity here *directly*
        rather than inferring it from the walker gradient.  */
     ln_energy_weights[i] = -ln_dos[i] - 0.5*log(diffusivity);
   }

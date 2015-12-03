@@ -23,14 +23,31 @@ plt.figure()
 
 Ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 10.0]
 
-fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
-fname = fbase + '-density.dat'
-minT = readandcompute.minT(fname)
+colors = { 0.1: 'r',
+           0.6: 'y',
+           0.7: 'm',
+           0.8: 'g',
+           0.9: 'b',
+           1.0: 'r',
+           10.0: 'c',
+       }
+lines = { '': '--',
+          '-tmi': '-',
+          '-toe': ':',
+      }
 
-for T in Ts:
-    if T >= minT:
-        density, x = readandcompute.density_x(fbase, T)
-        plt.plot(x/2, density, label='T=%g' % T)
+for method in ['', '-tmi', '-toe']:
+    fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww,ff,lenx,lenyz,method)
+    fname = fbase + '-density.dat'
+    try:
+        minT = readandcompute.minT(fname)
+
+        for T in Ts:
+            if T >= minT:
+                density, x = readandcompute.density_x(fbase, T)
+                plt.plot(x/2, density, colors[T]+lines[method], label='T=%g' % T)
+    except:
+        pass
 
 plt.ylim(0)
 plt.xlabel(r'$z/\sigma$')
