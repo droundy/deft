@@ -168,10 +168,10 @@ def g_r(fbase, T):
         if hist[i,0]:
             g += dos_boltz[i,:]*g_of_E[i,:]
             counts += dos_boltz[i,0]*hist[i,0]
-            if dos_boltz[i,0] > 0.0001:
-                print 'hist %d at energy %d with weight %g' % (hist[i,0], E[i,0], dos_boltz[i,0])
+            # if dos_boltz[i,0] > 0.0001:
+            #     print 'hist %d at energy %d with weight %g' % (hist[i,0], E[i,0], dos_boltz[i,0])
 
-    print 'with N %d we have counts %g' % (N, counts)
+    # print 'with N %d we have counts %g' % (N, counts)
     return g, r[0,:]
 
 
@@ -213,11 +213,11 @@ def density_x(fbase, T):
         if hist_1d[i]:
             density += dos_boltz_1d[i]*density_of_E[i,:]
             counts += dos_boltz_1d[i]*hist_1d[i]
-            if dos_boltz_1d[i] > 0.0001:
-                print 'hist %d at energy %d with weight %g' % (hist_1d[i], E_1d[i], dos_boltz_1d[i])
+            # if dos_boltz_1d[i] > 0.0001:
+            #     print 'hist %d at energy %d with weight %g' % (hist_1d[i], E_1d[i], dos_boltz_1d[i])
 
-    print 'we have counts %g with element dimensions %gx%gx%g' % (counts, dx, leny, lenz)
-    print 'sum', sum(hist_1d), sum(sum(denshist))
+    # print 'we have counts %g with element dimensions %gx%gx%g' % (counts, dx, leny, lenz)
+    # print 'sum', sum(hist_1d), sum(sum(denshist))
     return density, x_1d
 
 def e_de_transitions(basename):

@@ -36,7 +36,12 @@ lines = { '': '--',
           '-toe': ':',
       }
 
-for method in ['', '-tmi', '-toe']:
+first_method = True
+the_first_method = ''
+first_temperature = [True, True, True]
+methods = ['', '-tmi', '-toe']
+for i in range(len(methods)):
+    method = methods[i]
     fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww,ff,lenx,lenyz,method)
     fname = fbase + '-density.dat'
     try:
@@ -45,7 +50,20 @@ for method in ['', '-tmi', '-toe']:
         for T in Ts:
             if T >= minT:
                 density, x = readandcompute.density_x(fbase, T)
-                plt.plot(x/2, density, colors[T]+lines[method], label='T=%g' % T)
+                plt.plot(x/2, density, colors[T]+lines[method])
+                if first_method or method == the_first_method:
+                    if first_temperature[i]:
+                        plt.plot(x/2, density, colors[T]+lines[method], label='T=%g %s' % (T, method[1:]))
+                        first_temperature[i] = False
+                    else:
+                        plt.plot(x/2, density, colors[T]+lines[method], label='T=%g' % T)
+                    the_first_method = method
+                    first_method = False
+                elif first_temperature[i]:
+                    plt.plot(x/2, density, colors[T]+lines[method], label='T=%g %s' % (T, method[1:]))
+                    first_temperature[i] = False
+                else:
+                    plt.plot(x/2, density, colors[T]+lines[method])
     except:
         pass
 
