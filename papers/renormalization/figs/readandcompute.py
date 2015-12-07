@@ -99,7 +99,7 @@ def eta_u_F_cv_s_minT(dbase, T):
     eta = []
     minT = 1e100
     for N in range(2,500):
-        fbase = '%s/N%03d/data' % (dbase, N)
+        fbase = '%s/i1/N%03d/data' % (dbase, N) # Still an issue here when crossing recursion levels
         try:
             U0, F0, cv0, s0, minT0 = u_F_cv_s_minT(fbase, T)
             U.append(U0)
@@ -110,10 +110,10 @@ def eta_u_F_cv_s_minT(dbase, T):
             V = dimensions(fbase)[0]**3 # assuming it is cubic
             N = read_N(fbase)
             R = 1 # sphere radius
-            eta.append(N*(4*np.pi/3*R**3/V)
-        except:
+            eta.append(N*(4*np.pi/3*R**3/V))
+        except IOError:
             pass
-    return np.array(eta), np.array(U), F, cv, S, minT
+    return np.array(eta), np.array(U), F, cv, s, minT
 
 def absolute_f(fbase):
     # find the partition function yielding the absolute free energy  using 'absolute/' data
