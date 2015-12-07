@@ -105,7 +105,7 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "default_filename_suffix");
-  long simulation_iterations = 1000000;
+  long simulation_runs = 1000000;
   double acceptance_goal = .4;
   double R = 1;
   const double well_width = 1;
@@ -131,8 +131,8 @@ int main(int argc, const char *argv[]) {
      "This sets the desired filling fraction of the shrunk cell. Otherwise it defaults to ff."},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
-    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
-     0, "Number of iterations for which to run the simulation", "INT"},
+    {"runs", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_runs,
+     0, "Number of \"runs\" for which to run the simulation", "INT"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
     {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -263,7 +263,7 @@ int main(int argc, const char *argv[]) {
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   printf("\nFilling fraction of small cell is %g", ff_small);
-  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
+  if (sw.N <= 0 || simulation_runs < 0 || R <= 0 ||
       neighbor_scale <= 0 || sw.translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
@@ -531,7 +531,7 @@ int main(int argc, const char *argv[]) {
     sw.optimistic_samples[i] = 0;
   }
 
-  while(sw.iteration <= simulation_iterations) {
+  while (valid_runs <= simulation_runs) {
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
@@ -582,14 +582,14 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
 
-    if (time_to_save() || sw.iteration == simulation_iterations) {
+    if (time_to_save() || valid_runs == simulation_runs) {
       const clock_t now = clock();
       const double secs_done = double(now)/CLOCKS_PER_SEC;
       const int seconds = int(secs_done) % 60;
       const int minutes = int(secs_done / 60) % 60;
       const int hours = int(secs_done / 3600) % 24;
       const int days = int(secs_done / 86400);
-      const long percent_done = 100*sw.iteration/simulation_iterations;
+      const long percent_done = 100*valid_runs/simulation_runs;
       printf("Saving data after %i days, %02i:%02i:%02i, %li iterations (%ld%%) "
              "complete.\n", days, hours, minutes, seconds, sw.iteration,
              percent_done);

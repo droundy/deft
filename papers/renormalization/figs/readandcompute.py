@@ -127,10 +127,7 @@ def absolute_f(fbase):
    
     print("Num_files is: %s" % num_files)
     for j in xrange(0,num_files):
-        if j==0:
-            filename = fbase+'%05d-g' % (j)
-        else:
-            filename = fbase + '%05d' % (j)
+        filename = fbase + '%05d' % (j)
         print 'filename is "%s" and j is %d' % (filename, j)
         with open(filename+".dat") as file:
             for line in file:

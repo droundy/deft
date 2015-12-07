@@ -101,7 +101,7 @@ int main(int argc, const char *argv[]) {
   sprintf(filename, "default_filename");
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "default_filename_suffix");
-  long simulation_iterations = 1000000;
+  long simulation_counts = 1000000;
   double acceptance_goal = .4;
   double R = 1;
   const double well_width = 1;
@@ -119,10 +119,8 @@ int main(int argc, const char *argv[]) {
     {"N", '\0', POPT_ARG_INT, &sw.N, 0, "Number of balls to simulate", "INT"},
     {"ff_small", '\0', POPT_ARG_DOUBLE, &ff_small, 0, "Small filling fraction. If specified, "
      "This sets the desired filling fraction of the shrunk cell. Otherwise it defaults to ff."},
-    {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
-     "Number of walled dimensions (dimension order: x,y,z)", "INT"},
-    {"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
-     0, "Number of iterations for which to run the simulation", "INT"},
+    {"counts", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_counts,
+     0, "Number of \"counts\" for which to run the simulation", "INT"},
     {"de_g", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &de_g, 0,
      "Resolution of distribution functions", "DOUBLE"},
     {"max_rdf_radius", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -174,14 +172,6 @@ int main(int argc, const char *argv[]) {
   // Verify we have reasonable arguments and set secondary parameters
   // ----------------------------------------------------------------------------
 
-  if(sw.walls >= 2){
-    printf("Code cannot currently handle walls in more than one dimension.\n");
-    return 254;
-  }
-  if(sw.walls > 3){
-    printf("You cannot have walls in more than three dimensions.\n");
-    return 254;
-  }
   if(well_width < 1){
     printf("Interaction scale should be greater than (or equal to) 1.\n");
     return 254;
@@ -232,7 +222,7 @@ int main(int argc, const char *argv[]) {
   printf("\nSetting cell dimensions to (%g, %g, %g).\n",
          sw.len[x], sw.len[y], sw.len[z]);
   printf("\nFilling fraction of small cell is %g", ff_small);
-  if (sw.N <= 0 || simulation_iterations < 0 || R <= 0 ||
+  if (sw.N <= 0 || simulation_counts < 0 || R <= 0 ||
       neighbor_scale <= 0 || sw.translation_scale < 0 ||
       sw.len[x] < 0 || sw.len[y] < 0 || sw.len[z] < 0) {
     fprintf(stderr, "\nAll parameters must be positive.\n");
@@ -248,15 +238,9 @@ int main(int argc, const char *argv[]) {
 
   // If a filename was not selected, make a default
   if (strcmp(filename, "default_filename") == 0) {
-    char *wall_tag = new char[100];
-    if(sw.walls == 0) sprintf(wall_tag,"periodic");
-    else if(sw.walls == 1) sprintf(wall_tag,"wall");
-    else if(sw.walls == 2) sprintf(wall_tag,"tube");
-    else if(sw.walls == 3) sprintf(wall_tag,"box");
-    sprintf(filename, "%s-ww%04.2f-ff_small%04.2f-N%i",
-            wall_tag, well_width, eta, sw.N);
+    sprintf(filename, "ww%04.2f-ff_small%04.2f-N%i",
+            well_width, eta, sw.N);
     printf("\nUsing default file name: ");
-    delete[] wall_tag;
   }
   else
     printf("\nUsing given file name: ");
@@ -313,18 +297,6 @@ int main(int argc, const char *argv[]) {
 
   // Walker histograms
   sw.walkers_up = new long[sw.energy_levels]();
-
-
-  // Radial distribution function (RDF) histogram
-  long *g_energy_histogram = new long[sw.energy_levels]();
-  const int g_bins = round(min(min(min(sw.len[y],sw.len[z]),sw.len[x]),max_rdf_radius)
-                           / de_g / 2);
-  long **g_histogram = new long*[sw.energy_levels];
-  for(int i = 0; i < sw.energy_levels; i++)
-    g_histogram[i] = new long[g_bins]();
-
-  printf("memory use estimate = %.2g G\n\n",
-         8*double((6 + g_bins)*sw.energy_levels)/1024/1024/1024);
 
   sw.balls = new ball[sw.N];
 
@@ -440,7 +412,6 @@ int main(int argc, const char *argv[]) {
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
           "# cell dimensions: (%g, %g, %g)\n"
-          "# walls: %i\n"
           "# de_g: %g\n"
           "# seed: %li\n"
           "# N: %i\n"
@@ -448,11 +419,11 @@ int main(int argc, const char *argv[]) {
           "# well_width: %g\n"
           "# neighbor_scale: %g\n"
           "# ff_small: %g\n",
-          sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
+          sw.len[0], sw.len[1], sw.len[2], de_g, seed, sw.N, R,
           well_width, neighbor_scale, ff_small);
 
-  char *g_fname = new char[1024];
-  sprintf(g_fname, "%s/%s-g.dat", data_dir, filename);
+  char *the_fname = new char[1024];
+  sprintf(the_fname, "%s/%s.dat", data_dir, filename);
 
   took("Initialization");
 
@@ -476,7 +447,8 @@ int main(int argc, const char *argv[]) {
     sw.optimistic_samples[i] = 0;
   }
 
-  while(sw.iteration <= simulation_iterations) {
+  long counts = 0;
+  while(counts <= simulation_counts) {
     sw.iteration++;   // not calling move_a_ball(), so end_move_updates() is never called
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
@@ -499,36 +471,23 @@ int main(int argc, const char *argv[]) {
       total_valid_small_checks++;
       if(debug){printf("true\n");}
     }
+    counts = min(total_failed_small_checks, total_valid_small_checks);
 
-    // ---------------------------------------------------------------
-    // Add data to RDF histogram
-    // ---------------------------------------------------------------
-    if(!sw.walls){
-      g_energy_histogram[0]++;
-      for(int i = 0; i < sw.N; i++){
-        for(int j = 0; j < sw.N; j++){
-          if(i != j){
-            const vector3d r = periodic_diff(sw.balls[i].pos, sw.balls[j].pos, sw.len,
-                                             sw.walls);
-            const int r_i = floor(r.norm()/de_g);
-            if(r_i < g_bins) g_histogram[0][r_i]++;
-          }
-        }
-      }
-    }
     // ---------------------------------------------------------------
     // Save to file
     // ---------------------------------------------------------------
 
-    if (time_to_save() || sw.iteration == simulation_iterations) {
+    if (time_to_save() || counts == simulation_counts) {
       const clock_t now = clock();
       const double secs_done = double(now)/CLOCKS_PER_SEC;
       const int seconds = int(secs_done) % 60;
       const int minutes = int(secs_done / 60) % 60;
       const int hours = int(secs_done / 3600) % 24;
       const int days = int(secs_done / 86400);
-      printf("Saving data after %i days, %02i:%02i:%02i, %li iterations "
-             "complete.\n", days, hours, minutes, seconds, sw.iteration);
+      const long percent_done = 100*counts/simulation_counts;
+      printf("Saving data after %i days, %02i:%02i:%02i, %li iterations (%ld%%) "
+             "complete.\n", days, hours, minutes, seconds, sw.iteration,
+             percent_done);
       fflush(stdout);
 
       char *countinfo = new char[4096];
@@ -543,32 +502,9 @@ int main(int argc, const char *argv[]) {
 
       // Save RDF
       if(!sw.walls){
-        FILE *g_out = fopen((const char *)g_fname, "w");
+        FILE *g_out = fopen((const char *)the_fname, "w");
         fprintf(g_out, "%s", headerinfo);
         fprintf(g_out, "%s", countinfo);
-        fprintf(g_out, "# data table containing values of g "
-                "(i.e. radial distribution function)\n"
-                "# first column reserved for specifying energy level\n"
-                "# column number r_n (starting from the second column, "
-                "counting from zero) corresponds to radius r given by "
-                "r = (r_n + 0.5) * de_g\n");
-        const double density = sw.N/sw.len[x]/sw.len[y]/sw.len[z];
-        const double total_vol = sw.len[x]*sw.len[y]*sw.len[z];
-        for(int i = 0; i < sw.energy_levels; i++){
-          if(g_histogram[i][g_bins-1] > 0){ // if we have RDF data at this energy
-            fprintf(g_out, "\n%i",i);
-            for(int r_i = 0; r_i < g_bins; r_i++) {
-              const double probability = (double)g_histogram[i][r_i]
-                / g_energy_histogram[i];
-              const double r = (r_i + 0.5) * de_g;
-              const double shell_vol =
-                4.0/3.0*M_PI*(uipow(r+de_g/2, 3) - uipow(r-de_g/2, 3));
-              const double n2 = probability/total_vol/shell_vol;
-              const double g = n2/sqr(density);
-              fprintf(g_out, " %8.5f", g);
-            }
-          }
-        }
         fclose(g_out);
       }
 
@@ -594,14 +530,8 @@ int main(int argc, const char *argv[]) {
   delete[] sw.pessimistic_samples;
   delete[] sw.optimistic_samples;
 
-  for (int i = 0; i < sw.energy_levels; i++) {
-    delete[] g_histogram[i];
-  }
-  delete[] g_histogram;
-  delete[] g_energy_histogram;
-
   delete[] headerinfo;
-  delete[] g_fname;
+  delete[] the_fname;
 
   delete[] data_dir;
   delete[] filename;

@@ -74,7 +74,7 @@ for N in Ns:
     steps = 20 # Need a better value for this
     step_size = 0.05 # This too
     steps = 20
-    sim_iters = 1000000
+    sim_runs = 1000000
     sc_period = int(max(10, 1*N*N/10))
 
     ff_goal = (4*np.pi/3*R**3)*N/(L_i)**3 # this is the density
@@ -94,7 +94,7 @@ for N in Ns:
             ff_next = ff_goal
             
         output_file_path = dirname+'/'+filename
-        if not os.path.isfile(output_file_path+'.dat') and not os.path.isfile(output_file_path+'-g.dat'):
+        if not os.path.isfile(output_file_path+'.dat') and not os.path.isfile(output_file_path+'.dat'):
             print "Was checking for", output_file_path
             if have_srun:
                 cmd = 'srun -J L%04.2f/i%01d/N%03d/abs/%s' % (L,i,N, filename)
@@ -106,13 +106,14 @@ for N in Ns:
                 cmd += ' ../../../free-energy-monte-carlo-infinite-case'
                 cmd += ' --ff_small %g' % ff
                 # do infinite case for first step always
+                cmd += ' --counts %d' % sim_runs
             else:
                 cmd += ' ../../../free-energy-monte-carlo'
                 cmd += ' --ff_small %g' % ff_next
                 cmd += ' --ff %g' % ff
                 cmd += ' --sc_period %d' % sc_period
+                cmd += ' --runs %d' % sim_runs
             cmd += ' --N %d' % N
-            cmd += ' --iterations %d' % sim_iters
             cmd += ' --filename %s' % filename
             cmd += ' --data_dir %s' % dirname
             cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
