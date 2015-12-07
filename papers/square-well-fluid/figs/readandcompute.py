@@ -182,18 +182,16 @@ def density_x(fbase, T):
     x_1d = data[0,2:]
     dx = x_1d[1] - x_1d[0]
     E_1d = data[1:,0]
-    lnw_1d = data[1:,1]
-    hist_1d = numpy.zeros_like(lnw_1d)
+    ln_dos_1d = data[1:,1]
+    hist_1d = numpy.zeros_like(ln_dos_1d)
     n_E = len(E_1d)
     n_x = len(x_1d)
     N = read_N(fdensity)
     for i in xrange(n_E):
         hist_1d[i] = sum(denshist[i,:])/N
     x, E = numpy.meshgrid(x_1d, E_1d)
-    x, lnw = numpy.meshgrid(x_1d, lnw_1d)
+    x, ln_dos = numpy.meshgrid(x_1d, ln_dos_1d)
     x, hist = numpy.meshgrid(x_1d, hist_1d)
-
-    ln_dos_1d = numpy.log(hist_1d) - lnw_1d
 
     ln_dos_boltz_1d = ln_dos_1d - E_1d/T
     dos_boltz_1d = numpy.exp(ln_dos_boltz_1d - ln_dos_boltz_1d.max())

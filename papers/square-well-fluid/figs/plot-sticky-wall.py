@@ -31,9 +31,9 @@ colors = { 0.1: 'r',
            1.0: 'r',
            10.0: 'c',
        }
-lines = { '': '--',
+lines = { '': ':',
           '-tmi': '-',
-          '-toe': ':',
+          '-toe': '--',
       }
 
 first_method = True
