@@ -733,7 +733,11 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
             if (i < highest_problem_energy) highest_problem_energy = i;
           }
         }
-        printf("[%9ld] Have %ld energies to go\n", iteration, energies_unconverged);
+        double *ln_dos = compute_ln_dos(transition_dos);
+        const double nice_T = 1.0/(ln_dos[highest_problem_energy] - ln_dos[highest_problem_energy+1]);
+        delete[] ln_dos;
+        printf("[%9ld] Have %ld energies to go (down to T=%g)\n",
+               iteration, energies_unconverged, nice_T);
         printf("       <%d - %d vs %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
                min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
