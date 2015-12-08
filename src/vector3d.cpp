@@ -1,6 +1,6 @@
 #include "vector3d.h"
 
-MTRand random::my_mtrand = MTRand(MTRand::uint32(0));
+Rand random::my_rand = Rand(0);
 unsigned long random::seedval = 0;
 
 vector3d vector3d::ran(double scale) {

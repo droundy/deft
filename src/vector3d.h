@@ -1,5 +1,5 @@
 #include <math.h>
-#include "MersenneTwister.h"
+#include "xorshift.h"
 #include <cassert>
 #include <stdio.h>
 
@@ -9,10 +9,10 @@ struct random {
   static unsigned long seedval;
   static void seed(unsigned long seedme) {
     seedval = seedme;
-    my_mtrand = MTRand(seedval);
+    my_rand = Rand(seedval);
   }
   static double ran() {
-    return my_mtrand.randExc();
+    return my_rand.rand();
   }
   static unsigned long seed_randomly() {
     seedval = clock(); // in case reading /dev/urandom fails?
@@ -27,7 +27,7 @@ struct random {
     return seedval;
   }
 private:
-  static MTRand my_mtrand;
+  static Rand my_rand;
 };
 
 class vector3d {
