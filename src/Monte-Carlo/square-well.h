@@ -261,6 +261,9 @@ struct sw_simulation {
     transitions_movie_filename_format = 0; // default to NULL pointer here for safety.
     dos_movie_filename_format = 0; // default to NULL pointer here for safety.
     lnw_movie_filename_format = 0; // default to NULL pointer here for safety.
+    transitions_movie_count = 0;
+    dos_movie_count = 0;
+    lnw_movie_count = 0;
   };
 };
 
