@@ -640,8 +640,8 @@ int sw_simulation::set_min_important_energy(){
       // have some decent statistics here.
       min_important_energy = i;
     } else if (ln_dos[i+1] == ln_dos[i]) {
-      // We have probably reached the end of what we know about.
-      break;
+      // We have no information about this state, so let us keep
+      // looking, in case there is a nice state at lower energy...
     } else {
       // Adjust ln_dos for the next state to match the "canonical"
       // value.  This allows us to handle situations where there is a
