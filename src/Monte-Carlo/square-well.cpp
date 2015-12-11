@@ -1193,10 +1193,11 @@ void sw_simulation::optimize_weights_using_transitions() {
   // Assume that we already *have* a reasonable set of weights (with
   // which to compute the diffusivity), and that we have already
   // defined the min_important_energy.
+  update_weights_using_transitions();
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   double diffusivity = 1;
-  for(int i = max_entropy_state; i <= min_important_energy; i++) {
+  for(int i = max_entropy_state; i <= min_energy_state; i++) {
     double norm = 0, mean_sqr_de = 0, mean_de = 0;
     for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
       // cap the ratio of weights at 1
@@ -1219,15 +1220,12 @@ void sw_simulation::optimize_weights_using_transitions() {
        end of Section IIA (and expressed in words).  The main
 op       difference is that we compute the diffusivity here *directly*
        rather than inferring it from the walker gradient.  */
-    ln_energy_weights[i] = -ln_dos[i] - 0.5*log(diffusivity);
+    ln_energy_weights[i] -= 0.5*log(diffusivity);
   }
+  // Now we just define the maximum weight to be 1.
   for (int i=0; i<max_entropy_state; i++) {
     ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
   }
-  for (int i=min_important_energy; i<energy_levels; i++) {
-    ln_energy_weights[i] = ln_energy_weights[i-1] + 1/min_T;
-  }
-  initialize_canonical(min_T,min_important_energy);
   double ln_max = ln_energy_weights[max_entropy_state];
   for (int i=0;i<max_entropy_state;i++) {
     ln_energy_weights[i] = 0;
@@ -1247,11 +1245,12 @@ void sw_simulation::update_weights_using_transitions() {
         transition_matrix(i,i-1) == 0 ||
         transition_matrix(i-1,i) ==0 ||
         ln_dos[i] == ln_dos[i+1]) {
-      // use canonical weights for any energies where we have
-      // essentially no statistics.
-      ln_dos[i] = ln_dos[i-1] - 1.0/min_T;
+      // For any energies where we have essentially no statistics,
+      // continue the slope of the previous step.
+      ln_dos[i] = max(ln_dos[i-1] - 1.0/min_T, 2*ln_dos[i-1] - ln_dos[i-2]);
     } else {
-      ln_dos[i] = max(ln_dos[i-1] - 1.0/min_T, ln_dos[i]);
+      ln_dos[i] = max(max(ln_dos[i-1] - 1.0/min_T, ln_dos[i]),
+                      2*ln_dos[i-1] - ln_dos[i-2]);
     }
   }
   ln_dos[energy_levels-1] = ln_dos[energy_levels-2];
