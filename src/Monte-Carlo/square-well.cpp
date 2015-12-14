@@ -632,14 +632,13 @@ int sw_simulation::set_min_important_energy(){
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state+1; i < min_energy_state-2; i++) {
+  for (int i = max_entropy_state+1; i <= min_energy_state; i++) {
     if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T
-        && ln_dos[i] != ln_dos[i+1]
-        && transition_matrix(i,i+1) > 0 && transition_matrix(i,i) > 0 && transition_matrix(i+1,i) > 0) {
+        && ln_dos[i] != ln_dos[i-1]) {
       // This is an important energy if the DOS is high enough, and we
       // have some decent statistics here.
       min_important_energy = i;
-    } else if (ln_dos[i+1] == ln_dos[i]) {
+    } else if (ln_dos[i-1] == ln_dos[i]) {
       // We have no information about this state, so let us keep
       // looking, in case there is a nice state at lower energy...
     } else {
@@ -648,7 +647,7 @@ int sw_simulation::set_min_important_energy(){
       // drop in the density of states followed by a peak that is
       // large enough to warrant considering the lower energy
       // important.
-      ln_dos[i+1] = ln_dos[i] - 1.0/min_T;
+      ln_dos[i] = ln_dos[i-1] - 1.0/min_T;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
