@@ -40,7 +40,7 @@ def T_u_F_cv_s_minT(fbase):
         Z[i] = sum(dos_boltz)
         U[i] = sum(energy*dos_boltz)/Z[i]
 
-        F[i] = T_range[i]*np.log(Z[i]) - f_abs
+        F[i] = -T_range[i]*np.log(Z[i]) - f_abs
         # S = \sum_i^{microstates} P_i \log P_i
         # S = \sum_E D(E) e^{-\beta E} \log\left(\frac{e^{-\beta E}}{\sum_{E'} D(E') e^{-\beta E'}}\right)
         S[i] = sum(-dos_boltz*(-energy/T_range[i] - ln_dos_boltz.max() \
@@ -175,3 +175,10 @@ def read_N(f):
         for line in file:
             if "N" in line:
                 return int(line.split(': ')[-1])
+
+def nearest_T(Temps,T0):
+    nearest_T = Temps[0]
+    for T in set(Temps):
+        if abs(T - T0) <= abs(nearest_T - T0):
+            nearest_T = T
+    return np.searchsorted(Temps,nearest_T)
