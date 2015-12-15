@@ -633,7 +633,7 @@ int sw_simulation::set_min_important_energy(){
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
   for (int i = max_entropy_state+1; i <= min_energy_state; i++) {
-    if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T
+    if (ln_dos[i-1] - ln_dos[i] < 1.0/min_T
         && ln_dos[i] != ln_dos[i-1]) {
       // This is an important energy if the DOS is high enough, and we
       // have some decent statistics here.
