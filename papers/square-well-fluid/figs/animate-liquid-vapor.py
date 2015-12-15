@@ -18,6 +18,8 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
+print sys.argv
+
 if 'tmi' in sys.argv:
     moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi' % (ww,ff,lenx,lenyz)
 elif 'toe' in sys.argv:
@@ -124,7 +126,7 @@ for frame in xrange(numframes):
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
 
-duration = 5.0 # seconds
+duration = 10.0 # seconds
 
 avconv = "avconv -y -r %g -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (numframes/duration, moviedir, moviedir)
 os.system(avconv) # make the movie
