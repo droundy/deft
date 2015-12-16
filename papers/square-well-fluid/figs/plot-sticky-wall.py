@@ -30,6 +30,7 @@ colors = { 0.1: 'r',
            0.8: 'g',
            0.9: 'b',
            1.0: 'r',
+           5.0: 'k',
            10.0: 'c',
        }
 def color(T):
@@ -49,21 +50,24 @@ for i in range(len(methods)):
     fname = fbase + '-density.dat'
     try:
         minT = readandcompute.minT(fname)
+        convergedT = readandcompute.convergedT(fname)
 
         for T in Ts:
-            if T >= minT:
+            if T >= minT and T >= convergedT*0.8:
                 density, x = readandcompute.density_x(fbase, T)
                 plt.plot(x/2, density, color(T)+lines[i])
                 if first_method or method == the_first_method:
                     if first_temperature[i]:
-                        plt.plot(x/2, density, color(T)+lines[i], label='T=%g %s' % (T, method[1:]))
+                        plt.plot(x/2, density, color(T)+lines[i],
+                                 label='T=%g %s (converged to %.2g)' % (T, method[1:], convergedT))
                         first_temperature[i] = False
                     else:
                         plt.plot(x/2, density, color(T)+lines[i], label='T=%g' % T)
                     the_first_method = method
                     first_method = False
                 elif first_temperature[i]:
-                    plt.plot(x/2, density, color(T)+lines[i], label='T=%g %s' % (T, method[1:]))
+                    plt.plot(x/2, density, color(T)+lines[i],
+                             label='T=%g %s (converged to %.2g)' % (T, method[1:], convergedT))
                     first_temperature[i] = False
                 else:
                     plt.plot(x/2, density, color(T)+lines[i])

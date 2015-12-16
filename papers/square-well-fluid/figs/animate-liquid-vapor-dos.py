@@ -83,6 +83,7 @@ for frame in xrange(numframes):
         min_important_energy = readandcompute.min_important_energy(basename)
         ax.axvline(-min_important_energy, color='b', linestyle=':')
         ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], 'g--')
+        ax.axvline(-readandcompute.converged_state(datname), color='c', linestyle=':')
     except:
         pass
     e, lnw = readandcompute.e_lnw(basename)

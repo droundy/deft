@@ -79,6 +79,24 @@ def minT(f):
 def minT_from_transitions(fbase):
     return minT(fbase+"-transitions.dat")
 
+def convergedT(f):
+    if not '.dat' in f:
+        f = f+"-E.dat"
+    with open(f) as file:
+        for line in file:
+            if "converged temperature:" in line:
+                return float(line.split()[-1])
+    return 0
+
+def converged_state(f):
+    if not '.dat' in f:
+        f = f+"-E.dat"
+    with open(f) as file:
+        for line in file:
+            if "converged state:" in line:
+                return int(line.split()[-1])
+    print 'ERROR FINDING converged_state in', f
+
 def iterations(fbase):
     with open(fbase+"-E.dat") as file:
         for line in file:
