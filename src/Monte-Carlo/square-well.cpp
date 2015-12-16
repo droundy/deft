@@ -682,13 +682,17 @@ static void print_seconds_as_time(clock_t clocks) {
 }
 
 double sw_simulation::converged_to_temperature(double *ln_dos) const {
-  for (int i = max_entropy_state+1; i < min_important_energy; i++) {
+  int e = converged_to_state();
+  return 1.0/(ln_dos[e-1] - ln_dos[e]);
+}
+
+int sw_simulation::converged_to_state() const {
+  for (int i = max_entropy_state+1; i < min_energy_state; i++) {
     if (pessimistic_samples[i] < 10) {
-      const double nice_T = 1.0/(ln_dos[i-1] - ln_dos[i]);
-      return nice_T;
+      return i-1;
     }
   }
-  return min_T;
+  return min_important_energy;
 }
 
 bool sw_simulation::finished_initializing(bool be_verbose) {
@@ -1449,6 +1453,7 @@ void sw_simulation::write_header(FILE *f) const {
   fprintf(f, "\n");
 
   double *ln_dos = compute_ln_dos(transition_dos);
+  fprintf(f, "# converged state: %d\n", converged_to_state());
   fprintf(f, "# converged temperature: %g\n", converged_to_temperature(ln_dos));
   delete[] ln_dos;
   fprintf(f, "\n");
