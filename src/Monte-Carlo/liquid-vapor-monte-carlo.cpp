@@ -780,9 +780,11 @@ int main(int argc, const char *argv[]) {
               "# working moves: %li\n"
               "# total moves: %li\n"
               "# acceptance rate: %g\n"
+              "# converged state: %d\n"
               "# converged temperature: %g\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total,
+              sw.converged_to_state(),
               sw.converged_to_temperature(ln_dos));
 
       // Save energy histogram

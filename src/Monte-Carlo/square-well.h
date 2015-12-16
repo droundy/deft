@@ -216,6 +216,7 @@ struct sw_simulation {
   // For the following bit, convergence is defined in terms of having
   // 10 pessimistic samples.
   double converged_to_temperature(double *ln_dos) const;
+  int converged_to_state() const;
 
   double estimate_trip_time(int E1, int E2);
 
