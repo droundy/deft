@@ -213,6 +213,10 @@ struct sw_simulation {
   // check whether we are done initializing
   bool finished_initializing(bool be_verbose = false);
   bool reached_iteration_cap();
+  // For the following bit, convergence is defined in terms of having
+  // 10 pessimistic samples.
+  double converged_to_temperature(double *ln_dos) const;
+  int converged_to_state() const;
 
   double estimate_trip_time(int E1, int E2);
 
@@ -261,6 +265,9 @@ struct sw_simulation {
     transitions_movie_filename_format = 0; // default to NULL pointer here for safety.
     dos_movie_filename_format = 0; // default to NULL pointer here for safety.
     lnw_movie_filename_format = 0; // default to NULL pointer here for safety.
+    transitions_movie_count = 0;
+    dos_movie_count = 0;
+    lnw_movie_count = 0;
   };
 };
 

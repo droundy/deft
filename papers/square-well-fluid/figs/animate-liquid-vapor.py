@@ -18,6 +18,8 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
+print sys.argv
+
 if 'tmi' in sys.argv:
     moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi' % (ww,ff,lenx,lenyz)
 elif 'toe' in sys.argv:
@@ -76,17 +78,9 @@ for frame in xrange(numframes):
         N = readandcompute.read_N(basename)
         ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
         ax.axvline(-readandcompute.min_important_energy(basename), color='b', linestyle=':')
+        ax.axvline(-readandcompute.converged_state(basename+'-lndos.dat'), color='c', linestyle=':')
     except:
         pass
-
-    #     T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
-    #     ax.plot(u/N, T, 'k-')
-    #     ax.set_ylim(0, 3)
-    #     ax.axhline(minT, color='r', linestyle=':')
-
-    #     e, hist = readandcompute.e_hist(basename)
-    #     iterations = readandcompute.iterations(basename)
-    #     ax.plot(e/N, 2.5*hist/hist.max(), 'k-', label=r'%e iterations' % (iterations))
 
     e, init_hist = readandcompute.e_and_total_init_histogram(basename)
     if min_T != old_min_T:
@@ -124,7 +118,7 @@ for frame in xrange(numframes):
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
 
-duration = 5.0 # seconds
+duration = 10.0 # seconds
 
 avconv = "avconv -y -r %g -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (numframes/duration, moviedir, moviedir)
 os.system(avconv) # make the movie

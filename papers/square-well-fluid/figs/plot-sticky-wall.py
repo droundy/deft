@@ -24,46 +24,53 @@ plt.figure()
 Ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 10.0]
 
 colors = { 0.1: 'r',
+           0.5: 'k',
            0.6: 'y',
            0.7: 'm',
            0.8: 'g',
            0.9: 'b',
            1.0: 'r',
+           5.0: 'k',
            10.0: 'c',
        }
-lines = { '': ':',
-          '-tmi': '-',
-          '-toe': '--',
-      }
+def color(T):
+    try:
+        return colors[T]
+    except:
+        return ''
+lines = ['-', '--', ':',]
 
 first_method = True
 the_first_method = ''
 first_temperature = [True, True, True]
-methods = ['', '-tmi', '-toe']
+methods = ['-tmi', '-toe', '-tmmc', ]
 for i in range(len(methods)):
     method = methods[i]
     fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww,ff,lenx,lenyz,method)
     fname = fbase + '-density.dat'
     try:
         minT = readandcompute.minT(fname)
+        convergedT = readandcompute.convergedT(fname)
 
         for T in Ts:
-            if T >= minT:
+            if T >= minT and T >= convergedT*0.8:
                 density, x = readandcompute.density_x(fbase, T)
-                plt.plot(x/2, density, colors[T]+lines[method])
+                plt.plot(x/2, density, color(T)+lines[i])
                 if first_method or method == the_first_method:
                     if first_temperature[i]:
-                        plt.plot(x/2, density, colors[T]+lines[method], label='T=%g %s' % (T, method[1:]))
+                        plt.plot(x/2, density, color(T)+lines[i],
+                                 label='T=%g %s (converged to %.2g)' % (T, method[1:], convergedT))
                         first_temperature[i] = False
                     else:
-                        plt.plot(x/2, density, colors[T]+lines[method], label='T=%g' % T)
+                        plt.plot(x/2, density, color(T)+lines[i], label='T=%g' % T)
                     the_first_method = method
                     first_method = False
                 elif first_temperature[i]:
-                    plt.plot(x/2, density, colors[T]+lines[method], label='T=%g %s' % (T, method[1:]))
+                    plt.plot(x/2, density, color(T)+lines[i],
+                             label='T=%g %s (converged to %.2g)' % (T, method[1:], convergedT))
                     first_temperature[i] = False
                 else:
-                    plt.plot(x/2, density, colors[T]+lines[method])
+                    plt.plot(x/2, density, color(T)+lines[i])
     except:
         pass
 

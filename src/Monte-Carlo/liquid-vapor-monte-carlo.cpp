@@ -53,7 +53,7 @@ const int z = 2;
 // ------------------------------------------------------------------------------
 
 // States how long it's been since last took call.
-static void took(const char *name);
+static double took(const char *name);
 
 // Only print those balls that overlap or are outside the cell
 // Also prints those they overlap with
@@ -675,6 +675,7 @@ int main(int argc, const char *argv[]) {
 
   bool am_all_done;
   long how_often_to_check_finish = sw.N;
+  long iterations_per_update = 10*sw.N;
   do {
 
     for (int i = 0; i < sw.N; i++) sw.move_a_ball(tmmc);
@@ -714,6 +715,40 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
+    if (sw.iteration < 10*sw.N) {
+      continue; // We want to time just the iterations (including collecting histogram data.
+    } else if (sw.iteration == 10*sw.N) {
+      double time_for_N_iterations = took("first 10*N iterations");
+      sw.set_min_important_energy();
+      sw.set_max_entropy_energy();
+      if (tmi) {
+        sw.update_weights_using_transitions();
+      } else if (toe) {
+        sw.optimize_weights_using_transitions();
+      }
+      double time_to_update_weights = took("updating weights");
+      printf("iterations per time for one update = %g\n", 10*sw.N*time_to_update_weights/time_for_N_iterations);
+      // Try to spend just 1% of our time updating the weights.  This
+      // is a totally arbitrary heuristic.  Ideally we would base this
+      // on the number of iteratins needed to collect reasonable data.
+      // If it is too short, we waste time making negligible changes
+      // to the weights.  If it is too long, we waste time
+      // oversimulating.  I just decided that 1% of time wasted is no
+      // problem, and hopefully that will mean updating frequently
+      // enough.
+      iterations_per_update = 1000*sw.N*time_to_update_weights/time_for_N_iterations;
+      if (iterations_per_update < 10) iterations_per_update = 10;
+      printf("new iterations_per_update = %ld\n", iterations_per_update);
+    }
+    if (sw.iteration % iterations_per_update == 0) {
+      sw.set_min_important_energy();
+      sw.set_max_entropy_energy();
+      if (tmi) {
+        sw.update_weights_using_transitions();
+      } else if (toe) {
+        sw.optimize_weights_using_transitions();
+      }
+    }
 
     // ---------------------------------------------------------------
     // Save data to files
@@ -725,7 +760,7 @@ int main(int argc, const char *argv[]) {
     how_often_to_check_finish += sw.N; // As simulation progresses,
                                        // check for completion lees
                                        // frequently.
-    if (verbose || am_all_done) {
+    if ((verbose || am_all_done) && sw.iteration > 10*sw.N) {
       sw.set_min_important_energy();
       sw.set_max_entropy_energy();
       if (tmi) {
@@ -739,13 +774,18 @@ int main(int argc, const char *argv[]) {
       sw.write_transitions_file();
 
       char *countinfo = new char[4096];
+      double *ln_dos = sw.compute_ln_dos(transition_dos);
       sprintf(countinfo,
               "# iterations: %li\n"
               "# working moves: %li\n"
               "# total moves: %li\n"
-              "# acceptance rate: %g\n\n",
+              "# acceptance rate: %g\n"
+              "# converged state: %d\n"
+              "# converged temperature: %g\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
-              double(sw.moves.working)/sw.moves.total);
+              double(sw.moves.working)/sw.moves.total,
+              sw.converged_to_state(),
+              sw.converged_to_temperature(ln_dos));
 
       // Save energy histogram
       {
@@ -756,12 +796,10 @@ int main(int argc, const char *argv[]) {
         fprintf(dos_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
 
         fprintf(dos_out, "# energy   counts\n");
-        double *ln_dos = sw.compute_ln_dos(transition_dos);
         for (int i = 0; i < sw.energy_levels; i++) {
           fprintf(dos_out, "%d  %lg\n",i,ln_dos[i]);
         }
         fclose(dos_out);
-        delete[] ln_dos;
       }
 
       // Save pessimistic sample counts
@@ -828,7 +866,6 @@ int main(int argc, const char *argv[]) {
         }
         fprintf(densityout, "\n");
 
-        double *ln_dos = sw.compute_ln_dos(transition_dos);
         for (int i = 0; i < sw.energy_levels; i++) {
           if (sw.energy_histogram[i]) {
             fprintf(densityout, "%d\t%g", -i, ln_dos[i]);
@@ -839,9 +876,9 @@ int main(int argc, const char *argv[]) {
           }
         }
         fclose(densityout);
-        delete[] ln_dos;
       }
 
+      delete[] ln_dos;
       delete[] countinfo;
     }
   } while (!am_all_done);
@@ -933,7 +970,7 @@ static inline void check_neighbor_symmetry(const ball *p, int N) {
   }
 }
 
-static void took(const char *name) {
+static double took(const char *name) {
   assert(name); // so it'll count as being used...
   static clock_t last_time = clock();
   clock_t t = clock();
@@ -946,4 +983,5 @@ static void took(const char *name) {
   }
   fflush(stdout);
   last_time = t;
+  return seconds;
 }

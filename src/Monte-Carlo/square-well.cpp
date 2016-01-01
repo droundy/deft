@@ -632,23 +632,22 @@ int sw_simulation::set_min_important_energy(){
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state+1; i < min_energy_state-2; i++) {
-    if (ln_dos[i] - ln_dos[i+1] < 1.0/min_T
-        && ln_dos[i] != ln_dos[i+1]
-        && transition_matrix(i,i+1) > 0 && transition_matrix(i,i) > 0 && transition_matrix(i+1,i) > 0) {
+  for (int i = max_entropy_state+1; i <= min_energy_state; i++) {
+    if (ln_dos[i-1] - ln_dos[i] < 1.0/min_T
+        && ln_dos[i] != ln_dos[i-1]) {
       // This is an important energy if the DOS is high enough, and we
       // have some decent statistics here.
       min_important_energy = i;
-    } else if (ln_dos[i+1] == ln_dos[i]) {
-      // We have probably reached the end of what we know about.
-      break;
+    } else if (ln_dos[i-1] == ln_dos[i]) {
+      // We have no information about this state, so let us keep
+      // looking, in case there is a nice state at lower energy...
     } else {
       // Adjust ln_dos for the next state to match the "canonical"
       // value.  This allows us to handle situations where there is a
       // drop in the density of states followed by a peak that is
       // large enough to warrant considering the lower energy
       // important.
-      ln_dos[i+1] = ln_dos[i] - 1.0/min_T;
+      ln_dos[i] = ln_dos[i-1] - 1.0/min_T;
     }
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
@@ -680,6 +679,20 @@ static void print_seconds_as_time(clock_t clocks) {
   } else {
     printf(" %i days, %02i:%02i:%02i ", days, hours, minutes, seconds);
   }
+}
+
+double sw_simulation::converged_to_temperature(double *ln_dos) const {
+  int e = converged_to_state();
+  return 1.0/(ln_dos[e-1] - ln_dos[e]);
+}
+
+int sw_simulation::converged_to_state() const {
+  for (int i = max_entropy_state+1; i < min_energy_state; i++) {
+    if (pessimistic_samples[i] < 10) {
+      return i-1;
+    }
+  }
+  return min_important_energy;
 }
 
 bool sw_simulation::finished_initializing(bool be_verbose) {
@@ -736,8 +749,8 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
         double *ln_dos = compute_ln_dos(transition_dos);
         const double nice_T = 1.0/(ln_dos[highest_problem_energy] - ln_dos[highest_problem_energy+1]);
         delete[] ln_dos;
-        printf("[%9ld] Have %ld energies to go (down to T=%g)\n",
-               iteration, energies_unconverged, nice_T);
+        printf("[%9ld] Have %ld energies to go (down to T=%g or %g)\n",
+               iteration, energies_unconverged, nice_T, converged_to_temperature(ln_dos));
         printf("       <%d - %d vs %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
                min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
@@ -1193,10 +1206,11 @@ void sw_simulation::optimize_weights_using_transitions() {
   // Assume that we already *have* a reasonable set of weights (with
   // which to compute the diffusivity), and that we have already
   // defined the min_important_energy.
+  update_weights_using_transitions();
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   double diffusivity = 1;
-  for(int i = max_entropy_state; i <= min_important_energy; i++) {
+  for(int i = max_entropy_state; i <= min_energy_state; i++) {
     double norm = 0, mean_sqr_de = 0, mean_de = 0;
     for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
       // cap the ratio of weights at 1
@@ -1211,23 +1225,18 @@ void sw_simulation::optimize_weights_using_transitions() {
       mean_de /= norm;
       //printf("%4d: <de> = %15g   <de^2> = %15g\n", i, mean_de, mean_sqr_de);
       diffusivity = fabs(mean_sqr_de - mean_de*mean_de);
-    } else {
-      printf("Craziness at energy %d!!!\n", i);
     }
     /* This is a different way of computing it than is done by Trebst,
        Huse and Troyer, but uses the formula that they derived at the
        end of Section IIA (and expressed in words).  The main
 op       difference is that we compute the diffusivity here *directly*
        rather than inferring it from the walker gradient.  */
-    ln_energy_weights[i] = -ln_dos[i] - 0.5*log(diffusivity);
+    ln_energy_weights[i] -= 0.5*log(diffusivity);
   }
+  // Now we just define the maximum weight to be 1.
   for (int i=0; i<max_entropy_state; i++) {
     ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
   }
-  for (int i=min_important_energy; i<energy_levels; i++) {
-    ln_energy_weights[i] = ln_energy_weights[i-1] + 1/min_T;
-  }
-  initialize_canonical(min_T,min_important_energy);
   double ln_max = ln_energy_weights[max_entropy_state];
   for (int i=0;i<max_entropy_state;i++) {
     ln_energy_weights[i] = 0;
@@ -1241,22 +1250,14 @@ op       difference is that we compute the diffusivity here *directly*
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
   double *ln_dos = compute_ln_dos(transition_dos);
-  for (int i = 0; i < max_entropy_state; i++) ln_dos[i] = ln_dos[max_entropy_state];
-  for (int i = min_important_energy+1; i < energy_levels-1; i++) {
-    if (transition_matrix(i,i) == 0 ||
-        transition_matrix(i,i-1) == 0 ||
-        transition_matrix(i-1,i) ==0 ||
-        ln_dos[i] == ln_dos[i+1]) {
-      // use canonical weights for any energies where we have
-      // essentially no statistics.
-      ln_dos[i] = ln_dos[i-1] - 1.0/min_T;
-    } else {
-      ln_dos[i] = max(ln_dos[i-1] - 1.0/min_T, ln_dos[i]);
-    }
+  for (int i = 0; i < max_entropy_state; i++) {
+    ln_energy_weights[i] = -ln_dos[max_entropy_state];
   }
-  ln_dos[energy_levels-1] = ln_dos[energy_levels-2];
-  for (int i = 0; i < energy_levels; i++) {
+  for (int i = max_entropy_state; i <= min_important_energy; i++) {
     ln_energy_weights[i] = -ln_dos[i];
+  }
+  for (int i = min_important_energy+1; i < energy_levels; i++) {
+    ln_energy_weights[i] = -max(-ln_energy_weights[i-1] - 1.0/min_T, ln_dos[i]);
   }
   delete[] ln_dos;
 }
@@ -1449,6 +1450,12 @@ void sw_simulation::write_header(FILE *f) const {
   fprintf(f, "# total moves: %ld\n", moves.total);
   fprintf(f, "# acceptance rate: %g\n", double(moves.working)/moves.total);
 
+  fprintf(f, "\n");
+
+  double *ln_dos = compute_ln_dos(transition_dos);
+  fprintf(f, "# converged state: %d\n", converged_to_state());
+  fprintf(f, "# converged temperature: %g\n", converged_to_temperature(ln_dos));
+  delete[] ln_dos;
   fprintf(f, "\n");
 }
 
