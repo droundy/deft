@@ -69,7 +69,6 @@ def plot_walls(reduced_density, temps):
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
-# savefig('figs/hard-walls.pdf')
 figure(figsize=(9,14.5))
 
 subplot(2, 1, 1)
@@ -79,6 +78,5 @@ subplot(2, 1, 2)
 plot_walls(100, [10.0, 5.0, 2.5]) # 1.0 could work?
 
 plt.tight_layout();
-outputname = 'figs/hard-walls.pdf'
-savefig(outputname, bbox_inches=0)
+savefig('figs/hard-walls.pdf', bbox_inches=0)
 print('figs/hard-walls.pdf')

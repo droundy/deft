@@ -39,18 +39,11 @@ def plot_sw(ff, temps):
     xlim(-0.2, 4)
     #ylim(0, 4)
 
-    outputname = 'figs/radial-sw-%02d.pdf' % (ff)
-    savefig(outputname, bbox_inches=0)
-    print('figs/radial-sw-%02d.pdf' % (ff))
-
-
-# input: ['data/radial-sw-%.2f-%.2f-%.2f.dat' % (temp, 1.3, 0.2) for temp in [10.0, 5.0, 3.0]]
-# savefig('figs/radial-sw-20.pdf')
 plot_sw(20, [10.0, 5.0, 3.0])
+plt.savefig('figs/radial-sw-20.pdf')
 
-# input: ['data/radial-sw-%.2f-%.2f-%.2f.dat' % (temp, 1.3, 0.3) for temp in [10.0, 5.0, 3.0]]
-# savefig('figs/radial-sw-30.pdf')
 plot_sw(30, [10.0, 5.0, 3.0])
+plt.savefig('figs/radial-sw-30.pdf')
 
 figure()
 #col=matplotlib.cm.get_cmap('spring')
