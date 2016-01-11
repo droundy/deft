@@ -1,74 +1,95 @@
 #!/usr/bin/python2
+from __future__ import division
 import matplotlib, sys
 if 'show' not in sys.argv:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy, time, os
 
-matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
 import readandcompute
 
-ww = float(sys.argv[1])
-#arg ww = [1.3]
-ffs = eval(sys.argv[2])
-#arg ffs = [[0.1,0.2,0.3]]
-lenx = float(sys.argv[3])
-#arg lenx = [50,100]
-lenyz = float(sys.argv[4])
-#arg lenyz = [10]
+subdirname = sys.argv[1]
+filename = sys.argv[2]
+suffixes = sys.argv[3:]
 
-moviedir = 'figs/movies/ww%.2f-%gx%g' % (ww,lenx,lenyz)
+print sys.argv
+
+moviedir = 'figs/movies/%s/%s-hist' % (subdirname, filename)
 os.system('rm -rf ' + moviedir)
 assert not os.system('mkdir -p ' + moviedir)
 
 fig, ax = plt.subplots()
 
-all_colors = ['b', 'r', 'g', 'k']
-colors = {}
-for i in xrange(len(ffs)):
-    colors[ffs[i]] = all_colors[i]
+mine = 1e100
+maxe = -1e100
+maxhist = 0
+numframes = 0
 
-sleeptime = 30*60 # 30 minutes
+dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
+colors = ['k', 'b', 'r', 'g']
 
 for frame in xrange(100000):
-    plt.cla()
-    for ff in ffs:
-        basename = 'data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
-        e, diff = readandcompute.e_diffusion_estimate(basename)
-
-        N = readandcompute.read_N(basename);
+    for suffix in suffixes:
+        basename = dataformat % (suffix, frame)
         try:
-            ax.axvline(-readandcompute.max_entropy_state(basename)/N, color=colors[ff], linestyle=':')
-            ax.axvline(-readandcompute.min_important_energy(basename)/N, color=colors[ff], linestyle=':')
+            e, hist = readandcompute.e_and_total_init_histogram(basename)
+        except:
+            break
+        numframes = frame+1
+        maxhist = max(maxhist, hist.max())
+        mine = min(mine, e.min() - 20)
+        maxe = max(maxe, e.max())
+    if numframes % 25 == 0:
+        print 'counting %dth frame' % numframes
 
-            T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
-            ax.plot(u/N, T, 'k-')
-            ax.set_ylim(0, 3)
-            ax.axhline(minT, color='r', linestyle=':')
+print 'mine', mine
+print 'maxe', maxe
+print 'maxhist', maxhist
 
-            e, hist = readandcompute.e_hist(basename)
-            iterations = readandcompute.iterations(basename)
-            ax.plot(e/N, 2.5*hist/hist.max(), colors[ff]+'-', label=r'$\eta = %g$, %e iterations' % (ff, iterations))
+skipby = 1
+if numframes > 200:
+    skipby = numframes // 200
+    numframes = numframes // skipby
+    print 'only showing 1/%d of the frames' % skipby
+
+print 'numframes', numframes
+
+for frame in xrange(numframes):
+    if frame % 10 == 0:
+        print 'working on frame %d/%d' % (frame, numframes)
+    plt.cla()
+
+    for suffix_index in range(len(suffixes)):
+        suffix = suffixes[suffix_index]
+        basename = dataformat % (suffix, frame*skipby)
+
+        try:
+            e, hist = readandcompute.e_and_total_init_histogram(basename)
+            ax.plot(e, hist, colors[suffix_index]+'-')
+            datname = basename+'-transitions.dat'
+            min_T = readandcompute.minT(datname)
+            ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
+            min_important_energy = readandcompute.min_important_energy(basename)
+            ax.axvline(-min_important_energy, color='b', linestyle=':')
+            ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
         except:
             pass
 
-        e, init_hist = readandcompute.e_and_total_init_histogram(basename)
-        ax.plot(e, 2.5*init_hist/init_hist.max(), colors[ff]+'--',
-                label=r'$\eta = %g$, %e initialization iterations' % (ff, sum(init_hist)))
+    ax.set_xlabel(r'$E$')
+    ax.set_ylim(0, maxhist)
+    # ax.set_xlim(-5, -0.3)
+    ax.set_xlim(mine, maxe)
+    ax.set_ylabel(r'histogram')
+    # ax.legend(loc='best').get_frame().set_alpha(0.25)
+    plt.title(r'lv movie from %s ($T_{min} = %g$)' % (filename, min_T))
 
-    ax.set_xlabel(r'$E/N$')
-    ax.set_ylim(ymin=0)
-    ax.set_ylabel(r'$T$')
-    ax.legend(loc='best').get_frame().set_alpha(0.25)
-    plt.title(r'Histogram and internal energy movie with $\lambda = %g$' % (ww))
-
-    fname = '%s/frame%03d.png' % (moviedir, frame)
+    fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
-    os.system("convert  -delay 50 %s/frame*.png %s/movie.gif" % (moviedir, moviedir)) # make the movie
-    os.system("avconv -y -r 10 -i %s/frame%03d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
 
-    time.sleep(sleeptime)
+duration = 10.0 # seconds
 
-plt.show()
+avconv = "avconv -y -r %g -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (numframes/duration, moviedir, moviedir)
+os.system(avconv) # make the movie
+print(avconv)

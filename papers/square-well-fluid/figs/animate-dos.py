@@ -53,6 +53,12 @@ print 'mine', mine
 print 'maxe', maxe
 print 'minlndos', minlndos
 print 'maxlndos', maxlndos
+
+skipby = 1
+if numframes > 200:
+    skipby = numframes // 200
+    numframes = numframes // skipby
+    print 'only showing 1/%d of the frames' % skipby
 print 'numframes', numframes
 
 for frame in xrange(numframes):
