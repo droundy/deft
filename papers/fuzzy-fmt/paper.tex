@@ -34,13 +34,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-  We demonstrate a easy-to-implement variation on the Soft Fundamental
+  We introduce an easy-to-implement variation on the Soft Fundamental
   Measure Theory (SFMT) approach for the Weeks-Chandler-Anderson (WCA)
   fluid.  This approach is readily extensible to other soft repulsive
   potentials.  We demonstrate that this approach is comparable in
-  accuracy to the Barker-Henderson approach applied to the WCA fluid,
-  combined with Fundamental Measure Theory for the hard-sphere
-  fluid.
+  accuracy to the Barker-Henderson approach combined with the White
+  Bear density functional for the hard-sphere fluid.
 \end{abstract}
 
 \maketitle
@@ -56,14 +55,14 @@ dependent~\cite{rowlinson1964statistical, barker1967perturbation,
   andersen1971relationship}.  These works cemented the hard-sphere
 model as the reference system of choice for the theory of
 liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate}.  One reason for the wide use of the
-hard-sphere fluid hard sphere fluid as a reference system is that it
-is widely studied and well understood, not only for the homogeneous
+  lafitte2013accurate}.  The hard-sphere fluid hard sphere fluid is
+widely studied and well understood, not only for the homogeneous
 fluid~\cite{carnahan1969equation}, but also in the more challenging
 case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
   roth2002whitebear}.  However, the hard-sphere fluid remains a
-non-physical model, which is also numerically inconvenient in its use
-of delta functions.
+non-physical model, which can also be numerically inconvenient due its
+discontinuous potential, and the requirement for delta functions in
+computing weighted densities.
 
 Fundamental Measure Theory~(FMT) is a classical density functional
 theory for the free energy of the hard-sphere fluid developed by
@@ -71,17 +70,15 @@ Rosenfeld~\cite{rosenfeld1989}.  Due to its combination of
 computational efficiency with accuracy, FMT has since been used as the
 basis for a wide variety of classical density
 functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
-  marechal2013density, hughes2013classical, krebs2014improved},
-including those in the previous two chapters.
+  marechal2013density, hughes2013classical, krebs2014improved}.
 %
 In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
 (SFMT)~\cite{schmidt1999density}, which directly treats soft repulsive
-potentials in a framework based on the highly successful FMT developed
-by Rosenfeld~\cite{rosenfeld1989}.  SFMT has been used to describe the
-behavior of a star polymer in solution~\cite{schmidt2000density,
-  groh2001density, kim2001adsorption, sweatman2002fundamental}, as
-well as repulsive potentials applicable to
-atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
+potentials in a framework based on the highly successful FMT.  SFMT
+has been used to describe the behavior of a star polymer in
+solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
+  sweatman2002fundamental}, as well as repulsive potentials applicable
+to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 
 %% In his 2010 review of FMT, Roth states that the most important future
 %% developments in equilibrium DFT will involve treating soft repulsions
@@ -113,11 +110,9 @@ k_BT/\epsilon$.
 
 \subsection{Soft Fundamental Measure Theory}
 
-Soft fundamental measure theory (SFMT) is a generalization of FMT to
-soft interactions developed by Schmidt~\cite{schmidt1999density}.
-Like Rosenfeld's FMT~\cite{rosenfeld1989}, the excess free energy is
-written as an integral of functions of a set of weighted densities
-known as \emph{fundamental measures}:
+The excess free energy of SFMT, like that of Rosenfeld's
+FMT~\cite{rosenfeld1989}, is written as an integral of functions of a
+set of weighted densities known as \emph{fundamental measures}:
 \begin{equation}
 A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; , \label{eq:sfmt-excess-free}
@@ -141,7 +136,7 @@ are defined as convolutions with weight functions similar to those of
 hard-sphere FMT. Like hard-sphere fundamental measures, the new weight
 functions are constructed so as to deconvolve the Mayer function,
 \begin{equation}
-  f(r) = \exp (-\beta V(r)) - 1
+  f(r) = e^{-\beta V(r)} - 1
 \end{equation}
 where $\beta = 1/k_BT$, which in the case of hard spheres is just a
 step function.  The weighting functions are related by
@@ -158,10 +153,10 @@ step function.  The weighting functions are related by
    w_3(r) = \int_{r}^{\infty} w_2(r') dr',
   \label{eq:n-3}
 \end{equation}
-where the integral in Eq.~\ref{eq:n-3} is a one-dimensional integral
-over radius.
+where we note that the integral in Eq.~\ref{eq:n-3} is a
+one-dimensional integral over radius.
 
-Schmidt proves that SFMT reproduces the exact functional in
+Schmidt proved that SFMT reproduces the exact functional in
 the low-density limit, provided the weighting function that defines
 $n_2$ is related to the slope of the Mayer function by a convolution
 with itself
@@ -175,7 +170,8 @@ reason: they are needed in order to ensure the correct low-density
 behavior.  Equation~\ref{eq:mayerandw2} is the challenge point for
 SFMT: deconvolving the Mayer $f$ function for a realistic potential is
 challenging, which has limited the number of applications of this
-theory to simple liquids.
+theory to liquids in which the potential energy of interaction is
+proportional to the temperature.
 
 There are two options for constructing a theory directly using SFMT:
 either one must choose a pair potential and deconvolve the Mayer
