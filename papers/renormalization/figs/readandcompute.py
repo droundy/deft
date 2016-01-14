@@ -4,8 +4,7 @@ import math
 import string
 import glob
 
-def T_u_F_cv_s_minT(fbase):
-    max_T = 1.4
+def T_u_F_cv_s_minT(fbase, max_T):
     T_bins = 1e3
     dT = max_T/T_bins
     m = .25   # Need an appropriate scale for this - look at size of epsilon and sigma
@@ -54,7 +53,7 @@ def T_u_F_cv_s_minT(fbase):
     return T_range, U, F, CV, S, min_T
 
 
-def u_F_cv_s_minT(fbase, T):
+def u_F_cv_s_minT(fbase, T, max_T):
     m = .25   # Need an appropriate scale for this - look at size of epsilon and sigma
 
     min_T = minT(fbase)
@@ -72,14 +71,14 @@ def u_F_cv_s_minT(fbase, T):
 
     Z_inf = sum(np.exp(ln_dos - ln_dos.max()))
     S_inf = sum(-np.exp(ln_dos - ln_dos.max())*(-ln_dos.max() - np.log(Z_inf))) / Z_inf
-    f_abs = absolute_f(fbase)
 
     ln_dos_boltz = ln_dos - energy/T
     dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
     Z = sum(dos_boltz)
     U = sum(energy*dos_boltz)/Z
 
-    F = T*np.log(Z) - f_abs
+    F_infinte = -max_T*np.log(Z)
+    F = -T*np.log(Z) - relative_F_shift(fbase, F_infinite)
     # S = \sum_i^{microstates} P_i \log P_i
     # S = \sum_E D(E) e^{-\beta E} \log\left(\frac{e^{-\beta E}}{\sum_{E'} D(E') e^{-\beta E'}}\right)
     S = sum(-dos_boltz*(-energy/T - ln_dos_boltz.max() \
@@ -91,7 +90,7 @@ def u_F_cv_s_minT(fbase, T):
     CV = sum((energy/T)**2*dos_boltz)/Z - (sum(energy/T*dos_boltz)/Z)**2
     return U, F, CV, S, min_T
 
-def eta_u_F_cv_s_minT(dbase, T):
+def eta_u_F_cv_s_minT(dbase, T, max_T):
     U = []
     F = []
     cv = []
@@ -104,6 +103,7 @@ def eta_u_F_cv_s_minT(dbase, T):
             U0, F0, cv0, s0, minT0 = u_F_cv_s_minT(fbase, T)
             U.append(U0)
             F.append(F0)
+            map(lambda F: F - relative_F_shift(fbase, F))  #make each F absolute
             cv.append(cv0)
             s.append(s0)
             minT = max(minT, minT0)
@@ -115,6 +115,11 @@ def eta_u_F_cv_s_minT(dbase, T):
             pass
     return np.array(eta), np.array(U), F, cv, s, minT
 
+def relative_F_shift(fbase,F):
+    # find the difference between absolute and MC simulations
+    return np.abs(F - absolute_f(fbase))
+
+
 def absolute_f(fbase):
     # find the partition function yielding the absolute free energy  using 'absolute/' data
     fbase = fbase[:-4]+ '/absolute/'
@@ -123,7 +128,6 @@ def absolute_f(fbase):
     total = 0
     ratios = np.zeros(num_files)
     absolute_f = 0
-    
    
     print("Num_files is: %s" % num_files)
     for j in xrange(0,num_files):
