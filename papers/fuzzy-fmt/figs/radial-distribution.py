@@ -56,7 +56,6 @@ def plot_radial(reduced_density, temps):
 # input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, 1.0) for temp in [10.0, 5.0, 2.5]]
-# savefig('figs/radial-distribution.pdf')
 figure(figsize=(9,14.5))
 subplot(2, 1, 1)
 plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
@@ -65,7 +64,6 @@ subplot(2, 1, 2)
 plot_radial(100, [10.0, 5.0, 2.5])
 
 plt.tight_layout();
-outputname = 'figs/radial-distribution.pdf'
-savefig(outputname, bbox_inches=0)
+savefig('figs/radial-distribution.pdf', bbox_inches=0)
 print('figs/radial-distribution.pdf')
 

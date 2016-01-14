@@ -19,6 +19,17 @@ for paper in papers:
   print("> ../papers/"+paper+"/.figs.fac")
   print("c .pyc\n")
 
+for project in ['thesis-roth']:
+  print("| python3 latex.py papers/"+project+"/project.tex")
+  print("< config.py")
+  print("> ../papers/"+project+"/.project.tex.fac")
+  print("c .pyc\n")
+
+  print("| cd ../papers/%s && python2 ../../fac/figs.py figs/*.py > .figs.fac"
+        % project)
+  print("> ../papers/"+project+"/.figs.fac")
+  print("c .pyc\n")
+
 other_texs = """
    histogram/thesis/thesis.tex
 """.split()

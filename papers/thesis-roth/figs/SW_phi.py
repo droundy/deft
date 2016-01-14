@@ -9,7 +9,7 @@ import RG
 
 eta_conv = SW.sigma**3*plt.pi/6
 
-def plotphi(T, npart, filename, nv=0, nl=0, phi_min=0, phi_max=0):
+def plotphi(T, npart, nv=0, nl=0, phi_min=0, phi_max=0):
   n = plt.linspace(1e-8,0.2,20000)
   plt.figure()
   plt.plot(n*eta_conv,SW.phi(T,n,npart),'g-',label='SW')
@@ -31,40 +31,37 @@ def plotphi(T, npart, filename, nv=0, nl=0, phi_min=0, phi_max=0):
   if phi_min != 0 or phi_max != 0:
     plt.ylim(phi_min, phi_max)
 
-  plt.savefig(filename)
-
-
 ### Low temp ###
 
-#savefig('figs/SW-phi-lowT.pdf')
-plotphi(0.8, 0.04, 'figs/SW-phi-lowT.pdf')
+plotphi(0.8, 0.04)
+plt.savefig('figs/SW-phi-lowT.pdf')
 
 ### High Temp ###
 
-#savefig('figs/SW-phi-highT.pdf')
-plotphi(1.32, 0.0360850913603, 'figs/SW-phi-highT.pdf')
+plotphi(1.32, 0.0360850913603)
+plt.savefig('figs/SW-phi-highT.pdf')
 
 # Finding mu!
 
-#savefig('figs/fitting-step0-noslope.pdf')
-plotphi(0.8005709375, 0.0415310056528, 'figs/fitting-step0-noslope.pdf', 0, 0,
+plotphi(0.8005709375, 0.0415310056528, 0, 0,
         -0.002, 0.029)
+plt.savefig('figs/fitting-step0-noslope.pdf')
 
-#savefig('figs/fitting-step0.pdf')
-plotphi(0.8005709375, 0.0415310056528, 'figs/fitting-step0.pdf', 0.000846555248303, 0.088830194773,
+plotphi(0.8005709375, 0.0415310056528, 0.000846555248303, 0.088830194773,
         -0.002, 0.029)
+plt.savefig('figs/fitting-step0.pdf')
 
-#savefig('figs/fitting-step1-unzoomed.pdf')
-plotphi(0.8005709375, 0.0400810433452, 'figs/fitting-step1-unzoomed.pdf', 0.000922047538644, 0.0894990434726,
+plotphi(0.8005709375, 0.0400810433452, 0.000922047538644, 0.0894990434726,
         -0.002, 0.029)
+plt.savefig('figs/fitting-step1-unzoomed.pdf')
 
-#savefig('figs/fitting-step1.pdf')
-plotphi(0.8005709375, 0.0400810433452, 'figs/fitting-step1.pdf', 0.000922047538644, 0.0894990434726,
+plotphi(0.8005709375, 0.0400810433452, 0.000922047538644, 0.0894990434726,
         -0.0008, -0.0005)
+plt.savefig('figs/fitting-step1.pdf')
 
-#savefig('figs/fitting-step2.pdf')
-plotphi(0.8005709375, 0.0400859280435, 'figs/fitting-step2.pdf', 0.000921779389983, 0.0894968306258,
+plotphi(0.8005709375, 0.0400859280435, 0.000921779389983, 0.0894968306258,
         -0.0008, -0.0005)
+plt.savefig('figs/fitting-step2.pdf')
 
 
 # T = 0.8005709375
