@@ -36,7 +36,10 @@ for frame in xrange(100000):
         basename = dataformat % (suffix, frame)
         try:
             e, lndos = readandcompute.e_lndos(basename)
+        except (KeyboardInterrupt, SystemExit):
+            raise
         except:
+            # print "Failure in readandcompute.e_lndos:", sys.exc_info()[0]
             break
         numframes = frame+1
         minlndos = min(minlndos, lndos.min())
@@ -44,7 +47,10 @@ for frame in xrange(100000):
 
         try:
             e, hist = readandcompute.e_and_total_init_histogram(basename)
+        except (KeyboardInterrupt, SystemExit):
+            raise
         except:
+            # print "Failure in readandcompute.e_and_total_init_histogram:", sys.exc_info()[0]
             break
         mine = min(mine, e.min() - 20)
         maxe = max(maxe, e.max())
@@ -68,11 +74,11 @@ for frame in xrange(numframes):
 
     for suffix_index in range(len(suffixes)):
         suffix = suffixes[suffix_index]
-        basename = dataformat % (suffix, frame)
+        basename = dataformat % (suffix, frame*skipby)
 
         try:
             e, lndos = readandcompute.e_lndos(basename)
-            ax.plot(e, lndos, colors[suffix_index]+'-')
+            ax.plot(e, lndos, colors[suffix_index]+'-', label=suffix)
             datname = basename+'-lndos.dat'
             min_T = readandcompute.minT(datname)
             ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
@@ -82,6 +88,8 @@ for frame in xrange(numframes):
             ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
             e, lnw = readandcompute.e_lnw(basename)
             ax.plot(e, -lnw, 'r:')
+        except (KeyboardInterrupt, SystemExit):
+            raise
         except:
             pass
 
@@ -92,6 +100,7 @@ for frame in xrange(numframes):
     ax.set_ylabel(r'$\ln DOS$')
     # ax.legend(loc='best').get_frame().set_alpha(0.25)
     plt.title(r'lv movie from %s ($T_{min} = %g$)' % (filename, min_T))
+    plt.legend(loc='lower right')
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)

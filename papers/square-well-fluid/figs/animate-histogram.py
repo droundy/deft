@@ -35,6 +35,8 @@ for frame in xrange(100000):
         basename = dataformat % (suffix, frame)
         try:
             e, hist = readandcompute.e_and_total_init_histogram(basename)
+        except (KeyboardInterrupt, SystemExit):
+            raise
         except:
             break
         numframes = frame+1
@@ -67,13 +69,15 @@ for frame in xrange(numframes):
 
         try:
             e, hist = readandcompute.e_and_total_init_histogram(basename)
-            ax.plot(e, hist, colors[suffix_index]+'-')
+            ax.plot(e, hist, colors[suffix_index]+'-', label=suffix)
             datname = basename+'-transitions.dat'
             min_T = readandcompute.minT(datname)
             ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
             min_important_energy = readandcompute.min_important_energy(basename)
             ax.axvline(-min_important_energy, color='b', linestyle=':')
             ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
+        except (KeyboardInterrupt, SystemExit):
+            raise
         except:
             pass
 
@@ -84,6 +88,7 @@ for frame in xrange(numframes):
     ax.set_ylabel(r'histogram')
     # ax.legend(loc='best').get_frame().set_alpha(0.25)
     plt.title(r'lv movie from %s ($T_{min} = %g$)' % (filename, min_T))
+    plt.legend(loc='best')
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
