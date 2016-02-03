@@ -20,7 +20,7 @@ L_i = L*(2**i)
 Ns = eval(sys.argv[4])
 #arg Ns = [range(2,10)]
 
-print("\n----------------------SQUARE WELL MONTE CARLO------------------------------\n\n")
+print("\n----------------------LIQUID VAPOR MONTE CARLO------------------------------\n\n")
 
 Overwrite = False
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
@@ -37,31 +37,29 @@ for N in Ns:
     print('mkdir -p ' + dirname)
     os.system('mkdir -p '+ dirname)
     #filename = 'ww%4.2f-L%04.2f-N%03d' % ( ww, L, N)
-    filename = 'data'
+    filename = 'lv-data'
     iterations = 1000000
 
     output_file_path = dirname+'/'+filename+'-E.dat'
     if not os.path.isfile(output_file_path):
         print "Was checking for", output_file_path
         if have_srun:
-            cmd = 'srun -J ww%4.2f-L%04.2f/i%01d/N%03d' % (ww,L,i,N)
+            cmd = 'srun -J lv-ww%4.2f-L%04.2f/i%01d/N%03d' % (ww,L,i,N)
         else:
             cmd = ''
         cmd += ' nice -19' # don't hog the CPU
-        cmd += ' ../../../square-well-monte-carlo'
+        cmd += ' ../../../liquid-vapor-monte-carlo'
         cmd += ' --filename %s' % filename
         cmd += ' --N %d' % N
-        cmd += ' --min_T 0.1'
-        cmd += ' --data_dir %s' % dirname
-        cmd += ' --min_samples 10000'
-        cmd += ' --pessimistic_sampling'
-        cmd += ' --golden'
+        cmd += ' --min-T 0.5'
+        cmd += ' --dir %s' % dirname
+        cmd += ' --min-samples 10000'
+        cmd += ' --tmi'
         cmd += ' --ww %g' % ww
         cmd += ' --iterations %d' %iterations
-        cmd += ' --round_trips %d' % 1000
         cmd += ' --lenx %g --leny %g --lenz %g' % (L_i,L_i,L_i)
         cmd += ' > %s/%s.out 2>&1 &' % (dirname, filename)
-        # cmd = ("../../../square-well-monte-carlo --filename %s --N %d --min_T 0.1 --min_samples 10000 --golden --ww %g --iterations %d --lenx %g --leny %g --lenz %g --data_dir .  > %s.out 2>&1 &" %
+        # cmd = ("../../../liquid-vapor-monte-carlo --filename %s --N %d --min_T 0.1 --min_samples 10000 --golden --ww %g --iterations %d --lenx %g --leny %g --lenz %g --data_dir .  > %s.out 2>&1 &" %
         #        (filename, N, ww, iterations, L, L, L, filename))
         print(cmd)
         os.system(cmd)
