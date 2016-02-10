@@ -37,7 +37,7 @@ max_T = Ts[-1]
 # Fixed T for plots
 
 
-styles = ['ro','bo','g-','c-']
+styles = ['r-','b-','g-','c-']
 
 plot_all = plot_F_T = plot_F_eta = False
 
