@@ -19,23 +19,28 @@ def dos_energy_ns(dbase, i):
             pass
     return ln_dos, energy
 
-def F_hardsphere(dbase, i):
+def F_hardsphere(dbase, N):
     fbase = dbase + '/absolute/'
-    Fs = []  # initialize correctly or else use append....
-    valid = [] # maybe use a list or class... these aren't square, so arrays seem a bad iead (lots of zeros) 
-    failed = [] # maybe these don't even need to be stored?
-    ratios = []
-    Ns = []
+    F = 0
     for j in range(2, 200):
-        fname = fbase + '%05d' % (j)
+        valid = 0
+        failed = 0
+        ratios = 0
+        fname = fbase + '%05d' % (j)            
+        # if file exists, load the text from the file
         if os.path.isfile(fname+'.dat'):
-            # if file exists, load the text from the file
-            pass
-        for k in range(0,len(valid)):
-            # compute absolute Fs using read in data. Fs indexed by [N]
-            ratios[k,j] = failed[k,j] / valid[k,j]   # indexed by [filenumber, N]
-            Fs[j] += -np.log(ratios[k,j])/ Ns[j]
-            
+            #open file and read in total valid and failed checks of small cell
+            with (fname+'.dat') open as file:
+                for line in file:
+                    if 'valid small checks:' in line:
+                        valid = line.split()[-1]
+                    if 'failed small checks:' in line:
+                        failed = line.split()[-1]
+            # compute absolute F using read in data.
+            ratio = failed / valid 
+            F += -np.log(ratio)/ N
+    return F
+
 def U_F_S_ns(dbase, i):
     ln_dos, energy = dos_energy_ns(dbase, i)
     Ns = eval(ln_dos.keys())
@@ -45,15 +50,18 @@ def U_F_S_ns(dbase, i):
     
     for N in set(Ns):
         j=0
+        F_HS = F_hardsphere(dbase, N)
         for T in set(T_range):
             k=0
             ln_dos_boltz = ln_dos[N] - energy[N]/T
-            dos_boltz = np/exp(ln_dos_boltz - ln_dos_boltz.max())
+            dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max()) #overflow/underflow issues, need to keep lndos reasonable
             Z[k,j] = sum(dos_boltz)  #indexed by [T, N]
             
             U[k,j] = sum[energy[N]*dos_boltz]/Z[k,j]
-            F[k,j] = # need to map the [:,N] elements with absolute calculations... also 
-            
+            F[k,j] = 
+
+            # make absolute
+    return U, F, S        
     
     
     
