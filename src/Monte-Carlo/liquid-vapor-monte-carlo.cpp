@@ -795,7 +795,7 @@ int main(int argc, const char *argv[]) {
         fprintf(dos_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
         fprintf(dos_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
 
-        fprintf(dos_out, "# energy   counts\n");
+        fprintf(dos_out, "# energy   ln_dos\n");
         for (int i = 0; i < sw.energy_levels; i++) {
           fprintf(dos_out, "%d  %lg\n",i,ln_dos[i]);
         }
