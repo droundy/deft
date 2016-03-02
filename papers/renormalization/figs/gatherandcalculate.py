@@ -10,7 +10,7 @@ def dos_energy_ns(dbase, i):
     energy = {}
     ln_dos_hist = [] # need to initialize this correctly; how many elements?
     for N in range(2,100): #maybe require N as an argument?
-        fbase = '%s/%01d/N%03d/lv-data-dos.dat' % (dbase, i, N) 
+        fbase = '%s/%01d/N%03d/lv-data-dos.dat' % (dbase, i, N)
         if os.path.isfile(fbase+"-dos.dat"):
             ln_dos_hist = np.loadtext(fbase, ndmin=2)
             ln_dos[N] = ln_dos_hist[:,1]
@@ -23,11 +23,11 @@ def F_hardsphere(dbase, N):
     fbase = dbase + '/absolute/'
     F = 0
     # loop over files in the ./absolute/ directory
-    for j in range(0, 400): 
+    for j in range(0, 400):
         valid = 0
         total = 0
         ratio = 0
-        fname = fbase + '%05d' % (j)            
+        fname = fbase + '%05d' % (j)
         # if file exists, load the text from the file
         if os.path.isfile(fname+'.dat'):
             #open file and read in total valid and failed checks of small cell
@@ -65,21 +65,16 @@ def U_F_S_ns(dbase, i):
             # make absolute by equating entropy at T=inf. note that F_{ex,HS} \prop  S_{ex,HS}
             # need to take ln of sum of e^{ln_dos} to find number of states
             
-            S_SW = np.log(sum(np.exp(ln_dos[N]))) + 3/2*N # U(T) = 3/2NkT probably 
+            S_SW = np.log(sum(np.exp(ln_dos[N]))) + 3/2*N # U(T) = 3/2NkT probably
             S_HS = F_HS
             # F_{ex,HS} = -TS_HS; F_SW = U - TS_{ex,SW}
             # lim_{T \rightarrow \infty} U_{ex, SW} = constant; \therefore F_{ex,SW}(T=\infty) = -TS_{ex, SW }
             
             S_SW -= (S_SW - S_HS)
             F_SW = -T*(S_SW + 3/2*N)
-            # Now, F_{ex, SW} is the absolute free energy required for the configuration. So, make calculated F absolute!   
+            # Now, F_{ex, SW} is the absolute free energy required for the configuration. So, make calculated F absolute!
             F[k,j] -= (F[k,j] - F_SW)
 
             k += 1
         j += 1
-    return U, F, S        
-    
-    
-    
-            
-    
+    return U, F, S
