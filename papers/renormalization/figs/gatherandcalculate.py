@@ -1,11 +1,11 @@
 #!/usr/bin/python2
+from __future__ import division
 import numpy as np
 import math
 import string
 import os
 
-def dos_energy_ns(dbase, i):
-    # read in files and compute U, F, and S given a directory and recursion level
+def dos_energy(dbase, i):
     ln_dos = {}
     energy = {}
     ln_dos_hist = [] # need to initialize this correctly; how many elements?
@@ -44,28 +44,28 @@ def F_hardsphere(dbase, N):
 
 def U_F_S_ns(dbase, i):
     # Main function; take input of data directory and return all possible quantities
-    ln_dos, energy = dos_energy_ns(dbase, i)
+    ln_dos, energy = dos_energy(dbase, i)
     Ns = eval(ln_dos.keys())
     T_bins, dT, T_range = 1e3, 1/T_bins, np.arange(dT, 1, dT) # change Tmax # Generate array of temperatures
     Z = np.zeros(len(T_range), len(Ns))
     Zinf, U, F, S = (np.zeros_like(Z) for i in range(4))
     
-    for N in set(Ns): # Set iteration readability is great, but defining separate index seems sloppy...
-        j=0
+    for j in range(len(Ns)): # Set iteration readability is great, but defining separate index seems sloppy...
+        N = Ns[j]
         F_HS = F_hardsphere(dbase, N)
-        for T in set(T_range):
+        for k in range(len(T_range)):
             # all computed quantities are excess, with the exception of final entropy (includes ideal gas)
-            k=0
+            T = T_range[k]
             ln_dos_boltz = ln_dos[N] - energy[N]/T
             dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max()) #overflow/underflow issues, need to keep lndos reasonable
             Z[k,j] = sum(dos_boltz)  #indexed by [T, N]
-            U[k,j] = sum[energy[N]*dos_boltz]/Z[k,j]
-            F[k,j] = -T*np.log(Z[k,j])
+            U[k,j] = sum(energy[N]*dos_boltz)/Z[k,j]
+            F[k,j] = -T*np.log(Z[k,j]) fixme need max here? also ideal gas?
 
             # make absolute by equating entropy at T=inf. note that F_{ex,HS} \prop  S_{ex,HS}
             # need to take ln of sum of e^{ln_dos} to find number of states
             
-            S_SW = np.log(sum(np.exp(ln_dos[N]))) + 3/2*N # U(T) = 3/2NkT probably
+            S_SW = np.log(sum(np.exp(ln_dos[N]))) fixme deal with max of ln_dos
             S_HS = F_HS
             # F_{ex,HS} = -TS_HS; F_SW = U - TS_{ex,SW}
             # lim_{T \rightarrow \infty} U_{ex, SW} = constant; \therefore F_{ex,SW}(T=\infty) = -TS_{ex, SW }
@@ -75,6 +75,4 @@ def U_F_S_ns(dbase, i):
             # Now, F_{ex, SW} is the absolute free energy required for the configuration. So, make calculated F absolute!
             F[k,j] -= (F[k,j] - F_SW)
 
-            k += 1
-        j += 1
     return U, F, S
