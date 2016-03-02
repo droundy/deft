@@ -188,8 +188,9 @@ between molecules.
 
 In this paper, we will make use of the \emph{error function model} (or
 \emph{erf model}) introduced by Schmidt in
-Ref.~\citenum{schmidt2000fluid}.  The erf model corresponds to a
-Gaussian form for the weighting function $w_2$:
+Ref.~\citenum{schmidt2000fluid}, which is a analytically simple
+functional form.  The erf model corresponds to a Gaussian form for the
+weighting function $w_2$:
 \begin{align}
   w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}}
   \label{eq:gaussianw2}
@@ -208,10 +209,11 @@ potential:
 The erf potential is shown in Fig.~\ref{fig:potential-plot}, and the
 first derivative of the Mayer $f$ function corresponding to this
 potential is shown in Fig.~\ref{fig:w2-comparison}.  As is evident
-from Eq.~\ref{eq:Verf}, this simple functional relationship for $w_2$
-only holds for one chosen temperature.  At other temperatures, the
-same potential leads to an entirely different form for $f$ and $w_2$,
-which is not analytically tractable.
+from Eq.~\ref{eq:Verf}, if the potential energy of interaction is
+temperature-independent, then this simple form for $w_2$ can only hold
+for one temperature.  At other temperatures, the same potential leads
+to an entirely different form for $f$ and $w_2$, which is not
+analytically tractable.
 
 \subsection{Barker-Henderson hard sphere}
 
@@ -229,9 +231,9 @@ We utilize this variable diameter with the White Bear FMT free energy
 functional for the hard sphere fluid~\cite{roth2002whitebear} as a
 comparison for the SFMT presented in this paper.
 
-We use the White Bear version of the Fundamental-Measure Theory~(FMT)
-functional~\cite{roth2002whitebear}, which describes the excess free
-energy of an inhomogeneous hard-sphere fluid.  This functional differs
+The White Bear version of the Fundamental-Measure Theory~(FMT)
+functional~\cite{roth2002whitebear}, describes the excess free energy
+of an \emph{inhomogeneous} hard-sphere fluid.  This functional differs
 from the equations of SFMT presented in
 Equations~\ref{eq:sfmt-excess-free}-\ref{eq:n-3} only in replacing
 Eq.~\ref{eq:sfmt-phi3} with the following equation:
@@ -243,13 +245,15 @@ Eq.~\ref{eq:sfmt-phi3} with the following equation:
 } ,
 \end{align}
 which causes the functional to reduce to the Carnahan-Starling free
-energy rather than scaled-particle theory for homogeneous systems.  We
-note that the weighting function $w_2$ for a hard-sphere system is
+energy rather than scaled-particle theory for homogeneous systems.  In
+addition, the weighting function $w_2$ for a hard-sphere system is
 given by the Dirac $\delta$ function:
 \begin{align}
   w_2(r) = \delta(r - R),
 \end{align}
-where $R$ is the hard-sphere radius.
+where $R$ is the hard-sphere radius.  The remaining weighting
+functions are derived from $w_2$ according to
+Eqs.~\ref{eq:n-0-1}-\ref{eq:n-3}, as in SFMT.
 
 \subsection{Soft FMT for the WCA fluid}
 
@@ -262,14 +266,14 @@ where $R$ is the hard-sphere radius.
 \label{fig:potential-plot}
 \end{figure}
 
-Our approach to model the WCA fluid is to approximate the WCA
-potential by using the erf potential with temperature-dependent
-parameters.  We select the parameters $\Xi$ and $\alpha$ to match the
-value and derivative of $\Verf(r)$ and $\Vwca(r)$ at the distance
-$\alpha$, corresponding to the maximum slope of the Mayer $f$
-function.  In essence, this is similar to the Barker-Henderson
-approach, in which a hard-sphere potential with temperature-dependent
-diameter is used to model a soft repulsive fluid.
+Our approach is to approximate the effect a soft repulsive potential
+(specifically the potential of the WCA fluid) by using the erf
+potential with temperature-dependent parameters.  We select the
+parameters $\Xi$ and $\alpha$ to match the value and derivative of
+$\Verf(r)$ and $\Vwca(r)$ at the distance $\alpha$, corresponding to
+the maximum slope of the Mayer $f$ function.  Thus, we are using the
+erf potential in the same way that the Barker-Henderson approach uses
+the hard-sphere potential to model a soft repulsive fluid.
 
 \begin{figure}
 \begin{center}
