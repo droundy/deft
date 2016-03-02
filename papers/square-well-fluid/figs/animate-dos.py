@@ -61,8 +61,9 @@ print 'minlndos', minlndos
 print 'maxlndos', maxlndos
 
 skipby = 1
-if numframes > 200:
-    skipby = numframes // 200
+maxframes = 200
+if numframes > maxframes:
+    skipby = numframes // maxframes
     numframes = numframes // skipby
     print 'only showing 1/%d of the frames' % skipby
 print 'numframes', numframes
