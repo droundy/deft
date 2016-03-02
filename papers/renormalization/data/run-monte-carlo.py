@@ -3,7 +3,7 @@
 from __future__ import division
 import os, numpy, sys
 
-assert(not os.system("fac ../../../square-well-monte-carlo"))
+assert(not os.system("fac ../../../liquid-vapor-monte-carlo"))
 
 i = eval(sys.argv[1])
 #RG recursion level
