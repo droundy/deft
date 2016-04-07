@@ -582,7 +582,7 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
 
-    if (time_to_save() || valid_runs == simulation_runs) {
+    if (time_to_save() || valid_runs > simulation_runs) {
       const clock_t now = clock();
       const double secs_done = double(now)/CLOCKS_PER_SEC;
       const int seconds = int(secs_done) % 60;
