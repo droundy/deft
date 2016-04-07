@@ -698,6 +698,12 @@ int sw_simulation::converged_to_state() const {
 bool sw_simulation::finished_initializing(bool be_verbose) {
   set_max_entropy_energy();
 
+  const clock_t now = clock();
+  if (max_time > 0 && now/CLOCKS_PER_SEC > start_time + max_time) {
+      printf("Ran out of time after %g seconds!\n", max_time);
+      return true;
+  }
+
   if(end_condition == optimistic_sample_error
      || end_condition == pessimistic_sample_error){
 
@@ -758,7 +764,6 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[highest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy);
         {
-          const clock_t now = clock();
           printf("      ");
           print_seconds_as_time(now);
           long pess = pessimistic_samples[min_important_energy];

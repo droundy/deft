@@ -47,7 +47,6 @@ struct sw_simulation {
 
   /* The following are constant parameters that describe the physical
      system, but do not change as we simulate. */
-
   double well_width; // width of well in units of sphere radius
   double filling_fraction; // proportion of space filled with spheres
   int N; // number of balls
@@ -87,6 +86,7 @@ struct sw_simulation {
   /* The following control end conditions for histogram methods */
 
   end_conditions end_condition;
+  double max_time, start_time; // maximum time to run simulation, and when we started
   double min_T; // minimum temperature we care about
   int min_samples; // force some number of minimum energy samples
   double sample_error; // the maximum fractional sample error to achieve in initialization
@@ -268,6 +268,8 @@ struct sw_simulation {
     transitions_movie_count = 0;
     dos_movie_count = 0;
     lnw_movie_count = 0;
+    max_time = 0;
+    start_time = clock()/double(CLOCKS_PER_SEC);
   };
 };
 
