@@ -48,6 +48,8 @@ if os.system('which srun'):
 else:
     cmd = "srun --mem=%d -J lv:%s time nice -19 ./liquid-vapor-monte-carlo" % (mem_estimate, fname)
 
+cmd += ' --movies' # generate movie data
+
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
 cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)

@@ -76,6 +76,7 @@ int main(int argc, const char *argv[]) {
   int tmi = false;
   int toe = false;
   int tmmc = false;
+  int generate_movies = false;
 
   sw.min_important_energy = 0;
   sw.sim_dos_type = transition_dos;
@@ -160,6 +161,9 @@ int main(int argc, const char *argv[]) {
      "Base of output file names", "STRING"},
     {"filename-suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
      &filename_suffix, 0, "Output file name suffix", "STRING"},
+
+    {"movies", '\0', POPT_ARG_NONE, &generate_movies, 0,
+     "Generate movie data files", "BOOLEAN"},
 
     /*** OUTPUT DATA PARAMETERS ***/
 
@@ -468,23 +472,21 @@ int main(int argc, const char *argv[]) {
   sw.transitions_filename = new char[1024];
   sprintf((char *)sw.transitions_filename, "%s/%s-transitions.dat", data_dir, filename);
 
-  sw.transitions_movie_filename_format = new char[1024];
-  sprintf((char *)sw.transitions_movie_filename_format, "%s/%s-movie", data_dir, filename);
-  mkdir(sw.transitions_movie_filename_format, 0777);
-  sprintf((char *)sw.transitions_movie_filename_format,
-          "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
+  if (generate_movies) {
+    sw.transitions_movie_filename_format = new char[1024];
+    sprintf((char *)sw.transitions_movie_filename_format, "%s/%s-movie", data_dir, filename);
+    mkdir(sw.transitions_movie_filename_format, 0777);
+    sprintf((char *)sw.transitions_movie_filename_format,
+            "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
 
-  sw.dos_movie_filename_format = new char[1024];
-  sprintf((char *)sw.dos_movie_filename_format,
-          "%s/%s-movie/%%06d-lndos.dat", data_dir, filename);
+    sw.dos_movie_filename_format = new char[1024];
+    sprintf((char *)sw.dos_movie_filename_format,
+            "%s/%s-movie/%%06d-lndos.dat", data_dir, filename);
 
-  sw.lnw_movie_filename_format = new char[1024];
-  sprintf((char *)sw.lnw_movie_filename_format,
-          "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
-
-  char *histogram_movie_filename_format = new char[1024];
-  sprintf(histogram_movie_filename_format,
-          "%s/%s-movie/%%06d-E.dat", data_dir, filename);
+    sw.lnw_movie_filename_format = new char[1024];
+    sprintf((char *)sw.lnw_movie_filename_format,
+            "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
+  }
 
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
