@@ -15,7 +15,7 @@ def lndos_energy_Ns(dbase):
         if os.path.isfile(fname):
             ln_dos_hist = np.loadtxt(fname, ndmin=2)
             ln_dos[N] = ln_dos_hist[:,1]
-            energy[N] = ln_dos_hist[:,0] #slicing may be wrong, need to look at this harder. Also, if a file doesn't exist, index is no longer =N...
+            energy[N] = -ln_dos_hist[:,0] #slicing may be wrong, need to look at this harder. Also, if a file doesn't exist, index is no longer =N...
             Ns.append(N)
         else:
             pass

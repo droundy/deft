@@ -14,6 +14,7 @@ import gatherandcalculate
 all_colors = ['r','g','b','k','c','m','y']
 
 temperature_color = {}
+u_temperature_color = {}
 eta_color = {}
 linetype = {
     1: '-',
@@ -60,6 +61,17 @@ for i in i_values:
             plt.plot(etas[ok], Fexc[k,:][ok]/Ns[ok], linetype[i]+temperature_color[Ts[k]],
                      label=r'$T = %g$' % Ts[k])
 
+    plt.figure('Uexc-eta')
+    for k in range(0,len(Ts),5):
+        ok = Uexc[k,:] != 0
+        if Ts[k] in u_temperature_color:
+            plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], linetype[i]+u_temperature_color[Ts[k]])
+        else:
+            u_temperature_color[Ts[k]] = all_colors[next_color]
+            next_color = (next_color+1) % len(all_colors)
+            plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], linetype[i]+u_temperature_color[Ts[k]],
+                     label=r'$T = %g$' % Ts[k])
+
     plt.figure('HS')
     Sexcs, NNs = gatherandcalculate.Sexc_hardsphere_Ns(dbase)
     print Sexcs
@@ -83,6 +95,13 @@ plt.xlabel(r'$\eta$')
 plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')
 plt.savefig("figs/Fexc-vs-eta.pdf")
+
+plt.figure('Uexc-eta')
+plt.title(r'Excess internal energies for $\lambda=%g$, $L=%g$' % (ww,L))
+plt.xlabel(r'$\eta$')
+plt.ylabel(r'$U_{exc}/\epsilon N$')
+plt.legend(loc='best')
+plt.savefig("figs/Uexc-vs-eta.pdf")
 
 plt.figure('Fexc-T')
 plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww, L))
