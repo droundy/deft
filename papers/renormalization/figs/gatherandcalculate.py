@@ -8,14 +8,14 @@ import os, glob
 def lndos_energy_Ns(dbase):
     ln_dos = {}
     energy = {}
-    ln_dos_hist = [] # need to initialize this correctly; how many elements?
     Ns = []
     for N in range(2,100): #maybe require N as an argument?
         fname = '%s/N%03d/lv-data-dos.dat' % (dbase, N)
         if os.path.isfile(fname):
             ln_dos_hist = np.loadtxt(fname, ndmin=2)
             ln_dos[N] = ln_dos_hist[:,1]
-            energy[N] = -ln_dos_hist[:,0] #slicing may be wrong, need to look at this harder. Also, if a file doesn't exist, index is no longer =N...
+            # the energy is actually negative, but stored positive in the file:
+            energy[N] = -ln_dos_hist[:,0]
             Ns.append(N)
         else:
             pass

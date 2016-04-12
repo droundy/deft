@@ -21,6 +21,9 @@ linetype = {
     2: '--',
 }
 
+Ts = np.arange(0.75, 20.0, 0.25)
+Tnum_to_plot = [0,1,3,5,9, 17, 37]
+
 L = 2.84
 ww = 1.3
 R = 1
@@ -34,7 +37,6 @@ for i in i_values:
     V = (L*2**i)**3
     etas = Ns*4*np.pi/3*R**3/V
 
-    Ts = np.arange(0.5, 2.0, 0.05)
     Uexc = gatherandcalculate.Uexc(lndos, energy, Ts)
     Fexc = gatherandcalculate.Fexc(dbase, lndos, energy, Ts)
     Sexc = gatherandcalculate.Sexc(Uexc, Fexc, Ts)
@@ -51,7 +53,7 @@ for i in i_values:
                 plt.plot(Ts, Fexc[:,j]/Ns[j], linetype[i]+c)
 
     plt.figure('Fexc-eta')
-    for k in range(0,len(Ts),5):
+    for k in Tnum_to_plot:
         ok = Fexc[k,:] != 0
         if Ts[k] in temperature_color:
             plt.plot(etas[ok], Fexc[k,:][ok]/Ns[ok], linetype[i]+temperature_color[Ts[k]])
@@ -62,7 +64,7 @@ for i in i_values:
                      label=r'$T = %g$' % Ts[k])
 
     plt.figure('Uexc-eta')
-    for k in range(0,len(Ts),5):
+    for k in Tnum_to_plot:
         ok = Uexc[k,:] != 0
         if Ts[k] in u_temperature_color:
             plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], linetype[i]+u_temperature_color[Ts[k]])
