@@ -21,8 +21,9 @@ linetype = {
     2: '--',
 }
 
-Ts = np.arange(0.75, 20.0, 0.25)
-Tnum_to_plot = [0,1,3,5,9, 17, 37]
+Ts = np.arange(0.5, 20.0, 0.25)
+Tvals_to_plot = [0.5, 0.75, 1, 1.5, 2, 3, 5, 10]
+Tnum_to_plot = [list(Ts).index(T) for T in Tvals_to_plot]
 
 L = 2.84
 ww = 1.3
