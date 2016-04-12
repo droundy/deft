@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 import math
 import string
-import os
+import os, glob
 
 def lndos_energy_Ns(dbase):
     ln_dos = {}
@@ -26,7 +26,11 @@ def Sexc_hardsphere_Ns(dbase):
     S = []
     for N in range(2,100): # maybe go higher?
         fbase = '%s/N%03d/absolute/' % (dbase, N)
-        if os.path.isfile(fbase+'00000.dat'):
+        # we only try to add this N value if we have one .dat file,
+        # and our number of .dat files is the same as our number of
+        # .out files.  If the latter is not true, we probably have not
+        # finished running the absolute simulations.
+        if os.path.isfile(fbase+'00000.dat') and len(glob.glob(fbase+'*.dat')) == len(glob.glob(fbase+'*.out')):
             try:
                 thisS = Sexc_hardsphere(dbase, N)
                 S.append(thisS)
@@ -40,6 +44,9 @@ def Sexc_hardsphere(dbase, N):
     S = 0
     # loop over files in the ./absolute/ directory
     j = 0
+    # the following causes this function to fail if we have not
+    # finished the necessary simulations.
+    assert(len(glob.glob(fbase+'*.dat')) == len(glob.glob(fbase+'*.out')))
     while True:
         valid = 0
         total = 0
@@ -81,15 +88,18 @@ def Fexc(dbase, ln_dos, energy, Ts):
     F = np.zeros((len(Ts), len(Ns)))
     for j in range(len(Ns)):
         N = Ns[j]
-        Sexc_HS = Sexc_hardsphere(dbase, N)
-        for k in range(len(Ts)):
-            T = Ts[k]
-            ln_dos_boltz = ln_dos[N] - energy[N]/T
-            # Subtract of ln_dos_boltz.max() to keep dos_boltz reasonable
-            dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
-            Z = sum(dos_boltz)
-            Zinf = sum(np.exp(ln_dos[N] - ln_dos_boltz.max()))
-            F[k,j] = -T*Sexc_HS - T*np.log(Z/Zinf)
+        try:
+            Sexc_HS = Sexc_hardsphere(dbase, N)
+            for k in range(len(Ts)):
+                T = Ts[k]
+                ln_dos_boltz = ln_dos[N] - energy[N]/T
+                # Subtract of ln_dos_boltz.max() to keep dos_boltz reasonable
+                dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
+                Z = sum(dos_boltz)
+                Zinf = sum(np.exp(ln_dos[N] - ln_dos_boltz.max()))
+                F[k,j] = -T*Sexc_HS - T*np.log(Z/Zinf)
+        except:
+            F[:,j] = 0 # set it to zero when we do not know the hard-sphere entropy
     return F
 
 def Sexc(Uexc, Fexc, Ts):
