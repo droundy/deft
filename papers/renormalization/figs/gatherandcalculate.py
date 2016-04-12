@@ -33,8 +33,6 @@ def Sexc_hardsphere_Ns(dbase):
                 Ns.append(N)
             except:
                 print 'no data for N =', N
-        else:
-            print 'no such file as', fbase+'00000.dat'
     return np.array(S), np.array(Ns)
 
 def Sexc_hardsphere(dbase, N):

@@ -7,7 +7,7 @@ import numpy
 import numpy as np
 
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-# matplotlib.rc('text', usetex=True)
+matplotlib.rc('text', usetex=True)
 
 import gatherandcalculate
 
@@ -43,7 +43,6 @@ for i in i_values:
         modulo = 4*8**(i-1)
         if Ns[j] % modulo == 0:
             val = Ns[j] // modulo
-            print 'foo', Ns[j], val, etas[j]
             c = all_colors[(Ns[j] // modulo) % len(all_colors)]
             if i == i_values[0]:
                 plt.plot(Ts, Fexc[:,j]/V, linetype[i]+c, label=r'$\eta = %.2g$' % etas[j])
@@ -67,22 +66,21 @@ for i in i_values:
 
 
 plt.figure('HS')
-plt.title('Excess hard-sphere entropy for $L=%g$' % (L))
-plt.xlabel('$\eta$')
+plt.title(r'Excess hard-sphere entropy for $L=%g$' % (L))
+plt.xlabel(r'$\eta$')
 plt.ylabel(r'$S/V$')
-plt.legend(loc='best')
 plt.savefig("figs/Shs-vs-eta.pdf")
 
 plt.figure('Fexc-eta')
-plt.title('Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
-plt.xlabel('$\eta$')
+plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
+plt.xlabel(r'$\eta$')
 plt.ylabel(r'$F/\epsilon V$')
 plt.legend(loc='best')
 plt.savefig("figs/Fexc-vs-eta.pdf")
 
 plt.figure('Fexc-T')
-plt.title('Excess free energies for $\lambda=%g$, $L=%g$' % (ww, L))
-plt.xlabel('$kT/\epsilon$')
+plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww, L))
+plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$F/\epsilon V$')
 plt.legend(loc='best')
 plt.savefig("figs/Fexc-vs-T.pdf")
