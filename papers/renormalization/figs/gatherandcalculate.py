@@ -12,11 +12,15 @@ def lndos_energy_Ns(dbase):
     for N in range(2,100): #maybe require N as an argument?
         fname = '%s/N%03d/lv-data-dos.dat' % (dbase, N)
         if os.path.isfile(fname):
-            ln_dos_hist = np.loadtxt(fname, ndmin=2)
-            ln_dos[N] = ln_dos_hist[:,1]
-            # the energy is actually negative, but stored positive in the file:
-            energy[N] = -ln_dos_hist[:,0]
-            Ns.append(N)
+            try:
+                ln_dos_hist = np.loadtxt(fname, ndmin=2)
+                ln_dos[N] = ln_dos_hist[:,1]
+                # the energy is actually negative, but stored positive in the file:
+                energy[N] = -ln_dos_hist[:,0]
+                Ns.append(N)
+            except:
+                # this happens if there is no data in the file
+                pass
         else:
             pass
     return ln_dos, energy, np.array(Ns)
