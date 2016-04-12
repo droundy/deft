@@ -63,7 +63,7 @@ def Sexc_hardsphere(dbase, N):
                         total = int(line.split()[-1])
             # compute absolute S using read in data.
             ratio = valid / total
-            S += -np.log(ratio)/ N
+            S += np.log(ratio)
         else:
             # we have found the last data file and can stop now
             break

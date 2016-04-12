@@ -51,24 +51,31 @@ for i in i_values:
 
     plt.figure('Fexc-eta')
     for k in range(0,len(Ts),5):
+        ok = Fexc[k,:] != 0
         if Ts[k] in temperature_color:
-            plt.plot(etas, Fexc[k,:]/V, linetype[i]+temperature_color[Ts[k]])
+            plt.plot(etas[ok], Fexc[k,:][ok]/V, linetype[i]+temperature_color[Ts[k]])
         else:
             temperature_color[Ts[k]] = all_colors[next_color]
             next_color = (next_color+1) % len(all_colors)
-            plt.plot(etas, Fexc[k,:]/V, linetype[i]+temperature_color[Ts[k]],
+            plt.plot(etas[ok], Fexc[k,:][ok]/V, linetype[i]+temperature_color[Ts[k]],
                      label=r'$T = %g$' % Ts[k])
 
     plt.figure('HS')
     Sexcs, NNs = gatherandcalculate.Sexc_hardsphere_Ns(dbase)
     print Sexcs
-    plt.plot(NNs*4*np.pi/3*R**3/V, 100*Sexcs/V, linetype[i]+'k')
+    plt.plot(NNs*4*np.pi/3*R**3/V, Sexcs/V, linetype[i]+'k')
 
 
 plt.figure('HS')
+eta = np.arange(0.01, 0.4, 0.01)
+n = eta/(4*np.pi/3*R**3)
+print 'n', n
+Scs = -n*(4*eta-3*eta**2)/(1-eta)**2
+plt.plot(eta, Scs, ':', label='Carnahan-Starling')
 plt.title(r'Excess hard-sphere entropy for $L=%g$' % (L))
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$S/V$')
+plt.legend(loc='best')
 plt.savefig("figs/Shs-vs-eta.pdf")
 
 plt.figure('Fexc-eta')
