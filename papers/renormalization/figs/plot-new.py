@@ -40,55 +40,54 @@ for i in i_values:
 
     plt.figure('Fexc-T')
     for j in range(len(Ns)):
-        modulo = 4*8**(i-1)
-        if Ns[j] % modulo == 0:
+        modulo = 2*8**(i-1)
+        if Ns[j] % modulo == 0 and (Fexc[:,j] != 0).any():
             val = Ns[j] // modulo
             c = all_colors[(Ns[j] // modulo) % len(all_colors)]
             if i == i_values[0]:
-                plt.plot(Ts, Fexc[:,j]/V, linetype[i]+c, label=r'$\eta = %.2g$' % etas[j])
+                plt.plot(Ts, Fexc[:,j]/Ns[j], linetype[i]+c, label=r'$\eta = %.2g$' % etas[j])
             else:
-                plt.plot(Ts, Fexc[:,j]/V, linetype[i]+c)
+                plt.plot(Ts, Fexc[:,j]/Ns[j], linetype[i]+c)
 
     plt.figure('Fexc-eta')
     for k in range(0,len(Ts),5):
         ok = Fexc[k,:] != 0
         if Ts[k] in temperature_color:
-            plt.plot(etas[ok], Fexc[k,:][ok]/V, linetype[i]+temperature_color[Ts[k]])
+            plt.plot(etas[ok], Fexc[k,:][ok]/Ns[ok], linetype[i]+temperature_color[Ts[k]])
         else:
             temperature_color[Ts[k]] = all_colors[next_color]
             next_color = (next_color+1) % len(all_colors)
-            plt.plot(etas[ok], Fexc[k,:][ok]/V, linetype[i]+temperature_color[Ts[k]],
+            plt.plot(etas[ok], Fexc[k,:][ok]/Ns[ok], linetype[i]+temperature_color[Ts[k]],
                      label=r'$T = %g$' % Ts[k])
 
     plt.figure('HS')
     Sexcs, NNs = gatherandcalculate.Sexc_hardsphere_Ns(dbase)
     print Sexcs
-    plt.plot(NNs*4*np.pi/3*R**3/V, Sexcs/V, linetype[i]+'k')
+    plt.plot(NNs*4*np.pi/3*R**3/V, Sexcs/NNs, linetype[i]+'k')
 
 
 plt.figure('HS')
 eta = np.arange(0.01, 0.4, 0.01)
 n = eta/(4*np.pi/3*R**3)
-print 'n', n
-Scs = -n*(4*eta-3*eta**2)/(1-eta)**2
+Scs = -(4*eta-3*eta**2)/(1-eta)**2
 plt.plot(eta, Scs, ':', label='Carnahan-Starling')
 plt.title(r'Excess hard-sphere entropy for $L=%g$' % (L))
 plt.xlabel(r'$\eta$')
-plt.ylabel(r'$S/V$')
+plt.ylabel(r'$S_{exc}/N$')
 plt.legend(loc='best')
 plt.savefig("figs/Shs-vs-eta.pdf")
 
 plt.figure('Fexc-eta')
 plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
 plt.xlabel(r'$\eta$')
-plt.ylabel(r'$F/\epsilon V$')
+plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')
 plt.savefig("figs/Fexc-vs-eta.pdf")
 
 plt.figure('Fexc-T')
 plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww, L))
 plt.xlabel(r'$kT/\epsilon$')
-plt.ylabel(r'$F/\epsilon V$')
+plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')
 plt.savefig("figs/Fexc-vs-T.pdf")
 
