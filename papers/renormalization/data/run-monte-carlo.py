@@ -40,7 +40,7 @@ for N in Ns:
     filename = 'lv-data'
     iterations = 1000000
 
-    output_file_path = dirname+'/'+filename+'-E.dat'
+    output_file_path = dirname+'/'+filename+'-dos.dat'
     if not os.path.isfile(output_file_path):
         print "Was checking for", output_file_path
         if have_srun:
