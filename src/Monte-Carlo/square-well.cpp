@@ -689,6 +689,12 @@ double sw_simulation::converged_to_temperature(double *ln_dos) const {
 int sw_simulation::converged_to_state() const {
   for (int i = max_entropy_state+1; i < min_energy_state; i++) {
     if (pessimistic_samples[i] < 10) {
+      if (i == 1) {
+        // This is a special case for when we have only ever seen one
+        // energy.  This energy will be min_important_energy, and we
+        // need to include that energy in the output dos.
+        return min_important_energy;
+      }
       return i-1;
     }
   }

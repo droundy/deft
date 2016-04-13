@@ -798,6 +798,7 @@ int main(int argc, const char *argv[]) {
 
       char *countinfo = new char[4096];
       double *ln_dos = sw.compute_ln_dos(transition_dos);
+      int converged_state = sw.converged_to_state();
       sprintf(countinfo,
               "# iterations: %li\n"
               "# working moves: %li\n"
@@ -807,7 +808,7 @@ int main(int argc, const char *argv[]) {
               "# converged temperature: %g\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total,
-              sw.converged_to_state(),
+              converged_state,
               sw.converged_to_temperature(ln_dos));
 
       // Save energy histogram
@@ -818,8 +819,11 @@ int main(int argc, const char *argv[]) {
         fprintf(dos_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
         fprintf(dos_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
 
+        // Only output the ln_dos for energies that are essentially
+        // converged.  Otherwise we can end up with lots of wrong dos
+        // values at very low energies that we have to remove later.
         fprintf(dos_out, "# energy   counts\n");
-        for (int i = 0; i < sw.energy_levels; i++) {
+        for (int i = 0; i <= converged_state; i++) {
           fprintf(dos_out, "%d  %lg\n",i,ln_dos[i]);
         }
         fclose(dos_out);
