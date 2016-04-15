@@ -30,6 +30,7 @@ for project in ['thesis-roth']:
   print("> ../papers/"+project+"/.figs.fac")
   print("c .pyc\n")
 
+# Add thesis-vischer/Thesis.tex here when figures are available
 other_texs = """
    histogram/thesis/thesis.tex
 """.split()
