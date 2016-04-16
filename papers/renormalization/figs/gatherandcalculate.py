@@ -9,7 +9,7 @@ def lndos_energy_Ns(dbase):
     ln_dos = {}
     energy = {}
     Ns = []
-    for N in range(2,100): #maybe require N as an argument?
+    for N in range(2,600): #maybe require N as an argument?
         fname = '%s/N%03d/lv-data-dos.dat' % (dbase, N)
         if os.path.isfile(fname):
             try:
@@ -76,6 +76,7 @@ def Sexc_hardsphere(dbase, N):
 
 def Uexc(ln_dos, energy, Ts):
     Ns = ln_dos.keys()
+    Ns.sort()
     U = np.zeros((len(Ts), len(Ns)))
     for j in range(len(Ns)):
         N = Ns[j]
@@ -89,6 +90,7 @@ def Uexc(ln_dos, energy, Ts):
 
 def Fexc(dbase, ln_dos, energy, Ts):
     Ns = ln_dos.keys()
+    Ns.sort()
     F = np.zeros((len(Ts), len(Ns)))
     for j in range(len(Ns)):
         N = Ns[j]
