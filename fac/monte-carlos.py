@@ -14,7 +14,7 @@ monte_carlos = """
 """.split()
 
 utility_files = """
-   polyhedra square-well
+   polyhedra square-well InitBox
 """.split()
 
 for x in utility_files:

@@ -26,7 +26,7 @@ std::uniform_int_distribution<int> myIntRand(0, 9);
 
 
 	
-	INITBOX::INITBOX() {
+	INITBOX::INITBOX() {//not used... not tested...
 		lx = 10.154912976;
 		ly = 10.154912976;
 		lz = 10.154912976;
@@ -39,6 +39,11 @@ std::uniform_int_distribution<int> myIntRand(0, 9);
 		binSizeY = ly/sigma/lambda;
 		binSizeZ = lz/sigma/lambda;
 		resetNumberOfBonds();
+		numAtoms=0;
+		numAvailableInAtomList=500;
+		list=new ATOM[numAvailableInAtomList];
+		for(int n=0;n<numAvailableInAtomList;n++) list[n].id=n;
+		return;
 	}
 	INITBOX::INITBOX(double L,int N){
 		numAtoms=0;
@@ -53,19 +58,18 @@ std::uniform_int_distribution<int> myIntRand(0, 9);
 		binSizeY = ly/sigma/lambda;
 		binSizeZ = lz/sigma/lambda;
 		resetNumberOfBonds();
-		
-		for(int count=0;count<10 && numAtoms<N;count++){
+		list=new ATOM[2];
+		for(int count=0;count<10 && numAtoms!=N;count++){
 			//INITBOX(L);
+			delete [] list;
+			numAtoms=0;
 			temperature=1.1;
 			fillBoxWithRain(N);
-			if(numAtoms!=N){
-				//cout<<numAtoms<<endl;
-				numAtoms=0;
-				delete [] list;
-			}
 		//delete box;
 		}
-		if(numAtoms!=0) for(int count=0;count<10;count++) simulate(numAtoms*1000);
+		temperature=1000.0;
+		if(numAtoms!=0) for(int count=0;count<numAtoms+30;count++) simulate(numAtoms*1000);
+		numAvailableInAtomList=0;
 	}
 	INITBOX::INITBOX(double L) {
 		lx = L;
@@ -80,12 +84,43 @@ std::uniform_int_distribution<int> myIntRand(0, 9);
 		binSizeY = ly/sigma/lambda;
 		binSizeZ = lz/sigma/lambda;
 		resetNumberOfBonds();
+		numAtoms=0;
+		numAvailableInAtomList=500;
+		list=new ATOM[numAvailableInAtomList];
+		for(int n=0;n<numAvailableInAtomList;n++) list[n].id=n;
+		for (int nx = 0; nx < 30; nx++)
+			for (int ny = 0; ny < 30; ny++)
+				for (int nz = 0; nz < 30; nz++) {
+					bins[nx][ny][nz] = -1;
+					numInBins[nx][ny][nz] = 0;
+				}
 	}
 	void INITBOX::resetNumberOfBonds(void) {
 		for (unsigned int i = 0; i < sizeof(numberOfBonds) / sizeof(*numberOfBonds); i++) {
 			numberOfBonds[i] = 0.0;
 			for (int j = 0; j < 1024; j++) bondRadiusBins[i][j] = 0;
 		}
+	}
+	void INITBOX::addAtom(double x, double y, double z){
+		if(numAvailableInAtomList<=0){
+			class ATOM *list2;
+			list2=new ATOM[numAtoms+501];
+			for(int n=0;n<numAtoms;n++) list2[n]=list[n];//save old list
+			for(int n=0;n<numAtoms+501;n++) list2[n].id=n;//make sure new list has id's initialized
+			for(int n=0;n<numAtoms;n++) removeAtomFromBins(list[n]);//take old list out of the bins
+			numAvailableInAtomList=501;
+			delete[] list;
+			list=list2;
+			for(int n=0;n<numAtoms;n++) addAtomToBins(list[n]);//put new list back into the bins
+		}
+		numAtoms++;
+		numAvailableInAtomList--;
+		list[numAtoms-1].x=x;
+		list[numAtoms-1].y=y;
+		list[numAtoms-1].z=z;
+		list[numAtoms-1].id=numAtoms-1;
+		addAtomToBins(list[numAtoms-1]);
+		return;
 	}
 	bool INITBOX::randStep() {
 		std::uniform_int_distribution<int> randAtom(0, numAtoms-1);
@@ -899,6 +934,7 @@ std::uniform_int_distribution<int> myIntRand(0, 9);
 	}
 	int INITBOX::fillBoxWithRain(int N){
 		list=new ATOM[N];
+		numAvailableInAtomList=0;
 		for(int n=0;n<N;n++){
 			list[n].id=n;
 			//cout<<list[n].x<<endl;
@@ -1154,6 +1190,7 @@ std::uniform_int_distribution<int> myIntRand(0, 9);
 		//assumes a square box
 		numAtoms=N;
 		list=new ATOM[N];
+		numAvailableInAtomList=0;
 		for (int nx = 0; nx < 30; nx++)
 			for (int ny = 0; ny < 30; ny++)
 				for (int nz = 0; nz < 30; nz++) {
@@ -1268,6 +1305,7 @@ std::uniform_int_distribution<int> myIntRand(0, 9);
 	double INITBOX::fillBox(int N) {
 		numAtoms = N;
 		list = new ATOM[N];
+		numAvailableInAtomList=0;
 		std::uniform_real_distribution<double> lxRand(0.0, lx);
 		std::uniform_real_distribution<double> lyRand(0.0, ly);
 		std::uniform_real_distribution<double> lzRand(0.0, lz);

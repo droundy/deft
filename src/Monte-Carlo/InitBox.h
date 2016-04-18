@@ -31,6 +31,7 @@ public:
 	INITBOX(double L,int N);
 	INITBOX(double L);
 	void resetNumberOfBonds(void);
+	void addAtom(double x, double y, double z);
 	bool randStep();
 	double totalWallEnergyX(double x0);
 	double totalWallEnergyYplane(double y0);
@@ -76,4 +77,5 @@ public:
 private:
 	void removeAtomFromBins(ATOM &atom);
 	void addAtomToBins(ATOM &atom);
+	int numAvailableInAtomList;
 };

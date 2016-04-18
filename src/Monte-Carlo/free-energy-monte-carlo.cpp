@@ -8,6 +8,7 @@
 #include "handymath.h"
 #include "vector3d.h"
 #include "Monte-Carlo/square-well.h"
+#include "Monte-Carlo/InitBox.h"
 
 // ------------------------------------------------------------------------------
 // Notes on conventions and definitions used
@@ -80,6 +81,12 @@ inline void check_neighbor_symmetry(const ball *p, int N);
 // heuristic.
 bool time_to_save();
 
+//packs a cube with atoms using the rain method
+bool pack_cube(sw_simulation &sw);
+
+//loads baseAtoms.txt
+INITBOX *load_cube(char *data_dir);
+
 int main(int argc, const char *argv[]) {
   took("Starting program");
   // ----------------------------------------------------------------------------
@@ -111,6 +118,8 @@ int main(int argc, const char *argv[]) {
   const double well_width = 1;
   double ff = 0.3;
   double ff_small = -1;
+  bool force_cube=false;
+  bool pack_and_save_cube=false;
   double neighbor_scale = 2;
   double de_g = 0.05;
   double max_rdf_radius = 10;
@@ -129,6 +138,8 @@ int main(int argc, const char *argv[]) {
      "the cell."},
     {"ff_small", '\0', POPT_ARG_DOUBLE, &ff_small, 0, "Small filling fraction. If specified, "
      "This sets the desired filling fraction of the shrunk cell. Otherwise it defaults to ff."},
+    {"force_cube", '\0', POPT_ARG_NONE, &force_cube, 0, "forces box to be a cube", "BOOLEAN"},
+    {"pack_and_save_cube", '\0', POPT_ARG_NONE, &pack_and_save_cube, 0, "packs cube, save positions, then returns", "BOOLEAN"},
     {"walls", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &sw.walls, 0,
      "Number of walled dimensions (dimension order: x,y,z)", "INT"},
     {"runs", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_runs,
@@ -365,70 +376,161 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i < sw.N; i++) // initialize ball radii
     sw.balls[i].R = R;
 
-  // Balls will be initially placed on a face centered cubic (fcc) grid
-  // Note that the unit cells need not be actually "cubic", but the fcc grid will
-  //   be stretched to cell dimensions
-  const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
-  const int spots_per_cell = 4; // spots in each fcc periodic unit cell
-  int cells[3]; // array to contain number of cells in x, y, and z dimensions
-  for(int i = 0; i < 3; i++){
-    cells[i] = int(sw.len[i]/min_cell_width); // max number of cells that will fit
+    //###########################  pack and save  ####################
+  if(pack_and_save_cube==true){
+	  INITBOX *box=load_cube(data_dir);
+	  if(box!=NULL && box->numAtoms<sw.N) {delete box; box=NULL;}
+	  if(box!=NULL){//---------loaded baseAtoms up to max of sw.N
+		  printf("loading from baseAtoms.txt\n");
+		  for(int count=0;count<(100*box->numAtoms);count++){
+			  //mixes indices so the culled atoms are random
+			  //atoms are only culled from the end...
+			  int n1=floor(random::ran()*(box->numAtoms));
+			  int n2=floor(random::ran()*(box->numAtoms));
+			  double xTemp=box->list[n1].x;
+			  double yTemp=box->list[n1].y;
+			  double zTemp=box->list[n1].z;
+			  box->list[n1].x=box->list[n2].x;
+			  box->list[n1].y=box->list[n2].y;
+			  box->list[n1].z=box->list[n2].z;
+			  box->list[n2].x=xTemp;
+			  box->list[n2].y=yTemp;
+			  box->list[n2].z=zTemp;
+		  }
+		  //box2 is used to cull atoms from the end (if needed)
+		  //box2 is simulated to mix the atoms up after culling
+		  INITBOX *box2=new INITBOX(box->lx);
+		  for(int i=0;i<sw.N;i++) box2->addAtom(box->list[i].x,box->list[i].y,box->list[i].z);
+		  delete box;
+		  box2->temperature=1000.0;
+		  for(int i=0;i<100;i++) box2->simulate(sw.N*100);//mix box
+		  sw.len[x] = sw.len[y] = sw.len[z] = box2->lx;
+		  for(int i=0;i<sw.N;i++) {
+			  sw.balls[i].pos=vector3d(box2->list[i].x,box2->list[i].y,box2->list[i].z);
+		  }
+		  delete box2;
+	  }
+	  else{//if no baseAtoms.txt then try to pack the box
+		if(ff==0){printf("must initialize using --ff\n"); return 254;}
+		printf("building baseAtoms.txt\n");
+		const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
+		sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
+		if(pack_cube(sw)==false) {printf("could not fill box\n"); return 254;}
+	}//done initializing positions
+	  mkdir(data_dir, 0777); // create save directory
+	  
+	  char *posData = new char[4096];
+	  sprintf(posData,"%s/baseAtoms.txt",data_dir);
+	  FILE *pos_out = fopen((const char *)posData, "w");
+	  sprintf(posData,"L = %g\nN = %i\n",sw.len[x],sw.N);
+	  fprintf(pos_out,"%s",posData);
+	  for(int i=0;i<sw.N;i++){
+		sprintf(posData,"%g %g %g",
+				sw.balls[i].pos.x,sw.balls[i].pos.y,sw.balls[i].pos.z);
+		fprintf(pos_out,"%s",posData);
+		if(i+1<sw.N) fprintf(pos_out,"\n");
+	  }
+      fclose(pos_out);
+      delete[] posData;
+      took("Placement");
+      return 0;
   }
-
-  // It is usefull to know our cell dimensions
-  double cell_width[3];
-  for(int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
-
-  // If we made our cells to small, return with error
-  for(int i = 0; i < 3; i++){
-    if(cell_width[i] < min_cell_width){
-      printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
-             cell_width[0],cell_width[1],cell_width[2],
-             sw.len[0], sw.len[1], sw.len[2]);
-      printf("Minimum allowed placement cell width: %g\n",min_cell_width);
-      printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
-             sw.len[0],sw.len[1],sw.len[2]);
-      printf("Fixing the chosen ball number, filling fractoin, and relative\n"
-             "  simulation cell dimensions simultaneously does not appear to be possible\n");
-      return 176;
-    }
+  //###########################  DONE pack and save  #################
+  
+  if(force_cube==true){//try to load baseAtoms.txt
+	  if(ff==0){printf("must initialize using --ff\n"); return 254;}
+	  printf("attempting to load baseAtoms.txt\n");
+	  const double volume = 4*M_PI/3*R*R*R*sw.N/ff;
+	  sw.len[x] = sw.len[y] = sw.len[z] = pow(volume, 1.0/3);
+	  INITBOX *box=load_cube(data_dir);
+	  if(box==NULL) {
+		  printf("requires initialization on the smallest box\nuse the --pack_and_save --ff -N   flags\n");
+		  return 254; }
+	  if(box->numAtoms<sw.N){
+		  printf("boxAtoms.txt contains less atoms than expected\n");
+		  delete box;
+		  return 254; }
+	  if(box->lx>sw.len[x]){
+		  printf("baseAtoms must be in a box smaller than current simulation\n");
+		  delete box;
+		  return 254; }
+	  box->temperature=1000.0;
+	  for(int i=0;i<100;i++) box->simulate(sw.N*100);//mix box
+      double scaleFactor=sw.len[x]/box->lx;
+	  for(int i=0;i<sw.N;i++){
+          double x=(box->list[i].x)*scaleFactor;
+          double y=(box->list[i].y)*scaleFactor;
+          double z=(box->list[i].z)*scaleFactor;
+		  sw.balls[i].pos=vector3d(x,y,z);
+	  }
+	  delete box;
   }
-
-  // Define ball positions relative to cell position
-  vector3d* offset = new vector3d[4]();
-  offset[x] = vector3d(0,cell_width[y],cell_width[z])/2;
-  offset[y] = vector3d(cell_width[x],0,cell_width[z])/2;
-  offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
-
-  // Reserve some spots at random to be vacant
-  const int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
-  bool *spot_reserved = new bool[total_spots]();
-  int p; // Index of reserved spot
-  for(int i = 0; i < total_spots-sw.N; i++) {
-    p = floor(random::ran()*total_spots); // Pick a random spot index
-    if(spot_reserved[p] == false) // If it's not already reserved, reserve it
-      spot_reserved[p] = true;
-    else // Otherwise redo this index (look for a new spot)
-      i--;
+  else {
+	  // Balls will be initially placed on a face centered cubic (fcc) grid
+	  // Note that the unit cells need not be actually "cubic", but the fcc grid will
+      //   be stretched to cell dimensions
+	  const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
+	  const int spots_per_cell = 4; // spots in each fcc periodic unit cell
+	  int cells[3]; // array to contain number of cells in x, y, and z dimensions
+	  for(int i = 0; i < 3; i++){
+	    cells[i] = int(sw.len[i]/min_cell_width); // max number of cells that will fit
+	  }
+	
+	  // It is usefull to know our cell dimensions
+	  double cell_width[3];
+	  for(int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
+	
+	  // If we made our cells to small, return with error
+	  for(int i = 0; i < 3; i++){
+	    if(cell_width[i] < min_cell_width){
+	      printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
+	             cell_width[0],cell_width[1],cell_width[2],
+	             sw.len[0], sw.len[1], sw.len[2]);
+	      printf("Minimum allowed placement cell width: %g\n",min_cell_width);
+	      printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
+	             sw.len[0],sw.len[1],sw.len[2]);
+	      printf("Fixing the chosen ball number, filling fractoin, and relative\n"
+	             "  simulation cell dimensions simultaneously does not appear to be possible\n");
+	      return 176;
+	    }
+	  }
+	
+	  // Define ball positions relative to cell position
+	  vector3d* offset = new vector3d[4]();
+	  offset[x] = vector3d(0,cell_width[y],cell_width[z])/2;
+	  offset[y] = vector3d(cell_width[x],0,cell_width[z])/2;
+	  offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
+	
+	  // Reserve some spots at random to be vacant
+	  const int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
+	  bool *spot_reserved = new bool[total_spots]();
+	  int p; // Index of reserved spot
+	  for(int i = 0; i < total_spots-sw.N; i++) {
+	    p = floor(random::ran()*total_spots); // Pick a random spot index
+	    if(spot_reserved[p] == false) // If it's not already reserved, reserve it
+	      spot_reserved[p] = true;
+	    else // Otherwise redo this index (look for a new spot)
+	      i--;
+	  }
+	
+	  // Place all balls in remaining spots
+	  int b = 0;
+	  for(int i = 0; i < cells[x]; i++) {
+	    for(int j = 0; j < cells[y]; j++) {
+	      for(int k = 0; k < cells[z]; k++) {
+	        for(int l = 0; l < 4; l++) {
+	          if(!spot_reserved[i*(4*cells[z]*cells[y])+j*(4*cells[z])+k*4+l]) {
+	            sw.balls[b].pos = vector3d(i*cell_width[x],j*cell_width[y],
+	                                       k*cell_width[z]) + offset[l];
+	            b++;
+	          }
+	        }
+	      }
+	    }
+	  }
+	  delete[] offset;
+	  delete[] spot_reserved;
   }
-
-  // Place all balls in remaining spots
-  int b = 0;
-  for(int i = 0; i < cells[x]; i++) {
-    for(int j = 0; j < cells[y]; j++) {
-      for(int k = 0; k < cells[z]; k++) {
-        for(int l = 0; l < 4; l++) {
-          if(!spot_reserved[i*(4*cells[z]*cells[y])+j*(4*cells[z])+k*4+l]) {
-            sw.balls[b].pos = vector3d(i*cell_width[x],j*cell_width[y],
-                                       k*cell_width[z]) + offset[l];
-            b++;
-          }
-        }
-      }
-    }
-  }
-  delete[] offset;
-  delete[] spot_reserved;
   took("Placement");
 
   // ----------------------------------------------------------------------------
@@ -582,7 +684,7 @@ int main(int argc, const char *argv[]) {
     // Save to file
     // ---------------------------------------------------------------
 
-    if (time_to_save() || valid_runs > simulation_runs) {
+    if (time_to_save() || valid_runs == simulation_runs) {
       const clock_t now = clock();
       const double secs_done = double(now)/CLOCKS_PER_SEC;
       const int seconds = int(secs_done) % 60;
@@ -784,7 +886,42 @@ void save_locations(const ball *p, int N, const char *fname, const double len[3]
   }
   fclose(out);
 }
-
+INITBOX *load_cube(char *data_dir){
+	  char *fName = new char[4096];
+	  sprintf(fName,"%s/baseAtoms.txt",data_dir);
+	  FILE *pos_in = fopen((const char *)fName, "r");
+	  delete[] fName;
+	  if(pos_in==NULL) return NULL;
+	  int N;
+	  double L;
+	  fscanf(pos_in,"L = %lf\nN = %i\n",&L,&N);
+	  if(N<0 || N>1000) {fclose(pos_in);return NULL;}
+	  double *x=new double[N];
+	  double *y=new double[N];
+	  double *z=new double[N];
+	  for(int n=0;n<N-1;n++){
+		  fscanf(pos_in,"%lf %lf %lf\n",&x[n],&y[n],&z[n]);
+	  }
+	  fscanf(pos_in,"%lf %lf %lf",&x[N-1],&y[N-1],&z[N-1]);
+	  fclose(pos_in);
+	  INITBOX *box=new INITBOX(L);
+	  for(int n=0;n<N;n++) box->addAtom(x[n],y[n],z[n]);
+	  delete [] x;
+	  delete [] y;
+	  delete [] z;
+	  return box;
+}
+bool pack_cube(sw_simulation &sw){
+	//assumes you want to pack a cube (see name)
+	  INITBOX *box=new INITBOX(sw.len[x],sw.N);
+	  if(box->numAtoms!=sw.N){ delete box;return false;}
+		  for(int i=0;i<sw.N;i++){
+			  sw.balls[i].pos=vector3d(box->list[i].x,box->list[i].y,box->list[i].z);
+		  }
+		  printf("atoms initialized using rain method\n");
+	  delete box;
+	  return true;
+} 
 bool time_to_save() {
   static clock_t output_period = CLOCKS_PER_SEC; // start at outputting every second
   // top out at one hour interval
