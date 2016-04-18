@@ -1,0 +1,35 @@
+\documentclass[10pt]{article}
+
+%%% standard header
+\usepackage[margin=1in]{geometry} % one inch margins
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{fancyhdr} % easier header and footer management
+\pagestyle{fancyplain} % page formatting style
+\usepackage{hyperref} % for linking references
+\newcommand{\psl}{6pt} % store spacing as command for consistency
+\setlength{\parindent}{0cm} % don't indent new paragraphs...
+\parskip \psl % ... place a space between paragraphs instead
+\usepackage[inline]{enumitem} % include for \setlist{}, use below
+%\setlist{nolistsep} % more compact spacing between environments
+\setlist[itemize]{leftmargin=*} % nice margins for itemize ...
+\setlist[enumerate]{leftmargin=*} % ... and enumerate environments
+\frenchspacing % add a single space after a period
+\usepackage{lastpage} % for referencing last page
+\cfoot{\thepage~of \pageref{LastPage}} % "x of y" page labeling
+
+\renewcommand{\headrulewidth}{0.5pt} % horizontal line in header
+\lhead{Brenden Vischer}
+\chead{March 9th, 2015}
+\rhead{Kinetic Energy Partition Function}
+
+\begin{document}
+\begin{center}
+  \large \bf Derivation of Kinetic Contribution to Partition Function
+\end{center}
+
+\section*{Partition Function}
+
+

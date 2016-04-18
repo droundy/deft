@@ -6,6 +6,12 @@ if len(sys.argv) < 4:
     print "usage: %s RECURSION-LEVEL WELL-WIDTH LENGTH" % (sys.argv[0])
     exit(1)
 
+# Generate a script named rerun.sh, which can be used to run this
+# script again with the same arguments.  This is totally gratuitous,
+# but can be convenient when I forget which arguments to use.
+with open('rerun.sh', 'w') as f:
+    f.write('python2 "' + '" "'.join(sys.argv) + '"\n')
+
 i = eval(sys.argv[1])
 #RG recursion level
 

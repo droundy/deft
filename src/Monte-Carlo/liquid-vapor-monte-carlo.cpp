@@ -76,6 +76,7 @@ int main(int argc, const char *argv[]) {
   int tmi = false;
   int toe = false;
   int tmmc = false;
+  int generate_movies = false;
 
   sw.min_important_energy = 0;
   sw.sim_dos_type = transition_dos;
@@ -160,6 +161,9 @@ int main(int argc, const char *argv[]) {
      "Base of output file names", "STRING"},
     {"filename-suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
      &filename_suffix, 0, "Output file name suffix", "STRING"},
+
+    {"movies", '\0', POPT_ARG_NONE, &generate_movies, 0,
+     "Generate movie data files", "BOOLEAN"},
 
     /*** OUTPUT DATA PARAMETERS ***/
 
@@ -468,23 +472,21 @@ int main(int argc, const char *argv[]) {
   sw.transitions_filename = new char[1024];
   sprintf((char *)sw.transitions_filename, "%s/%s-transitions.dat", data_dir, filename);
 
-  sw.transitions_movie_filename_format = new char[1024];
-  sprintf((char *)sw.transitions_movie_filename_format, "%s/%s-movie", data_dir, filename);
-  mkdir(sw.transitions_movie_filename_format, 0777);
-  sprintf((char *)sw.transitions_movie_filename_format,
-          "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
+  if (generate_movies) {
+    sw.transitions_movie_filename_format = new char[1024];
+    sprintf((char *)sw.transitions_movie_filename_format, "%s/%s-movie", data_dir, filename);
+    mkdir(sw.transitions_movie_filename_format, 0777);
+    sprintf((char *)sw.transitions_movie_filename_format,
+            "%s/%s-movie/%%06d-transitions.dat", data_dir, filename);
 
-  sw.dos_movie_filename_format = new char[1024];
-  sprintf((char *)sw.dos_movie_filename_format,
-          "%s/%s-movie/%%06d-lndos.dat", data_dir, filename);
+    sw.dos_movie_filename_format = new char[1024];
+    sprintf((char *)sw.dos_movie_filename_format,
+            "%s/%s-movie/%%06d-lndos.dat", data_dir, filename);
 
-  sw.lnw_movie_filename_format = new char[1024];
-  sprintf((char *)sw.lnw_movie_filename_format,
-          "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
-
-  char *histogram_movie_filename_format = new char[1024];
-  sprintf(histogram_movie_filename_format,
-          "%s/%s-movie/%%06d-E.dat", data_dir, filename);
+    sw.lnw_movie_filename_format = new char[1024];
+    sprintf((char *)sw.lnw_movie_filename_format,
+            "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
+  }
 
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls
@@ -796,6 +798,7 @@ int main(int argc, const char *argv[]) {
 
       char *countinfo = new char[4096];
       double *ln_dos = sw.compute_ln_dos(transition_dos);
+      int converged_state = sw.converged_to_state();
       sprintf(countinfo,
               "# iterations: %li\n"
               "# working moves: %li\n"
@@ -805,7 +808,7 @@ int main(int argc, const char *argv[]) {
               "# converged temperature: %g\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total,
-              sw.converged_to_state(),
+              converged_state,
               sw.converged_to_temperature(ln_dos));
 
       // Save energy histogram
@@ -816,8 +819,11 @@ int main(int argc, const char *argv[]) {
         fprintf(dos_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
         fprintf(dos_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
 
+        // Only output the ln_dos for energies that are essentially
+        // converged.  Otherwise we can end up with lots of wrong dos
+        // values at very low energies that we have to remove later.
         fprintf(dos_out, "# energy   counts\n");
-        for (int i = 0; i < sw.energy_levels; i++) {
+        for (int i = 0; i <= converged_state; i++) {
           fprintf(dos_out, "%d  %lg\n",i,ln_dos[i]);
         }
         fclose(dos_out);

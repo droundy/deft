@@ -5,10 +5,10 @@ set -ev
 python figs/animate-dos.py lv ww1.30-ff0.20-100x10 tmi toe
 python figs/animate-histogram.py lv ww1.30-ff0.20-100x10 tmi toe
 
-python figs/animate-dos.py lv ww1.30-ff0.20-100x20 tmi toe
-python figs/animate-histogram.py lv ww1.30-ff0.20-100x20 tmi toe
+# python figs/animate-dos.py lv ww1.30-ff0.20-100x20 tmi toe
+# python figs/animate-histogram.py lv ww1.30-ff0.20-100x20 tmi toe
 
-# python figs/animate-dos.py lv N0050 tmi toe
+# # python figs/animate-dos.py lv N0050 tmi toe
 python figs/animate-dos.py lv N0500-0.1 tmi toe
 python figs/animate-dos.py lv N0500-0.2 tmi toe
 python figs/animate-dos.py lv N0500-0.3 tmi toe
