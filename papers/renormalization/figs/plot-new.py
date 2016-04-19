@@ -39,7 +39,7 @@ for i in i_values:
     etas = Ns*4*np.pi/3*R**3/V
 
     Uexc = gatherandcalculate.Uexc(lndos, energy, Ts)
-    Fexc = gatherandcalculate.Fexc(dbase, lndos, energy, Ts)
+    Fexc = gatherandcalculate.Fexc(dbase, lndos, energy, V, Ts)
     Sexc = gatherandcalculate.Sexc(Uexc, Fexc, Ts)
 
     plt.figure('Fexc-T')
@@ -94,6 +94,8 @@ plt.savefig("figs/Shs-vs-eta.pdf")
 
 plt.figure('Fexc-eta')
 plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
+plt.xlim(0,0.6)
+plt.ylim(-5,50)
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')
