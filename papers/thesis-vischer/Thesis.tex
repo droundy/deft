@@ -86,7 +86,7 @@
 \section{Introduction}
 \subsection{Motivation}
 Fluids have long garnered interest\cite{theorysimpleliquids}\cite{theoryofcrits}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor are indistinguishable and, more importantly, large fluctuations of fluid density occur. Most traditional fluid models assume the density across the cell to be nearly constant. As a result, these methods tend to poorly handle these fluctuations near criticality. 
-Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization-group (``GRG'') formalism to find the absolute Helmholtz free energy of systems near criticality.\\
+Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization-group formalism (``GRG'') to find the absolute Helmholtz free energy of systems near criticality.\\
 
 Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success, particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating a vast number of cells, varying the parameter each time, to find the most well-suited value for a particular fluid. We present a non-fitted approach that is GRG-minded from the ground up. We exploit the periodicity of Monte-Carlo methods to decompose large cells in the thermodynamic limit into small cells that only allow certain fluctuation wavelengths. We then carefully couple simulations of different ``doubling regimes'', each of which considers a different maximum wavelength of fluctuations, where the number density remains fixed but the volume and number have increased. Summing the difference in absolute Helmholtz free energy $\Delta F^{\text{abs}}$ between doubling regimes will then approximate the absolute free energy of the full cell, including near criticality. Finding absolute free energies is a somewhat challenging problem, but is certainly surmountable with more Monte Carlo. \\
 We will begin by outlining the necessary models and assumptions/approximations for this work. We will then detail the algorithms used to compute the quantities with the the discussion on results following. 
@@ -107,7 +107,7 @@ The energy of the fluid is then always an integer multiple of the well depth $\e
 
 \begin{figure}
     \centering
-    \includegraphics[width=.75\textwidth]{SWF-E.png}
+    %\includegraphics[width=.75\textwidth]{SWF-E.png}
     \caption{Demonstration of Square-Well approximation.}
     \label{sw_phi}
 \end{figure}
@@ -115,7 +115,7 @@ The energy of the fluid is then always an integer multiple of the well depth $\e
 The critical point is the temperature and pressure (or any other thermodynamic pairing) on a phase diagram (shown in Figure ~\ref{phase}) where the line between liquid and vapor terminates - liquid and vapor become indistinguishable and are assimilated into the ``fluid'' phase. Many interesting effects occur here, including the well-researched phenomena of critical opalescence. The correlation length, naively interpreted here as the maximum existing wavelength of the density fluctuations within the fluid, diverges to infinity near criticality. As mentioned previously, the diverging of the correlation length invalidates SAFT and many of its variants which assume constant density. 
 \begin{figure}
     \centering
-    \includegraphics[width=.75\textwidth]{phase.png}
+    %\includegraphics[width=.75\textwidth]{phase.png}
     \caption{Phase transitions of water with critical point and triple point identified.}
     \label{phase}
 \end{figure}
@@ -471,13 +471,13 @@ An important remaining question is whether there is a preferred choice of minimu
 Figures ~\ref{F-T} and ~\ref{F-eta} show preliminary free energy calculations.
 \begin{figure}[H]
 \centering
-    \includegraphics[width=.75\textwidth]{ww130-L03-i1_F-T.pdf}
+    %\includegraphics[width=.75\textwidth]{ww130-L03-i1_F-T.pdf}
     \caption{Preliminary results for absolute specific free energy as a function of temperature with each quantity scaled by well depth $\epsilon$. The vertical line at $T/\epsilon = 0.3$ is the lowest temperature at which our statistics are trustworthy.}
     \label{F-T}
 \end{figure}
 \begin{figure}
 \centering
-    \includegraphics[width=.75\textwidth]{ww130-L03-F_i1_fixed_i.pdf}
+    %\includegraphics[width=.75\textwidth]{ww130-L03-F_i1_fixed_i.pdf}
     \caption{Preliminary results for free energy as a function of density.}
     \label{F-eta}
 \end{figure}
