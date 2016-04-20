@@ -68,23 +68,10 @@ for N in Ns:
     print('mkdir -p '+dirname)
     os.system('mkdir -p '+dirname)
 
-    success_ratios = []
-    all_total_checks = []
-    all_valid_checks = []
-    steps = 20 # Need a better value for this
-    step_size = 0.05 # This too
-    steps = 20
     sim_runs = 1000000
     sc_period = int(max(10, 1*N*N/10))
 
     ff_goal = (4*np.pi/3*R**3)*N/(L_i)**3 # this is the density
-
-    # ffs = np.zeros(steps+1)
-    # ffs[0] = (4/3.0)*pi*R**3/L**3                # Deprecated; kept for posterity.
-    # for j in xrange(steps):
-    #     if j!= 0 and j % 4 == 0:
-    #         step_size = step_size * 0.5
-    #     ffs[j+1] = ffs[j] + step_size
 
     for j in xrange(len(ffs)-2):
         filename = '%05d' % (j)
@@ -92,9 +79,7 @@ for N in Ns:
         ff_next = ffs[j+1]
         if ffs[j+2] > ff_goal:
             ff_next = ff_goal
-            if j==0:#doubly special case where infinite is first and last
-                ff=ff_next
-            
+
         output_file_path = dirname+'/'+filename
         if not os.path.isfile(output_file_path+'.dat') and not os.path.isfile(output_file_path+'.dat'):
             print "Was checking for", output_file_path
@@ -106,7 +91,7 @@ for N in Ns:
             cmd += ' nice -19' # don't hog the CPU
             if j==0:
                 cmd += ' ../../../free-energy-monte-carlo-infinite-case'
-                cmd += ' --ff_small %g' % ff
+                cmd += ' --ff_small %g' % ff_next
                 # do infinite case for first step always
                 cmd += ' --counts %d' % sim_runs
             else:
