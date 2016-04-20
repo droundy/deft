@@ -42,11 +42,12 @@ if '-O' in sys.argv:  # Check for overwrite flag in arguments
     print(cmd_fe)
     os.system(cmd_fe)
 else:
-    cmd_fe = 'python run-absolute.py %d %g %g "%s"' % (i,ww,L,Ns)
-    if have_srun:
-        cmd_fe += ' --srun'
-    print(cmd_fe)
-    os.system(cmd_fe)
+    if '--no-abs' not in sys.argv:
+        cmd_fe = 'python run-absolute.py %d %g %g "%s"' % (i,ww,L,Ns)
+        if have_srun:
+            cmd_fe += ' --srun'
+        print(cmd_fe)
+        os.system(cmd_fe)
 
     cmd_mc = "python run-monte-carlo.py %d %g %g '%s'" %(i,ww,L,Ns)
     if have_srun:

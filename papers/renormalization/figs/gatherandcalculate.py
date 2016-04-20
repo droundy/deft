@@ -88,24 +88,32 @@ def Uexc(ln_dos, energy, Ts):
             U[k,j] = sum(energy[N]*dos_boltz)/sum(dos_boltz)
     return U
 
-def Fexc(dbase, ln_dos, energy, Ts):
+def Fexc(dbase, ln_dos, energy, volume, Ts):
     Ns = ln_dos.keys()
     Ns.sort()
     F = np.zeros((len(Ts), len(Ns)))
     for j in range(len(Ns)):
         N = Ns[j]
+        eta = N*4*np.pi/3/volume
+        Sexc_CS = -N*(4*eta-3*eta**2)/(1-eta)**2
         try:
             Sexc_HS = Sexc_hardsphere(dbase, N)
-            for k in range(len(Ts)):
-                T = Ts[k]
-                ln_dos_boltz = ln_dos[N] - energy[N]/T
-                # Subtract of ln_dos_boltz.max() to keep dos_boltz reasonable
-                dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
-                Z = sum(dos_boltz)
-                Zinf = sum(np.exp(ln_dos[N] - ln_dos_boltz.max()))
-                F[k,j] = -T*Sexc_HS - T*np.log(Z/Zinf)
+            if Sexc_HS == 0:
+                # fall back on assuming Carnahan-Starling excess entropy
+                # when we do not have a direct Monte Carlo result.
+                Sexc_HS = Sexc_CS
         except:
-            F[:,j] = 0 # set it to zero when we do not know the hard-sphere entropy
+            # fall back on assuming Carnahan-Starling excess entropy
+            # when we do not have a direct Monte Carlo result.
+            Sexc_HS = Sexc_CS
+        for k in range(len(Ts)):
+            T = Ts[k]
+            ln_dos_boltz = ln_dos[N] - energy[N]/T
+            # Subtract of ln_dos_boltz.max() to keep dos_boltz reasonable
+            dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
+            Z = sum(dos_boltz)
+            Zinf = sum(np.exp(ln_dos[N] - ln_dos_boltz.max()))
+            F[k,j] = -T*Sexc_HS - T*np.log(Z/Zinf)
     return F
 
 def Sexc(Uexc, Fexc, Ts):

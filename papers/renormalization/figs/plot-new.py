@@ -39,7 +39,7 @@ for i in i_values:
     etas = Ns*4*np.pi/3*R**3/V
 
     Uexc = gatherandcalculate.Uexc(lndos, energy, Ts)
-    Fexc = gatherandcalculate.Fexc(dbase, lndos, energy, Ts)
+    Fexc = gatherandcalculate.Fexc(dbase, lndos, energy, V, Ts)
     Sexc = gatherandcalculate.Sexc(Uexc, Fexc, Ts)
 
     plt.figure('Fexc-T')
@@ -68,7 +68,7 @@ for i in i_values:
     for k in Tnum_to_plot:
         ok = Uexc[k,:] != 0
         if Ts[k] in u_temperature_color:
-            plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], linetype[i]+u_temperature_color[Ts[k]])
+            plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], 'x'+linetype[i]+u_temperature_color[Ts[k]])
         else:
             u_temperature_color[Ts[k]] = all_colors[next_color]
             next_color = (next_color+1) % len(all_colors)
@@ -77,7 +77,7 @@ for i in i_values:
 
     plt.figure('HS')
     Sexcs, NNs = gatherandcalculate.Sexc_hardsphere_Ns(dbase)
-    print Sexcs
+    print NNs
     plt.plot(NNs*4*np.pi/3*R**3/V, Sexcs/NNs, linetype[i]+'k')
 
 
@@ -94,6 +94,8 @@ plt.savefig("figs/Shs-vs-eta.pdf")
 
 plt.figure('Fexc-eta')
 plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
+plt.xlim(0,0.6)
+plt.ylim(-5,50)
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')
