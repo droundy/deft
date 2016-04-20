@@ -92,6 +92,8 @@ for N in Ns:
         ff_next = ffs[j+1]
         if ffs[j+2] > ff_goal:
             ff_next = ff_goal
+            if j==0:#doubly special case where infinite is first and last
+                ff=ff_next
             
         output_file_path = dirname+'/'+filename
         if not os.path.isfile(output_file_path+'.dat') and not os.path.isfile(output_file_path+'.dat'):
