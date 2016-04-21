@@ -27,7 +27,7 @@ if len(sys.argv) >= 5 and sys.argv[4][0] == '[': # Hokey!!!
 else:
     Ns = range(2,4*(8**i)+1)
 
-have_srun = os.system('srun true') == 0
+have_srun = os.system('squeue') == 0
 
 if '-O' in sys.argv:  # Check for overwrite flag in arguments
     cmd_mc = "python run-monte-carlo.py %d %g %g '%s' -O" %(i,ww,L,Ns)
