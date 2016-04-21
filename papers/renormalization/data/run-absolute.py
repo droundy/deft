@@ -80,8 +80,8 @@ for N in Ns:
         if ffs[j+2] > ff_goal:
             ff_next = ff_goal
 
-        output_file_path = dirname+'/'+filename
-        if not os.path.isfile(output_file_path+'.dat') and not os.path.isfile(output_file_path+'.dat'):
+        output_file_path = dirname+'/'+filename+'.dat'
+        if not os.path.isfile(output_file_path):
             print "Was checking for", output_file_path
             if have_srun:
                 cmd = 'srun -J L%04.2f/i%01d/N%03d/abs/%s' % (L,i,N, filename)
@@ -116,7 +116,7 @@ for N in Ns:
         if ffs[j+2] > ff_goal:
             # We are all done now!
             # This automagically handles when ff > ff_goal!
-            break    
+            break
 
 if jobs_submitted == 0:
     print "Nothing needs to be done from run-absolute!"
