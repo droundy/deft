@@ -57,7 +57,7 @@ for N in Ns:
     # The maximum free energy is near the point where
     # Carnahan-Starling predict a filling fraction of 0.7, which is
     # not reasonable to simulate.
-    approximate_free_energies = np.arange(np.log(2), 3*N, np.log(2))/N
+    approximate_free_energies = np.arange(np.log(2), 3000*N, np.log(2))/N
     ffs = np.zeros_like(approximate_free_energies)
     for k in xrange(len(ffs)):
         ffs[k] = free_energy_over_kT_to_ff(approximate_free_energies[k])
