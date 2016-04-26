@@ -82,7 +82,7 @@ for i in i_values:
 
 
 plt.figure('HS')
-eta = np.arange(0.01, 0.4, 0.01)
+eta = np.arange(0.01, 0.5, 0.01)
 n = eta/(4*np.pi/3*R**3)
 Scs = -(4*eta-3*eta**2)/(1-eta)**2
 plt.plot(eta, Scs, ':', label='Carnahan-Starling')
@@ -110,6 +110,7 @@ plt.savefig("figs/Uexc-vs-eta.pdf")
 
 plt.figure('Fexc-T')
 plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww, L))
+plt.xlim(0,10)
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')
