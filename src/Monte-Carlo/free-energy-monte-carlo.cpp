@@ -633,7 +633,7 @@ int main(int argc, const char *argv[]) {
     sw.optimistic_samples[i] = 0;
   }
 
-  while (valid_runs <= simulation_runs) {
+  do {
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
     // ---------------------------------------------------------------
@@ -727,7 +727,7 @@ int main(int argc, const char *argv[]) {
 
       delete[] countinfo;
     }
-  }
+  } while (valid_runs < simulation_runs);
   // ----------------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------

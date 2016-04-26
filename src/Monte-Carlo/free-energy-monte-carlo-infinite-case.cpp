@@ -448,7 +448,7 @@ int main(int argc, const char *argv[]) {
   }
 
   long counts = 0;
-  while(counts <= simulation_counts) {
+  do {
     sw.iteration++;   // not calling move_a_ball(), so end_move_updates() is never called
     // ---------------------------------------------------------------
     // Move each ball once, add to energy histogram
@@ -510,7 +510,7 @@ int main(int argc, const char *argv[]) {
 
       delete[] countinfo;
     }
-  }
+  } while (counts < simulation_counts);
   // ----------------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
