@@ -154,11 +154,6 @@ A derivation of the two energy contributions for a monoatomic fluid follows. \\
 
 
 
-
-
-
-
-
 {\color{red} [This should probably go in an appendix. Further: replace $Z_C$ with $Z_{exc}$; fix the to the N on the $Z_{exc}$ term; include the $N!$ into the ideal term; fix the $V(r_1, r_2, ...)$||| All done! NOW: fix the dimensions on the $Z_{id}$ term!]}
 
 We begin with the canonical form of the canonical ensemble partition function $Z$:
@@ -428,8 +423,8 @@ In order to determine the filling fraction step size during thermodynamic integr
     F(\eta) &= \frac{4\eta - 3\eta^2}{(1-\eta)^2}   
     \label{C-S-eq}  
 \end{align} 
-where $\eta$ is the filling fraction. The Carnahan-Starling equation of state is an excellent approximation for low-density hard spheres. Close to solidification, near $\eta_{freeze} \approx .5$, this equation of state fails. Thankfully, we are only concerned with filling fractions slightly or significantly below this value, and so the Carnahan-Starling equation of state is an invaluable tool.\\ \ignore{BLAH}
-Combining Eq.~\ref{C-S-eq} with a simple bisection method allows for control of the filling fraction step size given a desired change in free energy. We determined that steps yielding an approximate change in specific absolute free energy of $\Delta F^{abs}/NT = \ln(2)$ through trial and error - smaller step sizes unnecessarily increased simulation time and larger step sizes tended to shrink too quickly causing the simulation to miss relevant states in the system. 
+where $\eta$ is the filling fraction. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, we are only concerned with filling fractions slightly or significantly below this value, and so the Carnahan-Starling equation of state is an invaluable tool.\\
+Combining Eq.~\ref{C-S-eq} with a simple bisection method allows for control of the filling fraction step size given a desired change in free energy. We determined that steps yielding an approximate change in specific absolute free energy of $\Delta F^{abs}/NT = \ln(2)$ through trial and error - smaller step sizes unnecessarily increased simulation time and larger step sizes tended to shrink too quickly causing the simulation to miss relevant states in the system. This step size corresponds to changing the entropy by $1/2$ each step. 
 
 \ignore{NB: is there a more physical reason we chose this filling fraction increase?}
 
@@ -468,13 +463,14 @@ The partition function now calculates the total number of states in the system w
 \section{Results}
 An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would [might?] expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We are primarily concerned with the ``scrunched'' case where the cell length is $\sqrt2\sigma$.
 
-Figures ~\ref{F-T} and ~\ref{F-eta} show preliminary free energy calculations.
+Figures ~\ref{F-T} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each  It is worth noting that the two succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.  
 \begin{figure}[H]
 \centering
     \includegraphics[width=.75\textwidth]{Fexc-vs-T.pdf}
-    \caption{Preliminary results for excess specific free energy as a function of temperature with each quantity scaled by well depth $\epsilon$. The vertical line at $T/\epsilon = 0.3$ is the lowest temperature at which our statistics are trustworthy.}
+    \caption{Excess specific free energy as a function of temperature with each quantity scaled by well depth $\epsilon$. }
     \label{F-T}
 \end{figure}
+
 
 
 \begin{figure}
@@ -487,7 +483,7 @@ Figures ~\ref{F-T} and ~\ref{F-eta} show preliminary free energy calculations.
 
 
 \begin{figure}
-\centering
+    \centering
     \includegraphics[width=.75\textwidth]{Uexc-vs-eta.pdf}
     \caption{Preliminary results for free energy as a function of density. Solid line represents first doubling regime, [more]}
     \label{U-eta}
