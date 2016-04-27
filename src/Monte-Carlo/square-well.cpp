@@ -1613,18 +1613,11 @@ bool sw_simulation::printing_allowed(){
   const double max_time_skip = 60*30; // 1/2 hour
   static double time_skip = 30; // seconds
   static int every_so_often = 0;
-  static int how_often = 1;
-  // clock can be expensive, so this is a heuristic to reduce our use of it.
-  if (++every_so_often % how_often == 0) {
-    const clock_t time_now = clock();
-    if(time_now-last_print_time > time_skip*double(CLOCKS_PER_SEC)){
-      how_often = 1+ 2*every_so_often/3; // our simple heuristic
-      last_print_time = time_now;
-      every_so_often = 0;
-      fflush(stdout); // flushing once a second will be no problem and can be helpful
-      time_skip = min(1.3*time_skip, max_time_skip);
-      return true;
-    }
+  if (++every_so_often > time_skip/estimated_time_per_iteration) {
+    every_so_often = 0;
+    fflush(stdout); // flushing once a second will be no problem and can be helpful
+    time_skip = min(1.3*time_skip, max_time_skip);
+    return true;
   }
   return false;
 }

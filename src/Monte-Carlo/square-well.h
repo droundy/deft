@@ -158,7 +158,7 @@ struct sw_simulation {
   void energy_change_updates(int energy_change); // updates to run if we've changed energy
 
   // the last time we printed status text (i.e. from initialization)
-  clock_t last_print_time;
+  double estimated_time_per_iteration; // in units of seconds per iteration
 
   // iterate long enough to find the max entropy state and initialize
   // the translation distance. return most probable energy
@@ -260,7 +260,9 @@ struct sw_simulation {
   }
 
   sw_simulation(){
-    last_print_time = clock();
+    // seconds per iteration (should be determined from actual timing,
+    // but this timing is about right for 50 spheres)
+    estimated_time_per_iteration = 4e-5;
     transitions_filename = 0; // default to NULL pointer here for safety.
     transitions_movie_filename_format = 0; // default to NULL pointer here for safety.
     dos_movie_filename_format = 0; // default to NULL pointer here for safety.

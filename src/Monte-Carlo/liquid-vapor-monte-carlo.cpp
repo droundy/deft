@@ -742,6 +742,7 @@ int main(int argc, const char *argv[]) {
       continue; // We want to time just the iterations (including collecting histogram data.
     } else if (sw.iteration == 10*sw.N) {
       double time_for_N_iterations = took("first 10*N iterations");
+      sw.estimated_time_per_iteration = time_for_N_iterations/10/sw.N;
       sw.set_min_important_energy();
       sw.set_max_entropy_energy();
       if (tmi) {
@@ -1011,5 +1012,9 @@ static double took(const char *name) {
   }
   fflush(stdout);
   last_time = t;
-  return seconds;
+  // We round our times to a close power of e to make our code more
+  // likely to be reproducible, i.e. so two runs with identical
+  // parameters (including random number seed) should (unless we are
+  // unlucky) result in identical output.
+  return exp(ceil(log(seconds)));
 }
