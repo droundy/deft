@@ -11,7 +11,7 @@ matplotlib.rc('text', usetex=True)
 
 import gatherandcalculate
 
-all_colors = ['r','g','b','k','c','m','y']
+all_colors = ['g','b','r','k','c','m','y']
 
 temperature_color = {}
 u_temperature_color = {}
@@ -30,6 +30,7 @@ ww = 1.3
 R = 1
 i_values = [1,2]
 next_color = 0
+next_u_color = 0
 for i in i_values:
     print 'working on iteration', i
     dbase = 'data/scrunched-ww%04.2f-L%04.2f/i%01d' % (ww, L,  i)
@@ -70,8 +71,8 @@ for i in i_values:
         if Ts[k] in u_temperature_color:
             plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], 'x'+linetype[i]+u_temperature_color[Ts[k]])
         else:
-            u_temperature_color[Ts[k]] = all_colors[next_color]
-            next_color = (next_color+1) % len(all_colors)
+            u_temperature_color[Ts[k]] = all_colors[next_u_color]
+            next_u_color = (next_u_color+1) % len(all_colors)
             plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], linetype[i]+u_temperature_color[Ts[k]],
                      label=r'$T = %g$' % Ts[k])
 
