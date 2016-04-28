@@ -591,6 +591,7 @@ int main(int argc, const char *argv[]) {
 
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
+          "# version: %s\n"
           "# cell dimensions: (%g, %g, %g)\n"
           "# walls: %i\n"
           "# de_g: %g\n"
@@ -603,6 +604,7 @@ int main(int argc, const char *argv[]) {
           "# scaling factor: %g\n"
           "# ff: %g\n"
           "# ff_small: %g\n",
+          version_identifier(),
           sw.len[0], sw.len[1], sw.len[2], sw.walls, de_g, seed, sw.N, R,
           well_width, sw.translation_scale, neighbor_scale, scaling_factor, ff, ff_small);
 

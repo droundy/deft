@@ -417,6 +417,7 @@ int main(int argc, const char *argv[]) {
 
   char *headerinfo = new char[4096];
   sprintf(headerinfo,
+          "# version: %s\n"
           "# cell dimensions: (%g, %g, %g)\n"
           "# de_g: %g\n"
           "# seed: %li\n"
@@ -425,6 +426,7 @@ int main(int argc, const char *argv[]) {
           "# well_width: %g\n"
           "# neighbor_scale: %g\n"
           "# ff_small: %g\n",
+          version_identifier(),
           sw.len[0], sw.len[1], sw.len[2], de_g, seed, sw.N, R,
           well_width, neighbor_scale, ff_small);
 
