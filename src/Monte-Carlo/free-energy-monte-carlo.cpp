@@ -9,6 +9,7 @@
 #include "vector3d.h"
 #include "Monte-Carlo/square-well.h"
 #include "Monte-Carlo/InitBox.h"
+#include "version-identifier.h"
 
 // ------------------------------------------------------------------------------
 // Notes on conventions and definitions used
@@ -88,6 +89,11 @@ bool pack_cube(sw_simulation &sw);
 INITBOX *load_cube(char *data_dir);
 
 int main(int argc, const char *argv[]) {
+  printf("Running %s version %s\n", argv[0], version_identifier());
+  for (int i=0; argv[i]; i++) {
+    printf("%s ", argv[i]);
+  }
+  printf("\n");
   took("Starting program");
   // ----------------------------------------------------------------------------
   // Define "Constants" -- set from arguments then unchanged
