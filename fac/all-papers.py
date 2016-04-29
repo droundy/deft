@@ -33,6 +33,7 @@ for project in ['thesis-roth']:
 # Add thesis-vischer/Thesis.tex here when figures are available
 other_texs = """
    histogram/thesis/thesis.tex
+   thesis-vischer/Thesis.tex
 """.split()
 
 for tex in other_texs:

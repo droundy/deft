@@ -28,13 +28,13 @@ def lndos_energy_Ns(dbase):
 def Sexc_hardsphere_Ns(dbase):
     Ns = []
     S = []
-    for N in range(2,100): # maybe go higher?
+    for N in range(2,600): # maybe go higher?
         fbase = '%s/N%03d/absolute/' % (dbase, N)
         # we only try to add this N value if we have one .dat file,
         # and our number of .dat files is the same as our number of
         # .out files.  If the latter is not true, we probably have not
         # finished running the absolute simulations.
-        if os.path.isfile(fbase+'00000.dat') and len(glob.glob(fbase+'*.dat')) == len(glob.glob(fbase+'*.out')):
+        if os.path.isfile(fbase+'Sexc.dat') or (os.path.isfile(fbase+'00000.dat') and len(glob.glob(fbase+'*.dat')) == len(glob.glob(fbase+'*.out'))):
             try:
                 thisS = Sexc_hardsphere(dbase, N)
                 S.append(thisS)
@@ -45,6 +45,10 @@ def Sexc_hardsphere_Ns(dbase):
 
 def Sexc_hardsphere(dbase, N):
     fbase = '%s/N%03d/absolute/' % (dbase, N)
+    if os.path.isfile(fbase+'Sexc.dat'):
+        foo = np.loadtxt(fbase+'Sexc.dat')
+        print foo, foo.shape
+        return foo
     S = 0
     # loop over files in the ./absolute/ directory
     j = 0

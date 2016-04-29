@@ -1,0 +1,28 @@
+# version: 0.0.0-704-g91cdea9
+# well_width: 1.3
+# ff: 0.01428642677356141
+# N: 5
+# walls: 0
+# cell dimensions: (11.36, 11.36, 11.36)
+# seed: 0
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 46
+# min_T: 0.5
+
+# pessimmistic_min_samples: 10000
+# iterations: 21167367
+# working moves: 97505984
+# total moves: 105836835
+# acceptance rate: 0.921286
+# converged state: 1
+# converged temperature: 0.84286
+
+# max_entropy_state: 0
+# min_important_energy: 1
+
+# energy   counts
+0  0
+1  -1.18644

@@ -1,0 +1,69 @@
+# version: 0.0.0-702-g1918bc5-dirty
+# well_width: 1.3
+# ff: 0.2742993940523791
+# N: 12
+# walls: 0
+# cell dimensions: (5.68, 5.68, 5.68)
+# seed: 12669272705837082721
+# de_g: 0.05
+# de_density: 0.1
+# translation_scale: 0.1
+# neighbor_scale: 2
+# energy_levels: 109
+# min_T: 0.5
+
+# pessimmistic_min_samples: 10000
+# iterations: 31320852
+# working moves: 220038335
+# total moves: 375850224
+# acceptance rate: 0.585442
+# converged state: 42
+# converged temperature: 0.500402
+
+# max_entropy_state: 25
+# min_important_energy: 42
+
+# energy   counts
+0  0
+1  0
+2  0
+3  0
+4  0
+5  0
+6  0
+7  0
+8  0
+9  0
+10  0
+11  0
+12  0
+13  3.73767
+14  6.26387
+15  8.34604
+16  10.2429
+17  11.8833
+18  13.2629
+19  14.4342
+20  15.3919
+21  16.1493
+22  16.7167
+23  17.1038
+24  17.3179
+25  17.3686
+26  17.2618
+27  17.0022
+28  16.5938
+29  16.0468
+30  15.3644
+31  14.5498
+32  13.6118
+33  12.5533
+34  11.3812
+35  10.0997
+36  8.71313
+37  7.22807
+38  5.64332
+39  3.95864
+40  2.17458
+41  0.281165
+42  -1.71723
