@@ -34,7 +34,7 @@ def Sexc_hardsphere_Ns(dbase):
         # and our number of .dat files is the same as our number of
         # .out files.  If the latter is not true, we probably have not
         # finished running the absolute simulations.
-        if os.path.isfile(fbase+'Sexc.dat') or (os.path.isfile(fbase+'00000.dat') and len(glob.glob(fbase+'*.dat')) == len(glob.glob(fbase+'*.out'))):
+        if os.path.isfile(fbase+'Sexc.dat') or (len(glob.glob(fbase+'*.dat')) == len(glob.glob(fbase+'*.out')) and os.path.isfile(fbase+'00000.dat')):
             try:
                 thisS = Sexc_hardsphere(dbase, N)
                 S.append(thisS)
