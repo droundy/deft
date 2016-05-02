@@ -241,28 +241,27 @@ For liquids, the $Z_{exc}$ term tends to be difficult to evaluate; the hard sphe
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Methods}
-This work requires the intersection of three methods to calculate the total absolute free energy $F^{abs}_{tot}$ of the bulk cell. A preliminary value of the free energy of the bulk can be obtained from Monte-Carlo simulations. This value can then be made absolute by carefully comparing the results with Thermodynamic Integration, a method of determining the excess free energy of a system. [more] 
+This work requires the intersection of three methods to calculate the absolute free energy $F^{abs}_{tot}$ of the bulk cell. A preliminary value of the free energy of the bulk can be obtained from Monte-Carlo simulations. This value can then be made absolute by carefully comparing the results with Thermodynamic Integration, a method of determining the excess free energy of a system. [more !fixme] 
 \subsection{Monte-Carlo Methods}
 Monte-Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. Statistical mechanics, however, does not exhibit this independence. Each time the man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of traditional Monte Carlo methods, Markov chain (specifically the Metropolis-Hastings algorithm) Monte Carlo is the natural decision.
 \subsubsection{Markov Chain}
-Markov chain methods eschew the true randomness of regular Monte Carlo by taking the current configuration into account before moving. 
-This method can lead to unsavory correlations in samples, but this danger is far outweighed by the usefulness of modeling systems where direct sampling is nigh impossible.
-\begin{figure}
-    \begin{tikzpicture}
-    \end{tikzpicture}
-\end{figure}
+Markov chain methods eschew the true randomness of regular Monte Carlo by taking the current configuration into account before moving. If we define the initial state of the system by a vector column $\mathbf{q}$ (where the components refer to general coordinates, typically taken to be position of each sphere), and the resulting state $\mathbf{p}$ after a single time step, the relationship
+\begin{align*}
+    \mathbf{q} &= \mathcal{P}\, \mathbf{p}\\
+\end{align*}
+defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square matrix (as long as the number of coordinates remain fixed) that contains information about these transitions. We call this construction $\mathcal{P}$ the {\it transition matrix}. The transition matrix's $i^{\text{th}}$ eigenvalue the probability of the $i^{\text{th}}$ state occurring which, for the canonical ensemble. If all elements of the transition matrix are nonzero, we can see that any state of the system is reachable after a finite number of transitions from any given initial state. A physically judicious choice of transition matrix is one that satisfies the thermodynamic steady state condition; given the equilibrium state $\mathbf{q}_{eq}$, we enforce that
+\begin{align*}
+    \mathcal{P}\,\mathbf{q}_{eq} &= \mathbf{q}_{eq}
+\end{align*}
+The transition matrix thusly embodies the physics of the simulations [more?]
 
-\begin{figure}
-    \caption{Monte-Carlo contrasted with Markov-Chain Monte-Carlo (This might be difficult...)}
-\end{figure}
 \ignore{\subsubsection{Histogram Methods}
 Histograms are graphical representation of ``counting'' data. Monte Carlo histogram methods simply track the number of times the system has visited a particular energy. If the transition matrix 
 \begin{figure}
     \caption{Sample histogram.}
 \end{figure}}
 \subsection{Broad Histogram Monte-Carlo}
-[Things about broad histogram methods]
-Broad histograms are focused entirely on determining the density of states $D(E)$ for a given system. [more]
+If one records the energy of the system at each time step, it is straightforward to construct a histogram of energies. 
 
 {\color{red} succeeding text may be worthless.}
 
@@ -494,37 +493,37 @@ The excess hard sphere entropy $T_{HS,~exc}$ is calculated directly from thermod
 \section{Results}
 An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would [might?] expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We are primarily concerned with the ``scrunched'' case where the cell length is $\sqrt2\sigma$.
 
-Figures ~\ref{F-T} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each  It is worth noting that the two succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.  
-\begin{figure}[H]
+Figures ~\ref{F-T} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each plot contains calculations from the first doubling regime ($L=2\lambda_0$) represented by solid lines and second doubling regime ($L = 4\lambda_0$) in dashes. It is worth noting that the succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.\\  
+\begin{figure}  
 \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Fexc-vs-T.pdf}
     \caption{Excess specific free energy as a function of temperature with each quantity scaled by well depth $\epsilon$. }
     \label{F-T}
 \end{figure}
 
-
+Figure \ref{F-T} shows expected behavior. As a function of temperature, the excess free energy monotonically increases for all densities tested. We see a positive free energy because $F = U -TS$; as temperature increases without bound, entropy remains negative and [blah blah more].\\
 
 \begin{figure}
 \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Shs-vs-eta.pdf}
-    \caption{Hard sphere entropy as a function of density.}
+    \caption{Excess hard sphere entropy as a function of density.}
     \label{Shs-eta}
 \end{figure}
 \ignore{Filling fraction or density? Value in distinction? We never use number density for the sake of units...}
-
+Figure \ref{Shs-eta} shows the computed excess entropy as a function of density. We see that the both the first and second doubling regime closely match the Carnahan-Starling prediction for the entropy. After freezing, the first doubling regime veers from the prediction by the Carnahan-Starling equation of state.\\
 
 \begin{figure}
     \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Uexc-vs-eta.pdf}
-    \caption{Preliminary results for free energy as a function of density. Solid line represents first doubling regime, [more]}
+    \caption{Excess internal energy as a function of density. The $x$ markers connected by dashed lines delineate second doubling regime densities that were simulated.}
     \label{U-eta}
 \end{figure}
-
+We see in Figure~\ref{U-eta} that the excess internal energy, as we would expect, becomes more negative as the density increases. The lower the temperature, the more ``clumped'' the system becomes, resulting in lower internal energies.
 
 \begin{figure}
 \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Fexc-vs-eta.pdf}
-    \caption{Preliminary results for free energy as a function of density. Solid line represents first doubling regime, [more]}
+    \caption{Excess specific free energy as a function of density.}
     \label{F-eta}
 \end{figure}
 
@@ -553,10 +552,7 @@ If the decomposition procedure outlined previously proves successful, the absolu
 
 
 \section{Conclusion}
-
-
-\subsection{Future Research}
-There are many other models that GRGT might be applicable to, such as the soft-sphere liquid or soft polyhedra.
+We have presented a method by which the properties of bulk fluids can be estimated by decomposing the bulk into individual cells in a renormalization-minded manner by exploiting the critical behavior of fluids. The free energy contribution of each length scale can then be investigated and compared, both to determine the most energetic density fluctuations and to provide calculations that serve as a intermediate comparison with SAFT methods. This method is immediately applicable to any system where the energy of a configuration is straightforward to compute (that is, relatively inexpensive computationally). We presented an application for a system that obeys the canonical ensemble, but the extension to the grand canonical ensemble can be done with little modification.  
 %\bibliographystyle{plain}
 \bibliography{Thesis}
 \end{document}
