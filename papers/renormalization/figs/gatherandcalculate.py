@@ -114,9 +114,17 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
             T = Ts[k]
             ln_dos_boltz = ln_dos[N] - energy[N]/T
             # Subtract of ln_dos_boltz.max() to keep dos_boltz reasonable
-            dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
+            offset = ln_dos_boltz.max()
             Z = sum(dos_boltz)
-            Zinf = sum(np.exp(ln_dos[N] - ln_dos_boltz.max()))
+            Zinf = sum(np.exp(ln_dos[N] - offset))
+            if Zinf == 0:
+                # # Here we handle the case where our offset was *so*
+                # # huge that it made Zinf underflow to zero.  We
+                # # handle this (which so far works) by not using the
+                # # offset in these cases.
+                Z = sum(dos_boltz+ offset)
+                Zinf = sum(np.exp(ln_dos[N]))
+                # print 'fixed: Z is', Z, 'and Zinf is', Zinf
             F[k,j] = -T*Sexc_HS - T*np.log(Z/Zinf)
     return F
 
