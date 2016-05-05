@@ -1,5 +1,6 @@
 #!/usr/bin/python2
 from __future__ import division
+from operator import add
 import numpy as np
 import math
 import string
@@ -115,14 +116,15 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
             ln_dos_boltz = ln_dos[N] - energy[N]/T
             # Subtract of ln_dos_boltz.max() to keep dos_boltz reasonable
             offset = ln_dos_boltz.max()
-            Z = sum(dos_boltz)
-            Zinf = sum(np.exp(ln_dos[N] - offset))
+            dos_boltz = ln_dos_boltz - offset
+            Z = sum(np.exp(ln_dos_boltz))
+            Zinf = sum(np.exp(dos_boltz))
             if Zinf == 0:
                 # # Here we handle the case where our offset was *so*
                 # # huge that it made Zinf underflow to zero.  We
                 # # handle this (which so far works) by not using the
                 # # offset in these cases.
-                Z = sum(dos_boltz+ offset)
+                Z = sum(dos_boltz + offset)
                 Zinf = sum(np.exp(ln_dos[N]))
                 # print 'fixed: Z is', Z, 'and Zinf is', Zinf
             F[k,j] = -T*Sexc_HS - T*np.log(Z/Zinf)
@@ -134,6 +136,30 @@ def Sexc(Uexc, Fexc, Ts):
         T = Ts[k]
         S[k,:] = (Uexc[k,:] - Fexc[k,:])/T
     return S
+
+# dirty Fabs function
+def Fabs(Fex, Ts, Ns, V):
+    m=1 # mass for thermal wavelength
+    hbar, kb = 1, 1 # constants always ought to be one
+    F = np.zeros_like(Fex)
+    Fid = np.zeros_like(Fex)
+    for l in range(len(Ts)):
+        for j in range(len(Ns)):
+            Lambda = hbar*np.sqrt(2*np.pi/(m*kb*Ts[l]))
+            Fid[l,j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*np.log(Ns[j])
+    F = np.add(Fex, Fid)
+    return F
+
+# dirty grand free (almost want to call it the Landau free energy..)
+def Phiabs(Fabs, mu, Ns):
+    Phiabs = np.zeros_like(Fabs)
+    for q in range(len(Ns)):
+        Phiabs[:,q] = Fabs[:,q] - mu*Ns[q]
+    print 'Phiabs is: ', Phiabs
+    return Phiabs
+
+
+
 
 # def U_F_S(dbase, i):
 #     # Main function; take input of data directory and return all possible quantities
