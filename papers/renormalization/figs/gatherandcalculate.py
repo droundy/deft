@@ -1,6 +1,5 @@
 #!/usr/bin/python2
 from __future__ import division
-from operator import add
 import numpy as np
 import math
 import string
@@ -139,7 +138,7 @@ def Sexc(Uexc, Fexc, Ts):
 
 # dirty Fabs function
 def Fabs(Fex, Ts, Ns, V):
-    m=1 # mass for thermal wavelength
+    m=1e6 # mass for thermal wavelength
     hbar, kb = 1, 1 # constants always ought to be one
     F = np.zeros_like(Fex)
     Fid = np.zeros_like(Fex)
@@ -147,7 +146,7 @@ def Fabs(Fex, Ts, Ns, V):
         for j in range(len(Ns)):
             Lambda = hbar*np.sqrt(2*np.pi/(m*kb*Ts[l]))
             Fid[l,j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*np.log(Ns[j])
-    F = np.add(Fex, Fid)
+    F = Fex + Fid
     return F
 
 # dirty grand free (almost want to call it the Landau free energy..)
