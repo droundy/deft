@@ -121,7 +121,7 @@ The potential energy of the fluid is then always an integer multiple of the well
 
 \begin{figure}
     \centering
-    %\includegraphics[width=.75\textwidth]{SWF-E.png}
+    \includegraphics[width=.75\textwidth]{SWF-E.png}
     \caption{Demonstration of Square-Well approximation.}
     \label{sw_phi}
 \end{figure}
@@ -129,8 +129,8 @@ The potential energy of the fluid is then always an integer multiple of the well
 The critical point is the temperature and pressure (or any other thermodynamic pairing) on a phase diagram (shown in Figure ~\ref{phase}) where the line between liquid and vapor terminates - liquid and vapor become indistinguishable and are assimilated into the ``fluid'' phase. Many interesting effects occur here, including the well-researched phenomena of critical opalescence. The correlation length, naively interpreted here as the maximum existing wavelength of the density fluctuations within the fluid, diverges to infinity near criticality. As mentioned previously, the diverging of the correlation length invalidates SAFT and many of its variants which assume constant density. 
 \begin{figure}
     \centering
-    %\includegraphics[width=.75\textwidth]{phase.png}
-    \caption{Phase transitions of water with critical point and triple point identified.}
+    \includegraphics[width=.75\textwidth]{phase.png}
+    \caption{Phase diagram of water with critical point and triple point identified.}
     \label{phase}
 \end{figure}
 \\
@@ -206,7 +206,7 @@ where we have separated the integrals by recognizing that the integrands are ind
 Additionally, for a proper quantum mechanical treatment we must assume that the particles are indistinguishable which means the above expression over-counts by a factor of $N!$. Additionally, we will multiply Eq. \ref{Z-intermed} by an overall factor of $\frac{V^N}{V^N}$ to preserve units and extensivity. Our expression for the partition function is then 
 
 \begin{align}
-    Z &= \frac{1}{V^N N!}\int_s \diff\mathbf{r}^N ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})} \left[V \int_s \diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right]^{N}
+    Z &= \frac{V^N}{V^N N!}\int_s \diff\mathbf{r}^N ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})} \left[\int_s \diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right]^{N}
     \label{Z_full}
 \end{align}
 
@@ -240,20 +240,29 @@ If we then allow the cell to become very large, then the we can easily see in Eq
 Evaluating this integral yields
 \begin{align}
     Z_{id} &= \left(\frac{V^N}{N!\Lambda^{3N}}\right) \,, \\
-    \Lambda &= \frac{\hbar\sqrt{2\pi\beta}}{\sqrt{m}}
+    \Lambda &= \frac{\hbar\sqrt{2\pi}}{\sqrt{mT}}
 \end{align}
 where we have introduced the thermal deBroglie wavelength $\Lambda$ which defines the de Broglie wavelength of an ideal gas at a temperature $T$. The full partition function for any monoatomic system is then
 \begin{align}
-    Z &= Z_{exc} \left(\frac{V}{\Lambda^{3}}\right)^{N} \,.
+    Z &= Z_{exc} \left(\frac{V}{N!\Lambda^{3}}\right)^{N} \,.
 \end{align}
-For liquids [fluids?], the $Z_{exc}$ term is difficult to ever evaluate; the hard sphere liquid, the simplest model for a dense fluid, does not have an analytic representation for the excess free energy. It follows that a considerable amount of work is required to determine the excess free energy for a given system. 
-
+For liquids [fluids?], the $Z_{exc}$ term is difficult to ever evaluate; the hard sphere liquid, the simplest model for a dense fluid, does not have an analytic representation for the excess free energy. It follows that a considerable amount of work is required to determine the excess free energy for a given system. The absolute free energy, by way of Eq. \ref{FdefSM}, now has the form
+\begin{align}
+    F_{abs} &= -T\,\ln\left(Z_{exc} \frac{V^N}{N!\Lambda^{3N}}\right)\\
+    &= -T\ln\left(Z_{exc}\right)\, -T\left(\frac{V}{(N!)^{1/N}\Lambda^3} \right)^N\\
+    &= -T\ln\left(Z_{exc}\right) - NT\ln\left(\frac{V}{\Lambda^3}\right) + NT\ln\left(N!^{1/N}\right)\\ 
+\end{align}
+Redefining the term including $Z_{exc}$ to be $F_{exc}$, and then using Sterling's approximation ($\ln(N!) = N\ln N$ for large N), we arrive at
+\begin{align}
+    F_{abs} &= F_{exc} - NT\ln\left(\frac{V}{\Lambda^3}\right) + NT\ln\left(N\right)
+\end{align}
+At a specified volume and number of particles, the ideal gas contribution is constant. Consequently, for a given temperature we only need to calculate the excess free energy. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            METHODS                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Methods}
-This work requires the intersection of three methods to calculate the absolute free energy $F^{abs}_{tot}$ of the bulk cell. A preliminary value of the free energy of the bulk can be obtained from Monte-Carlo simulations. This value can then be made absolute by carefully comparing the results with Thermodynamic Integration, a method of determining the excess free energy of a system. [more !fixme] 
+This work requires the intersection of three methods to calculate the absolute free energy $F_{abs}$ of the bulk cell. A preliminary value of the free energy of the bulk can be obtained from Monte-Carlo simulations. This value can then be made absolute by carefully comparing the results with Thermodynamic Integration, a method of determining the  free energy of the hard-sphere system. The resulting absolute free energies for each fluctuation length can be summed to yield the absolute free energy of the bulk. [more] 
 \subsection{Monte-Carlo Methods}
 Monte-Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically Metropolis-Hastings Monte Carlo.
 \subsubsection{Markov Chain}
@@ -274,7 +283,7 @@ Histograms are graphical representation of ``counting'' data. Monte Carlo histog
     \caption{Sample histogram.}
 \end{figure}}
 \subsection{Broad Histogram Monte-Carlo}
-If one records the energy of the system at each time step, it is straightforward to construct a histogram of energies. Typical implementations of histogram methods exhibit histograms that sharply peak near a central value $E_0$ which then symmetrically decays. Of course, at higher temperatures, the histogram broadens and flattens out as more energies become easily accessible and, in the limit that temperature becomes infinite, the histogram becomes completely flat since all states are equally likely. If the simulation is allowed to run for an infinite amount of time, the histogram will be precisely detail the system. x The tails of the histogram, however, contain spurious statistics because the system rarely visits these energies. Gathering sufficient statistics  
+If one records the energy of the system at each time step, it is straightforward to construct a histogram of energies. Typical implementations of histogram methods exhibit histograms that sharply peak near a central value $E_0$ which then symmetrically decays. Of course, at higher temperatures, the histogram broadens and flattens out as more energies become easily accessible and, in the limit that temperature becomes infinite, the histogram becomes completely flat since all states are equally likely [flat? what about $D(E)$]. If the simulation is allowed to run for an infinite amount of time, the histogram will be precisely detail the system. x The tails of the histogram, however, contain spurious statistics because the system rarely visits these energies. Gathering sufficient statistics  
 
 {\color{red} succeeding text may be worthless.}
 
@@ -461,7 +470,7 @@ It is straightforward the compute a Helmholtz free energy through the Monte-Carl
 
 At infinite temperature, the square well fluid has approximately the same behavior as the hard sphere fluid.  We assert that the correct inclusion, then, is to enforce that the excess free energy calculated via TMMC at $T=\infty$ is equal to the free energy calculated through thermodynamic integration. We do this by exploiting the infinite temperature behavior of the canonical ensemble:
 \begin{align}
-    Z(T=\infty) &= \left.\sum_{i=0}^{\text{\tiny Energies}} D(E) e^{-\beta E}\right|_{\beta = 0}\\
+    Z_{inf} &= \left.\sum_{i=0}^{\text{\tiny Energies}} D(E) e^{-\beta E}\right|_{\beta = 0}\\
     &= \sum_{i=0}^{\text{\tiny Energies}} D(E)\\
     &= \#\text{~states}\;.
 \end{align}
@@ -485,8 +494,8 @@ Since the excess hard sphere free energy is really just the entropy (scaled by t
     S_{SW,~exc} \Bigm\lvert_{T=\infty} &= S_{HS,~exc}
 \end{align*}
 
-\subsection{Calculating Thermodynamic Quantities from Simulation Output}
-Given the density of states output $\ln[D(E)]$ from the Monte-Carlo simulation, combined with {\it a priori} knowledge that the system obeys a canonical ensemble distribution of states, we can easily calculate, for instance, the excess internal energy:
+\subsection{Thermodynamic Quantities from Simulation}
+Given the density of states output $\ln[D(E)]$ from the Monte-Carlo simulation, combined with {\it a priori} knowledge that the system obeys a canonical ensemble distribution of states, we can calculate any thermodynamic , for instance, the excess internal energy:
 \begin{align*}
      U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp\left(\ln[D(E)] - \beta E_i\right)}{\sum_{i=0}^{\text{\tiny Energies}} \exp[\ln(D(E))] - \beta E_i}\\
      &= \frac{\sum_{i=0}^{\text{\tiny Energies}} E_i \exp\left(-\beta E_i\right)}{Z}
@@ -553,11 +562,10 @@ In addition to the ``scrunched'' primitive cell, we tested [hopefully one or two
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Discussion}
-If the decomposition procedure outlined previously proves successful, the absolute free energy yielded by this renormalization method ought to agree with the free energy yielded from other accepted theories. [more]
-\subsection{Change in Free Energy Over Multiple Regimes}
-[more]
-\subsection{Comparison With A Modified Statistical Associating Fluid Theory}
-[more]
+If the decomposition procedure outlined previously proves successful, the absolute free energy ought to obey known physics about the system.
+We particularly care about identifying liquid-vapor coexistence within the fluid. 
+\ignore{\subsection{Comparison With A Modified Statistical Associating Fluid Theory}
+[more]}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                             CONCLUSION                         %
