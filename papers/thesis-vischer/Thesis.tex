@@ -101,12 +101,20 @@
 \subsection{Motivation}
 Fluids have long garnered interest\cite{theorysimpleliquids}\cite{theoryofcrits}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, large fluctuations of fluid density occur. Most traditional fluid models assume the density across the cell to be nearly constant. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization group-like decomposition procedure to find the absolute Helmholtz free energy of systems near criticality.\\
 
-Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success [cite me], particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating many times to find the most well-suited value for a particular fluid [!fixme not quite].\\
+Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success \cite{white2001global}, particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating many times to find the most well-suited value for a particular fluid [!fixme not quite].\\
 
 We present here a method to calculate free energy of a liquid that largely avoids this fitting problem. We exploit the periodicity of Monte Carlo methods to decompose large cells in the thermodynamic limit into small cells that only allow certain fluctuation wavelengths. We then carefully couple simulations of different ``doubling regimes'', each of which considers a different maximum wavelength of fluctuations, where the fluid density $\eta$ remains fixed but the volume $V$ and number of particles $N$ have increased. Summing the absolute Helmholtz free energy $F^{\text{abs}}$ of each doubling regime will then approximate the absolute free energy of the full cell, especially near the critical point. We will begin by outlining the necessary models and assumptions/approximations for this work. We will then detail the algorithms used to compute the quantities with the the discussion on results following. 
 
 \subsection{Hard Sphere}
-The hard sphere model approximates monoatomic fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. Further, with no attraction, there is no energy associated with [more]. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic.  \\
+The hard sphere model approximates monoatomic fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. Further, with no attraction, there is no energy associated with [more]. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. 
+
+\subsubsection{Carnahan-Starling Equation of State}
+In order to determine the filling fraction step size during thermodynamic integration we must find changes in filling fraction that yield a suitably-sized change in the system's absolute free energy. To do this we use the Carnahan-Starling equation of state, shown in Eq.~\ref{C-S-eq}.
+\begin{align}
+    F(\eta) &= \frac{4\eta - 3\eta^2}{(1-\eta)^2}   
+    \label{C-S-eq}  
+\end{align} 
+where $\eta$ is the filling fraction. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, we are only concerned with filling fractions slightly or significantly below this value, and so the Carnahan-Starling equation of state is an invaluable tool.\\ 
 
 \ignore{[move me | For simulation purposes, the system is required to have periodic boundary conditions - that is, when a sphere would classically collide with the wall of the cell it instead breaches the wall and then reappears on the other side of the cell with the same velocity.]}
 
@@ -275,7 +283,9 @@ This work requires the intersection of three methods to calculate the absolute f
 
 \subsection{Monte Carlo Methods}
 
-Monte Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically Broad histogram transition matrix Monte Carlo.
+Monte Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. \\
+
+Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically Broad histogram transition matrix Monte Carlo.
 \subsubsection{Markov Chain}
 
 Markov chain Monte Carlo methods eschew the true randomness of traditional Monte Carlo by taking the current configuration into account before moving. If we define the initial state of the system by a vector column $\mathbf{q}$ (where the components refer to general coordinates, typically taken to be position of each sphere), and the resulting state $\mathbf{p}$ after a single time step, the relationship
@@ -313,7 +323,9 @@ To construct the broad histogram we need to perform a Markovian walk along the e
     \hrulefill
 \end{algorithm}
 
-Calculating the density of states, given the transition matrix constructed via the process in Algorithm~\ref{alg_tmmc}, is a trivial matter. The equilibrium condition given in Eq.~\ref{thermo-steady-state} is really a statement about the density of states; for a Monte Carlo simulation, the equilibrium state $q_{eq}$ is exactly the density of states. Solving the steady state condition as an eigenvalue problem for $q_{eq}$ then yields the density of states. It bares mentioning that most implementations of transition matrix methods consider the above procedure the ``initialization'' process. The canonical ``simulation'' period refers to gathering statistics for quantities that cannot be calculated from the density of states, such as the density of the fluid or the pair distribution function. Given that we only are concerned with quantities that can be computed given the density of states, we never actually ``simulate''. With the density of states computed, we can now calculate the partition function and thereby the free energy.
+Calculating the density of states, given the transition matrix constructed via the process in Algorithm~\ref{alg_tmmc}, is a trivial matter. The equilibrium condition given in Eq.~\ref{thermo-steady-state} is really a statement about the density of states; for a Monte Carlo simulation, the equilibrium state $q_{eq}$ is exactly the density of states. Solving the steady state condition as an eigenvalue problem for $q_{eq}$ then yields the density of states\cite{perlinthesis}. \\
+
+It bares mentioning that most implementations of transition matrix methods consider the above procedure the ``initialization'' process. The canonical ``simulation'' period refers to gathering statistics for quantities that cannot be calculated from the density of states, such as the density of the fluid or the pair distribution function. Given that we only are concerned with quantities that can be computed given the density of states, we never actually ``simulate''. With the density of states computed, we can now calculate the partition function and thereby the free energy.
 
 \subsection{Renormalization Group Theory}
 Renormalization group methods attempt to describe how a particular system's properties are altered when the system is viewed from varying length scales. Near the critical point, the fluid becomes self similar, and so fluctuations of all wavelengths are present. We can then compare quantities of related yet physically different systems as they all exhibit the similar properties.\\
@@ -457,15 +469,6 @@ As with the Monte Carlo these simulations are written in $C++$ for efficiency.
 \caption{Demonstration of filling fraction increase during thermodynamic integration from $\eta=0$ to $\eta=\eta_f=\eta_{max}$.}
 \end{figure}
 
-
-
-\subsubsection{Carnahan-Starling Equation of State}
-In order to determine the filling fraction step size during thermodynamic integration we must find changes in filling fraction that yield a suitably-sized change in the system's absolute free energy. To do this we use the Carnahan-Starling equation of state, shown in Eq.~\ref{C-S-eq}.
-\begin{align}
-    F(\eta) &= \frac{4\eta - 3\eta^2}{(1-\eta)^2}   
-    \label{C-S-eq}  
-\end{align} 
-where $\eta$ is the filling fraction. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, we are only concerned with filling fractions slightly or significantly below this value, and so the Carnahan-Starling equation of state is an invaluable tool.\\
 Combining Eq.~\ref{C-S-eq} with a simple bisection method allows for control of the filling fraction step size given a desired change in free energy. We determined that steps yielding an approximate change in specific absolute free energy of $\Delta F^{abs}/NT = \ln(2)$ through trial and error - smaller step sizes unnecessarily increased simulation time and larger step sizes tended to shrink too quickly causing the simulation to miss relevant states in the system. This step size corresponds to changing the entropy by $1/2$ each step. 
 
 \ignore{NB: is there a more physical reason we chose this filling fraction increase?}
@@ -510,7 +513,7 @@ The hard sphere system has no excess internal energy, so the excess free energy 
      F_{HS,~exc} &= -T\,S_{HS,~exc} 
 \end{align*} 
 
-Since the excess hard sphere free energy is really just the entropy[cite] (scaled by temperature), the statement that the square well and hard sphere excess free energies need be equal in the infinite temperature limit is really a constraint on the {\it entropy} of the two systems. We then conclude that
+Since the excess hard sphere free energy is really just the entropy \cite{valeskethesis} (scaled by temperature), the statement that the square well and hard sphere excess free energies need be equal in the infinite temperature limit is really a constraint on the {\it entropy} of the two systems. We then conclude that
 \begin{align*}
     S_{SW,~exc} \Bigm\lvert_{T=\infty} &= S_{HS,~exc}
 \end{align*}
@@ -527,7 +530,7 @@ where, as usual, $\beta = T^{-1}$. Taking the exponential of $\ln(D(E))$, unfort
      \implies F_{SW,~exc} &= -TS_{HS,~exc} + F_{inf}\\
      F_{SW,~exc} &= -TS_{HS,~exc} - T\ln\left(\frac{Z}{Z_{inf}}\right)
 \end{align*} 
-The excess hard sphere entropy $T_{HS,~exc}$ is calculated directly from thermodynamic integration and both the partition functions are calculated the usual way [MORE ABOUT $Z_inf$]. Once we have calculated both the excess free energy and excess internal energy, we can directly find the excess entropy:
+The excess hard sphere entropy $T_{HS,~exc}$ is calculated directly from thermodynamic integration, $Z$ is calculated using  . Once we have calculated both the excess free energy and excess internal energy, we can directly find the excess entropy:
 \begin{align*}
     S_{SW, ~exc} &= \frac{1}{T}\left(U_{SW,~exc} - F_{SW,~exc} \right)
 \end{align*}
@@ -587,7 +590,9 @@ In addition to the ``scrunched'' primitive cell, we tested [hopefully one or two
 If the decomposition procedure outlined previously proves successful, the absolute free energy ought to obey known physics about the system.
 We particularly care about identifying liquid-vapor coexistence within the fluid. \\
 
-Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vapor are simultaneously present in the fluid at densities that cause local minima in the grand free energy. Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy given the absolute free energy and number of spheres. The chemical potential $\mu$ is a somewhat unintuitive quantity that, for our purposes, we will treat as a free parameter. Tweaking the value of the chemical potential will allow us to easily identify coexistence in the fluid. 
+Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vapor are simultaneously present in the fluid at densities that cause local minima in the grand free energy. We know that the grand free energy has a guaranteed minimum at the origin because [things]; we then only need to identify the other minima.  \\
+
+Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy given the absolute free energy and number of spheres. The chemical potential $\mu$ is a somewhat unintuitive quantity that, for our purposes, we will treat as a free parameter. Tweaking the value of the chemical potential will allow us to easily identify second minima in the density curve. 
 \begin{figure}
 \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Phiabs-vs-eta.pdf}
@@ -595,9 +600,7 @@ Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vap
     \label{Phi-eta}
 \end{figure}
 
-\ignore{\subsection{Comparison With A Modified Statistical Associating Fluid Theory}
-[more]}
-
+Figure \ref{Phi-eta}, 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                             CONCLUSION                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -607,5 +610,5 @@ Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vap
 We have presented a method by which the properties of bulk fluids can be estimated by decomposing the bulk into individual cells in a renormalization-minded manner by exploiting the critical behavior of fluids. The free energy contribution of each length scale can then be investigated and compared, both to determine the most energetic density fluctuations and to provide calculations that serve as a intermediate comparison with SAFT methods. This method is immediately applicable to any system where the energy of a configuration is straightforward to compute (that is, relatively inexpensive computationally). The application presented was a system that obeys the canonical ensemble, but the extension to the grand canonical ensemble can be done with little modification. Future work can include stuff [more]. 
 %\bibliographystyle{plain}
 \cleardoublepage
-\bibliography{Thesis}
+\bibliography{./Thesis}
 \end{document}
