@@ -99,14 +99,16 @@
 
 \section{Introduction}
 \subsection{Motivation}
-Fluids have long garnered interest\cite{theorysimpleliquids}\cite{theoryofcrits}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, large fluctuations of fluid density occur. Most traditional fluid models assume the density across the cell to be nearly constant. As a result, these methods tend to poorly handle these fluctuations near criticality. 
-Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization-group formalism (``GRG'') to find the absolute Helmholtz free energy of systems near criticality.\\
+Fluids have long garnered interest\cite{theorysimpleliquids}\cite{theoryofcrits}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, large fluctuations of fluid density occur. Most traditional fluid models assume the density across the cell to be nearly constant. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization-group formalism (``GRG'') to find the absolute Helmholtz free energy of systems near criticality.\\
 
-Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success [cite me], particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating a vast number of cells, varying the parameter each time, to find the most well-suited value for a particular fluid [!fixme not quite]. We present a non-fitted approach that is GRG-minded from the ground up. We exploit the periodicity of Monte-Carlo methods to decompose large cells in the thermodynamic limit into small cells that only allow certain fluctuation wavelengths. We then carefully couple simulations of different ``doubling regimes'', each of which considers a different maximum wavelength of fluctuations, where the number density remains fixed but the volume and number have increased. Summing the difference in absolute Helmholtz free energy $\Delta F^{\text{abs}}$ between doubling regimes will then approximate the absolute free energy of the full cell, including near criticality. Finding absolute free energies is a somewhat challenging problem, but is certainly surmountable with more Monte Carlo. \\
-We will begin by outlining the necessary models and assumptions/approximations for this work. We will then detail the algorithms used to compute the quantities with the the discussion on results following. 
+Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success [cite me], particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating many times to find the most well-suited value for a particular fluid [!fixme not quite]. We present a non-fitted approach that is GRG-minded from the ground up. We exploit the periodicity of Monte-Carlo methods to decompose large cells in the thermodynamic limit into small cells that only allow certain fluctuation wavelengths. We then carefully couple simulations of different ``doubling regimes'', each of which considers a different maximum wavelength of fluctuations, where the fluid density $\eta$ remains fixed but the volume $V$ and number of particles $N$ have increased. Summing the absolute Helmholtz free energy $F^{\text{abs}}$ of each doubling regime will then approximate the absolute free energy of the full cell, especially near the critical point. We will begin by outlining the necessary models and assumptions/approximations for this work. We will then detail the algorithms used to compute the quantities with the the discussion on results following. 
 \subsection{Hard Sphere}
-The hard sphere model approximates monoatomic fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. There is also a harder-to-calculate [!fixme] ``excess'' energy to be considered (which, in fact, contains most of the interesting behavior) which will be discussed further on. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. For simulation purposes, the system is required to have periodic boundary conditions - that is, when a sphere would classically collide with the wall of the cell it instead breaches the wall and then reappears on the other side of the cell with the same velocity. \\
+The hard sphere model approximates monoatomic fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. There is also a harder-to-calculate [!fixme] ``excess'' energy to be considered (which, in fact, contains most of the interesting behavior) which will be discussed further on. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic.  \\
 \ignore{The hard sphere model is incredibly useful; as high temperatures are approached, energy associated with sphere location tends to asymptote for most models [are there any that this isn't true for?] and the kinetic term consequently dominates.}
+
+
+
+\ignore{[move me | For simulation purposes, the system is required to have periodic boundary conditions - that is, when a sphere would classically collide with the wall of the cell it instead breaches the wall and then reappears on the other side of the cell with the same velocity.]}
 
 \subsection{Square-Well Liquid}
 The square-well liquid is a common approximation that sees extensive use throughout computational fluid research. This simple fluid model consists of hard spheres that are subject to an intermolecular pair potential - that is, an attractive force between spheres. This model consists of several key parameters: sphere size $\sigma$, well width $\lambda$, and well depth $\epsilon$. \\
@@ -117,7 +119,7 @@ As a hard-sphere model, the spheres are not allowed to overlap. Any arrangement 
 \label{phi12}
 \end{equation}
 
-The potential energy of the fluid is then always an integer multiple of the well depth $\epsilon$. This leads us to choose $\epsilon$ and $\sigma$ as natural scales for the quantities of our simulation. We then define dimensionless temperatures $T/\epsilon$, energies $E/\epsilon$, and distances $r/\sigma$. Moreover, we make the decision to work in geometric units for coding simplicity, setting the Boltzmann constant $k_B$ (as well as any other physical constants) to one. This then allows us to resonably compare energies to temperatures since they have the same units.
+The potential energy of the fluid is then always an integer multiple of the well depth $\epsilon$. This leads us to choose $\epsilon$ and $\sigma$ as natural scales for the quantities of our simulation. We then define dimensionless temperatures $T/\epsilon$, energies $E/\epsilon$, and distances $r/\sigma$. Moreover, we make the decision to work in geometric units for coding simplicity, setting the Boltzmann constant $k_B$ (as well as any other physical constants) to one. This then allows us to reasonably compare energies and temperatures since they have the same units.
 
 \begin{figure}
     \centering
@@ -125,8 +127,9 @@ The potential energy of the fluid is then always an integer multiple of the well
     \caption{Demonstration of Square-Well approximation.}
     \label{sw_phi}
 \end{figure}
+
 \subsection{Critical Point} 
-The critical point is the temperature and pressure (or any other thermodynamic pairing) on a phase diagram (shown in Figure ~\ref{phase}) where the line between liquid and vapor terminates - liquid and vapor become indistinguishable and are assimilated into the ``fluid'' phase. Many interesting effects occur here, including the well-researched phenomena of critical opalescence. The correlation length, naively interpreted here as the maximum existing wavelength of the density fluctuations within the fluid, diverges to infinity near criticality. As mentioned previously, the diverging of the correlation length invalidates SAFT and many of its variants which assume constant density. 
+The critical point is the temperature and pressure (or any other thermodynamic pairing) on a phase diagram (shown in Figure ~\ref{phase}) where the line between liquid and vapor terminates - liquid and vapor become indistinguishable and are assimilated into the ``supercritical fluid'' phase. Many interesting effects occur here, including the well-researched phenomena of critical opalescence. The correlation length, naively interpreted here as the maximum existing wavelength of the density fluctuations within the fluid, diverges to infinity near criticality. As mentioned previously, the diverging of the correlation length invalidates SAFT and many of its variants which assume constant density. 
 \begin{figure}
     \centering
     \includegraphics[width=.75\textwidth]{phase.png}
@@ -134,34 +137,40 @@ The critical point is the temperature and pressure (or any other thermodynamic p
     \label{phase}
 \end{figure}
 \\
-The theory of this project is largely predicated upon the behavior of critical systems, namely the phenomena of self-similarity. Non-critical systems exhibit different characteristics when viewed at different length scales. Ever-present small-scale fluctuations in density are relevant, if not dominant, when viewing the system at very small scales, but typically become less important at larger scales and nearly irrelevant near the thermodynamic limit. Near the critical point all wavelengths of fluctuation are present, and so the system looks the same regardless of length scale chosen. This self-similarity allows for the decomposition of the large critical cell to smaller constituent cells. The details of the procedure are more carefully discussed later on.   
+The theory of this project is largely predicated upon the behavior of critical systems, namely the phenomena of self-similarity. Non-critical systems exhibit different characteristics when viewed at different length scales. Ever-present small-scale fluctuations in density are relevant, if not dominant, when viewing the system at very small scales, but typically become less important at larger scales and nearly irrelevant near the thermodynamic limit. Near the critical point all wavelengths of fluctuation are present, and so the system looks the same regardless of length scale chosen. This self-similarity allows for the decomposition of the large critical cell to smaller constituent cells. The details of the procedure are more carefully discussed in Chapter {\color{red} [blah]}.
 
 \subsection{Free energy}
-The free energy we are interested in calculating is the ``absolute'' Helmholtz free energy $F^{\text{abs}}$. The Helmholtz free energy is a Legendre transform of the internal energy $U$:
+The energy we are interested in calculating is the ``absolute'' Helmholtz free energy $F^{\text{abs}}$. The Helmholtz free energy is a Legendre transform of the internal energy $U$
 \begin{align}
-    F &= U - TS
+    F &= U - TS\, ,
     \label{Fdef}
 \end{align}
 and can be calculated given the ever-pervasive partition function $Z$:
 \begin{align}
-    F &= -T \ln Z
+    F &= -T \ln Z\, .
     \label{FdefSM}
 \end{align}
-With $F$ calculated, simple partial derivatives yield all other thermodynamic quantities. Though the Gibbs free energy yields the same information, the Helmholtz free energy is particularly useful because of the relationship with entropy:
+With $F$ calculated, partial derivatives yield all other interesting thermodynamic quantities. Though the Gibbs free energy yields the same information, the Helmholtz free energy is particularly useful because of the relationship with entropy, namely
 \begin{align}
-    S &= \left(\frac{\partial F}{\partial T}\right)_{V}
+    S &= \left(\frac{\partial F}{\partial T}\right)_{V}\, .
 \end{align}
-Since we are defining cells of fixed volume this partial derivative will be simple to evaulate for any temperature $T$.\\
+Further, if we allow the number of particles in the system to vary, we have the grand free energy $\Phi$, defined as
+\begin{align}
+    \Phi &= U-TS-\mu N\\
+    &= F - \mu N
+    \label{Phidef}
+\end{align}
+where $\mu$ is the chemical potential of the fluid, which is related to the tendency of particles to flow into or out of the system.\\
 
-Equations ~\ref{Fdef} and ~\ref{FdefSM} together bridge classical thermodynamics and statistical mechanics. Due to the nature of this project, we will primarily be concerned with the statistical mechanics definition (that is, Eq. ~\ref{FdefSM}) of the free energy. We are, then, ultimately concerned with determining the partition function for any system we are concerned with. The canonical ensemble partition function can be compactly represented by a summation:
+Equations~\ref{Fdef} and~\ref{FdefSM} together bridge classical thermodynamics and statistical mechanics. Due to the nature of this project, we will primarily be concerned with the statistical mechanics definition (that is, Eq.~\ref{FdefSM}) of the free energy. We are, then, ultimately concerned with determining the partition function for any given system. The canonical ensemble partition function can be compactly represented by a summation:
 \begin{align}
     Z &= \sum^{\text{states}}~e^{-\beta E_i}
 \end{align}
-where $\beta =  T^{-1}$ and $E_i$ is the energy of the $i^{\text{th}}$. Of course, it is typically impractical to sum over the individual states of the system, especially if there are expected degeneracies. Instead we sum over energies:
+where $\beta =  T^{-1}$ and $E_i$ is the energy of the $i^{\text{th}}$ state. Of course, it is impractical to sum over the individual states of the system because the number of states are generally innumerable. Instead we sum over energies:
 \begin{align}
     Z &= \sum^{\text{energies}}~D(E)~e^{-\beta E_i}
 \end{align}
-where we have now introduced the density of states $D(E)$ which is a simple function that returns the number of states which have a given energy $E$. This introduction is now the focus of calculation - if we can accurately determine the density of states of the system and have knowledge of the available energies, we can calculate the Helmholtz free energy and, from there, any other  \\   
+where we have now introduced the density of states $D(E)$ which is a simple function that returns the number of states which have a given energy $E$. This introduction is now the focus of calculation - if we can accurately determine the density of states of the system and have knowledge of the available energies, we can calculate the Helmholtz free energy and, from there, any other thermodynamic quantity we wish. \\   
 Since $F$ contains a natural log term, we can separate and characterize the individual contributions of kinetic energy (``ideal'') and energy associated with the configuration of the system (``excess'').  
 A derivation of the two energy contributions for a monoatomic fluid follows. \\
 
@@ -256,7 +265,7 @@ Redefining the term including $Z_{exc}$ to be $F_{exc}$, and then using Sterling
 \begin{align}
     F_{abs} &= F_{exc} - NT\ln\left(\frac{V}{\Lambda^3}\right) + NT\ln\left(N\right)
 \end{align}
-At a specified volume and number of particles, the ideal gas contribution is constant. Consequently, for a given temperature we only need to calculate the excess free energy. 
+At a specified volume and number of particles, the ideal gas contribution is constant. Consequently, for a given temperature we only need to compute the excess free energy.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            METHODS                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -278,7 +287,9 @@ defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square ma
 The transition matrix thus embodies the physics of the simulation. [more?]
 
 \ignore{\subsubsection{Histogram Methods}
-Histograms are graphical representation of ``counting'' data. Monte Carlo histogram methods simply track the number of times the system has visited a particular energy. If the transition matrix 
+Histograms are graphical representatio
+
+n of ``counting'' data. Monte Carlo histogram methods simply track the number of times the system has visited a particular energy. If the transition matrix 
 \begin{figure}
     \caption{Sample histogram.}
 \end{figure}}
@@ -489,7 +500,7 @@ The hard sphere system has no excess internal energy, so the excess free energy 
      F_{HS,~exc} &= -T\,S_{HS,~exc} 
 \end{align*} 
 
-Since the excess hard sphere free energy is really just the entropy (scaled by temperature), the statement that the square well and hard sphere excess free energies need be equal in the infinite temperature limit is really a constraint on the {\it entropy} of the two systems. We then conclude that
+Since the excess hard sphere free energy is really just the entropy[cite] (scaled by temperature), the statement that the square well and hard sphere excess free energies need be equal in the infinite temperature limit is really a constraint on the {\it entropy} of the two systems. We then conclude that
 \begin{align*}
     S_{SW,~exc} \Bigm\lvert_{T=\infty} &= S_{HS,~exc}
 \end{align*}
@@ -497,10 +508,10 @@ Since the excess hard sphere free energy is really just the entropy (scaled by t
 \subsection{Thermodynamic Quantities from Simulation}
 Given the density of states output $\ln[D(E)]$ from the Monte-Carlo simulation, combined with {\it a priori} knowledge that the system obeys a canonical ensemble distribution of states, we can calculate any thermodynamic , for instance, the excess internal energy:
 \begin{align*}
-     U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp\left(\ln[D(E)] - \beta E_i\right)}{\sum_{i=0}^{\text{\tiny Energies}} \exp[\ln(D(E))] - \beta E_i}\\
+     U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp\left(\ln[D(E)] - \beta E_i\right)}{\sum_{i=0}^{\text{\tiny Energies}} \exp[\ln(D(E)] - \beta E_i})\\
      &= \frac{\sum_{i=0}^{\text{\tiny Energies}} E_i \exp\left(-\beta E_i\right)}{Z}
 \end{align*} 
-where, as usual, $\beta = T^{-1}$. Taking the exponential of $\ln(D(E))$, unfortunately, tends to introduce overflow or underflow errors during computation. We combat this by subtracting the maximum value of the natural log of the density of states \ignore{subtracting maximum ought to make it more negative\dots} from each element of $D(E)$, and then adding the maximum back in after the exponential. We calculate the excess free energy by using the entropy equality developed previously:
+where, as usual, $\beta = T^{-1}$. Taking the exponential of $\ln(D(E))$, unfortunately, tends to introduce overflow or underflow errors during computation. We combat this by subtracting the maximum value of the natural log of the density of states \ignore{subtracting maximum ought to make it more negative\dots}from each element of $D(E)$, and then adding the maximum back in after the exponential. We calculate the excess free energy by using the entropy equality developed previously:
 \begin{align*}
      S_{SW,~exc}\Bigm\lvert_{T=\infty} &= S_{HS,~exc}\\
      \implies F_{SW,~exc} &= -TS_{HS,~exc} + F_{inf}\\
@@ -513,7 +524,7 @@ The excess hard sphere entropy $T_{HS,~exc}$ is calculated directly from thermod
 
 
 \section{Results}
-An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would [might?] expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We are primarily concerned with the ``scrunched'' case where the cell length is $\sqrt2\sigma$.
+An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would [might?] expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We are primarily concerned with the ``scrunched'' case where the cell length is $\sqrt2\sigma$.\\
 
 Figures ~\ref{F-T} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each plot contains calculations from the first doubling regime ($L=2\lambda_0$) represented by solid lines and second doubling regime ($L = 4\lambda_0$) in dashes. It is worth noting that the succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.\\  
 \begin{figure}  
@@ -540,7 +551,7 @@ Figure \ref{Shs-eta} shows the computed excess entropy as a function of density.
     \caption{Excess internal energy as a function of density. The $x$ markers connected by dashed lines delineate second doubling regime densities that were simulated.}
     \label{U-eta}
 \end{figure}
-We see in Figure~\ref{U-eta} that the excess internal energy, as we would expect, becomes more negative as the density increases. The lower the temperature, the more ``clumped'' the system becomes, resulting in lower internal energies.
+We see in Figure~\ref{U-eta} that the excess internal energy, as we would expect, becomes more negative as the density increases. The lower the temperature, the more ``clumped'' the system becomes, resulting in lower internal energies. [correct?]
 
 \begin{figure}
 \centering
@@ -550,12 +561,13 @@ We see in Figure~\ref{U-eta} that the excess internal energy, as we would expect
 \end{figure}
 
 \subsection{Primitive Cell}
-The ``scrunched'' system allows exactly four spheres to be packed -- at maximal filling fraction $\eta_{max} = \approx .741$ -- in the original non-doubled cell. This case corresponds to the unit cell a face-centered cubic lattice, the simplest sphere packing possible. We chose to focus on the scrunched case for two reasons. Firstly, if any physical length of the system is likely to be the correct choice for minimum fluctuation length 
+The ``scrunched'' system allows exactly four spheres to be packed -- at maximal filling fraction $\eta_{max} = \approx .741$ -- in the original non-doubled cell. This case corresponds to the unit cell a face-centered cubic lattice, the simplest sphere packing possible. We chose to focus on the scrunched case for two reasons. Firstly, if any physical length of the system is likely to be the correct choice for minimum fluctuation length [necessary?]
 
+\ignore{ Might never need these sections. |
 \subsubsection{Seed Disparity}
 Because of the random/psuedorandom nature of Monte-Carlo sampling, we tested over many different initial sphere placements (``seeds'') to see if there was consistent agreement. 
 \subsection{Other Cells?}
-In addition to the ``scrunched'' primitive cell, we tested [hopefully one or two] other minimum correlation lengths corresponding to other natural parameters in the system.
+In addition to the ``scrunched'' primitive cell, we tested [hopefully one or two] other minimum correlation lengths corresponding to other natural parameters in the system.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                       Discussion                            %
@@ -563,7 +575,16 @@ In addition to the ``scrunched'' primitive cell, we tested [hopefully one or two
 
 \section{Discussion}
 If the decomposition procedure outlined previously proves successful, the absolute free energy ought to obey known physics about the system.
-We particularly care about identifying liquid-vapor coexistence within the fluid. 
+We particularly care about identifying liquid-vapor coexistence within the fluid. \\
+
+Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vapor are simultaneously present in the fluid at densities that cause local minima in the grand free energy. Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy given the absolute free energy and number of spheres. The chemical potential $\mu$ is a somewhat unintuitive quantity that, for our purposes, we will treat as a free parameter. Tweaking the value of the chemical potential will allow us to easily identify coexistence in the fluid. 
+\begin{figure}
+\centering
+    \includegraphics[width=.75\textwidth]{../renormalization/figs/Phiabs-vs-eta.pdf}
+    \caption{Absolute specific free energy as a function of density.}
+    \label{Phi-eta}
+\end{figure}
+
 \ignore{\subsection{Comparison With A Modified Statistical Associating Fluid Theory}
 [more]}
 
