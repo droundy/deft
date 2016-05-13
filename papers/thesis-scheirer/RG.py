@@ -5,6 +5,7 @@ import integrate
 # Author: Dan Roth
 # Email: Daniel.Edward.Roth@gmail.com
 # Date: January 2014
+# Modified by Ryan Scheirer May 2016
 
 # The theory here comes from:
 ## 'Application of a renormalization-group threatment to SAFT-VR'
