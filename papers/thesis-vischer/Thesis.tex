@@ -99,22 +99,22 @@
 
 \section{Introduction}
 \subsection{Motivation}
-Fluids have long garnered interest\cite{theorysimpleliquids}\cite{theoryofcrits}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, large fluctuations of fluid density occur. Most traditional fluid models assume the density across the cell to be nearly constant. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization group-like decomposition procedure to find the absolute Helmholtz free energy of systems near criticality.\\
+Fluids have long garnered interest\cite{theorysimpleliquids}\cite{theoryofcrits}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, fluctuations of fluid density at large length scales occur. Most traditional fluid models assume the fluid density does not fluctuate beyond the molecular scale. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization group-like decomposition procedure to find the absolute Helmholtz free energy of systems near criticality.\\
 
-Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success \cite{white2001global}, particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating many times to find the most well-suited value for a particular fluid [!fixme not quite].\\
+Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success \cite{white2001global}, particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating many times to find the most well-suited value for a particular fluid \ignore{[!fixme not quite]}.\\
 
 We present here a method to calculate free energy of a liquid that largely avoids this fitting problem. We exploit the periodicity of Monte Carlo methods to decompose large cells in the thermodynamic limit into small cells that only allow certain fluctuation wavelengths. We then carefully couple simulations of different ``doubling regimes'', each of which considers a different maximum wavelength of fluctuations, where the fluid density $\eta$ remains fixed but the volume $V$ and number of particles $N$ have increased. Summing the absolute Helmholtz free energy $F^{\text{abs}}$ of each doubling regime will then approximate the absolute free energy of the full cell, especially near the critical point. We will begin by outlining the necessary models and assumptions/approximations for this work. We will then detail the algorithms used to compute the quantities with the the discussion on results following. 
 
 \subsection{Hard Sphere}
-The hard sphere model approximates monoatomic fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. Further, with no attraction, there is no energy associated with [more]. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. 
+The hard sphere model approximates monoatomic fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. Further, with no attraction, there is excess internal energy, implying the excess free energy is purely entropic. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. 
 
 \subsubsection{Carnahan-Starling Equation of State}
 In order to determine the filling fraction step size during thermodynamic integration we must find changes in filling fraction that yield a suitably-sized change in the system's absolute free energy. To do this we use the Carnahan-Starling equation of state, shown in Eq.~\ref{C-S-eq}.
 \begin{align}
-    F(\eta) &= \frac{4\eta - 3\eta^2}{(1-\eta)^2}   
+    F_{exc}(\eta) &= \frac{4\eta - 3\eta^2}{(1-\eta)^2} N k_b T  
     \label{C-S-eq}  
 \end{align} 
-where $\eta$ is the filling fraction. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, we are only concerned with filling fractions slightly or significantly below this value, and so the Carnahan-Starling equation of state is an invaluable tool.\\ 
+where $\eta$ is the filling fraction, $N/V$. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, the Carnahan-Starling equation of state is still an excellent approximation at low to moderate filling fractions.\\ 
 
 \ignore{[move me | For simulation purposes, the system is required to have periodic boundary conditions - that is, when a sphere would classically collide with the wall of the cell it instead breaches the wall and then reappears on the other side of the cell with the same velocity.]}
 
@@ -127,7 +127,7 @@ As a hard-sphere model, the spheres are not allowed to overlap. Any arrangement 
 \label{phi12}
 \end{equation}
 
-The potential energy of the fluid is then always an integer multiple of the well depth $\epsilon$. This leads us to choose $\epsilon$ and $\sigma$ as natural scales for the quantities of our simulation. We then define dimensionless temperatures $T/\epsilon$, energies $E/\epsilon$, and distances $r/\sigma$. Moreover, we make the decision to work in geometric units for coding simplicity, setting the Boltzmann constant $k_B$ (as well as any other physical constants) to one. This then allows us to reasonably compare energies and temperatures since they have the same units.
+The potential energy of the fluid is then always an integer multiple of the well depth $\epsilon$. This leads us to choose $\epsilon$ and $\sigma$ as natural scales for the quantities of our simulation. We then define dimensionless temperatures $T/\epsilon$, energies $E/\epsilon$, and distances $r/\sigma$. Moreover, we make the decision to work in geometric units for coding simplicity, setting the Boltzmann constant $k_B$ to one. This then allows us to reasonably compare energies and temperatures since they have the same units.
 
 \begin{figure}
     \centering
@@ -137,15 +137,15 @@ The potential energy of the fluid is then always an integer multiple of the well
 \end{figure}
 
 \subsection{Critical Point} 
-The critical point is the temperature and pressure (or any other thermodynamic pairing) on a phase diagram (shown in Figure ~\ref{phase}) where the line between liquid and vapor terminates - liquid and vapor become indistinguishable and are assimilated into the ``supercritical fluid'' phase. Many interesting effects occur here, including the well-researched phenomena of critical opalescence. The correlation length, naively interpreted here as the maximum existing wavelength of the density fluctuations within the fluid, diverges to infinity near criticality. As mentioned previously, the diverging of the correlation length invalidates SAFT and many of its variants which assume constant density. 
+The critical point is the temperature and pressure (or any other thermodynamic pairing) on a phase diagram (shown in Figure ~\ref{phase}) where the line between liquid and vapor terminates - liquid and vapor become indistinguishable and are assimilated into the ``supercritical fluid'' phase. Many interesting effects occur here, including the well-researched phenomena of critical opalescence. The correlation length, loosely interpreted here as the maximum wavelength of the density fluctuations within the fluid, diverges to infinity near criticality. As mentioned previously, the diverging of the correlation length invalidates SAFT and many of its variants which assume constant density beyond small length scales. 
 \begin{figure}
     \centering
     \includegraphics[width=.75\textwidth]{phase.png}
-    \caption{Phase diagram of water with critical point and triple point identified.}
+    \caption{Phase diagram of a liquid with critical point and triple point identified.}
     \label{phase}
 \end{figure}
 \\
-The theory of this project is largely predicated upon the behavior of critical systems, namely the phenomena of self-similarity. Non-critical systems exhibit different characteristics when viewed at different length scales. Ever-present small-scale fluctuations in density are relevant, if not dominant, when viewing the system at very small scales, but typically become less important at larger scales and nearly irrelevant near the thermodynamic limit. Near the critical point all wavelengths of fluctuation are present, and so the system looks the same regardless of length scale chosen. This self-similarity allows for the decomposition of the large critical cell to smaller constituent cells. The details of the procedure are more carefully discussed in Chapter {\color{red} [blah]}.
+The theory of this project is largely predicated upon the behavior of critical systems, namely the phenomena of self-similarity. Non-critical systems exhibit different characteristics when viewed at different length scales. Ever-present small-scale correlations (that is, fluctuations in density) are relevant, if not dominant, when viewing the system at very small scales, but typically become less important at larger scales and nearly irrelevant near the thermodynamic limit. Near the critical point all correlation wavelengths are present, and so the system looks the same regardless of length scale chosen. This self-similarity allows for the decomposition of the large critical cell to smaller constituent cells. The details of the procedure are more thoroughly discussed in Chapter.
 
 \subsection{Free energy}
 The energy we are interested in calculating is the ``absolute'' Helmholtz free energy $F^{\text{abs}}$. The Helmholtz free energy is a Legendre transform of the internal energy $U$
@@ -158,11 +158,11 @@ and can be calculated given the ever-pervasive partition function $Z$:
     F &= -T \ln Z\, .
     \label{FdefSM}
 \end{align}
-With $F$ calculated, partial derivatives yield all other interesting thermodynamic quantities. Though the Gibbs free energy yields the same information, the Helmholtz free energy is particularly useful because of the relationship with entropy, namely
+With $F$ calculated, its partial derivatives yield all other interesting thermodynamic quantities. Though the Gibbs free energy yields the same information, the Helmholtz free energy is particularly useful because of the relationship with entropy, namely
 \begin{align}
     S &= \left(\frac{\partial F}{\partial T}\right)_{V}\, .
 \end{align}
-Further, if we allow the number of particles in the system to vary, we have the grand free energy $\Phi$, defined as
+Entropy is a very similar partial derivative of the Gibbs free energy, but with pressure held fixed instead of volume. We typically will want to hold volume fixed, so the Helmholtz free energy is the natural choice. Further, if we allow the number of particles in the system to vary, we will use the grand free energy $\Phi$, defined as
 \begin{align}
     \Phi &= U-TS-\mu N\\
     &= F - \mu N
@@ -174,21 +174,22 @@ Equations~\ref{Fdef} and~\ref{FdefSM} together bridge classical thermodynamics a
 \begin{align}
     Z &= \sum^{\text{states}}~e^{-\beta E_i}
 \end{align}
-where $\beta =  T^{-1}$ and $E_i$ is the energy of the $i^{\text{th}}$ state. Of course, it is impractical to sum over the individual states of the system because the number of states are generally innumerable. Instead we sum over energies:
+where $\beta =  T^{-1}$ and $E_i$ is the energy of the $i^{\text{th}}$ state. Of course, it is impractical to sum over the individual states of the system because the number of states of a classical system are generally innumerable. Instead we sum over energies:
 \begin{align}
     Z &= \sum^{\text{energies}}~D(E)~e^{-\beta E_i}
 \end{align}
-where we have now introduced the density of states $D(E)$ which is a simple function that returns the number of states which have a given energy $E$. This introduction is now the focus of calculation - if we can accurately determine the density of states of the system and have knowledge of the available energies, we can calculate the Helmholtz free energy and, from there, any other thermodynamic quantity we wish. \\   
+where we have now introduced the density of states $D(E)$ which is a simple function that returns the number of states which have a given energy $E$. The density of states is now the focus of calculation - if we can accurately determine the density of states of the system, we can calculate the Helmholtz free energy and, from there, any other thermodynamic quantity we wish. \\  
+
 Since $F$ contains a natural log term, we can separate and characterize the individual contributions of kinetic energy (``ideal'') and energy associated with the configuration of the system (``excess'').  
 A derivation of the two energy contributions for a monoatomic fluid follows. \\
 
-{\color{red} [This should probably go in an appendix. Further: replace $Z_C$ with $Z_{exc}$; fix the to the N on the $Z_{exc}$ term; include the $N!$ into the ideal term; fix the $V(r_1, r_2, ...)$||| All done! NOW: fix the dimensions on the $Z_{id}$ term!]}
+\ignore{{\color{red} [This should probably go in an appendix. Further: replace $Z_C$ with $Z_{exc}$; fix the to the N on the $Z_{exc}$ term; include the $N!$ into the ideal term; fix the $V(r_1, r_2, ...)$||| All done! NOW: fix the dimensions on the $Z_{id}$ term!]}}
 
 We begin with the canonical form of the canonical ensemble partition function $Z$:
 \begin{align}
-    Z &= \sum_i D(E) e^{-\beta E_i}
+    Z &= \sum_E D(E) e^{-\beta E}
 \end{align}
-where we sum over individual energies of the system $E_i$. [reason that we sum over states] , so instead we sum over the states $s$:
+where we sum over individual energies of the system $E_i$. However, to provide a general expression, we will instead sum over the states $s$:
 \begin{align}
     Z &= \sum_s e^{-\beta E_s}
 \end{align} 
@@ -198,7 +199,7 @@ Further, the energy of each state is simply the sum of the excess and kinetic en
 \begin{align}
     E_s &= V_s(\mathbf{r}) + K_s(\mathbf{p})
 \end{align}
-noting that $V(\mathbf{r})$ is poorly defined for a single particle, but we digress. [FIXME]. 
+
 So now we have 
 
 \begin{align}
@@ -206,7 +207,7 @@ So now we have
     &= \sum_S e^{-\beta V(\mathbf{r})}~e^{-\beta K(\mathbf{p})}
 \end{align} 
 
-Each state is specified by a particular point in phase space (parameterized by $\mathbf{r}$ and $\mathbf{p}$). Even though this phase space is discrete, we can approximate the space as continuous by recognizing that the {\color{red}spacing between individual states is small compared to the total range of the states}, so that the summation becomes an integral:
+Each state is specified by a particular point in phase space (parameterized by $\mathbf{r}$ and $\mathbf{p}$). Even though quantum mechanically this phase space is discrete, we can approximate the space as continuous by recognizing that the spacing between individual states is small compared to the total range of the states, so that the summation becomes an integral:
 
 \begin{align}
     Z &= \int_s~ \diff\mathbf{r}~ \diff\mathbf{p} ~e^{-\beta V(\mathbf{r})}~e^{-\beta K(\mathbf{p})}
@@ -223,16 +224,16 @@ where we have separated the integrals by recognizing that the integrands are ind
 Additionally, for a proper quantum mechanical treatment we must assume that the particles are indistinguishable which means the above expression over-counts by a factor of $N!$. Additionally, we will multiply Eq. \ref{Z-intermed} by an overall factor of $\frac{V^N}{V^N}$ to preserve units and extensivity. Our expression for the partition function is then 
 
 \begin{align}
-    Z &= \frac{V^N}{V^N N!}\int_s \diff\mathbf{r}^N ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})} \left[\int_s \diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right]^{N}
+    Z &= \frac{1}{ N!}\int_s \frac{\diff\mathbf{r}^N}{V^N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})} \left[\int_s V\,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right]^{N}
     \label{Z_full}
 \end{align}
 
-We then define the two terms obvious in Eq. \ref{Z_full}, the excess term dependent on the potential energy $V(\mathbf{r})$ and the ideal term dependent on the kinetic energy $K(\mathbf{p})$: 
+We then define the two factors obvious in Eq. \ref{Z_full}, the excess factor dependent on the potential energy $V(\mathbf{r})$ and the ideal factor dependent on the kinetic energy $K(\mathbf{p})$: 
 
 \begin{align}
     Z &= (Z_{exc})(Z_{id}) \,,
 \end{align}
-where $Z_{id}$ contains the $N!$ term by convention. The excess term $Z_{exc}$ is system dependent because $V(\mathbf{r})$ is buried inside the integral, but the ideal term is the same for any system where the total energy separates in the preceding fashion. We judiciously decide to leave the excess term alone and work specifically with the ideal term. We then have
+where $Z_{id}$ contains the $N!$ term by convention. The excess term $Z_{exc}$ is system dependent because $V(\mathbf{r})$ is buried inside the integral, but the ideal factor is the same for any system where the total energy separates in the preceding fashion. We judiciously decide to leave the excess factor alone, for now, and work specifically with the ideal term. We then have
 
 \begin{align}
     Z_{id} &=  \frac{1}{N!}\left[\int_s \diff\mathbf{p} ~e^{-\beta K(\mathbf{p})}\right]^{N}
@@ -242,19 +243,17 @@ We begin by imagining a cell of length $L$ and volume $L^3$ in which lives a par
 \begin{align}
     \mathbf{k} &= \frac{2\pi}{L}(n_x\mathbf{\hat{x}} + n_y\mathbf{\hat{y}} + n_z\mathbf{\hat{z}})
 \end{align}
-It should be noted that this definition of $k$ introduces three-fold degeneracy.\\
 Remembering that kinetic energy can be expressed as $K = \frac{\hbar^2 k^2}{2m}$, and using our definition of $\mathbf{k}$:
 \begin{align}
-    Z_{id} &= \frac{1}{N!}\left[\int_s \diff\mathbf{p} ~e^{-\beta \frac{\hbar^2 k^2}{2m}}\right]^{N}
+    Z_{id} &= \frac{1}{N!}\left[\int_s V\, \diff\mathbf{p} ~e^{-\beta \frac{\hbar^2 k^2}{2m}}\right]^{N}
     \label{Zt_def}
 \end{align}
-This unfortunately introduces a mass quantity into the partition function which adds an additional parameter that needs to be determined. [more] 
-If we then allow the cell to become very large, then the we can easily see in Eq. \ref{Zt_def} that the spacing between occupants in phase space becomes small, so we can integrate instead $\diff ^3 n$ over all possible values of $n$:
+This unfortunately introduces a mass quantity into the partition function which adds an additional parameter that needs to be determined to properly account for quantum mechanical effects. If we then allow the cell to become very large, then the we can easily see in Eq. \ref{Zt_def} that the spacing between occupants in phase space becomes small, so we can integrate instead $\diff ^3 n$ over all possible values of $n$:
 \begin{align}
     Z_{id} &= \frac{1}{N!}\left[\int_0^\infty \diff^3 n ~e^{-\frac{\beta \hbar^2}{2m} \left(\frac{2\pi}{L}(n_x\mathbf{\hat{x}} + n_y\mathbf{\hat{y}} + n_z\mathbf{\hat{z}}\right)^2}\right]^{N} \\
     &= \frac{1}{N!}\left[\int_0^\infty \diff^3 n ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\right]^{N}
 \end{align}
-Evaluating this integral yields
+where extra factors of $\hbar $and$ \pi$ were gained from the change of variables. Evaluating this integral yields
 \begin{align}
     Z_{id} &= \left(\frac{V^N}{N!\Lambda^{3N}}\right) \,, \\
     \Lambda &= \frac{\hbar\sqrt{2\pi}}{\sqrt{mT}}
@@ -283,16 +282,15 @@ This work requires the intersection of three methods to calculate the absolute f
 
 \subsection{Monte Carlo Methods}
 
-Monte Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. \\
+Unbiased Monte Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. \\
 
 Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically Broad histogram transition matrix Monte Carlo.
 \subsubsection{Markov Chain}
-
-Markov chain Monte Carlo methods eschew the true randomness of traditional Monte Carlo by taking the current configuration into account before moving. If we define the initial state of the system by a vector column $\mathbf{q}$ (where the components refer to general coordinates, typically taken to be position of each sphere), and the resulting state $\mathbf{p}$ after a single time step, the relationship
+Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving. If we define the equilibrium state of the system by a vector column $\mathbf{q}$ (where the components refer to general coordinates, typically taken to be position of each sphere), and the resulting state $\mathbf{p}$ after a single time step, the relationship
 \begin{align*}
     \mathbf{p} &= \mathcal{P}\, \mathbf{q}\\
 \end{align*}
-defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square matrix that contains information about these transitions. We call this construction $\mathcal{P}$ the {\it transition matrix}. This matrix is $L\times L$, where $L$ is the number of energy levels in system. The transition matrix's $i^{\text{th}}$ eigenvalue the probability of the $i^{\text{th}}$ state occurring in the system. If all elements of the transition matrix are nonzero, we can see that any state of the system is reachable after a finite number of transitions from any given initial state. A physically judicious choice of transition matrix is one that satisfies the thermodynamic steady state condition; given the equilibrium state $\mathbf{q}_{eq}$, we enforce that
+defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square matrix that contains information about these transitions. We call this construction $\mathcal{P}$ the {\it transition matrix}. This matrix is $L\times L$, where $L$ is the number of energy levels in system. If all elements of the transition matrix are nonzero, we can see that any state of the system is reachable after a finite number of transitions from any given initial state. A physically judicious choice of transition matrix is one that satisfies the thermodynamic steady state condition; given the equilibrium state $\mathbf{q}_{eq}$, we enforce that
 \begin{align}
     \mathcal{P}\,\mathbf{q}_{eq} &= \mathbf{q}_{eq}
     \label{thermo-steady-state}
@@ -574,13 +572,7 @@ We see in Figure~\ref{U-eta} that the excess internal energy, as we would expect
 \end{figure}
 
 \subsection{Primitive Cell}
-The ``scrunched'' system allows exactly four spheres to be packed -- at maximal filling fraction $\eta_{max} = \approx .741$ -- in the original non-doubled cell. This case corresponds to the unit cell a face-centered cubic lattice, the simplest sphere packing possible. We chose to focus on the scrunched case for two reasons. Firstly, if any physical length of the system is likely to be the correct choice for minimum fluctuation length [necessary?]
-
-\ignore{ Might never need these sections. |
-\subsubsection{Seed Disparity}
-Because of the random/psuedorandom nature of Monte Carlo sampling, we tested over many different initial sphere placements (``seeds'') to see if there was consistent agreement. 
-\subsection{Other Cells?}
-In addition to the ``scrunched'' primitive cell, we tested [hopefully one or two] other minimum correlation lengths corresponding to other natural parameters in the system.}
+The ``scrunched'' system allows exactly four spheres to be packed -- at maximal filling fraction $\eta_{max} = \approx .741$ -- in the original non-doubled cell. This case corresponds to the unit cell a face-centered cubic lattice, the simplest sphere packing possible. We chose to focus on the scrunched case for two reasons. Firstly, if any physical length of the system is likely to be the correct choice for minimum fluctuation length.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                       Discussion                            %
@@ -600,14 +592,14 @@ Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy
     \label{Phi-eta}
 \end{figure}
 
-Figure \ref{Phi-eta}, 
+Figure \ref{Phi-eta}, \dots.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                             CONCLUSION                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \section{Conclusion}
-We have presented a method by which the properties of bulk fluids can be estimated by decomposing the bulk into individual cells in a renormalization-minded manner by exploiting the critical behavior of fluids. The free energy contribution of each length scale can then be investigated and compared, both to determine the most energetic density fluctuations and to provide calculations that serve as a intermediate comparison with SAFT methods. This method is immediately applicable to any system where the energy of a configuration is straightforward to compute (that is, relatively inexpensive computationally). The application presented was a system that obeys the canonical ensemble, but the extension to the grand canonical ensemble can be done with little modification. Future work can include stuff [more]. 
+We have presented a method by which the properties of bulk fluids can be estimated by decomposing the bulk into individual cells in a renormalization-minded manner by exploiting the critical behavior of fluids. The free energy contribution of each length scale can then be investigated and compared, both to determine the most energetic density fluctuations and to provide calculations that serve as a intermediate comparison with SAFT methods. This method is immediately applicable to any system where the energy of a configuration is straightforward to compute (that is, relatively inexpensive computationally). The application presented was a system that obeys the canonical ensemble, but the extension to the grand canonical ensemble can be done with little modification. Future work can include investing further doubling regimes ($i\geq 3$). 
 %\bibliographystyle{plain}
 \cleardoublepage
 \bibliography{./Thesis}
