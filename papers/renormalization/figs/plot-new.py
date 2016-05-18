@@ -20,6 +20,7 @@ eta_color = {}
 linetype = {
     1: '-',
     2: '--',
+    3: 'o:',
 }
 
 Ts = np.arange(0.5, 20.0, 0.25)
@@ -31,7 +32,7 @@ ww = 1.3
 R = 1
 mu = -20
 
-i_values = [1,2]
+i_values = [1,2,3]
 next_color = 0
 next_u_color = 0
 
@@ -86,7 +87,7 @@ for i in i_values:
     for k in Tnum_to_plot:
         ok = Uexc[k,:] != 0
         if Ts[k] in u_temperature_color:
-            plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], 'x'+linetype[i]+u_temperature_color[Ts[k]])
+            plt.plot(etas[ok], Uexc[k,:][ok]/Ns[ok], linetype[i]+u_temperature_color[Ts[k]])
         else:
             u_temperature_color[Ts[k]] = all_colors[next_u_color]
             next_u_color = (next_u_color+1) % len(all_colors)
@@ -100,7 +101,7 @@ for i in i_values:
         Phi = Fabs[k,:] - mu_here*Ns
         ok = Phi != 0
         if Ts[k] in u_temperature_color:
-            plt.plot(etas[ok], Phi[ok]/V, 'x'+linetype[i]+u_temperature_color[Ts[k]])
+            plt.plot(etas[ok], Phi[ok]/V, linetype[i]+u_temperature_color[Ts[k]])
         else:
             u_temperature_color[Ts[k]] = all_colors[next_u_color]
             next_u_color = (next_u_color+1) % len(all_colors)
@@ -137,7 +138,7 @@ plt.legend(loc='best')
 plt.savefig("figs/Shs-vs-eta.pdf")
 
 plt.figure('Fexc-eta')
-plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
+plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww,L))
 plt.xlim(0,0.6)
 plt.ylim(-5,50)
 plt.xlabel(r'$\eta$')

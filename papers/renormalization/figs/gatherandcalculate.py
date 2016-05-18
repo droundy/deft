@@ -9,7 +9,7 @@ def lndos_energy_Ns(dbase):
     ln_dos = {}
     energy = {}
     Ns = []
-    for N in range(2,600): #maybe require N as an argument?
+    for N in range(2,6000): #maybe require N as an argument?
         fname = '%s/N%03d/lv-data-dos.dat' % (dbase, N)
         if os.path.isfile(fname):
             try:
@@ -28,7 +28,7 @@ def lndos_energy_Ns(dbase):
 def Sexc_hardsphere_Ns(dbase):
     Ns = []
     S = []
-    for N in range(2,600): # maybe go higher?
+    for N in range(2,6000): # maybe go higher?
         fbase = '%s/N%03d/absolute/' % (dbase, N)
         # we only try to add this N value if we have one .dat file,
         # and our number of .dat files is the same as our number of
