@@ -11,6 +11,27 @@ matplotlib.rc('text', usetex=True)
 
 import gatherandcalculate
 
+def find_common_tangent(x,y):
+    los = []
+    his = []
+    slopes = []
+    for i in range(len(x)):
+        for j in range(i+1,len(y)):
+            slope = (y[j]-y[i])/(x[j]-x[i])
+            ynew = y - y[i] - slope*(x-x[i])
+            if ynew.min() > -abs(y[i])*1e-5:
+                los.append(i)
+                his.append(j)
+                slopes.append(slope)
+    longest = 0
+    for i in range(len(los)):
+        if his[i]-los[i] > longest:
+            lo = los[i]
+            hi = his[i]
+            longest = x[hi]-x[lo]
+            slope = slopes[i]
+    return slope
+
 all_colors = ['g','b','r','k','c','m','y']
 
 temperature_color = {}
@@ -76,11 +97,11 @@ for i in i_values:
     for k in Tnum_to_plot:
         ok = Fabs[k,:] != 0
         if Ts[k] in fabs_temperature_color:
-            plt.plot(etas[ok], Fabs[k,:][ok]/Ns[ok], linetype[i]+fabs_temperature_color[Ts[k]])
+            plt.plot(etas[ok], Fabs[k,:][ok]/V, linetype[i]+fabs_temperature_color[Ts[k]])
         else:
             fabs_temperature_color[Ts[k]] = all_colors[next_color]
             next_color = (next_color+1) % len(all_colors)
-            plt.plot(etas[ok], Fabs[k,:][ok]/Ns[ok], linetype[i]+fabs_temperature_color[Ts[k]],
+            plt.plot(etas[ok], Fabs[k,:][ok]/V, linetype[i]+fabs_temperature_color[Ts[k]],
                      label=r'$T = %g$' % Ts[k])
 
     plt.figure('Uexc-eta')
@@ -98,6 +119,7 @@ for i in i_values:
     for k in Tnum_to_plot[:3]:
         T = Ts[k]
         mu_here = (Fabs[k,:]/Ns).min()
+        mu_here = find_common_tangent(Ns, Fabs[k,:])
         Phi = Fabs[k,:] - mu_here*Ns
         ok = Phi != 0
         if Ts[k] in u_temperature_color:
@@ -149,7 +171,9 @@ plt.savefig("figs/Fexc-vs-eta.pdf")
 plt.figure('Fabs-eta')
 plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
 plt.xlabel(r'$\eta$')
-plt.ylabel(r'$F_{exc}/\epsilon N$')
+plt.ylabel(r'$F_{abs}/\epsilon V$')
+plt.ylim(-5, 0)
+plt.xlim(0,0.6)
 plt.legend(loc='best')
 plt.savefig("figs/Fabs-vs-eta.pdf")
 
@@ -172,7 +196,7 @@ plt.savefig("figs/Fexc-vs-T.pdf")
 plt.figure('Phiabs-eta')
 plt.title(r'Absolute grand free energies for $\lambda=%g$, $L=%g$' % (ww, L))
 # plt.xlim(0,1)
-plt.ylim(0,0.2)
+plt.ylim(-0.02, 0.15)
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$\Phi_{abs}/\epsilon V$')
 plt.legend(loc='best')
