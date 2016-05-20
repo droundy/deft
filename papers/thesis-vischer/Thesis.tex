@@ -262,35 +262,35 @@ where we have introduced the thermal deBroglie wavelength $\Lambda$ which define
 \begin{align}
     Z &= Z_{exc} \left(\frac{V}{N!\Lambda^{3}}\right)^{N} \,.
 \end{align}
-For liquids [fluids?], the $Z_{exc}$ term is difficult to ever evaluate; the hard sphere liquid, the simplest model for a dense fluid, does not have an analytic representation for the excess free energy. It follows that a considerable amount of work is required to determine the excess free energy for a given system. The absolute free energy, by way of Eq. \ref{FdefSM}, now has the form
+For liquids, the $Z_{exc}$ factor is difficult to evaluate; the hard sphere liquid, the simplest model for a dense fluid, does not have an analytic representation for the excess free energy. It follows that a considerable amount of work is required to determine the excess free energy for a given system. The absolute free energy, by way of Eq. \ref{FdefSM}, now has the form
 \begin{align}
     F_{abs} &= -T\,\ln\left(Z_{exc} \frac{V^N}{N!\Lambda^{3N}}\right)\\
     &= -T\ln\left(Z_{exc}\right)\, -T\left(\frac{V}{(N!)^{1/N}\Lambda^3} \right)^N\\
     &= -T\ln\left(Z_{exc}\right) - NT\ln\left(\frac{V}{\Lambda^3}\right) + NT\ln\left(N!^{1/N}\right)\\ 
 \end{align}
-Redefining the term including $Z_{exc}$ to be $F_{exc}$, and then using Sterling's approximation ($\ln(N!) = N\ln N$ for large N), we arrive at
+Redefining the first factor including $Z_{exc}$ to be $F_{exc}$, and then using Sterling's approximation ($\ln(N!) = N\ln N$ for large N), we arrive at
 \begin{align}
-    F_{abs} &= F_{exc} - NT\ln\left(\frac{V}{\Lambda^3}\right) + NT\ln\left(N\right)
+    F_{abs} &= F_{exc} - NT\left(\ln\left(\frac{V}{\Lambda^3}\right) - \ln\left(N\right)\right)
 \end{align}
-At a specified volume and number of particles, the ideal gas contribution is constant. Consequently, for a given temperature we only need to compute the excess free energy.
+At a specified volume and number of particles, the ideal gas contribution is only a function of temperature. Consequently, for a given temperature we only need to compute the excess free energy.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                            METHODS                                  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Methods}
-This work requires the intersection of three methods to calculate the absolute free energy $F_{abs}$ of the bulk cell. A preliminary value of the free energy of the bulk can be obtained from Monte Carlo simulations. This value can then be made absolute by carefully comparing the results with Thermodynamic Integration, a method of determining the  free energy of the hard-sphere system. The resulting absolute free energies for each fluctuation length can be summed to yield the absolute free energy of the bulk. [more] 
+This work requires the intersection of three methods to calculate the absolute free energy $F_{abs}$ of the bulk cell. A preliminary value of the free energy of the bulk can be obtained from Monte Carlo simulations. This value can then be made absolute by carefully comparing the results with thermodynamic integration, a method of determining the free energy of the hard-sphere system. The resulting absolute free energies for each fluctuation length can be summed to yield the absolute free energy of the bulk. {\color{red}[deal with the problems here]} 
 
 \subsection{Monte Carlo Methods}
 
 Unbiased Monte Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. \\
 
 Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically Broad histogram transition matrix Monte Carlo.
-\subsubsection{Markov Chain}
-Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving. If we define the equilibrium state of the system by a vector column $\mathbf{q}$ (where the components refer to general coordinates, typically taken to be position of each sphere), and the resulting state $\mathbf{p}$ after a single time step, the relationship
+\subsubsection{Metropolis-Hastings}
+Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving. If we define the ensemble of states of the system in equilibrium by a vector column $\mathbf{q}$, and the resulting state $\mathbf{p}$ after a single time step, the relationship
 \begin{align*}
     \mathbf{p} &= \mathcal{P}\, \mathbf{q}\\
 \end{align*}
-defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square matrix that contains information about these transitions. We call this construction $\mathcal{P}$ the {\it transition matrix}. This matrix is $L\times L$, where $L$ is the number of energy levels in system. If all elements of the transition matrix are nonzero, we can see that any state of the system is reachable after a finite number of transitions from any given initial state. A physically judicious choice of transition matrix is one that satisfies the thermodynamic steady state condition; given the equilibrium state $\mathbf{q}_{eq}$, we enforce that
+defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square matrix that contains information about these transitions. We call this construction $\mathcal{P}$ the {\it transition matrix}. This matrix is $L\times L$, where $L$ is the number of energy levels in system. If all rows of the transition matrix are , we can see that any state of the system is reachable after a finite number of transitions from any given initial state. A physically correct simulation will generate a transition matrix that satisfies the thermodynamic steady state condition; given the ensemble of equilibrium states $\mathbf{q}_{eq}$, we enforce that
 \begin{align}
     \mathcal{P}\,\mathbf{q}_{eq} &= \mathbf{q}_{eq}
     \label{thermo-steady-state}
@@ -298,13 +298,13 @@ defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square ma
 The transition matrix thus embodies the physics of the simulation.
 
 \subsection{Broad Histogram Monte Carlo}
-If the energy of the system at each time step in a Monte Carlo simulation is recorded, it is straightforward to construct a histogram of energies. That is, a histogram with a bin for each narrow $\Delta E$ around a value $E$ that displays the number of times the system visited that energy range. Typical implementations of histogram methods follow the ``canonical histogram'' procedure outlined by Ferrenberg and Swendsen \cite{ferrenberg1988histogram} -- given a histogram $h_T(E)$ extracted from a simulation at some temperature $T_0$, a reweighting scheme can then extend the histogram to any other temperature $T$ via 
+If the energy of the system at each time step in a Monte Carlo simulation is recorded, it is straightforward to construct a histogram of energies. That is, a histogram with a bin for each narrow $\Delta E$ around a value $E$ that counts the number of times the system visited that energy range. Typical implementations of histogram methods follow the ``canonical histogram'' procedure outlined by Ferrenberg and Swendsen \cite{ferrenberg1988histogram} -- given a histogram $h_T(E)$ extracted from a simulation at some temperature $T_0$, a reweighting scheme can then extend the histogram to any other temperature $T$ via 
 \begin{align}
     h_{T}(E) &= h_{T_0}(E) \exp\left(E/T - E/T_0 \right)
 \end{align}
 and then normalizing appropriately. This method unfortunately loses substantial accuracy far from the original temperature and causes an untoward spike near the average value of the original histogram. Further, this reweighting detracts from the accuracy of the tails of the histogram. We choose instead to implement a similar approach to that of de Oleveira and coworkers\cite{de1998broad}, the ``broad histogram''. \\
 
-To construct the broad histogram we need to perform a Markovian walk along the energy levels of the system. Throughout the walk we count the number of times we transitioned from a given initial state to to a given resulting state. If we walk across the entire energy range, we can construct histogram of energy transitions $h(E_i, E_j)$ for all $i, j$. The walk goes as follows: starting with a state $\mathbf{q_i}$ with energy $E_i$, we attempt perform a random move to a state $\mathbf{q_f}$ with energy $E_f$. Assuming the resulting configuration is valid, the move is always accepted if the energy decreases, i.e, $E_f - E_i <0$. Otherwise, we accept the move with a probability related to the ratio of counts of the transition occurring ``forwards'' to the transition occurring the opposite direction. Since each state is reachable within a finite amount of time in a Markovian process, a broader, more accurate histogram merely requires more computation time. This process is outlined in Algorithm~\ref{alg_tmmc}.\\
+To construct the broad histogram we need to perform a Markovian walk along the energy levels of the system. Throughout the walk we count the number of times we transitioned from a given initial energy to to a given resulting energy. If we walk across the entire energy range, we can construct histogram of energy transitions $h(E_i, E_j)$ for all $i, j$. The walk goes as follows: starting with a state $\mathbf{q_i}$ with energy $E_i$, we attempt perform a random move to a state $\mathbf{q_f}$ with energy $E_f$. Assuming the resulting configuration is valid, the move is always accepted if the energy decreases, i.e, $E_f - E_i <0$. Otherwise, we accept the move with a probability related to the ratio of counts of the transition occurring ``forwards'' to the transition occurring the opposite direction. Since each state is reachable within a finite amount of time in a Markovian process, a broader, more accurate histogram merely requires more computation time. This process is outlined in Algorithm~\ref{alg_tmmc}.\\
 
 \begin{algorithm}[tb]
     \caption{Transition Matrix Monte Carlo Initialization}
@@ -315,7 +315,7 @@ To construct the broad histogram we need to perform a Markovian walk along the e
         \item Perform a random walk, transitioning from an initial state $\mathbf{q_i}$ to a final state $\mathbf{q_{f}}$. Initially accept the state if the configuration is valid. \label{alg-tmmc-start}
         \item Increment the transition histogram $h(E_i, E_f)$.
         \item Accept move unconditionally if $\Delta E_f - E_i = E < 0$.
-        \item Else, accept move with a probability proportional to $\frac{h_(E_i, E_f )}{h_(E_f, E_i)}$.
+        \item Else, accept move with a probability proportional to $\frac{h(E_i, E_f )}{h(E_f, E_i)}$.
         \item If not end condition has been met, return to step \ref{alg-tmmc-start}.   
     \end{enumerate}
     \hrulefill
@@ -323,12 +323,12 @@ To construct the broad histogram we need to perform a Markovian walk along the e
 
 Calculating the density of states, given the transition matrix constructed via the process in Algorithm~\ref{alg_tmmc}, is a trivial matter. The equilibrium condition given in Eq.~\ref{thermo-steady-state} is really a statement about the density of states; for a Monte Carlo simulation, the equilibrium state $q_{eq}$ is exactly the density of states. Solving the steady state condition as an eigenvalue problem for $q_{eq}$ then yields the density of states\cite{perlinthesis}. \\
 
-It bares mentioning that most implementations of transition matrix methods consider the above procedure the ``initialization'' process. The canonical ``simulation'' period refers to gathering statistics for quantities that cannot be calculated from the density of states, such as the density of the fluid or the pair distribution function. Given that we only are concerned with quantities that can be computed given the density of states, we never actually ``simulate''. With the density of states computed, we can now calculate the partition function and thereby the free energy.
+It bears mentioning that most implementations of transition matrix methods consider the above procedure the ``initialization'' process. The canonical ``simulation'' period refers to gathering statistics for quantities that cannot be calculated from the density of states, such as the density of the fluid or the pair distribution function. Given that we only are concerned with quantities that can be computed given the density of states, we never actually ``simulate''. With the density of states computed, we can now calculate the partition function and thereby the free energy.
 
 \subsection{Renormalization Group Theory}
 Renormalization group methods attempt to describe how a particular system's properties are altered when the system is viewed from varying length scales. Near the critical point, the fluid becomes self similar, and so fluctuations of all wavelengths are present. We can then compare quantities of related yet physically different systems as they all exhibit the similar properties.\\
 We begin with a periodic cubic cell of length $L_0$ and volume $L_0^3$. 
-This cell has periodic boundary conditions and consequently allows for fluctuations up to wavelength $2L_0$. These fluctuations contribute some absolute free energy $F_0$ to the absolute free energy of the full cell. We then double the length of the cell to allow for fluctuations of up to wavelength $4L_0$. We continue this process until all relevant wavelengths have been included. Adding up the change in absolute free energy calculated in this manner then yields the total free energy of the critical system, which can then be compared to accepted simulation methods. Algorithm~\ref{alg_renorm} details this process. 
+This cell has periodic boundary conditions and consequently allows for fluctuations up to wavelength $L_0$. These fluctuations contribute some absolute free energy $F_0$ to the absolute free energy of the full cell. We then double the length of the cell to allow for fluctuations of up to wavelength $L_0$. We continue this process until all relevant wavelengths have been included. Adding up the change in absolute free energy calculated in this manner then yields the total free energy of the critical system, which can then be compared to accepted simulation methods. Algorithm~\ref{alg_renorm} details this process. 
 
 \begin{algorithm}[tb]
     \caption{Renormalization-esque calculation of total free energy}
@@ -354,7 +354,7 @@ Eq. ~\ref{GRGT-F1} details the mathematics of this coupling procedure.
     \label{GRGT-F2}
 \end{align}
 
-Strictly speaking, a formal limit is required for equality in Eq.~\ref{GRGT-F1}, rather than only including wavelengths up to $2^k\lambda_0$. Though theoretically all wavelengths are present in the critical system we posit that it is only necessary to include the first several. Given approximation, we choose instead to use Eq.~\ref{GRGT-F2}. Each $F^{\text{abs}}_i$ can be calculated using a combination of different Monte Carlo methods, namely TMMC and Thermodynamic Integration. A graphical representation of this process can be shown in Figure ~\ref{GRTG-demo}.\\
+Strictly speaking, a formal limit is required for equality in Eq.~\ref{GRGT-F1}, rather than only including wavelengths up to $2^k\lambda_0$. Though theoretically all wavelengths are present at the critical point it is only necessary to include the first several to accurately describe systems moderately close to the critical point. Given approximation, we choose instead to use Eq.~\ref{GRGT-F2}. Each $F^{\text{abs}}_i$ can be calculated using a combination of different Monte Carlo methods, namely Metropolis-Hastings Monte Carlo and thermodynamic integration. A graphical representation of this process can be shown in Figure ~\ref{GRTG-demo}.\\
 
 %%%%%%% TIKZZZZZ%%%%%%%
 
@@ -409,7 +409,7 @@ Strictly speaking, a formal limit is required for equality in Eq.~\ref{GRGT-F1},
 
 \subsection{Thermodynamic Integration}
 \subsubsection{General Process}
-Thermodynamic Integration is a unique way to determine the ``excess'' free energy of the system. Using hard sphere Monte Carlo, we transition from a filling fraction of zero (note that this statement is identical to assuming that the cell begins at infinite temperature, since the total energy does not depend on where the spheres are placed) to a near-close-packed system with filling fraction $\eta_max$, calculating the change in free energy at each step. When we have reached the desired final filling fraction we have found the free energy that was necessary to create that configuration of particles - this is exactly the absolute free energy of the system.\\
+Thermodynamic integration is a unique way to determine the ``excess'' free energy of the system. Using hard sphere Monte Carlo, we transition from a filling fraction of zero to a dense system with filling fraction $\eta_{max}$, calculating the change in free energy at each step. When we have reached the desired final filling fraction we have found the free energy that was necessary to create that configuration of particles - this is exactly the absolute free energy of the system.\\
 \subsubsection{Algorithm}
 The hard sphere fluid is simple to work with since its partition function simply counts the number of microstates in the system\cite{valeskethesis}. Since we are calculating the change in free energy as we transition to higher and higher filling fractions, we need only be concerned with finding the ratio of partition functions between each step. Since the hard sphere partition function is a ``counting'' mechanism, we can determine this ratio quite easily using Monte Carlo simulations. Given a starting state (defined by the arrangement of particles and filling fraction) we shrink the volume and intermolecular distances by a somewhat arbitrary scaling factor and then see if the resulting configuration of particles is valid. If the configuration is valid, we accept this is a working move and then return to the original configuration and test another scaling factor. If the resulting configuration is invalid, we count the move as failed and then repeat. The ``golden'' acceptance ratio is fifty percent - when we have found a scaling factor that yields a ratio near the desired value\dots\\
 
@@ -484,15 +484,15 @@ All simulation output is saved in text files for plotting and visualization ease
                 && \rightarrow \text{N=1}\\
                 &&\vdots\\
 \end{align*}
-Each sphere count subfolder contains a single text file from TMMC output and another subfolder where all of the Thermodynamic Integration output is stored. Each Thermodynamic Integration simulation outputs a single text file upon completion of each filling fraction step. On average, a single TI calculation requires approximately $175$ steps. \\
-This structure was chosen both for elegant parallelism and for plotting accessibility. 
+Each sphere count subfolder contains a single text file from TMMC output and another subfolder where all of the thermodynamic integration output is stored. Each thermodynamic integration simulation outputs a single text file upon completion of each filling fraction step. On average, a single calculation requires approximately $175$ steps. This structure was chosen both for elegant parallelism and for plotting accessibility. 
 
 \subsection{Calculating the Absolute Free Energy}
+{\color{red} please rewrite me. This paragraph has been terrible since it was written.}\\
 It is straightforward the compute a Helmholtz free energy through the Monte Carlo simulations; the difficulty in this method lies in computing the correct free energy. TMMC, as mentioned previously, yields a free energy accurate only up to a unknown constant. Since we need to add up changes in free energy across multiple simulations, we need each calculated free energy to be ``absolute'' - that is, we must eliminate this unknown constant. \\
 
-At infinite temperature, the square well fluid has approximately the same behavior as the hard sphere fluid.  We assert that the correct inclusion, then, is to enforce that the excess free energy calculated via TMMC at $T=\infty$ is equal to the free energy calculated through thermodynamic integration. We do this by exploiting the infinite temperature behavior of the canonical ensemble:
+At infinite temperature, the square well fluid has approximately the same behavior as the hard sphere fluid.  We assert that the correct inclusion, then, is to enforce that the excess entropy calculated via TMMC at $T=\infty$ is equal to the hard sphere entropy calculated through thermodynamic integration. We do this by exploiting the infinite temperature behavior of the canonical ensemble:
 \begin{align}
-    Z_{inf} &= \left.\sum_{i=0}^{\text{\tiny Energies}} D(E) e^{-\beta E}\right|_{\beta = 0}\\
+    Z_{\infty} &= \left.\sum_{i=0}^{\text{\tiny Energies}} D(E) e^{-\beta E}\right|_{\beta = 0}\\
     &= \sum_{i=0}^{\text{\tiny Energies}} D(E)\\
     &= \#\text{~states}\;.
 \end{align}
@@ -501,9 +501,9 @@ The partition function now calculates the total number of states in the system w
 \begin{align*}
     F_{SW,~exc} &= U_{SW,~exc} - T\,S_{SW,~exc}     
 \end{align*} 
-and, at infinite temperature, the internal energy vanishes, leaving us with
+and, at infinite temperature, the internal energy asymptotes to a value independent of temperature, leaving us with
 \begin{align}
-    F_{SW,~exc} &= -T\,S_{SW, ~exc} \;.
+    F_{SW,~exc} &= -T\,S_{SW, ~exc} + U_{exc}\;.
 \end{align}
 
 The hard sphere system has no excess internal energy, so the excess free energy is merely
@@ -519,10 +519,10 @@ Since the excess hard sphere free energy is really just the entropy \cite{valesk
 \subsection{Thermodynamic Quantities from Simulation}
 Given the density of states output $\ln[D(E)]$ from the Monte Carlo simulation, combined with {\it a priori} knowledge that the system obeys a canonical ensemble distribution of states, we can calculate any thermodynamic , for instance, the excess internal energy:
 \begin{align*}
-     U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp\left(\ln[D(E)] - \beta E_i\right)}{\sum_{i=0}^{\text{\tiny Energies}} \exp[\ln(D(E)] - \beta E_i})\\
+     U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp\left(\ln[D(E)] - \beta E_i\right)}{\sum_{i=0}^{\text{\tiny Energies}} \exp[\ln(D(E)] - \beta E_i)}\\
      &= \frac{\sum_{i=0}^{\text{\tiny Energies}} E_i \exp\left(-\beta E_i\right)}{Z}
 \end{align*} 
-where, as usual, $\beta = T^{-1}$. Taking the exponential of $\ln(D(E))$, unfortunately, tends to introduce overflow or underflow errors during computation. We combat this by subtracting the maximum value of the natural log of the density of states \ignore{subtracting maximum ought to make it more negative\dots}from each element of $D(E)$, and then adding the maximum back in after the exponential. We calculate the excess free energy by using the entropy equality developed previously:
+where, as usual, $\beta = T^{-1}$.  unfortunately, tends to introduce overflow or underflow errors during computation. We combat this by subtracting the maximum value of the natural log of the density of states \ignore{subtracting maximum ought to make it more negative\dots}from each element of $D(E)$, and then adding the maximum back in after the exponential. We calculate the excess free energy by using the entropy equality developed previously:
 \begin{align*}
      S_{SW,~exc}\Bigm\lvert_{T=\infty} &= S_{HS,~exc}\\
      \implies F_{SW,~exc} &= -TS_{HS,~exc} + F_{inf}\\
@@ -535,7 +535,7 @@ The excess hard sphere entropy $T_{HS,~exc}$ is calculated directly from thermod
 
 
 \section{Results}
-An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would [might?] expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We are primarily concerned with the ``scrunched'' case where the cell length is $\sqrt2\sigma$.\\
+An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would [might?] expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We choose to focus on the ``scrunched'' case where the cell length is $\sqrt2\sigma$.\\
 
 Figures ~\ref{F-T} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each plot contains calculations from the first doubling regime ($L=2\lambda_0$) represented by solid lines and second doubling regime ($L = 4\lambda_0$) in dashes. It is worth noting that the succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.\\  
 \begin{figure}  
