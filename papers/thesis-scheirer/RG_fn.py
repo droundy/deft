@@ -1,3 +1,5 @@
+from __future__ import division
+
 import scipy as sp
 from scipy.optimize import fsolve
 from scipy.interpolate import interp1d
@@ -32,8 +34,12 @@ import sys
 ### Normal temperature linspace (useful for quick troubleshooting) ###
 #temp = plt.linspace(0.4,1.3,40)
 numdata=1000
-numdensity = plt.linspace(0.0001,.2,numdata)
+max_fillingfraction_handled = 0.84
+numdensity = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),numdata)
 
+if len(sys.argv) < 2:
+        print("Usage: %s TEMPERATURE" % sys.argv[0])
+        exit(1)
 temp=float(sys.argv[1])
 sigma=2
 k_B=1
@@ -64,7 +70,7 @@ fload+='%d.out'%(fn-1)
 fsave+='%d.out'%fn
 if fn == 1:
         firstPass()
-        sys.exit("First Pass Done")
+        print("First Pass Done")
         
 
 
@@ -98,8 +104,9 @@ def testfit02():
         for i in range(0,len(numdensity2)):
                 n = numdensity2[i]
                 maxn = 1/(sigma**3*np.pi/6)
-                maxx = np.minimum(np.ones_like(n),maxn/(n+1e-42)-1)
-                
+                # warning: Forte defines x as a density, we define it
+                # as a dimensionless quantity that scales the density.
+                maxx = np.minimum(1.0, maxn/(n+1e-42)-1)
                 print "%d of %d     \r"%(i,len(numdensity2)),
                 r = float(numdensity2[i])
                 f02.append(float(fit2(r)))
@@ -133,6 +140,8 @@ def f01_load():
 
 
 def ID2(n):
+        ''' This is $I_D$ from Forte's paper.
+        '''
         maxpower = -1e10
         for k in range(0,len(numdensity)):
                 if numdensity[k] > maxx: break
@@ -148,8 +157,7 @@ def onlyPower(n,x,i):
 
 
 def integrand_ID2(n,maxpower,x):
-        argument = np.exp(-maxpower-RG.VD(2)/k_B/temp*(fbarD(temp,n,x,2) + ubarD(temp,n,x,2)))
-        return argument
+        return np.exp(-maxpower-RG.VD(2)/k_B/temp*(fbarD(temp,n,x,2) + ubarD(temp,n,x,2)))
 
 
 
@@ -158,14 +166,12 @@ def fbarD(T,n,x,i):
         iplusx = f01_ext(n*(1+x))
         iminusx = f01_ext(n*(1-x))
         nochangex = f01_ext(n)
-        value = (iplusx + iminusx)/2 - nochangex
-        return value
+        return (iplusx + iminusx)/2 - nochangex
 
 # Averge scaled potential
 # eqn (11), Forte 2011
 def ubarD(T,n,x,i):
-        value = (RG.u(temp,n*(1+x),0,i) + RG.u(temp,n*(1-x),0,i))/2 - RG.u(temp,n,0,i)
-        return value
+        return (RG.u(temp,n*(1+x),0,i) + RG.u(temp,n*(1-x),0,i))/2 - RG.u(temp,n,0,i)
 
 
 
