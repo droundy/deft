@@ -498,40 +498,44 @@ At infinite temperature, the square well fluid has approximately the same behavi
 \end{align}
 
 The partition function now calculates the total number of states in the system which we expected due to the equipartition theorem. The excess free energy is simply
-\begin{align*}
+\begin{align}
     F_{SW,~exc} &= U_{SW,~exc} - T\,S_{SW,~exc}     
-\end{align*} 
+\end{align} 
 and, at infinite temperature, the internal energy asymptotes to a value independent of temperature, leaving us with
 \begin{align}
     F_{SW,~exc} &= -T\,S_{SW, ~exc} + U_{exc}\;.
 \end{align}
 
 The hard sphere system has no excess internal energy, so the excess free energy is merely
-\begin{align*}
+\begin{align}
      F_{HS,~exc} &= -T\,S_{HS,~exc} 
-\end{align*} 
+\end{align} 
 
 Since the excess hard sphere free energy is really just the entropy \cite{valeskethesis} (scaled by temperature), the statement that the square well and hard sphere excess free energies need be equal in the infinite temperature limit is really a constraint on the {\it entropy} of the two systems. We then conclude that
-\begin{align*}
+\begin{align}
     S_{SW,~exc} \Bigm\lvert_{T=\infty} &= S_{HS,~exc}
-\end{align*}
+\end{align}
 
 \subsection{Thermodynamic Quantities from Simulation}
 Given the density of states output $\ln[D(E)]$ from the Monte Carlo simulation, combined with {\it a priori} knowledge that the system obeys a canonical ensemble distribution of states, we can calculate any thermodynamic , for instance, the excess internal energy:
-\begin{align*}
-     U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp\left(\ln[D(E)] - \beta E_i\right)}{\sum_{i=0}^{\text{\tiny Energies}} \exp[\ln(D(E)] - \beta E_i)}\\
+\begin{align}
+     U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp(\ln[D(E)] - \beta E_i)}{\sum_{i=0}^{\text{\tiny Energies}} \exp(\ln[D(E)] - \beta E_i)}\\
      &= \frac{\sum_{i=0}^{\text{\tiny Energies}} E_i \exp\left(-\beta E_i\right)}{Z}
-\end{align*} 
+\end{align} 
 where, as usual, $\beta = T^{-1}$.  unfortunately, tends to introduce overflow or underflow errors during computation. We combat this by subtracting the maximum value of the natural log of the density of states \ignore{subtracting maximum ought to make it more negative\dots}from each element of $D(E)$, and then adding the maximum back in after the exponential. We calculate the excess free energy by using the entropy equality developed previously:
-\begin{align*}
+\begin{align}
      S_{SW,~exc}\Bigm\lvert_{T=\infty} &= S_{HS,~exc}\\
-     \implies F_{SW,~exc} &= -TS_{HS,~exc} + F_{inf}\\
-     F_{SW,~exc} &= -TS_{HS,~exc} - T\ln\left(\frac{Z}{Z_{inf}}\right)
-\end{align*} 
+     \implies F_{SW,~exc}\Bigm\lvert_{T=\infty} &= U_{SW,~exc}\Bigm\lvert_{T=\infty} -TS_{HS,~exc} \\
+     \implies F_{SW,~exc}(T) &= F_{SW,~exc}\Bigm\lvert_{T=\infty} + \left(F_{SW,~exc}(T) - F_{SW,~exc}\Bigm\lvert_{T=\infty}\right)
+     \\
+     \implies F_{SW,~exc}(T) &= U_{SW,~exc}\Bigm\lvert_{T=\infty} -TS_{HS,~exc} + \left(F_{SW,~exc}(T) - F_{SW,~exc}\Bigm\lvert_{T=\infty}\right)
+     \\
+     F_{SW,~exc} &= U_{\infty} -TS_{HS,~exc} - T\ln\left(\frac{Z}{Z_{\infty}}\right)
+\end{align} 
 The excess hard sphere entropy $T_{HS,~exc}$ is calculated directly from thermodynamic integration, $Z$ is calculated using  . Once we have calculated both the excess free energy and excess internal energy, we can directly find the excess entropy:
-\begin{align*}
+\begin{align}
     S_{SW, ~exc} &= \frac{1}{T}\left(U_{SW,~exc} - F_{SW,~exc} \right)
-\end{align*}
+\end{align}
 
 
 \section{Results}
