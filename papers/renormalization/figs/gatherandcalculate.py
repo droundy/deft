@@ -118,6 +118,7 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
             dos_boltz = np.exp(ln_dos_boltz - offset)
             Z = sum(dos_boltz)
             Zinf = sum(np.exp(ln_dos[N] - offset))
+            Uinf = sum(energy[N]*np.exp(ln_dos[N]-ln_dos[N].max()))/sum(np.exp(ln_dos[N]-ln_dos[N].max()))
             if Zinf == 0:
                 # # Here we handle the case where our offset was *so*
                 # # huge that it made Zinf underflow to zero.  We
@@ -126,8 +127,9 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
                 Z = sum(dos_boltz + offset)
                 Zinf = sum(np.exp(ln_dos[N]))
                 # print 'fixed: Z is', Z, 'and Zinf is', Zinf
-            F[k,j] = -T*Sexc_HS - T*np.log(Z/Zinf)
+            F[k,j] = Uinf -T*Sexc_HS - T*np.log(Z/Zinf)
     return F
+
 
 def Sexc(Uexc, Fexc, Ts):
     S = np.zeros_like(Uexc)
