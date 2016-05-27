@@ -33,7 +33,7 @@ import sys
 #                                                                                             #
 ### Normal temperature linspace (useful for quick troubleshooting) ###
 #temp = plt.linspace(0.4,1.3,40)
-numdata=1000
+numdata=30
 max_fillingfraction_handled = 0.84
 numdensity = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),numdata)
 
@@ -87,7 +87,7 @@ def firstPass():
                 y[i]=RG_first_pass(temp,numdensity[i],1)
                 data.append([numdensity[i],y[i]])
         elapsed = time.time() - t
-        print(elapsed)        
+        print(elapsed)
 
         np.savetxt(fsave,data)
 
@@ -167,36 +167,17 @@ def f01_load():
         #plt.show()
 
 
+integrand_xs = []
+integrand_args = []
 
 def ID2(n):
         ''' This is $I_D$ from Forte's paper.
         '''
         maxpower = -1e99
-        numdensityMark10=(plt.linspace(0.00001,maxx*1.05,100))
-        xtemp=numdensityMark10[0]
-        for k in range(0,len(numdensityMark10)):
-                if numdensityMark10[k] > maxx: break
-                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
-                if onlyPower(n,numdensityMark10[k],fn)>maxpower:
-                        maxpower=onlyPower(n,numdensityMark10[k],fn)
-                        xtemp=numdensityMark10[k]
-        numdensityMark10=plt.linspace(xtemp*0.9,xtemp*1.1,100)
-        for k in range(0,len(numdensityMark10)):
-                if numdensityMark10[k] > maxx: break
-                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
-                if onlyPower(n,numdensityMark10[k],fn)>maxpower:
-                        maxpower=onlyPower(n,numdensityMark10[k],fn)
-                        xtemp=numdensityMark10[k]
-        
-        numdensityMark10=plt.linspace(xtemp*0.98,xtemp*1.02,1000)
-        for k in range(0,len(numdensityMark10)):
-                if numdensityMark10[k] > maxx: break
-                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
-                if onlyPower(n,numdensityMark10[k],fn)>maxpower:
-                        maxpower=onlyPower(n,numdensityMark10[k],fn)
-                        xtemp=numdensityMark10[k]
-        
-        #maxpower = sp.optimize.fmin(lambda x: -onlyPowerExperimental(n,x,maxx,fn),maxpower)
+        dx = maxx/1000
+        xpoints = np.arange(dx/2,maxx, dx)
+        for k in range(len(xpoints)):
+                maxpower = max(maxpower, onlyPower(n,xpoints[k],fn))
 
         #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),maxx*0.1,maxx*0.9)[0]*n
         #integral+=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx*0.1,100)*n
@@ -204,6 +185,12 @@ def ID2(n):
 
         integral=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx,1000)*n
         #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),0,maxx)[0]*n
+        global integrandIDlistx
+        global integrandIDlistarg
+        integrand_xs.append(integrandIDlistx)
+        integrand_args.append(integrandIDlistarg)
+        integrandIDlistx = []
+        integrandIDlistarg = []
         return np.log(integral)+maxpower  #returns log of ID
         #return integral
 
@@ -405,7 +392,9 @@ plt.figure()
 plt.title('integrand vs x')
 plt.ylabel('integrand')
 plt.xlabel('x')
-plt.plot(integrandIDlistx,integrandIDlistarg)
+for i in range(len(integrand_xs)):
+        plt.plot(integrand_xs[i], integrand_args[i])
+
 plt.show()
 
 
