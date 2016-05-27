@@ -41,21 +41,50 @@ if len(sys.argv) < 2:
         print("Usage: %s TEMPERATURE" % sys.argv[0])
         exit(1)
 temp=float(sys.argv[1])
+#temp=0.6
 sigma=2
 k_B=1
 
-fload = 'data/fit_T%.3f_f'%temp
-fsave = 'data/fit_T%.3f_f'%temp
+datadir = 'data05'
+try:
+        os.mkdir(datadir)
+except:
+        pass
+fload = datadir+'/fit_T%.3f_f'%temp
+fsave = datadir+'/fit_T%.3f_f'%temp
+
+print(temp)
+f01interp=lambda n: 1
+
+
+def RG_first_pass(T,n,i):
+        # eqn (55) Forte 2011:
+        global maxx
+        global maxn
+        maxn = 1/(sigma**3*np.pi/6)
+        maxx = np.minimum(1,maxn/(n+1e-42)-1)
+        fnaught = RG.SWfid(T,n) + RG.SWfhs(T,n) + RG.a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
+        f = fnaught
+        IDvalue = ID2(n)
+        ID_refvalue = ID2star(n)
+        dfi = -k_B*T*(IDvalue-ID_refvalue)/RG.VD(1) # eqn (7), Forte 2011
+        f += dfi
+        return f
 
 
 
 def firstPass():
+        global f01interp
+        f01interp=lambda n: RG.fiterative(temp,n,0)
         data=[]
         y = plt.linspace(0,1,len(numdensity))
         t = time.time()
+        lastprint = t
         for i in range(0,len(y)):
-                print "%d of %d     \r"%(i,len(y)),
-                y[i]=RG.fiterative(temp,numdensity[i],1)
+                if time.time() - lastprint > 5:
+                        print "%d of %d     \n"%(i,len(y)),
+                        lastprint = time.time()
+                y[i]=RG_first_pass(temp,numdensity[i],1)
                 data.append([numdensity[i],y[i]])
         elapsed = time.time() - t
         print(elapsed)        
@@ -68,10 +97,7 @@ while os.path.isfile(fload+'%d.out'%fn):
         fn+=1
 fload+='%d.out'%(fn-1)
 fsave+='%d.out'%fn
-if fn == 1:
-        firstPass()
-        print("First Pass Done")
-        
+print('fn:',fn)
 
 
 #                                                                                             #
@@ -92,6 +118,8 @@ if fn == 1:
 
 
 
+
+
 def testfit02():
         global f02
         global numdensity2
@@ -106,7 +134,8 @@ def testfit02():
                 maxn = 1/(sigma**3*np.pi/6)
                 # warning: Forte defines x as a density, we define it
                 # as a dimensionless quantity that scales the density.
-                maxx = np.minimum(1.0, maxn/(n+1e-42)-1)
+                maxx = np.minimum(1,maxn/(n+1e-42)-1)
+
                 print "%d of %d     \r"%(i,len(numdensity2)),
                 r = float(numdensity2[i])
                 f02.append(float(fit2(r)))
@@ -142,11 +171,39 @@ def f01_load():
 def ID2(n):
         ''' This is $I_D$ from Forte's paper.
         '''
-        maxpower = -1e10
-        for k in range(0,len(numdensity)):
-                if numdensity[k] > maxx: break
-                maxpower = max(maxpower,onlyPower(n,numdensity[k],2))
+        maxpower = -1e99
+        numdensityMark10=(plt.linspace(0.00001,maxx*1.05,100))
+        xtemp=numdensityMark10[0]
+        for k in range(0,len(numdensityMark10)):
+                if numdensityMark10[k] > maxx: break
+                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
+                if onlyPower(n,numdensityMark10[k],fn)>maxpower:
+                        maxpower=onlyPower(n,numdensityMark10[k],fn)
+                        xtemp=numdensityMark10[k]
+        numdensityMark10=plt.linspace(xtemp*0.9,xtemp*1.1,100)
+        for k in range(0,len(numdensityMark10)):
+                if numdensityMark10[k] > maxx: break
+                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
+                if onlyPower(n,numdensityMark10[k],fn)>maxpower:
+                        maxpower=onlyPower(n,numdensityMark10[k],fn)
+                        xtemp=numdensityMark10[k]
+        
+        numdensityMark10=plt.linspace(xtemp*0.98,xtemp*1.02,1000)
+        for k in range(0,len(numdensityMark10)):
+                if numdensityMark10[k] > maxx: break
+                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
+                if onlyPower(n,numdensityMark10[k],fn)>maxpower:
+                        maxpower=onlyPower(n,numdensityMark10[k],fn)
+                        xtemp=numdensityMark10[k]
+        
+        #maxpower = sp.optimize.fmin(lambda x: -onlyPowerExperimental(n,x,maxx,fn),maxpower)
+
+        #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),maxx*0.1,maxx*0.9)[0]*n
+        #integral+=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx*0.1,100)*n
+        #integral+=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),maxx*0.9,maxx,100)*n
+
         integral=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx,1000)*n
+        #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),0,maxx)[0]*n
         return np.log(integral)+maxpower  #returns log of ID
         #return integral
 
@@ -154,11 +211,20 @@ def ID2(n):
 def onlyPower(n,x,i):
         return (-RG.VD(i)/k_B/temp*(fbarD(temp,n,x,i) + ubarD(temp,n,x,i)))
 
+def onlyPowerExperimental(n,x,maxx,fn):
+        if(x>=maxx): return -1e99
+        if x<=0 : return -1e99
+        return onlyPower(n,x,fn)
 
-
+#integrandIDlistn = []
+integrandIDlistx = []
+integrandIDlistarg = []
 def integrand_ID2(n,maxpower,x):
-        return np.exp(-maxpower-RG.VD(2)/k_B/temp*(fbarD(temp,n,x,2) + ubarD(temp,n,x,2)))
-
+        argument = np.exp(-maxpower-RG.VD(fn)/k_B/temp*(fbarD(temp,n,x,fn) + ubarD(temp,n,x,fn)))
+        #integrandIDlistn.append(n)
+        integrandIDlistx.append(x)
+        integrandIDlistarg.append(argument)
+        return argument
 
 
 
@@ -202,6 +268,10 @@ def f01_ext(numdensity):
 def onlyPowerStar(n,x,i):
         return (-RG.VD(i)/k_B/temp*fbarD(temp,n,x,i))
 
+def onlyPowerStarExperimental(n,x,maxx,fn):
+        if(x>=maxx): return -1e99
+        if x<=0 : return -1e99
+        return onlyPowerStar(n,x,fn)
 
 
 
@@ -210,19 +280,60 @@ def onlyPowerStar(n,x,i):
 
 
 def ID2star(n):
-        maxpower = -1e10
-        for k in range(0,len(numdensity)):
-                if numdensity[k] > maxx: break
-                maxpower = max(maxpower,onlyPowerStar(n,numdensity[k],2))
+
+        maxpower = -1e99
+        xtemp=numdensity[0]
+        numdensityMark10=(plt.linspace(0.00001,maxx*1.05,100))
+        for k in range(0,len(numdensityMark10)):
+                if numdensityMark10[k] > maxx: break
+                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
+                if onlyPowerStar(n,numdensityMark10[k],fn)>maxpower:
+                        maxpower=onlyPowerStar(n,numdensityMark10[k],fn)
+                        xtemp=numdensityMark10[k]
+        
+        numdensityMark10=plt.linspace(xtemp*0.9,xtemp*1.1,100)
+        for k in range(0,len(numdensityMark10)):
+                if numdensityMark10[k] > maxx: break
+                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
+                if onlyPowerStar(n,numdensityMark10[k],fn)>maxpower:
+                        maxpower=onlyPowerStar(n,numdensityMark10[k],fn)
+                        xtemp=numdensityMark10[k]
+
+        numdensityMark10=plt.linspace(xtemp*0.98,xtemp*1.02,1000)
+        for k in range(0,len(numdensityMark10)):
+                if numdensityMark10[k] > maxx: break
+                #maxpower = max(maxpower,onlyPower(n,numdensityMark10[k],fn))
+                if onlyPowerStar(n,numdensityMark10[k],fn)>maxpower:
+                        maxpower=onlyPowerStar(n,numdensityMark10[k],fn)
+                        xtemp=numdensityMark10[k]
+        #maxpower2 = sp.optimize.fmin(lambda x: -onlyPowerStar(n,x,fn),0)
+        #maxpower = sp.optimize.fmin(lambda x: -onlyPowerStarExperimental(n,x,maxx,fn),maxpower)
+        # integral = sp.integrate.quad(lambda x: integrand_ID2star(n,maxpower,x),0,maxx)[0]*n
+        #print('scipy integral:',integral)
         integral=integrate.midpoint(lambda x: integrand_ID2star(n,maxpower,x),0,maxx,1000)*n
+
+        #integral = sp.integrate.quad(lambda x: integrand_ID2star(n,maxpower,x),maxx*0.1,maxx*0.9)[0]*n
+        #integral+=integrate.midpoint(lambda x: integrand_ID2star(n,maxpower,x),0,maxx*0.1,100)*n
+        #integral+=integrate.midpoint(lambda x: integrand_ID2star(n,maxpower,x),maxx*0.9,maxx,100)*n
+
         return np.log(integral)+maxpower  #returns log of ID
         #return integral
 
 
         
+        '''maxpower = -1e10
+        for k in range(0,len(numdensity)):
+                if numdensity[k] > maxx: break
+                maxpower = max(maxpower,onlyPowerStar(n,numdensity[k],fn))
+        integral=integrate.midpoint(lambda x: integrand_ID2star(n,maxpower,x),0,maxx,1000)*n
+        return np.log(integral)+maxpower  #returns log of ID
+        #return integral'''
+
+
+        
         
 def integrand_ID2star(n,maxpower,x):        
-        argument = np.exp(-maxpower-RG.VD(2)/k_B/temp*fbarD(temp,n,x,2))
+        argument = np.exp(-maxpower-RG.VD(fn)/k_B/temp*fbarD(temp,n,x,fn))
         return argument        
         
 
@@ -237,7 +348,7 @@ def fit2(n):
         # eqn (5) from Forte 2011:
         IDvalue = ID2(n)
         IDvalueStar = ID2star(n)
-        dfi = -k_B*T*(IDvalue-IDvalueStar)/RG.VD(2) # eqn (7), Forte 2011
+        dfi = -k_B*T*(IDvalue-IDvalueStar)/RG.VD(fn) # eqn (7), Forte 2011
         f += dfi
 
         return f
@@ -257,7 +368,12 @@ def fit2(n):
 #testload()
 #f01_load()
 #testf01()
+if fn == 1:
+        firstPass()
+        sys.exit("First Pass Done")
+
 testfit02()
+
 #april16th()
 #cotangent_t0()
 #expTest()
@@ -270,6 +386,29 @@ testfit02()
 #################################################
 
 #np.savetxt('figs/snaft2.out',data)
+
+#np.savetxt('integrandIDlistn',integrandIDlistn)
+#np.savetxt('integrandIDlistx',integrandIDlistx)
+#np.savetxt('integrandIDlistarg',integrandIDlistarg)
+
+#plt.figure()
+#plt.title('integrand vs n')
+#plt.ylabel('integrand')
+#plt.xlabel('number density')
+#plt.xlim([0.015,0.030])
+#plt.ylim([-0.01,1e112])
+#plt.plot(integrandIDlistx,integrandIDlistarg)
+#plt.savefig('meeting/23may2016/integrand_int100_03_T%.3f.png'%temp)
+#plt.show()
+
+plt.figure()
+plt.title('integrand vs x')
+plt.ylabel('integrand')
+plt.xlabel('x')
+plt.plot(integrandIDlistx,integrandIDlistarg)
+plt.show()
+
+
 
 #                                                                                             #
 #                                                                                             #
