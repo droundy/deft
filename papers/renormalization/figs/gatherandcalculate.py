@@ -45,10 +45,8 @@ def Sexc_hardsphere_Ns(dbase):
 
 def Sexc_hardsphere(dbase, N):
     fbase = '%s/N%03d/absolute/' % (dbase, N)
-    if os.path.isfile(fbase+'Sexc.dat'):
-        foo = np.loadtxt(fbase+'Sexc.dat')
-        print foo, foo.shape
-        return foo
+    # if os.path.isfile(fbase+'Sexc.dat'):
+    #     return np.loadtxt(fbase+'Sexc.dat')
     S = 0
     # loop over files in the ./absolute/ directory
     j = 0
@@ -76,6 +74,10 @@ def Sexc_hardsphere(dbase, N):
             # we have found the last data file and can stop now
             break
         j += 1
+    # If N is too small, we need to correct for error of Stirling's 
+    # approximation in F_id. Not sure how to rig the test for small
+    # N, but this'll do for now.
+    S -= Stirling_correction(N)
     return S
 
 def Uexc(ln_dos, energy, Ts):
@@ -128,11 +130,6 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
                 Zinf = sum(np.exp(ln_dos[N]))
                 # print 'fixed: Z is', Z, 'and Zinf is', Zinf
             F[k,j] = Uinf -T*Sexc_HS - T*np.log(Z/Zinf)
-            # If N is too small, we need to correct for error of Stirling's 
-            # approximation in F_id. Not sure how to rig the test for small
-            # N, but this'll do for now.
-            if N < 10:
-                F[k,j] += T*Stirling_correction(N)
     return F
 
 
@@ -161,13 +158,12 @@ def Phiabs(Fabs, mu, Ns):
     Phiabs = np.zeros_like(Fabs)
     for q in range(len(Ns)):
         Phiabs[:,q] = Fabs[:,q] - mu*Ns[q]
-    print 'Phiabs is: ', Phiabs
     return Phiabs
 
 def Stirling_correction(N):
-    guess = N*np.log(N)
-    actual = np.log(np.math.factorial(N))
-    return actual - guess
+    guess = N*np.log(N) - N
+    actual = sum(np.log(np.arange(1,N+.5)))
+    return 0*(actual - guess)
 
 # def U_F_S(dbase, i):
 #     # Main function; take input of data directory and return all possible quantities
