@@ -128,6 +128,11 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
                 Zinf = sum(np.exp(ln_dos[N]))
                 # print 'fixed: Z is', Z, 'and Zinf is', Zinf
             F[k,j] = Uinf -T*Sexc_HS - T*np.log(Z/Zinf)
+            # If N is too small, we need to correct for error of Stirling's 
+            # approximation in F_id. Not sure how to rig the test for small
+            # N, but this'll do for now.
+            if N < 10:
+                F[k,j] += T*Stirling_correction(N)
     return F
 
 
@@ -147,7 +152,7 @@ def Fabs(Fex, Ts, Ns, V):
     for l in range(len(Ts)):
         for j in range(len(Ns)):
             Lambda = hbar*np.sqrt(2*np.pi/(m*kb*Ts[l]))
-            Fid[l,j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*np.log(Ns[j])
+            Fid[l,j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*(np.log(Ns[j]) - 1)
     F = Fex + Fid
     return F
 
@@ -159,8 +164,10 @@ def Phiabs(Fabs, mu, Ns):
     print 'Phiabs is: ', Phiabs
     return Phiabs
 
-
-
+def Stirling_correction(N):
+    guess = N*np.log(N)
+    actual = np.log(np.math.factorial(N))
+    return actual - guess
 
 # def U_F_S(dbase, i):
 #     # Main function; take input of data directory and return all possible quantities
