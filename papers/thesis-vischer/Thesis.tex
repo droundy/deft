@@ -106,12 +106,12 @@ Past efforts to incorporate renormalization group methods into standard Statisti
 We present here a method to calculate free energy of a liquid that largely avoids this fitting problem. We exploit the periodicity of Monte Carlo methods to decompose large cells in the thermodynamic limit into small cells that only allow certain fluctuation wavelengths. We then carefully couple simulations of different ``doubling regimes'', each of which considers a different maximum wavelength of fluctuations, where the fluid density $\eta$ remains fixed but the volume $V$ and number of particles $N$ have increased. Summing the absolute Helmholtz free energy $F^{\text{abs}}$ of each doubling regime will then approximate the absolute free energy of the full cell, especially near the critical point. We will begin by outlining the necessary models and assumptions/approximations for this work. We will then detail the algorithms used to compute the quantities with the the discussion on results following. 
 
 \subsection{Hard Sphere}
-The hard sphere model approximates monoatomic fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. Further, with no attraction, there is excess internal energy, implying the excess free energy is purely entropic. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. 
+The hard sphere model approximates fluids as having no interactions other than collisions. These spheres exhibit no attraction, and consequently each carries kinetic energy $K = 3/2 k_b T$. Further, with no attraction, there is no excess internal energy, implying the excess free energy is purely entropic. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. 
 
 \subsubsection{Carnahan-Starling Equation of State}
 In order to determine the filling fraction step size during thermodynamic integration we must find changes in filling fraction that yield a suitably-sized change in the system's absolute free energy. To do this we use the Carnahan-Starling equation of state, shown in Eq.~\ref{C-S-eq}.
 \begin{align}
-    F_{exc}(\eta) &= \frac{4\eta - 3\eta^2}{(1-\eta)^2} N k_b T  
+    F_{exc}(\eta) &= N k_B T\,\frac{4\eta - 3\eta^2}{(1-\eta)^2}   
     \label{C-S-eq}  
 \end{align} 
 where $\eta$ is the filling fraction, $N/V$. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, the Carnahan-Starling equation of state is still an excellent approximation at low to moderate filling fractions.\\ 
@@ -127,7 +127,7 @@ As a hard-sphere model, the spheres are not allowed to overlap. Any arrangement 
 \label{phi12}
 \end{equation}
 
-The potential energy of the fluid is then always an integer multiple of the well depth $\epsilon$. This leads us to choose $\epsilon$ and $\sigma$ as natural scales for the quantities of our simulation. We then define dimensionless temperatures $T/\epsilon$, energies $E/\epsilon$, and distances $r/\sigma$. Moreover, we make the decision to work in geometric units for coding simplicity, setting the Boltzmann constant $k_B$ to one. This then allows us to reasonably compare energies and temperatures since they have the same units.
+This leads us to choose $\epsilon$ and $\sigma$ as natural scales for the quantities of our simulation. We then define dimensionless temperatures $T/\epsilon$, energies $E/\epsilon$, and distances $r/\sigma$. Moreover, we make the decision to work in geometric units for coding simplicity, setting the Boltzmann constant $k_B$ to one. This then allows us to reasonably compare energies and temperatures since they have the same units.
 
 \begin{figure}
     \centering
@@ -265,12 +265,12 @@ where we have introduced the thermal deBroglie wavelength $\Lambda$ which define
 For liquids, the $Z_{exc}$ factor is difficult to evaluate; the hard sphere liquid, the simplest model for a dense fluid, does not have an analytic representation for the excess free energy. It follows that a considerable amount of work is required to determine the excess free energy for a given system. The absolute free energy, by way of Eq. \ref{FdefSM}, now has the form
 \begin{align}
     F_{abs} &= -T\,\ln\left(Z_{exc} \frac{V^N}{N!\Lambda^{3N}}\right)\\
-    &= -T\ln\left(Z_{exc}\right)\, -T\left(\frac{V}{(N!)^{1/N}\Lambda^3} \right)^N\\
+    &= -T\ln\left(Z_{exc}\right)\, -T\ln\left(\frac{V}{(N!)^{1/N}\Lambda^3} \right)^N\\
     &= -T\ln\left(Z_{exc}\right) - NT\ln\left(\frac{V}{\Lambda^3}\right) + NT\ln\left(N!^{1/N}\right)\\ 
 \end{align}
-Redefining the first factor including $Z_{exc}$ to be $F_{exc}$, and then using Sterling's approximation ($\ln(N!) = N\ln N$ for large N), we arrive at \textcolor{red}{BRENDEN FIX: $N\ln N - N$, plus I think we may want to add to the excess free energy (probably to the excess HS entropy?) the difference?}
+Redefining the first factor including $Z_{exc}$ to be $F_{exc}$, and then using Sterling's approximation ($\ln(N!) = N\ln N - N$ for large N), we arrive at \textcolor{red}{BRENDEN FIX: $N\ln N - N$, plus I think we may want to add to the excess free energy (probably to the excess HS entropy?) the difference?}
 \begin{align}
-    F_{abs} &= F_{exc} - NT\left(\ln\left(\frac{V}{\Lambda^3}\right) - \ln\left(N\right)\right)
+    F_{abs} &= F_{exc} - NT\left(\ln\left(\frac{V}{\Lambda^3}\right) - \ln\left(N\right) + 1\right)
 \end{align}
 At a specified volume and number of particles, the ideal gas contribution is only a function of temperature. Consequently, for a given temperature we only need to compute the excess free energy.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -284,7 +284,7 @@ This work requires the intersection of three methods to calculate the absolute f
 
 Unbiased Monte Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. Traditional random sampling requires that the current step, or ``move'', is irrespective of previous steps. True random movement is an ideal simulation characteristic for the canonical ``drunken rambler'' scenario, in which a intoxicated man attempts to make his way home by taking random steps. Since the drunken man chooses his next move arbitrarily, his movement is considered ``random''; it follows that true random sampling is desirable for this physical system. \\
 
-Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically Broad histogram transition matrix Monte Carlo.
+Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically broad histogram transition matrix Monte Carlo.
 \subsubsection{Metropolis-Hastings}
 Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving. If we define the ensemble of states of the system in equilibrium by a vector column $\mathbf{q}$, and the resulting state $\mathbf{p}$ after a single time step, the relationship
 \begin{align*}
@@ -411,9 +411,13 @@ Strictly speaking, a formal limit is required for equality in Eq.~\ref{GRGT-F1},
 \subsubsection{General Process}
 Thermodynamic integration is a unique way to determine the ``excess'' free energy of the system. Using hard sphere Monte Carlo, we transition from a filling fraction of zero to a dense system with filling fraction $\eta_{max}$, calculating the change in free energy at each step. When we have reached the desired final filling fraction we have found the free energy that was necessary to create that configuration of particles - this is exactly the absolute free energy of the system.\\
 \subsubsection{Algorithm}
-The hard sphere fluid is simple to work with since its partition function simply counts the number of microstates in the system\cite{valeskethesis}. Since we are calculating the change in free energy as we transition to higher and higher filling fractions, we need only be concerned with finding the ratio of partition functions between each step. Since the hard sphere partition function is a ``counting'' mechanism, we can determine this ratio quite easily using Monte Carlo simulations. Given a starting state (defined by the arrangement of particles and filling fraction) we shrink the volume and intermolecular distances by a somewhat arbitrary scaling factor and then see if the resulting configuration of particles is valid. If the configuration is valid, we accept this is a working move and then return to the original configuration and test another scaling factor. If the resulting configuration is invalid, we count the move as failed and then repeat. The ``golden'' acceptance ratio is fifty percent - when we have found a scaling factor that yields a ratio near the desired value\dots\\
+The hard sphere fluid is simple to work with since its partition function simply counts the number of microstates in the system\cite{valeskethesis}. Since we are calculating the change in free energy as we transition to higher and higher filling fractions, we need only be concerned with finding the ratio of partition functions between each step. Since the hard sphere partition function is a ``counting'' mechanism, we can determine this ratio using Monte Carlo simulations. Given a starting state (defined by the arrangement of particles and filling fraction) we shrink the volume and intermolecular distances by a scaling factor and then see if the resulting configuration of particles is valid. If the configuration is valid, we accept it as also valid in the small cell and then return to the original configuration. If the resulting configuration is invalid, we count the move as failed. This process continues until a predefined number of iterations are completed.\\
 
-As with the Monte Carlo these simulations are written in $C++$ for efficiency. 
+
+Once a count of valid and failed moves for a given filling fraction step has been established, the entropy of the system can be determined. Give $N_i$ total checks of the small cell during the $i^{\text{th}}$ step, $M_i$ of which were valid, the entropy calculated integrating from a filling fraction of $\eta=0$ to some $\eta_f$ in $K$ steps is
+\begin{align}
+    S_{HS,~exc} &= \sum_i^K \ln\left(\frac{M_i}{N_i-M_i}\right)
+\end{align}
 
 \begin{algorithm}[!b]
 \caption{Thermodynamic integration.}
@@ -421,21 +425,17 @@ As with the Monte Carlo these simulations are written in $C++$ for efficiency.
 \begin{alg}
 \item Construct cell with desired number of spheres with filling fraction of zero.
 \item Move spheres random fractions of a predefined translation distance. \label{alg-ti-move}
-\item Repeat step \ref{alg-ti-move} for [desired number of iterations before small cell check].
-\item After [desired number of iterations], check the ``small cell'' by shrinking the volume and checking whether or not the configuration is still valid.
-\item If configuration is still valid, valid checks ++.
-\item If configuration is invalid, failed checks ++. \label{alg-ti-move-end}
+\item Repeat step \ref{alg-ti-move} for desired number of iterations before checking the small cell.
+\item Check the ``small cell'' by shrinking the volume and determine whether or not the configuration is still valid.
+\item If configuration is still valid, increment the count of valid checks.
+\item If configuration is invalid, increment the count of failed checks. \label{alg-ti-move-end}
 \item Repeat steps \ref{alg-ti-move} - \ref{alg-ti-move-end} until desired iterations reached.
 
 \end{alg}      
 \end{algorithm}  
 
-\ignore{Should I detail the algorithm itself and string simulations together or consider the entire process $\eta=0\rightarrow\eta_max$ to be the algorithm?}
 
-
-
-\ignore{is the distinction between infinite case and regular necessary? we always use infinite...}
-
+%TIKZ
 \begin{figure} \centering
     \resizebox{.75\textwidth}{!}{
     \begin{tikzpicture}[scale=.8,  auto]
@@ -463,9 +463,12 @@ As with the Monte Carlo these simulations are written in $C++$ for efficiency.
      (4,9) {$\eta_0 \approx 0$};
     \node [above] at (12,7) {$\eta_k$};
     \node [above] at (16.675,5.625) {$\eta_f$}; 
-\end{tikzpicture}}
-\caption{Demonstration of filling fraction increase during thermodynamic integration from $\eta=0$ to $\eta=\eta_f=\eta_{max}$.}
+    \end{tikzpicture}}
+    \caption{Demonstration of filling fraction increase during thermodynamic integration from $\eta=0$ to $\eta=\eta_f=\eta_{max}$.}
+    \label{TI-demo}
 \end{figure}
+
+
 
 Combining Eq.~\ref{C-S-eq} with a simple bisection method allows for control of the filling fraction step size given a desired change in free energy. We determined that steps yielding an approximate change in specific absolute free energy of $\Delta F^{abs}/NT = \ln(2)$ through trial and error - smaller step sizes unnecessarily increased simulation time and larger step sizes tended to shrink too quickly causing the simulation to miss relevant states in the system. This step size corresponds to changing the entropy by $1/2$ each step. 
 
@@ -541,11 +544,11 @@ The excess hard sphere entropy $T_{HS,~exc}$ is calculated directly from thermod
 \section{Results}
 An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would [might?] expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We choose to focus on the ``scrunched'' case where the cell length is $\sqrt2\sigma$.\\
 
-Figures ~\ref{F-T} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each plot contains calculations from the first doubling regime ($L=2\lambda_0$) represented by solid lines and second doubling regime ($L = 4\lambda_0$) in dashes. It is worth noting that the succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.\\  
+Figures ~\ref{F-T} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each plot contains calculated quantities for either the first two doubling regimes or the first three. Calculations from the first doubling regime ($L=\lambda_0$) are solid lines, with the second doubling regime ($L = 2\lambda_0$) in dashes and the third ($L = 4\lambda_0$), when present, in circles . It is worth noting that the succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.\\  
 \begin{figure}  
 \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Fexc-vs-T.pdf}
-    \caption{Excess specific free energy as a function of temperature with each quantity scaled by well depth $\epsilon$. }
+    \caption{Excess specific free energy as a function of temperature.}
     \label{F-T}
 \end{figure}
 
@@ -586,17 +589,16 @@ The ``scrunched'' system allows exactly four spheres to be packed -- at maximal 
 If the decomposition procedure outlined previously proves successful, the absolute free energy ought to obey known physics about the system.
 We particularly care about identifying liquid-vapor coexistence within the fluid. \\
 
-Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vapor are simultaneously present in the fluid at densities that cause local minima in the grand free energy. We know that the grand free energy has a guaranteed minimum at the origin because [things]; we then only need to identify the other minima.  \\
+Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vapor are simultaneously present in the fluid at densities that cause local minima in the grand free energy. We know that the grand free energy has a guaranteed minimum at the origin because [things]; we then only need to identify the other minimum.  \\
 
-Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy given the absolute free energy and number of spheres. The chemical potential $\mu$ is a somewhat unintuitive quantity that, for our purposes, we will treat as a free parameter. Tweaking the value of the chemical potential will allow us to easily identify second minima in the density curve. 
+Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy given the absolute free energy and number of spheres. The chemical potential $\mu$ is a somewhat unintuitive quantity that, for our purposes, we will treat as a free parameter. Tweaking the value of the chemical potential will allow us to easily identify second minima in the grand free energy, and thereby the densities of the liquid and vapor present in the system.
 \begin{figure}
 \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Phiabs-vs-eta.pdf}
-    \caption{Absolute specific free energy as a function of density.}
+    \caption{Absolute grand free energy as a function of density.}
     \label{Phi-eta}
 \end{figure}
-
-Figure \ref{Phi-eta}, \dots.
+Figure \ref{Phi-eta} 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                             CONCLUSION                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
