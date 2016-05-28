@@ -44,7 +44,7 @@ linetype = {
     3: 'o:',
 }
 
-Ts = np.arange(0.5, 20.0, 0.25)
+Ts = np.arange(0.5, 10.01, 0.25)
 Tvals_to_plot = [0.5, 0.75, 1, 1.5, 2, 3, 5, 10]
 Tnum_to_plot = [list(Ts).index(T) for T in Tvals_to_plot]
 
