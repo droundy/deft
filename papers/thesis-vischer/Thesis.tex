@@ -446,7 +446,7 @@ Once a count of valid and failed moves for a given filling fraction step has bee
     S_{HS,~exc} &= \sum_i^K \ln\left(\frac{M_i}{N_i-M_i}\right)
 \end{align}
 
-\begin{algorithm}[!b]
+\begin{algorithm}
 \caption{Thermodynamic integration.}
 \label{alg:ti}
 \begin{alg}
@@ -500,7 +500,7 @@ Combining the Carnahan-Starling equation of state (Eq.~\ref{C-S-eq}) with a simp
 \ignore{NB: is there a more physical reason we chose this filling fraction increase?}
 
 \subsection{Data Storage}
-All simulation output is saved in text files for plotting and visualization ease. The question of organization becomes important with this amount of files being generated. Each different system simulation (length $L = \sqrt2 \sigma, 5,10$) has data regarding each doubling regime ($i=0,1, 2, 3$) and each doubling regime contains data for each possible sphere count ($N=1, 2, 3\dots N_{max}$, where $N_{max}$ is typically limited by maximal sphere packing of $N_{max}V_{\text{sphere}}/L^3\approx.741$). The file structure mirrors the above symmetry: 
+All simulation output is saved in text files for plotting and visualization ease. The question of organization becomes important with this amount of files being generated. Each different system simulation (length $L = \sqrt2 \sigma, 5,10$) has data regarding each doubling regime ($i=\nobreak 0,1, 2, 3$) and each doubling regime contains data for each and every possible sphere count $N=\nobreak 1, 2, 3\dots N_{max}$, where $N_{max}$ is typically limited by maximal sphere packing of $N_{max}V_{\text{sphere}}/L^3\approx\nobreak 0.741$. The file structure mirrors the above symmetry:
 \begin{align*}
                 &\rightarrow \text{i=0} &\rightarrow \text{N=0}\\
                 & &\rightarrow \text{N=1}\\
