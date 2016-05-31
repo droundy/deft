@@ -37,6 +37,7 @@ all_colors = ['g','b','r','k','c','m','y']
 temperature_color = {}
 u_temperature_color = {}
 fabs_temperature_color = {}
+phiabs_temperature_color={}
 eta_color = {}
 linetype = {
     1: '-',
@@ -56,6 +57,7 @@ mu = -20
 i_values = [1,2,3]
 next_color = 0
 next_u_color = 0
+next_phi_color = 0
 
 for i in i_values:
     print 'working on iteration', i
@@ -122,12 +124,12 @@ for i in i_values:
         mu_here = find_common_tangent(Ns, Fabs[k,:])
         Phi = Fabs[k,:] - mu_here*Ns
         ok = Phi != 0
-        if Ts[k] in u_temperature_color:
-            plt.plot(etas[ok], Phi[ok]/V, linetype[i]+u_temperature_color[Ts[k]])
+        if Ts[k] in phiabs_temperature_color:
+            plt.plot(etas[ok], Phi[ok]/V, linetype[i]+phiabs_temperature_color[Ts[k]])
         else:
-            u_temperature_color[Ts[k]] = all_colors[next_u_color]
-            next_u_color = (next_u_color+1) % len(all_colors)
-            plt.plot(etas[ok], Phi[ok]/V, linetype[i]+u_temperature_color[Ts[k]],
+            phiabs_temperature_color[Ts[k]] = all_colors[next_phi_color]
+            next_phi_color = (next_phi_color+1) % len(all_colors)
+            plt.plot(etas[ok], Phi[ok]/V, linetype[i]+phiabs_temperature_color[Ts[k]],
                      label=r'$T = %g$' % Ts[k])
 
     plt.figure('Phiabs-T')
