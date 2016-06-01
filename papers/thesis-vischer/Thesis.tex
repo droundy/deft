@@ -109,11 +109,11 @@
 
 \section{Introduction}
 \subsection{Motivation}
-Fluids have long garnered interest\cite{theorysimpleliquids}\cite{theoryofcrits}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, fluctuations of fluid density at large length scales occur. Most traditional fluid models assume the fluid density does not fluctuate beyond the molecular scale. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization group-like decomposition procedure to find the absolute Helmholtz free energy of systems near criticality.\\
+Fluids have long garnered interest[verlet, van der waals, move Th. o'crits], particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, fluctuations of fluid density at large length scales occur. Most traditional fluid models assume the fluid density does not fluctuate beyond the molecular scale. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization group-like decomposition procedure to find the absolute Helmholtz free energy of systems near criticality.\\
 
-Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success \cite{white2001global}, particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. GRG's history in fluid simulation has largely been a fitted one - that is, determining a free parameter and then simulating many times to find the most well-suited value for a particular fluid \ignore{[!fixme not quite]}.\\
+Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success \cite{white2001global}, particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. Rather than include a fitted parameter, we elect to use a renormalization-inspired method to calculate the free energy of a liquid that is {\it predicated} upon critifcal behavior rather than invalidated by it. \\
 
-We present here a method to calculate the free energy of a liquid that largely avoids this fitting problem. We exploit the periodicity of Monte Carlo methods to decompose large cells in the thermodynamic limit into small cells that only allow certain fluctuation wavelengths. We then perform simulations of different doubling regimes, each of which considers a different maximum wavelength of fluctuations, where the fluid density $\eta$ remains fixed but the volume $V$ and number of particles $N$ have increased. We can calculate a so-called``absolute'' free energy, including the ideal and excess free energy contributions, for each doubling regime by using two Monte Carlo methods in concert: Metropolis-Hastings Monte Carlo, and thermodynamic integration. Summing the difference in absolute free energy of each doubling regime will then approximate the absolute free energy of the full cell, especially near the critical point. \\
+We exploit the critical phenomena of self-similarity to decompose large cells near the thermodynamic limit into small cells that only allow certain fluctuation wavelengths, enforced by the periodicity of Monte Carlo methods. We then perform simulations of different doubling regimes, each of which considers a different maximum wavelength of fluctuations, where the fluid density $\eta$ remains fixed but the volume $V$ and number of particles $N$ have increased. We can calculate a so-called ``absolute'' free energy, including the ideal and excess free energy contributions, for each doubling regime by using two Monte Carlo methods in concert: Metropolis-Hastings Monte Carlo, and thermodynamic integration. Summing the difference in absolute free energy of each doubling regime will then approximate the absolute free energy of the full cell, especially near the critical point. \\
 
 We will begin by outlining the necessary models for this work, and then in detail discuss the theoretical underpinnings of our method. We will then describe the algorithms used to compute the concerned quantities with the the discussion on results following. 
 
@@ -125,7 +125,7 @@ The Helmholtz free energy is a Legendre transform of the internal energy $U$
 \end{align}
 and can be calculated given the ever-pervasive partition function $Z$:
 \begin{align}
-    F &= -T \ln Z\, .
+    F &= -k_B T \ln Z\, .
     \label{FdefSM}
 \end{align}
 The Helmholtz free energy can also be separated into the contributions:
@@ -133,7 +133,7 @@ The Helmholtz free energy can also be separated into the contributions:
     F &= F_{\text{id}} + F_{\text{exc}}
     \label{F_abs}
 \end{align} 
-The $F_{\text{id}}$ term is the energy from the ideal gas behavior of the fluid. The excess free energy $F_{\text{exc}}$ contains the remaining energy of the fluid after including the ideal gas energy, and is therefore related to the energy of the configuration of the system.\\
+The $F_{\text{id}}$ term is the energy from the ideal gas behavior of the fluid. The excess free energy $F_{\text{exc}}$ contains the remaining free energy of the fluid after including the ideal gas energy, and is therefore related to the free energy of the configuration of the system.\\
 
 With $F$ calculated, its partial derivatives yield all other interesting thermodynamic quantities. Though the Gibbs free energy yields the same information, the Helmholtz free energy is particularly useful because of the relationship with entropy, namely
 \begin{align}
@@ -151,14 +151,14 @@ Equations~\ref{Fdef} and~\ref{FdefSM} together bridge classical thermodynamics a
 \begin{align}
     Z &= \sum^{\text{states}}~e^{-\beta E_i}
 \end{align}
-where $\beta =  T^{-1}$ and $E_i$ is the energy of the $i^{\text{th}}$ state. Of course, it is impractical to sum over the individual states of the system because the number of states of a classical system are generally innumerable. Instead we sum over energies:
+where $\beta = (k_B T)^{-1}$ and $E_i$ is the energy of the $i^{\text{th}}$ state. Of course, it is impractical to sum over the individual states of the system because the number of states of a classical system are generally innumerable. Instead we sum over energies:
 \begin{align}
-    Z &= \sum^{\text{energies}}~D(E)~e^{-\beta E_i}
+    Z &= \sum^{\text{energies}}~D(E)~e^{-\beta E}
 \end{align}
 where we have now introduced the density of states $D(E)$ which is a simple function that returns the number of states which have a given energy $E$. The density of states is now the focus of calculation - if we can accurately determine the density of states of the system, we can calculate the Helmholtz free energy and, from there, any other thermodynamic quantity we wish. \\  
 
 \subsection{Hard Sphere}
-The ``hard sphere'' is the simplest fluid model -- a hard sphere approximates a fluid particle as having no interactions other than collision. The only parameter for the hard sphere model is the sphere radius $\sigma$. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. Two spheres are not allowed to overlap, and else contribute nothing to the internal energy of the system. The energy between spheres $1$ and $2$, called the intermolecular pair potential, is then
+The ``hard sphere'' is the simplest fluid model -- a hard sphere approximates a fluid particle as having no interactions other than collision. The only parameter for the hard sphere model is the sphere radius $\sigma$. The system is defined to have zero total linear momentum, and any collision between two or more spheres is perfectly elastic. Two spheres are not allowed to overlap, and otherwise contribute nothing to the internal energy of the system. The energy between spheres $1$ and $2$, called the intermolecular pair potential, is then
 \begin{equation} 
     \Phi_{12}(|\vec{r}|) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\ 0 & |\vec{r}| > \sigma \end{cases}
 \label{phi12hs}
@@ -170,16 +170,15 @@ No attraction in Eq.~\ref{phi12hs}, and consequently no excess internal energy, 
 \end{align}
 Eq.~\ref{hs-fexc} showcases the beauty of the hard sphere system: one need only calculate the excess entropy of the hard sphere system to find the excess free energy.
 \subsubsection{Carnahan-Starling Equation of State}
-We will need to compute the free energy of the a hard sphere system innumerable times throughout this work, and so we must make use of the Carnahan-Starling equation of state. shown in Eq.~\ref{C-S-eq}.
+We will need to compute the free energy of the a hard sphere system innumerable times throughout this work, and so we make use of the Carnahan-Starling equation of state. shown in Eq.~\ref{C-S-eq}.
 \begin{align}
     F_{exc}(\eta) &= N k_B T\,\frac{4\eta - 3\eta^2}{(1-\eta)^2}
     \label{C-S-eq}  
 \end{align} 
 where $\eta$ is the filling fraction, $N/V$. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit \cite{cs-eos}. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, the Carnahan-Starling equation of state is still an excellent approximation at low to moderate filling fractions.\\ 
 
-
 \subsection{Square-Well Liquid}
-As a hard-sphere model, the spheres are not allowed to overlap. Any arrangement of spheres - hereafter referred to as the ``state'' of the system - that involves either two or more spheres overlapping or a sphere outside the allowed area - ``cell'' - is defined to be invalid. The ``square'' refers to the piecewise intermolecular pair potential $\Phi_{12}$, shown mathematically in Eq. \ref{phi12} and graphically in Figure~\ref{sw_phi}.
+The square well liquid is the simplest model for liquids\cite{theorysimpleliquids}. The square well approximation adds a constant short-range attractive potential to the hard sphere model. As in the hard-sphere model, the spheres are not allowed to overlap. Any arrangement of spheres - hereafter referred to as the ``state'' of the system - that involves either two or more spheres overlapping or a sphere outside the allowed area - ``cell'' - is defined to be invalid. The ``square'' refers to the piecewise intermolecular pair potential $\Phi_{12}$, shown mathematically in Eq. \ref{phi12} and graphically in Figure~\ref{sw_phi}.
 
 \begin{equation} 
 \Phi_{12}(\vec{r}) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\ -\epsilon & \sigma \leq |\vec{r}| \leq \sigma\lambda\\ 0 & |\vec{r}| > \sigma\lambda \end{cases}
@@ -299,10 +298,10 @@ We begin with the canonical form of the canonical ensemble partition function $Z
 \end{align}
 where we sum over individual energies of the system $E_i$. However, to provide a general expression, we will instead sum over the states $s$:
 \begin{align}
-    Z &= \sum_s e^{-\beta E_s}
+    Z &= \sum_s^{\text{states}} e^{-\beta E_s}
 \end{align} 
 
-Further, the energy of each state is simply the sum of the excess and kinetic energies $V$ and $K$, so
+Further, the energy of each state is simply the sum of the potential and kinetic energies $V$ and $K$, so
 
 \begin{align}
     E_s &= V_s(\mathbf{r}) + K_s(\mathbf{p})
@@ -341,7 +340,7 @@ We then define the two factors obvious in Eq. \ref{Z_full}, the excess factor de
 \begin{align}
     Z &= (Z_{exc})(Z_{id}) \,,
 \end{align}
-where $Z_{id}$ contains the $N!$ term by convention. The excess term $Z_{exc}$ is system dependent because $V(\mathbf{r})$ is buried inside the integral, but the ideal factor is the same for any system where the total energy separates in the preceding fashion. We judiciously decide to leave the excess factor alone, for now, and work specifically with the ideal term. We then have
+where $Z_{id}$ contains the $N!$ term by convention. The excess term $Z_{exc}$ is system dependent because $V(\mathbf{r})$ is buried inside the integral, but the ideal gas factor is the same for any system where the total energy separates in the preceding fashion. We judiciously decide to leave the excess factor alone, for now, and work specifically with the ideal term. We then have
 
 \begin{align}
     Z_{id} &= \frac{1}{N!}\left[\int_s V \diff\mathbf{p} ~e^{-\beta K(\mathbf{p})}\right]^{N}
@@ -356,7 +355,7 @@ Remembering that kinetic energy can be expressed as $K = \frac{\hbar^2 k^2}{2m}$
     Z_{id} &= \frac{1}{N!}\left[\int_s V\, \diff\mathbf{p} ~e^{-\beta \frac{\hbar^2 k^2}{2m}}\right]^{N}
     \label{Zt_def}
 \end{align}
-This unfortunately introduces a mass quantity into the partition function which adds an additional parameter that needs to be determined to properly account for quantum mechanical effects. If we then allow the cell to become very large, then the we can easily see in Eq. \ref{Zt_def} that the spacing between occupants in phase space becomes small, so we can integrate instead $\diff ^3 n$ over all possible values of $n$:
+This unfortunately introduces a mass quantity into the partition function which adds an additional parameter that needs to be determined to properly account for quantum mechanical effects. If we then allow the cell to become very large, then the we can see in Eq. \ref{Zt_def} that the spacing between occupants in phase space becomes small, so we can integrate instead $\diff ^3 n$ over all possible values of $n$:
 \begin{align}
     Z_{id} &= \frac{(2\pi \hbar)^{3N}}{V^N N!}\left[\int_0^\infty \diff^3 n ~e^{-\frac{\beta \hbar^2}{2m} \left(\frac{2\pi}{L}(n_x\mathbf{\hat{x}} + n_y\mathbf{\hat{y}} + n_z\mathbf{\hat{z}}\right)^2}\right]^{N} \\
     &= \frac{h^{3N}}{N!}\left[\int_0^\infty \diff^3 n ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\right]^{N}
@@ -368,9 +367,9 @@ where extra factors of $\hbar $ and volume were gained from the change of variab
 \end{align}
 where we have introduced the thermal deBroglie wavelength $\Lambda$ which defines the de Broglie wavelength of an ideal gas at a temperature $T$. The full partition function for any monoatomic system is then
 \begin{align}
-    Z &= Z_{exc} \left(\frac{h^3 V}{N!\Lambda^{3}}\right)^{N} \,.
+    Z &= \frac{Z_{exc}}{N!}\left(\frac{h^3 V}{\Lambda^{3}}\right)^{N} \,.
 \end{align}
-For liquids, the $Z_{exc}$ factor is difficult to evaluate; the hard sphere liquid, the simplest model for a dense fluid, does not have an analytic representation for the excess free energy. It follows that a considerable amount of work is required to determine the excess free energy for a given system. The absolute free energy, by way of Eq. \ref{FdefSM}, now has the form
+For liquids, the $Z_{exc}$ factor is difficult to evaluate; the hard sphere fluid, the simplest model for a dense fluid, does not have an analytic representation for the excess free energy. It follows that a considerable amount of work is required to determine the excess free energy for a given system. The absolute free energy, by way of Eq. \ref{FdefSM}, now has the form
 \begin{align}
     F_{abs} &= -T\,\ln\left(Z_{exc} \frac{h^{3N} V^N}{N!\Lambda^{3N}}\right)\\
     &= -T\ln\left(Z_{exc}\right)\, -T\ln\left(\frac{h^3 V}{(N!)^{1/N}\Lambda^3} \right)^N\\
@@ -393,11 +392,11 @@ Unbiased Monte Carlo methods use random sampling and check for certain condition
 
 Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically broad histogram transition matrix Monte Carlo.
 \subsubsection{Metropolis-Hastings}
-Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving \cite{metro-hastings}. If we define the ensemble of states of the system in equilibrium by a vector column $\mathbf{q}$, and the resulting state $\mathbf{p}$ after a single time step, the relationship
+Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving \cite{metro-hastings}. If we define the ensemble of states of the system in by a vector column $\mathbf{q}$, and the resulting ensemble of states after a step by $\mathbf{p}$, the relationship
 \begin{align*}
     \mathbf{p} &= \mathcal{P}\, \mathbf{q}\\
 \end{align*}
-defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square matrix that contains information about these transitions. We call this construction $\mathcal{P}$ the {\it transition matrix}. This matrix is $L\times L$, where $L$ is the number of energy levels in system. If all rows of the transition matrix are , we can see that any state of the system is reachable after a finite number of transitions from any given initial state. A physically correct simulation will generate a transition matrix that satisfies the thermodynamic steady state condition; given the ensemble of equilibrium states $\mathbf{q}_{eq}$, we enforce that
+defines a ``transition'' of the system. $\mathcal{P}$ is a necessarily square matrix that contains information about these transitions. We call this construction $\mathcal{P}$ the {\it transition matrix}. This matrix is $L\times L$, where $L$ is the number of energy levels in system. If all rows of the transition matrix contain at least one nonzero entry, we can see that any state of the system is reachable after a finite number of transitions from any given initial state. A physically correct simulation will generate a transition matrix that satisfies the thermodynamic steady state condition; given the ensemble of equilibrium states $\mathbf{q}_{eq}$, we enforce that
 \begin{align}
     \mathcal{P}\,\mathbf{q}_{eq} &= \mathbf{q}_{eq}
     \label{thermo-steady-state}
@@ -411,7 +410,7 @@ If the energy of the system at each time step in a Monte Carlo simulation is rec
 \end{align}
 and then normalizing appropriately. This method unfortunately loses substantial accuracy far from the original temperature and causes an untoward spike near the average value of the original histogram. Further, this reweighting detracts from the accuracy of the tails of the histogram. We choose instead to implement a similar approach to that of de Oleveira and coworkers\cite{de1998broad}, the ``broad histogram''. \\
 
-To construct the broad histogram we need to perform a Markovian walk along the energy levels of the system. Throughout the walk we count the number of times we transitioned from a given initial energy to to a given resulting energy. If we walk across the entire energy range, we can construct histogram of energy transitions $h(E_i, E_j)$ for all $i, j$. The walk goes as follows: starting with a state $\mathbf{q_i}$ with energy $E_i$, we attempt perform a random move to a state $\mathbf{q_f}$ with energy $E_f$. Assuming the resulting configuration is valid, the move is always accepted if the energy decreases, i.e, $E_f - E_i <0$. Otherwise, we accept the move with a probability related to the ratio of counts of the transition occurring ``forwards'' to the transition occurring the opposite direction. Since each state is reachable within a finite amount of time in a Markovian process, a broader, more accurate histogram merely requires more computation time. This process is outlined in Algorithm~\ref{alg_tmmc}.\\
+To construct the broad histogram we need to perform a Markovian walk along the energy levels of the system. Throughout the walk we count the number of times we transitioned from a given initial energy to to a given resulting energy. If we walk across the entire energy range, we can construct histogram of energy transitions $h(E_i, E_j)$ for all $i, j$. This histogram is then proportional to the transition matrix we wish to construct. The walk goes as follows: starting with a state $\mathbf{q_i}$ with energy $E_i$, we attempt perform a random move to a state $\mathbf{q_f}$ with energy $E_f$. Assuming the resulting configuration is valid, the move is always accepted if the energy decreases, i.e, $E_f - E_i <0$. Otherwise, we accept the move with a probability related to the ratio of counts of the transition occurring ``forwards'' to the transition occurring the opposite direction. Since each state is reachable within a finite amount of time in a Markovian process, a broader, more accurate histogram merely requires more computation time. This process is outlined in Algorithm~\ref{alg_tmmc}.\\
 
 \begin{algorithm}[tb]
     \caption{Transition Matrix Monte Carlo Initialization}
@@ -430,8 +429,7 @@ To construct the broad histogram we need to perform a Markovian walk along the e
 
 Calculating the density of states, given the transition matrix constructed via the process in Algorithm~\ref{alg_tmmc}, is a trivial matter. The equilibrium condition given in Eq.~\ref{thermo-steady-state} is really a statement about the density of states; for a Monte Carlo simulation, the equilibrium state $q_{eq}$ is exactly the density of states. Solving the steady state condition as an eigenvalue problem for $q_{eq}$ then yields the density of states\cite{perlinthesis}. \\
 
-It bears mentioning that most implementations of transition matrix methods consider the above procedure the ``initialization'' process. The canonical ``simulation'' period refers to gathering statistics for quantities that cannot be calculated from the density of states, such as the density of the fluid or the pair distribution function. Given that we only are concerned with quantities that can be computed given the density of states, we never actually ``simulate''. With the density of states computed, we can now calculate the system's partition function and thereby the Helmholtz free energy by Eq.~\ref{FdefSM}.
-
+It bears mentioning that most implementations of transition matrix methods consider the above procedure the ``initialization'' process. The canonical ``simulation'' period refers to gathering statistics for quantities that cannot be calculated from the density of states, such as the density of the fluid or the pair distribution function. Given that we only are concerned with quantities that can be computed given the density of states, we never actually ``simulate''. Further, we actually store the natural log of the density of states as output to help reduce overflow and underflow errors when calculating quantities. With the density of states computed, we can now calculate the system's partition function and thereby the Helmholtz free energy by Eq.~\ref{FdefSM}.
 
 \subsection{Thermodynamic Integration}
 \subsubsection{General Process}
@@ -443,7 +441,7 @@ The hard sphere fluid is simple to work with since its partition function simply
 
 Once a count of valid and failed moves for a given filling fraction step has been established, the entropy of the system can be determined. Give $N_i$ total checks of the small cell during the $i^{\text{th}}$ step, $M_i$ of which were valid, the entropy calculated integrating from a filling fraction of $\eta=0$ to some $\eta_f$ in $K$ steps is
 \begin{align}
-    S_{HS,~exc} &= \sum_i^K \ln\left(\frac{M_i}{N_i-M_i}\right)
+    S_{HS,~exc} &= \sum_i^K \ln\left(\frac{M_i}{N_i}\right)
 \end{align}
 
 \begin{algorithm}
@@ -512,12 +510,12 @@ All simulation output is saved in text files for plotting and visualization ease
                 && \rightarrow \text{N=1}\\
                 &&\vdots\\
 \end{align*}
-Each sphere count subfolder contains a single text file from TMMC output and another subfolder where all of the thermodynamic integration output is stored. Each thermodynamic integration simulation outputs a single text file upon completion of each filling fraction step. On average, a single calculation requires approximately $175$ steps. This structure was chosen both for elegant parallelism and for plotting accessibility. 
+Each sphere count subfolder contains a single text file from broad histogram output and another subfolder where all of the thermodynamic integration output is stored. Each thermodynamic integration simulation outputs a single text file upon completion of each filling fraction step. On average, a single calculation requires approximately $175$ steps. This structure was chosen both for elegant parallelism and for plotting accessibility. 
 
 \subsection{Calculating the Absolute Free Energy}
 As mentioned previously, the broad histogram Monte Carlo simulations have an arbitrary scaling factor in the density of states output. Reasonable comparisons between different doubling regimes will require  the removal of this arbitrary scaling. The key to doing so lies in the infinite temperature limit of the square well fluid.\\
 
-At infinite temperature, the square well fluid has approximately the same behavior as the hard sphere fluid. We assert that the correct inclusion, then, is to enforce that the excess entropy calculated via TMMC at $T=\infty$ is equal to the hard sphere entropy calculated through thermodynamic integration. We do this by exploiting the infinite temperature behavior of the canonical ensemble:
+At infinite temperature, the square well fluid has approximately the same behavior as the hard sphere fluid. We assert that the correct inclusion, then, is to enforce that the excess entropy calculated via broad histogram at $T=\infty$ is equal to the hard sphere entropy calculated through thermodynamic integration. We do this by exploiting the infinite temperature behavior of the canonical ensemble:
 \begin{align}
     Z_{\infty} &= \left.\sum_{i=0}^{\text{\tiny Energies}} D(E) e^{-\beta E}\right|_{\beta = 0}\\
     &= \sum_{i=0}^{\text{\tiny Energies}} D(E)\\
@@ -547,9 +545,9 @@ Since the excess hard sphere free energy is really just the entropy \cite{valesk
 Given the density of states output $\ln[D(E)]$ from the Monte Carlo simulation, combined with {\it a priori} knowledge that the system obeys a canonical ensemble distribution of states, we can calculate any thermodynamic quantity we wish given only the density of states. For instance, we can compute the the excess internal energy:
 \begin{align}
      U_{exc}(T) &= \frac{\sum_{i=0}^{\text{\tiny Energies}}\,E_i\, \exp(\ln[D(E)] - \beta E_i)}{\sum_{i=0}^{\text{\tiny Energies}} \exp(\ln[D(E)] - \beta E_i)}\\
-     &= \frac{\sum_{i=0}^{\text{\tiny Energies}} E_i \exp\left(-\beta E_i\right)}{Z}
+     &= \frac{\sum_{i=0}^{\text{\tiny Energies}} E_i D(E)\exp\left(-\beta E_i\right)}{Z}
 \end{align} 
-where, as usual, $\beta = T^{-1}$. tends to introduce overflow or underflow errors during computation. We combat this by subtracting the maximum value of the natural log of the density of states from each element of $D(E)$, and then adding the maximum back in after the exponential. We calculate the excess free energy by using the entropy equality developed previously:
+where, as usual, $\beta = T^{-1}$. There are still overflow and underflow errors present, even with our choice to compute the natural log of the density of states. To further combat this issue, we subtract off the maximum of the natural log of the density of states before taking the exponential, and then add it back in afterwards -- this greatly reduces the likelihood that a quantity becomes erroneously large or small. We calculate the excess free energy by using the entropy equality developed previously:
 \begin{align}
      S_{SW,~exc}\Bigm\lvert_{T=\infty} &= S_{HS,~exc}\\
      F_{SW,~exc}\Bigm\lvert_{T=\infty} &= U_{SW,~exc}\Bigm\lvert_{T=\infty} -TS_{HS,~exc} \\
@@ -569,13 +567,8 @@ Moreover, with the excess free energy computed, we merely need to include the id
 \section{Results}
 An important remaining question is whether there is a preferred choice of minimum cell length. Physically we would expect that there is some dominant minimum fluctuation in the bulk cell - this would then lend a natural decision for the minimum cell length $\lambda_0$. Unfortunately we do not know this {\it a priori}, so we are reduced to guessing. Using the coupling procedure outlined previously, we calculated changes in free energy up to the $n^{\text{th}}$ doubling regime for several different cell lengths. We choose to focus on the ``scrunched'' case where the base cell length is $\sqrt2\sigma$.\\
 
-Figures ~\ref{Shs-eta} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each plot contains calculated quantities for either the first two doubling regimes or the first three. Calculations from the first doubling regime ($L=\lambda_0$) are solid lines, with the second doubling regime ($L = 2\lambda_0$) in dashes and the third ($L = 4\lambda_0$), when present, in circles. It is worth noting that the succeeding plots with respect to density have been interpolated; with a fixed cell size, it is only possible to simulate discrete filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state.\\  
-\ignore{\begin{figure}  
-\centering
-    \includegraphics[width=.75\textwidth]{../renormalization/figs/Fexc-vs-T.pdf}
-    \caption{Excess specific free energy as a function of temperature.}
-    \label{F-T}
-\end{figure}}
+Figures ~\ref{Shs-eta} through ~\ref{F-eta} show several computed thermodynamic quantities for the scrunched system. Each plot contains calculated quantities for either the first two doubling regimes or the first three. Calculations from the first doubling regime ($L=\lambda_0$) are solid lines, with the second doubling regime ($L = 2\lambda_0$) in dashes and the third ($L = 4\lambda_0$), when present, in circles. 
+
 
 \begin{figure}
 \centering
@@ -584,7 +577,7 @@ Figures ~\ref{Shs-eta} through ~\ref{F-eta} show several computed thermodynamic 
     \label{Shs-eta}
 \end{figure}
 \ignore{Filling fraction or density? Value in distinction? We never use number density for the sake of units...}
-Figure \ref{Shs-eta} shows the computed excess entropy as a function of density. We see that both the first and second doubling regime closely match the Carnahan-Starling prediction for the entropy. After freezing, the first doubling regime veers from the prediction by the Carnahan-Starling equation of state; since the Carhan-Starling approximation is accurate only for low density fluids, we expect this behavior.\\
+Figure \ref{Shs-eta} shows the computed excess entropy as a function of density. It is worth noting that this plot has been interpolated; the thermodynamic integration calculations tend to be very lengthly for larger cells and, in the pursuit of both time and CPU time, we chose to simulate only specific filling fractions. The intervening points have been filled in using the Carnahan-Starling equation of state. We see that both the first and second doubling regime closely match the Carnahan-Starling prediction for the entropy. After freezing, the first doubling regime veers from the prediction by the Carnahan-Starling equation of state; since the Carhan-Starling approximation is accurate only for low density fluids, we expect this behavior.\\
 \begin{figure}
     \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Uexc-vs-eta.pdf}
@@ -599,7 +592,7 @@ We see in Figure~\ref{U-eta} that the excess internal energy, as we would expect
     \caption{Excess specific free energy as a function of density.}
     \label{F-eta}
 \end{figure}
-We see in Figure~\ref{F-eta} laregly positive free energies because $F = U -TS$; as the density increases, the entropy becomes more negative. For a given temperature, the increasingly negative entropy results in a positive free energy. We also see that higher temperatures have a higher free energy, which results from $T$ scaling the strength of the entropy contribution to the free energy.\\
+We see in Figure~\ref{F-eta} laregly positive free energies because $F = U -TS$; as the density increases, the excess entropy becomes more negative. For a given temperature, the increasingly negative entropy results in a positive free energy. We also see that higher temperatures have a higher free energy, which results from $T$ scaling the strength of the entropy contribution to the free energy.\\
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -607,12 +600,11 @@ We see in Figure~\ref{F-eta} laregly positive free energies because $F = U -TS$;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Discussion}
-If the decomposition procedure outlined previously proves successful, the absolute free energy ought to obey known physics about the system.
-We particularly care about identifying liquid-vapor coexistence within the fluid. \\
+If the decomposition procedure outlined previously proves successful, the absolute free energy ought to obey known physics about the system. We showcase here preliminary, and by no means concrete, results for a calculation of interest.\\  
 
-Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vapor are simultaneously present in the fluid at densities that cause local minima in the grand free energy. We know that the grand free energy has a guaranteed minimum at the origin; we then only need to identify the other minimum.  \\
+One of the more well-known uses of SAFT is generating curves that demonstrate under what conditions both the liquid and gas phase are present in the fluid. Identifying the densities at which the system exhibits liquid-vapor coexistence will allow us to partially determine whether the decomposition method presented here has merit. Finding coexistence requires use of the grand free energy $\Phi$. Liquid and vapor are simultaneously present in the fluid at densities that have local minima in the grand free energy. We know from theory that the grand free energy has a guaranteed minimum at the origin\cite{theoryofcrits}; we then only need to identify the other minimum. \\
 
-Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy given the absolute free energy and number of spheres. The chemical potential $\mu$ is a somewhat unintuitive quantity that, for our purposes, we will treat as a free parameter. Tweaking the value of the chemical potential will allow us to easily identify second minima in the grand free energy, and thereby the densities of the liquid and vapor present in the system.
+Referring back to Eq.~\ref{Phidef}, we can compute an absolute grand free energy given the absolute free energy and number of spheres. The chemical potential $\mu$ is a somewhat unintuitive quantity that, for our purposes, we will treat as a free parameter. Tweaking the value of the chemical potential will allow us to identify second minima in the grand free energy, and thereby the densities of the liquid and vapor present in the system.
 \begin{figure}[H]
 \centering
     \includegraphics[width=.75\textwidth]{../renormalization/figs/Phiabs-vs-eta.pdf}
