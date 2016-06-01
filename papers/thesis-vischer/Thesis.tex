@@ -87,7 +87,7 @@
 }
 
 \begin{document}
-
+\thispagestyle{empty}
 
 \titlepage
 
@@ -109,7 +109,7 @@
 
 \section{Introduction}
 \subsection{Motivation}
-Fluids have long garnered interest[verlet, van der waals, move Th. o'crits], particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, fluctuations of fluid density at large length scales occur. Most traditional fluid models assume the fluid density does not fluctuate beyond the molecular scale. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization group-like decomposition procedure to find the absolute Helmholtz free energy of systems near criticality.\\
+Fluids have long garnered interest\cite{verlet67}\cite{vanderwaals}, particularly among computationally-minded researchers, as an area in which current models are unequipped to robustly predict behavior across multiple regimes. A largely troublesome \cite{white2001global} regime is near the so-called ``critical point'' where liquid and vapor become indistinguishable and, more importantly, fluctuations of fluid density at large length scales occur. Most traditional fluid models assume the fluid density does not fluctuate beyond the molecular scale. As a result, these methods tend to poorly handle these fluctuations near criticality. Using the well-established model of the square-well fluid, we seek to determine the applicability of a particular generalized renormalization group-like decomposition procedure to find the absolute Helmholtz free energy of systems near criticality.\\
 
 Past efforts to incorporate renormalization group methods into standard Statistical Associating Fluid Theory (``SAFT'') methods have seen success \cite{white2001global}, particularly the treatment offered by Forte et al.~\cite{forte2011application} with the inclusion of a fitted parameter related to the correlation length. Rather than include a fitted parameter, we elect to use a renormalization-inspired method to calculate the free energy of a liquid that is {\it predicated} upon critifcal behavior rather than invalidated by it. \\
 
@@ -175,7 +175,7 @@ We will need to compute the free energy of the a hard sphere system innumerable 
     F_{exc}(\eta) &= N k_B T\,\frac{4\eta - 3\eta^2}{(1-\eta)^2}
     \label{C-S-eq}  
 \end{align} 
-where $\eta$ is the filling fraction, $N/V$. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit \cite{cs-eos}. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, the Carnahan-Starling equation of state is still an excellent approximation at low to moderate filling fractions.\\ 
+where $\eta$ is the filling fraction, $N/V$. The Carnahan-Starling equation of state was developed to model hard spheres at low densities in the thermodynamic limit \cite{cseos}. We are very much concerned with cells significantly far from the thermodynamic limit. Thankfully, the Carnahan-Starling equation of state is still an excellent approximation at low to moderate filling fractions.\\ 
 
 \subsection{Square-Well Liquid}
 The square well liquid is the simplest model for liquids\cite{theorysimpleliquids}. The square well approximation adds a constant short-range attractive potential to the hard sphere model. As in the hard-sphere model, the spheres are not allowed to overlap. Any arrangement of spheres - hereafter referred to as the ``state'' of the system - that involves either two or more spheres overlapping or a sphere outside the allowed area - ``cell'' - is defined to be invalid. The ``square'' refers to the piecewise intermolecular pair potential $\Phi_{12}$, shown mathematically in Eq. \ref{phi12} and graphically in Figure~\ref{sw_phi}.
@@ -218,7 +218,7 @@ Now consider a ``doubled'' version of the original cell, with length and allowed
     &\approx \sum_{i=1}^{k} F^{\text{abs}}_{i} - F^{\text{abs}}_{i-1}
     \label{GRGT-F2}
 \end{align}
-Strictly speaking, a formal limit is required for equality in Eq.~\ref{GRGT-F1}, rather than only including wavelengths up to $2^k\lambda_0$. Though theoretically all wavelengths are present at the critical point, it is only necessary to include the first several to accurately describe systems moderately close to the critical point, so we instead choose to use Eq.~\ref{GRGT-F2}. Each $F^{\text{abs}}_i$ can be calculated using a combination of different Monte Carlo methods, namely Metropolis-Hastings Monte Carlo and thermodynamic integration. A graphical, two-dimensional representation of this process can be shown in Figure ~\ref{GRTG-demo}.\\
+Strictly speaking, a formal limit is required for equality in Eq.~\ref{GRGT-F1}, rather than only including wavelengths up to $2^k\lambda_0$. Though theoretically all wavelengths are present at the critical point, it is only necessary to include the first several to accurately describe systems moderately close to the critical point, so we instead choose to use Eq.~\ref{GRGT-F2}. Each $F^{\text{abs}}_i$ can be calculated using a combination of different Monte Carlo methods, namely Metropolis-Hastings Monte Carlo and thermodynamic integration. A graphical, two-dimensional representation of this process is shown in Figure ~\ref{GRTG-demo} for the case of $L=L_0$ with a single ball in the original cell.\\
 
 \ignore{\begin{algorithm}[tb]
     \caption{Renormalization-esque calculation of total free energy}
@@ -279,7 +279,7 @@ Strictly speaking, a formal limit is required for equality in Eq.~\ref{GRGT-F1},
             \draw[ultra thick, fill=red] (8.5,1.5) circle [radius=.25];
             \draw[ultra thick, fill=red] (6.5,1.25) circle [radius=.25];                
      \end{tikzpicture}}
-\caption{2-D Demonstration of MC-GRGT doubling method.}
+\caption{2-D Demonstration of doubling method.}
 \label{GRTG-demo} 
 \end{figure} 
 
@@ -392,7 +392,7 @@ Unbiased Monte Carlo methods use random sampling and check for certain condition
 
 Statistical mechanics, however, does not exhibit this independence. Each time the drunken man makes a move there is an equal probability that he will move in any particular direction. Rather than all movements having equal probability, statistical mechanics stipulates that the probability of a particular move occurring depends explicitly upon the energy difference of the current and resulting configurations. Instead of true random Monte Carlo methods, we clearly need some way to control the probability of transitions from a given state. In pursuit of this control, we employ the method of Markov chains, specifically broad histogram transition matrix Monte Carlo.
 \subsubsection{Metropolis-Hastings}
-Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving \cite{metro-hastings}. If we define the ensemble of states of the system in by a vector column $\mathbf{q}$, and the resulting ensemble of states after a step by $\mathbf{p}$, the relationship
+Metropolis-Hastings Monte Carlo methods eschew the true randomness of unbiased Monte Carlo by taking the current configuration into account before moving \cite{metrohastings}. If we define the ensemble of states of the system in by a vector column $\mathbf{q}$, and the resulting ensemble of states after a step by $\mathbf{p}$, the relationship
 \begin{align*}
     \mathbf{p} &= \mathcal{P}\, \mathbf{q}\\
 \end{align*}
