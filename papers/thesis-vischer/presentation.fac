@@ -1,0 +1,5 @@
+| pdflatex presentation.tex && pdflatex presentation.tex
+< ideal-F-vs-T.pdf
+< presentation.tex
+> presentation.pdf
+C /etc/ld.so.cache

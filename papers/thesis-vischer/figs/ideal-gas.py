@@ -1,6 +1,6 @@
 from __future__ import division
 import matplotlib
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 
