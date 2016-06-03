@@ -12,7 +12,7 @@
 
 
 
-\title{Free energy of a liquid}
+\title[Free energy of a liquid]{Free energy of a liquid: separation, characterization, and why anyone cares}
 \author{Brenden Vischer}
 
 
@@ -36,28 +36,36 @@
 \subsection*{Free energy}
 \begin{frame}{What is free energy?}
 		\begin{columns}
-			\column{.5\textwidth}
-				Legendre Transform: 
+			\column{.5\textwidth}<1->
+				\begin{itemize}[noitemsep]
+				\item<2-> Legendre Transform: 
 				\begin{align*}
 				 	F &= U - T\,S\\
 				 	\diff F &= - S\, \diff T + P\, \diff V
 				\end{align*}
-				Statistical Mechanics: 
+				\item<3-> Statistical Mechanics: 
 				\begin{align*}
 					F &= - k_B T \ln \mathcal Z
 				\end{align*}
-
-			\column{.5\textwidth}
+				\end{itemize}
+			\column{.5\textwidth}<4->
 			Why Helmholtz and not Gibbs?
 			\begin{itemize}
-				\item Temperature and volume natural to control (pressure less so)
-				\item Entropy is derivative at constant volume rather than constant pressure
-				\item Statistical mechanics definition of $F$ - microscopic systems  
+				\item<5-> Temperature and volume natural to control 
+				\item<6-> Entropy is derivative at constant volume rather than constant pressure
+				\item<7-> Statistical mechanics definition of $F$ - microscopic systems  
 			\end{itemize}
 		\end{columns}
 \end{frame}
 
-\subsection*{Why separation?}
+\subsection*{Liquids}
+\begin{frame}
+	
+\end{frame}
+
+
+
+\section*{Why separation?}
 \begin{frame}{Why is separation important?}
 		\begin{columns}[t, onlytextwidth]
 			\column{.5\textwidth}
@@ -65,32 +73,31 @@
 				\item (something about systems being able to be separated - enumerating energies, then separating partition function, then stuff) 
 			\end{itemize}
 			\column{.5\textwidth}
-			Statistical Associating Fluid Theory 
+			Statistical Associating Fluid Theory % seg is HS + dispersion (SW/LJ), chain is covalent bonds, assoc is hydrogen bonds
 			\begin{align*}
-				\frac{F}{N k_B T} &= ~\frac{F_{id}}{N k_B T} + \frac{F_{mono}}{N k_B T} \\
-				&\quad +\frac{F_{assoc}}{N k_B T} + \frac{F_{chain}}{N k_B T}  
+				\frac{F}{N k_B T} &= \onslide<1->{\frac{F_{id}}{N k_B T}} \onslide<2->{+} \onslide<2->{\frac{F_{seg}}{N k_B T}} \\
+				\onslide<3->{&\quad +\frac{F_{chain}}{N k_B T}} \onslide<4->{+ \frac{F_{assoc}}{N k_B T}}
 			\end{align*}
 		\end{columns}
 \end{frame}
 
-\subsection*{Partition function}
+\section*{Separation}
 \begin{frame}
 	\begin{itemize}
-		\item 
+		\item<1-> 
 			\begin{align*} Z &= \sum_E^{\text{\tiny Energies}} D(E) 	
 			\exp\left(-\frac{E}{k_b T}\right)
 			\end{align*}
-
-		\item Since $E = K + V$, with $N$ particles: 
+		\item<2-> %Since $E = K + V$, with $N$ particles: 
 			\begin{align*}
-    		Z = \int_{s_1} \int_{s_2} \dots \int_{s_N}  \diff\mathbf{r_1}~ \diff\mathbf{p_1}  &~\diff\mathbf{r_2} ~\diff\mathbf{p_2} ~\dots ~\diff\mathbf{r_N}~ \diff\mathbf{p_N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})}\\
-    		&\cdot e^{-\beta(K(\mathbf{p_1}) + K(\mathbf{p_2}) ~\dots K(\mathbf{p_N}))}
+    		Z = \int_{s_1} \int_{s_2} \dots \int_{s_N}  \Big[\diff\mathbf{r_1}~ \diff\mathbf{p_1}  &~\diff\mathbf{r_2} ~\diff\mathbf{p_2} ~\dots ~\diff\mathbf{r_N}~ \diff\mathbf{p_N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})}\\
+    		&\cdot e^{-\beta(K(\mathbf{p_1}) + K(\mathbf{p_2}) ~\dots K(\mathbf{p_N}))}\Big]
 			\end{align*}
-		\item which simplifies to 
+		\item<3-> %which simplifies to 
 			\begin{align*}
 			Z &= \int_s \frac{\diff\mathbf{r}^N}{V^N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})} \frac{1}{ N!}	\left[V\int_s \,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right]^{N} 
 			\end{align*}
-		\item Let's call them 
+		\item<4-> %Let's call them 
 			\begin{align*}
 				Z &= Z_{id}(\mathbf{p})\,Z_{exc}(\mathbf{r_1},\, \dots\, ,\mathbf{r_N})	
 			\end{align*}
@@ -98,7 +105,7 @@
 \end{frame}
 
 \section*{Characterization}
-\subsection*{Ideal}
+\subsection*{ideal}
 \begin{frame}
 	\begin{columns}[t]
 		\column{.5\textwidth}
@@ -106,14 +113,18 @@
 				\item \begin{align*}
 					Z_{id} &= \frac{1}{N!}\left(V\int \,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right)^{N}	 	
 				\end{align*}
-				\item Using $K = p^2/2m$, $\mathbf{p}=\hbar \mathbf{k}$, and a quantized $\mathbf{k}$, we have
+				\item %Using $K = p^2/2m$, $\mathbf{p}=\hbar \mathbf{k}$, and a quantized $\mathbf{k}$, we have
 				\begin{align*}
-				Z_{id} &= \frac{(2\pi\hbar)^3}{V N!}\left[V \int_0^\infty \diff^3 n ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\right]^{N} 	
+				Z_{id} = \frac{(2\pi\hbar)^3}{V N!}&\Big[V \int_0^\infty \diff^3 n \\
+				& \cdot ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\Big]^{N} 	
 				\end{align*} 
+				\item \begin{align*}
+					Z_{id} &= \frac{}{}
+				\end{align*}
 			\end{itemize}
 		\column{.5\textwidth}
 			\begin{figure}
- 				\includegraphics[width=\textwidth]{Ideal-F-vs-T.pdf}
+ 				\includegraphics[width=\textwidth]{ideal-F-vs-T.pdf}
  				\caption{\tiny Free energy of the ideal gas}
  				\label{ideal}
  			\end{figure}
@@ -123,7 +134,7 @@
 \subsection*{Excess}
 \begin{frame}
 	\begin{columns}		
-		\column{.1\textwidth}
+		\column{.5\textwidth}
 			\begin{align*}
 				Z_{exc} &= \int_s \frac{\diff\mathbf{r}^N}{V^N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})}
 			\end{align*}
@@ -143,7 +154,7 @@
 		\end{description}
 	\end{columns}
 \end{frame}
-\section*{Final thing}
+\section*{Why anyone cares}
 \begin{frame}
 	\begin{itemize}
 		\item stuff
