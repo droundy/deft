@@ -1,21 +1,39 @@
 \documentclass{beamer}
 \usepackage{amsmath}
 \usepackage{enumitem}
-\mode<presentation>{\usetheme{Malmoe}}
+\usepackage{tikz}
 
-%%preamble
+
+\setlist[itemize,1]{label={\fontfamily{cmr}\fontencoding{T1}\selectfont\textbullet}}
+
+\mode<presentation>{\usetheme{Malmoe}}
+\setbeamertemplate{navigation symbols}{}%remove navigation symbols
+
 \newcommand{\ignore}[1]{}
 \newcommand*{\diff}{\mathsf{d}}
 \newcommand{\some}{{\color{red} something}}
 \renewcommand{\vec}[1]{\mathbf{#1}}
 
-
-
+\newcounter{mybox}
+\newcommand\tikzmark[1]{%
+\tikz[remember picture,overlay] \node[inner xsep=0pt] (#1) {};
+}
+\newcommand\ColorBox[2][]{%
+\stepcounter{mybox}%
+\node[draw=blue,fill=blue!20,align=left,#1] (box\themybox) {#2};
+}
 
 \title[Free energy of a liquid]{Free energy of a liquid: separation, characterization, and why anyone cares}
 \author{Brenden Vischer}
+ 
+\usebackgroundtemplate%
+{%
+  \tikz\node[opacity=.1] {\includegraphics[width=\paperwidth,height=\paperheight]{figs/background.jpg}};%
+}
 
+\setlength\intextsep{-2em}
 
+%%% DOCUMENT %%%
 
 \begin{document}
 \setbeamercolor{whitebox}{bg=gray!40}
@@ -33,134 +51,185 @@
 \end{frame}}
 
 \section*{Introduction}
-\subsection*{Free energy}
-\begin{frame}{What is free energy?}
-		\begin{columns}
-			\column{.5\textwidth}<1->
-				\begin{itemize}[noitemsep]
-				\item<2-> Legendre Transform: 
-				\begin{align*}
-				 	F &= U - T\,S\\
-				 	\diff F &= - S\, \diff T + P\, \diff V
-				\end{align*}
-				\item<3-> Statistical Mechanics: 
-				\begin{align*}
-					F &= - k_B T \ln \mathcal Z
-				\end{align*}
-				\end{itemize}
-			\column{.5\textwidth}<4->
-			Why Helmholtz and not Gibbs?
+\subsection*{Why care about liquids?}
+\begin{frame}{Why care about liquids?}
+		\begin{columns}[t, onlytextwidth]
+			\column{.5\textwidth}
+			\begin{figure}
+				\includegraphics[width=\textwidth]{figs/water.png}	
+			\end{figure}
+			\column{.5\textwidth}
+			\begin{block}{Water!}
 			\begin{itemize}
-				\item<5-> Temperature and volume natural to control 
-				\item<6-> Entropy is derivative at constant volume rather than constant pressure
-				\item<7-> Statistical mechanics definition of $F$ - microscopic systems  
+				\item $\approx 70\%$ of Earth surface and your weight
+				\item Fairly simple liquid
+				\item Still poorly understood 
 			\end{itemize}
+
+			Free energy of water % seg is HS + dispersion (SW/LJ), chain is covalent bonds, assoc is hydrogen bonds
+			\begin{align*}
+				\frac{F_{\text{water}}}{N k_B T} &= \frac{F_{id}}{N k_B T} + \frac{F_{HS}}{N k_B T} + \frac{F_{disp}}{N k_B T} 
+			\end{align*}
+			\end{block}
 		\end{columns}
 \end{frame}
 
-\subsection*{Liquids}
-\begin{frame}
+\subsection*{What is free energy?}
+\begin{frame}{What is free energy?}
+		\begin{columns}[t]
+		\column{.5\textwidth}		
+		Legendre Transform: 
+		\begin{align*}
+	 		F &= U - T\,S\\
+			\diff F &= - S\, \diff T + P\, \diff V
+		\end{align*}
+		\column{.5\textwidth}
+		Statistical Mechanics: 
+		\begin{align*}
+			F &= - k_B T \ln \mathcal Z
+		\end{align*}
+		\end{columns}		
+	\vspace{2em}Why Helmholtz and not Gibbs?
+	\begin{itemize}
+		\item Temperature and volume natural to control 
+		\item Entropy is derivative at constant volume rather than constant pressure
+	\end{itemize}
+	\end{frame}
+
+\subsection*{The liquid phase}
+\begin{frame}{The liquid phase}
+	\begin{columns}[T]
+		\column{.5\textwidth}
+		\begin{figure}
+			\includegraphics[width =\textwidth]{figs/phase-new}
+			\caption{Phase diagram for an arbitrary compound.}
+		\end{figure}
+		\column{.5\textwidth}
+		\begin{block}{Fluids}
+			\begin{itemize}
+				\item Not a solid - weak or nonexistent intermolecular forces
+			\end{itemize}
+		\end{block}
+		\begin{block}{Liquids}
+			\begin{itemize}
+				\item Naturally, the middle of solid and gas
+				\item Short range repulsion and large range attraction 
+			\end{itemize}
+		\end{block}
+	\end{columns}
 	
 \end{frame}
 
-
-
-\section*{Why separation?}
-\begin{frame}{Why is separation important?}
-		\begin{columns}[t, onlytextwidth]
-			\column{.5\textwidth}
-			\begin{itemize}[noitemsep]
-				\item (something about systems being able to be separated - enumerating energies, then separating partition function, then stuff) 
-			\end{itemize}
-			\column{.5\textwidth}
-			Statistical Associating Fluid Theory % seg is HS + dispersion (SW/LJ), chain is covalent bonds, assoc is hydrogen bonds
-			\begin{align*}
-				\frac{F}{N k_B T} &= \onslide<1->{\frac{F_{id}}{N k_B T}} \onslide<2->{+} \onslide<2->{\frac{F_{seg}}{N k_B T}} \\
-				\onslide<3->{&\quad +\frac{F_{chain}}{N k_B T}} \onslide<4->{+ \frac{F_{assoc}}{N k_B T}}
+\section*{Separation and characterization}
+\subsection*{Separation}
+\begin{frame}{Separation}
+	%\begin{itemize}
+	%\setlength\itemsep{-2em}
+	%	\item 
+			\begin{align*} 
+				Z &= \sum_i^{\text{\tiny States}} e^{-\beta E_i}\,, & E_i &= \Phi_i(\mathbf{r}_1,\, \dots,\, \mathbf{r}_N) + \sum_j^N K_j(\mathbf{p}_j)
 			\end{align*}
-		\end{columns}
+	%	\item %Since $E = K + V$, with $N$ particles: 
+			\begin{align*}
+    		Z = \int_{s_1} \cdots \int_{s_N} \diff\mathbf{r}_1~ \diff\mathbf{p}_1\cdots ~\diff\mathbf{r}_N~ \diff\mathbf{p}_N ~e^{-\beta \Big[\Phi(\mathbf{r}_1,\, \dots,\, \mathbf{r}_N) + K(\mathbf{p}_1) + \cdots + K(\mathbf{p}_N))\Big]}\\
+			\end{align*}
+	%	\item %which simplifies to 
+			\begin{align*}
+			Z &= \boxed{\frac{1}{ N!} \tikzmark{a}\left[V\int_s \,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right]^{N}} \,\cdot\, \boxed{ \int_s \frac{\diff\mathbf{r}^N}{V^N}\tikzmark{b} ~e^{-\beta \Phi(\mathbf{r_1},\, \dots,\, \mathbf{r_N})}} 
+			\end{align*}
+		%\item %Let's call them 
+		%	\begin{align*}
+		%		Z &= Z_{id}(\mathbf{p})\,Z_{exc}(\mathbf{r_1},\, \dots\, ,\mathbf{r_N})	
+		%	\end{align*}
+	%	\end{itemize}	
+	\begin{tikzpicture}[remember picture,overlay]
+		\ColorBox[xshift=2cm]{Ideal}
+		\draw[blue,->] (box1) -| ([xshift=10pt]a.south west);
+		\ColorBox[xshift=10cm,fill=blue!20,draw=blue]{Excess}
+		\draw[blue,->] (box2) -| ([xshift=10pt]b.south west);
+	\end{tikzpicture}
+	%\vspace{1em}
+		\begin{align*}
+			F &= F_{id} + F_{exc} 	
+		\end{align*}
 \end{frame}
 
-\section*{Separation}
-\begin{frame}
-	\begin{itemize}
-		\item<1-> 
-			\begin{align*} Z &= \sum_E^{\text{\tiny Energies}} D(E) 	
-			\exp\left(-\frac{E}{k_b T}\right)
-			\end{align*}
-		\item<2-> %Since $E = K + V$, with $N$ particles: 
-			\begin{align*}
-    		Z = \int_{s_1} \int_{s_2} \dots \int_{s_N}  \Big[\diff\mathbf{r_1}~ \diff\mathbf{p_1}  &~\diff\mathbf{r_2} ~\diff\mathbf{p_2} ~\dots ~\diff\mathbf{r_N}~ \diff\mathbf{p_N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})}\\
-    		&\cdot e^{-\beta(K(\mathbf{p_1}) + K(\mathbf{p_2}) ~\dots K(\mathbf{p_N}))}\Big]
-			\end{align*}
-		\item<3-> %which simplifies to 
-			\begin{align*}
-			Z &= \int_s \frac{\diff\mathbf{r}^N}{V^N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})} \frac{1}{ N!}	\left[V\int_s \,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right]^{N} 
-			\end{align*}
-		\item<4-> %Let's call them 
-			\begin{align*}
-				Z &= Z_{id}(\mathbf{p})\,Z_{exc}(\mathbf{r_1},\, \dots\, ,\mathbf{r_N})	
-			\end{align*}
-	\end{itemize}
-\end{frame}
-
-\section*{Characterization}
-\subsection*{ideal}
-\begin{frame}
-	\begin{columns}[t]
-		\column{.5\textwidth}
-			\begin{itemize}
-				\item \begin{align*}
+\subsection*{Characterization}
+\subsubsection*{Ideal}
+\begin{frame}{Ideal gas free energy}
+	%\begin{columns}[t, onlytextwidth]
+	%	\column{.5\textwidth}
+			%\begin{itemize}
+			%	\item 
+				\begin{align*}
 					Z_{id} &= \frac{1}{N!}\left(V\int \,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right)^{N}	 	
 				\end{align*}
-				\item %Using $K = p^2/2m$, $\mathbf{p}=\hbar \mathbf{k}$, and a quantized $\mathbf{k}$, we have
 				\begin{align*}
-				Z_{id} = \frac{(2\pi\hbar)^3}{V N!}&\Big[V \int_0^\infty \diff^3 n \\
-				& \cdot ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\Big]^{N} 	
-				\end{align*} 
-				\item \begin{align*}
-					Z_{id} &= \frac{}{}
+					\mathbf{p} &= \hbar \mathbf{k} = \hbar\left( \frac{2\pi}{V^{1/3}}n_x \hat x + n_y \hat y + n_z \hat z\right)
 				\end{align*}
-			\end{itemize}
-		\column{.5\textwidth}
-			\begin{figure}
- 				\includegraphics[width=\textwidth]{ideal-F-vs-T.pdf}
- 				\caption{\tiny Free energy of the ideal gas}
- 				\label{ideal}
- 			\end{figure}
+				\begin{align*}
+					Z_{id} = \frac{(2\pi\hbar)^{3N}}{V^N N!}&\Big[V \int_0^\infty \diff^3 n ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\Big]^{N} 	
+				\end{align*} 
+				 
+				\begin{align*}
+    				Z_{id} &= \left(\frac{h^{3N} V^N}{N!\Lambda^{3N}}\right) \,, & \Lambda &= \frac{\hbar\sqrt{2\pi}}{\sqrt{m k_B T}}
+				\end{align*}
+			%\end{itemize}
+		%\column{.5\textwidth}
+		%	\begin{figure}
+ 		%		\includegraphics[width=\textwidth]{ideal-F-vs-T.pdf}
+ 		%		\caption{\tiny Free energy of the ideal gas}
+ 		%		\label{ideal}
+ 		%	\end{figure}
+	%\end{columns}
+\end{frame}
+
+\subsubsection*{Excess}
+\begin{frame}{Excess free energy}	
+	\begin{columns}[t]
+	\setlength\abovedisplayskip{-2pt} 
+	\column{.7\textwidth}	
+	\begin{align*}
+		Z_{exc} &= \int_s \frac{\diff\mathbf{r}^N}{V^N} ~e^{-\beta \Phi(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})}
+	\end{align*}
+	\begin{align*}
+		F_{water, exc} &= -k_B T \ln \mathcal{Z}_{exc}\\
+		&= F_{HS} + F_{disp}
+	\end{align*}
+	\begin{figure}
+	\includegraphics[width=.7\textwidth]{figs/phi12}
+	\caption{Hard sphere and square well intermolecular pair potentials.}
+	\end{figure}
+	\column{.5\textwidth}
+	\begin{block}{Hard sphere fluid}
+	\setlength\abovedisplayskip{-2pt} 
+		\begin{equation*} 
+			\Phi_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\  0 & |\vec{r}| > \sigma \end{cases}
+			\label{phi12_hs}
+		\end{equation*}
+	\end{block}
+	\begin{block}{Square well fluid}
+	\setlength\abovedisplayskip{-2pt} 
+		\begin{equation*} 
+			\Phi_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\ -\epsilon & \sigma \leq |\vec{r}| \leq \sigma\lambda\\ 0 & |\vec{r}| > \sigma\lambda \end{cases}
+			\label{phi12_sw}
+		\end{equation*}
+	\end{block}
 	\end{columns}
 \end{frame}
 
-\subsection*{Excess}
-\begin{frame}
-	\begin{columns}		
-		\column{.5\textwidth}
-			\begin{align*}
-				Z_{exc} &= \int_s \frac{\diff\mathbf{r}^N}{V^N} ~e^{-\beta V(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})}
-			\end{align*}
-			\begin{itemize}
-				\item Dependant on system for $V$
-			\end{itemize}
-		\column{.4\textwidth}
-		\begin{description}[noitemsep, leftmargin=*]
-			\item[Square Well] \begin{equation*} 
-				V_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\ -\epsilon & \sigma \leq |\vec{r}| \leq \sigma\lambda\\ 0 & |\vec{r}| > \sigma\lambda \end{cases}
-				\label{phi12_sw}
-				\end{equation*}
-			\item[Hard Sphere] \begin{equation*} 
-				V_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\  0 & |\vec{r}| > \sigma \end{cases}
-				\label{phi12_hs}
-				\end{equation*}
-		\end{description}
-	\end{columns}
-\end{frame}
-\section*{Why anyone cares}
-\begin{frame}
+\section*{Final thoughts}
+\subsection*{Remarks}
+\begin{frame}{Remarks}
 	\begin{itemize}
-		\item stuff
-		\item things
-		\item junk
+		\item Liquids - however simple - are very complicated
+		\item Simplest models have no analytic solutions
+		\item Separation enables some behavioral investigation
 	\end{itemize}
+\end{frame}
+\subsection*{References}
+\begin{frame}{References}
+	references
 \end{frame}
 % \section*{Introduction}
 % \subsection*{Motivation}
@@ -199,44 +268,5 @@
 % 			\item Stuff
 % 		\end{itemize}
 % 	\end{frame}
-
-
-
-% \section*{Models and Methods}
-% \subsection*{Models}
-% \begin{frame}{Dense Fluid Models}
-% \begin{columns}[t]
-% 	\column{.5\textwidth}
-% 		\begin{block}{Hard Sphere}	
-% 			\begin{itemize}
-% 				\item The hard sphere system approximates particles to have no attraction. Spheres - particles - are only allowed to undergo perfectly elastic collisions. 
-% 				\item The excess internal energy is easy: either the no spheres overlap with $U_exc = 0$, or the configuration is invalid $U_{exc} = \infty$
-% 			\end{itemize}
-% 		\end{block}
-
-% 	\column{.5\textwidth}
-% 		\begin{block}{Square Well}	
-% 			\begin{itemize}
-% 		 		\item As a hard-sphere model, the spheres are not allowed to overlap.
-% 		 		\item The ``square'' in square well refers to the piecewise attraction potential: $\Phi_{12} = \begin{cases} -\epsilon & \sigma \leq r \leq \lambda\\ 0 & r > \lambda\end{cases}$, where $\sigma$ is the sphere radius and $\lambda$ is the attraction range.
-% 			\end{itemize}
-% 		\end{block} 
-% \end{columns}
-% \end{frame}
-% \subsection*{Methods}
-% \begin{frame}{MC and TI}
-% \begin{columns}[t]
-% 	\column{.5\textwidth}
-% 		\begin{block}{Monte-Carlo}
-% 			\scriptsize \vspace{.1cm} 
-% 				Monte-Carlo methods utilize random or pseudorandom sampling and check for certain conditions or measure certain quantities after a specified number of iterations. We use Transition Matrix Monte-Carlo, a broad-histogram method that efficiently determines the density of states for a given system.
-% 		\end{block}
-% 	\column{.5\textwidth}
-% 		\begin{block}{Thermodymic Integration}
-% 			\scriptsize \vspace{.1cm}
-% 				Thermodynamic integration is our method to determine the . Using Monte-Carlo, we transition from a filling fraction of zero to a near-close-packed system, calculating the change in free energy at each step and eventually reaching the ``absolute'' free energy
-% 		\end{block}
-% \end{columns}
-% \end{frame}
 
 \end{document}

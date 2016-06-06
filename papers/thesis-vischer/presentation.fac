@@ -1,5 +1,6 @@
 | pdflatex presentation.tex && pdflatex presentation.tex
 < ideal-F-vs-T.pdf
 < presentation.tex
+< figs/phase-new.pdf
 > presentation.pdf
 C /etc/ld.so.cache

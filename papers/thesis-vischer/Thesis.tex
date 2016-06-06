@@ -357,7 +357,7 @@ Remembering that kinetic energy can be expressed as $K = \frac{\hbar^2 k^2}{2m}$
 \end{align}
 This unfortunately introduces a mass quantity into the partition function which adds an additional parameter that needs to be determined to properly account for quantum mechanical effects. If we then allow the cell to become very large, then the we can see in Eq. \ref{Zt_def} that the spacing between occupants in phase space becomes small, so we can integrate instead $\diff ^3 n$ over all possible values of $n$:
 \begin{align}
-    Z_{id} &= \frac{(2\pi \hbar)^{3N}}{V^N N!}\left[\int_0^\infty \diff^3 n ~e^{-\frac{\beta \hbar^2}{2m} \left(\frac{2\pi}{L}(n_x\mathbf{\hat{x}} + n_y\mathbf{\hat{y}} + n_z\mathbf{\hat{z}}\right)^2}\right]^{N} \\
+    Z_{id} &= \frac{(2\pi \hbar)^{3N}}{V^N N!}\left[V\int_0^\infty \diff^3 n ~e^{-\frac{\beta \hbar^2}{2m} \left(\frac{2\pi}{L}(n_x\mathbf{\hat{x}} + n_y\mathbf{\hat{y}} + n_z\mathbf{\hat{z}}\right)^2}\right]^{N} \\
     &= \frac{h^{3N}}{N!}\left[\int_0^\infty \diff^3 n ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\right]^{N}
 \end{align}
 where extra factors of $\hbar $ and volume were gained from the change of variables. Evaluating this integral yields
