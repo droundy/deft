@@ -22,10 +22,10 @@ fig = plt.figure('s-w')
 plt.plot(rs,vs, color="black",label='$\Phi_{SW}$', linewidth=2.0)
 plt.plot(rs2, vs2, 'k--', label = '$\Phi_{HS}$', linewidth=3.0)
 
-ax = fig.add_subplot(111)
+#ax = fig.add_subplot(111)
 #for axis in ['top', 'bottom','left','right']:
-#       ax.spines[axis].set_linewidth[2]
-
+#    ax.spines[axis].set_linewidth(2)
+    
 plt.title('Potential for hard sphere and square well fluids', fontsize = 24, fontweight='bold')
 plt.tight_layout(pad=1.5)
 plt.legend(loc='best')

@@ -2,12 +2,22 @@
 \usepackage{amsmath}
 \usepackage{enumitem}
 \usepackage{tikz}
+\usepackage{url}
 
-
+% put bullets back in font package
 \setlist[itemize,1]{label={\fontfamily{cmr}\fontencoding{T1}\selectfont\textbullet}}
 
+% remove stupid navigation tools and add page numbers
 \mode<presentation>{\usetheme{Malmoe}}
-\setbeamertemplate{navigation symbols}{}%remove navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+\addtobeamertemplate{navigation symbols}{}{%
+    \setbeamercolor{footline}{fg=black}
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \insertframenumber/\inserttotalframenumber
+}
 
 \newcommand{\ignore}[1]{}
 \newcommand*{\diff}{\mathsf{d}}
@@ -51,6 +61,31 @@
 \end{frame}}
 
 \section*{Introduction}
+\subsection*{The liquid phase}
+\begin{frame}{The liquid phase}
+	\begin{columns}[T]
+		\column{.5\textwidth}
+		\begin{figure}
+			\frame{\includegraphics[width =\textwidth]{figs/phase-new}}
+			\caption{Phase diagram for an arbitrary compound.}
+		\end{figure}
+		\column{.5\textwidth}
+		\begin{block}{Phases}
+			\begin{itemize}
+				\item Solid: energy dominates
+				\item Gas: entropy dominates
+				\item Liquid: both
+			\end{itemize}
+		\end{block}
+		\begin{block}{Liquids}
+			\begin{itemize}
+				\item Short range repulsion and long range attraction 
+			\end{itemize}
+		\end{block}
+	\end{columns}
+	
+\end{frame}
+
 \subsection*{Why care about liquids?}
 \begin{frame}{Why care about liquids?}
 		\begin{columns}[t, onlytextwidth]
@@ -62,63 +97,46 @@
 			\begin{block}{Water!}
 			\begin{itemize}
 				\item $\approx 70\%$ of Earth surface and your weight
-				\item Fairly simple liquid
+				\item Seems simple, but is complicated
 				\item Still poorly understood 
 			\end{itemize}
-
-			Free energy of water % seg is HS + dispersion (SW/LJ), chain is covalent bonds, assoc is hydrogen bonds
-			\begin{align*}
-				\frac{F_{\text{water}}}{N k_B T} &= \frac{F_{id}}{N k_B T} + \frac{F_{HS}}{N k_B T} + \frac{F_{disp}}{N k_B T} 
-			\end{align*}
+			\end{block}
+			\begin{block}{Free energy of water}
+			 	% seg is HS + dispersion (SW/LJ), chain is covalent bonds, assoc is hydrogen bonds
+				\begin{align*}
+					F_{\text{water}} &= F_{id} + F_{HS} + F_{attr} + F_{assoc} 
+				\end{align*}
 			\end{block}
 		\end{columns}
 \end{frame}
 
 \subsection*{What is free energy?}
 \begin{frame}{What is free energy?}
+		\begin{block}{Intuitive}
+			$F$ - the available work in the system
+		\end{block}
+		\begin{block}{Mathematics}
+		\vspace{1em}
 		\begin{columns}[t]
 		\column{.5\textwidth}		
-		Legendre Transform: 
+		{\centering Thermodynamics:
 		\begin{align*}
-	 		F &= U - T\,S\\
-			\diff F &= - S\, \diff T + P\, \diff V
-		\end{align*}
+			\diff F &= - S\,  \diff T + P\, \diff V
+		\end{align*}}
 		\column{.5\textwidth}
-		Statistical Mechanics: 
+		{\centering
+		Statistical Mechanics
 		\begin{align*}
-			F &= - k_B T \ln \mathcal Z
-		\end{align*}
-		\end{columns}		
-	\vspace{2em}Why Helmholtz and not Gibbs?
+		F &= - k_B T \ln Z
+		\end{align*}}
+		\end{columns}
+		\end{block}		
+		Why Helmholtz and not Gibbs?
 	\begin{itemize}
-		\item Temperature and volume natural to control 
-		\item Entropy is derivative at constant volume rather than constant pressure
+		\item Control temperature and volume 
+		\item Entropy a more preferable partial derivative
 	\end{itemize}
 	\end{frame}
-
-\subsection*{The liquid phase}
-\begin{frame}{The liquid phase}
-	\begin{columns}[T]
-		\column{.5\textwidth}
-		\begin{figure}
-			\includegraphics[width =\textwidth]{figs/phase-new}
-			\caption{Phase diagram for an arbitrary compound.}
-		\end{figure}
-		\column{.5\textwidth}
-		\begin{block}{Fluids}
-			\begin{itemize}
-				\item Not a solid - weak or nonexistent intermolecular forces
-			\end{itemize}
-		\end{block}
-		\begin{block}{Liquids}
-			\begin{itemize}
-				\item Naturally, the middle of solid and gas
-				\item Short range repulsion and large range attraction 
-			\end{itemize}
-		\end{block}
-	\end{columns}
-	
-\end{frame}
 
 \section*{Separation and characterization}
 \subsection*{Separation}
@@ -131,7 +149,7 @@
 			\end{align*}
 	%	\item %Since $E = K + V$, with $N$ particles: 
 			\begin{align*}
-    		Z = \int_{s_1} \cdots \int_{s_N} \diff\mathbf{r}_1~ \diff\mathbf{p}_1\cdots ~\diff\mathbf{r}_N~ \diff\mathbf{p}_N ~e^{-\beta \Big[\Phi(\mathbf{r}_1,\, \dots,\, \mathbf{r}_N) + K(\mathbf{p}_1) + \cdots + K(\mathbf{p}_N))\Big]}\\
+    		Z = \frac{1}{N!}\int_{s_1} \cdots \int_{s_N} \diff\mathbf{r}_1~ \diff\mathbf{p}_1\cdots ~\diff\mathbf{r}_N~ \diff\mathbf{p}_N ~e^{-\beta \Big[\Phi(\mathbf{r}_1,\, \dots,\, \mathbf{r}_N) + K(\mathbf{p}_1) + \cdots + K(\mathbf{p}_N))\Big]}\\
 			\end{align*}
 	%	\item %which simplifies to 
 			\begin{align*}
@@ -155,67 +173,93 @@
 \end{frame}
 
 \subsection*{Characterization}
-\subsubsection*{Ideal}
-\begin{frame}{Ideal gas free energy}
-	%\begin{columns}[t, onlytextwidth]
-	%	\column{.5\textwidth}
-			%\begin{itemize}
-			%	\item 
-				\begin{align*}
-					Z_{id} &= \frac{1}{N!}\left(V\int \,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right)^{N}	 	
-				\end{align*}
-				\begin{align*}
-					\mathbf{p} &= \hbar \mathbf{k} = \hbar\left( \frac{2\pi}{V^{1/3}}n_x \hat x + n_y \hat y + n_z \hat z\right)
-				\end{align*}
-				\begin{align*}
-					Z_{id} = \frac{(2\pi\hbar)^{3N}}{V^N N!}&\Big[V \int_0^\infty \diff^3 n ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\Big]^{N} 	
-				\end{align*} 
+% \subsubsection*{Ideal}
+% \begin{frame}{Ideal gas free energy}
+% 	%\begin{columns}[t, onlytextwidth]
+% 	%	\column{.5\textwidth}
+% 			%\begin{itemize}
+% 			%	\item 
+% 				\begin{align*}
+% 					Z_{id} &= \frac{1}{N!}\left(V\int \,\diff\mathbf{p}~e^{-\beta K(\mathbf{p})}\right)^{N}	 	
+% 				\end{align*}
+% 				\begin{align*}
+% 					\mathbf{p} &= \hbar \mathbf{k} = \hbar\left( \frac{2\pi}{V^{1/3}}n_x \hat x + n_y \hat y + n_z \hat z\right)
+% 				\end{align*}
+% 				\begin{align*}
+% 					Z_{id} = \frac{(2\pi\hbar)^{3N}}{V^N N!}&\Big[V \int_0^\infty \diff^3 n ~e^{ \frac{-2\beta \hbar^2\pi^2}{mL^2}(n_x^2 + n_y^2 + n_z^2)}\Big]^{N} 	
+% 				\end{align*} 
 				 
-				\begin{align*}
-    				Z_{id} &= \left(\frac{h^{3N} V^N}{N!\Lambda^{3N}}\right) \,, & \Lambda &= \frac{\hbar\sqrt{2\pi}}{\sqrt{m k_B T}}
-				\end{align*}
-			%\end{itemize}
-		%\column{.5\textwidth}
-		%	\begin{figure}
- 		%		\includegraphics[width=\textwidth]{ideal-F-vs-T.pdf}
- 		%		\caption{\tiny Free energy of the ideal gas}
- 		%		\label{ideal}
- 		%	\end{figure}
-	%\end{columns}
-\end{frame}
+% 				\begin{align*}
+%     				Z_{id} &= \left(\frac{h^{3N} V^N}{N!\Lambda^{3N}}\right) \,, & \Lambda &= \frac{\hbar\sqrt{2\pi}}{\sqrt{m k_B T}}
+% 				\end{align*}
+% 			%\end{itemize}
+% 		%\column{.5\textwidth}
+% 		%	\begin{figure}
+%  		%		\includegraphics[width=\textwidth]{ideal-F-vs-T.pdf}
+%  		%		\caption{\tiny Free energy of the ideal gas}
+%  		%		\label{ideal}
+%  		%	\end{figure}
+% 	%\end{columns}
+% \end{frame}
 
 \subsubsection*{Excess}
 \begin{frame}{Excess free energy}	
 	\begin{columns}[t]
 	\setlength\abovedisplayskip{-2pt} 
-	\column{.7\textwidth}	
+	\column{.4\textwidth}	
 	\begin{align*}
 		Z_{exc} &= \int_s \frac{\diff\mathbf{r}^N}{V^N} ~e^{-\beta \Phi(\mathbf{r_1}, \mathbf{r_2}, \dots \mathbf{r_N})}
 	\end{align*}
-	\begin{align*}
-		F_{water, exc} &= -k_B T \ln \mathcal{Z}_{exc}\\
-		&= F_{HS} + F_{disp}
-	\end{align*}
+	\begin{itemize}
+		\item No algebraic expression for even simple $\Phi$
+		\item Need to use models, simulations to approximate behavior
+		\item Even with models...
+	\end{itemize}
+	\column{.6\textwidth}
 	\begin{figure}
-	\includegraphics[width=.7\textwidth]{figs/phi12}
-	\caption{Hard sphere and square well intermolecular pair potentials.}
+		\frame{\includegraphics[width=\textwidth]{figs/phi12}}
+		\caption{Hard sphere and square well intermolecular pair potentials.}
 	\end{figure}
-	\column{.5\textwidth}
-	\begin{block}{Hard sphere fluid}
-	\setlength\abovedisplayskip{-2pt} 
-		\begin{equation*} 
-			\Phi_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\  0 & |\vec{r}| > \sigma \end{cases}
-			\label{phi12_hs}
-		\end{equation*}
-	\end{block}
-	\begin{block}{Square well fluid}
-	\setlength\abovedisplayskip{-2pt} 
-		\begin{equation*} 
-			\Phi_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\ -\epsilon & \sigma \leq |\vec{r}| \leq \sigma\lambda\\ 0 & |\vec{r}| > \sigma\lambda \end{cases}
-			\label{phi12_sw}
-		\end{equation*}
-	\end{block}
+		% \begin{block}{Hard sphere fluid}
+	% \setlength\abovedisplayskip{-2pt} 
+	% 	\begin{equation*} 
+	% 		\Phi_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\  0 & |\vec{r}| > \sigma \end{cases}
+	% 		\label{phi12_hs}
+	% 	\end{equation*}
+	% \end{block}
+	% \begin{block}{Square well fluid}
+	% \setlength\abovedisplayskip{-2pt} 
+	% 	\begin{equation*} 
+	% 		\Phi_{12}(\mathbf r) = \begin{cases}\infty & |\vec{r}|\leq \sigma\\ -\epsilon & \sigma \leq |\vec{r}| \leq \sigma\lambda\\ 0 & |\vec{r}| > \sigma\lambda \end{cases}
+	% 		\label{phi12_sw}
+	% 	\end{equation*}
+	% \end{block}
 	\end{columns}
+\end{frame}
+
+
+\subsection*{Methods}
+\begin{frame}{Methods}
+	\begin{figure}
+		\frame{\includegraphics[width=.7\textwidth]{figs/integration.pdf}}
+	\end{figure}
+	\begin{itemize}
+		\item Thermodynamic Integration: integration over densities
+		\item Square Well Monte Carlo: integration over temperature
+	\end{itemize}
+\end{frame}
+
+\subsection*{Results}
+\begin{frame}{Results}
+\begin{columns}
+	\column{.7\textwidth}
+	\frame{\includegraphics[width=\textwidth]{figs/Fabs-vs-eta}}
+	\column{.4\textwidth}
+	\begin{itemize}
+		\item Two doubling regimes simulated
+		\item Becomes more negative with increasing temperature, density 
+	\end{itemize}
+\end{columns}
 \end{frame}
 
 \section*{Final thoughts}
@@ -229,7 +273,14 @@
 \end{frame}
 \subsection*{References}
 \begin{frame}{References}
-	references
+	\tiny
+	\begin{itemize}
+		\item Retrieved from \url{https://nicokrisch.files.wordpress.com/2014/05/}
+		\item Retrieved from \url{https://en.wikipedia.org/wiki/Chemical_polarity}
+		\item I. M. J.-P. Hansen, Theory of Simple Liquids, $3^{\text{rd}}$ ed. (Academic Press, 2006).
+		\item M. A. Perlin, ``Optimizing monte carlo simulation of the square-well fluid,'' (2015), Oregon State University.
+		\item A. Valeske, ``Determining free energies of hard sphere fluids via monte carlo simulation'' (2015), Oregon State University.
+	\end{itemize}
 \end{frame}
 % \section*{Introduction}
 % \subsection*{Motivation}
