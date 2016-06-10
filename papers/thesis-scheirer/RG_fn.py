@@ -33,7 +33,7 @@ import sys
 #                                                                                             #
 ### Normal temperature linspace (useful for quick troubleshooting) ###
 #temp = plt.linspace(0.4,1.3,40)
-numdata=1000
+numdata=30
 max_fillingfraction_handled = 0.84
 test_dn = (max_fillingfraction_handled/(4*np.pi/3))/numdata
 #numdensity = np.arange(0.0001,max_fillingfraction_handled/(4*np.pi/3),test_dn)
@@ -60,47 +60,69 @@ print(temp)
 
 
 def RG_first_pass(T,n,i):
-        # eqn (55) Forte 2011:
-        global maxx
-        global maxn
+        fnaught = RG.SWfid(T,n) + RG.SWfhs(T,n) + RG.a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
+        f = fnaught
+        return f + RG_dfi(n)
+
+def RG_later_pass(n):
+        f = f01_ext(n)
+        return f + RG_dfi(n)
+
+def RG_dfi(n):
         maxn = (max_fillingfraction_handled+0.01)/(sigma**3*np.pi/6)
-        '''NEED TO ADD SMALL THING ABOVE IF FAIL'''
+        # warning: Forte defines x as a density, we define it
+        # as a dimensionless quantity that scales the density.
         maxx = np.minimum(1,maxn/n-1)
-        
+
         if abs(maxx) < 1e-42:
                 print 'maxx is zero'
                 print 'maxx is zero'
                 print 'maxx is zero'
                 print 'maxx is zero'
                 print 'maxx is zero'
-                
-        fnaught = RG.SWfid(T,n) + RG.SWfhs(T,n) + RG.a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
-        f = fnaught
-        IDvalue = ID2(n)
-        ID_refvalue = ID2star(n)
-        dfi = -k_B*T*(IDvalue-ID_refvalue)/RG.VD(1) # eqn (7), Forte 2011
-        f += dfi
-        return f
-
-
+        T=temp
+        # eqn (5) from Forte 2011:
+        IDvalue = ID2(n, maxx)
+        IDvalueStar = ID2star(n, maxx)
+        return -k_B*T*(IDvalue-IDvalueStar)/RG.VD(fn) # eqn (7), Forte 2011
 
 def firstPass():
         global f01interp
         f01interp=lambda n: RG.fiterative(temp,n,0)
         data=[]
-        y = plt.linspace(0,1,len(numdensity))
         t = time.time()
         lastprint = t
-        for i in range(0,len(y)):
-                print "%d of %d     \r"%(i,len(y)),
-                '''if time.time() - lastprint > 5:
-                        print "%d of %d     \n"%(i,len(y)),
-                        lastprint = time.time()'''
-                y[i]=RG_first_pass(temp,numdensity[i],1)
-                data.append([numdensity[i],y[i]])
+        for i in range(numdata):
+            n = numdensity[i]
+            print "%d of %d     \r"%(i,numdata),
+            free_energy = RG_first_pass(temp,n,1)
+            data.append([n,free_energy])
         elapsed = time.time() - t
         print(elapsed)
 
+        np.savetxt(fsave,data)
+
+def laterPass():
+        global numdensity2
+        #numdensity2 = np.arange(0.0001,max_fillingfraction_handled/(4*np.pi/3),test_dn)
+        numdensity2 = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),numdata)
+        #numdensity2 = plt.linspace(0.0001,.2,numdata)
+        f01_load()
+        data=[]
+        f02 = []
+        for i in range(numdata):
+                print "%d of %d     \r"%(i,numdata),
+                n = numdensity2[i]
+                free_energy = RG_later_pass(n)
+                f02.append(free_energy)
+                data.append([n,free_energy])
+
+        #plt.figure()
+        #plt.plot(numdensity2,f02)
+        #plt.show()
+        #print(f01tot[0:20])
+
+        
         np.savetxt(fsave,data)
 
 
@@ -132,46 +154,6 @@ print('fn:',fn)
 
 
 
-def testfit02():
-        global f02
-        global numdensity2
-        global maxn
-        global maxx
-        #numdensity2 = np.arange(0.0001,max_fillingfraction_handled/(4*np.pi/3),test_dn)
-        numdensity2 = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),numdata)
-        #numdensity2 = plt.linspace(0.0001,.2,numdata)
-        f01_load()
-        data=[]
-        f02=[]
-        for i in range(0,len(numdensity2)):
-                n = numdensity2[i]
-                maxn = (max_fillingfraction_handled+0.01)/(sigma**3*np.pi/6)
-                # warning: Forte defines x as a density, we define it
-                # as a dimensionless quantity that scales the density.
-                maxx = np.minimum(1,maxn/n-1)
-
-                if abs(maxx) < 1e-42:
-                        print 'maxx is zero'
-                        print 'maxx is zero'
-                        print 'maxx is zero'
-                        print 'maxx is zero'
-                        print 'maxx is zero'
-
-                print "%d of %d     \r"%(i,len(numdensity2)),
-                r = float(numdensity2[i])
-                f02.append(float(fit2(r)))
-                data.append([numdensity2[i],f02[i]])
-                
-
-        #plt.figure()
-        #plt.plot(numdensity2,f02)
-        #plt.show()
-        #print(f01tot[0:20])
-
-        
-        np.savetxt(fsave,data)
-
-
 def f0(n):
         return RG.fiterative(temp,n,0)
 
@@ -191,7 +173,7 @@ def f01_load():
 '''integrand_xs = []
 integrand_args = []'''
 
-def ID2(n):
+def ID2(n, maxx):
         ''' This is $I_D$ from Forte's paper.
         '''
 
@@ -367,7 +349,7 @@ def onlyPowerStarExperimental(n,x,maxx,fn):
         
 
 
-def ID2star(n):
+def ID2star(n, maxx):
 
         maxpower = -1e99
         dx = maxx/1000
@@ -457,18 +439,6 @@ def integrand_ID2star(n,maxpower,x):
 
 
 
-def fit2(n):
-        T=temp
-        f = f01_ext(n)
-        # eqn (5) from Forte 2011:
-        IDvalue = ID2(n)
-        IDvalueStar = ID2star(n)
-        dfi = -k_B*T*(IDvalue-IDvalueStar)/RG.VD(fn) # eqn (7), Forte 2011
-        f += dfi
-
-        return f
-
-
 
 
 
@@ -485,9 +455,10 @@ def fit2(n):
 #testf01()
 if fn == 1:
         firstPass()
-        sys.exit("First Pass Done")
+        print('First pass done')
+        exit(0)
 
-testfit02()
+laterPass()
 
 #april16th()
 #cotangent_t0()
