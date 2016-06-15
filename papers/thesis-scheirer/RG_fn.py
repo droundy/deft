@@ -26,37 +26,38 @@ import sys
 
 
 
-
-
-################################## START INITIALIZATION #######################################
-#                                                                                             #
-#                                                                                             #
-### Normal temperature linspace (useful for quick troubleshooting) ###
-#temp = plt.linspace(0.4,1.3,40)
-numdata=30
-max_fillingfraction_handled = 0.84
-test_dn = (max_fillingfraction_handled/(4*np.pi/3))/numdata
-#numdensity = np.arange(0.0001,max_fillingfraction_handled/(4*np.pi/3),test_dn)
-numdensity = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),numdata)
-
 if len(sys.argv) < 2:
         print("Usage: %s TEMPERATURE" % sys.argv[0])
         exit(1)
 temp=float(sys.argv[1])
 
-sigma=2
-k_B=1
 
-datadir = 'data09'
+
+################################## START INITIALIZATION #######################################
+#                                                                                             #
+#                                                                                             #
+sigma = 2     #Sphere diameter
+k_B = 1       #Boltzman's constant
+
+numdata=30    #Number of numdensity data points
+max_fillingfraction_handled = 0.55
+sphere_volume = (sigma**3*np.pi/6)
+numdensity = plt.linspace(0.0008,max_fillingfraction_handled/sphere_volume,numdata)   #number density
+
+num_init = 1000
+num_right = 200
+num_left = 200
+num_mid = 1000
+
+datadir = 'data13'
 try:
         os.mkdir(datadir)
 except:
         pass
-fload = datadir+'/fit_T%.3f_f'%temp
-fsave = datadir+'/fit_T%.3f_f'%temp
+fload = datadir+'/fit_T%.5f_f'%temp
+fsave = datadir+'/fit_T%.5f_f'%temp
 
 print(temp)
-#f01interp=lambda n: 1
 
 
 def RG_first_pass(T,n,i):
@@ -69,7 +70,7 @@ def RG_later_pass(n):
         return f + RG_dfi(n)
 
 def RG_dfi(n):
-        maxn = (max_fillingfraction_handled+0.01)/(sigma**3*np.pi/6)
+        maxn = (max_fillingfraction_handled+0.0001)/sphere_volume
         # warning: Forte defines x as a density, we define it
         # as a dimensionless quantity that scales the density.
         maxx = np.minimum(1,maxn/n-1)
@@ -94,7 +95,7 @@ def firstPass():
         lastprint = t
         for i in range(numdata):
             n = numdensity[i]
-            print "%d of %d     \r"%(i,numdata),
+            print "%d of %d: "%(i,numdata),
             free_energy = RG_first_pass(temp,n,1)
             data.append([n,free_energy])
         elapsed = time.time() - t
@@ -103,24 +104,15 @@ def firstPass():
         np.savetxt(fsave,data)
 
 def laterPass():
-        global numdensity2
-        #numdensity2 = np.arange(0.0001,max_fillingfraction_handled/(4*np.pi/3),test_dn)
-        numdensity2 = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),numdata)
-        #numdensity2 = plt.linspace(0.0001,.2,numdata)
         f01_load()
         data=[]
         f02 = []
         for i in range(numdata):
-                print "%d of %d     \r"%(i,numdata),
-                n = numdensity2[i]
+                print "%d of %d: "%(i,numdata),
+                n = numdensity[i]
                 free_energy = RG_later_pass(n)
                 f02.append(free_energy)
                 data.append([n,free_energy])
-
-        #plt.figure()
-        #plt.plot(numdensity2,f02)
-        #plt.show()
-        #print(f01tot[0:20])
 
         
         np.savetxt(fsave,data)
@@ -165,135 +157,123 @@ def f01_load():
         numdensity = [f01data[i][0] for i in range(0,len(f01data))]
         f01interp = interp1d(numdensity,f01,kind='cubic')
 
-        #numdensity_interp=np.linspace(0.0001,0.2,100)
-        #plt.plot(numdensity,f01,'o',numdensity_interp,f01interp(numdensity_interp))
-        #plt.show()
 
 
-'''integrand_xs = []
-integrand_args = []'''
+##integrand_xs = []
+##integrand_args = []
 
 def ID2(n, maxx):
-        ''' This is $I_D$ from Forte's paper.
-        '''
+##        This is $I_D$ from Forte's paper.
+        
 
-        '''global integrandIDlistx
-        global integrandIDlistarg'''
+##        global integrandIDlistx
+##        global integrandIDlistarg
         
         
         maxpower = -1e99
-        dx = maxx/1000
-        #maxxx = maxx+dx
-        #xpoints = plt.linspace(dx/2.0,maxx,1000)
+        dx = maxx/num_init
         xpoints = np.arange(dx/2,maxx, dx)
         kmax=0
         for k in range(len(xpoints)):
                 if maxpower<onlyPower(n,xpoints[k],fn):
                         maxpower=onlyPower(n,xpoints[k],fn)
                         kmax=k
-                #maxpower = max(maxpower, onlyPower(n,xpoints[k],fn))
+                
+        #########FIND LEFT SIDE
+        x_left = xpoints[kmax]
+        k_left = kmax
+        while k_left>0 and integrand_ID2(n,maxpower,x_left)>0.1:
+                k_left -= 1
+                x_left = xpoints[k_left]
+        #########FIND RIGHT SIDE
+        x_right = xpoints[kmax]
+        k_right = kmax
+        while k_right<len(xpoints)-1 and integrand_ID2(n,maxpower,x_right)>0.1:
+                k_right += 1
+                x_right = xpoints[k_right]
+        
 
-        xLEFT = xpoints[kmax]
-        kLeft=kmax
-        while kLeft>0 and integrand_ID2(n,maxpower,xLEFT)>0.1:
-                kLeft-=1
-                xLEFT=xpoints[kLeft]
-        xRIGHT= xpoints[kmax]
-        kRight=kmax
-        while kRight<len(xpoints)-1 and integrand_ID2(n,maxpower,xRIGHT)>0.1:
-                kRight+=1
-                xRIGHT=xpoints[kRight]
-        '''integrandIDlistx = []
-        integrandIDlistarg = []'''
+        integral_left = 0
 
-        #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),maxx*0.1,maxx*0.9)[0]*n
-        #integral+=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx*0.1,100)*n
-        #integral+=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),maxx*0.9,maxx,100)*n
+        dx_left = x_left/num_left
+        xpoints_left = np.arange(dx_left/2,x_left,dx_left)
+        max_power_left = -1e99
+        for k in range(len(xpoints_left)):
+                max_power_left = max(max_power_left,onlyPower(n,xpoints_left[k],fn))
+        
 
-        integralLEFT = 0
-
-        dxLeft=xLEFT/200
-        xpointsLeft=np.arange(dxLeft/2,xLEFT,dxLeft)
-        maxPowerLeft=-1e99
-        for k in range(len(xpointsLeft)):
-                maxPowerLeft=max(maxPowerLeft,onlyPower(n,xpointsLeft[k],fn))
-        integralLEFT += integrate.midpoint(lambda x: integrand_ID2(n,maxPowerLeft,x),0,xLEFT,200)*n
-
-        '''integrand_xs.append(integrandIDlistx)
-        integrand_args.append(integrandIDlistarg)
-        integrandIDlistx = []
-        integrandIDlistarg = []'''
-
+        integral_right = 0
+ 
+        dx_right = (maxx-x_right)/num_right
+        xpoints_right = np.arange(x_right+dx_right/2,maxx,dx_right)
+        max_power_right = -1e99
+        for k in range(len(xpoints_right)):
+                max_power_right = max(max_power_right,onlyPower(n,xpoints_right[k],fn))
 
 
+        
+        integral_mid = 0
+        
+        dx_mid = (x_right-x_left)/num_mid
+        xpoints_mid = np.arange(x_left+dx_mid/2,x_right,dx_mid)
+        max_power_mid = -1e99
+        for k in range(len(xpoints_mid)):
+                max_power_mid = max(max_power_mid,onlyPower(n,xpoints_mid[k],fn))
+        
 
-        integralRIGHT = 0
-
-        if xRIGHT > maxx:
-                xRIGHT = maxx
-                maxPowerRight=0
+        if max_power_left > max_power_mid:
+                x_left = 0
+                integral_left = 0                
         else:
-                dxRight=(maxx-xRIGHT)/200
-                xpointsRight=np.arange(xRIGHT+dxRight/2,maxx,dxRight)
-                maxPowerRight=-1e99
-                for k in range(len(xpointsRight)):
-                        maxPowerRight=max(maxPowerRight,onlyPower(n,xpointsRight[k],fn))
-                integralRIGHT += integrate.midpoint(lambda x: integrand_ID2(n,maxPowerRight,x),xRIGHT,maxx,200)*n
-
-        '''integrand_xs.append(integrandIDlistx)
-        integrand_args.append(integrandIDlistarg)
-        integrandIDlistx = []
-        integrandIDlistarg = []'''
-
-
-        integralMID = 0
+                integral_left += integrate.midpoint(lambda x: integrand_ID2(n,max_power_left,x),0,x_left,num_left)*n
+        if max_power_right > max_power_mid:
+                x_right = maxx
+                integral_right = 0
+        else:
+                integral_right += integrate.midpoint(lambda x: integrand_ID2(n,max_power_right,x),x_right,maxx,num_right)*n
         
-        dxMid=(xRIGHT-xLEFT)/1000
-        xpointsMid=np.arange(xLEFT+dxMid/2,xRIGHT,dxMid)
-        maxPowerMid=-1e99
-        for k in range(len(xpointsMid)):
-                maxPowerMid=max(maxPowerMid,onlyPower(n,xpointsMid[k],fn))
-        integralMID += integrate.midpoint(lambda x: integrand_ID2(n,maxPowerMid,x),xLEFT,xRIGHT,1000)*n
+        if x_left != 0 and x_right != maxx:
+                integral_mid += integrate.midpoint(lambda x: integrand_ID2(n,max_power_mid,x),x_left,x_right,num_mid)*n
 
-
-        
-        
+        else:
+                dx_mid = (x_right-x_left)/num_mid
+                xpoints_mid = np.arange(x_left+dx_mid/2,x_right,dx_mid)
+                max_power_mid = -1e99
+                for k in range(len(xpoints_mid)):
+                        max_power_mid = max(max_power_mid,onlyPower(n,xpoints_mid[k],fn))
+                integral_mid += integrate.midpoint(lambda x: integrand_ID2(n,max_power_mid,x),x_left,x_right,num_mid)*n
                 
 
-        #integral=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx,1000)*n
-        #print "maxpower:", maxpower
-
-        #print 'maxpower:', maxPowerLeft+maxPowerRight+maxPowerMid
+        if integral_left == 0 and integral_right == 0:
+                print "TTm=%.2E   \r"%(max_power_mid),
+                return np.log(integral_mid)+max_power_mid
+        if integral_left != 0 and integral_right == 0:
+                print "FTlm=%.2E   \r"%(max_power_left-max_power_mid),
+                return np.log(integral_left*np.exp(max_power_left-max_power_mid)+integral_mid)+max_power_mid
+        if integral_left == 0 and integral_right != 0:
+                print "TFrm=%.2E   \r"%(max_power_right-max_power_mid),
+                return np.log(integral_right*np.exp(max_power_right-max_power_mid)+integral_mid)+max_power_mid
+        
+                
+        print "FFlm=%.2E FFrm=%.2E   \r"%(max_power_left-max_power_mid,max_power_right-max_power_mid),
+        return np.log(integral_left*np.exp(max_power_left-max_power_mid)+integral_right*np.exp(max_power_right-max_power_mid)+integral_mid)+max_power_mid
 
         
-        #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),0,maxx)[0]*n
-        
-        '''integrand_xs.append(integrandIDlistx)
-        integrand_args.append(integrandIDlistarg)
-        integrandIDlistx = []
-        integrandIDlistarg = []'''
-        return np.log(integralLEFT*np.exp(maxPowerLeft-maxPowerMid)+integralRIGHT*np.exp(maxPowerRight-maxPowerMid)+integralMID)+maxPowerMid
-
-        #return np.log(integral)+maxPowerLeft+maxPowerRight+maxPowerMid  #returns log of ID
-        #return integral
 
 
 def onlyPower(n,x,i):
         return (-RG.VD(i)/k_B/temp*(fbarD(temp,n,x,i) + ubarD(temp,n,x,i)))
 
-def onlyPowerExperimental(n,x,maxx,fn):
-        if(x>=maxx): return -1e99
-        if x<=0 : return -1e99
-        return onlyPower(n,x,fn)
 
-#integrandIDlistn = []
-'''integrandIDlistx = []
-integrandIDlistarg = []'''
+
+##integrandIDlistn = []
+##integrandIDlistx = []
+##integrandIDlistarg = []
 def integrand_ID2(n,maxpower,x):
         argument = np.exp(-maxpower-RG.VD(fn)/k_B/temp*(fbarD(temp,n,x,fn) + ubarD(temp,n,x,fn)))
-        #integrandIDlistn.append(n)
-        '''integrandIDlistx.append(x)
-        integrandIDlistarg.append(argument)'''
+##        integrandIDlistn.append(n)
+##        integrandIDlistx.append(x)
+##        integrandIDlistarg.append(argument)
         return argument
 
 
@@ -322,7 +302,7 @@ def ubarD(T,n,x,i):
         
 
 def f01_ext(numdensity):
-        if numdensity > 0.0001 and numdensity < max_fillingfraction_handled/(4*np.pi/3):
+        if numdensity > 0.0008 and numdensity < max_fillingfraction_handled/sphere_volume:
                 return f01interp(numdensity)
         return RG.fiterative(temp,numdensity,0)
 
@@ -338,10 +318,6 @@ def f01_ext(numdensity):
 def onlyPowerStar(n,x,i):
         return (-RG.VD(i)/k_B/temp*fbarD(temp,n,x,i))
 
-def onlyPowerStarExperimental(n,x,maxx,fn):
-        if(x>=maxx): return -1e99
-        if x<=0 : return -1e99
-        return onlyPowerStar(n,x,fn)
 
 
 
@@ -352,82 +328,94 @@ def onlyPowerStarExperimental(n,x,maxx,fn):
 def ID2star(n, maxx):
 
         maxpower = -1e99
-        dx = maxx/1000
-        #maxxx = maxx+dx
-        #xpoints = plt.linspace(dx/2.0,maxx,1000)
+        dx = maxx/num_init
         xpoints = np.arange(dx/2,maxx, dx)
         kmax=0
         for k in range(len(xpoints)):
                 if maxpower<onlyPowerStar(n,xpoints[k],fn):
-                        maxpower=onlyPowerStar(n,xpoints[k],fn)
+                        maxpower = onlyPowerStar(n,xpoints[k],fn)
                         kmax=k
-                #maxpower = max(maxpower, onlyPower(n,xpoints[k],fn))
+                
+        #########FIND LEFT SIDE
+        x_left = xpoints[kmax]
+        k_left = kmax
+        while k_left>0 and integrand_ID2star(n,maxpower,x_left)>0.1:
+                k_left -= 1
+                x_left = xpoints[k_left]
+        #########FIND RIGHT SIDE
+        x_right = xpoints[kmax]
+        k_right = kmax
+        while k_right<len(xpoints)-1 and integrand_ID2star(n,maxpower,x_right)>0.1:
+                k_right += 1
+                x_right = xpoints[k_right]
+        
 
-        xLEFT = xpoints[kmax]
-        kLeft=kmax
-        while kLeft>0 and integrand_ID2star(n,maxpower,xLEFT)>0.1:
-                kLeft-=1
-                xLEFT=xpoints[kLeft]
-        xRIGHT= xpoints[kmax]
-        kRight=kmax
-        while kRight<len(xpoints)-1 and integrand_ID2star(n,maxpower,xRIGHT)>0.1:
-                kRight+=1
-                xRIGHT=xpoints[kRight]
+        integral_left = 0
 
-        #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),maxx*0.1,maxx*0.9)[0]*n
-        #integral+=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx*0.1,100)*n
-        #integral+=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),maxx*0.9,maxx,100)*n
+        dx_left = x_left/num_left
+        xpoints_left = np.arange(dx_left/2,x_left,dx_left)
+        max_power_left = -1e99
+        for k in range(len(xpoints_left)):
+                max_power_left = max(max_power_left,onlyPowerStar(n,xpoints_left[k],fn))
+        
 
-        integralLEFT = 0
-
-        dxLeft=xLEFT/200
-        xpointsLeft=np.arange(dxLeft/2,xLEFT,dxLeft)
-        maxPowerLeft=-1e99
-        for k in range(len(xpointsLeft)):
-                maxPowerLeft=max(maxPowerLeft,onlyPowerStar(n,xpointsLeft[k],fn))
-        integralLEFT += integrate.midpoint(lambda x: integrand_ID2star(n,maxPowerLeft,x),0,xLEFT,200)*n
-
-
-
-
-
-
-        integralRIGHT = 0
-
-        if xRIGHT > maxx:
-                xRIGHT = maxx
-                maxPowerRight=0
-        else:
-                dxRight=(maxx-xRIGHT)/200
-                xpointsRight=np.arange(xRIGHT+dxRight/2,maxx,dxRight)
-                maxPowerRight=-1e99
-                for k in range(len(xpointsRight)):
-                        maxPowerRight=max(maxPowerRight,onlyPowerStar(n,xpointsRight[k],fn))
-                integralRIGHT += integrate.midpoint(lambda x: integrand_ID2star(n,maxPowerRight,x),xRIGHT,maxx,200)*n
-
-
-        integralMID = 0
-
-        dxMid=(xRIGHT-xLEFT)/1000
-        xpointsMid=np.arange(xLEFT+dxMid/2,xRIGHT,dxMid)
-        maxPowerMid=-1e99
-        for k in range(len(xpointsMid)):
-                maxPowerMid=max(maxPowerMid,onlyPowerStar(n,xpointsMid[k],fn))
-        integralMID += integrate.midpoint(lambda x: integrand_ID2star(n,maxPowerMid,x),xLEFT,xRIGHT,1000)*n
-
+        integral_right = 0
+ 
+        dx_right = (maxx-x_right)/num_right
+        xpoints_right = np.arange(x_right+dx_right/2,maxx,dx_right)
+        max_power_right = -1e99
+        for k in range(len(xpoints_right)):
+                max_power_right = max(max_power_right,onlyPowerStar(n,xpoints_right[k],fn))
 
 
         
+        integral_mid = 0
+        
+        dx_mid = (x_right-x_left)/num_mid
+        xpoints_mid = np.arange(x_left+dx_mid/2,x_right,dx_mid)
+        max_power_mid = -1e99
+        for k in range(len(xpoints_mid)):
+                max_power_mid = max(max_power_mid,onlyPowerStar(n,xpoints_mid[k],fn))
+        
+
+        if max_power_left > max_power_mid:
+                x_left = 0
+                integral_left = 0                
+        else:
+                integral_left += integrate.midpoint(lambda x: integrand_ID2star(n,max_power_left,x),0,x_left,num_left)*n
+        if max_power_right > max_power_mid:
+                x_right = maxx
+                integral_right = 0
+        else:
+                integral_right += integrate.midpoint(lambda x: integrand_ID2star(n,max_power_right,x),x_right,maxx,num_right)*n
+        
+        if x_left != 0 and x_right != maxx:
+                integral_mid += integrate.midpoint(lambda x: integrand_ID2star(n,max_power_mid,x),x_left,x_right,num_mid)*n
+
+        else:
+                dx_mid = (x_right-x_left)/num_mid
+                xpoints_mid = np.arange(x_left+dx_mid/2,x_right,dx_mid)
+                max_power_mid = -1e99
+                for k in range(len(xpoints_mid)):
+                        max_power_mid = max(max_power_mid,onlyPowerStar(n,xpoints_mid[k],fn))
+                integral_mid += integrate.midpoint(lambda x: integrand_ID2star(n,max_power_mid,x),x_left,x_right,num_mid)*n
                 
 
-        #integral=integrate.midpoint(lambda x: integrand_ID2(n,maxpower,x),0,maxx,1000)*n
-        #print "maxpower:", maxpower
-        #print 'maxpower:', maxPowerLeft+maxPowerRight+maxPowerMid
-        #integral = sp.integrate.quad(lambda x: integrand_ID2(n,maxpower,x),0,maxx)[0]*n
-        return np.log(integralLEFT*np.exp(maxPowerLeft-maxPowerMid)+integralRIGHT*np.exp(maxPowerRight-maxPowerMid)+integralMID)+maxPowerMid
-        #return integral
-
+        if integral_left == 0 and integral_right == 0:
+                #print "TTm=%.2E   \r"%(max_power_mid),
+                return np.log(integral_mid)+max_power_mid
+        if integral_left != 0 and integral_right == 0:
+                #print "FTlm=%.2E   \r"%(max_power_left-max_power_mid),
+                return np.log(integral_left*np.exp(max_power_left-max_power_mid)+integral_mid)+max_power_mid
+        if integral_left == 0 and integral_right != 0:
+                #print "TFrm=%.2E   \r"%(max_power_right-max_power_mid),
+                return np.log(integral_right*np.exp(max_power_right-max_power_mid)+integral_mid)+max_power_mid
         
+                
+        #print "FFlm=%.2E FFrm=%.2E   \r"%(max_power_left-max_power_mid,max_power_right-max_power_mid),
+        return np.log(integral_left*np.exp(max_power_left-max_power_mid)+integral_right*np.exp(max_power_right-max_power_mid)+integral_mid)+max_power_mid
+
+ 
         
 def integrand_ID2star(n,maxpower,x):        
         argument = np.exp(-maxpower-RG.VD(fn)/k_B/temp*fbarD(temp,n,x,fn))
@@ -435,24 +423,6 @@ def integrand_ID2star(n,maxpower,x):
         
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-#################################################
-#       CALL THE PLOTS YOU WANT TO PLOT         #
-#                                               #
-#testload()
-#f01_load()
-#testf01()
 if fn == 1:
         firstPass()
         print('First pass done')
@@ -460,41 +430,16 @@ if fn == 1:
 
 laterPass()
 
-#april16th()
-#cotangent_t0()
-#expTest()
-#cotangent_tloop()
-#liq_vap_co_tvsff()
-#cotangent_fsolve_breakdown()
-#liq_vap_co_pvsT()
-#                                               #
-#                                               #
-#################################################
 
-#np.savetxt('figs/snaft2.out',data)
 
-#np.savetxt('integrandIDlistn',integrandIDlistn)
-#np.savetxt('integrandIDlistx',integrandIDlistx)
-#np.savetxt('integrandIDlistarg',integrandIDlistarg)
-
-#plt.figure()
-#plt.title('integrand vs n')
-#plt.ylabel('integrand')
-#plt.xlabel('number density')
-#plt.xlim([0.015,0.030])
-#plt.ylim([-0.01,1e112])
-#plt.plot(integrandIDlistx,integrandIDlistarg)
-#plt.savefig('meeting/23may2016/integrand_int100_03_T%.3f.png'%temp)
-#plt.show()
-
-'''plt.figure()
-plt.title('integrand vs x')
-plt.ylabel('integrand')
-plt.xlabel('x')
-for i in range(len(integrand_xs)):
-        plt.plot(integrand_xs[i], integrand_args[i])
-
-plt.show()'''
+##plt.figure()
+##plt.title('integrand vs x')
+##plt.ylabel('integrand')
+##plt.xlabel('x')
+##for i in range(len(integrand_xs)):
+##        plt.plot(integrand_xs[i], integrand_args[i])
+##
+##plt.show()
 
 
 
