@@ -101,7 +101,7 @@ class vector3d {
   double dot(const vector3d &v) const {
     return x*v.x + y*v.y + z*v.z; }
   vector3d cross(const vector3d &v) const {
-    return vector3d(y*v.z - z*v.y, x*v.z - z*v.x, x*v.y - y*v.z); }
+    return vector3d(y*v.z - z*v.y, z*v.x - x*v.z, x*v.y - y*v.z); }
 
   double norm() const {
     return sqrt(x*x + y*y + z*z); }
