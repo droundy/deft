@@ -111,11 +111,9 @@ for p in range(45,len(T)):
 
 
 
-        def fload():
+        def fload(temp):
                 # Loads RG data and splits the file into two lists for number density and RG free energy
                 # Also uses the interp1d function from scipy to interpolate between data points
-                global finterp
-
 
                 fname = 'RG_final_data/09_250Ts/data2/fit_T%.16g_f3.out'%temp
                 #print fname," %.17g"%temp
@@ -146,7 +144,7 @@ for p in range(45,len(T)):
 
                 
                 #print(numdensity[0])
-                finterp = interp1d(numdensity,f,kind='cubic')
+                return interp1d(numdensity,f,kind='cubic')
 
 
 
@@ -189,109 +187,80 @@ for p in range(45,len(T)):
 
 
 
+        numdensity3 = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),1000)
+        finterp = fload(temp)
+        ysw=[]  # List for SnAFT SW fluid total free energy data
+        yrgdiffsw=[]  # List for fitted free energy difference (total RG free energy - total SnAFT SW free energy)
+        savdiff=[]  # List for difference between raw free energy difference and fitted data from savgo
+        rgfittot=[]  # List for fitted RG total free energy
+        rg=[]  # List for RG total free energy
+        rgdiff = []  # List for difference between RG total free energy and the savgo fitted total free energy
+        for i in range(0,len(numdensity3)):
+                ysw.append(SW.ftot(temp,numdensity3[i]))
+                yrgdiffsw.append(f_tot(numdensity3[i])-ysw[i])
+
+        savgo = savgol_filter(yrgdiffsw,1,0)  #  Uses Savitzky Golay filter from scipy package to fit data (gets rid of noise)
+        # Use the arguments of (function,1,0) if you wish to not apply the filter
+
+        for j in range(0,len(numdensity3)):
+                # Builds the fitted RG total free energy (rgfittot)
+                # Builds difference between raw free energy difference and fitted data from savgo
+                # Not necessiary, I was just curious how much the savgo filter adjusted the data
+                rgfittot.append(SW.ftot(temp,numdensity3[j])+savgo[j])
+                savdiff.append(yrgdiffsw[j]-savgo[j])
+                rg.append(f_tot(numdensity3[j]))
+                rgdiff.append(rgfittot[j]-rg[j])
+
+        frgpinterp = interp1d(numdensity,rgfittot,kind='cubic')
+
+        yrgp = []
+        dyrgp = []
+        madyrgp = []
+        for i in range(0,len(numdensity3)):
+                yrgp.append(frgp_ext(numdensity3[i]))
+                dyrgp.append(dfrgp_dn(numdensity3[i]))
+                if numdensity3[i] < 0.085 and numdensity3[i]>0.001:
+                        madyrgp.append(dyrgp[i])
+        madyrgp = sum(madyrgp)/len(madyrgp)
+        mu=SW.numH_dftot_dn(T[p],numdensity3)
+        mu2 = SW.numH_dftot_dn(T[p],nR1[p])
+        mu3 = dfrgp_dn(nL1[p])
+        mu4 = dfrgp_dn(nR1[p])
+        #print madyrgp
+        cotangentGuess = []
+        for i in range(0,len(numdensity3)):
+                cotangentGuess.append(yrgp[i]-madyrgp*numdensity3[i])
+
+        gfe=[]
+        for i in range(0,len(numdensity3)):
+                gfe.append(yrgp[i]-mu4*numdensity3[i])
+
+
+##        gfergp=[]
+##        for i in range(0,len(numdensity3)):
+##                gfergp.append(yrgp[i]-mu3*numdensity3[i])
 
 
 
+        swgfe=[]
+        for i in range(0,len(numdensity3)):
+                swgfe.append(ysw[i]-mu2*numdensity3[i])
 
+##        plt.plot(numdensity3,cotangentGuess)
+        plt.plot(numdensity3,swgfe,color='b',linewidth=2)
+        plt.plot(numdensity3,gfe,color='#f36118',linewidth=2)
+##        plt.plot(numdensity3,gfergp,color='c',linewidth=2)
+##        plt.plot(numdensity3,gfergp,color='g',linewidth=2)
+        plt.plot(nL1[p],gfe[p],'ko')
+        plt.plot(nR1[p],gfe[p],'ko')
+##        plt.axhline(SW.phi(T[p],nR1[p],nR1[p]),color='c',linewidth=2)
+        plt.axhline(gfe[p],color='r',linewidth=2)
 
-
-        def plotstuff():
-                global rgp
-                global frgpinterp
-                numdensity3 = plt.linspace(0.0001,max_fillingfraction_handled/(4*np.pi/3),1000)
-                fload()
-                ysw=[]  # List for SnAFT SW fluid total free energy data
-                yrgdiffsw=[]  # List for fitted free energy difference (total RG free energy - total SnAFT SW free energy) 
-                savdiff=[]  # List for difference between raw free energy difference and fitted data from savgo
-                rgfittot=[]  # List for fitted RG total free energy
-                rg=[]  # List for RG total free energy
-                rgdiff = []  # List for difference between RG total free energy and the savgo fitted total free energy
-                for i in range(0,len(numdensity3)):
-                        ysw.append(SW.ftot(temp,numdensity3[i]))
-                        yrgdiffsw.append(f_tot(numdensity3[i])-ysw[i]) 
- 
-    
-
-                savgo = savgol_filter(yrgdiffsw,1,0)  #  Uses Savitzky Golay filter from scipy package to fit data (gets rid of noise)
-                # Use the arguments of (function,1,0) if you wish to not apply the filter
-
-                for j in range(0,len(numdensity3)):
-                        # Builds the fitted RG total free energy (rgfittot)                
-                        # Builds difference between raw free energy difference and fitted data from savgo
-                        # Not necessiary, I was just curious how much the savgo filter adjusted the data
-                        rgfittot.append(SW.ftot(temp,numdensity3[j])+savgo[j])
-                        savdiff.append(yrgdiffsw[j]-savgo[j])
-                        rg.append(f_tot(numdensity3[j]))
-                        rgdiff.append(rgfittot[j]-rg[j])
-
-                
-                frgpinterp = interp1d(numdensity,rgfittot,kind='cubic')
-              
-
-                yrgp = []
-                dyrgp = []
-                madyrgp = []
-                for i in range(0,len(numdensity3)):
-                        yrgp.append(frgp_ext(numdensity3[i]))
-                        dyrgp.append(dfrgp_dn(numdensity3[i]))
-                        if numdensity3[i] < 0.085 and numdensity3[i]>0.001:
-                                madyrgp.append(dyrgp[i])
-                madyrgp = sum(madyrgp)/len(madyrgp)
-                mu=SW.numH_dftot_dn(T[p],numdensity3)
-                mu2 = SW.numH_dftot_dn(T[p],nR1[p])
-                mu3 = dfrgp_dn(nL1[p])
-                mu4 = dfrgp_dn(nR1[p])
-                #print madyrgp
-                cotangentGuess = []
-                for i in range(0,len(numdensity3)):
-                        cotangentGuess.append(yrgp[i]-madyrgp*numdensity3[i])
-
-                gfe=[]
-                for i in range(0,len(numdensity3)):
-                        gfe.append(yrgp[i]-mu4*numdensity3[i])
-
-
-##                gfergp=[]
-##                for i in range(0,len(numdensity3)):
-##                        gfergp.append(yrgp[i]-mu3*numdensity3[i])
-
-
-
-                swgfe=[]
-                for i in range(0,len(numdensity3)):
-                        swgfe.append(ysw[i]-mu2*numdensity3[i])
-                        
-
-##                plt.plot(numdensity3,cotangentGuess)
-                plt.plot(numdensity3,swgfe,color='b',linewidth=2)
-                plt.plot(numdensity3,gfe,color='#f36118',linewidth=2)
-##                plt.plot(numdensity3,gfergp,color='c',linewidth=2)
-##                plt.plot(numdensity3,gfergp,color='g',linewidth=2)
-                plt.plot(nL1[p],gfe[p],'ko')
-                plt.plot(nR1[p],gfe[p],'ko')
-##                plt.axhline(SW.phi(T[p],nR1[p],nR1[p]),color='c',linewidth=2)
-                plt.axhline(gfe[p],color='r',linewidth=2)
-
-                plt.xlim(0,nR1[p]+0.01)
-                plt.ylim(-.010,0.0075)
-##                plt.show()
-                plt.savefig('meeting/18july2016/f03/gfe_T%.16g.png'%T[p])
-                plt.close()
-              
-
-
-
-        plotstuff()
-
-
-
-
-
-        
-
-
-        
-
+        plt.xlim(0,nR1[p]+0.01)
+        plt.ylim(-.010,0.0075)
+##        plt.show()
+        plt.savefig('meeting/18july2016/f03/gfe_T%.16g.png'%T[p])
+        plt.close()
 
 
 

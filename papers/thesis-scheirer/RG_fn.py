@@ -54,8 +54,7 @@ try:
         os.mkdir(datadir)
 except:
         pass
-fload = datadir+'/fit_T%.5f_f'%temp
-fsave = datadir+'/fit_T%.5f_f'%temp
+fbase = datadir+'/fit_T%.5f_f'%temp
 
 print(temp)
 
@@ -119,10 +118,10 @@ def laterPass():
 
 
 fn=1
-while os.path.isfile(fload+'%d.out'%fn):
+while os.path.isfile(fbase+'%d.out'%fn):
         fn+=1
-fload+='%d.out'%(fn-1)
-fsave+='%d.out'%fn
+fload = fbase + '%d.out'%(fn-1)
+fsave = fbase + '%d.out'%fn
 print('fn:',fn)
 
 
