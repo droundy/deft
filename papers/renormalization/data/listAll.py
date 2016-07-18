@@ -58,7 +58,6 @@ def findFolders():
 					sortDone=True
 					for k in range(0,len(validFoldersss[i][j])-1):
 						nPrev=float(validFoldersss[i][j][k].split("/N")[1].split("/")[0])
-						#print validFoldersss[i][j][k+1]
 						nNext=float(validFoldersss[i][j][k+1].split("/N")[1].split("/")[0])
 						if nNext<nPrev:
 							sortDone=False

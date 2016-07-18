@@ -46,9 +46,7 @@ def Sexc_hardsphere_Ns(dbase):
 def Sexc_hardsphere(dbase, N):
     fbase = '%s/N%03d/absolute/' % (dbase, N)
     if os.path.isfile(fbase+'Sexc.dat'):
-        foo = np.loadtxt(fbase+'Sexc.dat')
-        print foo, foo.shape
-        return foo
+        return np.loadtxt(fbase+'Sexc.dat')
     S = 0
     # loop over files in the ./absolute/ directory
     j = 0
@@ -76,7 +74,13 @@ def Sexc_hardsphere(dbase, N):
             # we have found the last data file and can stop now
             break
         j += 1
-    return S
+    if S == 0:
+        # only add the Stirling correction if we have actually found
+        # the hard-sphere entropy.
+        return 0
+    # We need to correct for error of Stirling's approximation in
+    # F_id.
+    return S - Stirling_correction(N)
 
 def Uexc(ln_dos, energy, Ts):
     Ns = ln_dos.keys()
@@ -99,7 +103,9 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
     for j in range(len(Ns)):
         N = Ns[j]
         eta = N*4*np.pi/3/volume
-        Sexc_CS = -N*(4*eta-3*eta**2)/(1-eta)**2
+        # If we have no data, we will still want to include a
+        # Stirling_correction, since it really should be there...
+        Sexc_CS = -N*(4*eta-3*eta**2)/(1-eta)**2 - Stirling_correction(N)
         try:
             Sexc_HS = Sexc_hardsphere(dbase, N)
             if Sexc_HS == 0:
@@ -147,7 +153,7 @@ def Fabs(Fex, Ts, Ns, V):
     for l in range(len(Ts)):
         for j in range(len(Ns)):
             Lambda = hbar*np.sqrt(2*np.pi/(m*kb*Ts[l]))
-            Fid[l,j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*np.log(Ns[j])
+            Fid[l,j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*(np.log(Ns[j]) - 1)
     F = Fex + Fid
     return F
 
@@ -156,11 +162,12 @@ def Phiabs(Fabs, mu, Ns):
     Phiabs = np.zeros_like(Fabs)
     for q in range(len(Ns)):
         Phiabs[:,q] = Fabs[:,q] - mu*Ns[q]
-    print 'Phiabs is: ', Phiabs
     return Phiabs
 
-
-
+def Stirling_correction(N):
+    guess = N*np.log(N) - N
+    actual = sum(np.log(np.arange(1,N+.5)))
+    return (actual - guess)
 
 # def U_F_S(dbase, i):
 #     # Main function; take input of data directory and return all possible quantities

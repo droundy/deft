@@ -8,15 +8,18 @@ import pylab as plt
 from itertools import cycle
 
 class ThermoStats:
-    def __init__(self,fbase=None):
+    def __init__(self,fbase=None,SatInfinity=None):
         if fbase==None: return
         if fbase[-1]!='/': fbase+='/'
         self.ww=None
         self.L=None
         self.N=None
         self.SatInfinity=None
-        if os.path.isfile(fbase+"absolute/Sexc.dat")==False: return
-        self.SatInfinity=float(np.loadtxt(fbase+"absolute/Sexc.dat"))
+        if SatInfinity!=None:
+			self.SatInfinity=SatInfinity
+        else:
+			if os.path.isfile(fbase+"absolute/Sexc.dat")==False: return
+			self.SatInfinity=float(np.loadtxt(fbase+"absolute/Sexc.dat"))
         dataList=np.loadtxt(fbase+'lv-data-dos.dat')
         dos=dataList[:,1]
         energy=dataList[:,0]
@@ -82,6 +85,7 @@ class ThermoStats:
         dosMax=np.max(dos)
         zInfinity=np.log(np.sum(np.exp(dos-dosMax)))+dosMax
         return (-T*(log(np.sum(exp(z-zMax)))+zMax-zInfinity)-T*self.SatInfinity)/(self.L**3.0)
+        
     def generateData(self,T):
         Uexc=np.zeros(len(T))
         Sexc=np.zeros(len(T))
