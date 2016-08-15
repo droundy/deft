@@ -1,0 +1,144 @@
+\section{Overview}
+
+In this chapter, I wish to highlight some of the fun computational techniques I employed while working towards implementing SnAFT and GRG.  
+
+
+\section{Common Tangent}
+
+Consider the generic function
+
+\begin{equation}
+g(x) = x^4 - 4 x^3 - 5 x^2
+\end{equation}
+
+It is possible to draw a straight line, that only touches the function at two points and is tangent to the function at both points.  Such a line is call a common tangent line and is illustrated in figure (INSERT FIGURE REFERENCE HERE)
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.5]{generic_common_tangent.png}
+	\caption{The cyan line shows the common tangent line of the generic function of x shown in orange.  The black and red dots are the locations of the two points along the generic function that the common tangent is tangent to.}
+	\label{fig:generic_common_tangent}
+\end{figure}
+
+Mathematically, we can construct this common tangent by constructing two constraints:
+
+\quad The derivative at the right location $x_L$ is equal to the derivative at the left location $x_R$.
+
+\begin{equation}
+\frac{dg(x)}{dx}\Bigr|_{x_{\text{L}}} = \frac{dg(x)}{dx}\Bigr|_{x_{\text{R}}}
+\end{equation}
+
+\quad The tangent line is a linear line, thus the average slope between the two points is the same as the value of the derivative at either of the two points.
+
+\begin{equation}
+\frac{\Delta y}{\Delta x} = \frac{dg(x)}{dx}\Bigr|_{x_{\text{L}}}
+\end{equation}
+
+
+As it turns out, our Helmholtz free energy per volume has a similar shape to the generic function outlined above.  So lets take a look at what happens when we demand our two constraints for finding a common tangent.
+
+Recall our Helmholtz free energy per volume is just one Legendre transform away from internal energy, leaving us with
+
+\begin{equation}
+df = - S \, dT - P \, dV + \mu \, dn
+\end{equation}
+
+If we hold volume and number density constant
+
+\begin{equation}
+\left( \frac{df}{dn} \right)_{T,V} = \mu
+\end{equation}
+
+So our first constraint in finding common tangents for our Helmholtz free energy per volume leads us to
+
+\begin{equation}
+\left( \frac{df}{dn}\Bigr|_{n_{\text{L}}} \right)_{T,V} = \left( \frac{df}{dn}\Bigr|_{n_{\text{R}}} \right)_{T,V}
+\end{equation}
+
+\begin{equation}
+\mu_{\text{L}} = \mu_{\text{R}}
+\end{equation}
+
+Thus the first constraint tells us that our chemical potentials at both points must be equal.
+
+
+Now lets look at the second constraint for finding the common tangent.  Consider the Helmholtz free energy.
+
+\begin{equation}
+dF = - S \, dT - P \, dV + \mu \, dN 
+\end{equation}
+
+We can find the pressure with
+
+\begin{equation}
+\left( \frac{dF}{dV} \right)_{T,N} = - P
+\end{equation}
+
+But we want to work with free energies per volume.
+
+\begin{equation}
+F(T,V,N)  \rightarrow \frac{F}{V}(T,\frac{N}{V}) \rightarrow F(T,V,N) = f(T,\text{n}) \cdot V
+\end{equation}
+
+Thus our pressure is
+
+
+%\begin{equation}
+%-P = \left( \frac{df(T,\text{n}) \cdot V}{dV} \right)_{T,N} \rightarrow -P = f(T,\text{n}) + V \left( \frac{df(T,\text{n})}{dV} \right)_{T,N}
+%\end{equation}
+%
+%
+%\begin{equation}
+%- P = -P = f(T,\text{n}) + V  \frac{df(T,\text{n})}{d\text{n}} \frac{d\text{n}}{dV}
+%\end{equation}
+%
+%
+%\begin{equation}
+%-P = f(T,\text{n}) - V \, \mu \, \frac{N}{V^2}
+%\end{equation}
+
+\begin{equation}
+-P = f(T,\text{n}) - \mu \, \text{n}
+\end{equation}
+
+Going back to the second constraint
+
+\begin{equation}
+\frac{\Delta y}{\Delta x} = \frac{dg}{dx} \rightarrow  \frac{f(\text{n}_R) - f(\text{n}_L)}{\text{n}_R-\text{n}_L} = \frac{df}{dn} = \mu
+\end{equation}
+
+Using the expression we found for pressure in equation 4.11, the following pops out
+
+\begin{equation}
+P_L = P_R
+\end{equation}
+
+Which says our pressure at both points must be the same.
+
+Finally, notice how the two constraints for the common tangent of the Helmholtz free energy lead to an equilibrium state between liquid and vapor!  So all we need to do is find the two densities for which a common tangent exists in our Helmholtz free energy and we found out liquid and vapor equilibrium locations.
+
+The next subsection looks at how we computationally do this.
+
+
+\subsection{fsolve}
+
+In python, I use the root finding function found in the scipy.optimize library.  For a given free energy, I have fsolve find the roots of the two constraints described in the common tangent section.  Unfortunately, some pre-knowledge must exists to make an initial guess as to what the solutions are in order for fsolve to find the correct locations.  Luckily, it doesn't take too much time to quickly guess two solutions for fsolve to work. 
+
+Remember our Helmholtz free energy per volume is for a fixed temperature.  To find the common tangent for all temperatures I use the solution from fsolve as an initial guess of the next temperature.
+
+
+\section{Overflow}
+Explain dealing with large numbers... Emax was factored out then reintroduced.
+
+
+\section{Reuse}
+RG calculates free energy, then saves data.  Then loads and reuses data.
+
+Provide computation methods and data of what I have done so far.
+
+This is how you can refer to fig \ref{fig:liq vap co}. % Note: Have to build the latex document twice for it to work.
+
+
+
+
