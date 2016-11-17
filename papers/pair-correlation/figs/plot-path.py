@@ -352,5 +352,8 @@ xplot.text(6.7, ylim[1], plot_labels[1], fontsize=16)
 
 #fig.tight_layout(rect=[0, .03, 1, 1])
 savefig("figs/pair-correlation-pretty-%d.pdf" % (int(ff*10)))
+savefig("figs/pair-correlation-pretty-%d-nice.svg" % (int(ff*10)))
+savefig("figs/pair-correlation-pretty-%d-nice.png" % (int(ff*10)))
+
 show()
 
