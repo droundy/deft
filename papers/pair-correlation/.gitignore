@@ -5,3 +5,4 @@ figs/pretty-?.svg
 *.debug
 notes-content.tex
 figs/fit-parameters.*
+figs/*-nice.svg
