@@ -84,9 +84,9 @@ for method, data, de in [(golden_method, golden_data, de_golden), (method, metho
 plt.figure()
 
 if golden_data[0,0] < method_data[0,0]:
-    golden_data = golden_data[method_data[0,0] - golden_data[0,0]:,:]
+    golden_data = golden_data[int(method_data[0,0] - golden_data[0,0]):,:]
 else:
-    method_data = method_data[golden_data[0,0] - method_data[0,0]:,:]
+    method_data = method_data[int(golden_data[0,0] - method_data[0,0]):,:]
 
 energy = -golden_data[:,0]
 

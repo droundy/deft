@@ -127,7 +127,7 @@ twod_plot.set_ylim(-rmax, rmax)
 #fig.subplots_adjust(hspace=0.001)
 
 twod_plot.set_aspect('equal')
-g3mc = read_triplet(ff, 'mc')[:, center/dx:-1]
+g3mc = read_triplet(ff, 'mc')[:, int(center/dx):-1]
 rpoints = len(g3mc[:,0])
 zpoints = len(g3mc[0,:])
 r = arange(0, rpoints*dx, dx)

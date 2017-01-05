@@ -19,7 +19,7 @@ subsq xs = -- map (:[]) xs ++
           rest _ = []
 
 findNamedScalar :: Type b => Expression b -> Maybe Exprn
-findNamedScalar xxxx = mconcat [find volume,
+findNamedScalar xxxx = myconcat [find volume,
                                 find mydV,
                                 find mydr,
                                 searchExpressionDepthFirst Set.empty helper xxxx]
@@ -94,7 +94,7 @@ optimize eee = case optimizeScalars [] 0 eee of
 -- again later so we can easily experiment with different sets of
 -- optimizations.
 optimizeScalars :: [Statement] -> Int -> [Exprn] -> ([Statement], Int, [Exprn])
-optimizeScalars sts n everything = case mconcat $ map (mapExprn findNamedScalar) everything of
+optimizeScalars sts n everything = case myconcat $ map (mapExprn findNamedScalar) everything of
                                      Just (ES s@(Var _ _ _ _ (Just e))) ->
                                        case optimizeHelper Set.empty n [] everything [mkExprn e] of
                                          ([],_,_) -> optimizeScalars (sts++[Initialize (ES v), Assign (ES v) (ES s)]) n
@@ -111,13 +111,13 @@ optimizeHelper i n sts everything e = case handleSubstitution sts n everything e
                                         Nothing -> (sts, n, everything)
                                         Just (vs, sts', n', everything', e') -> optimizeHelper vs n' sts' everything' e'
   where todos = if Set.size i == 0
-                then [mconcat $ map (mapExprn (findToDo i everything)) e,
-                      mconcat $ map (mapExprn findFFTtodo) e,
-                      mconcat $ map (mapExprn (findFFTinputtodo i)) e]
-                else [mconcat $ map (mapExprn (findToDo i everything)) e,
-                      mconcat $ map (mapExprn findFFTtodo) e,
-                      mconcat $ map (mapExprn (findFFTinputtodo i)) e,
-                      mconcat $ map (mapExprn (findFFTinputtodo Set.empty)) e]
+                then [myconcat $ map (mapExprn (findToDo i everything)) e,
+                      myconcat $ map (mapExprn findFFTtodo) e,
+                      myconcat $ map (mapExprn (findFFTinputtodo i)) e]
+                else [myconcat $ map (mapExprn (findToDo i everything)) e,
+                      myconcat $ map (mapExprn findFFTtodo) e,
+                      myconcat $ map (mapExprn (findFFTinputtodo i)) e,
+                      myconcat $ map (mapExprn (findFFTinputtodo Set.empty)) e]
 
 handleSubstitution :: [Statement] -> Int -> [Exprn] -> [Exprn] -> [Maybe Exprn]
                       -> Maybe (Set.Set String, [Statement], Int, [Exprn], [Exprn])

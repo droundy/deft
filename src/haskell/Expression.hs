@@ -28,7 +28,7 @@ module Expression (Exprn(..),
                    findRepeatedSubExpression, findNamedScalars, findNamed,
                    findOrderedInputs, findInputs,
                    findTransforms, transform, Symmetry(..),
-                   MkBetter(..), Monoid(..), mconcat,
+                   MkBetter(..), MyMonoid(..), myconcat,
                    countexpression, substitute, countAfterRemoval,
                    substituteE, countAfterRemovalE,
                    mapExprn,
@@ -265,9 +265,9 @@ instance Type RealSpace where
   subAndCountHelper _ _ Ry = (ry, 0)
   subAndCountHelper _ _ Rz = (rz, 0)
   searchHelper f (IFFT e) = f e
-  searchHelper _ Rx = mempty
-  searchHelper _ Ry = mempty
-  searchHelper _ Rz = mempty
+  searchHelper _ Rx = myempty
+  searchHelper _ Ry = myempty
+  searchHelper _ Rz = myempty
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * ifft (joinFFTs $ pairs2sum ks)
@@ -467,11 +467,11 @@ instance Type KSpace where
   searchHelper f (FFT e) = f e
   searchHelper f (SphericalFourierTransform _ e) = f e
   searchHelper f (SetKZeroValue _ e) = f e
-  searchHelper f (Complex a b) = mappend (f a) (f b)
-  searchHelper _ Kx = mempty
-  searchHelper _ Ky = mempty
-  searchHelper _ Kz = mempty
-  searchHelper _ Delta = mempty
+  searchHelper f (Complex a b) = myappend (f a) (f b)
+  searchHelper _ Kx = myempty
+  searchHelper _ Ky = myempty
+  searchHelper _ Kz = myempty
+  searchHelper _ Delta = myempty
   joinFFThelper (Sum s0 _) = joinup Map.empty $ sum2pairs s0
         where joinup m [] = sum $ map toe $ Map.toList m
                 where toe (rs, Right ks) = rs * fft (joinFFTs $ pairs2sum ks)
@@ -546,8 +546,8 @@ searchExpression i f v@(Var _ _ _ _ (Just e)) =
             | otherwise -> Just e'
 searchExpression i f (Scalar e) = searchExpression i f e
 searchExpression i f (F _ e) = searchExpression i f e
-searchExpression i f (Product p _) = mconcat $ map (searchExpression i f . fst) $ product2pairs p
-searchExpression i f (Sum s _) = mconcat $ map (searchExpression i f . snd) $ sum2pairs s
+searchExpression i f (Product p _) = myconcat $ map (searchExpression i f . fst) $ product2pairs p
+searchExpression i f (Sum s _) = myconcat $ map (searchExpression i f . snd) $ sum2pairs s
 searchExpression i f (Expression x) = searchHelper (searchExpression i f) x
 
 searchExpressionDepthFirst :: Type a => Set.Set String
@@ -1218,19 +1218,19 @@ isConstant (Sum s _) = case sum2pairs s of
 isConstant (Product p _) = if Map.size p == 0 then Just 1 else Nothing
 isConstant _ = Nothing
 
-class Monoid m where
-  mappend :: m -> m -> m
-  mempty :: m
-instance Monoid (Maybe a) where
-  mappend (Just x) _ = Just x
-  mappend Nothing y = y
-  mempty = Nothing
-instance Ord a => Monoid (Set.Set a) where
-  mappend x y = Set.union x y
-  mempty = Set.empty
-mconcat :: Monoid m => [m] -> m
-mconcat (x:xs) = mappend x (mconcat xs)
-mconcat [] = mempty
+class MyMonoid m where
+  myappend :: m -> m -> m
+  myempty :: m
+instance MyMonoid (Maybe a) where
+  myappend (Just x) _ = Just x
+  myappend Nothing y = y
+  myempty = Nothing
+instance Ord a => MyMonoid (Set.Set a) where
+  myappend x y = Set.union x y
+  myempty = Set.empty
+myconcat :: MyMonoid m => [m] -> m
+myconcat (x:xs) = myappend x (myconcat xs)
+myconcat [] = myempty
 
 class (Ord a, Show a, Code a) => Type a where 
   amScalar :: Expression a -> Bool
@@ -1266,7 +1266,7 @@ class (Ord a, Show a, Code a) => Type a where
   joinFFThelper = id
   safeCoerce :: Type b => Expression b -> Expression a -> Maybe (Expression a)
   subAndCountHelper :: Type b => Expression b -> Expression b -> a -> (Expression a, Int)
-  searchHelper :: Monoid c => (forall b. Type b => Expression b -> c) -> a -> c
+  searchHelper :: MyMonoid c => (forall b. Type b => Expression b -> c) -> a -> c
 
 initializeE :: Exprn -> String
 initializeE (ES e) = initialize e
@@ -1452,7 +1452,7 @@ grad :: String -> Expression Scalar -> Expression RealSpace
 grad v e = derive (r_var v) 1 e
 
 countVars :: [Exprn] -> Int
-countVars s = Set.size $ mconcat $ map (mapExprn varSet) s
+countVars s = Set.size $ myconcat $ map (mapExprn varSet) s
 
 varSet :: Type a => Expression a -> Set.Set String
 varSet e@(Expression _) = case mkExprn e of
@@ -1771,7 +1771,7 @@ substituteE a a' (ER b) = mkExprn $ substitute a a' b
 substituteE a a' (EK b) = mkExprn $ substitute a a' b
 
 countAfterRemoval :: Type a => Expression a -> [Exprn] -> Int
-countAfterRemoval v e = Set.size $ mconcat $ map (mapExprn (varsetAfterRemoval v)) e
+countAfterRemoval v e = Set.size $ myconcat $ map (mapExprn (varsetAfterRemoval v)) e
 
 countAfterRemovalE :: Exprn -> [Exprn] -> Int
 countAfterRemovalE a b = mapExprn (\a' -> countAfterRemoval a' b) a
@@ -1910,23 +1910,23 @@ findRepeatedSubExpression everything = frse everything
 -- two elements together to create a third element of the same type.
 -- Sets are like this (union combines two sets), and so is Maybe,
 -- where we want to short-cut to find the first "Just" element.
-searchMonoid :: (Type a, Monoid c) => (forall b. Type b => Expression b -> c)
+searchMyMonoid :: (Type a, MyMonoid c) => (forall b. Type b => Expression b -> c)
                     -> Expression a -> c
-searchMonoid f x@(Var _ _ _ _ Nothing) = f x
-searchMonoid f x@(Var _ _ _ _ (Just e)) = f x `mappend` searchMonoid f e
-searchMonoid f x@(Scalar e) = f x `mappend` searchMonoid f e
-searchMonoid f x@(F _ e) = f x `mappend` searchMonoid f e
-searchMonoid f x@(Product p _) = f x `mappend` mconcat (map (searchMonoid f . fst) $ product2pairs p)
-searchMonoid f x@(Sum s _) = f x `mappend` mconcat (map (searchMonoid f . snd) $ sum2pairs s)
-searchMonoid f x@(Expression e) = f x `mappend` searchHelper (searchMonoid f) e
+searchMyMonoid f x@(Var _ _ _ _ Nothing) = f x
+searchMyMonoid f x@(Var _ _ _ _ (Just e)) = f x `myappend` searchMyMonoid f e
+searchMyMonoid f x@(Scalar e) = f x `myappend` searchMyMonoid f e
+searchMyMonoid f x@(F _ e) = f x `myappend` searchMyMonoid f e
+searchMyMonoid f x@(Product p _) = f x `myappend` myconcat (map (searchMyMonoid f . fst) $ product2pairs p)
+searchMyMonoid f x@(Sum s _) = f x `myappend` myconcat (map (searchMyMonoid f . snd) $ sum2pairs s)
+searchMyMonoid f x@(Expression e) = f x `myappend` searchHelper (searchMyMonoid f) e
 
 findNamedScalars :: Type b => Expression b -> Set.Set String
-findNamedScalars = searchMonoid helper
+findNamedScalars = searchMyMonoid helper
   where helper (Var _ _ b _ (Just e)) | ES _ <- mkExprn e = Set.singleton b
         helper _ = Set.empty
 
 findNamed :: Type b => Expression b -> Set.Set (String, Exprn)
-findNamed = searchMonoid helper
+findNamed = searchMyMonoid helper
   where helper e@(Var _ _ c _ (Just _)) = Set.singleton (c, mkExprn e)
         helper _ = Set.empty
 
@@ -1949,7 +1949,7 @@ findOrderedInputs e = fst $ helper Set.empty (findInputs e)
         findInputsE (ER ee) = findInputs ee
 
 findInputs :: Type b => Expression b -> Set.Set Exprn
-findInputs = searchMonoid helper
+findInputs = searchMyMonoid helper
   where helper e | ER (Var _ _ _ _ Nothing) <- mkExprn e,
                    not (Set.member (mkExprn e) grid_description) = Set.insert (mkExprn e) grid_description
         helper e@(Var _ _ _ _ Nothing) = Set.singleton (mkExprn e)
@@ -1960,7 +1960,7 @@ findInputs = searchMonoid helper
                                          ES $ zhat `dot` lat3]
 
 findTransforms :: Type b => Expression b -> [Expression KSpace]
-findTransforms = Set.toList . searchMonoid helper
+findTransforms = Set.toList . searchMyMonoid helper
   where helper e | EK ee@(Expression (SphericalFourierTransform _ _)) <- mkExprn e = Set.singleton ee
         helper _ = Set.empty
 

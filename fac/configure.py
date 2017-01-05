@@ -13,8 +13,12 @@ with open('testing-flags/test.c', 'w') as f:
 }
 """)
 flags = ''
-for flag in ['-Wall', '-Werror', '-O3', '-std=c++11', '-Isrc', '-Iinclude', '-g',
-             '-mtune=native', '-flto']:
+flags_for_eigen = ['-fpermissive']
+# I also added a misspelling on Werror below to make things keep
+# working with Eigen.  I really want to eliminate Eigen from the
+# build!
+for flag in ['-Wall', '-Werrorr', '-O3', '-std=c++11', '-Isrc', '-Iinclude', '-g',
+             '-mtune=native', '-flto'] + flags_for_eigen:
     if not os.system('cd testing-flags && g++ %s %s -c test.c' %
                      (flags, flag)):
         flags += ' ' + flag

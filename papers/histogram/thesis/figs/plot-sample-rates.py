@@ -77,7 +77,7 @@ for method in methods:
 
     for i in range(len(seeds)):
         for j in range(len(rates[i])):
-            net_rate[method][-energies[i][j]] += rates[i][j]
+            net_rate[method][int(-energies[i][j])] += rates[i][j]
     net_rate[method] /= len(seeds)
 
     energy[method] = energy[method][net_rate[method] != 0]

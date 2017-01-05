@@ -12,7 +12,7 @@
 \cfoot{\thepage~of \pageref{LastPage}} % "x of y" page labeling
 
 %%% physics
-\usepackage[boldvectors,braket]{physymb} % physics package
+\usepackage{braket} % physics package
 \newcommand{\bk}{\Braket} % shorthand for braket notation
 
 %%% math
@@ -298,6 +298,7 @@ The square-well (SW) fluid is a simple model used in classical density
 functional theories to capture low order effects of short-range
 attractive forces, such as the van der Waals force. The fluid is
 composed of spheres with diameter $\sigma$ which have a pair potential
+\newcommand\abs[1]{\left|#1\right|}
 \begin{align}
   v_{sw}\p{\vec r}=\left\{
     \begin{array}{ll}

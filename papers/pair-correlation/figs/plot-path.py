@@ -117,9 +117,9 @@ twod_plot.add_artist(sphere)
 
 twod_plot.set_aspect('equal')
 g2mc = read_walls_mc(ff)
-rbins = round(rmax/dx)
-zposbins = round(zmax/dx)
-znegbins = round(-zmin/dx)
+rbins = int(round(rmax/dx))
+zposbins = int(round(zmax/dx))
+znegbins = int(round(-zmin/dx))
 zbins = zposbins + znegbins
 g22 = zeros((rbins, zbins))
 g22[:, znegbins:zbins] = g2mc[:rbins,:zposbins]
