@@ -1,0 +1,319 @@
+%\pagestyle{plain}   %Use if you do not want the fancy headers and footers... 
+					 %({plain} -> just page number, {empty} -> nothing)...
+					 % this will change all pages that come after this tex file...
+					 % so make sure to reset the pagestyle to {fancy} at the end of this file
+
+
+
+...Splain stuff here...
+
+
+\section{Introduction}
+
+Recall, our interest lies in the ability to be able to accurately describe the liquid-vapor phase equilibrium conditions for fluids.  As mentioned in chapter 1, many models fall short of an accurate description of phase equilibrium for fluids near the critical point.  Incorporating finer details about the interactions within the fluid will result in better experimental agreement.  SnAFT is one such model which modifies the Helmholtz free energy to include these finer details for interactions.  In this chapter we will explore some of the important features of (SnAFT).  
+
+Naturally, before tackling real fluids, we will do what physics teaches us best, simplify the system into a more digestible problem.  We will simplify real fluids, like water, by considering all molecules as spherical interacting objects, subjected to a square well potential as shown in figure (INSERT FIGURE REF HERE).  This type of fluid is known as the square well fluid.  
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.2]{square_well_fluid_potential.png}
+	\caption{Shown above is the intermolecular pair potential for the square well fluid.  Each sphere has a diameter of $\sigma$.  The interaction range can be adjusted by varying the a scaling factor, $\lambda$.  The strength of the interaction is adjusted by $\epsilon$}
+	\label{fig:p_vs_t_h20}
+\end{figure}
+
+
+
+Mathematically, the shape of the square well potential is described by
+
+\[
+  \phi(\textbf{r};\lambda) = \left\{\def\arraystretch{1.2}%
+  \begin{array}{@{}c@{\quad}l@{}}
+    \infty & \text{if} \indent |\textbf{r}| \leq \sigma \\
+    - \epsilon & \text{if} \indent \sigma < |\textbf{r}| \leq \lambda \sigma \\
+    0 & \text{if} \indent |\textbf{r}| > \lambda \sigma \\
+    
+  \end{array}\right.
+\]
+
+where $\textbf{r}$ is the separation distance between the center of each spherical molecule of diameter $\sigma$.  The range of interaction is adjusted by varying the parameter $\lambda$, while the strength of the interaction is characterized by $\epsilon$. 
+
+To summarize what we have thus far;  we are looking at a system of particles that are interacting with each other, described by the square well potential, all contained in a region of constant volume.  Since the particles are in random motion, the interaction energy will constantly be changing as particles move closer and further away from each other.  Thus the total energy of our system will fluctuate.  Now we can make one more simplification, by surrounding our system in a heat bath, keeping the temperature constant.  With this physical model in mind, it is naturally ideal to use the canonical ensemble to statistically analyze our system.  
+
+The classical partition function for a canonical ensemble containing $N$ indistinguishable spheres is the following,
+
+\begin{equation}
+Z = \frac{1}{h^{3N} N!} \int d\textbf{r}^N d\textbf{p}^N e^{-\beta \mathcal{H}_N(\textbf{r}^N,\textbf{p}^N)}
+\end{equation} 
+
+where $h$ is Plank's constant and $\mathcal{H}_N$ is the classical $N$ sphere Hamiltonian with the functional dependence of  $(\textbf{r}^N,\textbf{p}^N)$, the $3N$ coordinates of position and momentum respectively.  Note that the $N!$ takes care of over counting, and Plank's constant is there to ensure our partition function is dimensionless.
+
+With our square well potential, our classical $N$ sphere Hamiltonian takes the form
+
+\begin{equation}
+\mathcal{H}_N = \sum^{N}_{i}  \frac{| \textbf{p}_i|^2}{2m} + \frac{1}{2}  \sum^{N}_{ij} \phi_{ij} ( | \textbf{r}_j - \textbf{r}_i | ) 
+\end{equation}
+
+where the first term is the kinetic energy $K_N$, which is only a function of momentum.  The second term is the potential $\phi_N$.  Note that our potential is dependent on the separation distance between two spheres, yielding in the square well coefficient $\phi_{ij}$.  To simplify the Hamiltonian, we write it as
+
+\begin{equation}
+\mathcal{H}_N = K_N + \phi_N
+\end{equation}
+
+With our Hamiltonian defined, we can update our partition function.
+
+\begin{equation}
+Z = \frac{1}{h^{3N} N!} \int d\textbf{r}^N d\textbf{p}^N e^{-\beta K_N + \phi_N }
+\end{equation} 
+
+Expanding the exponential, and realizing that we are integrating separable momenta for $N$ indistinguishable spheres, the partition function is simplified.
+
+\begin{equation}
+Z = \left( \int d\textbf{r}^N e^{\beta \phi_N} \right)  \left( \frac{1}{h^{3N} N!}  \left[ \int d\textbf{p} e^{-\beta K } \right]^N \right)
+\end{equation} 
+
+Notice the strange grouping of terms above.  This sets us up for a clever trick; multiplying by a fancy one, in the form of volume divided by volume, $\frac{V^N}{V^N}$.  Leading us to a partition function of the form
+
+
+\begin{equation}
+Z = \left( \frac{1}{V^N} \int d\textbf{r}^N e^{\beta \phi_N} \right)  \left( \frac{V^N}{h^{3N} N!}  \left[ \int d\textbf{p} e^{-\beta K } \right]^N \right)
+\end{equation} 
+
+Where we can now define the following:  The excesses partition function $Z_{\text{exc}}$, and the ideal gas partition function $Z_{\text{id}}$.
+
+Finally our total partition function looks like
+
+\begin{equation}
+Z = (Z_{\text{exc}})(Z_{\text{id}})
+\end{equation}
+
+The momentum of the spheres are well behaved functions, giving rise to an analytical expression for the idea gas partition function which will be explored in section 2 of this chapter.  Believe it or not, even with our simple square well potential, there is no analytical expression for the excess partition function.  The integral that shows up in the excess partition function is often referred to as the configurational integral;  it is here where much work is done trying to approximate the integrand into a form for computational methods to take care of.  
+
+If we rely on Boltzmann, we can take things one step further and write our total Helmholtz free energy as
+
+\begin{equation}
+A = -N k_B T \, \text{ln}(Z_{\text{exc}}Z_{\text{id}})
+\end{equation}
+
+Expanding the total Helmholtz free energy looks like
+
+\begin{equation}
+A = -N k_B T \, \text{ln}(Z_{\text{exc}}) -N k_B T \, \text{ln}(Z_{\text{id}})
+\end{equation}
+
+Simply redefining the first and second terms in the total Helmholtz free energy above gives us
+
+\begin{equation}
+A =  A_{\text{exc}} +  A_{\text{id}}
+\end{equation}
+
+Finally, we are at a spot where we can introduce Statistical Associating Fluid Theory (SAFT).  Recall, there exists no analytical solution for the excess partition function.  Likewise, we are out of luck if we look for an analytical expression for the excess Helmholtz free energy.  SAFT is a model which attempts to split this excess Helmholtz free energy up into physically sound components, which we will describe in the following sections.  For completeness, SAFT writes the total Helmholtz free energy as
+
+\begin{equation}
+A =  A_{\text{mono}} +  A_{\text{chain}} +  A_{\text{assoc}} + A_{\text{id}}
+\end{equation}
+
+As seen in the above expression for the SAFT Helmholtz free energy, the excess Helmholtz free energy is split up into three terms: mono, chain, and association.  The chain free energy is the contribution due to $m$ number of spheres forming a chain.  The association free energy is the contribution from chains of spheres interacting with one another via binding sites.  Going forward we will not consider the chain and association free energy terms, thus the creation of Statistical non-Associating Fluid Theory (SnAFT).  Forthermore, we will split the mono term into two parts, the hard sphere ($A_{\text{HS}}$) free energy and the dispersion ($A_{\text{disp}}$) free energy.  So now, our final definition for how SnAFT describes the total Helmholtz free energy is
+
+\begin{equation}
+A = A_{\text{id}} +  A_{\text{HS}} +  A_{\text{disp}}
+\end{equation}
+
+In the following sections, we will explore how each term is constructed based off of physical arguments. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Ideal Gas Free Energy}
+
+Recall the idea gas partition function
+
+\begin{equation}
+Z_{\text{id}} =    \frac{V^N}{h^{3N} N!}  \left[ \int d\textbf{p} e^{-\beta K } \right]^N 
+\end{equation} 
+
+The kinetic energy is a function of momentum,
+
+\begin{equation}
+K = \frac{| \textbf{p}|^2}{2m}
+\end{equation}  
+
+which means the integral that shows up in the idea gas partition function is just a Gaussian integral.  After integrating, the idea gas partition function has the analytical form
+
+\begin{equation}
+Z_{\text{id}} = \frac{V^N}{N! \Lambda^{3N}}
+\end{equation}
+
+where $\Lambda$ is the thermal de Broglie wavelength
+
+\begin{equation}
+\Lambda = \sqrt{\frac{2 \pi \hbar^2}{m k_B T}}
+\end{equation}
+
+Now our ideal gas free energy is
+
+\begin{equation}
+A_{\text{id}} = - N k_B T \text{ln} \left(  \frac{V^N}{N! \Lambda^{3N}}  \right)
+\end{equation}
+
+With the help of Stirling's approximation, our idea free energy has the form
+
+\begin{equation}
+A_{\text{id}} = N k_B T [ \text{ln} ( \text{n} \Lambda^3) -1 ]
+\end{equation}
+
+where $\text{n}$ is the number density of spheres, $\frac{N}{V}$.
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Thermodynamic Perturbation Theory}
+
+I left out a vital piece of information back in section 1 of this chapter when I mentioned that SnAFT splits the mono free energy term into a hard sphere and dispersion term.  More formally, a high temperature perturbation theory is utilized in order to expand the mono term in terms of inverse temperature, $\beta$. 
+
+\begin{equation}
+A_{\text{mono}} = A_{\text{HS}} + \beta a_1 + \beta^2 a_2 + ...
+\end{equation}
+
+Here, the hard sphere system is taken as the known system, while the attractive potential part of the square well potential $- \epsilon$ acts as a perturbation.  The second two terms in the expansion above are what encompass what we are calling the dispersion free energy.  
+
+In the next subsections we will take a closer look at the hard sphere and dispersion terms.
+
+
+\subsection{Hard Sphere Free Energy}
+
+The hard sphere free energy is found via a Fundamental Measure Theory, with the results highlighted in Huges' paper (INSERT REFERENCE HERE).  In her paper, Huges' splits the hard sphere free energy into three terms that are added together and scaled by $N k_B T$ to construct the total hard sphere free energy.  The three terms are as follows:
+
+\begin{equation}
+\Phi_1 = \text{n} \, \text{ln} (1-\eta)
+\end{equation} 
+
+\begin{equation}
+\Phi_2 = \frac{3 \text{n} \eta}{(1-\eta)}
+\end{equation} 
+
+\begin{equation}
+\Phi_3 = \frac{\text{n}[\eta + (1-\eta)^2 \, \text{ln}(1-\eta)]}{(1-\eta)^2}
+\end{equation} 
+
+The resulting hard sphere free energy then takes the form
+
+\begin{equation}
+A_{HS} = N k_B T [ \Phi_1 + \Phi_2 + \Phi_3 ]
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Dispersion Free Energy}
+
+Recall we defined the dispersion free energy as the first and second correction term to the reference hard sphere system,
+
+\begin{equation}
+A_{\text{disp}} = \beta a_1 + \beta^2 a_2
+\end{equation}
+
+
+The term $a_1$ can be thought of as the mean attractive energy, given by
+
+\begin{equation}
+a_1 = 2 \pi \text{n} \int^{\sigma}_{\infty} r^2 \phi(r) g^{\text{HS}}(r) dr
+\end{equation}
+
+where $r$ is the separation distance between the center of the interacting sphere, $\sigma$ is the sphere's diameter, and $g^{\text{HS}}$ is the pair correlation function.  Great care was taken into consideration when attempting to determine the pair correlation function.  A good approximation is to use an effective filling fraction, $\eta_{\text{eff}}$ combined with the Carnahan and Starling equation of state.  This yields a pair correlation function roughly equal to
+
+\begin{equation}
+g^{\text{HS}}_{\text{eff}} \approx \frac{\left( 1 - \frac{\eta_{\text{eff}}}{2} \right)}{(1-\eta_{\text{eff}})^3}
+\end{equation}
+
+Notice the lack of separation distance in this definition of the correlation function.  This greatly simplifies our mean attractive energy since we do not need to integrate over it.  Using our square well potential, the mean attractive energy term reduces down to
+
+\begin{equation}
+a_1 = - 2 \, \pi \, \text{n} \, g^{\text{HS}}_{\text{eff}} \, \epsilon \, \int^{\lambda \sigma}_{\sigma} r^2 \, dr
+\end{equation}
+
+
+\begin{equation}
+a_1 = - 2 \, \pi \, \text{n} \, g^{\text{HS}}_{\text{eff}} \, \epsilon \, \sigma^3 (\lambda^3 -1)
+\end{equation}
+
+Some algebraic manipulation and we get
+
+\begin{equation}
+a_1 = -4 \, \eta \, \epsilon \, (\lambda^3 -1) g^{\text{HS}}_{\text{eff}}
+\end{equation}
+
+
+
+Moving on to the second correction term, $a_2$ is a bit more difficult.  Hand waving tells us that we can consider $a_2$ as a term that account for fluctuations of energies.  If a local group of spheres are within each others interaction well, the fluid would look somewhat compressed in that region.  So the $a_2$ term accounts for these local compression regions, i.e. local density fluctuations. It takes the form
+
+\begin{equation}
+a_2 = \frac{1}{2} \epsilon \, \kappa^{\text{HS}} \, \eta \frac{\partial a_1}{\partial \eta}
+\end{equation}  
+
+where $\kappa^{\text{HS}}$ is the isothermal compressibility.
+
+\begin{equation}
+\kappa^{\text{HS}} = \frac{(1-\eta)^4}{1+4 \eta + 4 \eta^2}
+\end{equation}
+
+
+
+Putting it all together, our dispersion free energy term looks like
+
+\begin{equation}
+A_{\text{disp}} = - \beta \, N k_B T \left( 4 \, \eta \, \epsilon \, (\lambda^3 -1) g^{\text{HS}}_{\text{eff}} \right) + \beta^2 \, N k_B T \left( \frac{1}{2} \epsilon \, \kappa^{\text{HS}} \, \eta \frac{\partial a_1}{\partial \eta} \right) 
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%\pagestyle{fancy}   % Reset all pages after this file to fnacy headers

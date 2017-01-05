@@ -28,7 +28,7 @@ golden = sys.argv[4]
 seed = int(sys.argv[5])
 #arg seed = [0]
 
-all_Ns = os.popen("git ls-files | grep 'data/periodic-ww%.2f-ff%.2f.*-golden-E.dat'"
+all_Ns = os.popen("ls data/periodic-ww%.2f-ff%.2f.*-golden-E.dat"
                   %(ww,ff)).readlines()
 all_Ns = numpy.sort([ int(N.split('-')[-4][1:]) for N in all_Ns ])
 

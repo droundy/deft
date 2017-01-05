@@ -18,6 +18,8 @@
 *Notes.bib
 */figs/*.mkdat
 paperNotes.bib
+*-blx.bib
+*.run.xml
 *.tmp.*
 arxiv*
 referee*

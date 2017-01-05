@@ -1,0 +1,72 @@
+\documentclass[12pt,twoside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[letterpaper,width=150mm,top=25mm,bottom=25mm]{geometry}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{amsmath,amssymb}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[RO,LE]{Exploring Phase Equilibrium with Statistical non-Associating Fluid Theory}
+\fancyfoot{}
+\fancyfoot[LE,RO]{\thepage}
+\fancyfoot[LO,CE]{Chapter \thechapter}
+\fancyfoot[CO,RE]{Ryan M. Scheirer}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\usepackage[backend=bibtex,maxnames=99,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+
+%\title{
+%	{Exploring Phase Equilibrium with Statistical non-Associating Fluid Theory}\\
+%	{\large Oregon State University}\\
+%	{\includegraphics{osu2.PNG}}
+%	}
+
+
+\title{Exploring Phase Equilibrium with Statistical non-Associating Fluid Theory}
+
+\author{Ryan M. Scheirer}
+%\date{\today}
+
+\begin{document}
+
+\input{titlepage}
+
+%\maketitle
+
+\input{abstract}
+
+
+\tableofcontents
+
+\listoffigures
+
+\chapter{Introduction}
+\input{chapters/chapter01}
+
+\chapter{SnAFT Theory}
+\input{chapters/chapter02}
+
+\chapter{GRG Theory}
+\input{chapters/chapter03}
+
+\chapter{Methods}
+\input{chapters/chapter04}
+
+\chapter{Results}
+\input{chapters/chapter05}
+
+\chapter{Conclusion}
+\input{chapters/chapter06}
+
+
+\printbibliography
+
+\end{document}
