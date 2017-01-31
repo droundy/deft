@@ -372,7 +372,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // use tmmc for golden calculations
-  if (golden) tmmc = true;
+  if (golden) toe = true;
 
   // Check that we are only using one end condition
   if(sw.min_samples && sw.sample_error && sw.flatness){
