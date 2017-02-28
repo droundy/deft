@@ -1611,12 +1611,26 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
 
 bool sw_simulation::printing_allowed(){
   const double max_time_skip = 60*30; // 1/2 hour
-  static double time_skip = 30; // seconds
+  static double time_skip = 3; // seconds
   static int every_so_often = 0;
+
+  static clock_t last_output = clock(); // when we last output data
+
   if (++every_so_often > time_skip/estimated_time_per_iteration) {
-    every_so_often = 0;
     fflush(stdout); // flushing once a second will be no problem and can be helpful
+    clock_t now = clock();
     time_skip = min(1.3*time_skip, max_time_skip);
+ 
+	// update our setimated time per iteration based on actual time
+	// spent in this round of iterations
+    double elapsed_time = (now - last_output)/double(CLOCKS_PER_SEC);
+    if (now > last_output) {
+		estimated_time_per_iteration = elapsed_time / every_so_often;
+	} else {
+		estimated_time_per_iteration = 0.1 / every_so_often / double(CLOCKS_PER_SEC);
+	}
+    last_output = now;
+    every_so_often = 0;
     return true;
   }
   return false;
