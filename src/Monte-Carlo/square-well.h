@@ -260,9 +260,8 @@ struct sw_simulation {
   }
 
   sw_simulation(){
-    // seconds per iteration (should be determined from actual timing,
-    // but this timing is about right for 50 spheres)
-    estimated_time_per_iteration = 4e-5;
+    // seconds per iteration (will be adjusted from actual timing)
+    estimated_time_per_iteration = 0.1;
     transitions_filename = 0; // default to NULL pointer here for safety.
     transitions_movie_filename_format = 0; // default to NULL pointer here for safety.
     dos_movie_filename_format = 0; // default to NULL pointer here for safety.
