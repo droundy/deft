@@ -196,7 +196,7 @@ int main(int argc, const char *argv[]) {
      &sw.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
     
     {"max-time",'\0',POPT_ARG_DOUBLE,&sw.max_time, 0,
-     "return after max-time","DOUBLE"},
+     "quit after max-time seconds","DOUBLE"},
 
     /*** TESTING AND DEBUGGING OPTIONS ***/
 
