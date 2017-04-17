@@ -1261,12 +1261,16 @@ op       difference is that we compute the diffusivity here *directly*
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
   double *ln_dos = compute_ln_dos(transition_dos);
+  // Above the max_entropy_state we level out the weights.
   for (int i = 0; i < max_entropy_state; i++) {
     ln_energy_weights[i] = -ln_dos[max_entropy_state];
   }
+  // Down to the min_important_energy we use the DOS for the weights.
   for (int i = max_entropy_state; i <= min_important_energy; i++) {
     ln_energy_weights[i] = -ln_dos[i];
   }
+  // At lower energies, we use Boltzmann weights with the minimum
+  // temperature we are interested in.
   for (int i = min_important_energy+1; i < energy_levels; i++) {
     ln_energy_weights[i] = -max(-ln_energy_weights[i-1] - 1.0/min_T, ln_dos[i]);
   }
