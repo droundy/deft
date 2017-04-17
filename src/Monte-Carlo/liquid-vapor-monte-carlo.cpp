@@ -753,7 +753,7 @@ int main(int argc, const char *argv[]) {
       printf("iterations per time for one update = %g\n", 10*sw.N*time_to_update_weights/time_for_N_iterations);
       // Try to spend just 1% of our time updating the weights.  This
       // is a totally arbitrary heuristic.  Ideally we would base this
-      // on the number of iteratins needed to collect reasonable data.
+      // on the number of iterations needed to collect reasonable data.
       // If it is too short, we waste time making negligible changes
       // to the weights.  If it is too long, we waste time
       // oversimulating.  I just decided that 1% of time wasted is no
