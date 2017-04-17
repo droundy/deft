@@ -1270,7 +1270,8 @@ void sw_simulation::update_weights_using_transitions() {
     ln_energy_weights[i] = -ln_dos[i];
   }
   // At lower energies, we use Boltzmann weights with the minimum
-  // temperature we are interested in.
+  // temperature we are interested in, except in cases where the
+  // ln_dos is greater than the Boltzmann factor would predict..
   for (int i = min_important_energy+1; i < energy_levels; i++) {
     ln_energy_weights[i] = -max(-ln_energy_weights[i-1] - 1.0/min_T, ln_dos[i]);
   }
