@@ -497,78 +497,77 @@ int main(int argc, const char *argv[]) {
   //   be stretched to cell dimensions
   bool failFlag=false;
   if(initL>0.0){
-	  INITBOX *box=new INITBOX(initL,sw.N);
-	  if(box->numAtoms!=sw.N){ failFlag=true;}
-	  else{
-		  for(int i=0;i<sw.N;i++){
-			  sw.balls[i].pos=vector3d(box->list[i].x,box->list[i].y,box->list[i].z);
-		  }
-		  printf("atoms initialized using rain method\n");
-	  }
-	  delete box;
+    INITBOX *box=new INITBOX(initL,sw.N);
+    if(box->numAtoms!=sw.N){ failFlag=true;}
+    else{
+      for(int i=0;i<sw.N;i++){
+        sw.balls[i].pos=vector3d(box->list[i].x,box->list[i].y,box->list[i].z);
+      }
+      printf("atoms initialized using rain method\n");
+    }
+    delete box;
   }
   const double min_cell_width = 2*sqrt(2)*R; // minimum cell width
-	  const int spots_per_cell = 4; // spots in each fcc periodic unit cell
-	  int cells[3]; // array to contain number of cells in x, y, and z dimensions
-	  for (int i = 0; i < 3; i++) {
-	    cells[i] = int(sw.len[i]/min_cell_width); // max number of cells that will fit
-	  }
+  const int spots_per_cell = 4; // spots in each fcc periodic unit cell
+  int cells[3]; // array to contain number of cells in x, y, and z dimensions
+  for (int i = 0; i < 3; i++) {
+    cells[i] = int(sw.len[i]/min_cell_width); // max number of cells that will fit
+  }
   if(initL<=0.0 || failFlag==true){
-	  // It is usefull to know our cell dimensions
-	  double cell_width[3];
-	  for (int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
-	
-	  // If we made our cells too small, return with error
-	  for (int i = 0; i < 3; i++) {
-	    if (cell_width[i] < min_cell_width) {
-	      printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
-	             cell_width[0],cell_width[1],cell_width[2],
-	             sw.len[0], sw.len[1], sw.len[2]);
-	      printf("Minimum allowed placement cell width: %g\n",min_cell_width);
-	      printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
-	             sw.len[0],sw.len[1],sw.len[2]);
-	      printf("Fixing the chosen ball number, filling fractoin, and relative\n"
-	             "  simulation cell dimensions simultaneously does not appear to be possible\n");
-	      return 176;
-	    }
-	  }
-	
-	  // Define ball positions relative to cell position
-	  vector3d* offset = new vector3d[4]();
-	  offset[x] = vector3d(0,cell_width[y],cell_width[z])/2;
-	  offset[y] = vector3d(cell_width[x],0,cell_width[z])/2;
-	  offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
-	
-	  // Reserve some spots at random to be vacant
-	  const int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
-	  bool *spot_reserved = new bool[total_spots]();
-	  int p; // Index of reserved spot
-	  for (int i = 0; i < total_spots-sw.N; i++) {
-	    p = floor(random::ran()*total_spots); // Pick a random spot index
-	    if (spot_reserved[p] == false) // If it's not already reserved, reserve it
-	      spot_reserved[p] = true;
-	    else // Otherwise redo this index (look for a new spot)
-	      i--;
-	  }
-	
-	  // Place all balls in remaining spots
-	  int b = 0;
-	  for (int i = 0; i < cells[x]; i++) {
-	    for (int j = 0; j < cells[y]; j++) {
-	      for (int k = 0; k < cells[z]; k++) {
-	        for (int l = 0; l < 4; l++) {
-	          if (!spot_reserved[i*(4*cells[z]*cells[y])+j*(4*cells[z])+k*4+l]) {
-	            sw.balls[b].pos = vector3d(i*cell_width[x],j*cell_width[y],
-	                                       k*cell_width[z]) + offset[l];
-	            b++;
-	          }
-	        }
-	      }
-	    }
-	  }
-	  delete[] offset;
-	  delete[] spot_reserved;
-}
+    // It is usefull to know our cell dimensions
+    double cell_width[3];
+    for (int i = 0; i < 3; i++) cell_width[i] = sw.len[i]/cells[i];
+    // If we made our cells too small, return with error
+    for (int i = 0; i < 3; i++) {
+      if (cell_width[i] < min_cell_width) {
+        printf("Placement cell size too small: (%g,  %g,  %g) coming from (%g, %g, %g)\n",
+               cell_width[0],cell_width[1],cell_width[2],
+               sw.len[0], sw.len[1], sw.len[2]);
+        printf("Minimum allowed placement cell width: %g\n",min_cell_width);
+        printf("Total simulation cell dimensions: (%g,  %g,  %g)\n",
+               sw.len[0],sw.len[1],sw.len[2]);
+        printf("Fixing the chosen ball number, filling fractoin, and relative\n"
+               "  simulation cell dimensions simultaneously does not appear to be possible\n");
+        return 176;
+      }
+    }
+
+    // Define ball positions relative to cell position
+    vector3d* offset = new vector3d[4]();
+    offset[x] = vector3d(0,cell_width[y],cell_width[z])/2;
+    offset[y] = vector3d(cell_width[x],0,cell_width[z])/2;
+    offset[z] = vector3d(cell_width[x],cell_width[y],0)/2;
+
+    // Reserve some spots at random to be vacant
+    const int total_spots = spots_per_cell*cells[x]*cells[y]*cells[z];
+    bool *spot_reserved = new bool[total_spots]();
+    int p; // Index of reserved spot
+    for (int i = 0; i < total_spots-sw.N; i++) {
+      p = floor(random::ran()*total_spots); // Pick a random spot index
+      if (spot_reserved[p] == false) // If it's not already reserved, reserve it
+        spot_reserved[p] = true;
+      else // Otherwise redo this index (look for a new spot)
+        i--;
+    }
+
+    // Place all balls in remaining spots
+    int b = 0;
+    for (int i = 0; i < cells[x]; i++) {
+      for (int j = 0; j < cells[y]; j++) {
+        for (int k = 0; k < cells[z]; k++) {
+          for (int l = 0; l < 4; l++) {
+            if (!spot_reserved[i*(4*cells[z]*cells[y])+j*(4*cells[z])+k*4+l]) {
+              sw.balls[b].pos = vector3d(i*cell_width[x],j*cell_width[y],
+                                         k*cell_width[z]) + offset[l];
+              b++;
+            }
+          }
+        }
+      }
+    }
+    delete[] offset;
+    delete[] spot_reserved;
+  }
 
   took("Placement");
 
