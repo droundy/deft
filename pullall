@@ -1,0 +1,10 @@
+#!/usr/bin/python2.7
+
+import os
+
+repos = ['/home/droundy/git/deft.git',
+         '/home/simpstan/deft']
+
+for repo in repos:
+    os.system('git pull {} :'.format(repo))
+
