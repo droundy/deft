@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <time.h>
-#include "Monte-Carlo/monte-carlo.h"
+//#include "Monte-Carlo/monte-carlo.h"
+#include "monte-carlo.h"
 #include <cassert>
 #include <math.h>
 #include <stdlib.h>
