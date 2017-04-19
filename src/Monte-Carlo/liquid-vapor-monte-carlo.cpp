@@ -7,10 +7,14 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
+
 #include "handymath.h"
 #include "vector3d.h"
-#include "Monte-Carlo/square-well.h"
-#include "Monte-Carlo/InitBox.h"
+
+#include "square-well.h" 
+//#include "Monte-Carlo/square-well.h" 
+#include "InitBox.h"
+//#include "Monte-Carlo/InitBox.h"
 
 #include "version-identifier.h"
 
