@@ -7,14 +7,12 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
-#include "../handymath.h" // I added ../ so that Geany could find the file.
-#include "../vector3d.h"
-#include "square-well.h" // I altered square-well.h include file to "../handymath.h".
-//#include "Monte-Carlo/square-well.h" 
-#include "InitBox.h"
-//#include "Monte-Carlo/InitBox.h"
+#include "handymath.h"
+#include "vector3d.h"
+#include "Monte-Carlo/square-well.h" 
+#include "Monte-Carlo/InitBox.h"
 
-#include "../version-identifier.h"
+#include "version-identifier.h"
 
 // ------------------------------------------------------------------------------
 // Notes on conventions and definitions use
