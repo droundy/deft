@@ -10,11 +10,16 @@ matplotlib.rc('text', usetex=True)
 
 import readandcompute
 
+if len(sys.argv) < 4:
+	print("usage: python %s s000 periodic-whatever toe-golden [toe tmi]?" % (sys.argv[0]))
 subdirname = sys.argv[1]
 filename = sys.argv[2]
 suffixes = sys.argv[3:]
 
 print sys.argv
+if subdirname[:len('data/')] == 'data/':
+	subdirname = subdirname[len('data/'):]
+	print 'cutting redundant "data/" from first argument:', subdirname
 
 moviedir = 'figs/movies/%s/%s-dos' % (subdirname, filename)
 os.system('rm -rf ' + moviedir)

@@ -1261,6 +1261,14 @@ op       difference is that we compute the diffusivity here *directly*
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
   double *ln_dos = compute_ln_dos(transition_dos);
+  // Flatten the ln_dos at energies lower than the "converged-to state",
+  // since we don't trust ln_dos values down here.  The converged-to
+  // state is defined as where we have 10 pessimistic samples, but we
+  // may want to revisit this later!  FIXME
+  int converged = converged_to_state();
+  for (int i=converged; i<energy_levels; i++) {
+	  ln_dos[i] = ln_dos[converged];
+  }
   // Above the max_entropy_state we level out the weights.
   for (int i = 0; i < max_entropy_state; i++) {
     ln_energy_weights[i] = -ln_dos[max_entropy_state];
