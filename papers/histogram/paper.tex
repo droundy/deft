@@ -278,6 +278,44 @@ does have detailed balance.
 %   \label{fig:conv-S}
 % \end{figure}
 
+\section{Introduction}
+
+\subsection{Motivation and Background}
+
+A greater understanding of thermodynamic properties of biological systems has been
+a driving imputus over the last decade.  For instance, different cancers can be 
+identified by their respective thermodynamic entropies which play a role in determining
+their individual signaling networks~\cite{rietman2016thermodynamic}.  Also, free 
+energy is an important thermodynamic property used to predict protein folding
+and ligand binding~\cite{perez2016advances}.  Algorithms that can predict these
+thermodynamic properties with an appropriate potential will prove instrumental in
+furthering our understading of various biological systems.   
+
+There are primarily two main ways to calculate thermodynamic properties such as 
+free energy, the conditions for phase-coexistence, and critical 
+points~\cite{haber2014transition}.  The first method is molecular dynamics. 
+By using Newton's laws it is posible to determine the dynamical evolution of a
+given thermodynamic system.
+The precursur to molecular dynamics, the second method is known as Monte-Carlo.  
+Although, somewhat older, it is no less powerfull than molecular dynamic theory.  
+Indeed, Monte-Carlo computation is much simpler to implement, as well as, having 
+the ability to be more versatile than its conterpart.
+
+Monte-Carlo simulations make use of random number generation to sample a generalized
+ensemble.  Monte-Carlo methods have found their niche among computational 
+algorithms through their ability to successfully treat large systems of interacting 
+particles~\cite{landau2014guide, hansen1990theory}.  Histogram methods are a special
+class of Monte-Carlo.
+
+Questions: Why Monte-Carlo? The advantage of Histogram methods? What information do
+we hope to gain out of the simulation? Why treat as a square-well liquid?
+
+\subsection{Comparison of Methods}
+
+Talk about Wang-Landau, Simple-Flat, TMMC, and OETMMC.  What are individual 
+advantages and what should we expect?  This should be brief but will 
+probably take up about a page.
+
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
 \end{document}
