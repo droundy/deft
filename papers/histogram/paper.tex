@@ -298,16 +298,21 @@ By using Newton's laws it is posible to determine the dynamical evolution of a
 given thermodynamic system.
 The precursur to molecular dynamics, the second method is known as Monte-Carlo.  
 Although, somewhat older, it is no less powerfull than molecular dynamic theory.  
-Indeed, Monte-Carlo computation is much simpler to implement, as well as, having 
-the ability to be more versatile than its conterpart.
+Indeed, Monte-Carlo computation can often be much simpler to implement, as well 
+as, having the ability to be more versatile than its conterpart.
 
 Monte-Carlo simulations make use of random number generation to sample a generalized
 ensemble.  Monte-Carlo methods have found their niche among computational 
 algorithms through their ability to successfully treat large systems of interacting 
 particles~\cite{landau2014guide, hansen1990theory}.  Histogram methods are a special
-class of Monte-Carlo.
+class of Monte-Carlo techniques.
 
-Questions: Why Monte-Carlo? The advantage of Histogram methods? What information do
+A major advantage of using Histogram methods is that the algorithms give quantatative
+estimates for the density of states $\mathcal{D}$(E).  From the density of states,
+it is possible to calculate free energies and heat capacities, as well as, other 
+thermodynamic variables.
+
+Questions: The advantage of Histogram methods? What information do
 we hope to gain out of the simulation? Why treat as a square-well liquid?
 
 \subsection{Comparison of Methods}
