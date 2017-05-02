@@ -14,7 +14,7 @@
 \title{Applying the optimized ensemble histogram method to the
   square-well liquid}
 
-\author{Michael A. Perlin} \author{David Roundy}
+\author{Jordan K. Pommerenck} \author{Michael A. Perlin} \author{David Roundy}
 \affiliation{Department of Physics, Oregon State University,
   Corvallis, OR 97331}
 
@@ -160,7 +160,8 @@ if they're identical.
 The ratio of density of states at two energies should be proportional
 to the ratio of upgoing and downgoing transition rates between those
 two energies.  Thus these transitions give us information about
-$\Delta D$ (where $D$ is the density of states).
+$\Delta$$\mathcal{D}$($\varepsilon$) (where $\mathcal{D}$($\varepsilon$) 
+is the density of states).
 
 Figure~\ref{fig:transitions} below shows the transition matrix for a
 20-sphere system, computed during initialization using the Wang-Landau
@@ -178,10 +179,10 @@ interesting to implement.
 One natural approach would use linear algebra.  If the normalized
 transition matrix is $T$, then the density of states is given by
 \begin{equation}
-  D = TD
+  \mathcal{D}(\varepsilon) = T\mathcal{D}(\varepsilon) 
 \end{equation}
-By solving this equation for $D$, we could find a good approximation
-for $w$ to obtain a flat histogram.
+By solving this equation for $\mathcal{D}$($\varepsilon$), we could find a 
+good approximation for $w$ to obtain a flat histogram.
 
 I expect that we could use similar math to the optimized ensemble
 folks to optimize the round-trip rate.
@@ -220,37 +221,37 @@ does have detailed balance.
 
 \newpage
 
-\begin{figure}[p]
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_errors}
-  \caption{$u$ error scaling.}
-  \label{fig:scaling-u_err}
-\end{figure}
-\begin{figure}[p]
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_errors}
-  \caption{$c_V$ error scaling.}
-  \label{fig:scaling-cv_err}
-\end{figure}
-\begin{figure}[p]
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_errors}
-  \caption{$s$ error scaling.}
-  \label{fig:scaling-s_err}
-\end{figure}
+%\begin{figure}[p]
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_errors}
+  %\caption{$u$ error scaling.}
+  %\label{fig:scaling-u_err}
+%\end{figure}
+%\begin{figure}[p]
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_errors}
+  %\caption{$c_V$ error scaling.}
+  %\label{fig:scaling-cv_err}
+%\end{figure}
+%\begin{figure}[p]
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_errors}
+  %\caption{$s$ error scaling.}
+  %\label{fig:scaling-s_err}
+%\end{figure}
 
-\begin{figure}[p]
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_error_comp}
-  \caption{$u$ error comparisons.}
-  \label{fig:scaling-u_err_comp}
-\end{figure}
-\begin{figure}[p]
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_error_comp}
-  \caption{$c_V$ error comparisons.}
-  \label{fig:scaling-cv_err_comp}
-\end{figure}
-\begin{figure}[p]
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_error_comp}
-  \caption{$s$ error comparisons.}
-  \label{fig:scaling-s_err_comp}
-\end{figure}
+%\begin{figure}[p]
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_error_comp}
+  %\caption{$u$ error comparisons.}
+  %\label{fig:scaling-u_err_comp}
+%\end{figure}
+%\begin{figure}[p]
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_error_comp}
+  %\caption{$c_V$ error comparisons.}
+  %\label{fig:scaling-cv_err_comp}
+%\end{figure}
+%\begin{figure}[p]
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_error_comp}
+  %\caption{$s$ error comparisons.}
+  %\label{fig:scaling-s_err_comp}
+%\end{figure}
 
 
 % \subsection{Convergence tests}
@@ -288,13 +289,13 @@ identified by their respective thermodynamic entropies which play a role in dete
 their individual signaling networks~\cite{rietman2016thermodynamic}.  Also, free 
 energy is an important thermodynamic property used to predict protein folding
 and ligand binding~\cite{perez2016advances}.  Algorithms that can predict these
-thermodynamic properties with an appropriate potential will prove instrumental in
+thermodynamic properties with an appropriate potential are essential in
 furthering our understading of various biological systems.   
 
 There are primarily two main ways to calculate thermodynamic properties such as 
 free energy, the conditions for phase-coexistence, and critical 
 points~\cite{haber2014transition}.  The first method is molecular dynamics. 
-By using Newton's laws it is posible to determine the dynamical evolution of a
+By using Newton's laws, it is posible to determine the dynamical evolution of a
 given thermodynamic system.
 The precursur to molecular dynamics, the second method is known as Monte-Carlo.  
 Although, somewhat older, it is no less powerfull than molecular dynamic theory.  
@@ -304,22 +305,67 @@ as, having the ability to be more versatile than its conterpart.
 Monte-Carlo simulations make use of random number generation to sample a generalized
 ensemble.  Monte-Carlo methods have found their niche among computational 
 algorithms through their ability to successfully treat large systems of interacting 
-particles~\cite{landau2014guide, hansen1990theory}.  Histogram methods are a special
-class of Monte-Carlo techniques.
+particles~\cite{landau2014guide, Simple-Liquids}.  Histogram methods are a special
+class of Monte-Carlo techniques.  A major motivation for using Histogram methods 
+is that the algorithms give quantatative estimates for the density of states
+$\mathcal{D}$($\varepsilon$).  From the density of states, it is possible to calculate free 
+energies and heat capacities, as well as, other thermodynamic variables.  It is
+quite natural to treat a system under consideration as an idealized square-well 
+fluid~\cite{hughes2013classical, lurie2014approach,krebs2014improved}.  The potential benefits are that the model
+is able to accurately describe lower order effects due to short range attractive
+attractive forces~\cite{schulte2015thesis, perlin2015thesis}.  In this work, 
+we will compare various histogram methods by calculating thermodynamic properties 
+such as internal energy, heat capacity, and entropy.  By examining the relative 
+error when calculating these thermodynamic properties, a comparison can be made 
+among the presented histogram methods.
 
-A major advantage of using Histogram methods is that the algorithms give quantatative
-estimates for the density of states $\mathcal{D}$(E).  From the density of states,
-it is possible to calculate free energies and heat capacities, as well as, other 
-thermodynamic variables.
-
-Questions: The advantage of Histogram methods? What information do
-we hope to gain out of the simulation? Why treat as a square-well liquid?
 
 \subsection{Comparison of Methods}
 
-Talk about Wang-Landau, Simple-Flat, TMMC, and OETMMC.  What are individual 
-advantages and what should we expect?  This should be brief but will 
-probably take up about a page.
+We examine the Simple-Flat, Wang-Landau, Transition Matrix Monte-Carlo (TMMC),
+and Optemized Ensemble Transition Matrix Monte-Carlo (OETMMC) in this work.  The
+Simple-Flat and Wang-Landau are examples of flat histogram methods.  The TMMC and 
+OETMMC are in the family of nroad histogram methods.  In fact, the TMMC method 
+reduces to the broad histogram method in the case of temperature going to 
+infinity~\cite{wang1999transition}.  In the following subsections, we will briefly
+outline and describe each of the presented methods.
+
+\subsubsection{The Simple-Flat Algorithm}
+
+We examine the Simple-Flat
+
+\subsubsection{The Wang-Landau Algorithm}
+
+The Wang-Landau algorithm is in the family of flat histogram 
+methods~\cite{wang2001determining}.  While methods such as Metropolis Sampling and
+Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a 
+narrow distribution and require sampling at individual temperatures, the Wang-
+Landau algorithm uses a flat histogram and performs a random walk in energy space to
+determine the density of states.  Wang-Landau's major tenant is that when 
+counting the histogram $\mathcal{H}$($\varepsilon$), the energy occurences should 
+form a flat distribution.  The criteria for flat sampling is given by
+
+\begin{equation}
+	\frac{\min_{\varepsilon} \mathcal{H}(\varepsilon)}
+	{\big\langle\mathcal{H}(\varepsilon)\big\rangle } 
+	> \gamma 
+\end{equation}
+
+where $\gamma$ is usually set between 0.75 and 0.99 and is determines how many
+times each energy is sampled relative to the mean number of visits.  Difficulties
+can occur with this flatness criteria due to the fact that some energies on a
+given energy range might never be sampled~\cite{haber2014transition}.  The algorithm
+is briefly outlined below.
+
+
+
+\subsubsection{The TMMC Algorithm}
+
+We examine the TMMC
+
+\subsubsection{The OETMMC Algorithm}
+
+We examine the OETMMC
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
 
