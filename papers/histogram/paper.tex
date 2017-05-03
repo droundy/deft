@@ -14,7 +14,8 @@
 \title{Applying the optimized ensemble histogram method to the
   square-well liquid}
 
-\author{Jordan K. Pommerenck} \author{Michael A. Perlin} \author{David Roundy}
+\author{Jordan K. Pommerenck} \author{Michael A. Perlin} 
+\author{Tanner T. Simpson} \author{David J. Roundy}
 \affiliation{Department of Physics, Oregon State University,
   Corvallis, OR 97331}
 
@@ -99,7 +100,7 @@ only provides statistical information for a small number of energy
 states.  The bottom plot shows an even more serious issue: when
 running a simulation at a fixed temperature, it is possible to become
 frozen in a state that is far from the ground state, as happened in
-the $kT=0.1\epsilon$ simulation.
+the $k_{B}T=0.1\epsilon$ simulation.
 
 % \begin{table*}
 % \input{figs/scaling-table-ww130-ff30}
@@ -177,9 +178,9 @@ a flat histogram, or by optimizing the round-trip rate.  Both would be
 interesting to implement.
 
 One natural approach would use linear algebra.  If the normalized
-transition matrix is $T$, then the density of states is given by
+transition matrix is $\mathcal{T}$, then the density of states is given by
 \begin{equation}
-  \mathcal{D}(\varepsilon) = T\mathcal{D}(\varepsilon) 
+  \mathcal{D}(\varepsilon) = \mathcal{T}\mathcal{D}(\varepsilon) 
 \end{equation}
 By solving this equation for $\mathcal{D}$($\varepsilon$), we could find a 
 good approximation for $w$ to obtain a flat histogram.
@@ -330,7 +331,7 @@ reduces to the broad histogram method in the case of temperature going to
 infinity~\cite{wang1999transition}.  In the following subsections, we will briefly
 outline and describe each of the presented methods.
 
-\subsubsection{The Simple-Flat Algorithm}
+\subsubsection{The Simple-Flat (Multi-Canonical) Algorithm}
 
 We examine the Simple-Flat
 
@@ -341,7 +342,7 @@ methods~\cite{wang2001determining}.  While methods such as Metropolis Sampling a
 Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a 
 narrow distribution and require sampling at individual temperatures, the Wang-
 Landau algorithm uses a flat histogram and performs a random walk in energy space to
-determine the density of states.  Wang-Landau's major tenant is that when 
+determine the density of states~\cite{LandauMinSampling}.  Wang-Landau's major tenant is that when 
 counting the histogram $\mathcal{H}$($\varepsilon$), the energy occurences should 
 form a flat distribution.  The criteria for flat sampling is given by
 
@@ -350,18 +351,67 @@ form a flat distribution.  The criteria for flat sampling is given by
 	{\big\langle\mathcal{H}(\varepsilon)\big\rangle } 
 	> \gamma 
 \end{equation}
-
 where $\gamma$ is usually set between 0.75 and 0.99 and is determines how many
 times each energy is sampled relative to the mean number of visits.  Difficulties
 can occur with this flatness criteria due to the fact that some energies on a
 given energy range might never be sampled~\cite{haber2014transition}.  The algorithm
-is briefly outlined below.
+is briefly outlined below  
 
+\begin{equation}
+	\ln{\mathcal{H}_{t+1}(\varepsilon,N)}=\ln{\mathcal{H}_{t}(\varepsilon,N)}
+	+\ln{\mathcal{F}}
+\end{equation}
+\begin{equation}
+	\ln{\mathcal{F}_{k+1}}=\frac{u}{2}\ln{\mathcal{F}_{k}}
+\end{equation}
+for $u$ typically greater than 1 and $\mathcal{F}$ is the modification factor for
+the density of states.  We then accept a new configuration for the density of 
+states with a probability given by the following
 
+\begin{equation}
+	\mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) 
+	= \min[1,e^{\ln{\mathcal{H}(\varepsilon_i)}-\ln{\mathcal{H}(\varepsilon_j)}}]
+\end{equation}
+Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and 
+determined that choosing a large modification factor $\mathcal{F}_0 = e^{4}$ and
+rapidly reducing the factor by 10 during each step resulted in reduced statistical 
+error~\cite{zhou2005understanding}.
 
 \subsubsection{The TMMC Algorithm}
 
-We examine the TMMC
+The Transition Matrix Monte-Carlo algorithm is in the family of broad histogram
+methods~\cite{swendsen1999transition}.  The idea of the transition matrix was 
+first developed in the 1970s by Kieth Hastings~\cite{hastings1970monte}.  We begin
+by first initializing a transition matrix $\mathcal{T}_{ij}=0$ for all energies.  We
+next define the transition matrix and attempt to make a defined move which is either 
+accepted or rejected with an acceptance probability given by
+
+\begin{equation}
+\mathcal{T}_{ij} = \frac{\mathcal{T}_{d}(\varepsilon_j,-\Delta{\varepsilon})}
+{\sum\limits_{\Delta{\varepsilon}}\mathcal{T}_{d}
+(\varepsilon_j,\Delta{\varepsilon})}
+\end{equation}
+\begin{equation}
+\mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) = 
+\max\bigg[\frac{\mathcal{T}_{d}(\varepsilon_i,\Delta{\varepsilon})
++\mathcal{C}}{\mathcal{T}_{d}(\varepsilon_f,-\Delta{\varepsilon})
++\mathcal{C}}\frac{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d}
+(\varepsilon_i,\Delta{\varepsilon})+\mathcal{C}} 
+{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d}(\varepsilon_f,
+\Delta{\varepsilon})+\mathcal{C}},\exp{\bigg(-\frac{\Delta{\varepsilon}}
+{k_{B}T}\bigg)}\bigg]
+\end{equation}
+
+The Multi-Canonical (Flat histogram methods) ensemble is designed in such a way 
+so as to ensure visiting every energy level with equal 
+probability~\cite{swendsen1999transition}.  This would hardly be ideal using a
+Broad histogram approach where the acceptance rate should be related to the sampled
+energy.  While similar to the Multi-Canonical approach in that both methods sample
+over all energy space for a given temperature, the Broad histogram methods have the
+advantage of being able to sample over a larger temperature scale and away from the
+critical point~\cite{Broadhistogram,BroadHistogram2}.  This feature can allow the
+methods to solve more accurately and computationally efficient then Flat histogram
+methods.
 
 \subsubsection{The OETMMC Algorithm}
 
