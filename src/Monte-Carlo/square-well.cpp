@@ -1261,21 +1261,41 @@ op       difference is that we compute the diffusivity here *directly*
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions() {
   double *ln_dos = compute_ln_dos(transition_dos);
-  // Flatten the ln_dos at energies lower than the "converged-to state",
-  // since we don't trust ln_dos values down here.  The converged-to
-  // state is defined as where we have 10 pessimistic samples, but we
-  // may want to revisit this later!  FIXME
-  int converged = converged_to_state();
-  for (int i=converged; i<energy_levels; i++) {
-	  ln_dos[i] = ln_dos[converged];
+  if (false) {
+    // This is the slightly older hokey version, which should be
+    // deleted FIXME, when we are confident the new code actually
+    // works.  Note that we should also delete code declared in a
+    // FIXME below when we delete this.
+
+    // Flatten the ln_dos at energies lower than the "converged-to state",
+    // since we don't trust ln_dos values down here.  The converged-to
+    // state is defined as where we have 10 pessimistic samples, but we
+    // may want to revisit this later!  FIXME
+    int converged = converged_to_state();
+    for (int i=converged; i<energy_levels; i++) {
+      ln_dos[i] = ln_dos[converged];
+    }
   }
   // Above the max_entropy_state we level out the weights.
-  for (int i = 0; i < max_entropy_state; i++) {
+  for (int i = 0; i <= max_entropy_state; i++) {
     ln_energy_weights[i] = -ln_dos[max_entropy_state];
   }
   // Down to the min_important_energy we use the DOS for the weights.
   for (int i = max_entropy_state; i <= min_important_energy; i++) {
+    // FIXME the following is unused and should be deleted when we
+    // delete things based on the above FIXME.
     ln_energy_weights[i] = -ln_dos[i];
+
+    // The following is new code added to make the code more
+    // intelligently conservative when it comes to believing the
+    // density of states when there are poor statistics.
+
+    // the following is ln of 1/sqrt(ps), which is a fractional
+    // uncertainty in our count at energy i.
+    double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
+    double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
+    ln_energy_weights[i] = ln_energy_weights[i-1] - min(ln_dos_ratio,
+                                                        -ln_uncertainty);
   }
   // At lower energies, we use Boltzmann weights with the minimum
   // temperature we are interested in, except in cases where the
