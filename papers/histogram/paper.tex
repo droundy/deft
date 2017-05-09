@@ -284,16 +284,44 @@ does have detailed balance.
 
 \subsection{Motivation and Background}
 
-An accurate understanding of phase coexistence of liquid-vapor water-based systems is of increasing importance.  Chemical and biological molecular studies performed in water-based systems greatly benefit from an a priori knowledge of dynamics of the system.  Thus, considerable research has been done in recent years in developing models for the system and algorithms~\cite{wang1999transition, wang2002transition, swendsen1999transition, Broadhistogram, trebst2004optimizing, wessel2007optimized} for predicting phase coexistence from the thermodynamic properties of the system under study.  Popular models for the potential energy include:  the Double Gaussian-Core model~\cite{speranza2014phase, prestipino2014twofold}, the Gaussian-Core model~\cite{rane2013monte, krekelberg2009anomalous, mausbach2009solid}, the Soft-Sphere model~\cite{kreitzberg2015monte, torrie1977nonphysical}, and the Hard-Sphere model~\cite{hughes2013classical, lurie2014approach, krebs2014improved, schulte2015thesis, perlin2015thesis} for fluids.  While there exists a number of algorithms available for determining the thermodynamic properties of the system, among the most readily applied are molecular dynamics, density functional theory, and Monte-Carlo simulation.  In this work, we will discuss the Soft-sphere energy models and employ re-weighting histogram Monte-Carlo methods to solve for thermodynamic properties using the Soft-sphere model fluid.  
+An accurate understanding of phase coexistence of liquid-vapor water-based systems is of increasing importance.  Chemical and biological molecular studies performed in water-based systems greatly benefit from an a priori knowledge of dynamics of the system.  Thus, considerable research has been done in recent years in developing models for the system and algorithms~\cite{wang1999transition, wang2002transition, swendsen1999transition, Broadhistogram, trebst2004optimizing, wessel2007optimized} for predicting phase coexistence from the thermodynamic properties of the system under study.  Popular models for the potential energy include:  the Double Gaussian-Core model~\cite{speranza2014phase, prestipino2014twofold}, the Gaussian-Core model~\cite{rane2013monte, krekelberg2009anomalous, mausbach2009solid}, the Soft-Sphere model~\cite{kreitzberg2015monte, torrie1977nonphysical}, and the Hard-Sphere model~\cite{hughes2013classical, lurie2014approach, krebs2014improved, schulte2015thesis, perlin2015thesis} for fluids.  While there exists a number of algorithms available for determining the thermodynamic properties of the system, among the most readily applied are molecular dynamics, density functional theory, and Monte-Carlo simulation.  In this work, we will discuss the various energy models and employ re-weighting histogram Monte-Carlo methods to solve for thermodynamic properties using the Hard-sphere model fluid.  
  
-\subsection{Potential Energy Model}
+\subsection{Potential Energy Models}
 
-The literature presents a number of ways to treat the system of interest.  Particle interactions via the system potential is defined in order to initialize the calculation.  Current work in the literature favors the following as system models for liquid-vapor systems: Double Gaussian-Core model, Gaussian-Core model fluid, Soft-sphere model, and Hard-sphere model fluid.  The Soft-sphere model or Weeks-Chandler-Anderson Pair Potential~\cite{andersen1971relationship, weeks1971role} can be written as
+The literature presents a number of ways to treat the system of interest.  Particle interactions via the system potential is defined in order to initialize the calculation.  Current work in the literature favors the following as system models for liquid-vapor systems: Double Gaussian-Core model, Gaussian-Core model fluid, Soft-sphere model, and Hard-sphere model fluid.
+
+\subsubsection{Double Gaussian-Core Model}
+
+Double Gaussian-Core Model
+
+\begin{equation}
+\mathcal{V}_{\mathcal{DGC}}=\epsilon_1\exp\bigg(-\frac{r^2}{\sigma_1}\bigg)+\epsilon_2\exp\bigg(-\frac{(r-\xi)^2}{\sigma_2}\bigg)
+\end{equation}
+
+\subsubsection{Gaussian-Core Model}
+
+The Gaussian-Core Model
+
+\begin{equation}
+	\mathcal{V}_{\mathcal{GC}}=\epsilon\exp\bigg(-\frac{r^2}{\sigma}\bigg)
+\end{equation}
+  
+\subsubsection{The $\mathcal{WCA}$ Pair Potential}
+
+The Soft-sphere model or Weeks-Chandler-Anderson Pair Potential~\cite{andersen1971relationship, weeks1971role} can be written as
 \begin{equation}
 	\mathcal{V}_{\mathcal{WCA}}=\begin{cases}4\epsilon \bigg[\bigg(\frac{\sigma}{r}\bigg)^{12}-\bigg(\frac{\sigma}{r}\bigg)^{6}\bigg]+\epsilon & 0 < r<2^{1/6}\sigma\\0 & otherwise\end{cases} 
 \end{equation}
 where $\sigma$ represents the core separation of two spheres.  $r^{-12}$ is the reference potential while $r^{-6}$ is the system perturbation.  Two overlapping spheres experience this potential energy which is an extension of a Lennard-Jones potential with an offset $\epsilon$ such that the force experienced by the spheres is both attractive and repulsive~\cite{hoover1970soft}.  For low temperatures, the Soft-sphere potential essentially reduces to that of the Hard-sphere potential, since at low temperatures the liquid system now exhibits behavior closer to that of a solid.
 Scale invariance plays an important role when using Monte-Carlo simulations to determine thermodynamic properties of the system. As a result of this scale invariance, it is possible to determine the thermodynamic properties at a single temperature and extrapolate to determine properties at any temperature.  In the 1970s, various thermodynamic properties were determined for the Soft-sphere potential using Metropolis Monte-Carlo~\cite{andersen1971relationship, hansen1970phase}; however, these properties were not calculated with the family of re-weighting Histogram methods introduced somewhat later.
+
+\subsubsection{Square-Well Potential}
+
+This section could lead right into the next...
+
+\begin{equation}
+ \mathcal{V}_{\mathcal{DGC}}=\begin{cases} \infty & \lvert\textbf{r}\rvert< \sigma\\-\epsilon & \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 & \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
+\end{equation}
 
 \subsection{Histogram Monte-Carlo}
 
@@ -337,7 +365,7 @@ error~\cite{zhou2005understanding}.
 
 \subsubsection{The Multi-Canonical Algorithm}
 
-The
+This section still needs written!
 
 \subsubsection{The TMMC Algorithm}
 
@@ -380,7 +408,16 @@ properties can now be calculated from the density of states.
 
 \subsection{New Ideas for Re-Weighting}
 
-Our algorithm ideas
+With some editing and referencing, Section I could be rewritten and inserted here.
+There are actually a lot of cool ideas (...which likely won't make it into this paper) I came across in the literature (2013) talks about extrapolating Monte-Carlo to other temperatures and densities along isochors and isotherms.  (2017) talks about taking a Taylor expansion of the macrostate probability and updating in a histogram.  This was applied only to square-well fluid and allowed extrapolation from higher temperatures (at lower computational cost) to lower temperatures (higher computational cost).
+
+\section{Results}
+
+The results with discussion can go here!
+
+\section{Conclusion}
+
+A brief summary of what we have done and exciting take-away.
 
 %\section{Introduction}
 
