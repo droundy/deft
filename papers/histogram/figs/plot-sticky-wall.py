@@ -10,6 +10,10 @@ matplotlib.rc('text', usetex=True)
 
 import readnew
 
+if len(sys.argv) < 5:
+    print("Usage: python {} 1.3 0.22 100 10".format(sys.argv[0]))
+    exit(1)
+
 ww = float(sys.argv[1])
 #arg ww = [1.3]
 ff = float(sys.argv[2])

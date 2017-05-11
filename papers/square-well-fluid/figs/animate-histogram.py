@@ -10,6 +10,10 @@ matplotlib.rc('text', usetex=True)
 
 import readandcompute
 
+if len(sys.argv) < 4:
+    print("Usage: python {} lv ww1.30-ff0.22-100x10 tmi toe ...".format(sys.argv[0]))
+    exit(1)
+
 subdirname = sys.argv[1]
 filename = sys.argv[2]
 suffixes = sys.argv[3:]
