@@ -29,7 +29,7 @@ def mean_u_err(ww, ff, N, method, golden_u):
     toterr = 0.0
     numseeds = 0
     for seed in seeds:
-        t_u_cv_s_method = readandcompute.t_u_cv_s(ww, ff, N, method, seed)
+        t_u_cv_s_method = readandcompute.T_u_cv_s_minT(ww, ff, N, method, seed)
         if t_u_cv_s_method != None:
             du = abs((t_u_cv_s_method[1]-golden_u)[t_u_cv_s_method[0] > Tmax]).max()
             lw = 0.01
@@ -53,7 +53,7 @@ for golden_comp in all_goldens:
     ff = float(bits[2][2:])
     N = int(bits[3][1:])
     print 'ww = %g, ff = %g, N = %d' % (ww, ff, N)
-    t_u_cv_s = readandcompute.t_u_cv_s(ww, ff, N, golden)
+    t_u_cv_s = readandcompute.T_u_cv_s_minT(ww, ff, N, golden)
     if t_u_cv_s != None:
         plt.figure(2)
         plt.cla()

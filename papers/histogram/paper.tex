@@ -288,7 +288,12 @@ An accurate understanding of phase coexistence of liquid-vapor water-based syste
  
 \subsection{Potential Energy Models}
 
-The literature presents a number of ways to treat the system of interest.  Particle interactions via the system potential is defined in order to initialize the calculation.  Current work in the literature favors the following as system models for liquid-vapor systems: Double Gaussian-Core model, Gaussian-Core model fluid, Soft-sphere model, and Hard-sphere model fluid.
+The literature presents a number of ways to treat the system of 
+interest.  Particle interactions via the system potential is defined in 
+order to initialize the calculation.  Current work in the literature 
+favors the following as system models for liquid-vapor systems: Double 
+Gaussian-Core model, Gaussian-Core model fluid, Soft-sphere model, and 
+Hard-sphere model fluid.
 
 \subsubsection{Double Gaussian-Core Model}
 
@@ -308,12 +313,28 @@ The Gaussian-Core Model
   
 \subsubsection{The $\mathcal{WCA}$ Pair Potential}
 
-The Soft-sphere model or Weeks-Chandler-Anderson Pair Potential~\cite{andersen1971relationship, weeks1971role} can be written as
-\begin{equation}
+The Soft-sphere model or Weeks-Chandler-Anderson Pair 
+Potential~\cite{andersen1971relationship, weeks1971role} can be written 
+as \begin{equation}
 	\mathcal{V}_{\mathcal{WCA}}=\begin{cases}4\epsilon \bigg[\bigg(\frac{\sigma}{r}\bigg)^{12}-\bigg(\frac{\sigma}{r}\bigg)^{6}\bigg]+\epsilon & 0 < r<2^{1/6}\sigma\\0 & otherwise\end{cases} 
-\end{equation}
-where $\sigma$ represents the core separation of two spheres.  $r^{-12}$ is the reference potential while $r^{-6}$ is the system perturbation.  Two overlapping spheres experience this potential energy which is an extension of a Lennard-Jones potential with an offset $\epsilon$ such that the force experienced by the spheres is both attractive and repulsive~\cite{hoover1970soft}.  For low temperatures, the Soft-sphere potential essentially reduces to that of the Hard-sphere potential, since at low temperatures the liquid system now exhibits behavior closer to that of a solid.
-Scale invariance plays an important role when using Monte-Carlo simulations to determine thermodynamic properties of the system. As a result of this scale invariance, it is possible to determine the thermodynamic properties at a single temperature and extrapolate to determine properties at any temperature.  In the 1970s, various thermodynamic properties were determined for the Soft-sphere potential using Metropolis Monte-Carlo~\cite{andersen1971relationship, hansen1970phase}; however, these properties were not calculated with the family of re-weighting Histogram methods introduced somewhat later.
+\end{equation} where $\sigma$ represents the core separation of two 
+spheres.  $r^{-12}$ is the reference potential while $r^{-6}$ is the 
+system perturbation.  Two overlapping spheres experience this potential 
+energy which is an extension of a Lennard-Jones potential with an 
+offset $\epsilon$ such that the force experienced by the spheres is 
+both attractive and repulsive~\cite{hoover1970soft}. For low 
+temperatures, the Soft-sphere potential essentially reduces to that of 
+the Hard-sphere potential, since at low temperatures the liquid system 
+now exhibits behavior closer to that of a solid. Scale invariance plays 
+an important role when using Monte-Carlo simulations to determine 
+thermodynamic properties of the system. As a result of this scale 
+invariance, it is possible to determine the thermodynamic properties at 
+a single temperature and extrapolate to determine properties at any 
+temperature.  In the 1970s, various thermodynamic properties were 
+determined for the Soft-sphere potential using Metropolis 
+Monte-Carlo~\cite{andersen1971relationship, hansen1970phase}; however, 
+these properties were not calculated with the family of re-weighting 
+Histogram methods introduced somewhat later.
 
 \subsubsection{Square-Well Potential}
 
@@ -419,46 +440,46 @@ The results with discussion can go here!
 
 A brief summary of what we have done and exciting take-away.
 
+% I am going to edit the first section leaving the second as the original.
+
 \subsection{TMI Algorithm}
 
 Our Transition Matrix Initialization method (which needs a better
-name) uses the following algorithm to determine the weights.  The
-approach is to periodically recompute the weights during the
-simulation.  Updating the weights more frequency should not cause any
-trouble except the CPU time needed to compute the new weights.  For
-this reason, we try to only occasionally update the weights so we can
-focus our efforts on exploring new configurations.
+name) uses the following algorithm to determine the weights.  The method
+periodically recomputes the weights during the simulation.  Although no
+bottlenecks result when updating the weights more frequently, the
+algorithm will nonetheless see additional computational time.  Because
+of the potential to increase computational time, the algorithm
+infrequently but periodically updates the weights such that the central
+effort of the method allows focusing efforts on exploring new energy
+configurations.
 
-\subsubsection{High energies}
-At energies above the maximum in the density of states, we set
-the weights equal to the weight at the DOS maximum.  This avoids
-expending extra effort to equally sample states that are not favored
-at any positive temperature.
+\subsubsection{Weights at High Energy}
+At energies above the maximum in the density of states, we set the weights equal to the weight at the DOS maximum.  This avoids expending extra effort to equally sample states that are not favored at any positive temperature.
 
-\subsubsection{Interesting energies}
-At energies below the maximum, we would like to set the weight equal
-to the inverse of the density of states, \emph{unless} there are
-insufficient statistics to justify that.  We define a fractional
-uncertainty
+\subsubsection{Weights at Interesting Energy}
+At energies below the maximum, we would like to set the weight equal to the inverse of the density of states, \emph{unless} there are insufficient statistics to justify that.  We define a modification factor in terms of a fractional uncertainty
 \begin{align}
-  \epsilon(E) &= \frac{1}{\sqrt{N_s(E)}}
+  \mathcal{F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
 \end{align}
-where $N_s(E)$ is the number of round-trip samples taken at energy
-$E$.  We assume that our uncertainty in the ratio between the density
+where $N_s(\epsilon)$ is the number of round-trip samples taken at energy
+$\epsilon$.  We assume that our uncertainty in the ratio between the density
 of states at two adjascent energies is equal to this value, and then
 set the weight at each energy according to
 \begin{align}
-  w(E) &= w(E+1)\max\left(\frac1{\epsilon(E)},
+  \mathcal{W}_{E} &= \mathcal{W}_{E+1}\max\left(\frac1{\epsilon(E)},
   \frac{D(E)}{D(E+1)}\right)
   \\
-   &= w(E+1)\max\left(\frac1{\sqrt{N_s(E)}},
+   &= \mathcal{W}_{E+1}\max\left(\frac1{\sqrt{N_s(E)}},
   \frac{D(E)}{D(E+1)}\right)
 \end{align}
 
-\subsubsection{Low energies}
+\subsubsection{Weights at Low Energy}
 We define a minimum interesting temperature $T_{\min}$, and at low
 energies do some special stuff to avoid weighting things more
 strongly than a Boltzmann factor at $T_{\min}$ would do.
+
+% The original is below.
 
 \subsection{TMI Algorithm}
 
