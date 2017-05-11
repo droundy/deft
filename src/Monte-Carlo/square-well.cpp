@@ -1294,7 +1294,7 @@ void sw_simulation::update_weights_using_transitions() {
     // uncertainty in our count at energy i.
     double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
     double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
-    ln_energy_weights[i] = ln_energy_weights[i-1] - min(ln_dos_ratio,
+    ln_energy_weights[i] = ln_energy_weights[i-1] + min(-ln_dos_ratio,
                                                         -ln_uncertainty);
   }
   // At lower energies, we use Boltzmann weights with the minimum
