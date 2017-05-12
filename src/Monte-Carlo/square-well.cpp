@@ -1369,22 +1369,31 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
     printf("Unable to create file %s!\n", fname);
     exit(1);
   }
+  int greatest_dE = 0;
+  int least_dE = 0;
+  for (int i = 0; i < sw.energy_levels; i++) {
+    for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++) {
+      if (sw.transitions(i,de)) {
+        if (de < least_dE) least_dE = de;
+        if (de > greatest_dE) greatest_dE = de;
+      }
+    }
+  }
   sw.write_header(f);
   fprintf(f, "#       \tde\n");
   fprintf(f, "# energy");
-  for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++) {
+  for (int de = least_dE; de <= greatest_dE; de++) {
     fprintf(f, "\t%d", de);
   }
   fprintf(f, "\n");
   for(int i = 0; i < sw.energy_levels; i++) {
     bool have_i = false;
-    for (int de = -sw.biggest_energy_transition;
-         de <= sw.biggest_energy_transition; de++){
+    for (int de = least_dE; de <= greatest_dE; de++) {
       if (sw.transitions(i,de)) have_i = true;
     }
     if (have_i){
       fprintf(f, "%d", i);
-      for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++) {
+      for (int de = least_dE; de <= greatest_dE; de++) {
         fprintf(f, "\t%ld", sw.transitions(i, de));
       }
       fprintf(f, "\n");
@@ -1600,8 +1609,9 @@ void sw_simulation::initialize_transitions_file(const char *transitions_input_fi
       break;
     }
     if (!min_e) min_e = e;
-    for(int de = min_de; de <= -min_de; de++){
-      if (fscanf(transitions_infile,"%li",&transitions(e,de)) != 1) {
+    char nextc = 0; // keep going until we have reached the end of the line.
+    for (int de=min_de; nextc != '\n'; de++) {
+      if (fscanf(transitions_infile,"%li%c",&transitions(e,de), &nextc) != 2) {
         break;
       }
     }
