@@ -743,7 +743,25 @@ int main(int argc, const char *argv[]) {
       double time_for_N_iterations = took("first 10*N iterations");
       sw.estimated_time_per_iteration = time_for_N_iterations/10/sw.N;
       sw.set_min_important_energy();
+      int old_max_entropy_state = sw.max_entropy_state;
       sw.set_max_entropy_energy();
+      if (sw.max_entropy_state > old_max_entropy_state) {
+        // We are not converged yet, so let us zero out our density
+        // and rdf information.  The point is to not include the
+        // regular lattice data that we start with.  Eventually it
+        // would average out, but we don't really care to wait for
+        // that.
+        printf("We are not yet certain about max entropy: zero out density data!\n");
+        if (sw.walls==1) {
+          for (int i = 0; i < sw.energy_levels; i++)
+            for (int x_i = 0; x_i < density_bins; x_i++)
+              density_histogram[i][x_i] = 0;
+        } else if (sw.walls == 0) {
+          for (int i = 0; i < sw.energy_levels; i++)
+            for (int r_i = 0; r_i < g_bins; r_i++)
+              g_histogram[i][r_i] = 0;
+        }
+      }
       if (tmi) {
         sw.update_weights_using_transitions();
       } else if (toe) {
