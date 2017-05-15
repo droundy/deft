@@ -1289,13 +1289,19 @@ void sw_simulation::update_weights_using_transitions() {
     // The following is new code added to make the code more
     // intelligently conservative when it comes to believing the
     // density of states when there are poor statistics.
-
-    // the following is ln of 1/sqrt(ps), which is a fractional
-    // uncertainty in our count at energy i.
-    double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
-    double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
-    ln_energy_weights[i] = ln_energy_weights[i-1] + min(-ln_dos_ratio,
-                                                        -ln_uncertainty);
+    if (pessimistic_samples[i]) {
+      // the following is ln of 1/sqrt(ps), which is a fractional
+      // uncertainty in our count at energy i.
+      double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
+      double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
+      ln_energy_weights[i] = ln_energy_weights[i-1] + min(-ln_dos_ratio,
+                                                          -ln_uncertainty);
+    } else {
+      // This handles the case where we've never seen this energy
+      // before.  Just set its weight equal to that of the next higher
+      // energy.
+      ln_energy_weights[i] = ln_energy_weights[i-1];
+    }
   }
   // At lower energies, we use Boltzmann weights with the minimum
   // temperature we are interested in, except in cases where the
