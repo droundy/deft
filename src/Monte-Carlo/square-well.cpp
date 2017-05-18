@@ -1294,12 +1294,18 @@ void sw_simulation::update_weights_using_transitions(int version) {
   } else if (version == 2) {
     double slope = 0;
     int tangent_energy = 0;
-    for (int i = max_entropy_state+1; i <= min_important_energy; i++) {
+    for (int i = max_entropy_state+1; i <= energy_levels; i++) {
       // Here is a simpler approach.  We just use the ln_dos until it
       // becomes implausible, and then we extend linearly down with a
       // secant line in the log graph (tangent line would be more
       // agressive and probably also safe).
-      if (!slope && pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]
+      if (ln_dos[i] < ln_dos[i-1] - 1/min_T) {
+        // We have reached the minimum temperature we care about!  At
+        // lower energies, we will use Boltzmann weights with the
+        // minimum temperature we are interested in.
+        slope = 1/min_T;
+        tangent_energy = i-1;
+      } else if (!slope && pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]
           && (ln_dos[i]-ln_dos[i-1] < 0.5*log(pessimistic_samples[i]))) {
         ln_energy_weights[i] = -ln_dos[i];
       } else if (!slope) {
@@ -1310,16 +1316,6 @@ void sw_simulation::update_weights_using_transitions(int version) {
       if (slope) {
         ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
       }
-    }
-    if (!slope) {
-      tangent_energy = min_important_energy;
-      slope = 1/min_T;
-    }
-    // At lower energies, we use Boltzmann weights with the minimum
-    // temperature we are interested in (or the secant slope from
-    // above).
-    for (int i = min_important_energy+1; i < energy_levels; i++) {
-        ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
     }
   } else {
     printf("BAD TMI VERSION %d!@!!\n", version);
