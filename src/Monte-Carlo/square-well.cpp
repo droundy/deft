@@ -1316,7 +1316,7 @@ void sw_simulation::initialize_tmi() {
   } while(!finished_initializing(verbose));
 }
 
-// initialization with tmi
+// initialization with toe
 void sw_simulation::initialize_toe() {
   int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
   bool verbose = false;
