@@ -74,6 +74,7 @@ int main(int argc, const char *argv[]) {
 
   double fix_kT = 0;
   int tmi = false;
+  int tmi_version = 1;
   int toe = false;
   int tmmc = false;
   int generate_movies = false;
@@ -180,6 +181,8 @@ int main(int argc, const char *argv[]) {
      " rather than adjusted weights", "DOUBLE"},
     {"tmi", '\0', POPT_ARG_NONE, &tmi, 0,
      "Use transition matrix initialization", "BOOLEAN"},
+    {"tmi-version", '\0', POPT_ARG_INT, &tmi_version, 0,
+     "Use tmi version", "INT"},
     {"toe", '\0', POPT_ARG_NONE, &toe, 0,
      "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
@@ -371,9 +374,11 @@ int main(int argc, const char *argv[]) {
     if (fix_kT) {
       sprintf(method_tag, "-kT%g", fix_kT);
     } else if (tmi) {
-      sprintf(method_tag, "-tmi");
+      if (tmi_version == 1) sprintf(method_tag, "-tmi");
+      else sprintf(method_tag, "-tmi%d", tmi_version);
     } else if (toe) {
-      sprintf(method_tag, "-toe");
+      if (tmi_version == 1) sprintf(method_tag, "-toe");
+      else sprintf(method_tag, "-toe%d", tmi_version);
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else {
@@ -763,9 +768,9 @@ int main(int argc, const char *argv[]) {
         }
       }
       if (tmi) {
-        sw.update_weights_using_transitions();
+        sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
-        sw.optimize_weights_using_transitions();
+        sw.optimize_weights_using_transitions(tmi_version);
       }
       double time_to_update_weights = took("updating weights");
       printf("iterations per time for one update = %g\n", 10*sw.N*time_to_update_weights/time_for_N_iterations);
@@ -785,9 +790,9 @@ int main(int argc, const char *argv[]) {
       sw.set_min_important_energy();
       sw.set_max_entropy_energy();
       if (tmi) {
-        sw.update_weights_using_transitions();
+        sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
-        sw.optimize_weights_using_transitions();
+        sw.optimize_weights_using_transitions(tmi_version);
       }
     }
 
@@ -805,9 +810,9 @@ int main(int argc, const char *argv[]) {
       sw.set_min_important_energy();
       sw.set_max_entropy_energy();
       if (tmi) {
-        sw.update_weights_using_transitions();
+        sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
-        sw.optimize_weights_using_transitions();
+        sw.optimize_weights_using_transitions(tmi_version);
       }
       // Save transitions histogram and movie data.  This also sets
       // the transitions_movie_count to one beyond the current frame

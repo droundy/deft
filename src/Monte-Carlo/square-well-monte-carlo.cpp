@@ -92,6 +92,7 @@ int main(int argc, const char *argv[]) {
   int no_weights = false;
   double fix_kT = 0;
   int tmi = false;
+  int tmi_version = 1;
   int toe = false;
   int tmmc = false;
   int oetmmc = false;
@@ -238,6 +239,8 @@ int main(int argc, const char *argv[]) {
      " rather than adjusted weights", "DOUBLE"},
     {"tmi", '\0', POPT_ARG_NONE, &tmi, 0,
      "Use transition matrix initialization", "BOOLEAN"},
+    {"tmi-version", '\0', POPT_ARG_INT, &tmi_version, 0,
+     "Use tmi version", "INT"},
     {"toe", '\0', POPT_ARG_NONE, &toe, 0,
      "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
@@ -542,9 +545,11 @@ int main(int argc, const char *argv[]) {
     } else if (simple_flat) {
       sprintf(method_tag, "-simple_flat");
     } else if (tmi) {
-      sprintf(method_tag, "-tmi");
+      if (tmi_version == 1) sprintf(method_tag, "-tmi");
+      else sprintf(method_tag, "-tmi%d", tmi_version);
     } else if (toe) {
-      sprintf(method_tag, "-toe");
+      if (tmi_version == 1) sprintf(method_tag, "-toe");
+      else sprintf(method_tag, "-toe%d", tmi_version);
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (oetmmc) {
@@ -831,7 +836,7 @@ int main(int argc, const char *argv[]) {
     sw.initialize_transitions();
   } else if (oetmmc) {
     sw.initialize_transitions();
-    sw.optimize_weights_using_transitions();
+    sw.optimize_weights_using_transitions(tmi_version);
   }
 
   // If we wish to optimize the ensemble or set transition matrix weights, do so
@@ -852,7 +857,7 @@ int main(int argc, const char *argv[]) {
   } else if(transition_override){
     printf("\nOptimizing the weight array using the transition matrix!\n");
     sw.set_min_important_energy();
-    sw.optimize_weights_using_transitions();
+    sw.optimize_weights_using_transitions(tmi_version);
     took("Optimizing with tmmc");
   }
   sw.flush_weight_array();

@@ -188,8 +188,8 @@ struct sw_simulation {
 
   void initialize_simple_flat(int flat_update_factor);
 
-  void initialize_tmi();
-  void initialize_toe();
+  void initialize_tmi(int version=1);
+  void initialize_toe(int version=1);
   void initialize_transitions();
 
   void initialize_transitions_file(const char *transitions_input_filename);
@@ -197,9 +197,9 @@ struct sw_simulation {
   void write_header(FILE *f) const;
 
   double fractional_dos_precision;
-  void update_weights_using_transitions();
+  void update_weights_using_transitions(int version);
 
-  void optimize_weights_using_transitions();
+  void optimize_weights_using_transitions(int version);
 
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
