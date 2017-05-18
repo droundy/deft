@@ -1265,34 +1265,67 @@ void sw_simulation::update_weights_using_transitions(int version) {
   for (int i = 0; i <= max_entropy_state; i++) {
     ln_energy_weights[i] = -ln_dos[max_entropy_state];
   }
-  // Down to the min_important_energy we use the DOS for the weights.
-  for (int i = max_entropy_state; i < energy_levels; i++) {
-    // FIXME the following is unused and should be deleted when we
-    // delete things based on the above FIXME.
-    ln_energy_weights[i] = -ln_dos[i];
-
-    // The following is new code added to make the code more
-    // intelligently conservative when it comes to believing the
-    // density of states when there are poor statistics.
-    if (pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]) {
-      // the following is ln of 1/sqrt(ps), which is a fractional
-      // uncertainty in our count at energy i.
-      double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
-      double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
-      ln_energy_weights[i] = ln_energy_weights[i-1] + min(-ln_dos_ratio,
-                                                          -ln_uncertainty);
-    } else {
-      // This handles the case where we've never seen this energy
-      // before.  Just set its weight equal to that of the next higher
-      // energy.
-      ln_energy_weights[i] = ln_energy_weights[i-1];
+  if (version == 1) {
+    // Down to the min_important_energy we use the DOS for the weights.
+    for (int i = max_entropy_state; i < energy_levels; i++) {
+      // The following is new code added to make the code more
+      // intelligently conservative when it comes to believing the
+      // density of states when there are poor statistics.
+      if (pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]) {
+        // the following is ln of 1/sqrt(ps), which is a fractional
+        // uncertainty in our count at energy i.
+        double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
+        double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
+        ln_energy_weights[i] = ln_energy_weights[i-1] + min(-ln_dos_ratio,
+                                                            -ln_uncertainty);
+      } else {
+        // This handles the case where we've never seen this energy
+        // before.  Just set its weight equal to that of the next higher
+        // energy.
+        ln_energy_weights[i] = ln_energy_weights[i-1];
+      }
     }
-  }
-  // At lower energies, we use Boltzmann weights with the minimum
-  // temperature we are interested in, except in cases where the
-  // ln_dos is greater than the Boltzmann factor would predict.
-  for (int i = min_important_energy+1; i < energy_levels; i++) {
-    ln_energy_weights[i] = min(ln_energy_weights[i-1] + 1.0/min_T, ln_energy_weights[i]);
+    // At lower energies, we use Boltzmann weights with the minimum
+    // temperature we are interested in, except in cases where the
+    // ln_dos is greater than the Boltzmann factor would predict.
+    for (int i = min_important_energy+1; i < energy_levels; i++) {
+      ln_energy_weights[i] = min(ln_energy_weights[i-1] + 1.0/min_T, ln_energy_weights[i]);
+    }
+  } else if (version == 2) {
+    double slope = 0;
+    int tangent_energy = 0;
+    for (int i = max_entropy_state+1; i <= min_important_energy; i++) {
+      // Here is a simpler approach.  We just use the ln_dos until it
+      // becomes implausible, and then we extend linearly down with a
+      // secant line in the log graph (tangent line would be more
+      // agressive and probably also safe).
+      if (!slope && pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]
+          && (ln_dos[i]-ln_dos[i-1] < 0.5*log(pessimistic_samples[i]))) {
+        ln_energy_weights[i] = -ln_dos[i];
+      } else if (!slope) {
+        tangent_energy = i-1;
+        slope = (ln_dos[max_entropy_state] - ln_dos[tangent_energy])
+                       /(max_entropy_state-tangent_energy);
+      }
+      if (slope) {
+        ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
+      }
+    }
+    if (!slope) {
+      tangent_energy = min_important_energy;
+      slope = 1/min_T;
+    }
+    // At lower energies, we use Boltzmann weights with the minimum
+    // temperature we are interested in (or the secant slope from
+    // above).
+    for (int i = min_important_energy+1; i < energy_levels; i++) {
+        ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
+    }
+  } else {
+    printf("BAD TMI VERSION %d!@!!\n", version);
+    fprintf(stderr, "BAD TMI VERSION %d!@!!\n", version);
+    fflush(stdout);
+    exit(1);
   }
   delete[] ln_dos;
 }

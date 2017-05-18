@@ -374,9 +374,11 @@ int main(int argc, const char *argv[]) {
     if (fix_kT) {
       sprintf(method_tag, "-kT%g", fix_kT);
     } else if (tmi) {
-      sprintf(method_tag, "-tmi");
+      if (tmi_version == 1) sprintf(method_tag, "-tmi");
+      else sprintf(method_tag, "-tmi%d", tmi_version);
     } else if (toe) {
-      sprintf(method_tag, "-toe");
+      if (tmi_version == 1) sprintf(method_tag, "-toe");
+      else sprintf(method_tag, "-toe%d", tmi_version);
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else {

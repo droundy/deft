@@ -22,12 +22,17 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
 
+seed = 3
+
 if 'tmmc' in sys.argv:
     method = ' --tmmc'
     method_name = 'tmmc'
 elif 'toe' in sys.argv:
     method = ' --toe'
     method_name = 'toe'
+elif 'tmi2' in sys.argv:
+    method = ' --tmi --tmi-version=2'
+    method_name = 'tmi2'
 else:
     method = ' --tmi'
     method_name = 'tmi'
@@ -38,6 +43,8 @@ mem_estimate = 10 + 0.15*N # it actually also depends on ww, but I'm ignoring th
 
 datadir = 'papers/histogram/data/lv'
 fname = 'ww%.2f-ff%.2f-%gx%g-%s' % (ww, ff, lenx, lenyz, method_name)
+if seed != 0:
+    fname += '-s%d' % seed
 
 os.system('mkdir -p ' + datadir)
 
@@ -60,6 +67,8 @@ cmd += method
 cmd += ' --min-T %g --translation-scale 0.05' % min_T
 
 cmd += ' --dir %s --filename %s' % (datadir, fname)
+
+cmd += ' --seed=%d' % seed
 
 cmd += " >> %s/%s.out 2>&1 &" % (datadir, fname)
 
