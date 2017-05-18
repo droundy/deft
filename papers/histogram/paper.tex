@@ -284,7 +284,28 @@ does have detailed balance.
 
 \subsection{Motivation and Background}
 
-An accurate understanding of phase coexistence of liquid-vapor water-based systems is of increasing importance.  Chemical and biological molecular studies performed in water-based systems greatly benefit from an a priori knowledge of dynamics of the system.  Thus, considerable research has been done in recent years in developing models for the system and algorithms~\cite{wang1999transition, wang2002transition, swendsen1999transition, Broadhistogram, trebst2004optimizing, wessel2007optimized} for predicting phase coexistence from the thermodynamic properties of the system under study.  Popular models for the potential energy include:  the Double Gaussian-Core model~\cite{speranza2014phase, prestipino2014twofold}, the Gaussian-Core model~\cite{rane2013monte, krekelberg2009anomalous, mausbach2009solid}, the Soft-Sphere model~\cite{kreitzberg2015monte, torrie1977nonphysical}, and the Hard-Sphere model~\cite{hughes2013classical, lurie2014approach, krebs2014improved, schulte2015thesis, perlin2015thesis} for fluids.  While there exists a number of algorithms available for determining the thermodynamic properties of the system, among the most readily applied are molecular dynamics, density functional theory, and Monte-Carlo simulation.  In this work, we will discuss the various energy models and employ re-weighting histogram Monte-Carlo methods to solve for thermodynamic properties using the Hard-sphere model fluid.  
+An accurate understanding of phase coexistence of liquid-vapor 
+water-based systems is of increasing importance.  Chemical and 
+biological molecular studies performed in water-based systems greatly 
+benefit from an a priori knowledge of dynamics of the system.  Thus, 
+considerable research has been done in recent years in developing 
+models for the system and algorithms~\cite{wang1999transition, 
+wang2002transition, swendsen1999transition, Broadhistogram, 
+trebst2004optimizing, wessel2007optimized} for predicting phase 
+coexistence from the thermodynamic properties of the system under 
+study.  Popular models for the potential energy include:  the Double 
+Gaussian-Core model~\cite{speranza2014phase, prestipino2014twofold}, 
+the Gaussian-Core model~\cite{rane2013monte, krekelberg2009anomalous, 
+mausbach2009solid}, the Soft-Sphere model~\cite{kreitzberg2015monte, 
+torrie1977nonphysical}, and the Hard-Sphere 
+model~\cite{hughes2013classical, lurie2014approach, krebs2014improved, 
+schulte2015thesis, perlin2015thesis} for fluids.  While there exists a 
+number of algorithms available for determining the thermodynamic 
+properties of the system, among the most readily applied are molecular 
+dynamics, density functional theory, and Monte-Carlo simulation.  In 
+this work, we will discuss the various energy models and employ 
+re-weighting histogram Monte-Carlo methods to solve for thermodynamic 
+properties using the Hard-sphere model fluid.  
  
 \subsection{Potential Energy Models}
 
@@ -316,7 +337,9 @@ The Gaussian-Core Model
 The Soft-sphere model or Weeks-Chandler-Anderson Pair 
 Potential~\cite{andersen1971relationship, weeks1971role} can be written 
 as \begin{equation}
-	\mathcal{V}_{\mathcal{WCA}}=\begin{cases}4\epsilon \bigg[\bigg(\frac{\sigma}{r}\bigg)^{12}-\bigg(\frac{\sigma}{r}\bigg)^{6}\bigg]+\epsilon & 0 < r<2^{1/6}\sigma\\0 & otherwise\end{cases} 
+	\mathcal{V}_{\mathcal{WCA}}=\begin{cases}4\epsilon 
+	\bigg[\bigg(\frac{\sigma}{r}\bigg)^{12}-\bigg(\frac{\sigma}{r}\bigg)^{6}\bigg]+\epsilon 
+	& 0 < r<2^{1/6}\sigma\\0 & otherwise\end{cases} 
 \end{equation} where $\sigma$ represents the core separation of two 
 spheres.  $r^{-12}$ is the reference potential while $r^{-6}$ is the 
 system perturbation.  Two overlapping spheres experience this potential 
@@ -341,12 +364,33 @@ Histogram methods introduced somewhat later.
 This section could lead right into the next...
 
 \begin{equation}
- \mathcal{V}_{\mathcal{SW}}=\begin{cases} \infty & \lvert\textbf{r}\rvert< \sigma\\-\epsilon & \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 & \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
+ \mathcal{V}_{\mathcal{SW}}=\begin{cases} \infty & 
+ \lvert\textbf{r}\rvert< \sigma\\-\epsilon & 
+ \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 & 
+ \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
 \end{equation}
 
 \subsection{Histogram Monte-Carlo}
 
-While Monte-Carlo simulations have been performed on systems modeled with a Soft-sphere potential~\cite{andersen1971relationship, hansen1970phase, sun2013efficient, ghoufi2016computer} since the 1970s, we incorporate several new ideas using re-weighting Histogram methods that have not been investigated.  A major motivation for using Histogram methods is that the algorithms give quantitative estimates for the density of states $\mathcal{D}$($\varepsilon$).  Once the density of states is known, it is possible to calculate free energies and heat capacities, as well as, other thermodynamic properties.  In this work, we will calculate the free energy of the system $\mathcal{F}$, the heat capacity $\mathcal{C}$, and the entropy $\mathcal{S}$.  For the simulations, a particular well-width $\lambda=1.3$, packing-fraction $\eta=0.22$, and number of particles $\mathcal{N}$.  In this work, we compare the following re-weighting Histogram methods:  Wang-Landau, Multi-Canonical (Simple-Flat), Transition Matrix Monte-Carlo (TMMC), and Optimized Ensemble Transition Matrix Monte-Carlo (OETMMC).  In the following section, we will discuss these techniques, as well as, our implementation scheme for the Histogram algorithms.
+While Monte-Carlo simulations have been performed on systems modeled 
+with a Soft-sphere potential~\cite{andersen1971relationship, 
+hansen1970phase, sun2013efficient, ghoufi2016computer} since the 1970s, 
+we incorporate several new ideas using re-weighting Histogram methods 
+that have not been investigated.  A major motivation for using 
+Histogram methods is that the algorithms give quantitative estimates 
+for the density of states $\mathcal{D}$($\varepsilon$).  Once the 
+density of states is known, it is possible to calculate free energies 
+and heat capacities, as well as, other thermodynamic properties.  In 
+this work, we will calculate the internal energy of the system 
+$\mathcal{U}$, the heat capacity $\mathcal{C}$, and the entropy 
+$\mathcal{S}$.  For the simulations, a particular well-width 
+$\lambda=1.3$, packing-fraction $\eta=0.22$, and number of particles 
+$\mathcal{N}$.  In this work, we compare the following re-weighting 
+Histogram methods:  Wang-Landau, Multi-Canonical (Simple-Flat), 
+Transition Matrix Monte-Carlo (TMMC), and Optimized Ensemble Transition 
+Matrix Monte-Carlo (OETMMC).  In the following section, we will discuss 
+these techniques, as well as, our implementation scheme for the 
+Histogram algorithms.
 
 \section{Methods}
 
@@ -354,7 +398,17 @@ While Monte-Carlo simulations have been performed on systems modeled with a Soft
 
 \subsubsection{Wang-Landau Algorithm}
 
-The Wang-Landau algorithm is a powerful re-weighting Histogram method developed and refined well into 21st century~\cite{wang2001determining}.  While methods such as Metropolis Sampling and Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution and require sampling at individual temperatures, the Wang-Landau algorithm uses a flat histogram and performs a random walk in energy space to determine the density of states~\cite{LandauMinSampling}.  Wang-Landau's major tenant is that when counting the histogram $\mathcal{H}$($\varepsilon$), the energy occurences should form a flat distribution.  The criteria for flat sampling is given by
+The Wang-Landau algorithm is a powerful re-weighting Histogram method 
+developed and refined well into 21st 
+century~\cite{wang2001determining}.  While methods such as Metropolis 
+Sampling and Swendsen-Wang cluster 
+flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution 
+and require sampling at individual temperatures, the Wang-Landau 
+algorithm uses a flat histogram and performs a random walk in energy 
+space to determine the density of states~\cite{LandauMinSampling}.  
+Wang-Landau's major tenant is that when counting the histogram 
+$\mathcal{H}$($\varepsilon$), the energy occurences should form a flat 
+distribution.  The criteria for flat sampling is given by 
 \begin{equation}
 	\frac{\min_{\varepsilon} \mathcal{H}(\varepsilon)}
 	{\big\langle\mathcal{H}(\varepsilon)\big\rangle } 
@@ -390,32 +444,55 @@ This section still needs written!
 
 \subsubsection{The TMMC Algorithm}
 
-The Transition Matrix Monte-Carlo algorithm is often used in the family of broad histogram methods~\cite{swendsen1999transition}.  In fact, without the idea of a transition matrix detailed balance cannot be preserved for the Broad histogram method~\cite{wang1999broad}.  The sampling dynamics eventually produce a histogram that is flat when using the transition matrix.  The idea of the transition matrix was first developed in the 1970s by Kieth Hastings~\cite{hastings1970monte}.  We begin by first initializing a transition matrix $\mathcal{T}_{ij}=0$ for all energies.  We next define the transition matrix and attempt to make a defined move which is either accepted or rejected with an acceptance probability given by
-\begin{equation}
-\mathcal{T}_{ij} = \frac{\mathcal{T}_{d}(\varepsilon_j,-\Delta{\varepsilon})}
-{\sum\limits_{\Delta{\varepsilon}}\mathcal{T}_{d}
-(\varepsilon_j,\Delta{\varepsilon})}
-\end{equation}
-\begin{equation}
-\begin{split}
-\mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) = 
-\max\bigg[\frac{\mathcal{T}_{d}(\varepsilon_i,\Delta{\varepsilon})
-+\mathcal{C}}{\mathcal{T}_{d}(\varepsilon_f,-\Delta{\varepsilon})
-+\mathcal{C}}\\\frac{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d}
+The Transition Matrix Monte-Carlo algorithm is often used in the family 
+of broad histogram methods~\cite{swendsen1999transition}.  In fact, 
+without the idea of a transition matrix detailed balance cannot be 
+preserved for the Broad histogram method~\cite{wang1999broad}.  The 
+sampling dynamics eventually produce a histogram that is flat when 
+using the transition matrix.  The idea of the transition matrix was 
+first developed in the 1970s by Kieth 
+Hastings~\cite{hastings1970monte}.  We begin by first initializing a 
+transition matrix $\mathcal{T}_{ij}=0$ for all energies.  We next 
+define the transition matrix and attempt to make a defined move which 
+is either accepted or rejected with an acceptance probability given by 
+\begin{equation} \mathcal{T}_{ij} = 
+\frac{\mathcal{T}_{d}(\varepsilon_j,-\Delta{\varepsilon})} 
+{\sum\limits_{\Delta{\varepsilon}}\mathcal{T}_{d} 
+(\varepsilon_j,\Delta{\varepsilon})} \end{equation} \begin{equation} 
+\begin{split} \mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) = 
+\max\bigg[\frac{\mathcal{T}_{d}(\varepsilon_i,\Delta{\varepsilon}) 
++\mathcal{C}}{\mathcal{T}_{d}(\varepsilon_f,-\Delta{\varepsilon}) 
++\mathcal{C}}\\\frac{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d} 
 (\varepsilon_i,\Delta{\varepsilon})+\mathcal{C}} 
-{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d}(\varepsilon_f,
-\Delta{\varepsilon})+\mathcal{C}},\exp{\bigg(-\frac{\Delta{\varepsilon}}
-{k_{B}T}\bigg)}\bigg]
-\end{split}
-\end{equation}
-The Multi-Canonical (Flat histogram methods) ensemble is designed in such a way so as to ensure visiting every energy level with equal probability~\cite{swendsen1999transition}.  This would hardly be ideal using a Broad histogram approach where the acceptance rate should be related to the sampled energy.  While similar to the Multi-Canonical approach in that both methods sample over all energy space for a given temperature, the Broad histogram methods have the advantage of being able to sample over a larger temperature scale and away from the critical point~\cite{Broadhistogram,BroadHistogram2}.  This feature can allow the methods to solve more accurately and computationally efficient then Flat histogram methods.
+{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d}(\varepsilon_f, 
+\Delta{\varepsilon})+\mathcal{C}},\exp{\bigg(-\frac{\Delta{\varepsilon}} 
+{k_{B}T}\bigg)}\bigg] \end{split} \end{equation} The Multi-Canonical 
+(Flat histogram methods) ensemble is designed in such a way so as to 
+ensure visiting every energy level with equal 
+probability~\cite{swendsen1999transition}.  This would hardly be ideal 
+using a Broad histogram approach where the acceptance rate should be 
+related to the sampled energy.  While similar to the Multi-Canonical 
+approach in that both methods sample over all energy space for a given 
+temperature, the Broad histogram methods have the advantage of being 
+able to sample over a larger temperature scale and away from the 
+critical point~\cite{Broadhistogram,BroadHistogram2}.  This feature can 
+allow the methods to solve more accurately and computationally 
+efficient then Flat histogram methods.
 
 \subsubsection{The OETMMC Algorithm}
 
-The Optimized Ensemble method has similar features to the TMMC method.  In  addition, it re-weights the histogram such that unlikely (not-probable) transitions are not equally favored.  This allows the simulation low-energy sampling rate to maximized.  We outline an approach to updating the weights $\mathcal{W}_{i}$ based on the density of states $\mathcal{D}(\varepsilon)$~\cite{trebst2004optimizing,wessel2007optimized}.  We begin the algorithm by starting with the weights proportional to the reciprocal of the density of states.  Next, enter a loop which has the purpose of calculating a fraction
-$\chi(\eta)$ in terms of histograms $\mathcal{H}_{+}(\eta)$ and $\mathcal{H}_{-}(\eta)$ and updating the
-global histogram $\mathcal{H}(\varepsilon)$.
-\begin{equation}
+The Optimized Ensemble method has similar features to the TMMC method.  
+In  addition, it re-weights the histogram such that unlikely 
+(not-probable) transitions are not equally favored.  This allows the 
+simulation low-energy sampling rate to maximized.  We outline an 
+approach to updating the weights $\mathcal{W}_{i}$ based on the density 
+of states 
+$\mathcal{D}(\varepsilon)$~\cite{trebst2004optimizing,wessel2007optimized}.  
+We begin the algorithm by starting with the weights proportional to the 
+reciprocal of the density of states.  Next, enter a loop which has the 
+purpose of calculating a fraction $\chi(\eta)$ in terms of histograms 
+$\mathcal{H}_{+}(\eta)$ and $\mathcal{H}_{-}(\eta)$ and updating the 
+global histogram $\mathcal{H}(\varepsilon)$. \begin{equation}
 	\chi = \frac{\mathcal{H}_{+}(\eta)}{\mathcal{H}_{+}(\eta)+\mathcal{H}_{-}(\eta)}
 \end{equation}
 We next update the statistical weights and calculate a new acceptance probability.
@@ -444,34 +521,41 @@ A brief summary of what we have done and exciting take-away.
 
 \subsection{TMI Algorithm}
 
-Our Transition Matrix Initialization method (which needs a better
-name) uses the following algorithm to determine the weights.  The method
-periodically recomputes the weights during the simulation.  Although no
-bottlenecks result when updating the weights more frequently, the
-algorithm will nonetheless see additional computational time.  Because
+Our proposed Transition Matrix Fractional Uncertainty Weighting  
+method (TMFUW???) uses the following algorithm to determine the histogram weights.  
+The method periodically recomputes the weights during the simulation.  Although 
+no bottlenecks result when updating the weights more frequently, the
+algorithm will nonetheless introduce additional computational time.  Because
 of the potential to increase computational time, the algorithm
 infrequently but periodically updates the weights such that the central
 effort of the method allows focusing efforts on exploring new energy
 configurations.
 
 \subsubsection{Weights at High Energy}
-At energies above the maximum in the density of states, we set the weights equal to the weight at the DOS maximum.  This avoids expending extra effort to equally sample states that are not favored at any positive temperature.
+At energies above the maximum in the density of states, the method sets the weights 
+equal to the weight at the density of states maximum.  This avoids expending 
+extra computational time on equally sampling states that are not favored at any 
+positive temperature.
 
 \subsubsection{Weights at Interesting Energy}
-At energies below the maximum, we would like to set the weight equal to the inverse of the density of states, \emph{unless} there are insufficient statistics to justify that.  We define a modification factor in terms of a fractional uncertainty
+At energies below the maximum, the method attempts to set the weight equal to the 
+inverse of the density of states, \emph{unless} there are insufficient statistics 
+to justify this.  In order to determine when sufficient statistics have been reached,
+it becomes neccessary to define a modifcation factor, in this case, in terms of a 
+fractional uncertainty
 \begin{align}
   \mathcal{F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
 \end{align}
-where $N_s(\epsilon)$ is the number of round-trip samples taken at energy
+where $N_s(\epsilon)$ is the number of round-trip samples taken at an energy
 $\epsilon$.  We assume that our uncertainty in the ratio between the density
-of states at two adjascent energies is equal to this value, and then
-set the weight at each energy according to
+of states at two adjacent energies is equal to this value.  The weight at each
+energy can then be set according to
 \begin{align}
-  \mathcal{W}_{E} &= \mathcal{W}_{E+1}\max\left(\frac1{\epsilon(E)},
-  \frac{D(E)}{D(E+1)}\right)
+  \mathcal{W}_{\epsilon} &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\mathcal{F}
+  (\epsilon)},\frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
   \\
-   &= \mathcal{W}_{E+1}\max\left(\frac1{\sqrt{N_s(E)}},
-  \frac{D(E)}{D(E+1)}\right)
+   &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\sqrt{N_s(\epsilon)}},
+  \frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
 \end{align}
 
 \subsubsection{Weights at Low Energy}
