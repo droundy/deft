@@ -22,7 +22,7 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
 
-seed = 3
+seed = 0
 
 if 'tmmc' in sys.argv:
     method = ' --tmmc'
