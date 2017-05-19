@@ -46,8 +46,8 @@ lines = ['-', '--', ':',]
 
 first_method = True
 the_first_method = ''
-first_temperature = [True, True, True]
-methods = ['-tmi', '-toe', '-tmmc', ]
+first_temperature = [True, True, True, True]
+methods = ['-tmi2','tmi', '-toe', '-tmmc', ]
 for i in range(len(methods)):
     method = methods[i]
     fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww,ff,lenx,lenyz,method)
