@@ -1299,19 +1299,21 @@ void sw_simulation::update_weights_using_transitions(int version) {
       // becomes implausible, and then we extend linearly down with a
       // secant line in the log graph (tangent line would be more
       // agressive and probably also safe).
-      if (ln_dos[i] < ln_dos[i-1] - 1/min_T) {
-        // We have reached the minimum temperature we care about!  At
-        // lower energies, we will use Boltzmann weights with the
-        // minimum temperature we are interested in.
-        slope = 1/min_T;
-        tangent_energy = i-1;
-      } else if (!slope && pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]
-          && (ln_dos[i]-ln_dos[i-1] < 0.5*log(pessimistic_samples[i]))) {
-        ln_energy_weights[i] = -ln_dos[i];
-      } else if (!slope) {
-        tangent_energy = i-1;
-        slope = (ln_dos[max_entropy_state] - ln_dos[tangent_energy])
-                       /(max_entropy_state-tangent_energy);
+      if (!slope) {
+        if (ln_dos[i] < ln_dos[i-1] - 1/min_T) {
+          // We have reached the minimum temperature we care about!  At
+          // lower energies, we will use Boltzmann weights with the
+          // minimum temperature we are interested in.
+          slope = 1/min_T;
+          tangent_energy = i-1;
+        } else if (pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]
+                   && (ln_dos[i]-ln_dos[i-1] < 0.5*log(pessimistic_samples[i]))) {
+          ln_energy_weights[i] = -ln_dos[i];
+        } else {
+          tangent_energy = i-1;
+          slope = (ln_dos[max_entropy_state] - ln_dos[tangent_energy])
+            /(max_entropy_state-tangent_energy);
+        }
       }
       if (slope) {
         ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
