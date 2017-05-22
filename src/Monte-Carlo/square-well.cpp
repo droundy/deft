@@ -1306,7 +1306,7 @@ void sw_simulation::update_weights_using_transitions(int version) {
           // minimum temperature we are interested in.
           slope = 1/min_T;
           tangent_energy = i-1;
-        } else if (pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]
+        } else if (pessimistic_samples[i] > 1 && ln_dos[i] < ln_dos[i-1]
                    && (ln_dos[i]-ln_dos[i-1] < 0.5*log(pessimistic_samples[i]))) {
           ln_energy_weights[i] = -ln_dos[i];
         } else {
