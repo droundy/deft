@@ -563,7 +563,19 @@ We define a minimum interesting temperature $T_{\min}$, and at low
 energies do some special stuff to avoid weighting things more
 strongly than a Boltzmann factor at $T_{\min}$ would do.
 
-% The original is below.
+\subsection{GC-TMMC Algorithm}
+
+Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and 
+particle number of the system to fluctuate while holding the chemical potential,
+volume, and temperature constant.  The algorithm boasts a lower statistical noise 
+than conventional GCMC due to its incorporation of a transition matrix to estimate
+ensemble averages.  The steps for the algorithm are outlined below:
+
+\subsubsection{Define how particles can be inserted/removed}
+
+We define
+
+% The original TMI Algorithm text is below.
 
 \subsection{TMI Algorithm}
 
