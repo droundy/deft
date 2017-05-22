@@ -1300,14 +1300,14 @@ void sw_simulation::update_weights_using_transitions(int version) {
       // secant line in the log graph (tangent line would be more
       // agressive and probably also safe).
       if (!slope) {
-        if (ln_dos[i] < ln_dos[i-1] - 1/min_T) {
+        if (ln_dos[i-1] - ln_dos[i] > 1/min_T) {
           // We have reached the minimum temperature we care about!  At
           // lower energies, we will use Boltzmann weights with the
           // minimum temperature we are interested in.
-          slope = 1/min_T;
+          slope = -1/min_T;
           tangent_energy = i-1;
-        } else if (pessimistic_samples[i] > 1 && ln_dos[i] < ln_dos[i-1]
-                   && (ln_dos[i]-ln_dos[i-1] < 0.5*log(pessimistic_samples[i]))) {
+        } else if (ln_dos[i] < ln_dos[i-1]
+                   && ln_dos[i-1]-ln_dos[i] < 0.5*log(pessimistic_samples[i]) ) {
           ln_energy_weights[i] = -ln_dos[i];
         } else {
           tangent_energy = i-1;
