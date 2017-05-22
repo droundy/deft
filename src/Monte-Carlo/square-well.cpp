@@ -1040,7 +1040,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
         // We throw away the weight array that we just accumulated,
         // and replace it with one computed using the transition
         // matrix we have so far accumulated.
-        update_weights_using_transitions();
+        update_weights_using_transitions(1);
       }
 
       // repeat until terminal condition is met,
@@ -1059,7 +1059,7 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
   }
 
   if (use_transions_with_wl) {
-    update_weights_using_transitions();
+    update_weights_using_transitions(1);
   }
 
   initialize_canonical(min_T,min_important_energy);
@@ -1213,11 +1213,11 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
 /* This method implements the optimized ensemble using the transition
    matrix information.  This should give a similar set of weights to
    the optimized_ensemble approach. */
-void sw_simulation::optimize_weights_using_transitions() {
+void sw_simulation::optimize_weights_using_transitions(int version) {
   // Assume that we already *have* a reasonable set of weights (with
   // which to compute the diffusivity), and that we have already
   // defined the min_important_energy.
-  update_weights_using_transitions();
+  update_weights_using_transitions(version);
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   double diffusivity = 1;
@@ -1259,61 +1259,77 @@ op       difference is that we compute the diffusivity here *directly*
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions() {
+void sw_simulation::update_weights_using_transitions(int version) {
   double *ln_dos = compute_ln_dos(transition_dos);
-  if (false) {
-    // This is the slightly older hokey version, which should be
-    // deleted FIXME, when we are confident the new code actually
-    // works.  Note that we should also delete code declared in a
-    // FIXME below when we delete this.
-
-    // Flatten the ln_dos at energies lower than the "converged-to state",
-    // since we don't trust ln_dos values down here.  The converged-to
-    // state is defined as where we have 10 pessimistic samples, but we
-    // may want to revisit this later!  FIXME
-    int converged = converged_to_state();
-    for (int i=converged; i<energy_levels; i++) {
-      ln_dos[i] = ln_dos[converged];
-    }
-  }
   // Above the max_entropy_state we level out the weights.
   for (int i = 0; i <= max_entropy_state; i++) {
     ln_energy_weights[i] = -ln_dos[max_entropy_state];
   }
-  // Down to the min_important_energy we use the DOS for the weights.
-  for (int i = max_entropy_state; i <= min_important_energy; i++) {
-    // FIXME the following is unused and should be deleted when we
-    // delete things based on the above FIXME.
-    ln_energy_weights[i] = -ln_dos[i];
-
-    // The following is new code added to make the code more
-    // intelligently conservative when it comes to believing the
-    // density of states when there are poor statistics.
-    if (pessimistic_samples[i]) {
-      // the following is ln of 1/sqrt(ps), which is a fractional
-      // uncertainty in our count at energy i.
-      double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
-      double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
-      ln_energy_weights[i] = ln_energy_weights[i-1] + min(-ln_dos_ratio,
-                                                          -ln_uncertainty);
-    } else {
-      // This handles the case where we've never seen this energy
-      // before.  Just set its weight equal to that of the next higher
-      // energy.
-      ln_energy_weights[i] = ln_energy_weights[i-1];
+  if (version == 1) {
+    // Down to the min_important_energy we use the DOS for the weights.
+    for (int i = max_entropy_state; i < energy_levels; i++) {
+      // The following is new code added to make the code more
+      // intelligently conservative when it comes to believing the
+      // density of states when there are poor statistics.
+      if (pessimistic_samples[i] && ln_dos[i] < ln_dos[i-1]) {
+        // the following is ln of 1/sqrt(ps), which is a fractional
+        // uncertainty in our count at energy i.
+        double ln_uncertainty = -0.5*log(pessimistic_samples[i]);
+        double ln_dos_ratio = ln_dos[i] - ln_dos[i-1];
+        ln_energy_weights[i] = ln_energy_weights[i-1] + min(-ln_dos_ratio,
+                                                            -ln_uncertainty);
+      } else {
+        // This handles the case where we've never seen this energy
+        // before.  Just set its weight equal to that of the next higher
+        // energy.
+        ln_energy_weights[i] = ln_energy_weights[i-1];
+      }
     }
-  }
-  // At lower energies, we use Boltzmann weights with the minimum
-  // temperature we are interested in, except in cases where the
-  // ln_dos is greater than the Boltzmann factor would predict..
-  for (int i = min_important_energy+1; i < energy_levels; i++) {
-    ln_energy_weights[i] = -max(-ln_energy_weights[i-1] - 1.0/min_T, ln_dos[i]);
+    // At lower energies, we use Boltzmann weights with the minimum
+    // temperature we are interested in, except in cases where the
+    // ln_dos is greater than the Boltzmann factor would predict.
+    for (int i = min_important_energy+1; i < energy_levels; i++) {
+      ln_energy_weights[i] = min(ln_energy_weights[i-1] + 1.0/min_T, ln_energy_weights[i]);
+    }
+  } else if (version == 2) {
+    double slope = 0;
+    int tangent_energy = 0;
+    for (int i = max_entropy_state+1; i <= energy_levels; i++) {
+      // Here is a simpler approach.  We just use the ln_dos until it
+      // becomes implausible, and then we extend linearly down with a
+      // secant line in the log graph (tangent line would be more
+      // agressive and probably also safe).
+      if (!slope) {
+        if (ln_dos[i] < ln_dos[i-1] - 1/min_T) {
+          // We have reached the minimum temperature we care about!  At
+          // lower energies, we will use Boltzmann weights with the
+          // minimum temperature we are interested in.
+          slope = 1/min_T;
+          tangent_energy = i-1;
+        } else if (pessimistic_samples[i] > 1 && ln_dos[i] < ln_dos[i-1]
+                   && (ln_dos[i]-ln_dos[i-1] < 0.5*log(pessimistic_samples[i]))) {
+          ln_energy_weights[i] = -ln_dos[i];
+        } else {
+          tangent_energy = i-1;
+          slope = (ln_dos[max_entropy_state] - ln_dos[tangent_energy])
+            /(max_entropy_state-tangent_energy);
+        }
+      }
+      if (slope) {
+        ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
+      }
+    }
+  } else {
+    printf("BAD TMI VERSION %d!@!!\n", version);
+    fprintf(stderr, "BAD TMI VERSION %d!@!!\n", version);
+    fflush(stdout);
+    exit(1);
   }
   delete[] ln_dos;
 }
 
 // initialization with tmi
-void sw_simulation::initialize_tmi() {
+void sw_simulation::initialize_tmi(int version) {
   int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
   bool verbose = false;
   do {
@@ -1327,12 +1343,12 @@ void sw_simulation::initialize_tmi() {
     }
 
     set_min_important_energy();
-    update_weights_using_transitions();
+    update_weights_using_transitions(version);
   } while(!finished_initializing(verbose));
 }
 
-// initialization with tmi
-void sw_simulation::initialize_toe() {
+// initialization with toe
+void sw_simulation::initialize_toe(int version) {
   int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
   bool verbose = false;
   do {
@@ -1346,7 +1362,7 @@ void sw_simulation::initialize_toe() {
     }
 
     set_min_important_energy();
-    optimize_weights_using_transitions();
+    optimize_weights_using_transitions(version);
   } while(!finished_initializing(verbose));
 }
 
@@ -1365,7 +1381,7 @@ void sw_simulation::initialize_transitions() {
     }
   } while(!finished_initializing(verbose));
 
-  update_weights_using_transitions();
+  update_weights_using_transitions(1);
   set_min_important_energy();
 }
 
@@ -1633,7 +1649,7 @@ void sw_simulation::initialize_transitions_file(const char *transitions_input_fi
   // now construct the actual weight array
   /* FIXME: it appears that we are reading in the data file properly,
      but for some reason we are still not getting proper weights */
-  update_weights_using_transitions();
+  update_weights_using_transitions(1);
   flush_weight_array();
   set_min_important_energy();
   initialize_canonical(min_T,min_important_energy);
@@ -1660,7 +1676,8 @@ double sw_simulation::estimate_trip_time(int E1, int E2) {
 
 bool sw_simulation::printing_allowed(){
   const double max_time_skip = 60*30; // 1/2 hour
-  static double time_skip = 3; // seconds
+  const double initial_time_skip = 3; // seconds
+  static double time_skip = initial_time_skip;
   static int every_so_often = 0;
 
   static clock_t last_output = clock(); // when we last output data
@@ -1668,16 +1685,16 @@ bool sw_simulation::printing_allowed(){
   if (++every_so_often > time_skip/estimated_time_per_iteration) {
     fflush(stdout); // flushing once a second will be no problem and can be helpful
     clock_t now = clock();
-    time_skip = min(1.3*time_skip, max_time_skip);
- 
-	// update our setimated time per iteration based on actual time
-	// spent in this round of iterations
+    time_skip = min(time_skip + initial_time_skip, max_time_skip);
+
+    // update our setimated time per iteration based on actual time
+    // spent in this round of iterations
     double elapsed_time = (now - last_output)/double(CLOCKS_PER_SEC);
     if (now > last_output) {
-		estimated_time_per_iteration = elapsed_time / every_so_often;
-	} else {
-		estimated_time_per_iteration = 0.1 / every_so_often / double(CLOCKS_PER_SEC);
-	}
+      estimated_time_per_iteration = elapsed_time / every_so_often;
+    } else {
+      estimated_time_per_iteration = 0.1 / every_so_often / double(CLOCKS_PER_SEC);
+    }
     last_output = now;
     every_so_often = 0;
     return true;
