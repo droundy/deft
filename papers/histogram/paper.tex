@@ -526,13 +526,12 @@ A brief summary of what we have done and exciting take-away.
 
 \subsection{TMI Algorithm}
 
-Our proposed Transition Matrix Fractional Uncertainty Weighting  
-method (TMFUW???) uses the following algorithm to determine the histogram weights.  
-The method periodically recomputes the weights during the simulation.  Although 
-no bottlenecks result when updating the weights more frequently, the
-algorithm will nonetheless introduce additional computational time.  Because
-of the potential to increase computational time, the algorithm
-infrequently but periodically updates the weights such that the central
+Our proposed Transition Matrix Initilization Algorithm uses the following 
+method to determine the histogram weights.  The method periodically recomputes 
+the weights during the simulation.  Although no bottlenecks result when updating 
+the weights more frequently, the algorithm will nonetheless introduce additional 
+computational time.  Because of the potential to increase computational time, the 
+algorithm infrequently but periodically updates the weights such that the central
 effort of the method allows focusing efforts on exploring new energy
 configurations.
 
@@ -571,9 +570,12 @@ strongly than a Boltzmann factor at $T_{\min}$ would do.
 \subsection{GC-TMMC Algorithm}
 Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and 
 particle number of the system to fluctuate while holding the chemical potential,
-volume, and temperature constant.  The algorithm boasts a lower statistical noise 
-than conventional GCMC due to its incorporation of a transition matrix to estimate
-ensemble averages.  The steps for the algorithm are outlined below:
+volume, and temperature constant~\cite{chen2001aggregation, chen2002simulating, 
+errington2003direct, fenwick2006accurate, fenwick2008direct, errington2005direct}.  
+The algorithm boasts a lower statistical noise than conventional GCMC due to its 
+incorporation of a transition matrix to estimate ensemble averages~\cite{siderius2013use, 
+paluch2008comparing, grzelak2008computation}.  The steps for the algorithm are 
+outlined below:
 
 \subsubsection{Define particle insertion/deletion}
 In the system of consideration, the number of particles $\mathcal{N}$ can change
@@ -624,13 +626,14 @@ by enforcing detailed balance in the system.
   {\mathcal{P}_{N+1\rightarrow N}}\bigg)
 \end{align} 
 This equation will hold as long as N-space can be sampled sufficiently.  In an 
-implemented algorithm $N, N_{min}, and N_{max}$ are specified for macrostate domain
+implemented algorithm $N$, $N_{min}$, and $N_{max}$ are specified for macrostate domain
 sampling.
 
 \subsubsection{Define a biasing function}
 The primary difference between TMMC as defined by Fitzgerald et. al and GC-TMMC as 
 pioneered by JR Errington et. al is the use of a biasing function to control the acceptance
-rate of trial moves. 
+rate of trial moves~\cite{siderius2013use, fitzgerald2000monte}.  This type of 
+multi-canonical sampling augments the acceptance probability in the following way 
 \begin{align}
   p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{\exp[\eta(N_{new})]}
   {\exp[\eta(N_{old})]}\frac{\alpha_{new\rightarrow old}}
@@ -641,7 +644,7 @@ Although $p_{\eta}$ is used to control the actual transitions for trial configur
 in GC-TMMC, $p_{a}$ is still used to update the Collection Matrices.  Ideally the biasing
 function would be given by 
 \begin{align}
-  \eta{N} = -\ln\Pi(N;\mu,V,T)
+  \eta(N) = -\ln\Pi(N;\mu,V,T)
 \end{align}
 Since $\Pi$ is not usually known a priori, the biasing function is usually set to some 
 arbitrary constant for initialization.  The goal of this biasing function is to achieve
@@ -660,6 +663,13 @@ potential, we can write
 \end{split}
 \end{align}
 where $C$ is a normalization constant independent of the number of particles.
+
+\subsection{Fitzgerald TMMC Algorithm}
+Include here
+
+\subsection{TMI2 Algorithm}
+Include here
+
 % The original TMI Algorithm text is below.
 
 %\subsection{TMI Algorithm}
