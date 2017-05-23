@@ -100,7 +100,7 @@ for frame in xrange(numframes):
             pass
 
     ax.set_xlabel(r'$E$')
-    ax.set_ylim(1.1*minlndos, maxlndos)
+    ax.set_ylim(1.1*minlndos, maxlndos+5)
     # ax.set_xlim(-5, -0.3)
     ax.set_xlim(mine, maxe)
     ax.set_ylabel(r'$\ln DOS$')
