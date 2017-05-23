@@ -1291,7 +1291,7 @@ void sw_simulation::update_weights_using_transitions(int version) {
     for (int i = min_important_energy+1; i < energy_levels; i++) {
       ln_energy_weights[i] = min(ln_energy_weights[i-1] + 1.0/min_T, ln_energy_weights[i]);
     }
-  } else if (version == 2) {
+  } else if (version == 2 || version == 3) {
     double slope = 0;
     int tangent_energy = 0;
     for (int i = max_entropy_state+1; i <= energy_levels; i++) {
@@ -1311,12 +1311,26 @@ void sw_simulation::update_weights_using_transitions(int version) {
           ln_energy_weights[i] = -ln_dos[i];
         } else {
           tangent_energy = i-1;
-          slope = (ln_dos[max_entropy_state] - ln_dos[tangent_energy])
-            /(max_entropy_state-tangent_energy);
+          if (version == 2) {
+            slope = (ln_dos[max_entropy_state] - ln_dos[tangent_energy])
+              /(max_entropy_state-tangent_energy);
+          } else {
+            if (pessimistic_samples[i]) slope = -0.5*log(pessimistic_samples[i]);
+            else slope = 0;
+          }
         }
       }
       if (slope) {
         ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
+        if (pessimistic_samples[i] && ln_dos[i] > -ln_energy_weights[i]) {
+          // Panic mode! Go with flat weights, since surely the
+          // tangent slope is crazy wrong.
+          for (int j=i; j<=energy_levels; j++) {
+            ln_energy_weights[j] = ln_energy_weights[i-1];
+          }
+          slope = 0;
+          break;
+        }
       }
     }
   } else {

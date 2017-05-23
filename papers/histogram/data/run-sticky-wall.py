@@ -33,6 +33,9 @@ elif 'toe' in sys.argv:
 elif 'tmi2' in sys.argv:
     method = ' --tmi --tmi-version=2'
     method_name = 'tmi2'
+elif 'tmi3' in sys.argv:
+    method = ' --tmi --tmi-version=3'
+    method_name = 'tmi3'
 else:
     method = ' --tmi'
     method_name = 'tmi'
