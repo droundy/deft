@@ -1325,8 +1325,8 @@ void sw_simulation::update_weights_using_transitions(int version) {
         if (pessimistic_samples[i] && ln_dos[i] > -ln_energy_weights[i]) {
           // Panic mode! Go with flat weights, since surely the
           // tangent slope is crazy wrong.
-          printf("PANIC MODE in tmi3 at energy %d (factor of %g)\n", i,
-                 exp(ln_dos[i] + ln_energy_weights[i]));
+          printf("PANIC MODE in tmi%d at energy %d (factor of %g)\n", version,
+                 i, exp(ln_dos[i] + ln_energy_weights[i]));
           for (int j=i; j<=energy_levels; j++) {
             ln_energy_weights[j] = ln_energy_weights[i-1];
           }
