@@ -53,9 +53,9 @@ os.system('mkdir -p ' + datadir)
 
 if os.system('which srun'):
     # srun doesn't exist so just run on this machine
-    cmd = "time nice -19 ./liquid-vapor-monte-carlo"
+    cmd = "nohup time nice -19 ./liquid-vapor-monte-carlo"
 else:
-    cmd = "srun --mem=%d -J lv:%s time nice -19 ./liquid-vapor-monte-carlo" % (mem_estimate, fname)
+    cmd = "nohup srun --mem=%d -J lv:%s time nice -19 ./liquid-vapor-monte-carlo" % (mem_estimate, fname)
 
 cmd += ' --movies' # generate movie data
 
