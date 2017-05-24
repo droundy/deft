@@ -590,11 +590,11 @@ is allowed.  This criteria is called the acceptance probability and is denoted a
   p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
   {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
 \end{align}
-where $\alpha_{new\rightarrow old}$ is the probability of generating a new system 
-configuration the old.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
+where $\alpha_{new\rightarrow old}$ is the probability of generating an old system 
+configuration from the new.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
 =\alpha_{new\rightarrow old}$ although for advanced Monte-Carlo moves this would not 
-be the case.  The probabilies of actually observing the system in the old state is given
-by
+be the case~\cite{siepmann1990method}.  The probabilies of actually observing the 
+system in the old state is given by
 \begin{align}
   \pi_{old} = \frac{1}{\Xi}\frac{V^{N_{old}}}{\Lambda^{3N_{old}}N_{old}!}
   \exp[-\beta(\epsilon_{old}-\mu N_{old})]
@@ -704,25 +704,31 @@ using histogram estimators to determine the PNPD.
 
 \subsection{TMI2 Algorithm}
 
-\subsubsection{Weights at Interesting Energy}
-At energies below the maximum, the method attempts to set the weight equal to the 
-inverse of the density of states, \emph{unless} there are insufficient statistics 
-to justify this.  In order to determine when sufficient statistics have been reached,
-it becomes neccessary to define a modifcation factor, in this case, in terms of a 
-fractional uncertainty
+The second version of transition matrix initialization algorithm works by looking at
+the logarithm of the density of states.  If the logrithm of the density of states at 
+the previous energy minus the current logrithm of the density of states is greater than
+the reciprocal of the minimum temperature than the algorithm has reached the minimum 
+temperature of interest.  If this is not the case, pessimistic samples are used to control
+the transitions and the energy weights are set by
 \begin{align}
-  \mathcal{F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
-\end{align}
-where $N_s(\epsilon)$ is the number of round-trip samples taken at an energy
-$\epsilon$.  We assume that our uncertainty in the ratio between the density
-of states at two adjacent energies is equal to this value.  The weight at each
-energy can then be set according to
+  \ln\mathcal{W}_\epsilon = - \ln\mathcal{D}
+\end{align} 
+If the previous condition is not satisfied either, we determine the weights another way.
+A secant line is constructed by finding the slope $\mathcal{M}$ of a line that 
+connects two points on the log of the density of states curve.
 \begin{align}
-  \mathcal{W}_{\epsilon} &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\mathcal{F}
-  (\epsilon)},\frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
-  \\
-   &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\sqrt{N_s(\epsilon)}},
-  \frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
+  \mathcal{M} = \bigg(\frac{\ln\mathcal{D}(\mathcal{S}_{max}) - \ln\mathcal{D}
+  (\epsilon_{tangent})}{\mathcal{S}_{max}-\epsilon_{tangent}}\bigg)
+\end{align} 
+The density of states at the maximum entropy $\mathcal{S}_{max}$ is greater than
+the density of states at the tangent energy $\epsilon_{tangent}$ causing the numerator
+to be positive.  For our algorithms the energies are defined as negative; thus, the 
+tangent energy is more negative than the maximum entropy energy.  Because of this, the
+slope is positive and ensures cautious sampling of unkown energies.  The weights are 
+then set to 
+\begin{align}
+  \ln\mathcal{W}_\epsilon = \ln\mathcal{W}_\epsilon (\epsilon_{tangent}) +
+  \mathcal{M}\epsilon_{tangent}
 \end{align}
 
 % The original TMI Algorithm text is below.
