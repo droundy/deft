@@ -707,32 +707,73 @@ using histogram estimators to determine the PNPD.
 
 \subsection{TMI2 Algorithm}
 
-The second version of transition matrix initialization algorithm works by looking at
-the logarithm of the density of states.  If the logrithm of the density of states at 
-the previous energy minus the current logrithm of the density of states is greater than
-the reciprocal of the minimum temperature than the algorithm has reached the minimum 
-temperature of interest.  If this is not the case, pessimistic samples are used to control
-the transitions and the energy weights are set by
+The second version of transition matrix initialization algorithm works
+by looking at the logarithm of the density of states.  We begin at
+high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the entropy) and work our way
+downward.
+
+\paragraph{Reaching $T_{\min}$:}
+If the change in the logarithm of the density of states is greater
+than the reciprocal of the minimum temperature, i.e. if
 \begin{align}
-  \ln\mathcal{W}_\epsilon = - \ln\mathcal{D}
-\end{align} 
-If the previous condition is not satisfied either, we determine the weights another way.
-A secant line is constructed by finding the slope $\mathcal{M}$ of a line that 
-connects two points on the log of the density of states curve.
-\begin{align}
-  \mathcal{M} = \bigg(\frac{\ln\mathcal{D}(\mathcal{S}_{max}) - \ln\mathcal{D}
-  (\epsilon_{tangent})}{\mathcal{S}_{max}-\epsilon_{tangent}}\bigg)
-\end{align} 
-The density of states at the maximum entropy $\mathcal{S}_{max}$ is greater than
-the density of states at the tangent energy $\epsilon_{tangent}$ causing the numerator
-to be positive.  For our algorithms the energies are defined as negative; thus, the 
-tangent energy is more negative than the maximum entropy energy.  Because of this, the
-slope is positive and ensures cautious sampling of unkown energies.  The weights are 
-then set to 
-\begin{align}
-  \ln\mathcal{W}_\epsilon = \ln\mathcal{W}_\epsilon (\epsilon_{tangent}) +
-  \mathcal{M}\epsilon_{tangent}
+  \ln\frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} &>
+  \frac{\epsilon_{i-1} - \epsilon_i}{k_BT_{\min}}
+  \\
+  \frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} &>
+  e^{\beta_{\max}(\epsilon_{i-1} - \epsilon_i)}
 \end{align}
+then the algorithm has reached the minimum temperature of interest.
+In this case, we set the log weights at all lower energies using a
+Boltzmann ratio relative to this energy.
+\paragraph{Confident at $\epsilon_i$:} We are confident in our density
+of states at energy $\epsilon_i$ provided two conditions are true.
+\begin{enumerate}
+\item The density of states must be decreasing as the energy decreases
+  from its next-higher energy.
+\item The change in density of states (relative to the next higher
+  energy) must be smaller than a pessimistic estimate of the counting
+  uncertainty at the energy we are examining:
+  \begin{align}
+    \frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
+  \end{align}
+  where $N_i$ is the number of ``pessimistic
+  samples'' at $\epsilon_i$, the lower of the two energies under
+  consideration.
+\end{enumerate}
+If both of these are true, we believe we know the density of states at
+this energy well, and the weights are set by
+\begin{align}
+  \ln w(\epsilon_i) = -\ln\mathcal{D}(\epsilon_i)
+\end{align}
+\paragraph{Reached $T_\text{converged}$:}
+If this is not the case, $\epsilon_i$ is the lowest energy that is
+adequately converged.  We set the weights for energies lower than this
+to a Boltzmann ratio with a temperature determined using the slope of
+a secant line on the $\ln w$ versus $\epsilon$ graph.
+\begin{align}
+  \beta_\text{secant} = \bigg(\frac{\ln\mathcal{D}(\epsilon_{S_{\max}}) - \ln\mathcal{D}
+  (\epsilon_\text{pivot})}{\epsilon_{S_{\max}}-\epsilon_\text{pivot}}\bigg)
+\end{align}
+This ``slope'' is a positive quantity.  The weights at energies below
+$\epsilon_\text{pivot}$ are given by
+\begin{align}
+  \ln w(\epsilon) = \ln w(\epsilon_\text{pivot}) -
+  \beta_\text{secant}(\epsilon - \epsilon_\text{pivot})
+\end{align}
+indicating that there are higher weights at lower energies, since
+$\beta$ is positive.  We have one additional caveat: we examine the
+lower energies for which we have samples (``pessimistic'' samples),
+and if we find any energy at which the density of states is greater
+than the inverse of the weight, we adjust $\beta$ to cause it to pass
+through that point.  This ensures that the product of the weight with
+the estimated density of states is always less than or equal one for
+energies below $\epsilon_\text{converged}$.
+
+\subsection{TMI3 Algorithm}
+The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
+difference, which is that instead of a secant line being used to
+estimate the converged temperature, we use a tangent line, estimated
+using the lowest two ``converged'' energies.
 
 % The original TMI Algorithm text is below.
 

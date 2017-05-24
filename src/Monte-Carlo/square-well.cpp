@@ -1311,7 +1311,12 @@ void sw_simulation::update_weights_using_transitions(int version) {
       ln_energy_weights[i] = min(ln_energy_weights[i-1] + 1.0/min_T, ln_energy_weights[i]);
     }
   } else if (version == 2 || version == 3) {
-    double slope = 0;
+    // The slope on the log graph is the thermodynamic quantity we
+    // describe as beta, so that is what we call it here.  We choose
+    // to define beta to be positive (as physical beta=1/kT values
+    // would be), which requires some juggling of signs below, since
+    // our energies are opposite.
+    double beta = 0;
     int pivot = 0;
     for (int i = max_entropy_state+1; i <= energy_levels; i++) {
       // Here is a simpler approach.  We just use the ln_dos until it
@@ -1322,7 +1327,7 @@ void sw_simulation::update_weights_using_transitions(int version) {
           // We have reached the minimum temperature we care about!  At
           // lower energies, we will use Boltzmann weights with the
           // minimum temperature we are interested in.
-          slope = -1/min_T;
+          beta = 1/min_T;
           pivot = i-1;
         } else if (ln_dos[i] < ln_dos[i-1]
                    && ln_dos[i-1]-ln_dos[i] < 0.5*log(pessimistic_samples[i]) ) {
@@ -1330,22 +1335,22 @@ void sw_simulation::update_weights_using_transitions(int version) {
         } else {
           pivot = i-1;
           if (version == 2) {
-            slope = (ln_dos[max_entropy_state] - ln_dos[pivot])/(max_entropy_state-pivot);
+            beta = (ln_dos[max_entropy_state] - ln_dos[pivot])/(pivot-max_entropy_state);
           } else {
-            slope = ln_dos[i] - ln_dos[i-1]; // just set it to the tangent!
+            beta = ln_dos[i-2] - ln_dos[i-1]; // just set it to the tangent!
           }
-          if (slope != slope) slope = 0;
-          for (int j=i+1; j<=energy_levels && pessimistic_samples[j]; j++) {
-            // avoid setting the slope to intersect with the DOS at
+          if (beta != beta) beta = 0;
+          for (int j=pivot+1; j<=energy_levels && pessimistic_samples[j]; j++) {
+            // avoid setting the beta to intersect with the DOS at
             // any energy where we have any information about the DOS.
-            double s_here = (ln_dos[pivot] - ln_dos[j])/(pivot-j);
-            slope = max(slope, s_here);
+            double beta_here = (ln_dos[pivot] - ln_dos[j])/(j-pivot);
+            beta = min(beta, beta_here);
           }
-          slope = min(slope, 0);  // never make lower energies *less* probable
+          beta = max(beta, 0);  // never make lower energies *less* probable
         }
       }
       if (pivot) {
-        ln_energy_weights[i] = ln_energy_weights[pivot] + slope*(pivot-i);
+        ln_energy_weights[i] = ln_energy_weights[pivot] + beta*(i-pivot);
       }
     }
   } else {
