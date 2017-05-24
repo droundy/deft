@@ -1261,6 +1261,25 @@ op       difference is that we compute the diffusivity here *directly*
 // update the weight array using transitions
 void sw_simulation::update_weights_using_transitions(int version) {
   double *ln_dos = compute_ln_dos(transition_dos);
+  // Let us be cautious and just ensure that we always have the proper
+  // max_entropy_state.  This is probably redundant, but especially
+  // when version>1 an error in max_entropy_state could cause real
+  // trouble.
+  int old_max_entropy_state = max_entropy_state;
+  for (int i=0; i<=energy_levels; i++) {
+    if (ln_dos[i] > ln_dos[max_entropy_state]) {
+      max_entropy_state = i;
+    }
+  }
+  if (old_max_entropy_state > max_entropy_state+1) {
+    // We should zero out our pessimistic_samples, since we apparently
+    // didn't have a clear picture of what it meant to randomize the
+    // system.  We allow for a change of 1 (the minimal change) so as
+    // to avoid trashing data when going between two states with
+    // almost equal (max) entropy.
+    printf("I am resetting the histograms, because max_entropy_state changed.\n");
+    reset_histograms();
+  }
   // Above the max_entropy_state we level out the weights.
   for (int i = 0; i <= max_entropy_state; i++) {
     ln_energy_weights[i] = -ln_dos[max_entropy_state];
@@ -1293,46 +1312,40 @@ void sw_simulation::update_weights_using_transitions(int version) {
     }
   } else if (version == 2 || version == 3) {
     double slope = 0;
-    int tangent_energy = 0;
+    int pivot = 0;
     for (int i = max_entropy_state+1; i <= energy_levels; i++) {
       // Here is a simpler approach.  We just use the ln_dos until it
       // becomes implausible, and then we extend linearly down with a
-      // secant line in the log graph (tangent line would be more
-      // agressive and probably also safe).
-      if (!slope) {
+      // secant (or tangent for version 3) line in the log graph.
+      if (!pivot) {
         if (ln_dos[i-1] - ln_dos[i] > 1/min_T) {
           // We have reached the minimum temperature we care about!  At
           // lower energies, we will use Boltzmann weights with the
           // minimum temperature we are interested in.
           slope = -1/min_T;
-          tangent_energy = i-1;
+          pivot = i-1;
         } else if (ln_dos[i] < ln_dos[i-1]
                    && ln_dos[i-1]-ln_dos[i] < 0.5*log(pessimistic_samples[i]) ) {
           ln_energy_weights[i] = -ln_dos[i];
         } else {
-          tangent_energy = i-1;
+          pivot = i-1;
           if (version == 2) {
-            slope = (ln_dos[max_entropy_state] - ln_dos[tangent_energy])
-              /(max_entropy_state-tangent_energy);
+            slope = (ln_dos[max_entropy_state] - ln_dos[pivot])/(max_entropy_state-pivot);
           } else {
-            if (pessimistic_samples[i]) slope = -0.5*log(pessimistic_samples[i]);
-            else slope = 0;
+            slope = ln_dos[i] - ln_dos[i-1]; // just set it to the tangent!
           }
+          if (slope != slope) slope = 0;
+          for (int j=i+1; j<=energy_levels && pessimistic_samples[j]; j++) {
+            // avoid setting the slope to intersect with the DOS at
+            // any energy where we have any information about the DOS.
+            double s_here = (ln_dos[pivot] - ln_dos[j])/(pivot-j);
+            slope = max(slope, s_here);
+          }
+          slope = min(slope, 0);  // never make lower energies *less* probable
         }
       }
-      if (slope) {
-        ln_energy_weights[i] = ln_energy_weights[tangent_energy] + slope*(tangent_energy-i);
-        if (pessimistic_samples[i] && ln_dos[i] > -ln_energy_weights[i]) {
-          // Panic mode! Go with flat weights, since surely the
-          // tangent slope is crazy wrong.
-          printf("PANIC MODE in tmi%d at energy %d (factor of %g)\n", version,
-                 i, exp(ln_dos[i] + ln_energy_weights[i]));
-          for (int j=i; j<=energy_levels; j++) {
-            ln_energy_weights[j] = ln_energy_weights[i-1];
-          }
-          slope = 0;
-          break;
-        }
+      if (pivot) {
+        ln_energy_weights[i] = ln_energy_weights[pivot] + slope*(pivot-i);
       }
     }
   } else {
@@ -1354,7 +1367,6 @@ void sw_simulation::initialize_tmi(int version) {
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
-      set_max_entropy_energy();
       write_transitions_file();
     }
 
@@ -1373,7 +1385,6 @@ void sw_simulation::initialize_toe(int version) {
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
-      set_max_entropy_energy();
       write_transitions_file();
     }
 

@@ -42,13 +42,12 @@ def color(T):
         return colors[T]
     except:
         return ''
-lines = ['-', '--', ':', '-.']
+lines = ['-', '--', ':', '-.', '.']
 
 first_method = True
 the_first_method = ''
 
-first_temperature = [True, True, True, True]
-methods = ['-tmi', '-toe', '-tmi2', '-tmmc']
+methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
 first_temperature = [True]*len(methods)
 
 for i in range(len(methods)):
@@ -60,7 +59,7 @@ for i in range(len(methods)):
         convergedT = readnew.convergedT(fname)
 
         for T in Ts:
-            if T >= minT and T >= convergedT*0.8:
+            if T >= minT and T >= convergedT*1.0:
                 density, x = readnew.density_x(fbase, T)
                 plt.plot(x/2, density, color(T)+lines[i])
                 if first_method or method == the_first_method:
