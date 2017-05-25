@@ -1463,14 +1463,14 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
     exit(1);
   }
   sw.write_header(f);
-  fprintf(f, "# energy\tlndos\n");
+  fprintf(f, "# energy\tlndos\tps\n");
   double *lndos = sw.compute_ln_dos(transition_dos);
   double maxdos = lndos[0];
   for (int i = 0; i < sw.energy_levels; i++) {
     if (maxdos < lndos[i]) maxdos = lndos[i];
   }
   for (int i = 0; i < sw.energy_levels; i++) {
-    fprintf(f, "%d\t%g\n", i, lndos[i] - maxdos);
+    fprintf(f, "%d\t%g\t%d\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
   }
   fclose(f);
   delete[] lndos;
