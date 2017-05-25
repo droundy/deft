@@ -524,9 +524,9 @@ A brief summary of what we have done and exciting take-away.
 
 % I am going to edit the first section leaving the second as the original.
 
-\subsection{TMI Algorithm}
+\subsection{TMI1 Algorithm}
 
-Our proposed Transition Matrix Initilization Algorithm uses the following 
+Our proposed transition matrix initilization algorithm TMI$_1$ uses the following 
 method to determine the histogram weights.  The method periodically recomputes 
 the weights during the simulation.  Although no bottlenecks result when updating 
 the weights more frequently, the algorithm will nonetheless introduce additional 
@@ -555,11 +555,11 @@ $\epsilon$.  We assume that our uncertainty in the ratio between the density
 of states at two adjacent energies is equal to this value.  The weight at each
 energy can then be set according to
 \begin{align}
-  \mathcal{W}_{\epsilon} &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\mathcal{F}
-  (\epsilon)},\frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
+  \mathcal{W}_{\epsilon} &= \mathcal{W}_{\epsilon+1}\max\left[\frac1{\mathcal{F}
+  (\epsilon)},\frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right]
   \\
-   &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\sqrt{N_s(\epsilon)}},
-  \frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
+   &= \mathcal{W}_{\epsilon+1}\max\left[\frac1{\sqrt{N_s(\epsilon)}},
+  \frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right]
 \end{align}
 
 \subsubsection{Weights at Low Energy}
@@ -597,7 +597,7 @@ be the case~\cite{siepmann1990method}.  The probabilies of actually observing th
 system in the old state is given by
 \begin{align}
   \pi_{old} = \frac{1}{\Xi}\frac{V^{N_{old}}}{\Lambda^{3N_{old}}N_{old}!}
-  \exp[-\beta(\epsilon_{old}-\mu N_{old})]
+  e^{-\beta(\epsilon_{old}-\mu N_{old})}
 \end{align}  
 where $\Xi$ is the grand canonical partition function and $\Lambda$ is the De Broglie
 wavelength.
@@ -635,8 +635,8 @@ pioneered by JR Errington et al. is the use of a biasing function to control the
 rate of trial moves~\cite{siderius2013use, fitzgerald2000monte}.  This type of 
 multi-canonical sampling augments the acceptance probability in the following way 
 \begin{align}
-  p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{\exp[\eta(N_{new})]}
-  {\exp[\eta(N_{old})]}\frac{\alpha_{new\rightarrow old}}
+  p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{e^{\eta(N_{new})}}
+  {e^{\eta(N_{old})}}\frac{\alpha_{new\rightarrow old}}
   {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
 \end{align}
 
@@ -657,7 +657,7 @@ Since the canonical partition function $Z(N,V,T)$ does not depend on the chemica
 potential, we can write
 \begin{align}
 \begin{split}
-  \Pi(N;\mu,V,T) = \frac{\exp[\beta\mu N]Z(N,V,T)}{\Xi(\mu,V,T)}\\
+  \Pi(N;\mu,V,T) = \frac{e^{\beta\mu N}Z(N,V,T)}{\Xi(\mu,V,T)}\\
   \ln\Pi(N;\mu,V,T) = \ln\Pi(N;\mu_0,V,T) \\
   + \beta N(\mu-\mu_0) + C
 \end{split}
@@ -667,8 +667,8 @@ where $C$ is a normalization constant independent of the number of particles.
 \subsection{Fitzgerald TMMC Algorithm}
 The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
 consists of three primary steps.  The first two steps are common to the Metropolis 
-algorithm while the third makes use of the actual transition probabilities
-~\cite{fitzgerald2000monte}.
+algorithm while the third makes use of the actual transition 
+probabilities~\cite{fitzgerald2000monte}.
 
 \subsubsection{define a transition probability}
 Assuming that the system under study is in a state denoted old and a proposed transition
@@ -692,6 +692,13 @@ be the case~\cite{paluch2008comparing, siepmann1990method}.
 \davidsays{How is $\pi$ defined for this method? The $\pi$ here and
   the use of $p_a$ in updating the collection matrix are the major
   differences I see between this an our method.}
+The probabily of observing the system in the old state can be found based on the 
+ensemble constraints placed on the system.  Fitzgerald et al. considered the system of
+interest using the canonical ensemble while Errington et al. extends this method to the
+grand canonical ensemble and introduces biasing.
+\begin{align}
+  \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
+\end{align}
 
 \subsubsection{define a bookkeeping step}
 The third step in the TMMC algorithm consists of recording the data in a collection 
