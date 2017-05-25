@@ -685,21 +685,24 @@ defined
   p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
   {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
 \end{align}
-where $\alpha_{new\rightarrow old}$ is the probability of generating a new system 
-configuration the old.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
-=\alpha_{new\rightarrow old}$ although for advanced Monte-Carlo moves this would not 
-be the case~\cite{paluch2008comparing, siepmann1990method}.
-\davidsays{How is $\pi$ defined for this method? The $\pi$ here and
-  the use of $p_a$ in updating the collection matrix are the major
-  differences I see between this an our method.}
-The probabily of observing the system in the old state can be found based on the 
-ensemble constraints placed on the system.  Fitzgerald et al. considered the system of
-interest using the canonical ensemble while Errington et al. extends this method to the
-grand canonical ensemble and introduces biasing.
+where $\alpha_{new\rightarrow old}$ is the probability of generating a 
+new system configuration the old.  For conventional Monte-Carlo moves 
+$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although 
+for advanced Monte-Carlo moves this would not be the 
+case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of 
+observing the system in the old state can be found based on the 
+ensemble constraints placed on the system.  Fitzgerald et al. 
+considered the system of interest using the canonical ensemble while 
+Errington et al. extends this method to the grand canonical ensemble 
+and introduces biasing.
 \begin{align}
   \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
 \end{align}
-
+This appears to result in the acceptance probability given for TMMC introduced by 
+Swendsen and Wang.
+\begin{align}
+  p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
+\end{align}
 \subsubsection{define a bookkeeping step}
 The third step in the TMMC algorithm consists of recording the data in a collection 
 matrix (analogous to the transition histogram matrix).
