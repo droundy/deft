@@ -30,21 +30,35 @@ the_first_method = ''
 
 methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
 first_temperature = [True]*len(methods)
-method = methods[0]
+method = methods[0]      # This is the method which we wish to compare.
 
-#print('ww%.2f-ff%.2f-%gx%g%s-movie') % (ww,ff,lenx,lenyz,method)
-fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000070' % (ww,ff,lenx,lenyz,method)
+# We manually choose the file with which we wish to compare against.
+fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000200' % (1.3,0.22,30,6,'-tmi2')
 
+lndos_ref,ps_ref = readnew.e_lndos_ps(fbase)
+ps1_ref = numpy.array(ps_ref) + 1
+
+fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000200' % (ww,ff,lenx,lenyz,method)
 
 lndos,ps = readnew.e_lndos_ps(fbase)
 
-plt.semilogx(ps,lndos)
+#print(numpy.size(lndos))
+#print(numpy.size(lndos_ref))
 
-#plt.ylim(0)
-#plt.xlabel(r'$Pessimistic Samples$')
-#plt.ylabel(r'$lndos$')
-#plt.legend(loc='best')
-#plt.title(r'$lndos$ with $\lambda = %g$ and $\eta=%g$' % (ww, ff))
+# Now we subtract to obtain a comparison.
+
+Error = numpy.absolute(lndos - lndos_ref)
+
+plt.semilogx(ps1_ref, Error, label = 'Error')
+
+plt.ylim((0,1.0))
+plt.xlim((10,1000000))
+
+plt.xlabel(r'Pessimistic Samples')
+plt.ylabel('Error in $\mathcal{D}(\epsilon)$')
+plt.title('Error in $\mathcal{D}(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
 
 plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g%s-Error.pdf' % (ww,ff,lenx,lenyz,method))
 plt.show()
