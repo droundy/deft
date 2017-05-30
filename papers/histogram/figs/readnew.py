@@ -10,9 +10,10 @@ def e_hist(fbase):
     hist = e_hist[:,1]
     return energy, hist
 
-def e_lndos(fbase):
-    e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
-
+def e_lndos(f):
+	if '.dat' not in f:
+        f = f+"-lndos.dat"
+    e_lndos = numpy.loadtxt(f+"-lndos.dat", ndmin=2, dtype=numpy.float)
     energy = -e_lndos[:,0] # array of energies
     lndos = e_lndos[:,1]
     return energy, lndos
@@ -64,7 +65,7 @@ def T_u_cv_s_minT(fbase):
     return T_range, U, CV, S, min_T
 
 def minT(f):
-    if not '.dat' in f:
+    if '.dat' not in f:
         f = f+"-E.dat"
     min_T = 0
     with open(f) as file:
@@ -97,8 +98,10 @@ def converged_state(f):
                 return int(line.split()[-1])
     print 'ERROR FINDING converged_state in', f
 
-def iterations(fbase):
-    with open(fbase+"-E.dat") as file:
+def iterations(f):
+    if '.dat' not in f:
+        f = f+"-E.dat"
+    with open(f) as file:
         for line in file:
             if "iterations:" in line:
                 return int(line.split()[-1])
@@ -110,7 +113,7 @@ def dr_g(fbase):
                 return float(line.split()[-1])
 
 def dimensions(f):
-    if not '.dat' in f:
+    if '.dat' not in f:
         f = f+"-E.dat"
     with open(f) as file:
         for line in file:
