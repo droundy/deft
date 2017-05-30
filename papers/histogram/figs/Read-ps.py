@@ -33,23 +33,20 @@ first_temperature = [True]*len(methods)
 method = methods[0]      # This is the method which we wish to compare.
 
 # We manually choose the file with which we wish to compare against.
-fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000200' % (1.3,0.22,30,6,'-tmi2')
+fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000500' % (ww,ff,lenx,lenyz,'-tmi2')
 
-lndos_ref,ps_ref = readnew.e_lndos_ps(fbase)
+energy_ref,lndos_ref,ps_ref = readnew.e_lndos_ps(fbase)
 ps1_ref = numpy.array(ps_ref) + 1
 
-fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000200' % (ww,ff,lenx,lenyz,method)
+fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000500' % (ww,ff,lenx,lenyz,method)
 
-lndos,ps = readnew.e_lndos_ps(fbase)
-
-#print(numpy.size(lndos))
-#print(numpy.size(lndos_ref))
+energy,lndos,ps = readnew.e_lndos_ps(fbase)
 
 # Now we subtract to obtain a comparison.
 
 Error = numpy.absolute(lndos - lndos_ref)
 
-plt.semilogx(ps1_ref, Error, label = 'Error')
+plt.semilogx(ps1_ref, Error, label = '$\mid tmi_3 - tmi_2 \mid$')
 
 plt.ylim((0,1.0))
 plt.xlim((10,1000000))
