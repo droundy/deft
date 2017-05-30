@@ -18,26 +18,23 @@ def e_lndos(f):
     lndos = e_lndos[:,1]
     return energy, lndos
 
-#----------------------------------------------------------------------#
+#----------------------------------------------------------------------# 
 #Jordan is writing a function here that will read in the pessimistic 
-#samples and the logrithm of the density of states from two different 
-#files.  One of the files will be a reference while the other will be 
-#user defined.  This function can be used later in a new script to 
-#compare various thermodynamic quantities such as U(T), S(T), and Cv(T) 
-#with pessimistic samples.
+#samples, energy, and the logrithm of the density of states from two 
+#different files.  One of the files will be a reference while the other 
+#will be user defined.  This function can be used later in a new script 
+#to compare various thermodynamic quantities such as U(T), S(T), and 
+#Cv(T) with pessimistic samples.
 #----------------------------------------------------------------------#
 
 def e_lndos_ps(fbase):
-    e_lndos_ps = numpy.loadtxt(fbase+"-lndos.dat", ndmin=1, dtype=numpy.float)
+    e_lndos_ps = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
     
+    energy = e_lndos_ps[:,0]
     lndos = e_lndos_ps[:,1]
     ps = e_lndos_ps[:,2] # pessimistic samples
-    
-    # Load a reference file for comparison
 
-    #ps_ref = -e_lndos_ps[:,2] 
-    #lndos_ref = e_lndos_ps[:,1]
-    return lndos, ps
+    return energy, lndos, ps
 
 #----------------------------------------------------------------------#
 
