@@ -11,7 +11,7 @@ matplotlib.rc('text', usetex=True)
 import readnew
 
 if len(sys.argv) < 5:
-    print("Usage: python {} 1.3 0.22 100 10".format(sys.argv[0]))
+    print("Usage: python {} 1.3 0.22 100 10 tmi".format(sys.argv[0]))
     exit(1)
 
 ww = float(sys.argv[1])
@@ -23,14 +23,14 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
+if len(sys.argv) > 5:
+    method = sys.argv[5]
+else:
+    method = "-tmi3"
+#arg method = ['-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
+
 plt.figure()
 
-first_method = True
-the_first_method = ''
-
-methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
-first_temperature = [True]*len(methods)
-method = methods[0]      # This is the method which we wish to compare.
 
 # We manually choose the file with which we wish to compare against.
 fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/000500' % (ww,ff,lenx,lenyz,'-tmi2')
