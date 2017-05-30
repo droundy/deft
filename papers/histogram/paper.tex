@@ -524,15 +524,14 @@ A brief summary of what we have done and exciting take-away.
 
 % I am going to edit the first section leaving the second as the original.
 
-\subsection{TMI Algorithm}
+\subsection{TMI1 Algorithm}
 
-Our proposed Transition Matrix Fractional Uncertainty Weighting  
-method (TMFUW???) uses the following algorithm to determine the histogram weights.  
-The method periodically recomputes the weights during the simulation.  Although 
-no bottlenecks result when updating the weights more frequently, the
-algorithm will nonetheless introduce additional computational time.  Because
-of the potential to increase computational time, the algorithm
-infrequently but periodically updates the weights such that the central
+Our proposed transition matrix initilization algorithm TMI$_1$ uses the following 
+method to determine the histogram weights.  The method periodically recomputes 
+the weights during the simulation.  Although no bottlenecks result when updating 
+the weights more frequently, the algorithm will nonetheless introduce additional 
+computational time.  Because of the potential to increase computational time, the 
+algorithm infrequently but periodically updates the weights such that the central
 effort of the method allows focusing efforts on exploring new energy
 configurations.
 
@@ -556,11 +555,11 @@ $\epsilon$.  We assume that our uncertainty in the ratio between the density
 of states at two adjacent energies is equal to this value.  The weight at each
 energy can then be set according to
 \begin{align}
-  \mathcal{W}_{\epsilon} &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\mathcal{F}
-  (\epsilon)},\frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
+  \mathcal{W}_{\epsilon} &= \mathcal{W}_{\epsilon+1}\max\left[\frac1{\mathcal{F}
+  (\epsilon)},\frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right]
   \\
-   &= \mathcal{W}_{\epsilon+1}\max\left(\frac1{\sqrt{N_s(\epsilon)}},
-  \frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right)
+   &= \mathcal{W}_{\epsilon+1}\max\left[\frac1{\sqrt{N_s(\epsilon)}},
+  \frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right]
 \end{align}
 
 \subsubsection{Weights at Low Energy}
@@ -571,9 +570,12 @@ strongly than a Boltzmann factor at $T_{\min}$ would do.
 \subsection{GC-TMMC Algorithm}
 Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and 
 particle number of the system to fluctuate while holding the chemical potential,
-volume, and temperature constant.  The algorithm boasts a lower statistical noise 
-than conventional GCMC due to its incorporation of a transition matrix to estimate
-ensemble averages.  The steps for the algorithm are outlined below:
+volume, and temperature constant~\cite{chen2001aggregation, chen2002simulating, 
+errington2003direct, fenwick2006accurate, fenwick2008direct, errington2005direct}.  
+The algorithm boasts a lower statistical noise than conventional GCMC due to its 
+incorporation of a transition matrix to estimate ensemble averages~\cite{siderius2013use, 
+paluch2008comparing, grzelak2008computation}.  The steps for the algorithm are 
+outlined below:
 
 \subsubsection{Define particle insertion/deletion}
 In the system of consideration, the number of particles $\mathcal{N}$ can change
@@ -588,20 +590,20 @@ is allowed.  This criteria is called the acceptance probability and is denoted a
   p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
   {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
 \end{align}
-where $\alpha_{new\rightarrow old}$ is the probability of generating a new system 
-configuration the old.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
+where $\alpha_{new\rightarrow old}$ is the probability of generating an old system 
+configuration from the new.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
 =\alpha_{new\rightarrow old}$ although for advanced Monte-Carlo moves this would not 
-be the case.  The probabilies of actually observing the system in the old state is given
-by
+be the case~\cite{siepmann1990method}.  The probabilies of actually observing the 
+system in the old state is given by
 \begin{align}
   \pi_{old} = \frac{1}{\Xi}\frac{V^{N_{old}}}{\Lambda^{3N_{old}}N_{old}!}
-  \exp[-\beta(\epsilon_{old}-\mu N_{old})]
+  e^{-\beta(\epsilon_{old}-\mu N_{old})}
 \end{align}  
 where $\Xi$ is the grand canonical partition function and $\Lambda$ is the De Broglie
 wavelength.
 
 \subsubsection{Define a Collection Matrix}
-In order to calculate an overal transition probability $\mathcal{P}_{N,\delta}$, we
+In order to calculate an overall transition probability $\mathcal{P}_{N,\delta}$, we
 must first define how the system procession is to be recorded.  A Collection Matrix
 can be defined, such that for any one move, two elements are updated.
 \begin{align}
@@ -624,16 +626,17 @@ by enforcing detailed balance in the system.
   {\mathcal{P}_{N+1\rightarrow N}}\bigg)
 \end{align} 
 This equation will hold as long as N-space can be sampled sufficiently.  In an 
-implemented algorithm $N, N_{min}, and N_{max}$ are specified for macrostate domain
+implemented algorithm $N$, $N_{min}$, and $N_{max}$ are specified for macrostate domain
 sampling.
 
 \subsubsection{Define a biasing function}
-The primary difference between TMMC as defined by Fitzgerald et. al and GC-TMMC as 
-pioneered by JR Errington et. al is the use of a biasing function to control the acceptance
-rate of trial moves. 
+The primary difference between TMMC as defined by Fitzgerald et al. and GC-TMMC as 
+pioneered by JR Errington et al. is the use of a biasing function to control the acceptance
+rate of trial moves~\cite{siderius2013use, fitzgerald2000monte}.  This type of 
+multi-canonical sampling augments the acceptance probability in the following way 
 \begin{align}
-  p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{\exp[\eta(N_{new})]}
-  {\exp[\eta(N_{old})]}\frac{\alpha_{new\rightarrow old}}
+  p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{e^{\eta(N_{new})}}
+  {e^{\eta(N_{old})}}\frac{\alpha_{new\rightarrow old}}
   {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
 \end{align}
 
@@ -641,7 +644,7 @@ Although $p_{\eta}$ is used to control the actual transitions for trial configur
 in GC-TMMC, $p_{a}$ is still used to update the Collection Matrices.  Ideally the biasing
 function would be given by 
 \begin{align}
-  \eta{N} = -\ln\Pi(N;\mu,V,T)
+  \eta(N) = -\ln\Pi(N;\mu,V,T)
 \end{align}
 Since $\Pi$ is not usually known a priori, the biasing function is usually set to some 
 arbitrary constant for initialization.  The goal of this biasing function is to achieve
@@ -654,12 +657,134 @@ Since the canonical partition function $Z(N,V,T)$ does not depend on the chemica
 potential, we can write
 \begin{align}
 \begin{split}
-  \Pi(N;\mu,V,T) = \frac{\exp[\beta\mu N]Z(N,V,T)}{\Xi(\mu,V,T)}\\
+  \Pi(N;\mu,V,T) = \frac{e^{\beta\mu N}Z(N,V,T)}{\Xi(\mu,V,T)}\\
   \ln\Pi(N;\mu,V,T) = \ln\Pi(N;\mu_0,V,T) \\
   + \beta N(\mu-\mu_0) + C
 \end{split}
 \end{align}
 where $C$ is a normalization constant independent of the number of particles.
+
+\subsection{Fitzgerald TMMC Algorithm}
+The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
+consists of three primary steps.  The first two steps are common to the Metropolis 
+algorithm while the third makes use of the actual transition 
+probabilities~\cite{fitzgerald2000monte}.
+
+\subsubsection{define a transition probability}
+Assuming that the system under study is in a state denoted old and a proposed transition
+is made to a new state denoted new, the probability is defined as
+\begin{align}
+  p_{old \rightarrow new} = p_{new \rightarrow old}
+\end{align}
+where we have allowed the probabilies to be equal for simplicity of presentation.
+
+\subsubsection{define an acceptance probability}
+The probability for accepting a transition from an old state to a new one can be 
+defined
+\begin{align}
+  p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
+  {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
+\end{align}
+where $\alpha_{new\rightarrow old}$ is the probability of generating a 
+new system configuration the old.  For conventional Monte-Carlo moves 
+$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although 
+for advanced Monte-Carlo moves this would not be the 
+case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of 
+observing the system in the old state can be found based on the 
+ensemble constraints placed on the system.  Fitzgerald et al. 
+considered the system of interest using the canonical ensemble while 
+Errington et al. extends this method to the grand canonical ensemble 
+and introduces biasing.
+\begin{align}
+  \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
+\end{align}
+This appears to result in the acceptance probability given for TMMC introduced by 
+Swendsen and Wang.
+\begin{align}
+  p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
+\end{align}
+\subsubsection{define a bookkeeping step}
+The third step in the TMMC algorithm consists of recording the data in a collection 
+matrix (analogous to the transition histogram matrix).
+\begin{align}
+  \mathcal{C}_{N,\delta} = \mathcal{C}_{N,\delta} + p_{a}\\
+  \mathcal{C}_{N,0} = \mathcal{C}_{N,0} +(1 - p_{a})
+\end{align}  
+If $\delta=0$, that is, the number of particles has not been changed, then only 
+$\mathcal{C}_{N,0}$ is incremented by unity. Fitzgerald et al. ~\cite{fitzgerald2000monte}
+show that defining the third step this way results in a uniform improvement over 
+using histogram estimators to determine the PNPD.
+
+\subsection{TMI2 Algorithm}
+
+The second version of transition matrix initialization algorithm works
+by looking at the logarithm of the density of states.  We begin at
+high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the entropy) and work our way
+downward.
+
+\paragraph{Reaching $T_{\min}$:}
+If the change in the logarithm of the density of states is greater
+than the reciprocal of the minimum temperature, i.e. if
+\begin{align}
+  \ln\frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} &>
+  \frac{\epsilon_{i-1} - \epsilon_i}{k_BT_{\min}}
+  \\
+  \frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} &>
+  e^{\beta_{\max}(\epsilon_{i-1} - \epsilon_i)}
+\end{align}
+then the algorithm has reached the minimum temperature of interest.
+In this case, we set the log weights at all lower energies using a
+Boltzmann ratio relative to this energy.
+\paragraph{Confident at $\epsilon_i$:} We are confident in our density
+of states at energy $\epsilon_i$ provided two conditions are true.
+\begin{enumerate}
+\item The density of states must be decreasing as the energy decreases
+  from its next-higher energy.
+\item The change in density of states (relative to the next higher
+  energy) must be smaller than a pessimistic estimate of the counting
+  uncertainty at the energy we are examining:
+  \begin{align}
+    \frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
+  \end{align}
+  where $N_i$ is the number of ``pessimistic
+  samples'' at $\epsilon_i$, the lower of the two energies under
+  consideration.
+\end{enumerate}
+If both of these are true, we believe we know the density of states at
+this energy well, and the weights are set by
+\begin{align}
+  \ln w(\epsilon_i) = -\ln\mathcal{D}(\epsilon_i)
+\end{align}
+\paragraph{Reached $T_\text{converged}$:}
+If this is not the case, $\epsilon_i$ is the lowest energy that is
+adequately converged.  We set the weights for energies lower than this
+to a Boltzmann ratio with a temperature determined using the slope of
+a secant line on the $\ln w$ versus $\epsilon$ graph.
+\begin{align}
+  \beta_\text{secant} = \bigg(\frac{\ln\mathcal{D}(\epsilon_{S_{\max}}) - \ln\mathcal{D}
+  (\epsilon_\text{pivot})}{\epsilon_{S_{\max}}-\epsilon_\text{pivot}}\bigg)
+\end{align}
+This ``slope'' is a positive quantity.  The weights at energies below
+$\epsilon_\text{pivot}$ are given by
+\begin{align}
+  \ln w(\epsilon) = \ln w(\epsilon_\text{pivot}) -
+  \beta_\text{secant}(\epsilon - \epsilon_\text{pivot})
+\end{align}
+indicating that there are higher weights at lower energies, since
+$\beta$ is positive.  We have one additional caveat: we examine the
+lower energies for which we have samples (``pessimistic'' samples),
+and if we find any energy at which the density of states is greater
+than the inverse of the weight, we adjust $\beta$ to cause it to pass
+through that point.  This ensures that the product of the weight with
+the estimated density of states is always less than or equal one for
+energies below $\epsilon_\text{converged}$.
+
+\subsection{TMI3 Algorithm}
+The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
+difference, which is that instead of a secant line being used to
+estimate the converged temperature, we use a tangent line, estimated
+using the lowest two ``converged'' energies.
+
 % The original TMI Algorithm text is below.
 
 %\subsection{TMI Algorithm}
