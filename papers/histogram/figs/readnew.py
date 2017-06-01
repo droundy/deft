@@ -17,15 +17,6 @@ def e_lndos(fbase):
     lndos = e_lndos[:,1]
     return energy, lndos
 
-#----------------------------------------------------------------------# 
-#Jordan is writing a function here that will read in the pessimistic 
-#samples, energy, and the logrithm of the density of states from two 
-#different files.  One of the files will be a reference while the other 
-#will be user defined.  This function can be used later in a new script 
-#to compare various thermodynamic quantities such as U(T), S(T), and 
-#Cv(T) with pessimistic samples.
-#----------------------------------------------------------------------#
-
 def e_lndos_ps(fbase):
     e_lndos_ps = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
     
@@ -34,8 +25,6 @@ def e_lndos_ps(fbase):
     ps = e_lndos_ps[:,2] # pessimistic samples
 
     return energy, lndos, ps
-
-#----------------------------------------------------------------------#
 
 def e_lnw(fbase):
     e_lnw = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2, dtype=numpy.float)
@@ -50,14 +39,19 @@ def T_u_cv_s_minT(fbase):
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
     min_T = minT(fbase)
-    # energy histogram file; indexed by [-energy,counts]
-    e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2)
-    # weight histogram file; indexed by [-energy,ln(weight)]
-    lnw_hist = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2)
+    
+    # Now compute (or just read in) the lndos and the energies
+    try:
+        energy,ln_dos = e_lndos(fbase)
+    except:
+        # energy histogram file; indexed by [-energy,counts]
+        e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2)
+        # weight file; indexed by [-energy,ln(weight)]
+        lnw_hist = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2)
 
-    energy = -e_hist[:,0] # array of energies
-    lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
-    ln_dos = numpy.log(e_hist[:,1]) - lnw
+        energy = -e_hist[:,0] # array of energies
+        lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
+        ln_dos = numpy.log(e_hist[:,1]) - lnw
 
     Z = numpy.zeros(len(T_range)) # partition function
     U = numpy.zeros(len(T_range)) # internal energy
