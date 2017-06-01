@@ -3,11 +3,16 @@ from __future__ import division
 import numpy
 
 def e_hist(fbase):
-    # energy histogram file; indexed by [-energy,counts]
-    e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2, dtype=numpy.float)
-
-    energy = -e_hist[:,0] # array of energies
-    hist = e_hist[:,1]
+    try:
+        trans = numpy.loadtxt(fbase +"-transitions.dat", dtype=numpy.float)
+        energy = -trans[:,0]
+        trans = trans[:,1:]
+        hist = numpy.sum(trans, axis=1)
+    except:
+        # energy histogram file; indexed by [-energy,counts]
+        e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2, dtype=numpy.float)
+        energy = -e_hist[:,0] # array of energies
+        hist = e_hist[:,1]
     return energy, hist
 
 def e_lndos(f):

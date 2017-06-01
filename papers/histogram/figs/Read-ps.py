@@ -26,42 +26,43 @@ lenyz = float(sys.argv[4])
 number = sys.argv[5]
 #arg number = [000100]
 
-methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
+all_methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
+methods = []
+prettymethods = []
 
-#----------------------------------------------------------------------#
-nom = len(methods)
+T = []
+u = []
 
-T = numpy.zeros(nom,dtype = object)
-u = numpy.zeros(nom,dtype = object)
-cv = numpy.zeros(nom,dtype = object)
-s = numpy.zeros(nom,dtype = object)
-minT = numpy.zeros(nom,dtype = object)
-
-energy = numpy.zeros(nom,dtype = object)
-lndos = numpy.zeros(nom,dtype = object)
-ps = numpy.zeros(nom,dtype = object)
+energy = []
+lndos = []
+ps = []
+hist = []
 
 fref = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi3-dos.dat' % (ww,ff,lenx,lenyz)
 energy_ref,lndos_ref = readnew.e_lndos(fref)
 max_entropy_state = readnew.max_entropy_state(fref)
 
-for i in range(len(methods)):
+for method in all_methods:
     try:
-        method = methods[i]
         fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s-movie/%s' % (ww,ff,lenx,lenyz,method,number)
-        T[i],u[i],cv[i],s[i],minT[i] = readnew.T_u_cv_s_minT(fbase)
-        energy[i],lndos[i],ps[i] = readnew.e_lndos_ps(fbase)
-        energy[i] = energy[i][:len(lndos_ref)]
-        lndos[i] = lndos[i][:len(lndos_ref)]
-        ps[i] = ps[i][:len(lndos_ref)]
+        myT,myu,mycv,mys,myminT = readnew.T_u_cv_s_minT(fbase)
+        myenergy,mylndos,myps = readnew.e_lndos_ps(fbase)
+        _, myhist = readnew.e_hist(fbase)
 
     except:
-        pass
+        continue
+    energy.append(myenergy[:len(lndos_ref)])
+    lndos.append(mylndos[:len(lndos_ref)])
+    ps.append(myps[:len(lndos_ref)])
+    newhist = np.zeros_like(lndos_ref)
+    newhist[:len(myhist)] = myhist
+    hist.append(newhist)
+    methods.append(method)
+    prettymethods.append(method[1:])
+    T.append(myT)
+    u.append(myu)
 
-#----------------------------------------------------------------------#
 
-Error_DOS = numpy.absolute(lndos[0] - lndos[1])
-#plt.semilogx(ps1[0], Error_DOS, label = '$\mid tmi_3 - tmi_2 \mid$')
 error0 = abs(1-numpy.exp(lndos[0]-lndos[0][max_entropy_state]
                          -lndos_ref+lndos_ref[max_entropy_state])[ps[0] > 0])
 
@@ -69,16 +70,16 @@ error1 = abs(1-numpy.exp(lndos[1]-lndos[1][max_entropy_state]
                          -lndos_ref+lndos_ref[max_entropy_state])[ps[1] > 0])
 
 plt.loglog(ps[0][ps[0] > 0], error0,
-             'ro',linewidth = 2, label = '$tmi_3$')
+             'ro',linewidth = 2, label = prettymethods[0])
 plt.loglog(ps[1][ps[1] > 0], error1,
-             'bx',linewidth = 2, label = '$tmi_2$')
+             'bx',linewidth = 2, label = prettymethods[1])
 plt.loglog(ps[1][ps[1] > 0], 3/np.sqrt(ps[1][ps[1] > 0]), 'k:',
-            label=r'$\frac{3}{\sqrt{ps}}$')
+            label=r'$\frac{3}{\sqrt{N_R}}$')
 #plt.ylim((-50,-20))
 
-plt.xlabel(r'Pessimistic Samples')
-plt.ylabel('$(D-D_{ref})/D_{ref}$')
-plt.title('$\mathcal{D}(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
+plt.xlabel(r'$N_R(\epsilon)$')
+plt.ylabel(r'$\frac{D(\epsilon)-D_{\textrm{ref}}(\epsilon)}{D_{\textrm{ref}}(\epsilon)}$')
+plt.title(r'$D(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 
@@ -86,16 +87,32 @@ plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g%s-Error.pdf'
             % (ww,ff,lenx,lenyz,'-tmi3'))
 
 plt.figure()
-#plt.semilogx(ps1[0], Error_DOS, label = '$\mid tmi_3 - tmi_2 \mid$')
-plt.plot(energy[0], lndos[0],'r',linewidth = 2, label = '$tmi_3$')
-plt.plot(energy[1], lndos[1],'b',linewidth = 2, label = '$tmi_2$')
+plt.plot(energy[0], lndos[0],'r',linewidth = 2, label = prettymethods[0])
+plt.plot(energy[1], lndos[1],'b',linewidth = 2, label = prettymethods[1])
 
 plt.xlabel(r'energy')
-plt.ylabel('$\mathcal{D}(\epsilon)$')
-plt.title('$\mathcal{D}(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
+plt.ylabel('$D(\epsilon)$')
+plt.title('$D(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 plt.legend(loc='best')
 plt.tight_layout(pad=0.2)
 
 plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g%s-vs-energy.pdf'
+            % (ww,ff,lenx,lenyz,'-tmi3'))
+
+plt.figure()
+#print ps[0].shape, hist[0].shape
+#print hist[0]
+plt.loglog(ps[0][ps[0] > 0], hist[0][ps[0]>0],
+             'ro',linewidth = 2, label = prettymethods[0])
+plt.loglog(ps[1][ps[1] > 0], hist[1][ps[1]>0],
+             'bx',linewidth = 2, label = prettymethods[1])
+
+plt.xlabel(r'$N_R(\epsilon)$')
+plt.ylabel(r'$H(\epsilon)$')
+plt.title('$H(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+
+plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g%s-hist-vs-NR.pdf'
             % (ww,ff,lenx,lenyz,'-tmi3'))
 plt.show()
