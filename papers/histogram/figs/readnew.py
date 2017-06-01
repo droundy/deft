@@ -13,15 +13,14 @@ def e_hist(fbase):
 def e_lndos(f):
     if '.dat' not in f:
         f = f+"-lndos.dat"
-    e_lndos = numpy.loadtxt(f+"-lndos.dat", ndmin=2, dtype=numpy.float)
+    e_lndos = numpy.loadtxt(f, ndmin=2, dtype=numpy.float)
     energy = -e_lndos[:,0] # array of energies
     lndos = e_lndos[:,1]
     return energy, lndos
 
 def e_lndos_ps(fbase):
     e_lndos_ps = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
-    
-    energy = e_lndos_ps[:,0]
+    energy = -e_lndos_ps[:,0]
     lndos = e_lndos_ps[:,1]
     ps = e_lndos_ps[:,2] # pessimistic samples
 
@@ -39,12 +38,13 @@ def T_u_cv_s_minT(fbase):
     T_bins = 1e3
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
-    min_T = minT(fbase)
     
     # Now compute (or just read in) the lndos and the energies
     try:
         energy,ln_dos = e_lndos(fbase)
+        min_T = minT(fbase+'-lndos.dat')
     except:
+        min_T = minT(fbase)
         # energy histogram file; indexed by [-energy,counts]
         e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2)
         # weight file; indexed by [-energy,ln(weight)]
