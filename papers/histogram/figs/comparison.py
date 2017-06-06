@@ -22,6 +22,9 @@ maxentropystate = numpy.zeros(len(r))
 minimportantenergy = numpy.zeros(len(r))
 erroratenergy = numpy.zeros(len(r))
 
+goodenough = 0.1
+goodenoughenergy = numpy.zeros(len(r))
+
 for i,f in enumerate(sorted(r)):
     e,lndos = readnew.e_lndos(f)
     iterations[i] = readnew.iterations(f)
@@ -29,8 +32,23 @@ for i,f in enumerate(sorted(r)):
     minimportantenergy[i] = readnew.min_important_energy(f)
     doserror = lndos - lndos[maxref] - lndosref + lndosref[maxref]
     erroratenergy[i] = doserror[energy]
+
+    # The following finds out what energy we are converged to at the
+    # "goodenough" level.
+    if any(numpy.logical_and(abs(doserror) > goodenough, e < -maxref)):
+        goodenoughenergy[i] = max(e[numpy.logical_and(abs(doserror) > goodenough, e < -maxref)])
+    else:
+        goodenoughenergy[i] = -minimportantenergy[i]
 print minimportantenergy[-1]
 plt.plot(iterations, erroratenergy, 'r.')
+plt.xlabel('# iterations')
+plt.ylabel('error')
+
+plt.figure()
+plt.plot(iterations, goodenoughenergy, 'r.')
+plt.xlabel('# iterations')
+plt.ylabel('energy we are converged to')
+plt.title('Convergence at %g%% level' % (goodenough*100))
 plt.show()
 
 
