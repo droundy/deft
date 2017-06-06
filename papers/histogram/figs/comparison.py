@@ -1,17 +1,51 @@
 from __future__ import division
-import numpy as np
+import numpy, sys, os
 import matplotlib.pyplot as plt
+import readnew
+from glob import glob
 
-T1 = np.genfromtxt(fname = "../deft/papers/histogram/data/s002/periodic-ww1.30-ff0.30-N200-toe-golden-movie/000556-lndos.dat")
-print T1
+if os.path.exists('../data'):
+    os.chdir('..')
+
+energy = int(sys.argv[1])
+reference = sys.argv[2]
+filebase = sys.argv[3]
+
+ref = "data/" + reference
+eref, lndosref = readnew.e_lndos(ref)
+maxref = readnew.max_entropy_state(ref)
+
+r = glob('data/%s-movie/*lndos.dat' % (filebase))
+
+iterations = numpy.zeros(len(r))
+maxentropystate = numpy.zeros(len(r))
+minimportantenergy = numpy.zeros(len(r))
+erroratenergy = numpy.zeros(len(r))
+
+for i,f in enumerate(sorted(r)):
+    e,lndos = readnew.e_lndos(f)
+    iterations[i] = readnew.iterations(f)
+    maxentropystate[i] = readnew.max_entropy_state(f)
+    minimportantenergy[i] = readnew.min_important_energy(f)
+    doserror = lndos - lndos[maxref] - lndosref + lndosref[maxref]
+    erroratenergy[i] = doserror[energy]
+print minimportantenergy[-1]
+plt.plot(iterations, erroratenergy, 'r.')
+plt.show()
 
 
 
-def e_lndos(fbase):
-    e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
 
-    energy = -e_lndos[:,0] # array of energies
-    lndos = e_lndos[:,1]
-    return energy, lndos
 
-print e_lndos(
+
+
+
+
+
+
+
+
+
+
+
+
