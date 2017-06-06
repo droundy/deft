@@ -11,9 +11,9 @@ def e_hist(fbase):
     return energy, hist
 
 def e_lndos(f):
-	if '.dat' not in f:
+    if '.dat' not in f:
         f = f+"-lndos.dat"
-    e_lndos = numpy.loadtxt(f+"-lndos.dat", ndmin=2, dtype=numpy.float)
+    e_lndos = numpy.loadtxt(f, ndmin=2, dtype=numpy.float)
     energy = -e_lndos[:,0] # array of energies
     lndos = e_lndos[:,1]
     return energy, lndos
