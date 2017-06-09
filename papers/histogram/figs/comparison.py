@@ -12,7 +12,10 @@ reference = sys.argv[2]
 filebase = sys.argv[3]
 
 ref = "data/" + reference
-eref, lndosref = readnew.e_lndos(ref)
+try:
+    eref, lndosref, psref = readnew.e_lndos_ps(ref)
+except:
+    eref, lndosref = readnew.e_lndos(ref)
 maxref = readnew.max_entropy_state(ref)
 
 r = glob('data/%s-movie/*lndos.dat' % (filebase))
@@ -26,6 +29,10 @@ goodenough = 0.1
 goodenoughenergy = numpy.zeros(len(r))
 
 for i,f in enumerate(sorted(r)):
+    try:
+        e,lndos,ps = readnew.e_lndos_ps(f)
+    except:
+        continue
     e,lndos = readnew.e_lndos(f)
     iterations[i] = readnew.iterations(f)
     maxentropystate[i] = readnew.max_entropy_state(f)
@@ -40,6 +47,23 @@ for i,f in enumerate(sorted(r)):
     else:
         goodenoughenergy[i] = -minimportantenergy[i]
 print minimportantenergy[-1]
+print len(ps)
+
+plt.loglog(ps[ps > 0], iterations[ps > 0],
+             'ro',linewidth = 2,label = r'30x4 tmi3')
+plt.loglog(psref[ps > 0], iterations[ps > 0],
+             'bx',linewidth = 2,label = r'30x4 ref')
+
+plt.xlabel(r'$iterations$')
+plt.ylabel(r'$N_R(\epsilon)$')
+#plt.title(r'$D(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
+plt.legend(loc='best')
+plt.tight_layout(pad=0.2)
+
+#plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g%s-Error.pdf'
+            #% (ww,ff,lenx,lenyz,'-tmi3'))
+
+plt.figure()
 plt.plot(iterations, erroratenergy, 'r.')
 plt.xlabel('# iterations')
 plt.ylabel('error')

@@ -24,7 +24,9 @@ def e_lndos(f):
     return energy, lndos
 
 def e_lndos_ps(fbase):
-    e_lndos_ps = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
+    if '.dat' not in fbase:
+        fbase = fbase + "-lndos.dat"    
+    e_lndos_ps = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
     energy = -e_lndos_ps[:,0]
     lndos = e_lndos_ps[:,1]
     ps = e_lndos_ps[:,2] # pessimistic samples
