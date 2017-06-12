@@ -4,6 +4,7 @@ import os
 
 repos = ['/home/droundy/git/deft.git',
          '/home/jordan/deft',
+         '/home/patrick/deft',
          '/home/simpstan/deft']
 
 for repo in repos:
