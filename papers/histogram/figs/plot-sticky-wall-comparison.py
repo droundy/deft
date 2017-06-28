@@ -27,7 +27,7 @@ lenyz_ref1 = float(sys.argv[5])
 lenyz__ref2 = float(sys.argv[6])
 #arg lenyz = [10]
 T = float(sys.argv[7])
-#arg Ts = [0.8]
+#arg T = [0.8]
 
 plt.figure()
 
