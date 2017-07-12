@@ -217,8 +217,10 @@ def g_r(fbase, T):
     return g, r[0,:]
 
 
-def density_x(fbase, T):
-    fdensity = fbase+"-density.dat"
+def density_x(fdensity, T):
+    if '.dat' not in fdensity:
+        fdensity = fdensity+"-density.dat"
+    #fdensity = fbase+"-density.dat"
     data = numpy.loadtxt(fdensity)
     denshist = data[1:,2:]
     x_1d = data[0,2:]
