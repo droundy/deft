@@ -181,8 +181,7 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double 
     xNeighbor = yNeighbor = zNeighbor = 0;
     xsteps=ysteps=zsteps = 0;
 
-    for (int sphereNum = 0; sphereNum < totalNumOfSpheres; sphereNum++)
-    {
+    for (int sphereNum = 0; sphereNum < totalNumOfSpheres; sphereNum++) {
         sphereMatrix[sphereNum].x = xRef + xNeighbor;
         sphereMatrix[sphereNum].y = yRef + yNeighbor;
         sphereMatrix[sphereNum].z = zRef + zNeighbor;
@@ -191,48 +190,37 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double 
         xNeighbor = yNeighbor = zNeighbor = 0;
         smallCell = sphereNum%4;
 
-        if (smallCell == 0)
-        {
+        if (smallCell == 0) {
             xNeighbor = cubeSideLength / 2;
             zNeighbor = cubeSideLength / 2;
-        }
-        else if (smallCell == 1)
-        {
+        } else if (smallCell == 1) {
             xNeighbor = cubeSideLength / 2;
             yNeighbor = cubeSideLength / 2;
-        }
-        else if (smallCell == 2)
-        {
+        } else if (smallCell == 2) {
             yNeighbor = cubeSideLength / 2;
             zNeighbor = cubeSideLength / 2;
-        }
-        else if (smallCell == 3)
-        {
-            if (xRef + cubeSideLength < sizeOfSystem)
-            {
+        } else if (smallCell == 3) {
+            if (xRef + cubeSideLength < sizeOfSystem) {
                 xRef += cubeSideLength;
                 xsteps += 1;
-            }
-            else if ((xRef + cubeSideLength >= sizeOfSystem) && (yRef + cubeSideLength  < sizeOfSystem))
-            {
+            } else if ((xRef + cubeSideLength >= sizeOfSystem)
+                       && (yRef + cubeSideLength  < sizeOfSystem)) {
                 xRef -= xsteps*cubeSideLength;
                 yRef += cubeSideLength;
                 ysteps += 1;
                 xsteps = 0;
-            }
-            else if ((yRef + cubeSideLength >= sizeOfSystem) && (xRef + cubeSideLength >=sizeOfSystem) && (zRef + cubeSideLength < sizeOfSystem))
-            {
+            } else if ((yRef + cubeSideLength >= sizeOfSystem)
+                       && (xRef + cubeSideLength >=sizeOfSystem)
+                       && (zRef + cubeSideLength < sizeOfSystem)) {
                 xRef -= xsteps*cubeSideLength;
                 yRef -= ysteps*cubeSideLength;
                 zRef += cubeSideLength;
                 xsteps = ysteps = 0;
-            }
-            else if ((yRef + cubeSideLength >= sizeOfSystem) && (xRef + cubeSideLength >=sizeOfSystem) && (zRef + cubeSideLength >= sizeOfSystem))
-            {
+            } else if ((yRef + cubeSideLength >= sizeOfSystem)
+                        && (xRef + cubeSideLength >=sizeOfSystem)
+                        && (zRef + cubeSideLength >= sizeOfSystem)) {
                 sphereNum = totalNumOfSpheres;
-            }
-            else
-            {
+            } else {
                 printf(" Help!!!\n");
                 cout << " Help!!!" << endl;
             }
