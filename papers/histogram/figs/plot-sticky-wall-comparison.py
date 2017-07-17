@@ -10,10 +10,11 @@ matplotlib.rc('text', usetex=True)
 
 import readnew
 import glob
+import os
 
 
 if len(sys.argv) < 5:
-    print("Usage: python {} 1.3 0.22 100 10 0.8".format(sys.argv[0]))
+    print("Usage: python {} 1.3 0.22 100 0.8".format(sys.argv[0]))
     exit(1)
 
 ww = float(sys.argv[1])
@@ -30,7 +31,8 @@ plt.figure()
 methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
 method = methods[0]
  
-fbase = glob.glob('data/lv/ww%.2f-ff%.2f-%gx*%s-density.dat' % (ww,ff,lenx,method))
+fname = glob.glob('data/lv/ww%.2f-ff%.2f-%gx*%s-density.dat' % (ww,ff,lenx,method))
+fbase = sorted(fname, key=os.path.getsize)
 
 for i in range(len(fbase)):
     density, x = readnew.density_x(fbase[i], T)
