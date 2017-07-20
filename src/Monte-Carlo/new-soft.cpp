@@ -1,39 +1,59 @@
 #define _USE_MATH_DEFINES
-
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <random>
 #include <math.h>
 #include <chrono>
-
 #include <vector3d.h>
 
 using namespace std;
 using sec = chrono::seconds;
 using get_time = chrono::steady_clock;
 
+// ------------------------------------------------------------------------------
+// Global Constants
+// ------------------------------------------------------------------------------
+
+const int x = 0;
+const int y = 1;
+const int z = 2;
+
+// ------------------------------------------------------------------------------
+// Functions
+// ------------------------------------------------------------------------------
+
+// Places a desired number of spheres into an FCC lattice
+inline vector3d *FCCLattice(int numOfSpheres,double cubeSideLength, double sizeOfSystem);
+
+// Applies periodic boundary conditions in x,y,z
+inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem);
+
+// Calculates total potential of system
+double totalPotential(vector3d *sphereMatrix, int numOfSpheres);
+
+// Checks whether the move of a sphere is valid
+bool conditionCheck(vector3d *sphereMatrix, vector3d movedSpherePos, int numOfSpheres, int movedSphereNum,double Temperature);
+
 // Random Number Stuff which can be changed
 random_device rd;
 mt19937 gen(rd());
 
-// List of Functions
-inline vector3d *FCCLattice(int numOfSpheres,double cubeSideLength, double sizeOfSystem);
-inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem);
-double totalPotential(vector3d *sphereMatrix, int numOfSpheres);
-bool conditionCheck(vector3d *sphereMatrix, vector3d movedSpherePos, int numOfSpheres, int movedSphereNum,double Temperature);
-// inline ArrayXd radialDistribution(MatrixXd sphereMatrix, int numOfSpheres, double sizeOfSystem, double dg);
+// ------------------------------------------------------------------------------
+// Test Variables
+// ------------------------------------------------------------------------------
 
-// Variables which can be changed.
 int numOfSpheres = 32;   // Subject to change depending on cell size parameters
-double cellLength = 4;  // Angstroms??
+int totalIterations = 1;
+
+double sigma = 0.345;
+double cellLength = 4;
 double sizeOfSystem = 2*cellLength;
 double Temperature = 83.8;
-double sigma = 0.345; //
+
 double epsilon = 1;
 double WCA = 0;
 
-int totalIterations = 1000000;
 double dr = 0.01;
 double dg = 0.001;
 
@@ -44,9 +64,9 @@ int main()
     vector3d *sphereMatrix = FCCLattice(numOfSpheres,cellLength,sizeOfSystem);
     cout << "Number of Spheres in System: " << numOfSpheres << ". The system may have been revised due to an unrealistic amount of spheres in the desired space." << endl;
 
-
     uniform_int_distribution<int> randSphere(0,numOfSpheres-1);
     normal_distribution<double> randMove(0,dr);
+    uniform_real_distribution<double> randProb(0.0,1.0);
 
     int acceptedTrials = 0;
 
@@ -66,26 +86,19 @@ int main()
     vector3d R1,R2,Rj,initialRow;
     bool trialAcceptance;
 
-    // ArrayXd radial;
-
-    for (int currentIteration = 0; currentIteration < totalIterations; ++currentIteration)
-    {   // Performs the random move and checking
+    for (int currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {   // Performs the random move and checking
         bool overlap = false;
         int movedSphereNum = randSphere(gen);
         vector3d movedSpherePos = sphereMatrix[movedSphereNum];
-        for (int i = 0; i < 3; ++i)
-        {   // Store to temporary array for comparison
+
+        for (int i = 0; i < 3; ++i){   // Store to temporary array for comparison
             movedSpherePos[i] += randMove(gen);
         }
         movedSpherePos = periodicBC(movedSpherePos,sizeOfSystem);
-
-        uniform_real_distribution<double> randProb(0.0,1.0);
-
         initialRow = sphereMatrix[movedSphereNum];
-        for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere)
-        {   // Determines the difference in energy due to the random move
-            if (currentSphere != movedSphereNum)
-            {
+
+        for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere) {   // Determines the difference in energy due to the random move
+            if (currentSphere != movedSphereNum) {
                 Rj = sphereMatrix[currentSphere];
                 // Calculates Energy after Sphere move
                 R2 = Rj - movedSpherePos;
@@ -102,35 +115,29 @@ int main()
                 SR112 = SR16*SR16;
                 energy1 += SR112 - SR16;
 
-                if (sqrt(R2sq) < sigma)
-                {
+                if (sqrt(R2sq) < sigma){
                     overlap = true;
                 }
             }
         }
 
         double energyChange = energy2 - energy1;
-        if (energyChange <= 0)
-        {
+        if (energyChange <= 0)  {
             trialAcceptance = true;
         }
-        else if (energyChange > 0)
-        {
+        else if (energyChange > 0)  {
             double p = exp(-energyChange / Temperature);
             double r = randProb(gen);
-            if ((p > r)&&(overlap == false))
-            {
+            if ((p > r)&&(overlap == false))    {
                 trialAcceptance = true;
             }
-            else
-            {
+            else    {
                 trialAcceptance = false;
             }
         }
 
 
-        if (trialAcceptance == true)
-        {   // Rewrites position and energy files
+        if (trialAcceptance == true){   // Rewrites position and energy files
             sphereMatrix[movedSphereNum] = movedSpherePos;
             totalEnergy = totalPotential(sphereMatrix,numOfSpheres);
             acceptedTrials += 1;
@@ -231,14 +238,11 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double 
 
 inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem)
 {   // Applies periodic boundary conditions in x,y,z. Assumes no random move is larger than sizeOfSystem.
-    for (int i = 0; i < 3; i++)
-    {
-        if (inputVector[i] > sizeOfSystem)
-        {
+    for (int i = 0; i < 3; i++){
+        if (inputVector[i] > sizeOfSystem){
             inputVector[i] -= sizeOfSystem;
         }
-        else if (inputVector[i] < 0)
-        {
+        else if (inputVector[i] < 0){
             inputVector[i] += sizeOfSystem;
         }
     }
@@ -251,11 +255,9 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres)
     double Rsq, SR2, SR6, SR12;
     vector3d R,Rj;
 
-    for (int i = 0; i < numOfSpheres; ++i)
-    {   // Sphere 1
+    for (int i = 0; i < numOfSpheres; ++i)  {   // Sphere 1
         vector3d Ri = sphereMatrix[i];
-        for (int j = i + 1; j < numOfSpheres; ++j)
-        {   // Vector from Sphere 2
+        for (int j = i + 1; j < numOfSpheres; ++j)  {   // Vector from Sphere 2
             Rj = sphereMatrix[j];
             R = Rj - Ri;
             Rsq = R.norm();
