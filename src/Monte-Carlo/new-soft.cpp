@@ -24,7 +24,7 @@ const int z = 2;
 // ------------------------------------------------------------------------------
 
 // Places a desired number of spheres into an FCC lattice
-inline vector3d *FCCLattice(int numOfSpheres,double cubeSideLength, double sizeOfSystem);
+inline vector3d *FCCLattice(int numOfSpheres,double cubeSideLength, double sizeOfSystem, double sphereRadius);
 
 // Applies periodic boundary conditions in x,y,z
 inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem);
@@ -35,6 +35,9 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres);
 // Checks whether the move of a sphere is valid
 bool conditionCheck(vector3d *sphereMatrix, vector3d movedSpherePos, int numOfSpheres, int movedSphereNum,double Temperature);
 
+// Counts the number of spheres within a certain radius. Does not take into consideration mirror image particles.
+int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem);
+
 // Random Number Stuff which can be changed
 random_device rd;
 mt19937 gen(rd());
@@ -44,24 +47,22 @@ mt19937 gen(rd());
 // ------------------------------------------------------------------------------
 
 int numOfSpheres = 32;   // Subject to change depending on cell size parameters
-int totalIterations = 1;
+int totalIterations = 10000000;
 
-double sigma = 0.345;
-double cellLength = 4;
+double sigma = 3.45;
+double cellLength = 6*sigma;
 double sizeOfSystem = 2*cellLength;
-double Temperature = 83.8;
+double Temperature = 84;
 
 double epsilon = 1;
 double WCA = 0;
 
 double dr = 0.01;
-double dg = 0.001;
-
 
 int main()
 {
     auto start = get_time::now();
-    vector3d *sphereMatrix = FCCLattice(numOfSpheres,cellLength,sizeOfSystem);
+    vector3d *sphereMatrix = FCCLattice(numOfSpheres,cellLength,sizeOfSystem,sigma/2);
     cout << "Number of Spheres in System: " << numOfSpheres << ". The system may have been revised due to an unrealistic amount of spheres in the desired space." << endl;
 
     uniform_int_distribution<int> randSphere(0,numOfSpheres-1);
@@ -86,7 +87,8 @@ int main()
     vector3d R1,R2,Rj,initialRow;
     bool trialAcceptance;
 
-    for (int currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {   // Performs the random move and checking
+    // Performs the random move and checking
+    for (int currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
         bool overlap = false;
         int movedSphereNum = randSphere(gen);
         vector3d movedSpherePos = sphereMatrix[movedSphereNum];
@@ -115,7 +117,7 @@ int main()
                 SR112 = SR16*SR16;
                 energy1 += SR112 - SR16;
 
-                if (sqrt(R2sq) < sigma){
+                if (sqrt(R2sq) < sigma/2){
                     overlap = true;
                 }
             }
@@ -143,6 +145,17 @@ int main()
             acceptedTrials += 1;
         }
 
+        if ((currentIteration % 1000) == true){
+           int *radialDistHist;
+
+           radialDistHist = radialDistribution(sphereMatrix,numOfSpheres,sizeOfSystem);
+
+           for (int i = 0; i < 1000; i++ ) {
+                fprintf(radial_file, "%d\t",radialDistHist[i]);
+           }
+           fprintf(radial_file,"\n");
+        }
+
         fprintf(energy_file, "%g\n", totalEnergy);
         outputFile[2] << totalEnergy << endl;
         if ((currentIteration == 9*totalIterations/10) ||(currentIteration == totalIterations/10) ||(currentIteration == totalIterations/4) || (currentIteration == totalIterations/2) || (currentIteration == 3*totalIterations/4))
@@ -155,15 +168,8 @@ int main()
             cout << endl;
         }
     }
-    /*
-     * radial = radialDistribution(sphereMatrix,numOfSpheres,sizeOfSystem, dg);
-    outputFile[1] <<  radial.transpose() << endl;
-    * */
-    //radial = radialDistribution(sphereMatrix,numOfSpheres,sizeOfSystem, dg);
-    //double factor = totalIterations;
-    cout << "Ratio of Accepted to Total: " << acceptedTrials << "/" << totalIterations << endl;
-    //cout << 1000/factor << endl;
 
+    cout << "Ratio of Accepted to Total: " << acceptedTrials << "/" << totalIterations << endl;
 
     // Write Positions to File
     outputFile[0].open(filename[0].c_str());
@@ -178,13 +184,12 @@ int main()
     fclose(radial_file);
 }
 
-inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double sizeOfSystem)
-{   // Takes in a desired number of spheres, the side length of a single cube, and the total size of the system to fill in an FCC lattice.
+inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double sizeOfSystem,double sphereRadius)   {
     vector3d *sphereMatrix = new vector3d[totalNumOfSpheres];
     double xRef,yRef,zRef,xNeighbor,yNeighbor,zNeighbor;
     int xsteps,ysteps,zsteps,smallCell, breaker;
 
-    xRef = yRef = zRef = 0; // Can be used as sphere radius.
+    xRef = yRef = zRef = sphereRadius;
     xNeighbor = yNeighbor = zNeighbor = 0;
     xsteps=ysteps=zsteps = 0;
 
@@ -236,8 +241,7 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double 
     return sphereMatrix;
 }
 
-inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem)
-{   // Applies periodic boundary conditions in x,y,z. Assumes no random move is larger than sizeOfSystem.
+inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem)   {
     for (int i = 0; i < 3; i++){
         if (inputVector[i] > sizeOfSystem){
             inputVector[i] -= sizeOfSystem;
@@ -249,8 +253,7 @@ inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem)
      return inputVector;
 }
 
-double totalPotential(vector3d *sphereMatrix, int numOfSpheres)
-{   // Calculates the Sum of Potentials between spheres for Whole System
+double totalPotential(vector3d *sphereMatrix, int numOfSpheres) {
     double totalPotential = 0.0;
     double Rsq, SR2, SR6, SR12;
     vector3d R,Rj;
@@ -269,43 +272,29 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres)
     }
     return totalPotential = 4*epsilon*totalPotential + WCA;
 }
-/*
-inline ArrayXd radialDistribution(MatrixXd sphereMatrix, int numOfSpheres, double sizeOfSystem, double dg)
-{   // Attempt. This is where I don't know what the hell I'm doing.
+
+int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem)   {
     vector3d R1,R2;
     double R;
-    int box;
-
-    int numOfBoxes = int(1.5*sizeOfSystem / dg);
-    ArrayXd deltan = ArrayXd::Zero(numOfBoxes+1);
-    ArrayXd Rs = ArrayXd::Zero(numOfBoxes+1);
-    ArrayXd G = ArrayXd::Zero(numOfBoxes+1);
+    // I am having an issue making the size of the dr for the histogram a variable.
+    const int numOfBoxes = 1000;
+    static int deltan[numOfBoxes];
 
     for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere)
     {
-        R1 = sphereMatrix.row(currentSphere);
+        R1 = sphereMatrix[currentSphere];
         for (int testSphere = currentSphere + 1; testSphere < numOfSpheres; ++testSphere)
         {
-            R2 = sphereMatrix.row(testSphere);
+            R2 = sphereMatrix[testSphere];
             R = (R2-R1).norm();
-            box = int(R / dg);
-            if ((R < 1.5*sizeOfSystem))// && (box <= numOfBoxes))
-            {
-                deltan[box] += 1; // This is meant to represent a weighted Delta Function.
-                Rs[box] = R;
+            int box = int(R*numOfBoxes/sizeOfSystem);   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
+            if (R < sizeOfSystem){
+                deltan[box] += 1;
             }
         }
     }
-
-    for (int i = 0; i < numOfBoxes; ++i)
-    {
-        R = Rs[i];
-        if (R != 0)
-        {
-            G[i] = deltan[i]/(double((numOfSpheres)*(numOfSpheres-1))*2*M_PI*R*R*dg);
-        }
-    }
-
-    return G;
+    return deltan;
 }
-*/
+
+
+
