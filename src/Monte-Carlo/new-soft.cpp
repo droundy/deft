@@ -6,18 +6,11 @@
 #include <math.h>
 #include <chrono>
 #include <vector3d.h>
+#include <MersenneTwister.h>
 
 using namespace std;
 using sec = chrono::seconds;
 using get_time = chrono::steady_clock;
-
-// ------------------------------------------------------------------------------
-// Global Constants
-// ------------------------------------------------------------------------------
-
-const int x = 0;
-const int y = 1;
-const int z = 2;
 
 // ------------------------------------------------------------------------------
 // Functions
@@ -38,6 +31,12 @@ bool conditionCheck(vector3d *sphereMatrix, vector3d movedSpherePos, int numOfSp
 // Counts the number of spheres within a certain radius. Does not take into consideration mirror image particles.
 int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem);
 
+// MT RNG over Normal distribution for random sphere movements.
+double randGauss();
+
+//
+int randSphere();
+
 // Random Number Stuff which can be changed
 random_device rd;
 mt19937 gen(rd());
@@ -47,17 +46,17 @@ mt19937 gen(rd());
 // ------------------------------------------------------------------------------
 
 int numOfSpheres = 32;   // Subject to change depending on cell size parameters
-int totalIterations = 10000000;
+int totalIterations = 1000000;
 
-double sigma = 3.45;
-double cellLength = 6*sigma;
+double sigma = 3.45;//1;
+double cellLength = 6*sigma;//1.8*sigma;
 double sizeOfSystem = 2*cellLength;
-double Temperature = 84;
+double Temperature = 85;
 
-double epsilon = 1;
+double epsilon = 1; //kJ/mol
 double WCA = 0;
 
-double dr = 0.01;
+double dr = 0.001;
 
 int main()
 {
@@ -87,6 +86,7 @@ int main()
     vector3d R1,R2,Rj,initialRow;
     bool trialAcceptance;
 
+
     // Performs the random move and checking
     for (int currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
         bool overlap = false;
@@ -94,7 +94,7 @@ int main()
         vector3d movedSpherePos = sphereMatrix[movedSphereNum];
 
         for (int i = 0; i < 3; ++i){   // Store to temporary array for comparison
-            movedSpherePos[i] += randMove(gen);
+            movedSpherePos[i] += randMove(gen);//dr*randGauss();
         }
         movedSpherePos = periodicBC(movedSpherePos,sizeOfSystem);
         initialRow = sphereMatrix[movedSphereNum];
@@ -104,22 +104,42 @@ int main()
                 Rj = sphereMatrix[currentSphere];
                 // Calculates Energy after Sphere move
                 R2 = Rj - movedSpherePos;
+                // Check Mirror images
+                if (fabs(R2.x) > (sizeOfSystem/2)){
+                    R2.x -= copysign(sizeOfSystem,R2.x);
+                }
+                if(fabs(R2.y) > (sizeOfSystem/2)){
+                    R2.y -= copysign(sizeOfSystem,R2.y);
+                }
+                if(fabs(R2.z) > (sizeOfSystem/2)){
+                    R2.z -= copysign(sizeOfSystem,R2.z);
+                }
                 R2sq = R2.norm();
                 SR22 = (sigma*sigma)/R2sq;
                 SR26 = SR22*SR22*SR22;
                 SR212 = SR26*SR26;
                 energy2 += SR212 - SR26;
+
                 // Calculates Energy before Sphere move.
                 R1 = Rj - initialRow;
+                if (fabs(R1.x) > (sizeOfSystem/2)){
+                    R1.x -= copysign(sizeOfSystem,R1.x);
+                }
+                if (fabs(R1.y) > (sizeOfSystem/2)){
+                    R1.y -= copysign(sizeOfSystem,R1.y);
+                }
+                if (fabs(R1.z) > (sizeOfSystem/2)){
+                    R1.z -= copysign(sizeOfSystem,R1.z);
+                }
                 R1sq = R1.norm();
                 SR12 = (sigma*sigma)/R1sq;
                 SR16 = SR12*SR12*SR12;
                 SR112 = SR16*SR16;
                 energy1 += SR112 - SR16;
 
-                if (sqrt(R2sq) < sigma/2){
-                    overlap = true;
-                }
+//                if (sqrt(R2sq) < sigma/4){
+//                    overlap = true;
+//                }
             }
         }
 
@@ -137,23 +157,18 @@ int main()
                 trialAcceptance = false;
             }
         }
-
-
         if (trialAcceptance == true){   // Rewrites position and energy files
             sphereMatrix[movedSphereNum] = movedSpherePos;
             totalEnergy = totalPotential(sphereMatrix,numOfSpheres);
             acceptedTrials += 1;
-        }
-
-        if ((currentIteration % 1000) == true){
-           int *radialDistHist;
-
-           radialDistHist = radialDistribution(sphereMatrix,numOfSpheres,sizeOfSystem);
-
-           for (int i = 0; i < 1000; i++ ) {
-                fprintf(radial_file, "%d\t",radialDistHist[i]);
-           }
-           fprintf(radial_file,"\n");
+            if ((acceptedTrials % 1000) == true){
+                int *radialDistHist;
+                radialDistHist = radialDistribution(sphereMatrix,numOfSpheres,sizeOfSystem);
+               for (int i = 0; i < 1000; i++ ) {
+                    fprintf(radial_file, "%d\t",radialDistHist[i]);
+               }
+               fprintf(radial_file,"\n");
+            }
         }
 
         fprintf(energy_file, "%g\n", totalEnergy);
@@ -263,6 +278,16 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres) {
         for (int j = i + 1; j < numOfSpheres; ++j)  {   // Vector from Sphere 2
             Rj = sphereMatrix[j];
             R = Rj - Ri;
+            if (fabs(R.x) > (sizeOfSystem/2)){
+                R.x -= copysign(sizeOfSystem,R.x);
+            }
+            if (fabs(R.y) > (sizeOfSystem/2)){
+                R.y -= copysign(sizeOfSystem,R.y);
+            }
+            if (fabs(R.z) > (sizeOfSystem/2)){
+                R.z -= copysign(sizeOfSystem,R.z);
+            }
+
             Rsq = R.norm();
             SR2 = (sigma*sigma)/Rsq;
             SR6 = SR2*SR2*SR2;
@@ -274,9 +299,9 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres) {
 }
 
 int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem)   {
-    vector3d R1,R2;
-    double R;
-    // I am having an issue making the size of the dr for the histogram a variable.
+    vector3d R1,R2,R;
+    double Rmag;
+    // I am having an issue making the size of the dr for the histogram a variable. So I hard set it. Don't judge.
     const int numOfBoxes = 1000;
     static int deltan[numOfBoxes];
 
@@ -286,9 +311,19 @@ int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfS
         for (int testSphere = currentSphere + 1; testSphere < numOfSpheres; ++testSphere)
         {
             R2 = sphereMatrix[testSphere];
-            R = (R2-R1).norm();
-            int box = int(R*numOfBoxes/sizeOfSystem);   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
-            if (R < sizeOfSystem){
+            R = R2 - R1;
+            if (fabs(R.x) > (sizeOfSystem/2)){
+                R.x -= copysign(sizeOfSystem,R.x);
+            }
+            if (fabs(R.y) > (sizeOfSystem/2)){
+                R.y -= copysign(sizeOfSystem,R.y);
+            }
+            if (fabs(R.z) > (sizeOfSystem/2)){
+                R.z -= copysign(sizeOfSystem,R.z);
+            }
+            Rmag = (R).norm();
+            int box = int(Rmag*numOfBoxes/sizeOfSystem);   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
+            if (Rmag < 2*sizeOfSystem){
                 deltan[box] += 1;
             }
         }
@@ -296,5 +331,8 @@ int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfS
     return deltan;
 }
 
-
-
+double randGauss(){
+  const long unsigned int x =0;
+  static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
+  return my_mtrand.randNorm(); // which is the range of [0,1)
+}
