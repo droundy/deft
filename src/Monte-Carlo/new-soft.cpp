@@ -17,7 +17,7 @@ using get_time = chrono::steady_clock;
 // ------------------------------------------------------------------------------
 
 // Places a desired number of spheres into an FCC lattice
-inline vector3d *FCCLattice(int numOfSpheres,double cubeSideLength, double sizeOfSystem, double sphereRadius);
+inline vector3d *FCCLattice(int numOfSpheres, double sphereRadius);
 
 // Applies periodic boundary conditions in x,y,z
 static inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem);
@@ -37,6 +37,15 @@ vector3d nearestImage(vector3d R2,vector3d R1, double sizeOfSystem);
 // Calculates the potential energy due to radial distances between spheres
 double bondEnergy(vector3d R);
 
+// RNG for randomVector function
+double ran();
+
+// Generates a random vector of size dr to move spheres
+vector3d randomVector(double dr);
+
+// Calculates product of radial forces and displacements of spheres for an ensemble
+double pairVirialFunction(vector3d *spheres);
+
 // Random Number Stuff which can be changed
 random_device rd;
 mt19937 gen(rd());
@@ -45,57 +54,79 @@ mt19937 gen(rd());
 // Test Variables
 // ------------------------------------------------------------------------------
 
-int numOfSpheres = 32;   // Subject to change depending on cell size parameters
-long totalIterations = 1000000;
-
-double sigma = 1;//1;
-double cellLength = 1.76*sigma;//1.8*sigma;
-double sizeOfSystem = 2*cellLength;
-double epsilon = 1; //
-double Temperature = 85 * epsilon  /  119.8;  // (epsilon * T / k_B) unit of (kelvin * joules / kelvin) = joule.
-// epsilon / k_B = 119.8K from Verlet and Hansen
-
+int numOfSpheres = 32;
+long totalIterations = 10000000;
 double dr = 0.005;
+double sigma = 3.405;
+double epsilon = 1;
+double reducedDensity = 1;
+double reducedTemperature = 1 ;  // (epsilon * T / k_B) unit of (kelvin * joules / kelvin) = joule.
+// epsilon / k_B = 119.8K from Verlet and Hansen
+// I believe that without reducing the Temperature I was not making a dimensionless value and was creating
+// artificially high acceptance rates.
+
+// ------------------------------------------------------------------------------
+// Global Constants
+// ------------------------------------------------------------------------------
+double volume = (numOfSpheres*sigma*sigma*sigma) / reducedDensity;
+double sizeOfSystem = pow(volume, 1./3.);
 
 int main()
 {
     auto start = get_time::now();
-    vector3d *spheres = FCCLattice(numOfSpheres,cellLength,sizeOfSystem,sigma/2);
-    cout << "Number of Spheres in System: " << numOfSpheres << ". The system may have been revised due to an unrealistic amount of spheres in the desired space." << endl;
+    vector3d *spheres = FCCLattice(numOfSpheres,sigma/2);
+    cout << "Number of Spheres in System: " << numOfSpheres << ", Size of System: " << sizeOfSystem << endl;
 
     uniform_int_distribution<int> randSphere(0,numOfSpheres-1);
-    normal_distribution<double> randMove(0,dr);
     uniform_real_distribution<double> randProb(0.0,1.0);
 
+
     double totalEnergy = totalPotential(spheres,numOfSpheres);
+    double volume = sizeOfSystem*sizeOfSystem*sizeOfSystem;
+    double volumeMax = 5*volume;
+    double dVr = 0.1;
+    double dV = dVr*dVr*dVr;
+    int dVsteps = int((volumeMax - volume) / dV);
+    double totalEnergyArray[dVsteps];
+
+    for (int n = 0; n < dVsteps; ++n){
+        vector3d *tempSpheres = spheres;
+        totalEnergyArray[n] = totalPotential(tempSpheres,numOfSpheres);
+    }
+
+    double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon) / volume;
+    double pressureExternal = pairVirialFunction(spheres) / volume;
+
     long acceptedTrials = 0;
     int runningRadial[1000];
 
     FILE *positions_file = fopen("MonteCarloSS.positions", "w");
     FILE *radial_file = fopen("MonteCarloSS.radial", "w");
     FILE *energy_file = fopen("MonteCarloSS.energies", "w");
-    string filename[3] = {"MonteCarloSS.positions","MonteCarloSS.radial","MonteCarloSS.energies"};
-    ofstream outputFile[3];
+    FILE *pressure_file = fopen("MonteCarloSS.pressure", "w");
+    string filename[4] = {"MonteCarloSS.positions","MonteCarloSS.radial","MonteCarloSS.energies","MonteCarloSS.pressure"};
+    ofstream outputFile[4];
     outputFile[2].open(filename[2].c_str());
     outputFile[1].open(filename[1].c_str());
-
+    outputFile[3].open(filename[3].c_str());
 
     // Performs the random move and checking
     for (long currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
+        double pressure = pressureIdeal + pressureExternal;
+        fprintf(pressure_file, "%g\n",pressure);
         bool overlap = false;
         bool trialAcceptance = false;
+        // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = randSphere(gen);
-        vector3d movedSpherePos = spheres[movedSphereNum];
+        vector3d movedSpherePos = spheres[movedSphereNum] + randomVector(dr);
 
-        for (int i = 0; i < 3; ++i){   // Store to temporary array for comparison
-            movedSpherePos[i] += randMove(gen);//dr*randGauss();
-        }
         movedSpherePos = periodicBC(movedSpherePos,sizeOfSystem);
         vector3d initialSpherePos = spheres[movedSphereNum];
 
         double energyNew = 0.0;
         double energyOld = 0.0;
-        for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere) {   // Determines the difference in energy due to the random move
+        // Determines the difference in energy due to the random move
+        for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere) {
             if (currentSphere != movedSphereNum) {
                 vector3d Rj = spheres[currentSphere];
                 vector3d R2 = nearestImage(Rj,movedSpherePos,sizeOfSystem);
@@ -107,46 +138,32 @@ int main()
 
         double energyChange = energyNew - energyOld;
 
-        if ((currentIteration % (totalIterations / 10)) ==0){
-            cout << "Current Iteration: " << currentIteration << endl;
-            cout << "Energy Change: " << energyChange << endl;
-            double p = exp(-energyChange / Temperature);
-            cout << "If energy change > 0, p: " << p << endl;
-            cout << endl;
-        }
-
-
         if (energyChange <= 0)  {
             trialAcceptance = true;
-        }
-        else if (energyChange > 0)  {
-            double p = exp(-energyChange / Temperature); // Need to get units correct in here.
-            double r = randProb(gen);
-            if ((p > r))    {
-                trialAcceptance = true;
+        }   else if (energyChange > 0)  {
+                double p = exp(-energyChange / reducedTemperature); // Need to get units correct in here.
+                double r = randProb(gen);
+                if ((p > r))    {
+                    trialAcceptance = true;
+                }   else    {
+                    trialAcceptance = false;
+                }
             }
-            else    {
-                trialAcceptance = false;
-            }
-        }
-        if (trialAcceptance == true){   // Rewrites position and energy files
+        if (trialAcceptance == true){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
             totalEnergy = totalPotential(spheres,numOfSpheres);
+            pressureExternal = pairVirialFunction(spheres);
             acceptedTrials += 1;
-
-            if ((acceptedTrials%1000) == 0){
+            if ((acceptedTrials % (totalIterations/10)) == 0){
                 int *radialDistHist;
                 radialDistHist = radialDistribution(spheres,numOfSpheres,sizeOfSystem);
                 for (int i = 0; i < 1000; ++i){
                     runningRadial[i] = radialDistHist[i];
-                    fprintf(radial_file, "%d\t",runningRadial[i]);
                 }
-                fprintf(radial_file,"\n");
             }
         }
 
         fprintf(energy_file, "%g\n", totalEnergy);
-        outputFile[2] << totalEnergy << endl;
         if ((currentIteration == 9*totalIterations/10) ||(currentIteration == totalIterations/10) ||(currentIteration == totalIterations/4) || (currentIteration == totalIterations/2) || (currentIteration == 3*totalIterations/4))
         { // Writes out status of simulation.
             auto end = get_time::now();
@@ -168,21 +185,29 @@ int main()
                 spheres[i].x, spheres[i].y, spheres[i].z);
     }
 
+    for (int i = 0; i < 1000; ++i){
+        fprintf(radial_file, "%d\t",runningRadial[i]);
+    }
+    fprintf(radial_file,"\n");
+
     fclose(energy_file);
     fclose(positions_file);
     fclose(radial_file);
+    fclose(pressure_file);
 }
 
-inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double sizeOfSystem,double sphereRadius)   {
+inline vector3d *FCCLattice(int totalNumOfSpheres,double sphereRadius)   {
     vector3d *sphereMatrix = new vector3d[totalNumOfSpheres];
     double xRef,yRef,zRef,xNeighbor,yNeighbor,zNeighbor;
     int xsteps,ysteps,zsteps,smallCell, breaker;
+    double cubeSideLengthFactor = ceil(pow(numOfSpheres,1./5.));
 
-    xRef = yRef = zRef = sphereRadius;
+    xRef = yRef = zRef = (-sizeOfSystem/2) + sphereRadius;
     xNeighbor = yNeighbor = zNeighbor = 0;
     xsteps=ysteps=zsteps = 0;
 
     for (int sphereNum = 0; sphereNum < totalNumOfSpheres; sphereNum++) {
+        double cubeSideLength = sizeOfSystem / cubeSideLengthFactor;
         sphereMatrix[sphereNum].x = xRef + xNeighbor;
         sphereMatrix[sphereNum].y = yRef + yNeighbor;
         sphereMatrix[sphereNum].z = zRef + zNeighbor;
@@ -201,30 +226,38 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double 
             yNeighbor = cubeSideLength / 2;
             zNeighbor = cubeSideLength / 2;
         } else if (smallCell == 3) {
-            if (xRef + cubeSideLength < sizeOfSystem) {
+            if (xRef + cubeSideLength < sizeOfSystem/2) {
                 xRef += cubeSideLength;
                 xsteps += 1;
-            } else if ((xRef + cubeSideLength >= sizeOfSystem)
-                       && (yRef + cubeSideLength  < sizeOfSystem)) {
+            } else if ((xRef + cubeSideLength >= sizeOfSystem/2)
+                       && (yRef + cubeSideLength  < sizeOfSystem/2)) {
                 xRef -= xsteps*cubeSideLength;
                 yRef += cubeSideLength;
                 ysteps += 1;
                 xsteps = 0;
-            } else if ((yRef + cubeSideLength >= sizeOfSystem)
-                       && (xRef + cubeSideLength >=sizeOfSystem)
-                       && (zRef + cubeSideLength < sizeOfSystem)) {
+            } else if ((yRef + cubeSideLength >= sizeOfSystem/2)
+                       && (xRef + cubeSideLength >=sizeOfSystem/2)
+                       && (zRef + cubeSideLength < sizeOfSystem/2)) {
                 xRef -= xsteps*cubeSideLength;
                 yRef -= ysteps*cubeSideLength;
                 zRef += cubeSideLength;
                 xsteps = ysteps = 0;
-            } else if ((yRef + cubeSideLength >= sizeOfSystem)
-                        && (xRef + cubeSideLength >=sizeOfSystem)
-                        && (zRef + cubeSideLength >= sizeOfSystem)) {
+            } else if ((yRef + cubeSideLength >= sizeOfSystem/2)
+                        && (xRef + cubeSideLength >=sizeOfSystem/2)
+                        && (zRef + cubeSideLength >= sizeOfSystem/2)) {
                 sphereNum = totalNumOfSpheres;
-            } else {
-                printf(" Help!!!\n");
-                cout << " Help!!!" << endl;
             }
+        }
+        if ((fabs(sphereMatrix[sphereNum].x) <= 0.0001) & (fabs(sphereMatrix[sphereNum].y) <= 0.0001) &
+            (fabs(sphereMatrix[sphereNum].z) <=0.0001)){
+            cubeSideLengthFactor += 1;
+            xRef = yRef = zRef = (-sizeOfSystem/2) + sphereRadius;
+            xNeighbor = yNeighbor = zNeighbor = 0;
+            xsteps=ysteps=zsteps = 0;
+            sphereNum = 0;
+        }
+        else {
+            sphereNum = sphereNum;
         }
     }
     return sphereMatrix;
@@ -232,10 +265,10 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double cubeSideLength, double 
 
 static inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem)   {
     for (int i = 0; i < 3; i++){
-        if (inputVector[i] > sizeOfSystem){
+        if (inputVector[i] > sizeOfSystem/2){
             inputVector[i] -= sizeOfSystem;
         }
-        else if (inputVector[i] < 0){
+        else if (inputVector[i] < -sizeOfSystem/2){
             inputVector[i] += sizeOfSystem;
         }
     }
@@ -261,13 +294,13 @@ int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfS
     const int numOfBoxes = 1000;
     static int deltan[numOfBoxes];
 
-    for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere)
+    for (int i = 0; i < numOfSpheres; ++i)
     {
-        vector3d R1 = sphereMatrix[currentSphere];
-        for (int testSphere = currentSphere + 1; testSphere < numOfSpheres; ++testSphere)
+        vector3d Ri = sphereMatrix[i];
+        for (int j = i + 1; j < numOfSpheres; ++j)
         {
-            vector3d R2 = sphereMatrix[testSphere];
-            vector3d R = nearestImage(R2,R1,sizeOfSystem);
+            vector3d Rj = sphereMatrix[j];
+            vector3d R = nearestImage(Rj,Ri,sizeOfSystem);
             double Rmag = R.norm();
             int box = int(Rmag*numOfBoxes/sizeOfSystem);   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
             if (Rmag < sizeOfSystem){
@@ -300,3 +333,62 @@ double bondEnergy(vector3d R){
     double bondEnergy = SR12 - SR6;
     return 4*epsilon*bondEnergy + epsilon;    // Carries units of energy.
 }
+
+double ran(){
+  const long unsigned int x =0;
+  static MTRand my_mtrand(x);
+  return my_mtrand.randExc();
+}
+
+vector3d randomVector(double dr){
+  double x, y, z, r2;
+  do{
+    x = 2 * ran() - 1;
+    y = 2 * ran() - 1;
+    z = 2 * ran() - 1;
+    r2 = x * x + y * y + z * z;
+  } while(r2 >= 1 || r2 == 0);
+  double fac = dr*sqrt(-2*log(r2)/r2);
+  vector3d out(x*fac,y*fac,z*fac);
+  return out;
+}
+
+double pairVirialFunction(vector3d *spheres) {
+    double w = 0;
+    for (int i = 0; i < numOfSpheres; ++i){
+        vector3d Ri = spheres[i];
+        for (int j = i + 1; j < numOfSpheres; ++j){
+            vector3d Rj = spheres[j];
+            vector3d R = nearestImage(Rj,Ri,sizeOfSystem);
+            double R2 = R.normsquared();
+            if (R2 < 2*sizeOfSystem){
+                double SR2 = (sigma*sigma)/R2;
+                double SR6 = SR2*SR2*SR2;
+                double SR12 = SR6*SR6;
+                w += 2*SR12 - SR6;
+            }
+            else{
+                w += 0;
+            }
+
+        }
+    }
+    return 8*epsilon*w;
+}
+
+//double stretch(vector3d *spheres,int n){
+////    int maxn = int((Vmax - Vmin) / deltaV);
+////    for (int n = 0; n < maxn; ++n){
+//    double stretchEnergy = 0;
+//    double pressure = 0;
+//    for (int i = 0; i < numOfSpheres; ++i){
+//        vector3d stretchi = (1+n*deltaV)*spheres[i];
+//        for (int j = 0; j < numOfSpheres; ++j){
+//            vector3d R = (1+n*deltaV)*spheres[j] - stretchi;
+//            stretchEnergy += bondEnergy(R);
+//            pressure +=
+//        }
+//    }
+//
+//
+//}
