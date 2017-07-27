@@ -45,7 +45,7 @@ double ran();
 vector3d randomVector(double dr);
 
 // Calculates product of radial forces and displacements of spheres for an ensemble
-double pairVirialFunction(vector3d *spheres, int n,double dVr);
+double pairVirialFunction(vector3d *spheres);
 
 // Random Number Stuff which can be changed
 random_device rd;
@@ -56,7 +56,7 @@ mt19937 gen(rd());
 // ------------------------------------------------------------------------------
 
 int numOfSpheres = 32;
-long totalIterations = 10000000;
+long totalIterations = 1000000000;
 double dr = 0.005;
 double sigma = 3.405;
 double epsilon = 1;
@@ -82,30 +82,22 @@ int main()
     uniform_real_distribution<double> randProb(0.0,1.0);
 
 
+    double dVr = 0.01*sizeOfSystem;
+    int dVsteps = int((1.2*sizeOfSystem - sizeOfSystem) / (dVr));
 
-    double volume = sizeOfSystem*sizeOfSystem*sizeOfSystem;
-    double volumeMax = 2*volume;
-    int dVsteps = 100;
-    double dV = (volumeMax - volume) / dVsteps;
-    double dVr = pow(dV,1./3.);
-
-    double pressureChange[dVsteps];
     double energyChange[dVsteps];
     double tempEnergy[dVsteps];
-    double tempPressureExc[dVsteps];
 
     for (int i = 0; i < dVsteps; ++i){
-        pressureChange[i] = 0;
         energyChange[i] = 0;
         tempEnergy[i] = totalPotential(spheres,numOfSpheres,i,dVr)/totalIterations;
-        tempPressureExc[i] = pairVirialFunction(spheres,i,dVr)/totalIterations;
     }
 
     double totalEnergy = totalPotential(spheres,numOfSpheres,0,dVr);
 
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon) / volume;
-    double pressureExternal = pairVirialFunction(spheres, 0,dVr) / volume;
-
+    double virial = pairVirialFunction(spheres);
+    double exPressure = 0.0;
 
     long acceptedTrials = 0;
     int runningRadial[1000];
@@ -127,14 +119,11 @@ int main()
         if (currentIteration >= 1000000){
             for (int n = 0; n < dVsteps; ++n){
                 energyChange[n] += tempEnergy[n];
-                pressureChange[n] += tempPressureExc[n] + ((numOfSpheres*reducedTemperature*epsilon) / (n*dV + volume));
-                fprintf(pressure_file,"%g\t",pressureChange[n]);
             }
-//            fprintf(pressure_file,"\n");
         }
-
-//        fprintf(pressure_file, "%g\n",pressure);
-        bool overlap = false;
+        
+        exPressure += virial;
+        
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = randSphere(gen);
@@ -172,20 +161,22 @@ int main()
         if (trialAcceptance == true){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
             totalEnergy = totalPotential(spheres,numOfSpheres,0,dVr);
+            virial = pairVirialFunction(spheres);
+            
             if (currentIteration >= 1000000){
                 for (int n = 0; n < dVsteps; ++n){
-                    tempEnergy[n] = totalPotential(spheres,numOfSpheres,n,dVr)/totalIterations;
-                    tempPressureExc[n] = pairVirialFunction(spheres,n,dVr)/totalIterations;
+                    tempEnergy[n] = totalPotential(spheres,numOfSpheres,n,dVr);
                 }
             }
             acceptedTrials += 1;
-//            if ((acceptedTrials % (totalIterations/10)) == 0){
-//                int *radialDistHist;
-//                radialDistHist = radialDistribution(spheres,numOfSpheres,sizeOfSystem);
-//                for (int i = 0; i < 1000; ++i){
-//                    runningRadial[i] = radialDistHist[i];
-//                }
-//            }
+            
+            if ((acceptedTrials % (totalIterations/10)) == 0){
+                int *radialDistHist;
+                radialDistHist = radialDistribution(spheres,numOfSpheres,sizeOfSystem);
+                for (int i = 0; i < 1000; ++i){
+                    runningRadial[i] = radialDistHist[i] ;
+                }
+            }
         }
 
         fprintf(energy_file, "%g\n", totalEnergy);
@@ -218,6 +209,8 @@ int main()
     for (int i = 0; i < dVsteps; ++i){
         fprintf(energyArray_file,"%g\t",energyChange[i]);
     }
+    
+    fprintf(pressure_file, "%g\t",pressureIdeal + (exPressure / (totalIterations*volume)));
     fprintf(energyArray_file,"\n");
 
     fclose(energy_file);
@@ -225,6 +218,9 @@ int main()
     fclose(radial_file);
     fclose(pressure_file);
     fclose(energyArray_file);
+    auto end = get_time::now();
+    auto diff = end - start;
+    cout << "Total Time to Completion: " << chrono::duration_cast<sec>(diff).count() << " sec " <<endl;
 }
 
 inline vector3d *FCCLattice(int totalNumOfSpheres,double sphereRadius)   {
@@ -285,7 +281,7 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double sphereRadius)   {
             xRef = yRef = zRef = (-sizeOfSystem/2) + sphereRadius;
             xNeighbor = yNeighbor = zNeighbor = 0;
             xsteps=ysteps=zsteps = 0;
-            sphereNum = 0;
+            sphereNum = -1;
         }
         else {
             sphereNum = sphereNum;
@@ -384,7 +380,7 @@ vector3d randomVector(double dr){
   return out;
 }
 
-double pairVirialFunction(vector3d *spheres, int n,double dVr) {
+double pairVirialFunction(vector3d *spheres) {
     double w = 0;
     for (int i = 0; i < numOfSpheres; ++i){
         vector3d Ri = spheres[i];
