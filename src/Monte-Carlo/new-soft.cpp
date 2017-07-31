@@ -6,8 +6,7 @@
 #include <random>
 #include <math.h>
 #include <chrono>
-#include <vector3d.h>
-#include <MersenneTwister.h>
+#include "vector3d.h"
 
 using namespace std;
 using sec = chrono::seconds;
@@ -38,25 +37,15 @@ vector3d nearestImage(vector3d R2,vector3d R1, double sizeOfSystem);
 // Calculates the potential energy due to radial distances between spheres
 double bondEnergy(vector3d R);
 
-// RNG for randomVector function
-double ran();
-
-// Generates a random vector of size dr to move spheres
-vector3d randomVector(double dr);
-
 // Calculates product of radial forces and displacements of spheres for an ensemble
 double pairVirialFunction(vector3d *spheres);
-
-// Random Number Stuff which can be changed
-random_device rd;
-mt19937 gen(rd());
 
 // ------------------------------------------------------------------------------
 // Test Variables
 // ------------------------------------------------------------------------------
 
 int numOfSpheres = 32;
-long totalIterations = 1000000000;
+long totalIterations = 100000;
 double dr = 0.005;
 double sigma = 3.405;
 double epsilon = 1;
@@ -77,10 +66,6 @@ int main()
     auto start = get_time::now();
     vector3d *spheres = FCCLattice(numOfSpheres,sigma/2);
     cout << "Number of Spheres in System: " << numOfSpheres << ", Size of System: " << sizeOfSystem << endl;
-
-    uniform_int_distribution<int> randSphere(0,numOfSpheres-1);
-    uniform_real_distribution<double> randProb(0.0,1.0);
-
 
     double dVr = 0.01*sizeOfSystem;
     int dVsteps = int((1.2*sizeOfSystem - sizeOfSystem) / (dVr));
@@ -126,8 +111,8 @@ int main()
         
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
-        int movedSphereNum = randSphere(gen);
-        vector3d movedSpherePos = spheres[movedSphereNum] + randomVector(dr);
+        int movedSphereNum = random::ran64() % numOfSpheres;
+        vector3d movedSpherePos = spheres[movedSphereNum] + vector3d::ran(dr);
 
         movedSpherePos = periodicBC(movedSpherePos,sizeOfSystem);
         vector3d initialSpherePos = spheres[movedSphereNum];
@@ -151,7 +136,7 @@ int main()
             trialAcceptance = true;
         }   else if (energyChange > 0)  {
                 double p = exp(-energyChange / reducedTemperature); // Need to get units correct in here.
-                double r = randProb(gen);
+                double r = random::ran();
                 if ((p > r))    {
                     trialAcceptance = true;
                 }   else    {
@@ -227,7 +212,7 @@ inline vector3d *FCCLattice(int totalNumOfSpheres,double sphereRadius)   {
     vector3d *sphereMatrix = new vector3d[totalNumOfSpheres];
     double xRef,yRef,zRef,xNeighbor,yNeighbor,zNeighbor;
     int xsteps,ysteps,zsteps,smallCell, breaker;
-    double cubeSideLengthFactor = ceil(pow(numOfSpheres,1./5.));
+    double cubeSideLengthFactor = ceil(pow(numOfSpheres,1./3.));
 
     xRef = yRef = zRef = (-sizeOfSystem/2) + sphereRadius;
     xNeighbor = yNeighbor = zNeighbor = 0;
@@ -361,25 +346,6 @@ double bondEnergy(vector3d R){
     return 4*epsilon*bondEnergy + epsilon;    // Carries units of energy.
 }
 
-double ran(){
-  const long unsigned int x =0;
-  static MTRand my_mtrand(x);
-  return my_mtrand.randExc();
-}
-
-vector3d randomVector(double dr){
-  double x, y, z, r2;
-  do{
-    x = 2 * ran() - 1;
-    y = 2 * ran() - 1;
-    z = 2 * ran() - 1;
-    r2 = x * x + y * y + z * z;
-  } while(r2 >= 1 || r2 == 0);
-  double fac = dr*sqrt(-2*log(r2)/r2);
-  vector3d out(x*fac,y*fac,z*fac);
-  return out;
-}
-
 double pairVirialFunction(vector3d *spheres) {
     double w = 0;
     for (int i = 0; i < numOfSpheres; ++i){
@@ -393,8 +359,7 @@ double pairVirialFunction(vector3d *spheres) {
                 double SR6 = SR2*SR2*SR2;
                 double SR12 = SR6*SR6;
                 w += 2*SR12 - SR6;
-            }
-            else{
+            } else {
                 w += 0;
             }
         }
