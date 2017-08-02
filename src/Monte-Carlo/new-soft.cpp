@@ -70,11 +70,11 @@ int main()
     double dVr = 0.01*sizeOfSystem;
     int dVsteps = int((1.2*sizeOfSystem - sizeOfSystem) / (dVr));
 
-    double energyChange[dVsteps];
-    double tempEnergy[dVsteps];
+    double energyChange[dVsteps]; // remove this?
+    double tempEnergy[dVsteps]; // remove this?
 
     for (int i = 0; i < dVsteps; ++i){
-        energyChange[i] = 0;
+        energyChange[i] = 0; // remove this?
         tempEnergy[i] = totalPotential(spheres,numOfSpheres,i,dVr)/totalIterations;
     }
 
@@ -92,12 +92,6 @@ int main()
     FILE *energy_file = fopen("MonteCarloSS.energies", "w");
     FILE *pressure_file = fopen("MonteCarloSS.pressure", "w");
     FILE *energyArray_file = fopen("MonteCarloSS.energyArray","w");
-    string filename[5] = {"MonteCarloSS.positions","MonteCarloSS.radial","MonteCarloSS.energies","MonteCarloSS.pressure","MonteCarloSS.energyArray"};
-    ofstream outputFile[5];
-    outputFile[2].open(filename[2].c_str());
-    outputFile[1].open(filename[1].c_str());
-    outputFile[3].open(filename[3].c_str());
-    outputFile[4].open(filename[4].c_str());
 
     // Performs the random move and checking
     for (long currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
@@ -179,8 +173,6 @@ int main()
     cout << "Ratio of Accepted to Total: " << acceptedTrials << "/" << totalIterations << endl;
 
     // Write Positions to File
-    outputFile[0].open(filename[0].c_str());
-    outputFile[0] << spheres << endl;
     for (int i=0; i<numOfSpheres; i++) {
         fprintf(positions_file, "%g\t%g\t%g\n",
                 spheres[i].x, spheres[i].y, spheres[i].z);
@@ -287,6 +279,7 @@ static inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem)   {
      return inputVector;
 }
 
+// remove n and dVr?
 double totalPotential(vector3d *sphereMatrix, int numOfSpheres, int n,double dVr) {
     double totalPotential = 0.0;
 
@@ -339,6 +332,7 @@ vector3d nearestImage(vector3d R2,vector3d R1, double sizeOfSystem){
 
 double bondEnergy(vector3d R){
     double Rsq = R.normsquared();
+    // fixme add cutoff for WCA
     double SR2 = (sigma*sigma)/Rsq;
     double SR6 = SR2*SR2*SR2;
     double SR12 = SR6*SR6;
@@ -354,6 +348,7 @@ double pairVirialFunction(vector3d *spheres) {
             vector3d Rj = spheres[j];
             vector3d R = nearestImage(Rj,Ri,sizeOfSystem);
             double R2 = R.normsquared();
+            // fixme add cutoff for WCA
             if (R2 < 2*sizeOfSystem){
                 double SR2 = (sigma*sigma)/R2;
                 double SR6 = SR2*SR2*SR2;
