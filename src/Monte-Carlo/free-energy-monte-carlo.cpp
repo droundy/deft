@@ -133,7 +133,6 @@ int main(int argc, const char *argv[]) {
   double scaling_factor = 1.0;
   int small_cell_check_period = (1 * sw.N * sw.N)/10;
 
-  poptContext optCon;
   // ----------------------------------------------------------------------------
   // Set values from parameters
   // ----------------------------------------------------------------------------
@@ -188,7 +187,7 @@ int main(int argc, const char *argv[]) {
     POPT_AUTOHELP
     POPT_TABLEEND
   };
-  optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+  poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[OPTION...]\nNumber of balls and filling "
                          "fraction or cell dimensions are required arguments.");
 
