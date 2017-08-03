@@ -13,8 +13,8 @@
 using namespace std;
 using sec = chrono::seconds;
 using get_time = chrono::steady_clock;
-//random_device rd;
-//mt19937 gen(rd());
+random_device rd;
+mt19937 gen(rd());
 // ------------------------------------------------------------------------------
 // Global Constants
 // ------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ using get_time = chrono::steady_clock;
 inline vector3d *FCCLattice();
 
 // Applies periodic boundary conditions in x,y,z
-static inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem);
+static inline vector3d periodicBC(vector3d inputVector, double systemLength[3],bool wall[3]);
 
 // Calculates total potential of system
 double totalPotential(vector3d *sphereMatrix, int numOfSpheres);
@@ -42,7 +42,7 @@ bool conditionCheck(vector3d *sphereMatrix, vector3d movedSpherePos, int numOfSp
 int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem);
 
 // Finds the nearest mirror image in adjacent cubes and specifies the vector displacement
-vector3d nearestImage(vector3d R2,vector3d R1, double sizeOfSystem);
+vector3d nearestImage(vector3d R2,vector3d R1, double systemLength[3], bool wall[3]);
 
 // Calculates the potential energy due to radial distances between spheres
 double bondEnergy(vector3d R);
@@ -55,28 +55,29 @@ double pairVirialFunction(vector3d *spheres);
 // ------------------------------------------------------------------------------
 
 //int numOfSpheres = 105;
-long totalIterations = 0;
+long totalIterations = 1;
 double dr = 0.005;
 double sigma = 1;
 double epsilon = 1;
-double reducedDensity = 4;
+double reducedDensity = 1;
 double reducedTemperature = 1 ;  // (epsilon * T / k_B) unit of (kelvin * joules / kelvin) = joule.
 
 double cutoff = sigma * pow(2,5./6.);
-double systemLength[3] = {5,5,5};
+double systemLength[3] = {10,10,100};
 double volume = systemLength[x] * systemLength[y] * systemLength[z];
 int numOfSpheres = int(volume * reducedDensity);
 double sizeOfSystem = pow(volume, 1./3.);
+bool wall[3] = {false,false,false};
 
 // Stuff to Remove before pushing
-//vector3d ran3();
-//double ran();
+vector3d ran3();
+double ran();
 
 int main()
 {
     // Stuff to Remove before pushing
-//    uniform_int_distribution<int> randSphere(0,numOfSpheres-1);
-//    normal_distribution<double> randMove(0,dr);
+    uniform_int_distribution<int> randSphere(0,numOfSpheres-1);
+    normal_distribution<double> randMove(0,dr);
 
     auto start = get_time::now();
     vector3d *spheres = FCCLattice();
@@ -106,11 +107,18 @@ int main()
 
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
-        int movedSphereNum = random::ran64() % numOfSpheres;//randSphere(gen);
-        vector3d movedSpherePos = spheres[movedSphereNum] + vector3d::ran(dr);//ran3()*dr;
-
-        movedSpherePos = periodicBC(movedSpherePos,sizeOfSystem);
+        int movedSphereNum = 0;//randSphere(gen);//random::ran64() % numOfSpheres;
+        cout << "Initial Position: " << spheres[movedSphereNum].x << ", " << spheres[movedSphereNum].y << ", " <<spheres[movedSphereNum].z << endl;
+        vector3d movedSpherePos = spheres[movedSphereNum] + vector3d(-1,-1,-1);//ran3()*dr;//vector3d::ran(dr);
+        cout << "Moved Sphere Position: " << movedSpherePos.x << ", "<< movedSpherePos.y << ", " <<movedSpherePos.z << endl;
+        movedSpherePos = periodicBC(movedSpherePos,systemLength,wall);
+        cout << "After PBC: " << movedSpherePos.x << ", "<< movedSpherePos.y << ", " <<movedSpherePos.z << endl;
         vector3d initialSpherePos = spheres[movedSphereNum];
+        vector3d testSpherePos = spheres[1];
+        cout << "Test Sphere Location: " << testSpherePos.x << ", " <<testSpherePos.y << ", " <<testSpherePos.z << endl;
+        vector3d testVec = nearestImage(testSpherePos,movedSpherePos,systemLength,wall);
+        cout << "Nearest Image: " << testVec.x << ", " <<testVec.y << ", "<< testVec.z << endl;
+        cout << "radial distance: " << testVec.norm() << endl;
 
         double energyNew = 0.0;
         double energyOld = 0.0;
@@ -118,8 +126,8 @@ int main()
         for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere) {
             if (currentSphere != movedSphereNum) {
                 vector3d Rj = spheres[currentSphere];
-                vector3d R2 = nearestImage(Rj,movedSpherePos,sizeOfSystem);
-                vector3d R1 = nearestImage(Rj,initialSpherePos,sizeOfSystem);
+                vector3d R2 = nearestImage(Rj,movedSpherePos,systemLength,wall);
+                vector3d R1 = nearestImage(Rj,initialSpherePos,systemLength,wall);
                 energyNew += bondEnergy(R2);
                 energyOld += bondEnergy(R1);
             }
@@ -131,7 +139,7 @@ int main()
             trialAcceptance = true;
         }   else if (energyChange > 0)  {
                 double p = exp(-energyChange / reducedTemperature); // Need to get units correct in here.
-                double r = random::ran();//randMove(gen);
+                double r = randMove(gen);//random::ran();
                 if ((p > r))    {
                     trialAcceptance = true;
                 }   else    {
@@ -147,13 +155,13 @@ int main()
             acceptedTrials += 1;
 
 
-            if ((acceptedTrials % (totalIterations/10)) == 0){
-                int *radialDistHist;
-                radialDistHist = radialDistribution(spheres,numOfSpheres,sizeOfSystem);
-                for (int i = 0; i < 1000; ++i){
-                    runningRadial[i] = radialDistHist[i] ;
-                }
-            }
+//            if ((acceptedTrials % (totalIterations/10)) == 0){
+//                int *radialDistHist;
+//                radialDistHist = radialDistribution(spheres,numOfSpheres,sizeOfSystem);
+//                for (int i = 0; i < 1000; ++i){
+//                    runningRadial[i] = radialDistHist[i] ;
+//                }
+//            }
         }
 
         fprintf(energy_file, "%g\n", totalEnergy);
@@ -203,8 +211,6 @@ inline vector3d *FCCLattice()   {
     double cellLength = systemLength[x]/cellNumber;
 
     double sphereRadius = sigma/2;
-    double sizeOfSystem = 2;
-    double cubeSideLength = 1;//sizeOfSystem / cubeSideLengthFactor;
 
     vector3d cornerSphere = {sphereRadius,sphereRadius,sphereRadius};   // Sphere's Center is radial distance from borders
     vector3d *offset = new vector3d[4];
@@ -259,13 +265,21 @@ inline vector3d *FCCLattice()   {
     return sphereMatrix;
 }
 
-static inline vector3d periodicBC(vector3d inputVector, double sizeOfSystem)   {
+static inline vector3d periodicBC(vector3d inputVector, double systemLength[3], bool wall[3])   {
     for (int i = 0; i < 3; i++){
-        if (inputVector[i] > sizeOfSystem/2){
-            inputVector[i] -= sizeOfSystem;
+        while (inputVector[i] > systemLength[i]){
+            if (wall[i] == true){
+                inputVector[i] = 2*systemLength[i] - inputVector[i];
+            } else {
+                inputVector[i] -= systemLength[i];
+            }
         }
-        else if (inputVector[i] < -sizeOfSystem/2){
-            inputVector[i] += sizeOfSystem;
+        while (inputVector[i] < 0){
+            if (wall[i] == true){
+                inputVector[i] = fabs(inputVector[i]);
+            } else{
+                inputVector[i] += systemLength[i];
+            }
         }
     }
      return inputVector;
@@ -279,7 +293,7 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres) {
         vector3d Ri = sphereMatrix[i];
         for (int j = i + 1; j < numOfSpheres; ++j)  {   // Vector from Sphere 2
             vector3d Rj = sphereMatrix[j];
-            vector3d R = nearestImage(Rj,Ri,sizeOfSystem);
+            vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             totalPotential += bondEnergy(R);
         }
     }
@@ -297,7 +311,7 @@ int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfS
         for (int j = i + 1; j < numOfSpheres; ++j)
         {
             vector3d Rj = sphereMatrix[j];
-            vector3d R = nearestImage(Rj,Ri,sizeOfSystem);
+            vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             double Rmag = R.norm();
             int box = int(Rmag*numOfBoxes/sizeOfSystem);   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
             if (Rmag < sizeOfSystem){
@@ -308,16 +322,19 @@ int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfS
     return deltan;
 }
 
-vector3d nearestImage(vector3d R2,vector3d R1, double sizeOfSystem){
+vector3d nearestImage(vector3d R2,vector3d R1, double systemLength[3], bool wall[3]){
     vector3d R = R2 - R1;
-    if (fabs(R.x) > (sizeOfSystem/2)){
-        R.x -= copysign(sizeOfSystem,R.x);
+    if ((fabs(R.x) > (systemLength[x]/2))
+        && (wall[x] == false)){
+        R.x -= copysign(systemLength[x],R.x);
     }
-    if (fabs(R.y) > (sizeOfSystem/2)){
-        R.y -= copysign(sizeOfSystem,R.y);
+    if ((fabs(R.y) > (systemLength[y]/2))
+        && (wall[y] == false)){
+        R.y -= copysign(systemLength[y],R.y);
     }
-    if (fabs(R.z) > (sizeOfSystem/2)){
-        R.z -= copysign(sizeOfSystem,R.z);
+    if ((fabs(R.z) > (systemLength[z]/2))
+        && (wall[z] == false)){
+        R.z -= copysign(systemLength[z],R.z);
     }
     return R;
 }
@@ -341,9 +358,8 @@ double pairVirialFunction(vector3d *spheres) {
         vector3d Ri = spheres[i];
         for (int j = i + 1; j < numOfSpheres; ++j){
             vector3d Rj = spheres[j];
-            vector3d R = nearestImage(Rj,Ri,sizeOfSystem);
+            vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             double R2 = R.normsquared();
-            // fixme add cutoff for WCA
             if (R2 < cutoff){
                 double SR2 = (sigma*sigma)/R2;
                 double SR6 = SR2*SR2*SR2;
@@ -355,21 +371,21 @@ double pairVirialFunction(vector3d *spheres) {
     return 8*epsilon*w;
 }
 
-//double ran(){
-//  const long unsigned int x =0;
-//  static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
-//  return my_mtrand.randExc(); // which is the range of [0,1)
-//}
-//
-//vector3d ran3(){
-//  double x, y, r2,z;
-//  do{
-//    x = 2 * ran() - 1;
-//    y = 2 * ran() - 1;
-//    z = 2 * ran() - 1;
-//    r2 = x * x + y * y + z * z;
-//  } while(r2 >= 1 || r2 == 0);
-//  double fac = sqrt(-2*log(r2)/r2);
-//  vector3d out(x*fac,y*fac,z*fac);
-//}
+double ran(){
+  const long unsigned int x =0;
+  static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
+  return my_mtrand.randExc(); // which is the range of [0,1)
+}
+
+vector3d ran3(){
+  double x, y, r2,z;
+  do{
+    x = 2 * ran() - 1;
+    y = 2 * ran() - 1;
+    z = 2 * ran() - 1;
+    r2 = x * x + y * y + z * z;
+  } while(r2 >= 1 || r2 == 0);
+  double fac = sqrt(-2*log(r2)/r2);
+  vector3d out(x*fac,y*fac,z*fac);
+}
 
