@@ -7,6 +7,7 @@
 #include <math.h>
 #include <chrono>
 #include "vector3d.h"
+#include <popt.h>
 
 #include "MersenneTwister.h"
 
@@ -21,25 +22,28 @@ mt19937 gen(rd());
     const int x = 0;
     const int y = 1;
     const int z = 2;
+    const double sigma = 1;
+    const double epsilon = 1;
+    const double cutoff = sigma * pow(2,5./6.);
 
 // ------------------------------------------------------------------------------
 // Functions
 // ------------------------------------------------------------------------------
 
 // Places a desired number of spheres into an FCC lattice
-inline vector3d *FCCLattice();
+inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3]);
 
 // Applies periodic boundary conditions in x,y,z
 static inline vector3d periodicBC(vector3d inputVector, double systemLength[3],bool wall[3]);
 
 // Calculates total potential of system
-double totalPotential(vector3d *sphereMatrix, int numOfSpheres);
+double totalPotential(vector3d *sphereMatrix, int numOfSpheres,double systemLength[3],bool wall[3]);
 
 // Checks whether the move of a sphere is valid
 bool conditionCheck(vector3d *sphereMatrix, vector3d movedSpherePos, int numOfSpheres, int movedSphereNum,double Temperature);
 
 // Counts the number of spheres within a certain radius. Does not take into consideration mirror image particles.
-int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem);
+int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem[3],bool wall[3]);
 
 // Finds the nearest mirror image in adjacent cubes and specifies the vector displacement
 vector3d nearestImage(vector3d R2,vector3d R1, double systemLength[3], bool wall[3]);
@@ -48,80 +52,152 @@ vector3d nearestImage(vector3d R2,vector3d R1, double systemLength[3], bool wall
 double bondEnergy(vector3d R);
 
 // Calculates product of radial forces and displacements of spheres for an ensemble
-double pairVirialFunction(vector3d *spheres);
+double pairVirialFunction(vector3d *spheres, int numOfSpheres,double systemLength[3],bool wall[3]);
 
-// ------------------------------------------------------------------------------
-// Test Variables
-// ------------------------------------------------------------------------------
-
-//int numOfSpheres = 105;
-long totalIterations = 1;
-double dr = 0.005;
-double sigma = 1;
-double epsilon = 1;
-double reducedDensity = 1;
-double reducedTemperature = 1 ;  // (epsilon * T / k_B) unit of (kelvin * joules / kelvin) = joule.
-
-double cutoff = sigma * pow(2,5./6.);
-double systemLength[3] = {10,10,100};
-double volume = systemLength[x] * systemLength[y] * systemLength[z];
-int numOfSpheres = int(volume * reducedDensity);
-double sizeOfSystem = pow(volume, 1./3.);
-bool wall[3] = {false,false,false};
-
-// Stuff to Remove before pushing
-vector3d ran3();
-double ran();
-
-int main()
-{
-    // Stuff to Remove before pushing
-    uniform_int_distribution<int> randSphere(0,numOfSpheres-1);
-    normal_distribution<double> randMove(0,dr);
-
+int main(int argc, const char *argv[])  {
     auto start = get_time::now();
-    vector3d *spheres = FCCLattice();
-    cout << "Number of Spheres in System: " << numOfSpheres << ", Size of System: "
-        << systemLength[x] << ", " << systemLength[y] << ", " << systemLength[z] << endl;
+    // Initialize Variables and Dummy Variables
+    double systemLength[3] = {10,10,10};
+    double reducedDensity = 0.1;
+    double reducedTemperature = 1;
+    long totalIterations = 1000;
+    double dr = 0.005;
+    bool wall[3] = {false,false,false};
+    int walls[3] = {0,0,0};
 
+    poptContext optCon;
 
-    double totalEnergy = totalPotential(spheres,numOfSpheres);
+  // ----------------------------------------------------------------------------
+  // Parse input options
+  // ----------------------------------------------------------------------------
+    // To assign values from command line ex.
+    // in deft ./new-soft --lenx 69.0 --leny 42.1717 --lenz 99 ... ad nauseam
+    poptOption optionsTable[] = {
+        
+        /*** System Dimensions ***/
+        {"lenx", '\0', POPT_ARG_DOUBLE, &systemLength[x], 0, 
+            "System Length in X", "DOUBLE"},
+        {"leny", '\0', POPT_ARG_DOUBLE, &systemLength[y], 0, 
+            "System Length in Y", "DOUBLE"},
+        {"lenz", '\0', POPT_ARG_DOUBLE, &systemLength[z], 0, 
+            "System Length in Z", "DOUBLE"},
+        
+        /*** Thermodynamic Properties ***/ 
+        {"fillFrac", '\0', POPT_ARG_DOUBLE, &reducedDensity, 0, 
+            "Filling Fraction/Reduced Density", "DOUBLE"},
+        {"temp", '\0', POPT_ARG_DOUBLE, &reducedTemperature, 0,
+            "Reduced Temperature", "DOUBLE"},
+        {"wallx", '\0', POPT_ARG_INT, &walls[x], 0,
+            "If x dimension has a wall (int). ", "INT"},
+        {"wally", '\0', POPT_ARG_INT, &walls[y], 0,
+            "If y dimension has a wall (int)", "INT"},
+        {"wallz", '\0', POPT_ARG_INT, &walls[z], 0,
+            "If z dimension has a wall (int)", "INT"},
+        
+        /*** Simulation Characteristics ***/
+        {"iters" ,'\0', POPT_ARG_LONG, &totalIterations, 0,
+            "Total number of iterations", "LONG"},
+        {"dr", '\0', POPT_ARG_DOUBLE, &dr, 0,
+            "Maximum size of random move", "DOUBLE"},
+        
+        POPT_AUTOHELP
+        POPT_TABLEEND
+    };
+    optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+    poptSetOtherOptionHelp(optCon, "[OPTION...]\n"
+                         "popt does not take boolean operators, therefore"
+                         "the existence of walls is determined by ints.\n"
+                         "false = 0, true = 1. As you may have guessed. :)");
 
+    int c = 0;
+    // go through arguments, set them based on optionsTable
+    while((c = poptGetNextOpt(optCon)) >= 0);
+    if (c < -1) {
+        fprintf(stderr, "\n%s: %s\n", poptBadOption(optCon, 0), poptStrerror(c));
+        return 1;
+    } // 0: opt-> arg should not be NULL
+    poptFreeContext(optCon);
+
+    if ((systemLength[x] <= 0) || (systemLength[y] <= 0) || (systemLength[z] <= 0)){
+        printf("System lengths can't be less than or equal to zero");
+        printf("System Length: (%g %g %g)\n",systemLength[x],systemLength[y],systemLength[z]);
+        return 254;
+    }
+    if ((systemLength[x] <= sigma) || (systemLength[y] <= sigma) || (systemLength[z] <= sigma)){
+        printf("You have asked for a system with size less than or equal to the diameter of a ball.\n"
+        "System Lengths: %g %g %g\n",systemLength[x],systemLength[y],systemLength[z]);
+        printf("sigma: %g\n", sigma);
+        return 254;
+    }
+    if (totalIterations < 0) {
+        printf("Total iterations can't be less than zero: %ld\n",totalIterations);
+        return 254;
+    }
+    if (reducedTemperature <= 0){
+        printf("Despite the attempts and dreams of delusional humans," 
+        "the temperature can't be less than or equal to zero: "
+        "Temperature: %g\n", reducedTemperature);
+        return 254;
+    }
+    if (reducedDensity <= 0){
+        printf("Do you really want a system with zero or negative balls???\n"
+        "Reduced Density: %g\n", reducedDensity);
+        return 254;
+    }
+    if ((systemLength[x] <= dr)||(systemLength[y] <= dr)||(systemLength[z] <= dr)){
+        printf("The random moved step can't be larger than the system length in any direction\n"
+                "System Length: %g %g %g\n",systemLength[x],systemLength[y],systemLength[z]);
+        printf("dr: %g\n", dr);
+        return 254;
+    }
+    cout << fabs(walls[z]) << endl;
+    if ((walls[x]>1 || walls[x]<0)
+            ||(walls[y]>1 || walls[y]<0)
+            ||(walls[z]>1 || walls[z]<0)){
+            printf("The entries for wall existence must be either 1 or 0\n."
+            "For an explanation consult new-soft --help\n");
+            printf("Wall existences: %d %d %d\n", walls[x],walls[y],walls[z]);
+         return 254;
+    }
+    
+    wall[x] = bool(walls[x]); wall[y] = bool(walls[y]); wall[z] = bool(walls[z]); 
+    cout << walls[x] << "," << walls[y] << "," << walls[z] << endl;
+    double volume = systemLength[x] * systemLength[y] * systemLength[z];
+    int numOfSpheres = int(volume * reducedDensity);
+    // LATTICE MAKER
+    vector3d *spheres = FCCLattice(numOfSpheres,systemLength);
+    printf("Lattice Made\n");
+    
+    double totalEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon) / volume;
-    double virial = pairVirialFunction(spheres);
+    double virial = pairVirialFunction(spheres, numOfSpheres, systemLength,wall);
     double exPressure = 0.0;
-
     long acceptedTrials = 0;
-    int runningRadial[1000];
+    double runningRadial[1000] = {0};
+    
+    printf("Number of Spheres: %d\n", numOfSpheres);
+    printf("Size of System: %g %g %g\n", systemLength[x],systemLength[y],systemLength[z]);
+    printf("Wall existence on x,y,z %d %d %d\n",wall[x],wall[y],wall[z]); 
+    
 
     FILE *positions_file = fopen("MonteCarloSS.positions", "w");
     FILE *radial_file = fopen("MonteCarloSS.radial", "w");
     FILE *energy_file = fopen("MonteCarloSS.energies", "w");
     FILE *pressure_file = fopen("MonteCarloSS.pressure", "w");
-    FILE *energyArray_file = fopen("MonteCarloSS.energyArray","w");
+
 
     // Performs the random move and checking
     for (long currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
 
         exPressure += virial;
-
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
-        int movedSphereNum = 0;//randSphere(gen);//random::ran64() % numOfSpheres;
-        cout << "Initial Position: " << spheres[movedSphereNum].x << ", " << spheres[movedSphereNum].y << ", " <<spheres[movedSphereNum].z << endl;
-        vector3d movedSpherePos = spheres[movedSphereNum] + vector3d(-1,-1,-1);//ran3()*dr;//vector3d::ran(dr);
-        cout << "Moved Sphere Position: " << movedSpherePos.x << ", "<< movedSpherePos.y << ", " <<movedSpherePos.z << endl;
-        movedSpherePos = periodicBC(movedSpherePos,systemLength,wall);
-        cout << "After PBC: " << movedSpherePos.x << ", "<< movedSpherePos.y << ", " <<movedSpherePos.z << endl;
+        int movedSphereNum = random::ran64() % numOfSpheres;//randSphere(gen);
         vector3d initialSpherePos = spheres[movedSphereNum];
-        vector3d testSpherePos = spheres[1];
-        cout << "Test Sphere Location: " << testSpherePos.x << ", " <<testSpherePos.y << ", " <<testSpherePos.z << endl;
-        vector3d testVec = nearestImage(testSpherePos,movedSpherePos,systemLength,wall);
-        cout << "Nearest Image: " << testVec.x << ", " <<testVec.y << ", "<< testVec.z << endl;
-        cout << "radial distance: " << testVec.norm() << endl;
-
-        double energyNew = 0.0;
-        double energyOld = 0.0;
+        vector3d movedSpherePos = spheres[movedSphereNum] + vector3d::ran(dr);//ran3()*dr;
+        movedSpherePos = periodicBC(movedSpherePos,systemLength,wall);
+        
+        double energyNew = 0.0, energyOld = 0.0;
         // Determines the difference in energy due to the random move
         for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere) {
             if (currentSphere != movedSphereNum) {
@@ -139,7 +215,7 @@ int main()
             trialAcceptance = true;
         }   else if (energyChange > 0)  {
                 double p = exp(-energyChange / reducedTemperature); // Need to get units correct in here.
-                double r = randMove(gen);//random::ran();
+                double r = random::ran();//randMove(gen);
                 if ((p > r))    {
                     trialAcceptance = true;
                 }   else    {
@@ -148,20 +224,16 @@ int main()
             }
         if (trialAcceptance == true){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
-            totalEnergy = totalPotential(spheres,numOfSpheres);
-            virial = pairVirialFunction(spheres);
-
-
+            totalEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+            virial = pairVirialFunction(spheres, numOfSpheres,systemLength,wall);
             acceptedTrials += 1;
-
-
-//            if ((acceptedTrials % (totalIterations/10)) == 0){
-//                int *radialDistHist;
-//                radialDistHist = radialDistribution(spheres,numOfSpheres,sizeOfSystem);
-//                for (int i = 0; i < 1000; ++i){
-//                    runningRadial[i] = radialDistHist[i] ;
-//                }
-//            }
+            if ((acceptedTrials % (totalIterations/10)) == 0){
+                int *radialDistHist;
+                radialDistHist = radialDistribution(spheres,numOfSpheres,systemLength,wall);
+                for (int i = 0; i < 1000; ++i){
+                    runningRadial[i] += radialDistHist[i];
+                }
+            }
         }
 
         fprintf(energy_file, "%g\n", totalEnergy);
@@ -185,26 +257,23 @@ int main()
     }
 
     for (int i = 0; i < 1000; ++i){
-        fprintf(radial_file, "%d\t",runningRadial[i]);
+        fprintf(radial_file, "%g\n",runningRadial[i]);
     }
-    fprintf(radial_file,"\n");
-
-
 
     fprintf(pressure_file, "%g\t",pressureIdeal + (exPressure / (totalIterations*volume)));
-    fprintf(energyArray_file,"\n");
+
 
     fclose(energy_file);
     fclose(positions_file);
     fclose(radial_file);
     fclose(pressure_file);
-    fclose(energyArray_file);
     auto end = get_time::now();
     auto diff = end - start;
     cout << "Total Time to Completion: " << chrono::duration_cast<sec>(diff).count() << " sec " <<endl;
 }
 
-inline vector3d *FCCLattice()   {
+
+inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
     vector3d *sphereMatrix = new vector3d[numOfSpheres];
 
     double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
@@ -219,7 +288,7 @@ inline vector3d *FCCLattice()   {
     offset[2] = vector3d(cellLength,cellLength,0)/2;
     offset[3] = vector3d(0,cellLength,cellLength)/2;
 
-    int xsteps = 0; int ysteps = 0;int  zsteps = 0;
+    int ysteps = 0; int  zsteps = 0;
 
     for (int sphereNum = 0; sphereNum < numOfSpheres; sphereNum++) {
         sphereMatrix[sphereNum] = cornerSphere + offset[sphereNum%4];
@@ -248,14 +317,13 @@ inline vector3d *FCCLattice()   {
                             sphereNum = numOfSpheres;
                          }
         }
-        if ((fabs(sphereMatrix[sphereNum].x) <= 0.0001) & (fabs(sphereMatrix[sphereNum].y) <= 0.0001) &
-            (fabs(sphereMatrix[sphereNum].z) <=0.0001)){
-            cout << "Cell Dimensions have shrunk " << endl;
+        if ((fabs(sphereMatrix[sphereNum].x) < 0.0001) & (fabs(sphereMatrix[sphereNum].y) < 0.0001) & // Rescale Primitive Unit Cell
+            (fabs(sphereMatrix[sphereNum].z) < 0.0001)){
+            printf("Cell Dimensions have shrunk ");
             cornerSphere.x = cornerSphere.y = cornerSphere.z =  sphereRadius;
-            xsteps=ysteps=zsteps = 0;
+            ysteps=zsteps = 0;
             cellNumber += 1;
             cellLength = systemLength[x]/cellNumber;
-
             offset[1] = vector3d(cellLength,0,cellLength)/2;
             offset[2] = vector3d(cellLength,cellLength,0)/2;
             offset[3] = vector3d(0,cellLength,cellLength)/2;
@@ -285,8 +353,7 @@ static inline vector3d periodicBC(vector3d inputVector, double systemLength[3], 
      return inputVector;
 }
 
-// remove n and dVr?
-double totalPotential(vector3d *sphereMatrix, int numOfSpheres) {
+double totalPotential(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3],bool wall[3]) {
     double totalPotential = 0.0;
 
     for (int i = 0; i < numOfSpheres; ++i)  {   // Sphere 1
@@ -300,21 +367,19 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres) {
     return totalPotential;
 }
 
-int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem) {
-    // I am having an issue making the size of the dr for the histogram a variable. So I hard set it. Don't judge.
+int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3], bool wall[3]) {
     const int numOfBoxes = 1000;
     static int deltan[numOfBoxes];
 
-    for (int i = 0; i < numOfSpheres; ++i)
-    {
+
+    for (int i = 0; i < numOfSpheres; ++i) {
         vector3d Ri = sphereMatrix[i];
-        for (int j = i + 1; j < numOfSpheres; ++j)
-        {
+        for (int j = i + 1; j < numOfSpheres; ++j) {
             vector3d Rj = sphereMatrix[j];
             vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             double Rmag = R.norm();
-            int box = int(Rmag*numOfBoxes/sizeOfSystem);   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
-            if (Rmag < sizeOfSystem){
+            int box = int(Rmag*numOfBoxes/(2*cutoff));   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
+            if (Rmag <= 2*cutoff){
                 deltan[box] += 1;
             }
         }
@@ -352,7 +417,7 @@ double bondEnergy(vector3d R){
         }
 }
 
-double pairVirialFunction(vector3d *spheres) {
+double pairVirialFunction(vector3d *spheres, int numOfSpheres, double systemLength[3], bool wall[3]) {
     double w = 0;
     for (int i = 0; i < numOfSpheres; ++i){
         vector3d Ri = spheres[i];
@@ -370,22 +435,3 @@ double pairVirialFunction(vector3d *spheres) {
     }
     return 8*epsilon*w;
 }
-
-double ran(){
-  const long unsigned int x =0;
-  static MTRand my_mtrand(x); // always use the same random number generator (for debugging)!
-  return my_mtrand.randExc(); // which is the range of [0,1)
-}
-
-vector3d ran3(){
-  double x, y, r2,z;
-  do{
-    x = 2 * ran() - 1;
-    y = 2 * ran() - 1;
-    z = 2 * ran() - 1;
-    r2 = x * x + y * y + z * z;
-  } while(r2 >= 1 || r2 == 0);
-  double fac = sqrt(-2*log(r2)/r2);
-  vector3d out(x*fac,y*fac,z*fac);
-}
-
