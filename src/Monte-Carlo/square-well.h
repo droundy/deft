@@ -183,6 +183,10 @@ struct sw_simulation {
   void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
+  void initialize_wang_landau_with_tweaks(double wl_factor, double wl_fmod,
+                                          double wl_threshold, double wl_cutoff,
+                                          bool fixed_energy_range);
+
 
   void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
 

@@ -410,16 +410,11 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 }
 
 void sw_simulation::flush_weight_array(){
+  for (int i = 0; i < energy_levels; i++)
+    ln_energy_weights[i] -= ln_energy_weights[max_entropy_state];
   // floor weights above state of max entropy
   for (int i = 0; i < max_entropy_state; i++)
-    ln_energy_weights[i] = ln_energy_weights[max_entropy_state];
-  // substract off minimum weight from the entire array to reduce numerical error
-  double min_weight = ln_energy_weights[0];
-  for (int i = 1; i < max_entropy_state; i++)
-    min_weight = min(min_weight, ln_energy_weights[i]);
-  for (int i = 0; i < energy_levels; i++)
-    ln_energy_weights[i] -= min_weight;
-  return;
+    ln_energy_weights[i] = 0;
 }
 
 double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling){
@@ -944,6 +939,119 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
   const double original_wl_factor = wl_factor;
   int weight_updates = 0;
   bool done = false;
+  assert(min_important_energy);
+  int old_min_important_energy = min_important_energy;
+  while (!done) {
+
+    if(fixed_energy_range){
+      // If we have a fixed energy range, don't allow going below it
+      initialize_canonical(-1e-2,min_important_energy);
+    }
+
+
+    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
+      move_a_ball();
+      ln_energy_weights[energy] -= wl_factor;
+    }
+
+    if(!fixed_energy_range){
+      // Find and set the minimum important energy, as well as canonical weights below it
+      set_min_important_energy();
+      set_max_entropy_energy();
+      initialize_canonical(min_T,min_important_energy);
+      if (min_important_energy > old_min_important_energy && wl_factor != original_wl_factor) {
+        printf("\nFound new energy states!\n");
+        printf("  min_important_energy goes from %d -> %d\n",
+               old_min_important_energy, min_important_energy);
+        printf("  wl_factor goes from %g -> %g\n",
+               wl_factor, original_wl_factor);
+        wl_factor = original_wl_factor;
+        old_min_important_energy = min_important_energy;
+        flush_weight_array();
+        for (int i = 0; i < energy_levels; i++) {
+          if (energy_histogram[i] > 0) energy_histogram[i] = 1;
+        }
+        continue; // don't even considering quitting when we just
+                  // discovered a new energy!
+      }
+    }
+
+    // compute variation in energy histogram
+    int highest_hist_i = 0; // the most commonly visited energy
+    int lowest_hist_i = 0; // the least commonly visited energy
+    double highest_hist = 0; // highest histogram value
+    double lowest_hist = 1e200; // lowest histogram value
+    double total_counts = 0; // total counts in energy histogram
+    int num_nonzero = 0; // number of nonzero bins
+    for(int i = max_entropy_state+1; i <= min_important_energy; i++){
+      num_nonzero += 1;
+      total_counts += energy_histogram[i];
+      if(energy_histogram[i] > highest_hist){
+        highest_hist = energy_histogram[i];
+        highest_hist_i = i;
+      }
+      if(energy_histogram[i] < lowest_hist){
+        lowest_hist = energy_histogram[i];
+        lowest_hist_i = i;
+      }
+    }
+    double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
+    const double variation = hist_mean/lowest_hist - 1;
+    const double min_over_mean = lowest_hist/hist_mean;
+    const long min_interesting_energy_count = energy_histogram[min_important_energy];
+
+    // print status text for testing purposes
+    bool be_verbose = printing_allowed();
+
+    // check whether our histogram is flat enough to update wl_factor
+    if (variation > 0 && variation < wl_threshold) {
+      weight_updates += 1;
+      printf("We reached WL flatness!\n");
+      be_verbose = true;
+      wl_factor /= wl_fmod;
+      flush_weight_array();
+      for (int i = 0; i < energy_levels; i++) {
+        if (energy_histogram[i] > 0) energy_histogram[i] = 1;
+      }
+
+      // repeat until terminal condition is met,
+      // and make sure we're not stuck at a newly introduced minimum energy state
+      if (wl_factor < wl_cutoff && energy != min_energy_state
+          && end_condition != init_iter_limit) {
+        printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
+               iteration, weight_updates);
+        done = true;
+      }
+    }
+    if (be_verbose) {
+      write_transitions_file(); // Just for the heck of it, save the transition matrix...
+      printf("WL weight update: %i\n",weight_updates);
+      printf("  WL factor: %g\n",wl_factor);
+      printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
+      printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
+             highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
+      printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
+             pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
+             min_interesting_energy_count);
+      // printf("  min_energy_state: %d,  max_entropy_state: %d,  min_important_energy %d, energies visited: %d\n",
+      //        min_energy_state, max_entropy_state, min_important_energy, num_nonzero);
+      // printf("  current energy: %d\n", energy);
+      // printf("  hist_mean: %g,  total_counts: %g\n", hist_mean, total_counts);
+    }
+  }
+
+  initialize_canonical(min_T,min_important_energy);
+}
+
+
+
+// initialize the weight array using the Wang-Landau method.
+void sw_simulation::initialize_wang_landau_with_tweaks(double wl_factor, double wl_fmod,
+                                                       double wl_threshold, double wl_cutoff,
+                                                       bool fixed_energy_range) {
+  const double original_wl_factor = wl_factor;
+  int weight_updates = 0;
+  bool done = false;
   if (fixed_energy_range) {
     min_important_energy = default_min_e();
   } else {
@@ -1278,6 +1386,8 @@ void sw_simulation::update_weights_using_transitions(int version) {
     // to avoid trashing data when going between two states with
     // almost equal (max) entropy.
     printf("I am resetting the histograms, because max_entropy_state changed.\n");
+    fflush(stdout);
+    fprintf(stderr, "I am resetting the histograms, because max_entropy_state changed.\n");
     reset_histograms();
   }
   // Above the max_entropy_state we level out the weights.
