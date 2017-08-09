@@ -1,7 +1,10 @@
 #!/usr/bin/env python2
-
 import shlex, subprocess, sys, argparse, os
 import numpy as np
+
+########################################################################
+## This script is used to run a single instance of new-soft
+########################################################################
 
 parser = argparse.ArgumentParser(description='run new-soft')
 
@@ -50,7 +53,6 @@ parser.add_argument('--iters', metavar='ITERATIONS', type=int, action='store',
 parser.add_argument('--dr', metavar='LENGTH', type=float, action='store',
                     default=0,
                     help='Random Move Length Max')
-
 args = parser.parse_args()
 
 # Directory and Filename Information

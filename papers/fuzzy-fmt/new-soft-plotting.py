@@ -1,16 +1,24 @@
 #!/usr/bin/env python2
-
 from __future__ import division
 from mpl_toolkits.mplot3d import Axes3D
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-
+########################################################################
+## This script reads data from files and plots
+########################################################################
+#Global Constants
 x = 0
 y = 1
 z = 2
-arraylength = 0
 
+pmin = 0.1
+pmax = 1.1
+dp = 0.1
+
+Tmin = 0.01
+Tmax = 3.51
+dT = 0.5
 
 def plotPressure(pmin,pmax,dp,Tmin,Tmax,dT):
 	nd = np.arange(pmin,pmax,dp)
@@ -84,20 +92,8 @@ def plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT):
 			plt.xlabel('Radial Distance (r)')
 			plt.ylabel('Number of Spheres at this distance')
 
-pmin = 0.3
-pmax = 0.4
-dp = 0.1
-
-Tmin = 0.01
-Tmax = 3.5
-dT = 0.5
-
-
-
-#~ for i in range(945,970): print unichr(i),i
-
 #~ plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT)
-plotPositions(pmin,pmax,dp,Tmin,Tmax,dT)
-#~ plotPressure(pmin,pmax,dp,Tmin,Tmax,dT)
+#~ plotPositions(pmin,pmax,dp,Tmin,Tmax,dT)		# Careful w/ this one
+plotPressure(pmin,pmax,dp,Tmin,Tmax,dT)
 
 plt.show()
