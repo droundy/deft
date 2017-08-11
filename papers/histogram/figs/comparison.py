@@ -12,6 +12,7 @@ reference = sys.argv[2]
 filebase = sys.argv[3]
 methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-toe3','-tmmc', '-vanilla_wang_landau']
 ref = "data/" + reference
+maxref = readnew.max_entropy_state(ref)
 goodenough = 0.1
 
 colors = {
@@ -27,7 +28,6 @@ try:
     eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
 except:
     eref, lndosref = readnew.e_lndos(ref)
-maxref = readnew.max_entropy_state(ref)
 
 for method in methods:
     try: 
@@ -39,21 +39,42 @@ for method in methods:
         maxentropystate = numpy.zeros(len(r))
         minimportantenergy = numpy.zeros(len(r))
         erroratenergy = numpy.zeros(len(r))
-        for i,f in enumerate(sorted(r)):
-                e,lndos,Nrt = readnew.e_lndos_ps(f)
-                goodenoughenergy = numpy.zeros(len(r))
-                
-                iterations[i] = readnew.iterations(f)
-                e,lndos = readnew.e_lndos(f)
-                
-                Nrt_at_energy[i] = Nrt[energy]
-                maxentropystate[i] = readnew.max_entropy_state(f)
-                minimportantenergy[i] = readnew.min_important_energy(f)
-                doserror = lndos - lndos[maxref] - lndosref + lndosref[maxref]
-                erroratenergy[i] = doserror[energy]
+        goodenoughenergy = numpy.zeros(len(r))
 
-    # The following finds out what energy we are converged to at the
-    # "goodenough" level.
+        for i,f in enumerate(sorted(r)):
+            e,lndos,Nrt = readnew.e_lndos_ps(f)
+
+            iterations[i] = readnew.iterations(f)
+            Nrt_at_energy[i] = Nrt[energy]
+            maxentropystate[i] = readnew.max_entropy_state(f)
+            minimportantenergy[i] = readnew.min_important_energy(f)
+
+            doserror = lndos - lndos[maxref] - lndosref + lndosref[maxref]
+            erroratenergy[i] = doserror[energy]
+
+        newiterations = []
+        newnrt = []
+        newmax = []
+        newmin = []
+        i = 0
+        while iterations[i] < max(iterations):
+            newiterations.append(iterations[i])
+            newmax.append(maxentropystate[i])
+            newmin.append(minimportantenergy[i])
+            i+=1
+        # print i, 'for', method
+        # maxentropystate = maxentropystate[:i+1]
+        newiterations.append(max(iterations))
+        newmax.append(max(maxentropystate))
+        newmin.append(max(minimportantenergy))
+        i = 0
+        while Nrt_at_energy[i] < max(Nrt_at_energy):
+            newnrt.append(Nrt_at_energy[i])
+            i+=1
+        newnrt.append(max(Nrt_at_energy))
+
+        # The following finds out what energy we are converged to at the
+        # "goodenough" level.
         if any(numpy.logical_and(abs(doserror) > goodenough, e < -maxref)):
             goodenoughenergy[i] = max(e[numpy.logical_and(abs(doserror) > goodenough, e < -maxref)])
         else:
@@ -66,7 +87,7 @@ for method in methods:
         #plt.legend(loc = 'best')
 
         plt.figure('round-trips-at-energy')
-        plt.plot(iterations, Nrt_at_energy, '%s-' % colors[method], label = method[1:])
+        plt.plot(newiterations, newnrt, '%s-' % colors[method], label = method[1:])
         plt.title('Roundy Trips at energy %g' % energy)
         plt.xlabel('# iterations')
         plt.ylabel('Roundy Trips')
@@ -85,9 +106,10 @@ for method in methods:
         #plt.ylabel('energy we are converged to')
         #plt.title('Convergence at %g%% level' % (goodenough*100))
         #plt.legend(loc = 'best')
-        print iterations
+
     except:
-        continue
+        print 'I had trouble with', method
+        raise
 plt.show()
 
 #~ plt.loglog(ps[ps > 0], iterations[ps > 0],
