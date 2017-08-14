@@ -105,7 +105,7 @@ struct sw_simulation {
   mutable int dos_movie_count;
   const char *lnw_movie_filename_format;
   mutable int lnw_movie_count;
-  /* Finally, the following define file names for output files. */
+  /* Finally, the following defines file names for output files. */
   const char *transitions_filename;
 
   /* The following tracks how many transitions we have attempted from
@@ -184,6 +184,8 @@ struct sw_simulation {
   // set canonical weights below some given energy
   void initialize_canonical(double T, int reference=0);
 
+  void initialize_wltmmc(double wl_fmod,
+                         double wl_threshold, double wl_cutoff);
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
