@@ -824,7 +824,8 @@ int main(int argc, const char *argv[]) {
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau || vanilla_wang_landau) {
-    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff,
+    sw.wl_factor = wl_factor;
+    sw.initialize_wang_landau(wl_fmod, wl_threshold, wl_cutoff,
                               vanilla_wang_landau);
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
@@ -833,6 +834,7 @@ int main(int argc, const char *argv[]) {
   } else if (toe) {
     sw.initialize_toe();
   } else if (tmmc) {
+    sw.use_tmmc = true;
     sw.initialize_transitions();
   } else if (oetmmc) {
     sw.initialize_transitions();

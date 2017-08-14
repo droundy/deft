@@ -262,7 +262,7 @@ void sw_simulation::reset_histograms(){
   }
 }
 
-void sw_simulation::move_a_ball(bool use_transition_matrix) {
+void sw_simulation::move_a_ball() {
   int id = moves.total % N;
   moves.total++;
   const int old_interaction_count =
@@ -315,7 +315,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   const int energy_change = new_interaction_count - old_interaction_count;
   transitions(energy, energy_change) += 1; // update the transition histogram
   double Pmove = 1;
-  if (use_transition_matrix) {
+  if (use_tmmc) {
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
       const double betamax = 1.0/min_T;
       double Pmin = exp(energy_change*betamax);
@@ -372,6 +372,9 @@ void sw_simulation::end_move_updates(){
   if(moves.total % N == 0) iteration++;
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
+  // Note: if not using WL method, wl_factor = 0 and the following has
+  // no effect.
+  ln_energy_weights[energy] -= wl_factor;
 }
 
 void sw_simulation::energy_change_updates(int energy_change){
@@ -933,9 +936,10 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 }
 
 // initialize the weight array using the Wang-Landau method.
-void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
+void sw_simulation::initialize_wang_landau(double wl_fmod,
                                            double wl_threshold, double wl_cutoff,
                                            bool fixed_energy_range) {
+  assert(wl_factor);
   const double original_wl_factor = wl_factor;
   int weight_updates = 0;
   bool done = false;
@@ -1046,9 +1050,10 @@ void sw_simulation::initialize_wang_landau(double wl_factor, double wl_fmod,
 
 
 // initialize the weight array using the Wang-Landau method.
-void sw_simulation::initialize_wang_landau_with_tweaks(double wl_factor, double wl_fmod,
+void sw_simulation::initialize_wang_landau_with_tweaks(double wl_fmod,
                                                        double wl_threshold, double wl_cutoff,
                                                        bool fixed_energy_range) {
+  assert(wl_factor);
   const double original_wl_factor = wl_factor;
   int weight_updates = 0;
   bool done = false;
@@ -1070,10 +1075,7 @@ void sw_simulation::initialize_wang_landau_with_tweaks(double wl_factor, double 
     }
 
 
-    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
-      move_a_ball();
-      ln_energy_weights[energy] -= wl_factor;
-    }
+    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) move_a_ball();
 
     if(!fixed_energy_range){
       // Find and set the minimum important energy, as well as canonical weights below it
@@ -1510,10 +1512,11 @@ void sw_simulation::initialize_toe(int version) {
 
 // initialization with tmmc
 void sw_simulation::initialize_transitions() {
+  assert(use_tmmc);
   int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
   bool verbose = false;
   do {
-    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball(true);
+    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
     check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
     verbose = printing_allowed();
     if (verbose) {

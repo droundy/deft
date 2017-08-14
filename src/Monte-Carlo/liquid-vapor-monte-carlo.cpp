@@ -684,6 +684,7 @@ int main(int argc, const char *argv[]) {
             "# kT: %g\n",
             headerinfo, fix_kT);
   } else if (tmmc) {
+    sw.use_tmmc = true;
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
             headerinfo);
@@ -706,7 +707,7 @@ int main(int argc, const char *argv[]) {
   long how_often_to_check_finish = sw.N;
   long iterations_per_update = 10*sw.N;
   do {
-    for (int i = 0; i < sw.N; i++) sw.move_a_ball(tmmc);
+    for (int i = 0; i < sw.N; i++) sw.move_a_ball();
     if (sw.iteration % (100*sw.N*sw.N) == 0) {
       // Every so often, check that we still have the correct energy.
       // Technically we shouldn't need to do this at all, this is just
