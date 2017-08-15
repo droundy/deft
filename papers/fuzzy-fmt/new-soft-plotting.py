@@ -17,7 +17,7 @@ pmax = 1.09
 dp = 0.1
 
 Tmin = 0.01
-Tmax = 1.51
+Tmax = 4.51
 dT = 0.5
 
 def plotPressure(pmin,pmax,dp,Tmin,Tmax,dT):
@@ -33,7 +33,8 @@ def plotPressure(pmin,pmax,dp,Tmin,Tmax,dT):
 					if(l[0] != "#"):
 						tempPress = l.strip().split("\n")
 						a = int(temp/dT)
-						b = int(density/dp)-1
+						b = int(density/dp)-10
+						print b
 						pressure[b][a] = tempPress[0]
 	fig = plt.figure()
 	for i in range(len(nd)):
@@ -95,8 +96,8 @@ def plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT):
 			plt.xlabel('Radial Distance (r)')
 			plt.ylabel('Number of Spheres at this distance')
 
-plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT)
-plotPositions(pmin,pmax,dp,Tmin,Tmax,dT)		# Careful w/ this one
-#~ plotPressure(pmin,pmax,dp,Tmin,Tmax,dT)
+#~ plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT)
+#~ plotPositions(pmin,pmax,dp,Tmin,Tmax,dT)		# Careful w/ this one
+plotPressure(pmin,pmax,dp,Tmin,Tmax,dT)
 
 plt.show()

@@ -8,15 +8,15 @@ import numpy as np
 ## System Size Determination
 spheres = 108 # Number of Spheres
 # Simulation Characteristics
-iters = 1e9
+iters = 1e8
 dr = 0.1
 # Densities to test
-pmin = 1.0
-pmax = 1.09
+pmin = 1.2
+pmax = 1.21
 dp = 0.1
 # Temperatures to test
 Tmin = 0.01
-Tmax = 4.51
+Tmax = 0.51
 dT = 0.5
 # Directory and Filename Information
 directory = "data"

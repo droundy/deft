@@ -58,7 +58,6 @@ int main(int argc, const char *argv[])  {
     long totalIterations = 1000;
     double dr = 0.005;
     bool wall[3] = {false,false,false};
-    int walls[3] = {0,0,0};
     int numOfSpheres = 0;
     
 	char *data_dir = new char[1024];
@@ -101,12 +100,12 @@ int main(int argc, const char *argv[])  {
             "Reduced Density", "DOUBLE"},
         {"temp", '\0', POPT_ARG_DOUBLE, &reducedTemperature, 0,
             "Reduced Temperature", "DOUBLE"},
-        {"wallx", '\0', POPT_ARG_NONE, &walls[x], 0,
-            "If x dimension has a wall (int). ", "INT"},
-        {"wally", '\0', POPT_ARG_NONE, &walls[y], 0,
-            "If y dimension has a wall (int)", "INT"},
-        {"wallz", '\0', POPT_ARG_NONE, &walls[z], 0,
-            "If z dimension has a wall (int)", "INT"},
+        {"wallx", '\0', POPT_ARG_NONE, &wall[x], 0,
+            "If x dimension has a wall (int). ", "BOOL"},
+        {"wally", '\0', POPT_ARG_NONE, &wall[y], 0,
+            "If y dimension has a wall (int)", "BOOL"},
+        {"wallz", '\0', POPT_ARG_NONE, &wall[z], 0,
+            "If z dimension has a wall (int)", "BOOL"},
         
         /*** Simulation Characteristics ***/
         {"iters" ,'\0', POPT_ARG_LONG, &totalIterations, 0,
@@ -128,9 +127,9 @@ int main(int argc, const char *argv[])  {
     };
     optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
     poptSetOtherOptionHelp(optCon, "[OPTION...]\n"
-                         "popt does not take boolean operators, therefore"
-                         "the existence of walls is determined by ints.\n"
-                         "false = 0, true = 1. As you may have guessed. :)");
+                         "Type of BOOL means that the command just needs"
+                         " to be called. You don't need to associate any"
+                         " value with that argument. :)");
     int c = 0;
     while((c = poptGetNextOpt(optCon)) >= 0);
     if (c < -1) {
@@ -160,20 +159,12 @@ int main(int argc, const char *argv[])  {
         return 1;
     }
 
-    if ((walls[x]>1 || walls[x]<0)
-            ||(walls[y]>1 || walls[y]<0)
-            ||(walls[z]>1 || walls[z]<0)){
-            printf("The entries for wall existence must be either 1 or 0\n."
-            "For an explanation consult new-soft --help\n");
-            printf("Wall existences: %d %d %d\n", walls[x],walls[y],walls[z]);
-         return 1;
-    }
     // Changes to Input Conditions
     if (numOfSpheres == 0) {
 		assert(reducedDensity > 0);
 		printf("Performing DVT simulation.\n");
 		numOfSpheres = int(systemLength[x] * systemLength[y] * systemLength[z] * reducedDensity);
-		printf(" to: %d\n",numOfSpheres);
+		printf("N to: %d\n",numOfSpheres);
 	} else if (systemLength[x] == 0 && systemLength[y] == 0 && systemLength[z] == 0) {
 		assert(reducedDensity > 0);
 		assert(numOfSpheres > 0);
@@ -189,16 +180,18 @@ int main(int argc, const char *argv[])  {
   // ----------------------------------------------------------------------------
 	double volume = systemLength[x] * systemLength[y] * systemLength[z];
     vector3d *spheres = FCCLattice(numOfSpheres,systemLength);
-    double totalEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-    double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon) / volume;
+    double tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+    double tempE2 = tempEnergy*tempEnergy;
+    double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
     double virial = forceTimesDist(spheres, numOfSpheres, systemLength,wall);
+    double totalEnergy = 0.0;
+    double energy2 = 0.0;
     double exPressure = 0.0;
     long acceptedTrials = 0;
     long *runningRadial = new long[1000];
-    wall[x] = bool(walls[x]); wall[y] = bool(walls[y]); wall[z] = bool(walls[z]);
     long radialWrites = 0;
     int outputCount = 0;
-    int outTime = 5; // Seconds
+    int outTime = 1; // Seconds
     bool repeat = false;
 
 	printf("Filename: %s\n",filename);
@@ -222,17 +215,15 @@ int main(int argc, const char *argv[])  {
 	char *pos_fname = new char[1024];
 	char *radial_fname = new char[1024];
 	char *press_fname = new char[1024];
+	char *energy_fname = new char[1024];
+	sprintf(energy_fname, "%s/%s-energy.dat",data_dir,filename);
 	sprintf(pos_fname, "%s/%s-pos.dat", data_dir, filename);
 	sprintf(radial_fname, "%s/%s-radial.dat", data_dir, filename);
 	sprintf(press_fname,"%s/%s-press.dat", data_dir, filename);
     FILE *pos_out = fopen((const char *)pos_fname, "w");
     FILE *radial_out = fopen((const char *)radial_fname,"w");
     FILE *press_out = fopen((const char *)press_fname,"w");
-	fprintf(pos_out, "%s", headerinfo);
-	fprintf(radial_out, "%s", headerinfo);
-	fprintf(radial_out, "%s", countinfo);
-	fprintf(press_out, "%s", headerinfo);
-	fprintf(press_out, "%s", countinfo);
+    FILE *energy_out = fopen((const char *)energy_fname,"w");
 	if (!radial_out) {
 		printf("Unable to create file %s\n", radial_fname);
 		exit(1);
@@ -244,6 +235,8 @@ int main(int argc, const char *argv[])  {
 	fflush(stdout);
     for (long currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
         exPressure += virial;
+        totalEnergy += tempEnergy;
+        energy2 += tempE2;
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = random::ran64() % numOfSpheres;
@@ -276,7 +269,8 @@ int main(int argc, const char *argv[])  {
             }
         if (trialAcceptance == true){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
-            totalEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+            tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+            tempE2 = tempEnergy*tempEnergy;
             virial = forceTimesDist(spheres, numOfSpheres,systemLength,wall);
             acceptedTrials += 1;
         }
@@ -295,20 +289,33 @@ int main(int argc, const char *argv[])  {
 	// ---------------------------------------------------------------
     // Save data to files
     // ---------------------------------------------------------------
-		if (((clock == outTime) && (outputCount <= 5)) 
-			|| (((clock % 1800) == 0) && (repeat = false))
+		if (((clock == outTime) && (outputCount <= 6)) 
+			|| (((clock % 1800) == 0) && (repeat == false))
 			|| (currentIteration == totalIterations-1)){
 			int minutes = clock / 60;
 			int hours = minutes / 60;
 			int days = hours / 24;
 			outputCount += 1;
 			outTime = 3*outTime;
+			double ratio = (double(currentIteration)/ 
+							double(totalIterations));
+			int estEndTime = (double(clock)/ratio)-clock;
+			int fmin = estEndTime/60;
+			int fhrs = fmin/60;
+			int fdays = fhrs/24;
 			printf("Filename: %s\n",filename);
-			printf("Iteration: %ld of %ld\n",currentIteration,totalIterations);
+			printf("Percent Complete: %.7f %\n",100*ratio);
+			printf("Iteration: %ld of %ld\n",
+				currentIteration,totalIterations);
 			printf("Time Elapsed: %d sec\n",clock);
-			printf("Acceptance Rate: %ld / %ld\n", acceptedTrials,currentIteration);
-			printf("Saved data at: %d days, %d hrs, %d min, %d sec \n\n",days,hours-days*24,
+			printf("Acceptance Rate: %.5f %\n", 
+				100*double(acceptedTrials)/double(currentIteration));
+			printf("Saved data after: %d days, %d hrs, %d min, %d sec \n"
+					,days,hours-days*24,
 					minutes-hours*60,clock-minutes*60);
+			printf("Estimated Finish: %d days, %d hrs, %d min, %d sec \n\n"
+					,fdays,fhrs-fdays*24,
+					fmin-fhrs*60,estEndTime-fmin*60);
 			fflush(stdout);
 			sprintf(countinfo,
 				"# iterations: %li\n"
@@ -317,6 +324,9 @@ int main(int argc, const char *argv[])  {
 			fopen(pos_fname, "w");
 			fopen(radial_fname,"w");
 			fopen(press_fname,"w");
+			fopen(energy_fname,"w");
+			fprintf(energy_out,"%s",headerinfo);
+			fprintf(energy_out,"%s",countinfo);
 			fprintf(pos_out, "%s", headerinfo);
 			fprintf(pos_out, "%s", countinfo);
 			fprintf(radial_out, "%s", headerinfo);
@@ -332,9 +342,17 @@ int main(int argc, const char *argv[])  {
 				spheres[i].x, spheres[i].y, spheres[i].z);
 			}
 			for (int i = 0; i < 1000; ++i){ // This isn't being averaged properly
-				fprintf(radial_out, "%g\t%g\n", i*systemLength[x]/(2*1000.0), double(runningRadial[i]/(numOfSpheres*radialWrites)));
+				fprintf(radial_out, "%g\t%g\n", 
+					i*systemLength[x]/(2*1000.0), 
+					double(volume*runningRadial[i]/
+						  (numOfSpheres*numOfSpheres*radialWrites)));
 			}
-			fprintf(press_out, "%g\n",pressureIdeal + (exPressure / (totalIterations*volume)));    
+			fprintf(press_out, "%g\n",pressureIdeal + 
+				(exPressure / (totalIterations*volume)));
+			fprintf(energy_out,"%g\t%g\b",
+					totalEnergy/double(currentIteration),
+					energy2/double(currentIteration));
+			fclose(energy_out);
 			fclose(pos_out);
 			fclose(radial_out);
 			fclose(press_out);
@@ -350,6 +368,8 @@ int main(int argc, const char *argv[])  {
     auto end = get_time::now();
     auto diff = end - start;
     cout << "Total Time to Completion: " << chrono::duration_cast<sec>(diff).count() << " sec " <<endl;
+    delete[] runningRadial;
+    delete[] spheres;
 }
 
 inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
@@ -390,7 +410,8 @@ inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
                 sphereNum = numOfSpheres;
                 }
         }
-        if ((fabs(sphereMatrix[sphereNum].x) < 0.0001) & (fabs(sphereMatrix[sphereNum].y) < 0.0001) & // Rescale Primitive Unit Cell
+        if ((fabs(sphereMatrix[sphereNum].x) < 0.0001) & 
+			(fabs(sphereMatrix[sphereNum].y) < 0.0001) & // Rescale Primitive Unit Cell
             (fabs(sphereMatrix[sphereNum].z) < 0.0001)){
             printf("Cell Dimensions have shrunk.\n");
             cornerSphere.x = cornerSphere.y = cornerSphere.z =  sigma/2;
@@ -439,7 +460,7 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres, double systemLen
     }
     return totalPotential;
 }
-// The radial distribution function is broken. Fix this!!!!
+
 double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3], bool wall[3]) {
     const int numOfBoxes = 1000;
     double *deltan = new double[numOfBoxes];
