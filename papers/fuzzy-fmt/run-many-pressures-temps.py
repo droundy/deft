@@ -11,33 +11,34 @@ spheres = 108 # Number of Spheres
 iters = 1e9
 dr = 0.1
 # Densities to test
-pmin = 0.1
-pmax = 0.2
+pmin = 1.0
+pmax = 1.09
 dp = 0.1
 # Temperatures to test
 Tmin = 0.01
-Tmax = 0.51
+Tmax = 4.51
 dT = 0.5
+# Directory and Filename Information
+directory = "data"
 # Makes a new directory for you if it's not already there.
 try:
-	os.makedirs('data8-10-17')
+	os.makedirs(directory)
 except:
 	pass
-
-# Directory and Filename Information
-directory = "data8-10-17"
-
 for density in np.arange(pmin,pmax,dp):
 	for temp in np.arange(Tmin,Tmax,dT):
 		filename = "ff-"+str(density)+"_temp-"+str(temp)
-		#command_line = "sbatch -o data/{}.out -c 1 -n 1 -J {}"\
-		command_line = "rq run -J {filename} ../../new-soft --density {} --temp {} --sphereNum {}"\
-		" --iters {iters:.0f} --dr {dr} --dir {directory}".format(
-		                  density, temp, spheres,
+		command_line = "rq run -J {filename} ../../new-soft "\
+		"--density {density} --temp {temp} --sphereNum {spheres}"\
+		" --iters {iters:.0f} --dr {dr} --dir {directory} "\
+		"--filename {filename}".format(
+		                  density=density, 
+		                  temp=temp, 
+		                  spheres=spheres,
 						  iters=iters,
 						  dr=dr,
 						  directory=directory,
-						  filename=filename)
+						  filename=filename,)
 		print command_line
 		args = shlex.split(command_line)
 		p = subprocess.call(args)
