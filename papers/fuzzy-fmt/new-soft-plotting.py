@@ -5,7 +5,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 ########################################################################
-## This script reads data from files and plots
+## This script reads data from files and plots for new-soft
 ########################################################################
 #Global Constants
 x = 0
