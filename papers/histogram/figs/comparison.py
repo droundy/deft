@@ -40,6 +40,8 @@ for method in methods:
         minimportantenergy = numpy.zeros(len(r))
         erroratenergy = numpy.zeros(len(r))
         goodenoughenergy = numpy.zeros(len(r))
+        errorinentropy = numpy.zeros(len(r))
+
 
         for i,f in enumerate(sorted(r)):
             e,lndos,Nrt = readnew.e_lndos_ps(f)
@@ -48,15 +50,16 @@ for method in methods:
             Nrt_at_energy[i] = Nrt[energy]
             maxentropystate[i] = readnew.max_entropy_state(f)
             minimportantenergy[i] = readnew.min_important_energy(f)
-
             doserror = lndos - lndos[maxref] - lndosref + lndosref[maxref]
+            errorinentropy[i] = numpy.sum(doserror)/len(doserror)
             erroratenergy[i] = doserror[energy]
-        print e
+
         newiterations = []
         newnrt = []
         newmax = []
         newmin = []
         i = 0
+        
         while iterations[i] < max(iterations):
             newiterations = iterations[:i+1]
             newmin = minimportantenergy[:i+1]
@@ -103,6 +106,12 @@ for method in methods:
         plt.title('Convergence at %g%% level' % (goodenough*100))
         plt.legend(loc = 'best')
 
+        plt.figure('errorinentropy')
+        plt.plot(newiterations, errorinentropy[0:len(newiterations)], '%s-' % colors[method], label = method[1:])
+        plt.xlabel('#iterations')
+        plt.ylabel('Error in Entropy')
+        plt.title('Average Entropy Error at Each Iteration')
+        plt.legend(loc='best')
     except:
         print 'I had trouble with', method
         raise
