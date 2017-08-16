@@ -56,7 +56,8 @@ parser.add_argument('--dr', metavar='LENGTH', type=float, action='store',
 args = parser.parse_args()
 
 # Directory and Filename Information
-direc_name = "data"
+direc_name = "data8-10-17"
+## Make this Directory name a parsed argument
 
 filename = "ff-"+str(args.density)+"_temp-"+str(args.temp)
 command_line ="../../new-soft --NDT "+str(args.NDT)+" --DVT "+str(args.DVT)+\

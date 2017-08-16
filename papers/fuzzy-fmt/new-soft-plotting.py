@@ -5,19 +5,19 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 ########################################################################
-## This script reads data from files and plots
+## This script reads data from files and plots for new-soft
 ########################################################################
 #Global Constants
 x = 0
 y = 1
 z = 2
 
-pmin = 0.1
-pmax = 1.1
+pmin = 1.0
+pmax = 1.09
 dp = 0.1
 
 Tmin = 0.01
-Tmax = 3.51
+Tmax = 4.51
 dT = 0.5
 
 def plotPressure(pmin,pmax,dp,Tmin,Tmax,dT):
@@ -33,7 +33,8 @@ def plotPressure(pmin,pmax,dp,Tmin,Tmax,dT):
 					if(l[0] != "#"):
 						tempPress = l.strip().split("\n")
 						a = int(temp/dT)
-						b = int(density/dp)-1
+						b = int(density/dp)-10
+						print b
 						pressure[b][a] = tempPress[0]
 	fig = plt.figure()
 	for i in range(len(nd)):
@@ -74,7 +75,7 @@ def plotPositions(pmin,pmax,dp,Tmin,Tmax,dT):
 
 
 def plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT):
-	radboxes = np.linspace(0,2**(1/6),1000)
+	radboxes = np.zeros(1000)
 	radheights = np.zeros(1000)
 	for density in np.arange(pmin,pmax,dp):
 		for temp in np.arange(Tmin,Tmax,dT):
@@ -83,11 +84,14 @@ def plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT):
 			with open('data/ff-'+str(density)+'_temp-'+str(temp)+'-radial.dat') as f:
 						for l in f:
 							if(l[0] != "#"):
-								height = l.strip().split("\n")
-								radheights[count] = height[0]
+								data = l.strip().split("\t")
+								radboxes[count] = data[0]
+								radheights[count] = data[1]
+								#~ radheights[count] = height[0]
 								count += 1
+
 			plt.figure()
-			plt.plot(radboxes,radheights)
+			plt.plot(radboxes[14:],radheights[14:])
 			plt.title('Sum of Spheres at a Radial Distance, non-averaged. At temp: '+str(temp)+' and Density: ' +str(density))
 			plt.xlabel('Radial Distance (r)')
 			plt.ylabel('Number of Spheres at this distance')
