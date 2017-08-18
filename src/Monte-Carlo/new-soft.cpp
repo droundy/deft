@@ -8,9 +8,11 @@
 #include <cassert>
 #include "vector3d.h"
 #include <popt.h>
+#include <ctime>
 
 using namespace std;
 using sec = chrono::seconds;
+using ms = chrono::milliseconds;
 using get_time = chrono::steady_clock;
 // ------------------------------------------------------------------------------
 // Global Constants
@@ -49,6 +51,7 @@ double bondEnergy(vector3d R);
 double forceTimesDist(vector3d *spheres, int numOfSpheres,double systemLength[3],bool wall[3]);
 
 int main(int argc, const char *argv[])  {
+	time_t mytime;
     auto start = get_time::now();
     // Initialize Variables and Dummy Variables
     double systemLength[3] = {0,0,0};
@@ -191,26 +194,31 @@ int main(int argc, const char *argv[])  {
     long *runningRadial = new long[1000];
     long radialWrites = 0;
     int outputCount = 0;
-    int outTime = 1; // Seconds
-    bool repeat = false;
-
+    bool save = false;
+    long saveIter = 1e3;
+    int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
+	mytime = time(NULL);
+	
 	printf("Filename: %s\n",filename);
 	printf("Lattice Made\n");
     printf("Number of Spheres: %d\n", numOfSpheres);
     printf("Size of System: %g %g %g\n", systemLength[x],systemLength[y],systemLength[z]);
     printf("Wall existence on x,y,z %d %d %d\n",wall[x],wall[y],wall[z]);
+    printf(ctime(&mytime));
   // ----------------------------------------------------------------------------
   // File Save Initiation
   // ----------------------------------------------------------------------------
     char *headerinfo = new char[4096];
     sprintf(headerinfo,
-		"# well_width: %g %g %g\n"
-		"# ff: %g\n"
+		"# System Lengths: %g %g %g\n"
+		"# Density: %g\n"
+		"# Temperature: %g\n"
 		"# N: %d\n"
-		"# walls: %d %d %d\n",
+		"# walls: %d %d %d\n"
+		"# volume: %g\n",
 		systemLength[x],systemLength[y],systemLength[z],
-		reducedDensity,numOfSpheres,
-		wall[x],wall[y],wall[z]);
+		reducedDensity,reducedTemperature,numOfSpheres,
+		wall[x],wall[y],wall[z], volume);
     char *countinfo = new char[4096];
 	char *pos_fname = new char[1024];
 	char *radial_fname = new char[1024];
@@ -283,91 +291,103 @@ int main(int argc, const char *argv[])  {
             }
             delete[] radialDistHist;
         }
-		auto end = get_time::now();
-		auto diff = end - start;
-		int clock = int(chrono::duration_cast<sec>(diff).count());
 	// ---------------------------------------------------------------
     // Save data to files
     // ---------------------------------------------------------------
-		if (((clock == outTime) && (outputCount <= 6)) 
-			|| (((clock % 1800) == 0) && (repeat == false))
-			|| (currentIteration == totalIterations-1)){
-			int minutes = clock / 60;
-			int hours = minutes / 60;
-			int days = hours / 24;
-			outputCount += 1;
-			outTime = 3*outTime;
-			double ratio = (double(currentIteration)/ 
-							double(totalIterations));
-			int estEndTime = (double(clock)/ratio)-clock;
-			int fmin = estEndTime/60;
-			int fhrs = fmin/60;
-			int fdays = fhrs/24;
-			printf("Filename: %s\n",filename);
-			printf("Percent Complete: %.7f %\n",100*ratio);
-			printf("Iteration: %ld of %ld\n",
-				currentIteration,totalIterations);
-			printf("Time Elapsed: %d sec\n",clock);
-			printf("Acceptance Rate: %.5f %\n", 
-				100*double(acceptedTrials)/double(currentIteration));
-			printf("Saved data after: %d days, %d hrs, %d min, %d sec \n"
-					,days,hours-days*24,
-					minutes-hours*60,clock-minutes*60);
-			printf("Estimated Finish: %d days, %d hrs, %d min, %d sec \n\n"
-					,fdays,fhrs-fdays*24,
-					fmin-fhrs*60,estEndTime-fmin*60);
-			fflush(stdout);
-			sprintf(countinfo,
-				"# iterations: %li\n"
-				"# accepted moves: %li\n",
-				totalIterations, acceptedTrials);
-			fopen(pos_fname, "w");
-			fopen(radial_fname,"w");
-			fopen(press_fname,"w");
-			fopen(energy_fname,"w");
-			fprintf(energy_out,"%s",headerinfo);
-			fprintf(energy_out,"%s",countinfo);
-			fprintf(pos_out, "%s", headerinfo);
-			fprintf(pos_out, "%s", countinfo);
-			fprintf(radial_out, "%s", headerinfo);
-			fprintf(radial_out, "%s", countinfo);
-			fprintf(press_out, "%s", headerinfo);
-			fprintf(press_out, "%s", countinfo);
-			if (!radial_out) {
-				printf("Unable to create file %s\n", radial_fname);
-				exit(1);
+		if ((currentIteration == saveIter) || (currentIteration + 1 == totalIterations)){
+			auto end = get_time::now();
+			auto diff = end - start;
+			double clockms = double(chrono::duration_cast<ms>(diff).count());
+			long clock = long(chrono::duration_cast<sec>(diff).count());
+			if (currentIteration + 1 == totalIterations){
+				save = true;
+			}	else if (clock < saveTimes[outputCount]){
+				saveIter = ceil(1e3*saveTimes[outputCount]*double(saveIter)/clockms);
+				save = false;
+			}	else if ((clock >= saveTimes[outputCount])&&(outputCount < 7)) {
+				outputCount += 1;
+				save = true;
+				saveIter = ceil(saveTimes[outputCount]*double(saveIter)/clock);
+			}	else if ((clock >= saveTimes[outputCount]) && (outputCount == 7)){
+				saveIter = ceil((saveTimes[outputCount]+clock)*double(saveIter)/clock);
+				save = true;
 			}
-			for (int i=0; i<numOfSpheres; i++) {
-				fprintf(pos_out, "%g\t%g\t%g\n",
-				spheres[i].x, spheres[i].y, spheres[i].z);
+
+			if (save == true){
+				long minutes = long(clock) / 60;
+				long hours = minutes / 60;
+				long days = hours / 24;
+				double ratio = (double(currentIteration+1)/ 
+								double(totalIterations));
+				long estEndTime = (double(clock)/ratio)-clock;
+				long fmin = estEndTime/60;
+				long fhrs = fmin/60;
+				long fdays = fhrs/24;
+				printf("Filename: %s\n",filename);
+				printf("Iteration: %ld of %ld\n",
+					currentIteration+1,totalIterations);
+				printf("Percent Complete: %.7f %\n",100.0*ratio);
+				printf("Acceptance Rate: %.5f %\n", 
+					100.0*double(acceptedTrials)/double(currentIteration+1));
+				printf("Running for: %ld days, %ld hrs, %ld min, %ld sec \n"
+						,days,hours-days*24,
+						minutes-hours*60,clock-minutes*60);
+				printf("Estimated to Finish in: %ld days, %ld hrs, %ld min, %ld sec \n"
+						,fdays,fhrs-fdays*24,
+						fmin-fhrs*60,estEndTime-fmin*60);
+				mytime = time(NULL);
+				printf("Save time: %s\n\n",ctime(&mytime));
+				fflush(stdout);
+				sprintf(countinfo,
+					"# iterations: %ld\n"
+					"# accepted moves: %ld\n",
+					currentIteration + 1, acceptedTrials);
+				fopen(pos_fname, "w");
+				fopen(radial_fname,"w");
+				fopen(press_fname,"w");
+				fopen(energy_fname,"w");
+				fprintf(energy_out,"%s",headerinfo);
+				fprintf(energy_out,"%s",countinfo);
+				fprintf(pos_out, "%s", headerinfo);
+				fprintf(pos_out, "%s", countinfo);
+				fprintf(radial_out, "%s", headerinfo);
+				fprintf(radial_out, "%s", countinfo);
+				fprintf(press_out, "%s", headerinfo);
+				fprintf(press_out, "%s", countinfo);
+				if (!radial_out) {
+					printf("Unable to create file %s\n", radial_fname);
+					exit(1);
+				}
+				for (int i=0; i<numOfSpheres; i++) {
+					fprintf(pos_out, "%g\t%g\t%g\n",
+					spheres[i].x, spheres[i].y, spheres[i].z);
+				}
+				for (int i = 0; i < 1000; ++i){ // This isn't being averaged properly
+					fprintf(radial_out, "%g\t%g\n", 
+						(i*systemLength[x])/(2*1000.0), 
+						double(volume*runningRadial[i]/
+							  (numOfSpheres*numOfSpheres*radialWrites)));
+				}
+				fprintf(press_out, "%g\n",pressureIdeal + 
+					(exPressure / (totalIterations*volume)));
+				fprintf(energy_out,"%g\t%g\n",
+						totalEnergy/double(currentIteration),
+						energy2/double(currentIteration));
+				fclose(energy_out);
+				fclose(pos_out);
+				fclose(radial_out);
+				fclose(press_out);
+				save = false;
 			}
-			for (int i = 0; i < 1000; ++i){ // This isn't being averaged properly
-				fprintf(radial_out, "%g\t%g\n", 
-					i*systemLength[x]/(2*1000.0), 
-					double(volume*runningRadial[i]/
-						  (numOfSpheres*numOfSpheres*radialWrites)));
-			}
-			fprintf(press_out, "%g\n",pressureIdeal + 
-				(exPressure / (totalIterations*volume)));
-			fprintf(energy_out,"%g\t%g\b",
-					totalEnergy/double(currentIteration),
-					energy2/double(currentIteration));
-			fclose(energy_out);
-			fclose(pos_out);
-			fclose(radial_out);
-			fclose(press_out);
-			repeat = true;
-		}	else if (((clock % 1800) != 0) && (repeat = true)){
-			repeat = false;
 		}
     }
 	// ----------------------------------------------------------------------------
 	// END OF MAIN PROGRAM LOOP
 	// ----------------------------------------------------------------------------
-    cout << "Ratio of Accepted to Total: " << acceptedTrials << "/" << totalIterations << endl;
     auto end = get_time::now();
     auto diff = end - start;
     cout << "Total Time to Completion: " << chrono::duration_cast<sec>(diff).count() << " sec " <<endl;
+    printf(":)");
     delete[] runningRadial;
     delete[] spheres;
 }
