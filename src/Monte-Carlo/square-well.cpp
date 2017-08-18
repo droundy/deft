@@ -329,7 +329,7 @@ void sw_simulation::move_a_ball() {
       }
       double tup = transitions(energy, energy_change)/double(tup_norm);
       double tdown = transitions(energy+energy_change,-energy_change)/double(tdown_norm);
-      if (tdown < tup) {
+      if (tdown < tup && tdown > 0) {
         Pmove = tdown/tup;
         if (Pmove < Pmin) Pmove = Pmin;
       }
