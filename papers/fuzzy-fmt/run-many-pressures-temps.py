@@ -1,55 +1,44 @@
 #!/usr/bin/env python2
-
 import shlex, subprocess, os
 import numpy as np
-
-# Thermodynamic characteristics
-fillFrac = 0.8
-temp = 0.2
+########################################################################
+## This script is used to run new-soft
+########################################################################
 
 ## System Size Determination
-lenx = 10
-leny = 10
-lenz = 10
-wallx = 0
-wally = 0
-wallz = 0
-
+spheres = 108 # Number of Spheres
 # Simulation Characteristics
-iters = 1000000
+iters = 1e8
 dr = 0.1
-
+# Densities to test
+pmin = 1.2
+pmax = 1.21
+dp = 0.1
+# Temperatures to test
+Tmin = 0.01
+Tmax = 0.51
+dT = 0.5
 # Directory and Filename Information
-direc_name = "CHRIS"
-
-
-ffmin = 0.1
-ffmax = 1.1
-dff = 0.1
-
-tempmin = 0.01
-tempmax = 3.5
-dtemp = 0.5
-
-
-tempFF = np.arange(ffmin,ffmax,dff)
-tempTemp = np.arange(tempmin,tempmax,dtemp)
-
+directory = "data"
+# Makes a new directory for you if it's not already there.
 try:
-	os.makedirs('data')
+	os.makedirs(directory)
 except:
 	pass
-
-for fillFrac in tempFF:
-	for temp in tempTemp:
-		filename = "ff-"+str(fillFrac)+"_temp-"+str(temp)
-		command_line = "sbatch -o data/{}.out -c 1 -n 1 -J {} ./run-new-soft.py --density {} --temp {}".format(
-		                  filename, filename, fillFrac, temp)
+for density in np.arange(pmin,pmax,dp):
+	for temp in np.arange(Tmin,Tmax,dT):
+		filename = "ff-"+str(density)+"_temp-"+str(temp)
+		command_line = "rq run -J {filename} ../../new-soft "\
+		"--density {density} --temp {temp} --sphereNum {spheres}"\
+		" --iters {iters:.0f} --dr {dr} --dir {directory} "\
+		"--filename {filename}".format(
+		                  density=density, 
+		                  temp=temp, 
+		                  spheres=spheres,
+						  iters=iters,
+						  dr=dr,
+						  directory=directory,
+						  filename=filename,)
+		print command_line
 		args = shlex.split(command_line)
-		
-		#print args
 		p = subprocess.call(args)
-
-
-
-

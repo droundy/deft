@@ -5,11 +5,14 @@
 #include <random>
 #include <math.h>
 #include <chrono>
+#include <cassert>
 #include "vector3d.h"
 #include <popt.h>
+#include <ctime>
 
 using namespace std;
 using sec = chrono::seconds;
+using ms = chrono::milliseconds;
 using get_time = chrono::steady_clock;
 // ------------------------------------------------------------------------------
 // Global Constants
@@ -19,7 +22,7 @@ using get_time = chrono::steady_clock;
     const int z = 2;
     const double sigma = 1;
     const double epsilon = 1;
-    const double cutoff = sigma * pow(2,5./6.);
+    const double cutoff = sigma * pow(2,1./6.);
 // ------------------------------------------------------------------------------
 // Functions
 // ------------------------------------------------------------------------------
@@ -36,7 +39,7 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres,double systemLeng
 bool conditionCheck(vector3d *sphereMatrix, vector3d movedSpherePos, int numOfSpheres, int movedSphereNum,double Temperature);
 
 // Counts the number of spheres within a certain radius. Does not take into consideration mirror image particles.
-int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem[3],bool wall[3]);
+double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double sizeOfSystem[3],bool wall[3]);
 
 // Finds the nearest mirror image in adjacent cubes and specifies the vector displacement
 vector3d nearestImage(vector3d R2,vector3d R1, double systemLength[3], bool wall[3]);
@@ -45,18 +48,20 @@ vector3d nearestImage(vector3d R2,vector3d R1, double systemLength[3], bool wall
 double bondEnergy(vector3d R);
 
 // Calculates product of radial forces and displacements of spheres for an ensemble
-double pairVirialFunction(vector3d *spheres, int numOfSpheres,double systemLength[3],bool wall[3]);
+double forceTimesDist(vector3d *spheres, int numOfSpheres,double systemLength[3],bool wall[3]);
 
 int main(int argc, const char *argv[])  {
+	time_t mytime;
     auto start = get_time::now();
     // Initialize Variables and Dummy Variables
-    double systemLength[3] = {10,10,10};
-    double reducedDensity = 0.1;
-    double reducedTemperature = 1;
+    double systemLength[3] = {0,0,0};
+    double xy = 0;
+    double reducedDensity = 0;
+    double reducedTemperature = 0;
     long totalIterations = 1000;
     double dr = 0.005;
     bool wall[3] = {false,false,false};
-    int walls[3] = {0,0,0};
+    int numOfSpheres = 0;
     
 	char *data_dir = new char[1024];
 	sprintf(data_dir,"none");
@@ -64,34 +69,46 @@ int main(int argc, const char *argv[])  {
 	sprintf(filename, "none");
 	char *filename_suffix = new char[1024];
 	sprintf(filename_suffix, "none");
-
-    poptContext optCon;
+	
 	// ----------------------------------------------------------------------------
 	// Parse input options
 	// ----------------------------------------------------------------------------
     // To assign values from command line ex.
     // in deft ./new-soft --lenx 69.0 --leny 42.1717 --lenz 99 ... ad nauseam
+	poptContext optCon;
     poptOption optionsTable[] = {
         
         /*** System Dimensions ***/
         {"lenx", '\0', POPT_ARG_DOUBLE, &systemLength[x], 0, 
-            "System Length in X", "DOUBLE"},
+            "System Length in X. "
+            "This command is used for NVT/DVT. If NDT is true, this value"
+            " will be rewritten.", "DOUBLE"},
         {"leny", '\0', POPT_ARG_DOUBLE, &systemLength[y], 0, 
-            "System Length in Y", "DOUBLE"},
+            "System Length in Y. "
+            "This command is used for NVT/DVT. If NDT is true, this value"
+            " will be rewritten.", "DOUBLE"},
         {"lenz", '\0', POPT_ARG_DOUBLE, &systemLength[z], 0, 
-            "System Length in Z", "DOUBLE"},
+            "System Length in Z. "
+            "This command is used for NVT/DVT. If NDT is true, this value"
+            " will be rewritten.", "DOUBLE"},
+		{"lenxy", '0', POPT_ARG_DOUBLE, &xy, 0,
+			"Length of x and y. This command is used for NDT. "
+			"If DVT/NVT is true, this value will"
+			" be unused.", "DOUBLE"},
         
         /*** Thermodynamic Properties ***/ 
-        {"fillFrac", '\0', POPT_ARG_DOUBLE, &reducedDensity, 0, 
-            "Filling Fraction/Reduced Density", "DOUBLE"},
+        {"sphereNum",'\0', POPT_ARG_INT, &numOfSpheres, 0,
+			"Number of Spheres in System", "INT"},
+        {"density", '\0', POPT_ARG_DOUBLE, &reducedDensity, 0, 
+            "Reduced Density", "DOUBLE"},
         {"temp", '\0', POPT_ARG_DOUBLE, &reducedTemperature, 0,
             "Reduced Temperature", "DOUBLE"},
-        {"wallx", '\0', POPT_ARG_INT, &walls[x], 0,
-            "If x dimension has a wall (int). ", "INT"},
-        {"wally", '\0', POPT_ARG_INT, &walls[y], 0,
-            "If y dimension has a wall (int)", "INT"},
-        {"wallz", '\0', POPT_ARG_INT, &walls[z], 0,
-            "If z dimension has a wall (int)", "INT"},
+        {"wallx", '\0', POPT_ARG_NONE, &wall[x], 0,
+            "If x dimension has a wall (int). ", "BOOL"},
+        {"wally", '\0', POPT_ARG_NONE, &wall[y], 0,
+            "If y dimension has a wall (int)", "BOOL"},
+        {"wallz", '\0', POPT_ARG_NONE, &wall[z], 0,
+            "If z dimension has a wall (int)", "BOOL"},
         
         /*** Simulation Characteristics ***/
         {"iters" ,'\0', POPT_ARG_LONG, &totalIterations, 0,
@@ -113,9 +130,9 @@ int main(int argc, const char *argv[])  {
     };
     optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
     poptSetOtherOptionHelp(optCon, "[OPTION...]\n"
-                         "popt does not take boolean operators, therefore"
-                         "the existence of walls is determined by ints.\n"
-                         "false = 0, true = 1. As you may have guessed. :)");
+                         "Type of BOOL means that the command just needs"
+                         " to be called. You don't need to associate any"
+                         " value with that argument. :)");
     int c = 0;
     while((c = poptGetNextOpt(optCon)) >= 0);
     if (c < -1) {
@@ -124,72 +141,110 @@ int main(int argc, const char *argv[])  {
     }
     poptFreeContext(optCon);
 
-    if ((systemLength[x] <= 0) || (systemLength[y] <= 0) || (systemLength[z] <= 0)){
-        printf("System lengths can't be less than or equal to zero");
+    if ((systemLength[x] < 0) || (systemLength[y] < 0) || (systemLength[z] < 0)){
+        printf("System lengths can't be less than or zero\n");
         printf("System Length: (%g %g %g)\n",systemLength[x],systemLength[y],systemLength[z]);
-        return 254;
-    }
-    if ((systemLength[x] <= sigma) || (systemLength[y] <= sigma) || (systemLength[z] <= sigma)){
-        printf("You have asked for a system with size less than or equal to the diameter of a ball.\n"
-        "System Lengths: %g %g %g\n",systemLength[x],systemLength[y],systemLength[z]);
-        printf("sigma: %g\n", sigma);
-        return 254;
+        return 1;
     }
     if (totalIterations < 0) {
         printf("Total iterations can't be less than zero: %ld\n",totalIterations);
-        return 254;
+        return 1;
     }
     if (reducedTemperature <= 0){
         printf("Despite the attempts and dreams of delusional humans," 
         "the temperature can't be less than or equal to zero: "
         "Temperature: %g\n", reducedTemperature);
-        return 254;
+        return 1;
     }
     if (reducedDensity <= 0){
         printf("Do you really want a system with zero or negative balls???\n"
         "Reduced Density: %g\n", reducedDensity);
-        return 254;
+        return 1;
     }
-    if ((systemLength[x] <= dr)||(systemLength[y] <= dr)||(systemLength[z] <= dr)){
-        printf("The random moved step can't be larger than the system length in any direction\n"
-                "System Length: %g %g %g\n",systemLength[x],systemLength[y],systemLength[z]);
-        printf("dr: %g\n", dr);
-        return 254;
-    }
-    cout << fabs(walls[z]) << endl;
-    if ((walls[x]>1 || walls[x]<0)
-            ||(walls[y]>1 || walls[y]<0)
-            ||(walls[z]>1 || walls[z]<0)){
-            printf("The entries for wall existence must be either 1 or 0\n."
-            "For an explanation consult new-soft --help\n");
-            printf("Wall existences: %d %d %d\n", walls[x],walls[y],walls[z]);
-         return 254;
-    }
-    
-    wall[x] = bool(walls[x]); wall[y] = bool(walls[y]); wall[z] = bool(walls[z]); 
-    double volume = systemLength[x] * systemLength[y] * systemLength[z];
-    int numOfSpheres = int(volume * reducedDensity);
-    // LATTICE MAKER
+
+    // Changes to Input Conditions
+    if (numOfSpheres == 0) {
+		assert(reducedDensity > 0);
+		printf("Performing DVT simulation.\n");
+		numOfSpheres = int(systemLength[x] * systemLength[y] * systemLength[z] * reducedDensity);
+		printf("N to: %d\n",numOfSpheres);
+	} else if (systemLength[x] == 0 && systemLength[y] == 0 && systemLength[z] == 0) {
+		assert(reducedDensity > 0);
+		assert(numOfSpheres > 0);
+		printf("Performing NDT simulation\n");
+		double tempVol = (sigma*sigma*sigma*numOfSpheres)/(reducedDensity);
+		systemLength[x] = systemLength[y] = systemLength[z] = pow(tempVol,1./3.);
+	} else if (systemLength[x] == 0 || systemLength[y] == 0 || systemLength[z] == 0) {
+		printf("You need to specify the all of the lengths or none!\n");
+		exit(1);
+	}	// NVT doesn't need any tweaks to initial conditions
+  // ----------------------------------------------------------------------------
+  // Initial Conditions
+  // ----------------------------------------------------------------------------
+	double volume = systemLength[x] * systemLength[y] * systemLength[z];
     vector3d *spheres = FCCLattice(numOfSpheres,systemLength);
-    printf("Lattice Made\n");
-    
-    double totalEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-    double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon) / volume;
-    double virial = pairVirialFunction(spheres, numOfSpheres, systemLength,wall);
+    double tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+    double tempE2 = tempEnergy*tempEnergy;
+    double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
+    double virial = forceTimesDist(spheres, numOfSpheres, systemLength,wall);
+    double totalEnergy = 0.0;
+    double energy2 = 0.0;
     double exPressure = 0.0;
     long acceptedTrials = 0;
-    double runningRadial[1000] = {0};
-    
+    long *runningRadial = new long[1000];
+    long radialWrites = 0;
+    int outputCount = 0;
+    bool save = false;
+    long saveIter = 1e3;
+    int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
+	mytime = time(NULL);
+	
+	printf("Filename: %s\n",filename);
+	printf("Lattice Made\n");
     printf("Number of Spheres: %d\n", numOfSpheres);
     printf("Size of System: %g %g %g\n", systemLength[x],systemLength[y],systemLength[z]);
-    printf("Wall existence on x,y,z %d %d %d\n",wall[x],wall[y],wall[z]); 
-
+    printf("Wall existence on x,y,z %d %d %d\n",wall[x],wall[y],wall[z]);
+    printf(ctime(&mytime));
+  // ----------------------------------------------------------------------------
+  // File Save Initiation
+  // ----------------------------------------------------------------------------
+    char *headerinfo = new char[4096];
+    sprintf(headerinfo,
+		"# System Lengths: %g %g %g\n"
+		"# Density: %g\n"
+		"# Temperature: %g\n"
+		"# N: %d\n"
+		"# walls: %d %d %d\n"
+		"# volume: %g\n",
+		systemLength[x],systemLength[y],systemLength[z],
+		reducedDensity,reducedTemperature,numOfSpheres,
+		wall[x],wall[y],wall[z], volume);
+    char *countinfo = new char[4096];
+	char *pos_fname = new char[1024];
+	char *radial_fname = new char[1024];
+	char *press_fname = new char[1024];
+	char *energy_fname = new char[1024];
+	sprintf(energy_fname, "%s/%s-energy.dat",data_dir,filename);
+	sprintf(pos_fname, "%s/%s-pos.dat", data_dir, filename);
+	sprintf(radial_fname, "%s/%s-radial.dat", data_dir, filename);
+	sprintf(press_fname,"%s/%s-press.dat", data_dir, filename);
+    FILE *pos_out = fopen((const char *)pos_fname, "w");
+    FILE *radial_out = fopen((const char *)radial_fname,"w");
+    FILE *press_out = fopen((const char *)press_fname,"w");
+    FILE *energy_out = fopen((const char *)energy_fname,"w");
+	if (!radial_out) {
+		printf("Unable to create file %s\n", radial_fname);
+		exit(1);
+	}
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
-  printf("Main loop started");
+	printf("Main loop started\n\n");
+	fflush(stdout);
     for (long currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
         exPressure += virial;
+        totalEnergy += tempEnergy;
+        energy2 += tempE2;
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = random::ran64() % numOfSpheres;
@@ -222,77 +277,119 @@ int main(int argc, const char *argv[])  {
             }
         if (trialAcceptance == true){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
-            totalEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-            virial = pairVirialFunction(spheres, numOfSpheres,systemLength,wall);
+            tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+            tempE2 = tempEnergy*tempEnergy;
+            virial = forceTimesDist(spheres, numOfSpheres,systemLength,wall);
             acceptedTrials += 1;
-            if ((acceptedTrials % (totalIterations/10)) == 0){
-                int *radialDistHist;
-                radialDistHist = radialDistribution(spheres,numOfSpheres,systemLength,wall);
-                for (int i = 0; i < 1000; ++i){
-                    runningRadial[i] += radialDistHist[i];
-                }
+        }
+        if ((currentIteration % (10*numOfSpheres)) == 0){
+			radialWrites += 1;
+            double *radialDistHist;
+            radialDistHist = radialDistribution(spheres,numOfSpheres,systemLength,wall);
+            for (int i = 0; i < 1000; ++i){
+                runningRadial[i] += radialDistHist[i];
             }
+            delete[] radialDistHist;
         }
-        if ((currentIteration == 9*totalIterations/10) ||(currentIteration == totalIterations/10) ||(currentIteration == totalIterations/4) || (currentIteration == totalIterations/2) || (currentIteration == 3*totalIterations/4))
-        { // Writes out status of simulation.
-            auto end = get_time::now();
-            auto diff = end - start;
-            cout << "Iteration: " << currentIteration << " of " << totalIterations << endl;
-            cout << "Time Elapsed: " << chrono::duration_cast<sec>(diff).count()<<" sec " << endl;
-            cout << "Ratio of Acceptance: " << acceptedTrials << "/" << totalIterations << endl;
-            cout << endl;
-        }
-    }
-    cout << "Ratio of Accepted to Total: " << acceptedTrials << "/" << totalIterations << endl;
 	// ---------------------------------------------------------------
     // Save data to files
     // ---------------------------------------------------------------
-    char *headerinfo = new char[4096];
-    sprintf(headerinfo,
-		"# well_width: %g %g %g\n"
-		"# ff: %g\n"
-		"# N: %d\n"
-		"# walls: %d %d %d\n",
-		systemLength[x],systemLength[y],systemLength[z],
-		reducedDensity,numOfSpheres,
-		wall[x],wall[y],wall[z]);
-    char *countinfo = new char[4096];
-    sprintf(countinfo,
-		"# iterations: %li\n"
-		"# accepted moves: %li\n",
-		totalIterations, acceptedTrials);
-	char *pos_fname = new char[1024];
-	char *radial_fname = new char[1024];
-	char *press_fname = new char[1024];
-	sprintf(pos_fname, "%s/%s-pos.dat", data_dir, filename);
-	sprintf(radial_fname, "%s/%s-radial.dat", data_dir, filename);
-	sprintf(press_fname,"%s/%s-press.dat", data_dir, filename);
-    FILE *pos_out = fopen((const char *)pos_fname, "w");
-    FILE *radial_out = fopen((const char *)radial_fname,"w");
-    FILE *press_out = fopen((const char *)press_fname,"w");
-	fprintf(pos_out, "%s", headerinfo);
-	fprintf(pos_out, "%s", countinfo);
-	fprintf(radial_out, "%s", headerinfo);
-	fprintf(radial_out, "%s", countinfo);
-	fprintf(press_out, "%s", headerinfo);
-	fprintf(press_out, "%s", countinfo);
-	if (!radial_out) {
-		printf("Unable to create file %s\n", radial_fname);
-		exit(1);
-	}
-    
-    
-    for (int i=0; i<numOfSpheres; i++) {
-        fprintf(pos_out, "%g\t%g\t%g\n",
-                spheres[i].x, spheres[i].y, spheres[i].z);
+		if ((currentIteration == saveIter) || (currentIteration + 1 == totalIterations)){
+			auto end = get_time::now();
+			auto diff = end - start;
+			double clockms = double(chrono::duration_cast<ms>(diff).count());
+			long clock = long(chrono::duration_cast<sec>(diff).count());
+			if (currentIteration + 1 == totalIterations){
+				save = true;
+			}	else if (clock < saveTimes[outputCount]){
+				saveIter = ceil(1e3*saveTimes[outputCount]*double(saveIter)/clockms);
+				save = false;
+			}	else if ((clock >= saveTimes[outputCount])&&(outputCount < 7)) {
+				outputCount += 1;
+				save = true;
+				saveIter = ceil(saveTimes[outputCount]*double(saveIter)/clock);
+			}	else if ((clock >= saveTimes[outputCount]) && (outputCount == 7)){
+				saveIter = ceil((saveTimes[outputCount]+clock)*double(saveIter)/clock);
+				save = true;
+			}
+
+			if (save == true){
+				long minutes = long(clock) / 60;
+				long hours = minutes / 60;
+				long days = hours / 24;
+				double ratio = (double(currentIteration+1)/ 
+								double(totalIterations));
+				long estEndTime = (double(clock)/ratio)-clock;
+				long fmin = estEndTime/60;
+				long fhrs = fmin/60;
+				long fdays = fhrs/24;
+				printf("Filename: %s\n",filename);
+				printf("Iteration: %ld of %ld\n",
+					currentIteration+1,totalIterations);
+				printf("Percent Complete: %.7f %\n",100.0*ratio);
+				printf("Acceptance Rate: %.5f %\n", 
+					100.0*double(acceptedTrials)/double(currentIteration+1));
+				printf("Running for: %ld days, %ld hrs, %ld min, %ld sec \n"
+						,days,hours-days*24,
+						minutes-hours*60,clock-minutes*60);
+				printf("Estimated to Finish in: %ld days, %ld hrs, %ld min, %ld sec \n"
+						,fdays,fhrs-fdays*24,
+						fmin-fhrs*60,estEndTime-fmin*60);
+				mytime = time(NULL);
+				printf("Save time: %s\n\n",ctime(&mytime));
+				fflush(stdout);
+				sprintf(countinfo,
+					"# iterations: %ld\n"
+					"# accepted moves: %ld\n",
+					currentIteration + 1, acceptedTrials);
+				fopen(pos_fname, "w");
+				fopen(radial_fname,"w");
+				fopen(press_fname,"w");
+				fopen(energy_fname,"w");
+				fprintf(energy_out,"%s",headerinfo);
+				fprintf(energy_out,"%s",countinfo);
+				fprintf(pos_out, "%s", headerinfo);
+				fprintf(pos_out, "%s", countinfo);
+				fprintf(radial_out, "%s", headerinfo);
+				fprintf(radial_out, "%s", countinfo);
+				fprintf(press_out, "%s", headerinfo);
+				fprintf(press_out, "%s", countinfo);
+				if (!radial_out) {
+					printf("Unable to create file %s\n", radial_fname);
+					exit(1);
+				}
+				for (int i=0; i<numOfSpheres; i++) {
+					fprintf(pos_out, "%g\t%g\t%g\n",
+					spheres[i].x, spheres[i].y, spheres[i].z);
+				}
+				for (int i = 0; i < 1000; ++i){ // This isn't being averaged properly
+					fprintf(radial_out, "%g\t%g\n", 
+						(i*systemLength[x])/(2*1000.0), 
+						double(volume*runningRadial[i]/
+							  (numOfSpheres*numOfSpheres*radialWrites)));
+				}
+				fprintf(press_out, "%g\n",pressureIdeal + 
+					(exPressure / (totalIterations*volume)));
+				fprintf(energy_out,"%g\t%g\n",
+						totalEnergy/double(currentIteration),
+						energy2/double(currentIteration));
+				fclose(energy_out);
+				fclose(pos_out);
+				fclose(radial_out);
+				fclose(press_out);
+				save = false;
+			}
+		}
     }
-    for (int i = 0; i < 1000; ++i){
-        fprintf(radial_out, "%g\n",runningRadial[i]);
-    }
-    fprintf(press_out, "%g\n",pressureIdeal + (exPressure / (totalIterations*volume)));
+	// ----------------------------------------------------------------------------
+	// END OF MAIN PROGRAM LOOP
+	// ----------------------------------------------------------------------------
     auto end = get_time::now();
     auto diff = end - start;
     cout << "Total Time to Completion: " << chrono::duration_cast<sec>(diff).count() << " sec " <<endl;
+    printf(":)");
+    delete[] runningRadial;
+    delete[] spheres;
 }
 
 inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
@@ -333,9 +430,10 @@ inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
                 sphereNum = numOfSpheres;
                 }
         }
-        if ((fabs(sphereMatrix[sphereNum].x) < 0.0001) & (fabs(sphereMatrix[sphereNum].y) < 0.0001) & // Rescale Primitive Unit Cell
+        if ((fabs(sphereMatrix[sphereNum].x) < 0.0001) & 
+			(fabs(sphereMatrix[sphereNum].y) < 0.0001) & // Rescale Primitive Unit Cell
             (fabs(sphereMatrix[sphereNum].z) < 0.0001)){
-            printf("Cell Dimensions have shrunk ");
+            printf("Cell Dimensions have shrunk.\n");
             cornerSphere.x = cornerSphere.y = cornerSphere.z =  sigma/2;
             ysteps=zsteps = 0;
             cellNumber += 1;
@@ -372,9 +470,9 @@ static inline vector3d periodicBC(vector3d inputVector, double systemLength[3], 
 double totalPotential(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3],bool wall[3]) {
     double totalPotential = 0.0;
 
-    for (int i = 0; i < numOfSpheres; ++i)  {   // Sphere 1
+    for (int i = 0; i < numOfSpheres; ++i)  {
         vector3d Ri = sphereMatrix[i];
-        for (int j = i + 1; j < numOfSpheres; ++j)  {   // Vector from Sphere 2
+        for (int j = i + 1; j < numOfSpheres; ++j)  {
             vector3d Rj = sphereMatrix[j];
             vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             totalPotential += bondEnergy(R);
@@ -383,10 +481,9 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres, double systemLen
     return totalPotential;
 }
 
-int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3], bool wall[3]) {
+double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3], bool wall[3]) {
     const int numOfBoxes = 1000;
-    static int deltan[numOfBoxes];
-
+    double *deltan = new double[numOfBoxes];
 
     for (int i = 0; i < numOfSpheres; ++i) {
         vector3d Ri = sphereMatrix[i];
@@ -394,8 +491,8 @@ int *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemL
             vector3d Rj = sphereMatrix[j];
             vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             double Rmag = R.norm();
-            int box = int(Rmag*numOfBoxes/(2*cutoff));   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
-            if (Rmag <= 2*cutoff){
+            int box = int(Rmag*numOfBoxes/(systemLength[x]/2));   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
+            if (Rmag <= systemLength[x]/2){
                 deltan[box] += 1;
             }
         }
@@ -428,12 +525,12 @@ double bondEnergy(vector3d R){
         double SR12 = SR6*SR6;
         double bondEnergy = SR12 - SR6;
         return 4*epsilon*bondEnergy + epsilon;
-    }   else {
+    } else {
         return 0;
-        }
+    }
 }
-// You're going to want to change the name from pairVirial
-double pairVirialFunction(vector3d *spheres, int numOfSpheres, double systemLength[3], bool wall[3]) {
+
+double forceTimesDist(vector3d *spheres, int numOfSpheres, double systemLength[3], bool wall[3]) {
     double w = 0;
     for (int i = 0; i < numOfSpheres; ++i){
         vector3d Ri = spheres[i];

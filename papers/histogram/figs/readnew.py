@@ -169,7 +169,7 @@ def max_entropy_state(f):
     with open(f) as file:
         for line in file:
             if("max_entropy_state" in line):
-                return float(line.split()[-1])
+                return int(line.split()[-1])
 
 def g_r(fbase, T):
     data = numpy.loadtxt(fbase+"-g.dat", ndmin=2)

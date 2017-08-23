@@ -48,11 +48,7 @@ if seed != 0:
 
 os.system('mkdir -p ' + datadir)
 
-if True or os.system('which srun'):
-    # srun doesn't exist so just run on this machine
-    cmd = "time nice -19 ./liquid-vapor-monte-carlo"
-else:
-    cmd = "nohup srun --mem=%d -J lv:%s time nice -19 ./liquid-vapor-monte-carlo" % (mem_estimate, fname)
+cmd = "rq run -o %s/%s.out -J lv/%s ./liquid-vapor-monte-carlo" % (datadir, fname, fname)
 
 cmd += ' --movies' # generate movie data
 

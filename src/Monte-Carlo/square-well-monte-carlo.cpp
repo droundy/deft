@@ -1116,11 +1116,6 @@ int main(int argc, const char *argv[]) {
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total);
 
-      // Save transitions histogram.  This also sets the
-      // transitions_movie_count to one beyond the current frame
-      // number.
-      sw.write_transitions_file();
-
       // Save energy histogram
       FILE *e_out = fopen((const char *)e_fname, "w");
       fprintf(e_out, "%s", headerinfo);
