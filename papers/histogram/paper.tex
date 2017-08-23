@@ -715,6 +715,51 @@ $\mathcal{C}_{N,0}$ is incremented by unity. Fitzgerald et al. ~\cite{fitzgerald
 show that defining the third step this way results in a uniform improvement over 
 using histogram estimators to determine the PNPD.
 
+\subsection{WL-TMMC Algorithm}
+
+Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
+by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
+advantage of the ease of implementation and applicability to a variety
+of systems, while making use of a transition matrix to adress WL
+weaknesses such as a limited statistical accuracy plateau which is not
+improved with additional MC steps.  This WL version is more accurate for
+a given number of simulation steps.
+
+\paragraph{Initializing Wang-Landau:} We begin the simulation by
+defining a minimum important energy.  In traditional Wang-Landau the WL
+factor begins at 1.0 and the factor is modified by 2.0 until the
+simulation is cutoff typically around $10^{-10}$.  Rane et. al. in the
+first published implemenation of WL-TMMC~\cite{rane2013monte} suggests
+using a WL factor between 1.0 and $10^{-2}$ with a cutoff $<10^{-5}$.
+In our implementation of WL-TMMC, we allow the WL factor to be 1 but
+the cutoff is now $10^{-4}$. A single sweep is defined as each
+macrostate being sampled a number of times in this case 100 and it is
+sufficient that each macrostate is visited at least once.  The goal of
+this WL initialization is to prefill the transition matrix for the next
+portion of the simulation.
+\paragraph{Initializing TMMC:} The purpose of prefilling the transition
+matrix is apparent because if numerous zeros existed in the collection
+matrix, the infinite temperature transition matrix would be
+ill-defined.  Sampling over large ranges of density of states would
+therefore take an unexceptable length of time to
+complete~\cite{shell2003improved, shen2014elucidating}.  The transition
+matrix in terms of the collection matrix is given as follows:
+\begin{align}
+\widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
+{\sum_{K} C(I,K)}
+\end{align}
+We now run the TMMC portion of the simulation.  Siderius does this for
+20 additional sweeps (does about 8 sweeps for WL).  We do this until we
+reach a temperature of interest say T = 0.1.
+I don't think we have yet implemented a biasing function to control acceptance
+rate of trial moves but we probably could/should? at some point.
+\begin{align}
+  P_{acc}(i\rightarrow j) = \min\bigg[1,\frac{\widetilde{T}_{\infty}(J\rightarrow I)}
+  {\widetilde{T}_{\infty}(I\rightarrow J)}\bigg]
+\end{align}
+this is only used to control actual transitions not update the collection
+matrices.
+
 \subsection{TMI2 Algorithm}
 
 The second version of transition matrix initialization algorithm works
