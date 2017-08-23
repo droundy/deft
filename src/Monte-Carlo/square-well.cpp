@@ -1582,6 +1582,43 @@ void sw_simulation::update_weights_using_transitions(int version) {
   delete[] ln_dos;
 }
 
+//// calculate_weights is under construction by DR and JP (2017).
+//// put wltmmc code in here so that we can call using lvmc.
+
+//// calculate the weight array using transitions
+//void sw_simulation::calculate_weights_using_transitions(int version) {
+  //if (version == 1) {
+    //// I would just cut and paste wltmmc code here but it takes arguments
+    //// not quite sure how to deal with that. I assume options go in POPT in
+    //// lvmc?
+    //// these are three arguments: wl_fmod, wl_threshold, wl_cutoff
+  //}
+//else {
+    //printf("NO WL-TMMC VERSION %d!@!!\n", version);
+    //fprintf(stderr, "NO WL-TMMC VERSION %d!@!!\n", version);
+    //fflush(stdout);
+    //exit(1);
+  //}
+  //delete[] ln_dos;
+//}
+
+//// porting to lvmc is under construction by DR and JP (2017).
+//// initialization with wltmmc
+//void sw_simulation::initialize_wltmmc() {
+  //int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  //bool verbose = false;
+  //do {
+    //for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
+    //check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    //verbose = printing_allowed();
+    //if (verbose) {
+      //write_transitions_file();
+    //}
+
+    //calculate_weights_using_transitions(version); // I made this reference wltmmc.
+  //} while(!finished_initializing(verbose));
+//}
+
 // initialization with tmi
 void sw_simulation::initialize_tmi(int version) {
   int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
