@@ -554,7 +554,9 @@ int main(int argc, const char *argv[]) {
       if (tmi_version == 1) sprintf(method_tag, "-toe");
       else sprintf(method_tag, "-toe%d", tmi_version);
     } else if (tmmc) {
-      sprintf(method_tag, "-tmmc");
+      sprintf(method_tag, "-tmmc");}
+      else if (wltmmc) {
+      sprintf(method_tag, "-wltmmc");
     } else if (oetmmc) {
       sprintf(method_tag, "-oetmmc");
     } else if (wang_landau) {
