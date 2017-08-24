@@ -183,6 +183,8 @@ int main(int argc, const char *argv[])  {
   // ----------------------------------------------------------------------------
 	double volume = systemLength[x] * systemLength[y] * systemLength[z];
     vector3d *spheres = FCCLattice(numOfSpheres,systemLength);
+    // rename this probably???
+    vector3d *sphDif = new vector3d[numOfSpheres];
     double tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
     double tempE2 = tempEnergy*tempEnergy;
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
@@ -196,6 +198,9 @@ int main(int argc, const char *argv[])  {
     int outputCount = 0;
     bool save = false;
     long saveIter = 1e3;
+    double *glass = new double[totalIterations];
+    double Di[numOfSpheres] = {0};
+    double tempD = 0;
     int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
 	mytime = time(NULL);
 	
@@ -221,21 +226,16 @@ int main(int argc, const char *argv[])  {
 		wall[x],wall[y],wall[z], volume);
     char *countinfo = new char[4096];
 	char *pos_fname = new char[1024];
+	sprintf(pos_fname, "%s/%s-pos.dat", data_dir, filename);
 	char *radial_fname = new char[1024];
+	sprintf(radial_fname, "%s/%s-radial.dat", data_dir, filename);
 	char *press_fname = new char[1024];
+	sprintf(press_fname,"%s/%s-press.dat", data_dir, filename);
 	char *energy_fname = new char[1024];
 	sprintf(energy_fname, "%s/%s-energy.dat",data_dir,filename);
-	sprintf(pos_fname, "%s/%s-pos.dat", data_dir, filename);
-	sprintf(radial_fname, "%s/%s-radial.dat", data_dir, filename);
-	sprintf(press_fname,"%s/%s-press.dat", data_dir, filename);
-    FILE *pos_out = fopen((const char *)pos_fname, "w");
-    FILE *radial_out = fopen((const char *)radial_fname,"w");
-    FILE *press_out = fopen((const char *)press_fname,"w");
-    FILE *energy_out = fopen((const char *)energy_fname,"w");
-	if (!radial_out) {
-		printf("Unable to create file %s\n", radial_fname);
-		exit(1);
-	}
+	char *dif_fname = new char[1024];
+	sprintf(dif_fname, "%s/%s-dif.dat",data_dir,filename);
+	//~ FILE *dif_out = fopen((const char *)dif_fname,"w");//Rewrites
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
@@ -245,11 +245,13 @@ int main(int argc, const char *argv[])  {
         exPressure += virial;
         totalEnergy += tempEnergy;
         energy2 += tempE2;
+        glass[currentIteration] = tempD;
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = random::ran64() % numOfSpheres;
         vector3d initialSpherePos = spheres[movedSphereNum];
-        vector3d movedSpherePos = spheres[movedSphereNum] + vector3d::ran(dr);
+        vector3d randMove = vector3d::ran(dr);
+        vector3d movedSpherePos = spheres[movedSphereNum] + randMove;
         movedSpherePos = periodicBC(movedSpherePos,systemLength,wall);
         // Determines the difference in energy due to the random move
         double energyNew = 0.0, energyOld = 0.0;
@@ -280,6 +282,12 @@ int main(int argc, const char *argv[])  {
             tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
             tempE2 = tempEnergy*tempEnergy;
             virial = forceTimesDist(spheres, numOfSpheres,systemLength,wall);
+            sphDif[movedSphereNum] += randMove;
+            double paper = sphDif[movedSphereNum].normsquared();
+            Di[movedSphereNum] += paper;
+            for (int i = 0; i < numOfSpheres; i++){
+				tempD += Di[i]/numOfSpheres;
+			}
             acceptedTrials += 1;
         }
         if ((currentIteration % (10*numOfSpheres)) == 0){
@@ -342,41 +350,43 @@ int main(int argc, const char *argv[])  {
 					"# iterations: %ld\n"
 					"# accepted moves: %ld\n",
 					currentIteration + 1, acceptedTrials);
-				fopen(pos_fname, "w");
-				fopen(radial_fname,"w");
-				fopen(press_fname,"w");
-				fopen(energy_fname,"w");
-				fprintf(energy_out,"%s",headerinfo);
-				fprintf(energy_out,"%s",countinfo);
-				fprintf(pos_out, "%s", headerinfo);
-				fprintf(pos_out, "%s", countinfo);
-				fprintf(radial_out, "%s", headerinfo);
-				fprintf(radial_out, "%s", countinfo);
-				fprintf(press_out, "%s", headerinfo);
-				fprintf(press_out, "%s", countinfo);
-				if (!radial_out) {
-					printf("Unable to create file %s\n", radial_fname);
-					exit(1);
-				}
+				// Save Positions
+				FILE *pos_out = fopen((const char *)pos_fname, "w");
+				fprintf(pos_out, "%s%s", headerinfo,countinfo);
 				for (int i=0; i<numOfSpheres; i++) {
 					fprintf(pos_out, "%g\t%g\t%g\n",
 					spheres[i].x, spheres[i].y, spheres[i].z);
 				}
+				// Save Radial
+				FILE *radial_out = fopen((const char *)radial_fname,"w");
+				fprintf(radial_out, "%s%s", headerinfo,countinfo);
 				for (int i = 0; i < 1000; ++i){ // This isn't being averaged properly
 					fprintf(radial_out, "%g\t%g\n", 
 						(i*systemLength[x])/(2*1000.0), 
 						double(volume*runningRadial[i]/
 							  (numOfSpheres*numOfSpheres*radialWrites)));
 				}
+				// Save Pressure
+				FILE *press_out = fopen((const char *)press_fname,"w");
+				fprintf(press_out, "%s%s", headerinfo,countinfo);
 				fprintf(press_out, "%g\n",pressureIdeal + 
 					(exPressure / (totalIterations*volume)));
+				// Save Energy
+				FILE *energy_out = fopen((const char *)energy_fname,"w");
+				fprintf(energy_out,"%s%s",headerinfo,countinfo);
 				fprintf(energy_out,"%g\t%g\n",
 						totalEnergy/double(currentIteration),
 						energy2/double(currentIteration));
-				fclose(energy_out);
+				// Save Diffusion
+				FILE *dif_out = fopen((const char *)dif_fname,"w");
+				for (int i = 0; i < currentIteration; i++){
+					fprintf(dif_out,"%g\n",double(glass[i]/currentIteration));
+				}
 				fclose(pos_out);
 				fclose(radial_out);
 				fclose(press_out);
+				fclose(energy_out);
+				fclose(dif_out);
 				save = false;
 			}
 		}
@@ -384,10 +394,7 @@ int main(int argc, const char *argv[])  {
 	// ----------------------------------------------------------------------------
 	// END OF MAIN PROGRAM LOOP
 	// ----------------------------------------------------------------------------
-    auto end = get_time::now();
-    auto diff = end - start;
-    cout << "Total Time to Completion: " << chrono::duration_cast<sec>(diff).count() << " sec " <<endl;
-    printf(":)");
+    printf("All Done :)\n");
     delete[] runningRadial;
     delete[] spheres;
 }
