@@ -9,7 +9,7 @@ monte_carlos = """
    monte-carlo soft-monte-carlo pair-monte-carlo
    triplet-monte-carlo polyhedra-monte-carlo polyhedra-talk
    square-well-monte-carlo liquid-vapor-monte-carlo
-   radial-distribution-monte-carlo
+   radial-distribution-monte-carlo new-soft
    free-energy-monte-carlo free-energy-monte-carlo-infinite-case
 """.split()
 

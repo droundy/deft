@@ -77,6 +77,7 @@ int main(int argc, const char *argv[]) {
   int tmi_version = 1;
   int toe = false;
   int tmmc = false;
+  int wltmmc = false;
   int generate_movies = false;
 
   sw.min_important_energy = 0;
@@ -187,6 +188,8 @@ int main(int argc, const char *argv[]) {
      "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
+    {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
+     "Use Wang-Landau transition matrix monte carlo", "BOOLEAN"},
 
     /*** END CONDITION PARAMETERS ***/
 
@@ -259,9 +262,9 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if (tmi + toe + tmmc + (fix_kT != 0) != 1) {
-    printf("Exactly one histogram method must be selected! (%d %d %d %g)\n",
-           tmi, toe, tmmc, fix_kT);
+  if (tmi + toe + tmmc + wltmmc + (fix_kT != 0) != 1) {
+    printf("Exactly one histogram method must be selected! (%d %d %d %d %g)\n",
+           tmi, toe, tmmc, wltmmc, fix_kT);
     return 254;
   }
 
@@ -381,6 +384,8 @@ int main(int argc, const char *argv[]) {
       else sprintf(method_tag, "-toe%d", tmi_version);
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
+    } else if (wltmmc) {
+      sprintf(method_tag, "-wltmmc");
     } else {
       printf("We could not identify a method for a method tag.\n");
       return 104;
@@ -684,8 +689,13 @@ int main(int argc, const char *argv[]) {
             "# kT: %g\n",
             headerinfo, fix_kT);
   } else if (tmmc) {
+    sw.use_tmmc = true;
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
+            headerinfo);
+  } else if (wltmmc) {
+    sprintf(headerinfo,
+            "%s# histogram method: wltmmc\n",
             headerinfo);
   }
 
@@ -706,7 +716,7 @@ int main(int argc, const char *argv[]) {
   long how_often_to_check_finish = sw.N;
   long iterations_per_update = 10*sw.N;
   do {
-    for (int i = 0; i < sw.N; i++) sw.move_a_ball(tmmc);
+    for (int i = 0; i < sw.N; i++) sw.move_a_ball();
     if (sw.iteration % (100*sw.N*sw.N) == 0) {
       // Every so often, check that we still have the correct energy.
       // Technically we shouldn't need to do this at all, this is just
@@ -748,29 +758,12 @@ int main(int argc, const char *argv[]) {
       double time_for_N_iterations = took("first 10*N iterations");
       sw.estimated_time_per_iteration = time_for_N_iterations/10/sw.N;
       sw.set_min_important_energy();
-      int old_max_entropy_state = sw.max_entropy_state;
-      sw.set_max_entropy_energy();
-      if (sw.max_entropy_state > old_max_entropy_state) {
-        // We are not converged yet, so let us zero out our density
-        // and rdf information.  The point is to not include the
-        // regular lattice data that we start with.  Eventually it
-        // would average out, but we don't really care to wait for
-        // that.
-        printf("We are not yet certain about max entropy: zero out density data!\n");
-        if (sw.walls==1) {
-          for (int i = 0; i < sw.energy_levels; i++)
-            for (int x_i = 0; x_i < density_bins; x_i++)
-              density_histogram[i][x_i] = 0;
-        } else if (sw.walls == 0) {
-          for (int i = 0; i < sw.energy_levels; i++)
-            for (int r_i = 0; r_i < g_bins; r_i++)
-              g_histogram[i][r_i] = 0;
-        }
-      }
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
+      } else {
+        sw.set_max_entropy_energy();
       }
       double time_to_update_weights = took("updating weights");
       printf("iterations per time for one update = %g\n", 10*sw.N*time_to_update_weights/time_for_N_iterations);
@@ -788,11 +781,12 @@ int main(int argc, const char *argv[]) {
     }
     if (sw.iteration % iterations_per_update == 0) {
       sw.set_min_important_energy();
-      sw.set_max_entropy_energy();
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
+      } else {
+        sw.set_max_entropy_energy();
       }
     }
 
@@ -808,12 +802,14 @@ int main(int argc, const char *argv[]) {
                                        // frequently.
     if ((verbose || am_all_done) && sw.iteration > 10*sw.N) {
       sw.set_min_important_energy();
-      sw.set_max_entropy_energy();
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
+      } else {
+        sw.set_max_entropy_energy();
       }
+
       // Save transitions histogram and movie data.  This also sets
       // the transitions_movie_count to one beyond the current frame
       // number.
@@ -917,6 +913,13 @@ int main(int argc, const char *argv[]) {
         fprintf(densityout, "\n");
 
         for (int i = 0; i < sw.energy_levels; i++) {
+          if (sw.pessimistic_samples[i] == 0) {
+            for (int x_i = 0; x_i < density_bins; x_i++) {
+              // This is in case we had a wrong max_entropy_state; We
+              // may have some old data that we shouldn't trust.
+              density_histogram[i][x_i] = 0;
+            }
+          }
           if (sw.energy_histogram[i]) {
             fprintf(densityout, "%d\t%g", -i, ln_dos[i]);
             for (int x_i = 0; x_i < density_bins; x_i++) {

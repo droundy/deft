@@ -98,6 +98,7 @@ int main(int argc, const char *argv[]) {
   int oetmmc = false;
   int wang_landau = false;
   int vanilla_wang_landau = false;
+  int wltmmc = false;
   int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
@@ -249,6 +250,8 @@ int main(int argc, const char *argv[]) {
      "Use optimized-ensemble transition matrix monte carlo", "BOOLEAN"},
     {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
      "Use Wang-Landau histogram method", "BOOLEAN"},
+    {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
+     "Use Wang-Landau TMMC method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
     {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
@@ -363,13 +366,13 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + bool(vanilla_wang_landau) + tmi + toe + bool(tmmc) + bool(oetmmc) + (fix_kT != 0)
-     + reading_in_transition_matrix + bool(golden) != 1){
+     + vanilla_wang_landau + tmi + toe + wltmmc + tmmc + oetmmc + (fix_kT != 0)
+     + reading_in_transition_matrix + golden != 1){
     printf("Exactly one histogram method must be selected!\n");
     return 254;
   }
   // Check that no more than one secondary method is used
-  if(bool(optimized_ensemble) + bool(transition_override) > 1){
+  if(optimized_ensemble + transition_override > 1){
     printf("Cannot use more than one secondary histogram method!\n");
     return 254;
   }
@@ -551,7 +554,9 @@ int main(int argc, const char *argv[]) {
       if (tmi_version == 1) sprintf(method_tag, "-toe");
       else sprintf(method_tag, "-toe%d", tmi_version);
     } else if (tmmc) {
-      sprintf(method_tag, "-tmmc");
+      sprintf(method_tag, "-tmmc");}
+      else if (wltmmc) {
+      sprintf(method_tag, "-wltmmc");
     } else if (oetmmc) {
       sprintf(method_tag, "-oetmmc");
     } else if (wang_landau) {
@@ -824,8 +829,12 @@ int main(int argc, const char *argv[]) {
   } else if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau || vanilla_wang_landau) {
-    sw.initialize_wang_landau(wl_factor, wl_fmod, wl_threshold, wl_cutoff,
+    sw.wl_factor = wl_factor;
+    sw.initialize_wang_landau(wl_fmod, wl_threshold, wl_cutoff,
                               vanilla_wang_landau);
+  } else if (wltmmc) {
+    sw.wl_factor = wl_factor;
+    sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {
@@ -833,6 +842,7 @@ int main(int argc, const char *argv[]) {
   } else if (toe) {
     sw.initialize_toe();
   } else if (tmmc) {
+    sw.use_tmmc = true;
     sw.initialize_transitions();
   } else if (oetmmc) {
     sw.initialize_transitions();
@@ -1105,11 +1115,6 @@ int main(int argc, const char *argv[]) {
               "# acceptance rate: %g\n\n",
               sw.iteration, sw.moves.working, sw.moves.total,
               double(sw.moves.working)/sw.moves.total);
-
-      // Save transitions histogram.  This also sets the
-      // transitions_movie_count to one beyond the current frame
-      // number.
-      sw.write_transitions_file();
 
       // Save energy histogram
       FILE *e_out = fopen((const char *)e_fname, "w");

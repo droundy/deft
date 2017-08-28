@@ -102,9 +102,9 @@ int main(int argc, char **argv) {
     return 1;
   }
   printf("git version: %s\n", version_identifier());
-  sscanf(argv[1], "%lg", &lattice_constant);
-  sscanf(argv[2], "%lg", &reduced_density);
-  sscanf(argv[3], "%lg", &temp);
+  assert(sscanf(argv[1], "%lg", &lattice_constant) == 1);
+  assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
+  assert(sscanf(argv[3], "%lg", &temp) == 1);
 
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
