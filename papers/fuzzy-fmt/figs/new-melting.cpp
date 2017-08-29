@@ -136,6 +136,7 @@ int main(int argc, char **argv) {
   fveff.Veff() = 0;
 
   {
+    // This is where we set up the inhomogeneous n(r)
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector rrx = f.get_rx();
     const Vector rry = f.get_ry();
