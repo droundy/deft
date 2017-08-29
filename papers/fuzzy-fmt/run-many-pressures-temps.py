@@ -9,15 +9,15 @@ import numpy as np
 spheres = 108 # Number of Spheres
 # Simulation Characteristics
 iters = 1e8
-dr = 0.1
+dr = 0.5
 # Densities to test
-pmin = 1.2
-pmax = 1.21
-dp = 0.1
+pmin = 0.1
+pmax = 10.0
+dp = 1.0
 # Temperatures to test
-Tmin = 0.01
-Tmax = 0.51
-dT = 0.5
+Tmin = 0.51
+Tmax = 1.01
+dT = 0.1
 # Directory and Filename Information
 directory = "data"
 # Makes a new directory for you if it's not already there.
@@ -28,6 +28,7 @@ except:
 for density in np.arange(pmin,pmax,dp):
 	for temp in np.arange(Tmin,Tmax,dT):
 		filename = "ff-"+str(density)+"_temp-"+str(temp)
+		#~ command_line = "../../new-soft "\
 		command_line = "rq run -J {filename} ../../new-soft "\
 		"--density {density} --temp {temp} --sphereNum {spheres}"\
 		" --iters {iters:.0f} --dr {dr} --dir {directory} "\
