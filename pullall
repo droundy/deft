@@ -6,7 +6,7 @@ repos = ['/home/droundy/git/deft.git',
          '/home/jordan/deft',
          '/home/kirstie/git/deft.git',
          '/home/maychr/git/deft.git',
-         '/home/patrick/deft',
+         '/home/patrick/git/deft.git',
          '/home/simpstan/deft']
 
 for repo in repos:
