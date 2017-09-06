@@ -9,7 +9,7 @@
 #include <errno.h>
 #include "handymath.h"
 #include "vector3d.h"
-#include "Monte-Carlo/square-well.h" 
+#include "Monte-Carlo/grand.h"
 #include "Monte-Carlo/InitBox.h"
 
 #include "version-identifier.h"
