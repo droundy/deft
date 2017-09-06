@@ -315,10 +315,6 @@ int count_interactions(int id, ball *p, double interaction_scale,
 int count_all_interactions(ball *balls, int N, double interaction_scale,
                            double len[3], int walls, int sticky_wall);
 
-// Find index of max entropy point
-int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
-                          int energy_levels);
-
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius
 int max_balls_within(double radius);

@@ -93,14 +93,14 @@ for frame in xrange(numframes):
             ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], colors[suffix_index]+'--')
             ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
             e, lnw = readandcompute.e_lnw(basename)
-            ax.plot(e, -lnw, 'r:')
+            ax.plot(e, -lnw, colors[suffix_index]+':')
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             pass
 
     ax.set_xlabel(r'$E$')
-    ax.set_ylim(1.1*minlndos, maxlndos)
+    ax.set_ylim(1.1*minlndos, maxlndos+5)
     # ax.set_xlim(-5, -0.3)
     ax.set_xlim(mine, maxe)
     ax.set_ylabel(r'$\ln DOS$')
