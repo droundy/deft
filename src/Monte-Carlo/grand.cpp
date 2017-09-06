@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <float.h>
-#include "Monte-Carlo/square-well.h"
+#include "Monte-Carlo/grand.h"
 #include "handymath.h"
 #include <sys/stat.h> // for seeing if the movie data file already exists.
 
