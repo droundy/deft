@@ -3,42 +3,35 @@ from __future__ import division
 import numpy
 
 def e_hist(fbase):
-    # energy histogram file; indexed by [-energy,counts]
-    e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2, dtype=numpy.float)
-
-    energy = -e_hist[:,0] # array of energies
-    hist = e_hist[:,1]
+    try:
+        trans = numpy.loadtxt(fbase +"-transitions.dat", dtype=numpy.float)
+        energy = -trans[:,0]
+        trans = trans[:,1:]
+        hist = numpy.sum(trans, axis=1)
+    except:
+        # energy histogram file; indexed by [-energy,counts]
+        e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2, dtype=numpy.float)
+        energy = -e_hist[:,0] # array of energies
+        hist = e_hist[:,1]
     return energy, hist
 
-def e_lndos(fbase):
-    e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
-
+def e_lndos(f):
+    if '.dat' not in f:
+        f = f+"-lndos.dat"
+    e_lndos = numpy.loadtxt(f, ndmin=2, dtype=numpy.float)
     energy = -e_lndos[:,0] # array of energies
     lndos = e_lndos[:,1]
     return energy, lndos
 
-#----------------------------------------------------------------------#
-#Jordan is writing a function here that will read in the pessimistic 
-#samples and the logrithm of the density of states from two different 
-#files.  One of the files will be a reference while the other will be 
-#user defined.  This function can be used later in a new script to 
-#compare various thermodynamic quantities such as U(T), S(T), and Cv(T) 
-#with pessimistic samples.
-#----------------------------------------------------------------------#
-
 def e_lndos_ps(fbase):
-    e_lndos_ps = numpy.loadtxt(fbase+"-lndos.dat", ndmin=1, dtype=numpy.float)
-    
+    if '.dat' not in fbase:
+        fbase = fbase + "-lndos.dat"    
+    e_lndos_ps = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
+    energy = -e_lndos_ps[:,0]
     lndos = e_lndos_ps[:,1]
     ps = e_lndos_ps[:,2] # pessimistic samples
-    
-    # Load a reference file for comparison
 
-    #ps_ref = -e_lndos_ps[:,2] 
-    #lndos_ref = e_lndos_ps[:,1]
-    return lndos, ps
-
-#----------------------------------------------------------------------#
+    return energy, lndos, ps
 
 def e_lnw(fbase):
     e_lnw = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2, dtype=numpy.float)
@@ -52,15 +45,21 @@ def T_u_cv_s_minT(fbase):
     T_bins = 1e3
     dT = max_T/T_bins
     T_range = numpy.arange(dT,max_T,dT)
-    min_T = minT(fbase)
-    # energy histogram file; indexed by [-energy,counts]
-    e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2)
-    # weight histogram file; indexed by [-energy,ln(weight)]
-    lnw_hist = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2)
+    
+    # Now compute (or just read in) the lndos and the energies
+    try:
+        energy,ln_dos = e_lndos(fbase)
+        min_T = minT(fbase+'-lndos.dat')
+    except:
+        min_T = minT(fbase)
+        # energy histogram file; indexed by [-energy,counts]
+        e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2)
+        # weight file; indexed by [-energy,ln(weight)]
+        lnw_hist = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2)
 
-    energy = -e_hist[:,0] # array of energies
-    lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
-    ln_dos = numpy.log(e_hist[:,1]) - lnw
+        energy = -e_hist[:,0] # array of energies
+        lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
+        ln_dos = numpy.log(e_hist[:,1]) - lnw
 
     Z = numpy.zeros(len(T_range)) # partition function
     U = numpy.zeros(len(T_range)) # internal energy
@@ -87,7 +86,7 @@ def T_u_cv_s_minT(fbase):
     return T_range, U, CV, S, min_T
 
 def minT(f):
-    if not '.dat' in f:
+    if '.dat' not in f:
         f = f+"-E.dat"
     min_T = 0
     with open(f) as file:
@@ -120,8 +119,10 @@ def converged_state(f):
                 return int(line.split()[-1])
     print 'ERROR FINDING converged_state in', f
 
-def iterations(fbase):
-    with open(fbase+"-E.dat") as file:
+def iterations(f):
+    if '.dat' not in f:
+        f = f+"-E.dat"
+    with open(f) as file:
         for line in file:
             if "iterations:" in line:
                 return int(line.split()[-1])
@@ -133,7 +134,7 @@ def dr_g(fbase):
                 return float(line.split()[-1])
 
 def dimensions(f):
-    if not '.dat' in f:
+    if '.dat' not in f:
         f = f+"-E.dat"
     with open(f) as file:
         for line in file:
@@ -168,7 +169,7 @@ def max_entropy_state(f):
     with open(f) as file:
         for line in file:
             if("max_entropy_state" in line):
-                return float(line.split()[-1])
+                return int(line.split()[-1])
 
 def g_r(fbase, T):
     data = numpy.loadtxt(fbase+"-g.dat", ndmin=2)
@@ -216,8 +217,10 @@ def g_r(fbase, T):
     return g, r[0,:]
 
 
-def density_x(fbase, T):
-    fdensity = fbase+"-density.dat"
+def density_x(fdensity, T):
+    if '.dat' not in fdensity:
+        fdensity = fdensity+"-density.dat"
+    #fdensity = fbase+"-density.dat"
     data = numpy.loadtxt(fdensity)
     denshist = data[1:,2:]
     x_1d = data[0,2:]

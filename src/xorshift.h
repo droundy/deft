@@ -75,7 +75,7 @@ public:
       s[(i+1)&15] ^= uint64_t(this);
       s[(i+2)&15] ^= uint64_t(clock());
       s[(i+3)&15] ^= uint64_t(getpid());
-      s[(i+4)&15] ^= uint64_t(getppid());
+      s[(i+4)&15] ^= uint64_t(getpid());
       s[(i+5)&15] ^= uint64_t(urandom);
       s[(i+5)&15] ^= uint64_t(rand());
     }

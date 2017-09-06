@@ -1,4 +1,12 @@
 #!/usr/bin/env python2
+
+#SBATCH --nodes=1 # Number of cores 
+#SBATCH --ntasks=1 # Ensure that all cores are on one machine. 
+#SBATCH --time=0-00:00 # Runtime in D-HH:MM. Zero is no imposed time limit.
+#SBATCH --mem=100 # Memory pool for all cores (see also --mem-per-cpu).
+#SBATCH --mail-type=ALL # Type of email notification- BEGIN,END,FAIL,ALL. 
+#SBATCH --mail-user=pommerjo@oregonstate.edu # Email to which notifications will be sent.   
+
 from __future__ import division
 import os, numpy, sys, re
 
@@ -21,24 +29,13 @@ ff = float(sys.argv[2])
 lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
+method_name = sys.argv[6]
 
 seed = 0
 
-if 'tmmc' in sys.argv:
-    method = ' --tmmc'
-    method_name = 'tmmc'
-elif 'toe' in sys.argv:
-    method = ' --toe'
-    method_name = 'toe'
-elif 'tmi2' in sys.argv:
-    method = ' --tmi --tmi-version=2'
-    method_name = 'tmi2'
-elif 'tmi3' in sys.argv:
-    method = ' --tmi --tmi-version=3'
-    method_name = 'tmi3'
-else:
-    method = ' --tmi'
-    method_name = 'tmi'
+method = ' --' + method_name
+if method[-1] in "123":
+    method = method[:-1] + ' --tmi-version=' + method[-1]
 
 n = ff/(4*numpy.pi/3)
 N = round(n*lenyz*lenyz*lenx)
@@ -51,11 +48,7 @@ if seed != 0:
 
 os.system('mkdir -p ' + datadir)
 
-if os.system('which srun'):
-    # srun doesn't exist so just run on this machine
-    cmd = "nohup time nice -19 ./liquid-vapor-monte-carlo"
-else:
-    cmd = "nohup srun --mem=%d -J lv:%s time nice -19 ./liquid-vapor-monte-carlo" % (mem_estimate, fname)
+cmd = "rq run -o %s/%s.out -J lv/%s ./liquid-vapor-monte-carlo" % (datadir, fname, fname)
 
 cmd += ' --movies' # generate movie data
 
@@ -73,8 +66,8 @@ cmd += ' --dir %s --filename %s' % (datadir, fname)
 
 cmd += ' --seed=%d' % seed
 
-cmd += " >> %s/%s.out 2>&1 &" % (datadir, fname)
+# cmd += " >> %s/%s.out 2>&1 &" % (datadir, fname)
 
 print(cmd)
-os.system('echo %s > %s/%s.out' % (cmd, datadir, fname))
+# os.system('echo %s > %s/%s.out' % (cmd, datadir, fname))
 os.system(cmd)
