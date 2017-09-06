@@ -80,6 +80,12 @@ int main(int argc, const char *argv[]) {
   int wltmmc = false;
   int generate_movies = false;
 
+  /* Do not change these here! They are taken directly from the WL paper.
+     If you want to change the WL parameters, run this code with appropriate arguments */
+  double wl_fmod = 2;
+  double wl_threshold = 1/0.95-1;
+  double wl_cutoff = 1e-8;
+
   sw.min_important_energy = 0;
   sw.sim_dos_type = transition_dos;
 
@@ -190,6 +196,18 @@ int main(int argc, const char *argv[]) {
      "Use transition matrix monte carlo", "BOOLEAN"},
     {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
      "Use Wang-Landau transition matrix monte carlo", "BOOLEAN"},
+
+    /*** HISTOGRAM METHOD PARAMETERS ***/ // added for wltmmc 2017 by JP.
+
+    {"wl_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.wl_factor,
+     0, "Initial value of Wang-Landau factor", "DOUBLE"},
+    {"wl_fmod", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_fmod, 0,
+     "Wang-Landau factor modifiction parameter", "DOUBLE"},
+    {"wl_threshold", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &wl_threshold, 0, "Threhold for normalized standard deviation in "
+     "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
+    {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
 
     /*** END CONDITION PARAMETERS ***/
 
@@ -761,6 +779,9 @@ int main(int argc, const char *argv[]) {
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
+        sw.optimize_weights_using_transitions(tmi_version);
+      } else if (sw.wl_factor != 0) {
+        // update with WLTMMC (or WL?!)
         sw.optimize_weights_using_transitions(tmi_version);
       } else {
         sw.set_max_entropy_energy();
