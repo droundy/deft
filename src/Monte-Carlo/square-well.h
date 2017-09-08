@@ -184,7 +184,7 @@ struct sw_simulation {
   // set canonical weights below some given energy
   void initialize_canonical(double T, int reference=0);
 
-  void initialize_wltmmc(double wl_factor, double wl_fmod,
+  void initialize_wltmmc(double wl_fmod,
                          double wl_threshold, double wl_cutoff);
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
@@ -208,7 +208,7 @@ struct sw_simulation {
 
   double fractional_dos_precision;
   void update_weights_using_transitions(int version);
-  void calculate_weights_using_wltmmc(double wl_factor, double wl_fmod,
+  void calculate_weights_using_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff); // added by JP in 2017 for wltmmc.
   void optimize_weights_using_transitions(int version);
 
