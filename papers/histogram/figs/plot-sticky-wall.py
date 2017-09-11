@@ -47,7 +47,7 @@ lines = ['-', '--', ':', '-.','.']
 first_method = True
 the_first_method = ''
 
-methods = [ '-tmi3', '-toe3', '-tmmc', '-tmi', '-wltmmc']
+methods = [ '-tmi3', '-toe3', '-tmmc', '-wltmmc', '-tmi']
 first_temperature = [True]*len(methods)
 
 for i in range(len(methods)):
