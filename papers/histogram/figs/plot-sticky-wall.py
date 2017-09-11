@@ -42,7 +42,7 @@ def color(T):
         return colors[T]
     except:
         return ''
-lines = ['-', '--', ':', '-.','.']
+lines = ['-', '--', ':', '-.','-.']
 
 first_method = True
 the_first_method = ''
