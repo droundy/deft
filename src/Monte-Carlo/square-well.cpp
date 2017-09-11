@@ -1587,9 +1587,9 @@ void sw_simulation::update_weights_using_transitions(int version) {
 // put wltmmc code in for streamlining.
 
 // calculate the weight array using transitions
-void sw_simulation::calculate_weights_using_wltmmc(double wl_factor, double wl_fmod,
+void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
                                                    double wl_threshold, double wl_cutoff) {
-
+  
   int weight_updates = 0;
   assert(min_important_energy);
   //int old_min_important_energy = min_important_energy;
@@ -1659,20 +1659,12 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_factor, double wl_f
       // says to decrease the wl_factor.
       update_weights_using_transitions(1);
 
-      //// repeat until terminal condition is met
-      //if (wl_factor < wl_cutoff) {
-        //printf("Took %ld iterations and %i updates to do the Wang-Landau method bit.\n",
-              //iteration, weight_updates);
-        //wl_factor = 0.0; // We are done with WL portion!  :)
-        //use_tmmc = true; // Now we will be doing TMMC like anyone else!
-        //break;
-      //}
     }
   }
 } // done with WL!
 
 // initialization with wltmmc
-void sw_simulation::initialize_wltmmc(double wl_factor, double wl_fmod,
+void sw_simulation::initialize_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff) {
 
   while (true) { // This while loop does the WL portion of the algorithm
@@ -1682,8 +1674,15 @@ void sw_simulation::initialize_wltmmc(double wl_factor, double wl_fmod,
 
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) move_a_ball();
 
-    calculate_weights_using_wltmmc(wl_factor, wl_fmod,
-                                   wl_threshold, wl_cutoff);
+    calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
+    // repeat until terminal condition is met
+    if (wl_factor < wl_cutoff) {
+      //printf("Took %ld iterations and %i updates to do the Wang-Landau method bit.\n",
+            //iteration, weight_updates);
+      wl_factor = 0.0; // We are done with WL portion!  :)
+      use_tmmc = true; // Now we will be doing TMMC like anyone else!
+      break;
+    }
   }
 
   // now we switch over to tmmc using the collection matrix that

@@ -196,6 +196,8 @@ int main(int argc, const char *argv[]) {
      "Use transition matrix monte carlo", "BOOLEAN"},
     {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
      "Use Wang-Landau transition matrix monte carlo", "BOOLEAN"},
+    {"min_important_energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
+     "Fix a minimum important energy at a given value", "INT"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/ // added for wltmmc 2017 by JP.
 
