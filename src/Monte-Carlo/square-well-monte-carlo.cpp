@@ -834,7 +834,7 @@ int main(int argc, const char *argv[]) {
                               vanilla_wang_landau);
   } else if (wltmmc) {
     sw.wl_factor = wl_factor;
-    sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
+    sw.initialize_wltmmc(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {

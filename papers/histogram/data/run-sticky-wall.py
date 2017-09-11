@@ -31,6 +31,12 @@ lenyz = float(sys.argv[4])
 min_T = float(sys.argv[5])
 method_name = sys.argv[6]
 
+if method_name == 'wltmmc':
+    wl_factor = 1.0
+    wl_threshold = float(sys.argv[7])
+    wl_cutoff = float(sys.argv[8])
+    min_important_energy = float(sys.argv[9])
+
 seed = 0
 
 method = ' --' + method_name
@@ -43,6 +49,8 @@ mem_estimate = 10 + 0.15*N # it actually also depends on ww, but I'm ignoring th
 
 datadir = 'papers/histogram/data/lv'
 fname = 'ww%.2f-ff%.2f-%gx%g-%s' % (ww, ff, lenx, lenyz, method_name)
+if method_name == 'wltmmc':
+    fname += '-%g-%g' % (wl_threshold, wl_cutoff)
 if seed != 0:
     fname += '-s%d' % seed
 
@@ -54,9 +62,13 @@ cmd += ' --movies' # generate movie data
 
 cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
+# added by JP for wltmmc 2017.
+if method_name == 'wltmmc':
+  cmd += " --wl-factor %g --wl-threshold %g --wl-cutoff %g --min-important-energy %g" % (wl_factor, wl_threshold, wl_cutoff, min_important_energy)
+
 cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)
 
-cmd += " --min-samples 100"
+cmd += " --min-samples 10000"
 
 cmd += method
 
