@@ -179,24 +179,28 @@ int main(int argc, const char *argv[])  {
   // ----------------------------------------------------------------------------
 	double volume = systemLength[x] * systemLength[y] * systemLength[z];
     vector3d *spheres = FCCLattice(numOfSpheres,systemLength);
-    // rename this probably???
     vector3d *sphereMoveVec = new vector3d[numOfSpheres];
+    // Energy
     double currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
     double tempE2 = currentEnergy*currentEnergy;
+	double totalEnergy = 0.0;
+    double energy2 = 0.0;
+    // Pressure
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
     double virial = forceTimesDist(spheres, numOfSpheres, systemLength,wall);
-    double totalEnergy = 0.0;
-    double energy2 = 0.0;
     double exPressure = 0.0;
-    long acceptedTrials = 0;
+    // Radial Dist.
     long *runningRadial = new long[1000];
     long radialWrites = 0;
+    // Diffusion
+	double *diffusion = new double[totalIterations];
+    double sphereTotalMove[numOfSpheres] = {0};
+    double currentD = 0;
+    // File Saving and misc.
+	long acceptedTrials = 0;
     int outputCount = 0;
     bool save = false;
     long saveIter = 1e3;
-    double *diffusion = new double[totalIterations];
-    double sphereTotalMove[numOfSpheres] = {0};
-    double currentD = 0;
     int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
 	mytime = time(NULL);
 	
@@ -240,14 +244,14 @@ int main(int argc, const char *argv[])  {
         exPressure += virial;
         totalEnergy += currentEnergy;
         energy2 += tempE2;
-        diffusion[currentIteration] = currentD;
+        diffusion[currentIteration] = currentD/(1+currentIteration);
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = random::ran64() % numOfSpheres;
         vector3d initialSpherePos = spheres[movedSphereNum];
         vector3d randMove = vector3d::ran(dr);
-        vector3d movedSpherePos = spheres[movedSphereNum] + randMove;
-        movedSpherePos = periodicBC(movedSpherePos,systemLength,wall);
+        //~ vector3d movedSpherePos = spheres[movedSphereNum] + randMove;
+        vector3d movedSpherePos = periodicBC(spheres[movedSphereNum]+randMove,systemLength,wall);
         // Determines the difference in energy due to the random move
         double energyNew = 0.0, energyOld = 0.0;
         for (int currentSphere = 0; currentSphere < numOfSpheres; ++currentSphere) {
@@ -266,21 +270,22 @@ int main(int argc, const char *argv[])  {
         }   else if (energyChange > 0)  {
                 double p = exp(-energyChange / reducedTemperature); // Need to get units correct in here.
                 double r = random::ran();
-                if ((p > r))    {
+                if (p > r)    {
                     trialAcceptance = true;
                 }   else    {
                     trialAcceptance = false;
                 }
             }
-        if (trialAcceptance == true){   // If accepted, update lattice, PE, and radial dist. func.
+        if (trialAcceptance){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
             currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-            tempE2 = currentEnergy*currentEnergy;
-            virial = forceTimesDist(spheres, numOfSpheres,systemLength,wall);
+            tempE2 = currentEnergy*currentEnergy; // Don't need?
+            virial = forceTimesDist(spheres,numOfSpheres,systemLength,wall);
             sphereMoveVec[movedSphereNum] += randMove;
 			sphereTotalMove[movedSphereNum] = sphereMoveVec[movedSphereNum].normsquared();
+			currentD = 0; // reset to zero
             for (int i = 0; i < numOfSpheres; i++){
-				currentD = sphereTotalMove[i]/numOfSpheres;
+				currentD += sphereTotalMove[i]/numOfSpheres;
 			}
             acceptedTrials += 1;
         }
@@ -356,7 +361,7 @@ int main(int argc, const char *argv[])  {
 					fprintf(radial_out, "%g\t%g\n", 
 						(i*systemLength[x])/(2*1000.0), 
 						double(volume*runningRadial[i]/
-							  (numOfSpheres*numOfSpheres*radialWrites)));
+							  (numOfSpheres*numOfSpheres*radialWrites))); //g(r) = (V/N^2)
 				}
 				// Save Pressure
 				FILE *press_out = fopen((const char *)press_fname,"w");
@@ -372,8 +377,9 @@ int main(int argc, const char *argv[])  {
 				// Save Diffusion
 
 				FILE *dif_out = fopen((const char *)dif_fname,"w");
+				fprintf(dif_out, "%s%s", headerinfo,countinfo);
 				for (long i = 0; i < currentIteration; i += currentIteration/1000 + 1) {
-					fprintf(dif_out,"%ld\t%g\n",i,double(diffusion[i]/i));
+					fprintf(dif_out,"%ld\t%g\n",i,double(diffusion[i]));
 				}
 				fclose(pos_out);
 				fclose(radial_out);
@@ -397,6 +403,7 @@ inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
     double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
     double cellLength = systemLength[x]/cellNumber;
     int ysteps = 0; int  zsteps = 0;
+    int shrinks = 0;
     
     vector3d cornerSphere = {sigma/2,sigma/2,sigma/2};   // Sphere's Center is radial distance from borders
     vector3d *offset = new vector3d[4];
@@ -430,10 +437,12 @@ inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
                 sphereNum = numOfSpheres;
                 }
         }
-        if ((fabs(sphereMatrix[sphereNum].x) < 0.0001) & 
-			(fabs(sphereMatrix[sphereNum].y) < 0.0001) & // Rescale Primitive Unit Cell
-            (fabs(sphereMatrix[sphereNum].z) < 0.0001)){
+        if ((fabs(sphereMatrix[sphereNum].x) < 1e-10) & 
+			(fabs(sphereMatrix[sphereNum].y) < 1e-10) & // Rescale Primitive Unit Cell
+            (fabs(sphereMatrix[sphereNum].z) < 1e-10) &
+            (shrinks < 10)){
             printf("Cell Dimensions have shrunk.\n");
+            shrinks += 1;
             cornerSphere.x = cornerSphere.y = cornerSphere.z =  sigma/2;
             ysteps=zsteps = 0;
             cellNumber += 1;
@@ -442,7 +451,10 @@ inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
             offset[2] = vector3d(cellLength,cellLength,0)/2;
             offset[3] = vector3d(0,cellLength,cellLength)/2;
             sphereNum = -1;
-        }
+        }	else if(shrinks >= 10) {
+			printf('Error in lattice create. Crashing for your sake.');
+			return 1;
+		}
     }
     return sphereMatrix;
 }
@@ -485,8 +497,8 @@ double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double syst
     const int numOfBoxes = 1000;
     double *deltan = new double[numOfBoxes];
     
-    for (int i = 0; i < numOfBoxes; i++){
-		deltan[i] = 0;
+    for (int i = 0; i < numOfBoxes; i++){ // W/o this there is a possibility
+		deltan[i] = 0;					  // of getting values xx.e-312 or so which is just a nuisance
 	}
 	
     for (int i = 0; i < numOfSpheres; ++i) {
