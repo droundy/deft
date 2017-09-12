@@ -1656,7 +1656,7 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
       // of states periodically.  They do not specify precisely when
       // to "refresh", but we are doing so each time the WL approach
       // says to decrease the wl_factor.
-      update_weights_using_transitions(1);
+      update_weights_using_transitions(1, true);
     }
     if (verbose || we_changed) {
       printf("  WL factor: %g (vs %g)\n",wl_factor, wl_cutoff);
