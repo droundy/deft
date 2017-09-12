@@ -700,8 +700,6 @@ int sw_simulation::converged_to_state() const {
 }
 
 bool sw_simulation::finished_initializing(bool be_verbose) {
-  set_max_entropy_energy();
-
   const clock_t now = clock();
   if (max_time > 0 && now/CLOCKS_PER_SEC > start_time + max_time) {
       printf("Ran out of time after %g seconds!\n", max_time);
@@ -1478,29 +1476,31 @@ op       difference is that we compute the diffusivity here *directly*
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions(int version) {
+void sw_simulation::update_weights_using_transitions(int version, bool energy_range_fixed) {
   double *ln_dos = compute_ln_dos(transition_dos);
-  set_min_important_energy(ln_dos);
-  // Let us be cautious and just ensure that we always have the proper
-  // max_entropy_state.  This is probably redundant, but especially
-  // when version>1 an error in max_entropy_state could cause real
-  // trouble.
-  int old_max_entropy_state = max_entropy_state;
-  for (int i=0; i<=energy_levels; i++) {
-    if (ln_dos[i] > ln_dos[max_entropy_state]) {
-      max_entropy_state = i;
+  if (!energy_range_fixed) {
+    set_min_important_energy(ln_dos);
+    // Let us be cautious and just ensure that we always have the proper
+    // max_entropy_state.  This is probably redundant, but especially
+    // when version>1 an error in max_entropy_state could cause real
+    // trouble.
+    int old_max_entropy_state = max_entropy_state;
+    for (int i=0; i<=energy_levels; i++) {
+      if (ln_dos[i] > ln_dos[max_entropy_state]) {
+        max_entropy_state = i;
+      }
     }
-  }
-  if (old_max_entropy_state > max_entropy_state+1) {
-    // We should zero out our pessimistic_samples, since we apparently
-    // didn't have a clear picture of what it meant to randomize the
-    // system.  We allow for a change of 1 (the minimal change) so as
-    // to avoid trashing data when going between two states with
-    // almost equal (max) entropy.
-    printf("I am resetting the histograms, because max_entropy_state changed.\n");
-    fflush(stdout);
-    fprintf(stderr, "I am resetting the histograms, because max_entropy_state changed.\n");
-    reset_histograms();
+    if (old_max_entropy_state > max_entropy_state+1) {
+      // We should zero out our pessimistic_samples, since we apparently
+      // didn't have a clear picture of what it meant to randomize the
+      // system.  We allow for a change of 1 (the minimal change) so as
+      // to avoid trashing data when going between two states with
+      // almost equal (max) entropy.
+      printf("I am resetting the histograms, because max_entropy_state changed.\n");
+      fflush(stdout);
+      fprintf(stderr, "I am resetting the histograms, because max_entropy_state changed.\n");
+      reset_histograms();
+    }
   }
   // Above the max_entropy_state we level out the weights.
   for (int i = 0; i <= max_entropy_state; i++) {
@@ -1657,7 +1657,6 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
       // to "refresh", but we are doing so each time the WL approach
       // says to decrease the wl_factor.
       update_weights_using_transitions(1);
-
     }
     if (verbose || we_changed) {
       printf("  WL factor: %g (vs %g)\n",wl_factor, wl_cutoff);

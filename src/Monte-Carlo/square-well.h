@@ -207,7 +207,7 @@ struct sw_simulation {
   void write_header(FILE *f) const;
 
   double fractional_dos_precision;
-  void update_weights_using_transitions(int version);
+  void update_weights_using_transitions(int version, bool energy_range_fixed = false);
   void calculate_weights_using_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff,
                                       bool verbose); // added by JP in 2017 for wltmmc.

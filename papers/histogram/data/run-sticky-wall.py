@@ -36,6 +36,7 @@ if method_name == 'wltmmc':
     wl_threshold = float(sys.argv[7])
     wl_cutoff = float(sys.argv[8])
     min_important_energy = float(sys.argv[9])
+    max_entropy_energy = float(sys.argv[10])
 
 seed = 0
 
@@ -64,7 +65,8 @@ cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 
 # added by JP for wltmmc 2017.
 if method_name == 'wltmmc':
-  cmd += " --wl-factor %g --wl-threshold %g --wl-cutoff %g --min-important-energy %g" % (wl_factor, wl_threshold, wl_cutoff, min_important_energy)
+  cmd += " --wl-factor %g --wl-threshold %g --wl-cutoff %g" % (wl_factor, wl_threshold, wl_cutoff)
+  cmd += " --min-important-energy %g --max-entropy-energy %g" % (min_important_energy, max_entropy_energy)
 
 cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)
 

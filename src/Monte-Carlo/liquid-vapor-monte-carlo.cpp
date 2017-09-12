@@ -90,6 +90,7 @@ int main(int argc, const char *argv[]) {
   sw.sim_dos_type = transition_dos;
 
   // some miscellaneous default or dummy simulation parameters
+  sw.max_entropy_state = 0;
   sw.len[0] = sw.len[1] = sw.len[2] = 0;
   sw.walls = 0;
   sw.sticky_wall = 0;
@@ -198,6 +199,8 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau transition matrix monte carlo", "BOOLEAN"},
     {"min-important-energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
      "Fix a minimum important energy at a given value", "INT"},
+    {"max-entropy-energy", '\0', POPT_ARG_INT, &sw.max_entropy_state, 0,
+     "Set the maximum-entropy energy", "INT"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/ // added for wltmmc 2017 by JP.
 
@@ -434,7 +437,6 @@ int main(int argc, const char *argv[]) {
 
   sw.balls = new ball[sw.N];
   sw.iteration = 0;
-  sw.max_entropy_state = 0;
   sw.min_energy_state = 0;
 
   // initialize ball radii
