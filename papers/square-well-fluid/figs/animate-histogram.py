@@ -80,8 +80,8 @@ for frame in xrange(numframes):
             min_T = readandcompute.minT(datname)
             ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
             min_important_energy = readandcompute.min_important_energy(basename)
-            ax.axvline(-min_important_energy, color='b', linestyle=':')
-            ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
+            #ax.axvline(-min_important_energy, color='b', linestyle=':')
+            #ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
         except (KeyboardInterrupt, SystemExit):
             raise
         except:

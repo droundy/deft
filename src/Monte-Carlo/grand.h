@@ -93,10 +93,6 @@ struct sw_simulation {
   double flatness; // maximum allowable proportional deviation from mean histogram value
   int init_iters; // number of iterations for which to initialize
 
-  /* The following determine how we move balls */
-  bool use_tmmc; // true means rejection/acceptance comes from transition matrix.
-  double wl_factor; // if it is non-zero, update weights on each move WL-style.
-
   /* The following define file names for periodic output files that
      are dumped every so often.  It should contain a single %d style format. */
   const char *transitions_movie_filename_format;
@@ -105,7 +101,7 @@ struct sw_simulation {
   mutable int dos_movie_count;
   const char *lnw_movie_filename_format;
   mutable int lnw_movie_count;
-  /* Finally, the following defines file names for output files. */
+  /* Finally, the following define file names for output files. */
   const char *transitions_filename;
 
   /* The following tracks how many transitions we have attempted from
@@ -157,7 +153,7 @@ struct sw_simulation {
   long *walkers_up;
 
   void reset_histograms();
-  void move_a_ball(); // attempt to move one ball
+  void move_a_ball(bool use_transition_matrix = false); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
   void energy_change_updates(int energy_change); // updates to run if we've changed energy
 
@@ -184,15 +180,9 @@ struct sw_simulation {
   // set canonical weights below some given energy
   void initialize_canonical(double T, int reference=0);
 
-  void initialize_wltmmc(double wl_factor, double wl_fmod,
-                         double wl_threshold, double wl_cutoff);
-  void initialize_wang_landau(double wl_fmod,
+  void initialize_wang_landau(double wl_factor, double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
-  void initialize_wang_landau_with_tweaks(double wl_fmod,
-                                          double wl_threshold, double wl_cutoff,
-                                          bool fixed_energy_range);
-
 
   void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
 
@@ -207,10 +197,8 @@ struct sw_simulation {
   void write_header(FILE *f) const;
 
   double fractional_dos_precision;
-  void update_weights_using_transitions(int version, bool energy_range_fixed = false);
-  void calculate_weights_using_wltmmc(double wl_fmod,
-                                      double wl_threshold, double wl_cutoff,
-                                      bool verbose); // added by JP in 2017 for wltmmc.
+  void update_weights_using_transitions(int version);
+
   void optimize_weights_using_transitions(int version);
 
   // return fractional error in sample count
@@ -219,7 +207,7 @@ struct sw_simulation {
   double* compute_ln_dos(dos_types dos_type) const;
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
-  int set_min_important_energy(double *ln_dos = 0);
+  int set_min_important_energy();
   void set_max_entropy_energy();
 
   // check whether we are done initializing
@@ -283,8 +271,6 @@ struct sw_simulation {
     lnw_movie_count = 0;
     max_time = 0;
     start_time = clock()/double(CLOCKS_PER_SEC);
-    wl_factor = 0.0; // default to no WL method
-    use_tmmc = false; // default to not using TMMC for accepting moves.
   };
 };
 
@@ -328,6 +314,10 @@ int count_interactions(int id, ball *p, double interaction_scale,
 // Count the interactions of all the balls
 int count_all_interactions(ball *balls, int N, double interaction_scale,
                            double len[3], int walls, int sticky_wall);
+
+// Find index of max entropy point
+int new_max_entropy_state(long *energy_histogram, double *ln_energy_weights,
+                          int energy_levels);
 
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius

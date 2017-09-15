@@ -42,12 +42,12 @@ def color(T):
         return colors[T]
     except:
         return ''
-lines = ['-', '--', ':', '-.', '.']
+lines = ['-', '--', ':', '.','-.']
 
 first_method = True
 the_first_method = ''
 
-methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
+methods = [ '-tmi3', '-toe3', '-tmmc', '-wltmmc-1-0.0001', '-tmi']
 first_temperature = [True]*len(methods)
 
 for i in range(len(methods)):

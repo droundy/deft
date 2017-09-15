@@ -10,10 +10,6 @@
 #include <popt.h>
 #include <ctime>
 
-using namespace std;
-using sec = chrono::seconds;
-using ms = chrono::milliseconds;
-using get_time = chrono::steady_clock;
 // ------------------------------------------------------------------------------
 // Global Constants
 // ------------------------------------------------------------------------------
@@ -52,7 +48,7 @@ double forceTimesDist(vector3d *spheres, int numOfSpheres,double systemLength[3]
 
 int main(int argc, const char *argv[])  {
 	time_t mytime;
-    auto start = get_time::now();
+    clock_t start = clock();
     // Initialize Variables and Dummy Variables
     double systemLength[3] = {0,0,0};
     double xy = 0;
@@ -184,9 +180,9 @@ int main(int argc, const char *argv[])  {
 	double volume = systemLength[x] * systemLength[y] * systemLength[z];
     vector3d *spheres = FCCLattice(numOfSpheres,systemLength);
     // rename this probably???
-    vector3d *sphDif = new vector3d[numOfSpheres];
-    double tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-    double tempE2 = tempEnergy*tempEnergy;
+    vector3d *sphereMoveVec = new vector3d[numOfSpheres];
+    double currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+    double tempE2 = currentEnergy*currentEnergy;
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
     double virial = forceTimesDist(spheres, numOfSpheres, systemLength,wall);
     double totalEnergy = 0.0;
@@ -198,9 +194,9 @@ int main(int argc, const char *argv[])  {
     int outputCount = 0;
     bool save = false;
     long saveIter = 1e3;
-    double *glass = new double[totalIterations];
-    double Di[numOfSpheres] = {0};
-    double tempD = 0;
+    double *diffusion = new double[totalIterations];
+    double sphereTotalMove[numOfSpheres] = {0};
+    double currentD = 0;
     int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
 	mytime = time(NULL);
 	
@@ -235,7 +231,6 @@ int main(int argc, const char *argv[])  {
 	sprintf(energy_fname, "%s/%s-energy.dat",data_dir,filename);
 	char *dif_fname = new char[1024];
 	sprintf(dif_fname, "%s/%s-dif.dat",data_dir,filename);
-	//~ FILE *dif_out = fopen((const char *)dif_fname,"w");//Rewrites
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
@@ -243,9 +238,9 @@ int main(int argc, const char *argv[])  {
 	fflush(stdout);
     for (long currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
         exPressure += virial;
-        totalEnergy += tempEnergy;
+        totalEnergy += currentEnergy;
         energy2 += tempE2;
-        glass[currentIteration] = tempD;
+        diffusion[currentIteration] = currentD;
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = random::ran64() % numOfSpheres;
@@ -279,14 +274,13 @@ int main(int argc, const char *argv[])  {
             }
         if (trialAcceptance == true){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
-            tempEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-            tempE2 = tempEnergy*tempEnergy;
+            currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+            tempE2 = currentEnergy*currentEnergy;
             virial = forceTimesDist(spheres, numOfSpheres,systemLength,wall);
-            sphDif[movedSphereNum] += randMove;
-            double paper = sphDif[movedSphereNum].normsquared();
-            Di[movedSphereNum] += paper;
+            sphereMoveVec[movedSphereNum] += randMove;
+			sphereTotalMove[movedSphereNum] = sphereMoveVec[movedSphereNum].normsquared();
             for (int i = 0; i < numOfSpheres; i++){
-				tempD += Di[i]/numOfSpheres;
+				currentD = sphereTotalMove[i]/numOfSpheres;
 			}
             acceptedTrials += 1;
         }
@@ -303,14 +297,12 @@ int main(int argc, const char *argv[])  {
     // Save data to files
     // ---------------------------------------------------------------
 		if ((currentIteration == saveIter) || (currentIteration + 1 == totalIterations)){
-			auto end = get_time::now();
-			auto diff = end - start;
-			double clockms = double(chrono::duration_cast<ms>(diff).count());
-			long clock = long(chrono::duration_cast<sec>(diff).count());
+			clock_t end = clock();
+			double clock = (end - start)/double(CLOCKS_PER_SEC);
 			if (currentIteration + 1 == totalIterations){
 				save = true;
 			}	else if (clock < saveTimes[outputCount]){
-				saveIter = ceil(1e3*saveTimes[outputCount]*double(saveIter)/clockms);
+				saveIter = ceil(saveTimes[outputCount]*double(saveIter)/clock);
 				save = false;
 			}	else if ((clock >= saveTimes[outputCount])&&(outputCount < 7)) {
 				outputCount += 1;
@@ -321,7 +313,7 @@ int main(int argc, const char *argv[])  {
 				save = true;
 			}
 
-			if (save == true){
+			if (save) {
 				long minutes = long(clock) / 60;
 				long hours = minutes / 60;
 				long days = hours / 24;
@@ -334,12 +326,12 @@ int main(int argc, const char *argv[])  {
 				printf("Filename: %s\n",filename);
 				printf("Iteration: %ld of %ld\n",
 					currentIteration+1,totalIterations);
-				printf("Percent Complete: %.7f %\n",100.0*ratio);
-				printf("Acceptance Rate: %.5f %\n", 
+				printf("Percent Complete: %.7f \n",100.0*ratio);
+				printf("Acceptance Rate: %.5f \n", 
 					100.0*double(acceptedTrials)/double(currentIteration+1));
 				printf("Running for: %ld days, %ld hrs, %ld min, %ld sec \n"
 						,days,hours-days*24,
-						minutes-hours*60,clock-minutes*60);
+						minutes-hours*60,long(clock)-minutes*60);
 				printf("Estimated to Finish in: %ld days, %ld hrs, %ld min, %ld sec \n"
 						,fdays,fhrs-fdays*24,
 						fmin-fhrs*60,estEndTime-fmin*60);
@@ -378,16 +370,17 @@ int main(int argc, const char *argv[])  {
 						totalEnergy/double(currentIteration),
 						energy2/double(currentIteration));
 				// Save Diffusion
+
 				FILE *dif_out = fopen((const char *)dif_fname,"w");
-				for (int i = 0; i < currentIteration; i++){
-					fprintf(dif_out,"%g\n",double(glass[i]/currentIteration));
+				for (long i = 0; i < currentIteration; i += currentIteration/1000 + 1) {
+					fprintf(dif_out,"%ld\t%g\n",i,double(diffusion[i]/i));
 				}
 				fclose(pos_out);
 				fclose(radial_out);
 				fclose(press_out);
 				fclose(energy_out);
 				fclose(dif_out);
-				save = false;
+				save = false; 
 			}
 		}
     }
@@ -491,15 +484,19 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres, double systemLen
 double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3], bool wall[3]) {
     const int numOfBoxes = 1000;
     double *deltan = new double[numOfBoxes];
-
+    
+    for (int i = 0; i < numOfBoxes; i++){
+		deltan[i] = 0;
+	}
+	
     for (int i = 0; i < numOfSpheres; ++i) {
         vector3d Ri = sphereMatrix[i];
         for (int j = i + 1; j < numOfSpheres; ++j) {
             vector3d Rj = sphereMatrix[j];
             vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             double Rmag = R.norm();
-            int box = int(Rmag*numOfBoxes/(systemLength[x]/2));   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
-            if (Rmag <= systemLength[x]/2){
+            int box = floor(Rmag*numOfBoxes/(systemLength[x]/2));   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
+            if (Rmag <= (systemLength[x]/2)){
                 deltan[box] += 1;
             }
         }
