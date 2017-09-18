@@ -10,7 +10,7 @@ if os.path.exists('../data'):
 energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
-methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-toe3', '-toe2', '-tmmc', '-wltmmc', -'vanilla_wang_landau']
+methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3', '-wltmmc', '-vanilla_wang_landau']
 ref = "data/" + reference
 maxref = readnew.max_entropy_state(ref)
 goodenough = 0.1
@@ -60,25 +60,17 @@ for method in methods:
         newnrt = []
         newmax = []
         newmin = []
-        i = 0
 
-        while iterations[i] < max(iterations):
-            newiterations = iterations[:i+1]
-            newmin = minimportantenergy[:i+1]
-            newmax = maxentropystate[:i+1]
+        i = 1
+        while i < len(iterations) and iterations[i] > iterations[i-1]:
+            num_frames_to_count = i+1
             i+=1
-
-        i = 0
-        while Nrt_at_energy[i] < max(Nrt_at_energy):
-            newnrt = Nrt_at_energy[:i+1]
-            i+=1
-
-        # The following finds out what energy we are converged to at the
-        # "goodenough" level.
-        if any(numpy.logical_and(abs(doserror) > goodenough, e < -maxref)):
-            goodenoughenergy[i] = max(e[numpy.logical_and(abs(doserror) > goodenough, e < -maxref)])
-        else:
-            goodenoughenergy[i] = -minimportantenergy[i]
+        newiterations = iterations[:num_frames_to_count]
+        newmin = minimportantenergy[:num_frames_to_count]
+        newmax = maxentropystate[:num_frames_to_count]
+        newnrt = Nrt_at_energy[:num_frames_to_count]
+        Nrt_at_energy = Nrt_at_energy[:num_frames_to_count]
+        erroratenergy = erroratenergy[:num_frames_to_count]
 
         plt.figure('error-at-energy-iterations')
         plt.plot(newiterations[newnrt > 0], erroratenergy[newnrt > 0], '%s-' % colors[method], label = method[1:])
@@ -126,19 +118,7 @@ for method in methods:
         raise
 plt.show()
 
-#~ plt.loglog(ps[ps > 0], iterations[ps > 0],
-             #~ 'ro',linewidth = 2,label = r'30x4 tmi3')
-#~ plt.loglog(psref[ps > 0], iterations[ps > 0],
-             #~ 'bx',linewidth = 2,label = r'30x4 ref')
 
-#~ plt.xlabel(r'$iterations$')
-#~ plt.ylabel(r'$N_R(\epsilon)$')
-#~ #plt.title(r'$D(\epsilon)$ for $\lambda=%g$, $\eta=%g$' % (ww, ff))
-#~ plt.legend(loc='best')
-#~ plt.tight_layout(pad=0.2)
-
-#plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g%s-Error.pdf'
-            #% (ww,ff,lenx,lenyz,'-tmi3'))
 
 
 
