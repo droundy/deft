@@ -5,10 +5,10 @@
 #include <random>
 #include <math.h>
 #include <chrono>
-#include <cassert>
 #include "vector3d.h"
 #include <popt.h>
 #include <ctime>
+#include <cassert>
 
 // ------------------------------------------------------------------------------
 // Global Constants
@@ -203,12 +203,14 @@ int main(int argc, const char *argv[])  {
     long saveIter = 1e3;
     int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
 	mytime = time(NULL);
+	long drAdjust = numOfSpheres*numOfSpheres;
 	
 	printf("Filename: %s\n",filename);
 	printf("Lattice Made\n");
     printf("Number of Spheres: %d\n", numOfSpheres);
     printf("Size of System: %g %g %g\n", systemLength[x],systemLength[y],systemLength[z]);
     printf("Wall existence on x,y,z %d %d %d\n",wall[x],wall[y],wall[z]);
+    printf("dr: %.5g\n",dr);
     printf(ctime(&mytime));
   // ----------------------------------------------------------------------------
   // File Save Initiation
@@ -298,6 +300,21 @@ int main(int argc, const char *argv[])  {
             }
             delete[] radialDistHist;
         }
+    // ---------------------------------------------------------------
+    // Displacement Vector Adjustment
+    // ---------------------------------------------------------------
+    if ((currentIteration % drAdjust == 0) && (currentIteration != 0)) {
+		double ratio = double(acceptedTrials) / double(currentIteration);
+		if (ratio >= 0.6) {
+            dr *= 1.25;
+            drAdjust += drAdjust;
+		} else if (ratio <= 0.4) {
+            dr *= 0.8;
+            drAdjust += drAdjust;
+		} else {
+            drAdjust *= 10; // Minimize effects on detiled balance
+		}
+	}
 	// ---------------------------------------------------------------
     // Save data to files
     // ---------------------------------------------------------------
@@ -334,6 +351,7 @@ int main(int argc, const char *argv[])  {
 				printf("Percent Complete: %.7f \n",100.0*ratio);
 				printf("Acceptance Rate: %.5f \n", 
 					100.0*double(acceptedTrials)/double(currentIteration+1));
+				printf("dr: %.5f, drAdjust: %ld\n",dr,drAdjust);
 				printf("Running for: %ld days, %ld hrs, %ld min, %ld sec \n"
 						,days,hours-days*24,
 						minutes-hours*60,long(clock)-minutes*60);
@@ -348,14 +366,14 @@ int main(int argc, const char *argv[])  {
 					"# accepted moves: %ld\n",
 					currentIteration + 1, acceptedTrials);
 				// Save Positions
-				FILE *pos_out = fopen((const char *)pos_fname, "w");
+				FILE *pos_out = fopen(pos_fname, "w");
 				fprintf(pos_out, "%s%s", headerinfo,countinfo);
 				for (int i=0; i<numOfSpheres; i++) {
 					fprintf(pos_out, "%g\t%g\t%g\n",
 					spheres[i].x, spheres[i].y, spheres[i].z);
 				}
 				// Save Radial
-				FILE *radial_out = fopen((const char *)radial_fname,"w");
+				FILE *radial_out = fopen(radial_fname,"w");
 				fprintf(radial_out, "%s%s", headerinfo,countinfo);
 				for (int i = 0; i < 1000; ++i){ // This isn't being averaged properly
 					fprintf(radial_out, "%g\t%g\n", 
@@ -364,19 +382,19 @@ int main(int argc, const char *argv[])  {
 							  (numOfSpheres*numOfSpheres*radialWrites))); //g(r) = (V/N^2)
 				}
 				// Save Pressure
-				FILE *press_out = fopen((const char *)press_fname,"w");
+				FILE *press_out = fopen(press_fname,"w");
 				fprintf(press_out, "%s%s", headerinfo,countinfo);
 				fprintf(press_out, "%g\n",pressureIdeal + 
 					(exPressure / (totalIterations*volume)));
 				// Save Energy
-				FILE *energy_out = fopen((const char *)energy_fname,"w");
+				FILE *energy_out = fopen(energy_fname,"w");
 				fprintf(energy_out,"%s%s",headerinfo,countinfo);
 				fprintf(energy_out,"%g\t%g\n",
 						totalEnergy/double(currentIteration),
 						energy2/double(currentIteration));
 				// Save Diffusion
 
-				FILE *dif_out = fopen((const char *)dif_fname,"w");
+				FILE *dif_out = fopen(dif_fname,"w");
 				fprintf(dif_out, "%s%s", headerinfo,countinfo);
 				for (long i = 0; i < currentIteration; i += currentIteration/1000 + 1) {
 					fprintf(dif_out,"%ld\t%g\n",i,double(diffusion[i]));
@@ -399,64 +417,34 @@ int main(int argc, const char *argv[])  {
 }
 
 inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
+    assert(systemLength[0] == systemLength[1]);
+    assert(systemLength[0] == systemLength[2]);
     vector3d *sphereMatrix = new vector3d[numOfSpheres];
     double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
     double cellLength = systemLength[x]/cellNumber;
-    int ysteps = 0; int  zsteps = 0;
-    int shrinks = 0;
     
-    vector3d cornerSphere = {sigma/2,sigma/2,sigma/2};   // Sphere's Center is radial distance from borders
     vector3d *offset = new vector3d[4];
     offset[0] = vector3d(0,0,0);
     offset[1] = vector3d(cellLength,0,cellLength)/2;
     offset[2] = vector3d(cellLength,cellLength,0)/2;
     offset[3] = vector3d(0,cellLength,cellLength)/2;
     
-    for (int sphereNum = 0; sphereNum < numOfSpheres; sphereNum++) {
-        sphereMatrix[sphereNum] = cornerSphere + offset[sphereNum%4];
-        if (sphereNum%4 == 0) {
-            if (cornerSphere.z + cellLength < systemLength[z]) {
-                cornerSphere.z += cellLength;
-                zsteps += 1;
-            } else if ((cornerSphere.z + cellLength >= systemLength[z])
-                    && (cornerSphere.y + cellLength  < systemLength[y])) {
-                cornerSphere.z -= zsteps*cellLength;
-                cornerSphere.y += cellLength;
-                ysteps += 1;
-                zsteps = 0;
-            } else if ((cornerSphere.y + cellLength >= systemLength[y])
-                    && (cornerSphere.z + cellLength >=systemLength[z])
-                    && (cornerSphere.x + cellLength < systemLength[x])) {
-                cornerSphere.z -= zsteps*cellLength;
-                cornerSphere.y -= ysteps*cellLength;
-                cornerSphere.x += cellLength;
-                zsteps = ysteps = 0;
-            } else if ((cornerSphere.x + cellLength >= systemLength[x])
-                    && (cornerSphere.y + cellLength >= systemLength[y])
-                    && (cornerSphere.z + cellLength >= systemLength[z])){
-                sphereNum = numOfSpheres;
-                }
-        }
-        if ((fabs(sphereMatrix[sphereNum].x) < 1e-10) & 
-			(fabs(sphereMatrix[sphereNum].y) < 1e-10) & // Rescale Primitive Unit Cell
-            (fabs(sphereMatrix[sphereNum].z) < 1e-10) &
-            (shrinks < 10)){
-            printf("Cell Dimensions have shrunk.\n");
-            shrinks += 1;
-            cornerSphere.x = cornerSphere.y = cornerSphere.z =  sigma/2;
-            ysteps=zsteps = 0;
-            cellNumber += 1;
-            cellLength = systemLength[x]/cellNumber;
-            offset[1] = vector3d(cellLength,0,cellLength)/2;
-            offset[2] = vector3d(cellLength,cellLength,0)/2;
-            offset[3] = vector3d(0,cellLength,cellLength)/2;
-            sphereNum = -1;
-        }	else if(shrinks >= 10) {
-			printf('Error in lattice create. Crashing for your sake.');
-			return 1;
+    int sphereNum = 0;
+    for (int i=0; i<cellNumber; i++) {
+        for (int j=0; j<cellNumber; j++) {
+			for (int k=0; k<cellNumber; k++) {
+				vector3d cornerSphere = { cellLength*i, cellLength*j, cellLength*k };
+				for (int b=0; b<4; b++) {
+					sphereMatrix[sphereNum++] = cornerSphere + offset[b];
+					if (sphereNum == numOfSpheres) {
+						delete[] offset;
+						return sphereMatrix;
+					}
+				}
+
+			}
 		}
-    }
-    return sphereMatrix;
+	}
 }
 
 static inline vector3d periodicBC(vector3d inputVector, double systemLength[3], bool wall[3])   {
@@ -500,7 +488,6 @@ double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double syst
     for (int i = 0; i < numOfBoxes; i++){ // W/o this there is a possibility
 		deltan[i] = 0;					  // of getting values xx.e-312 or so which is just a nuisance
 	}
-	
     for (int i = 0; i < numOfSpheres; ++i) {
         vector3d Ri = sphereMatrix[i];
         for (int j = i + 1; j < numOfSpheres; ++j) {

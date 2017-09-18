@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import math
+import argparse
 ########################################################################
 ## This script reads data from files and plots for new-soft
 ########################################################################
@@ -14,17 +15,20 @@ x = 0
 y = 1
 z = 2
 
-pmin = 0.1
-pmax = 10.1
-dp = 1.0
+# Densities to test. Labelled p because it looks like rho :)
+pmin = 0.6
+pmax = 1.0
+dp = 0.1
 
-Tmin = 0.51
-Tmax = 1.00
+# Temperatures to test
+Tmin = 1.0
+Tmax = 1.09
 dT = 0.1
 
 def plotPressure(pmin,pmax,dp,Tmin,Tmax,dT):
 	nd = np.arange(pmin,pmax,dp)
 	nT = np.arange(Tmin,Tmax,dT)
+
 	pressure = np.zeros((len(nd),len(nT)))
 	plt.figure()
 	for density in nd:
@@ -32,13 +36,13 @@ def plotPressure(pmin,pmax,dp,Tmin,Tmax,dT):
 		for temp in nT:
 			pressure = np.loadtxt('data/ff-'+str(density)+'_temp-'+str(temp)+'-press.dat')
 			pressArray.append(float(pressure))
-		plt.semilogy(nT,pressArray,'.-')
-		for i in range(len(pressArray)):
-			plt.text(nT[i],pressArray[i],str(pressArray[i]),ha = 'center',va = 'center')
-		plt.title('Pressure v. Temperature')
-		plt.xlabel('Temperature')
-		plt.ylabel('Pressure')
-	plt.legend(nd[:],title='Reduced Density')
+                plt.plot(pressArray,density,'k.-')
+    #~ for i in range(len(pressArray)):
+        #~ plt.text(nT[i],pressArray[i],str(pressArray[i]),ha = 'center',va = 'center')
+        plt.title('Density v. Pressure')
+        plt.xlabel('Pressure')
+        plt.ylabel('Density')
+	#~ plt.legend(nd[:],title='Reduced Density')
 	
 
 
@@ -102,10 +106,23 @@ def plotDiffusionCoeff(pmin,pmax,dp,Tmin,Tmax,dT):
 				plt.ylabel('Diffusion Coefficient')
 				plt.legend(labels = lis[:],title = 'Temp')
 
-plotDiffusionCoeff(pmin,pmax,dp,Tmin,Tmax,dT)
-#~ plotEnergyPDF(pmin,pmax,dp,Tmin,Tmax,dT)
-#~ plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT)
-#~ plotPositions(pmin,pmax,dp,Tmin,Tmax,dT)		# Careful w/ this one
-#~ plotPressure(pmin,pmax,dp,Tmin,Tmax,dT)
+parser = argparse.ArgumentParser(description='Which plots to make.\nChange data sets to plot in script.')
+parser.add_argument('--plot', metavar='PLOT', action ="store",
+                    default='pressure', help='the plot to use')
+args = parser.parse_args()
+
+if args.plot.lower() == 'energy':
+    plotEnergyPDF(pmin,pmax,dp,Tmin,Tmax,dT)
+elif args.plot.lower() == 'diffusion':
+        plotDiffusionCoeff(pmin,pmax,dp,Tmin,Tmax,dT)
+elif args.plot.lower() == 'radial':
+        plotRadialDF(pmin,pmax,dp,Tmin,Tmax,dT)
+elif args.plot.lower() == 'positions':
+        plotPositions(pmin,pmax,dp,Tmin,Tmax,dT)		# Careful w/ this one
+elif args.plot.lower() == 'pressure':
+        plotPressure(pmin,pmax,dp,Tmin,Tmax,dT)
+else:
+    print("\nPlot type %s not recognized.\nPlease enter either:\n"\
+              "diffusion\nenergy\npositions\npressure\nor radial\n"%args.plot)
 
 plt.show()
