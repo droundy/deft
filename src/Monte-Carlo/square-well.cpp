@@ -335,9 +335,16 @@ void sw_simulation::move_a_ball() {
       }
     }
   } else {
-    const double lnPmove =
-      ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-    if (lnPmove < 0) Pmove = exp(lnPmove);
+    if (wl_factor > 0 && (energy_change + energy_change > min_important_energy
+                          || energy+energy_change<max_entropy_state)) {
+      // This means we are using a WL method, and the system is trying
+      // to leave the energy range specified.  We cannot permit this!
+      Pmove = 0;
+    } else {
+      const double lnPmove =
+        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+      if (lnPmove < 0) Pmove = exp(lnPmove);
+    }
   }
   if (Pmove < 1) {
     if (random::ran() > Pmove) {
