@@ -35,7 +35,10 @@ dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 colors = ['k', 'b', 'r', 'g']
 
 lastframe = -1
+alldone = False
 for frame in xrange(100000):
+    if alldone:
+        break
     for suffix in suffixes:
         basename = dataformat % (suffix, frame)
         try:
@@ -43,6 +46,7 @@ for frame in xrange(100000):
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
+            alldone = True
             break
         numframes = frame+1
         maxhist = max(maxhist, hist.max())
@@ -52,6 +56,7 @@ for frame in xrange(100000):
         print 'counting %dth frame' % numframes
         lastframe = frame
 
+print 'counted %d frames' % numframes
 print 'mine', mine
 print 'maxe', maxe
 print 'maxhist', maxhist
