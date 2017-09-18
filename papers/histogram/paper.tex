@@ -707,42 +707,47 @@ Swendsen and Wang.
 The third step in the TMMC algorithm consists of recording the data in a collection 
 matrix (analogous to the transition histogram matrix).
 \begin{align}
-  \mathcal{C}_{N,\delta} = \mathcal{C}_{N,\delta} + p_{a}\\
-  \mathcal{C}_{N,0} = \mathcal{C}_{N,0} +(1 - p_{a})
+  C_{N,\delta} = C_{N,\delta} + p_{a}\\
+  C_{N,0} = C_{N,0} +(1 - p_{a})
 \end{align}  
 If $\delta=0$, that is, the number of particles has not been changed, then only 
-$\mathcal{C}_{N,0}$ is incremented by unity. Fitzgerald et al. ~\cite{fitzgerald2000monte}
+$C_{N,0}$ is incremented by unity. Fitzgerald et al. ~\cite{fitzgerald2000monte}
 show that defining the third step this way results in a uniform improvement over 
 using histogram estimators to determine the PNPD.
 
 \subsection{WL-TMMC Algorithm}
 
-Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
-by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
-advantage of the ease of implementation and applicability to a variety
-of systems, while making use of a transition matrix to adress WL
-weaknesses such as a limited statistical accuracy plateau which is not
-improved with additional MC steps.  This WL version is more accurate for
-a given number of simulation steps.
+Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed 
+by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes 
+advantage of the ease of implementation and applicability to a variety 
+of systems, while making use of a transition matrix to adress WL 
+weaknesses such as a limited statistical accuracy plateau which is not 
+improved with additional Monte-Carlo steps.  This WL version is more 
+accurate for a given number of simulation steps.
 
-\paragraph{Initializing Wang-Landau:} We begin the simulation by
-defining a minimum important energy.  In traditional Wang-Landau the WL
-factor begins at 1.0 and the factor is modified by 2.0 until the
-simulation is cutoff typically around $10^{-10}$.  Rane et. al. in the
-first published implemenation of WL-TMMC~\cite{rane2013monte} suggests
-using a WL factor between 1.0 and $10^{-2}$ with a cutoff $<10^{-5}$.
-In our implementation of WL-TMMC, we allow the WL factor to be 1 but
-the cutoff is now $10^{-4}$. A single sweep is defined as each
-macrostate being sampled a number of times in this case 100 and it is
-sufficient that each macrostate is visited at least once.  The goal of
-this WL initialization is to prefill the transition matrix for the next
-portion of the simulation.
-\paragraph{Initializing TMMC:} The purpose of prefilling the transition
-matrix is apparent because if numerous zeros existed in the collection
-matrix, the infinite temperature transition matrix would be
-ill-defined.  Sampling over large ranges of density of states would
-therefore take an unexceptable length of time to
-complete~\cite{shell2003improved, shen2014elucidating}.  The transition
+\paragraph{Initializing Wang-Landau:} We begin the simulation by 
+defining a minimum important energy and a maximum entropy state. In 
+traditional Wang-Landau the WL factor begins at 1.0 and the factor is 
+modified by 2.0 until the simulation is cutoff typically around 
+$10^{-10}$.  Rane et. al. in the first published implemenation of 
+WL-TMMC~\cite{rane2013monte} suggests using a WL factor between 1.0 and 
+$10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC, 
+we set the WL factor to be 1 and the cutoff at $10^{-4}$. A single 
+sweep is defined as each macrostate being sampled a number of times in 
+this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a 
+flatness criteria~\cite{wang2001determining, wang2001efficient, 
+hatch2015computational, mahynski2017predicting} for the accumulated 
+histogram usually between 0.75 to 0.90.  For our simulation, it is 
+sufficient that each macrostate is visited at least once (each 
+histogram bin has one entry)~\cite{shell2003improved}.  The goal of 
+this WL initialization is to prefill the transition matrix for the next 
+portion of the simulation. 
+\paragraph{Initializing TMMC:} The purpose of prefilling the transition 
+matrix is apparent because if numerous zeros existed in the collection 
+matrix, the infinite temperature transition matrix would be 
+ill-defined.  Sampling over large ranges of density of states would 
+therefore take an unacceptable length of time to 
+complete~\cite{shell2003improved, shen2014elucidating}.  The transition 
 matrix in terms of the collection matrix is given as follows:
 \begin{align}
 \widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
@@ -750,8 +755,8 @@ matrix in terms of the collection matrix is given as follows:
 \end{align}
 We now run the TMMC portion of the simulation.  Siderius does this for
 20 additional sweeps (does about 8 sweeps for WL).  We do this until we
-reach a temperature of interest say T = 0.1.
-I don't think we have yet implemented a biasing function to control acceptance
+reach a specified temperature of interest.
+We have not yet implemented a biasing function to control acceptance
 rate of trial moves but we probably could/should? at some point.
 \begin{align}
   P_{acc}(i\rightarrow j) = \min\bigg[1,\frac{\widetilde{T}_{\infty}(J\rightarrow I)}
