@@ -24,7 +24,7 @@
 #include "new/Minimize.h"
 #include "version-identifier.h"
 
-const bool use_veff = true;
+const bool use_veff = false;
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -96,37 +96,56 @@ void run_solid(double lattice_constant, double reduced_density, double kT,
 }
 
 int main(int argc, char **argv) {
-  double lattice_constant, reduced_density, temp;
+  printf("Hello I am Kirstie\n");
+  double lattice_constant;  //kirmod - 7  
+  
+  double reduced_density, normalization_prefactor, temp;   // kiradd-1  reduced density = my homogeneous density (i think)
+  
+  
+  //Get inputs from command line
   if (argc != 4) {
-    printf("usage: %s reduced-lattice-constant nliquid-reduced kT\n", argv[0]);
+    printf("usage: %s homogeneous(reduced) density normalization prefactor kT\n", argv[0]);  //kirmod -2
     return 1;
   }
   printf("git version: %s\n", version_identifier());
-  assert(sscanf(argv[1], "%lg", &lattice_constant) == 1);
-  assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
+  assert(sscanf(argv[1], "%lg", &reduced_density) == 1);  //kirmod-3
+  assert(sscanf(argv[2], "%lg", &normalization_prefactor) == 1);  //kirmod-4
   assert(sscanf(argv[3], "%lg", &temp) == 1);
-
+  printf("homogeneous(reduced) density= %f, normalization_prefactor= %f, temp= %f\n", reduced_density, normalization_prefactor, temp);  //kiradd-5
+  //end Get inputs from command line
+  
+  lattice_constant = pow(4/reduced_density, 1.0/3);    //  Number of spheres in one cube = 4  kiradd-8
+  printf("lattice constant is %g\n", lattice_constant);
+  
+  //return 0;  // kirstie test
+ 
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
-  hf.epsilon() = 1;
+  hf.epsilon() = 1;   //energy constant in the WCA fluid  -kir
   hf.kT() = temp;
   hf.n() = reduced_density;
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
 
-  const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;
+  // return 0;  // kirstie test
+
+  const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;  
   printf("bulk energy is %g\n", hf.energy());
   printf("liquid cell free energy should be %g\n", homogeneous_free_energy);
 
+ //return 0;  // kirstie test
+
   const double dx = 0.05;
-  SFMTFluidVeff fveff(lattice_constant, lattice_constant, lattice_constant, dx);
-  SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
+  SFMTFluidVeff fveff(lattice_constant, lattice_constant, lattice_constant, dx);  
+  SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);   
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
   f.kT() = hf.kT();
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.n() = hf.n();
+  
+  //return 0;  // kirstie test 
 
   fveff.sigma() = hf.sigma();
   fveff.epsilon() = hf.epsilon();
@@ -134,6 +153,8 @@ int main(int argc, char **argv) {
   fveff.mu() = hf.mu();
   fveff.Vext() = 0;
   fveff.Veff() = 0;
+  
+  //return 0;  // kirstie test  
 
   {
     // This is where we set up the inhomogeneous n(r)
@@ -142,7 +163,10 @@ int main(int argc, char **argv) {
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
     const double gwidth = 0.1;
-    const double norm = 1.2*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor
+    const double norm = normalization_prefactor*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor   // kirmod -6
+    
+    //return 0;  //kirstie test
+    
     Vector setn = (use_veff) ? fveff.Veff() : f.n();
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
@@ -224,7 +248,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  {
+  if (false) {
     char *fname = new char[5000];
     mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
     snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/initial-melting-%04.2f-%04.2f-%04.2f.dat",
@@ -245,11 +269,14 @@ int main(int argc, char **argv) {
   }
 
   printf("my initial energy is %g\n", f.energy());
+  f.printme("Crstyal stuff!");
+  printf("hello Kirstie\n");
   if (f.energy() != f.energy()) {
     printf("FAIL!  nan for initial energy is bad!\n");
     exit(1);
   }
 
-  run_solid(lattice_constant, reduced_density, temp, &fveff, &f, homogeneous_free_energy);
+  printf("Crystal free energy is %g\n", f.energy());
+  //run_solid(lattice_constant, reduced_density, temp, &fveff, &f, homogeneous_free_energy);
   return 0;
 }

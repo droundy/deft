@@ -335,9 +335,16 @@ void sw_simulation::move_a_ball() {
       }
     }
   } else {
-    const double lnPmove =
-      ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-    if (lnPmove < 0) Pmove = exp(lnPmove);
+    if (wl_factor > 0 && (energy_change + energy_change > min_important_energy
+                          || energy+energy_change<max_entropy_state)) {
+      // This means we are using a WL method, and the system is trying
+      // to leave the energy range specified.  We cannot permit this!
+      Pmove = 0;
+    } else {
+      const double lnPmove =
+        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+      if (lnPmove < 0) Pmove = exp(lnPmove);
+    }
   }
   if (Pmove < 1) {
     if (random::ran() > Pmove) {
@@ -620,11 +627,13 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
   return ln_downwalkers;
 }
 
-int sw_simulation::set_min_important_energy(){
+int sw_simulation::set_min_important_energy(double *input_ln_dos){
 
   // We always use the transition matrix to estimate the
   // min_important_energy, since it is more robust at the outset.
-  double *ln_dos = compute_ln_dos(transition_dos);
+  double *ln_dos;
+  if (input_ln_dos) ln_dos = input_ln_dos;
+  else ln_dos = compute_ln_dos(transition_dos);
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
@@ -651,7 +660,7 @@ int sw_simulation::set_min_important_energy(){
     min_important_energy = min_energy_state;
   }
 
-  delete[] ln_dos;
+  if (!input_ln_dos) delete[] ln_dos;
   return min_important_energy;
 }
 
@@ -698,8 +707,6 @@ int sw_simulation::converged_to_state() const {
 }
 
 bool sw_simulation::finished_initializing(bool be_verbose) {
-  set_max_entropy_energy();
-
   const clock_t now = clock();
   if (max_time > 0 && now/CLOCKS_PER_SEC > start_time + max_time) {
       printf("Ran out of time after %g seconds!\n", max_time);
@@ -714,8 +721,6 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
 
   } else if(end_condition == optimistic_min_samples
             || end_condition == pessimistic_min_samples) {
-    set_min_important_energy();
-
     if(end_condition == optimistic_min_samples){
       if (be_verbose) {
         long num_to_go = 0, energies_unconverged = 0;
@@ -933,116 +938,116 @@ void sw_simulation::initialize_canonical(double T, int reference) {
   }
 }
 
-//// this method is under construction by DR and JP (2017).
-//// initialize the weight array using the wltmmc method.
-//void sw_simulation::initialize_wltmmc(double wl_fmod,
-                                      //double wl_threshold, double wl_cutoff) {
-  ////const double original_wl_factor = wl_factor;
-  //int weight_updates = 0;
-  //assert(min_important_energy);
-  ////int old_min_important_energy = min_important_energy;
-  //while (true) { // This while loop does the WL portion of the algorithm
+// this method is under construction by DR and JP (2017).
+// initialize the weight array using the wltmmc method.
+void sw_simulation::initialize_wltmmc(double wl_factor, double wl_fmod,
+                                      double wl_threshold, double wl_cutoff) {
+  //const double original_wl_factor = wl_factor;
+  int weight_updates = 0;
+  assert(min_important_energy);
+  //int old_min_important_energy = min_important_energy;
+  while (true) { // This while loop does the WL portion of the algorithm
 
-    //// Since we have a fixed energy range, don't allow going below it
-    //initialize_canonical(-1e-2,min_important_energy);
+    // Since we have a fixed energy range, don't allow going below it
+    initialize_canonical(-1e-2,min_important_energy);
 
-    //for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) move_a_ball();
+    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) move_a_ball();
 
-    //// compute variation in energy histogram
-    //int highest_hist_i = 0; // the most commonly visited energy
-    //int lowest_hist_i = 0; // the least commonly visited energy
-    //double highest_hist = 0; // highest histogram value
-    //double lowest_hist = 1e200; // lowest histogram value
-    //double total_counts = 0; // total counts in energy histogram
-    //int num_nonzero = 0; // number of nonzero bins
-    //for(int i = max_entropy_state+1; i <= min_important_energy; i++){
-      //num_nonzero += 1;
-      //total_counts += energy_histogram[i];
-      //if(energy_histogram[i] > highest_hist){
-        //highest_hist = energy_histogram[i];
-        //highest_hist_i = i;
-      //}
-      //if(energy_histogram[i] < lowest_hist){
-        //lowest_hist = energy_histogram[i];
-        //lowest_hist_i = i;
-      //}
-    //}
-    //double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
-    //if (lowest_hist == 0) {
-      //printf("We have never yet visited %d!\n", lowest_hist_i);
-    //} else {
-      //const double variation = hist_mean/lowest_hist - 1;
-      //const double min_over_mean = lowest_hist/hist_mean;
-      //const long min_interesting_energy_count = energy_histogram[min_important_energy];
+    // compute variation in energy histogram
+    int highest_hist_i = 0; // the most commonly visited energy
+    int lowest_hist_i = 0; // the least commonly visited energy
+    double highest_hist = 0; // highest histogram value
+    double lowest_hist = 1e200; // lowest histogram value
+    double total_counts = 0; // total counts in energy histogram
+    int num_nonzero = 0; // number of nonzero bins
+    for(int i = max_entropy_state+1; i <= min_important_energy; i++){
+      num_nonzero += 1;
+      total_counts += energy_histogram[i];
+      if(energy_histogram[i] > highest_hist){
+        highest_hist = energy_histogram[i];
+        highest_hist_i = i;
+      }
+      if(energy_histogram[i] < lowest_hist){
+        lowest_hist = energy_histogram[i];
+        lowest_hist_i = i;
+      }
+    }
+    double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
+    if (lowest_hist == 0) {
+      printf("We have never yet visited %d!\n", lowest_hist_i);
+    } else {
+      const double variation = hist_mean/lowest_hist - 1;
+      const double min_over_mean = lowest_hist/hist_mean;
+      const long min_interesting_energy_count = energy_histogram[min_important_energy];
 
-      //// print status text for testing purposes
-      //bool be_verbose = printing_allowed();
+      // print status text for testing purposes
+      bool be_verbose = printing_allowed();
 
-      //if (be_verbose) {
-        //write_transitions_file(); // Just for the heck of it, save the transition matrix...
-        //printf("WL weight update: %i\n",weight_updates);
-        //printf("  WL factor: %g\n",wl_factor);
-        //printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
-        //printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
-               //highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
-        //printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
-               //pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
-               //min_interesting_energy_count);
-      //}
+      if (be_verbose) {
+        write_transitions_file(); // Just for the heck of it, save the transition matrix...
+        printf("WL weight update: %i\n",weight_updates);
+        printf("  WL factor: %g\n",wl_factor);
+        printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
+        printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
+               highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
+        printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
+               pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
+               min_interesting_energy_count);
+      }
 
-      //// check whether our histogram is flat enough to update wl_factor.
-      //// We are choosing to have wl_threshold=1 mean that as long as
-      //// everything has been visited once we are permitted to move on.
-      //if (variation < wl_threshold || wl_threshold == 1) {
-        //weight_updates += 1;
-        //printf("We reached WL flatness!\n");
-        //be_verbose = true;
-        //wl_factor /= wl_fmod;
-        //flush_weight_array();
-        //for (int i = 0; i < energy_levels; i++) {
-          //energy_histogram[i] = 0;
-        //}
-        //// We throw away the weight array that we just accumulated,
-        //// and replace it with one computed using the transition
-        //// matrix we have so far accumulated.
+      // check whether our histogram is flat enough to update wl_factor.
+      // We are choosing to have wl_threshold=1 mean that as long as
+      // everything has been visited once we are permitted to move on.
+      if (variation < wl_threshold || wl_threshold == 1) {
+        weight_updates += 1;
+        printf("We reached WL flatness!\n");
+        be_verbose = true;
+        wl_factor /= wl_fmod;
+        flush_weight_array();
+        for (int i = 0; i < energy_levels; i++) {
+          energy_histogram[i] = 0;
+        }
+        // We throw away the weight array that we just accumulated,
+        // and replace it with one computed using the transition
+        // matrix we have so far accumulated.
 
-        //// This is referred to by Shell 2003 as "refreshing" the density
-        //// of states periodically.  They do not specify precisely when
-        //// to "refresh", but we are doing so each time the WL approach
-        //// says to decrease the wl_factor.
-        //update_weights_using_transitions(1);
+        // This is referred to by Shell 2003 as "refreshing" the density
+        // of states periodically.  They do not specify precisely when
+        // to "refresh", but we are doing so each time the WL approach
+        // says to decrease the wl_factor.
+        update_weights_using_transitions(1);
 
-        //// repeat until terminal condition is met
-        //if (wl_factor < wl_cutoff) {
-          //printf("Took %ld iterations and %i updates to do the Wang-Landau method bit.\n",
-                //iteration, weight_updates);
-          //wl_factor = 0.0; // We are done with WL portion!  :)
-          //use_tmmc = true;
-          //break;
-        //}
-      //}
-    //}
-  //} // done with WL!
+        // repeat until terminal condition is met
+        if (wl_factor < wl_cutoff) {
+          printf("Took %ld iterations and %i updates to do the Wang-Landau method bit.\n",
+                iteration, weight_updates);
+          wl_factor = 0.0; // We are done with WL portion!  :)
+          use_tmmc = true;
+          break;
+        }
+      }
+    }
+  } // done with WL!
 
-  //// now we switch over to tmmc using the collection matrix that
-  //// was generated using wang-landau.
+  // now we switch over to tmmc using the collection matrix that
+  // was generated using wang-landau.
 
-  //int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
-  //bool verbose = false;
+  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  bool verbose = false;
 
-  //do {
-    //// perform sweeps until iteration cap is reached.
-    //for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    //check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
-    //verbose = printing_allowed();
-    //if (verbose) {
-      //update_weights_using_transitions(1);
-      //write_transitions_file();
-    //}
-  //} while(!finished_initializing(verbose));
-//}
+  do {
+    // perform sweeps until iteration cap is reached.
+    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
+    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    verbose = printing_allowed();
+    if (verbose) {
+      update_weights_using_transitions(1);
+      write_transitions_file();
+    }
+  } while(!finished_initializing(verbose));
+}
 
-//// this is the end of code on WL-TMMC.
+// this is the end of code on WL-TMMC.
 
 // initialize the weight array using the Wang-Landau method.
 void sw_simulation::initialize_wang_landau(double wl_fmod,
@@ -1478,28 +1483,31 @@ op       difference is that we compute the diffusivity here *directly*
 }
 
 // update the weight array using transitions
-void sw_simulation::update_weights_using_transitions(int version) {
+void sw_simulation::update_weights_using_transitions(int version, bool energy_range_fixed) {
   double *ln_dos = compute_ln_dos(transition_dos);
-  // Let us be cautious and just ensure that we always have the proper
-  // max_entropy_state.  This is probably redundant, but especially
-  // when version>1 an error in max_entropy_state could cause real
-  // trouble.
-  int old_max_entropy_state = max_entropy_state;
-  for (int i=0; i<=energy_levels; i++) {
-    if (ln_dos[i] > ln_dos[max_entropy_state]) {
-      max_entropy_state = i;
+  if (!energy_range_fixed) {
+    set_min_important_energy(ln_dos);
+    // Let us be cautious and just ensure that we always have the proper
+    // max_entropy_state.  This is probably redundant, but especially
+    // when version>1 an error in max_entropy_state could cause real
+    // trouble.
+    int old_max_entropy_state = max_entropy_state;
+    for (int i=0; i<=energy_levels; i++) {
+      if (ln_dos[i] > ln_dos[max_entropy_state]) {
+        max_entropy_state = i;
+      }
     }
-  }
-  if (old_max_entropy_state > max_entropy_state+1) {
-    // We should zero out our pessimistic_samples, since we apparently
-    // didn't have a clear picture of what it meant to randomize the
-    // system.  We allow for a change of 1 (the minimal change) so as
-    // to avoid trashing data when going between two states with
-    // almost equal (max) entropy.
-    printf("I am resetting the histograms, because max_entropy_state changed.\n");
-    fflush(stdout);
-    fprintf(stderr, "I am resetting the histograms, because max_entropy_state changed.\n");
-    reset_histograms();
+    if (old_max_entropy_state > max_entropy_state+1) {
+      // We should zero out our pessimistic_samples, since we apparently
+      // didn't have a clear picture of what it meant to randomize the
+      // system.  We allow for a change of 1 (the minimal change) so as
+      // to avoid trashing data when going between two states with
+      // almost equal (max) entropy.
+      printf("I am resetting the histograms, because max_entropy_state changed.\n");
+      fflush(stdout);
+      fprintf(stderr, "I am resetting the histograms, because max_entropy_state changed.\n");
+      reset_histograms();
+    }
   }
   // Above the max_entropy_state we level out the weights.
   for (int i = 0; i <= max_entropy_state; i++) {
@@ -1588,11 +1596,20 @@ void sw_simulation::update_weights_using_transitions(int version) {
 
 // calculate the weight array using transitions
 void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
-                                                   double wl_threshold, double wl_cutoff) {
-  
-  int weight_updates = 0;
+                                                   double wl_threshold,
+                                                   double wl_cutoff,
+                                                   bool verbose) {
+
   assert(min_important_energy);
-  //int old_min_important_energy = min_important_energy;
+  if (wl_factor < wl_cutoff) {
+    if (wl_factor > 0.0) {
+      printf("All done with WL portion of WLTMMC!\n");
+    }
+    wl_factor = 0.0; // We are done with WL portion!  :)
+    use_tmmc = true; // Now we will be doing TMMC like anyone else!
+    set_min_important_energy();
+    return;
+  }
 
   // compute variation in energy histogram
   int highest_hist_i = 0; // the most commonly visited energy
@@ -1616,39 +1633,28 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
   }
   double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
   if (lowest_hist == 0) {
-    printf("We have never yet visited %d!\n", lowest_hist_i);
+    if (verbose) {
+      printf("We have never yet visited %d!\n", lowest_hist_i);
+    }
   } else {
     const double variation = hist_mean/lowest_hist - 1;
     const double min_over_mean = lowest_hist/hist_mean;
     const long min_interesting_energy_count = energy_histogram[min_important_energy];
 
-    // print status text for testing purposes
-    bool be_verbose = printing_allowed();
-
-    if (be_verbose) {
-      write_transitions_file(); // Just for the heck of it, save the transition matrix...
-      printf("WL weight update: %i\n",weight_updates);
-      printf("  WL factor: %g\n",wl_factor);
-      printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
-      printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
-            highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
-      printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
-            pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
-            min_interesting_energy_count);
-    }
-
+    bool we_changed = false;
     // check whether our histogram is flat enough to update wl_factor.
     // We are choosing to have wl_threshold=1 mean that as long as
     // everything has been visited once we are permitted to move on.
     if (variation < wl_threshold || wl_threshold == 1) {
-      weight_updates += 1;
-      printf("We reached WL flatness!\n");
-      be_verbose = true;
+      we_changed = true;
+      printf("We reached WL flatness from %d to %d!\n",
+             min_important_energy, max_entropy_state);
       wl_factor /= wl_fmod;
       flush_weight_array();
       for (int i = 0; i < energy_levels; i++) {
         energy_histogram[i] = 0;
       }
+
       // We throw away the weight array that we just accumulated,
       // and replace it with one computed using the transition
       // matrix we have so far accumulated.
@@ -1657,55 +1663,19 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
       // of states periodically.  They do not specify precisely when
       // to "refresh", but we are doing so each time the WL approach
       // says to decrease the wl_factor.
-      update_weights_using_transitions(1);
-
+      update_weights_using_transitions(1, true);
+    }
+    if (verbose || we_changed) {
+      printf("  WL factor: %g (vs %g)\n",wl_factor, wl_cutoff);
+      printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
+      printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
+             highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
+      printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
+             pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
+             min_interesting_energy_count);
     }
   }
 } // done with WL!
-
-// initialization with wltmmc
-void sw_simulation::initialize_wltmmc(double wl_fmod,
-                                      double wl_threshold, double wl_cutoff) {
-
-  while (true) { // This while loop does the WL portion of the algorithm
-
-    // Since we have a fixed energy range, don't allow going below it
-    initialize_canonical(-1e-2,min_important_energy);
-
-    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) move_a_ball();
-
-    calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
-    // repeat until terminal condition is met
-    if (wl_factor < wl_cutoff) {
-      //printf("Took %ld iterations and %i updates to do the Wang-Landau method bit.\n",
-            //iteration, weight_updates);
-      wl_factor = 0.0; // We are done with WL portion!  :)
-      use_tmmc = true; // Now we will be doing TMMC like anyone else!
-      break;
-    }
-  }
-
-  // now we switch over to tmmc using the collection matrix that
-  // was generated using Wang-Landau.
-
-  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
-  bool verbose = false;
-
-  do {
-    // perform sweeps until iteration cap is reached.
-    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
-    verbose = printing_allowed();
-    if (verbose) {
-      update_weights_using_transitions(1);
-      write_transitions_file();
-    }
-  } while(!finished_initializing(verbose));
-
-  // this is the end of code on WL-TMMC.
-  //delete[] ln_dos;
-  }
-
 
 // initialization with tmi
 void sw_simulation::initialize_tmi(int version) {

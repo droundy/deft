@@ -90,6 +90,7 @@ int main(int argc, const char *argv[]) {
   sw.sim_dos_type = transition_dos;
 
   // some miscellaneous default or dummy simulation parameters
+  sw.max_entropy_state = 0;
   sw.len[0] = sw.len[1] = sw.len[2] = 0;
   sw.walls = 0;
   sw.sticky_wall = 0;
@@ -196,19 +197,21 @@ int main(int argc, const char *argv[]) {
      "Use transition matrix monte carlo", "BOOLEAN"},
     {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
      "Use Wang-Landau transition matrix monte carlo", "BOOLEAN"},
-    {"min_important_energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
+    {"min-important-energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
      "Fix a minimum important energy at a given value", "INT"},
+    {"max-entropy-energy", '\0', POPT_ARG_INT, &sw.max_entropy_state, 0,
+     "Set the maximum-entropy energy", "INT"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/ // added for wltmmc 2017 by JP.
 
-    {"wl_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.wl_factor,
+    {"wl-factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &sw.wl_factor,
      0, "Initial value of Wang-Landau factor", "DOUBLE"},
-    {"wl_fmod", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_fmod, 0,
+    {"wl-fmod", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_fmod, 0,
      "Wang-Landau factor modifiction parameter", "DOUBLE"},
-    {"wl_threshold", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+    {"wl-threshold", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_threshold, 0, "Threhold for normalized standard deviation in "
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
-    {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+    {"wl-cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
 
     /*** END CONDITION PARAMETERS ***/
@@ -434,7 +437,6 @@ int main(int argc, const char *argv[]) {
 
   sw.balls = new ball[sw.N];
   sw.iteration = 0;
-  sw.max_entropy_state = 0;
   sw.min_energy_state = 0;
 
   // initialize ball radii
@@ -777,15 +779,15 @@ int main(int argc, const char *argv[]) {
     } else if (sw.iteration == 10*sw.N) {
       double time_for_N_iterations = took("first 10*N iterations");
       sw.estimated_time_per_iteration = time_for_N_iterations/10/sw.N;
-      sw.set_min_important_energy();
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
       } else if (sw.wl_factor != 0) {
         // update with WLTMMC (or WL?!)
-        sw.optimize_weights_using_transitions(tmi_version);
+        sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, false);
       } else {
+        sw.set_min_important_energy();
         sw.set_max_entropy_energy();
       }
       double time_to_update_weights = took("updating weights");
@@ -803,12 +805,15 @@ int main(int argc, const char *argv[]) {
       printf("new iterations_per_update = %ld\n", iterations_per_update);
     }
     if (sw.iteration % iterations_per_update == 0) {
-      sw.set_min_important_energy();
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
+      } else if (sw.wl_factor != 0) {
+        // update with WLTMMC (or WL?!)
+        sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, false);
       } else {
+        sw.set_min_important_energy();
         sw.set_max_entropy_energy();
       }
     }
@@ -824,12 +829,15 @@ int main(int argc, const char *argv[]) {
                                        // check for completion lees
                                        // frequently.
     if ((verbose || am_all_done) && sw.iteration > 10*sw.N) {
-      sw.set_min_important_energy();
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
+      } else if (sw.wl_factor != 0) {
+        // update with WLTMMC (or WL?!)
+        sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, true);
       } else {
+        sw.set_min_important_energy();
         sw.set_max_entropy_energy();
       }
 
