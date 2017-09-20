@@ -737,6 +737,7 @@ int main(int argc, const char *argv[]) {
   bool am_all_done=false;
   long how_often_to_check_finish = sw.N;
   long iterations_per_update = 10*sw.N;
+  const long iterations_to_time = 100*sw.N;
   do {
     for (int i = 0; i < sw.N; i++) sw.move_a_ball();
     if (sw.iteration % (100*sw.N*sw.N) == 0) {
@@ -773,12 +774,12 @@ int main(int argc, const char *argv[]) {
         }
       }
     }
-    if (sw.iteration < 10*sw.N) {
+    if (sw.iteration < iterations_to_time) {
 		//printf("about to continue on <10*sw.N");
       continue; // We want to time just the iterations (including collecting histogram data.
-    } else if (sw.iteration == 10*sw.N) {
-      double time_for_N_iterations = took("first 10*N iterations");
-      sw.estimated_time_per_iteration = time_for_N_iterations/10/sw.N;
+    } else if (sw.iteration == iterations_to_time) {
+      double time_for_timed_iterations = took("first 10*N iterations");
+      sw.estimated_time_per_iteration = time_for_timed_iterations/iterations_to_time;
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
@@ -786,12 +787,20 @@ int main(int argc, const char *argv[]) {
       } else if (sw.wl_factor != 0) {
         // update with WLTMMC (or WL?!)
         sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, false);
+        // We also update the weights here to ensure that we have a
+        // reasonably pessimistic view of how long an update may take.
+        // REMEMBER: This is ONLY for timing purposes.  Because it is
+        // done just once it shouldn't have a major effect on the
+        // convergence of the method.
+        sw.update_weights_using_transitions(1, true);
       } else {
         sw.set_min_important_energy();
         sw.set_max_entropy_energy();
       }
       double time_to_update_weights = took("updating weights");
-      printf("iterations per time for one update = %g\n", 10*sw.N*time_to_update_weights/time_for_N_iterations);
+      printf("iterations per time for one update = %g/%g = %g\n",
+             time_to_update_weights, sw.estimated_time_per_iteration,
+             time_to_update_weights/sw.estimated_time_per_iteration);
       // Try to spend just 1% of our time updating the weights.  This
       // is a totally arbitrary heuristic.  Ideally we would base this
       // on the number of iterations needed to collect reasonable data.
@@ -800,7 +809,7 @@ int main(int argc, const char *argv[]) {
       // oversimulating.  I just decided that 1% of time wasted is no
       // problem, and hopefully that will mean updating frequently
       // enough.
-      iterations_per_update = 1000*sw.N*time_to_update_weights/time_for_N_iterations;
+      iterations_per_update = 1000*sw.N*time_to_update_weights/time_for_timed_iterations;
       if (iterations_per_update < 10) iterations_per_update = 10;
       printf("new iterations_per_update = %ld\n", iterations_per_update);
     }
