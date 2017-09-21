@@ -53,8 +53,8 @@ for frame in xrange(100000):
         minlndos = min(minlndos, lndos.min())
         maxlndos = max(maxlndos, lndos.max())
         numframes = frame+1
-        mine = min(mine, e.min() - 20)
-        maxe = max(maxe, e.max())
+        mine = min(mine, e[lndos == lndos[-1]].max() - 20)
+        maxe = max(maxe, e[lndos == lndos[0]].min())
     if numframes % 25 == 0 and frame != lastframe:
         print 'counting %dth frame' % numframes
         lastframe = frame
