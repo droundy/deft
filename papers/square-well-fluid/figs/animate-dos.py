@@ -36,7 +36,11 @@ numframes = 0
 dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 colors = ['k', 'b', 'r', 'g']
 
+lastframe = -1
+alldone = False
 for frame in xrange(100000):
+    if alldone:
+        break
     for suffix in suffixes:
         basename = dataformat % (suffix, frame)
         try:
@@ -44,22 +48,18 @@ for frame in xrange(100000):
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
-            # print "Failure in readandcompute.e_lndos:", sys.exc_info()[0]
+            alldone = True
             break
-        numframes = frame+1
         minlndos = min(minlndos, lndos.min())
         maxlndos = max(maxlndos, lndos.max())
-
-        try:
-            e, hist = readandcompute.e_and_total_init_histogram(basename)
-        except (KeyboardInterrupt, SystemExit):
-            raise
-        except:
-            # print "Failure in readandcompute.e_and_total_init_histogram:", sys.exc_info()[0]
-            break
+        numframes = frame+1
         mine = min(mine, e.min() - 20)
         maxe = max(maxe, e.max())
+    if numframes % 25 == 0 and frame != lastframe:
+        print 'counting %dth frame' % numframes
+        lastframe = frame
 
+print 'counted %d frames' % numframes
 print 'mine', mine
 print 'maxe', maxe
 print 'minlndos', minlndos
@@ -87,8 +87,8 @@ for frame in xrange(numframes):
             ax.plot(e, lndos, colors[suffix_index]+'-', label=suffix)
             datname = basename+'-lndos.dat'
             min_T = readandcompute.minT(datname)
-            ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
-            min_important_energy = readandcompute.min_important_energy(basename)
+            ax.axvline(-readandcompute.max_entropy_state(datname), color='r', linestyle=':')
+            min_important_energy = readandcompute.min_important_energy(datname)
             ax.axvline(-min_important_energy, color='b', linestyle=':')
             ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], colors[suffix_index]+'--')
             ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
