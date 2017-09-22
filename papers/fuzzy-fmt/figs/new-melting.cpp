@@ -96,44 +96,37 @@ void run_solid(double lattice_constant, double reduced_density, double kT,
 }
 
 int main(int argc, char **argv) {
-  printf("Hello I am Kirstie\n");
-  double lattice_constant;  //kirmod - 7  
-  
-  double reduced_density, normalization_prefactor, temp;   // kiradd-1  reduced density = my homogeneous density (i think)
+  double lattice_constant; 
+  double reduced_density, gwidth, normalization_prefactor, temp;   // reduced density is the homogeneous (flat) density
   
   
   //Get inputs from command line
-  if (argc != 4) {
-    printf("usage: %s homogeneous(reduced) density normalization prefactor kT\n", argv[0]);  //kirmod -2
+  if (argc != 5) {
+    printf("ENTER: %s homogeneous(reduced) density, normalization prefactor, Gaussian width, kT\n", argv[0]);
     return 1;
   }
-  printf("git version: %s\n", version_identifier());
-  assert(sscanf(argv[1], "%lg", &reduced_density) == 1);  //kirmod-3
-  assert(sscanf(argv[2], "%lg", &normalization_prefactor) == 1);  //kirmod-4
-  assert(sscanf(argv[3], "%lg", &temp) == 1);
-  printf("homogeneous(reduced) density= %f, normalization_prefactor= %f, temp= %f\n", reduced_density, normalization_prefactor, temp);  //kiradd-5
-  //end Get inputs from command line
+  // printf("git version: %s\n", version_identifier());
+  assert(sscanf(argv[1], "%lg", &reduced_density) == 1);
+  assert(sscanf(argv[2], "%lg", &normalization_prefactor) == 1);
+  assert(sscanf(argv[3], "%lg", &gwidth) == 1);
+  assert(sscanf(argv[4], "%lg", &temp) == 1);
+  printf("Homogeneous(reduced) Density= %g, Normalization prefactor= %g, Gaussian width= %g, temp= %g\n", reduced_density, normalization_prefactor, gwidth, temp);  //kiradd-5
+
   
-  lattice_constant = pow(4/reduced_density, 1.0/3);    //  Number of spheres in one cube = 4  kiradd-8
-  printf("lattice constant is %g\n", lattice_constant);
-  
-  //return 0;  // kirstie test
+  lattice_constant = pow(4/reduced_density, 1.0/3);      // Number of spheres in one cube = 4
+  printf("lattice constant = %g\n", lattice_constant);
  
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
-  hf.epsilon() = 1;   //energy constant in the WCA fluid  -kir
+  hf.epsilon() = 1;   //energy constant in the WCA fluid
   hf.kT() = temp;
   hf.n() = reduced_density;
   hf.mu() = 0;
-  hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
-
-  // return 0;  // kirstie test
+  // hf.mu() = hf.d_by_dn(); // we will set mu based on the derivative of hf
 
   const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;  
   printf("bulk energy is %g\n", hf.energy());
   printf("liquid cell free energy should be %g\n", homogeneous_free_energy);
-
- //return 0;  // kirstie test
 
   const double dx = 0.05;
   SFMTFluidVeff fveff(lattice_constant, lattice_constant, lattice_constant, dx);  
@@ -144,8 +137,6 @@ int main(int argc, char **argv) {
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.n() = hf.n();
-  
-  //return 0;  // kirstie test 
 
   fveff.sigma() = hf.sigma();
   fveff.epsilon() = hf.epsilon();
@@ -153,92 +144,92 @@ int main(int argc, char **argv) {
   fveff.mu() = hf.mu();
   fveff.Vext() = 0;
   fveff.Veff() = 0;
-  
-  //return 0;  // kirstie test  
 
   {
-    // This is where we set up the inhomogeneous n(r)
-    const int Ntot = f.Nx()*f.Ny()*f.Nz();
+    // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
+    const int Ntot = f.Nx()*f.Ny()*f.Nz();  //Ntot is the total number of position vectors at which the density will be calculated
     const Vector rrx = f.get_rx();
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double gwidth = 0.1;
-    const double norm = normalization_prefactor*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor   // kirmod -6
-    
-    //return 0;  //kirstie test
-    
+    const double norm = normalization_prefactor*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor
+  
     Vector setn = (use_veff) ? fveff.Veff() : f.n();
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
       const double rz = rrz[i];
-      setn[i] = 0.0000001*hf.n();
-      {
-        double dist = sqrt(rx*rx + ry*ry+rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+      
+      setn[i] = 0.0000001*hf.n();  //sets the initial value for the density to be everywhere a small value other than zero
+      // The FCC cube is set up with one whole sphere in the center of the cube
+      // dist is the magnitude of vector r - vector R = square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)  
+      // where r is the position vector and R is a vector to the center of a sphere
+      // The following code calculates the contribution to the density at a position vector (rx,ry,rz) from each Guassian
+      {                            
+        double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R1: Gaussian centered at the origin  Rx=0, Ry=0, Rz=0 
       }
       {
         double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R2: Gaussian centered at Rx=a/2, Ry=a/2, Rz=0
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R3: Gaussian centered at Rx=-a/2, Ry=a/2,  Rz=0 
 
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R4: Gaussian centered at Rx=a/2,  Ry=-a/2,  Rz=0
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R5: Gaussian centered at Rx=-a/2, Ry=-a/2,  Rz=0
       }
       {
         double dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R6: Gaussian centered at Rx=0, Ry=a/2,  Rz=a/2
 
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R7: Gaussian centered at Rx=0, Ry=a/2, Rz=-a/2 
 
         dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R8: Gaussian centered at Rx=0, Ry=-a/2, Rz=a/2 
 
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R9: Gaussian centered at Rx=0, Ry=-a/2, Rz=-a/2
       }
       {
         double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                            (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                            ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R10: Gaussian centered at Rx=a/2, Ry=0, Rz=a/2
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R11: Gaussian centered at Rx=-a/2,  Ry=0, Rz=a/2 
 
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R12: Gaussian centered at Rx=a/2,  Ry=0, Rz=-a/2 
 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R13: Gaussian centered at Rx=-a/2, Ry=0, Rz=-a/2 
       }
     }
     if (use_veff) {
@@ -267,16 +258,23 @@ int main(int argc, char **argv) {
     }
     fclose(o);
   }
-
-  printf("my initial energy is %g\n", f.energy());
+  
+  printf("Crystal free energy is %g\n", f.energy());
   f.printme("Crstyal stuff!");
-  printf("hello Kirstie\n");
   if (f.energy() != f.energy()) {
     printf("FAIL!  nan for initial energy is bad!\n");
     exit(1);
   }
-
-  printf("Crystal free energy is %g\n", f.energy());
+  
   //run_solid(lattice_constant, reduced_density, temp, &fveff, &f, homogeneous_free_energy);
+  
+  double DIFF;   // Find the difference between the homogenious (liquid) free energy and the crystal free energy
+  DIFF = homogeneous_free_energy - f.energy();
+  printf("DIFF = Liquid Cell Free Energy - Crystal Free Energy  = %g \n", DIFF);
+  if (f.energy() < homogeneous_free_energy) {
+    printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n");
+  }
+    else printf("TRY AGAIN!\n");
+  
   return 0;
 }
