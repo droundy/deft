@@ -19,12 +19,9 @@
 #include <time.h>
 #include <sys/stat.h>
 #include "new/SFMTFluidFast.h"
-#include "new/SFMTFluidVeffFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 #include "version-identifier.h"
-
-const bool use_veff = false;
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -46,54 +43,6 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-void run_solid(double lattice_constant, double reduced_density, double kT,
-               SFMTFluidVeff *fveff, SFMTFluid *f,
-               double homogeneous_free_energy) {
-  Minimize min = (use_veff) ? Minimize(fveff) : Minimize(f);
-  min.set_relative_precision(1e-12);
-  min.set_maxiter(10000);
-  min.set_miniter(9);
-  min.precondition(true);
-
-  printf("========================================\n");
-  printf("| Working on rho* = %4g and kT = %4g and a = %g |\n", reduced_density, kT, lattice_constant);
-  printf("========================================\n");
-  while (min.improve_energy(verbose)) {
-    //f->run_finite_difference_test("SFMT");
-    printf("Compare with homogeneous free energy: %.15g\n", homogeneous_free_energy);
-    Vector n = (use_veff) ? fveff->get_n() : f->n();
-    double inh = inhomogeneity(n);
-    printf("Inhomogeneity is %g\n", inh);
-    double Ntot = n.sum()*f->get_dV();
-    printf("Ntot = %g\n", Ntot);
-    printf("n*bar = %g\n", Ntot/f->get_volume());
-    printf("\n");
-    if (inh < 1) {
-      printf("It is flat enough for me!\n");
-      break;
-    }
-  }
-  took("Doing the minimization");
-  min.print_info();
-
-  char *fname = new char[5000];
-  mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
-  snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/melting-%04.2f-%04.2f-%04.2f.dat",
-           lattice_constant, reduced_density, kT);
-  FILE *o = fopen(fname, "w");
-  if (!o) {
-    fprintf(stderr, "error creating file %s\n", fname);
-    exit(1);
-  }
-  delete[] fname;
-  const int Nz = f->Nz();
-  Vector rz = f->get_rz();
-  Vector n = (use_veff) ? fveff->get_n() : f->n();
-  for (int i=0;i<Nz/2;i++) {
-    fprintf(o, "%g\t%g\n", rz[i], n[i]);
-  }
-  fclose(o);
-}
 
 int main(int argc, char **argv) {
   double lattice_constant; 
@@ -125,11 +74,10 @@ int main(int argc, char **argv) {
   // hf.mu() = hf.d_by_dn(); // we will set mu based on the derivative of hf
 
   const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;  
-  printf("bulk energy is %g\n", hf.energy());
-  printf("liquid cell free energy should be %g\n", homogeneous_free_energy);
+  printf("Bulk energy is %g\n", hf.energy());
+  printf("Fluid cell free energy should be %g\n", homogeneous_free_energy);
 
-  const double dx = 0.05;
-  SFMTFluidVeff fveff(lattice_constant, lattice_constant, lattice_constant, dx);  
+  const double dx = 0.05; 
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);   
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
@@ -137,13 +85,6 @@ int main(int argc, char **argv) {
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.n() = hf.n();
-
-  fveff.sigma() = hf.sigma();
-  fveff.epsilon() = hf.epsilon();
-  fveff.kT() = hf.kT();
-  fveff.mu() = hf.mu();
-  fveff.Vext() = 0;
-  fveff.Veff() = 0;
 
   {
     // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
@@ -153,7 +94,7 @@ int main(int argc, char **argv) {
     const Vector rrz = f.get_rz();
     const double norm = normalization_prefactor*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor
   
-    Vector setn = (use_veff) ? fveff.Veff() : f.n();
+    Vector setn = f.n();
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
@@ -231,13 +172,9 @@ int main(int argc, char **argv) {
                     ry*ry);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R13: Gaussian centered at Rx=-a/2, Ry=0, Rz=-a/2 
       }
+     }
+
     }
-    if (use_veff) {
-      for (int i=0; i<Ntot; i++) {
-        fveff.Veff()[i] = -temp*log(fveff.Veff()[i]); // convert from density to effective potential
-      }
-    }
-  }
 
   if (false) {
     char *fname = new char[5000];
@@ -252,7 +189,7 @@ int main(int argc, char **argv) {
     delete[] fname;
     const int Nz = f.Nz();
     Vector rz = f.get_rz();
-    Vector n = (use_veff) ? fveff.get_n() : f.n();
+    Vector n = f.n();
     for (int i=0;i<Nz/2;i++) {
       fprintf(o, "%g\t%g\n", rz[i], n[i]);
     }
@@ -265,12 +202,11 @@ int main(int argc, char **argv) {
     printf("FAIL!  nan for initial energy is bad!\n");
     exit(1);
   }
-  
-  //run_solid(lattice_constant, reduced_density, temp, &fveff, &f, homogeneous_free_energy);
-  
-  double DIFF;   // Find the difference between the homogenious (liquid) free energy and the crystal free energy
-  DIFF = homogeneous_free_energy - f.energy();
-  printf("DIFF = Liquid Cell Free Energy - Crystal Free Energy  = %g \n", DIFF);
+ 
+  // Find the difference between the homogeneous (fluid) free energy and the crystal free energy 
+  double DIFF;   
+  DIFF = f.energy() - homogeneous_free_energy;
+  printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
   if (f.energy() < homogeneous_free_energy) {
     printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n");
   }
