@@ -47,6 +47,7 @@ double inhomogeneity(Vector n) {
 int main(int argc, char **argv) {
   double lattice_constant; 
   double reduced_density, gwidth, normalization_prefactor, temp;   // reduced density is the homogeneous (flat) density
+  double N;
   
   
   //Get inputs from command line
@@ -59,11 +60,10 @@ int main(int argc, char **argv) {
   assert(sscanf(argv[2], "%lg", &normalization_prefactor) == 1);
   assert(sscanf(argv[3], "%lg", &gwidth) == 1);
   assert(sscanf(argv[4], "%lg", &temp) == 1);
-  printf("Homogeneous(reduced) Density= %g, Normalization prefactor= %g, Gaussian width= %g, temp= %g\n", reduced_density, normalization_prefactor, gwidth, temp);  //kiradd-5
-
+  printf("Homogeneous(reduced) Density= %g, Normalization prefactor= %g, Gaussian width= %g, temp= %g\n", reduced_density, normalization_prefactor, gwidth, temp);
   
-  lattice_constant = pow(4/reduced_density, 1.0/3);      // Number of spheres in one cube = 4
-  printf("lattice constant = %g\n", lattice_constant);
+  lattice_constant = pow(4/reduced_density, 1.0/3);      // Number of spheres in one cube = 4 
+  printf("lattice constant = %g for 4 spheres in one Fluid cell\n", lattice_constant);
  
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
@@ -78,6 +78,7 @@ int main(int argc, char **argv) {
   printf("Fluid cell free energy should be %g\n", homogeneous_free_energy);
 
   const double dx = 0.05; 
+  const double dV = pow(0.05,3);  //volume element dV  dx=dy=dz=0.05
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);   
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
@@ -89,22 +90,25 @@ int main(int argc, char **argv) {
   {
     // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
     const int Ntot = f.Nx()*f.Ny()*f.Nz();  //Ntot is the total number of position vectors at which the density will be calculated
-    const Vector rrx = f.get_rx();
+    const Vector rrx = f.get_rx();          //Nx is the total number of values for rx  etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
     const double norm = normalization_prefactor*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor
   
     Vector setn = f.n();
+    N = 0.0;
+    
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
       const double rz = rrz[i];
-      
+ 
       setn[i] = 0.0000001*hf.n();  //sets the initial value for the density to be everywhere a small value other than zero
       // The FCC cube is set up with one whole sphere in the center of the cube
       // dist is the magnitude of vector r - vector R = square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)  
       // where r is the position vector and R is a vector to the center of a sphere
       // The following code calculates the contribution to the density at a position vector (rx,ry,rz) from each Guassian
+      // and adds them together to get the density at position vector (rx, ry, rz) which is then stored in setn[i]
       {                            
         double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R1: Gaussian centered at the origin  Rx=0, Ry=0, Rz=0 
@@ -171,9 +175,10 @@ int main(int argc, char **argv) {
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R13: Gaussian centered at Rx=-a/2, Ry=0, Rz=-a/2 
+        
+        N = (setn[i]*dV) + N;  //Calculate N, the number of spheres in one crystal cube
       }
      }
-
     }
 
   if (false) {
@@ -197,7 +202,8 @@ int main(int argc, char **argv) {
   }
   
   printf("Crystal free energy is %g\n", f.energy());
-  f.printme("Crstyal stuff!");
+  printf("Number of spheres in one crystal cube is %g\n", N);
+  f.printme("Crystal stuff!");
   if (f.energy() != f.energy()) {
     printf("FAIL!  nan for initial energy is bad!\n");
     exit(1);
@@ -208,9 +214,9 @@ int main(int argc, char **argv) {
   DIFF = f.energy() - homogeneous_free_energy;
   printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
   if (f.energy() < homogeneous_free_energy) {
-    printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n");
+    printf("Crystal Free Energy is LOWER than the Fluid Cell Free Energy!!!\n");
   }
     else printf("TRY AGAIN!\n");
-  
+
   return 0;
 }
