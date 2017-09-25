@@ -736,18 +736,20 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
   bool am_all_done=false;
   long how_often_to_check_finish = sw.N;
-  long iterations_per_update = 10*sw.N;
-  const long iterations_to_time = 100*sw.N;
+  //long iterations_per_update = 10*sw.N;
+  //const long iterations_to_time = 100*sw.N;
+  long iterations_per_update = sw.N*sw.N;
+  const long iterations_to_time = 0;
   do {
     for (int i = 0; i < sw.N; i++) sw.move_a_ball();
-    if (sw.iteration % (100*sw.N*sw.N) == 0) {
-      // Every so often, check that we still have the correct energy.
-      // Technically we shouldn't need to do this at all, this is just
-      // here in case a bug creeps in.
-      assert(sw.energy ==
-             count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
-                                    sw.walls, sw.sticky_wall));
-    }
+    //~ if (sw.iteration % (100*sw.N*sw.N) == 0) {
+      //~ // Every so often, check that we still have the correct energy.
+      //~ // Technically we shouldn't need to do this at all, this is just
+      //~ // here in case a bug creeps in.
+      //~ assert(sw.energy ==
+             //~ count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
+                                    //~ sw.walls, sw.sticky_wall));
+    //~ }
 
     // ---------------------------------------------------------------
     // Add data to density and RDF histograms
@@ -777,7 +779,7 @@ int main(int argc, const char *argv[]) {
     if (sw.iteration < iterations_to_time) {
 		//printf("about to continue on <10*sw.N");
       continue; // We want to time just the iterations (including collecting histogram data.
-    } else if (sw.iteration == iterations_to_time) {
+    } else if (sw.iteration == iterations_to_time && iterations_to_time > 0) {
       double time_for_timed_iterations = took("first 10*N iterations");
       sw.estimated_time_per_iteration = time_for_timed_iterations/iterations_to_time;
       if (tmi) {
