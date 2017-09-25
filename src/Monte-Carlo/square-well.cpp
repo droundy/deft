@@ -459,7 +459,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       ln_dos[i] = ln_dos[i-1];
       double down_to_here = 0;
       double up_from_here = 0;
-      for (int j=0; j<i; j++) {
+      for (int j=max(0,i-biggest_energy_transition); j<i; j++) {
         const double tdown = transition_matrix(i, j);
         if (tdown) {
           // we are careful here not to take the exponential (which
