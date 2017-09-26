@@ -19,12 +19,9 @@
 #include <time.h>
 #include <sys/stat.h>
 #include "new/SFMTFluidFast.h"
-#include "new/SFMTFluidVeffFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 #include "version-identifier.h"
-
-const bool use_veff = false;
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -46,76 +43,34 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-void run_solid(double lattice_constant, double reduced_density, double kT,
-               SFMTFluidVeff *fveff, SFMTFluid *f,
-               double homogeneous_free_energy) {
-  Minimize min = (use_veff) ? Minimize(fveff) : Minimize(f);
-  min.set_relative_precision(1e-12);
-  min.set_maxiter(10000);
-  min.set_miniter(9);
-  min.precondition(true);
-
-  printf("========================================\n");
-  printf("| Working on rho* = %4g and kT = %4g and a = %g |\n", reduced_density, kT, lattice_constant);
-  printf("========================================\n");
-  while (min.improve_energy(verbose)) {
-    //f->run_finite_difference_test("SFMT");
-    printf("Compare with homogeneous free energy: %.15g\n", homogeneous_free_energy);
-    Vector n = (use_veff) ? fveff->get_n() : f->n();
-    double inh = inhomogeneity(n);
-    printf("Inhomogeneity is %g\n", inh);
-    double Ntot = n.sum()*f->get_dV();
-    printf("Ntot = %g\n", Ntot);
-    printf("n*bar = %g\n", Ntot/f->get_volume());
-    printf("\n");
-    if (inh < 1) {
-      printf("It is flat enough for me!\n");
-      break;
-    }
-  }
-  took("Doing the minimization");
-  min.print_info();
-
-  char *fname = new char[5000];
-  mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
-  snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/melting-%04.2f-%04.2f-%04.2f.dat",
-           lattice_constant, reduced_density, kT);
-  FILE *o = fopen(fname, "w");
-  if (!o) {
-    fprintf(stderr, "error creating file %s\n", fname);
-    exit(1);
-  }
-  delete[] fname;
-  const int Nz = f->Nz();
-  Vector rz = f->get_rz();
-  Vector n = (use_veff) ? fveff->get_n() : f->n();
-  for (int i=0;i<Nz/2;i++) {
-    fprintf(o, "%g\t%g\n", rz[i], n[i]);
-  }
-  fclose(o);
-}
 
 int main(int argc, char **argv) {
   double lattice_constant; 
-  double reduced_density, gwidth, normalization_prefactor, temp;   // reduced density is the homogeneous (flat) density
-  
+  double reduced_density, gwidth, fv, temp;   // reduced density is the homogeneous (flat) density
+  double N_crystal, crystal_density;  //number of spheres and density computed by integrating n(r)
+  double cell_spheres;  // number of spheres that FILL one cell (no vacancies)
+  double reduced_num_spheres;  // number of spheres in one cell based on input vacancy fraction fv  
   
   //Get inputs from command line
   if (argc != 5) {
-    printf("ENTER: %s homogeneous(reduced) density, normalization prefactor, Gaussian width, kT\n", argv[0]);
+    printf("ENTER: %s homogeneous(reduced) density, fraction of vacancies, Gaussian width, kT\n", argv[0]);
     return 1;
   }
   // printf("git version: %s\n", version_identifier());
   assert(sscanf(argv[1], "%lg", &reduced_density) == 1);
-  assert(sscanf(argv[2], "%lg", &normalization_prefactor) == 1);
+  assert(sscanf(argv[2], "%lg", &fv) == 1);
   assert(sscanf(argv[3], "%lg", &gwidth) == 1);
   assert(sscanf(argv[4], "%lg", &temp) == 1);
-  printf("Homogeneous(reduced) Density= %g, Normalization prefactor= %g, Gaussian width= %g, temp= %g\n", reduced_density, normalization_prefactor, gwidth, temp);  //kiradd-5
-
+  printf("Homogeneous(reduced) Density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
   
-  lattice_constant = pow(4/reduced_density, 1.0/3);      // Number of spheres in one cube = 4
-  printf("lattice constant = %g\n", lattice_constant);
- 
+  cell_spheres = 1.0;   // the number of spheres that fill a fluid cell -ASK (should be 4 for FCC! not 1!)
+  reduced_num_spheres = cell_spheres*(1-fv);   //the reduced number of spheres in a fluid cell
+  printf("A full cell contains %g sphere(s).\n",  cell_spheres);
+  printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, cell_spheres*fv); 
+  
+  lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);      
+  printf("lattice constant = %g\n", lattice_constant);    
+  
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
   hf.epsilon() = 1;   //energy constant in the WCA fluid
@@ -125,11 +80,11 @@ int main(int argc, char **argv) {
   // hf.mu() = hf.d_by_dn(); // we will set mu based on the derivative of hf
 
   const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;  
-  printf("bulk energy is %g\n", hf.energy());
-  printf("liquid cell free energy should be %g\n", homogeneous_free_energy);
+  printf("Bulk energy is %g\n", hf.energy());
+  printf("Fluid cell free energy should be %g\n", homogeneous_free_energy);
 
-  const double dx = 0.05;
-  SFMTFluidVeff fveff(lattice_constant, lattice_constant, lattice_constant, dx);  
+  const double dx = 0.05;         //grid point spacing dx=dy=dz=0.05
+  const double dV = pow(0.05,3);  //volume element dV  
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);   
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
@@ -138,32 +93,27 @@ int main(int argc, char **argv) {
   f.Vext() = 0;
   f.n() = hf.n();
 
-  fveff.sigma() = hf.sigma();
-  fveff.epsilon() = hf.epsilon();
-  fveff.kT() = hf.kT();
-  fveff.mu() = hf.mu();
-  fveff.Vext() = 0;
-  fveff.Veff() = 0;
-
   {
     // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
     const int Ntot = f.Nx()*f.Ny()*f.Nz();  //Ntot is the total number of position vectors at which the density will be calculated
-    const Vector rrx = f.get_rx();
+    const Vector rrx = f.get_rx();          //Nx is the total number of values for rx  etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = normalization_prefactor*pow(sqrt(2*M_PI)*gwidth, 3); // the prefactor is a safety factor
-  
-    Vector setn = (use_veff) ? fveff.Veff() : f.n();
+    const double norm = (1/reduced_num_spheres)*pow(sqrt(2*M_PI)*gwidth, 3); 
+
+    Vector setn = f.n();
+    N_crystal = 0.0000001;  //sets the initial value for computing the number of spheres in the crystal to a small value other than zero
+    
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
-      const double rz = rrz[i];
-      
+      const double rz = rrz[i]; 
       setn[i] = 0.0000001*hf.n();  //sets the initial value for the density to be everywhere a small value other than zero
       // The FCC cube is set up with one whole sphere in the center of the cube
       // dist is the magnitude of vector r - vector R = square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)  
       // where r is the position vector and R is a vector to the center of a sphere
       // The following code calculates the contribution to the density at a position vector (rx,ry,rz) from each Guassian
+      // and adds them together to get the density at position vector (rx, ry, rz) which is then stored in setn[i]
       {                            
         double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R1: Gaussian centered at the origin  Rx=0, Ry=0, Rz=0 
@@ -230,14 +180,14 @@ int main(int argc, char **argv) {
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                  //R13: Gaussian centered at Rx=-a/2, Ry=0, Rz=-a/2 
+        
+        N_crystal = (setn[i]*dV) + N_crystal;  //Calculates the number of spheres in one crystal cell
       }
+     }
     }
-    if (use_veff) {
-      for (int i=0; i<Ntot; i++) {
-        fveff.Veff()[i] = -temp*log(fveff.Veff()[i]); // convert from density to effective potential
-      }
-    }
-  }
+
+
+  crystal_density = N_crystal/pow(lattice_constant,3);
 
   if (false) {
     char *fname = new char[5000];
@@ -252,29 +202,38 @@ int main(int argc, char **argv) {
     delete[] fname;
     const int Nz = f.Nz();
     Vector rz = f.get_rz();
-    Vector n = (use_veff) ? fveff.get_n() : f.n();
+    Vector n = f.n();
     for (int i=0;i<Nz/2;i++) {
       fprintf(o, "%g\t%g\n", rz[i], n[i]);
     }
     fclose(o);
   }
-  
+
   printf("Crystal free energy is %g\n", f.energy());
-  f.printme("Crstyal stuff!");
+  printf("Number of spheres in one crystal cell is %g\n", N_crystal);
+  printf("corresponding to a homogeneous density of %g\n", crystal_density);
+  
+   hf.n() = crystal_density;
+  
+  printf("And now the Bulk energy is %g\n", hf.energy());
+ // homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;
+  printf("And now the Fluid cell free energy should be %g\n", hf.energy()*lattice_constant*lattice_constant*lattice_constant);
+  
+  f.printme("Crystal stuff!");
   if (f.energy() != f.energy()) {
     printf("FAIL!  nan for initial energy is bad!\n");
     exit(1);
   }
-  
-  //run_solid(lattice_constant, reduced_density, temp, &fveff, &f, homogeneous_free_energy);
-  
-  double DIFF;   // Find the difference between the homogenious (liquid) free energy and the crystal free energy
-  DIFF = homogeneous_free_energy - f.energy();
-  printf("DIFF = Liquid Cell Free Energy - Crystal Free Energy  = %g \n", DIFF);
-  if (f.energy() < homogeneous_free_energy) {
-    printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n");
+ 
+  // Find the difference between the homogeneous (fluid) free energy and the crystal free energy 
+  double DIFF;   
+  DIFF = f.energy() - (hf.energy()*lattice_constant*lattice_constant*lattice_constant);
+  printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
+//  if (f.energy() < homogeneous_free_energy) {
+  if (f.energy() < hf.energy()*lattice_constant*lattice_constant*lattice_constant) {
+    printf("Crystal Free Energy is LOWER than the Fluid Cell Free Energy!!!\n");
   }
     else printf("TRY AGAIN!\n");
-  
+
   return 0;
 }
