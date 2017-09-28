@@ -111,7 +111,8 @@ int main(int argc, char **argv) {
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = (1/reduced_num_spheres)*pow(sqrt(2*M_PI)*gwidth, 3); 
+ //   const double norm = (1/reduced_num_spheres)*pow(sqrt(2*M_PI)*gwidth, 3); 
+    const double norm = pow(sqrt(2*M_PI)*gwidth, 3);                                 //KIR ADDED
     const double norm_no_vacancies = (1/cell_spheres)*pow(sqrt(2*M_PI)*gwidth, 3);   //KIR ADDED
 ////   const double norm = (1/(cell_spheres*(1-fv)))*pow(sqrt(2*M_PI)*gwidth, 3); 
  //   printf("norm is %g\n", norm);
@@ -126,10 +127,8 @@ int main(int argc, char **argv) {
       const double ry = rry[i];
       const double rz = rrz[i]; 
       setn[i] = 0.0000001*hf.n(); //sets initial density everywhere to a small value other than zero
-  //    printf("\nsetn[%d] is initially %g\n", i, setn[i]);
       setn_no_vacancies[i] = 0.0000001*hf.n(); //sets initial density everywhere to a small value other than zero  KIR ADDED -OK
-  //    printf("setn_no_vacancies[%d] is initially %g\n", i, setn_no_vacancies[i]);
-      // The FCC cube is set up with one whole sphere in the center of the cube.
+        // The FCC cube is set up with one whole sphere in the center of the cube.
       // dist is the magnitude of vector r-vector R=square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)  
       // where r is a position vector and R is a vector to the center of a sphere or Gaussian.
       // The following code calculates the contribution to the density 
