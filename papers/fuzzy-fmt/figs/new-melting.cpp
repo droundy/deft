@@ -113,6 +113,9 @@ int main(int argc, char **argv) {
       // at a position vector (rrx[i],rry[i],rrz[i]) from each Guassian
       // and adds them to get the density at that position vector which 
       // is then stored in setn[i].
+      //NOTE! For this code to give proper results, the Gaussians must
+      //have a width that is much smaller than the lattice constant so 
+      //that the Gaussian's can be considered contained within the cube!
       {   
         //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0                          
         double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
@@ -192,9 +195,9 @@ int main(int argc, char **argv) {
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
         setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
-     }
+      }
         //Calculate the number of spheres in one crystal cell
-        N_crystal = (setn[i]*dV) + N_crystal; //number of spheres computed by integrating n(r)
+        N_crystal = (setn[i]*dV) + N_crystal; //number of spheres computed by integrating n(r) computationally
     }  //end for loop
      printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
   }
