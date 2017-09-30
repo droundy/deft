@@ -43,7 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGE: ADDED NOTE BELOW ABOUT THE CURRENT PROBLEM LINE 202
+//CHANGE: Cleaned up some comments. Is line 102 needed?
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
@@ -60,9 +60,9 @@ int main(int argc, char **argv) {
   assert(sscanf(argv[4], "%lg", &temp) == 1);
   printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
   
-  const double cell_spheres = 4.0;  // number of spheres that FILL one cell (no vacancies)
+  const double cell_spheres = 4.0;  // number of spheres in one cell when there are no vacancies
   printf("A full cell contains %g sphere(s).\n",  cell_spheres);
-  double reduced_num_spheres = cell_spheres*(1-fv); // CHECK if right! number of spheres in one cell based on input vacancy fraction fv  
+  double reduced_num_spheres = cell_spheres*(1-fv); // number of spheres in one cell based on input vacancy fraction fv  
   printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, cell_spheres*fv); 
   double lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);      
   printf("lattice constant = %g\n", lattice_constant);    
