@@ -43,7 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGED EXPRESSION OF NORM IN LINE 99 SO CAN MULTIPLY BY NORM RATHER THAN DIVIDE BY NORM TO BETTER MATCH NOTES FROM DAVID
+//CHANGE: ADDED NOTE BELOW ABOUT THE CURRENT PROBLEM LINE 202
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
@@ -199,6 +199,16 @@ int main(int argc, char **argv) {
      printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
   }
  
+ //PROBLEM: Not only is the computed number of spheres N_crystal far from the reduced number of spheres
+ //(which I think is something we are expecting to see and compensate for), but N_crystal changes
+ //with the Gaussain width (gwidth). I don't think N_crystal should change with the width since
+ //that is the point of multiplying a Gaussain function by 1/(squareroot of 2pi * gwidth)^3.
+ //An analytical integral over one Gaussian is multiplied by 1/(squareroot of 2pi * gwidth)^3 
+ //to make the integral of one Gaussian=1 irregardless of the width of the Gaussian. It appears
+ //that the term 1/(squareroot of 2pi * gwidth)^3 is not effectively compensating for varying gwdith values.
+ //This is why I had computed a new quantity N_crystal_no_vacancies in my earlier program last 
+ //week so that I could see what was being computed for the number of spheres with no vacanices 
+ //at a particular gwidth and use it to renormalize. But I'm not sure if I did that correctly.
   
   if (false) {
     char *fname = new char[5000];
