@@ -44,6 +44,8 @@ double inhomogeneity(Vector n) {
 }
 
 
+// THIS IS BACK TO WHERE I WAS LAST MONDAY SEPT 25!
+
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
