@@ -115,8 +115,8 @@ int main(int argc, char **argv) {
       // is then stored in setn[i].
       //NOTE! For this code to give proper results, the Gaussians must
       //have a width that is much smaller than the lattice constant so 
-      //that parts of the Gaussian's that extend into the cell do not 
-      //extend out the other sides of the cell!
+      //that parts of the Gaussian's that extend into the cube do not 
+      //extend out the other sides of the cube!
       {   
         //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0                          
         double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
