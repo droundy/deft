@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = reduced_num_spheres)/pow(sqrt(2*M_PI)*gwidth, 3); 
+    const double norm = reduced_num_spheres/pow(sqrt(2*M_PI)*gwidth, 3); 
 
     Vector setn = f.n();
     double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
