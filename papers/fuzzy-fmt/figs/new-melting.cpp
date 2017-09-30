@@ -43,8 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-
-// THIS IS BACK TO WHERE I WAS LAST MONDAY SEPT 25!
+//CHANGED EXPRESSION OF NORM IN LINE 99 SO CAN MULTIPLY BY NORM RATHER THAN DIVIDE BY NORM TO BETTER MATCHES NOTES FROM DAVID
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
@@ -97,7 +96,7 @@ int main(int argc, char **argv) {
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = (1/reduced_num_spheres)*pow(sqrt(2*M_PI)*gwidth, 3); 
+    const double norm = reduced_num_spheres)/pow(sqrt(2*M_PI)*gwidth, 3); 
 
     Vector setn = f.n();
     double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
@@ -117,82 +116,82 @@ int main(int argc, char **argv) {
       {   
         //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0                          
         double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
       }
       {
         //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
         double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
 
         //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
  
         //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                    rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
 
         //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rz*rz);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
       }
       {
         //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
         double dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
                          
         //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
     
         //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
         dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
        
         //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                    rx*rx);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
      }
      {
         //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
         double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                            (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                           ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
 
         //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
 
         //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                    ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                      
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);                      
 
         //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
      }
         //Calculate the number of spheres in one crystal cell
         N_crystal = (setn[i]*dV) + N_crystal; //number of spheres computed by integrating n(r)
