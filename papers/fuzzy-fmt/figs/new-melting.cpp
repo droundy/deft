@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
   
   const double cell_spheres = 4.0;  // number of spheres that FILL one cell (no vacancies)
   printf("A full cell contains %g sphere(s).\n",  cell_spheres);
-  double reduced_num_spheres = cell_spheres*(1-fv);    // number of spheres in one cell based on input vacancy fraction fv  
+  double reduced_num_spheres = cell_spheres*(1-fv); // CHECK if right! number of spheres in one cell based on input vacancy fraction fv  
   printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, cell_spheres*fv); 
   double lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);      
   printf("lattice constant = %g\n", lattice_constant);    
@@ -221,42 +221,20 @@ int main(int argc, char **argv) {
 
   printf("Crystal free energy is %g\n", f.energy());
   
-  //KIR ADDED -junk now?----------------------------------------------------------------
-  //printf("Number of spheres in one crystal cell is %g\n", N_crystal);
-  //printf("corresponding to a homogeneous density of %g\n", crystal_density);
-  //hf.n() = crystal_density;
-  //printf("And now the Bulk energy is %g\n", hf.energy());
-  //homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;
-  //printf("And now the Fluid cell free energy should be %g\n", hf.energy()*lattice_constant*lattice_constant*lattice_constant);
-  //END KIR ADDED -----------------------------------------------------------------------
- 
   f.printme("Crystal stuff!");
   if (f.energy() != f.energy()) {
     printf("FAIL!  nan for initial energy is bad!\n");
     exit(1);
   }
-  
-  //KIR ADDED -junk now?----------------------------------------------------------------
-  //Find the difference between the homogeneous (fluid) free energy and the crystal free energy 
-  //double DIFF;   
-  //DIFF = f.energy() - (hf.energy()*lattice_constant*lattice_constant*lattice_constant);
-  //printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
-  //if (f.energy() < homogeneous_free_energy) {
-  //if (f.energy() < hf.energy()*lattice_constant*lattice_constant*lattice_constant) {
-  //printf("Crystal Free Energy is LOWER than the Fluid Cell Free Energy!!!\n");
-  //}
-  //else printf("TRY AGAIN!\n");
-  //END KIR ADDED -----------------------------------------------------------------------
-
 
   // Find the difference between the homogeneous (fluid) free energy and the crystal free energy 
   double DIFF;   
   DIFF = f.energy() - homogeneous_free_energy;
   printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
   if (f.energy() < homogeneous_free_energy) {
-    printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n");
+    printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
   }
-    else printf("TRY AGAIN!\n");
+    else printf("TRY AGAIN!\n\n");
     
   //Create dataout file - or open file in append mode
   FILE *newmeltoutfile;
