@@ -43,7 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGED EXPRESSION OF NORM IN LINE 99 SO CAN MULTIPLY BY NORM RATHER THAN DIVIDE BY NORM TO BETTER MATCHES NOTES FROM DAVID
+//CHANGED EXPRESSION OF NORM IN LINE 99 SO CAN MULTIPLY BY NORM RATHER THAN DIVIDE BY NORM TO BETTER MATCH NOTES FROM DAVID
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
