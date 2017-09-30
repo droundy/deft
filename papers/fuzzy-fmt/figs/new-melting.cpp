@@ -43,7 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGE: Added important note on line 116.
+//CHANGE: Tracing through program operation computing N_crystal
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
@@ -96,12 +96,14 @@ int main(int argc, char **argv) {
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = reduced_num_spheres/pow(sqrt(2*M_PI)*gwidth, 3); 
+ //   const double norm = reduced_num_spheres/*pow(sqrt(2*M_PI)*gwidth, 3); 
+    const double norm = 1/pow(sqrt(2*M_PI)*gwidth,3); 
 
     Vector setn = f.n();
     double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
      
-    for (int i=0; i<Ntot; i++) {
+  //  for (int i=0; i<Ntot; i++) {
+      for (int i=0; i<3; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
       const double rz = rrz[i]; 
@@ -115,12 +117,13 @@ int main(int argc, char **argv) {
       // is then stored in setn[i].
       //NOTE! For this code to give proper results, the Gaussians must
       //have a width that is much smaller than the lattice constant so 
-      //that parts of the Gaussian's that extend into the cube do not 
+      //that parts of the Gaussians that extend into the cube do not 
       //extend out the other sides of the cube!
       {   
         //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0                          
         double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
         setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
+        printf("R1: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
       }
       {
         //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
@@ -128,24 +131,28 @@ int main(int argc, char **argv) {
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rz*rz);
         setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
+         printf("R2: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
 
         //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rz*rz);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+        printf("R3: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
  
         //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                    rz*rz);
         setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
+        printf("R4: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
 
         //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rz*rz);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+        printf("R5: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD 
       }
       {
         //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
@@ -153,54 +160,63 @@ int main(int argc, char **argv) {
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rx*rx);
         setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
+        printf("R6: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
                          
         //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rx*rx);
         setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
+        printf("R7: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
     
         //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
         dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rx*rx);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
+        printf("R8: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
        
         //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                    rx*rx);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth); 
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+        printf("R9: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD 
      }
      {
         //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
         double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                            (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                           ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+        printf("R10: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD 
 
         //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+        printf("R11: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD 
 
         //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                    ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);                      
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
+        printf("R12: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD               
 
         //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);  
+        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+        printf("R13: setn[%d]=%g added %g\n", i, setn[i], norm*exp(-0.5*dist*dist/gwidth/gwidth));  //KIRADD
       }
-        //Calculate the number of spheres in one crystal cell
-        N_crystal = (setn[i]*dV) + N_crystal; //number of spheres computed by integrating n(r) computationally
-    }  //end for loop
-     printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
+      //Integrate n(r) computationally to check number of spheres in one cell
+        N_crystal = (setn[i]*dV) + N_crystal; 
+        printf("Integrated number of spheres in loop %d is %g with setn[%d]=%g\n", i, N_crystal, i,setn[i]);
+    } //end for loop
+    printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
   }
  
  //PROBLEM: Not only is the computed number of spheres N_crystal far from the reduced number of spheres
