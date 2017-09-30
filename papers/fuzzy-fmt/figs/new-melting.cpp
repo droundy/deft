@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
   double cell_spheres;  // number of spheres that FILL one cell (no vacancies)
   double reduced_num_spheres;  // number of spheres in one cell based on input vacancy fraction fv  
   double N_crystal, crystal_density;  //number of spheres and density computed by integrating n(r)
- // double N_crystal_no_vacancies;  //number of spheres and density computed by integrating n(r)   KIR ADDED
+ 
   
   //Get inputs from command line
   if (argc != 5) {
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
   assert(sscanf(argv[4], "%lg", &temp) == 1);
   printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
   
-  cell_spheres = 1.0;   // the number of spheres that fill one fluid cell (no vacancies) -ASK (should be 4 for FCC! not 1!)
+  cell_spheres = 1.0;   // the number of spheres that fill one fluid cell (no vacancies)
   printf("A full cell contains %g sphere(s).\n",  cell_spheres);
   reduced_num_spheres = cell_spheres*(1-fv);   //the reduced number of spheres in a fluid cell
   printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, cell_spheres*fv); 
@@ -93,17 +93,7 @@ int main(int argc, char **argv) {
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.n() = hf.n();
-  
-  // KIR ADDED ---(gets rid of nan) --------------------------------------
- //  SFMTFluid f_no_vacancies(lattice_constant, lattice_constant, lattice_constant, dx);   
-//  f_no_vacancies.sigma() = hf.sigma();
- // f_no_vacancies.epsilon() = hf.epsilon();
-//  f_no_vacancies.kT() = hf.kT();
-//  f_no_vacancies.mu() = hf.mu();
-//  f_no_vacancies.Vext() = 0;
-//  f_no_vacancies.n() = hf.n();
-  //----------------------------------------------------------------------
-  
+
 
   {
     // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
@@ -112,23 +102,16 @@ int main(int argc, char **argv) {
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
     const double norm = (1/reduced_num_spheres)*pow(sqrt(2*M_PI)*gwidth, 3); 
- //   const double norm = pow(sqrt(2*M_PI)*gwidth, 3);                                 //KIR ADDED
-  //  const double norm_no_vacancies = (1/cell_spheres)*pow(sqrt(2*M_PI)*gwidth, 3);   //KIR ADDED
-////   const double norm = (1/(cell_spheres*(1-fv)))*pow(sqrt(2*M_PI)*gwidth, 3); 
- //   printf("norm is %g\n", norm);
 
     Vector setn = f.n();
-  //  Vector setn_no_vacancies = f_no_vacancies.n();  //KIR ADDED    
     N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
-  //  N_crystal_no_vacancies = 0.0000001;  // ?needed? ASK! KIR ADDED
      
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
       const double ry = rry[i];
       const double rz = rrz[i]; 
       setn[i] = 0.0000001*hf.n(); //sets initial density everywhere to a small value other than zero
-   //   setn_no_vacancies[i] = 0.0000001*hf.n(); //sets initial density everywhere to a small value other than zero  KIR ADDED -OK
-        // The FCC cube is set up with one whole sphere in the center of the cube.
+      // The FCC cube is set up with one whole sphere in the center of the cube.
       // dist is the magnitude of vector r-vector R=square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)  
       // where r is a position vector and R is a vector to the center of a sphere or Gaussian.
       // The following code calculates the contribution to the density 
@@ -139,7 +122,6 @@ int main(int argc, char **argv) {
         //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0                          
         double dist = sqrt(rx*rx + ry*ry+rz*rz);                           
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
-      //  setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED       
       }
       {
         //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
@@ -147,28 +129,24 @@ int main(int argc, char **argv) {
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rz*rz);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
-      //  setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                         
 
         //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rz*rz);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
-     //   setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED   
  
         //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                    rz*rz);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
-     //   setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                     
 
         //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rz*rz);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
-    //    setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                  
       }
       {
         //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
@@ -176,28 +154,24 @@ int main(int argc, char **argv) {
                            (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                            rx*rx);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
-     //  setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED  
                          
         //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry-lattice_constant/2)*(ry-lattice_constant/2) +
                     rx*rx);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
-     //   setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                      
-
+    
         //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
         dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                     rx*rx);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
-     //   setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                   
        
         //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
         dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     (ry+lattice_constant/2)*(ry+lattice_constant/2) +
                    rx*rx);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm; 
-    //    setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                   
      }
      {
         //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
@@ -205,45 +179,30 @@ int main(int argc, char **argv) {
                            (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                           ry*ry);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
-   //     setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                    
 
         //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz-lattice_constant/2)*(rz-lattice_constant/2) +
                     ry*ry);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
-    //    setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                   
 
         //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
         dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                    ry*ry);
-        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;   
-   //     setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED                    
+        setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;                      
 
         //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2 
         dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
                     (rz+lattice_constant/2)*(rz+lattice_constant/2) +
                     ry*ry);
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
-    //    setn_no_vacancies[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm_no_vacancies;     //KIR ADDED  
      }
         //Calculate the number of spheres in one crystal cell
-     //   N_crystal_no_vacancies = (setn_no_vacancies[i]*dV) + N_crystal_no_vacancies;     //KIR ADDED  
         N_crystal = (setn[i]*dV) + N_crystal; 
-     }  //end for loop
-     
+    }  //end for loop
      printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
-  //   printf("Integrated number of spheres in one crystal cell with no vacancies is %g\n", N_crystal_no_vacancies);
-//   crystal_density = N_crystal/pow(lattice_constant,3);  //homogeneous equivilant should match entered reduced density
-  //   printf("NORMALIZED number of spheres in one crystal cell is %g\n", N_crystal/N_crystal_no_vacancies);
-     
-  //   printf("normalizing setn ... ");
-   //  for (int i=0; i<Ntot; i++) {
-   //     setn[i]=setn[i]/(N_crystal/N_crystal_no_vacancies);
-   // }
-   //  printf("setn has been normalized\n");
-    }
+  }
  
   
   if (false) {
@@ -309,9 +268,9 @@ int main(int argc, char **argv) {
   FILE *newmeltoutfile;
   newmeltoutfile = fopen("newmeltdataout.dat", "a");
   //fprintf(newmeltoutfile, "#temp  redensity fv  kT     CryFreeEnergy\n");
- //fprintf(newmeltoutfile, "# %g  %g  %g  %g  %g\n", reduced_density, fv, gwidth,temp, f.energy());
-  //  fprintf(newmeltoutfile, "#redensity   CrystalFreeEnergy\n");
-    fprintf(newmeltoutfile, "%g %g\n", gwidth, f.energy());
+  //fprintf(newmeltoutfile, "# %g  %g  %g  %g  %g\n", reduced_density, fv, gwidth,temp, f.energy());
+  //fprintf(newmeltoutfile, "#redensity   CrystalFreeEnergy\n");
+  fprintf(newmeltoutfile, "%g %g\n", gwidth, f.energy());
     
   return 0;
 }
