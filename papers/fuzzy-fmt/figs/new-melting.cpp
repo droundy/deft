@@ -45,12 +45,7 @@ double inhomogeneity(Vector n) {
 
 
 int main(int argc, char **argv) {
-  double lattice_constant; 
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
-  double cell_spheres;  // number of spheres that FILL one cell (no vacancies)
-  double reduced_num_spheres;  // number of spheres in one cell based on input vacancy fraction fv  
-  double N_crystal, crystal_density;  //number of spheres and density computed by integrating n(r)
- 
   
   //Get inputs from command line
   if (argc != 5) {
@@ -64,12 +59,11 @@ int main(int argc, char **argv) {
   assert(sscanf(argv[4], "%lg", &temp) == 1);
   printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
   
-  cell_spheres = 1.0;   // the number of spheres that fill one fluid cell (no vacancies)
+  const double cell_spheres = 4.0;  // number of spheres that FILL one cell (no vacancies)
   printf("A full cell contains %g sphere(s).\n",  cell_spheres);
-  reduced_num_spheres = cell_spheres*(1-fv);   //the reduced number of spheres in a fluid cell
+  double reduced_num_spheres = cell_spheres*(1-fv);    // number of spheres in one cell based on input vacancy fraction fv  
   printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, cell_spheres*fv); 
-  
-  lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);      
+  double lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);      
   printf("lattice constant = %g\n", lattice_constant);    
   
   HomogeneousSFMTFluid hf;
@@ -104,7 +98,7 @@ int main(int argc, char **argv) {
     const double norm = (1/reduced_num_spheres)*pow(sqrt(2*M_PI)*gwidth, 3); 
 
     Vector setn = f.n();
-    N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
+    double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
      
     for (int i=0; i<Ntot; i++) {
       const double rx = rrx[i];
@@ -199,7 +193,7 @@ int main(int argc, char **argv) {
         setn[i] += exp(-0.5*dist*dist/gwidth/gwidth)/norm;  
      }
         //Calculate the number of spheres in one crystal cell
-        N_crystal = (setn[i]*dV) + N_crystal; 
+        N_crystal = (setn[i]*dV) + N_crystal; //number of spheres computed by integrating n(r)
     }  //end for loop
      printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
   }
