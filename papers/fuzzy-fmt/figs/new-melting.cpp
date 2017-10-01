@@ -43,7 +43,8 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGE: Changed norm. 
+//CHANGE: Changed norm. For reduced_density=1.3, fv=.1, gwidth=.4576, kt=2 this gives 
+//N_crystal of 3.60013 for reduced number of spheres=3.6  with DIFF=-38.5!
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
