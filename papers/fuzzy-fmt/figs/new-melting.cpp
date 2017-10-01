@@ -43,7 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGE: Tracing through program operation computing N_crystal
+//CHANGE: 
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
@@ -214,7 +214,7 @@ int main(int argc, char **argv) {
       }
       //Integrate n(r) computationally to check number of spheres in one cell
         N_crystal = (setn[i]*dV) + N_crystal; 
-        printf("Integrated number of spheres in loop %d is %g with setn[%d]=%g\n", i, N_crystal, i,setn[i]);
+        printf("Integrated number of spheres in loop %d is %g with setn[%d]=%g added %g\n", i, N_crystal, i,setn[i], (setn[i]*dV));
     } //end for loop
     printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
   }
