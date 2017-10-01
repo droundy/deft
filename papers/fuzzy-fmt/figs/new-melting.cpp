@@ -43,7 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGE: if run this with .235 0 .649 2  Get N_crystal= 4.00091 but the free energy calc fails
+//CHANGE: Changed norm. 
 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
@@ -88,19 +88,22 @@ int main(int argc, char **argv) {
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.n() = hf.n();
-
-
+  
+   double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
+     
   {
     // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
     const int Ntot = f.Nx()*f.Ny()*f.Nz();  //Ntot is the total number of position vectors at which the density will be calculated
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
- //   const double norm = reduced_num_spheres/*pow(sqrt(2*M_PI)*gwidth, 3); 
-    const double norm = 1/pow(sqrt(2*M_PI)*gwidth,3); 
+ //   const double norm = reduced_num_spheres/pow(sqrt(2*M_PI)*gwidth, 3); 
+ //   const double norm = 1/pow(sqrt(2*M_PI)*gwidth,3); 
+    const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Using normally normalized Gaussians would correspond to 4 spheres
+                                                           // so we need to multiply by (1-fv) to get the reduced number of spheres.
 
     Vector setn = f.n();
-    double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
+//    double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
      
     for (int i=0; i<Ntot; i++) {
   //    for (int i=0; i<3; i++) {
@@ -229,6 +232,7 @@ int main(int argc, char **argv) {
  //This is why I had computed a new quantity N_crystal_no_vacancies in my earlier program last 
  //week so that I could see what was being computed for the number of spheres with no vacanices 
  //at a particular gwidth and use it to renormalize. But I'm not sure if I did that correctly.
+ 
   
   if (false) {
     char *fname = new char[5000];
@@ -273,7 +277,7 @@ int main(int argc, char **argv) {
   //fprintf(newmeltoutfile, "#temp  redensity fv  kT     CryFreeEnergy\n");
   //fprintf(newmeltoutfile, "# %g  %g  %g  %g  %g\n", reduced_density, fv, gwidth,temp, f.energy());
   //fprintf(newmeltoutfile, "#redensity   CrystalFreeEnergy\n");
-  fprintf(newmeltoutfile, "%g %g\n", gwidth, f.energy());
-    
+  //fprintf(newmeltoutfile, "%g %g\n", gwidth, f.energy());
+  fprintf(newmeltoutfile, "%g %g\n", gwidth, N_crystal);
   return 0;
 }
