@@ -16,8 +16,8 @@ y = 1
 z = 2
 
 # Default data sets to pull from. 
-# Will crash if Position, Energy, or Radial are called.
-rhoDefault = [0.6,0.7,0.8,0.9,0.91,0.92,0.93,0.94,1.0,1.1,1.2,1.3,1.4]
+rhoDefault = [0.6,0.7,0.8,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,\
+    0.99,1.0,1.1,1.2,1.3,1.4]
 TDefault = [1.0]
 
 def plotPressure(rho,T):
@@ -27,8 +27,20 @@ def plotPressure(rho,T):
 		for temp in T:
 			pressure = np.loadtxt('data/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-press.dat')
-			pressArray.append(float(pressure))
-                plt.plot(pressArray,density,'k.-')
+                
+                if density == 0.95:
+                    pressure = float(pressure*1e10/3664101397)
+                elif density == 0.96:
+                    pressure = float(pressure*1e10/3742376538)
+                elif density == 0.97:
+                    pressure = float(pressure*1e10/3804308688)
+                elif density == 0.98:
+                    pressure = float(pressure*1e10/3964798948)
+                elif density == 0.99:
+                    pressure = float(pressure*1e10/4160728275)
+                    
+                pressArray.append(float(pressure))
+                plt.plot(pressArray,density,'k.')
         plt.title('Density v. Pressure')
         plt.xlabel('Pressure')
         plt.ylabel('Density')
@@ -62,20 +74,20 @@ def plotRadialDF(rho,T):
 			plt.ylabel('Number of Spheres at this distance')
 
 
-def plotEnergyPDF(rho,T):
-	for density in rho:
-		plt.figure()
-		for temp in T:
-			energyData = np.loadtxt('data/ff-'+str(density)+'_temp-'+\
-                str(temp)+'-energy.dat')
-			mu,e2 = energyData
-			sigma = np.sqrt(e2 - mu*mu)
-			x = np.linspace(mu - 4*sigma, mu + 4*sigma, 1000)
-			plt.plot(x,mlab.normpdf(x,mu,sigma))
-			plt.title('Energy Probability Distribution Function Density: '+\
-                str(density))
-			plt.xlabel('Total Internal Energy')
-			plt.ylabel('Probability')
+#~ def plotEnergyPDF(rho,T):
+	#~ for density in rho:
+		#~ plt.figure()
+		#~ for temp in T:
+			#~ energyData = np.loadtxt('data/ff-'+str(density)+'_temp-'+\
+                #~ str(temp)+'-energy.dat')
+			#~ mu,e2 = energyData
+			#~ sigma = np.sqrt(e2 - mu*mu)
+			#~ x = np.linspace(mu - 4*sigma, mu + 4*sigma, 1000)
+			#~ plt.plot(x,mlab.normpdf(x,mu,sigma))
+			#~ plt.title('Energy Probability Distribution Function Density: '+\
+                #~ str(density))
+			#~ plt.xlabel('Total Internal Energy')
+			#~ plt.ylabel('Probability')
 
 	
 def plotDiffusionCoeff(rho,T):
@@ -84,13 +96,14 @@ def plotDiffusionCoeff(rho,T):
         for density in rho:
             diffusionData = np.loadtxt('data/ff-'+str(density)+'_temp-'+\
                 str(temp)+'-dif.dat')
-            plt.semilogy(density,diffusionData[999,1],'ko')
+            plt.semilogy(density,diffusionData,'k.')
             plt.title('Diffusion Coefficient v. Reduced Density')
             plt.xlabel(r'$\rho*$')
             plt.ylabel('D (length/iteration)')
+            #~ plt.ylim(0)
 
 parser = argparse.ArgumentParser(description='Which plots to make.')
-parser.add_argument('--plot', metavar='PLOT', action ="store",
+parser.add_argument('-p','--plot', metavar='PLOT', action ="store",
                     default='diffusion', help='the plot to make')
 parser.add_argument('-r','--rho', metavar = 'RHO',type = float, nargs = "+",
                     default = rhoDefault, help = "List of densities.")
@@ -108,10 +121,10 @@ elif args.plot.lower() == 'pressure':
     plotPressure(args.rho,args.temp)
 elif (len(args.rho) <=5 and len(args.temp) <= 5) \
     and args.plot.lower()!=('diffusion' or 'pressure'):
-    if args.plot.lower() == 'energy':
-        plotEnergyPDF(args.rho,args.temp)
+    #~ if args.plot.lower() == 'energy':
+        #~ plotEnergyPDF(args.rho,args.temp)
             
-    elif args.plot.lower() == 'radial':
+    if args.plot.lower() == 'radial':
         plotRadialDF(args.rho,args.temp)		
 
     elif args.plot.lower() == 'positions':
@@ -125,6 +138,6 @@ elif (len(args.rho) > 5 or len(args.temp) > 5) \
     "%d\n\n"%(len(args.rho),len(args.temp),len(args.rho)*len(args.temp)))
 else:
     print("\nOr Plot type %s not recognized.\nPlease enter either:\n"\
-                "diffusion\nenergy\npositions\npressure\nor radial\n"%args.plot)
+                "diffusion\npositions\npressure\nor radial\n"%args.plot)
 
 plt.show()
