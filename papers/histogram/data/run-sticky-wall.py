@@ -48,7 +48,7 @@ n = ff/(4*numpy.pi/3)
 N = round(n*lenyz*lenyz*lenx)
 mem_estimate = 10 + 0.15*N # it actually also depends on ww, but I'm ignoring that for now.
 
-datadir = 'papers/histogram/data/lv'
+datadir = 'papers/histogram/data/new-heuristic'
 fname = 'ww%.2f-ff%.2f-%gx%g-%s' % (ww, ff, lenx, lenyz, method_name)
 if method_name == 'wltmmc':
     fname += '-%g-%g' % (wl_threshold, wl_cutoff)

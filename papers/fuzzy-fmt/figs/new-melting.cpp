@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
   f.Vext() = 0;
   f.n() = hf.n();
   
-   double N_crystal = 0.0000001;  // ?needed? ASK! sets initial value for number of spheres in crystal to a small value other than zero
+   double N_crystal = 0;
      
   {
     // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
       const double rx = rrx[i];
       const double ry = rry[i];
       const double rz = rrz[i]; 
-      setn[i] = 0.0000001*hf.n(); //sets initial density everywhere to a small value other than zero
+      setn[i] = 0.0*hf.n(); //sets initial density everywhere to a small value (zero)
       // The FCC cube is set up with one whole sphere in the center of the cube.
       // dist is the magnitude of vector r-vector R=square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)  
       // where r is a position vector and R is a vector to the center of a sphere or Gaussian.
@@ -220,7 +220,15 @@ int main(int argc, char **argv) {
         N_crystal = (setn[i]*dV) + N_crystal; 
 //        printf("Integrated number of spheres in loop %d is %g with setn[%d]=%g added %g\n", i, N_crystal, i,setn[i], (setn[i]*dV));
     } //end for loop
-    printf("Integrated number of spheres in one crystal cell is %g\n", N_crystal);
+    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+           N_crystal, reduced_num_spheres);
+    setn = setn*(reduced_num_spheres/N_crystal);
+    double checking_normalized_num_spheres = 0;
+    for (int i=0; i<Ntot; i++) {
+      checking_normalized_num_spheres += setn[i]*dV;
+    }
+    printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
+           checking_normalized_num_spheres, reduced_num_spheres);
   }
  
  //PROBLEM: Not only is the computed number of spheres N_crystal far from the reduced number of spheres
