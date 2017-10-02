@@ -160,13 +160,6 @@ struct sw_simulation {
   // the last time we printed status text (i.e. from initialization)
   double estimated_time_per_iteration; // in units of seconds per iteration
 
-  // iterate long enough to find the max entropy state and initialize
-  // the translation distance. return most probable energy
-  int initialize_max_entropy(double acceptance_goal = 0.4);
-
-  // initialize the translation distance. return most probable energy
-  void initialize_translation_distance(double acceptance_goal = 0.4);
-
   // iterate enough times for the energy to change n times.  Return
   // the number of "up" moves.
   int simulate_energy_changes(int num_moves);
@@ -179,18 +172,6 @@ struct sw_simulation {
 
   // set canonical weights below some given energy
   void initialize_canonical(double T, int reference=0);
-
-  void initialize_wang_landau(double wl_factor, double wl_fmod,
-                              double wl_threshold, double wl_cutoff,
-                              bool fixed_energy_range);
-
-  void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
-
-  void initialize_simple_flat(int flat_update_factor);
-
-  void initialize_tmi(int version=1);
-  void initialize_toe(int version=1);
-  void initialize_transitions();
 
   void initialize_transitions_file(const char *transitions_input_filename);
   void write_transitions_file() const;

@@ -27,7 +27,7 @@ for flag in ['-Wall', '-Werrorr', '-O3', '-std=c++11', '-Isrc', '-Iinclude', '-g
 if len(flags) > 0:
     flags = flags[1:]
 linkflags = ''
-for flag in ['-lpopt', '-lprofiler', '-lfftw3', '-flto']:
+for flag in ['-lpopt', '-lprofiler', '-g', '-lfftw3', '-flto']:
     if not os.system('cd testing-flags && g++ %s %s -o test test.c' %
                      (flags, flag)):
         linkflags += ' ' + flag
