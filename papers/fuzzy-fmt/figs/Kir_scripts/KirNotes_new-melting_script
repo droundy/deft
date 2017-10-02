@@ -1,0 +1,25 @@
+New-Melting Script Notes: Runs new-melting.cpp several times to generate data and plots data
+
+Edit script file:  /home/kirstie/deft/papers/fuzzy-fmt/figs/Kir_scripts/kir_new-melting_script.sh
+Run script file from Kir_scripts directory as:   ./kir_new-melting_script.sh
+
+The script file runs /home/kirstie/deft/papers/fuzzy-fmt/figs/new-melting.cpp several times generating data and creating the data file:  newmeltdataout.dat in Kir_scripts directory
+
+The script file then runs /home/kirstie/deft/papers/fuzzy-fmt/figs/Kir_scripts/newmeltdataout.cpp 
+which uses newmeltdataout.dat to create plot file: newmeltdataout.gnu in Kir_scripts directory
+
+The script file runs gnuplot with pause command to show the plot. Alternatively, to see the plot start gnuplot (enter "gnuplot") and type load 'newmeltdataout.gnu' to display the plot.
+
+FILES to commit:
+
+   kir_new-melting_script.sh
+   new-melting.cpp
+   newmeltdataout.cpp
+
+
+*Remember to compile newmeltdataout.cpp using g++ newmeltdataout.cpp -o newmeltdataout
+*Remember to make script file executable using chmod u+x kir_new-melting_script.sh
+
+
+
+
