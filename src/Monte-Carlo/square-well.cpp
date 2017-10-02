@@ -1637,7 +1637,6 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
       printf("We have never yet visited %d!\n", lowest_hist_i);
     }
   } else {
-    const double variation = hist_mean/lowest_hist - 1;
     const double min_over_mean = lowest_hist/hist_mean;
     const long min_interesting_energy_count = energy_histogram[min_important_energy];
 
@@ -1645,7 +1644,7 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
     // check whether our histogram is flat enough to update wl_factor.
     // We are choosing to have wl_threshold=1 mean that as long as
     // everything has been visited once we are permitted to move on.
-    if (variation < wl_threshold || wl_threshold == 1) {
+    if (min_over_mean >= wl_threshold || wl_threshold == 1) {
       we_changed = true;
       printf("We reached WL flatness from %d to %d!\n",
              min_important_energy, max_entropy_state);
@@ -1667,7 +1666,7 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
     }
     if (verbose || we_changed) {
       printf("  WL factor: %g (vs %g)\n",wl_factor, wl_cutoff);
-      printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
+      printf("  min/mean %g\n", min_over_mean);
       printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
              highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
       printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
