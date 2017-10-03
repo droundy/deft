@@ -32,7 +32,7 @@ maxhist = 0
 numframes = 0
 
 dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
-colors = ['k', 'b', 'r', 'g']
+colors = ['k', 'b', 'r', 'g', 'c', 'm']
 
 lastframe = -1
 alldone = False
