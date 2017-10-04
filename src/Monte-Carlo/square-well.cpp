@@ -940,7 +940,7 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 
 // this method is under construction by DR and JP (2017).
 // initialize the weight array using the wltmmc method.
-void sw_simulation::initialize_wltmmc(double wl_factor, double wl_fmod,
+void sw_simulation::initialize_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff) {
   //const double original_wl_factor = wl_factor;
   int weight_updates = 0;
@@ -976,7 +976,7 @@ void sw_simulation::initialize_wltmmc(double wl_factor, double wl_fmod,
     if (lowest_hist == 0) {
       printf("We have never yet visited %d!\n", lowest_hist_i);
     } else {
-      const double variation = hist_mean/lowest_hist - 1;
+
       const double min_over_mean = lowest_hist/hist_mean;
       const long min_interesting_energy_count = energy_histogram[min_important_energy];
 
@@ -987,7 +987,7 @@ void sw_simulation::initialize_wltmmc(double wl_factor, double wl_fmod,
         write_transitions_file(); // Just for the heck of it, save the transition matrix...
         printf("WL weight update: %i\n",weight_updates);
         printf("  WL factor: %g\n",wl_factor);
-        printf("  count variation: %g (min/mean %g)\n", variation, min_over_mean);
+        printf("  min/mean %g\n", min_over_mean);
         printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
                highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
         printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
@@ -998,7 +998,7 @@ void sw_simulation::initialize_wltmmc(double wl_factor, double wl_fmod,
       // check whether our histogram is flat enough to update wl_factor.
       // We are choosing to have wl_threshold=1 mean that as long as
       // everything has been visited once we are permitted to move on.
-      if (variation < wl_threshold || wl_threshold == 1) {
+      if (min_over_mean >= wl_threshold || wl_threshold == 1) {
         weight_updates += 1;
         printf("We reached WL flatness!\n");
         be_verbose = true;
