@@ -1,0 +1,76 @@
+Data Collection Procedure: 
+
+GOAL: Produce a plot of Free Energy vs Reduced Density along an isotherm (fixed Temperature)
+
+1. Choose a value for KT (temperature). This will be the same for all runs.
+
+For EACH choosen value of Reduced Density ...
+
+2.  Create a Denisty folder "Den_x.x" in the folder DATAandPLOTS_KIR with the x.x labeled with
+    the Reduced Density at which we are trying to find the lowest Free Energy (entered in step 3).
+
+3.  Remove data out file (if exists) as this will be recreated and appended:  rm newmeltdataout.dat
+
+4.  Choose a value for gwidth to begin.
+
+5.  Edit and run new-melting.cpp with the fv for loop active running from fv=0 (no vacancies) to fv=1 step 0.01
+    and keyboard inputs of: Reduced Density, Width of Gaussian(gwidth), and KT  
+
+6.  Data is collected in newmeltdataout.dat 
+    Review data to find a range of fv values that give the lowest Free Energy at the given gwidth.
+
+	(optional). Run ./newmeltdataout.cpp which creates gnu plotting file newmeltdataout.gnu
+
+	(optional). Run gnuplot newmeltdataout.gnu to plot and view data
+	
+	View newmeltdataout.dat file to see actual values and find fv with lowest Free Energy
+
+	Store plot and newmeltdataout.dat file in DATAandPLOTS_KIR folder in the appropriate Density folder 		
+        (labeled with Reduced Density the from step 3) with value of fv and lowest Free Energy in the name.
+
+7.  Repeat steps 2-4 as needed with finer steps and narrower range to find the fv value that gives 
+    the lowest Free Energy at the given gwidth. 
+
+8.  You have made one plot of fv vs Free Energy at a choosen gwidth and found the fv value that gives the 
+    lowest Free Energy for that choosen gwidth. Now try other gwidth inputs above and below the originally  
+    choosen gwidth value to see about happens to the fv value corresponding to the lowest Free Energy. 
+    Narrow in on the best value of fv that gives the lowest energy for any range of gwidth values generally. 
+
+9.  Store plot and newmeltdataout.dat files in DATAandPLOTS_KIR folder in the appropriate Density folder 
+    (labeled with Reduced Density the from step 3) with value of fv and lowest Free Energy in the name.
+    
+10. Again remove data out file as this will be recreated and appended:  rm newmeltdataout.dat
+
+11. Edit and run new-melting.cpp with the gwidth for loop active running from gwidth=0 to gwidth=
+    lattice_consant step 0.01 and keyboard inputs of: Reduced Density from step 3, fv=lowest value from 
+    step 6, KT from step 3
+
+12. Data is collected in newmeltdataout.dat
+    Review data to find a range of gwidth values that give the lowest Free Energy at the given gwidth.
+
+	(optional). Run ./newmeltdataout.cpp which creates gnu plotting file newmeltdataout.gnu
+
+	(optional). Run gnuplot newmeltdataout.gnu to plot and view data
+
+	View newmeltdataout.dat file to see actual values and find gwitdth with the lowest Free Energy
+
+13. Repeat steps 6-8 with finer steps and narrower range to find the gwidth value that gives 
+    the lowest Free Energy at the given fv value found in step 5.
+
+14. You have made one plot of gwidth vs Free Energy at the value of fv found in step 8. Now try other 
+    fv inputs above and below to confirm that you have found the combination of fv and gwidth values that 
+    give the lowest Free Energy. 
+
+15. Store plots and newmeltdataout.dat files of significant data in DATAandPLOTS_KIR folder in the
+    appropriate Density folder (labeled with Reduced Density the from step 3).
+
+16. When found the fv and gwidth values that give the lowest Free Energy at the Reduced Density and KT
+    values entered in step 3, take a snapshot (png) of the printed data output of new-melting.cpp and 
+    save in the same folder with the plots and data files. 
+
+17. Enter the values for Liquid Free Energy, Crystal Free Energy, Reduced Density, Fraction of Vacanices(fv), 
+    Gaussian width(gwidth), and KT into the text document in the DATAandPLOTS_KIR folder called DATALOG.
+
+18. Repeat steps 2-17 with a new value for the Reduced Density and the same value for KT.
+
+
