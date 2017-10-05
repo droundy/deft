@@ -34,8 +34,8 @@ double dx = 0.05;
 double eps = 1;
 const double radius = 1;
 double sigma = radius*pow(2,5.0/6.0);
-double temperature = 0.01; //default temp 
-// double kT = 0.01; //default temp 
+double temperature = 0.01; //default temp
+// double kT = 0.01; //default temp
 
 double soft_sphere_potential(Cartesian r) {
   const double z = r.z();
@@ -43,7 +43,9 @@ double soft_sphere_potential(Cartesian r) {
   const double x = r.x();
   const double VoverKTcutoff = 100;
   const double distance = sqrt(x*x + y*y + z*z);
-  if (distance >= 2*radius) { return 0; }
+  if (distance >= 2*radius) {
+    return 0;
+  }
   double V = (4*eps*(uipow(sigma/distance,12) - uipow(sigma/distance,6)) + eps)/36;
   if (V/temperature < VoverKTcutoff) return V;
   return VoverKTcutoff*temperature;
@@ -109,10 +111,10 @@ double run_soft_sphere(double reduced_density, double temp) {
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, temperature,
-                                                            potential,
-                                                            QuadraticLineMinimizer));
+                                potential,
+                                QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  for (int i=0; min.improve_energy(true) && i<100; i++) {
   }
 
   took("Doing the minimization");

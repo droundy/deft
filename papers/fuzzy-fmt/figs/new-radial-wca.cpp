@@ -73,7 +73,7 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
       fprintf(stderr, "error creating file %s\n", fname);
       exit(1);
     }
-    for (int i=0;i<Nz/2;i++) {
+    for (int i=0; i<Nz/2; i++) {
       fprintf(o, "%g\t%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i], n3[i]);
     }
     fclose(o);
@@ -131,7 +131,9 @@ int main(int argc, char **argv) {
     for (int i=0; i<Ntot; i++) {
       const double Vmax = 100*temp;
       f.Vext()[i] = 4*epsilon*(uipow(sigma/r[i], 12) - uipow(sigma/r[i], 6)) + epsilon;
-      if (r[i] > 2*radius) { f.Vext()[i] = 0; }
+      if (r[i] > 2*radius) {
+        f.Vext()[i] = 0;
+      }
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
 
       if (f.Vext()[i] > 0) {

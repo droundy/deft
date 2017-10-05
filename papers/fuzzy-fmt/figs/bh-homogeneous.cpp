@@ -33,14 +33,14 @@ const double sigma = radius*pow(2,5.0/6.0);
 const double R = 2*radius;
 const double epsilon = 1.0;
 const int N = 1000000;
- 
+
 double R_BH(const double kT) {
   double bh_diameter = 0;
   const double dr = R/N;
   const double beta = 1.0/kT;
   for (double r_cur=dr/2; r_cur < R; r_cur += dr) {
     bh_diameter += (1 - exp(-beta*(4*epsilon*(uipow(sigma/r_cur,12)
-                                              - uipow(sigma/r_cur,6)) + epsilon)))*dr;
+                                   - uipow(sigma/r_cur,6)) + epsilon)))*dr;
   }
   return bh_diameter/2;
 }

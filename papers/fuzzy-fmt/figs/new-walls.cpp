@@ -68,7 +68,7 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   const int Nz = f->Nz();
   Vector rz = f->get_rz();
   Vector n = f->get_n();
-  for (int i=0;i<Nz/2;i++) {
+  for (int i=0; i<Nz/2; i++) {
     fprintf(o, "%g\t%g\n", (rz[i] - spacing)/f->sigma(), n[i]*uipow(f->sigma(), 3));
   }
   fclose(o);

@@ -52,7 +52,7 @@ double R_BH(const double kT) {
   const double beta = 1.0/kT;
   for (double r_cur=dr/2; r_cur < R; r_cur += dr) {
     bh_diameter += (1 - exp(-beta*(4*epsilon*(uipow(sigma/r_cur,12)
-                                              - uipow(sigma/r_cur,6)) + epsilon)))*dr;
+                                   - uipow(sigma/r_cur,6)) + epsilon)))*dr;
   }
   return bh_diameter/2;
 }
@@ -76,10 +76,10 @@ double soft_wall_potential(double z, double Vcutoff) {
   const double R9 = pow(R_0,9);
 
   double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
-                                       + 2*sig12*(1/z9 - 1/R9)/45
-                                       + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4)
-                                                    - 2*sig12/5/pow(R_0,10))
-                                       + sig6*(1/R3-1/z3)/3);
+                                         + 2*sig12*(1/z9 - 1/R9)/45
+                                         + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4)
+                                             - 2*sig12/5/pow(R_0,10))
+                                         + sig6*(1/R3-1/z3)/3);
   if (potential < Vcutoff) return potential;
   return Vcutoff;
 }
@@ -114,10 +114,10 @@ void run_soft_walls(double reduced_density, WhiteBearFluidVeff *f, double kT) {
   Vector rz = f->get_rz();
   Vector n = f->get_n();
   Vector n3 = f->get_n3();
-  for (int i=Nz/2+1;i<Nz;i++) {
+  for (int i=Nz/2+1; i<Nz; i++) {
     fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
   }
-  for (int i=0;i<Nz/2;i++) {
+  for (int i=0; i<Nz/2; i++) {
     fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
   }
   fclose(o);

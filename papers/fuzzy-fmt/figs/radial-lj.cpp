@@ -42,8 +42,8 @@ double dx = 0.05;
 double eps = 1;
 const double radius = 1;
 double sigma = radius*pow(2,5.0/6.0);
-double temperature = 0.01; //default temp 
-// double kT = 0.01; //default temp 
+double temperature = 0.01; //default temp
+// double kT = 0.01; //default temp
 
 double lj_potential(Cartesian r) {
   const double z = r.z();
@@ -116,10 +116,10 @@ double run_soft_sphere(double reduced_density, double temp) {
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, temperature,
-                                                            potential,
-                                                            QuadraticLineMinimizer));
+                                potential,
+                                QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  for (int i=0; min.improve_energy(true) && i<100; i++) {
   }
 
   took("Doing the minimization");
