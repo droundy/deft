@@ -251,7 +251,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
    fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g\n", reduced_density, fv, gwidth,
           temp, reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy);  //running gwidth loop
  
-  return Free_Energy;
+  return Free_Energy/reduced_num_spheres;
 }
 
 int main(int argc, char **argv) {
