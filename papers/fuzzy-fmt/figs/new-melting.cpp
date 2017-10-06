@@ -243,7 +243,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   FILE *newmeltoutfile;
   newmeltoutfile = fopen("newmeltdataout.dat", "a");
   fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g\n", temp, reduced_density, fv, gwidth,
-           reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);  //running gwidth loop
+           reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);
   return Free_Energy/reduced_num_spheres;
 }
 
@@ -277,7 +277,7 @@ int main(int argc, char **argv) {
      }
      printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
    } else if (gwidth < 0) {
-      for (double gwidth=0.001; gwidth <= 5; gwidth+=0.01) {
+      for (double gwidth=0.001; gwidth <= 1; gwidth+=0.01) {
          find_energy(temp, reduced_density, fv, gwidth);
        }     
    } else {
