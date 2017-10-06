@@ -248,9 +248,8 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   //fprintf(newmeltoutfile, "%g %g\n", gwidth, f.energy());
  // fprintf(newmeltoutfile, "%g %g\n", fv, Free_Energy);  // running fv loop
  //  fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g\n", reduced_density, fv, gwidth, temp, checking_normalized_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy);  //running gwidth loop
-   fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g\n", reduced_density, fv, gwidth,
-          temp, reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy);  //running gwidth loop
- 
+   fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g\n", reduced_density, fv, gwidth,
+          temp, reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);  //running gwidth loop
   return Free_Energy/reduced_num_spheres;
 }
 
