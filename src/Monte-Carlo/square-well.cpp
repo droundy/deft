@@ -942,11 +942,11 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 // initialize the weight array using the wltmmc method.
 void sw_simulation::initialize_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff) {
-  int check_how_often = biggest_energy_transition*energy_levels; // update WL stuff only so often
+  int check_how_often =  N; // update WL stuff only so often
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    check_how_often += N; // try a little harder next time...
 
     verbose = printing_allowed();
     if (verbose) write_transitions_file();
@@ -976,7 +976,6 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
       move_a_ball();
-      ln_energy_weights[energy] -= wl_factor;
     }
 
     if(!fixed_energy_range){
@@ -1029,7 +1028,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
     bool be_verbose = printing_allowed();
 
     // check whether our histogram is flat enough to update wl_factor
-    if (variation > 0 && variation < wl_threshold) {
+    if (min_over_mean >= wl_threshold) {
       weight_updates += 1;
       printf("We reached WL flatness!\n");
       be_verbose = true;
@@ -1457,11 +1456,11 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
 
 // initialization with tmi
 void sw_simulation::initialize_tmi(int version) {
-  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  int check_how_often = N; // avoid wasting time if we are done
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    check_how_often += N; // try a little harder next time...
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
@@ -1475,11 +1474,11 @@ void sw_simulation::initialize_tmi(int version) {
 
 // initialization with toe
 void sw_simulation::initialize_toe(int version) {
-  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  int check_how_often = N; // avoid wasting time if we are done
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    check_how_often += N; // try a little harder next time...
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
@@ -1494,11 +1493,11 @@ void sw_simulation::initialize_toe(int version) {
 // initialization with tmmc
 void sw_simulation::initialize_transitions() {
   assert(use_tmmc);
-  int check_how_often = biggest_energy_transition*energy_levels; // avoid wasting time if we are done
+  int check_how_often = N; // avoid wasting time if we are done
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += biggest_energy_transition*energy_levels; // try a little harder next time...
+    check_how_often += N; // try a little harder next time...
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();

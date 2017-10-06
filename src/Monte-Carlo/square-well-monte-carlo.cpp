@@ -117,7 +117,7 @@ int main(int argc, const char *argv[]) {
   double wl_factor = 1;
   double wl_fmod = 2;
   double wl_threshold = 0.8;
-  double wl_cutoff = 1e-8;
+  double wl_cutoff = 1e-10;
 
   // end conditions
   int default_pessimistic_min_samples = 10;
