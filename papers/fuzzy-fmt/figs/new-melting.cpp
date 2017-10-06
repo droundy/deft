@@ -43,35 +43,26 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-//CHANGE: Changed norm. For reduced_density=1.3, fv=.1, gwidth=.4576, kt=2 this gives
-//N_crystal of 3.60013 for reduced number of spheres=3.6  with DIFF=-38.5!
-
-int main(int argc, char **argv) {
-  double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
-
-  //Get inputs from command line
-  if (argc != 4) {
-    printf("ENTER: %s homogeneous(reduced) density, fraction of vacancies, Gaussian width, kT\n", argv[0]);
-    return 1;
-  }
-  // printf("git version: %s\n", version_identifier());
-  assert(sscanf(argv[1], "%lg", &reduced_density) == 1);
-// assert(sscanf(argv[2], "%lg", &fv) == 1);
-  assert(sscanf(argv[2], "%lg", &gwidth) == 1);
-  assert(sscanf(argv[3], "%lg", &temp) == 1);
-  printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
-
+double find_energy(double temp, double reduced_density, double fv, double gwidth) {
   const double cell_spheres = 4.0;  // number of spheres in one cell when there are no vacancies
   printf("A full cell contains %g sphere(s).\n",  cell_spheres);
 
-  for (double fv=0; fv <=1; fv+=0.01) {
-    printf("Reduced homogeneous density= %g, fraction of vacancies=%g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
+  double reduced_num_spheres = cell_spheres*(1-fv); // number of spheres in one cell based on input vacancy fraction fv  
+  double vacancy = cell_spheres*fv;
+  double lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);  
+    
+  HomogeneousSFMTFluid hf;
+  hf.sigma() = 1;
+  hf.epsilon() = 1;   //energy constant in the WCA fluid
+  hf.kT() = temp;
+  hf.n() = reduced_density;
+  hf.mu() = 0;
 
-    double reduced_num_spheres = cell_spheres*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
-    printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, cell_spheres*fv);
-    double lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);
-    printf("lattice constant = %g\n", lattice_constant);
-
+  printf("Reduced homogeneous density= %g, fraction of vacancies=%g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp); 
+    
+  printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, vacancy); 
+  printf("lattice constant = %g\n", lattice_constant);   
+  
     // for (double gwidth=0.2; gwidth <=0.4; gwidth+=0.001) {
     //  printf("Reduced homogeneous density= %g, fraction of vacancies=%g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
 
@@ -219,26 +210,12 @@ int main(int argc, char **argv) {
       printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
              checking_normalized_num_spheres, reduced_num_spheres);
     }
-
-
-    if (false) {
-      char *fname = new char[5000];
-      mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
-      snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/initial-melting-%04.2f-%04.2f-%04.2f.dat",
-               lattice_constant, reduced_density, temp);
-      FILE *o = fopen(fname, "w");
-      if (!o) {
-        fprintf(stderr, "error creating file %s\n", fname);
-        exit(1);
-      }
-      delete[] fname;
-      const int Nz = f.Nz();
-      Vector rz = f.get_rz();
-      Vector n = f.n();
-      for (int i=0; i<Nz/2; i++) {
-        fprintf(o, "%g\t%g\n", rz[i], n[i]);
-      }
-      fclose(o);
+    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+           N_crystal, reduced_num_spheres);
+    setn = setn*(reduced_num_spheres/N_crystal);  //Normalizes setn
+    double checking_normalized_num_spheres = 0;   
+    for (int i=0; i<Ntot; i++) {
+      checking_normalized_num_spheres += setn[i]*dV;
     }
     //printf("Crystal free energy is %g\n", f.energy());
     double Free_Energy = f.energy();
@@ -249,24 +226,84 @@ int main(int argc, char **argv) {
       printf("FAIL!  nan for initial energy is bad!\n");
       exit(1);
     }
+    delete[] fname;
+    const int Nz = f.Nz();
+    Vector rz = f.get_rz();
+    Vector n = f.n();
+    for (int i=0;i<Nz/2;i++) {
+      fprintf(o, "%g\t%g\n", rz[i], n[i]);
+    }
+    fclose(o);
+  }
+  //printf("Crystal free energy is %g\n", f.energy());
+  double Free_Energy = f.energy();
+  printf("Crystal free energy is %g\n", Free_Energy);
+  
+  f.printme("Crystal stuff!");
+  if (f.energy() != f.energy()) {
+    printf("FAIL!  nan for initial energy is bad!\n");
+    return f.energy();
+  }
 
-    // Find the difference between the homogeneous (fluid) free energy and the crystal free energy
-    double DIFF;
-    DIFF = f.energy() - homogeneous_free_energy;
-    printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
-    if (f.energy() < homogeneous_free_energy) {
-      printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
-    } else printf("TRY AGAIN!\n\n");
+  // Find the difference between the homogeneous (fluid) free energy and the crystal free energy 
+  double DIFF;   
+  DIFF = f.energy() - homogeneous_free_energy;
+  printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
+  if (f.energy() < homogeneous_free_energy) {
+    printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
+  }
+    else printf("TRY AGAIN!\n\n");
+    
+  //Create dataout file - or open file in append mode
+  FILE *newmeltoutfile;
+  newmeltoutfile = fopen("newmeltdataout.dat", "a");
+  //fprintf(newmeltoutfile, "#temp  redensity fv  kT     CryFreeEnergy\n");
+  //fprintf(1.3 0.1 0.32 2   3.6   1.40428 -9.17801   -48.192newmeltoutfile, "# %g  %g  %g  %g  %g\n", reduced_density, fv, gwidth,temp, f.energy());
+  //fprintf(newmeltoutfile, "#redensity   CrystalFreeEnergy\n");
+  //fprintf(newmeltoutfile, "%g %g\n", gwidth, f.energy());
+ // fprintf(newmeltoutfile, "%g %g\n", fv, Free_Energy);  // running fv loop
+ //  fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g\n", reduced_density, fv, gwidth, temp, checking_normalized_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy);  //running gwidth loop
+   fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g\n", reduced_density, fv, gwidth,
+          temp, reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);  //running gwidth loop
+  return Free_Energy/reduced_num_spheres;
+}
 
-    //Create dataout file - or open file in append mode
-    FILE *newmeltoutfile;
-    newmeltoutfile = fopen("newmeltdataout.dat", "a");
-    //fprintf(newmeltoutfile, "#temp  redensity fv  kT     CryFreeEnergy\n");
-    //fprintf(newmeltoutfile, "# %g  %g  %g  %g  %g\n", reduced_density, fv, gwidth,temp, f.energy());
-    //fprintf(newmeltoutfile, "#redensity   CrystalFreeEnergy\n");
-    //fprintf(newmeltoutfile, "%g %g\n", gwidth, f.energy());
-    fprintf(newmeltoutfile, "%g %g\n", fv, Free_Energy);  // running fv loop
-    // fprintf(newmeltoutfile, "%g %g\n", gwidth, Free_Energy);  //running gwidth loop
-  }  //fv/gwidth for loop
+int main(int argc, char **argv) {
+  double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  
+  //Get inputs from command line
+  if (argc != 5) {
+    printf("ENTER: %s homogeneous(reduced) density, fraction of vacancies, Gaussian width, kT\n", argv[0]);
+    return 1;
+  }
+  // printf("git version: %s\n", version_identifier());
+  assert(sscanf(argv[1], "%lg", &temp) == 1);
+  assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
+  assert(sscanf(argv[3], "%lg", &fv) == 1);
+  assert(sscanf(argv[4], "%lg", &gwidth) == 1);
+  printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
+
+  if (fv == -1) {
+    double best_energy = 1e100;
+    double best_fv, best_gwidth;
+    for (double fv=0; fv <=1; fv+=0.01) {
+      for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
+         double e = find_energy(temp, reduced_density, fv, gwidth);
+         if (e < best_energy) {
+           best_energy = e;
+           best_fv = fv;
+           best_gwidth = gwidth;
+         }
+       }
+     }
+     printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
+   } else if (gwidth < 0) {
+      for (double gwidth=0.001; gwidth <= 5; gwidth+=0.01) {
+         find_energy(temp, reduced_density, fv, gwidth);
+       }     
+   } else {
+     find_energy(temp, reduced_density, fv, gwidth);
+   }
+
   return 0;
 }
