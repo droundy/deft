@@ -44,7 +44,7 @@ const double spacing = 1.5; // space on each side
 double notinwall(Cartesian r) {
   const double z = r.z();
   if (fabs(z) > spacing) {
-      return 1;
+    return 1;
   }
   return 0;
 }
@@ -105,14 +105,14 @@ double run_walls(double reduced_density, const char *name, Functional fhs, doubl
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, kT,
-                                                            &potential,
-                                                            QuadraticLineMinimizer));
+                                &potential,
+                                QuadraticLineMinimizer));
   took("Setting up the variables");
   if (strcmp(name, "hard") != 0 && false) {
     printf("For now, SoftFluid doesn't work properly, so we're skipping the\n");
     printf("minimization at temperature %g.\n", teff);
   } else {
-    for (int i=0;min.improve_energy(false) && i<100;i++) {
+    for (int i=0; min.improve_energy(false) && i<100; i++) {
     }
   }
   took("Doing the minimization");

@@ -50,7 +50,7 @@ int main(int, char **) {
 
       HomogeneousSFMTFluid hf;
       hf.sigma() = 1; // for this computation we will use sigma as our
-                      // unit of distance to keep things simple.
+      // unit of distance to keep things simple.
       hf.epsilon() = 1;
       hf.kT() = temp;
       hf.n() = n_reduced;

@@ -83,7 +83,7 @@ int main(int argc, const char *argv[]) {
   /* Do not change these here! They are taken directly from the WL paper.
      If you want to change the WL parameters, run this code with appropriate arguments */
   double wl_fmod = 2;
-  double wl_threshold = 1/0.95-1;
+  double wl_threshold = 0.8;
   double wl_cutoff = 1e-8;
 
   sw.min_important_energy = 0;

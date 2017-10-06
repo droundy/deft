@@ -33,8 +33,8 @@ const double spacing = 1.5; // space on each side
 double eta = 1;
 const double rho = 1;
 const double radius = 1;
-double temperature = 0.01; //default temp 
-// double kT = 0.01; //default temp 
+double temperature = 0.01; //default temp
+// double kT = 0.01; //default temp
 
 double soft_wall_potential(Cartesian r) {
   const double z = r.z();
@@ -46,12 +46,16 @@ double soft_wall_potential(Cartesian r) {
   double z3 = pow(z,3);
   double z9 = pow(z,9);
   double R3 = pow(R_0,3);
-  double R9 = pow(R_0,9); 
-  if (z >= (spacing + R_0) || z <= (spacing + R_0)) { return 0; }
-  else if ( z > -spacing && z < spacing ) { return Vcutoff; }
-  else {
+  double R9 = pow(R_0,9);
+  if (z >= (spacing + R_0) || z <= (spacing + R_0)) {
+    return 0;
+  } else if ( z > -spacing && z < spacing ) {
+    return Vcutoff;
+  } else {
     double potential = M_PI*rho*eta*((z3-R3)/6 + 2*sig12*(1/z9 - 1/R9)/45 + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4) - 2*sig12/5/pow(R_0,10)) + sig6*(1/R3-1/z3));
-    if (potential < Vcutoff) { return potential; }
+    if (potential < Vcutoff) {
+      return potential;
+    }
   }
   return Vcutoff;
 }
@@ -106,7 +110,7 @@ double run_soft_wall(double eta, double temp) {
 
   static Grid *potential = 0;
   potential = new Grid(gd);
-  *potential = softwallpotential - temperature*log(eta/(4*M_PI/3*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess 
+  *potential = softwallpotential - temperature*log(eta/(4*M_PI/3*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess
   const double approx_energy = f(temperature, eta/(4*M_PI/3))*xmax*ymax*zmax;
   const double precision = fabs(approx_energy*1e-9);
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, temperature);
@@ -114,10 +118,10 @@ double run_soft_wall(double eta, double temp) {
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, temperature,
-                                                            potential,
-                                                            QuadraticLineMinimizer));
+                                potential,
+                                QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  for (int i=0; min.improve_energy(true) && i<100; i++) {
   }
 
   took("Doing the minimization");

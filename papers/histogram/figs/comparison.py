@@ -23,7 +23,7 @@ colors = {
     '-toe3': 'r',
     '-tmmc': 'k',
     '-toe2': 'c',
-    '-vanilla_wang_landau': 'b',
+    '-vanilla_wang_landau': 'm',
     '-wltmmc': 'p'}
 
 try:
@@ -56,59 +56,47 @@ for method in methods:
             errorinentropy[i] = numpy.sum(doserror)/len(doserror)
             erroratenergy[i] = doserror[energy]
             maxerror[i] = numpy.amax(doserror)
-        newiterations = []
-        newnrt = []
-        newmax = []
-        newmin = []
 
         i = 1
         while i < len(iterations) and iterations[i] > iterations[i-1]:
             num_frames_to_count = i+1
             i+=1
-        newiterations = iterations[:num_frames_to_count]
-        newmin = minimportantenergy[:num_frames_to_count]
-        newmax = maxentropystate[:num_frames_to_count]
-        newnrt = Nrt_at_energy[:num_frames_to_count]
+        iterations = iterations[:num_frames_to_count]
+        minimportantenergy = minimportantenergy[:num_frames_to_count]
+        maxentropystate = maxentropystate[:num_frames_to_count]
         Nrt_at_energy = Nrt_at_energy[:num_frames_to_count]
         erroratenergy = erroratenergy[:num_frames_to_count]
 
         plt.figure('error-at-energy-iterations')
-        plt.plot(newiterations[newnrt > 0], erroratenergy[newnrt > 0], '%s-' % colors[method], label = method[1:])
+        plt.plot(iterations, erroratenergy, '%s-' % colors[method], label = method[1:])
         plt.title('Error at energy %g' % energy)
         plt.xlabel('# iterations')
         plt.ylabel('error')
         plt.legend(loc = 'best')
 
         plt.figure('round-trips-at-energy')
-        plt.plot(newiterations[0:len(newnrt)], newnrt, '%s-' % colors[method], label = method[1:])
+        plt.plot(iterations, Nrt_at_energy, '%s-' % colors[method], label = method[1:])
         plt.title('Roundy Trips at energy %g, n = 50' % energy)
         plt.xlabel('# iterations')
         plt.ylabel('Roundy Trips')
         plt.legend(loc = 'best')
         
         plt.figure('error-at-energy-round-trips')
-        plt.plot(newnrt[newnrt > 0], erroratenergy[newnrt > 0], '%s-' % colors[method], label = method[1:])
+        plt.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0], '%s-' % colors[method], label = method[1:])
         plt.title('Error at energy %g' % energy)
         plt.xlabel('Roundy Trips')
         plt.ylabel('Error')
         plt.legend(loc = 'best')
-        
-        plt.figure('convergence')
-        plt.plot(newiterations, goodenoughenergy[0:len(newiterations)], '%s-' % colors[method], label = method[1:])
-        plt.xlabel('# iterations')
-        plt.ylabel('energy we are converged to')
-        plt.title('Convergence at %g%% level' % (goodenough*100))
-        plt.legend(loc = 'best')
-        
+
         plt.figure('maxerror')
-        plt.loglog(newiterations, maxerror[0:len(newiterations)], '%s-' % colors[method], label = method[1:])
+        plt.loglog(iterations, maxerror, '%s-' % colors[method], label = method[1:])
         plt.xlabel('# iterations')
         plt.ylabel('Maximum Entropy Error')
         plt.title('Maximum Entropy Error vs Iterations')
         plt.legend(loc = 'best')
 
         plt.figure('errorinentropy')
-        plt.loglog(newiterations, errorinentropy[0:len(newiterations)], '%s-' % colors[method], label = method[1:])
+        plt.loglog(iterations, errorinentropy[0:len(iterations)], '%s-' % colors[method], label = method[1:])
         plt.xlabel('#iterations')
         plt.ylabel('Error in Entropy')
         plt.title('Average Entropy Error at Each Iteration, n = 50')

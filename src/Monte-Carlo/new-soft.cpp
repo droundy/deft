@@ -182,9 +182,9 @@ int main(int argc, const char *argv[])  {
     vector3d *sphereMoveVec = new vector3d[numOfSpheres];
     // Energy
     double currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-    double tempE2 = currentEnergy*currentEnergy;
+    //~ double tempE2 = currentEnergy*currentEnergy;
 	double totalEnergy = 0.0;
-    double energy2 = 0.0;
+
     // Pressure
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
     double virial = forceTimesDist(spheres, numOfSpheres, systemLength,wall);
@@ -193,9 +193,9 @@ int main(int argc, const char *argv[])  {
     long *runningRadial = new long[1000];
     long radialWrites = 0;
     // Diffusion
-	double *diffusion = new double[totalIterations];
+	double diffusion = 0; // = new double[totalIterations];
     double sphereTotalMove[numOfSpheres] = {0};
-    double currentD = 0;
+    //~ double currentD = 0;
     // File Saving and misc.
 	long acceptedTrials = 0;
     int outputCount = 0;
@@ -245,14 +245,11 @@ int main(int argc, const char *argv[])  {
     for (long currentIteration = 0; currentIteration < totalIterations; ++currentIteration) {
         exPressure += virial;
         totalEnergy += currentEnergy;
-        energy2 += tempE2;
-        diffusion[currentIteration] = currentD/(1+currentIteration);
         bool trialAcceptance = false;
         // Picks a random sphere to move and performs a random move on that sphere.
         int movedSphereNum = random::ran64() % numOfSpheres;
         vector3d initialSpherePos = spheres[movedSphereNum];
         vector3d randMove = vector3d::ran(dr);
-        //~ vector3d movedSpherePos = spheres[movedSphereNum] + randMove;
         vector3d movedSpherePos = periodicBC(spheres[movedSphereNum]+randMove,systemLength,wall);
         // Determines the difference in energy due to the random move
         double energyNew = 0.0, energyOld = 0.0;
@@ -281,13 +278,12 @@ int main(int argc, const char *argv[])  {
         if (trialAcceptance){   // If accepted, update lattice, PE, and radial dist. func.
             spheres[movedSphereNum] = movedSpherePos;
             currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-            tempE2 = currentEnergy*currentEnergy; // Don't need?
             virial = forceTimesDist(spheres,numOfSpheres,systemLength,wall);
             sphereMoveVec[movedSphereNum] += randMove;
 			sphereTotalMove[movedSphereNum] = sphereMoveVec[movedSphereNum].normsquared();
-			currentD = 0; // reset to zero
+			diffusion = 0; // reset to zero
             for (int i = 0; i < numOfSpheres; i++){
-				currentD += sphereTotalMove[i]/numOfSpheres;
+				diffusion += sphereTotalMove[i]/numOfSpheres;
 			}
             acceptedTrials += 1;
         }
@@ -312,7 +308,7 @@ int main(int argc, const char *argv[])  {
             dr *= 0.8;
             drAdjust += drAdjust;
 		} else {
-            drAdjust *= 10; // Minimize effects on detiled balance
+            drAdjust *= 10;
 		}
 	}
 	// ---------------------------------------------------------------
@@ -375,30 +371,26 @@ int main(int argc, const char *argv[])  {
 				// Save Radial
 				FILE *radial_out = fopen(radial_fname,"w");
 				fprintf(radial_out, "%s%s", headerinfo,countinfo);
-				for (int i = 0; i < 1000; ++i){ // This isn't being averaged properly
-					fprintf(radial_out, "%g\t%g\n", 
-						(i*systemLength[x])/(2*1000.0), 
+				for (int i = 0; i < 1000; ++i){ 
+                    double r_i = (i*systemLength[x])/(2*1000.0);
+					fprintf(radial_out, "%g\t%g\n", r_i, 
 						double(volume*runningRadial[i]/
-							  (numOfSpheres*numOfSpheres*radialWrites))); //g(r) = (V/N^2)
+							  (4*M_PI*r_i*r_i*numOfSpheres*radialWrites))); //g(r) = (V/N^2)...Needs to be normalized properly in the python script
 				}
 				// Save Pressure
 				FILE *press_out = fopen(press_fname,"w");
 				fprintf(press_out, "%s%s", headerinfo,countinfo);
 				fprintf(press_out, "%g\n",pressureIdeal + 
-					(exPressure / (totalIterations*volume)));
+					(exPressure / (currentIteration*volume))); 
 				// Save Energy
 				FILE *energy_out = fopen(energy_fname,"w");
 				fprintf(energy_out,"%s%s",headerinfo,countinfo);
 				fprintf(energy_out,"%g\t%g\n",
-						totalEnergy/double(currentIteration),
-						energy2/double(currentIteration));
+						totalEnergy/double(currentIteration));
 				// Save Diffusion
-
 				FILE *dif_out = fopen(dif_fname,"w");
 				fprintf(dif_out, "%s%s", headerinfo,countinfo);
-				for (long i = 0; i < currentIteration; i += currentIteration/1000 + 1) {
-					fprintf(dif_out,"%ld\t%g\n",i,double(diffusion[i]));
-				}
+                fprintf(dif_out,"%g\n",double(diffusion/(currentIteration+1)));
 				fclose(pos_out);
 				fclose(radial_out);
 				fclose(press_out);
@@ -481,6 +473,8 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres, double systemLen
     return totalPotential;
 }
 
+// Add Structure Factor
+
 double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3], bool wall[3]) {
     const int numOfBoxes = 1000;
     double *deltan = new double[numOfBoxes];
@@ -494,8 +488,8 @@ double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double syst
             vector3d Rj = sphereMatrix[j];
             vector3d R = nearestImage(Rj,Ri,systemLength,wall);
             double Rmag = R.norm();
-            int box = floor(Rmag*numOfBoxes/(systemLength[x]/2));   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
             if (Rmag <= (systemLength[x]/2)){
+                int box = floor(Rmag*numOfBoxes/(systemLength[x]/2));   // box = (R/dr) = (R / (sizeOfSystem/numOfBoxes))
                 deltan[box] += 1;
             }
         }

@@ -116,7 +116,7 @@ int main(int argc, const char *argv[]) {
      If you want to change the WL parameters, run this code with appropriate arguments */
   double wl_factor = 1;
   double wl_fmod = 2;
-  double wl_threshold = 1/0.95-1;
+  double wl_threshold = 0.8;
   double wl_cutoff = 1e-8;
 
   // end conditions
@@ -284,6 +284,8 @@ int main(int argc, const char *argv[]) {
      "Update scaling for the simple flat method", "INT"},
     {"min_important_energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
      "Fix a minimum important energy at a given value", "INT"},
+    {"max_entropy_energy", '\0', POPT_ARG_INT, &sw.max_entropy_state, 0,
+     "Set the maximum-entropy energy", "INT"},
 
     /*** END CONDITION PARAMETERS ***/
 
@@ -834,7 +836,7 @@ int main(int argc, const char *argv[]) {
                               vanilla_wang_landau);
   } else if (wltmmc) {
     sw.wl_factor = wl_factor;
-    sw.initialize_wltmmc(wl_factor, wl_fmod, wl_threshold, wl_cutoff);
+    sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {

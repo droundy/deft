@@ -84,7 +84,7 @@ void run_walls(double reduced_density, WhiteBearFluidVeff *f, double kT) {
   Vector rz = f->get_rz();
   Vector n = f->get_n();
   printf("multiplying by sigma = %g\n", sigma);
-  for (int i=0;i<Nz/2;i++) {
+  for (int i=0; i<Nz/2; i++) {
     fprintf(o, "%g\t%g\n", (rz[i] - spacing)/sigma, n[i]*uipow(sigma, 3));
   }
   fclose(o);

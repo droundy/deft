@@ -41,8 +41,8 @@ double xmax = zmax;
 double dx = 0.05;
 double V0 = 1;
 const double radius = 1;
-double temperature = 0.01; //default temp 
-// double kT = 0.01; //default temp 
+double temperature = 0.01; //default temp
+// double kT = 0.01; //default temp
 
 double soft_sphere_potential(Cartesian r) {
   const double z = r.z();
@@ -51,9 +51,10 @@ double soft_sphere_potential(Cartesian r) {
   const double V0overKTcutoff = 100;
   const double Rcutoff = 2*radius*(1-sqrt(V0overKTcutoff/(V0/temperature)));
   const double distance = sqrt(x*x + y*y + z*z);
-  if (distance >= radius*2) { return 0; }
-  else if (distance > Rcutoff) {
-      return V0*pow((1-distance/(2*radius)),2);
+  if (distance >= radius*2) {
+    return 0;
+  } else if (distance > Rcutoff) {
+    return V0*pow((1-distance/(2*radius)),2);
   }
   return V0overKTcutoff*temperature;
 }
@@ -108,7 +109,7 @@ double run_soft_sphere(double eta, double temp) {
 
   static Grid *potential = 0;
   potential = new Grid(gd);
-  *potential = softspherepotential - temperature*log(eta/(4*M_PI/3*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess 
+  *potential = softspherepotential - temperature*log(eta/(4*M_PI/3*radius*radius*radius))*VectorXd::Ones(gd.NxNyNz); // Bad starting guess
   const double approx_energy = f(temperature, eta/(4*M_PI/3))*xmax*ymax*zmax;
   const double precision = fabs(approx_energy*1e-9);
   printf("\tMinimizing to %g absolute precision from %g from %g...\n", precision, approx_energy, temperature);
@@ -116,10 +117,10 @@ double run_soft_sphere(double eta, double temp) {
 
   Minimizer min = Precision(precision,
                             PreconditionedConjugateGradient(f, gd, temperature,
-                                                            potential,
-                                                            QuadraticLineMinimizer));
+                                potential,
+                                QuadraticLineMinimizer));
   took("Setting up the variables");
-  for (int i=0;min.improve_energy(true) && i<100;i++) {
+  for (int i=0; min.improve_energy(true) && i<100; i++) {
   }
 
   took("Doing the minimization");
