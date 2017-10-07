@@ -232,7 +232,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
 
   // Find the difference between the homogeneous (fluid) free energy and the crystal free energy
   double DIFF;
-  DIFF = f.energy() - homogeneous_free_energy;
+  DIFF = (f.energy() - homogeneous_free_energy)/reduced_num_spheres;
   printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
   if (f.energy() < homogeneous_free_energy) {
     printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
@@ -242,8 +242,8 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   FILE *newmeltoutfile;
   newmeltoutfile = fopen("newmeltdataout.dat", "a");
   fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g\n", temp, reduced_density, fv, gwidth,
-          reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);
-  return Free_Energy/reduced_num_spheres;
+          reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, DIFF);
+  return DIFF;
 }
 
 int main(int argc, char **argv) {
