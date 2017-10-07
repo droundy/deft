@@ -233,7 +233,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   // Find the difference between the homogeneous (fluid) free energy and the crystal free energy
   double DIFF;
   DIFF = (f.energy() - homogeneous_free_energy)/reduced_num_spheres;
-  printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
+  printf("DIFF = (Crystal Free Energy - Fluid Cell Free Energy)/spheres = %g \n", DIFF);
   if (f.energy() < homogeneous_free_energy) {
     printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
   } else printf("TRY AGAIN!\n\n");
@@ -264,8 +264,8 @@ int main(int argc, char **argv) {
   if (fv == -1) {
     double best_energy = 1e100;
     double best_fv, best_gwidth;
-    for (double fv=0; fv <=1; fv+=0.01) {
-      for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
+    for (double fv=0; fv <=.1; fv+=0.01) {
+      for (double gwidth=0.01; gwidth <= .5; gwidth+=0.01) {
         double e = find_energy(temp, reduced_density, fv, gwidth);
         if (e < best_energy) {
           best_energy = e;
@@ -274,9 +274,10 @@ int main(int argc, char **argv) {
         }
       }
     }
-    printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
+    double free_energy=find_energy(temp, reduced_density, best_fv, best_gwidth);
+    printf("best fv %g gwidth %g E %g and lowest free energy is %g\n", best_fv, best_gwidth, best_energy, free_energy);
   } else if (gwidth < 0) {
-    for (double gwidth=0.001; gwidth <= 1; gwidth+=0.01) {
+    for (double gwidth=0.01; gwidth <= .5; gwidth+=0.01) {
       find_energy(temp, reduced_density, fv, gwidth);
     }
   } else {
