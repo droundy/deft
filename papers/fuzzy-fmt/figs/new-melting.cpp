@@ -241,8 +241,12 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   //Create dataout file - or open file in append mode
   FILE *newmeltoutfile;
   newmeltoutfile = fopen("newmeltdataout.dat", "a");
-  fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g\n", temp, reduced_density, fv, gwidth,
-          reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);
+  if (newmeltoutfile) {
+    fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g\n", temp, reduced_density, fv, gwidth,
+            reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);
+  } else {
+    printf("Unable to open file newmeltdataout.out!\n");
+  }
   return Free_Energy/reduced_num_spheres;
 }
 
