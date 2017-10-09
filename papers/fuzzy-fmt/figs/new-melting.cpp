@@ -73,7 +73,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
     printf("Homogeneous free energy per sphere is %g\n", homogeneous_free_energy);
   }
 
-  const double dx = 0.05;         //grid point spacing dx=dy=dz=0.05
+  const double dx = 0.01;         //grid point spacing dx=dy=dz=0.05
   const double dV = pow(0.05,3);  //volume element dV
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
