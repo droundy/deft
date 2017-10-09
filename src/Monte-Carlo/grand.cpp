@@ -442,7 +442,7 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
 double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
 
   double *ln_dos = new double[energy_levels]();
-
+  double *eq_error = new double[energy_levels];
   if(dos_type == histogram_dos){
     for(int i = max_entropy_state; i < energy_levels; i++){
       if(energy_histogram[i] != 0){
@@ -470,6 +470,33 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
         ln_dos[i] += log(down_to_here/up_from_here);
       }
     }
+    double eq_error1 =0;
+    double eq_error2 = 0;
+    double eq_error_max = 0;
+    int imax = 0;
+    for (int i = 0; i< energy_levels; i++) {
+      if (energy_histogram[i]) {
+	double eqei = 0; // exp equilibrium error; ith component
+	for (int j = 0; j < energy_levels; j++) {
+	  double tij = transition_matrix(i,j);
+	  if (tij) {
+	    eqei += transition_matrix(i,j)*exp(ln_dos[j]-ln_dos[i]);
+	  }
+	}
+	eq_error[i] = log(eqei);
+	if (eq_error_max < abs(eq_error[i])) {
+	  eq_error_max = abs(eq_error[i]);
+	  imax = i;
+	}
+	eq_error_max = max(eq_error_max,abs(eq_error[i]));
+	eq_error1 += abs(eq_error[i]);
+	eq_error2 += eq_error[i]*eq_error[i];
+      }
+    }
+    eq_error2 = sqrt(eq_error2);
+    printf("Eq. Error 1 Norm: %g\n",exp(eq_error1)-1);
+    printf("Eq. Error 2 Norm: %g\n",exp(eq_error2)-1);
+    printf("Eq. Error Max Norm: %g, %d \n",exp(eq_error_max)-1,imax);
   } else {
     printf("We don't know what dos type we have!\n");
     exit(1);
