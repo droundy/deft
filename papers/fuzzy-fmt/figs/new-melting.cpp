@@ -44,10 +44,9 @@ double inhomogeneity(Vector n) {
 }
 
 
-double find_energy(double temp, double reduced_density, double fv, double gwidth) {
+double find_energy(double temp, double reduced_density, double fv, double gwidth,
+                   bool verbose=false) {
   const double cell_spheres = 4.0;  // number of spheres in one cell when there are no vacancies
-  printf("A full cell contains %g sphere(s).\n",  cell_spheres);
-
   double reduced_num_spheres = cell_spheres*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = cell_spheres*fv;
   double lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);
@@ -59,15 +58,20 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   hf.n() = reduced_density;
   hf.mu() = 0;
 
-  printf("Reduced homogeneous density= %g, fraction of vacancies=%g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
+  if (verbose) {
+    printf("Reduced homogeneous density= %g, fraction of vacancies=%g, Gaussian width= %g, temp= %g\n",
+           reduced_density, fv, gwidth, temp);
 
-  printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n", reduced_num_spheres, vacancy);
-  printf("lattice constant = %g\n", lattice_constant);
+    printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n",
+           reduced_num_spheres, vacancy);
+    printf("lattice constant = %g\n", lattice_constant);
+  }
 
-
-  const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;  //ASK DAVID about this!!!!
-  printf("Bulk energy is %g\n", hf.energy());
-  printf("Fluid cell free energy should be %g\n", homogeneous_free_energy);
+  const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere
+  if (verbose) {
+    printf("Bulk energy per volume is %g\n", hf.energy());
+    printf("Homogeneous free energy per sphere is %g\n", homogeneous_free_energy);
+  }
 
   const double dx = 0.05;         //grid point spacing dx=dy=dz=0.05
   const double dV = pow(0.05,3);  //volume element dV
@@ -190,15 +194,19 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
       //Integrate n(r) computationally to check number of spheres in one cell
       N_crystal = (setn[i]*dV) + N_crystal;
     }
-    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
-           N_crystal, reduced_num_spheres);
-    setn = setn*(reduced_num_spheres/N_crystal);  //Normalizes setn
-    double checking_normalized_num_spheres = 0;
-    for (int i=0; i<Ntot; i++) {
-      checking_normalized_num_spheres += setn[i]*dV;
+    if (verbose) {
+      printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+             N_crystal, reduced_num_spheres);
     }
-    printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
-           checking_normalized_num_spheres, reduced_num_spheres);
+    setn = setn*(reduced_num_spheres/N_crystal);  //Normalizes setn
+    if (verbose) {
+      double checking_normalized_num_spheres = 0;
+      for (int i=0; i<Ntot; i++) {
+        checking_normalized_num_spheres += setn[i]*dV;
+      }
+      printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
+             checking_normalized_num_spheres, reduced_num_spheres);
+    }
   }
 
 
@@ -222,20 +230,19 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
     fclose(o);
   }
   //printf("crystal free energy is %g\n", f.energy());
-  //double crystal_free_energy = f.energy();    //ASK DAVID about this!!! shouldn't this be consistent with line 75 before find DIFF?
-  double crystal_free_energy = f.energy()*lattice_constant*lattice_constant*lattice_constant;  //Fixed? ASK DAVID about this!!!
-  double free_energy=crystal_free_energy/reduced_num_spheres;   //Check with DAVID - this is for comparison - want the lowest of this value! (I think)
-  printf("Crystal free energy is %g\n", crystal_free_energy);
-  
-  f.printme("Crystal stuff!");
-  if (f.energy() != f.energy()) {
-    printf("FAIL!  nan for initial energy is bad!\n");
-    return f.energy();
-  }
+  double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
+  if (verbose) {
+    printf("Crystal free energy is %g\n", crystal_free_energy);
 
-  if (crystal_free_energy < homogeneous_free_energy) {
-    printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
-  } else printf("TRY AGAIN!\n\n");
+    f.printme("Crystal stuff!");
+    if (f.energy() != f.energy()) {
+      printf("FAIL!  nan for initial energy is bad!\n");
+    }
+
+    if (crystal_free_energy < homogeneous_free_energy) {
+      printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
+    } else printf("TRY AGAIN!\n\n");
+  }
 
   //Create dataout file - or open file in append mode
   FILE *newmeltoutfile = fopen("newmeltdataout.dat", "a");
@@ -249,7 +256,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   } else {
     printf("Unable to open file newmeltdataout.out!\n");
   }
-  return free_energy;
+  return crystal_free_energy - homogeneous_free_energy;
 }
 
 int main(int argc, char **argv) {
@@ -270,23 +277,32 @@ int main(int argc, char **argv) {
   if (fv == -1) {
     double best_energy = 1e100;
     double best_fv, best_gwidth;
+    const int num_to_compute = int(0.3/0.05*1/0.01);
+    int num_computed = 0;
     for (double fv=0; fv <=1; fv+=0.01) {
-      for (double gwidth=0.01; gwidth <= .3; gwidth+=0.01) {
+      for (double gwidth=0.05; gwidth <= .3; gwidth+=0.05) {
         double e = find_energy(temp, reduced_density, fv, gwidth);
+        num_computed += 1;
+        if (num_computed % (num_to_compute/100) == 0) {
+          printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
+                 best_energy);
+        }
         if (e < best_energy) {
+          printf("better free energy with fv %g gwidth %g and E %g\n",
+                 fv, gwidth, e);
           best_energy = e;
           best_fv = fv;
           best_gwidth = gwidth;
         }
       }
     }
-    printf("best fv %g gwidth %g E %g and lowest free energy is %g\n", best_fv, best_gwidth, best_energy*4*(1-best_fv));
+    printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
   } else if (gwidth < 0) {
     for (double gwidth=0.01; gwidth <= .3; gwidth+=0.01) {
       find_energy(temp, reduced_density, fv, gwidth);
     }
   } else {
-    find_energy(temp, reduced_density, fv, gwidth);
+    find_energy(temp, reduced_density, fv, gwidth, true);
   }
 
   return 0;
