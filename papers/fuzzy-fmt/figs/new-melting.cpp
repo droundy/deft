@@ -238,8 +238,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   } else printf("TRY AGAIN!\n\n");
 
   //Create dataout file - or open file in append mode
-  FILE *newmeltoutfile;
-  newmeltoutfile = fopen("newmeltdataout.dat", "a");
+  FILE *newmeltoutfile = fopen("newmeltdataout.dat", "a");
   if (newmeltoutfile) {
     fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g   DIFF %g\n", temp, reduced_density, fv, gwidth,
             reduced_num_spheres, lattice_constant, homogeneous_free_energy, crystal_free_energy, crystal_free_energy-homogeneous_free_energy);
