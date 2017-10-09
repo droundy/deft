@@ -242,6 +242,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   if (newmeltoutfile) {
     fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g   DIFF %g\n", temp, reduced_density, fv, gwidth,
             reduced_num_spheres, lattice_constant, homogeneous_free_energy, crystal_free_energy, crystal_free_energy-homogeneous_free_energy);
+    fclose(newmeltoutfile);
   } else {
     printf("Unable to open file newmeltdataout.out!\n");
   }
