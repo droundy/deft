@@ -264,7 +264,7 @@ int main(int argc, char **argv) {
     double best_energy = 1e100;
     double best_fv, best_gwidth;
     for (double fv=0; fv <=1; fv+=0.01) {
-      for (double gwidth=0.01; gwidth <= .3; gwidth+=0.01) {
+      for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
         double e = find_energy(temp, reduced_density, fv, gwidth);
         if (e < best_energy) {
           best_energy = e;
@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
     }
     printf("best fv %g gwidth %g E %g and lowest free energy is %g\n", best_fv, best_gwidth, best_energy*4*(1-best_fv));
   } else if (gwidth < 0) {
-    for (double gwidth=0.01; gwidth <= .3; gwidth+=0.01) {
+    for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
       find_energy(temp, reduced_density, fv, gwidth);
     }
   } else {
