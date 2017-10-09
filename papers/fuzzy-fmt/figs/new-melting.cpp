@@ -43,6 +43,7 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
+
 double find_energy(double temp, double reduced_density, double fv, double gwidth) {
   const double cell_spheres = 4.0;  // number of spheres in one cell when there are no vacancies
   printf("A full cell contains %g sphere(s).\n",  cell_spheres);
@@ -64,7 +65,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   printf("lattice constant = %g\n", lattice_constant);
 
 
-  const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;
+  const double homogeneous_free_energy = hf.energy()*lattice_constant*lattice_constant*lattice_constant;  //ASK DAVID about this!!!!
   printf("Bulk energy is %g\n", hf.energy());
   printf("Fluid cell free energy should be %g\n", homogeneous_free_energy);
 
@@ -220,21 +221,19 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
     }
     fclose(o);
   }
-  //printf("Crystal free energy is %g\n", f.energy());
-  double Free_Energy = f.energy();
-  printf("Crystal free energy is %g\n", Free_Energy);
-
+  //printf("crystal free energy is %g\n", f.energy());
+  //double crystal_free_energy = f.energy();    //ASK DAVID about this!!! shouldn't this be consistent with line 75 before find DIFF?
+  double crystal_free_energy = f.energy()*lattice_constant*lattice_constant*lattice_constant;  //Fixed? ASK DAVID about this!!!
+  double free_energy=crystal_free_energy/reduced_num_spheres;   //Check with DAVID - this is for comparison - want the lowest of this value! (I think)
+  printf("Crystal free energy is %g\n", crystal_free_energy);
+  
   f.printme("Crystal stuff!");
   if (f.energy() != f.energy()) {
     printf("FAIL!  nan for initial energy is bad!\n");
     return f.energy();
   }
 
-  // Find the difference between the homogeneous (fluid) free energy and the crystal free energy
-  double DIFF;
-  DIFF = f.energy() - homogeneous_free_energy;
-  printf("DIFF = Crystal Free Energy - Fluid Cell Free Energy = %g \n", DIFF);
-  if (f.energy() < homogeneous_free_energy) {
+  if (crystal_free_energy < homogeneous_free_energy) {
     printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
   } else printf("TRY AGAIN!\n\n");
 
@@ -242,12 +241,12 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   FILE *newmeltoutfile;
   newmeltoutfile = fopen("newmeltdataout.dat", "a");
   if (newmeltoutfile) {
-    fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g\n", temp, reduced_density, fv, gwidth,
-            reduced_num_spheres, lattice_constant, homogeneous_free_energy, Free_Energy, Free_Energy/reduced_num_spheres);
+    fprintf(newmeltoutfile, "%g %g %g %g   %g   %g %g   %g   %g   DIFF %g\n", temp, reduced_density, fv, gwidth,
+            reduced_num_spheres, lattice_constant, homogeneous_free_energy, crystal_free_energy, crystal_free_energy-homogeneous_free_energy);
   } else {
     printf("Unable to open file newmeltdataout.out!\n");
   }
-  return Free_Energy/reduced_num_spheres;
+  return free_energy;
 }
 
 int main(int argc, char **argv) {
@@ -269,7 +268,7 @@ int main(int argc, char **argv) {
     double best_energy = 1e100;
     double best_fv, best_gwidth;
     for (double fv=0; fv <=1; fv+=0.01) {
-      for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
+      for (double gwidth=0.01; gwidth <= .3; gwidth+=0.01) {
         double e = find_energy(temp, reduced_density, fv, gwidth);
         if (e < best_energy) {
           best_energy = e;
@@ -278,9 +277,9 @@ int main(int argc, char **argv) {
         }
       }
     }
-    printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
+    printf("best fv %g gwidth %g E %g and lowest free energy is %g\n", best_fv, best_gwidth, best_energy*4*(1-best_fv));
   } else if (gwidth < 0) {
-    for (double gwidth=0.001; gwidth <= 1; gwidth+=0.01) {
+    for (double gwidth=0.01; gwidth <= .3; gwidth+=0.01) {
       find_energy(temp, reduced_density, fv, gwidth);
     }
   } else {
