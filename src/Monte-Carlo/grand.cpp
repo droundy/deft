@@ -438,6 +438,37 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   return error_times_Z/Z;
 }
 
+void sw_simulation::apply_transition_matrix(double *ln_output, const double *ln_input) const {
+  for (int i = 0; i< energy_levels; i++) {
+    if (transitions(i,0)) {
+      ln_output[i] = 0;
+      for (int j = 0; j < energy_levels; j++) {
+        double tij = transition_matrix(i,j);
+        if (tij) {
+          ln_output[i] += transition_matrix(i,j)*exp(ln_dos[j]-ln_dos[i]);
+        }
+      }
+      ln_output[i] = log(ln_output[i]) + ln_input[i];
+    }
+  }
+}
+
+void sw_simulation::compute_transition_residual(double *residual,
+                                                const double *guess) const {
+  apply_transition_matrix(residual, guess);
+  // now r = ln(T dos)
+  for (int i=0;i<energy_levels;i++) {
+    if (transitions(i,0)) {
+      const double ln_ratio = residual[i]-guess[i];
+      // now ln_ratio = ln((T dos)/dos) = ln(T dos) - ln dos \sim 0
+      residual[i] = 1 - exp(ln_ratio) - 1;
+      // r = 1 - (T dos)/dos = (dos - T dos)/dos
+    } else {
+      residual[i] = 0; // assume no error with no information
+    }
+  }
+}
+
 double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 
   if (!ln_dos) ln_dos = new double[energy_levels]();
@@ -450,46 +481,87 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       else ln_dos[i] = -DBL_MAX;
     }
   } else if(dos_type == transition_dos) {
-    ln_dos[0] = 0;
-    for (int i=1; i<energy_levels; i++) {
-      ln_dos[i] = ln_dos[i-1];
-      double down_to_here = 0;
-      double up_from_here = 0;
-      for (int j=0; j<i; j++) {
-        const double tdown = transition_matrix(i, j);
-        if (tdown) {
-          // we are careful here not to take the exponential (which
-          // could give a NaN) unless we already know there is some
-          // probability of making this transition.
-          down_to_here += exp(ln_dos[j] - ln_dos[i])*tdown;
-        }
-        up_from_here += transition_matrix(j, i);
+    const bool use_CG = false;
+    if (use_CG) {
+      // The following is a broken attempt by David to implement a
+      // Conjugate Gradient solution.  It attempts to follow the
+      // notation in
+      // https://en.wikipedia.org/wiki/Conjugate_gradient_method#Example_code_in_MATLAB_.2F_GNU_Octave
+      // but runs into trouble due to need to avoid storing the dos
+      // itself.  Also because we care about the relative uncertainty
+      // of the dos, which stopping based on rsnew as in the wikipedia
+      // example would fail at miserably.
+      double *p = new double[energy_levels];
+      double *r = new double[energy_levels];
+      double *minus_Ap = new double[energy_levels];
+      compute_transition_residual(r, ln_dos);
+      double rsqr_old = 0;
+      for (int i=0;i<energy_levels;i++) {
+        p[i] = r[i];
+        rsqr_old += r[i]*r[i];
       }
-      if (down_to_here > 0 && up_from_here > 0) {
-        ln_dos[i] += log(down_to_here/up_from_here);
+      int num_rounds = 0;
+      while (rsqr_old > 1e-5 && num_rounds < energy_levels) {
+        compute_transition_residual(minus_Ap, p);
+        double pAp = 0;
+        for (int i=0;i<energy_levels;i++) {
+          pAp -= p[i]*minus_Ap[i];
+        }
+        const double alpha = rsqr_old/pAp;
+        for (int i=0;i<energy_levels;i++) {
+          ln_dos[i] += log(1-alpha*p[i]); // should be... dos = dos + alpha*p
+          r[i] += alpha*minus_Ap[i];
+        }
+        double rsqr_new = 0;
+        for (int i=0;i<energy_levels;i++) {
+          rsqr_new += r[i]*r[i];
+        }
+        for (int i=0;i<energy_levels;i++) {
+          p[i] = r[i] + (rsqr_new/rsqr_old)*p[i];
+        }
+        rsqr_old = rsqr_new;
+        num_rounds++;
+      }
+      delete[] p;
+      delete[] r;
+      delete[] minus_Ap;
+    } else {
+      ln_dos[0] = 0;
+      for (int i=1; i<energy_levels; i++) {
+        ln_dos[i] = ln_dos[i-1];
+        double down_to_here = 0;
+        double up_from_here = 0;
+        for (int j=0; j<i; j++) {
+          const double tdown = transition_matrix(i, j);
+          if (tdown) {
+            // we are careful here not to take the exponential (which
+            // could give a NaN) unless we already know there is some
+            // probability of making this transition.
+            down_to_here += exp(ln_dos[j] - ln_dos[i])*tdown;
+          }
+          up_from_here += transition_matrix(j, i);
+        }
+        if (down_to_here > 0 && up_from_here > 0) {
+          ln_dos[i] += log(down_to_here/up_from_here);
+        }
       }
     }
     double eq_error1 =0;
     double eq_error2 = 0;
     double eq_error_max = 0;
     int imax = 0;
+    double *ln_T_dos = new double[energy_levels];
+    apply_transition_matrix(ln_T_dos, ln_dos);
     for (int i = 0; i< energy_levels; i++) {
       if (energy_histogram[i]) {
-	double eqei = 0; // exp equilibrium error; ith component
-	for (int j = 0; j < energy_levels; j++) {
-	  double tij = transition_matrix(i,j);
-	  if (tij) {
-	    eqei += transition_matrix(i,j)*exp(ln_dos[j]-ln_dos[i]);
-	  }
-	}
-	eq_error[i] = log(eqei);
-	if (eq_error_max < abs(eq_error[i])) {
-	  eq_error_max = abs(eq_error[i]);
-	  imax = i;
-	}
-	eq_error_max = max(eq_error_max,abs(eq_error[i]));
-	eq_error1 += abs(eq_error[i]);
-	eq_error2 += eq_error[i]*eq_error[i];
+        eq_error[i] = ln_T_dos[i] - ln_dos[i];
+        if (eq_error_max < abs(eq_error[i])) {
+          eq_error_max = abs(eq_error[i]);
+          imax = i;
+        }
+        eq_error_max = max(eq_error_max,abs(eq_error[i]));
+        eq_error1 += abs(eq_error[i]);
+        eq_error2 += eq_error[i]*eq_error[i];
       }
     }
     eq_error2 = sqrt(eq_error2);
