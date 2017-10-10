@@ -956,7 +956,8 @@ void sw_simulation::update_weights_using_transitions(int version) {
         // This handles the case where we've never seen this energy
         // before.  Just set its weight equal to that of the next higher
         // energy.
-        ln_energy_weights[i] = ln_energy_weights[i-1];
+        if (i > 0) ln_energy_weights[i] = ln_energy_weights[i-1];
+        else ln_energy_weights[i] = 0;
       }
     }
     // At lower energies, we use Boltzmann weights with the minimum
