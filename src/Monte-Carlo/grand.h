@@ -74,6 +74,7 @@ struct sw_simulation {
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
+  double *ln_dos;
   dos_types sim_dos_type;
 
   /* The following keep track of how many times we have walked
@@ -185,7 +186,7 @@ struct sw_simulation {
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
-  double* compute_ln_dos(dos_types dos_type) const;
+  double* compute_ln_dos(dos_types dos_type);
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy();
@@ -252,6 +253,7 @@ struct sw_simulation {
     lnw_movie_count = 0;
     max_time = 0;
     start_time = clock()/double(CLOCKS_PER_SEC);
+    ln_dos = 0;
   };
 };
 

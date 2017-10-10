@@ -435,13 +435,12 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
     else
       error_times_Z += boltz/sqrt(max(pessimistic_samples[i],1));
   }
-  delete[] ln_dos;
   return error_times_Z/Z;
 }
 
-double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
+double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 
-  double *ln_dos = new double[energy_levels]();
+  if (!ln_dos) ln_dos = new double[energy_levels]();
   double *eq_error = new double[energy_levels];
   if(dos_type == histogram_dos){
     for(int i = max_entropy_state; i < energy_levels; i++){
@@ -647,7 +646,6 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
     printf("Found sample rate of %g from norm %.16g\n", 1.0/(1 - norm), norm);
     if (sample_rate) *sample_rate = 1.0/(1 - norm);
   }
-  delete[] ln_dos;
   return ln_downwalkers;
 }
 
@@ -682,7 +680,6 @@ int sw_simulation::set_min_important_energy(){
     min_important_energy = min_energy_state;
   }
 
-  delete[] ln_dos;
   return min_important_energy;
 }
 
@@ -692,7 +689,6 @@ void sw_simulation::set_max_entropy_energy() {
   for (int i=energy_levels-1; i >= 0; i--) {
     if (ln_dos[i] > ln_dos[max_entropy_state]) max_entropy_state = i;
   }
-  delete[] ln_dos;
 }
 
 static void print_seconds_as_time(clock_t clocks) {
@@ -787,7 +783,6 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
         }
         double *ln_dos = compute_ln_dos(transition_dos);
         const double nice_T = 1.0/(ln_dos[highest_problem_energy] - ln_dos[highest_problem_energy+1]);
-        delete[] ln_dos;
         printf("[%9ld] Have %ld energies to go (down to T=%g or %g)\n",
                iteration, energies_unconverged, nice_T, converged_to_temperature(ln_dos));
         printf("       <%d - %d vs %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
@@ -935,7 +930,6 @@ op       difference is that we compute the diffusivity here *directly*
   for (int i=max_entropy_state;i<energy_levels;i++) {
     ln_energy_weights[i] -= ln_max;
   }
-  delete[] ln_dos;
 }
 
 // update the weight array using transitions
@@ -1005,7 +999,6 @@ void sw_simulation::update_weights_using_transitions(int version) {
     fflush(stdout);
     exit(1);
   }
-  delete[] ln_dos;
 }
 
 static void write_t_file(const sw_simulation &sw, const char *fname) {
@@ -1064,7 +1057,6 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
     fprintf(f, "%d\t%g\n", i, lndos[i] - maxdos);
   }
   fclose(f);
-  delete[] lndos;
 }
 
 static void write_lnw_file(const sw_simulation &sw, const char *fname) {
@@ -1153,7 +1145,6 @@ void sw_simulation::write_header(FILE *f) const {
   double *ln_dos = compute_ln_dos(transition_dos);
   fprintf(f, "# converged state: %d\n", converged_to_state());
   fprintf(f, "# converged temperature: %g\n", converged_to_temperature(ln_dos));
-  delete[] ln_dos;
   fprintf(f, "\n");
 }
 
