@@ -256,7 +256,7 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   } else {
     printf("Unable to open file newmeltdataout.out!\n");
   }
-  return crystal_free_energy - homogeneous_free_energy;
+  return (crystal_free_energy - homogeneous_free_energy);
 }
 
 int main(int argc, char **argv) {
@@ -284,8 +284,10 @@ int main(int argc, char **argv) {
         double e = find_energy(temp, reduced_density, fv, gwidth);
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
-          printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
-                 best_energy);
+          //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
+                 //best_energy);
+          printf("We are %.0f%% done, e= %g, best_energy == %g\n", 100*num_computed/double(num_to_compute),
+                 e, best_energy);
         }
         if (e < best_energy) {
           printf("better free energy with fv %g gwidth %g and E %g\n",
