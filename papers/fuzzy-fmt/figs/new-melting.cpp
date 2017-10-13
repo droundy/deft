@@ -43,9 +43,12 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
+  struct data {
+    double diff;
+    double free_energy;
+  };
 
-double find_energy(double temp, double reduced_density, double fv, double gwidth,
-                   bool verbose=false) {
+  struct data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
   const double cell_spheres = 4.0;  // number of spheres in one cell when there are no vacancies
   double reduced_num_spheres = cell_spheres*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = cell_spheres*fv;
@@ -231,6 +234,9 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   }
   //printf("crystal free energy is %g\n", f.energy());
   double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
+  struct data data_out; 
+  data_out.diff=crystal_free_energy - homogeneous_free_energy;
+  data_out.free_energy=crystal_free_energy;
   if (verbose) {
     printf("Crystal free energy is %g\n", crystal_free_energy);
 
@@ -256,7 +262,9 @@ double find_energy(double temp, double reduced_density, double fv, double gwidth
   } else {
     printf("Unable to open file newmeltdataout.out!\n");
   }
-  return (crystal_free_energy - homogeneous_free_energy);
+  
+  return data_out;
+  
 }
 
 int main(int argc, char **argv) {
@@ -277,7 +285,7 @@ int main(int argc, char **argv) {
 
   if (fv == -1) {
     double best_energy = 1e100;
-    double best_fv, best_gwidth;
+    double best_fv, best_gwidth, best_free_energy;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
     //for (double fv=0; fv<1; fv+=0.01) {
@@ -286,16 +294,17 @@ int main(int argc, char **argv) {
       printf("lattice_constant is %g\n", lattice_constant);
     //for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
       for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
-        double e = find_energy(temp, reduced_density, fv, gwidth);
+        struct data e_data =find_energy(temp, reduced_density, fv, gwidth);
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
                  best_energy);
         }
-        if (e < best_energy) {
+        if (e_data.diff < best_energy) {
           printf("better free energy with fv %g gwidth %g and E %g\n",
-                 fv, gwidth, e);
-          best_energy = e;
+                 fv, gwidth, e_data.diff);
+          best_energy = e_data.diff;
+          best_free_energy = e_data.free_energy;
           best_fv = fv;
           best_gwidth = gwidth;
           
