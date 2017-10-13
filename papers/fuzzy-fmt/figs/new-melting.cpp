@@ -267,6 +267,7 @@ int main(int argc, char **argv) {
     printf("ENTER: %s homogeneous(reduced) density, fraction of vacancies, Gaussian width, kT\n", argv[0]);
     return 1;
   }
+  
   // printf("git version: %s\n", version_identifier());
   assert(sscanf(argv[1], "%lg", &temp) == 1);
   assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
@@ -279,8 +280,12 @@ int main(int argc, char **argv) {
     double best_fv, best_gwidth;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
-    for (double fv=0; fv <=1; fv+=0.01) {
-      for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
+    //for (double fv=0; fv<1; fv+=0.01) {
+    for (double fv=0; fv<1; fv+=0.2) {   //quick run
+      double lattice_constant = pow((4*(1-fv))/reduced_density, 1.0/3);
+      printf("lattice_constant is %g\n", lattice_constant);
+    //for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
+      for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
         double e = find_energy(temp, reduced_density, fv, gwidth);
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
@@ -293,12 +298,25 @@ int main(int argc, char **argv) {
           best_energy = e;
           best_fv = fv;
           best_gwidth = gwidth;
+          
+          //Create dataout file 
+          FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
+          if (newmeltbest) {
+            //fprintf(newmeltbest, "#T\tn\tbest_energy\n");
+            fprintf(newmeltbest, "%g\t%g\n", reduced_density, best_energy);
+          fclose(newmeltbest);
+          } else {
+          printf("Unable to open file newmeltbestdata.dat!\n");
+          }
         }
       }
     }
     printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
   } else if (gwidth < 0) {
-    for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
+    //for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
+    double lattice_constant = pow((4*(1-fv))/reduced_density, 1.0/3);
+    printf("lattice_constant is %g\n", lattice_constant);
+    for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
       find_energy(temp, reduced_density, fv, gwidth);
     }
   } else {
