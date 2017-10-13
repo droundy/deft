@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
           best_fv = fv;
           best_gwidth = gwidth;
           
-          if (best_energy < 0) {
+          if (best_energy < 0) { //only send data to best data out file if there is crystalization!
           //Create dataout file 
           FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
           if (newmeltbest) {
