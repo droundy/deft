@@ -311,15 +311,17 @@ int main(int argc, char **argv) {
           best_fv = fv;
           best_gwidth = gwidth;
           
+          if (best_energy < 0) {
           //Create dataout file 
           FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
           if (newmeltbest) {
             //fprintf(newmeltbest, "#T\tn\tbest_energy\n");
-            fprintf(newmeltbest, "%g\t%g\n", reduced_density, best_energy);
+            fprintf(newmeltbest, "%g\t%g\n", reduced_density, best_free_energy);
           fclose(newmeltbest);
           } else {
           printf("Unable to open file newmeltbestdata.dat!\n");
           }
+         }
         }
       }
     }
