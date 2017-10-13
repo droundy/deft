@@ -300,12 +300,12 @@ int main(int argc, char **argv) {
         struct data e_data =find_energy(temp, reduced_density, fv, gwidth);
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
-          printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
-                 best_energy);
+          //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
+          //       best_energy);
         }
         if (e_data.diff < best_energy) {
-          printf("better free energy with fv %g gwidth %g and E %g\n",
-                 fv, gwidth, e_data.diff);
+          //printf("better free energy with fv %g gwidth %g and E %g\n",
+          //       fv, gwidth, e_data.diff);
           best_energy = e_data.diff;
           best_free_energy = e_data.free_energy;
           best_fv = fv;
@@ -319,7 +319,7 @@ int main(int argc, char **argv) {
           FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
           if (newmeltbest) {
             //fprintf(newmeltbest, "#T\tn\tbest_energy\n");
-            fprintf(newmeltbest, "%g\t%g\n", reduced_density, best_free_energy);
+            fprintf(newmeltbest, "%g\t%g\t%g\n", reduced_density, best_free_energy, best_energy);
           fclose(newmeltbest);
           } else {
           printf("Unable to open file newmeltbestdata.dat!\n");
