@@ -310,8 +310,11 @@ int main(int argc, char **argv) {
           best_free_energy = e_data.free_energy;
           best_fv = fv;
           best_gwidth = gwidth;
-          
-          if (best_energy < 0) { //only send data to best data out file if there is crystalization!
+        }
+      }
+    }
+    printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
+    if (best_energy < 0) { //only send data to best data out file if there is crystalization!
           //Create dataout file 
           FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
           if (newmeltbest) {
@@ -321,11 +324,7 @@ int main(int argc, char **argv) {
           } else {
           printf("Unable to open file newmeltbestdata.dat!\n");
           }
-         }
-        }
-      }
     }
-    printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
   } else if (gwidth < 0) {
       double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
