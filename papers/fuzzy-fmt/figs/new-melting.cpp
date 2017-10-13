@@ -47,12 +47,16 @@ double inhomogeneity(Vector n) {
     double diff;
     double free_energy;
   };
+  
+  double find_lattice_constant(double reduced_density, double fv) {
+    double a = pow(4*(1-fv)/reduced_density, 1.0/3);
+    return a;
+  } 
 
   struct data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
-  const double cell_spheres = 4.0;  // number of spheres in one cell when there are no vacancies
-  double reduced_num_spheres = cell_spheres*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
-  double vacancy = cell_spheres*fv;
-  double lattice_constant = pow(reduced_num_spheres/reduced_density, 1.0/3);
+  double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
+  double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
+  double lattice_constant = find_lattice_constant(reduced_density, fv);
 
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
@@ -95,7 +99,7 @@ double inhomogeneity(Vector n) {
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
     const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Using normally normalized Gaussians would correspond to 4 spheres
-    // so we need to multiply by (1-fv) to get the reduced number of spheres.
+                                                           // so we need to multiply by (1-fv) to get the reduced number of spheres.
     Vector setn = f.n();
 
     for (int i=0; i<Ntot; i++) {
@@ -288,11 +292,10 @@ int main(int argc, char **argv) {
     double best_fv, best_gwidth, best_free_energy;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
-    //for (double fv=0; fv<1; fv+=0.01) {
+    //for (double fv=0; fv<1; fv+=0.01) {  //full run
     for (double fv=0; fv<1; fv+=0.2) {   //quick run
-      double lattice_constant = pow((4*(1-fv))/reduced_density, 1.0/3);
+      double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
-    //for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
       for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
         struct data e_data =find_energy(temp, reduced_density, fv, gwidth);
         num_computed += 1;
@@ -322,8 +325,7 @@ int main(int argc, char **argv) {
     }
     printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
   } else if (gwidth < 0) {
-    //for (double gwidth=0.01; gwidth <= 1; gwidth+=0.01) {
-    double lattice_constant = pow((4*(1-fv))/reduced_density, 1.0/3);
+      double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
       find_energy(temp, reduced_density, fv, gwidth);
