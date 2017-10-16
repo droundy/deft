@@ -9,7 +9,10 @@
 #include <popt.h>
 #include <ctime>
 #include <cassert>
+#include <complex.h>
 
+using std::complex;
+using std::exp;
 // ------------------------------------------------------------------------------
 // Global Constants
 // ------------------------------------------------------------------------------
@@ -19,6 +22,7 @@
     const double sigma = 1;
     const double epsilon = 1;
     const double cutoff = sigma * pow(2,1./6.);
+
 // ------------------------------------------------------------------------------
 // Functions
 // ------------------------------------------------------------------------------
@@ -45,6 +49,7 @@ double bondEnergy(vector3d R);
 
 // Calculates product of radial forces and displacements of spheres for an ensemble
 double forceTimesDist(vector3d *spheres, int numOfSpheres,double systemLength[3],bool wall[3]);
+
 
 int main(int argc, const char *argv[])  {
 	time_t mytime;
@@ -184,7 +189,6 @@ int main(int argc, const char *argv[])  {
     double currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
     //~ double tempE2 = currentEnergy*currentEnergy;
 	double totalEnergy = 0.0;
-
     // Pressure
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
     double virial = forceTimesDist(spheres, numOfSpheres, systemLength,wall);
@@ -195,7 +199,15 @@ int main(int argc, const char *argv[])  {
     // Diffusion
 	double diffusion = 0; // = new double[totalIterations];
     double sphereTotalMove[numOfSpheres] = {0};
-    //~ double currentD = 0;
+    // Structure Factor
+    double kmax = 24*M_PI;
+    double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
+    double cellLength = systemLength[x]/cellNumber;
+    double dk = M_PI / (20*cellLength);
+    int kpoints = ceil(((kmax-2*M_PI)/cellLength)/dk);
+    long structureWrites = 0;
+    double structureFactor[kpoints][kpoints] = {0};
+    
     // File Saving and misc.
 	long acceptedTrials = 0;
     int outputCount = 0;
@@ -204,7 +216,7 @@ int main(int argc, const char *argv[])  {
     int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
 	mytime = time(NULL);
 	long drAdjust = numOfSpheres*numOfSpheres;
-	
+
 	printf("Filename: %s\n",filename);
 	printf("Lattice Made\n");
     printf("Number of Spheres: %d\n", numOfSpheres);
@@ -237,6 +249,8 @@ int main(int argc, const char *argv[])  {
 	sprintf(energy_fname, "%s/%s-energy.dat",data_dir,filename);
 	char *dif_fname = new char[1024];
 	sprintf(dif_fname, "%s/%s-dif.dat",data_dir,filename);
+    char *struc_fname = new char[1024];
+    sprintf(struc_fname, "%s/%s-struc.dat",data_dir,filename);
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
   // ----------------------------------------------------------------------------
@@ -295,6 +309,21 @@ int main(int argc, const char *argv[])  {
                 runningRadial[i] += radialDistHist[i];
             }
             delete[] radialDistHist;
+        if ((currentIteration % (10*numOfSpheres)) == 0){
+            structureWrites += 1;
+            for (int kx = 0; kx < kpoints -1; kx++) {
+                    for (int ky = 0; ky < kpoints -1; ky++) {
+                        double rho_k_real = 0, rho_k_imag = 0;
+                        for (int n = 0; n < numOfSpheres; n++) {
+                            double kr = dk*((kx+1)*spheres[n].x + (ky+1)*spheres[n].y);
+                            rho_k_real += cos(kr);
+                            rho_k_imag += sin(kr);
+                        }
+                        structureFactor[kx][ky] += (rho_k_real*rho_k_real + rho_k_imag*rho_k_imag)/numOfSpheres;
+                    }
+                }
+            }
+            
         }
     // ---------------------------------------------------------------
     // Displacement Vector Adjustment
@@ -372,10 +401,11 @@ int main(int argc, const char *argv[])  {
 				FILE *radial_out = fopen(radial_fname,"w");
 				fprintf(radial_out, "%s%s", headerinfo,countinfo);
 				for (int i = 0; i < 1000; ++i){ 
-                    double r_i = (i*systemLength[x])/(2*1000.0);
+                    const double dr = systemLength[x]/(2*1000.0);
+                    double r_i = i*dr;
 					fprintf(radial_out, "%g\t%g\n", r_i, 
 						double(volume*runningRadial[i]/
-							  (4*M_PI*r_i*r_i*numOfSpheres*radialWrites))); //g(r) = (V/N^2)...Needs to be normalized properly in the python script
+							  (4*M_PI*r_i*r_i*dr*numOfSpheres*radialWrites))); //g(r) = (V/N^2)...Needs to be normalized properly in the python script
 				}
 				// Save Pressure
 				FILE *press_out = fopen(press_fname,"w");
@@ -391,11 +421,25 @@ int main(int argc, const char *argv[])  {
 				FILE *dif_out = fopen(dif_fname,"w");
 				fprintf(dif_out, "%s%s", headerinfo,countinfo);
                 fprintf(dif_out,"%g\n",double(diffusion/(currentIteration+1)));
+                // Save Structure Factor
+                FILE *struc_out = fopen(struc_fname,"w");
+                fprintf(struc_out, "%s%s", headerinfo,countinfo);
+                fprintf(struc_out, "# Structure Writes %ld\n",structureWrites);
+                fprintf(struc_out, "# kpoints %ld\n", kpoints);
+                for (int kx = 0; kx < kpoints -1; kx++) {
+                    for (int ky = 0; ky < kpoints -1; ky++) {
+                        fprintf(struc_out,"%g\t",structureFactor[kx][ky]/structureWrites);
+                    }
+                    fprintf(struc_out,"\n");
+                }
+                
+                // Close files
 				fclose(pos_out);
 				fclose(radial_out);
 				fclose(press_out);
 				fclose(energy_out);
 				fclose(dif_out);
+                fclose(struc_out);
 				save = false; 
 			}
 		}
@@ -406,6 +450,13 @@ int main(int argc, const char *argv[])  {
     printf("All Done :)\n");
     delete[] runningRadial;
     delete[] spheres;
+    delete[] countinfo;
+    delete[] pos_fname;
+    delete[] radial_fname;
+    delete[] press_fname;
+    delete[] energy_fname;
+    delete[] dif_fname;
+    delete[] struc_fname;
 }
 
 inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
@@ -472,8 +523,6 @@ double totalPotential(vector3d *sphereMatrix, int numOfSpheres, double systemLen
     }
     return totalPotential;
 }
-
-// Add Structure Factor
 
 double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double systemLength[3], bool wall[3]) {
     const int numOfBoxes = 1000;
