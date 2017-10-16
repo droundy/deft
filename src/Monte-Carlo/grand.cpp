@@ -274,7 +274,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   // calls sw_fix_periodic, we need not worry about moving out of the
   // cell.
   if (overlaps_with_any(temp, balls, len, walls)){
-    transitions(energy, 0) += 1; // update the transition histogram
+    collection(energy, 0) += 1; // update the transition histogram
     end_move_updates();
     return;
   }
@@ -297,7 +297,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
     if (overlaps_with_any(temp, balls, len, walls)) {
       // turns out we overlap after all.  :(
       delete[] temp.neighbors;
-      transitions(energy, 0) += 1; // update the transition histogram
+      collection(energy, 0) += 1; // update the transition histogram
       end_move_updates();
       return;
     }
@@ -313,7 +313,7 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
   // Now we can check whether we actually want to do this move based on the
   // new energy.
   const int energy_change = new_interaction_count - old_interaction_count;
-  transitions(energy, energy_change) += 1; // update the transition histogram
+  collection(energy, energy_change) += 1; // update the transition histogram
   double Pmove = 1;
   if (use_transition_matrix) {
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
@@ -324,13 +324,13 @@ void sw_simulation::move_a_ball(bool use_transition_matrix) {
       long tup_norm = 0;
       long tdown_norm = 0;
       for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
-        tup_norm += transitions(energy, de);
-        tdown_norm += transitions(energy+energy_change, de);
+        tup_norm += collection(energy, de);
+        tdown_norm += collection(energy+energy_change, de);
       }
-      double tup = transitions(energy, energy_change)/double(tup_norm);
-      double tdown = transitions(energy+energy_change,-energy_change)/double(tdown_norm);
+      double tup = collection(energy, energy_change)/double(tup_norm);
+      double tdown = collection(energy+energy_change,-energy_change)/double(tdown_norm);
       if (tdown < tup) {
-        const double Pconfidence = 1.0/sqrt(transitions(energy+energy_change,-energy_change));
+        const double Pconfidence = 1.0/sqrt(collection(energy+energy_change,-energy_change));
         Pmove = tdown/tup;
         if (!(Pmove > Pconfidence)) Pmove = Pconfidence;
         if (Pmove < Pmin) Pmove = Pmin;
@@ -440,7 +440,7 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
 
 void sw_simulation::apply_transition_matrix(double *ln_output, const double *ln_input) const {
   for (int i = 0; i< energy_levels; i++) {
-    if (transitions(i,0)) {
+    if (collection(i,0)) {
       ln_output[i] = 0;
       for (int j = 0; j < energy_levels; j++) {
         double tij = transition_matrix(i,j);
@@ -458,7 +458,7 @@ void sw_simulation::compute_transition_residual(double *residual,
   apply_transition_matrix(residual, guess);
   // now r = ln(T dos)
   for (int i=0;i<energy_levels;i++) {
-    if (transitions(i,0)) {
+    if (collection(i,0)) {
       const double ln_ratio = residual[i]-guess[i];
       // now ln_ratio = ln((T dos)/dos) = ln(T dos) - ln dos \sim 0
       residual[i] = 1 - exp(ln_ratio) - 1;
@@ -623,24 +623,24 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
       for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de++) {
         if (i+de < energy_levels && i+de >= 0) {
           if (de < 0 && ln_downwalkers[i] > ln_downwalkers[i+de]) {
-            norm += transitions(i, de)*exp(ln_energy_weights[i] - ln_energy_weights[i+de]);
+            norm += collection(i, de)*exp(ln_energy_weights[i] - ln_energy_weights[i+de]);
           } else {
-            norm += transitions(i, de);
+            norm += collection(i, de);
           }
         }
       }
       if (norm) {
         for (int de = max(-i, -biggest_energy_transition);
              de <= min(energies_observed-i-1, biggest_energy_transition); de++) {
-          if (transitions(i,de)) {
+          if (collection(i,de)) {
             double change;
             if (de < 0 && ln_downwalkers[i] > ln_downwalkers[i+de]) {
               change = exp(ln_downwalkers[i] - ln_downwalkers[i+de]
                            + ln_energy_weights[i] - ln_energy_weights[i+de])
-                *transitions(i,de)/norm;
+                *collection(i,de)/norm;
             } else {
               change = exp(ln_downwalkers[i] - ln_downwalkers[i+de])
-                *transitions(i,de)/norm;
+                *collection(i,de)/norm;
             }
             if (change != change) {
               printf("ln_downwalkers[i] == %g\n", ln_downwalkers[i]);
@@ -648,7 +648,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
               printf("ln_energy_weights[i] == %g\n", ln_energy_weights[i]);
               printf("ln_energy_weights[i+de] == %g\n", ln_energy_weights[i+de]);
               printf("norm == %g\n", norm);
-              printf("transitions(i,de) == %ld\n", transitions(i,de));
+              printf("collection(i,de) == %ld\n", collection(i,de));
               printf("change is nan at i=%d and de=%d\n", i, de);
               exit(1);
             }
@@ -972,7 +972,7 @@ void sw_simulation::optimize_weights_using_transitions(int version) {
     double norm = 0, mean_sqr_de = 0, mean_de = 0;
     for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
       // cap the ratio of weights at 1
-      double T = transitions(i, de)*exp(max(0,ln_dos[biggest_energy_transition+i]
+      double T = collection(i, de)*exp(max(0,ln_dos[biggest_energy_transition+i]
                                             -ln_dos[biggest_energy_transition+i+de]));
       norm += T;
       mean_sqr_de += T*double(de)*de;
@@ -1084,7 +1084,7 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
   int least_dE = 0;
   for (int i = 0; i < sw.energy_levels; i++) {
     for (int de = -sw.biggest_energy_transition; de <= sw.biggest_energy_transition; de++) {
-      if (sw.transitions(i,de)) {
+      if (sw.collection(i,de)) {
         if (de < least_dE) least_dE = de;
         if (de > greatest_dE) greatest_dE = de;
       }
@@ -1100,12 +1100,12 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
   for(int i = 0; i < sw.energy_levels; i++) {
     bool have_i = false;
     for (int de = least_dE; de <= greatest_dE; de++) {
-      if (sw.transitions(i,de)) have_i = true;
+      if (sw.collection(i,de)) have_i = true;
     }
     if (have_i){
       fprintf(f, "%d", i);
       for (int de = least_dE; de <= greatest_dE; de++) {
-        fprintf(f, "\t%ld", sw.transitions(i, de));
+        fprintf(f, "\t%ld", sw.collection(i, de));
       }
       fprintf(f, "\n");
     }
@@ -1320,7 +1320,7 @@ void sw_simulation::initialize_transitions_file(const char *transitions_input_fi
     if (!min_e) min_e = e;
     char nextc = 0; // keep going until we have reached the end of the line.
     for (int de=min_de; nextc != '\n'; de++) {
-      if (fscanf(transitions_infile,"%li%c",&transitions(e,de), &nextc) != 2) {
+      if (fscanf(transitions_infile,"%li%c",&collection(e,de), &nextc) != 2) {
         break;
       }
     }
