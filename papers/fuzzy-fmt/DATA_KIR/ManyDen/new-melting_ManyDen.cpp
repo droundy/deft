@@ -43,17 +43,17 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-  struct data {
-    double diff;
-    double free_energy;
-  };
-  
-  double find_lattice_constant(double reduced_density, double fv) {
-    double a = pow(4*(1-fv)/reduced_density, 1.0/3);
-    return a;
-  } 
+struct data {
+  double diff;
+  double free_energy;
+};
 
-  struct data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
+double find_lattice_constant(double reduced_density, double fv) {
+  double a = pow(4*(1-fv)/reduced_density, 1.0/3);
+  return a;
+}
+
+struct data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -81,7 +81,7 @@ double inhomogeneity(Vector n) {
   }
 
   //const double dx = 0.01;       //grid point spacing dx=dy=dz=0.01
-  const double dx = 0.01; 
+  const double dx = 0.01;
   const double dV = pow(dx,3);  //volume element dV
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
@@ -100,7 +100,7 @@ double inhomogeneity(Vector n) {
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
     const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Using normally normalized Gaussians would correspond to 4 spheres
-                                                           // so we need to multiply by (1-fv) to get the reduced number of spheres.
+    // so we need to multiply by (1-fv) to get the reduced number of spheres.
     Vector setn = f.n();
 
     for (int i=0; i<Ntot; i++) {
@@ -239,7 +239,7 @@ double inhomogeneity(Vector n) {
   }
   //printf("crystal free energy is %g\n", f.energy());
   double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
-  struct data data_out; 
+  struct data data_out;
   data_out.diff=crystal_free_energy - homogeneous_free_energy;
   data_out.free_energy=crystal_free_energy;
   if (verbose) {
@@ -267,9 +267,9 @@ double inhomogeneity(Vector n) {
   } else {
     printf("Unable to open file newmeltdataout.out!\n");
   }
-  
+
   return data_out;
-  
+
 }
 
 int main(int argc, char **argv) {
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
     printf("ENTER: %s homogeneous(reduced) density, fraction of vacancies, Gaussian width, kT\n", argv[0]);
     return 1;
   }
-  
+
   // printf("git version: %s\n", version_identifier());
   assert(sscanf(argv[1], "%lg", &temp) == 1);
   assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
@@ -316,18 +316,18 @@ int main(int argc, char **argv) {
     }
     printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
     if (best_energy < 0) { //only send data to best data out file if there is crystalization!
-          //Create dataout file 
-          FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
-          if (newmeltbest) {
-            //fprintf(newmeltbest, "#T\tn\tbest_energy\n");
-            fprintf(newmeltbest, "%g\t%g\t%g\n", reduced_density, best_free_energy, best_energy);
-          fclose(newmeltbest);
-          } else {
-          printf("Unable to open file newmeltbestdata.dat!\n");
-          }
+      //Create dataout file
+      FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
+      if (newmeltbest) {
+        //fprintf(newmeltbest, "#T\tn\tbest_energy\n");
+        fprintf(newmeltbest, "%g\t%g\t%g\n", reduced_density, best_free_energy, best_energy);
+        fclose(newmeltbest);
+      } else {
+        printf("Unable to open file newmeltbestdata.dat!\n");
+      }
     }
   } else if (gwidth < 0) {
-      double lattice_constant = find_lattice_constant(reduced_density, fv);
+    double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
       find_energy(temp, reduced_density, fv, gwidth);
