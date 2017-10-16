@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // printf("git version: %s\n", version_identifier());
+  printf("git version: %s\n", version_identifier());
   assert(sscanf(argv[1], "%lg", &temp) == 1);
   assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
   assert(sscanf(argv[3], "%lg", &fv) == 1);
@@ -324,6 +324,7 @@ int main(int argc, char **argv) {
     //Create dataout file
     FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
     if (newmeltbest) {
+      fprintf(newmeltbest, "# git version: %s\n", version_identifier());
       fprintf(newmeltbest, "#T\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
               reduced_density, best_free_energy, best_energy, cFEpervol, best_fv);
