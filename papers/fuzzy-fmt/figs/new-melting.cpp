@@ -43,19 +43,18 @@ double inhomogeneity(Vector n) {
   return (maxn - minn)/fabs(minn);
 }
 
-  struct data {
-    double diff;
-    double free_energy;
-    //double hfree_energy_per_vol;   //FIX THIS!
-    double cfree_energy_per_vol;
-  };
-  
-  double find_lattice_constant(double reduced_density, double fv) {
-    double a = pow(4*(1-fv)/reduced_density, 1.0/3);
-    return a;
-  } 
+struct data {
+  double diff;
+  double free_energy;
+  double hfree_energy_per_vol;
+  double cfree_energy_per_vol;
+};
 
-  struct data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
+double find_lattice_constant(double reduced_density, double fv) {
+  return pow(4*(1-fv)/reduced_density, 1.0/3);
+}
+
+data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -240,10 +239,10 @@ double inhomogeneity(Vector n) {
   }
   //printf("crystal free energy is %g\n", f.energy());
   double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
-  struct data data_out; 
+  data data_out;
   data_out.diff=crystal_free_energy - homogeneous_free_energy;
   data_out.free_energy=crystal_free_energy;
-  //data_out.hfree_energy_per_vol=hf.energy();  //FIX THIS!
+  data_out.hfree_energy_per_vol=hf.energy();
   data_out.cfree_energy_per_vol=f.energy()/pow(lattice_constant,3);
   if (verbose) {
     printf("Crystal free energy is %g\n", crystal_free_energy);
@@ -303,7 +302,7 @@ int main(int argc, char **argv) {
       printf("lattice_constant is %g\n", lattice_constant);
       //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //full run
       for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
-        struct data e_data =find_energy(temp, reduced_density, fv, gwidth);
+        data e_data =find_energy(temp, reduced_density, fv, gwidth);
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
@@ -325,8 +324,9 @@ int main(int argc, char **argv) {
           //Create dataout file
           FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
           if (newmeltbest) {
-            //fprintf(newmeltbest, "#T\tn\tbest_energy\n");
-            fprintf(newmeltbest, "%g\t%g\t%g\t%g\n", reduced_density, best_free_energy, best_energy, cFEpervol);
+            fprintf(newmeltbest, "#T\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
+            fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
+                    reduced_density, best_free_energy, best_energy, cFEpervol, best_fv);
           fclose(newmeltbest);
           } else {
           printf("Unable to open file newmeltbestdata.dat!\n");
