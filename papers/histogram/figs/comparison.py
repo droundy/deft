@@ -10,11 +10,24 @@ if os.path.exists('../data'):
 energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
-methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3', '-wltmmc', '-vanilla_wang_landau']
+methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3', '-vanilla_wang_landau']
+
+# For WLTMMC compatibility with LVMC
+lvextra = glob('data/%s-wltmmc*-movie' % filebase)
+split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
+split2 = [i.split('-m', 1)[0] for i in split1]
+
+for j in range(len(split2)):
+    methods.append('-%s' %split2[j])
+print methods
+
 ref = "data/" + reference
 maxref = readnew.max_entropy_state(ref)
 goodenough = 0.1
-
+#I commented out associated colors for each method as I wasn't sure how
+#to modify the colors dict to work for lvmc.  I'll work on fixing this
+#in the future.
+'''
 colors = {
     '-tmi3': 'b',
     '-tmi2': 'k',
@@ -24,8 +37,8 @@ colors = {
     '-tmmc': 'k',
     '-toe2': 'c',
     '-vanilla_wang_landau': 'm',
-    '-wltmmc': 'p'}
-
+    '-wltmmc': 'c'}
+'''
 try:
     eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
 except:
@@ -68,38 +81,38 @@ for method in methods:
         erroratenergy = erroratenergy[:num_frames_to_count]
 
         plt.figure('error-at-energy-iterations')
-        plt.plot(iterations, erroratenergy, '%s-' % colors[method], label = method[1:])
-        plt.title('Error at energy %g' % energy)
+        plt.plot(iterations, erroratenergy, label = method[1:])
+        plt.title('Error at energy %g %s' % (energy,filebase))
         plt.xlabel('# iterations')
         plt.ylabel('error')
         plt.legend(loc = 'best')
 
-        plt.figure('round-trips-at-energy')
-        plt.plot(iterations, Nrt_at_energy, '%s-' % colors[method], label = method[1:])
-        plt.title('Roundy Trips at energy %g, n = 50' % energy)
+        plt.figure('round-trips-at-energy' )
+        plt.plot(iterations, Nrt_at_energy, label = method[1:])
+        plt.title('Roundy Trips at energy %g, %s' % (energy,filebase))
         plt.xlabel('# iterations')
         plt.ylabel('Roundy Trips')
         plt.legend(loc = 'best')
         
         plt.figure('error-at-energy-round-trips')
-        plt.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0], '%s-' % colors[method], label = method[1:])
-        plt.title('Error at energy %g' % energy)
+        plt.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0], label = method[1:])
+        plt.title('Error at energy %g %s' % (energy,filebase))
         plt.xlabel('Roundy Trips')
         plt.ylabel('Error')
         plt.legend(loc = 'best')
 
         plt.figure('maxerror')
-        plt.loglog(iterations, maxerror, '%s-' % colors[method], label = method[1:])
+        plt.loglog(iterations, maxerror, label = method[1:])
         plt.xlabel('# iterations')
         plt.ylabel('Maximum Entropy Error')
-        plt.title('Maximum Entropy Error vs Iterations')
+        plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         plt.legend(loc = 'best')
 
         plt.figure('errorinentropy')
-        plt.loglog(iterations, errorinentropy[0:len(iterations)], '%s-' % colors[method], label = method[1:])
+        plt.loglog(iterations, errorinentropy[0:len(iterations)], label = method[1:])
         plt.xlabel('#iterations')
         plt.ylabel('Error in Entropy')
-        plt.title('Average Entropy Error at Each Iteration, n = 50')
+        plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
         plt.legend(loc='best')
     except:
         print 'I had trouble with', method
