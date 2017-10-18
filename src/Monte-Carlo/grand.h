@@ -112,25 +112,25 @@ struct sw_simulation {
      statistics on entropy differences, under the assumption that we
      sample all states of a given energy equally. */
   int biggest_energy_transition;
-  long *transitions_table;
-  long &transitions(int energy, int energy_change) {
+  long *collection_matrix;
+  long &collection(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
-  long transitions(int energy, int energy_change) const {
+  long collection(int energy, int energy_change) const {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   /* "transition_matrix" is a read-only sloppy and normalized version
-     of the matrix also called "transitions" above, which is a little
+     of the matrix also called "collection" above, which is a little
      easier for me to wrap my brains around.  DJR */
   double transition_matrix(int to, int from) const {
     if (abs(to - from) > biggest_energy_transition ||
@@ -139,10 +139,10 @@ struct sw_simulation {
     }
     long norm = 0;
     for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
-      norm += transitions(from, de);
+      norm += collection(from, de);
     }
     if (norm == 0) return 0;
-    return transitions(from, to - from)/double(norm);
+    return collection(from, to - from)/double(norm);
   };
 
   int max_interactions() const { // return the maximum observed number of interactions

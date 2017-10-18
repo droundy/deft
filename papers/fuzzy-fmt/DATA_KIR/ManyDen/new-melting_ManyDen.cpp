@@ -46,15 +46,14 @@ double inhomogeneity(Vector n) {
 struct data {
   double diff;
   double free_energy;
-  double hfree_energy_per_vol;
-  double cfree_energy_per_vol;
 };
 
 double find_lattice_constant(double reduced_density, double fv) {
-  return pow(4*(1-fv)/reduced_density, 1.0/3);
+  double a = pow(4*(1-fv)/reduced_density, 1.0/3);
+  return a;
 }
 
-data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
+struct data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -81,7 +80,8 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     printf("Homogeneous free energy per sphere is %g\n", homogeneous_free_energy);
   }
 
-  const double dx = 0.01;       //grid point spacing dx=dy=dz=0.01
+  //const double dx = 0.01;       //grid point spacing dx=dy=dz=0.01
+  const double dx = 0.01;
   const double dV = pow(dx,3);  //volume element dV
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
@@ -239,11 +239,9 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   }
   //printf("crystal free energy is %g\n", f.energy());
   double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
-  data data_out;
+  struct data data_out;
   data_out.diff=crystal_free_energy - homogeneous_free_energy;
   data_out.free_energy=crystal_free_energy;
-  data_out.hfree_energy_per_vol=hf.energy();
-  data_out.cfree_energy_per_vol=f.energy()/pow(lattice_constant,3);
   if (verbose) {
     printf("Crystal free energy is %g\n", crystal_free_energy);
 
@@ -283,7 +281,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  printf("git version: %s\n", version_identifier());
+  // printf("git version: %s\n", version_identifier());
   assert(sscanf(argv[1], "%lg", &temp) == 1);
   assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
   assert(sscanf(argv[3], "%lg", &fv) == 1);
@@ -293,16 +291,14 @@ int main(int argc, char **argv) {
   if (fv == -1) {
     double best_energy = 1e100;
     double best_fv, best_gwidth, best_free_energy;
-    double cFEpervol;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
     //for (double fv=0; fv<1; fv+=0.01) {  //full run
     for (double fv=0; fv<1; fv+=0.2) {   //quick run
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
-      //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //full run
       for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
-        data e_data =find_energy(temp, reduced_density, fv, gwidth);
+        struct data e_data =find_energy(temp, reduced_density, fv, gwidth);
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
@@ -315,24 +311,21 @@ int main(int argc, char **argv) {
           best_free_energy = e_data.free_energy;
           best_fv = fv;
           best_gwidth = gwidth;
-          cFEpervol=e_data.cfree_energy_per_vol;
         }
       }
     }
     printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
-    //if (best_energy < 0) { //only send data to best data out file if there is crystalization!
-    //Create dataout file
-    FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
-    if (newmeltbest) {
-      fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#T\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
-              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv);
-      fclose(newmeltbest);
-    } else {
-      printf("Unable to open file newmeltbestdata.dat!\n");
+    if (best_energy < 0) { //only send data to best data out file if there is crystalization!
+      //Create dataout file
+      FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
+      if (newmeltbest) {
+        //fprintf(newmeltbest, "#T\tn\tbest_energy\n");
+        fprintf(newmeltbest, "%g\t%g\t%g\n", reduced_density, best_free_energy, best_energy);
+        fclose(newmeltbest);
+      } else {
+        printf("Unable to open file newmeltbestdata.dat!\n");
+      }
     }
-    //}
   } else if (gwidth < 0) {
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
