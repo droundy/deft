@@ -85,6 +85,12 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 0.8;
   double wl_cutoff = 1e-8;
+  
+  /* Do not change these here! They are taken directly from the WL paper.
+     If you want to change the SA parameters, run this code with appropriate arguments */
+  double t0 = 10e3;
+  double sa_factor = 0.01;
+  
 
   sw.min_important_energy = 0;
   sw.sim_dos_type = transition_dos;

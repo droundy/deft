@@ -207,6 +207,8 @@ struct sw_simulation {
   void calculate_weights_using_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff,
                                       bool verbose); // added by JP in 2017 for wltmmc.
+  void stochastic_weights_using_satmmc(double t0, double sa_factor,
+                                       double wl_cutoff, bool verbose); // added by JP in 2017 for satmmc.
   void optimize_weights_using_transitions(int version);
 
   // return fractional error in sample count
