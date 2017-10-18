@@ -643,7 +643,7 @@ int main(int argc, const char *argv[]) {
      than this, which probably is not possible (for a significant
      number of spheres). */
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance + 1);
-  sw.transitions_table =
+  sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
   // Walker histograms
@@ -1255,7 +1255,7 @@ int main(int argc, const char *argv[]) {
   delete[] sw.ln_energy_weights;
   delete[] sw.energy_histogram;
 
-  delete[] sw.transitions_table;
+  delete[] sw.collection_matrix;
 
   delete[] sw.walkers_up;
 
