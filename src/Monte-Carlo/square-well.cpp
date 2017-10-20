@@ -1088,77 +1088,15 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 // stochastic_weights is under construction by DR and JP (2017).
 // this is used for Stochastic Approximation Monte Carlo.
 
-void sw_simulation::initialize_stochastic_approximation(double t0, double sa_factor,
-                                                    double wl_cutoff) {
-  bool done = false;
-
-  while (!done) {
-    // printing_allowed should give updates in terminal.
-    bool be_verbose = printing_allowed();
+void sw_simulation::initialize_samc(double t0) {
+  do {
 
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
+      wl_factor = t0 / max(t0, moves.total);
       move_a_ball();
     }
 
-    double wl_factor = t0 / max(t0, iteration) * sa_factor;
-
-    // specify end condition using SA definition of wl_factor.
-
-    if (wl_factor < wl_cutoff) {
-      printf("Took %ld iterations to initialize with stochastic approximation method.\n",
-              iteration);
-      set_min_important_energy();
-      done = true;
-    }
-
-    // not exactly sure how to implement this but I think be_verbose needs
-    // to be true so down below it will print every so often...
-    be_verbose = true;
-
-    
-    // compute variation in energy histogram
-    int highest_hist_i = 0; // the most commonly visited energy
-    int lowest_hist_i = 0; // the least commonly visited energy
-    double highest_hist = 0; // highest histogram value
-    double lowest_hist = 1e200; // lowest histogram value
-    double total_counts = 0; // total counts in energy histogram
-    int num_nonzero = 0; // number of nonzero bins
-
-    for(int i = max_entropy_state+1; i <= min_important_energy; i++){
-      num_nonzero += 1;
-      total_counts += energy_histogram[i];
-      if(energy_histogram[i] > highest_hist){
-        highest_hist = energy_histogram[i];
-        highest_hist_i = i;
-      }
-      if(energy_histogram[i] < lowest_hist){
-        lowest_hist = energy_histogram[i];
-        lowest_hist_i = i;
-      }
-    }
-  
-
-
-    if (lowest_hist == 0) {
-      printf("We have never yet visited %d!\n", lowest_hist_i);
-      } else {
-
-        double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
-        const double min_over_mean = lowest_hist/hist_mean;
-        const long min_interesting_energy_count = energy_histogram[min_important_energy];
-  
-        if (be_verbose) {
-          printf("  WL factor: %g (vs %g)\n",wl_factor, wl_cutoff);
-          printf("  min/mean %g\n", min_over_mean);
-          printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
-                highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
-          printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
-                pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
-                min_interesting_energy_count);
-        }
-      }
-
-  }
+  } while(!finished_initializing(printing_allowed()));
 
   initialize_canonical(min_T,min_important_energy);
 }
@@ -1733,7 +1671,7 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
     if (maxdos < lndos[i]) maxdos = lndos[i];
   }
   for (int i = 0; i < sw.energy_levels; i++) {
-    fprintf(f, "%d\t%g\t%d\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
+    fprintf(f, "%d\t%g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
   }
   fclose(f);
   delete[] lndos;

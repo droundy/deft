@@ -188,8 +188,7 @@ struct sw_simulation {
                          double wl_threshold, double wl_cutoff);
   void initialize_satmmc(double t0, 
                          double sa_factor, double wl_cutoff);
-  void initialize_stochastic_approximation(double t0, 
-                         double sa_factor, double wl_cutoff);
+  void initialize_samc(double t0);
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
