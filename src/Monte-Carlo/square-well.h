@@ -115,13 +115,13 @@ struct sw_simulation {
      statistics on entropy differences, under the assumption that we
      sample all states of a given energy equally. */
   int biggest_energy_transition;
-  long *transitions_table;
+  long *collection_matrix;
   long &transitions(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   long transitions(int energy, int energy_change) const {
@@ -129,7 +129,7 @@ struct sw_simulation {
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   /* "transition_matrix" is a read-only sloppy and normalized version
