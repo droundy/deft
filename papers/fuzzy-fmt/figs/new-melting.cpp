@@ -401,9 +401,9 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
+      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
-              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+              reduced_density, best_free_energy, best_free_energy-best_energy, best_energy, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -433,9 +433,9 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
+      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
-              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+              reduced_density, best_free_energy, best_free_energy-best_energy, best_energy, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
