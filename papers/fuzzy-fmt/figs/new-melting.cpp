@@ -390,6 +390,10 @@ int main(int argc, char **argv) {
     printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
   }
 
+  //Create bestdataout filename (to be used if we are looping)
+  char *bestdat_filename = new char[1024];
+  sprintf(bestdat_filename, "%s/kT%g_rd%g_best.dat",
+          data_dir, temp, reduced_density);
   
   if (fv == -1) {
     double best_energy = 1e100;
@@ -423,12 +427,8 @@ int main(int argc, char **argv) {
     }
     printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy);
 
-    //Create bestdataout filename
-    char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat",
-            data_dir, temp, reduced_density, best_fv, best_gwidth);
+    //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
-    
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
@@ -459,12 +459,8 @@ int main(int argc, char **argv) {
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy);
     
-    //Create bestdataout filename
-    char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat",
-            data_dir, temp, reduced_density, best_fv, best_gwidth);
+    //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
-
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
