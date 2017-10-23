@@ -261,13 +261,12 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     } else printf("TRY AGAIN!\n\n");
   }
 
-  // Create all output data file
+  // Create all output data filename
   char *alldat_filename = new char[1024];   //ASK DAVID!!
-  sprintf(alldat_filename, "crystalization/data/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat", temp, reduced_density, fv, gwidth);
-  printf("Create data file: kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat\n", temp, reduced_density, fv, gwidth);
-  //printf("data dir =%s\n", data_dir);  //This causes a segmentation fault if leave off star in function
-  //sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat", data_dir, temp, reduced_density, fv, gwidth);  //unable to open file with this
-  //printf("Create data file: %s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat\n", data_dir, temp, reduced_density, fv, gwidth);
+  sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat",
+          data_dir, temp, reduced_density, fv, gwidth);
+  printf("Create data file: %s\n", alldat_filename);
+  printf("data dir =%s\n", data_dir);
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
@@ -424,12 +423,11 @@ int main(int argc, char **argv) {
     }
     printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy);
 
-    //Create bestdataout file
+    //Create bestdataout filename
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "crystalization/data/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat", temp, reduced_density, best_fv, best_gwidth);
-    printf("Create best data file: kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat\n", temp, reduced_density, best_fv, best_gwidth);
-    //sprintf(bestdat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat", data_dir, temp, reduced_density, best_fv, best_gwidth); //unable to open file
-    //printf("Create best data file: %s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat\n", data_dir, temp, reduced_density, best_fv, best_gwidth);
+    sprintf(bestdat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat",
+            data_dir, temp, reduced_density, best_fv, best_gwidth);
+    printf("Create best data file: %s\n", bestdat_filename);
     
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
@@ -461,13 +459,12 @@ int main(int argc, char **argv) {
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy);
     
-    //Create bestdataout file
+    //Create bestdataout filename
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "crystalization/data/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat", temp, reduced_density, best_fv, best_gwidth);
-    printf("Create best data file: kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat\n", temp, reduced_density, best_fv, best_gwidth);
-    //sprintf(bestdat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat", data_dir, temp, reduced_density, best_fv, best_gwidth); //unable to open file
-    //printf("Create best data file: %s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat\n", data_dir, temp, reduced_density, best_fv, best_gwidth);
-    
+    sprintf(bestdat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-bestdat.dat",
+            data_dir, temp, reduced_density, best_fv, best_gwidth);
+    printf("Create best data file: %s\n", bestdat_filename);
+
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
