@@ -261,7 +261,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 }
 
 int main(int argc, char **argv) {
-  double reduced_density, gwidth=0.3, fv=0, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  double reduced_density, gwidth=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
   double fv_start=0.0, fv_end=1, fv_step=0.01, gw_start=0.01, gw_end, gw_step=10;
   double dx=0.01;
@@ -270,19 +270,14 @@ int main(int argc, char **argv) {
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
   char *default_data_dir = new char[1024];
-  sprintf(default_data_dir, "crystalization/data");   //ASK!
+  sprintf(default_data_dir, "crystalization/data");
   char *filename = new char[1024];
   sprintf(filename, "none");
-  //char *filename_suffix = new char[1024];   //ASK!
-  //sprintf(filename_suffix, "none");
-  
-  //if (false) {  ??ASK DAVID!  WATCH OUT right now re-writes over data!!!  FIX!
-    mkdir("crystalization", 0777); // make sure the directory exists
-    mkdir("crystalization/data", 0777); // make sure the directory exists
-    printf("made directory [deft/papers/fuzzy-fmt]crystalization/data\n");
-  //}
-  
-  
+
+  mkdir("crystalization", 0777); // make sure the directory exists
+  mkdir("crystalization/data", 0777); // make sure the directory exists
+  printf("made directory [deft/papers/fuzzy-fmt]crystalization/data\n");
+
   //********************Setup POPT to get inputs from command line*******************
 
   poptContext optCon;
@@ -302,7 +297,7 @@ int main(int argc, char **argv) {
     {"fv", '\0', POPT_ARG_DOUBLE, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
     {"gw", '\0', POPT_ARG_DOUBLE, &gwidth, 0, "width of Gaussian", "DOUBLE or -1 for loop"},
 
-    /*** LOOPING OPTIONS ***/  //ASK DAVID -- if want loop with start/end/step info must also set fv=-1 and gw=-1 as well!
+    /*** LOOPING OPTIONS ***/
     {"fvstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_start, 0, "start fv loop at", "DOUBLE"},
     {"fvend", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_end, 0, "end fv loop at", "DOUBLE"},
     {"fvstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_step, 0, "fv loop step", "DOUBLE"},
@@ -317,11 +312,6 @@ int main(int argc, char **argv) {
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
     "Directory in which to save data", "DIRNAME"},
-   // {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
-   //  "Base of output file names", "STRING"},
-   // {"filename-suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,   //ASK!
-   //  &filename_suffix, 0, "Output file name suffix", "STRING"},
-    
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -362,7 +352,7 @@ int main(int argc, char **argv) {
   
   // Set default data directory
   if (strcmp(data_dir,"none") == 0) {
-    sprintf(data_dir,"%s\n",default_data_dir);  // ????ASK!
+    sprintf(data_dir,"%s\n",default_data_dir);
     printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   } else {
     mkdir(data_dir, 0777); 
