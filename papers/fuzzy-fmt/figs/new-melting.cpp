@@ -270,13 +270,10 @@ int main(int argc, char **argv) {
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
   char *default_data_dir = new char[1024];
-  sprintf(default_data_dir, "crystalization/data");
+//  sprintf(default_data_dir, "crystalization/data");
+  sprintf(default_data_dir, "crystalization");
   char *filename = new char[1024];
   sprintf(filename, "none");
-
-  mkdir("crystalization", 0777); // make sure the directory exists
-  mkdir("crystalization/data", 0777); // make sure the directory exists
-  printf("made directory [deft/papers/fuzzy-fmt]crystalization/data\n");
 
   //********************Setup POPT to get inputs from command line*******************
 
@@ -350,14 +347,14 @@ int main(int argc, char **argv) {
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant/2, step=lattice constant/%g\n", gw_start, gw_step);
   }
   
-  // Set default data directory
+  // Create directory for data files
   if (strcmp(data_dir,"none") == 0) {
     sprintf(data_dir,"%s\n",default_data_dir);
     printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   } else {
-    mkdir(data_dir, 0777); 
     printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
   }
+  mkdir(data_dir, 0777); // create the directory 
 
   //Create bestdataout filename (to be used if we are looping)
   char *bestdat_filename = new char[1024];
