@@ -115,13 +115,13 @@ struct sw_simulation {
      statistics on entropy differences, under the assumption that we
      sample all states of a given energy equally. */
   int biggest_energy_transition;
-  long *transitions_table;
+  long *collection_matrix;
   long &transitions(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   long transitions(int energy, int energy_change) const {
@@ -129,7 +129,7 @@ struct sw_simulation {
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   /* "transition_matrix" is a read-only sloppy and normalized version
@@ -186,6 +186,9 @@ struct sw_simulation {
 
   void initialize_wltmmc(double wl_fmod,
                          double wl_threshold, double wl_cutoff);
+  void initialize_satmmc(double t0, 
+                         double sa_factor, double wl_cutoff);
+  void initialize_samc(double t0);
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
@@ -207,6 +210,8 @@ struct sw_simulation {
   void calculate_weights_using_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff,
                                       bool verbose); // added by JP in 2017 for wltmmc.
+  void stochastic_weights_using_satmmc(double t0, double sa_factor,
+                                       double wl_cutoff, bool verbose); // added by JP in 2017 for satmmc.
   void optimize_weights_using_transitions(int version);
 
   // return fractional error in sample count

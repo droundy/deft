@@ -548,18 +548,18 @@ to justify this.  In order to determine when sufficient statistics have been rea
 it becomes neccessary to define a modifcation factor, in this case, in terms of a 
 fractional uncertainty
 \begin{align}
-  \mathcal{F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
+  {F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
 \end{align}
 where $N_s(\epsilon)$ is the number of round-trip samples taken at an energy
 $\epsilon$.  We assume that our uncertainty in the ratio between the density
 of states at two adjacent energies is equal to this value.  The weight at each
 energy can then be set according to
 \begin{align}
-  \mathcal{W}_{\epsilon} &= \mathcal{W}_{\epsilon+1}\max\left[\frac1{\mathcal{F}
-  (\epsilon)},\frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right]
+  {W}_{\epsilon} &= {W}_{\epsilon+1}\max\left[\frac1{{F}
+  (\epsilon)},\frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
   \\
-   &= \mathcal{W}_{\epsilon+1}\max\left[\frac1{\sqrt{N_s(\epsilon)}},
-  \frac{\mathcal{D}(\epsilon)}{\mathcal{D}(\epsilon+1)}\right]
+   &= {W}_{\epsilon+1}\max\left[\frac1{\sqrt{N_s(\epsilon)}},
+  \frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
 \end{align}
 
 \subsubsection{Weights at Low Energy}
@@ -607,15 +607,15 @@ In order to calculate an overall transition probability $\mathcal{P}_{N,\delta}$
 must first define how the system procession is to be recorded.  A Collection Matrix
 can be defined, such that for any one move, two elements are updated.
 \begin{align}
-  \mathcal{C}_{N,\delta} = \mathcal{C}_{N,\delta} + p_{a}\\
-  \mathcal{C}_{N,0} = \mathcal{C}_{N,0} +(1 - p_{a})
+  {C}_{N,\delta} = {C}_{N,\delta} + p_{a}\\
+  {C}_{N,0} = {C}_{N,0} +(1 - p_{a})
 \end{align}  
 If $\delta=0$, that is, the number of particles has not been changed, then only 
 $\mathcal{C}_{N,0}$ is incremented by unity.  The overal transition probability can
 now be defined as 
 \begin{align}
-  \mathcal{P}_{N,\delta} = \frac{\mathcal{C}_{N,\delta}}
-  {\sum_{j=-1}^{+1} \mathcal{C}_{N,j}}
+  \mathcal{P}_{N,\delta} = \frac{{C}_{N,\delta}}
+  {\sum_{j=-1}^{+1} {C}_{N,j}}
 \end{align} 
 
 \subsubsection{Define the Particle Number Probability Distribution}
@@ -776,10 +776,10 @@ downward.
 If the change in the logarithm of the density of states is greater
 than the reciprocal of the minimum temperature, i.e. if
 \begin{align}
-  \ln\frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} &>
+  \ln\frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
   \frac{\epsilon_{i-1} - \epsilon_i}{k_BT_{\min}}
   \\
-  \frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} &>
+  \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
   e^{\beta_{\max}(\epsilon_{i-1} - \epsilon_i)}
 \end{align}
 then the algorithm has reached the minimum temperature of interest.
@@ -794,7 +794,7 @@ of states at energy $\epsilon_i$ provided two conditions are true.
   energy) must be smaller than a pessimistic estimate of the counting
   uncertainty at the energy we are examining:
   \begin{align}
-    \frac{\mathcal D(\epsilon_i)}{\mathcal D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
+    \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
   \end{align}
   where $N_i$ is the number of ``pessimistic
   samples'' at $\epsilon_i$, the lower of the two energies under
@@ -803,7 +803,7 @@ of states at energy $\epsilon_i$ provided two conditions are true.
 If both of these are true, we believe we know the density of states at
 this energy well, and the weights are set by
 \begin{align}
-  \ln w(\epsilon_i) = -\ln\mathcal{D}(\epsilon_i)
+  \ln w(\epsilon_i) = -\ln{D}(\epsilon_i)
 \end{align}
 \paragraph{Reached $T_\text{converged}$:}
 If this is not the case, $\epsilon_i$ is the lowest energy that is
@@ -811,7 +811,7 @@ adequately converged.  We set the weights for energies lower than this
 to a Boltzmann ratio with a temperature determined using the slope of
 a secant line on the $\ln w$ versus $\epsilon$ graph.
 \begin{align}
-  \beta_\text{secant} = \bigg(\frac{\ln\mathcal{D}(\epsilon_{S_{\max}}) - \ln\mathcal{D}
+  \beta_\text{secant} = \bigg(\frac{\ln{D}(\epsilon_{S_{\max}}) - \ln{D}
   (\epsilon_\text{pivot})}{\epsilon_{S_{\max}}-\epsilon_\text{pivot}}\bigg)
 \end{align}
 This ``slope'' is a positive quantity.  The weights at energies below
@@ -834,6 +834,22 @@ The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
 difference, which is that instead of a secant line being used to
 estimate the converged temperature, we use a tangent line, estimated
 using the lowest two ``converged'' energies.
+
+\subsection{TOE3 Algorithm}
+The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses the metric of round trips defined by a walker visiting the extreme energies for the density of states.  The rate for the walker is dependent of the diffusivity $D(\epsilon)$ at a given energy $E$.  The goal of the method is to maximize the number of round trips that the Monte-Carlo simulation makes.  The optimized density of states is given by the following:
+\begin{align}
+  n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
+\end{align}
+where unlike in the original paper detailing the method, we compute the difusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the difusivity.
+\begin{align}
+  D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
+\end{align}
+
+\subsection{SAMC Algorithm}
+The SAMC Algorithm was proposed as the reason that the Wang-Landau Algorithm converges.  It is primarily the 1/t WL Algorithm although it does not require knowledge of the entire energy range.
+
+\subsection{SA-TMMC Algorithm or maybe just SATM}
+This method is based on both the SA-TMMC Algorithm and the TMMC Algorithm.  It is similar to WL-TMMC in terms of operation.
 
 % The original TMI Algorithm text is below.
 

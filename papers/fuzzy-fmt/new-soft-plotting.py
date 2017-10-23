@@ -16,9 +16,8 @@ y = 1
 z = 2
 
 # Default data sets to pull from. 
-rhoDefault = [0.6,0.7,0.8,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,\
-    0.99,1.0,1.1,1.2,1.3,1.4]
-TDefault = [1.0]
+rhoDefault = [0.7]
+TDefault = [2.0]
 
 def plotPressure(rho,T):
 	plt.figure()
@@ -67,7 +66,7 @@ def plotRadialDF(rho,T):
 			radialData  = np.loadtxt('data2/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-radial.dat')
 			plt.figure()
-			plt.plot(radialData[:,0],radialData[:,1]/(radialData[:,0]**2))
+			plt.plot(radialData[:,0],radialData[:,1])#/(radialData[:,0]**2))
 			plt.title('Sum of Spheres at a Radial Distance, non-averaged.\n'\
 				'Temp: '+str(temp)+' and Density: ' +str(density))
 			plt.xlabel('Radial Distance (r)')
@@ -90,17 +89,30 @@ def plotRadialDF(rho,T):
 			#~ plt.ylabel('Probability')
             
 def plotStructureFactor(rho,T):
-    fig, ax = plt.subplots()
+    
     for temp in T:
         for density in rho:
-            structureData = np.loadtxt('data2/ff-'+str(density)+'_temp-'+\
-                str(temp)+'-struc.dat')
-            #~ print structureData[0][:]
-            cax =ax.imshow(structureData[30:][30:], interpolation = 'nearest', cmap = "gnuplot")
+            fig, ax = plt.subplots()
+            fname = 'data2/ff-%s_temp-%s-struc.dat' % (density, temp)
+            structureData = np.loadtxt(fname)
+            Nballs = -1;
+            with open(fname) as f:
+                for l in f.readlines():
+                    if l[:5] == '# N: ':
+                        Nballs = int(l[5:])
+                        break
+            dk = 1/40
+            kvals = dk*np.arange(0.0, len(structureData), 1)
+            kx, ky = np.meshgrid(kvals, kvals)
+        
+            sf_max = structureData[30:][30:].max()/Nballs
+            ds = sf_max / 1000
+            cax =ax.contourf(kx, ky, structureData/(Nballs), levels = np.arange(0,0.5,ds))
+            ax.set_aspect('equal')
             cbar = fig.colorbar(cax)
-            ax.set_title('Structure Factor')
-            ax.set_xlabel('kx')
-            ax.set_ylabel('ky')
+            ax.set_title('Structure Factor density:'+str(density))
+            ax.set_xlabel(r'$k_x (\frac{\pi}{a}$)')
+            ax.set_ylabel(r'$k_y (\frac{\pi}{a}$)')
 
 	
 def plotDiffusionCoeff(rho,T):
@@ -109,6 +121,7 @@ def plotDiffusionCoeff(rho,T):
         for density in rho:
             diffusionData = np.loadtxt('data2/ff-'+str(density)+'_temp-'+\
                 str(temp)+'-dif.dat')
+            print diffusionData
             plt.semilogy(density,diffusionData,'k.')
             plt.title('Diffusion Coefficient v. Reduced Density')
             plt.xlabel(r'$\rho*$')

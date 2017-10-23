@@ -956,6 +956,24 @@ void sw_simulation::initialize_wltmmc(double wl_fmod,
 
 // this is the end of code on WL-TMMC.
 
+// this method is under construction by DR and JP (2017).
+// initialize the weight array using the satmmc method.
+void sw_simulation::initialize_satmmc(double t0, double sa_factor, 
+                                      double wl_cutoff) {
+  int check_how_often =  N; // update SA stuff only so often
+  bool verbose = false;
+  do {
+    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
+    check_how_often += N; // try a little harder next time...
+
+    verbose = printing_allowed();
+    if (verbose) write_transitions_file();
+    stochastic_weights_using_satmmc(t0, sa_factor, wl_cutoff, verbose);
+  } while(!finished_initializing(verbose));
+}
+
+// this is the end of code on SA-TMMC.
+
 // initialize the weight array using the Wang-Landau method.
 void sw_simulation::initialize_wang_landau(double wl_fmod,
                                            double wl_threshold, double wl_cutoff,
@@ -1063,6 +1081,22 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
       // printf("  hist_mean: %g,  total_counts: %g\n", hist_mean, total_counts);
     }
   }
+
+  initialize_canonical(min_T,min_important_energy);
+}
+
+// stochastic_weights is under construction by DR and JP (2017).
+// this is used for Stochastic Approximation Monte Carlo.
+
+void sw_simulation::initialize_samc(double t0) {
+  do {
+
+    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
+      wl_factor = t0 / max(t0, moves.total);
+      move_a_ball();
+    }
+
+  } while(!finished_initializing(printing_allowed()));
 
   initialize_canonical(min_T,min_important_energy);
 }
@@ -1370,9 +1404,8 @@ void sw_simulation::update_weights_using_transitions(int version, bool energy_ra
 }
 
 // calculate_weights is under construction by DR and JP (2017).
-// put wltmmc code in for streamlining.
 
-// calculate the weight array using transitions
+// calculate the weight array using transitions for wltmmc
 void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
                                                    double wl_threshold,
                                                    double wl_cutoff,
@@ -1453,6 +1486,81 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
     }
   }
 } // done with WL!
+
+// stochastic_weights is under construction by DR and JP (2017).
+// this is used for Stochastic Approximation Monte Carlo.
+
+// calculate the weight array using transitions for satmmc
+void sw_simulation::stochastic_weights_using_satmmc(double t0, double sa_factor,
+                                                    double wl_cutoff, bool verbose) {
+
+  double wl_factor = t0 / max(t0, iteration) * sa_factor;
+
+  // specify end condition using SA definition of wl_factor.
+
+  //assert(min_important_energy);
+  if (wl_factor < wl_cutoff) {
+    if (wl_factor > 0.0) {
+      printf("All done with SA portion of SATMMC!\n");
+    }
+    wl_factor = 0.0; // We are done with SA portion!  :)
+    use_tmmc = true; // Now we will be doing TMMC like anyone else!
+    set_min_important_energy();
+    return;
+  }
+
+  bool we_changed = false;
+  
+  // use this to determine when to print information since
+  // SA is a continuous update process.
+  for (int i = 0; i < iteration; i += iteration) {
+    we_changed = true;
+    update_weights_using_transitions(1, true);
+  }
+
+
+
+  // compute variation in energy histogram
+  int highest_hist_i = 0; // the most commonly visited energy
+  int lowest_hist_i = 0; // the least commonly visited energy
+  double highest_hist = 0; // highest histogram value
+  double lowest_hist = 1e200; // lowest histogram value
+  double total_counts = 0; // total counts in energy histogram
+  int num_nonzero = 0; // number of nonzero bins
+
+  for(int i = max_entropy_state+1; i <= min_important_energy; i++){
+    num_nonzero += 1;
+    total_counts += energy_histogram[i];
+    if(energy_histogram[i] > highest_hist){
+      highest_hist = energy_histogram[i];
+      highest_hist_i = i;
+    }
+    if(energy_histogram[i] < lowest_hist){
+      lowest_hist = energy_histogram[i];
+      lowest_hist_i = i;
+    }
+  }
+
+  double hist_mean = (double)total_counts / (min_important_energy - max_entropy_state);
+  if (lowest_hist == 0) {
+    if (verbose) {
+      printf("We have never yet visited %d!\n", lowest_hist_i);
+    }
+  } else {
+    const double min_over_mean = lowest_hist/hist_mean;
+    const long min_interesting_energy_count = energy_histogram[min_important_energy];
+
+    if (verbose || we_changed) {
+      printf("  WL factor: %g (vs %g)\n",wl_factor, wl_cutoff);
+      printf("  min/mean %g\n", min_over_mean);
+      printf("  highest/lowest histogram energies (values): %d (%.2g) / %d (%.2g)\n",
+             highest_hist_i, highest_hist, lowest_hist_i, lowest_hist);
+      printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
+             pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
+             min_interesting_energy_count);
+    }
+  }
+} // done with SA!
 
 // initialization with tmi
 void sw_simulation::initialize_tmi(int version) {
@@ -1563,7 +1671,7 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
     if (maxdos < lndos[i]) maxdos = lndos[i];
   }
   for (int i = 0; i < sw.energy_levels; i++) {
-    fprintf(f, "%d\t%g\t%d\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
+    fprintf(f, "%d\t%g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
   }
   fclose(f);
   delete[] lndos;

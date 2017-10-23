@@ -201,7 +201,7 @@ int main(int argc, const char *argv[])  {
     double sphereTotalMove[numOfSpheres] = {0};
     // Structure Factor
     double kmax = 24*M_PI;
-    double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
+    const double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
     double cellLength = systemLength[x]/cellNumber;
     double dk = M_PI / (20*cellLength);
     int kpoints = ceil(((kmax-2*M_PI)/cellLength)/dk);
@@ -309,13 +309,13 @@ int main(int argc, const char *argv[])  {
                 runningRadial[i] += radialDistHist[i];
             }
             delete[] radialDistHist;
-        if ((currentIteration % (10*numOfSpheres)) == 0){
+        if ((currentIteration % (10*numOfSpheres*kpoints)) == 0){
             structureWrites += 1;
             for (int kx = 0; kx < kpoints -1; kx++) {
                     for (int ky = 0; ky < kpoints -1; ky++) {
                         double rho_k_real = 0, rho_k_imag = 0;
                         for (int n = 0; n < numOfSpheres; n++) {
-                            double kr = dk*((kx+1)*spheres[n].x + (ky+1)*spheres[n].y);
+                            double kr = dk*(kx*spheres[n].x + ky*spheres[n].y);
                             rho_k_real += cos(kr);
                             rho_k_imag += sin(kr);
                         }
@@ -340,6 +340,7 @@ int main(int argc, const char *argv[])  {
             drAdjust *= 10;
 		}
 	}
+    // MAKE IT SO THAT THE RESIDUE FROM EARLIER PARTS WILL BE ERASED
 	// ---------------------------------------------------------------
     // Save data to files
     // ---------------------------------------------------------------
@@ -355,8 +356,9 @@ int main(int argc, const char *argv[])  {
 				outputCount += 1;
 				save = true;
 				saveIter = ceil(saveTimes[outputCount]*double(saveIter)/clock);
-			}	else if ((clock >= saveTimes[outputCount]) && (outputCount == 7)){
+			}	else if ((clock >= saveTimes[outputCount]) && (outputCount >= 7)){
 				saveIter = ceil((saveTimes[outputCount]+clock)*double(saveIter)/clock);
+                outputCount += 1;
 				save = true;
 			}
 
@@ -415,7 +417,7 @@ int main(int argc, const char *argv[])  {
 				// Save Energy
 				FILE *energy_out = fopen(energy_fname,"w");
 				fprintf(energy_out,"%s%s",headerinfo,countinfo);
-				fprintf(energy_out,"%g\t%g\n",
+				fprintf(energy_out,"%g\n",
 						totalEnergy/double(currentIteration));
 				// Save Diffusion
 				FILE *dif_out = fopen(dif_fname,"w");
@@ -425,14 +427,13 @@ int main(int argc, const char *argv[])  {
                 FILE *struc_out = fopen(struc_fname,"w");
                 fprintf(struc_out, "%s%s", headerinfo,countinfo);
                 fprintf(struc_out, "# Structure Writes %ld\n",structureWrites);
-                fprintf(struc_out, "# kpoints %ld\n", kpoints);
+                fprintf(struc_out, "# kpoints %d\n", kpoints);
                 for (int kx = 0; kx < kpoints -1; kx++) {
                     for (int ky = 0; ky < kpoints -1; ky++) {
                         fprintf(struc_out,"%g\t",structureFactor[kx][ky]/structureWrites);
                     }
                     fprintf(struc_out,"\n");
                 }
-                
                 // Close files
 				fclose(pos_out);
 				fclose(radial_out);
@@ -442,6 +443,11 @@ int main(int argc, const char *argv[])  {
                 fclose(struc_out);
 				save = false; 
 			}
+            if ((outputCount == 7) || (outputCount == 9)) {
+                structureFactor[kpoints][kpoints] = {0};
+                printf("Structure Factor Reset\n");
+                printf("Reset Time: %s\n\n",ctime(&mytime));
+            }
 		}
     }
 	// ----------------------------------------------------------------------------
