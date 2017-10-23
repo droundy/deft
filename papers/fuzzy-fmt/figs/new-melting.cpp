@@ -218,29 +218,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     }
   }
 
-//ASK David about this stuff!! ----------------
-//  if (false) {
-//    char *fname = new char[5000];
-//    mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
-//    snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/initial-melting-%04.2f-%04.2f-%04.2f.dat",
-//             lattice_constant, reduced_density, temp);
-//    FILE *o = fopen(fname, "w");
-//    if (!o) {
-//      fprintf(stderr, "error creating file %s\n", fname);
-//      exit(1);
-//    }
-//    delete[] fname;
-//    const int Nz = f.Nz();
-//    Vector rz = f.get_rz();
-//    Vector n = f.n();
-//    for (int i=0; i<Nz/2; i++) {
-//      fprintf(o, "%g\t%g\n", rz[i], n[i]);
-//    }
-//    fclose(o);
-//  }
-//---------------------------------------------  
-
-
   //printf("crystal free energy is %g\n", f.energy());
   double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
   data data_out;
@@ -262,7 +239,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   }
 
   // Create all output data filename
-  char *alldat_filename = new char[1024];   //ASK DAVID!!
+  char *alldat_filename = new char[1024];
   sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
   printf("Create data file: %s\n", alldat_filename);
@@ -288,7 +265,7 @@ int main(int argc, char **argv) {
   
   double fv_start=0.0, fv_end=1, fv_step=0.01, gw_start=0.01, gw_end, gw_step=10;
   double dx=0.01;
-  bool verbose;  // ASK?
+  int verbose = false;
   
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
@@ -315,6 +292,9 @@ int main(int argc, char **argv) {
   // ----------------------------------------------------------------------------
 
   poptOption optionsTable[] = {
+
+    {"verbose", '\0', POPT_ARG_NONE, &verbose, 0,
+     "Print lots of good stuff!", "BOOLEAN"},
 
     /*** FLUID PARAMETERS ***/
     {"kT", '\0', POPT_ARG_DOUBLE, &temp, 0, "temperature", "DOUBLE"},
@@ -407,7 +387,7 @@ int main(int argc, char **argv) {
       //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //full run
       for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/gw_step) {   //full run
       //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
-        data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir);
+        data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
@@ -447,7 +427,7 @@ int main(int argc, char **argv) {
     printf("lattice_constant is %g\n", lattice_constant);
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
     for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/gw_step) {   //full run
-      data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir);
+      data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
       if (e_data.diff < best_energy) {
           best_energy = e_data.diff;
           best_free_energy = e_data.free_energy;
