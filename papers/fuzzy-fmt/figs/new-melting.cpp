@@ -266,7 +266,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
   printf("Create data file: %s\n", alldat_filename);
-  printf("data dir =%s\n", data_dir);
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
