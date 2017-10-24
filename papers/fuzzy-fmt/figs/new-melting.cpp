@@ -351,9 +351,9 @@ int main(int argc, char **argv) {
   // Create directory for data files
   if (strcmp(data_dir,"none") == 0) {
     sprintf(data_dir,"%s\n",default_data_dir);
-    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
+  //  printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   } else {
-    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
+  //  printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
   }
   mkdir(data_dir, 0777);  
 
@@ -395,7 +395,7 @@ int main(int argc, char **argv) {
     printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy);
 
     //Create bestdataout file
-    printf("Create best data file: %s\n", bestdat_filename);
+    //printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
@@ -427,7 +427,7 @@ int main(int argc, char **argv) {
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy);
     
     //Create bestdataout file
-    printf("Create best data file: %s\n", bestdat_filename);
+    //printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
