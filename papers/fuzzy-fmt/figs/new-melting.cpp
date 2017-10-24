@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
           data_dir, temp, reduced_density);
   
   if (fv == -1) {
-    double best_energy = 1e100;
+    double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_free_energy;
     double cFEpervol;
     const int num_to_compute = int(0.3/0.05*1/0.01);
@@ -378,13 +378,13 @@ int main(int argc, char **argv) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
-          //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
-          //       best_energy);
+          //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
+          //       best_energy_diff);
         }
-        if (e_data.diff < best_energy) {
+        if (e_data.diff < best_energy_diff) {
           //printf("better free energy with fv %g gwidth %g and E %g\n",
           //       fv, gwidth, e_data.diff);
-          best_energy = e_data.diff;
+          best_energy_diff = e_data.diff;
           best_free_energy = e_data.free_energy;
           best_fv = fv;
           best_gwidth = gwidth;
@@ -392,7 +392,7 @@ int main(int argc, char **argv) {
         }
       }
     }
-    printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy);
+    printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
 
     //Create bestdataout file
     //printf("Create best data file: %s\n", bestdat_filename);
@@ -401,14 +401,14 @@ int main(int argc, char **argv) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
       fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-              temp, reduced_density, best_free_energy, best_free_energy-best_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+              temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
 
   } else if (gwidth == -1) {
-    double best_energy = 1e100;
+    double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_free_energy;
     double cFEpervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -416,15 +416,15 @@ int main(int argc, char **argv) {
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
     for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/gw_step) {   //full run
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
-      if (e_data.diff < best_energy) {
-          best_energy = e_data.diff;
+      if (e_data.diff < best_energy_diff) {
+          best_energy_diff = e_data.diff;
           best_free_energy = e_data.free_energy;
           best_fv = fv;
           best_gwidth = gwidth;
           cFEpervol=e_data.cfree_energy_per_vol;
         }
     }
-    printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy);
+    printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
     
     //Create bestdataout file
     //printf("Create best data file: %s\n", bestdat_filename);
@@ -433,7 +433,7 @@ int main(int argc, char **argv) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
       fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-              temp, reduced_density, best_free_energy, best_free_energy-best_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+              temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
