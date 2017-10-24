@@ -242,7 +242,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   char *alldat_filename = new char[1024];
   sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
-  printf("Create data file: %s\n", alldat_filename);
+  //printf("Create data file: %s\n", alldat_filename);
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
@@ -272,8 +272,8 @@ int main(int argc, char **argv) {
   char *default_data_dir = new char[1024];
 //  sprintf(default_data_dir, "crystalization/data");
   sprintf(default_data_dir, "crystalization");
-  char *filename = new char[1024];
-  sprintf(filename, "none");
+  char *filename = new char[1024];  //delete?
+  sprintf(filename, "none");  //delete?
 
   //********************Setup POPT to get inputs from command line*******************
 
@@ -304,11 +304,12 @@ int main(int argc, char **argv) {
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
     
  //   /*** GRID OPTIONS ***/
- //   {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  //? if include this must pass it to find_energy() !
+ //   {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  //ASK! if include this must pass it to find_energy() !
     
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
     "Directory in which to save data", "DIRNAME"},
+    
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -354,7 +355,7 @@ int main(int argc, char **argv) {
   } else {
     printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
   }
-  mkdir(data_dir, 0777); // create the directory 
+  mkdir(data_dir, 0777);  
 
   //Create bestdataout filename (to be used if we are looping)
   char *bestdat_filename = new char[1024];
@@ -398,9 +399,9 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-              reduced_density, best_free_energy, best_free_energy-best_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              temp, reduced_density, best_free_energy, best_free_energy-best_energy, best_energy, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -430,8 +431,8 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
               temp, reduced_density, best_free_energy, best_free_energy-best_energy, best_energy, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
