@@ -1,6 +1,8 @@
 #include "../vector3d.h"
 #pragma once
 
+#define NDEBUG // disable assertions for extra speed! (and to test if it matters)
+
 struct ball {
   vector3d pos;
   double R;
