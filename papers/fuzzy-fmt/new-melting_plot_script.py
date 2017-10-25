@@ -25,6 +25,7 @@ crystal_energies_per_atom = thisdata[:,2]
 homogeneous_energies_per_atom = thisdata[:,3]
 energy_differences_per_atom = thisdata[:,4]
 crystal_energies_per_volume = thisdata[:,5]
+#if want vol = 4*(1-fv)/reduced_density
 
 print 'densities', densities
 print 'crystal_energies_per_atom', crystal_energies_per_atom
