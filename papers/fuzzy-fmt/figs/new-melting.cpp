@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <popt.h>
 #include "new/SFMTFluidFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
@@ -54,7 +55,7 @@ double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
 
-data find_energy(double temp, double reduced_density, double fv, double gwidth, bool verbose=false) {
+data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -67,8 +68,8 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   hf.mu() = 0;
 
   if (verbose) {
-    printf("Reduced homogeneous density= %g, fraction of vacancies=%g, Gaussian width= %g, temp= %g\n",
-           reduced_density, fv, gwidth, temp);
+    //printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n",
+    //       reduced_density, fv, gwidth, temp);
 
     printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n",
            reduced_num_spheres, vacancy);
@@ -217,26 +218,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     }
   }
 
-
-  if (false) {
-    char *fname = new char[5000];
-    mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
-    snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/initial-melting-%04.2f-%04.2f-%04.2f.dat",
-             lattice_constant, reduced_density, temp);
-    FILE *o = fopen(fname, "w");
-    if (!o) {
-      fprintf(stderr, "error creating file %s\n", fname);
-      exit(1);
-    }
-    delete[] fname;
-    const int Nz = f.Nz();
-    Vector rz = f.get_rz();
-    Vector n = f.n();
-    for (int i=0; i<Nz/2; i++) {
-      fprintf(o, "%g\t%g\n", rz[i], n[i]);
-    }
-    fclose(o);
-  }
   //printf("crystal free energy is %g\n", f.energy());
   double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
   data data_out;
@@ -257,9 +238,16 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     } else printf("TRY AGAIN!\n\n");
   }
 
-  //Create dataout file - or open file in append mode
-  FILE *newmeltoutfile = fopen("newmeltdataout.dat", "a");
+  // Create all output data filename
+  char *alldat_filename = new char[1024];
+  sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat",
+          data_dir, temp, reduced_density, fv, gwidth);
+  printf("Create data file: %s\n", alldat_filename);
+
+  //Create dataout file
+  FILE *newmeltoutfile = fopen(alldat_filename, "w");
   if (newmeltoutfile) {
+    fprintf(newmeltoutfile, "# git version: %s\n", version_identifier());  
     fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\tNsph\tlat_con\tFhom\tFcry\tdiff\n");
     fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
             temp, reduced_density, fv, gwidth, reduced_num_spheres, lattice_constant,
@@ -267,29 +255,115 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
             crystal_free_energy-homogeneous_free_energy);
     fclose(newmeltoutfile);
   } else {
-    printf("Unable to open file newmeltdataout.out!\n");
+    printf("Unable to open file %s!\n", alldat_filename);
   }
-
   return data_out;
-
 }
 
 int main(int argc, char **argv) {
-  double reduced_density, gwidth, fv, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  double reduced_density, gwidth=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  
+  double fv_start=0.0, fv_end=1, fv_step=0.01, gw_start=0.01, gw_end, gw_step=10;
+  double dx=0.01;
+  int verbose = false;
+  
+  char *data_dir = new char[1024];
+  sprintf(data_dir,"none");
+  char *default_data_dir = new char[1024];
+  sprintf(default_data_dir, "crystalization/data");
+  char *filename = new char[1024];
+  sprintf(filename, "none");
 
-  //Get inputs from command line
-  if (argc != 5) {
-    printf("ENTER: %s homogeneous(reduced) density, fraction of vacancies, Gaussian width, kT\n", argv[0]);
+  mkdir("crystalization", 0777); // make sure the directory exists
+  mkdir("crystalization/data", 0777); // make sure the directory exists
+  printf("made directory [deft/papers/fuzzy-fmt]crystalization/data\n");
+
+  //********************Setup POPT to get inputs from command line*******************
+
+  poptContext optCon;
+
+  // ----------------------------------------------------------------------------
+  // Parse input options
+  // ----------------------------------------------------------------------------
+
+  poptOption optionsTable[] = {
+
+    {"verbose", '\0', POPT_ARG_NONE, &verbose, 0,
+     "Print lots of good stuff!", "BOOLEAN"},
+
+    /*** FLUID PARAMETERS ***/
+    {"kT", '\0', POPT_ARG_DOUBLE, &temp, 0, "temperature", "DOUBLE"},
+    {"rd", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
+    {"fv", '\0', POPT_ARG_DOUBLE, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
+    {"gw", '\0', POPT_ARG_DOUBLE, &gwidth, 0, "width of Gaussian", "DOUBLE or -1 for loop"},
+
+    /*** LOOPING OPTIONS ***/
+    {"fvstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_start, 0, "start fv loop at", "DOUBLE"},
+    {"fvend", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_end, 0, "end fv loop at", "DOUBLE"},
+    {"fvstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_step, 0, "fv loop step", "DOUBLE"},
+    
+    {"gwstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_start, 0, "start gwidth loop at", "DOUBLE"},
+ //   {"gwend", '\0', POPT_ARG_DOUBLE, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  //Think about what to do with this
+    {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
+    
+ //   /*** GRID OPTIONS ***/
+ //   {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  //? if include this must pass it to find_energy() !
+    
+    /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
+    {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
+    "Directory in which to save data", "DIRNAME"},
+    POPT_AUTOHELP
+    POPT_TABLEEND
+  };
+
+  optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+  poptSetOtherOptionHelp(optCon, "[OPTION...]\nRequired arguments: temperature (kT), "
+                         "reduced density (rd)");
+                         
+  int c = 0;
+  // go through arguments, set them based on optionsTable
+  while((c = poptGetNextOpt(optCon)) >= 0);
+  if (c < -1) {
+    fprintf(stderr, "\n%s: %s\n", poptBadOption(optCon, 0), poptStrerror(c));
     return 1;
   }
+  poptFreeContext(optCon);    
+    
+  printf("------------------------------------------------------------------\n");
+  printf("Running %s with parameters:\n", argv[0]);
+  for (int i = 1; i < argc; i++) {
+    if (argv[i][0] == '-') printf("\n");
+    printf("%s ", argv[i]);
+  }
+  printf("\n");
+  printf("------------------------------------------------------------------\n\n");
+
+//*****************************End POPT Setup**************************************
+
 
   printf("git version: %s\n", version_identifier());
-  assert(sscanf(argv[1], "%lg", &temp) == 1);
-  assert(sscanf(argv[2], "%lg", &reduced_density) == 1);
-  assert(sscanf(argv[3], "%lg", &fv) == 1);
-  assert(sscanf(argv[4], "%lg", &gwidth) == 1);
-  printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n", reduced_density, fv, gwidth, temp);
+  printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gwidth);
+   if (fv == -1) {
+    printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
+  }
+  if (gwidth == -1) {
+    printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant/2, step=lattice constant/%g\n", gw_start, gw_step);
+  }
+  
+  // Set default data directory
+  if (strcmp(data_dir,"none") == 0) {
+    sprintf(data_dir,"%s\n",default_data_dir);
+    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
+  } else {
+    mkdir(data_dir, 0777); 
+    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
+  }
 
+  //Create bestdataout filename (to be used if we are looping)
+  char *bestdat_filename = new char[1024];
+  sprintf(bestdat_filename, "%s/kT%g_rd%g_best.dat",
+          data_dir, temp, reduced_density);
+  
   if (fv == -1) {
     double best_energy = 1e100;
     double best_fv, best_gwidth, best_free_energy;
@@ -297,12 +371,13 @@ int main(int argc, char **argv) {
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
     //for (double fv=0; fv<1; fv+=0.01) {  //full run
-    for (double fv=0; fv<1; fv+=0.2) {   //quick run
+    for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {   //quick run
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
       //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //full run
-      for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
-        data e_data =find_energy(temp, reduced_density, fv, gwidth);
+      for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/gw_step) {   //full run
+      //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
+        data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
@@ -319,28 +394,55 @@ int main(int argc, char **argv) {
         }
       }
     }
-    printf("best fv %g gwidth %g E %g\n", best_fv, best_gwidth, best_energy);
-    //if (best_energy < 0) { //only send data to best data out file if there is crystalization!
-    //Create dataout file
-    FILE *newmeltbest = fopen("newmeltbestdata.dat", "w");
+    printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy);
+
+    //Create bestdataout file
+    printf("Create best data file: %s\n", bestdat_filename);
+    FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#T\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
+      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
-              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv);
+              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
-      printf("Unable to open file newmeltbestdata.dat!\n");
+      printf("Unable to open file %s!\n", bestdat_filename);
     }
-    //}
-  } else if (gwidth < 0) {
+
+  } else if (gwidth == -1) {
+    double best_energy = 1e100;
+    double best_fv, best_gwidth, best_free_energy;
+    double cFEpervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
-    for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //quick run
-      find_energy(temp, reduced_density, fv, gwidth);
+    //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
+    for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/gw_step) {   //full run
+      data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
+      if (e_data.diff < best_energy) {
+          best_energy = e_data.diff;
+          best_free_energy = e_data.free_energy;
+          best_fv = fv;
+          best_gwidth = gwidth;
+          cFEpervol=e_data.cfree_energy_per_vol;
+        }
     }
+    printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy);
+    
+    //Create bestdataout file
+    printf("Create best data file: %s\n", bestdat_filename);
+    FILE *newmeltbest = fopen(bestdat_filename, "w");
+    if (newmeltbest) {
+      fprintf(newmeltbest, "# git version: %s\n", version_identifier());
+      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
+              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+      fclose(newmeltbest);
+    } else {
+      printf("Unable to open file %s!\n", bestdat_filename);
+    }
+    
   } else {
-    find_energy(temp, reduced_density, fv, gwidth, true);
+    find_energy(temp, reduced_density, fv, gwidth, data_dir, true);
   }
 
   return 0;
