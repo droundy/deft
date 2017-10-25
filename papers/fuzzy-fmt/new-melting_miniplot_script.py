@@ -32,9 +32,9 @@ print 'homogeneous_energies_per_atom', homogeneous_energies_per_atom
 print 'energy_differences_per_atom', energy_differences_per_atom
 print 'crystal_energies_per_volume', crystal_energies_per_volume
 
-plot1=data_directory+"/cFEvsDen_plot.png"
-plot2=data_directory+"/hFEvsDen_plot.png"
-plot3=data_directory+"/Pressure_plot.png"
+plot1=data_directory+"/plot1_cFEvsDen.png"
+plot2=data_directory+"/plot2_hFEvsDen.png"
+plot3=data_directory+"/plot3_Pressure.png"
 
 # Plot Crystal Free Energy per sphere vs Reduced Density
 plt.plot(densities, crystal_energies_per_atom)
