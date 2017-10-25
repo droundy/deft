@@ -77,3 +77,10 @@ plt.savefig(plot3)
 
 plt.show()
 
+
+
+#------------------------------------------------------------------------------
+#Do we need these in the plot file? - ASK!
+ #crystal_energiesdensities = np.zeros_like(densities)  #initializing...
+ #crystal_energies_per_volume = np.zeros_like(densities)
+ #energy_differences = np.zeros_like(densities)

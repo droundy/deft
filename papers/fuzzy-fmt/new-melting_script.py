@@ -15,7 +15,7 @@ rdensities=sys.argv[2:]  #if enter by command line and not by hand
 print rdensities
 temp_num=float(temp)
 
-#print "Do you want to save default directory deft/papers/fuzzy-fmt/crystalization?"
+#print "Do you want to save default directory deft/papers/fuzzy-fmt/crystalization before it is over-written?"
 #os.system('rm ')  #ASK-remove data directory? - might not want to do this!
 
 #rdensities=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]  #if enter by hand and not by command line
@@ -39,11 +39,7 @@ for i in range(len(densities)):
 #NOTE: lattice_constant will be divided by gwstep     
    
         
-#------------------------------------------------------------------------------
-#Do we need these in the plot file? - ASK!
- #crystal_energiesdensities = np.zeros_like(densities)  #initializing...
- #crystal_energies_per_volume = np.zeros_like(densities)
- #energy_differences = np.zeros_like(densities)
 
- #fvstep=sys.argv[2]
+
+
 
