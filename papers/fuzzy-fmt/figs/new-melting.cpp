@@ -272,8 +272,7 @@ int main(int argc, char **argv) {
   char *default_data_dir = new char[1024];
 //  sprintf(default_data_dir, "crystalization/data");
   sprintf(default_data_dir, "crystalization");
-  char *filename = new char[1024];  //delete?
-  sprintf(filename, "none");  //delete?
+  
 
   //********************Setup POPT to get inputs from command line*******************
 
