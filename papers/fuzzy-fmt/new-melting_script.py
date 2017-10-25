@@ -20,7 +20,7 @@ import sys
 #os.system('rm ')  #ASK-remove data directory? - might not want to do this!
 
 #rdensities=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]  #if enter by hand and not by command line
-rdensities=[0.3, 0.4]  #if enter by hand and not by command line TEST
+rdensities=[0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]  #if enter by hand and not by command line TEST
 num_rd=len(rdensities)-1 
 
 #ASK-change rdensities strings from command line input to float numbers
