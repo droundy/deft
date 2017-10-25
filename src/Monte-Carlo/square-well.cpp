@@ -375,10 +375,14 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
+  if (sa_t0) {
+    if (sa_reset && energy_histogram[energy] == 0) sa_t0 = moves.total;
+    wl_factor = sa_factor*sa_t0/max(sa_t0, moves.total);
+  }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
-  // Note: if not using WL method, wl_factor = 0 and the following has
-  // no effect.
+  // Note: if not using WL or SA method, wl_factor = 0 and the
+  // following has no effect.
   ln_energy_weights[energy] -= wl_factor;
 }
 
@@ -958,8 +962,7 @@ void sw_simulation::initialize_wltmmc(double wl_fmod,
 
 // this method is under construction by DR and JP (2017).
 // initialize the weight array using the satmmc method.
-void sw_simulation::initialize_satmmc(double t0, double sa_factor, 
-                                      double wl_cutoff) {
+void sw_simulation::initialize_satmmc(double wl_cutoff) {
   int check_how_often =  N; // update SA stuff only so often
   bool verbose = false;
   do {
@@ -968,7 +971,7 @@ void sw_simulation::initialize_satmmc(double t0, double sa_factor,
 
     verbose = printing_allowed();
     if (verbose) write_transitions_file();
-    stochastic_weights_using_satmmc(t0, sa_factor, wl_cutoff, verbose);
+    stochastic_weights_using_satmmc(wl_cutoff, verbose);
   } while(!finished_initializing(verbose));
 }
 
@@ -1088,13 +1091,10 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 // stochastic_weights is under construction by DR and JP (2017).
 // this is used for Stochastic Approximation Monte Carlo.
 
-void sw_simulation::initialize_samc(double t0) {
+void sw_simulation::initialize_samc() {
   do {
 
-    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
-      wl_factor = t0 / max(t0, moves.total);
-      move_a_ball();
-    }
+    for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) move_a_ball();
 
   } while(!finished_initializing(printing_allowed()));
 
@@ -1491,10 +1491,7 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
 // this is used for Stochastic Approximation Monte Carlo.
 
 // calculate the weight array using transitions for satmmc
-void sw_simulation::stochastic_weights_using_satmmc(double t0, double sa_factor,
-                                                    double wl_cutoff, bool verbose) {
-
-  double wl_factor = t0 / max(t0, iteration) * sa_factor;
+void sw_simulation::stochastic_weights_using_satmmc(double wl_cutoff, bool verbose) {
 
   // specify end condition using SA definition of wl_factor.
 

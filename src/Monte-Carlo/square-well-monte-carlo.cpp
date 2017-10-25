@@ -120,7 +120,6 @@ int main(int argc, const char *argv[]) {
   double wl_threshold = 0.8;
   double wl_cutoff = 1e-10;
 
-  double sa_t0 = 1;
   // end conditions
   int default_pessimistic_min_samples = 10;
   int default_optimistic_min_samples = 200;
@@ -283,7 +282,9 @@ int main(int argc, const char *argv[]) {
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
     {"sa_t0", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &sa_t0, 0, "SA time", "DOUBLE"},
+     &sw.sa_t0, 0, "SA time", "DOUBLE"},
+    {"sa_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &sw.sa_factor, 0, "SA prefactor", "DOUBLE"},
     {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
      "Update scaling for the optimized ensemble method", "INT"},
     {"flat_update_factor", '\0', POPT_ARG_INT, &flat_update_factor, 0,
@@ -847,7 +848,7 @@ int main(int argc, const char *argv[]) {
     sw.wl_factor = wl_factor;
     sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
   } else if (samc) {
-    sw.initialize_samc(sa_t0);
+    sw.initialize_samc();
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {
