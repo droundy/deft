@@ -72,7 +72,7 @@ plt.plot(mid_n, pressure)
 plt.title('Reduced Pressure vs Reduced Density')
 plt.xlabel('Reduced Density')
 plt.ylabel('Reduced Pressure')
-plt.savefig(plot2)
+plt.savefig(plot3)
 
 plt.show()
 
