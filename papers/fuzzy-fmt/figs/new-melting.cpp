@@ -242,7 +242,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   char *alldat_filename = new char[1024];
   sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
-  printf("Create data file: %s\n", alldat_filename);
+  //printf("Create data file: %s\n", alldat_filename);
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
@@ -263,20 +263,16 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 int main(int argc, char **argv) {
   double reduced_density, gwidth=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
-  double fv_start=0.0, fv_end=1, fv_step=0.01, gw_start=0.01, gw_end, gw_step=10;
+  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=10;
   double dx=0.01;
   int verbose = false;
   
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
   char *default_data_dir = new char[1024];
-  sprintf(default_data_dir, "crystalization/data");
-  char *filename = new char[1024];
-  sprintf(filename, "none");
-
-  mkdir("crystalization", 0777); // make sure the directory exists
-  mkdir("crystalization/data", 0777); // make sure the directory exists
-  printf("made directory [deft/papers/fuzzy-fmt]crystalization/data\n");
+//  sprintf(default_data_dir, "crystalization/data");
+  sprintf(default_data_dir, "crystalization");
+  
 
   //********************Setup POPT to get inputs from command line*******************
 
@@ -307,11 +303,12 @@ int main(int argc, char **argv) {
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
     
  //   /*** GRID OPTIONS ***/
- //   {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  //? if include this must pass it to find_energy() !
+ //   {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  //ASK! if include this must pass it to find_energy() !
     
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
     "Directory in which to save data", "DIRNAME"},
+    
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -350,14 +347,14 @@ int main(int argc, char **argv) {
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant/2, step=lattice constant/%g\n", gw_start, gw_step);
   }
   
-  // Set default data directory
+  // Create directory for data files
   if (strcmp(data_dir,"none") == 0) {
     sprintf(data_dir,"%s\n",default_data_dir);
-    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
+  //  printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   } else {
-    mkdir(data_dir, 0777); 
-    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
+  //  printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
   }
+  mkdir(data_dir, 0777);  
 
   //Create bestdataout filename (to be used if we are looping)
   char *bestdat_filename = new char[1024];
@@ -365,7 +362,7 @@ int main(int argc, char **argv) {
           data_dir, temp, reduced_density);
   
   if (fv == -1) {
-    double best_energy = 1e100;
+    double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_free_energy;
     double cFEpervol;
     const int num_to_compute = int(0.3/0.05*1/0.01);
@@ -380,13 +377,13 @@ int main(int argc, char **argv) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
-          //printf("We are %.0f%% done, best_energy == %g\n", 100*num_computed/double(num_to_compute),
-          //       best_energy);
+          //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
+          //       best_energy_diff);
         }
-        if (e_data.diff < best_energy) {
+        if (e_data.diff < best_energy_diff) {
           //printf("better free energy with fv %g gwidth %g and E %g\n",
           //       fv, gwidth, e_data.diff);
-          best_energy = e_data.diff;
+          best_energy_diff = e_data.diff;
           best_free_energy = e_data.free_energy;
           best_fv = fv;
           best_gwidth = gwidth;
@@ -394,23 +391,23 @@ int main(int argc, char **argv) {
         }
       }
     }
-    printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy);
+    printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
 
     //Create bestdataout file
-    printf("Create best data file: %s\n", bestdat_filename);
+    //printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
-              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
 
   } else if (gwidth == -1) {
-    double best_energy = 1e100;
+    double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_free_energy;
     double cFEpervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -418,24 +415,24 @@ int main(int argc, char **argv) {
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
     for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/gw_step) {   //full run
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
-      if (e_data.diff < best_energy) {
-          best_energy = e_data.diff;
+      if (e_data.diff < best_energy_diff) {
+          best_energy_diff = e_data.diff;
           best_free_energy = e_data.free_energy;
           best_fv = fv;
           best_gwidth = gwidth;
           cFEpervol=e_data.cfree_energy_per_vol;
         }
     }
-    printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy);
+    printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
     
     //Create bestdataout file
-    printf("Create best data file: %s\n", bestdat_filename);
+    //printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#rd\tbest_crystal_energy_per_atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\n",
-              reduced_density, best_free_energy, best_energy, cFEpervol, best_fv, best_gwidth);
+      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
