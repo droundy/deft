@@ -15,7 +15,7 @@ data_file=data_directory+"/plot.dat"
 print "Removing plot file if it exists..."
 os.system("rm "+data_file)
 print "Creating new plot file [fuzzy-fmt]/"+data_file 
-os.system("cat "+data_directory+"/*best.dat >>"+data_directory+"/plot.dat")  
+os.system("cat "+data_directory+"/*best.dat >>"+data_directory+"/plot.dat")  #ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!!
 
 thisdata = np.loadtxt(data_file)
 print thisdata
