@@ -271,7 +271,7 @@ int main(int argc, char **argv) {
   sprintf(data_dir,"none");
   char *default_data_dir = new char[1024];
 //  sprintf(default_data_dir, "crystalization/data");
-  sprintf(default_data_dir, "crystalization");
+  sprintf(default_data_dir, "crystallization");
   
 
   //********************Setup POPT to get inputs from command line*******************
@@ -349,7 +349,7 @@ int main(int argc, char **argv) {
   
   // Create directory for data files
   if (strcmp(data_dir,"none") == 0) {
-    sprintf(data_dir,"%s\n",default_data_dir);
+    sprintf(data_dir,"%s",default_data_dir);
   //  printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   } else {
   //  printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
