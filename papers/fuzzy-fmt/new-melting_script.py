@@ -1,42 +1,68 @@
 #!/usr/bin/python2
 
 import os
+import argparse
 import numpy as np
-import matplotlib.pyplot as plt
 import sys
 
-if len(sys.argv) < 3:
-    print "Usage: T dfv dgw [DENSITIES TO COMPUTE]..."
-    exit(1)
+#parser = argparse.ArgumentParser(description='Variables for running mew-melting:', epilog="stuff...")
+parser = argparse.ArgumentParser(description="Must enter: EITHER a list of one or more denisties with --n OR density loop variables --nstart, --nend, --nstep; --t=2 by default otherwise enter EITHER a list of one or more temperatures with --t OR --tstart, --tend, --tstep.")
+group1 = parser.add_mutually_exclusive_group(required=True)
+group2 = parser.add_mutually_exclusive_group()
+group1.add_argument('--n', metavar='density', type=float, nargs='+', 
+                    help='reduced density(s)')
+group2.add_argument('--t', metavar='temperature', type=float, nargs='+', default=[2],
+                    help='reduced temperature(s) (default: 2)')
+group1.add_argument('--nstart', metavar='nloop_start', type=float,
+                    help='starting reduced density')
+parser.add_argument('--nend', metavar='  nloop_end', type=float,
+                    help='ending reduced density')
+parser.add_argument('--nstep', metavar=' nloop_step', type=float, default=0.1,
+                    help='step reduced density by (default: 0.1)')
+group2.add_argument('--tstart', metavar='tloop_start', type=float,
+                    help='starting temperature kT')
+parser.add_argument('--tend', metavar='  tloop_end', type=float,
+                    help='ending temperature kT')
+parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
+                    help='step temperature kT by (default: 1.0)')
 
-#make these loops over T and rdensities?
-temp=sys.argv[1]    
-rdensities=sys.argv[2:]  #if enter by command line and not by hand
-print rdensities
-temp_num=float(temp)
+args=parser.parse_args()
+print args  #for debug
 
-#print "Do you want to save default directory deft/papers/fuzzy-fmt/crystalization before it is over-written?"
-#os.system('rm ')  #ASK-remove data directory? - might not want to do this!
+densities=args.n
+temperatures=args.t
+nstart=args.nstart
+nend=args.nend
+nstep=args.nstep
+tstart=args.tstart
+tend=args.tend
+tstep=args.tstep
+    
+if args.nstart:
+    densities = np.arange(nstart, nend+nstep, nstep, float)
+    
+if args.tstart:
+    temperatures = np.arange(tstart, tend+tstep, tstep, float)
 
-#rdensities=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]  #if enter by hand and not by command line
-#rdensities=[0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]  #if enter by hand and not by command line
-num_rd=len(rdensities)-1 
+#If make a higher level script, move this question to the top level!
+print
+print "Do you want to save default directory [fuzzy-fmt]/crystalization before it is over-written?"
+wait = raw_input("If not, press the ENTER key to continue program...")
+print 
 
-#ASK-change rdensities strings from command line input to float numbers
-densities = np.array([float(d) for d in rdensities])
-  
-for i in range(len(densities)):
-   #if enter by hand and not by command line...
-    #rdensity=densities[i]  
-    #print 'running with', rdensity     
-    #os.system('figs/new-melting.mkdat --kT 2 --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10' % (rdensity))    
-   #if enter by command line and not by hand...
-    rdensity_num=densities[i]   
-    print 'running with', rdensity_num  
-    os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10' % (temp_num, rdensity_num))
-      
+print "Running new-melting with temperatures:", temperatures
+print "and densities:", densities
+print
 
-#NOTE: lattice_constant will be divided by gwstep     
+for i in range(0,len(temperatures)):
+    for j in range(0,len(densities)):
+        print 
+        #os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 
+        #  --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],denstities[j])) 
+        print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop
+        
+##----------------------------------------------------------------------
+##NOTE: lattice_constant will be divided by gwstep     
    
         
 
