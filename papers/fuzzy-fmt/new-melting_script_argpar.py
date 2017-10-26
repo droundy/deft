@@ -43,14 +43,16 @@ if args.nstart:
     
 if args.tstart:
     temperatures = np.arange(tstart, tend+tstep, tstep, float)
+    
+print
+print "Do you want to save default directory [fuzzy-fmt]/crystalization before it is over-written?"
+wait = raw_input("Press the ENTER key to continue...")
 
 for i in range(0,len(temperatures)):
-    print temperatures[i]
     for j in range(0,len(densities)):
-        print densities[j]
         #os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 
         #  --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],denstities[j])) 
-        #print temperatures[i], densities[j]  #testing for loop
+        print temperatures[i], densities[j]  #testing for loop
         
 print "Running with densities: ", densities
 print "length of densities=", len(densities)
@@ -67,8 +69,7 @@ print "DONE"
 
 ##----------------------------------------------------------------------
 
-##print "Do you want to save default directory deft/papers/fuzzy-fmt/crystalization 
-#        before it is over-written?"
+
 ##os.system('rm ')  #ASK-remove data directory? - might not want to do this!
 
 ##NOTE: lattice_constant will be divided by gwstep     
