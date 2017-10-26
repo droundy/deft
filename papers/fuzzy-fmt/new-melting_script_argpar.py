@@ -27,7 +27,7 @@ parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
                     help='step temperature kT by (default: 1.0)')
 
 args=parser.parse_args()
-print args
+#print args
 
 densities=args.n
 temperatures=args.t
@@ -44,7 +44,7 @@ if args.nstart:
 if args.tstart:
     temperatures = np.arange(tstart, tend+tstep, tstep, float)
     
-print
+
 print "Do you want to save default directory [fuzzy-fmt]/crystalization before it is over-written?"
 wait = raw_input("Press the ENTER key to continue...")
 
@@ -68,9 +68,6 @@ print "length of temperatures=", len(temperatures)
 print "DONE"
 
 ##----------------------------------------------------------------------
-
-
-##os.system('rm ')  #ASK-remove data directory? - might not want to do this!
 
 ##NOTE: lattice_constant will be divided by gwstep     
    
