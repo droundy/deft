@@ -57,8 +57,8 @@ print
 for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
         print 
-        #os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 
-        #  --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],denstities[j])) 
+        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 
+          --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],denstities[j])) 
         print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop
         
 ##----------------------------------------------------------------------
