@@ -15,7 +15,8 @@ data_file=data_directory+"/plot.dat"
 print "Removing plot file if it exists..."
 os.system("rm "+data_file)
 print "Creating new plot file [fuzzy-fmt]/"+data_file 
-os.system("cat "+data_directory+"/*best.dat >>"+data_directory+"/plot.dat")  #ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!!
+os.system("cat "+data_directory+"/*best.dat >>"+data_directory+"/plot.dat")  
+#ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!!
 
 thisdata = np.loadtxt(data_file)
 print thisdata
@@ -80,6 +81,8 @@ plt.show()
 
 
 #------------------------------------------------------------------------------
+#NOTE: lattice_constant will be divided by gwstep   
+
 #Do we need these in the plot file? - ASK!
  #crystal_energiesdensities = np.zeros_like(densities)  #initializing...
  #crystal_energies_per_volume = np.zeros_like(densities)
