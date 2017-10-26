@@ -98,6 +98,9 @@ struct sw_simulation {
   /* The following determine how we move balls */
   bool use_tmmc; // true means rejection/acceptance comes from transition matrix.
   double wl_factor; // if it is non-zero, update weights on each move WL-style.
+  double sa_t0; // if it is non-zero, update wl_factor on each move SA-style.
+  double sa_prefactor; // prefactor in computing wl_factor when running SA.
+  bool use_satmmc; // if true, reset sa_t0 whenever we encounter a new energy.
 
   /* The following define file names for periodic output files that
      are dumped every so often.  It should contain a single %d style format. */
@@ -188,9 +191,8 @@ struct sw_simulation {
 
   void initialize_wltmmc(double wl_fmod,
                          double wl_threshold, double wl_cutoff);
-  void initialize_satmmc(double t0, 
-                         double sa_factor, double wl_cutoff);
-  void initialize_samc(double t0);
+  void initialize_satmmc();
+  void initialize_samc();
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
@@ -212,8 +214,6 @@ struct sw_simulation {
   void calculate_weights_using_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff,
                                       bool verbose); // added by JP in 2017 for wltmmc.
-  void stochastic_weights_using_satmmc(double t0, double sa_factor,
-                                       double wl_cutoff, bool verbose); // added by JP in 2017 for satmmc.
   void optimize_weights_using_transitions(int version);
 
   // return fractional error in sample count
@@ -287,6 +287,9 @@ struct sw_simulation {
     max_time = 0;
     start_time = clock()/double(CLOCKS_PER_SEC);
     wl_factor = 0.0; // default to no WL method
+    sa_t0 = 0.0; // default to no SA method either
+    sa_prefactor = 1.0; // default to standard SAMC when using SAMC.
+    use_satmmc = false; // default to not using SATMMC.
     use_tmmc = false; // default to not using TMMC for accepting moves.
   };
 };

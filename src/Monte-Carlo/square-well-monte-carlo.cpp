@@ -100,6 +100,7 @@ int main(int argc, const char *argv[]) {
   int vanilla_wang_landau = false;
   int wltmmc = false;
   int samc = false;
+  int satmmc = false;
   int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
@@ -120,7 +121,6 @@ int main(int argc, const char *argv[]) {
   double wl_threshold = 0.8;
   double wl_cutoff = 1e-10;
 
-  double sa_t0 = 1;
   // end conditions
   int default_pessimistic_min_samples = 10;
   int default_optimistic_min_samples = 200;
@@ -256,6 +256,8 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau TMMC method", "BOOLEAN"},
     {"samc", '\0', POPT_ARG_NONE, &samc, 0,
      "Use Stochastic-Approximation Monte-Carlo method", "BOOLEAN"},
+    {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
+     "Use Stochastic-Approximation Transition Matrix Monte-Carlo method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
     {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
@@ -283,7 +285,9 @@ int main(int argc, const char *argv[]) {
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
     {"sa_t0", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     &sa_t0, 0, "SA time", "DOUBLE"},
+     &sw.sa_t0, 0, "SA time", "DOUBLE"},
+    {"sa_prefactor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &sw.sa_prefactor, 0, "SA prefactor", "DOUBLE"},
     {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
      "Update scaling for the optimized ensemble method", "INT"},
     {"flat_update_factor", '\0', POPT_ARG_INT, &flat_update_factor, 0,
@@ -374,7 +378,7 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + vanilla_wang_landau + tmi + toe + wltmmc + samc + tmmc
+     + vanilla_wang_landau + tmi + toe + wltmmc + samc + satmmc + tmmc
      + oetmmc + (fix_kT != 0)
      + reading_in_transition_matrix + golden != 1){
     printf("Exactly one histogram method must be selected!\n");
@@ -568,6 +572,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wltmmc");
     } else if (samc) {
       sprintf(method_tag, "-samc");
+    } else if (satmmc) {
+      sprintf(method_tag, "-satmmc");
     } else if (oetmmc) {
       sprintf(method_tag, "-oetmmc");
     } else if (wang_landau) {
@@ -847,7 +853,9 @@ int main(int argc, const char *argv[]) {
     sw.wl_factor = wl_factor;
     sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
   } else if (samc) {
-    sw.initialize_samc(sa_t0);
+    sw.initialize_samc();
+  } else if (satmmc) {
+    sw.initialize_satmmc();
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {
