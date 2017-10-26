@@ -49,11 +49,16 @@ if args.tstart:
     temperatures = np.arange(tstart, tend+tstep, tstep, float)
 
 #If make a higher level script, move this question to the top level!
-print
-print "Do you want to save default directory [fuzzy-fmt]/crystalization before it is over-written?"
-wait = raw_input("If not, press the ENTER key to continue program...")
-print 
-
+if args.d:
+    print
+    print "Data directory is deft/papers/fuzzy-fmt/"+data_dir
+    print 
+else:
+    print
+    print "Do you want to save default directory [fuzzy-fmt]/crystalization before it is over-written?"
+    wait = raw_input("If not, press the ENTER key to continue program...")
+    print 
+    
 print "Running new-melting with temperatures:", temperatures
 print "and densities:", densities
 print
