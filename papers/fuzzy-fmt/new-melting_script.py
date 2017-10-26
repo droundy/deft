@@ -25,6 +25,8 @@ parser.add_argument('--tend', metavar='  tloop_end', type=float,
                     help='ending temperature kT')
 parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
                     help='step temperature kT by (default: 1.0)')
+parser.add_argument('--d', metavar='     directory', type=str, default="crystalization",
+                    help='directory for data files')                    
 
 args=parser.parse_args()
 print
@@ -38,6 +40,7 @@ nstep=args.nstep
 tstart=args.tstart
 tend=args.tend
 tstep=args.tstep
+data_dir=args.d
     
 if args.nstart:
     densities = np.arange(nstart, nend+nstep, nstep, float)
@@ -59,7 +62,7 @@ for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
         print
         print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],densities[j])) 
+        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10 --dir %s' %(temperatures[i],densities[j], data_dir)) 
 
         
 ##----------------------------------------------------------------------
