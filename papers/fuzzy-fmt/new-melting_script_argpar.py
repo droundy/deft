@@ -6,21 +6,21 @@ import numpy as np
 import sys
 
 parser = argparse.ArgumentParser(description='Variables for running mew-melting.')
-parser.add_argument('--n', metavar='n', type=float, nargs='+',
+parser.add_argument('--n', metavar='n', type=float, nargs='+', default=[1.2],
                     help='reduced density(s) (default: 1.2)')
-parser.add_argument('--t', metavar='t', type=float, nargs='+',
+parser.add_argument('--t', metavar='t', type=float, nargs='+', default=[2],
                     help='temperature(s) (default: 2)')
-parser.add_argument('--nstart', metavar='n_start', type=float, 
+parser.add_argument('--nstart', metavar='n_start', type=float,
                     help='starting reduced density (default: 0.2)')
-parser.add_argument('--nend', metavar='n_end', type=float, 
+parser.add_argument('--nend', metavar='n_end', type=float,
                     help='ending reduced density (default: 1.8)')
-parser.add_argument('--nstep', metavar='n_step', type=float, 
+parser.add_argument('--nstep', metavar='n_step', type=float,
                     help='step reduced density by (default: 0.1)')
-parser.add_argument('--tstart', metavar='t_start', type=float, 
+parser.add_argument('--tstart', metavar='t_start', type=float,
                     help='starting temperature kT (default: 2.0)')
-parser.add_argument('--tend', metavar='t_end', type=float, 
+parser.add_argument('--tend', metavar='t_end', type=float,
                     help='ending temperature (default: 2.0)')
-parser.add_argument('--tstep', metavar='ntstep', type=float, 
+parser.add_argument('--tstep', metavar='ntstep', type=float,
                     help='step temperature by (default: 1.0)')
 
 args=parser.parse_args()
@@ -53,9 +53,9 @@ for i in range(0,len(temperatures)):
         #os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10' % (temperatures[i], denstities[j])) 
         
         
-#print "Running with densities: ", densities
+print "Running with densities: ", densities
 #print "length of densities=", len(densities)
-#print "Running with temperatures: ", temperatures
+print "Running with temperatures: ", temperatures
 #print "length of temperatures=", len(temperatures)
 #print "nstart is", nstart 
 #print "nend is", nend 
