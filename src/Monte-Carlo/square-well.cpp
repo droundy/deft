@@ -399,7 +399,12 @@ void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
   if (sa_t0) {
-    if (use_satmmc && energy_histogram[energy] == 0) sa_t0 = moves.total;
+    if (use_satmmc && energy_histogram[energy] == 0) {
+      if (wl_factor < 0.95)
+        printf("Resetting sa_t0 from %g to %g (discovered energy %d, wl_factor is %g)\n",
+               sa_t0, double(moves.total), energy, wl_factor);
+      sa_t0 = moves.total;
+    }
     wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
   }
   energy_histogram[energy]++;
