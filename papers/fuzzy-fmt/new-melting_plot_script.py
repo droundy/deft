@@ -25,6 +25,7 @@ crystal_energies_per_atom = thisdata[:,2]
 homogeneous_energies_per_atom = thisdata[:,3]
 energy_differences_per_atom = thisdata[:,4]
 crystal_energies_per_volume = thisdata[:,5]
+#if want vol = 4*(1-fv)/reduced_density
 
 print 'densities', densities
 print 'crystal_energies_per_atom', crystal_energies_per_atom
@@ -76,3 +77,10 @@ plt.savefig(plot3)
 
 plt.show()
 
+
+
+#------------------------------------------------------------------------------
+#Do we need these in the plot file? - ASK!
+ #crystal_energiesdensities = np.zeros_like(densities)  #initializing...
+ #crystal_energies_per_volume = np.zeros_like(densities)
+ #energy_differences = np.zeros_like(densities)
