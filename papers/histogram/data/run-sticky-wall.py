@@ -11,7 +11,7 @@ from __future__ import division
 import os, numpy, sys, re
 
 if len(sys.argv) < 6:
-    print "usage:  python2 %s ww ff lenx lenyz min_T" % sys.argv[0]
+    print "usage:  python2 %s ww ff lenx lenyz min_T method" % sys.argv[0]
     exit(1)
 
 if os.path.exists('paper.tex'):
