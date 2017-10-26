@@ -348,7 +348,7 @@ void sw_simulation::move_a_ball() {
           // not true.)
           sa_weight = sqrt(1/ncounts_up + 1/ncounts_down);
         }
-        Pmove = sa_weight*saPmove + (1-sa_weight*Pmove);
+        Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
       }
 
       // Here we enforce the Tmin probability.  Note that in SATMMC
