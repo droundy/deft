@@ -27,6 +27,7 @@ parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
                     help='step temperature kT by (default: 1.0)')
 
 args=parser.parse_args()
+print
 print args  #for debug
 
 densities=args.n
@@ -56,10 +57,10 @@ print
 
 for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
-        print 
-        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 
-          --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],denstities[j])) 
-        print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop
+        print
+        print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
+        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],densities[j])) 
+
         
 ##----------------------------------------------------------------------
 ##NOTE: lattice_constant will be divided by gwstep     
