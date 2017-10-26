@@ -27,7 +27,7 @@ parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
                     help='step temperature kT by (default: 1.0)')
 
 args=parser.parse_args()
-#print args
+print args  #for debug
 
 densities=args.n
 temperatures=args.t
@@ -43,32 +43,25 @@ if args.nstart:
     
 if args.tstart:
     temperatures = np.arange(tstart, tend+tstep, tstep, float)
-    
 
+#If make a higher level script, move this question to the top level!
+print
 print "Do you want to save default directory [fuzzy-fmt]/crystalization before it is over-written?"
-wait = raw_input("Press the ENTER key to continue...")
+wait = raw_input("If not, press the ENTER key to continue program...")
+print 
+
+print "Running new-melting with temperatures:", temperatures
+print "and densities:", densities
+print
 
 for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
+        print 
         #os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 
         #  --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],denstities[j])) 
-        print temperatures[i], densities[j]  #testing for loop
+        print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop
         
-print "Running with densities: ", densities
-print "length of densities=", len(densities)
-print "Running with temperatures: ", temperatures
-print "length of temperatures=", len(temperatures)
-#print "nstart is", nstart 
-#print "nend is", nend 
-#print "nstep is", nstep
-#print "tstart is", tstart
-#print "tend is", tend 
-#print "tstep is", tstep     
-
-print "DONE"
-
 ##----------------------------------------------------------------------
-
 ##NOTE: lattice_constant will be divided by gwstep     
    
         
