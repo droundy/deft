@@ -12,6 +12,8 @@ import sys
 parser = argparse.ArgumentParser(description="Must enter: EITHER a list of one or more denisties with --n OR density loop variables --nstart, --nend, --nstep; --t=2 by default otherwise enter EITHER a list of one or more temperatures with --t OR --tstart, --tend, --tstep.")
 group1 = parser.add_mutually_exclusive_group(required=True)
 group2 = parser.add_mutually_exclusive_group()
+group3 = parser.add_mutually_exclusive_group()
+group4 = parser.add_mutually_exclusive_group()
 group1.add_argument('--n', metavar='density', type=float, nargs='+', 
                     help='reduced density(s)')
 group2.add_argument('--t', metavar='temperature', type=float, nargs='+', default=[2],
@@ -38,13 +40,13 @@ parser.add_argument('--fvstep', metavar='fvloop_step', type=float, default=0.2,
                     help='step fv by (default: 0.2)') 
 parser.add_argument('--gwstart', metavar='  gwloop_start', type=float, default=0.01,   #ASK if we really want to do this!
                     help='starting gwidth (default: 0.01)')
-parser.add_argument('--gwend', metavar='  gwloop_end', type=float,
+group3.add_argument('--gwend', metavar='  gwloop_end', type=float,
                     help='ending gwidth')
-parser.add_argument('--gwstep', metavar=' gwloop_step', type=float, default=0.1,
-                    help='step gwidth by (default: 0.1)') 
-parser.add_argument('--gwlend', metavar=' gwloop_latend', type=float, default=2,
+group4.add_argument('--gwstep', metavar=' gwloop_step', type=float,
+                    help='step gwidth') 
+group3.add_argument('--gwlend', metavar=' gwloop_latend', type=float, default=2,
                     help='ending gwidth will be computed lattice_constant divided by this number (default: 2)')
-parser.add_argument('--gwlstep', metavar='gwloop_latstep', type=float, default=10,
+group4.add_argument('--gwlstep', metavar='gwloop_latstep', type=float, default=10,
                     help='gwidth will step by computed lattice_constant divided by this number (default: 10)')                   
                                    
 
@@ -93,12 +95,20 @@ print "  Reduced Densities:", densities
 print "  Data directory: deft/papers/fuzzy-fmt/"+data_dir
 print 
 
-for i in range(0,len(temperatures)):
-    for j in range(0,len(densities)):
-        print
-        print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_latend, gwidth_latstep, data_dir)) 
 
+if args.gwend or args.gwstep:
+for i in range(0,len(temperatures)):
+        for j in range(0,len(densities)):
+            print
+            print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
+            os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwend %g --gwstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_end, gwidth_step, data_dir)) 
+else:
+    for i in range(0,len(temperatures)):
+        for j in range(0,len(densities)):
+            print
+            print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
+            os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_latend, gwidth_latstep, data_dir)) 
+            
         
 ##----------------------------------------------------------------------
 ##NOTE: lattice_constant will be divided by gwstep     
