@@ -59,7 +59,10 @@ for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
         print
         print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10' %(temperatures[i],densities[j])) 
+        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10'
+                  %(temperatures[i],densities[j]))
+        #os.system('rq run -J new-melting-%g-%g figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwstep 10'
+                  %(temperatures[i], densities[j], temperatures[i],densities[j]))
 
         
 ##----------------------------------------------------------------------
