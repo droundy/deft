@@ -70,7 +70,7 @@ if args.tstart:
 #If make a higher level script, move this question to the top level!
 if args.d == "crystallization":
     print
-    print "Do you want to save default directory [fuzzy-fmt]/crystallization before it is over-written?"
+    print "Do you want to save default directory [fuzzy-fmt]/crystallization?"
     wait = raw_input("If not, press the ENTER key to continue program...")
 else:
     print
