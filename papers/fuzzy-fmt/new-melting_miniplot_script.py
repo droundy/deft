@@ -39,7 +39,7 @@ plot3=data_directory+"/plot3_Pressure_kT"+temp+".png"
 
 # Plot Crystal Free Energy per sphere vs Reduced Density
 plt.plot(densities, crystal_energies_per_atom)
-plt.title('Crystal Free Energy per sphere vs Reduced Density')
+plt.title('Crystal Free Energy per sphere vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
 plt.ylabel('Crystal Free Energy')
 plt.savefig(plot1)
@@ -48,7 +48,7 @@ plt.figure()
 
 # Plot Crystal Free Energy per sphere vs Reduced Density
 plt.plot(densities, homogeneous_energies_per_atom)
-plt.title('Homogeneous Free Energy per sphere vs Reduced Density')
+plt.title('Homogeneous Free Energy per sphere vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
 plt.ylabel('Homogeneous Free Energy')
 plt.savefig(plot2)
@@ -70,7 +70,7 @@ pressure = -(mid_n*mid_n)*(df/dn) #for fixed N and T
 
 # Plot Pressure vs Reduced Density
 plt.plot(mid_n, pressure)
-plt.title('Reduced Pressure vs Reduced Density')
+plt.title('Reduced Pressure vs Reduced Density at Fixed kT=', temp)
 plt.xlabel('Reduced Density')
 plt.ylabel('Reduced Pressure')
 plt.savefig(plot3)

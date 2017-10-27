@@ -19,7 +19,7 @@ os.system("rm "+data_file)
 print "Creating new plot file [fuzzy-fmt]/"+data_file 
 
 os.system("cat "+data_directory+"/kT"+temp+"*best.dat >>"+data_file)   
-#ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!!
+#ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!! STILL HAVE PROBLEM!!
 
 thisdata = np.loadtxt(data_file)
 print thisdata
