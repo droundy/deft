@@ -82,7 +82,6 @@ plt.savefig(plot3)
 plt.show()
 
 
-
 #------------------------------------------------------------------------------
 #NOTE: lattice_constant will be divided by gwstep   
 
