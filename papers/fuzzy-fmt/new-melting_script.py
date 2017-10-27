@@ -1,4 +1,7 @@
 #!/usr/bin/python2
+#NOTE: Run this script from deft/papers/fuzzy-fmt with the 
+#command ./new-melting_script.py followed by agruments as 
+#described with --usage flag.
 
 import os
 import argparse
