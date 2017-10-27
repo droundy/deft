@@ -1,21 +1,24 @@
 #!/usr/bin/python2
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
+#with comand ./new-melting_plot_script.py [directory where data stored] [temp]
 
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-if len(sys.argv) < 2:
-    print "Usage: directory"
+if len(sys.argv) < 3:
+    print "Usage: directory  temperature"
     exit(1)
 
 data_directory=sys.argv[1]
-data_file=data_directory+"/plot.dat"
+temp=sys.argv[2]
+data_file=data_directory+"/plot_kT"+temp+".dat"
 print "Removing plot file if it exists..."
 os.system("rm "+data_file)
 print "Creating new plot file [fuzzy-fmt]/"+data_file 
-os.system("cat "+data_directory+"/*best.dat >>"+data_directory+"/plot.dat")  
+
+os.system("cat "+data_directory+"/kT"+temp+"*best.dat >>"+data_file)   
 #ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!!
 
 thisdata = np.loadtxt(data_file)
@@ -34,9 +37,9 @@ print 'homogeneous_energies_per_atom', homogeneous_energies_per_atom
 print 'energy_differences_per_atom', energy_differences_per_atom
 print 'crystal_energies_per_volume', crystal_energies_per_volume
 
-plot1=data_directory+"/plot1_cFEvsDen.png"
-plot2=data_directory+"/plot2_hFEvsDen.png"
-plot3=data_directory+"/plot3_Pressure.png"
+plot1=data_directory+"/plot1_cFEvsDen_kT"+temp+".png"
+plot2=data_directory+"/plot2_hFEvsDen_kT"+temp+".png"
+plot3=data_directory+"/plot3_Pressure_kT"+temp+".png"
 
 # Plot Crystal Free Energy per sphere vs Reduced Density
 plt.plot(densities, crystal_energies_per_atom)
