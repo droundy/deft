@@ -55,10 +55,10 @@ tend=args.tend
 tstep=args.tstep
 data_dir=args.d
 fv_step=args.fvst
-gwdith_start=args.gs
-gwdith_end=args.ge
-gwdith_step=args.gst
-gwdith_latend=args.gle
+gwidth_start=args.gs
+gwidth_end=args.ge
+gwidth_step=args.gst
+gwidth_latend=args.gle
 gwidth_latstep=args.glst
     
 if args.nstart:
@@ -79,14 +79,14 @@ else:
     print 
     
 print "Running new-melting with temperatures:", temperatures
-print "and densities:", densities
+print "and densities:", densities, "and data directory", data_dir
 print
 
 for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
         print
         print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_step, gwidth_start, gwdith_latend, gwidth_latstep, data_dir)) 
+        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_step, gwidth_start, gwidth_latend, gwidth_latstep, data_dir)) 
 
         
 ##----------------------------------------------------------------------
