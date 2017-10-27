@@ -13,10 +13,6 @@ if len(sys.argv) < 3:
 data_directory=sys.argv[1]
 temp=sys.argv[2]
 data_file=data_directory+"/plot_kT"+temp+".dat"
-#print "Removing plot file if it exists..."
-#os.system("rm "+data_file)
-#print "Creating new plot file [fuzzy-fmt]/"+data_file 
-#os.system("cat "+data_directory+"/*best.dat >>"+data_directory+"/plot.dat")  
 
 thisdata = np.loadtxt(data_file)
 print thisdata
