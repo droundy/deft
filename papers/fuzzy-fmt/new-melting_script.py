@@ -29,18 +29,22 @@ parser.add_argument('--tend', metavar='  tloop_end', type=float,
 parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
                     help='step temperature kT by (default: 1.0)')
 parser.add_argument('--d', metavar='     directory', type=str, default="crystallization",
-                    help='directory for data files')     
-parser.add_argument('--fvst', metavar='fvloop_step', type=float, default=0.2,
+                    help='directory for data files') 
+parser.add_argument('--fvstart', metavar='  fvloop_start', type=float, default=0,   #ASK if we really want to do this!
+                    help='starting fv (default: 0)')
+parser.add_argument('--fvend', metavar='  fvloop_end', type=float, default=1,
+                    help='ending gwidth (default: 1)')
+parser.add_argument('--fvstep', metavar='fvloop_step', type=float, default=0.2,
                     help='step fv by (default: 0.2)') 
-parser.add_argument('--gs', metavar='  gwloop_start', type=float, default=0.01,   #ASK if we really want to do this!
+parser.add_argument('--gstart', metavar='  gwloop_start', type=float, default=0.01,   #ASK if we really want to do this!
                     help='starting gwidth (default: 0.01)')
-parser.add_argument('--ge', metavar='  gwloop_end', type=float,
+parser.add_argument('--gend', metavar='  gwloop_end', type=float,
                     help='ending gwidth')
-parser.add_argument('--gst', metavar=' gwloop_step', type=float,
-                    help='step gwidth by') 
-parser.add_argument('--gle', metavar=' gwloop_latend', type=float, default=2,
+parser.add_argument('--gstep', metavar=' gwloop_step', type=float, default=0.1,
+                    help='step gwidth by (default: 0.1)') 
+parser.add_argument('--glend', metavar=' gwloop_latend', type=float, default=2,
                     help='ending gwidth will be computed lattice_constant divided by this number (default: 2)')
-parser.add_argument('--glst', metavar='gwloop_latstep', type=float, default=10,
+parser.add_argument('--glstep', metavar='gwloop_latstep', type=float, default=10,
                     help='gwidth will step by computed lattice_constant divided by this number (default: 10)')                   
                                    
 
@@ -57,12 +61,15 @@ tstart=args.tstart
 tend=args.tend
 tstep=args.tstep
 data_dir=args.d
-fv_step=args.fvst
-gwidth_start=args.gs
-gwidth_end=args.ge
-gwidth_step=args.gst
-gwidth_latend=args.gle
-gwidth_latstep=args.glst
+
+fv_start=args.fvstart
+fv_end=args.fvend
+fv_step=args.fvstep
+gwidth_start=args.gstart
+gwidth_end=args.gend
+gwidth_step=args.gstep
+gwidth_latend=args.glend
+gwidth_latstep=args.glstep
     
 if args.nstart:
     densities = np.arange(nstart, nend+nstep, nstep, float)
