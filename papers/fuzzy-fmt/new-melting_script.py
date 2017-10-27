@@ -71,7 +71,7 @@ gwidth_start=args.gwstart
 gwidth_end=args.gwend
 gwidth_step=args.gwstep
 gwidth_latend=args.gwlend
-gwidth_latstep=args.gwstep
+gwidth_latstep=args.gwlstep
     
 if args.nstart:
     densities = np.arange(nstart, nend+nstep, nstep, float)
@@ -97,12 +97,12 @@ print
 
 
 if args.gwend or args.gwstep:
-for i in range(0,len(temperatures)):
+    for i in range(0,len(temperatures)):
         for j in range(0,len(densities)):
             print
             print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
             os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwend %g --gwstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_end, gwidth_step, data_dir)) 
-else:
+else:  #use gwidth values reference lattice_constant by default
     for i in range(0,len(temperatures)):
         for j in range(0,len(densities)):
             print
