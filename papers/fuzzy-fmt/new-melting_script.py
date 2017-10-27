@@ -43,7 +43,7 @@ parser.add_argument('--glst', metavar='gwloop_latstep', type=float, default=10,
 
 args=parser.parse_args()
 print
-print args  #for debug
+print args  #also put this in data record of what ran!
 
 densities=args.n
 temperatures=args.t
@@ -71,16 +71,16 @@ if args.tstart:
 if args.d:
     print
     print "Data directory is deft/papers/fuzzy-fmt/"+data_dir
-    print 
 else:
     print
     print "Do you want to save default directory [fuzzy-fmt]/crystallization before it is over-written?"
     wait = raw_input("If not, press the ENTER key to continue program...")
-    print 
     
-print "Running new-melting with temperatures:", temperatures
-print "and densities:", densities, "and data directory", data_dir
-print
+print     
+print "Running new-melting_script.py with:"
+print "  kT Temperatures:", temperatures
+print "  Reduced Densities:", densities
+print 
 
 for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
