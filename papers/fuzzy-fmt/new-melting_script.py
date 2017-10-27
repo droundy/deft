@@ -70,16 +70,17 @@ if args.tstart:
 #If make a higher level script, move this question to the top level!
 if args.d == "crystallization":
     print
-    print "Do you want to save default directory [fuzzy-fmt]/crystallization?"
+    print "Do you want to save or remove default directory [fuzzy-fmt]/crystallization?"
     wait = raw_input("If not, press the ENTER key to continue program...")
+    print
 else:
     print
-    print "Data directory is deft/papers/fuzzy-fmt/"+data_dir
     
 print     
 print "Running new-melting_script.py with:"
 print "  kT Temperatures:", temperatures
 print "  Reduced Densities:", densities
+print "  Data directory: deft/papers/fuzzy-fmt/"+data_dir
 print 
 
 for i in range(0,len(temperatures)):

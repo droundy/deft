@@ -240,7 +240,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 
   // Create all output data filename
   char *alldat_filename = new char[1024];
-  sprintf(alldat_filename, "%s/kT%g_rd%g_fv%04.2f_gw%04.3f-alldat.dat",
+  sprintf(alldat_filename, "%s/kT%g_rd%0.1f_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
   //printf("Create data file: %s\n", alldat_filename);
 
