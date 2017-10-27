@@ -70,7 +70,7 @@ pressure = -(mid_n*mid_n)*(df/dn) #for fixed N and T
 
 # Plot Pressure vs Reduced Density
 plt.plot(mid_n, pressure)
-plt.title('Reduced Pressure vs Reduced Density at Fixed kT=', temp)
+plt.title('Reduced Pressure vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
 plt.ylabel('Reduced Pressure')
 plt.savefig(plot3)
