@@ -1,5 +1,6 @@
 #!/usr/bin/python2
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
+#with comand ./new-melting_miniplot_script.py [directory where data stored] [temp]
 #to create plots from plot.dat files already in the data directory
 
 import os
