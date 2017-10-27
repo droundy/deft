@@ -19,92 +19,363 @@
   Corvallis, OR 97331}
 
 \begin{abstract}
-  We have applied the clever histogram method to the square-well
-  liquid.
+  We present several histogram methods and compare the performance and efficiency at treating the square-well fluid.
 \end{abstract}
 
 \maketitle
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-E}
-  \caption{A histogram plot demonstrating the difficulty of using
-    canonical Monte Carlo to simulate a system.  A simulation at a
-    give temperature only provides information fo a small number of
-    energy states.\label{fig:histograms}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-E}
+  %\caption{A histogram plot demonstrating the difficulty of using
+    %canonical Monte Carlo to simulate a system.  A simulation at a
+    %give temperature only provides information fo a small number of
+    %energy states.\label{fig:histograms}}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-weights}
-  \caption{The weight functions from different methods.}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-weights}
+  %\caption{The weight functions from different methods.}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-dos}
-  \caption{A density of states plot demonstrating the difficulty of
-    using canonical Monte Carlo to simulate a system.  A simulation at
-    a give temperature only provides information fo a small number of
-    energy states.\label{fig:dos}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-dos}
+  %\caption{A density of states plot demonstrating the difficulty of
+    %using canonical Monte Carlo to simulate a system.  A simulation at
+    %a give temperature only provides information fo a small number of
+    %energy states.\label{fig:dos}}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-sample-rate}
-  \caption{Inverse sampling rates from different methods.}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-sample-rate}
+  %\caption{Inverse sampling rates from different methods.}
+%\end{figure}
 
 % \begin{figure}
 %   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-scaling}
 %   \caption{Scaling.\label{fig:scaling}}
 % \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u}
-  \caption{Specific internal energy.\label{fig:u}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u}
+  %\caption{Specific internal energy.\label{fig:u}}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc}
-  \caption{Specific heat capacity.\label{fig:hc}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc}
+  %\caption{Specific heat capacity.\label{fig:hc}}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S}
-  \caption{Specific entropy.\label{fig:S}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S}
+  %\caption{Specific entropy.\label{fig:S}}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u_err}
-  \caption{Specific internal energy.\label{fig:u}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u_err}
+  %\caption{Specific internal energy.\label{fig:u}}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc_err}
-  \caption{Specific heat capacity.\label{fig:hc}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc_err}
+  %\caption{Specific heat capacity.\label{fig:hc}}
+%\end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-s_err}
-  \caption{Error in specific entropy.\label{fig:Serr}}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-s_err}
+  %\caption{Error in specific entropy.\label{fig:Serr}}
+%\end{figure}
 
 %% \begin{figure}
 %%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-rdf}
 %%   \caption{Radial distribution function.\label{fig:rdf}}
 %% \end{figure}
 
-As shown in Fig.~\ref{fig:histograms}, there are several difficulties
-encountered when running Monte Carlo simulations at a fixed
-temperature.  On the top plot, which shows three simulations run at
-$\lambda = 1.3$, it is apparent that each given canonical simulation
-only provides statistical information for a small number of energy
-states.  The bottom plot shows an even more serious issue: when
-running a simulation at a fixed temperature, it is possible to become
-frozen in a state that is far from the ground state, as happened in
-the $k_{B}T=0.1\epsilon$ simulation.
+%As shown in Fig.~\ref{fig:histograms}, there are several difficulties
+%encountered when running Monte Carlo simulations at a fixed
+%temperature.  On the top plot, which shows three simulations run at
+%$\lambda = 1.3$, it is apparent that each given canonical simulation
+%only provides statistical information for a small number of energy
+%states.  The bottom plot shows an even more serious issue: when
+%running a simulation at a fixed temperature, it is possible to become
+%frozen in a state that is far from the ground state, as happened in
+%the $k_{B}T=0.1\epsilon$ simulation.
 
 % \begin{table*}
 % \input{figs/scaling-table-ww130-ff30}
 % \caption{Scaling data}
 % \end{table*}
+
+\section{Introduction}
+
+We consider the square-well fluid i.e. a system of particles whose interactions are governed by a square-well potential~\cite{singh2003surface, barker2004perturbationSW}.  The square-well potential is an ideal testbed as it is the simplest model that ensures both attractive and repulsive forces are experienced by interacting particles~\cite{barker1967-SW-perturbation, vega1992phase}.  The potential $U(\textbf{r})$ for such a system is given by
+\begin{equation}
+ U(\textbf{r})=\begin{cases} \infty & 
+ \lvert\textbf{r}\rvert< \sigma\\-\epsilon & 
+ \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 & 
+ \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
+\end{equation}
+where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
+reduced range of the potential well, and $\epsilon$ is its depth.
+
+The organization of this paper is as follows: In the next section we describe in detail seven flat-histogram methods used to calculate the density of states for the liquid-vapor system.  Section III contains the results and comparison of the methods applied to the square-well fluid.  Section IV is the conclusion as well as an overview of which methods performed well and suggestions for continued improvement. 
+
+
+\section{Methods}
+
+Here we employ a variety of flat-histogram methods.  We outline the general workings of algorithm we developed in detail and summarize algorithms that can be found elsewhere.  The following alogrithms are introduced and applied to the square-well fluid: Transition Matrix Initialization (TMI), Transition Optimized Ensemble (TOE), Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation Monte-Carlo (SAMC), and Stochastic-Approximation Transition Matrix Monte-Carlo (SA-TMMC).
+
+\subsection{TMI2 Algorithm}
+
+The second version of transition matrix initialization algorithm works
+by looking at the logarithm of the density of states.  We begin at
+high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the entropy) and work our way
+downward.
+
+\paragraph{Reaching $T_{\min}$:}
+If the change in the logarithm of the density of states is greater
+than the reciprocal of the minimum temperature, i.e. if
+\begin{align}
+  \ln\frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
+  \frac{\epsilon_{i-1} - \epsilon_i}{k_BT_{\min}}
+  \\
+  \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
+  e^{\beta_{\max}(\epsilon_{i-1} - \epsilon_i)}
+\end{align}
+then the algorithm has reached the minimum temperature of interest.
+In this case, we set the log weights at all lower energies using a
+Boltzmann ratio relative to this energy.
+\paragraph{Confident at $\epsilon_i$:} We are confident in our density
+of states at energy $\epsilon_i$ provided two conditions are true.
+\begin{enumerate}
+\item The density of states must be decreasing as the energy decreases
+  from its next-higher energy.
+\item The change in density of states (relative to the next higher
+  energy) must be smaller than a pessimistic estimate of the counting
+  uncertainty at the energy we are examining:
+  \begin{align}
+    \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
+  \end{align}
+  where $N_i$ is the number of ``pessimistic
+  samples'' at $\epsilon_i$, the lower of the two energies under
+  consideration.
+\end{enumerate}
+If both of these are true, we believe we know the density of states at
+this energy well, and the weights are set by
+\begin{align}
+  \ln w(\epsilon_i) = -\ln{D}(\epsilon_i)
+\end{align}
+\paragraph{Reached $T_\text{converged}$:}
+If this is not the case, $\epsilon_i$ is the lowest energy that is
+adequately converged.  We set the weights for energies lower than this
+to a Boltzmann ratio with a temperature determined using the slope of
+a secant line on the $\ln w$ versus $\epsilon$ graph.
+\begin{align}
+  \beta_\text{secant} = \bigg(\frac{\ln{D}(\epsilon_{S_{\max}}) - \ln{D}
+  (\epsilon_\text{pivot})}{\epsilon_{S_{\max}}-\epsilon_\text{pivot}}\bigg)
+\end{align}
+This ``slope'' is a positive quantity.  The weights at energies below
+$\epsilon_\text{pivot}$ are given by
+\begin{align}
+  \ln w(\epsilon) = \ln w(\epsilon_\text{pivot}) -
+  \beta_\text{secant}(\epsilon - \epsilon_\text{pivot})
+\end{align}
+indicating that there are higher weights at lower energies, since
+$\beta$ is positive.  We have one additional caveat: we examine the
+lower energies for which we have samples (``pessimistic'' samples),
+and if we find any energy at which the density of states is greater
+than the inverse of the weight, we adjust $\beta$ to cause it to pass
+through that point.  This ensures that the product of the weight with
+the estimated density of states is always less than or equal one for
+energies below $\epsilon_\text{converged}$.
+
+
+
+\subsection{TMI3 Algorithm}
+The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
+difference, which is that instead of a secant line being used to
+estimate the converged temperature, we use a tangent line, estimated
+using the lowest two ``converged'' energies.
+
+
+
+
+\subsection{TOE3 Algorithm}
+The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses the metric of round trips defined by a walker visiting the extreme energies for the density of states.  The rate for the walker is dependent of the diffusivity $D(\epsilon)$ at a given energy $E$.  The goal of the method is to maximize the number of round trips that the Monte-Carlo simulation makes.  The optimized density of states is given by the following:
+\begin{align}
+  n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
+\end{align}
+where unlike in the original paper detailing the method, we compute the difusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the difusivity.
+\begin{align}
+  D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
+\end{align}
+
+
+
+
+
+\subsection{TMMC Algorithm}
+The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
+consists of three primary steps.  The first two steps are common to the Metropolis 
+algorithm while the third makes use of the actual transition 
+probabilities~\cite{fitzgerald2000monte}.
+
+\subsubsection{define a transition probability}
+Assuming that the system under study is in a state denoted old and a proposed transition
+is made to a new state denoted new, the probability is defined as
+\begin{align}
+  p_{old \rightarrow new} = p_{new \rightarrow old}
+\end{align}
+where we have allowed the probabilies to be equal for simplicity of presentation.
+
+\subsubsection{define an acceptance probability}
+The probability for accepting a transition from an old state to a new one can be 
+defined
+\begin{align}
+  p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
+  {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
+\end{align}
+where $\alpha_{new\rightarrow old}$ is the probability of generating a 
+new system configuration the old.  For conventional Monte-Carlo moves 
+$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although 
+for advanced Monte-Carlo moves this would not be the 
+case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of 
+observing the system in the old state can be found based on the 
+ensemble constraints placed on the system.  Fitzgerald et al. 
+considered the system of interest using the canonical ensemble however extension to other ensembles is quite natural.  
+\begin{align}
+  \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
+\end{align}
+The acceptance probability given for TMMC is idential to that introduced by 
+Swendsen and Wang~\cite{wang2002transition}.
+\begin{align}
+  p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
+\end{align}
+\subsubsection{define a bookkeeping step}
+The third step in the TMMC algorithm consists of recording the data in a collection 
+matrix (analogous to the transition histogram matrix).
+\begin{align}
+  C_{N,\delta} = C_{N,\delta} + p_{a}\\
+  C_{N,0} = C_{N,0} +(1 - p_{a})
+\end{align}  
+If $\delta=0$, that is, the energy state has not been changed, then only 
+$C_{N,0}$ is incremented by unity. Fitzgerald et al.~\cite{fitzgerald2000monte}
+show that defining the third step this way results in a uniform improvement over 
+using histogram estimators to determine the PNPD.
+
+
+
+
+\subsection{Wang-Landau Algorithm}
+
+The Wang-Landau algorithm is a powerful re-weighting Histogram method 
+developed and refined well into 21st 
+century~\cite{wang2001determining}.  While methods such as Metropolis 
+Sampling and Swendsen-Wang cluster 
+flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution 
+and require sampling at individual temperatures, the Wang-Landau 
+algorithm uses a flat histogram and performs a random walk in energy 
+space to determine the density of states~\cite{LandauMinSampling}.  
+Wang-Landau's major tenant is that when counting the histogram 
+$\mathcal{H}$($\varepsilon$), the energy occurences should form a flat 
+distribution.  The criteria for flat sampling is given by 
+\begin{equation}
+	\frac{\min_{\varepsilon} \mathcal{H}(\varepsilon)}
+	{\big\langle\mathcal{H}(\varepsilon)\big\rangle } 
+	> \gamma 
+\end{equation}
+where $\gamma$ is usually set between 0.75 and 0.99 and is determines how many
+times each energy is sampled relative to the mean number of visits.  Difficulties
+can occur with this flatness criteria due to the fact that some energies on a
+given energy range might never be sampled~\cite{haber2014transition}.  The algorithm
+is briefly outlined below  
+\begin{equation}
+	\ln{\mathcal{H}_{t+1}(\varepsilon,N)}=\ln{\mathcal{H}_{t}(\varepsilon,N)}
+	+\ln{\mathcal{F}}
+\end{equation}
+\begin{equation}
+	\ln{\mathcal{F}_{k+1}}=\frac{u}{2}\ln{\mathcal{F}_{k}}
+\end{equation}
+for $u$ typically greater than 1 and $\mathcal{F}$ is the modification factor for
+the density of states.  We then accept a new configuration for the density of 
+states with a probability given by the following
+\begin{equation}
+	\mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) 
+	= \min[1,e^{\ln{\mathcal{H}(\varepsilon_i)}-\ln{\mathcal{H}(\varepsilon_j)}}]
+\end{equation}
+Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and 
+determined that choosing a large modification factor $\mathcal{F}_0 = e^{4}$ and
+rapidly reducing the factor by 10 during each step resulted in reduced statistical 
+error~\cite{zhou2005understanding}.
+
+
+\subsection{WL-TMMC Algorithm}
+
+Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed 
+by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes 
+advantage of the ease of implementation and applicability to a variety 
+of systems, while making use of a transition matrix to adress WL 
+weaknesses such as a limited statistical accuracy plateau which is not 
+improved with additional Monte-Carlo steps.  This WL version is more 
+accurate for a given number of simulation steps.
+
+\paragraph{Initializing Wang-Landau:} We begin the simulation by 
+defining a minimum important energy and a maximum entropy state. In 
+traditional Wang-Landau the WL factor begins at 1.0 and the factor is 
+modified by 2.0 until the simulation is cutoff typically around 
+$10^{-10}$.  Rane et. al. in the first published implemenation of 
+WL-TMMC~\cite{rane2013monte} suggests using a WL factor between 1.0 and 
+$10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC, 
+we set the WL factor to be 1 and the cutoff at $10^{-4}$. A single 
+sweep is defined as each macrostate being sampled a number of times in 
+this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a 
+flatness criteria~\cite{wang2001determining, wang2001efficient, 
+hatch2015computational, mahynski2017predicting} for the accumulated 
+histogram usually between 0.75 to 0.90.  For our simulation, it is 
+sufficient that each macrostate is visited at least once (each 
+histogram bin has one entry)~\cite{shell2003improved}.  The goal of 
+this WL initialization is to prefill the transition matrix for the next 
+portion of the simulation. 
+\paragraph{Initializing TMMC:} The purpose of prefilling the transition 
+matrix is apparent because if numerous zeros existed in the collection 
+matrix, the infinite temperature transition matrix would be 
+ill-defined.  Sampling over large ranges of density of states would 
+therefore take an unacceptable length of time to 
+complete~\cite{shell2003improved, shen2014elucidating}.  The transition 
+matrix in terms of the collection matrix is given as follows:
+\begin{align}
+\widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
+{\sum_{K} C(I,K)}
+\end{align}
+We now run the TMMC portion of the simulation.  Siderius does this for
+20 additional sweeps (does about 8 sweeps for WL).  We do this until we
+reach a specified temperature of interest.
+We have not yet implemented a biasing function to control acceptance
+rate of trial moves but we probably could/should? at some point.
+\begin{align}
+  P_{acc}(i\rightarrow j) = \min\bigg[1,\frac{\widetilde{T}_{\infty}(J\rightarrow I)}
+  {\widetilde{T}_{\infty}(I\rightarrow J)}\bigg]
+\end{align}
+this is only used to control actual transitions not update the collection
+matrices.
+
+
+
+
+\subsection{SAMC Algorithm}
+The SAMC Algorithm was proposed as the reason that the Wang-Landau Algorithm converges.  It is primarily the 1/t WL Algorithm although it does not require knowledge of the entire energy range.
+
+
+\subsection{SA-TMMC Algorithm}
+
+This method is based on both the SA-TMMC Algorithm and the TMMC Algorithm.  It is similar to WL-TMMC in terms of operation.
+
+
+
+
+\section{Results}
+
+Talk about results of simulations and show graphics here...
+
 
 \section{New ideas for algorithms}
 
@@ -138,13 +409,13 @@ $n$.  Now the uncertainty in the mean is given by
 if $\Delta \bar E \ll (E_0 - \bar E)$ then we can conclude that we are
 certain where the maximum is, and how wide it is.
 
-\begin{figure*}
-  \includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-transitions}\hfill%
-\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-transitions}\hfill%
-\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-tmmc-compare-transitions}
-  \caption{A plot showing the probability of energy transitions (with
-    no weighting) from given energy states.\label{fig:transitions}}
-\end{figure*}
+%\begin{figure*}
+  %\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-transitions}\hfill%
+%\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-transitions}\hfill%
+%\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-tmmc-compare-transitions}
+  %\caption{A plot showing the probability of energy transitions (with
+    %no weighting) from given energy states.\label{fig:transitions}}
+%\end{figure*}
 
 \subsection{Tracking transitions}
 
@@ -279,576 +550,576 @@ does have detailed balance.
 %   \label{fig:conv-S}
 % \end{figure}
 
-\section{Introduction}
+%\section{Introduction}
 
-\subsection{Motivation and Background}
+%\subsection{Motivation and Background}
 
-An accurate understanding of phase coexistence of liquid-vapor 
-water-based systems is of increasing importance.  Chemical and 
-biological molecular studies performed in water-based systems greatly 
-benefit from an a priori knowledge of dynamics of the system.  Thus, 
-considerable research has been done in recent years in developing 
-models for the system and algorithms~\cite{wang1999transition, 
-wang2002transition, swendsen1999transition, Broadhistogram, 
-trebst2004optimizing, wessel2007optimized} for predicting phase 
-coexistence from the thermodynamic properties of the system under 
-study.  Popular models for the potential energy include:  the Double 
-Gaussian-Core model~\cite{speranza2014phase, prestipino2014twofold}, 
-the Gaussian-Core model~\cite{rane2013monte, krekelberg2009anomalous, 
-mausbach2009solid}, the Soft-Sphere model~\cite{kreitzberg2015monte, 
-torrie1977nonphysical}, and the Hard-Sphere 
-model~\cite{hughes2013classical, lurie2014approach, krebs2014improved, 
-schulte2015thesis, perlin2015thesis} for fluids.  While there exists a 
-number of algorithms available for determining the thermodynamic 
-properties of the system, among the most readily applied are molecular 
-dynamics, density functional theory, and Monte-Carlo simulation.  In 
-this work, we will discuss the various energy models and employ 
-re-weighting histogram Monte-Carlo methods to solve for thermodynamic 
-properties using the Hard-sphere model fluid.  
+%An accurate understanding of phase coexistence of liquid-vapor 
+%water-based systems is of increasing importance.  Chemical and 
+%biological molecular studies performed in water-based systems greatly 
+%benefit from an a priori knowledge of dynamics of the system.  Thus, 
+%considerable research has been done in recent years in developing 
+%models for the system and algorithms~\cite{wang1999transition, 
+%wang2002transition, swendsen1999transition, Broadhistogram, 
+%trebst2004optimizing, wessel2007optimized} for predicting phase 
+%coexistence from the thermodynamic properties of the system under 
+%study.  Popular models for the potential energy include:  the Double 
+%Gaussian-Core model~\cite{speranza2014phase, prestipino2014twofold}, 
+%the Gaussian-Core model~\cite{rane2013monte, krekelberg2009anomalous, 
+%mausbach2009solid}, the Soft-Sphere model~\cite{kreitzberg2015monte, 
+%torrie1977nonphysical}, and the Hard-Sphere 
+%model~\cite{hughes2013classical, lurie2014approach, krebs2014improved, 
+%schulte2015thesis, perlin2015thesis} for fluids.  While there exists a 
+%number of algorithms available for determining the thermodynamic 
+%properties of the system, among the most readily applied are molecular 
+%dynamics, density functional theory, and Monte-Carlo simulation.  In 
+%this work, we will discuss the various energy models and employ 
+%re-weighting histogram Monte-Carlo methods to solve for thermodynamic 
+%properties using the Hard-sphere model fluid.  
  
-\subsection{Potential Energy Models}
+%\subsection{Potential Energy Models}
 
-The literature presents a number of ways to treat the system of 
-interest.  Particle interactions via the system potential is defined in 
-order to initialize the calculation.  Current work in the literature 
-favors the following as system models for liquid-vapor systems: Double 
-Gaussian-Core model, Gaussian-Core model fluid, Soft-sphere model, and 
-Hard-sphere model fluid.
+%The literature presents a number of ways to treat the system of 
+%interest.  Particle interactions via the system potential is defined in 
+%order to initialize the calculation.  Current work in the literature 
+%favors the following as system models for liquid-vapor systems: Double 
+%Gaussian-Core model, Gaussian-Core model fluid, Soft-sphere model, and 
+%Hard-sphere model fluid.
 
-\subsubsection{Double Gaussian-Core Model}
+%\subsubsection{Double Gaussian-Core Model}
 
-Double Gaussian-Core Model
+%Double Gaussian-Core Model
 
-\begin{equation}
-\mathcal{V}_{\mathcal{DGC}}=\epsilon_1\exp\bigg(-\frac{r^2}{\sigma_1}\bigg)+\epsilon_2\exp\bigg(-\frac{(r-\xi)^2}{\sigma_2}\bigg)
-\end{equation}
+%\begin{equation}
+%\mathcal{V}_{\mathcal{DGC}}=\epsilon_1\exp\bigg(-\frac{r^2}{\sigma_1}\bigg)+\epsilon_2\exp\bigg(-\frac{(r-\xi)^2}{\sigma_2}\bigg)
+%\end{equation}
 
-\subsubsection{Gaussian-Core Model}
+%\subsubsection{Gaussian-Core Model}
 
-The Gaussian-Core Model
+%The Gaussian-Core Model
 
-\begin{equation}
-	\mathcal{V}_{\mathcal{GC}}=\epsilon\exp\bigg(-\frac{r^2}{\sigma}\bigg)
-\end{equation}
+%\begin{equation}
+	%\mathcal{V}_{\mathcal{GC}}=\epsilon\exp\bigg(-\frac{r^2}{\sigma}\bigg)
+%\end{equation}
   
-\subsubsection{The $\mathcal{WCA}$ Pair Potential}
+%\subsubsection{The $\mathcal{WCA}$ Pair Potential}
 
-The Soft-sphere model or Weeks-Chandler-Anderson Pair 
-Potential~\cite{andersen1971relationship, weeks1971role} can be written 
-as \begin{equation}
-	\mathcal{V}_{\mathcal{WCA}}=\begin{cases}4\epsilon 
-	\bigg[\bigg(\frac{\sigma}{r}\bigg)^{12}-\bigg(\frac{\sigma}{r}\bigg)^{6}\bigg]+\epsilon 
-	& 0 < r<2^{1/6}\sigma\\0 & otherwise\end{cases} 
-\end{equation} where $\sigma$ represents the core separation of two 
-spheres.  $r^{-12}$ is the reference potential while $r^{-6}$ is the 
-system perturbation.  Two overlapping spheres experience this potential 
-energy which is an extension of a Lennard-Jones potential with an 
-offset $\epsilon$ such that the force experienced by the spheres is 
-both attractive and repulsive~\cite{hoover1970soft}. For low 
-temperatures, the Soft-sphere potential essentially reduces to that of 
-the Hard-sphere potential, since at low temperatures the liquid system 
-now exhibits behavior closer to that of a solid. Scale invariance plays 
-an important role when using Monte-Carlo simulations to determine 
-thermodynamic properties of the system. As a result of this scale 
-invariance, it is possible to determine the thermodynamic properties at 
-a single temperature and extrapolate to determine properties at any 
-temperature.  In the 1970s, various thermodynamic properties were 
-determined for the Soft-sphere potential using Metropolis 
-Monte-Carlo~\cite{andersen1971relationship, hansen1970phase}; however, 
-these properties were not calculated with the family of re-weighting 
-Histogram methods introduced somewhat later.
+%The Soft-sphere model or Weeks-Chandler-Anderson Pair 
+%Potential~\cite{andersen1971relationship, weeks1971role} can be written 
+%as \begin{equation}
+	%\mathcal{V}_{\mathcal{WCA}}=\begin{cases}4\epsilon 
+	%\bigg[\bigg(\frac{\sigma}{r}\bigg)^{12}-\bigg(\frac{\sigma}{r}\bigg)^{6}\bigg]+\epsilon 
+	%& 0 < r<2^{1/6}\sigma\\0 & otherwise\end{cases} 
+%\end{equation} where $\sigma$ represents the core separation of two 
+%spheres.  $r^{-12}$ is the reference potential while $r^{-6}$ is the 
+%system perturbation.  Two overlapping spheres experience this potential 
+%energy which is an extension of a Lennard-Jones potential with an 
+%offset $\epsilon$ such that the force experienced by the spheres is 
+%both attractive and repulsive~\cite{hoover1970soft}. For low 
+%temperatures, the Soft-sphere potential essentially reduces to that of 
+%the Hard-sphere potential, since at low temperatures the liquid system 
+%now exhibits behavior closer to that of a solid. Scale invariance plays 
+%an important role when using Monte-Carlo simulations to determine 
+%thermodynamic properties of the system. As a result of this scale 
+%invariance, it is possible to determine the thermodynamic properties at 
+%a single temperature and extrapolate to determine properties at any 
+%temperature.  In the 1970s, various thermodynamic properties were 
+%determined for the Soft-sphere potential using Metropolis 
+%Monte-Carlo~\cite{andersen1971relationship, hansen1970phase}; however, 
+%these properties were not calculated with the family of re-weighting 
+%Histogram methods introduced somewhat later.
 
-\subsubsection{Square-Well Potential}
+%\subsubsection{Square-Well Potential}
 
-This section could lead right into the next...
+%This section could lead right into the next...
 
-\begin{equation}
- \mathcal{V}_{\mathcal{SW}}=\begin{cases} \infty & 
- \lvert\textbf{r}\rvert< \sigma\\-\epsilon & 
- \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 & 
- \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
-\end{equation}
+%\begin{equation}
+ %\mathcal{V}_{\mathcal{SW}}=\begin{cases} \infty & 
+ %\lvert\textbf{r}\rvert< \sigma\\-\epsilon & 
+ %\sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 & 
+ %\lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
+%\end{equation}
 
-\subsection{Histogram Monte-Carlo}
+%\subsection{Histogram Monte-Carlo}
 
-While Monte-Carlo simulations have been performed on systems modeled 
-with a Soft-sphere potential~\cite{andersen1971relationship, 
-hansen1970phase, sun2013efficient, ghoufi2016computer} since the 1970s, 
-we incorporate several new ideas using re-weighting Histogram methods 
-that have not been investigated.  A major motivation for using 
-Histogram methods is that the algorithms give quantitative estimates 
-for the density of states $\mathcal{D}$($\varepsilon$).  Once the 
-density of states is known, it is possible to calculate free energies 
-and heat capacities, as well as, other thermodynamic properties.  In 
-this work, we will calculate the internal energy of the system 
-$\mathcal{U}$, the heat capacity $\mathcal{C}$, and the entropy 
-$\mathcal{S}$.  For the simulations, a particular well-width 
-$\lambda=1.3$, packing-fraction $\eta=0.22$, and number of particles 
-$\mathcal{N}$.  In this work, we compare the following re-weighting 
-Histogram methods:  Wang-Landau, Multi-Canonical (Simple-Flat), 
-Transition Matrix Monte-Carlo (TMMC), and Optimized Ensemble Transition 
-Matrix Monte-Carlo (OETMMC).  In the following section, we will discuss 
-these techniques, as well as, our implementation scheme for the 
-Histogram algorithms.
+%While Monte-Carlo simulations have been performed on systems modeled 
+%with a Soft-sphere potential~\cite{andersen1971relationship, 
+%hansen1970phase, sun2013efficient, ghoufi2016computer} since the 1970s, 
+%we incorporate several new ideas using re-weighting Histogram methods 
+%that have not been investigated.  A major motivation for using 
+%Histogram methods is that the algorithms give quantitative estimates 
+%for the density of states $\mathcal{D}$($\varepsilon$).  Once the 
+%density of states is known, it is possible to calculate free energies 
+%and heat capacities, as well as, other thermodynamic properties.  In 
+%this work, we will calculate the internal energy of the system 
+%$\mathcal{U}$, the heat capacity $\mathcal{C}$, and the entropy 
+%$\mathcal{S}$.  For the simulations, a particular well-width 
+%$\lambda=1.3$, packing-fraction $\eta=0.22$, and number of particles 
+%$\mathcal{N}$.  In this work, we compare the following re-weighting 
+%Histogram methods:  Wang-Landau, Multi-Canonical (Simple-Flat), 
+%Transition Matrix Monte-Carlo (TMMC), and Optimized Ensemble Transition 
+%Matrix Monte-Carlo (OETMMC).  In the following section, we will discuss 
+%these techniques, as well as, our implementation scheme for the 
+%Histogram algorithms.
 
-\section{Methods}
+%\section{Methods}
 
-\subsection{Re-Weighting Histogram Algorithms}
+%\subsection{Re-Weighting Histogram Algorithms}
 
-\subsubsection{Wang-Landau Algorithm}
+%\subsubsection{Wang-Landau Algorithm}
 
-The Wang-Landau algorithm is a powerful re-weighting Histogram method 
-developed and refined well into 21st 
-century~\cite{wang2001determining}.  While methods such as Metropolis 
-Sampling and Swendsen-Wang cluster 
-flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution 
-and require sampling at individual temperatures, the Wang-Landau 
-algorithm uses a flat histogram and performs a random walk in energy 
-space to determine the density of states~\cite{LandauMinSampling}.  
-Wang-Landau's major tenant is that when counting the histogram 
-$\mathcal{H}$($\varepsilon$), the energy occurences should form a flat 
-distribution.  The criteria for flat sampling is given by 
-\begin{equation}
-	\frac{\min_{\varepsilon} \mathcal{H}(\varepsilon)}
-	{\big\langle\mathcal{H}(\varepsilon)\big\rangle } 
-	> \gamma 
-\end{equation}
-where $\gamma$ is usually set between 0.75 and 0.99 and is determines how many
-times each energy is sampled relative to the mean number of visits.  Difficulties
-can occur with this flatness criteria due to the fact that some energies on a
-given energy range might never be sampled~\cite{haber2014transition}.  The algorithm
-is briefly outlined below  
-\begin{equation}
-	\ln{\mathcal{H}_{t+1}(\varepsilon,N)}=\ln{\mathcal{H}_{t}(\varepsilon,N)}
-	+\ln{\mathcal{F}}
-\end{equation}
-\begin{equation}
-	\ln{\mathcal{F}_{k+1}}=\frac{u}{2}\ln{\mathcal{F}_{k}}
-\end{equation}
-for $u$ typically greater than 1 and $\mathcal{F}$ is the modification factor for
-the density of states.  We then accept a new configuration for the density of 
-states with a probability given by the following
-\begin{equation}
-	\mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) 
-	= \min[1,e^{\ln{\mathcal{H}(\varepsilon_i)}-\ln{\mathcal{H}(\varepsilon_j)}}]
-\end{equation}
-Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and 
-determined that choosing a large modification factor $\mathcal{F}_0 = e^{4}$ and
-rapidly reducing the factor by 10 during each step resulted in reduced statistical 
-error~\cite{zhou2005understanding}.
+%The Wang-Landau algorithm is a powerful re-weighting Histogram method 
+%developed and refined well into 21st 
+%century~\cite{wang2001determining}.  While methods such as Metropolis 
+%Sampling and Swendsen-Wang cluster 
+%flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution 
+%and require sampling at individual temperatures, the Wang-Landau 
+%algorithm uses a flat histogram and performs a random walk in energy 
+%space to determine the density of states~\cite{LandauMinSampling}.  
+%Wang-Landau's major tenant is that when counting the histogram 
+%$\mathcal{H}$($\varepsilon$), the energy occurences should form a flat 
+%distribution.  The criteria for flat sampling is given by 
+%\begin{equation}
+	%\frac{\min_{\varepsilon} \mathcal{H}(\varepsilon)}
+	%{\big\langle\mathcal{H}(\varepsilon)\big\rangle } 
+	%> \gamma 
+%\end{equation}
+%where $\gamma$ is usually set between 0.75 and 0.99 and is determines how many
+%times each energy is sampled relative to the mean number of visits.  Difficulties
+%can occur with this flatness criteria due to the fact that some energies on a
+%given energy range might never be sampled~\cite{haber2014transition}.  The algorithm
+%is briefly outlined below  
+%\begin{equation}
+	%\ln{\mathcal{H}_{t+1}(\varepsilon,N)}=\ln{\mathcal{H}_{t}(\varepsilon,N)}
+	%+\ln{\mathcal{F}}
+%\end{equation}
+%\begin{equation}
+	%\ln{\mathcal{F}_{k+1}}=\frac{u}{2}\ln{\mathcal{F}_{k}}
+%\end{equation}
+%for $u$ typically greater than 1 and $\mathcal{F}$ is the modification factor for
+%the density of states.  We then accept a new configuration for the density of 
+%states with a probability given by the following
+%\begin{equation}
+	%\mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) 
+	%= \min[1,e^{\ln{\mathcal{H}(\varepsilon_i)}-\ln{\mathcal{H}(\varepsilon_j)}}]
+%\end{equation}
+%Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and 
+%determined that choosing a large modification factor $\mathcal{F}_0 = e^{4}$ and
+%rapidly reducing the factor by 10 during each step resulted in reduced statistical 
+%error~\cite{zhou2005understanding}.
 
-\subsubsection{The Multi-Canonical Algorithm}
+%\subsubsection{The Multi-Canonical Algorithm}
 
-This section still needs written!
+%This section still needs written!
 
-\subsubsection{The TMMC Algorithm}
+%\subsubsection{The TMMC Algorithm}
 
-The Transition Matrix Monte-Carlo algorithm is often used in the family 
-of broad histogram methods~\cite{swendsen1999transition}.  In fact, 
-without the idea of a transition matrix detailed balance cannot be 
-preserved for the Broad histogram method~\cite{wang1999broad}.  The 
-sampling dynamics eventually produce a histogram that is flat when 
-using the transition matrix.  The idea of the transition matrix was 
-first developed in the 1970s by Kieth 
-Hastings~\cite{hastings1970monte}.  We begin by first initializing a 
-transition matrix $\mathcal{T}_{ij}=0$ for all energies.  We next 
-define the transition matrix and attempt to make a defined move which 
-is either accepted or rejected with an acceptance probability given by 
-\begin{equation} \mathcal{T}_{ij} = 
-\frac{\mathcal{T}_{d}(\varepsilon_j,-\Delta{\varepsilon})} 
-{\sum\limits_{\Delta{\varepsilon}}\mathcal{T}_{d} 
-(\varepsilon_j,\Delta{\varepsilon})} 
-\end{equation} 
+%The Transition Matrix Monte-Carlo algorithm is often used in the family 
+%of broad histogram methods~\cite{swendsen1999transition}.  In fact, 
+%without the idea of a transition matrix detailed balance cannot be 
+%preserved for the Broad histogram method~\cite{wang1999broad}.  The 
+%sampling dynamics eventually produce a histogram that is flat when 
+%using the transition matrix.  The idea of the transition matrix was 
+%first developed in the 1970s by Kieth 
+%Hastings~\cite{hastings1970monte}.  We begin by first initializing a 
+%transition matrix $\mathcal{T}_{ij}=0$ for all energies.  We next 
+%define the transition matrix and attempt to make a defined move which 
+%is either accepted or rejected with an acceptance probability given by 
+%\begin{equation} \mathcal{T}_{ij} = 
+%\frac{\mathcal{T}_{d}(\varepsilon_j,-\Delta{\varepsilon})} 
+%{\sum\limits_{\Delta{\varepsilon}}\mathcal{T}_{d} 
+%(\varepsilon_j,\Delta{\varepsilon})} 
+%\end{equation} 
 
-\begin{equation} 
-\begin{split} \mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) = 
-\max\bigg[\frac{\mathcal{T}_{d}(\varepsilon_i,\Delta{\varepsilon}) 
-+\mathcal{C}}{\mathcal{T}_{d}(\varepsilon_f,-\Delta{\varepsilon}) 
-+\mathcal{C}}\\\frac{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d} 
-(\varepsilon_i,\Delta{\varepsilon})+\mathcal{C}} 
-{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d}(\varepsilon_f, 
-\Delta{\varepsilon})+\mathcal{C}},\exp{\bigg(-\frac{\Delta{\varepsilon}} 
-{k_{B}T}\bigg)}\bigg] 
-\end{split} 
-\end{equation} 
-The Multi-Canonical (Flat histogram methods) ensemble is designed in such a 
-way so as to ensure visiting every energy level with equal 
-probability~\cite{swendsen1999transition}.  This would hardly be ideal 
-using a Broad histogram approach where the acceptance rate should be 
-related to the sampled energy.  While similar to the Multi-Canonical 
-approach in that both methods sample over all energy space for a given 
-temperature, the Broad histogram methods have the advantage of being 
-able to sample over a larger temperature scale and away from the 
-critical point~\cite{Broadhistogram,BroadHistogram2}.  This feature can 
-allow the methods to solve more accurately and computationally 
-efficient then Flat histogram methods.
+%\begin{equation} 
+%\begin{split} \mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) = 
+%\max\bigg[\frac{\mathcal{T}_{d}(\varepsilon_i,\Delta{\varepsilon}) 
+%+\mathcal{C}}{\mathcal{T}_{d}(\varepsilon_f,-\Delta{\varepsilon}) 
+%+\mathcal{C}}\\\frac{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d} 
+%(\varepsilon_i,\Delta{\varepsilon})+\mathcal{C}} 
+%{\sum\limits_{\Delta{\varepsilon'}}\mathcal{T}_{d}(\varepsilon_f, 
+%\Delta{\varepsilon})+\mathcal{C}},\exp{\bigg(-\frac{\Delta{\varepsilon}} 
+%{k_{B}T}\bigg)}\bigg] 
+%\end{split} 
+%\end{equation} 
+%The Multi-Canonical (Flat histogram methods) ensemble is designed in such a 
+%way so as to ensure visiting every energy level with equal 
+%probability~\cite{swendsen1999transition}.  This would hardly be ideal 
+%using a Broad histogram approach where the acceptance rate should be 
+%related to the sampled energy.  While similar to the Multi-Canonical 
+%approach in that both methods sample over all energy space for a given 
+%temperature, the Broad histogram methods have the advantage of being 
+%able to sample over a larger temperature scale and away from the 
+%critical point~\cite{Broadhistogram,BroadHistogram2}.  This feature can 
+%allow the methods to solve more accurately and computationally 
+%efficient then Flat histogram methods.
 
-\subsubsection{The OETMMC Algorithm}
+%\subsubsection{The OETMMC Algorithm}
 
-The Optimized Ensemble method has similar features to the TMMC method.  
-In  addition, it re-weights the histogram such that unlikely 
-(not-probable) transitions are not equally favored.  This allows the 
-simulation low-energy sampling rate to maximized.  We outline an 
-approach to updating the weights $\mathcal{W}_{i}$ based on the density 
-of states 
-$\mathcal{D}(\varepsilon)$~\cite{trebst2004optimizing,wessel2007optimized}.  
-We begin the algorithm by starting with the weights proportional to the 
-reciprocal of the density of states.  Next, enter a loop which has the 
-purpose of calculating a fraction $\chi(\eta)$ in terms of histograms 
-$\mathcal{H}_{+}(\eta)$ and $\mathcal{H}_{-}(\eta)$ and updating the 
-global histogram $\mathcal{H}(\varepsilon)$. \begin{equation}
-	\chi = \frac{\mathcal{H}_{+}(\eta)}{\mathcal{H}_{+}(\eta)+\mathcal{H}_{-}(\eta)}
-\end{equation}
-We next update the statistical weights and calculate a new acceptance probability.
-\begin{equation}
-	\mathcal{W}_{i+1}(\eta) = \mathcal{W}_{i}(\eta)\sqrt{\frac{1}{\mathcal{H}_{+}(\eta)+
-	\mathcal{H}_{-}(\eta)}\bigg|\frac{\text{d}\chi(\eta)}{\text{d}\eta}\bigg|} 
-\end{equation}
-Once the statistical weights are found the can relate the density of states and the 
-global histogram. With the completetion of finding the global histogram, thermodynamic
-properties can now be calculated from the density of states.
+%The Optimized Ensemble method has similar features to the TMMC method.  
+%In  addition, it re-weights the histogram such that unlikely 
+%(not-probable) transitions are not equally favored.  This allows the 
+%simulation low-energy sampling rate to maximized.  We outline an 
+%approach to updating the weights $\mathcal{W}_{i}$ based on the density 
+%of states 
+%$\mathcal{D}(\varepsilon)$~\cite{trebst2004optimizing,wessel2007optimized}.  
+%We begin the algorithm by starting with the weights proportional to the 
+%reciprocal of the density of states.  Next, enter a loop which has the 
+%purpose of calculating a fraction $\chi(\eta)$ in terms of histograms 
+%$\mathcal{H}_{+}(\eta)$ and $\mathcal{H}_{-}(\eta)$ and updating the 
+%global histogram $\mathcal{H}(\varepsilon)$. \begin{equation}
+	%\chi = \frac{\mathcal{H}_{+}(\eta)}{\mathcal{H}_{+}(\eta)+\mathcal{H}_{-}(\eta)}
+%\end{equation}
+%We next update the statistical weights and calculate a new acceptance probability.
+%\begin{equation}
+	%\mathcal{W}_{i+1}(\eta) = \mathcal{W}_{i}(\eta)\sqrt{\frac{1}{\mathcal{H}_{+}(\eta)+
+	%\mathcal{H}_{-}(\eta)}\bigg|\frac{\text{d}\chi(\eta)}{\text{d}\eta}\bigg|} 
+%\end{equation}
+%Once the statistical weights are found the can relate the density of states and the 
+%global histogram. With the completetion of finding the global histogram, thermodynamic
+%properties can now be calculated from the density of states.
 
-\subsection{New Ideas for Re-Weighting}
+%\subsection{New Ideas for Re-Weighting}
 
-With some editing and referencing, Section I could be rewritten and inserted here.
-There are actually a lot of cool ideas.
+%With some editing and referencing, Section I could be rewritten and inserted here.
+%There are actually a lot of cool ideas.
 
-\section{Results}
+%\section{Results}
 
-The results with discussion can go here!
+%The results with discussion can go here!
 
-\section{Conclusion}
+%\section{Conclusion}
 
-A brief summary of what we have done and exciting take-away.
+%A brief summary of what we have done and exciting take-away.
 
-% I am going to edit the first section leaving the second as the original.
+%% I am going to edit the first section leaving the second as the original.
 
-\subsection{TMI1 Algorithm}
+%\subsection{TMI1 Algorithm}
 
-Our proposed transition matrix initilization algorithm TMI$_1$ uses the following 
-method to determine the histogram weights.  The method periodically recomputes 
-the weights during the simulation.  Although no bottlenecks result when updating 
-the weights more frequently, the algorithm will nonetheless introduce additional 
-computational time.  Because of the potential to increase computational time, the 
-algorithm infrequently but periodically updates the weights such that the central
-effort of the method allows focusing efforts on exploring new energy
-configurations.
+%Our proposed transition matrix initilization algorithm TMI$_1$ uses the following 
+%method to determine the histogram weights.  The method periodically recomputes 
+%the weights during the simulation.  Although no bottlenecks result when updating 
+%the weights more frequently, the algorithm will nonetheless introduce additional 
+%computational time.  Because of the potential to increase computational time, the 
+%algorithm infrequently but periodically updates the weights such that the central
+%effort of the method allows focusing efforts on exploring new energy
+%configurations.
 
-\subsubsection{Weights at High Energy}
-At energies above the maximum in the density of states, the method sets the weights 
-equal to the weight at the density of states maximum.  This avoids expending 
-extra computational time on equally sampling states that are not favored at any 
-positive temperature.
+%\subsubsection{Weights at High Energy}
+%At energies above the maximum in the density of states, the method sets the weights 
+%equal to the weight at the density of states maximum.  This avoids expending 
+%extra computational time on equally sampling states that are not favored at any 
+%positive temperature.
 
-\subsubsection{Weights at Interesting Energy}
-At energies below the maximum, the method attempts to set the weight equal to the 
-inverse of the density of states, \emph{unless} there are insufficient statistics 
-to justify this.  In order to determine when sufficient statistics have been reached,
-it becomes neccessary to define a modifcation factor, in this case, in terms of a 
-fractional uncertainty
-\begin{align}
-  {F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
-\end{align}
-where $N_s(\epsilon)$ is the number of round-trip samples taken at an energy
-$\epsilon$.  We assume that our uncertainty in the ratio between the density
-of states at two adjacent energies is equal to this value.  The weight at each
-energy can then be set according to
-\begin{align}
-  {W}_{\epsilon} &= {W}_{\epsilon+1}\max\left[\frac1{{F}
-  (\epsilon)},\frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
-  \\
-   &= {W}_{\epsilon+1}\max\left[\frac1{\sqrt{N_s(\epsilon)}},
-  \frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
-\end{align}
+%\subsubsection{Weights at Interesting Energy}
+%At energies below the maximum, the method attempts to set the weight equal to the 
+%inverse of the density of states, \emph{unless} there are insufficient statistics 
+%to justify this.  In order to determine when sufficient statistics have been reached,
+%it becomes neccessary to define a modifcation factor, in this case, in terms of a 
+%fractional uncertainty
+%\begin{align}
+  %{F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
+%\end{align}
+%where $N_s(\epsilon)$ is the number of round-trip samples taken at an energy
+%$\epsilon$.  We assume that our uncertainty in the ratio between the density
+%of states at two adjacent energies is equal to this value.  The weight at each
+%energy can then be set according to
+%\begin{align}
+  %{W}_{\epsilon} &= {W}_{\epsilon+1}\max\left[\frac1{{F}
+  %(\epsilon)},\frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
+  %\\
+   %&= {W}_{\epsilon+1}\max\left[\frac1{\sqrt{N_s(\epsilon)}},
+  %\frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
+%\end{align}
 
-\subsubsection{Weights at Low Energy}
-We define a minimum interesting temperature $T_{\min}$, and at low
-energies do some special stuff to avoid weighting things more
-strongly than a Boltzmann factor at $T_{\min}$ would do.
+%\subsubsection{Weights at Low Energy}
+%We define a minimum interesting temperature $T_{\min}$, and at low
+%energies do some special stuff to avoid weighting things more
+%strongly than a Boltzmann factor at $T_{\min}$ would do.
 
-\subsection{GC-TMMC Algorithm}
-Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and 
-particle number of the system to fluctuate while holding the chemical potential,
-volume, and temperature constant~\cite{chen2001aggregation, chen2002simulating, 
-errington2003direct, fenwick2006accurate, fenwick2008direct, errington2005direct}.  
-The algorithm boasts a lower statistical noise than conventional GCMC due to its 
-incorporation of a transition matrix to estimate ensemble averages~\cite{siderius2013use, 
-paluch2008comparing, grzelak2008computation}.  The steps for the algorithm are 
-outlined below:
+%\subsection{GC-TMMC Algorithm}
+%Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and 
+%particle number of the system to fluctuate while holding the chemical potential,
+%volume, and temperature constant~\cite{chen2001aggregation, chen2002simulating, 
+%errington2003direct, fenwick2006accurate, fenwick2008direct, errington2005direct}.  
+%The algorithm boasts a lower statistical noise than conventional GCMC due to its 
+%incorporation of a transition matrix to estimate ensemble averages~\cite{siderius2013use, 
+%paluch2008comparing, grzelak2008computation}.  The steps for the algorithm are 
+%outlined below:
 
-\subsubsection{Define particle insertion/deletion}
-In the system of consideration, the number of particles $\mathcal{N}$ can change
-by an amount $\delta$.  It is assumed that in the system either no particles can be 
-inserted or deleted, a single insertion takes place, or a single deletion takes place.
-This yields a condition $\delta={-1,0,+1}$ for particle insertion.
+%\subsubsection{Define particle insertion/deletion}
+%In the system of consideration, the number of particles $\mathcal{N}$ can change
+%by an amount $\delta$.  It is assumed that in the system either no particles can be 
+%inserted or deleted, a single insertion takes place, or a single deletion takes place.
+%This yields a condition $\delta={-1,0,+1}$ for particle insertion.
 
-\subsubsection{Define an acceptance probability}
-Now it is necessary to define criteria for determining whether a particle insertion/deletion
-is allowed.  This criteria is called the acceptance probability and is denoted as
-\begin{align}
-  p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
-  {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
-\end{align}
-where $\alpha_{new\rightarrow old}$ is the probability of generating an old system 
-configuration from the new.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
-=\alpha_{new\rightarrow old}$ although for advanced Monte-Carlo moves this would not 
-be the case~\cite{siepmann1990method}.  The probabilies of actually observing the 
-system in the old state is given by
-\begin{align}
-  \pi_{old} = \frac{1}{\Xi}\frac{V^{N_{old}}}{\Lambda^{3N_{old}}N_{old}!}
-  e^{-\beta(\epsilon_{old}-\mu N_{old})}
-\end{align}  
-where $\Xi$ is the grand canonical partition function and $\Lambda$ is the De Broglie
-wavelength.
+%\subsubsection{Define an acceptance probability}
+%Now it is necessary to define criteria for determining whether a particle insertion/deletion
+%is allowed.  This criteria is called the acceptance probability and is denoted as
+%\begin{align}
+  %p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
+  %{\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
+%\end{align}
+%where $\alpha_{new\rightarrow old}$ is the probability of generating an old system 
+%configuration from the new.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
+%=\alpha_{new\rightarrow old}$ although for advanced Monte-Carlo moves this would not 
+%be the case~\cite{siepmann1990method}.  The probabilies of actually observing the 
+%system in the old state is given by
+%\begin{align}
+  %\pi_{old} = \frac{1}{\Xi}\frac{V^{N_{old}}}{\Lambda^{3N_{old}}N_{old}!}
+  %e^{-\beta(\epsilon_{old}-\mu N_{old})}
+%\end{align}  
+%where $\Xi$ is the grand canonical partition function and $\Lambda$ is the De Broglie
+%wavelength.
 
-\subsubsection{Define a Collection Matrix}
-In order to calculate an overall transition probability $\mathcal{P}_{N,\delta}$, we
-must first define how the system procession is to be recorded.  A Collection Matrix
-can be defined, such that for any one move, two elements are updated.
-\begin{align}
-  {C}_{N,\delta} = {C}_{N,\delta} + p_{a}\\
-  {C}_{N,0} = {C}_{N,0} +(1 - p_{a})
-\end{align}  
-If $\delta=0$, that is, the number of particles has not been changed, then only 
-$\mathcal{C}_{N,0}$ is incremented by unity.  The overal transition probability can
-now be defined as 
-\begin{align}
-  \mathcal{P}_{N,\delta} = \frac{{C}_{N,\delta}}
-  {\sum_{j=-1}^{+1} {C}_{N,j}}
-\end{align} 
+%\subsubsection{Define a Collection Matrix}
+%In order to calculate an overall transition probability $\mathcal{P}_{N,\delta}$, we
+%must first define how the system procession is to be recorded.  A Collection Matrix
+%can be defined, such that for any one move, two elements are updated.
+%\begin{align}
+  %{C}_{N,\delta} = {C}_{N,\delta} + p_{a}\\
+  %{C}_{N,0} = {C}_{N,0} +(1 - p_{a})
+%\end{align}  
+%If $\delta=0$, that is, the number of particles has not been changed, then only 
+%$\mathcal{C}_{N,0}$ is incremented by unity.  The overal transition probability can
+%now be defined as 
+%\begin{align}
+  %\mathcal{P}_{N,\delta} = \frac{{C}_{N,\delta}}
+  %{\sum_{j=-1}^{+1} {C}_{N,j}}
+%\end{align} 
 
-\subsubsection{Define the Particle Number Probability Distribution}
-The Particle Number Probability Distribution (PNPD) $\Pi(N;\mu,V,T)$ can be found 
-by enforcing detailed balance in the system.
-\begin{align}
-  \ln(\Pi_{N+1}) = \ln(\Pi_{N}) + \ln\bigg(\frac{\mathcal{P}_{N\rightarrow N+1}}
-  {\mathcal{P}_{N+1\rightarrow N}}\bigg)
-\end{align} 
-This equation will hold as long as N-space can be sampled sufficiently.  In an 
-implemented algorithm $N$, $N_{min}$, and $N_{max}$ are specified for macrostate domain
-sampling.
+%\subsubsection{Define the Particle Number Probability Distribution}
+%The Particle Number Probability Distribution (PNPD) $\Pi(N;\mu,V,T)$ can be found 
+%by enforcing detailed balance in the system.
+%\begin{align}
+  %\ln(\Pi_{N+1}) = \ln(\Pi_{N}) + \ln\bigg(\frac{\mathcal{P}_{N\rightarrow N+1}}
+  %{\mathcal{P}_{N+1\rightarrow N}}\bigg)
+%\end{align} 
+%This equation will hold as long as N-space can be sampled sufficiently.  In an 
+%implemented algorithm $N$, $N_{min}$, and $N_{max}$ are specified for macrostate domain
+%sampling.
 
-\subsubsection{Define a biasing function}
-The primary difference between TMMC as defined by Fitzgerald et al. and GC-TMMC as 
-pioneered by JR Errington et al. is the use of a biasing function to control the acceptance
-rate of trial moves~\cite{siderius2013use, fitzgerald2000monte}.  This type of 
-multi-canonical sampling augments the acceptance probability in the following way 
-\begin{align}
-  p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{e^{\eta(N_{new})}}
-  {e^{\eta(N_{old})}}\frac{\alpha_{new\rightarrow old}}
-  {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
-\end{align}
+%\subsubsection{Define a biasing function}
+%The primary difference between TMMC as defined by Fitzgerald et al. and GC-TMMC as 
+%pioneered by JR Errington et al. is the use of a biasing function to control the acceptance
+%rate of trial moves~\cite{siderius2013use, fitzgerald2000monte}.  This type of 
+%multi-canonical sampling augments the acceptance probability in the following way 
+%\begin{align}
+  %p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{e^{\eta(N_{new})}}
+  %{e^{\eta(N_{old})}}\frac{\alpha_{new\rightarrow old}}
+  %{\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
+%\end{align}
 
-Although $p_{\eta}$ is used to control the actual transitions for trial configurations
-in GC-TMMC, $p_{a}$ is still used to update the Collection Matrices.  Ideally the biasing
-function would be given by 
-\begin{align}
-  \eta(N) = -\ln\Pi(N;\mu,V,T)
-\end{align}
-Since $\Pi$ is not usually known a priori, the biasing function is usually set to some 
-arbitrary constant for initialization.  The goal of this biasing function is to achieve
-uniform sampling (a common feature shared by the flat histogram Monte-Carlo family).
+%Although $p_{\eta}$ is used to control the actual transitions for trial configurations
+%in GC-TMMC, $p_{a}$ is still used to update the Collection Matrices.  Ideally the biasing
+%function would be given by 
+%\begin{align}
+  %\eta(N) = -\ln\Pi(N;\mu,V,T)
+%\end{align}
+%Since $\Pi$ is not usually known a priori, the biasing function is usually set to some 
+%arbitrary constant for initialization.  The goal of this biasing function is to achieve
+%uniform sampling (a common feature shared by the flat histogram Monte-Carlo family).
 
-\subsubsection{Histogram reweighting for the PNPD}
-Once the PNPD has beeen collected for a given chemical potential $\mu_0$, histogram 
-reweighting is used to determine thermodynamic properties at other chemic potentials.  
-Since the canonical partition function $Z(N,V,T)$ does not depend on the chemical 
-potential, we can write
-\begin{align}
-\begin{split}
-  \Pi(N;\mu,V,T) = \frac{e^{\beta\mu N}Z(N,V,T)}{\Xi(\mu,V,T)}\\
-  \ln\Pi(N;\mu,V,T) = \ln\Pi(N;\mu_0,V,T) \\
-  + \beta N(\mu-\mu_0) + C
-\end{split}
-\end{align}
-where $C$ is a normalization constant independent of the number of particles.
+%\subsubsection{Histogram reweighting for the PNPD}
+%Once the PNPD has beeen collected for a given chemical potential $\mu_0$, histogram 
+%reweighting is used to determine thermodynamic properties at other chemic potentials.  
+%Since the canonical partition function $Z(N,V,T)$ does not depend on the chemical 
+%potential, we can write
+%\begin{align}
+%\begin{split}
+  %\Pi(N;\mu,V,T) = \frac{e^{\beta\mu N}Z(N,V,T)}{\Xi(\mu,V,T)}\\
+  %\ln\Pi(N;\mu,V,T) = \ln\Pi(N;\mu_0,V,T) \\
+  %+ \beta N(\mu-\mu_0) + C
+%\end{split}
+%\end{align}
+%where $C$ is a normalization constant independent of the number of particles.
 
-\subsection{Fitzgerald TMMC Algorithm}
-The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
-consists of three primary steps.  The first two steps are common to the Metropolis 
-algorithm while the third makes use of the actual transition 
-probabilities~\cite{fitzgerald2000monte}.
+%\subsection{Fitzgerald TMMC Algorithm}
+%The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
+%consists of three primary steps.  The first two steps are common to the Metropolis 
+%algorithm while the third makes use of the actual transition 
+%probabilities~\cite{fitzgerald2000monte}.
 
-\subsubsection{define a transition probability}
-Assuming that the system under study is in a state denoted old and a proposed transition
-is made to a new state denoted new, the probability is defined as
-\begin{align}
-  p_{old \rightarrow new} = p_{new \rightarrow old}
-\end{align}
-where we have allowed the probabilies to be equal for simplicity of presentation.
+%\subsubsection{define a transition probability}
+%Assuming that the system under study is in a state denoted old and a proposed transition
+%is made to a new state denoted new, the probability is defined as
+%\begin{align}
+  %p_{old \rightarrow new} = p_{new \rightarrow old}
+%\end{align}
+%where we have allowed the probabilies to be equal for simplicity of presentation.
 
-\subsubsection{define an acceptance probability}
-The probability for accepting a transition from an old state to a new one can be 
-defined
-\begin{align}
-  p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
-  {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
-\end{align}
-where $\alpha_{new\rightarrow old}$ is the probability of generating a 
-new system configuration the old.  For conventional Monte-Carlo moves 
-$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although 
-for advanced Monte-Carlo moves this would not be the 
-case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of 
-observing the system in the old state can be found based on the 
-ensemble constraints placed on the system.  Fitzgerald et al. 
-considered the system of interest using the canonical ensemble while 
-Errington et al. extends this method to the grand canonical ensemble 
-and introduces biasing.
-\begin{align}
-  \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
-\end{align}
-This appears to result in the acceptance probability given for TMMC introduced by 
-Swendsen and Wang.
-\begin{align}
-  p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
-\end{align}
-\subsubsection{define a bookkeeping step}
-The third step in the TMMC algorithm consists of recording the data in a collection 
-matrix (analogous to the transition histogram matrix).
-\begin{align}
-  C_{N,\delta} = C_{N,\delta} + p_{a}\\
-  C_{N,0} = C_{N,0} +(1 - p_{a})
-\end{align}  
-If $\delta=0$, that is, the number of particles has not been changed, then only 
-$C_{N,0}$ is incremented by unity. Fitzgerald et al. ~\cite{fitzgerald2000monte}
-show that defining the third step this way results in a uniform improvement over 
-using histogram estimators to determine the PNPD.
+%\subsubsection{define an acceptance probability}
+%The probability for accepting a transition from an old state to a new one can be 
+%defined
+%\begin{align}
+  %p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
+  %{\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
+%\end{align}
+%where $\alpha_{new\rightarrow old}$ is the probability of generating a 
+%new system configuration the old.  For conventional Monte-Carlo moves 
+%$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although 
+%for advanced Monte-Carlo moves this would not be the 
+%case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of 
+%observing the system in the old state can be found based on the 
+%ensemble constraints placed on the system.  Fitzgerald et al. 
+%considered the system of interest using the canonical ensemble while 
+%Errington et al. extends this method to the grand canonical ensemble 
+%and introduces biasing.
+%\begin{align}
+  %\pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
+%\end{align}
+%This appears to result in the acceptance probability given for TMMC introduced by 
+%Swendsen and Wang.
+%\begin{align}
+  %p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
+%\end{align}
+%\subsubsection{define a bookkeeping step}
+%The third step in the TMMC algorithm consists of recording the data in a collection 
+%matrix (analogous to the transition histogram matrix).
+%\begin{align}
+  %C_{N,\delta} = C_{N,\delta} + p_{a}\\
+  %C_{N,0} = C_{N,0} +(1 - p_{a})
+%\end{align}  
+%If $\delta=0$, that is, the number of particles has not been changed, then only 
+%$C_{N,0}$ is incremented by unity. Fitzgerald et al. ~\cite{fitzgerald2000monte}
+%show that defining the third step this way results in a uniform improvement over 
+%using histogram estimators to determine the PNPD.
 
-\subsection{WL-TMMC Algorithm}
+%\subsection{WL-TMMC Algorithm}
 
-Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed 
-by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes 
-advantage of the ease of implementation and applicability to a variety 
-of systems, while making use of a transition matrix to adress WL 
-weaknesses such as a limited statistical accuracy plateau which is not 
-improved with additional Monte-Carlo steps.  This WL version is more 
-accurate for a given number of simulation steps.
+%Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed 
+%by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes 
+%advantage of the ease of implementation and applicability to a variety 
+%of systems, while making use of a transition matrix to adress WL 
+%weaknesses such as a limited statistical accuracy plateau which is not 
+%improved with additional Monte-Carlo steps.  This WL version is more 
+%accurate for a given number of simulation steps.
 
-\paragraph{Initializing Wang-Landau:} We begin the simulation by 
-defining a minimum important energy and a maximum entropy state. In 
-traditional Wang-Landau the WL factor begins at 1.0 and the factor is 
-modified by 2.0 until the simulation is cutoff typically around 
-$10^{-10}$.  Rane et. al. in the first published implemenation of 
-WL-TMMC~\cite{rane2013monte} suggests using a WL factor between 1.0 and 
-$10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC, 
-we set the WL factor to be 1 and the cutoff at $10^{-4}$. A single 
-sweep is defined as each macrostate being sampled a number of times in 
-this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a 
-flatness criteria~\cite{wang2001determining, wang2001efficient, 
-hatch2015computational, mahynski2017predicting} for the accumulated 
-histogram usually between 0.75 to 0.90.  For our simulation, it is 
-sufficient that each macrostate is visited at least once (each 
-histogram bin has one entry)~\cite{shell2003improved}.  The goal of 
-this WL initialization is to prefill the transition matrix for the next 
-portion of the simulation. 
-\paragraph{Initializing TMMC:} The purpose of prefilling the transition 
-matrix is apparent because if numerous zeros existed in the collection 
-matrix, the infinite temperature transition matrix would be 
-ill-defined.  Sampling over large ranges of density of states would 
-therefore take an unacceptable length of time to 
-complete~\cite{shell2003improved, shen2014elucidating}.  The transition 
-matrix in terms of the collection matrix is given as follows:
-\begin{align}
-\widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
-{\sum_{K} C(I,K)}
-\end{align}
-We now run the TMMC portion of the simulation.  Siderius does this for
-20 additional sweeps (does about 8 sweeps for WL).  We do this until we
-reach a specified temperature of interest.
-We have not yet implemented a biasing function to control acceptance
-rate of trial moves but we probably could/should? at some point.
-\begin{align}
-  P_{acc}(i\rightarrow j) = \min\bigg[1,\frac{\widetilde{T}_{\infty}(J\rightarrow I)}
-  {\widetilde{T}_{\infty}(I\rightarrow J)}\bigg]
-\end{align}
-this is only used to control actual transitions not update the collection
-matrices.
+%\paragraph{Initializing Wang-Landau:} We begin the simulation by 
+%defining a minimum important energy and a maximum entropy state. In 
+%traditional Wang-Landau the WL factor begins at 1.0 and the factor is 
+%modified by 2.0 until the simulation is cutoff typically around 
+%$10^{-10}$.  Rane et. al. in the first published implemenation of 
+%WL-TMMC~\cite{rane2013monte} suggests using a WL factor between 1.0 and 
+%$10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC, 
+%we set the WL factor to be 1 and the cutoff at $10^{-4}$. A single 
+%sweep is defined as each macrostate being sampled a number of times in 
+%this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a 
+%flatness criteria~\cite{wang2001determining, wang2001efficient, 
+%hatch2015computational, mahynski2017predicting} for the accumulated 
+%histogram usually between 0.75 to 0.90.  For our simulation, it is 
+%sufficient that each macrostate is visited at least once (each 
+%histogram bin has one entry)~\cite{shell2003improved}.  The goal of 
+%this WL initialization is to prefill the transition matrix for the next 
+%portion of the simulation. 
+%\paragraph{Initializing TMMC:} The purpose of prefilling the transition 
+%matrix is apparent because if numerous zeros existed in the collection 
+%matrix, the infinite temperature transition matrix would be 
+%ill-defined.  Sampling over large ranges of density of states would 
+%therefore take an unacceptable length of time to 
+%complete~\cite{shell2003improved, shen2014elucidating}.  The transition 
+%matrix in terms of the collection matrix is given as follows:
+%\begin{align}
+%\widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
+%{\sum_{K} C(I,K)}
+%\end{align}
+%We now run the TMMC portion of the simulation.  Siderius does this for
+%20 additional sweeps (does about 8 sweeps for WL).  We do this until we
+%reach a specified temperature of interest.
+%We have not yet implemented a biasing function to control acceptance
+%rate of trial moves but we probably could/should? at some point.
+%\begin{align}
+  %P_{acc}(i\rightarrow j) = \min\bigg[1,\frac{\widetilde{T}_{\infty}(J\rightarrow I)}
+  %{\widetilde{T}_{\infty}(I\rightarrow J)}\bigg]
+%\end{align}
+%this is only used to control actual transitions not update the collection
+%matrices.
 
-\subsection{TMI2 Algorithm}
+%\subsection{TMI2 Algorithm}
 
-The second version of transition matrix initialization algorithm works
-by looking at the logarithm of the density of states.  We begin at
-high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the entropy) and work our way
-downward.
+%The second version of transition matrix initialization algorithm works
+%by looking at the logarithm of the density of states.  We begin at
+%high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the entropy) and work our way
+%downward.
 
-\paragraph{Reaching $T_{\min}$:}
-If the change in the logarithm of the density of states is greater
-than the reciprocal of the minimum temperature, i.e. if
-\begin{align}
-  \ln\frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
-  \frac{\epsilon_{i-1} - \epsilon_i}{k_BT_{\min}}
-  \\
-  \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
-  e^{\beta_{\max}(\epsilon_{i-1} - \epsilon_i)}
-\end{align}
-then the algorithm has reached the minimum temperature of interest.
-In this case, we set the log weights at all lower energies using a
-Boltzmann ratio relative to this energy.
-\paragraph{Confident at $\epsilon_i$:} We are confident in our density
-of states at energy $\epsilon_i$ provided two conditions are true.
-\begin{enumerate}
-\item The density of states must be decreasing as the energy decreases
-  from its next-higher energy.
-\item The change in density of states (relative to the next higher
-  energy) must be smaller than a pessimistic estimate of the counting
-  uncertainty at the energy we are examining:
-  \begin{align}
-    \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
-  \end{align}
-  where $N_i$ is the number of ``pessimistic
-  samples'' at $\epsilon_i$, the lower of the two energies under
-  consideration.
-\end{enumerate}
-If both of these are true, we believe we know the density of states at
-this energy well, and the weights are set by
-\begin{align}
-  \ln w(\epsilon_i) = -\ln{D}(\epsilon_i)
-\end{align}
-\paragraph{Reached $T_\text{converged}$:}
-If this is not the case, $\epsilon_i$ is the lowest energy that is
-adequately converged.  We set the weights for energies lower than this
-to a Boltzmann ratio with a temperature determined using the slope of
-a secant line on the $\ln w$ versus $\epsilon$ graph.
-\begin{align}
-  \beta_\text{secant} = \bigg(\frac{\ln{D}(\epsilon_{S_{\max}}) - \ln{D}
-  (\epsilon_\text{pivot})}{\epsilon_{S_{\max}}-\epsilon_\text{pivot}}\bigg)
-\end{align}
-This ``slope'' is a positive quantity.  The weights at energies below
-$\epsilon_\text{pivot}$ are given by
-\begin{align}
-  \ln w(\epsilon) = \ln w(\epsilon_\text{pivot}) -
-  \beta_\text{secant}(\epsilon - \epsilon_\text{pivot})
-\end{align}
-indicating that there are higher weights at lower energies, since
-$\beta$ is positive.  We have one additional caveat: we examine the
-lower energies for which we have samples (``pessimistic'' samples),
-and if we find any energy at which the density of states is greater
-than the inverse of the weight, we adjust $\beta$ to cause it to pass
-through that point.  This ensures that the product of the weight with
-the estimated density of states is always less than or equal one for
-energies below $\epsilon_\text{converged}$.
+%\paragraph{Reaching $T_{\min}$:}
+%If the change in the logarithm of the density of states is greater
+%than the reciprocal of the minimum temperature, i.e. if
+%\begin{align}
+  %\ln\frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
+  %\frac{\epsilon_{i-1} - \epsilon_i}{k_BT_{\min}}
+  %\\
+  %\frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
+  %e^{\beta_{\max}(\epsilon_{i-1} - \epsilon_i)}
+%\end{align}
+%then the algorithm has reached the minimum temperature of interest.
+%In this case, we set the log weights at all lower energies using a
+%Boltzmann ratio relative to this energy.
+%\paragraph{Confident at $\epsilon_i$:} We are confident in our density
+%of states at energy $\epsilon_i$ provided two conditions are true.
+%\begin{enumerate}
+%\item The density of states must be decreasing as the energy decreases
+  %from its next-higher energy.
+%\item The change in density of states (relative to the next higher
+  %energy) must be smaller than a pessimistic estimate of the counting
+  %uncertainty at the energy we are examining:
+  %\begin{align}
+    %\frac{D(\epsilon_i)}{D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
+  %\end{align}
+  %where $N_i$ is the number of ``pessimistic
+  %samples'' at $\epsilon_i$, the lower of the two energies under
+  %consideration.
+%\end{enumerate}
+%If both of these are true, we believe we know the density of states at
+%this energy well, and the weights are set by
+%\begin{align}
+  %\ln w(\epsilon_i) = -\ln{D}(\epsilon_i)
+%\end{align}
+%\paragraph{Reached $T_\text{converged}$:}
+%If this is not the case, $\epsilon_i$ is the lowest energy that is
+%adequately converged.  We set the weights for energies lower than this
+%to a Boltzmann ratio with a temperature determined using the slope of
+%a secant line on the $\ln w$ versus $\epsilon$ graph.
+%\begin{align}
+  %\beta_\text{secant} = \bigg(\frac{\ln{D}(\epsilon_{S_{\max}}) - \ln{D}
+  %(\epsilon_\text{pivot})}{\epsilon_{S_{\max}}-\epsilon_\text{pivot}}\bigg)
+%\end{align}
+%This ``slope'' is a positive quantity.  The weights at energies below
+%$\epsilon_\text{pivot}$ are given by
+%\begin{align}
+  %\ln w(\epsilon) = \ln w(\epsilon_\text{pivot}) -
+  %\beta_\text{secant}(\epsilon - \epsilon_\text{pivot})
+%\end{align}
+%indicating that there are higher weights at lower energies, since
+%$\beta$ is positive.  We have one additional caveat: we examine the
+%lower energies for which we have samples (``pessimistic'' samples),
+%and if we find any energy at which the density of states is greater
+%than the inverse of the weight, we adjust $\beta$ to cause it to pass
+%through that point.  This ensures that the product of the weight with
+%the estimated density of states is always less than or equal one for
+%energies below $\epsilon_\text{converged}$.
 
-\subsection{TMI3 Algorithm}
-The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
-difference, which is that instead of a secant line being used to
-estimate the converged temperature, we use a tangent line, estimated
-using the lowest two ``converged'' energies.
+%\subsection{TMI3 Algorithm}
+%The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
+%difference, which is that instead of a secant line being used to
+%estimate the converged temperature, we use a tangent line, estimated
+%using the lowest two ``converged'' energies.
 
-\subsection{TOE3 Algorithm}
-The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses the metric of round trips defined by a walker visiting the extreme energies for the density of states.  The rate for the walker is dependent of the diffusivity $D(\epsilon)$ at a given energy $E$.  The goal of the method is to maximize the number of round trips that the Monte-Carlo simulation makes.  The optimized density of states is given by the following:
-\begin{align}
-  n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
-\end{align}
-where unlike in the original paper detailing the method, we compute the difusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the difusivity.
-\begin{align}
-  D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
-\end{align}
+%\subsection{TOE3 Algorithm}
+%The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses the metric of round trips defined by a walker visiting the extreme energies for the density of states.  The rate for the walker is dependent of the diffusivity $D(\epsilon)$ at a given energy $E$.  The goal of the method is to maximize the number of round trips that the Monte-Carlo simulation makes.  The optimized density of states is given by the following:
+%\begin{align}
+  %n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
+%\end{align}
+%where unlike in the original paper detailing the method, we compute the difusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the difusivity.
+%\begin{align}
+  %D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
+%\end{align}
 
-\subsection{SAMC Algorithm}
-The SAMC Algorithm was proposed as the reason that the Wang-Landau Algorithm converges.  It is primarily the 1/t WL Algorithm although it does not require knowledge of the entire energy range.
+%\subsection{SAMC Algorithm}
+%The SAMC Algorithm was proposed as the reason that the Wang-Landau Algorithm converges.  It is primarily the 1/t WL Algorithm although it does not require knowledge of the entire energy range.
 
-\subsection{SA-TMMC Algorithm or maybe just SATM}
-This method is based on both the SA-TMMC Algorithm and the TMMC Algorithm.  It is similar to WL-TMMC in terms of operation.
+%\subsection{SA-TMMC Algorithm or maybe just SATM}
+%This method is based on both the SA-TMMC Algorithm and the TMMC Algorithm.  It is similar to WL-TMMC in terms of operation.
 
 % The original TMI Algorithm text is below.
 
