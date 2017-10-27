@@ -26,7 +26,20 @@ parser.add_argument('--tend', metavar='  tloop_end', type=float,
 parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
                     help='step temperature kT by (default: 1.0)')
 parser.add_argument('--d', metavar='     directory', type=str, default="crystallization",
-                    help='directory for data files')                    
+                    help='directory for data files')     
+parser.add_argument('--fvst', metavar='fvloop_step', type=float, default=0.2,
+                    help='step fv by (default: 0.2)') 
+parser.add_argument('--gs', metavar='  gwloop_start', type=float, default=0.01,   #ASK if we really want to do this!
+                    help='starting gwidth (default: 0.01)')
+parser.add_argument('--ge', metavar='  gwloop_end', type=float,
+                    help='ending gwidth')
+parser.add_argument('--gst', metavar=' gwloop_step', type=float,
+                    help='step gwidth by') 
+parser.add_argument('--gle', metavar=' gwloop_latend', type=float, default=2,
+                    help='ending gwidth will be computed lattice_constant divided by this number (default: 2)')
+parser.add_argument('--glst', metavar='gwloop_latstep', type=float, default=10,
+                    help='gwidth will step by computed lattice_constant divided by this number (default: 10)')                   
+                                   
 
 args=parser.parse_args()
 print
@@ -41,6 +54,12 @@ tstart=args.tstart
 tend=args.tend
 tstep=args.tstep
 data_dir=args.d
+fv_step=args.fvst
+gwdith_start=args.gs
+gwdith_end=args.ge
+gwdith_step=args.gst
+gwdith_latend=args.gle
+gwidth_latstep=args.glst
     
 if args.nstart:
     densities = np.arange(nstart, nend+nstep, nstep, float)
@@ -67,7 +86,7 @@ for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
         print
         print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep 0.2 --gwstart 0.01 --gwlstep 10 --dir %s' %(temperatures[i],densities[j], data_dir)) 
+        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_step, gwidth_start, gwdith_latend, gwidth_latstep, data_dir)) 
 
         
 ##----------------------------------------------------------------------
