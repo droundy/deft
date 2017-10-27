@@ -36,15 +36,15 @@ parser.add_argument('--fvend', metavar='  fvloop_end', type=float, default=1,
                     help='ending gwidth (default: 1)')
 parser.add_argument('--fvstep', metavar='fvloop_step', type=float, default=0.2,
                     help='step fv by (default: 0.2)') 
-parser.add_argument('--gstart', metavar='  gwloop_start', type=float, default=0.01,   #ASK if we really want to do this!
+parser.add_argument('--gwstart', metavar='  gwloop_start', type=float, default=0.01,   #ASK if we really want to do this!
                     help='starting gwidth (default: 0.01)')
-parser.add_argument('--gend', metavar='  gwloop_end', type=float,
+parser.add_argument('--gwend', metavar='  gwloop_end', type=float,
                     help='ending gwidth')
-parser.add_argument('--gstep', metavar=' gwloop_step', type=float, default=0.1,
+parser.add_argument('--gwstep', metavar=' gwloop_step', type=float, default=0.1,
                     help='step gwidth by (default: 0.1)') 
-parser.add_argument('--glend', metavar=' gwloop_latend', type=float, default=2,
+parser.add_argument('--gwlend', metavar=' gwloop_latend', type=float, default=2,
                     help='ending gwidth will be computed lattice_constant divided by this number (default: 2)')
-parser.add_argument('--glstep', metavar='gwloop_latstep', type=float, default=10,
+parser.add_argument('--gwlstep', metavar='gwloop_latstep', type=float, default=10,
                     help='gwidth will step by computed lattice_constant divided by this number (default: 10)')                   
                                    
 
@@ -65,11 +65,11 @@ data_dir=args.d
 fv_start=args.fvstart
 fv_end=args.fvend
 fv_step=args.fvstep
-gwidth_start=args.gstart
-gwidth_end=args.gend
-gwidth_step=args.gstep
-gwidth_latend=args.glend
-gwidth_latstep=args.glstep
+gwidth_start=args.gwstart
+gwidth_end=args.gwend
+gwidth_step=args.gwstep
+gwidth_latend=args.gwlend
+gwidth_latstep=args.gwstep
     
 if args.nstart:
     densities = np.arange(nstart, nend+nstep, nstep, float)
@@ -97,7 +97,7 @@ for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
         print
         print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart 0.0 --fvend 1.0 --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_step, gwidth_start, gwidth_latend, gwidth_latstep, data_dir)) 
+        os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_latend, gwidth_latstep, data_dir)) 
 
         
 ##----------------------------------------------------------------------
