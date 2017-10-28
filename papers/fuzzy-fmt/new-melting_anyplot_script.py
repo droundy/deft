@@ -14,13 +14,13 @@ groupf = parser.add_mutually_exclusive_group(required=True)
 groupx = parser.add_mutually_exclusive_group(required=True)
 groupy = parser.add_mutually_exclusive_group(required=True)
 
-parser.add_argument('directory', metavar='directory', type=str,
+parser.add_argument('directory', metavar='exisiting_data_directory', type=str,
                     help='exisiting directory for data files') 
 groupf.add_argument('--ftemp', action="store_true",
                     help='use plot.dat file with this fixed temperature')
 groupf.add_argument('--fdensity', action="store_true",
                     help='use plot.dat file with this fixed temperature') 
-parser.add_argument('value', metavar='Value of fixed quantity', type=str,
+parser.add_argument('value', metavar='value_of_fixed_quantity', type=str,
                     help='use plot.dat file with this fixed value')  
                     
 groupx.add_argument('--xtemp', action="store_true",
