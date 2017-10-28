@@ -22,7 +22,6 @@ os.system("cat "+data_directory+"/kT"+temp+"*best.dat >>"+data_file)
 #ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!! STILL HAVE PROBLEM!!
 
 thisdata = np.loadtxt(data_file)
-print thisdata
 
 densities=thisdata[:,1]
 crystal_energies_per_atom = thisdata[:,2]
@@ -30,12 +29,6 @@ homogeneous_energies_per_atom = thisdata[:,3]
 energy_differences_per_atom = thisdata[:,4]
 crystal_energies_per_volume = thisdata[:,5]
 #if want vol = 4*(1-fv)/reduced_density
-
-print 'densities', densities
-print 'crystal_energies_per_atom', crystal_energies_per_atom
-print 'homogeneous_energies_per_atom', homogeneous_energies_per_atom
-print 'energy_differences_per_atom', energy_differences_per_atom
-print 'crystal_energies_per_volume', crystal_energies_per_volume
 
 plot1=data_directory+"/plot1_FEvsDen_kT"+temp+".png"
 plot2=data_directory+"/plot2_Pressure_kT"+temp+".png"
