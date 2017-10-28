@@ -9,12 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-if len(sys.argv) < 6:
-    print
-    print "Usage: directory  --Fixed_quantity  Fixed_value  --x-axis_data   --y-axis_data"  
-    print
-    exit(1)
-
 parser = argparse.ArgumentParser(description='Creates a plot.', epilog="stuff...")
 groupf = parser.add_mutually_exclusive_group(required=True)
 groupx = parser.add_mutually_exclusive_group(required=True)
