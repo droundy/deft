@@ -7,6 +7,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import matplotlib.patches as mpatches
 
 if len(sys.argv) < 3:
     print "Usage: directory temperature"
@@ -31,25 +32,17 @@ print 'homogeneous_energies_per_atom', homogeneous_energies_per_atom
 print 'energy_differences_per_atom', energy_differences_per_atom
 print 'crystal_energies_per_volume', crystal_energies_per_volume
 
-plot1=data_directory+"/plot1_cFEvsDen_kT"+temp+".png"
-plot2=data_directory+"/plot2_hFEvsDen_kT"+temp+".png"
-plot3=data_directory+"/plot3_Pressure_kT"+temp+".png"
+plot1=data_directory+"/plot1_FEvsDen_kT"+temp+".png"
+plot2=data_directory+"/plot2_Pressure_kT"+temp+".png"
 
-# Plot Crystal Free Energy per sphere vs Reduced Density
-plt.plot(densities, crystal_energies_per_atom)
-plt.title('Crystal Free Energy per sphere vs Reduced Density at Fixed kT='+temp)
+# Plot Free Energy/atom vs Reduced Density
+plt.plot(densities, crystal_energies_per_atom, 'b', label="Crystal Free Energy/atom")
+plt.plot(densities, homogeneous_energies_per_atom, 'g', label="Homogeneous Free Energy/atom")
+plt.title('Free Energy/atom vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
-plt.ylabel('Crystal Free Energy')
+plt.ylabel('Free Energy')
+plt.legend()
 plt.savefig(plot1)
-
-plt.figure()
-
-# Plot Crystal Free Energy per sphere vs Reduced Density
-plt.plot(densities, homogeneous_energies_per_atom)
-plt.title('Homogeneous Free Energy per sphere vs Reduced Density at Fixed kT='+temp)
-plt.xlabel('Reduced Density')
-plt.ylabel('Homogeneous Free Energy')
-plt.savefig(plot2)
 
 plt.figure()
 
@@ -67,11 +60,11 @@ pressure = -(mid_n*mid_n)*(df/dn) #for fixed N and T
 #print "pressure =", pressure
 
 # Plot Pressure vs Reduced Density
-plt.plot(mid_n, pressure)
+plt.plot(mid_n, pressure, color='red')
 plt.title('Reduced Pressure vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
 plt.ylabel('Reduced Pressure')
-plt.savefig(plot3)
+plt.savefig(plot2)
 
 plt.show()
 
