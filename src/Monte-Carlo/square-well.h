@@ -1,7 +1,7 @@
 #include "../vector3d.h"
 #pragma once
 
-#define NDEBUG // disable assertions for extra speed! (and to test if it matters)
+//#define NDEBUG // disable assertions for extra speed! (and to test if it matters)
 
 struct ball {
   vector3d pos;
@@ -68,6 +68,7 @@ struct sw_simulation {
   double neighbor_R; // radius of our neighbor sphere
   double translation_scale; // scale for how far to move balls
   int energy_levels; // total number of energy levels
+  int energies_found; // number of energy levels that have been visited
 
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
@@ -275,6 +276,7 @@ struct sw_simulation {
   }
 
   sw_simulation(){
+    energies_found = 0; // we have not yet found any!
     // seconds per iteration (will be adjusted from actual timing)
     estimated_time_per_iteration = 0.1;
     transitions_filename = 0; // default to NULL pointer here for safety.

@@ -346,7 +346,14 @@ void sw_simulation::move_a_ball() {
           // probability, assuming that each count in the collection
           // matrix is statistically independent.  (Obviously that is
           // not true.)
-          sa_weight = sqrt(1/ncounts_up + 1/ncounts_down);
+          // A change! We now assume that only a fraction of the counts
+          // are statistically independent, with that fraction given by
+          // energies_found**2/sa_t0.  The idea is that sa_t0 measures
+          // how many moves were needed to sample energies_found
+          // energies.  But random sampling (moving the energy with
+          // each independent move) should sample all energies in
+          // energies_found**2 random samples.
+          sa_weight = max(1,sqrt(sa_t0*(1/ncounts_up + 1/ncounts_down))/energies_found);
         }
         Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
       }
@@ -403,6 +410,7 @@ void sw_simulation::end_move_updates(){
       if (wl_factor < 0.95)
         printf("Resetting sa_t0 from %g to %g (discovered energy %d, wl_factor is %g)\n",
                sa_t0, double(moves.total), energy, wl_factor);
+      energies_found++; // we found a new energy!
       sa_t0 = moves.total;
     }
     wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
@@ -1359,7 +1367,10 @@ void sw_simulation::update_weights_using_transitions(int version, bool energy_ra
       printf("I am resetting the histograms, because max_entropy_state changed.\n");
       fflush(stdout);
       fprintf(stderr, "I am resetting the histograms, because max_entropy_state changed.\n");
-      reset_histograms();
+      for(int i = 0; i < energy_levels; i++){
+        pessimistic_samples[i] = 0;
+        pessimistic_observation[i] = false;
+      }
     }
   }
   // Above the max_entropy_state we level out the weights.
