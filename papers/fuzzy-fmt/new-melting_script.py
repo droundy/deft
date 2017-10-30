@@ -95,7 +95,6 @@ print "  Reduced Densities:", densities
 print "  Data directory: deft/papers/fuzzy-fmt/"+data_dir
 print 
 
-
 if args.gwend or args.gwstep:
     for i in range(0,len(temperatures)):
         for j in range(0,len(densities)):
@@ -108,8 +107,7 @@ else:  #use gwidth values reference lattice_constant by default
             print
             print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
             os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_latend, gwidth_latstep, data_dir)) 
-            
-        
+
 ##----------------------------------------------------------------------
 ##NOTE: lattice_constant will be divided by gwstep     
    
