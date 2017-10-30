@@ -95,18 +95,23 @@ print "  Reduced Densities:", densities
 print "  Data directory: deft/papers/fuzzy-fmt/"+data_dir
 print 
 
-if args.gwend or args.gwstep:
-    for i in range(0,len(temperatures)):
-        for j in range(0,len(densities)):
-            print
-            print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-            os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwend %g --gwstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_end, gwidth_step, data_dir)) 
-else:  #use gwidth values reference lattice_constant by default
-    for i in range(0,len(temperatures)):
-        for j in range(0,len(densities)):
-            print
-            print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop 
-            os.system('figs/new-melting.mkdat --kT %g --rd %g --fvstart %g --fvend %g --fvstep %g --gwstart %g --gwlend %g --gwlstep %g --dir %s' %(temperatures[i],densities[j], fv_start, fv_end, fv_step, gwidth_start, gwidth_latend, gwidth_latstep, data_dir)) 
+for i in range(0,len(temperatures)):
+    for j in range(0,len(densities)):
+        print
+        print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop
+        cmd = ''
+        if os.system('which rq') == 0:
+            cmd = 'rq run -J new-melting-kT=%g-n=%g ' % (temperatures[i],densities[j])
+        cmd += 'figs/new-melting.mkdat --kT %g --rd %g' % (temperatures[i],densities[j])
+        cmd += ' --dir %s' % (data_dir)
+        cmd += ' --fvstart %g --fvend %g --fvstep %g' % (fv_start, fv_end, fv_step)
+        if args.gwend or args.gwstep:
+            cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwidth_start, gwidth_end, gwidth_step)
+        else: #use gwidth values reference lattice_constant by default
+            cmd += ' --gwstart %g --gwlend %g --gwlstep %g' % (gwidth_start, gwidth_latend, gwidth_latstep)
+
+        print(cmd)
+        os.system(cmd)
 
 ##----------------------------------------------------------------------
 ##NOTE: lattice_constant will be divided by gwstep     
