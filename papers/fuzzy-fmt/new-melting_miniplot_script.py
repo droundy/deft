@@ -1,21 +1,21 @@
 #!/usr/bin/python2
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
+#with comand ./new-melting_miniplot_script.py [directory where data stored] [temp]
+#to create plots from plot.dat files already in the data directory
 
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import matplotlib.patches as mpatches
 
-if len(sys.argv) < 2:
-    print "Usage: directory"
+if len(sys.argv) < 3:
+    print "Usage: directory temperature"
     exit(1)
 
 data_directory=sys.argv[1]
-data_file=data_directory+"/plot.dat"
-#print "Removing plot file if it exists..."
-#os.system("rm "+data_file)
-#print "Creating new plot file [fuzzy-fmt]/"+data_file 
-#os.system("cat "+data_directory+"/*best.dat >>"+data_directory+"/plot.dat")  
+temp=sys.argv[2]
+data_file=data_directory+"/plot_kT"+temp+".dat"
 
 thisdata = np.loadtxt(data_file)
 print thisdata
@@ -32,25 +32,17 @@ print 'homogeneous_energies_per_atom', homogeneous_energies_per_atom
 print 'energy_differences_per_atom', energy_differences_per_atom
 print 'crystal_energies_per_volume', crystal_energies_per_volume
 
-plot1=data_directory+"/plot1_cFEvsDen.png"
-plot2=data_directory+"/plot2_hFEvsDen.png"
-plot3=data_directory+"/plot3_Pressure.png"
+plot1=data_directory+"/plot1_FEvsDen_kT"+temp+".png"
+plot2=data_directory+"/plot2_Pressure_kT"+temp+".png"
 
-# Plot Crystal Free Energy per sphere vs Reduced Density
-plt.plot(densities, crystal_energies_per_atom)
-plt.title('Crystal Free Energy per sphere vs Reduced Density')
+# Plot Free Energy/atom vs Reduced Density
+plt.plot(densities, crystal_energies_per_atom, 'b', label="Crystal Free Energy/atom")
+plt.plot(densities, homogeneous_energies_per_atom, 'g', label="Homogeneous Free Energy/atom")
+plt.title('Free Energy/atom vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
-plt.ylabel('Crystal Free Energy')
+plt.ylabel('Free Energy')
+plt.legend()
 plt.savefig(plot1)
-
-plt.figure()
-
-# Plot Crystal Free Energy per sphere vs Reduced Density
-plt.plot(densities, homogeneous_energies_per_atom)
-plt.title('Homogeneous Free Energy per sphere vs Reduced Density')
-plt.xlabel('Reduced Density')
-plt.ylabel('Homogeneous Free Energy')
-plt.savefig(plot2)
 
 plt.figure()
 
@@ -68,11 +60,11 @@ pressure = -(mid_n*mid_n)*(df/dn) #for fixed N and T
 #print "pressure =", pressure
 
 # Plot Pressure vs Reduced Density
-plt.plot(mid_n, pressure)
-plt.title('Reduced Pressure vs Reduced Density')
+plt.plot(mid_n, pressure, color='red')
+plt.title('Reduced Pressure vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
 plt.ylabel('Reduced Pressure')
-plt.savefig(plot3)
+plt.savefig(plot2)
 
 plt.show()
 
