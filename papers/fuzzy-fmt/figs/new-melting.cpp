@@ -263,7 +263,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 int main(int argc, char **argv) {
   double reduced_density, gwidth=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
-  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_lend=2, gw_lstep=10;
+  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_lend=0.5, gw_lstep=10;
   double dx=0.01;
   int verbose = false;
   
@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
     {"fvstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_step, 0, "fv loop step", "DOUBLE"},
     
     {"gwstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_start, 0, "start gwidth loop at", "DOUBLE"},
-    {"gwlend", '\0', POPT_ARG_DOUBLE, &gw_lend, 0, "end gwidth loop at lattice_constant/gw_lend", "DOUBLE"},  //Think about what to do with this
+    {"gwlend", '\0', POPT_ARG_DOUBLE, &gw_lend, 0, "end gwidth loop at lattice_constant*gw_lend", "DOUBLE"},  //Think about what to do with this
     {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "gwidth loop step by lattice_constant/gw_lstep", "DOUBLE"},
     //{"gwend", '\0', POPT_ARG_DOUBLE, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  
     //{"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
@@ -346,7 +346,7 @@ int main(int argc, char **argv) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
   }
   if (gwidth == -1) {
-    printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant/2, step=lattice constant/%g\n", gw_start, gw_lstep);
+    printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant/%g\n", gw_start, gw_lend, gw_lstep);
   }
   
   // Create directory for data files
@@ -374,7 +374,7 @@ int main(int argc, char **argv) {
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
       //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //full run
-      for (double gwidth=0.01; gwidth <= lattice_constant/gw_lend; gwidth+=lattice_constant/gw_lstep) {   //full run
+      for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {   //full run
       //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
         num_computed += 1;
@@ -415,7 +415,7 @@ int main(int argc, char **argv) {
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
-    for (double gwidth=0.01; gwidth <= lattice_constant/gw_lend; gwidth+=lattice_constant/gw_lstep) {   //full run
+    for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {   //full run
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
       if (e_data.diff < best_energy_diff) {
           best_energy_diff = e_data.diff;
