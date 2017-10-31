@@ -45,7 +45,7 @@ group3.add_argument('--gwend', metavar='  gwloop_end', type=float,
 group4.add_argument('--gwstep', metavar=' gwloop_step', type=float,
                     help='step gwidth') 
 group3.add_argument('--gwlend', metavar=' gwloop_latend', type=float, default=2,
-                    help='ending gwidth will be computed lattice_constant divided by this number (default: 2)')
+                    help='ending gwidth will be computed lattice_constant multiplied by this number (default: 0.5)')
 group4.add_argument('--gwlstep', metavar='gwloop_latstep', type=float, default=10,
                     help='gwidth will step by computed lattice_constant divided by this number (default: 10)')                   
                                    
