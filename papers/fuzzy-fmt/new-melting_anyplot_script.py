@@ -21,8 +21,13 @@ groupf.add_argument('--ftemp', action="store_true",
 groupf.add_argument('--fdensity', action="store_true",
                     help='use plot.dat file with this fixed temperature') 
 parser.add_argument('value', metavar='value_of_fixed_quantity', type=str,
-                    help='use plot.dat file with this fixed value')  
+                    help='use plot.dat file with this fixed value')
+parser.add_argument('--xlab', metavar='label for x-axis', type=str,
+                    help='label for x-axis. use with --xcol.') 
+parser.add_argument('--ylab', metavar='label for y-axis', type=str,
+                    help='label for y-axis. use with --ycol.') 
                     
+                     
 groupx.add_argument('--xtemp', action="store_true",
                     help='temperature on x-axis') 
 groupx.add_argument('--xdensity', action="store_true",
@@ -38,7 +43,9 @@ groupx.add_argument('--xcfev', action="store_true",
 groupx.add_argument('--xfv', action="store_true",
                     help='fraction of vacancies (fv) on x-axis') 
 groupx.add_argument('--xgw', action="store_true",
-                    help='Gaussian width on x-axis') 
+                    help='Gaussian width on x-axis')
+groupx.add_argument('--xcol', metavar='column for x-axis data', type=int,
+                    help='column for x-axis data') 
 
 groupy.add_argument('--ytemp', action="store_true",
                     help='temperature on y-axis') 
@@ -55,7 +62,9 @@ groupy.add_argument('--ycfev', action="store_true",
 groupy.add_argument('--yfv', action="store_true",
                     help='fraction of vacancies (fv) on y-axis') 
 groupy.add_argument('--ygw', action="store_true",
-                    help='Gaussian width on y-axis') 
+                    help='Gaussian width on y-axis')
+groupy.add_argument('--ycol', metavar='column for y-axis data', type=int,
+                    help='column for y-axis data') 
 
 args=parser.parse_args()
 #print
@@ -82,8 +91,8 @@ if args.xtemp:
     x_plot="kT"
 elif args.xdensity:  
     x_axis=thisdata[:,1]     
-    x_label="Reduced Density"
-    x_plot="Den"
+    x_label="Reduced Density (n)"
+    x_plot="n"
 elif args.xcfe:  
     x_axis=thisdata[:,2]     
     x_label="Crystal Free Energy/atom"
@@ -108,6 +117,10 @@ elif args.xgw:
     x_axis=thisdata[:,7]     
     x_label="Width of Gaussian (gwidth)"
     x_plot="gw"
+elif args.xcol:   
+    x_axis=thisdata[:,args.xcol]     
+    x_label=args.xlab
+    x_plot=args.xlab
     
 if args.ytemp:  
     y_axis=thisdata[:,0]     
@@ -115,8 +128,8 @@ if args.ytemp:
     y_plot="kT"
 elif args.ydensity:  
     y_axis=thisdata[:,1]     
-    y_label="Reduced Density"
-    y_plot="Den"
+    y_label="Reduced Density (n)"
+    y_plot="n"
 elif args.ycfe:  
     y_axis=thisdata[:,2]     
     y_label="Crystal Free Energy/atom"
@@ -141,6 +154,10 @@ elif args.ygw:
     y_axis=thisdata[:,7]
     y_label="Width of Gaussian (gwidth)"
     y_plot="gw"
+elif args.ycol:   
+    y_axis=thisdata[:,args.ycol]     
+    y_label=args.ylab
+    y_plot=args.ylab
 
 plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+".png"
 plot_title=y_label+" vs "+x_label+" at Fixed "+fixed_quantity+"="+fixed_value
