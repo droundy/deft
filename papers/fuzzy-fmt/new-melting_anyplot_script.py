@@ -75,7 +75,7 @@ data_directory=args.directory
 if args.ftemp:
     fixed_quantity="kT"
 elif args.fdensity:
-    fixed_quantity="rd"
+    fixed_quantity="n"
     
 fixed_value=args.value
 
