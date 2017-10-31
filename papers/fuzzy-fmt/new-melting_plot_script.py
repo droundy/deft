@@ -14,12 +14,15 @@ if len(sys.argv) < 3:
 data_directory=sys.argv[1]
 temp=sys.argv[2]
 data_file=data_directory+"/plot_kT"+temp+".dat"
-print "Removing plot file if it exists..."
+print "Removing plot file if it exists..."  #ASK is there a way to tell whether it exists so can avoid error message?
 os.system("rm "+data_file)
+
+#wait = raw_input("If not, press the ENTER key to continue program...")
+print
+
 print "Creating new plot file [fuzzy-fmt]/"+data_file 
 
 os.system("cat "+data_directory+"/kT"+temp+"*best.dat >>"+data_file)   
-#ASK! Need to make sure "rd1.0" and not "rd1" for ordering files in directory!! STILL HAVE PROBLEM!!
 
 thisdata = np.loadtxt(data_file)
 

@@ -74,10 +74,10 @@ gwidth_latend=args.gwlend
 gwidth_latstep=args.gwlstep
     
 if args.nstart:
-    densities = np.arange(nstart, nend+nstep, nstep, float)
+    densities = np.arange(nstart, nend, nstep, float)
     
 if args.tstart:
-    temperatures = np.arange(tstart, tend+tstep, tstep, float)
+    temperatures = np.arange(tstart, tend, tstep, float)
     
 print     
 print "Running new-melting_script.py with:"
@@ -85,6 +85,7 @@ print "  kT Temperatures:", temperatures
 print "  Reduced Densities:", densities
 print "  Data directory: deft/papers/fuzzy-fmt/"+data_dir
 print 
+
 
 for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
