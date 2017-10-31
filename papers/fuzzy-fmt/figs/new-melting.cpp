@@ -102,8 +102,8 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Using normally normalized Gaussians would correspond to 4 spheres
-    // so we need to multiply by (1-fv) to get the reduced number of spheres.
+    const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
+                                                           // multiply 4 by (1-fv) to get the reduced number of spheres.
     Vector setn = f.n();
 
     for (int i=0; i<Ntot; i++) {
@@ -221,7 +221,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   }
 
   //printf("crystal free energy is %g\n", f.energy());
-  double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
+  double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per atom
   data data_out;
   data_out.diff_free_energy_per_atom=crystal_free_energy - homogeneous_free_energy;
   data_out.cfree_energy_per_atom=crystal_free_energy;
@@ -267,9 +267,9 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 }
 
 int main(int argc, char **argv) {
-  double reduced_density, gwidth=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  double reduced_density, gwidth, gwidth_l=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
-  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_lend=0.5, gw_lstep=10;
+  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=0.1, gw_lend=0.5, gw_lstep=10, gwend, gwstep;
   double dx=0.01;
   int verbose = false;
   
@@ -298,6 +298,7 @@ int main(int argc, char **argv) {
     {"n", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
     {"fv", '\0', POPT_ARG_DOUBLE, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
     {"gw", '\0', POPT_ARG_DOUBLE, &gwidth, 0, "width of Gaussian", "DOUBLE or -1 for loop"},
+    {"gwl", '\0', POPT_ARG_DOUBLE, &gwidth_l, 0, "width of Gaussian", "DOUBLE or -1 for loop"},    
 
     /*** LOOPING OPTIONS ***/
     {"fvstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_start, 0, "start fv loop at", "DOUBLE"},
@@ -305,10 +306,10 @@ int main(int argc, char **argv) {
     {"fvstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_step, 0, "fv loop step", "DOUBLE"},
     
     {"gwstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_start, 0, "start gwidth loop at", "DOUBLE"},
-    {"gwlend", '\0', POPT_ARG_DOUBLE, &gw_lend, 0, "end gwidth loop at lattice_constant*gw_lend", "DOUBLE"},  //Think about what to do with this
-    {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "gwidth loop step by lattice_constant/gw_lstep", "DOUBLE"},
-    //{"gwend", '\0', POPT_ARG_DOUBLE, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  
-    //{"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
+    {"gwlend", '\0', POPT_ARG_DOUBLE, &gw_lend, 0, "end gwidth loop at lattice_constant*gw_lend", "DOUBLE"},  
+    {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "step by lattice_constant/gw_lstep", "DOUBLE"},
+    {"gwend", '\0', POPT_ARG_DOUBLE, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  
+    {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
     
  //   /*** GRID OPTIONS ***/
  //   {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  //ASK! if include this must pass it to find_energy() !
@@ -351,9 +352,16 @@ int main(int argc, char **argv) {
    if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
   }
+  
   if (gwidth == -1) {
+    gwend=gw_end;
+    gwstep=gw_step;
+    printf("gw loop variables: gwidth start=%g, gwidth end=%g, step=%g\n", gw_start, gw_end, gw_step);
+  } else if  (gwidth_l == -1) {
+    gwend=gw_lend;
+    gwstep=gw_lstep;
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant/%g\n", gw_start, gw_lend, gw_lstep);
-  }
+  } 
   
   // Create directory for data files
   if (strcmp(data_dir,"none") == 0) {
@@ -375,13 +383,13 @@ int main(int argc, char **argv) {
     double hfree_energy_pervol, cfree_energy_pervol;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
-    //for (double fv=0; fv<1; fv+=0.01) {  //full run
-    for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {   //quick run
+    for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {   
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
-      //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {   //full run
-      for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {   //full run
-      //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
+      //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {  //delete
+      //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {  //delete
+      //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {  //delete
+        for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
@@ -408,12 +416,12 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      //fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
-      //fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-            //temp, reduced_density, best_cfree_energy, best_cfree_energy-best_energy_diff, best_energy_diff, cfree_energy_pervol, best_fv, best_gwidth);
-      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\twidth of Gaussian\thomogeneous_energy_per_atom\tbest_crystal_free energy per atom\tbest_energy_difference_per_atom\tbest_lattice_constant\thomogeneous_energy_per_volume\tbest_crystal_energy_per_volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-              temp, reduced_density, best_fv, best_gwidth, best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
+      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\twidth of Gaussian\thomogeneous_energy_per_atom",
+                           "\tbest_crystal_free energy per atom\tbest_energy_difference_per_atom",
+                           "\tbest_lattice_constant\thomogeneous_energy_per_volume\tbest_crystal_energy_per_volume\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth, 
+                            best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, 
+                            best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -425,8 +433,9 @@ int main(int argc, char **argv) {
     double hfree_energy_pervol, cfree_energy_pervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
-    //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
-    for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {   //full run
+    //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {
+    //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {
+      for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
           best_energy_diff = e_data.diff_free_energy_per_atom;
