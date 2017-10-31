@@ -1115,11 +1115,11 @@ void sw_simulation::initialize_samc() {
   assert(sa_prefactor);
   assert(!use_satmmc);
 
-  int check_how_often =  N; // check if finished only so often
+  int check_how_often =  N*N; // check if finished only so often
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += N; // try a little harder next time...
+    check_how_often += N*N; // try a little harder next time...
 
     verbose = printing_allowed();
     if (verbose) write_transitions_file();
@@ -1136,11 +1136,11 @@ void sw_simulation::initialize_satmmc() {
   sa_t0 = 1;
   assert(sa_prefactor);
 
-  int check_how_often =  N; // check if finished only so often
+  int check_how_often =  N*N; // check if finished only so often
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += N; // try a little harder next time...
+    check_how_often += N*N; // try a little harder next time...
 
     verbose = printing_allowed();
     if (verbose) write_transitions_file();
@@ -1541,11 +1541,11 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
 
 // initialization with tmi
 void sw_simulation::initialize_tmi(int version) {
-  int check_how_often = N; // avoid wasting time if we are done
+  int check_how_often = N*N; // avoid wasting time if we are done
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += N; // try a little harder next time...
+    check_how_often += N*N; // try a little harder next time...
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
@@ -1559,11 +1559,11 @@ void sw_simulation::initialize_tmi(int version) {
 
 // initialization with toe
 void sw_simulation::initialize_toe(int version) {
-  int check_how_often = N; // avoid wasting time if we are done
+  int check_how_often = N*N; // avoid wasting time if we are done
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += N; // try a little harder next time...
+    check_how_often += N*N; // try a little harder next time...
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
@@ -1578,11 +1578,11 @@ void sw_simulation::initialize_toe(int version) {
 // initialization with tmmc
 void sw_simulation::initialize_transitions() {
   assert(use_tmmc);
-  int check_how_often = N; // avoid wasting time if we are done
+  int check_how_often = N*N; // avoid wasting time if we are done
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += N; // try a little harder next time...
+    check_how_often += N*N; // try a little harder next time...
     verbose = printing_allowed();
     if (verbose) {
       set_min_important_energy();
