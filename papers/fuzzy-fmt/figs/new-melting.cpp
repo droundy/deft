@@ -250,7 +250,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
   if (newmeltoutfile) {
     fprintf(newmeltoutfile, "# git version: %s\n", version_identifier());  
-    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\tNsph\tlat_con\tFhom\tFcry\tdiff\n");
+    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\tFhom\tFcry\tdiff\tlattice_constant\tNsph\n");
     fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
             temp, reduced_density, fv, gwidth, homogeneous_free_energy,
             crystal_free_energy, crystal_free_energy-homogeneous_free_energy,
@@ -269,7 +269,8 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 int main(int argc, char **argv) {
   double reduced_density, gwidth, gwidth_l=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
-  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=0.1, gw_lend=0.5, gw_lstep=10, gwend, gwstep;
+  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=0.1, gw_lend=0.5, gw_lstep=10;
+  double gwloop, gwlat, gwend, gwstep;
   double dx=0.01;
   int verbose = false;
   
@@ -354,12 +355,12 @@ int main(int argc, char **argv) {
   }
   
   if (gwidth == -1) {
-    gwend=gw_end;
-    gwstep=gw_step;
+    gwloop=-1;
+    gwlat=0;
     printf("gw loop variables: gwidth start=%g, gwidth end=%g, step=%g\n", gw_start, gw_end, gw_step);
   } else if  (gwidth_l == -1) {
-    gwend=gw_lend;
-    gwstep=gw_lstep;
+    gwloop=-1;
+    gwlat=1;
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant/%g\n", gw_start, gw_lend, gw_lstep);
   } 
   
@@ -389,7 +390,15 @@ int main(int argc, char **argv) {
       //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {  //delete
       //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {  //delete
       //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {  //delete
-        for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
+      if (gwlat=1) {
+        gwend=lattice_constant*gw_lend;
+        gwstep=lattice_constant/gw_lstep; 
+      } else if (gwlat=0) {
+        gwend=gw_end;
+        gwstep=gw_step;
+      }
+      printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
+      for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
@@ -416,10 +425,8 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\twidth of Gaussian\thomogeneous_energy_per_atom",
-                           "\tbest_crystal_free energy per atom\tbest_energy_difference_per_atom",
-                           "\tbest_lattice_constant\thomogeneous_energy_per_volume\tbest_crystal_energy_per_volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth, 
+      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\tGaussian_width\thomogeneous_energy/atom\t\tbest_crystal_free_energy/atom\tbest_energy_difference/atom\tbest_lattice_constant\thomogeneous_energy/volume\tbest_crystal_energy/volume\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth, 
                             best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, 
                             best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
       fclose(newmeltbest);
@@ -427,7 +434,7 @@ int main(int argc, char **argv) {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
 
-  } else if (gwidth == -1) {
+  } else if (gwloop == -1) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
     double hfree_energy_pervol, cfree_energy_pervol;
@@ -435,6 +442,14 @@ int main(int argc, char **argv) {
     printf("lattice_constant is %g\n", lattice_constant);
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {
     //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {
+    if (gwlat=1) {
+        gwend=lattice_constant*gw_lend;
+        gwstep=lattice_constant/gw_lstep; 
+      } else if (gwlat=0) {
+        gwend=gw_end;
+        gwstep=gw_step;
+      }
+      printf ("gwend=%g, gwstep=%g   ", gwend, gwstep);
       for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
@@ -457,8 +472,8 @@ int main(int argc, char **argv) {
       //fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
       //fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
       //        temp, reduced_density, best_cfree_energy, best_cfree_energy-best_energy_diff, best_energy_diff, cfree_energy_pervol, best_fv, best_gwidth);
-      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\twidth of Gaussian\thomogeneous_energy_per_atom\tbest_crystal_free energy per atom\tbest_energy_difference_per_atom\tbest_lattice_constant\thomogeneous_energy_per_volume\tbest_crystal_energy_per_volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\tGaussian_width\thomogeneous_energy/atom\t\tbest_crystal_free_energy/atom\tbest_energy_difference/atom\tbest_lattice_constant\thomogeneous_energy/volume\tbest_crystal_energy/volume\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t%g\n",
               temp, reduced_density, best_fv, best_gwidth, best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
       fclose(newmeltbest);
     } else {
