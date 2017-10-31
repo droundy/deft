@@ -139,7 +139,7 @@ elif args.yhfe:
     y_label="Homogeneous Free Energy/atom"
     y_plot="hFE" 
 elif args.ydiff:  
-    y_axis=thisdata[:,4]   
+    y_axis=thisdata[:,4]  
     y_label="Diff=(CrystalFE-HomogeneousFE)/atom" 
     y_plot="DiffFE"
 elif args.ycfev:  

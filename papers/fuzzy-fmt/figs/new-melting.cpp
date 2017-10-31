@@ -240,7 +240,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 
   // Create all output data filename
   char *alldat_filename = new char[1024];
-  sprintf(alldat_filename, "%s/kT%5.3f_rd%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
+  sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
   //printf("Create data file: %s\n", alldat_filename);
 
@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
 
     /*** FLUID PARAMETERS ***/
     {"kT", '\0', POPT_ARG_DOUBLE, &temp, 0, "temperature", "DOUBLE"},
-    {"rd", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
+    {"n", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
     {"fv", '\0', POPT_ARG_DOUBLE, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
     {"gw", '\0', POPT_ARG_DOUBLE, &gwidth, 0, "width of Gaussian", "DOUBLE or -1 for loop"},
 
@@ -317,7 +317,7 @@ int main(int argc, char **argv) {
 
   optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[OPTION...]\nRequired arguments: temperature (kT), "
-                         "reduced density (rd)");
+                         "reduced density (n)");
                          
   int c = 0;
   // go through arguments, set them based on optionsTable
@@ -360,7 +360,7 @@ int main(int argc, char **argv) {
 
   //Create bestdataout filename (to be used if we are looping)
   char *bestdat_filename = new char[1024];
-  sprintf(bestdat_filename, "%s/kT%5.3f_rd%05.3f_best.dat",
+  sprintf(bestdat_filename, "%s/kT%5.3f_n%05.3f_best.dat",
           data_dir, temp, reduced_density);
   
   if (fv == -1) {
@@ -400,7 +400,7 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
               temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
@@ -432,7 +432,7 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\trd\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
               temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
       fclose(newmeltbest);
