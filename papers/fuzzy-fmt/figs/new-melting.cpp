@@ -45,8 +45,8 @@ double inhomogeneity(Vector n) {
 }
 
 struct data {
-  double diff;
-  double free_energy;
+  double diff_free_energy_per_atom;
+  double cfree_energy_per_atom;
   double hfree_energy_per_vol;
   double cfree_energy_per_vol;
 };
@@ -66,6 +66,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   hf.kT() = temp;
   hf.n() = reduced_density;
   hf.mu() = 0;
+  //Note: hf.energy() returns energy/volume
 
   if (verbose) {
     //printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n",
@@ -91,6 +92,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.n() = hf.n();
+  //Note: f.energy() returns energy (not energy/volume like hf.energy()!)
 
   double N_crystal = 0;
 
@@ -221,8 +223,8 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   //printf("crystal free energy is %g\n", f.energy());
   double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per sphere
   data data_out;
-  data_out.diff=crystal_free_energy - homogeneous_free_energy;
-  data_out.free_energy=crystal_free_energy;
+  data_out.diff_free_energy_per_atom=crystal_free_energy - homogeneous_free_energy;
+  data_out.cfree_energy_per_atom=crystal_free_energy;
   data_out.hfree_energy_per_vol=hf.energy();
   data_out.cfree_energy_per_vol=f.energy()/pow(lattice_constant,3);
   if (verbose) {
@@ -250,9 +252,13 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     fprintf(newmeltoutfile, "# git version: %s\n", version_identifier());  
     fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\tNsph\tlat_con\tFhom\tFcry\tdiff\n");
     fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-            temp, reduced_density, fv, gwidth, reduced_num_spheres, lattice_constant,
-            homogeneous_free_energy, crystal_free_energy,
-            crystal_free_energy-homogeneous_free_energy);
+            temp, reduced_density, fv, gwidth, homogeneous_free_energy,
+            crystal_free_energy, crystal_free_energy-homogeneous_free_energy,
+            lattice_constant, reduced_num_spheres);
+    //fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+    //        temp, reduced_density, fv, gwidth, reduced_num_spheres, lattice_constant,
+    //        homogeneous_free_energy, crystal_free_energy,
+    //        crystal_free_energy-homogeneous_free_energy);
     fclose(newmeltoutfile);
   } else {
     printf("Unable to open file %s!\n", alldat_filename);
@@ -365,8 +371,8 @@ int main(int argc, char **argv) {
   
   if (fv == -1) {
     double best_energy_diff = 1e100;
-    double best_fv, best_gwidth, best_free_energy;
-    double cFEpervol;
+    double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
+    double hfree_energy_pervol, cfree_energy_pervol;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
     //for (double fv=0; fv<1; fv+=0.01) {  //full run
@@ -382,14 +388,16 @@ int main(int argc, char **argv) {
           //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
           //       best_energy_diff);
         }
-        if (e_data.diff < best_energy_diff) {
+        if (e_data.diff_free_energy_per_atom < best_energy_diff) {
           //printf("better free energy with fv %g gwidth %g and E %g\n",
-          //       fv, gwidth, e_data.diff);
-          best_energy_diff = e_data.diff;
-          best_free_energy = e_data.free_energy;
+          //       fv, gwidth, e_data.diff_free_energy_per_atom);
+          best_energy_diff = e_data.diff_free_energy_per_atom;
+          best_cfree_energy = e_data.cfree_energy_per_atom;
           best_fv = fv;
           best_gwidth = gwidth;
-          cFEpervol=e_data.cfree_energy_per_vol;
+          best_lattice_constant=lattice_constant;
+          hfree_energy_pervol=e_data.hfree_energy_per_vol;
+          cfree_energy_pervol=e_data.cfree_energy_per_vol;
         }
       }
     }
@@ -400,9 +408,12 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      //fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      //fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+            //temp, reduced_density, best_cfree_energy, best_cfree_energy-best_energy_diff, best_energy_diff, cfree_energy_pervol, best_fv, best_gwidth);
+      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\twidth of Gaussian\thomogeneous_energy_per_atom\tbest_crystal_free energy per atom\tbest_energy_difference_per_atom\tbest_lattice_constant\thomogeneous_energy_per_volume\tbest_crystal_energy_per_volume\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-              temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
+              temp, reduced_density, best_fv, best_gwidth, best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -410,19 +421,21 @@ int main(int argc, char **argv) {
 
   } else if (gwidth == -1) {
     double best_energy_diff = 1e100;
-    double best_fv, best_gwidth, best_free_energy;
-    double cFEpervol;
+    double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
+    double hfree_energy_pervol, cfree_energy_pervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {   //quick run
     for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {   //full run
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
-      if (e_data.diff < best_energy_diff) {
-          best_energy_diff = e_data.diff;
-          best_free_energy = e_data.free_energy;
+      if (e_data.diff_free_energy_per_atom < best_energy_diff) {
+          best_energy_diff = e_data.diff_free_energy_per_atom;
+          best_cfree_energy = e_data.cfree_energy_per_atom;
           best_fv = fv;
           best_gwidth = gwidth;
-          cFEpervol=e_data.cfree_energy_per_vol;
+          best_lattice_constant=lattice_constant;
+          hfree_energy_pervol=e_data.hfree_energy_per_vol;
+          cfree_energy_pervol=e_data.cfree_energy_per_vol;
         }
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
@@ -432,9 +445,12 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      //fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
+      //fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+      //        temp, reduced_density, best_cfree_energy, best_cfree_energy-best_energy_diff, best_energy_diff, cfree_energy_pervol, best_fv, best_gwidth);
+      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\twidth of Gaussian\thomogeneous_energy_per_atom\tbest_crystal_free energy per atom\tbest_energy_difference_per_atom\tbest_lattice_constant\thomogeneous_energy_per_volume\tbest_crystal_energy_per_volume\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-              temp, reduced_density, best_free_energy, best_free_energy-best_energy_diff, best_energy_diff, cFEpervol, best_fv, best_gwidth);
+              temp, reduced_density, best_fv, best_gwidth, best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);

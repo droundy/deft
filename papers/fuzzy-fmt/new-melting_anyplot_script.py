@@ -93,30 +93,30 @@ elif args.xdensity:
     x_axis=thisdata[:,1]     
     x_label="Reduced Density (n)"
     x_plot="n"
-elif args.xcfe:  
-    x_axis=thisdata[:,2]     
-    x_label="Crystal Free Energy/atom"
-    x_plot="cFE"
-elif args.xhfe:  
-    x_axis=thisdata[:,3]     
-    x_label="Homogeneous Free Energy/atom" 
-    x_plot="hFE"
-elif args.xdiff:  
-    x_axis=thisdata[:,4]     
-    x_label="Diff=(CrystalFE-HomogeneousFE)/atom" 
-    x_plot="DiffFE"
-elif args.xcfev:  
-    x_axis=thisdata[:,5]     
-    x_label="Crystal Free Energy/volume"
-    x_plot="cFEv"
 elif args.xfv:  
-    x_axis=thisdata[:,6]     
+    x_axis=thisdata[:,2]     
     x_label="Fraction of vacancies (fv)"
     x_plot="fv"
 elif args.xgw:   
-    x_axis=thisdata[:,7]     
+    x_axis=thisdata[:,3]     
     x_label="Width of Gaussian (gwidth)"
     x_plot="gw"
+elif args.xhfe:  
+    x_axis=thisdata[:,4]     
+    x_label="Homogeneous Free Energy/atom" 
+    x_plot="hFE"
+elif args.xcfe:  
+    x_axis=thisdata[:,5]     
+    x_label="Crystal Free Energy/atom"
+    x_plot="cFE"
+elif args.xdiff:  
+    x_axis=thisdata[:,6]     
+    x_label="Diff=(CrystalFE-HomogeneousFE)/atom" 
+    x_plot="DiffFE"
+elif args.xcfev:  
+    x_axis=thisdata[:,10]     
+    x_label="Crystal Free Energy/volume"
+    x_plot="cFEv"
 elif args.xcol:   
     x_axis=thisdata[:,args.xcol]     
     x_label=args.xlab
@@ -130,30 +130,30 @@ elif args.ydensity:
     y_axis=thisdata[:,1]     
     y_label="Reduced Density (n)"
     y_plot="n"
-elif args.ycfe:  
-    y_axis=thisdata[:,2]     
-    y_label="Crystal Free Energy/atom"
-    y_plot="cFE"
-elif args.yhfe:  
-    y_axis=thisdata[:,3]    
-    y_label="Homogeneous Free Energy/atom"
-    y_plot="hFE" 
-elif args.ydiff:  
-    y_axis=thisdata[:,4]  
-    y_label="Diff=(CrystalFE-HomogeneousFE)/atom" 
-    y_plot="DiffFE"
-elif args.ycfev:  
-    y_axis=thisdata[:,5]    
-    y_label="Crystal Free Energy/volume"
-    y_plot="cFEv"
 elif args.yfv:  
-    y_axis=thisdata[:,6]     
+    y_axis=thisdata[:,2]     
     y_label="Fraction of vacancies (fv)"
     y_plot="fv"
 elif args.ygw:   
-    y_axis=thisdata[:,7]
+    y_axis=thisdata[:,3]
     y_label="Width of Gaussian (gwidth)"
     y_plot="gw"
+elif args.yhfe:  
+    y_axis=thisdata[:,4]    
+    y_label="Homogeneous Free Energy/atom"
+    y_plot="hFE" 
+elif args.ycfe:  
+    y_axis=thisdata[:,5]     
+    y_label="Crystal Free Energy/atom"
+    y_plot="cFE"
+elif args.ydiff:  
+    y_axis=thisdata[:,6]  
+    y_label="Diff=(CrystalFE-HomogeneousFE)/atom" 
+    y_plot="DiffFE"
+elif args.ycfev:  
+    y_axis=thisdata[:,10]    
+    y_label="Crystal Free Energy/volume"
+    y_plot="cFEv"
 elif args.ycol:   
     y_axis=thisdata[:,args.ycol]     
     y_label=args.ylab
