@@ -755,7 +755,7 @@ int main(int argc, const char *argv[]) {
   long how_often_to_check_finish = sw.N;
   //long iterations_per_update = 10*sw.N;
   //const long iterations_to_time = 100*sw.N;
-  long iterations_per_update = 1;
+  long iterations_per_update = sw.N;
   do {
     for (int i = 0; i < sw.N; i++) sw.move_a_ball();
     //~ if (sw.iteration % (100*sw.N*sw.N) == 0) {
@@ -793,7 +793,7 @@ int main(int argc, const char *argv[]) {
       }
     }
     if (sw.iteration % iterations_per_update == 0) {
-      iterations_per_update += 1;
+      iterations_per_update += sw.N;
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
