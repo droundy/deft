@@ -94,7 +94,7 @@ for i in range(0,len(temperatures)):
         cmd = ''
         if os.system('which rq') == 0:
             cmd = 'rq run -J new-melting-kT=%g-n=%g ' % (temperatures[i],densities[j])
-        cmd += 'figs/new-melting.mkdat --kT %g --rd %g' % (temperatures[i],densities[j])
+        cmd += 'figs/new-melting.mkdat --kT %g --n %g' % (temperatures[i],densities[j])
         cmd += ' --dir %s' % (data_dir)
         cmd += ' --fvstart %g --fvend %g --fvstep %g' % (fv_start, fv_end, fv_step)
         if args.gwend or args.gwstep:
