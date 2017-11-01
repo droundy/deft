@@ -250,7 +250,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
   if (newmeltoutfile) {
     fprintf(newmeltoutfile, "# git version: %s\n", version_identifier());  
-    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\tFhom\tFcry\tdiff\tlattice_constant\tNsph\n");
+    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\t\tFhom\tFcry\tdiff\t\tlattice_constant\tNsph\n");
     fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
             temp, reduced_density, fv, gwidth, homogeneous_free_energy,
             crystal_free_energy, crystal_free_energy-homogeneous_free_energy,
