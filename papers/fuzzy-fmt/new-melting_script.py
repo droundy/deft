@@ -98,7 +98,7 @@ for i in range(0,len(temperatures)):
         cmd += ' --dir %s' % (data_dir)
         cmd += ' --fvstart %g --fvend %g --fvstep %g' % (fv_start, fv_end, fv_step)
         if args.gwend or args.gwstep:
-            cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwidth_start, gwidth_end, gwidth_step)
+            cmd += ' --gwstart %g --gwend %g --gwstep %g --gw=-1' % (gwidth_start, gwidth_end, gwidth_step)
         else: #use gwidth values reference lattice_constant by default
             cmd += ' --gwstart %g --gwlend %g --gwlstep %g' % (gwidth_start, gwidth_latend, gwidth_latstep)
 

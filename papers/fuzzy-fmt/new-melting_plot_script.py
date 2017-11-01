@@ -25,12 +25,14 @@ print "Creating new plot file [fuzzy-fmt]/"+data_file
 os.system("cat "+data_directory+"/kT"+temp+"*best.dat >>"+data_file)   
 
 thisdata = np.loadtxt(data_file)
+print thisdata
 
 densities=thisdata[:,1]
-crystal_energies_per_atom = thisdata[:,2]
-homogeneous_energies_per_atom = thisdata[:,3]
-energy_differences_per_atom = thisdata[:,4]
-crystal_energies_per_volume = thisdata[:,5]
+print densities
+crystal_energies_per_atom = thisdata[:,5]
+homogeneous_energies_per_atom = thisdata[:,4]
+energy_differences_per_atom = thisdata[:,6]
+crystal_energies_per_volume = thisdata[:,9]
 #if want vol = 4*(1-fv)/reduced_density
 
 plot1=data_directory+"/plot1_FEvsDen_kT"+temp+".png"
