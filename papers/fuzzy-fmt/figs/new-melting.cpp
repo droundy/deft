@@ -49,6 +49,7 @@ struct data {
   double cfree_energy_per_atom;
   double hfree_energy_per_vol;
   double cfree_energy_per_vol;
+  char   dataoutfile;
 };
 
 double find_lattice_constant(double reduced_density, double fv) {
@@ -245,12 +246,14 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
   //printf("Create data file: %s\n", alldat_filename);
+  
+  data_out.dataoutfile=alldat_filename;
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
   if (newmeltoutfile) {
     fprintf(newmeltoutfile, "# git version: %s\n", version_identifier());  
-    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\t\tFhom\tFcry\tdiff\t\tlattice_constant\tNsph\n");
+    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFreeEnergy/atom\tcFreeEnergy/atom\tFEdiff/atom\tlattice_constant\tNsph\n");
     fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
             temp, reduced_density, fv, gwidth, homogeneous_free_energy,
             crystal_free_energy, crystal_free_energy-homogeneous_free_energy,
@@ -377,6 +380,7 @@ int main(int argc, char **argv) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
     double hfree_energy_pervol, cfree_energy_pervol;
+    char best_datafile = new char[1024];
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
     for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {   
@@ -414,6 +418,7 @@ int main(int argc, char **argv) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
+          best_datafile=e_data.dataoutfile;
         }
       }
     }
@@ -437,6 +442,7 @@ int main(int argc, char **argv) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
     double hfree_energy_pervol, cfree_energy_pervol;
+    char best_datafile = new char[1024];   
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {
@@ -460,6 +466,7 @@ int main(int argc, char **argv) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
+          best_datafile=e_data.dataoutfile;
         }
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
