@@ -49,9 +49,7 @@ struct data {
   double cfree_energy_per_atom;
   double hfree_energy_per_vol;
   double cfree_energy_per_vol;
-  //char   dataoutfile_name;
   char *dataoutfile_name;
-  //  char dataoutfile_name[1024];
 };
 
 double find_lattice_constant(double reduced_density, double fv) {
@@ -99,7 +97,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   //Note: f.energy() returns energy (not energy/volume like hf.energy()!)
 
   double N_crystal = 0;
-
+ 
   {
     // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
     const int Ntot = f.Nx()*f.Ny()*f.Nz();  //Ntot is the total number of position vectors at which the density will be calculated
@@ -231,6 +229,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   data_out.cfree_energy_per_atom=crystal_free_energy;
   data_out.hfree_energy_per_vol=hf.energy();
   data_out.cfree_energy_per_vol=f.energy()/pow(lattice_constant,3);
+  
   if (verbose) {
     printf("Crystal free energy is %g\n", crystal_free_energy);
 
@@ -245,18 +244,15 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   }
 
   // Create all output data filename
-  //char *alldat_filename = new char[1024];
-    char *alldat_filename;
-  sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
+  char *alldat_filename = new char[1024];
+  sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat", 
           data_dir, temp, reduced_density, fv, gwidth);
-  //printf("Create data file: %s\n", alldat_filename);
-  
+  printf("Create data file: %s\n", alldat_filename);
   data_out.dataoutfile_name=alldat_filename;
-  //sprintf(data_out.dataoutfile_name, "%s", alldat_filename); //??
-  printf("alldat_filename is %s\n", alldat_filename);
-  printf("dataoutfile_name is %s\n", data_out.dataoutfile_name);
   
-  sprintf(data_out.dataoutfile_name, "%s", alldat_filename); //??
+printf("GOOD TO HERE!\n"); 
+//printf("stopped\n");
+//return 0; //DELETE!!! 
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
@@ -267,10 +263,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
             temp, reduced_density, fv, gwidth, homogeneous_free_energy,
             crystal_free_energy, crystal_free_energy-homogeneous_free_energy,
             lattice_constant, reduced_num_spheres);
-    //fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-    //        temp, reduced_density, fv, gwidth, reduced_num_spheres, lattice_constant,
-    //        homogeneous_free_energy, crystal_free_energy,
-    //        crystal_free_energy-homogeneous_free_energy);
     fclose(newmeltoutfile);
   } else {
     printf("Unable to open file %s!\n", alldat_filename);
@@ -279,10 +271,10 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 }
 
 int main(int argc, char **argv) {
-  double reduced_density, gwidth=-2, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  double reduced_density, gw=-2, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
   double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
-  double gwend, gwstep;
+  double gwidth, gwend, gwstep;
   double dx=0.01;
   int verbose = false;
   
@@ -310,7 +302,7 @@ int main(int argc, char **argv) {
     {"kT", '\0', POPT_ARG_DOUBLE, &temp, 0, "temperature", "DOUBLE"},
     {"n", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
     {"fv", '\0', POPT_ARG_DOUBLE, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
-    {"gw", '\0', POPT_ARG_DOUBLE, &gwidth, 0, "width of Gaussian", "DOUBLE or -1 for loop without lattice values"}, 
+    {"gw", '\0', POPT_ARG_DOUBLE, &gw, 0, "width of Gaussian", "DOUBLE or -1 for loop without lattice values or -2 (default)"}, 
 
     /*** LOOPING OPTIONS ***/
     {"fvstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_start, 0, "start fv loop at", "DOUBLE"},
@@ -360,14 +352,14 @@ int main(int argc, char **argv) {
 
 
   printf("git version: %s\n", version_identifier());
-  printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gwidth);
+  printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
    if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
   }
   
-  if (gwidth == -1) {
+  if (gw == -1) {
     printf("gw loop variables: gwidth start=%g, gwidth end=%g, step=%g\n", gw_start, gw_end, gw_step);
-  } else if (gwidth == -2) {
+  } else if (gw == -2) {
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant*%g\n", gw_start, gw_lend, gw_lstep);
   } 
   
@@ -397,23 +389,23 @@ int main(int argc, char **argv) {
     for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {   
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
-      //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {  //delete
-      //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant*gw_lstep) {  //delete
-      //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {  //delete
-      if (gwidth == -1) {  
-        printf ("gwidth is %g", gwidth);       
+      if (gw == -1) {        
             gwend=gw_end;
             gwstep=gw_step;
-      } else if (gwidth == -2) {
-            printf ("gwidth is %g", gwidth);  
+      } else if (gw == -2) {
             gwend=lattice_constant*gw_lend;
             gwstep=lattice_constant*gw_lstep;
       }
+      printf ("gw is %g\n", gw);  
       printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
-      printf ("gwidth is %g", gwidth); 
+
+//printf("stopped\n");
+//return 0; //DELETE!!!
       
       for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
+//printf("stopped\n");
+//return 0; //DELETE!!!
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
@@ -430,7 +422,7 @@ int main(int argc, char **argv) {
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
           //best_datafile=e_data.dataoutfile_name;
-          sprintf(best_file, "%s_newbest.dat", e_data.dataoutfile_name);
+          ////sprintf(best_file, "%s_newbest.dat", e_data.dataoutfile_name);
         //printf("e_data.dataoutfile_name is %s", e_data.dataoutfile_name);
         }
       }
@@ -455,23 +447,21 @@ int main(int argc, char **argv) {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
 
-  } else if (gwidth < 0) {
+  } else if (gw < 0) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
     double hfree_energy_pervol, cfree_energy_pervol;
     char best_datafile = new char[1024];   
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
-    //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {
-    //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant*gw_lstep) {
-      if (gwidth == -1) {         
+      if (gw == -1) {         
             gwend=gw_end;
             gwstep=gw_step;
-      } else if (gwidth == -2) {
+      } else if (gw == -2) {
             gwend=lattice_constant*gw_lend;
             gwstep=lattice_constant*gw_lstep;
       }
-      printf("gwidth is %g", gwidth);
+      printf("gw is %g\n", gw);
       printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
       for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
@@ -495,9 +485,6 @@ int main(int argc, char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      //fprintf(newmeltbest, "#kT\tn\tbest_crystal_energy_per_atom\thomogeneous free energy per atom\tbest_energy_difference_per_atom\t\tbest_crystal_energy_per_volume\tvacancy_fraction\twidth of Gaussian\n");
-      //fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-      //        temp, reduced_density, best_cfree_energy, best_cfree_energy-best_energy_diff, best_energy_diff, cfree_energy_pervol, best_fv, best_gwidth);
       fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\tGaussian_width\thomogeneous_energy/atom\t\tbest_crystal_free_energy/atom\tbest_energy_difference/atom\tbest_lattice_constant\thomogeneous_energy/volume\tbest_crystal_energy/volume\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t%g\n",
               temp, reduced_density, best_fv, best_gwidth, best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
@@ -507,8 +494,9 @@ int main(int argc, char **argv) {
     }
     
   } else {
+    gwidth=gw; //NEW
     find_energy(temp, reduced_density, fv, gwidth, data_dir, true);
   }
-
+  
   return 0;
 }
