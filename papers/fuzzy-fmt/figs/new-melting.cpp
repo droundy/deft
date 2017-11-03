@@ -249,10 +249,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
           data_dir, temp, reduced_density, fv, gwidth);
   printf("Create data file: %s\n", alldat_filename);
   data_out.dataoutfile_name=alldat_filename;
-  
-printf("GOOD TO HERE!\n"); 
-//printf("stopped\n");
-//return 0; //DELETE!!! 
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
@@ -273,7 +269,7 @@ printf("GOOD TO HERE!\n");
 int main(int argc, char **argv) {
   double reduced_density, gw=-2, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
-  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
+  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
   double gwidth, gwend, gwstep;
   double dx=0.01;
   int verbose = false;
@@ -301,8 +297,8 @@ int main(int argc, char **argv) {
     /*** FLUID PARAMETERS ***/
     {"kT", '\0', POPT_ARG_DOUBLE, &temp, 0, "temperature", "DOUBLE"},
     {"n", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
-    {"fv", '\0', POPT_ARG_DOUBLE, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
-    {"gw", '\0', POPT_ARG_DOUBLE, &gw, 0, "width of Gaussian", "DOUBLE or -1 for loop without lattice values or -2 (default)"}, 
+    {"fv", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
+    {"gw", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw, 0, "width of Gaussian", "DOUBLE or -1 for loop (without lattice ref) or -2 loop (with lattice ref)"}, 
 
     /*** LOOPING OPTIONS ***/
     {"fvstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_start, 0, "start fv loop at", "DOUBLE"},
@@ -310,9 +306,9 @@ int main(int argc, char **argv) {
     {"fvstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_step, 0, "fv loop step", "DOUBLE"},
     
     {"gwstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_start, 0, "start gwidth loop at", "DOUBLE"},
-    {"gwlend", '\0', POPT_ARG_DOUBLE, &gw_lend, 0, "end gwidth loop at lattice_constant*gw_lend", "DOUBLE"},  
+    {"gwlend", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lend, 0, "end gwidth loop at lattice_constant*gw_lend", "DOUBLE"},  
     {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "step by lattice_constant*gw_lstep", "DOUBLE"},
-    {"gwend", '\0', POPT_ARG_DOUBLE, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  
+    {"gwend", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
     
  //   /*** GRID OPTIONS ***/
@@ -342,7 +338,7 @@ int main(int argc, char **argv) {
   printf("------------------------------------------------------------------\n");
   printf("Running %s with parameters:\n", argv[0]);
   for (int i = 1; i < argc; i++) {
-    if (argv[i][0] == '-') printf("\n");
+    if (argv[i][1] == '-') printf("\n");
     printf("%s ", argv[i]);
   }
   printf("\n");
@@ -362,6 +358,11 @@ int main(int argc, char **argv) {
   } else if (gw == -2) {
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant*%g\n", gw_start, gw_lend, gw_lstep);
   } 
+  
+ printf("GOOD to here");
+//printf("stopped\n");
+//return 0; //DELETE!!! 
+  
   
   // Create directory for data files
   if (strcmp(data_dir,"none") == 0) {
@@ -398,14 +399,9 @@ int main(int argc, char **argv) {
       }
       printf ("gw is %g\n", gw);  
       printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
-
-//printf("stopped\n");
-//return 0; //DELETE!!!
       
       for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
-//printf("stopped\n");
-//return 0; //DELETE!!!
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
