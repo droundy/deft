@@ -9,10 +9,7 @@
 #include <popt.h>
 #include <ctime>
 #include <cassert>
-#include <complex.h>
 
-using std::complex;
-using std::exp;
 // ------------------------------------------------------------------------------
 // Global Constants
 // ------------------------------------------------------------------------------
@@ -78,7 +75,6 @@ int main(int argc, const char *argv[])  {
     // in deft ./new-soft --lenx 69.0 --leny 42.1717 --lenz 99 ... ad nauseam
 	poptContext optCon;
     poptOption optionsTable[] = {
-        
         /*** System Dimensions ***/
         {"lenx", '\0', POPT_ARG_DOUBLE, &systemLength[x], 0, 
             "System Length in X. "
@@ -162,7 +158,6 @@ int main(int argc, const char *argv[])  {
         "Reduced Density: %g\n", reducedDensity);
         return 1;
     }
-
     // Changes to Input Conditions
     if (numOfSpheres == 0) {
 		assert(reducedDensity > 0);
@@ -178,16 +173,15 @@ int main(int argc, const char *argv[])  {
 	} else if (systemLength[x] == 0 || systemLength[y] == 0 || systemLength[z] == 0) {
 		printf("You need to specify the all of the lengths or none!\n");
 		exit(1);
-	}	// NVT doesn't need any tweaks to initial conditions
-  // ----------------------------------------------------------------------------
-  // Initial Conditions
-  // ----------------------------------------------------------------------------
+	}
+    // ----------------------------------------------------------------------------
+    // Initial Conditions
+    // ----------------------------------------------------------------------------
 	double volume = systemLength[x] * systemLength[y] * systemLength[z];
     vector3d *spheres = FCCLattice(numOfSpheres,systemLength);
     vector3d *sphereMoveVec = new vector3d[numOfSpheres];
     // Energy
     double currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-    //~ double tempE2 = currentEnergy*currentEnergy;
 	double totalEnergy = 0.0;
     // Pressure
     double pressureIdeal = (numOfSpheres*reducedTemperature*epsilon)/volume;
@@ -197,7 +191,7 @@ int main(int argc, const char *argv[])  {
     long *runningRadial = new long[1000];
     long radialWrites = 0;
     // Diffusion
-	double diffusion = 0; // = new double[totalIterations];
+	double diffusion = 0;
     double sphereTotalMove[numOfSpheres] = {0};
     // Structure Factor
     double kmax = 24*M_PI;
@@ -207,7 +201,6 @@ int main(int argc, const char *argv[])  {
     int kpoints = ceil(((kmax-2*M_PI)/cellLength)/dk);
     long structureWrites = 0;
     double structureFactor[kpoints][kpoints] = {0};
-    
     // File Saving and misc.
 	long acceptedTrials = 0;
     int outputCount = 0;
@@ -216,7 +209,8 @@ int main(int argc, const char *argv[])  {
     int saveTimes[8] = {1,5,10,30,60,300,600,1800}; // seconds
 	mytime = time(NULL);
 	long drAdjust = numOfSpheres*numOfSpheres;
-
+    int structureReset = 0;
+    // Introduction
 	printf("Filename: %s\n",filename);
 	printf("Lattice Made\n");
     printf("Number of Spheres: %d\n", numOfSpheres);
@@ -224,9 +218,9 @@ int main(int argc, const char *argv[])  {
     printf("Wall existence on x,y,z %d %d %d\n",wall[x],wall[y],wall[z]);
     printf("dr: %.5g\n",dr);
     printf(ctime(&mytime));
-  // ----------------------------------------------------------------------------
-  // File Save Initiation
-  // ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // File Save Initiation
+    // ----------------------------------------------------------------------------
     char *headerinfo = new char[4096];
     sprintf(headerinfo,
 		"# System Lengths: %g %g %g\n"
@@ -281,19 +275,22 @@ int main(int argc, const char *argv[])  {
         if (energyChange <= 0)  {
             trialAcceptance = true;
         }   else if (energyChange > 0)  {
-                double p = exp(-energyChange / reducedTemperature); // Need to get units correct in here.
-                double r = random::ran();
+                double p = exp(-energyChange / reducedTemperature);
+                double r = random::ran(); // fixme
                 if (p > r)    {
                     trialAcceptance = true;
                 }   else    {
                     trialAcceptance = false;
                 }
             }
-        if (trialAcceptance){   // If accepted, update lattice, PE, and radial dist. func.
+        if (trialAcceptance){ 
             spheres[movedSphereNum] = movedSpherePos;
-            currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
-            virial = forceTimesDist(spheres,numOfSpheres,systemLength,wall);
+            currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall); // update instead
+            // try currentEnergy += energyChange; // rerun totalPotential when saving?
+            virial = forceTimesDist(spheres,numOfSpheres,systemLength,wall); // update instead
+            // TODO: try timing runs with different N values, and plotting time per move versus N
             sphereMoveVec[movedSphereNum] += randMove;
+            // small speed improvement:  delay the following until saving
 			sphereTotalMove[movedSphereNum] = sphereMoveVec[movedSphereNum].normsquared();
 			diffusion = 0; // reset to zero
             for (int i = 0; i < numOfSpheres; i++){
@@ -301,7 +298,7 @@ int main(int argc, const char *argv[])  {
 			}
             acceptedTrials += 1;
         }
-        if ((currentIteration % (10*numOfSpheres)) == 0){
+        if ((currentIteration % (10*numOfSpheres)) == 0){ // try increasing 10 -> 100?
 			radialWrites += 1;
             double *radialDistHist;
             radialDistHist = radialDistribution(spheres,numOfSpheres,systemLength,wall);
@@ -309,7 +306,7 @@ int main(int argc, const char *argv[])  {
                 runningRadial[i] += radialDistHist[i];
             }
             delete[] radialDistHist;
-        if ((currentIteration % (10*numOfSpheres*kpoints)) == 0){
+        if ((currentIteration % (10*numOfSpheres*kpoints*kpoints)) == 0){ // try increasing 10 -> 100?
             structureWrites += 1;
             for (int kx = 0; kx < kpoints -1; kx++) {
                     for (int ky = 0; ky < kpoints -1; ky++) {
@@ -340,7 +337,6 @@ int main(int argc, const char *argv[])  {
             drAdjust *= 10;
 		}
 	}
-    // MAKE IT SO THAT THE RESIDUE FROM EARLIER PARTS WILL BE ERASED
 	// ---------------------------------------------------------------
     // Save data to files
     // ---------------------------------------------------------------
@@ -356,9 +352,9 @@ int main(int argc, const char *argv[])  {
 				outputCount += 1;
 				save = true;
 				saveIter = ceil(saveTimes[outputCount]*double(saveIter)/clock);
-			}	else if ((clock >= saveTimes[outputCount]) && (outputCount >= 7)){
+			}	else if ((clock >= saveTimes[outputCount]) && (outputCount == 7)){
 				saveIter = ceil((saveTimes[outputCount]+clock)*double(saveIter)/clock);
-                outputCount += 1;
+                structureReset += 1;
 				save = true;
 			}
 
@@ -407,7 +403,7 @@ int main(int argc, const char *argv[])  {
                     double r_i = i*dr;
 					fprintf(radial_out, "%g\t%g\n", r_i, 
 						double(volume*runningRadial[i]/
-							  (4*M_PI*r_i*r_i*dr*numOfSpheres*radialWrites))); //g(r) = (V/N^2)...Needs to be normalized properly in the python script
+							  (4*M_PI*r_i*r_i*dr*numOfSpheres*radialWrites)));
 				}
 				// Save Pressure
 				FILE *press_out = fopen(press_fname,"w");
@@ -443,10 +439,11 @@ int main(int argc, const char *argv[])  {
                 fclose(struc_out);
 				save = false; 
 			}
-            if ((outputCount == 7) || (outputCount == 9)) {
+            if ((structureReset == 1) || (structureReset == 3)) {
                 structureFactor[kpoints][kpoints] = {0};
                 printf("Structure Factor Reset\n");
                 printf("Reset Time: %s\n\n",ctime(&mytime));
+                fflush(stdout);
             }
 		}
     }
@@ -534,8 +531,8 @@ double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double syst
     const int numOfBoxes = 1000;
     double *deltan = new double[numOfBoxes];
     
-    for (int i = 0; i < numOfBoxes; i++){ // W/o this there is a possibility
-		deltan[i] = 0;					  // of getting values xx.e-312 or so which is just a nuisance
+    for (int i = 0; i < numOfBoxes; i++){ 
+		deltan[i] = 0;					  
 	}
     for (int i = 0; i < numOfSpheres; ++i) {
         vector3d Ri = sphereMatrix[i];
@@ -554,16 +551,13 @@ double *radialDistribution(vector3d *sphereMatrix, int numOfSpheres, double syst
 
 vector3d nearestImage(vector3d R2,vector3d R1, double systemLength[3], bool wall[3]){
     vector3d R = R2 - R1;
-    if ((fabs(R.x) > (systemLength[x]/2))
-        && (wall[x] == false)){
+    if (fabs(R.x) > systemLength[x]/2 && !wall[x]) {
         R.x -= copysign(systemLength[x],R.x);
     }
-    if ((fabs(R.y) > (systemLength[y]/2))
-        && (wall[y] == false)){
+    if (fabs(R.y) > systemLength[y]/2 && !wall[y]) {
         R.y -= copysign(systemLength[y],R.y);
     }
-    if ((fabs(R.z) > (systemLength[z]/2))
-        && (wall[z] == false)){
+    if (fabs(R.z) > systemLength[z]/2 && !wall[z]) {
         R.z -= copysign(systemLength[z],R.z);
     }
     return R;

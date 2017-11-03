@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 from __future__ import division
-import shlex, subprocess, os
+import subprocess, os
 import numpy as np
 ########################################################################
 ## This script is used to run new-soft
@@ -13,7 +13,7 @@ spheres = 256
 iters = 1e9
 
 # Densities to test
-rho = [1.3,1.4,1.5,1.6]
+rho = [1.1,1.2,0.9]
 
 # Temperatures to test
 T = [2.0]
@@ -42,5 +42,7 @@ for density in rho:
 						  directory=directory,
 						  filename=filename,)
         print command_line
-        args = shlex.split(command_line)
-        p = subprocess.call(args)
+        p = subprocess.call(command_line, shell=True)
+# srun -J sleep-quietly nohup nice -19 hostname &> hostname.out &
+# scancel
+# man srun
