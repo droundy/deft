@@ -371,7 +371,7 @@ int main(int argc, char **argv) {
   //Create bestdataout filename (to be used if we are looping)
   char *bestdat_filename = new char[1024];
   sprintf(bestdat_filename, "%s/kT%5.3f_n%05.3f_best.dat",
-          data_dir, temp, reduced_density);   //For option 1: create a new file with best data
+          data_dir, temp, reduced_density);   
   
   if (fv == -1) {
     double best_energy_diff = 1e100;
@@ -416,7 +416,7 @@ int main(int argc, char **argv) {
     }
     printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
         
-    //Create bestdataout file  - Option 1
+    //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
@@ -461,7 +461,7 @@ int main(int argc, char **argv) {
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
     
-    //Create bestdataout file  - Option 1
+    //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
