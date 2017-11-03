@@ -57,11 +57,12 @@ double find_lattice_constant(double reduced_density, double fv) {
 }
 
 
-data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, bool verbose=false) {
+data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-
+  double dV = pow(dx,3);  //volume element dV
+  
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
   hf.epsilon() = 1;   //energy constant in the WCA fluid
@@ -85,8 +86,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     printf("Homogeneous free energy per sphere is %g\n", homogeneous_free_energy);
   }
 
-  const double dx = 0.01;       //grid point spacing dx=dy=dz=0.01
-  const double dV = pow(dx,3);  //volume element dV
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
@@ -248,12 +247,10 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   char *alldat_filedescriptor = new char[1024];
   sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f", 
           temp, reduced_density, fv, gwidth);
-  sprintf(alldat_filename, "%s/%s-alldat.dat", 
-          data_dir, alldat_filedescriptor);
+  sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
   //sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat", 
   //        data_dir, temp, reduced_density, fv, gwidth);
   printf("Create data file: %s\n", alldat_filename);
-  //data_out.dataoutfile_name=alldat_filename;
   data_out.dataoutfile_name=alldat_filedescriptor;
 
   //Create dataout file
@@ -277,7 +274,7 @@ int main(int argc, char **argv) {
   
   double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
   double gwidth, gwend, gwstep;
-  double dx=0.01;
+  double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
   
   char *data_dir = new char[1024];
@@ -317,8 +314,8 @@ int main(int argc, char **argv) {
     {"gwend", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
     
- //   /*** GRID OPTIONS ***/
- //   {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  //ASK! if include this must pass it to find_energy() !
+   // /*** GRID OPTIONS ***/
+   // {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},  
     
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
@@ -351,7 +348,6 @@ int main(int argc, char **argv) {
   printf("------------------------------------------------------------------\n\n");
 
 //*****************************End POPT Setup**************************************
-
 
   printf("git version: %s\n", version_identifier());
   printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
@@ -395,7 +391,7 @@ int main(int argc, char **argv) {
       printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
       
       for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
-        data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
+        data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
@@ -452,7 +448,7 @@ int main(int argc, char **argv) {
       printf("gw is %g\n", gw);
       printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
       for (double gwidth=gw_start; gwidth <= gwend; gwidth+=gwstep) {
-      data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, bool(verbose));
+      data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
           best_energy_diff = e_data.diff_free_energy_per_atom;
           best_cfree_energy = e_data.cfree_energy_per_atom;
@@ -485,7 +481,7 @@ int main(int argc, char **argv) {
     
   } else {
     gwidth=gw; 
-    find_energy(temp, reduced_density, fv, gwidth, data_dir, true);
+    find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, true);
   }
   
   return 0;
