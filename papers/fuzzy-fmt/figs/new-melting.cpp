@@ -247,7 +247,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   char *alldat_filename = new char[1024];
   sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat", 
           data_dir, temp, reduced_density, fv, gwidth);
-  printf("Create data file: %s\n", alldat_filename);
+  //printf("Create data file: %s\n", alldat_filename);
   data_out.dataoutfile_name=alldat_filename;
 
   //Create dataout file
@@ -358,33 +358,27 @@ int main(int argc, char **argv) {
   } else if (gw == -2) {
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant*%g\n", gw_start, gw_lend, gw_lstep);
   } 
-  
- printf("GOOD to here");
-//printf("stopped\n");
-//return 0; //DELETE!!! 
-  
-  
+    
   // Create directory for data files
   if (strcmp(data_dir,"none") == 0) {
     sprintf(data_dir,"%s",default_data_dir);
-  //  printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
+    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   } else {
-  //  printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
+    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);  
   }
   mkdir(data_dir, 0777);  
 
   //Create bestdataout filename (to be used if we are looping)
   char *bestdat_filename = new char[1024];
   sprintf(bestdat_filename, "%s/kT%5.3f_n%05.3f_best.dat",
-          data_dir, temp, reduced_density);
-  
-  char *best_file;
+          data_dir, temp, reduced_density);   //For option 1: create a new file with best data
+          
+  char *best_alldatfile;  //For option 2: to copy best alldat file and rename best file below
   
   if (fv == -1) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
     double hfree_energy_pervol, cfree_energy_pervol;
-    char best_datafile = new char[1024];
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
     for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {   
@@ -417,20 +411,16 @@ int main(int argc, char **argv) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
-          //best_datafile=e_data.dataoutfile_name;
-          ////sprintf(best_file, "%s_newbest.dat", e_data.dataoutfile_name);
-        //printf("e_data.dataoutfile_name is %s", e_data.dataoutfile_name);
+          printf("e_data.dataoutfile_name is: %s\n", e_data.dataoutfile_name);  //for debug
+          //sprintf(best_alldatfile, "%s_newbest.dat", e_data.dataoutfile_name);  //Option 2 //segmentation fault! ASK!
+          //printf("Copy best alldat file to create newbest data file: %s\n", best_alldatfile);
         }
       }
     }
     printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
-
-    //printf("best data file is %s", best_datafile);
-    //sprintf(best_file, "%s_newbest.dat", best_datafile);
-
         
-    //Create bestdataout file
-    //printf("Create best data file: %s\n", bestdat_filename);
+    //Create bestdataout file  - Option 1
+    printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
@@ -446,8 +436,7 @@ int main(int argc, char **argv) {
   } else if (gw < 0) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
-    double hfree_energy_pervol, cfree_energy_pervol;
-    char best_datafile = new char[1024];   
+    double hfree_energy_pervol, cfree_energy_pervol; 
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
       if (gw == -1) {         
@@ -469,15 +458,15 @@ int main(int argc, char **argv) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
-          //best_datafile=e_data.dataoutfile_name;
+          printf("e_data.dataoutfile_name is: %s\n", e_data.dataoutfile_name);  //for debug
+          //sprintf(best_alldatfile, "%s_newbest.dat", e_data.dataoutfile_name);  //Option 2   //segmentation fault! ASK!
+          //printf("Copy best alldat file to create newbest data file: %s\n", best_alldatfile);
         }
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
-    //printf("best data file is %s", best_datafile);
-    //sprintf(best_file, "%s_best.dat", best_datafile);
     
-    //Create bestdataout file
-    //printf("Create best data file: %s\n", bestdat_filename);
+    //Create bestdataout file  - Option 1
+    printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
@@ -490,7 +479,7 @@ int main(int argc, char **argv) {
     }
     
   } else {
-    gwidth=gw; //NEW
+    gwidth=gw; 
     find_energy(temp, reduced_density, fv, gwidth, data_dir, true);
   }
   
