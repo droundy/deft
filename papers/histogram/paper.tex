@@ -1,6 +1,7 @@
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
-\usepackage{graphicx}% Include figure files
+\usepackage{graphicx} % Include figure files
 \usepackage{color}
+\usepackage{nicefrac} % Include for inline fractions
 
 \newcommand{\red}[1]{{\bf \color{red} #1}}
 \newcommand{\green}[1]{{\bf \color{green} #1}}
@@ -366,25 +367,35 @@ The SAMC Algorithm was proposed as the reason that the Wang-Landau Algorithm con
 
 
 \subsection{SA-TMMC Algorithm}
-\jpsays{This is my first take on this section!}
-
-We introduce a new algorithm consisting of the merger of the Stochastic Approximation (SA) method proposed by Liang et al.~\cite{liang2007stochastic} and the TMMC Algorithm with suitable adaptations.  While the Stochastic Approximation method has recently been implemented in comparison with the Wang-Landau Algorithm~\cite{werlich2015stochastic, schneider2017convergence}, it seems quite natural to create a new Monte-Carlo method which we will call SATM.  Like in the original implementation, we define an update factor where $t_0$ is the number of Monte-Carlo moves and $t$ is the current iteration.  
+We introduce a new algorithm consisting of the merger of the Stochastic Approximation (SA) method proposed by Liang et al.~\cite{liang2007stochastic} and the TMMC Algorithm with suitable adaptations.  While the Stochastic Approximation method has recently been implemented in comparison with the Wang-Landau Algorithm~\cite{werlich2015stochastic, schneider2017convergence}, it seems quite natural to create a new Monte-Carlo method which we will call SA-TMMC.  Like in the original implementation, we define an update factor where $t_0$ is the number of Monte-Carlo moves and $t$ is the current iteration.  
 \begin{align}
 F_{t}^{\text{SA}} = \frac{t_0}{\max(t_0,t)}
 \end{align}
-One potential problem of merging SA and TMMC is that SA provides no nice transition to the later method due to the lack of a user-controlled cutoff.  Also, the choice of parameter $t_0$ proves difficult particularly for complex systems.  We discuss here how we resolve both of these issues. 
-
-\jpsays{We might also adress the question of whether convergence is an issue since we are not technically doing SA since $t_0$ is adaptive?}
+One potential problem of merging SA and TMMC is that SA provides no nice transition to the later method due to the lack of a user-controlled cutoff.  Also for SA Monte-Carlo, the choice of parameter $t_0$ proves difficult particularly for complex systems.  Finally, we enforce a minimum temperature probability which prevents the system from sampling states below the minimum temperature.  We discuss here how we resolve all of the potential issues we encountered when integrating both SA and TMMC. 
 
 \subsubsection{Define an adaptive parameter $t_0$}
-talk about resetting $t_0$.
+It has been shown that if $F_{t}^{\text{SA}}$ satisfies two conditions the estimator is proven to converge to the real DOS~\cite{liang2006theory, liang2007stochastic}.
+\begin{align}
+\sum_{t=1}^\infty F_{t}^{\text{SA}} = \infty \quad\textrm{and}\quad
+\sum_{t=1}^\infty (F_{t}^{\text{SA}})^\zeta < \infty
+\end{align}
+where $\zeta \in \{1,2\}$.  For practical implementation with TMMC, we find it necessary to reset $t_0$ everytime a new energy state is found.  This ensures that all energy states are sampled before TMMC move probabilities begin to be favored.  
+\jpsays{I have no idea how this impacts convergence!}
 
 \subsubsection{Define a statistical weight to control the transition between SA and TMMC}
-We can go back and forth between SA and TMMC.
+Our algorithm can alternate between SA and TMMC on the fly using weights to determine the probability that a move between adjacent energy states is allowed.  We define the transition probability $\text{SA}_{\text{Weight}}$ as
 \begin{align}
-SA_{\text{Weight}} =\frac{\sqrt{t_0}}{N_\text{found}} 
+\text{SA}_{\text{Weight}} =\frac{\sqrt{t_0}}{N_\text{found}} 
 \sqrt{\frac{1}{n_\downarrow}+\frac{1}{n_\uparrow}}
 \end{align}
+where $t_0$ is the number of Monte-Carlo moves, $N_\text{found}$ is the number of energy states that have been found i.e. visited, and $n_{\uparrow\downarrow}$ are the number of upward or downward moves between adjacent energy states respectively.  The rational behind the transition probability is that the transition weight can be related to the fractional uncertainty in upward and downward moves assuming there is no system correlation (the moves are independent).  Although this is not necessarily the case, we find that this definition for the transition weight is satifactory.  The prefactor $\nicefrac{\sqrt{t_0}}{N_\text{found}}$ is justified by the fact that $t_0$ represents how many moves were necessary to randomly sample $N_\text{found}$ energies and $N^2_\text{found}$ is the number of samples necessary to randomly sample all the energies independently.  
+
+\subsubsection{Enforce a minimum temperature probability}
+One potentially damaging aspect to the convergence of the Stochastic Approximation method is the need to enforce a minimum temperature probability.  We define this probability as 
+\begin{align}
+P_{\text{min}} = e^{\beta_{\text{max}}\Delta\epsilon}
+\end{align}
+where $\beta_{\text{max}} = \nicefrac{1}{k_B T_\text{min}}$.  If the transition probability is ever below the minimum temperature transition probability, we set the former equal to the later.
 
 \section{Results}
 
