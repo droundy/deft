@@ -49,12 +49,15 @@ struct data {
   double cfree_energy_per_atom;
   double hfree_energy_per_vol;
   double cfree_energy_per_vol;
-  char   dataoutfile;
+  //char   dataoutfile_name;
+  char *dataoutfile_name;
+  //  char dataoutfile_name[1024];
 };
 
 double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
+
 
 data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
@@ -242,12 +245,18 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   }
 
   // Create all output data filename
-  char *alldat_filename = new char[1024];
+  //char *alldat_filename = new char[1024];
+    char *alldat_filename;
   sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
           data_dir, temp, reduced_density, fv, gwidth);
   //printf("Create data file: %s\n", alldat_filename);
   
-  data_out.dataoutfile=alldat_filename;
+  data_out.dataoutfile_name=alldat_filename;
+  //sprintf(data_out.dataoutfile_name, "%s", alldat_filename); //??
+  printf("alldat_filename is %s\n", alldat_filename);
+  printf("dataoutfile_name is %s\n", data_out.dataoutfile_name);
+  
+  sprintf(data_out.dataoutfile_name, "%s", alldat_filename); //??
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
@@ -272,8 +281,8 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 int main(int argc, char **argv) {
   double reduced_density, gwidth=-2, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
-  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=0.1, gw_lend=0.5, gw_lstep=10;
-  double gwloop, gwlat, gwend, gwstep;
+  double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
+  double gwend, gwstep;
   double dx=0.01;
   int verbose = false;
   
@@ -310,7 +319,7 @@ int main(int argc, char **argv) {
     
     {"gwstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_start, 0, "start gwidth loop at", "DOUBLE"},
     {"gwlend", '\0', POPT_ARG_DOUBLE, &gw_lend, 0, "end gwidth loop at lattice_constant*gw_lend", "DOUBLE"},  
-    {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "step by lattice_constant/gw_lstep", "DOUBLE"},
+    {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "step by lattice_constant*gw_lstep", "DOUBLE"},
     {"gwend", '\0', POPT_ARG_DOUBLE, &gw_end, 0, "end gwidth loop at", "DOUBLE"},  
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
     
@@ -359,7 +368,7 @@ int main(int argc, char **argv) {
   if (gwidth == -1) {
     printf("gw loop variables: gwidth start=%g, gwidth end=%g, step=%g\n", gw_start, gw_end, gw_step);
   } else if (gwidth == -2) {
-    printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant/%g\n", gw_start, gw_lend, gw_lstep);
+    printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant*%g\n", gw_start, gw_lend, gw_lstep);
   } 
   
   // Create directory for data files
@@ -376,6 +385,8 @@ int main(int argc, char **argv) {
   sprintf(bestdat_filename, "%s/kT%5.3f_n%05.3f_best.dat",
           data_dir, temp, reduced_density);
   
+  char *best_file;
+  
   if (fv == -1) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
@@ -387,7 +398,7 @@ int main(int argc, char **argv) {
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
       //for (double gwidth=0.01; gwidth <= lattice_constant/2; gwidth+=lattice_constant/10) {  //delete
-      //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {  //delete
+      //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant*gw_lstep) {  //delete
       //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {  //delete
       if (gwidth == -1) {  
         printf ("gwidth is %g", gwidth);       
@@ -396,7 +407,7 @@ int main(int argc, char **argv) {
       } else if (gwidth == -2) {
             printf ("gwidth is %g", gwidth);  
             gwend=lattice_constant*gw_lend;
-            gwstep=lattice_constant/gw_lstep;
+            gwstep=lattice_constant*gw_lstep;
       }
       printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
       printf ("gwidth is %g", gwidth); 
@@ -418,12 +429,18 @@ int main(int argc, char **argv) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
-          best_datafile=e_data.dataoutfile;
+          //best_datafile=e_data.dataoutfile_name;
+          sprintf(best_file, "%s_newbest.dat", e_data.dataoutfile_name);
+        //printf("e_data.dataoutfile_name is %s", e_data.dataoutfile_name);
         }
       }
     }
     printf("Best: fv %g  gwidth %g  Energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
 
+    //printf("best data file is %s", best_datafile);
+    //sprintf(best_file, "%s_newbest.dat", best_datafile);
+
+        
     //Create bestdataout file
     //printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
@@ -446,13 +463,13 @@ int main(int argc, char **argv) {
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     //for (double gwidth=gw_start; gwidth <= gw_end+gw_step; gwidth+=gw_step) {
-    //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant/gw_lstep) {
+    //for (double gwidth=0.01; gwidth <= lattice_constant*gw_lend; gwidth+=lattice_constant*gw_lstep) {
       if (gwidth == -1) {         
             gwend=gw_end;
             gwstep=gw_step;
       } else if (gwidth == -2) {
             gwend=lattice_constant*gw_lend;
-            gwstep=lattice_constant/gw_lstep;
+            gwstep=lattice_constant*gw_lstep;
       }
       printf("gwidth is %g", gwidth);
       printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
@@ -466,10 +483,12 @@ int main(int argc, char **argv) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
-          best_datafile=e_data.dataoutfile;
+          //best_datafile=e_data.dataoutfile_name;
         }
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
+    //printf("best data file is %s", best_datafile);
+    //sprintf(best_file, "%s_best.dat", best_datafile);
     
     //Create bestdataout file
     //printf("Create best data file: %s\n", bestdat_filename);
