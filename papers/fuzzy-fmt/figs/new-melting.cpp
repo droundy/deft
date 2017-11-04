@@ -425,6 +425,7 @@ double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
 
 //display_simplex(double simplex_fe[3][3]);
 int k, l;
+printf("\n");
 for (k=0; k<3; k++) {
   for(l=0; l<3; l++) {
         printf("%g\t", simplex_fe[k][l]);
@@ -452,6 +453,18 @@ for (i =0; i < 2; ++i) {    //standard sorting algorithm
    }; 
 };          
   
+//display_simplex(double simplex_fe[3][3]);
+//int k, l;
+printf("\n");
+for (k=0; k<3; k++) {
+  for(l=0; l<3; l++) {
+        printf("%g\t", simplex_fe[k][l]);
+  };
+  printf("\n");
+};
+
+
+
   
 printf("0fv=simplex[0][0]=%g, 0gw=simplex[0][1]=%g\n", simplex_fe[0][0], simplex_fe[0][1]);
 printf("1fv=simplex[1][0]=%g, 1gw=simplex[1][1]=%g\n", simplex_fe[1][0], simplex_fe[1][1]);
