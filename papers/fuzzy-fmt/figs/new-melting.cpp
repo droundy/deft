@@ -270,7 +270,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 
 //-----------------------------------Downhill Simplex-----------------------------------------
 
-
 void display_simplex(double simplex_fe[3][3]) {
 printf("\n");
 for (int k=0; k<3; k++) {
@@ -303,44 +302,6 @@ for (int i =0; i < 2; ++i) {    //standard sorting algorithm
    } 
  } 
 }
-
-//struct point {
-//  double fv;
-//  double gw;
-//};
-
-//struct simplex {
-//  double 0fv;
-//  double 0gw;
-//  double 0fe;
-//  double 1fv;
-//  double 1gw;
-//  double 1fe;
-//  double 2fv;
-//  double 2gw;
-//  double 2fe;
-//};
-
-//struct point_with_fe {
-//  double fv;
-//  double gw;
- // double fe;
-//};
-
-//simplex_with_fe {
- // point_with_fe 0;
- // point_with_fe 1;
- // point_with_fe 2;
-//};
-
-//simplex_with_fe simplex[1].fv=0.2;   //I like this best! - no, not as easy to cycle through in four loops.
-
-//struct three_point_simplex {
-//  point best;
-//  point mid;
-//  point worst;
-//};
-//printf("guess is: %g\n", guess.best.fv);  //REF
 
 //-----------------------------------END Downhill Simplex-------------------------------------  
 
