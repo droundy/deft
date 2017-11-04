@@ -284,7 +284,7 @@ void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][
   for (int k=0; k<3; k++) {
         data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, bool(verbose));
         simplex_fe[k][2]=dhill_data.cfree_energy_per_atom;
-        printf("simplex_fe[%i][2]=%g", k, simplex_fe[k][2]);
+        printf("simplex_fe[%i][2]=%g\n", k, simplex_fe[k][2]);
   }
 }
   
@@ -407,9 +407,6 @@ display_simplex(simplex_fe);
 order_simplex(simplex_fe);  
 display_simplex(simplex_fe);
 
-printf("0fv=simplex[0][0]=%g, 0gw=simplex[0][1]=%g\n", simplex_fe[0][0], simplex_fe[0][1]);
-printf("1fv=simplex[1][0]=%g, 1gw=simplex[1][1]=%g\n", simplex_fe[1][0], simplex_fe[1][1]);
-printf("2fv=simplex[2][0]=%g, 2gw=simplex[2][1]=%g\n", simplex_fe[2][0], simplex_fe[2][1]);
 printf("best=%g  ", simplex_fe[0][2]);
 printf("mid=%g  ", simplex_fe[1][2]);
 printf("worst=%g\n", simplex_fe[2][2]); 
