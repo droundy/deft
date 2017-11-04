@@ -271,13 +271,13 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
 //-----------------------------------Downhill Simplex-----------------------------------------
 
 void display_simplex(double simplex_fe[3][3]) {
-printf("\n");
-for (int k=0; k<3; k++) {
-  for(int l=0; l<3; l++) {
-        printf("%g\t", simplex_fe[k][l]);
-  }
   printf("\n");
- }
+  for (int k=0; k<3; k++) {
+    for(int l=0; l<3; l++) {
+          printf("%g\t", simplex_fe[k][l]);
+    }
+    printf("\n");
+  }
 }
 
 void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
@@ -289,18 +289,25 @@ void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][
 }
   
 void order_simplex(double simplex_fe[3][3]) { 
-double holdfe[3]; 
-for (int i =0; i < 2; ++i) {    //standard sorting algorithm
-  for (int j=i+1; j < 3; j++) {
-      if (simplex_fe[i][2] > simplex_fe[j][2]) {
-         for (int m=0; m < 3; m++) {
-          holdfe[m]=simplex_fe[i][m]; 
-          simplex_fe[i][m]=simplex_fe[j][m];
-          simplex_fe[j][m]=holdfe[m]; 
-         }    
-      } 
-   } 
- } 
+  double holdfe[3]; 
+  for (int i =0; i < 2; ++i) {    //standard sorting algorithm
+    for (int j=i+1; j < 3; j++) {
+        if (simplex_fe[i][2] > simplex_fe[j][2]) {
+          for (int m=0; m < 3; m++) {
+            holdfe[m]=simplex_fe[i][m]; 
+            simplex_fe[i][m]=simplex_fe[j][m];
+            simplex_fe[j][m]=holdfe[m]; 
+          }    
+        } 
+    } 
+  } 
+}
+
+void reflect_simplex(double simplex_fe[3][3]) {
+  double worstf=simplex_fe[2][0];
+  simplex_fe[2][0]=simplex_fe[0][0]+simplex_fe[1][0]-worstf;
+  double worstg=simplex_fe[2][1];
+  simplex_fe[2][1]=simplex_fe[0][1]+simplex_fe[1][1]-worstg;
 }
 
 //-----------------------------------END Downhill Simplex-------------------------------------  
@@ -406,6 +413,10 @@ evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose))
 display_simplex(simplex_fe);  
 order_simplex(simplex_fe);  
 display_simplex(simplex_fe);
+reflect_simplex(simplex_fe);
+display_simplex(simplex_fe);
+
+//reflect_simplex(simplex_fe);
 
 printf("best=%g  ", simplex_fe[0][2]);
 printf("mid=%g  ", simplex_fe[1][2]);
