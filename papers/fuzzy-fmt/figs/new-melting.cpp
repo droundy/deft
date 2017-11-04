@@ -303,13 +303,25 @@ void order_simplex(double simplex_fe[3][3]) {
   } 
 }
 
-void reflect_simplex(double simplex_fe[3][3]) {
-  double worstf=simplex_fe[2][0];
-  simplex_fe[2][0]=simplex_fe[0][0]+simplex_fe[1][0]-worstf;
-  double worstg=simplex_fe[2][1];
-  simplex_fe[2][1]=simplex_fe[0][1]+simplex_fe[1][1]-worstg;
-  simplex_fe[2][2]=0;
+void reflect_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
+  double reflected_f=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
+  double reflected_g=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
+  data reflected=find_energy(temp, reduced_density, reflected_f, reflected_g, data_dir, dx, bool(verbose));
+  double reflected_fe=reflected.cfree_energy_per_atom;
+  if (reflected_fe < simplex_fe[2][2]) {
+      simplex_fe[2][0]=reflected_f;
+      simplex_fe[2][1]=reflected_g;
+      simplex_fe[2][2]=reflected_fe;
+  }
 }
+
+//void reflect_simplex(double simplex_fe[3][3]) {
+//  double reflectedf=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
+//  double reflectedg=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
+//  simplex_fe[2][0]=reflectedf;
+//  simplex_fe[2][1]=reflectedg;
+//  simplex_fe[2][2]=0;
+//}
 
 //-----------------------------------END Downhill Simplex-------------------------------------  
 
@@ -408,13 +420,15 @@ double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
 // simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
 //                     {0.1, 0.3, 0},   //mid when ordered
 //                     {0.1, 0.4, 0}};  //worst when ordered
-
+double reflected_point_fe;
 display_simplex(simplex_fe);
 evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
 display_simplex(simplex_fe);  
 order_simplex(simplex_fe);  
 display_simplex(simplex_fe);
-reflect_simplex(simplex_fe);
+
+reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+   
 display_simplex(simplex_fe);
 evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
 display_simplex(simplex_fe);
