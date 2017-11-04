@@ -440,15 +440,28 @@ for (k=0; k<3; k++) {
         printf("simplex_fe[%i][2]=%g", k, simplex_fe[k][2]);
   };
   
+//display_simplex(double simplex_fe[3][3]);
+//int k, l;
+printf("\n");
+for (k=0; k<3; k++) {
+  for(l=0; l<3; l++) {
+        printf("%g\t", simplex_fe[k][l]);
+  };
+  printf("\n");
+}; 
+  
+  
 //order_simplex(double simplex_fe[3][3]);  
-int i, j;  
-double holdfe; 
+int i, j, m;  
+double holdfe[3]; 
 for (i =0; i < 2; ++i) {    //standard sorting algorithm
   for (j=i+1; j < 3; j++) {
       if (simplex_fe[i][2] > simplex_fe[j][2]) {
-          holdfe=simplex_fe[i][2];
-          simplex_fe[i][2]=simplex_fe[j][2];
-          simplex_fe[j][2]=holdfe;       
+         for (m=0; m < 3; m++) {
+          holdfe[m]=simplex_fe[i][m]; 
+          simplex_fe[i][m]=simplex_fe[j][m];
+          simplex_fe[j][m]=holdfe[m]; 
+         };     
       }; 
    }; 
 };          
