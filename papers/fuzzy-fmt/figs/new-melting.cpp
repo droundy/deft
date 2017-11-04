@@ -288,7 +288,7 @@ void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][
   }
 }
   
-void order_simplex(double simplex_fe[3][3]) { 
+void sort_simplex(double simplex_fe[3][3]) { 
   double holdfe[3]; 
   for (int i =0; i < 2; ++i) {    //standard sorting algorithm
     for (int j=i+1; j < 3; j++) {
@@ -334,19 +334,9 @@ int main(int argc, char **argv) {
   int verbose = false;
   
 //-----------------------------------Downhill Simplex-----------------------------------------
-//double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
-//                          {0.1, 0.3, 0},   //mid when ordered
-//                          {0.1, 0.4, 0}};  //worst when ordered 
-                           
-double simplex_fe[3][3] = {{0.1, 0.2, 0}, {0.1, 0.4, 0}, {0.1, 0.3, 0}};  //testing
- 
-//double simplex_fe[3][3] = {{0.1, 0.3, 0}, {0.1, 0.2, 0}, {0.1, 0.4, 0}};  //testing
-//double simplex_fe[3][3] = {{0.1, 0.3, 0}, {0.1, 0.4, 0}, {0.1, 0.2, 0}};  //testing
-
-//double simplex_fe[3][3] = { {0.1, 0.4, 0}, {0.1, 0.2, 0}, {0.1, 0.3, 0}}; //testing
-//double simplex_fe[3][3] = { {0.1, 0.4, 0}, {0.1, 0.3, 0}, {0.1, 0.2, 0}}; //testing                         
-                           
-                           
+double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
+                           {0.1, 0.3, 0},   //mid when ordered
+                           {0.1, 0.4, 0}};  //worst when ordered 
                            
 //-----------------------------------END Downhill Simplex-------------------------------------  
   
@@ -428,14 +418,14 @@ double simplex_fe[3][3] = {{0.1, 0.2, 0}, {0.1, 0.4, 0}, {0.1, 0.3, 0}};  //test
    
 //-----------------------------------Downhill Simplex-----------------------------------------
 
-// simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
-//                     {0.1, 0.3, 0},   //mid when ordered
-//                     {0.1, 0.4, 0}};  //worst when ordered
+// simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when sorted
+//                     {0.1, 0.3, 0},   //mid when sorted
+//                     {0.1, 0.4, 0}};  //worst when sorted
 double reflected_point_fe;
 display_simplex(simplex_fe);
 evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
 display_simplex(simplex_fe);  
-order_simplex(simplex_fe);  
+sort_simplex(simplex_fe);  
 display_simplex(simplex_fe);
 
 reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
@@ -443,7 +433,7 @@ reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
 display_simplex(simplex_fe);
 evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
 display_simplex(simplex_fe);
-order_simplex(simplex_fe);  
+sort_simplex(simplex_fe);  
 display_simplex(simplex_fe);
 
 printf("best=%g  ", simplex_fe[0][2]);
