@@ -58,6 +58,19 @@ struct point {
   double gw;
 };
 
+void display_simplex(double simplex_fe[3][3]) {
+int k, l;
+printf("\n");
+for (k=0; k<3; k++) {
+  for(l=0; l<3; l++) {
+        printf("%g\t", simplex_fe[k][l]);
+  };
+  printf("\n");
+};
+
+};
+
+
 //struct simplex {
 //  double 0fv;
 //  double 0gw;
@@ -69,9 +82,6 @@ struct point {
 //  double 2gw;
 //  double 2fe;
 //};
-
-
-
 
 //struct point_with_fe {
 //  double fv;
@@ -422,6 +432,11 @@ printf("simplex[2].gw is: %g\n", simplex[2].gw);
 double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
                            {0.1, 0.3, 0},   //mid when ordered
                            {0.1, 0.4, 0}};  //worst when ordered
+
+
+display_simplex(simplex_fe);
+
+return 0;
 
 //display_simplex(double simplex_fe[3][3]);
 int k, l;
