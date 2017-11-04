@@ -52,63 +52,6 @@ struct data {
   char *dataoutfile_name;
 };
 
-//-----------------------------------Downhill Simplex-----------------------------------------
-struct point {
-  double fv;
-  double gw;
-};
-
-void display_simplex(double simplex_fe[3][3]) {
-int k, l;
-printf("\n");
-for (k=0; k<3; k++) {
-  for(l=0; l<3; l++) {
-        printf("%g\t", simplex_fe[k][l]);
-  };
-  printf("\n");
-};
-
-};
-
-
-//struct simplex {
-//  double 0fv;
-//  double 0gw;
-//  double 0fe;
-//  double 1fv;
-//  double 1gw;
-//  double 1fe;
-//  double 2fv;
-//  double 2gw;
-//  double 2fe;
-//};
-
-//struct point_with_fe {
-//  double fv;
-//  double gw;
- // double fe;
-//};
-
-//simplex_with_fe {
- // point_with_fe 0;
- // point_with_fe 1;
- // point_with_fe 2;
-//};
-
-//simplex_with_fe simplex[1].fv=0.2;   //I like this best! - no, not as easy to cycle through in four loops.
-
-
-
-
-//struct three_point_simplex {
-//  point best;
-//  point mid;
-//  point worst;
-//};
-//printf("guess is: %g\n", guess.best.fv);  //REF
-
-//-----------------------------------END Downhill Simplex-------------------------------------  
-
 double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
@@ -269,7 +212,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     setn = setn*(reduced_num_spheres/N_crystal);  //Normalizes setn
     if (verbose) {
       double checking_normalized_num_spheres = 0;
-      for (int i=0; i<Ntot; i++) {
+      for (int i=0; i<Ntot; i++) {  
         checking_normalized_num_spheres += setn[i]*dV;
       }
       printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
@@ -325,6 +268,83 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   return data_out;
 }
 
+//-----------------------------------Downhill Simplex-----------------------------------------
+
+
+void display_simplex(double simplex_fe[3][3]) {
+printf("\n");
+for (int k=0; k<3; k++) {
+  for(int l=0; l<3; l++) {
+        printf("%g\t", simplex_fe[k][l]);
+  }
+  printf("\n");
+ }
+}
+
+void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
+  for (int k=0; k<3; k++) {
+        data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, bool(verbose));
+        simplex_fe[k][2]=dhill_data.cfree_energy_per_atom;
+        printf("simplex_fe[%i][2]=%g", k, simplex_fe[k][2]);
+  }
+}
+  
+void order_simplex(double simplex_fe[3][3]) { 
+double holdfe[3]; 
+for (int i =0; i < 2; ++i) {    //standard sorting algorithm
+  for (int j=i+1; j < 3; j++) {
+      if (simplex_fe[i][2] > simplex_fe[j][2]) {
+         for (int m=0; m < 3; m++) {
+          holdfe[m]=simplex_fe[i][m]; 
+          simplex_fe[i][m]=simplex_fe[j][m];
+          simplex_fe[j][m]=holdfe[m]; 
+         }    
+      } 
+   } 
+ } 
+}
+
+//struct point {
+//  double fv;
+//  double gw;
+//};
+
+//struct simplex {
+//  double 0fv;
+//  double 0gw;
+//  double 0fe;
+//  double 1fv;
+//  double 1gw;
+//  double 1fe;
+//  double 2fv;
+//  double 2gw;
+//  double 2fe;
+//};
+
+//struct point_with_fe {
+//  double fv;
+//  double gw;
+ // double fe;
+//};
+
+//simplex_with_fe {
+ // point_with_fe 0;
+ // point_with_fe 1;
+ // point_with_fe 2;
+//};
+
+//simplex_with_fe simplex[1].fv=0.2;   //I like this best! - no, not as easy to cycle through in four loops.
+
+//struct three_point_simplex {
+//  point best;
+//  point mid;
+//  point worst;
+//};
+//printf("guess is: %g\n", guess.best.fv);  //REF
+
+//-----------------------------------END Downhill Simplex-------------------------------------  
+
+
 int main(int argc, char **argv) {
   double reduced_density, gw=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
@@ -333,21 +353,9 @@ int main(int argc, char **argv) {
   int verbose = false;
   
 //-----------------------------------Downhill Simplex-----------------------------------------
-  
-struct point simplex[3] = {{0.1,0.2}, {0.1,0.3}, {0.1,0.4}};   //initial guess
-//struct point simplex[3] = {{0.1,0.2}, {0.1,0.4}, {0.1,0.3}};   //initial guess
-//struct point simplex[3] = {{0.1,0.3}, {0.1,0.2}, {0.1,0.4}};   //initial guess
-//struct point simplex[3] = {{0.1,0.3}, {0.1,0.4}, {0.1,0.2}};   //initial guess
-//struct point simplex[3] = {{0.1,0.4}, {0.1,0.3}, {0.1,0.2}};   //initial guess
-//struct point simplex[3] = {{0.1,0.4}, {0.1,0.2}, {0.1,0.3}};   //initial guess
-
-printf("simplex[0].fv is: %g\n", simplex[0].fv);
-printf("simplex[0].gw is: %g\n", simplex[0].gw);
-printf("simplex[1].fv is: %g\n", simplex[1].fv);
-printf("simplex[1].gw is: %g\n", simplex[1].gw);
-printf("simplex[2].fv is: %g\n", simplex[2].fv);
-printf("simplex[2].gw is: %g\n", simplex[2].gw);
-
+double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
+                           {0.1, 0.3, 0},   //mid when ordered
+                           {0.1, 0.4, 0}};  //worst when ordered 
 //-----------------------------------END Downhill Simplex-------------------------------------  
   
   char *data_dir = new char[1024];
@@ -427,181 +435,23 @@ printf("simplex[2].gw is: %g\n", simplex[2].gw);
  
    
 //-----------------------------------Downhill Simplex-----------------------------------------
-//double simplex_fe[3][3];
-//double start_guess[3][3] = {{0.1, 0.2, 0},
-double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
-                           {0.1, 0.3, 0},   //mid when ordered
-                           {0.1, 0.4, 0}};  //worst when ordered
 
+// simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
+//                     {0.1, 0.3, 0},   //mid when ordered
+//                     {0.1, 0.4, 0}};  //worst when ordered
 
 display_simplex(simplex_fe);
+evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
+display_simplex(simplex_fe);  
+order_simplex(simplex_fe);  
+display_simplex(simplex_fe);
 
-return 0;
-
-//display_simplex(double simplex_fe[3][3]);
-int k, l;
-printf("\n");
-for (k=0; k<3; k++) {
-  for(l=0; l<3; l++) {
-        printf("%g\t", simplex_fe[k][l]);
-  };
-  printf("\n");
-};
-
-//evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose));
-  for (k=0; k<3; k++) {
-        data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, bool(verbose));
-        simplex_fe[k][2]=dhill_data.cfree_energy_per_atom;
-        printf("simplex_fe[%i][2]=%g", k, simplex_fe[k][2]);
-  };
-  
-//display_simplex(double simplex_fe[3][3]);
-//int k, l;
-printf("\n");
-for (k=0; k<3; k++) {
-  for(l=0; l<3; l++) {
-        printf("%g\t", simplex_fe[k][l]);
-  };
-  printf("\n");
-}; 
-  
-  
-//order_simplex(double simplex_fe[3][3]);  
-int i, j, m;  
-double holdfe[3]; 
-for (i =0; i < 2; ++i) {    //standard sorting algorithm
-  for (j=i+1; j < 3; j++) {
-      if (simplex_fe[i][2] > simplex_fe[j][2]) {
-         for (m=0; m < 3; m++) {
-          holdfe[m]=simplex_fe[i][m]; 
-          simplex_fe[i][m]=simplex_fe[j][m];
-          simplex_fe[j][m]=holdfe[m]; 
-         };     
-      }; 
-   }; 
-};          
-  
-//display_simplex(double simplex_fe[3][3]);
-//int k, l;
-printf("\n");
-for (k=0; k<3; k++) {
-  for(l=0; l<3; l++) {
-        printf("%g\t", simplex_fe[k][l]);
-  };
-  printf("\n");
-};
-
-
-
-  
 printf("0fv=simplex[0][0]=%g, 0gw=simplex[0][1]=%g\n", simplex_fe[0][0], simplex_fe[0][1]);
 printf("1fv=simplex[1][0]=%g, 1gw=simplex[1][1]=%g\n", simplex_fe[1][0], simplex_fe[1][1]);
 printf("2fv=simplex[2][0]=%g, 2gw=simplex[2][1]=%g\n", simplex_fe[2][0], simplex_fe[2][1]);
 printf("best=%g  ", simplex_fe[0][2]);
 printf("mid=%g  ", simplex_fe[1][2]);
 printf("worst=%g\n", simplex_fe[2][2]); 
- 
- 
- 
-  
-
-//data dhill_data=find_energy(temp, reduced_density, simplex.best.fv, simplex.best.gw, data_dir, dx, bool(verbose));
-//double Bestpt_FE=dhill_data.cfree_energy_per_atom;
-//     dhill_data=find_energy(temp, reduced_density, simplex.mid.fv, simplex.mid.gw, data_dir, dx, bool(verbose));
-//double Midpt_FE=dhill_data.cfree_energy_per_atom;
-//     dhill_data=find_energy(temp, reduced_density, simplex.worst.fv, simplex.worst.gw, data_dir, dx, bool(verbose));
-//double Worstpt_FE=dhill_data.cfree_energy_per_atom;
-
-
-//order_points(temp, reduced_density, simplex, data_dir, dx, bool(verbose));  ---create function!------------------
-//double fe[3];
-//int i, j;
-//point temp_best, temp_mid, temp_worst;
-//double best_fe=4, mid_fe=4, worst_fe=4; //for testing 4=error
-//for (i=0; i<3; i++) {
-//  data dhill_data=find_energy(temp, reduced_density, simplex[i].fv, simplex[i].gw, data_dir, dx, bool(verbose));
- // fe[i]=dhill_data.cfree_energy_per_atom;
- // printf("fe[%i]=%g\n", i, fe[i]);
-//};
-
-//double holdfe; 
-//point holdsim;
-//for (i =0; i < 2; ++i) {    //standard sorting algorithm
-//  for (j=i+1; j < 3; j++) {
-//      if (fe[i] > fe[j]) {
-//          holdfe=fe[i];
-//          holdsim=simplex[i];
-//          fe[i]=fe[j];
-//          simplex[i]=simplex[j];
-//          fe[j]=holdfe;         
-//          simplex[j]=holdsim;
-//      }; 
-//   }; 
-//};        
-
-//printf("simplex[1].fv=%g, simplex[1].gw=%g\n", simplex[0].fv, simplex[0].gw);
-//printf("simplex[2].fv=%g, simplex[2].gw=%g\n", simplex[1].fv, simplex[1].gw);
-//printf("simplex[3].fv=%g, simplex[3].gw=%g\n", simplex[2].fv, simplex[2].gw);
-//printf("best=%g  ", fe[0]);
-//printf("mid=%g  ", fe[1]);
-//printf("worst=%g\n", fe[2]);
-
-
-//  if ((fe[0] < fe[1]) and (fe[0] < fe[2])) {
-//      temp_best=simplex[0]; 
-//      best_fe=0; 
-//     if (fe[1] < fe[2]) {
-//          temp_mid=simplex[1]; 
-//          mid_fe=1; 
-//          temp_worst=simplex[2]; 
-//          worst_fe=2; 
-//      } else {
-//          temp_mid=simplex[2]; 
-//          mid_fe=2; 
-//          temp_worst=simplex[1]; 
-//          worst_fe=1; 
-//      };
-//  } else if ((fe[1] < fe[0]) and (fe[1] < fe[2])) {
-//          temp_best=simplex[1]; 
-//          best_fe=1; 
-//          if (fe[0] < fe[2]) {
-//            temp_mid=simplex[0]; 
-//            mid_fe=0; 
-//            temp_worst=simplex[2]; 
-//            worst_fe=2; 
-//          } else {
-//            temp_mid=simplex[2]; 
-//            mid_fe=2; 
-//            temp_worst=simplex[0]; 
-//            worst_fe=0; 
-//      };
- // } else if ((fe[2] < fe[0]) and (fe[2] < fe[1])) {
-//          temp_best=simplex[2]; 
-//          best_fe=2; 
-//          if (fe[0] < fe[1]) {
-//          temp_mid=simplex[0]; 
-//          mid_fe=0; 
- //         temp_worst=simplex[1]; 
- //         worst_fe=1; 
- //         } else {
- //           temp_mid=simplex[1]; 
-  //          mid_fe=1; 
- //           temp_worst=simplex[0]; 
-  //          worst_fe=0;
- //         };
- // }; 
-  
-//simplex[1]=temp_best;
-//simplex[2]=temp_mid;
-//simplex[3]=temp_worst;
-  
-//printf("simplex[1].fv=%g, simplex[1].gw=%g\n", simplex[0].fv, simplex[0].gw);
-//printf("simplex[2].fv=%g, simplex[2].gw=%g\n", simplex[1].fv, simplex[1].gw);
-//printf("simplex[3].fv=%g, simplex[3].gw=%g\n", simplex[2].fv, simplex[2].gw);
-//printf("best=%g  ", best_fe);
-//printf("mid=%g  ", mid_fe);
-//printf("worst=%g\n", worst_fe);
-
 
 //-----------------------------------END Downhill Simplex-------------------------------------  
     
