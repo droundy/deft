@@ -419,9 +419,9 @@ printf("simplex[2].gw is: %g\n", simplex[2].gw);
 //-----------------------------------Downhill Simplex-----------------------------------------
 //double simplex_fe[3][3];
 //double start_guess[3][3] = {{0.1, 0.2, 0},
-double simplex_fe[3][3] = {{0.1, 0.2, 0},
-                           {0.1, 0.3, 0},
-                           {0.1, 0.4, 0}};
+double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
+                           {0.1, 0.3, 0},   //mid when ordered
+                           {0.1, 0.4, 0}};  //worst when ordered
 
 //display_simplex(double simplex_fe[3][3]);
 int k, l;
@@ -453,9 +453,9 @@ for (i =0; i < 2; ++i) {    //standard sorting algorithm
 };          
   
   
-printf("simplex[1].fv=%g, simplex[1].gw=%g\n", simplex_fe[0][0], simplex_fe[0][1]);
-printf("simplex[2].fv=%g, simplex[2].gw=%g\n", simplex_fe[1][0], simplex_fe[1][1]);
-printf("simplex[3].fv=%g, simplex[3].gw=%g\n", simplex_fe[2][0], simplex_fe[2][1]);
+printf("0fv=simplex[0][0]=%g, 0gw=simplex[0][1]=%g\n", simplex_fe[0][0], simplex_fe[0][1]);
+printf("1fv=simplex[1][0]=%g, 1gw=simplex[1][1]=%g\n", simplex_fe[1][0], simplex_fe[1][1]);
+printf("2fv=simplex[2][0]=%g, 2gw=simplex[2][1]=%g\n", simplex_fe[2][0], simplex_fe[2][1]);
 printf("best=%g  ", simplex_fe[0][2]);
 printf("mid=%g  ", simplex_fe[1][2]);
 printf("worst=%g\n", simplex_fe[2][2]); 
