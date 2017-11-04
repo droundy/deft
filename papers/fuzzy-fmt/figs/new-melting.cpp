@@ -308,6 +308,7 @@ void reflect_simplex(double simplex_fe[3][3]) {
   simplex_fe[2][0]=simplex_fe[0][0]+simplex_fe[1][0]-worstf;
   double worstg=simplex_fe[2][1];
   simplex_fe[2][1]=simplex_fe[0][1]+simplex_fe[1][1]-worstg;
+  simplex_fe[2][2]=0;
 }
 
 //-----------------------------------END Downhill Simplex-------------------------------------  
@@ -415,8 +416,10 @@ order_simplex(simplex_fe);
 display_simplex(simplex_fe);
 reflect_simplex(simplex_fe);
 display_simplex(simplex_fe);
-
-//reflect_simplex(simplex_fe);
+evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
+display_simplex(simplex_fe);
+order_simplex(simplex_fe);  
+display_simplex(simplex_fe);
 
 printf("best=%g  ", simplex_fe[0][2]);
 printf("mid=%g  ", simplex_fe[1][2]);
