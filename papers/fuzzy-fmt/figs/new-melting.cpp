@@ -347,6 +347,14 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   return contracted;
 }
 
+point_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
+  point_fe shrunken;
+  shrunken.fv=1;
+  shrunken.gw=1;
+  data shrink=find_energy(temp, reduced_density, shrunken.fv, shrunken.gw, data_dir, dx, bool(verbose));
+  shrunken.fe=shrink.cfree_energy_per_atom;
+  return shrunken;
+}
 
 //void reflect_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
 //  double reflected_fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
@@ -489,6 +497,7 @@ point_fe reflected_point;
 point_fe extended_point;
 points_fe contracted_points;
 point_fe better_contracted_point;
+point_fe shrunken_point;
 reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
 if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
   simplex_fe[0][2]=reflected_point.fv;
@@ -516,7 +525,9 @@ if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
   simplex_fe[0][2]=better_contracted_point.fv;
   simplex_fe[1][2]=better_contracted_point.gw; 
   simplex_fe[2][2]=better_contracted_point.fe; 
-  } 
+  } else {
+  // shrunken_point=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+  }
 }  
 
    
