@@ -347,12 +347,18 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   return contracted;
 }
 
-point_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
-  point_fe shrunken;
-  shrunken.fv=1;
-  shrunken.gw=1;
-  data shrink=find_energy(temp, reduced_density, shrunken.fv, shrunken.gw, data_dir, dx, bool(verbose));
-  shrunken.fe=shrink.cfree_energy_per_atom;
+points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
+  points_fe shrunken;
+  
+  shrunken.out.fv=(1/2)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
+  shrunken.out.gw=(1/2)*(simplex_fe[0][1] + simplex_fe[1][1]);
+  data shrink_out=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, bool(verbose));
+  shrunken.out.fe=shrink_out.cfree_energy_per_atom;
+  
+  shrunken.in.fv=(1/2)*(simplex_fe[0][0] + simplex_fe[2][0]);
+  shrunken.in.gw=(1/2)*(simplex_fe[0][1] + simplex_fe[2][1]);
+  data shrink_in=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, bool(verbose));
+  shrunken.in.fe=shrink_in.cfree_energy_per_atom;
   return shrunken;
 }
 
@@ -497,7 +503,7 @@ point_fe reflected_point;
 point_fe extended_point;
 points_fe contracted_points;
 point_fe better_contracted_point;
-point_fe shrunken_point;
+points_fe shrunken_points;
 reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
 if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
   simplex_fe[0][2]=reflected_point.fv;
@@ -526,7 +532,14 @@ if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
   simplex_fe[1][2]=better_contracted_point.gw; 
   simplex_fe[2][2]=better_contracted_point.fe; 
   } else {
-  // shrunken_point=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+    shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+    simplex_fe[0][1]=shrunken_points.out.fv;
+    simplex_fe[1][1]=shrunken_points.out.gw; 
+    simplex_fe[2][1]=shrunken_points.out.fe; 
+    
+    simplex_fe[0][2]=shrunken_points.in.fv;
+    simplex_fe[1][2]=shrunken_points.in.gw; 
+    simplex_fe[2][2]=shrunken_points.in.fe; 
   }
 }  
 
