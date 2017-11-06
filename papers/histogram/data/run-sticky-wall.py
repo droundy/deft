@@ -70,7 +70,7 @@ if method_name == 'wltmmc':
 
 cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)
 
-cmd += " --min-samples 10000"
+cmd += " --min-samples 100000"
 
 cmd += method
 
