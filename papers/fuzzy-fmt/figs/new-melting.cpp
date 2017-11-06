@@ -352,13 +352,13 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
   
   shrunken.out.fv=(1/2)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
   shrunken.out.gw=(1/2)*(simplex_fe[0][1] + simplex_fe[1][1]);
-  data shrink_out=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose);
-  shrunken.out.fe=shrink_out.cfree_energy_per_atom;
+  shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw,
+                              data_dir, dx, verbose).cfree_energy_per_atom;
   
   shrunken.in.fv=(1/2)*(simplex_fe[0][0] + simplex_fe[2][0]);
   shrunken.in.gw=(1/2)*(simplex_fe[0][1] + simplex_fe[2][1]);
-  data shrink_in=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose);
-  shrunken.in.fe=shrink_in.cfree_energy_per_atom;
+  shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw,
+                             data_dir, dx, verbose).cfree_energy_per_atom;
   return shrunken;
 }
 
