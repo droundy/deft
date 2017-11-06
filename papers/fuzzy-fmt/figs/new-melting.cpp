@@ -366,18 +366,15 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 //}
 
 void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
-  point_fe reflected_point;
-  point_fe extended_point;
-  points_fe contracted_points;
-  point_fe better_contracted_point;
-  points_fe shrunken_points;
-  reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+  point_fe reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
   if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
     simplex_fe[0][2]=reflected_point.fv;
     simplex_fe[1][2]=reflected_point.gw;
     simplex_fe[2][2]=reflected_point.fe;
-  } else if (reflected_point.fe < simplex_fe[0][0]) {
-    extended_point=extend_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+    return;
+  }
+  if (reflected_point.fe < simplex_fe[0][0]) {
+    point_fe extended_point=extend_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
     if (extended_point.fe < reflected_point.fe) {
       simplex_fe[0][2]=extended_point.fv;
       simplex_fe[1][2]=extended_point.gw;
@@ -387,28 +384,29 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
       simplex_fe[1][2]=reflected_point.gw;
       simplex_fe[2][2]=reflected_point.fe;
     }
-  } else {
-    contracted_points=contract_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-    if (contracted_points.out.fe < contracted_points.in.fe) {
-      better_contracted_point=contracted_points.out;
-    }  else {
-      better_contracted_point=contracted_points.in;
-    }
-    if (better_contracted_point.fe < simplex_fe[2][1]) {
-      simplex_fe[0][2]=better_contracted_point.fv;
-      simplex_fe[1][2]=better_contracted_point.gw;
-      simplex_fe[2][2]=better_contracted_point.fe;
-    } else {
-      shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-      simplex_fe[0][1]=shrunken_points.out.fv;
-      simplex_fe[1][1]=shrunken_points.out.gw;
-      simplex_fe[2][1]=shrunken_points.out.fe;
-
-      simplex_fe[0][2]=shrunken_points.in.fv;
-      simplex_fe[1][2]=shrunken_points.in.gw;
-      simplex_fe[2][2]=shrunken_points.in.fe;
-    }
+    return;
   }
+  points_fe contracted_points=contract_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+  point_fe better_contracted_point;
+  if (contracted_points.out.fe < contracted_points.in.fe) {
+    better_contracted_point=contracted_points.out;
+  }  else {
+    better_contracted_point=contracted_points.in;
+  }
+  if (better_contracted_point.fe < simplex_fe[2][1]) {
+    simplex_fe[0][2]=better_contracted_point.fv;
+    simplex_fe[1][2]=better_contracted_point.gw;
+    simplex_fe[2][2]=better_contracted_point.fe;
+    return;
+  }
+  points_fe shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+  simplex_fe[0][1]=shrunken_points.out.fv;
+  simplex_fe[1][1]=shrunken_points.out.gw;
+  simplex_fe[2][1]=shrunken_points.out.fe;
+
+  simplex_fe[0][2]=shrunken_points.in.fv;
+  simplex_fe[1][2]=shrunken_points.in.gw;
+  simplex_fe[2][2]=shrunken_points.in.fe;
 }
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
