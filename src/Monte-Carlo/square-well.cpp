@@ -353,7 +353,10 @@ void sw_simulation::move_a_ball() {
           // energies.  But random sampling (moving the energy with
           // each independent move) should sample all energies in
           // energies_found**2 random samples.
-          sa_weight = max(1,sqrt(sa_t0*(1/ncounts_up + 1/ncounts_down))/energies_found);
+
+          //sa_weight = max(1,sqrt(sa_t0*(1/ncounts_up + 1/ncounts_down))/energies_found);
+          sa_weight = 1/(1+1/(energies_found*energies_found
+          *sqrt(tup*tdown)*(1/ncounts_up+1/ncounts_down)));
         }
         Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
       }
@@ -413,7 +416,8 @@ void sw_simulation::end_move_updates(){
       energies_found++; // we found a new energy!
       sa_t0 = moves.total;
     }
-    wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
+    //wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
+    wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
