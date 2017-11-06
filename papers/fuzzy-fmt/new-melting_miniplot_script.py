@@ -20,10 +20,10 @@ data_file=data_directory+"/plot_kT"+temp+".dat"
 thisdata = np.loadtxt(data_file)
 
 densities=thisdata[:,1]
-crystal_energies_per_atom = thisdata[:,2]
-homogeneous_energies_per_atom = thisdata[:,3]
-energy_differences_per_atom = thisdata[:,4]
-crystal_energies_per_volume = thisdata[:,5]
+crystal_energies_per_atom = thisdata[:,5]
+homogeneous_energies_per_atom = thisdata[:,4]
+energy_differences_per_atom = thisdata[:,6]
+crystal_energies_per_volume = thisdata[:,9]
 
 plot1=data_directory+"/plot1_FEvsDen_kT"+temp+".png"
 plot2=data_directory+"/plot2_Pressure_kT"+temp+".png"
@@ -33,7 +33,7 @@ plt.plot(densities, crystal_energies_per_atom, 'b', label="Crystal Free Energy/a
 plt.plot(densities, homogeneous_energies_per_atom, 'g', label="Homogeneous Free Energy/atom")
 plt.title('Free Energy/atom vs Reduced Density at Fixed kT='+temp)
 plt.xlabel('Reduced Density')
-plt.ylabel('Free Energy')
+plt.ylabel('Free Energy/atom')
 plt.legend()
 plt.savefig(plot1)
 

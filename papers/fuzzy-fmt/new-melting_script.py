@@ -32,22 +32,28 @@ parser.add_argument('--tstep', metavar=' tloop_step', type=float, default=1,
                     help='step temperature kT by (default: 1.0)')
 parser.add_argument('--d', metavar='     directory', type=str, default="crystallization",
                     help='directory for data files') 
-parser.add_argument('--fvstart', metavar='  fvloop_start', type=float, default=0,   #ASK if we really want to do this!
+parser.add_argument('--fv', metavar=' loop option', type=float, default=-1,   
+                    help='gwidth or -1 loop (default: -1)')
+parser.add_argument('--fvstart', metavar='  fvloop_start', type=float, default=0,   
                     help='starting fv (default: 0)')
 parser.add_argument('--fvend', metavar='  fvloop_end', type=float, default=1,
                     help='ending gwidth (default: 1)')
 parser.add_argument('--fvstep', metavar='fvloop_step', type=float, default=0.2,
                     help='step fv by (default: 0.2)') 
-parser.add_argument('--gwstart', metavar='  gwloop_start', type=float, default=0.01,   #ASK if we really want to do this!
+parser.add_argument('--gw', metavar=' loop option', type=float, default=-1,   
+                    help='gwidth or -1 loop without lattice ref or -2 loop with lattice ref (default: -1)')
+parser.add_argument('--gwstart', metavar='  gwloop_start', type=float, default=0.01,   
                     help='starting gwidth (default: 0.01)')
 group3.add_argument('--gwend', metavar='  gwloop_end', type=float,
                     help='ending gwidth')
 group4.add_argument('--gwstep', metavar=' gwloop_step', type=float,
                     help='step gwidth') 
-group3.add_argument('--gwlend', metavar=' gwloop_latend', type=float, default=2,
-                    help='ending gwidth will be computed lattice_constant divided by this number (default: 2)')
-group4.add_argument('--gwlstep', metavar='gwloop_latstep', type=float, default=10,
-                    help='gwidth will step by computed lattice_constant divided by this number (default: 10)')                   
+group3.add_argument('--gwlend', metavar=' gwloop_latend', type=float, default=0.5,
+                    help='ending gwidth will be computed lattice_constant multiplied by this number (default: 0.5)')
+group4.add_argument('--gwlstep', metavar='gwloop_latstep', type=float, default=0.1,
+                    help='gwidth will step by computed lattice_constant multiplied by this number (default: 0.1)') 
+parser.add_argument('--dx', metavar='dx grid spacing', type=float, default=0.01,
+                    help='grid spacing (default: 0.01)')                   
                                    
 
 args=parser.parse_args()
@@ -63,10 +69,12 @@ tstart=args.tstart
 tend=args.tend
 tstep=args.tstep
 data_dir=args.d
+dx=args.dx
 
 fv_start=args.fvstart
 fv_end=args.fvend
 fv_step=args.fvstep
+gw=args.gw
 gwidth_start=args.gwstart
 gwidth_end=args.gwend
 gwidth_step=args.gwstep
@@ -74,19 +82,10 @@ gwidth_latend=args.gwlend
 gwidth_latstep=args.gwlstep
     
 if args.nstart:
-    densities = np.arange(nstart, nend+nstep, nstep, float)
+    densities = np.arange(nstart, nend, nstep, float)
     
 if args.tstart:
-    temperatures = np.arange(tstart, tend+tstep, tstep, float)
-
-#If make a higher level script, move this question to the top level!
-if args.d == "crystallization":
-    print
-    print "Do you want to save or remove default directory [fuzzy-fmt]/crystallization?"
-    wait = raw_input("If not, press the ENTER key to continue program...")
-    print
-else:
-    print
+    temperatures = np.arange(tstart, tend, tstep, float)
     
 print     
 print "Running new-melting_script.py with:"
@@ -95,26 +94,26 @@ print "  Reduced Densities:", densities
 print "  Data directory: deft/papers/fuzzy-fmt/"+data_dir
 print 
 
+
 for i in range(0,len(temperatures)):
     for j in range(0,len(densities)):
         print
-        print "Temperature:", temperatures[i], "Density:", densities[j]  #testing for loop
+        print "Temperature:", temperatures[i], "Density:", densities[j]
         cmd = ''
         if os.system('which rq') == 0:
             cmd = 'rq run -J new-melting-kT=%g-n=%g ' % (temperatures[i],densities[j])
-        cmd += 'figs/new-melting.mkdat --kT %g --rd %g' % (temperatures[i],densities[j])
-        cmd += ' --dir %s' % (data_dir)
-        cmd += ' --fvstart %g --fvend %g --fvstep %g' % (fv_start, fv_end, fv_step)
+        cmd += 'figs/new-melting.mkdat --kT %g --n %g' % (temperatures[i],densities[j])
+        cmd += ' --d %s --dx' % (data_dir, dx)
+        cmd += ' --fvstart %g --fvend %g --fvstep %g --fv %g' % (fv_start, fv_end, fv_step, fv)
         if args.gwend or args.gwstep:
-            cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwidth_start, gwidth_end, gwidth_step)
-        else: #use gwidth values reference lattice_constant by default
+            cmd += ' --gwstart %g --gwend %g --gwstep %g --gw %g' % (gwidth_start, gwidth_end, gwidth_step, gw)
+        else: 
             cmd += ' --gwstart %g --gwlend %g --gwlstep %g' % (gwidth_start, gwidth_latend, gwidth_latstep)
 
         print(cmd)
         os.system(cmd)
 
-##----------------------------------------------------------------------
-##NOTE: lattice_constant will be divided by gwstep     
+   
    
         
 
