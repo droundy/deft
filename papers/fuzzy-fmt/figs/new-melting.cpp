@@ -421,10 +421,11 @@ int main(int argc, char **argv) {
   int verbose = false;
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
-  double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
-    {0.1, 0.3, 0},   //mid when ordered
-    {0.1, 0.4, 0}
-  };  //worst when ordered
+  double simplex_fe[3][3] = {
+    {0.1, 0.2, 0},   // best when ordered
+    {0.1, 0.3, 0},   // mid when ordered
+    {0.1, 0.4, 0}    // worst when ordered
+  };
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
