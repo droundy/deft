@@ -24,25 +24,15 @@ def plotPressure(rho,T):
 	for density in rho:
 		pressArray = []
 		for temp in T:
-			pressure = np.loadtxt('data2/ff-'+str(density)+\
+			pressure = np.loadtxt('data/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-press.dat')
                 
-                if density == 0.95:
-                    pressure = float(pressure*1e10/3664101397)
-                elif density == 0.96:
-                    pressure = float(pressure*1e10/3742376538)
-                elif density == 0.97:
-                    pressure = float(pressure*1e10/3804308688)
-                elif density == 0.98:
-                    pressure = float(pressure*1e10/3964798948)
-                elif density == 0.99:
-                    pressure = float(pressure*1e10/4160728275)
                     
                 pressArray.append(float(pressure))
-                plt.plot(pressArray,density,'k.')
-        plt.title('Density v. Pressure')
-        plt.xlabel('Pressure')
-        plt.ylabel('Density')
+                plt.plot(density,pressArray,'k.')
+        plt.title('Pressure-Density at T*: '+str(temp))
+        plt.ylabel('Pressure p*')
+        plt.xlabel(r'Density $\rho*$')
 
 def plotPositions(rho,T):
 	for density in rho:
@@ -67,10 +57,10 @@ def plotRadialDF(rho,T):
                 '_temp-'+str(temp)+'-radial.dat')
 			plt.figure()
 			plt.plot(radialData[:,0],radialData[:,1])#/(radialData[:,0]**2))
-			plt.title('Sum of Spheres at a Radial Distance, non-averaged.\n'\
+			plt.title('Radial Distribution Function.\n'\
 				'Temp: '+str(temp)+' and Density: ' +str(density))
 			plt.xlabel('Radial Distance (r)')
-			plt.ylabel('Number of Spheres at this distance')
+			plt.ylabel('Nearby Spheres')
 
 
 #~ def plotEnergyPDF(rho,T):
@@ -104,10 +94,10 @@ def plotStructureFactor(rho,T):
             dk = 1/40
             kvals = dk*np.arange(0.0, len(structureData), 1)
             kx, ky = np.meshgrid(kvals, kvals)
-        
-            sf_max = structureData[30:][30:].max()/Nballs
-            ds = sf_max / 1000
-            cax =ax.contourf(kx, ky, structureData/(Nballs), levels = np.arange(0,0.5,ds))
+            resolution = 2e3
+            sf_max = structureData[30:][30:].max()/Nballs/4
+            ds = sf_max / resolution
+            cax =ax.contourf(kx, ky, structureData/(Nballs), levels = np.arange(0,sf_max + ds,ds))
             ax.set_aspect('equal')
             cbar = fig.colorbar(cax)
             ax.set_title('Structure Factor density:'+str(density))
@@ -119,7 +109,7 @@ def plotDiffusionCoeff(rho,T):
     plt.figure()
     for temp in T:
         for density in rho:
-            diffusionData = np.loadtxt('data2/ff-'+str(density)+'_temp-'+\
+            diffusionData = np.loadtxt('data/ff-'+str(density)+'_temp-'+\
                 str(temp)+'-dif.dat')
             print diffusionData
             plt.semilogy(density,diffusionData,'k.')
