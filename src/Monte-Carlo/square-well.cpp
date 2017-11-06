@@ -357,7 +357,7 @@ void sw_simulation::move_a_ball() {
           //sa_weight = max(1,sqrt(sa_t0*(1/ncounts_up + 1/ncounts_down))/energies_found);
           const double sa_uncert_sqr = saPmove*saPmove/(energies_found*energies_found);
           const double tm_uncert_sqr = Pmove*Pmove*(1/ncounts_up+1/ncounts_down);
-          sa_weight = tm_uncert_sqr/(sa_uncert_sqr + tm_uncert_sqr));
+          sa_weight = tm_uncert_sqr/(sa_uncert_sqr + tm_uncert_sqr);
         }
         Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
       }
