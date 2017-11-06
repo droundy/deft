@@ -268,7 +268,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   return data_out;
 }
 
-//-----------------------------------Downhill Simplex-----------------------------------------
+//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
 
 struct point_fe {
   double fv;
@@ -362,39 +362,57 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
   return shrunken;
 }
 
-//void reflect_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
-//  double reflected_fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
-//  double reflected_gw=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
-//  data reflected=find_energy(temp, reduced_density, reflected_f, reflected_g, data_dir, dx, bool(verbose));
- // double reflected_fe=reflected.cfree_energy_per_atom;
- // if (reflected_fe < simplex_fe[2][2]) {
- //     simplex_fe[2][0]=reflected_f;
- //     simplex_fe[2][1]=reflected_g;
- //     simplex_fe[2][2]=reflected_fe;
- // }
+//check_convergence_simplex() {
 //}
 
-//void extend_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
-//  double extended_g=;
-//  data extended=find_energy(temp, reduced_density, extended_f, extended_g, data_dir, dx, bool(verbose));
-//  double extended_fe=extended.cfree_energy_per_atom;
-//  if (extended_fe < simplex_fe[2][2]) {
-//      simplex_fe[2][0]=extended_f;
-//      simplex_fe[2][1]=extended_g;
-//      simplex_fe[2][2]=extended_fe;
-//  }
-//}
+void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool(verbose)) {
+point_fe reflected_point;
+point_fe extended_point;
+points_fe contracted_points;
+point_fe better_contracted_point;
+points_fe shrunken_points;
+reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
+  simplex_fe[0][2]=reflected_point.fv;
+  simplex_fe[1][2]=reflected_point.gw; 
+  simplex_fe[2][2]=reflected_point.fe;
+} else if (reflected_point.fe < simplex_fe[0][0]) {
+  extended_point=extend_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+  if (extended_point.fe < reflected_point.fe) {
+    simplex_fe[0][2]=extended_point.fv;
+    simplex_fe[1][2]=extended_point.gw; 
+    simplex_fe[2][2]=extended_point.fe;
+  } else {
+    simplex_fe[0][2]=reflected_point.fv;
+    simplex_fe[1][2]=reflected_point.gw; 
+    simplex_fe[2][2]=reflected_point.fe;
+  }
+} else {  
+  contracted_points=contract_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
+  if (contracted_points.out.fe < contracted_points.in.fe) {
+    better_contracted_point=contracted_points.out;
+  }  else {
+    better_contracted_point=contracted_points.in;
+  }
+  if (better_contracted_point.fe < simplex_fe[2][1]) {
+  simplex_fe[0][2]=better_contracted_point.fv;
+  simplex_fe[1][2]=better_contracted_point.gw; 
+  simplex_fe[2][2]=better_contracted_point.fe; 
+  } else {
+    shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+    simplex_fe[0][1]=shrunken_points.out.fv;
+    simplex_fe[1][1]=shrunken_points.out.gw; 
+    simplex_fe[2][1]=shrunken_points.out.fe; 
+    
+    simplex_fe[0][2]=shrunken_points.in.fv;
+    simplex_fe[1][2]=shrunken_points.in.gw; 
+    simplex_fe[2][2]=shrunken_points.in.fe; 
+  }
+ } 
+} 
 
+//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
-//void reflect_simplex(double simplex_fe[3][3]) {
-//  double reflected_f=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
-//  double reflected_g=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
-//  simplex_fe[2][0]=reflected_f;
-//  simplex_fe[2][1]=reflected_g;
-//  simplex_fe[2][2]=0;
-//}
-
-//-----------------------------------END Downhill Simplex-------------------------------------  
 
 
 int main(int argc, char **argv) {
@@ -404,12 +422,13 @@ int main(int argc, char **argv) {
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
   
-//-----------------------------------Downhill Simplex-----------------------------------------
+//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
 double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
                            {0.1, 0.3, 0},   //mid when ordered
                            {0.1, 0.4, 0}};  //worst when ordered 
-                           
-//-----------------------------------END Downhill Simplex-------------------------------------  
+ 
+//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++                           
+ 
   
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
@@ -487,74 +506,32 @@ double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
   printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
  
    
-//-----------------------------------Downhill Simplex-----------------------------------------
+//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
 
 // simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when sorted
 //                     {0.1, 0.3, 0},   //mid when sorted
 //                     {0.1, 0.4, 0}};  //worst when sorted
-//double reflected_point_fe;
-display_simplex(simplex_fe);
-evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
-display_simplex(simplex_fe);  
-sort_simplex(simplex_fe);  
-display_simplex(simplex_fe);
 
-point_fe reflected_point;
-point_fe extended_point;
-points_fe contracted_points;
-point_fe better_contracted_point;
-points_fe shrunken_points;
-reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
-if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
-  simplex_fe[0][2]=reflected_point.fv;
-  simplex_fe[1][2]=reflected_point.gw; 
-  simplex_fe[2][2]=reflected_point.fe;
-} else if (reflected_point.fe < simplex_fe[0][0]) {
-  extended_point=extend_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
-  if (extended_point.fe < reflected_point.fe) {
-    simplex_fe[0][2]=extended_point.fv;
-    simplex_fe[1][2]=extended_point.gw; 
-    simplex_fe[2][2]=extended_point.fe;
-  } else {
-    simplex_fe[0][2]=reflected_point.fv;
-    simplex_fe[1][2]=reflected_point.gw; 
-    simplex_fe[2][2]=reflected_point.fe;
-  }
-} else {  
-  contracted_points=contract_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
-  if (contracted_points.out.fe < contracted_points.in.fe) {
-    better_contracted_point=contracted_points.out;
-  }  else {
-    better_contracted_point=contracted_points.in;
-  }
-  if (better_contracted_point.fe < simplex_fe[2][1]) {
-  simplex_fe[0][2]=better_contracted_point.fv;
-  simplex_fe[1][2]=better_contracted_point.gw; 
-  simplex_fe[2][2]=better_contracted_point.fe; 
-  } else {
-    shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
-    simplex_fe[0][1]=shrunken_points.out.fv;
-    simplex_fe[1][1]=shrunken_points.out.gw; 
-    simplex_fe[2][1]=shrunken_points.out.fe; 
-    
-    simplex_fe[0][2]=shrunken_points.in.fv;
-    simplex_fe[1][2]=shrunken_points.in.gw; 
-    simplex_fe[2][2]=shrunken_points.in.fe; 
-  }
-}  
-
-   
 display_simplex(simplex_fe);
 evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose)); 
 display_simplex(simplex_fe);
+
+//put in loop...
 sort_simplex(simplex_fe);  
-display_simplex(simplex_fe);
+display_simplex(simplex_fe);  //for debug
+advance_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+display_simplex(simplex_fe);   //for debug
+//check_convergence_simplex(); 
+//end loop
 
-printf("best=%g  ", simplex_fe[0][2]);
-printf("mid=%g  ", simplex_fe[1][2]);
-printf("worst=%g\n", simplex_fe[2][2]); 
+sort_simplex(simplex_fe);    //delete when have loop
+display_simplex(simplex_fe);  //delete when have loop
 
-//-----------------------------------END Downhill Simplex-------------------------------------  
+//printf("best=%g  ", simplex_fe[0][2]);
+//printf("mid=%g  ", simplex_fe[1][2]);
+//printf("worst=%g\n", simplex_fe[2][2]); 
+
+//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++  
     
    
    if (fv == -1) {
