@@ -366,11 +366,15 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 //}
 
 void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
+      printf("   reflect simplex\n");  //debug
   point_fe reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+      printf("   simplex reflected, reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
   if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
     simplex_fe[0][2]=reflected_point.fv;
     simplex_fe[1][2]=reflected_point.gw;
     simplex_fe[2][2]=reflected_point.fe;
+    printf("   simplex reflected\n");  //debug
+    display_simplex(   simplex_fe);   //debug
     return;
   }
   if (reflected_point.fe < simplex_fe[0][0]) {
@@ -379,27 +383,41 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
       simplex_fe[0][2]=extended_point.fv;
       simplex_fe[1][2]=extended_point.gw;
       simplex_fe[2][2]=extended_point.fe;
+      printf("   simplex reflected\n");  //debug
+      display_simplex(   simplex_fe);   //debug
     } else {
       simplex_fe[0][2]=reflected_point.fv;
       simplex_fe[1][2]=reflected_point.gw;
       simplex_fe[2][2]=reflected_point.fe;
+      printf("   simplex reflected\n");  //debug
+      display_simplex(   simplex_fe);  //debug
     }
     return;
   }
+  printf("   contract simplex\n");  //debug
   points_fe contracted_points=contract_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+  printf("   simplex contracted\n");  //debug
+  printf("   contracted_points.in.fv=%g, contracted_points.in.gw=%g, contracted_points.in.fe=%g\n", contracted_points.in.fv, contracted_points.in.gw, contracted_points.in.fe);  //debug
+  printf("   contracted_points.out.fv=%g, contracted_points.out.gw=%g, contracted_points.out.fe=%g\n", contracted_points.out.fv, contracted_points.out.gw, contracted_points.out.fe);  //debug
   point_fe better_contracted_point;
   if (contracted_points.out.fe < contracted_points.in.fe) {
     better_contracted_point=contracted_points.out;
   }  else {
     better_contracted_point=contracted_points.in;
   }
+  printf("   better_contracted_point.fv=%g, better_contracted_point.gw=%g, better_contracted_point.fe=%g\n", better_contracted_point.fv, better_contracted_point.gw, better_contracted_point.fe);  //debug
   if (better_contracted_point.fe < simplex_fe[2][1]) {
     simplex_fe[0][2]=better_contracted_point.fv;
     simplex_fe[1][2]=better_contracted_point.gw;
     simplex_fe[2][2]=better_contracted_point.fe;
+      printf("   simplex contracted\n");  //debug
+    display_simplex(   simplex_fe);  //debug
     return;
   }
+  printf("   shrink simplex\n");  //debug
   points_fe shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+  printf("   shrunken_points.in.fv=%g, shrunken_points.in.gw=%g, shrunken_points.in.fe=%g\n", shrunken_points.in.fv, shrunken_points.in.gw, shrunken_points.in.fe);  //debug
+  printf("   shrunken_points.out.fv=%g, shrunken_points.out.gw=%g, shrunken_points.out.fe=%g\n", shrunken_points.out.fv, shrunken_points.out.gw, shrunken_points.out.fe);  //debug
   simplex_fe[0][1]=shrunken_points.out.fv;
   simplex_fe[1][1]=shrunken_points.out.gw;
   simplex_fe[2][1]=shrunken_points.out.fe;
@@ -407,14 +425,18 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   simplex_fe[0][2]=shrunken_points.in.fv;
   simplex_fe[1][2]=shrunken_points.in.gw;
   simplex_fe[2][2]=shrunken_points.in.fe;
+  
+  printf("   simplex shrunken\n");  //debug
+  display_simplex(   simplex_fe);  //debug
 }
+
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
 
 
 int main(int argc, char **argv) {
-  double reduced_density, gw=-1, fv=-1, temp; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   double fv_start=0.0, fv_end=1.0, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
   double gwidth, gwend, gwstep;
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
@@ -508,6 +530,14 @@ int main(int argc, char **argv) {
   printf("git version: %s\n", version_identifier());
   printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
 
+  // Create directory for data files
+  if (strcmp(data_dir,"none") == 0) {
+    sprintf(data_dir,"%s",default_data_dir);
+    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
+  } else {
+    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
+  }
+  mkdir(data_dir, 0777);
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
 
@@ -518,17 +548,22 @@ int main(int argc, char **argv) {
   display_simplex(simplex_fe);
   evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
   display_simplex(simplex_fe);
+  printf("starting downhill simplex loop...\n");
 
-//put in loop...
-  sort_simplex(simplex_fe);
-  display_simplex(simplex_fe);  //for debug
-  advance_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
-  display_simplex(simplex_fe);   //for debug
+  for (int i=0;i<50;i++) {
+    printf("sort simplex\n");
+    sort_simplex(simplex_fe);
+    printf("simplex sorted\n");
+    display_simplex(simplex_fe);  //for debug
+    printf("advance simplex\n");
+    advance_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+    printf("simplex advanced\n");
+    display_simplex(simplex_fe);   //for debug
 //check_convergence_simplex();
-//end loop
-
+  }
   sort_simplex(simplex_fe);    //delete when have loop
   display_simplex(simplex_fe);  //delete when have loop
+  exit(1);
 
 //printf("best=%g  ", simplex_fe[0][2]);
 //printf("mid=%g  ", simplex_fe[1][2]);
@@ -546,15 +581,6 @@ int main(int argc, char **argv) {
   } else if (gw == -2) {
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant*%g\n", gw_start, gw_lend, gw_lstep);
   }
-
-  // Create directory for data files
-  if (strcmp(data_dir,"none") == 0) {
-    sprintf(data_dir,"%s",default_data_dir);
-    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
-  } else {
-    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
-  }
-  mkdir(data_dir, 0777);
 
   if (fv == -1) {
     double best_energy_diff = 1e100;
