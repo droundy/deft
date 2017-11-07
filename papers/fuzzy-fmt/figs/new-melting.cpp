@@ -452,7 +452,7 @@ int main(int argc, char **argv) {
   double gwidth, gwend, gwstep;
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
-  int downhill = true;
+  int downhill = false;
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
   double simplex_fe[3][3] = {{0.8, 0.2, 0},  //best when ordered
@@ -503,7 +503,7 @@ int main(int argc, char **argv) {
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
     
     /*** Downhill Simplex OPTIONS ***/
-    {"nodh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Don't do a Downhill Simplex", "BOOLEAN"},
+    {"dh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Do a Downhill Simplex", "BOOLEAN"},
     
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
