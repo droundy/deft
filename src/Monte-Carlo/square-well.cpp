@@ -355,9 +355,16 @@ void sw_simulation::move_a_ball() {
           // energies_found**2 random samples.
 
           //sa_weight = max(1,sqrt(sa_t0*(1/ncounts_up + 1/ncounts_down))/energies_found);
-          const double sa_uncert_sqr = saPmove*saPmove/(energies_found*energies_found);
-          const double tm_uncert_sqr = Pmove*Pmove*(1/ncounts_up+1/ncounts_down);
-          sa_weight = tm_uncert_sqr/(sa_uncert_sqr + tm_uncert_sqr);
+          
+          // We need the following uncertainty in TMMC in order to
+          // ensure that the cumulative error in the weights over the
+          // entire energy range is less than 1.
+          const double needed_uncert_sqr = 1/energies_found;
+          // The following is pessimistically assuming that we may end
+          // up with a very small Pmove due to systematic (correlated)
+          // errors, as we have observed happen before.
+          const double tm_uncert_sqr = 1/ncounts_up+1/ncounts_down;
+          sa_weight = tm_uncert_sqr/(needed_uncert_sqr + tm_uncert_sqr);
         }
         Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
       }
