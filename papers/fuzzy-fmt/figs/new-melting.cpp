@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+//#include <math.h>
 #include <time.h>
 #include <sys/stat.h>
 #include <popt.h>
@@ -339,9 +340,10 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   printf("working with simplex:\n"); //debug
   display_simplex(   simplex_fe);   //debug
 
-  contracted.out.fv=((3/4)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2)*(simplex_fe[2][0]));
-  double A=((3/4)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2)*(simplex_fe[2][0]));
-  printf("A is %g\n", A); //debug
+  contracted.out.fv=((3/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
+  //double Apple=((3/4)*(0.1+0.1))-((1/2)*(0.1));  //debug -this doesn't work!
+  double Apple=1/2.0;  //debug -this doesn't work!
+  printf("Apple is %f\n", Apple); //debug
   contracted.out.gw=((3/4)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2)*(simplex_fe[2][1]));
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
   data contract_out=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose);
@@ -379,7 +381,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
       printf("   reflect simplex\n");  //debug
   point_fe reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
       printf("   simplex reflected, reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
-  if (simplex_fe[0][2]  < reflected_point.fe and reflected_point.fe < simplex_fe[1][2]) {
+  if (simplex_fe[0][2]  < reflected_point.fe && reflected_point.fe < simplex_fe[1][2]) {
     simplex_fe[2][0]=reflected_point.fv;
     simplex_fe[2][1]=reflected_point.gw;
     simplex_fe[2][2]=reflected_point.fe;
