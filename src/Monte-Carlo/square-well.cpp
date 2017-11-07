@@ -340,7 +340,7 @@ void sw_simulation::move_a_ball() {
         if (lnPmove < 0) {
           saPmove = exp(lnPmove);
         }
-        double sa_weight = 1.0;
+        sa_weight = 1.0;
         if (ncounts_up > 1 && ncounts_down > 1) {
           // The following is the fractional uncertainty in the TMMC
           // probability, assuming that each count in the collection
@@ -418,11 +418,7 @@ void sw_simulation::end_move_updates(){
   if(moves.total % N == 0) iteration++;
   if (sa_t0) {
     if (use_satmmc && energy_histogram[energy] == 0) {
-      if (wl_factor < 0.95)
-        printf("Resetting sa_t0 from %g to %g (discovered energy %d, wl_factor is %g)\n",
-               sa_t0, double(moves.total), energy, wl_factor);
       energies_found++; // we found a new energy!
-      sa_t0 = moves.total;
     }
     //wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
     wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
@@ -787,12 +783,14 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
         }
         printf("[%9ld] Have %ld samples to go (at %ld energies)\n",
                iteration, num_to_go, energies_unconverged);
-        printf("       <%d - %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
+        printf("       <%d - %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d",
                lowest_problem_energy, highest_problem_energy,
                optimistic_samples[lowest_problem_energy],
                pessimistic_samples[lowest_problem_energy],
                optimistic_samples[highest_problem_energy],
                pessimistic_samples[highest_problem_energy], min_samples, energy);
+        if (use_tmmc) printf(", sa %.0f% %g", 100*sa_weight, wl_factor);
+        printf(")\n");
         fflush(stdout);
       }
       for(int i = min_important_energy; i > max_entropy_state; i--){
@@ -816,18 +814,20 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
         delete[] ln_dos;
         printf("[%9ld] Have %ld energies to go (down to T=%g or %g)\n",
                iteration, energies_unconverged, nice_T, converged_to_temperature(ln_dos));
-        printf("       <%d - %d vs %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d)\n",
+        printf("       <%d - %d vs %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d",
                min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
                optimistic_samples[min_important_energy],
                pessimistic_samples[highest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy);
+        if (use_satmmc) printf(", sa %.2g%% %.2g", 100*sa_weight, wl_factor);
+        printf(")\n");
         {
           printf("      ");
           print_seconds_as_time(now);
           long pess = pessimistic_samples[min_important_energy];
           long percent_done = 100*pess/min_samples;
-          printf("(%ld%% done,", percent_done);
+          printf("(%ld%% done", percent_done);
           if (pess > 0) {
             const clock_t clocks_remaining = now*(min_samples-pess)/pess;
             print_seconds_as_time(clocks_remaining);

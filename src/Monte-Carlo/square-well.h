@@ -102,6 +102,7 @@ struct sw_simulation {
   double sa_t0; // if it is non-zero, update wl_factor on each move SA-style.
   double sa_prefactor; // prefactor in computing wl_factor when running SA.
   bool use_satmmc; // if true, reset sa_t0 whenever we encounter a new energy.
+  double sa_weight; // the most recent sa_weight used in satmmc.
 
   /* The following define file names for periodic output files that
      are dumped every so often.  It should contain a single %d style format. */
@@ -292,6 +293,7 @@ struct sw_simulation {
     sa_t0 = 0.0; // default to no SA method either
     sa_prefactor = 1.0; // default to standard SAMC when using SAMC.
     use_satmmc = false; // default to not using SATMMC.
+    sa_weight = 0.0;
     use_tmmc = false; // default to not using TMMC for accepting moves.
   };
 };
