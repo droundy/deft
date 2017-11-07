@@ -327,8 +327,8 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
 
 point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   point_fe extended;
-  extended.fv=(3/2)*(simplex_fe[0][0]+simplex_fe[1][0])-2*simplex_fe[2][0];
-  extended.gw=(3/2)*(simplex_fe[0][1]+simplex_fe[1][1])-2*simplex_fe[2][1];
+  extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-2.0*simplex_fe[2][0];
+  extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-2.0*simplex_fe[2][1];
   data extend=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose);
   extended.fe=extend.cfree_energy_per_atom;
   return extended;
@@ -341,16 +341,13 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   display_simplex(   simplex_fe);   //debug
 
   contracted.out.fv=((3/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
-  //double Apple=((3/4)*(0.1+0.1))-((1/2)*(0.1));  //debug -this doesn't work!
-  double Apple=1/2.0;  //debug -this doesn't work!
-  printf("Apple is %f\n", Apple); //debug
-  contracted.out.gw=((3/4)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2)*(simplex_fe[2][1]));
+  contracted.out.gw=((3/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
   data contract_out=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose);
   contracted.in.fe=contract_out.cfree_energy_per_atom;
 
-  contracted.in.fv=((1/4)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2)*(simplex_fe[2][0]));
-  contracted.in.gw=((1/4)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2)*(simplex_fe[2][1]));
+  contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
+  contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
   data contract_in=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose);
   contracted.in.fe=contract_in.cfree_energy_per_atom;
@@ -360,13 +357,13 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
 points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   points_fe shrunken;
 
-  shrunken.out.fv=(1/2)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
-  shrunken.out.gw=(1/2)*(simplex_fe[0][1] + simplex_fe[1][1]);
+  shrunken.out.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
+  shrunken.out.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[1][1]);
   shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw,
                               data_dir, dx, verbose).cfree_energy_per_atom;
 
-  shrunken.in.fv=(1/2)*(simplex_fe[0][0] + simplex_fe[2][0]);
-  shrunken.in.gw=(1/2)*(simplex_fe[0][1] + simplex_fe[2][1]);
+  shrunken.in.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[2][0]);
+  shrunken.in.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[2][1]);
   shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw,
                              data_dir, dx, verbose).cfree_energy_per_atom;
   return shrunken;
@@ -422,7 +419,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
     better_contracted_point=contracted_points.in;
   }
   printf("   better_contracted_point.fv=%g, better_contracted_point.gw=%g, better_contracted_point.fe=%g\n", better_contracted_point.fv, better_contracted_point.gw, better_contracted_point.fe);  //debug
-  if (better_contracted_point.fe < simplex_fe[2][1]) {
+  if (better_contracted_point.fe < simplex_fe[1][2]) {
     simplex_fe[2][0]=better_contracted_point.fv;
     simplex_fe[2][1]=better_contracted_point.gw;
     simplex_fe[2][2]=better_contracted_point.fe;
