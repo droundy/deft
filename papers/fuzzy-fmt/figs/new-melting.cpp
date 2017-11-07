@@ -455,10 +455,10 @@ int main(int argc, char **argv) {
   int downhill = true;
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
-  double simplex_fe[3][3] = {{0.05, 0.2, 0},   //best when ordered
-    {0.4, 0.3, 0},   //mid when ordered
-    {0.2, 0.1, 0}
-  };  //worst when ordered
+  double simplex_fe[3][3] = {{0.8, 0.2, 0},  //best when ordered
+                             {0.4, 0.3, 0},   //mid when ordered
+                             {0.2, 0.1, 0}    //worst when ordered
+  };  
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
