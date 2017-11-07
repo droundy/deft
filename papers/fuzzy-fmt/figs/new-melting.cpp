@@ -593,7 +593,7 @@ if (downhill) {
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
 
-return 0;  //for debug
+//return 0;  //for debug
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
