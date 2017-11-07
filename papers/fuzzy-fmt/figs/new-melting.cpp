@@ -16,7 +16,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include <math.h>
 #include <time.h>
 #include <sys/stat.h>
 #include <popt.h>
@@ -377,12 +376,12 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
       display_simplex(   simplex_fe);   //debug
       printf("   reflect simplex\n");  //debug
   point_fe reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-      printf("   simplex reflected, reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
+      printf("   reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
   if (simplex_fe[0][2]  < reflected_point.fe && reflected_point.fe < simplex_fe[1][2]) {
     simplex_fe[2][0]=reflected_point.fv;
     simplex_fe[2][1]=reflected_point.gw;
     simplex_fe[2][2]=reflected_point.fe;
-    printf("   simplex reflected A\n");  //debug
+    printf("   **simplex reflected A\n");  //debug
     display_simplex(   simplex_fe);   //debug
     return;
   }
@@ -393,13 +392,13 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
       simplex_fe[2][0]=extended_point.fv;
       simplex_fe[2][1]=extended_point.gw;
       simplex_fe[2][2]=extended_point.fe;
-      printf("   simplex reflected B and extended\n");  //debug
+      printf("   **simplex reflected B and extended\n");  //debug
       display_simplex(   simplex_fe);   //debug
     } else {
       simplex_fe[2][0]=reflected_point.fv;
       simplex_fe[2][1]=reflected_point.gw;
       simplex_fe[2][2]=reflected_point.fe;
-      printf("   simplex reflected C but not extended\n");  //debug
+      printf("   **simplex reflected C but not extended\n");  //debug
       display_simplex(   simplex_fe);  //debug
     }
     return;
@@ -414,7 +413,6 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   if (contracted_points.out.fe < contracted_points.in.fe) {
     better_contracted_point=contracted_points.out;  //there's probably a problem with this!
     printf("better_contracted_point.fv=%g, better_contracted_point.gw=%g, better_contracted_point.fe=%g\n", better_contracted_point.fv, better_contracted_point.gw, better_contracted_point.fe); //debug
-    printf("contracted_points.out\n", contracted_points.out);  //debug
   }  else {
     better_contracted_point=contracted_points.in;
   }
@@ -423,7 +421,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
     simplex_fe[2][0]=better_contracted_point.fv;
     simplex_fe[2][1]=better_contracted_point.gw;
     simplex_fe[2][2]=better_contracted_point.fe;
-    printf("   simplex contracted\n");  //debug
+    printf("   **simplex contracted\n");  //debug
     display_simplex(   simplex_fe);  //debug
     return;
   }
@@ -439,7 +437,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   simplex_fe[2][1]=shrunken_points.in.gw;
   simplex_fe[2][2]=shrunken_points.in.fe;
   
-  printf("   simplex shrunken\n");  //debug
+  printf("   **simplex shrunken\n");  //debug
   display_simplex(   simplex_fe);  //debug
 }
 
@@ -454,11 +452,12 @@ int main(int argc, char **argv) {
   double gwidth, gwend, gwstep;
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
+  int downhill = true;
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
-  double simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when ordered
-    {0.1, 0.3, 0},   //mid when ordered
-    {0.1, 0.4, 0}
+  double simplex_fe[3][3] = {{0.05, 0.2, 0},   //best when ordered
+    {0.4, 0.3, 0},   //mid when ordered
+    {0.2, 0.1, 0}
   };  //worst when ordered
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
@@ -502,7 +501,10 @@ int main(int argc, char **argv) {
     {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "step by lattice_constant*gw_lstep", "DOUBLE"},
     {"gwend", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_end, 0, "end gwidth loop at", "DOUBLE"},
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
-
+    
+    /*** Downhill Simplex OPTIONS ***/
+    {"nodh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Don't do a Downhill Simplex", "BOOLEAN"},
+    
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
 
@@ -554,9 +556,11 @@ int main(int argc, char **argv) {
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
 
-// simplex_fe[3][3] = {{0.1, 0.2, 0},   //best when sorted
-//                     {0.1, 0.3, 0},   //mid when sorted
-//                     {0.1, 0.4, 0}};  //worst when sorted
+// simplex_fe[3][3] = {{0.05, 0.2, 0},   //best when sorted
+//                     {0.2, 0.3, 0},   //mid when sorted
+//                     {0.4, 0.1, 0}};  //worst when sorted
+
+if (downhill) {
 
   display_simplex(simplex_fe);
   printf("Calculating free energies (takes a bit- 14sec x 3 )...\n");
@@ -583,6 +587,8 @@ int main(int argc, char **argv) {
 //printf("best=%g  ", simplex_fe[0][2]);
 //printf("mid=%g  ", simplex_fe[1][2]);
 //printf("worst=%g\n", simplex_fe[2][2]);
+
+}
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
