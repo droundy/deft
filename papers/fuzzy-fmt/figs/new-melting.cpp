@@ -289,6 +289,7 @@ void display_simplex(double simplex_fe[3][3]) {
     }
     printf("\n");
   }
+  printf("\n");
 }
 
 void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
@@ -334,14 +335,21 @@ point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3
 
 points_fe contract_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   points_fe contracted;
+  
+  printf("working with simplex:\n"); //debug
+  display_simplex(   simplex_fe);   //debug
 
   contracted.out.fv=((3/4)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2)*(simplex_fe[2][0]));
+  double A=((3/4)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2)*(simplex_fe[2][0]));
+  printf("A is %g\n", A); //debug
   contracted.out.gw=((3/4)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2)*(simplex_fe[2][1]));
+  printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
   data contract_out=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose);
   contracted.in.fe=contract_out.cfree_energy_per_atom;
 
   contracted.in.fv=((1/4)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2)*(simplex_fe[2][0]));
   contracted.in.gw=((1/4)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2)*(simplex_fe[2][1]));
+  printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
   data contract_in=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose);
   contracted.in.fe=contract_in.cfree_energy_per_atom;
   return contracted;
@@ -366,51 +374,57 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 //}
 
 void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
+      printf("working with simplex:\n"); //debug
+      display_simplex(   simplex_fe);   //debug
       printf("   reflect simplex\n");  //debug
   point_fe reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
       printf("   simplex reflected, reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
-  if (simplex_fe[0][2]  < reflected_point.fe < simplex_fe[2][2]) {
-    simplex_fe[0][2]=reflected_point.fv;
-    simplex_fe[1][2]=reflected_point.gw;
+  if (simplex_fe[0][2]  < reflected_point.fe and reflected_point.fe < simplex_fe[1][2]) {
+    simplex_fe[2][0]=reflected_point.fv;
+    simplex_fe[2][1]=reflected_point.gw;
     simplex_fe[2][2]=reflected_point.fe;
-    printf("   simplex reflected\n");  //debug
+    printf("   simplex reflected A\n");  //debug
     display_simplex(   simplex_fe);   //debug
     return;
   }
-  if (reflected_point.fe < simplex_fe[0][0]) {
+  if (reflected_point.fe < simplex_fe[0][2]) {
     point_fe extended_point=extend_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
+    printf("   extended_point.fv=%g, extended_point.gw=%g, extended_point.fe=%g\n", extended_point.fv, extended_point.gw, extended_point.fe);  //debug
     if (extended_point.fe < reflected_point.fe) {
-      simplex_fe[0][2]=extended_point.fv;
-      simplex_fe[1][2]=extended_point.gw;
+      simplex_fe[2][0]=extended_point.fv;
+      simplex_fe[2][1]=extended_point.gw;
       simplex_fe[2][2]=extended_point.fe;
-      printf("   simplex reflected\n");  //debug
+      printf("   simplex reflected B and extended\n");  //debug
       display_simplex(   simplex_fe);   //debug
     } else {
-      simplex_fe[0][2]=reflected_point.fv;
-      simplex_fe[1][2]=reflected_point.gw;
+      simplex_fe[2][0]=reflected_point.fv;
+      simplex_fe[2][1]=reflected_point.gw;
       simplex_fe[2][2]=reflected_point.fe;
-      printf("   simplex reflected\n");  //debug
+      printf("   simplex reflected C but not extended\n");  //debug
       display_simplex(   simplex_fe);  //debug
     }
     return;
   }
   printf("   contract simplex\n");  //debug
+  printf("working with simplex:\n"); //debug
+  display_simplex(   simplex_fe);   //debug
   points_fe contracted_points=contract_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-  printf("   simplex contracted\n");  //debug
   printf("   contracted_points.in.fv=%g, contracted_points.in.gw=%g, contracted_points.in.fe=%g\n", contracted_points.in.fv, contracted_points.in.gw, contracted_points.in.fe);  //debug
   printf("   contracted_points.out.fv=%g, contracted_points.out.gw=%g, contracted_points.out.fe=%g\n", contracted_points.out.fv, contracted_points.out.gw, contracted_points.out.fe);  //debug
   point_fe better_contracted_point;
   if (contracted_points.out.fe < contracted_points.in.fe) {
-    better_contracted_point=contracted_points.out;
+    better_contracted_point=contracted_points.out;  //there's probably a problem with this!
+    printf("better_contracted_point.fv=%g, better_contracted_point.gw=%g, better_contracted_point.fe=%g\n", better_contracted_point.fv, better_contracted_point.gw, better_contracted_point.fe); //debug
+    printf("contracted_points.out\n", contracted_points.out);  //debug
   }  else {
     better_contracted_point=contracted_points.in;
   }
   printf("   better_contracted_point.fv=%g, better_contracted_point.gw=%g, better_contracted_point.fe=%g\n", better_contracted_point.fv, better_contracted_point.gw, better_contracted_point.fe);  //debug
   if (better_contracted_point.fe < simplex_fe[2][1]) {
-    simplex_fe[0][2]=better_contracted_point.fv;
-    simplex_fe[1][2]=better_contracted_point.gw;
+    simplex_fe[2][0]=better_contracted_point.fv;
+    simplex_fe[2][1]=better_contracted_point.gw;
     simplex_fe[2][2]=better_contracted_point.fe;
-      printf("   simplex contracted\n");  //debug
+    printf("   simplex contracted\n");  //debug
     display_simplex(   simplex_fe);  //debug
     return;
   }
@@ -418,12 +432,12 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   points_fe shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
   printf("   shrunken_points.in.fv=%g, shrunken_points.in.gw=%g, shrunken_points.in.fe=%g\n", shrunken_points.in.fv, shrunken_points.in.gw, shrunken_points.in.fe);  //debug
   printf("   shrunken_points.out.fv=%g, shrunken_points.out.gw=%g, shrunken_points.out.fe=%g\n", shrunken_points.out.fv, shrunken_points.out.gw, shrunken_points.out.fe);  //debug
-  simplex_fe[0][1]=shrunken_points.out.fv;
+  simplex_fe[1][0]=shrunken_points.out.fv;
   simplex_fe[1][1]=shrunken_points.out.gw;
-  simplex_fe[2][1]=shrunken_points.out.fe;
+  simplex_fe[1][2]=shrunken_points.out.fe;
 
-  simplex_fe[0][2]=shrunken_points.in.fv;
-  simplex_fe[1][2]=shrunken_points.in.gw;
+  simplex_fe[2][0]=shrunken_points.in.fv;
+  simplex_fe[2][1]=shrunken_points.in.gw;
   simplex_fe[2][2]=shrunken_points.in.fe;
   
   printf("   simplex shrunken\n");  //debug
@@ -546,11 +560,13 @@ int main(int argc, char **argv) {
 //                     {0.1, 0.4, 0}};  //worst when sorted
 
   display_simplex(simplex_fe);
+  printf("Calculating free energies (takes a bit- 14sec x 3 )...\n");
   evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
   display_simplex(simplex_fe);
   printf("starting downhill simplex loop...\n");
 
   for (int i=0;i<50;i++) {
+    printf("\nLoop %i of 50 \n", i);  //for debug
     printf("sort simplex\n");
     sort_simplex(simplex_fe);
     printf("simplex sorted\n");
@@ -571,6 +587,8 @@ int main(int argc, char **argv) {
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
+
+return 0;  //for debug
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
