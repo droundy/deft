@@ -74,6 +74,7 @@ struct sw_simulation {
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
+  double *ln_dos;
   dos_types sim_dos_type;
 
   /* The following keep track of how many times we have walked
@@ -111,25 +112,25 @@ struct sw_simulation {
      statistics on entropy differences, under the assumption that we
      sample all states of a given energy equally. */
   int biggest_energy_transition;
-  long *transitions_table;
-  long &transitions(int energy, int energy_change) {
+  long *collection_matrix;
+  long &collection(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
-  long transitions(int energy, int energy_change) const {
+  long collection(int energy, int energy_change) const {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   /* "transition_matrix" is a read-only sloppy and normalized version
-     of the matrix also called "transitions" above, which is a little
+     of the matrix also called "collection" above, which is a little
      easier for me to wrap my brains around.  DJR */
   double transition_matrix(int to, int from) const {
     if (abs(to - from) > biggest_energy_transition ||
@@ -138,10 +139,10 @@ struct sw_simulation {
     }
     long norm = 0;
     for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
-      norm += transitions(from, de);
+      norm += collection(from, de);
     }
     if (norm == 0) return 0;
-    return transitions(from, to - from)/double(norm);
+    return collection(from, to - from)/double(norm);
   };
 
   int max_interactions() const { // return the maximum observed number of interactions
@@ -185,7 +186,9 @@ struct sw_simulation {
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
-  double* compute_ln_dos(dos_types dos_type) const;
+  void apply_transition_matrix(double *ln_output, const double *ln_input) const;
+  void compute_transition_residual(double *residual, const double *guess) const;
+  double* compute_ln_dos(dos_types dos_type);
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy();
@@ -252,6 +255,7 @@ struct sw_simulation {
     lnw_movie_count = 0;
     max_time = 0;
     start_time = clock()/double(CLOCKS_PER_SEC);
+    ln_dos = 0;
   };
 };
 

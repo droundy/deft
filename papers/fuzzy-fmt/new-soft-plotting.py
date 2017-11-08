@@ -16,9 +16,8 @@ y = 1
 z = 2
 
 # Default data sets to pull from. 
-rhoDefault = [0.6,0.7,0.8,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,\
-    0.99,1.0,1.1,1.2,1.3,1.4]
-TDefault = [1.0]
+rhoDefault = [0.7]
+TDefault = [2.0]
 
 def plotPressure(rho,T):
 	plt.figure()
@@ -28,27 +27,17 @@ def plotPressure(rho,T):
 			pressure = np.loadtxt('data/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-press.dat')
                 
-                if density == 0.95:
-                    pressure = float(pressure*1e10/3664101397)
-                elif density == 0.96:
-                    pressure = float(pressure*1e10/3742376538)
-                elif density == 0.97:
-                    pressure = float(pressure*1e10/3804308688)
-                elif density == 0.98:
-                    pressure = float(pressure*1e10/3964798948)
-                elif density == 0.99:
-                    pressure = float(pressure*1e10/4160728275)
                     
                 pressArray.append(float(pressure))
-                plt.plot(pressArray,density,'k.')
-        plt.title('Density v. Pressure')
-        plt.xlabel('Pressure')
-        plt.ylabel('Density')
+                plt.plot(density,pressArray,'k.')
+        plt.title('Pressure-Density at T*: '+str(temp))
+        plt.ylabel('Pressure p*')
+        plt.xlabel(r'Density $\rho*$')
 
 def plotPositions(rho,T):
 	for density in rho:
 		for temp in T:
-			spheres = np.loadtxt('data/ff-'+str(density)+\
+			spheres = np.loadtxt('data2/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-pos.dat')
 			fig = plt.figure()
 			ax = fig.add_subplot(111, projection = '3d')
@@ -64,14 +53,14 @@ def plotPositions(rho,T):
 def plotRadialDF(rho,T):
 	for density in rho:
 		for temp in T:
-			radialData  = np.loadtxt('data/ff-'+str(density)+\
+			radialData  = np.loadtxt('data2/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-radial.dat')
 			plt.figure()
-			plt.plot(radialData[:,0],radialData[:,1]/(radialData[:,0]**2))
-			plt.title('Sum of Spheres at a Radial Distance, non-averaged.\n'\
+			plt.plot(radialData[:,0],radialData[:,1])#/(radialData[:,0]**2))
+			plt.title('Radial Distribution Function.\n'\
 				'Temp: '+str(temp)+' and Density: ' +str(density))
 			plt.xlabel('Radial Distance (r)')
-			plt.ylabel('Number of Spheres at this distance')
+			plt.ylabel('Nearby Spheres')
 
 
 #~ def plotEnergyPDF(rho,T):
@@ -88,6 +77,32 @@ def plotRadialDF(rho,T):
                 #~ str(density))
 			#~ plt.xlabel('Total Internal Energy')
 			#~ plt.ylabel('Probability')
+            
+def plotStructureFactor(rho,T):
+    
+    for temp in T:
+        for density in rho:
+            fig, ax = plt.subplots()
+            fname = 'data2/ff-%s_temp-%s-struc.dat' % (density, temp)
+            structureData = np.loadtxt(fname)
+            Nballs = -1;
+            with open(fname) as f:
+                for l in f.readlines():
+                    if l[:5] == '# N: ':
+                        Nballs = int(l[5:])
+                        break
+            dk = 1/40
+            kvals = dk*np.arange(0.0, len(structureData), 1)
+            kx, ky = np.meshgrid(kvals, kvals)
+            resolution = 2e3
+            sf_max = structureData[30:][30:].max()/Nballs/4
+            ds = sf_max / resolution
+            cax =ax.contourf(kx, ky, structureData/(Nballs), levels = np.arange(0,sf_max + ds,ds))
+            ax.set_aspect('equal')
+            cbar = fig.colorbar(cax)
+            ax.set_title('Structure Factor density:'+str(density))
+            ax.set_xlabel(r'$k_x (\frac{\pi}{a}$)')
+            ax.set_ylabel(r'$k_y (\frac{\pi}{a}$)')
 
 	
 def plotDiffusionCoeff(rho,T):
@@ -96,6 +111,7 @@ def plotDiffusionCoeff(rho,T):
         for density in rho:
             diffusionData = np.loadtxt('data/ff-'+str(density)+'_temp-'+\
                 str(temp)+'-dif.dat')
+            print diffusionData
             plt.semilogy(density,diffusionData,'k.')
             plt.title('Diffusion Coefficient v. Reduced Density')
             plt.xlabel(r'$\rho*$')
@@ -129,6 +145,8 @@ elif (len(args.rho) <=5 and len(args.temp) <= 5) \
 
     elif args.plot.lower() == 'positions':
         plotPositions(args.rho,args.temp)
+    elif args.plot.lower() == 'structure':
+        plotStructureFactor(args.rho,args.temp)
 elif (len(args.rho) > 5 or len(args.temp) > 5) \
     and args.plot.lower()!=('diffusion' or 'pressure'):
     print("\nPlease reduce the amount of plots you want to make by "\

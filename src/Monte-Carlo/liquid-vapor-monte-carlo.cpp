@@ -77,6 +77,7 @@ int main(int argc, const char *argv[]) {
   int tmi_version = 1;
   int toe = false;
   int tmmc = false;
+  int satmmc = false;
   int wltmmc = false;
   int generate_movies = false;
 
@@ -85,6 +86,12 @@ int main(int argc, const char *argv[]) {
   double wl_fmod = 2;
   double wl_threshold = 0.8;
   double wl_cutoff = 1e-8;
+  
+  /* Do not change these here! They are taken directly from the WL paper.
+     If you want to change the SA parameters, run this code with appropriate arguments */
+  double t0 = 10e3;
+  double sa_factor = 0.01;
+  
 
   sw.min_important_energy = 0;
   sw.sim_dos_type = transition_dos;
@@ -195,6 +202,8 @@ int main(int argc, const char *argv[]) {
      "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
+    {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
+     "Use stochastic approximation transition matrix monte carlo", "BOOLEAN"},
     {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
      "Use Wang-Landau transition matrix monte carlo", "BOOLEAN"},
     {"min-important-energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
@@ -285,9 +294,9 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if (tmi + toe + tmmc + wltmmc + (fix_kT != 0) != 1) {
-    printf("Exactly one histogram method must be selected! (%d %d %d %d %g)\n",
-           tmi, toe, tmmc, wltmmc, fix_kT);
+  if (tmi + toe + tmmc + satmmc + wltmmc + (fix_kT != 0) != 1) {
+    printf("Exactly one histogram method must be selected! (%d %d %d %d %d %g)\n",
+           tmi, toe, tmmc, satmmc, wltmmc, fix_kT);
     return 254;
   }
 
@@ -409,6 +418,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-tmmc");
     } else if (wltmmc) {
       sprintf(method_tag, "-wltmmc");
+    } else if (satmmc) {
+      sprintf(method_tag, "-satmmc");
     } else {
       printf("We could not identify a method for a method tag.\n");
       return 104;
@@ -476,7 +487,7 @@ int main(int argc, const char *argv[]) {
      than this, which probably is not possible (for a significant
      number of spheres). */
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance + 1);
-  sw.transitions_table =
+  sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
   // Walker histograms
@@ -715,6 +726,12 @@ int main(int argc, const char *argv[]) {
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
             headerinfo);
+  } else if (satmmc) {
+    sw.use_satmmc = true;
+    sw.sa_t0 = 1;
+    sprintf(headerinfo,
+            "%s# histogram method: satmmc\n",
+            headerinfo);
   } else if (wltmmc) {
     sprintf(headerinfo,
             "%s# histogram method: wltmmc\n",
@@ -738,7 +755,7 @@ int main(int argc, const char *argv[]) {
   long how_often_to_check_finish = sw.N;
   //long iterations_per_update = 10*sw.N;
   //const long iterations_to_time = 100*sw.N;
-  long iterations_per_update = 1;
+  long iterations_per_update = sw.N;
   do {
     for (int i = 0; i < sw.N; i++) sw.move_a_ball();
     //~ if (sw.iteration % (100*sw.N*sw.N) == 0) {
@@ -776,12 +793,12 @@ int main(int argc, const char *argv[]) {
       }
     }
     if (sw.iteration % iterations_per_update == 0) {
-      iterations_per_update += 1;
+      iterations_per_update += sw.N;
       if (tmi) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
-      } else if (sw.wl_factor != 0) {
+      } else if (sw.wl_factor != 0 && sw.sa_t0 == 0) {
         // update with WLTMMC (or WL?!)
         sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, false);
       } else {
@@ -805,7 +822,7 @@ int main(int argc, const char *argv[]) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
-      } else if (sw.wl_factor != 0) {
+      } else if (sw.wl_factor != 0 && sw.sa_t0 == 0) {
         // update with WLTMMC (or WL?!)
         sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, true);
       } else {
@@ -950,7 +967,7 @@ int main(int argc, const char *argv[]) {
   delete[] sw.ln_energy_weights;
   delete[] sw.energy_histogram;
 
-  delete[] sw.transitions_table;
+  delete[] sw.collection_matrix;
 
   delete[] sw.walkers_up;
 

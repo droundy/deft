@@ -1,6 +1,8 @@
 #include "../vector3d.h"
 #pragma once
 
+//#define NDEBUG // disable assertions for extra speed! (and to test if it matters)
+
 struct ball {
   vector3d pos;
   double R;
@@ -66,6 +68,7 @@ struct sw_simulation {
   double neighbor_R; // radius of our neighbor sphere
   double translation_scale; // scale for how far to move balls
   int energy_levels; // total number of energy levels
+  int energies_found; // number of energy levels that have been visited
 
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
@@ -96,6 +99,10 @@ struct sw_simulation {
   /* The following determine how we move balls */
   bool use_tmmc; // true means rejection/acceptance comes from transition matrix.
   double wl_factor; // if it is non-zero, update weights on each move WL-style.
+  double sa_t0; // if it is non-zero, update wl_factor on each move SA-style.
+  double sa_prefactor; // prefactor in computing wl_factor when running SA.
+  bool use_satmmc; // if true, reset sa_t0 whenever we encounter a new energy.
+  double sa_weight; // the most recent sa_weight used in satmmc.
 
   /* The following define file names for periodic output files that
      are dumped every so often.  It should contain a single %d style format. */
@@ -115,13 +122,13 @@ struct sw_simulation {
      statistics on entropy differences, under the assumption that we
      sample all states of a given energy equally. */
   int biggest_energy_transition;
-  long *transitions_table;
+  long *collection_matrix;
   long &transitions(int energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   long transitions(int energy, int energy_change) const {
@@ -129,7 +136,7 @@ struct sw_simulation {
     assert(energy_change <= biggest_energy_transition);
     assert(energy >= 0);
     assert(energy < energy_levels);
-    return transitions_table[energy*(2*biggest_energy_transition+1)
+    return collection_matrix[energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   /* "transition_matrix" is a read-only sloppy and normalized version
@@ -186,6 +193,8 @@ struct sw_simulation {
 
   void initialize_wltmmc(double wl_fmod,
                          double wl_threshold, double wl_cutoff);
+  void initialize_satmmc();
+  void initialize_samc();
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
@@ -268,6 +277,7 @@ struct sw_simulation {
   }
 
   sw_simulation(){
+    energies_found = 0; // we have not yet found any!
     // seconds per iteration (will be adjusted from actual timing)
     estimated_time_per_iteration = 0.1;
     transitions_filename = 0; // default to NULL pointer here for safety.
@@ -280,6 +290,10 @@ struct sw_simulation {
     max_time = 0;
     start_time = clock()/double(CLOCKS_PER_SEC);
     wl_factor = 0.0; // default to no WL method
+    sa_t0 = 0.0; // default to no SA method either
+    sa_prefactor = 1.0; // default to standard SAMC when using SAMC.
+    use_satmmc = false; // default to not using SATMMC.
+    sa_weight = 0.0;
     use_tmmc = false; // default to not using TMMC for accepting moves.
   };
 };

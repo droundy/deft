@@ -449,7 +449,7 @@ int main(int argc, const char *argv[]) {
      than this, which probably is not possible (for a significant
      number of spheres). */
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance + 1);
-  sw.transitions_table =
+  sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
   // Walker histograms
@@ -658,6 +658,7 @@ int main(int argc, const char *argv[]) {
   sprintf(density_fname, "%s/%s-density.dat", data_dir, filename);
 
   char *headerinfo = new char[4096];
+  char *headerinfo_copy = new char[4096];
   sprintf(headerinfo,
           "# version: %s\n"
           "# well_width: %g\n"
@@ -679,22 +680,26 @@ int main(int argc, const char *argv[]) {
 
 
   if (fix_kT) {
+    strcpy(headerinfo_copy, headerinfo);
     sprintf(headerinfo,
             "%s# histogram method: canonical (fixed temperature)\n"
             "# kT: %g\n",
-            headerinfo, fix_kT);
+            headerinfo_copy, fix_kT);
   } else if (tmmc) {
+    strcpy(headerinfo_copy, headerinfo);
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
-            headerinfo);
+            headerinfo_copy);
   }
 
   if (sw.end_condition != none) {
-    sprintf(headerinfo, "%s# %s:", headerinfo, end_condition_text);
+    strcpy(headerinfo_copy, headerinfo);
+    sprintf(headerinfo, "%s# %s:", headerinfo_copy, end_condition_text);
+    strcpy(headerinfo_copy, headerinfo);
     if (sw.min_samples) {
-      sprintf(headerinfo, "%s %i\n", headerinfo, sw.min_samples);
+      sprintf(headerinfo, "%s %i\n", headerinfo_copy, sw.min_samples);
     } else if (sw.end_condition == init_iter_limit) {
-      sprintf(headerinfo, "%s %i\n", headerinfo, sw.init_iters);
+      sprintf(headerinfo, "%s %i\n", headerinfo_copy, sw.init_iters);
     }
   }
   took("Finishing initialization");
@@ -944,7 +949,7 @@ int main(int argc, const char *argv[]) {
   delete[] sw.ln_energy_weights;
   delete[] sw.energy_histogram;
 
-  delete[] sw.transitions_table;
+  delete[] sw.collection_matrix;
 
   delete[] sw.walkers_up;
 

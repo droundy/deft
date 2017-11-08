@@ -99,6 +99,8 @@ int main(int argc, const char *argv[]) {
   int wang_landau = false;
   int vanilla_wang_landau = false;
   int wltmmc = false;
+  int samc = false;
+  int satmmc = false;
   int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
@@ -252,6 +254,10 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau histogram method", "BOOLEAN"},
     {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
      "Use Wang-Landau TMMC method", "BOOLEAN"},
+    {"samc", '\0', POPT_ARG_NONE, &samc, 0,
+     "Use Stochastic-Approximation Monte-Carlo method", "BOOLEAN"},
+    {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
+     "Use Stochastic-Approximation Transition Matrix Monte-Carlo method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
     {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
@@ -278,6 +284,10 @@ int main(int argc, const char *argv[]) {
      "energy histogram at which to adjust Wang-Landau factor", "DOUBLE"},
     {"wl_cutoff", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
      &wl_cutoff, 0, "Cutoff for Wang-Landau factor", "DOUBLE"},
+    {"sa_t0", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &sw.sa_t0, 0, "SA time", "DOUBLE"},
+    {"sa_prefactor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     &sw.sa_prefactor, 0, "SA prefactor", "DOUBLE"},
     {"oe_update_factor", '\0', POPT_ARG_INT, &oe_update_factor, 0,
      "Update scaling for the optimized ensemble method", "INT"},
     {"flat_update_factor", '\0', POPT_ARG_INT, &flat_update_factor, 0,
@@ -368,7 +378,8 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + vanilla_wang_landau + tmi + toe + wltmmc + tmmc + oetmmc + (fix_kT != 0)
+     + vanilla_wang_landau + tmi + toe + wltmmc + samc + satmmc + tmmc
+     + oetmmc + (fix_kT != 0)
      + reading_in_transition_matrix + golden != 1){
     printf("Exactly one histogram method must be selected!\n");
     return 254;
@@ -556,9 +567,13 @@ int main(int argc, const char *argv[]) {
       if (tmi_version == 1) sprintf(method_tag, "-toe");
       else sprintf(method_tag, "-toe%d", tmi_version);
     } else if (tmmc) {
-      sprintf(method_tag, "-tmmc");}
-      else if (wltmmc) {
+      sprintf(method_tag, "-tmmc");
+    } else if (wltmmc) {
       sprintf(method_tag, "-wltmmc");
+    } else if (samc) {
+      sprintf(method_tag, "-samc");
+    } else if (satmmc) {
+      sprintf(method_tag, "-satmmc");
     } else if (oetmmc) {
       sprintf(method_tag, "-oetmmc");
     } else if (wang_landau) {
@@ -643,7 +658,7 @@ int main(int argc, const char *argv[]) {
      than this, which probably is not possible (for a significant
      number of spheres). */
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance + 1);
-  sw.transitions_table =
+  sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
   // Walker histograms
@@ -837,6 +852,10 @@ int main(int argc, const char *argv[]) {
   } else if (wltmmc) {
     sw.wl_factor = wl_factor;
     sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
+  } else if (samc) {
+    sw.initialize_samc();
+  } else if (satmmc) {
+    sw.initialize_satmmc();
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {
@@ -1255,7 +1274,7 @@ int main(int argc, const char *argv[]) {
   delete[] sw.ln_energy_weights;
   delete[] sw.energy_histogram;
 
-  delete[] sw.transitions_table;
+  delete[] sw.collection_matrix;
 
   delete[] sw.walkers_up;
 
