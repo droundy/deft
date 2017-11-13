@@ -204,7 +204,8 @@ struct sw_simulation {
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
-  double* compute_ln_dos(dos_types dos_type) const;
+  void ln_dos_check(double * ln_dos);
+  double* compute_ln_dos(dos_types dos_type) const ;
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy();
