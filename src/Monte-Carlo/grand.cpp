@@ -503,10 +503,14 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       }
     }
     emin++;
-    if (emax <= emin){
+    if (emax <= emin) {
+      // We have only ever explored one (or zero?) energies, so we
+      // know nothing about the density of states.  Just leave it as a
+      // constant!
       for (int e = 0; e < energy_levels; e++){
 	ln_dos[e] =0;
       }
+      return ln_dos; // all done!
     } else {
       int cols = 2*bet + 1;
       double * M = new double[(emax-emin + 1)*cols];
