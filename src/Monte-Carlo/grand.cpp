@@ -471,9 +471,9 @@ void sw_simulation::ln_dos_check(double * ln_dos) const {
   delete [] eq_error;
 }
 
-double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
+double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 
-  double *ln_dos = new double[energy_levels]();
+  ln_dos = new double[energy_levels]();
 
   if(dos_type == histogram_dos){
     for(int i = max_entropy_state; i < energy_levels; i++){
