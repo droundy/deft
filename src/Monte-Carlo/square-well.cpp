@@ -723,10 +723,10 @@ void sw_simulation::set_max_entropy_energy() {
 
 static void print_seconds_as_time(clock_t clocks) {
   const double secs_done = double(clocks)/CLOCKS_PER_SEC;
-  const int seconds = int(secs_done) % 60;
-  const int minutes = int(secs_done / 60) % 60;
-  const int hours = int(secs_done / 3600) % 24;
-  const int days = int(secs_done / 86400);
+  const int seconds = long(secs_done) % 60;
+  const int minutes = long(secs_done / 60) % 60;
+  const int hours = long(secs_done / 3600) % 24;
+  const int days = long(secs_done / 86400);
   if (days == 0) {
     printf(" %02i:%02i:%02i ", hours, minutes, seconds);
   } else {
