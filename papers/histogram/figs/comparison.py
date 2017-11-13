@@ -10,7 +10,7 @@ if os.path.exists('../data'):
 energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
-methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3', '-vanilla_wang_landau']
+methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3', '-vanilla_wang_landau', '-samc', '-satmmc']
 
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/%s-wltmmc*-movie' % filebase)
@@ -59,7 +59,6 @@ for method in methods:
         maxentropystate = numpy.zeros(len(r))
         minimportantenergy = numpy.zeros(len(r))
         erroratenergy = numpy.zeros(len(r))
-        goodenoughenergy = numpy.zeros(len(r))
         errorinentropy = numpy.zeros(len(r))
         maxerror = numpy.zeros(len(r))
 
@@ -98,50 +97,16 @@ for method in methods:
 
         numpy.savetxt('%s/energy-%d.txt' %(dirname, energy),
                       numpy.c_[Nrt_at_energy, erroratenergy],
+                      fmt = ('%.4g'),
                       delimiter = '\t', header = 'round trips\t doserror')
         numpy.savetxt('%s/errors.txt' %(dirname),
                       numpy.c_[iterations, errorinentropy, maxerror],
-                      fmt = ('%d', '%.3g', '%.3g'),
+                      fmt = ('%.4g'),
                       delimiter = '\t', header = 'iterations\t errorinentropy\t maxerror')
-        
-        #plt.figure('error-at-energy-iterations')
-        #plt.plot(iterations, erroratenergy, label = method[1:])
-        #plt.title('Error at energy %g %s' % (energy,filebase))
-        #plt.xlabel('# iterations')
-        #plt.ylabel('error')
-        #plt.legend(loc = 'best')
-
-        #plt.figure('round-trips-at-energy' )
-        #plt.plot(iterations, Nrt_at_energy, label = method[1:])
-        #plt.title('Roundy Trips at energy %g, %s' % (energy,filebase))
-        #plt.xlabel('# iterations')
-        #plt.ylabel('Roundy Trips')
-        #plt.legend(loc = 'best')
-        
-        #plt.figure('error-at-energy-round-trips')
-        #plt.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0], label = method[1:])
-        #plt.title('Error at energy %g %s' % (energy,filebase))
-        #plt.xlabel('Roundy Trips')
-        #plt.ylabel('Error')
-        #plt.legend(loc = 'best')
-
-        #plt.figure('maxerror')
-        #plt.loglog(iterations, maxerror, label = method[1:])
-        #plt.xlabel('# iterations')
-        #plt.ylabel('Maximum Entropy Error')
-        #plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
-        #plt.legend(loc = 'best')
-
-        #plt.figure('errorinentropy')
-        #plt.loglog(iterations, errorinentropy[0:len(iterations)], label = method[1:])
-        #plt.xlabel('#iterations')
-        #plt.ylabel('Error in Entropy')
-        #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
-        #plt.legend(loc='best')
     except:
         print 'I had trouble with', method
         raise
-#plt.show()
+
 
 
 
