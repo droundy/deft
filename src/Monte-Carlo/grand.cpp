@@ -438,47 +438,169 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   return error_times_Z/Z;
 }
 
-void sw_simulation::apply_transition_matrix(double *ln_output, const double *ln_input) const {
+void sw_simulation::ln_dos_check(double * ln_dos) const {
+  double * eq_error = new double[energy_levels]();
+  double eq_error1 =0;
+  double eq_error2 = 0;
+  double eq_error_max = 0;
+  int imax = 0;
   for (int i = 0; i< energy_levels; i++) {
-    if (collection(i,0)) {
-      ln_output[i] = 0;
+    //printf("%g\t",ln_dos[i]);
+    if (energy_histogram[i]) {
+      double eqei = 0; // exp equilibrium error; ith component
       for (int j = 0; j < energy_levels; j++) {
-        double tij = transition_matrix(i,j);
-        if (tij) {
-          ln_output[i] += transition_matrix(i,j)*exp(ln_dos[j]-ln_dos[i]);
-        }
+	double tij = transition_matrix(i,j);
+	if (tij) {
+	  eqei += tij*exp(ln_dos[j]-ln_dos[i]);
+	}
       }
-      ln_output[i] = log(ln_output[i]) + ln_input[i];
+      eq_error[i] = log(eqei);
+      if (eq_error_max < abs(eq_error[i])) {
+	eq_error_max = abs(eq_error[i]);
+	imax = i;
+      }
+      eq_error1 += abs(eq_error[i]);
+      eq_error2 += eq_error[i]*eq_error[i];
     }
   }
+  //printf("\n");
+  eq_error2 = sqrt(eq_error2);
+  printf("Eq. Error 1 Norm: %g\n",exp(eq_error1)-1);
+  printf("Eq. Error 2 Norm: %g\n",exp(eq_error2)-1);
+  printf("Eq. Error Max Norm: %g, %d \n",exp(eq_error_max)-1,imax);
+  delete [] eq_error;
 }
 
-void sw_simulation::compute_transition_residual(double *residual,
-                                                const double *guess) const {
-  apply_transition_matrix(residual, guess);
-  // now r = ln(T dos)
-  for (int i=0;i<energy_levels;i++) {
-    if (collection(i,0)) {
-      const double ln_ratio = residual[i]-guess[i];
-      // now ln_ratio = ln((T dos)/dos) = ln(T dos) - ln dos \sim 0
-      residual[i] = 1 - exp(ln_ratio) - 1;
-      // r = 1 - (T dos)/dos = (dos - T dos)/dos
-    } else {
-      residual[i] = 0; // assume no error with no information
-    }
-  }
-}
+double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
 
-double* sw_simulation::compute_ln_dos(dos_types dos_type) {
+  double *ln_dos = new double[energy_levels]();
 
-  if (!ln_dos) ln_dos = new double[energy_levels]();
-  double *eq_error = new double[energy_levels];
   if(dos_type == histogram_dos){
     for(int i = max_entropy_state; i < energy_levels; i++){
       if(energy_histogram[i] != 0){
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
       }
       else ln_dos[i] = -DBL_MAX;
+    }
+  }
+  else if (1 /* try Gauss Jordan Elim */){
+    /* copy the collect matrix to M, subtract row sum from diagonal */
+    int bet = 0;
+    int emin = 0;
+    int emax = 0;
+    for (int e = 0; e < energy_levels; e++){
+      double sum = 0;
+      for(int de = -biggest_energy_transition; de <= biggest_energy_transition; de ++) {
+	sum += transition_matrix(e, e+de);
+	if (transition_matrix(e,e+de)){
+	  bet = max(abs(de),bet);
+	}
+      }
+      if (sum) {
+	emax = e;
+      } else if(emax == 0){
+	emin = e;
+      }
+    }
+    emin++;
+    if (emax <= emin){
+      for (int e = 0; e < energy_levels; e++){
+	ln_dos[e] =0;
+      }
+    } else {
+      int cols = 2*bet + 1;
+      double * M = new double[(emax-emin + 1)*cols];
+ 
+      /*int pause; */ /* variable I use for scanf to pause the simulation */
+      for (int e = emin; e <= emax; e++){
+	for (int de  =-bet; de  <= bet; de++){
+	  M[(e- emin)*cols + bet + de] = transition_matrix(e,e+de);
+	}
+	M[e*cols + bet] -= 1;
+      }
+
+/*      printf("%i, %i\n", emin, emax);
+    
+      for (int e = emin; e <= emax; e++) {
+	printf("energy = %i; ",e);
+	for (int de = -bet; de <=bet; de ++){
+	  printf("%15g ",M[(e-emin)*cols + bet + de]);
+	}
+	printf("\n");
+      }
+      scanf("%i", &pause); */
+    
+
+      /* make matrix upper triangular up to last column */
+      for (int e = emin; e < emax; e++){
+	/*leading index of row we will subtract from other rows */
+	int ind1 = (e-emin)*cols + bet;
+	for (int de = 1; de <= min(bet,emax-e); de++) {
+	  /* index of entry we want to eliminate*/
+	  int ind2 = (e-emin+de)*cols + bet -de;
+	  if (M[ind2] != 0){
+	    /* coefficient to multiply upper row by */
+	    double c = M[ind2]/M[ind1];
+	    for (int de1 = 0; de1 <= bet; de1++){
+	      M[ind2+de1] -= c*M[ind1+de1];
+	    }
+	  }
+	}
+      }
+    
+      /*for (int e = emin; e <= emax; e++) {
+	printf("energy = %i; ",e);
+	for (int de = -bet; de <=bet; de ++){
+	  if (de == 0) {
+	    printf("| ");
+	  }
+	  printf("%15g ",M[(e-emin)*cols + bet +de]);
+	}
+	printf("\n");
+      } */   
+      /* now we can find dos from final col */
+      for (int e = 0; e < energy_levels; e++) {
+	ln_dos[e] = 0;
+      }
+      for (int de = 0; de <= min(bet,emax-emin);  de++){
+	ln_dos[emax-de] = M[(emax-emin-de)*cols + bet+ de];
+      }
+      /* make matrix diagonal, keep track of ops*/
+      for (int e = emax-1; e >= emin; e--){
+	/*leading index of row we will subtract from other rows */
+
+	if (M[(e-emin)*cols + bet] != 0) {
+	  ln_dos[e] = -ln_dos[e]/M[(e-emin)*cols+bet];
+	  for (int de = 1; de <= min(bet,e); de++) {
+	    /* use info from up the column to modify solution*/
+	    ln_dos[e-de] = ln_dos[e-de] +  M[(e-emin-de)*cols + bet + de]*ln_dos[e];
+	  }
+	} 
+	else {
+	  ln_dos[e] = 0;
+	}
+      }
+      ln_dos[emax] = 1;
+      double dos_min = 1;
+
+      for (int e = emin; e <= emax; e++) {
+	ln_dos[e] = ln_dos[e]/ln_dos[emin];
+	if (ln_dos[e] >0) { 
+	  dos_min = min(ln_dos[e], dos_min);
+	}
+      }
+    
+      /*for(int e1 = emin; e1<=emax;e1++) { printf("%g ",ln_dos[e1]);} printf("\n");*/
+      for (int e = energy_levels-1; e >= 0; e--){
+	if (ln_dos[e]>0) {
+	  ln_dos[e] = log(ln_dos[e]);
+	} else {
+	  ln_dos[e] = log(dos_min);
+	}
+      }
+      /*for(int e1 = emin; e1<=emax;e1++) { printf("%g ",ln_dos[e1]);} printf("\n");*/
+      ln_dos_check(ln_dos);
+      delete[] M;
     }
   } else if(dos_type == transition_dos) {
     ln_dos[0] = 0;
@@ -500,29 +622,11 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
         ln_dos[i] += log(down_to_here/up_from_here);
       }
     }
+    ln_dos_check(ln_dos);
+  } else {
+    printf("We don't know what dos type we have!\n");
+    exit(1);
   }
-  double eq_error1 =0;
-  double eq_error2 = 0;
-  double eq_error_max = 0;
-  int imax = 0;
-  double *ln_T_dos = new double[energy_levels];
-  apply_transition_matrix(ln_T_dos, ln_dos);
-  for (int i = 0; i< energy_levels; i++) {
-    if (energy_histogram[i]) {
-      eq_error[i] = ln_T_dos[i] - ln_dos[i];
-      if (eq_error_max < abs(eq_error[i])) {
-        eq_error_max = abs(eq_error[i]);
-        imax = i;
-      }
-      eq_error_max = max(eq_error_max,abs(eq_error[i]));
-      eq_error1 += abs(eq_error[i]);
-      eq_error2 += eq_error[i]*eq_error[i];
-    }
-  }
-  eq_error2 = sqrt(eq_error2);
-  printf("Eq. Error 1 Norm: %g\n",exp(eq_error1)-1);
-  printf("Eq. Error 2 Norm: %g\n",exp(eq_error2)-1);
-  printf("Eq. Error Max Norm: %g, %d \n",exp(eq_error_max)-1,imax);
 
   return ln_dos;
 }
