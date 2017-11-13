@@ -85,6 +85,17 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     printf("Homogeneous free energy per sphere is %g\n", homogeneous_free_energy);
   }
 
+  if (fv >= 1) {
+    printf("Craziness: fv==1 is a meaningless scenario!");
+    data data_out;
+    data_out.diff_free_energy_per_atom=sqrt(-1);
+    data_out.cfree_energy_per_atom=sqrt(-1);
+    data_out.hfree_energy_per_vol=hf.energy();
+    data_out.cfree_energy_per_vol=sqrt(-1);
+    data_out.dataoutfile_name = 0; // return a null pointer?
+    return data_out;
+  }
+
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
@@ -449,7 +460,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 int main(int argc, char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
-  double gwidth, gwend, gwstep;
+  double gwend, gwstep;
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
   int downhill = false;
@@ -715,8 +726,7 @@ if (downhill) {
     }
 
   } else {
-    gwidth=gw;
-    find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, true);
+    find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);
   }
 
   return 0;
