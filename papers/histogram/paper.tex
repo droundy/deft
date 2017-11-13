@@ -261,50 +261,34 @@ matrix (analogous to the transition histogram matrix).
 If $\delta=0$, that is, the energy state has not been changed, then only 
 $C_{N,0}$ is incremented by unity. Fitzgerald et al.~\cite{fitzgerald2000monte}
 show that defining the third step this way results in a uniform improvement over 
-using histogram estimators to determine the PNPD.
-
-
-
+using histogram estimators to determine the particle number probability distribution (PNPD).
 
 \subsection{Wang-Landau Algorithm}
 
-The Wang-Landau algorithm is a powerful re-weighting Histogram method 
-developed and refined well into 21st 
-century~\cite{wang2001determining}.  While methods such as Metropolis 
-Sampling and Swendsen-Wang cluster 
-flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution 
-and require sampling at individual temperatures, the Wang-Landau 
-algorithm uses a flat histogram and performs a random walk in energy 
-space to determine the density of states~\cite{LandauMinSampling}.  
-Wang-Landau's major tenant is that when counting the histogram 
-$\mathcal{H}$($\varepsilon$), the energy occurences should form a flat 
-distribution.  The criteria for flat sampling is given by 
+The Wang-Landau Algorithm developed by Wang and Landau proposes a random walk in energy space in order to estimate the density of states~\cite{wang2001efficient}. While methods such as Metropolis Sampling and Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution and require sampling at individual temperatures, the Wang-Landau algorithm uses a flat histogram and performs a random walk in energy space to determine the density of states~\cite{wang2001determining, landau2014guide}. Wang-Landau's major tenant is that when counting the histogram 
+$H(\epsilon)$, the energy occurences should form a flat distribution.  The criteria for flat sampling is given by 
 \begin{equation}
-	\frac{\min_{\varepsilon} \mathcal{H}(\varepsilon)}
-	{\big\langle\mathcal{H}(\varepsilon)\big\rangle } 
-	> \gamma 
+	\frac{\min_{\epsilon} H(\epsilon)}
+	{\big\langle H(\epsilon)\big\rangle } 
+	> \eta 
 \end{equation}
-where $\gamma$ is usually set between 0.75 and 0.99 and is determines how many
-times each energy is sampled relative to the mean number of visits.  Difficulties
-can occur with this flatness criteria due to the fact that some energies on a
-given energy range might never be sampled~\cite{haber2014transition}.  The algorithm
-is briefly outlined below  
+where $\eta$ is usually set to $0.80$ and determines how many times each energy is sampled relative to the mean number of visits.  Difficulties can occur with this flatness criteria due to the fact that some energies on a given energy range might never be sampled~\cite{haber2014transition}.  Over the past decade much attention was directed at examining the rate of convergence and error saturation~\cite{lee2006convergence, belardinelli2007wang}.  The algorithm is briefly outlined below where $w$ represents the weights:  
 \begin{equation}
-	\ln{\mathcal{H}_{t+1}(\varepsilon,N)}=\ln{\mathcal{H}_{t}(\varepsilon,N)}
-	+\ln{\mathcal{F}}
+	\ln{w_{t+1}(\epsilon,N)}=\ln{w_{t}(\epsilon,N)}
+	+\gamma
 \end{equation}
 \begin{equation}
-	\ln{\mathcal{F}_{k+1}}=\frac{u}{2}\ln{\mathcal{F}_{k}}
+	\ln{\gamma_{k+1}}=\frac{u}{2}\ln{\gamma_{k}}
 \end{equation}
-for $u$ typically greater than 1 and $\mathcal{F}$ is the modification factor for
+for $u$ typically greater than 1 and $\gamma$ is the modification factor for
 the density of states.  We then accept a new configuration for the density of 
 states with a probability given by the following
 \begin{equation}
-	\mathcal{P}(\varepsilon_i \rightarrow \varepsilon_j) 
-	= \min[1,e^{\ln{\mathcal{H}(\varepsilon_i)}-\ln{\mathcal{H}(\varepsilon_j)}}]
+	\mathcal{P}(\epsilon_i \rightarrow \varepsilon_j) 
+	= \min[1,e^{\ln{w(\epsilon_i)}-\ln{w(\epsilon_j)}}]
 \end{equation}
 Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and 
-determined that choosing a large modification factor $\mathcal{F}_0 = e^{4}$ and
+determined that choosing a large modification factor $\gamma_0 = e^{4}$ and
 rapidly reducing the factor by 10 during each step resulted in reduced statistical 
 error~\cite{zhou2005understanding}.
 
@@ -323,10 +307,10 @@ accurate for a given number of simulation steps.
 defining a minimum important energy and a maximum entropy state. In 
 traditional Wang-Landau the WL factor begins at 1.0 and the factor is 
 modified by 2.0 until the simulation is cutoff typically around 
-$10^{-10}$.  Rane et. al. in the first published implemenation of 
-WL-TMMC~\cite{rane2013monte} suggests using a WL factor between 1.0 and 
+$10^{-10}$.  Rane et. al. published an implemenation of 
+WL-TMMC~\cite{rane2013monte} that suggested using a WL factor between 1.0 and 
 $10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC, 
-we set the WL factor to be 1 and the cutoff at $10^{-4}$. A single 
+we set the WL factor to be 1 and the cutoff at $10^{-10}$. A single 
 sweep is defined as each macrostate being sampled a number of times in 
 this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a 
 flatness criteria~\cite{wang2001determining, wang2001efficient, 
