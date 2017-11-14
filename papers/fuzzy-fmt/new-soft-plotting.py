@@ -16,7 +16,8 @@ y = 1
 z = 2
 
 # Default data sets to pull from. 
-rhoDefault = [0.7]
+rhoDefault = [0.7,0.85,0.89,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,
+        1.0,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.1,1.15,1.2]
 TDefault = [2.0]
 
 def plotPressure(rho,T):
@@ -24,7 +25,7 @@ def plotPressure(rho,T):
 	for density in rho:
 		pressArray = []
 		for temp in T:
-			pressure = np.loadtxt('data/ff-'+str(density)+\
+			pressure = np.loadtxt('data2/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-press.dat')
                 
                     
@@ -33,6 +34,7 @@ def plotPressure(rho,T):
         plt.title('Pressure-Density at T*: '+str(temp))
         plt.ylabel('Pressure p*')
         plt.xlabel(r'Density $\rho*$')
+        plt.grid()
 
 def plotPositions(rho,T):
 	for density in rho:
@@ -61,6 +63,7 @@ def plotRadialDF(rho,T):
 				'Temp: '+str(temp)+' and Density: ' +str(density))
 			plt.xlabel('Radial Distance (r)')
 			plt.ylabel('Nearby Spheres')
+                plt.grid()
 
 
 #~ def plotEnergyPDF(rho,T):
@@ -109,13 +112,14 @@ def plotDiffusionCoeff(rho,T):
     plt.figure()
     for temp in T:
         for density in rho:
-            diffusionData = np.loadtxt('data/ff-'+str(density)+'_temp-'+\
+            diffusionData = np.loadtxt('data2/ff-'+str(density)+'_temp-'+\
                 str(temp)+'-dif.dat')
-            print diffusionData
+            #~ print diffusionData
             plt.semilogy(density,diffusionData,'k.')
             plt.title('Diffusion Coefficient v. Reduced Density')
             plt.xlabel(r'$\rho*$')
             plt.ylabel('D (length/iteration)')
+            plt.grid()
             #~ plt.ylim(0)
 
 parser = argparse.ArgumentParser(description='Which plots to make.')
