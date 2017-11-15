@@ -342,31 +342,18 @@ void sw_simulation::move_a_ball() {
         }
         sa_weight = 1.0;
         if (ncounts_up > 1 && ncounts_down > 1) {
-          // The following is the fractional uncertainty in the TMMC
-          // probability, assuming that each count in the collection
-          // matrix is statistically independent.  (Obviously that is
-          // not true.)
-          // A change! We now assume that only a fraction of the counts
-          // are statistically independent, with that fraction given by
-          // energies_found**2/sa_t0.  The idea is that sa_t0 measures
-          // how many moves were needed to sample energies_found
-          // energies.  But random sampling (moving the energy with
-          // each independent move) should sample all energies in
-          // energies_found**2 random samples.
-
-          //sa_weight = max(1,sqrt(sa_t0*(1/ncounts_up + 1/ncounts_down))/energies_found);
-          
-          // We need the following uncertainty in TMMC in order to
-          // ensure that the cumulative error in the weights over the
-          // entire energy range is less than 1.
+          // We need the following *fractional* uncertainty in TMMC in
+          // order to ensure that the cumulative error in the weights
+          // over the entire energy range is reasonable.
           const double needed_uncert_sqr = 1.0/energies_found;
-          // The following is pessimistically assuming that we may end
-          // up with a very small Pmove due to systematic (correlated)
-          // errors, as we have observed happen before.
-          const double tm_uncert_sqr = Pmove*Pmove*(1.0/ncounts_up+1.0/ncounts_down);
+          // The following is our reasonably optimistic (uncorrelated)
+          // estimate for the fractional uncertainty for the TM
+          // probability.
+          const double tm_uncert_sqr = 1.0/ncounts_up+1.0/ncounts_down;
           sa_weight = tm_uncert_sqr/(needed_uncert_sqr + tm_uncert_sqr);
         }
-        Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
+        // Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
+        Pmove = pow(saPmove, sa_weight)*pow(Pmove, 1-sa_weight); // use a geometric average
       }
 
       // Here we enforce the Tmin probability.  Note that in SATMMC
