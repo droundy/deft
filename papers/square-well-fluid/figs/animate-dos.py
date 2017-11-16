@@ -4,7 +4,7 @@ import matplotlib, sys
 if 'show' not in sys.argv:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy, time, os
+import numpy, time, os, glob
 
 matplotlib.rc('text', usetex=True)
 
@@ -59,18 +59,8 @@ for frame in xrange(100000):
         print 'counting %dth frame' % numframes
         lastframe = frame
 
-bestframe = ''
-for frame in xrange(lastframe, 100000):
-    basename = dataformat % (suffixes[0], frame)
-    try:
-        e, lndos = readandcompute.e_lndos(basename)
-    except (KeyboardInterrupt, SystemExit):
-        raise
-    except:
-        break
-    bestframe = basename
-    if frame % 100 == 0:
-        print 'examining %dth most golden' % frame
+bestframe = sorted(glob.glob('data/%s/%s-%s-movie/*-lndos.dat'
+                             % (subdirname, filename, suffixes[0])))[-1]
 best_e, best_lndos = readandcompute.e_lndos(bestframe)
 print 'best data is', bestframe
 
