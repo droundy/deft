@@ -78,6 +78,8 @@ int main(int argc, const char *argv[]) {
   int toe = false;
   int tmmc = false;
   int satmmc = false;
+  int samc = false;
+  int sad = false;
   int wltmmc = false;
   int generate_movies = false;
 
@@ -204,6 +206,12 @@ int main(int argc, const char *argv[]) {
      "Use transition matrix monte carlo", "BOOLEAN"},
     {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
      "Use stochastic approximation transition matrix monte carlo", "BOOLEAN"},
+    {"sad", '\0', POPT_ARG_NONE, &sad, 0,
+     "Use stochastic approximation monte carlo dynamical version", "BOOLEAN"},
+    {"samc", '\0', POPT_ARG_NONE, &samc, 0,
+     "Use stochastic approximation monte carlo", "BOOLEAN"},
+    {"sa-t0", '\0', POPT_ARG_DOUBLE,
+     &sw.sa_t0, 0, "t0 value used in SAMC", "DOUBLE"},
     {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
      "Use Wang-Landau transition matrix monte carlo", "BOOLEAN"},
     {"min-important-energy", '\0', POPT_ARG_INT, &sw.min_important_energy, 0,
@@ -294,7 +302,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if (tmi + toe + tmmc + satmmc + wltmmc + (fix_kT != 0) != 1) {
+  if (tmi + toe + tmmc + satmmc + sad + samc + wltmmc + (fix_kT != 0) != 1) {
     printf("Exactly one histogram method must be selected! (%d %d %d %d %d %g)\n",
            tmi, toe, tmmc, satmmc, wltmmc, fix_kT);
     return 254;
@@ -420,6 +428,10 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wltmmc");
     } else if (satmmc) {
       sprintf(method_tag, "-satmmc");
+    } else if (samc) {
+      sprintf(method_tag, "-samc");
+    } else if (sad) {
+      sprintf(method_tag, "-sad");
     } else {
       printf("We could not identify a method for a method tag.\n");
       return 104;
@@ -728,9 +740,18 @@ int main(int argc, const char *argv[]) {
             headerinfo);
   } else if (satmmc) {
     sw.use_satmmc = true;
-    sw.sa_t0 = 1;
     sprintf(headerinfo,
             "%s# histogram method: satmmc\n",
+            headerinfo);
+  } else if (samc) {
+    if (sw.sa_t0 == 0) sw.sa_t0 = 1;
+    sprintf(headerinfo,
+            "%s# histogram method: samc (t0 = %g)\n",
+            headerinfo, sw.sa_t0);
+  } else if (sad) {
+    sw.use_sad = true;
+    sprintf(headerinfo,
+            "%s# histogram method: sad\n",
             headerinfo);
   } else if (wltmmc) {
     sprintf(headerinfo,

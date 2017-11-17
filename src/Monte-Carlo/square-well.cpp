@@ -403,12 +403,15 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
-  if (sa_t0) {
-    if (use_satmmc && energy_histogram[energy] == 0) {
+  if (sa_t0 || use_sad || use_satmmc) {
+    if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
     }
-    //wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
-    wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
+    if (use_sad || use_satmmc) {
+      wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
+    } else {
+      wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
+    }
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
@@ -808,6 +811,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[highest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy);
         if (use_satmmc) printf(", sa %.2g%% %.2g", 100*sa_weight, wl_factor);
+        else if (use_sad) printf(", sa %.2g", wl_factor);
         printf(")\n");
         {
           printf("      ");
@@ -1109,7 +1113,8 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 // stochastic_weights is under construction by DR and JP (2017).
 // this is used for Stochastic Approximation Monte Carlo.
 
-void sw_simulation::initialize_samc() {
+void sw_simulation::initialize_samc(bool am_sad) {
+  use_sad = am_sad;
   assert(sa_t0);
   assert(sa_prefactor);
   assert(!use_satmmc);
@@ -1121,7 +1126,11 @@ void sw_simulation::initialize_samc() {
     check_how_often += N*N; // try a little harder next time...
 
     verbose = printing_allowed();
-    if (verbose) write_transitions_file();
+    if (verbose) {
+      set_min_important_energy();
+      set_max_entropy_energy();
+      write_transitions_file();
+    }
   } while(!finished_initializing(verbose));
 
   initialize_canonical(min_T,min_important_energy);
@@ -1142,7 +1151,11 @@ void sw_simulation::initialize_satmmc() {
     check_how_often += N*N; // try a little harder next time...
 
     verbose = printing_allowed();
-    if (verbose) write_transitions_file();
+    if (verbose) {
+      set_min_important_energy();
+      set_max_entropy_energy();
+      write_transitions_file();
+    }
   } while(!finished_initializing(verbose));
 
   initialize_canonical(min_T,min_important_energy);
