@@ -740,7 +740,6 @@ int main(int argc, const char *argv[]) {
             headerinfo);
   } else if (satmmc) {
     sw.use_satmmc = true;
-    sw.sa_t0 = 1;
     sprintf(headerinfo,
             "%s# histogram method: satmmc\n",
             headerinfo);
@@ -820,7 +819,7 @@ int main(int argc, const char *argv[]) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
-      } else if (sw.wl_factor != 0 && sw.sa_t0 == 0) {
+      } else if (wltmmc) {
         // update with WLTMMC (or WL?!)
         sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, false);
       } else {
@@ -844,7 +843,7 @@ int main(int argc, const char *argv[]) {
         sw.update_weights_using_transitions(tmi_version);
       } else if (toe) {
         sw.optimize_weights_using_transitions(tmi_version);
-      } else if (sw.wl_factor != 0 && sw.sa_t0 == 0) {
+      } else if (wltmmc) {
         // update with WLTMMC (or WL?!)
         sw.calculate_weights_using_wltmmc(wl_fmod, wl_threshold, wl_cutoff, true);
       } else {
