@@ -71,6 +71,7 @@ tstep=args.tstep
 data_dir=args.d
 dx=args.dx
 
+fv = args.fv
 fv_start=args.fvstart
 fv_end=args.fvend
 fv_step=args.fvstep
@@ -103,12 +104,12 @@ for i in range(0,len(temperatures)):
         if os.system('which rq') == 0:
             cmd = 'rq run -J new-melting-kT=%g-n=%g ' % (temperatures[i],densities[j])
         cmd += 'figs/new-melting.mkdat --kT %g --n %g' % (temperatures[i],densities[j])
-        cmd += ' --d %s --dx' % (data_dir, dx)
+        cmd += ' --d %s --dx %g' % (data_dir, dx)
         cmd += ' --fvstart %g --fvend %g --fvstep %g --fv %g' % (fv_start, fv_end, fv_step, fv)
-        if args.gwend or args.gwstep:
+        if gw <= 0:
             cmd += ' --gwstart %g --gwend %g --gwstep %g --gw %g' % (gwidth_start, gwidth_end, gwidth_step, gw)
-        else: 
-            cmd += ' --gwstart %g --gwlend %g --gwlstep %g' % (gwidth_start, gwidth_latend, gwidth_latstep)
+        else:
+            cmd += ' --gw %g' % (gw)
 
         print(cmd)
         os.system(cmd)
