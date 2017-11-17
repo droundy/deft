@@ -276,6 +276,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   } else {
     printf("Unable to open file %s!\n", alldat_filename);
   }
+  delete[] alldat_filename;
   return data_out;
 }
 
@@ -460,7 +461,6 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 int main(int argc, char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
-  double gwend, gwstep;
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
   int downhill = false;
@@ -626,17 +626,20 @@ if (downhill) {
     for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
-      if (gw == -1) {
-        gwend=gw_end;
-        gwstep=gw_step;
-      } else if (gw == -2) {
-        gwend=lattice_constant*gw_lend;
-        gwstep=lattice_constant*gw_lstep;
+      if (gw == -2) {
+        gw_end=lattice_constant*gw_lend;
+        gw_step=lattice_constant*gw_lstep;
+      } else if (gw > 0) {
+        // In this case we want to do a single gwidth value, so let us
+        // set the start, end and step so as to achieve that.
+        gw_start = gw;
+        gw_end = gw;
+        gw_step = 0.1;
       }
       printf ("gw is %g\n", gw);
-      printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
+      if (gw < 0) printf("gwend=%g, gwstep=%g   \n\n", gw_end, gw_step);
 
-      for (double gwidth=gw_start; gwidth <= gwend +gwstep; gwidth+=gwstep) {
+      for (double gwidth=gw_start; gwidth < gw_end +0.1*gw_step; gwidth+=gw_step) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
@@ -661,7 +664,7 @@ if (downhill) {
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/%s_best.dat", data_dir, best_alldatfile);
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
 
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
@@ -676,6 +679,7 @@ if (downhill) {
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
+    delete[] bestdat_filename;
 
   } else if (gw < 0) {
     double best_energy_diff = 1e100;
@@ -684,16 +688,13 @@ if (downhill) {
     double hfree_energy_pervol, cfree_energy_pervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
-    if (gw == -1) {
-      gwend=gw_end;
-      gwstep=gw_step;
-    } else if (gw == -2) {
-      gwend=lattice_constant*gw_lend;
-      gwstep=lattice_constant*gw_lstep;
+    if (gw == -2) {
+      gw_end=lattice_constant*gw_lend;
+      gw_step=lattice_constant*gw_lstep;
     }
     printf("gw is %g\n", gw);
-    printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
-    for (double gwidth=gw_start; gwidth <= gwend + gwstep; gwidth+=gwstep) {
+    printf ("gwend=%g, gwstep=%g   \n\n", gw_end, gw_step);
+    for (double gwidth=gw_start; gwidth < gw_end + 0.1*gw_step; gwidth+=gw_step) {
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
         best_energy_diff = e_data.diff_free_energy_per_atom;
@@ -710,7 +711,7 @@ if (downhill) {
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/%s_best.dat", data_dir, best_alldatfile);
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
 
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
@@ -724,6 +725,7 @@ if (downhill) {
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
+    delete[] bestdat_filename;
 
   } else {
     find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);
