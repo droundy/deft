@@ -740,6 +740,7 @@ int main(int argc, const char *argv[]) {
             headerinfo);
   } else if (satmmc) {
     sw.use_satmmc = true;
+    sw.sa_t0 = 1;
     sprintf(headerinfo,
             "%s# histogram method: satmmc\n",
             headerinfo);
