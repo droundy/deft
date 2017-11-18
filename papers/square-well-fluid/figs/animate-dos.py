@@ -33,6 +33,9 @@ minlndos = 1e100
 maxlndos = -1e100
 numframes = 0
 
+def uses_crazy_weights_dos(suffix):
+    return 'wl' in suffix or suffix in ['samc', 'sad']
+
 dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 colors = ['k', 'b', 'r', 'g', 'c', 'm']
 
@@ -50,8 +53,9 @@ for frame in xrange(100000):
         except:
             alldone = True
             break
-        minlndos = min(minlndos, lndos.min())
-        maxlndos = max(maxlndos, lndos.max())
+        if not uses_crazy_weights_dos(suffix):
+            minlndos = min(minlndos, lndos.min())
+            maxlndos = max(maxlndos, lndos.max())
         numframes = frame+1
         mine = min(mine, e[lndos == lndos[-1]].max() - 20)
         maxe = max(maxe, e[lndos == lndos[0]].min())

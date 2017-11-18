@@ -316,6 +316,7 @@ void sw_simulation::move_a_ball() {
   transitions(energy, energy_change) += 1; // update the transition histogram
   double Pmove = 1;
   if (use_tmmc || use_satmmc) {
+    assert(sa_t0 == 0.0); // these methods should *not* have t0 set!
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
       /* I note that Swendson 1999 uses essentially this method
            *after* two stages of initialization. */
@@ -362,8 +363,20 @@ void sw_simulation::move_a_ball() {
       double Pmin = exp(energy_change*betamax);
       if (Pmove < Pmin) Pmove = Pmin;
     }
+  } if (use_sad) {
+    // always allow changes that increase the energy (remember minus sign):
+    if (energy_change < 0) {
+      const double lnPmove =
+        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+      if (lnPmove < 0) Pmove = exp(lnPmove);
+      // Here we enforce the Tmin probability.
+      const double betamax = 1.0/min_T;
+      double Pmin = exp(energy_change*betamax);
+      if (Pmove < Pmin) Pmove = Pmin;
+    }
   } else {
-    if (!sa_t0 && wl_factor > 0 && (energy + energy_change > min_important_energy
+    if (!sa_t0
+        && wl_factor > 0 && (energy + energy_change > min_important_energy
                                     || energy+energy_change<max_entropy_state)) {
       // This means we are using a WL method, and the system is trying
       // to leave the energy range specified.  We cannot permit this!
@@ -490,6 +503,33 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
       }
       else ln_dos[i] = -DBL_MAX;
+    }
+  } else if (dos_type == weights_dos) {
+    // weights_dos is useful for WL, SAD, or SAMC algorithms, where
+    // the density of states is determined directly from the weights.
+    int minE = 0;
+    double betamax = 1/min_T;
+    for (int i=0; i<energy_levels; i++) {
+      ln_dos[i] = ln_energy_weights[max_entropy_state] - ln_energy_weights[i];
+      if (!minE && ln_dos[i-1] - ln_dos[i] > betamax) minE = i;
+    }
+    if (!sa_t0) {
+      // Above the max_entropy_state our weights are effectively constant,
+      // so the density of states is proportional to our histogram.
+      for (int i=0; i<max_entropy_state; i++) {
+        if (energy_histogram[i]) {
+          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[max_entropy_state]));
+        }
+      }
+      // Below the minimum important energy, we also need to use the histogram,
+      // only now adjusted by a Boltzmann factor.  We compute the min
+      // important energy above for extreme clarity.
+      for (int i=minE+1; i<energy_levels; i++) {
+        if (energy_histogram[i]) {
+          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[minE]))
+            - (i-minE)*betamax;  // the last bit gives Boltzmann factor
+        }
+      }
     }
   } else if(dos_type == transition_dos) {
     ln_dos[0] = 0;
@@ -1141,7 +1181,7 @@ void sw_simulation::initialize_samc(bool am_sad) {
 // initialize the weight array using the satmmc method.
 void sw_simulation::initialize_satmmc() {
   use_satmmc = true;
-  sa_t0 = 1;
+  assert(!sa_t0);
   assert(sa_prefactor);
 
   int check_how_often =  N*N; // check if finished only so often
@@ -1654,7 +1694,10 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
   }
   sw.write_header(f);
   fprintf(f, "# energy\tlndos\tps\n");
-  double *lndos = sw.compute_ln_dos(transition_dos);
+  dos_types how_to_compute_dos = transition_dos;
+  bool using_wl = sw.wl_factor && !(sw.use_sad || sw.use_satmmc || sw.sa_t0);
+  if (sw.use_sad || sw.sa_t0 || using_wl) how_to_compute_dos = weights_dos;
+  double *lndos = sw.compute_ln_dos(how_to_compute_dos);
   double maxdos = lndos[0];
   for (int i = 0; i < sw.energy_levels; i++) {
     if (maxdos < lndos[i]) maxdos = lndos[i];

@@ -31,7 +31,7 @@ enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
                       optimistic_sample_error, pessimistic_sample_error, flat_histogram,
                       init_iter_limit };
 
-enum dos_types { histogram_dos, transition_dos };
+enum dos_types { histogram_dos, transition_dos, weights_dos };
 
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
