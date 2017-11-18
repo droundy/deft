@@ -518,7 +518,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       // so the density of states is proportional to our histogram.
       for (int i=0; i<max_entropy_state; i++) {
         if (energy_histogram[i]) {
-          ln_dos[i] = log(energy_histogram[i]/energy_histogram[max_entropy_state]);
+          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[max_entropy_state]));
         }
       }
       // Below the minimum important energy, we also need to use the histogram,
@@ -526,7 +526,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       // important energy above for extreme clarity.
       for (int i=minE+1; i<energy_levels; i++) {
         if (energy_histogram[i]) {
-          ln_dos[i] = log(energy_histogram[i]/energy_histogram[minE])
+          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[minE]))
             - (i-minE)*betamax;  // the last bit gives Boltzmann factor
         }
       }
