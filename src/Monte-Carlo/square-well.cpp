@@ -507,8 +507,29 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
   } else if (dos_type == weights_dos) {
     // weights_dos is useful for WL, SAD, or SAMC algorithms, where
     // the density of states is determined directly from the weights.
+    int minE = 0;
+    double betamax = 1/min_T;
     for (int i=0; i<energy_levels; i++) {
       ln_dos[i] = ln_energy_weights[max_entropy_state] - ln_energy_weights[i];
+      if (!minE && ln_dos[i-1] - ln_dos[i] > betamax) minE = i;
+    }
+    if (!sa_t0) {
+      // Above the max_entropy_state our weights are effectively constant,
+      // so the density of states is proportional to our histogram.
+      for (int i=0; i<max_entropy_state; i++) {
+        if (energy_histogram[i]) {
+          ln_dos[i] = log(energy_histogram[i]/energy_histogram[max_entropy_state]);
+        }
+      }
+      // Below the minimum important energy, we also need to use the histogram,
+      // only now adjusted by a Boltzmann factor.  We compute the min
+      // important energy above for extreme clarity.
+      for (int i=minE+1; i<energy_levels; i++) {
+        if (energy_histogram[i]) {
+          ln_dos[i] = log(energy_histogram[i]/energy_histogram[minE])
+            - (i-minE)*betamax;  // the last bit gives Boltzmann factor
+        }
+      }
     }
   } else if(dos_type == transition_dos) {
     ln_dos[0] = 0;
