@@ -3,7 +3,13 @@
 #pragma once
 
 #include "lattice.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "Eigen/Eigen"
+#pragma GCC diagnostic pop
+
 
 typedef std::complex<double> complex;
 

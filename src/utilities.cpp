@@ -15,7 +15,12 @@
 // Please see the file AUTHORS for a list of authors.
 
 #include "utilities.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <Eigen/Core>
+#pragma GCC diagnostic pop
 
 long Eigen::djr_memused = 0;
 long Eigen::djr_mempeak = 0;
