@@ -362,8 +362,19 @@ void sw_simulation::move_a_ball() {
       double Pmin = exp(energy_change*betamax);
       if (Pmove < Pmin) Pmove = Pmin;
     }
+  } if (use_sad) {
+    // always allow changes that increase the energy (remember minus sign):
+    if (energy_change < 0) {
+      const double lnPmove =
+        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+      if (lnPmove < 0) Pmove = exp(lnPmove);
+      // Here we enforce the Tmin probability.
+      const double betamax = 1.0/min_T;
+      double Pmin = exp(energy_change*betamax);
+      if (Pmove < Pmin) Pmove = Pmin;
+    }
   } else {
-    if (!(sa_t0 || use_sad)
+    if (!sa_t0
         && wl_factor > 0 && (energy + energy_change > min_important_energy
                                     || energy+energy_change<max_entropy_state)) {
       // This means we are using a WL method, and the system is trying
