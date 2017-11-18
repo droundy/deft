@@ -463,34 +463,36 @@ int main(int argc, const char *argv[])  {
 }
 
 inline vector3d *FCCLattice(int numOfSpheres, double systemLength[3])   {
-    assert(systemLength[0] == systemLength[1]);
-    assert(systemLength[0] == systemLength[2]);
-    vector3d *sphereMatrix = new vector3d[numOfSpheres];
-    double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
-    double cellLength = systemLength[x]/cellNumber;
-    
-    vector3d *offset = new vector3d[4];
-    offset[0] = vector3d(0,0,0);
-    offset[1] = vector3d(cellLength,0,cellLength)/2;
-    offset[2] = vector3d(cellLength,cellLength,0)/2;
-    offset[3] = vector3d(0,cellLength,cellLength)/2;
-    
-    int sphereNum = 0;
-    for (int i=0; i<cellNumber; i++) {
-        for (int j=0; j<cellNumber; j++) {
-			for (int k=0; k<cellNumber; k++) {
-				vector3d cornerSphere = { cellLength*i, cellLength*j, cellLength*k };
-				for (int b=0; b<4; b++) {
-					sphereMatrix[sphereNum++] = cornerSphere + offset[b];
-					if (sphereNum == numOfSpheres) {
-						delete[] offset;
-						return sphereMatrix;
-					}
-				}
+  assert(systemLength[0] == systemLength[1]);
+  assert(systemLength[0] == systemLength[2]);
+  vector3d *sphereMatrix = new vector3d[numOfSpheres];
+  double cellNumber = ceil(pow(numOfSpheres/4,1./3.));
+  double cellLength = systemLength[x]/cellNumber;
 
-			}
-		}
-	}
+  vector3d *offset = new vector3d[4];
+  offset[0] = vector3d(0,0,0);
+  offset[1] = vector3d(cellLength,0,cellLength)/2;
+  offset[2] = vector3d(cellLength,cellLength,0)/2;
+  offset[3] = vector3d(0,cellLength,cellLength)/2;
+
+  int sphereNum = 0;
+  for (int i=0; i<cellNumber; i++) {
+    for (int j=0; j<cellNumber; j++) {
+      for (int k=0; k<cellNumber; k++) {
+        vector3d cornerSphere = { cellLength*i, cellLength*j, cellLength*k };
+        for (int b=0; b<4; b++) {
+          sphereMatrix[sphereNum++] = cornerSphere + offset[b];
+          if (sphereNum == numOfSpheres) {
+            delete[] offset;
+            return sphereMatrix;
+          }
+        }
+      }
+    }
+  }
+  delete[] offset;
+  delete[] sphereMatrix;
+  return 0; // return null pointer if we could not fit the spheres
 }
 
 static inline vector3d periodicBC(vector3d inputVector, double systemLength[3], bool wall[3])   {

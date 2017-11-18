@@ -175,8 +175,8 @@ struct sw_simulation {
   void initialize_canonical(double T, int reference=0);
 
   void initialize_transitions_file(const char *transitions_input_filename);
-  void write_transitions_file() const;
-  void write_header(FILE *f) const;
+  void write_transitions_file();
+  void write_header(FILE *f);
 
   double fractional_dos_precision;
   void update_weights_using_transitions(int version);

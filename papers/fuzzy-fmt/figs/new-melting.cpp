@@ -24,7 +24,7 @@
 #include "new/Minimize.h"
 #include "version-identifier.h"
 
-static void took(const char *name) {
+static inline void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
   assert(name); // so it'll count as being used...
@@ -465,7 +465,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 
 
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
@@ -495,8 +495,6 @@ int main(int argc, char **argv) {
 
 
   //********************Setup POPT to get inputs from command line*******************
-
-  poptContext optCon;
 
   // ----------------------------------------------------------------------------
   // Parse input options
@@ -542,7 +540,7 @@ int main(int argc, char **argv) {
     POPT_TABLEEND
   };
 
-  optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+  poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[OPTION...]\nRequired arguments: temperature (kT), "
                          "reduced density (n)");
 
@@ -632,7 +630,6 @@ if (downhill) {
   if (fv == -1) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
-    char *best_alldatfile;  //Identify best all.dat file
     double hfree_energy_pervol, cfree_energy_pervol;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
@@ -698,7 +695,6 @@ if (downhill) {
   } else if (gw < 0) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
-    char *best_alldatfile;  //Identify best all.dat file
     double hfree_energy_pervol, cfree_energy_pervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);

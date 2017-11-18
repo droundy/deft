@@ -1,6 +1,10 @@
 #ifndef EIGEN_CORE_H
 #define EIGEN_CORE_H
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 // first thing Eigen does: prevent MSVC from committing suicide
 #include "src/Core/util/DisableMSVCWarnings.h"
 
@@ -156,5 +160,7 @@ using std::size_t;
 } // namespace Eigen
 
 #include "src/Core/util/EnableMSVCWarnings.h"
+
+#pragma GCC diagnostic pop
 
 #endif // EIGEN_CORE_H

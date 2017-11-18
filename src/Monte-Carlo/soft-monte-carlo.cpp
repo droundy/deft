@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <time.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <Eigen/Core>
+#pragma GCC diagnostic pop
 #include "utilities.h"
 #include "MersenneTwister.h"
 USING_PART_OF_NAMESPACE_EIGEN

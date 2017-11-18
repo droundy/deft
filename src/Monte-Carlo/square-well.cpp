@@ -819,7 +819,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[lowest_problem_energy],
                optimistic_samples[highest_problem_energy],
                pessimistic_samples[highest_problem_energy], min_samples, energy);
-        if (use_tmmc) printf(", sa %.0f% %g", 100*sa_weight, wl_factor);
+        if (use_tmmc) printf(", sa %.0f%% %g", 100*sa_weight, wl_factor);
         printf(")\n");
         fflush(stdout);
       }
