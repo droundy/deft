@@ -363,7 +363,8 @@ void sw_simulation::move_a_ball() {
       if (Pmove < Pmin) Pmove = Pmin;
     }
   } else {
-    if (!sa_t0 && wl_factor > 0 && (energy + energy_change > min_important_energy
+    if (!(sa_t0 || use_sad)
+        && wl_factor > 0 && (energy + energy_change > min_important_energy
                                     || energy+energy_change<max_entropy_state)) {
       // This means we are using a WL method, and the system is trying
       // to leave the energy range specified.  We cannot permit this!
