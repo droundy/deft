@@ -33,7 +33,7 @@ class Vector;
 class ComplexVector {
 public:
   ComplexVector() : size(0), offset(0), data(0), references_count(0) {}
-  explicit ComplexVector(int sz) : size(sz), offset(0), data(new std::complex<double>[size]),
+  explicit ComplexVector(long sz) : size(sz), offset(0), data(new std::complex<double>[size]),
                                    references_count(new int) {
     *references_count = 1;
   }
@@ -70,23 +70,23 @@ public:
     }
   }
   void operator=(std::complex<double> x) {
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       data[i] = x;
     }
   }
 
   // operator[] is a pair of "safe" operator for indexing a vector
-  std::complex<double> operator[](int i) const {
+  std::complex<double> operator[](long i) const {
     assert(i + offset >= 0);
     assert(i < size);
     return data[i + offset];
   };
-  std::complex<double> &operator[](int i) {
+  std::complex<double> &operator[](long i) {
     assert(i + offset >= 0);
     assert(i < size);
     return data[i + offset];
   };
-  ComplexVector slice(int start, int num) const {
+  ComplexVector slice(long start, long num) const {
     assert(start + num <= size);
     ComplexVector out;
     out.size = num;
@@ -105,7 +105,7 @@ public:
     assert(size == a.size);
     ComplexVector out(size);
     const std::complex<double> *p1 = data + offset, *p2 = a.data + a.offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       out.data[i] = p1[i] + p2[i];
     }
     return out;
@@ -117,7 +117,7 @@ public:
     assert(size == a.size);
     ComplexVector out(size);
     const std::complex<double> *p1 = data + offset, *p2 = a.data + a.offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       out.data[i] = p1[i] - p2[i];
     }
     return out;
@@ -125,7 +125,7 @@ public:
   ComplexVector operator-() const {
     ComplexVector out(size);
     const std::complex<double> *p1 = data + offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       out.data[i] = -p1[i];
     }
     return out;
@@ -133,7 +133,7 @@ public:
   ComplexVector operator*(std::complex<double> a) const {
     ComplexVector out(size);
     const std::complex<double> *p2 = data + offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       out.data[i] = a*p2[i];
     }
     return out;
@@ -144,7 +144,7 @@ public:
     assert(size == a.size);
     std::complex<double> *p1 = data + offset;
     const std::complex<double> *p2 = a.data + a.offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       p1[i] += p2[i];
     }
   }
@@ -152,20 +152,20 @@ public:
     assert(size == a.size);
     std::complex<double> *p1 = data + offset;
     const std::complex<double> *p2 = a.data + a.offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       p1[i] -= p2[i];
     }
   }
   void operator*=(std::complex<double> a) {
     std::complex<double> *p1 = data + offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       p1[i] *= a;
     }
   }
   std::complex<double> sum() const {
     const std::complex<double> *p1 = data + offset;
     std::complex<double> out = 0;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       out += p1[i];
     }
     return out;
@@ -174,7 +174,7 @@ public:
     assert(a.size == size);
     std::complex<double> out = 0;
     const std::complex<double> *p1 = data + offset, *p2 = a.data + a.offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       out += p1[i]*p2[i];
     }
     return out;
@@ -182,54 +182,54 @@ public:
   std::complex<double> norm() const {
     std::complex<double> out = 0;
     const std::complex<double> *p1 = data + offset;
-    for (int i=0; i<size; i++) {
+    for (long i=0; i<size; i++) {
       out += p1[i]*p1[i];
     }
     return sqrt(out);
   }
-  int get_size() const {
+  long get_size() const {
     return size;
   }
-  std::complex<double> index3d(int Nx, int Ny, int Nz, int x, int y, int z) const {
+  std::complex<double> index3d(long Nx, long Ny, long Nz, long x, long y, long z) const {
     return (*this)[x*Ny*(Nz/2+1) + y*(Nz/2+1) + z];
   }
-  std::complex<double> &index3d(int Nx, int Ny, int Nz, int x, int y, int z) {
+  std::complex<double> &index3d(long Nx, long Ny, long Nz, long x, long y, long z) {
     return (*this)[x*Ny*(Nz/2+1) + y*(Nz/2+1) + z];
   }
-  void dumpSliceXR(const char *fname, int Nx, int Ny, int Nz, int x) const {
+  void dumpSliceXR(const char *fname, long Nx, long Ny, long Nz, long x) const {
     FILE *f = fopen(fname, "w");
     if (!f) {
       printf("unable to create file %s\n", fname);
       return;
     }
-    for (int y= Ny/2; y<Ny; y++) {
-      for (int z=0; z<=Nz/2; z++) {
+    for (long y= Ny/2; y<Ny; y++) {
+      for (long z=0; z<=Nz/2; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).real());
       }
       fprintf(f, "\n");
     }
-    for (int y=0; y<=Ny/2; y++) {
-      for (int z=0; z<=Nz/2; z++) {
+    for (long y=0; y<=Ny/2; y++) {
+      for (long z=0; z<=Nz/2; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).real());
       }
       fprintf(f, "\n");
     }
     fclose(f);
   }
-  void dumpSliceXI(const char *fname, int Nx, int Ny, int Nz, int x) const {
+  void dumpSliceXI(const char *fname, long Nx, long Ny, long Nz, long x) const {
     FILE *f = fopen(fname, "w");
     if (!f) {
       printf("unable to create file %s\n", fname);
       return;
     }
-    for (int y= Ny/2; y<Ny; y++) {
-      for (int z=0; z<=Nz/2; z++) {
+    for (long y= Ny/2; y<Ny; y++) {
+      for (long z=0; z<=Nz/2; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).imag());
       }
       fprintf(f, "\n");
     }
-    for (int y=0; y<=Ny/2; y++) {
-      for (int z=0; z<=Nz/2; z++) {
+    for (long y=0; y<=Ny/2; y++) {
+      for (long z=0; z<=Nz/2; z++) {
         fprintf(f, "%g\t", index3d(Nx, Ny, Nz, x, y, z).imag());
       }
       fprintf(f, "\n");
@@ -238,18 +238,18 @@ public:
   }
 
 private:
-  int size, offset;
+  long size, offset;
   std::complex<double> *data;
   int *references_count; // counts how many objects refer to the data.
-  friend Vector ifft(int Nx, int Ny, int Nz, double dV, ComplexVector f);
-  friend ComplexVector fft(int Nx, int Ny, int Nz, double dV, Vector f);
+  friend Vector ifft(long Nx, long Ny, long Nz, double dV, ComplexVector f);
+  friend ComplexVector fft(long Nx, long Ny, long Nz, double dV, Vector f);
 };
 
 inline ComplexVector operator*(std::complex<double> a, const ComplexVector &b) {
-  const int sz = b.size;
+  const long sz = b.size;
   ComplexVector out(sz);
   const std::complex<double> *p2 = b.data + b.offset;
-  for (int i=0; i<sz; i++) {
+  for (long i=0; i<sz; i++) {
     out.data[i] = a*p2[i];
   }
   return out;

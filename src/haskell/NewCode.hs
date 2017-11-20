@@ -58,7 +58,7 @@ create3dHeader e0 n =
         returnType = Reference (ctype ee),
         constness = "const",
         args = [],
-        contents = "int sofar = 0;" : initme (inputs e0)
+        contents = "long sofar = 0;" : initme (inputs e0)
         }
         where initme (xx@(ES _):_) | xx == ee = ["return data[sofar];"]
               initme (xx:_) | xx == ee = ["return data.slice(sofar," ++ sizeE ee ++ ");"]
@@ -70,7 +70,7 @@ create3dHeader e0 n =
               initme _ = error "bug inin setarg initme"
       sizeE (ES _) = "1"
       sizeE (ER _) = "Nx*Ny*Nz"
-      sizeE (EK _) = "Nx*Ny*(int(Nz)/2+1)"
+      sizeE (EK _) = "Nx*Ny*(long(Nz)/2+1)"
       inputs :: Expression Scalar -> [Exprn]
       inputs x = findOrderedInputs x -- Set.toList $ findInputs x -- 
       codeMutableData a = unlines $ map (\x -> "\tmutable double " ++ x ++ ";") a
@@ -109,7 +109,7 @@ create0dHeader e0 n =
           returnType = Reference (ctype ee),
           constness = "const",
           args = [],
-          contents = "int sofar = 0;" : initme (findOrderedInputs e0)
+          contents = "long sofar = 0;" : initme (findOrderedInputs e0)
           }
         where initme (xx@(ES _):rr)
                 | xx == ee = ["return data[sofar];"]
@@ -137,7 +137,7 @@ create0dMethods e variables n =
      returnType = None,
      constness = "",
      args = [],
-     contents =["data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));"]
+     contents =["data = Vector(long(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));"]
      }] ++
   createAnydMethods e variables n
     where
@@ -152,7 +152,7 @@ create3dMethods e variables n =
      returnType = None,
      constness = "",
      args = [(Int, "myNx"), (Int, "myNy"), (Int, "myNz")],
-     contents =["data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
+     contents =["data = Vector(long(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
                 "Nx() = myNx;",
                 "Ny() = myNy;",
                 "Nz() = myNz;"]
@@ -162,10 +162,10 @@ create3dMethods e variables n =
      returnType = None,
      constness = "",
      args = [(Double, "ax"), (Double, "ay"), (Double, "az"), (Double, "dx")],
-     contents =["int myNx = int(ceil(ax/dx/2))*2;",
-                "int myNy = int(ceil(ay/dx/2))*2;",
-                "int myNz = int(ceil(az/dx/2))*2;",
-                "data = Vector(int(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
+     contents =["long myNx = long(ceil(ax/dx/2))*2;",
+                "long myNy = long(ceil(ay/dx/2))*2;",
+                "long myNz = long(ceil(az/dx/2))*2;",
+                "data = Vector(long(" ++ code (sum $ map actualsize $ findOrderedInputs e) ++ "));",
                 "Nx() = myNx;",
                 "Ny() = myNy;",
                 "Nz() = myNz;",
@@ -186,7 +186,7 @@ create3dMethods e variables n =
           returnType = ctype a,
           constness = "const",
           args = [],
-          contents = ["int sofar = 0;"] ++
+          contents = ["long sofar = 0;"] ++
                      map createInput (findOrderedInputs e) ++
                      [newcodeStatements $ eval_named (""++rsname) a]
       }
@@ -203,9 +203,9 @@ createAnydMethods e variables n =
       returnType = Double,
       constness = "const",
       args = [],
-      contents = ["int sofar = 0;"] ++
+      contents = ["long sofar = 0;"] ++
                  map createInput (findOrderedInputs e) ++
-                 [newcodeStatements (eval_scalar e)]
+                 [newcodeStatements estmts]
       },
    CFunction {
      name = n++"::grad",
@@ -214,7 +214,7 @@ createAnydMethods e variables n =
      args = [],
      contents = ["Vector output(data.get_size());",
                  "output = 0;"]++
-                "int sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
+                "long sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
                 [newcodeStatements grade,
                  "return output;"]
      },
@@ -236,7 +236,7 @@ createAnydMethods e variables n =
                  "egp.precond = Vector(data.get_size());",
                  "egp.precond = egp.grad;",
                  "Vector output(egp.precond); // output is identical to egp.precond"]++
-                  "int sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
+                  "long sofar = 0;" : concatMap createInputAndGrad (findOrderedInputs e) ++
                   [newcodeStatements precond,
                    "return egp;"]
      },
@@ -264,7 +264,7 @@ createAnydMethods e variables n =
           returnType = ctype a,
           constness = "const",
           args = [],
-          contents = ["int sofar = 0;"] ++
+          contents = ["long sofar = 0;"] ++
                      map createInput (findOrderedInputs e) ++
                      [newcodeStatements $ eval_named (""++rsname) a]
       }
@@ -274,7 +274,7 @@ createAnydMethods e variables n =
           returnType = Double,
           constness = "const",
           args = [],
-          contents = ["int sofar = 0;"] ++
+          contents = ["long sofar = 0;"] ++
                      map createInput (findOrderedInputs e) ++
                      -- the cleanallvars is needed for when we have a
                      -- bad interaction where e is defined using some
@@ -319,6 +319,7 @@ createAnydMethods e variables n =
       varn (vnam, ES _) = ES $ Var CannotBeFreed ('*':vnam) ('*':vnam) vnam Nothing
       varn (vnam, ER _) = ER $ Var CannotBeFreed (vnam++"[i]") vnam vnam Nothing
       varn (_, EK _) = error "unhandled type k-space in varn"
+      estmts = eval_scalar e
 
 eval_scalar :: Expression Scalar -> [Statement]
 eval_scalar x = reuseVar $ freeVectors $ st ++ [Return e']

@@ -95,6 +95,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   }
 
   SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
+  printf("Predicted memory use: %.1f G\n", f.Nx()*f.Ny()*f.Nz()*12*8.0/1024/1024/1024);
   f.sigma() = hf.sigma();
   f.epsilon() = hf.epsilon();
   f.kT() = hf.kT();

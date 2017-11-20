@@ -56,10 +56,23 @@ codeStatements (s:ss) = code s ++ "\n" ++ codeStatements ss
 codeStatements [] = ""
 
 newcodeStatements :: [Statement] -> String
-newcodeStatements (Initialize v : Assign v' (ES e) : ss)
-  | v == v' = "\tdouble " ++ newcode (Assign v (ES e)) ++ "\n" ++ newcodeStatements ss
-newcodeStatements (s:ss) = newcode s ++ "\n" ++ newcodeStatements ss
-newcodeStatements [] = ""
+newcodeStatements sts = newcodeStatementsHelper 2 2 sts -- 2 for n and Vext
+
+newcodeStatementsHelper :: Int -> Int -> [Statement] -> String
+newcodeStatementsHelper peak mem (Initialize v : Assign v' (ES e) : ss)
+  | v == v' = "\tdouble " ++ newcode (Assign v (ES e)) ++ "\n"
+    ++ newcodeStatementsHelper peak mem ss
+newcodeStatementsHelper peak mem (s@(Initialize (ES _)):ss) =
+  newcode s ++ "\n" ++ newcodeStatementsHelper peak mem ss
+newcodeStatementsHelper peak mem (s@(Initialize _):ss) =
+  newcode s ++ " mem used = " ++ show (mem+1) ++ "\n"
+  ++ newcodeStatementsHelper (max peak (mem+1)) (mem+1) ss
+newcodeStatementsHelper peak mem (s@(Free _):ss) =
+  newcode s ++ " mem used = " ++ show (mem-1) ++ "\n"
+  ++ newcodeStatementsHelper peak (mem-1) ss
+newcodeStatementsHelper peak mem (s:ss) = newcode s ++ "\n"
+  ++ newcodeStatementsHelper peak mem ss
+newcodeStatementsHelper peak _ [] = "\t// peak mem = " ++ show peak
 
 substituteS :: Type a => Expression a -> Expression a -> Statement -> Statement
 substituteS x y (Assign s e) = Assign s (substituteE x y e)
