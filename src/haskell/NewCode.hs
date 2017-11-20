@@ -205,7 +205,7 @@ createAnydMethods e variables n =
       args = [],
       contents = ["int sofar = 0;"] ++
                  map createInput (findOrderedInputs e) ++
-                 [newcodeStatements (eval_scalar e)]
+                 [newcodeStatements estmts]
       },
    CFunction {
      name = n++"::grad",
@@ -319,6 +319,7 @@ createAnydMethods e variables n =
       varn (vnam, ES _) = ES $ Var CannotBeFreed ('*':vnam) ('*':vnam) vnam Nothing
       varn (vnam, ER _) = ER $ Var CannotBeFreed (vnam++"[i]") vnam vnam Nothing
       varn (_, EK _) = error "unhandled type k-space in varn"
+      estmts = eval_scalar e
 
 eval_scalar :: Expression Scalar -> [Statement]
 eval_scalar x = reuseVar $ freeVectors $ st ++ [Return e']
