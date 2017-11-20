@@ -346,8 +346,10 @@ matrices.
 
 
 
-\subsection{SAMC Algorithm}
-The SAMC Algorithm was proposed as the reason that the Wang-Landau Algorithm converges.  It is primarily the 1/t WL Algorithm although it does not require knowledge of the entire energy range.
+\subsection{SAD Algorithm}
+The SAD (Stochastic Approximation Dynamic) is a version of the SAMC Algorithm that attempts to dynamically choose the modification factor rather than relying on system dependent parameters such as $t_0$ or $\gamma_0$.  There is an immediate advantage of such an algorithm where parameters are chosen independent of system size or type. SAMC is a dynamic importance sampling algorithm
+
+\jpsays{For my own note:  In statistics, importance sampling is a general technique for estimating properties of a particular distribution, while only having samples generated from a different distribution than the distribution of interest. It is related to umbrella sampling in computational physics.}
 
 
 \subsection{SA-TMMC Algorithm}
