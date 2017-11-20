@@ -56,7 +56,7 @@ codeStatements (s:ss) = code s ++ "\n" ++ codeStatements ss
 codeStatements [] = ""
 
 newcodeStatements :: [Statement] -> String
-newcodeStatements sts = newcodeStatementsHelper 1 1 sts
+newcodeStatements sts = newcodeStatementsHelper 2 2 sts -- 2 for n and Vext
 
 newcodeStatementsHelper :: Int -> Int -> [Statement] -> String
 newcodeStatementsHelper peak mem (Initialize v : Assign v' (ES e) : ss)
