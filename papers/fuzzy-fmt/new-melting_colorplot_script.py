@@ -45,7 +45,7 @@ free_energy_difference = thisdata[:,6]
 #plt.colorbar()
 
 #plt.show()
-plt.title("Crystal Free Energy, kT=2, n=0.92")
+plt.title("Difference in Free Energy, kT=2, n=0.92")
 plt.xlabel("fv")
 plt.ylabel("gw")
 

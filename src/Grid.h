@@ -4,7 +4,12 @@
 
 #include "GridDescription.h"
 #include <stdio.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <Eigen/Geometry>
+#pragma GCC diagnostic pop
 
 static const double default_eps_size = 1000.0;
 

@@ -31,7 +31,7 @@ enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
                       optimistic_sample_error, pessimistic_sample_error, flat_histogram,
                       init_iter_limit };
 
-enum dos_types { histogram_dos, transition_dos };
+enum dos_types { histogram_dos, transition_dos, weights_dos };
 
 // This should store all information needed to run a simulation.  Thus
 // we can just pass this struct around to functions that run the
@@ -101,7 +101,8 @@ struct sw_simulation {
   double wl_factor; // if it is non-zero, update weights on each move WL-style.
   double sa_t0; // if it is non-zero, update wl_factor on each move SA-style.
   double sa_prefactor; // prefactor in computing wl_factor when running SA.
-  bool use_satmmc; // if true, reset sa_t0 whenever we encounter a new energy.
+  bool use_satmmc; // if true, reset sa_t0 whenever we encounter a new energy (also do TMMC).
+  bool use_sad;  // if true, dynamically update sa_t0 when we encounter new energies.
   double sa_weight; // the most recent sa_weight used in satmmc.
 
   /* The following define file names for periodic output files that
@@ -194,7 +195,7 @@ struct sw_simulation {
   void initialize_wltmmc(double wl_fmod,
                          double wl_threshold, double wl_cutoff);
   void initialize_satmmc();
-  void initialize_samc();
+  void initialize_samc(bool am_sad = false);
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
@@ -293,6 +294,7 @@ struct sw_simulation {
     sa_t0 = 0.0; // default to no SA method either
     sa_prefactor = 1.0; // default to standard SAMC when using SAMC.
     use_satmmc = false; // default to not using SATMMC.
+    use_sad = false; // default to not using SAD MC (think happy thoughts!)
     sa_weight = 0.0;
     use_tmmc = false; // default to not using TMMC for accepting moves.
   };

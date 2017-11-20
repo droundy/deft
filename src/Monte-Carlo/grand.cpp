@@ -1134,7 +1134,7 @@ void sw_simulation::update_weights_using_transitions(int version) {
   }
 }
 
-static void write_t_file(const sw_simulation &sw, const char *fname) {
+static void write_t_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1173,7 +1173,7 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
-static void write_d_file(const sw_simulation &sw, const char *fname) {
+static void write_d_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1192,7 +1192,7 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
-static void write_lnw_file(const sw_simulation &sw, const char *fname) {
+static void write_lnw_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1210,7 +1210,7 @@ static void write_lnw_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
-void sw_simulation::write_transitions_file() const {
+void sw_simulation::write_transitions_file() {
   // silently do not save if there is not file name
   if (transitions_filename) write_t_file(*this, transitions_filename);
 
@@ -1252,7 +1252,7 @@ void sw_simulation::write_transitions_file() const {
   }
 }
 
-void sw_simulation::write_header(FILE *f) const {
+void sw_simulation::write_header(FILE *f) {
   fprintf(f, "# version: %s\n", version_identifier());
   fprintf(f, "# seed: %ld\n", random::seedval);
   fprintf(f, "# well_width: %g\n", well_width);

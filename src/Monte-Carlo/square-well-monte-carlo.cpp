@@ -101,6 +101,7 @@ int main(int argc, const char *argv[]) {
   int wltmmc = false;
   int samc = false;
   int satmmc = false;
+  int sad = false;
   int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
@@ -256,6 +257,8 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau TMMC method", "BOOLEAN"},
     {"samc", '\0', POPT_ARG_NONE, &samc, 0,
      "Use Stochastic-Approximation Monte-Carlo method", "BOOLEAN"},
+    {"sad", '\0', POPT_ARG_NONE, &sad, 0,
+     "Use Stochastic-Approximation Monte-Carlo method, dynamic version", "BOOLEAN"},
     {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
      "Use Stochastic-Approximation Transition Matrix Monte-Carlo method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
@@ -378,7 +381,7 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + vanilla_wang_landau + tmi + toe + wltmmc + samc + satmmc + tmmc
+     + vanilla_wang_landau + tmi + toe + wltmmc + samc + sad + satmmc + tmmc
      + oetmmc + (fix_kT != 0)
      + reading_in_transition_matrix + golden != 1){
     printf("Exactly one histogram method must be selected!\n");
@@ -572,6 +575,8 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wltmmc");
     } else if (samc) {
       sprintf(method_tag, "-samc");
+    } else if (sad) {
+      sprintf(method_tag, "-sad");
     } else if (satmmc) {
       sprintf(method_tag, "-satmmc");
     } else if (oetmmc) {
@@ -852,8 +857,8 @@ int main(int argc, const char *argv[]) {
   } else if (wltmmc) {
     sw.wl_factor = wl_factor;
     sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
-  } else if (samc) {
-    sw.initialize_samc();
+  } else if (samc || sad) {
+    sw.initialize_samc(bool(sad));
   } else if (satmmc) {
     sw.initialize_satmmc();
   } else if (simple_flat) {

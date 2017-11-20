@@ -24,7 +24,7 @@
 #include "new/Minimize.h"
 #include "version-identifier.h"
 
-static void took(const char *name) {
+static inline void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
   assert(name); // so it'll count as being used...
@@ -49,7 +49,6 @@ struct data {
   double cfree_energy_per_atom;
   double hfree_energy_per_vol;
   double cfree_energy_per_vol;
-  char *dataoutfile_name;
 };
 
 double find_lattice_constant(double reduced_density, double fv) {
@@ -92,7 +91,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     data_out.cfree_energy_per_atom=sqrt(-1);
     data_out.hfree_energy_per_vol=hf.energy();
     data_out.cfree_energy_per_vol=sqrt(-1);
-    data_out.dataoutfile_name = 0; // return a null pointer?
     return data_out;
   }
 
@@ -261,7 +259,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   //sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
   //        data_dir, temp, reduced_density, fv, gwidth);
   printf("Create data file: %s\n", alldat_filename);
-  data_out.dataoutfile_name=alldat_filedescriptor;
 
   //Create dataout file
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
@@ -276,6 +273,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   } else {
     printf("Unable to open file %s!\n", alldat_filename);
   }
+  delete[] alldat_filename;
   return data_out;
 }
 
@@ -303,10 +301,12 @@ void display_simplex(double simplex_fe[3][3]) {
   printf("\n");
 }
 
+
 void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   for (int k=0; k<3; k++) {
     data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
-    simplex_fe[k][2]=dhill_data.cfree_energy_per_atom;
+    simplex_fe[k][2]=dhill_data.diff_free_energy_per_atom;
+//simplex_fe[k][2]=sqrt((simplex_fe[k][0]*simplex_fe[k][0]) + (simplex_fe[k][1]*simplex_fe[k][1]));  //TEST SIMPLEX
     printf("simplex_fe[%i][2]=%g\n", k, simplex_fe[k][2]);
   }
 }
@@ -331,16 +331,18 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
   reflected.fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
   reflected.gw=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
   data reflect=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose);
-  reflected.fe=reflect.cfree_energy_per_atom;
+  reflected.fe=reflect.diff_free_energy_per_atom;
+//reflected.fe=sqrt((reflected.fv*reflected.fv) + (reflected.gw*reflected.gw));  //TEST SIMPLEX
   return reflected;
 }
 
 point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   point_fe extended;
-  extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-2.0*simplex_fe[2][0];
-  extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-2.0*simplex_fe[2][1];
+  extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-(2.0*simplex_fe[2][0]);
+  extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-(2.0*simplex_fe[2][1]);
   data extend=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose);
-  extended.fe=extend.cfree_energy_per_atom;
+  extended.fe=extend.diff_free_energy_per_atom;
+//extended.fe=sqrt((extended.fv*extended.fv) + (extended.gw*extended.gw));  //TEST SIMPLEX
   return extended;
 }
 
@@ -354,13 +356,16 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   contracted.out.gw=((3/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
   data contract_out=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose);
-  contracted.in.fe=contract_out.cfree_energy_per_atom;
+  contracted.out.fe=contract_out.diff_free_energy_per_atom;
+//contracted.out.fe=sqrt((contracted.out.fv*contracted.out.fv) + (contracted.out.gw*contracted.out.gw));  //TEST SIMPLEX
 
-  contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
-  contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
+  contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))+((1/2.0)*(simplex_fe[2][0]));
+  contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))+((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
   data contract_in=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose);
-  contracted.in.fe=contract_in.cfree_energy_per_atom;
+  contracted.in.fe=contract_in.diff_free_energy_per_atom;
+//contracted.in.fe=sqrt((contracted.in.fv*contracted.in.fv) + (contracted.in.gw*contracted.in.gw));  //TEST SIMPLEX
+
   return contracted;
 }
 
@@ -370,12 +375,15 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
   shrunken.out.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
   shrunken.out.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[1][1]);
   shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw,
-                              data_dir, dx, verbose).cfree_energy_per_atom;
+                              data_dir, dx, verbose).diff_free_energy_per_atom;
+//shrunken.out.fe=sqrt((shrunken.out.fv*shrunken.out.fv) + (shrunken.out.gw*shrunken.out.gw));  //TEST SIMPLEX
 
   shrunken.in.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[2][0]);
   shrunken.in.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[2][1]);
   shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw,
-                             data_dir, dx, verbose).cfree_energy_per_atom;
+                             data_dir, dx, verbose).diff_free_energy_per_atom;
+//shrunken.in.fe=sqrt((shrunken.in.fv*shrunken.in.fv) + (shrunken.in.gw*shrunken.in.gw));  //TEST SIMPLEX
+
   return shrunken;
 }
 
@@ -457,10 +465,9 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 
 
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
-  double gwend, gwstep;
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
   int downhill = false;
@@ -470,6 +477,12 @@ int main(int argc, char **argv) {
                              {0.4, 0.3, 0},   //mid when ordered
                              {0.2, 0.1, 0}    //worst when ordered
   };
+
+//  double simplex_fe[3][3] = {{80, 20, 0},  //best when ordered   TEST SIMPLEX
+//                             {40, 30, 0},   //mid when ordered
+//                             {20, 10, 0}    //worst when ordered
+//  };
+
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
@@ -482,8 +495,6 @@ int main(int argc, char **argv) {
 
 
   //********************Setup POPT to get inputs from command line*******************
-
-  poptContext optCon;
 
   // ----------------------------------------------------------------------------
   // Parse input options
@@ -529,7 +540,7 @@ int main(int argc, char **argv) {
     POPT_TABLEEND
   };
 
-  optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+  poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[OPTION...]\nRequired arguments: temperature (kT), "
                          "reduced density (n)");
 
@@ -580,7 +591,7 @@ if (downhill) {
   printf("starting downhill simplex loop...\n");
 
   for (int i=0;i<50;i++) {
-    printf("\nLoop %i of 50 \n", i);  //for debug
+    printf("\nLoop %i of 50 \n", i+1);  //for debug
     printf("sort simplex\n");
     sort_simplex(simplex_fe);
     printf("simplex sorted\n");
@@ -619,24 +630,28 @@ if (downhill) {
   if (fv == -1) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
-    char *best_alldatfile;  //Identify best all.dat file
     double hfree_energy_pervol, cfree_energy_pervol;
     const int num_to_compute = int(0.3/0.05*1/0.01);
     int num_computed = 0;
     for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {
       double lattice_constant = find_lattice_constant(reduced_density, fv);
       printf("lattice_constant is %g\n", lattice_constant);
-      if (gw == -1) {
-        gwend=gw_end;
-        gwstep=gw_step;
-      } else if (gw == -2) {
-        gwend=lattice_constant*gw_lend;
-        gwstep=lattice_constant*gw_lstep;
+      if (gw == -2) {
+        gw_end=lattice_constant*gw_lend;
+        gw_step=lattice_constant*gw_lstep;
+      } else if (gw > 0) {
+        // In this case we want to do a single gwidth value, so let us
+        // set the start, end and step so as to achieve that.
+        gw_start = gw;
+        gw_end = gw;
+        gw_step = 0.1;
       }
-      printf ("gw is %g\n", gw);
-      printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
+      if (gw < 0) {
+        printf ("gw is %g\n", gw);
+        printf("gwend=%g, gwstep=%g   \n\n", gw_end, gw_step);
+      }
 
-      for (double gwidth=gw_start; gwidth <= gwend +gwstep; gwidth+=gwstep) {
+      for (double gwidth=gw_start; gwidth < gw_end +0.1*gw_step; gwidth+=gw_step) {
         data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
@@ -653,7 +668,6 @@ if (downhill) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
-          best_alldatfile=e_data.dataoutfile_name;  //file descriptor (ASK! want to copy each best alldat file to save it?)
         }
       }
     }
@@ -661,7 +675,7 @@ if (downhill) {
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/%s_best.dat", data_dir, best_alldatfile);
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
 
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
@@ -676,24 +690,21 @@ if (downhill) {
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
+    delete[] bestdat_filename;
 
   } else if (gw < 0) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
-    char *best_alldatfile;  //Identify best all.dat file
     double hfree_energy_pervol, cfree_energy_pervol;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
-    if (gw == -1) {
-      gwend=gw_end;
-      gwstep=gw_step;
-    } else if (gw == -2) {
-      gwend=lattice_constant*gw_lend;
-      gwstep=lattice_constant*gw_lstep;
+    if (gw == -2) {
+      gw_end=lattice_constant*gw_lend;
+      gw_step=lattice_constant*gw_lstep;
     }
     printf("gw is %g\n", gw);
-    printf ("gwend=%g, gwstep=%g   \n\n", gwend, gwstep);
-    for (double gwidth=gw_start; gwidth <= gwend + gwstep; gwidth+=gwstep) {
+    printf ("gwend=%g, gwstep=%g   \n\n", gw_end, gw_step);
+    for (double gwidth=gw_start; gwidth < gw_end + 0.1*gw_step; gwidth+=gw_step) {
       data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
         best_energy_diff = e_data.diff_free_energy_per_atom;
@@ -703,14 +714,13 @@ if (downhill) {
         best_lattice_constant=lattice_constant;
         hfree_energy_pervol=e_data.hfree_energy_per_vol;
         cfree_energy_pervol=e_data.cfree_energy_per_vol;
-        best_alldatfile=e_data.dataoutfile_name;  //file descriptor (ASK! want to copy the best alldat file to save it?)
       }
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/%s_best.dat", data_dir, best_alldatfile);
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
 
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
@@ -724,6 +734,7 @@ if (downhill) {
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
     }
+    delete[] bestdat_filename;
 
   } else {
     find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);

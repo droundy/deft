@@ -316,6 +316,7 @@ void sw_simulation::move_a_ball() {
   transitions(energy, energy_change) += 1; // update the transition histogram
   double Pmove = 1;
   if (use_tmmc || use_satmmc) {
+    assert(sa_t0 == 0.0); // these methods should *not* have t0 set!
     if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
       /* I note that Swendson 1999 uses essentially this method
            *after* two stages of initialization. */
@@ -342,31 +343,18 @@ void sw_simulation::move_a_ball() {
         }
         sa_weight = 1.0;
         if (ncounts_up > 1 && ncounts_down > 1) {
-          // The following is the fractional uncertainty in the TMMC
-          // probability, assuming that each count in the collection
-          // matrix is statistically independent.  (Obviously that is
-          // not true.)
-          // A change! We now assume that only a fraction of the counts
-          // are statistically independent, with that fraction given by
-          // energies_found**2/sa_t0.  The idea is that sa_t0 measures
-          // how many moves were needed to sample energies_found
-          // energies.  But random sampling (moving the energy with
-          // each independent move) should sample all energies in
-          // energies_found**2 random samples.
-
-          //sa_weight = max(1,sqrt(sa_t0*(1/ncounts_up + 1/ncounts_down))/energies_found);
-          
-          // We need the following uncertainty in TMMC in order to
-          // ensure that the cumulative error in the weights over the
-          // entire energy range is less than 1.
+          // We need the following *fractional* uncertainty in TMMC in
+          // order to ensure that the cumulative error in the weights
+          // over the entire energy range is reasonable.
           const double needed_uncert_sqr = 1.0/energies_found;
-          // The following is pessimistically assuming that we may end
-          // up with a very small Pmove due to systematic (correlated)
-          // errors, as we have observed happen before.
-          const double tm_uncert_sqr = Pmove*Pmove*(1.0/ncounts_up+1.0/ncounts_down);
+          // The following is our reasonably optimistic (uncorrelated)
+          // estimate for the fractional uncertainty for the TM
+          // probability.
+          const double tm_uncert_sqr = 1.0/ncounts_up+1.0/ncounts_down;
           sa_weight = tm_uncert_sqr/(needed_uncert_sqr + tm_uncert_sqr);
         }
-        Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
+        // Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
+        Pmove = pow(saPmove, sa_weight)*pow(Pmove, 1-sa_weight); // use a geometric average
       }
 
       // Here we enforce the Tmin probability.  Note that in SATMMC
@@ -375,8 +363,20 @@ void sw_simulation::move_a_ball() {
       double Pmin = exp(energy_change*betamax);
       if (Pmove < Pmin) Pmove = Pmin;
     }
+  } if (use_sad) {
+    // always allow changes that increase the energy (remember minus sign):
+    if (energy_change < 0) {
+      const double lnPmove =
+        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+      if (lnPmove < 0) Pmove = exp(lnPmove);
+      // Here we enforce the Tmin probability.
+      const double betamax = 1.0/min_T;
+      double Pmin = exp(energy_change*betamax);
+      if (Pmove < Pmin) Pmove = Pmin;
+    }
   } else {
-    if (!sa_t0 && wl_factor > 0 && (energy + energy_change > min_important_energy
+    if (!sa_t0
+        && wl_factor > 0 && (energy + energy_change > min_important_energy
                                     || energy+energy_change<max_entropy_state)) {
       // This means we are using a WL method, and the system is trying
       // to leave the energy range specified.  We cannot permit this!
@@ -416,12 +416,15 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
-  if (sa_t0) {
-    if (use_satmmc && energy_histogram[energy] == 0) {
+  if (sa_t0 || use_sad || use_satmmc) {
+    if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
     }
-    //wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
-    wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
+    if (use_sad || use_satmmc) {
+      wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
+    } else {
+      wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
+    }
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
@@ -500,6 +503,33 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
       }
       else ln_dos[i] = -DBL_MAX;
+    }
+  } else if (dos_type == weights_dos) {
+    // weights_dos is useful for WL, SAD, or SAMC algorithms, where
+    // the density of states is determined directly from the weights.
+    int minE = 0;
+    double betamax = 1/min_T;
+    for (int i=0; i<energy_levels; i++) {
+      ln_dos[i] = ln_energy_weights[max_entropy_state] - ln_energy_weights[i];
+      if (!minE && ln_dos[i-1] - ln_dos[i] > betamax) minE = i;
+    }
+    if (!sa_t0) {
+      // Above the max_entropy_state our weights are effectively constant,
+      // so the density of states is proportional to our histogram.
+      for (int i=0; i<max_entropy_state; i++) {
+        if (energy_histogram[i]) {
+          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[max_entropy_state]));
+        }
+      }
+      // Below the minimum important energy, we also need to use the histogram,
+      // only now adjusted by a Boltzmann factor.  We compute the min
+      // important energy above for extreme clarity.
+      for (int i=minE+1; i<energy_levels; i++) {
+        if (energy_histogram[i]) {
+          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[minE]))
+            - (i-minE)*betamax;  // the last bit gives Boltzmann factor
+        }
+      }
     }
   } else if(dos_type == transition_dos) {
     ln_dos[0] = 0;
@@ -789,7 +819,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[lowest_problem_energy],
                optimistic_samples[highest_problem_energy],
                pessimistic_samples[highest_problem_energy], min_samples, energy);
-        if (use_tmmc) printf(", sa %.0f% %g", 100*sa_weight, wl_factor);
+        if (use_tmmc) printf(", sa %.0f%% %g", 100*sa_weight, wl_factor);
         printf(")\n");
         fflush(stdout);
       }
@@ -821,6 +851,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[highest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy);
         if (use_satmmc) printf(", sa %.2g%% %.2g", 100*sa_weight, wl_factor);
+        else if (use_sad) printf(", sa %.2g", wl_factor);
         printf(")\n");
         {
           printf("      ");
@@ -1122,7 +1153,8 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 // stochastic_weights is under construction by DR and JP (2017).
 // this is used for Stochastic Approximation Monte Carlo.
 
-void sw_simulation::initialize_samc() {
+void sw_simulation::initialize_samc(bool am_sad) {
+  use_sad = am_sad;
   assert(sa_t0);
   assert(sa_prefactor);
   assert(!use_satmmc);
@@ -1134,7 +1166,11 @@ void sw_simulation::initialize_samc() {
     check_how_often += N*N; // try a little harder next time...
 
     verbose = printing_allowed();
-    if (verbose) write_transitions_file();
+    if (verbose) {
+      set_min_important_energy();
+      set_max_entropy_energy();
+      write_transitions_file();
+    }
   } while(!finished_initializing(verbose));
 
   initialize_canonical(min_T,min_important_energy);
@@ -1145,7 +1181,7 @@ void sw_simulation::initialize_samc() {
 // initialize the weight array using the satmmc method.
 void sw_simulation::initialize_satmmc() {
   use_satmmc = true;
-  sa_t0 = 1;
+  assert(!sa_t0);
   assert(sa_prefactor);
 
   int check_how_often =  N*N; // check if finished only so often
@@ -1155,7 +1191,11 @@ void sw_simulation::initialize_satmmc() {
     check_how_often += N*N; // try a little harder next time...
 
     verbose = printing_allowed();
-    if (verbose) write_transitions_file();
+    if (verbose) {
+      set_min_important_energy();
+      set_max_entropy_energy();
+      write_transitions_file();
+    }
   } while(!finished_initializing(verbose));
 
   initialize_canonical(min_T,min_important_energy);
@@ -1654,7 +1694,10 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
   }
   sw.write_header(f);
   fprintf(f, "# energy\tlndos\tps\n");
-  double *lndos = sw.compute_ln_dos(transition_dos);
+  dos_types how_to_compute_dos = transition_dos;
+  bool using_wl = sw.wl_factor && !(sw.use_sad || sw.use_satmmc || sw.sa_t0);
+  if (sw.use_sad || sw.sa_t0 || using_wl) how_to_compute_dos = weights_dos;
+  double *lndos = sw.compute_ln_dos(how_to_compute_dos);
   double maxdos = lndos[0];
   for (int i = 0; i < sw.energy_levels; i++) {
     if (maxdos < lndos[i]) maxdos = lndos[i];

@@ -4,7 +4,7 @@ import matplotlib, sys
 if 'show' not in sys.argv:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy, time, os
+import numpy, time, os, glob
 
 matplotlib.rc('text', usetex=True)
 
@@ -33,6 +33,9 @@ minlndos = 1e100
 maxlndos = -1e100
 numframes = 0
 
+def uses_crazy_weights_dos(suffix):
+    return 'wl' in suffix or suffix in ['samc', 'sad']
+
 dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 colors = ['k', 'b', 'r', 'g', 'c', 'm']
 
@@ -50,14 +53,20 @@ for frame in xrange(100000):
         except:
             alldone = True
             break
-        minlndos = min(minlndos, lndos.min())
-        maxlndos = max(maxlndos, lndos.max())
+        if not uses_crazy_weights_dos(suffix):
+            minlndos = min(minlndos, lndos.min())
+            maxlndos = max(maxlndos, lndos.max())
         numframes = frame+1
         mine = min(mine, e[lndos == lndos[-1]].max() - 20)
         maxe = max(maxe, e[lndos == lndos[0]].min())
     if numframes % 25 == 0 and frame != lastframe:
         print 'counting %dth frame' % numframes
         lastframe = frame
+
+bestframe = sorted(glob.glob('data/%s/%s-%s-movie/*-lndos.dat'
+                             % (subdirname, filename, suffixes[0])))[-1]
+best_e, best_lndos = readandcompute.e_lndos(bestframe)
+print 'best data is', bestframe
 
 print 'counted %d frames' % numframes
 print 'mine', mine
@@ -77,6 +86,7 @@ for frame in xrange(numframes):
     if frame % 10 == 0:
         print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
+    ax.plot(best_e, best_lndos, ':', color='0.5')
 
     for suffix_index in range(len(suffixes)):
         suffix = suffixes[suffix_index]

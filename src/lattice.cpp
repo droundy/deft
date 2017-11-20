@@ -1,5 +1,10 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <Eigen/LU>
 #include <Eigen/Geometry>
+#pragma GCC diagnostic pop
+
 #include "lattice.h"
 #include <stdio.h>
 

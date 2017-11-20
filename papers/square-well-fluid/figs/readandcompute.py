@@ -11,7 +11,10 @@ def e_hist(fbase):
     return energy, hist
 
 def e_lndos(fbase):
-    e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
+    if fbase[-len('-lndos.dat'):] == '-lndos.dat':
+        e_lndos = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
+    else:
+        e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
 
     energy = -e_lndos[:,0] # array of energies
     lndos = e_lndos[:,1]
