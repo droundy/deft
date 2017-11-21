@@ -1155,7 +1155,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 
 void sw_simulation::initialize_samc(bool am_sad) {
   use_sad = am_sad;
-  assert(sa_t0);
+  assert(sa_t0 || am_sad);
   assert(sa_prefactor);
   assert(!use_satmmc);
 
