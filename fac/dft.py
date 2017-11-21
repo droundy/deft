@@ -61,16 +61,15 @@ mkdats = """
   papers/water-saft/figs/single-rod
   papers/water-saft/figs/sphere
 
-  papers/pair-correlation/figs/walls
-
 """.split()
 
 for s in mkdats:
-    # The extra_requirements below is overkill, since it is only
-    # needed in pair-correlation.  But it keeps things easy by just
-    # adding this as a universal requirement, and costs us little in
-    # efficiency.
     src.link(s+'.cpp', s+'.mkdat',
              objects = {'src/%s.o' % x for x in generic_sources},
-             extra_requirements = {'papers/pair-correlation/figs/ghs-analytics.h',
-                                   'papers/pair-correlation/figs/short-range-ghs-analytics.h'})
+             extra_requirements = set())
+
+src.link('papers/pair-correlation/figs/walls.cpp',
+         'papers/pair-correlation/figs/walls.mkdat',
+         objects = {'src/%s.o' % x for x in generic_sources},
+         extra_requirements = {'papers/pair-correlation/figs/ghs-analytics.h',
+                               'papers/pair-correlation/figs/short-range-ghs-analytics.h'})

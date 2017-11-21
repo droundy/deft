@@ -72,6 +72,8 @@ class facfile:
                                src/gSigmaAm2Fast.o src/gSigmaSm2Fast.o
                                src/YuWuCorrelationFast.o
                             """.split())
+            if "version-identifier" in includes:
+                headers |= {'src/version-identifier.h'}
             for i in includes:
                 if i == 'Monte-Carlo/monte-carlo':
                     i = 'utilities'
