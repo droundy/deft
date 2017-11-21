@@ -5,7 +5,9 @@
 #include "lattice.h"
 
 #pragma GCC diagnostic push
+#if __GCC__ > 5
 #pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "Eigen/Eigen"
 #pragma GCC diagnostic pop
