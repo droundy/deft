@@ -535,8 +535,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
 	printf("\n");
       }*/
 
-    
-
+   
       /* make matrix upper triangular up to last column */
       for (int e = emin; e < emax; e++){
 	/*leading index of row we will subtract from other rows */
@@ -599,8 +598,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
 	}
       }
       for(int e1 = 0; e1< energy_levels;e1++) { printf("%g ",error[e1]);} printf("\n\n");
-      
-
+      delete [] error;
 
       double dos_min = 0;
       double dos_max = 0;
