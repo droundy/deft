@@ -513,7 +513,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       ln_dos[i] = ln_energy_weights[max_entropy_state] - ln_energy_weights[i];
       if (!minE && ln_dos[i-1] - ln_dos[i] > betamax) minE = i;
     }
-    if (!sa_t0 || use_sad) {
+    if (!sa_t0) {
       // Above the max_entropy_state our weights are effectively constant,
       // so the density of states is proportional to our histogram.
       for (int i=0; i<max_entropy_state; i++) {
@@ -526,7 +526,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       // important energy above for extreme clarity.
       for (int i=minE+1; i<energy_levels; i++) {
         if (energy_histogram[i]) {
-          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[minE]))
+          ln_dos[i] = ln_dos[i] + log(energy_histogram[i]/double(energy_histogram[minE]))
             - (i-minE)*betamax;  // the last bit gives Boltzmann factor
         }
       }
@@ -851,10 +851,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[highest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy);
         if (use_satmmc) printf(", sa %.2g%% %.2g", 100*sa_weight, wl_factor);
-        else if (use_sad) printf(", sa %.2g %.4g %.4g %.4g", wl_factor,
-                 double(log(energy_histogram[40])),
-                 double(log(energy_histogram[50])),
-                 double(log(energy_histogram[max_entropy_state])));
+        else if (use_sad) printf(", sa %.2g", wl_factor);
         printf(")\n");
         {
           printf("      ");
@@ -903,7 +900,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
 
         /* The following is a hokey and quick way to guess at a
            min_important_energy, which assumes a method such as tmmc,
-           which puts a bount on the "effective temperature" at
+           which puts a bound on the "effective temperature" at
            min_T. */
         int min_maybe_important_energy = min_energy_state;
         for (int i=min_energy_state; i>max_entropy_state;i--) {
