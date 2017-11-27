@@ -486,15 +486,15 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
   else if (1 /* try Gauss Jordan Elim */){
     /* copy the collect matrix to M, subtract row sum from diagonal */
     int bet = 0;
-    int emin = 0;
+    int emin = -1;
     int emax = 0;
     for (int e = 0; e < energy_levels; e++){
-      bool nonzero_found = 0;
+      bool nonzero_found = false;
       for(int de = -biggest_energy_transition; de <= biggest_energy_transition; de ++) {
 	//printf("%g \t", transition_matrix(e,e+de));
 	if (transition_matrix(e,e+de)){
 	  bet = max(abs(de),bet);
-	  nonzero_found = 1;
+	  nonzero_found = true;
 	}
       }
       //printf("\n");
@@ -504,7 +504,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	emin = e;
       }
     }
-    if (emin > 0) emin++;
+    emin++;
     if (emax <= emin) {
       // We have only ever explored one (or zero?) energies, so we
       // know nothing about the density of states.  Just leave it as a
