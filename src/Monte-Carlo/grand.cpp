@@ -475,9 +475,6 @@ void sw_simulation::ln_dos_check(double * ln_dos) const {
 }
 
 double* sw_simulation::compute_ln_dos(dos_types dos_type) {
-
-  ln_dos = new double[energy_levels]();
-
   if(dos_type == histogram_dos){
     for(int i = max_entropy_state; i < energy_levels; i++){
       if(energy_histogram[i] != 0){
