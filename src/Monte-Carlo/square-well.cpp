@@ -508,12 +508,12 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
     // weights_dos is useful for WL, SAD, or SAMC algorithms, where
     // the density of states is determined directly from the weights.
     int minE = 0;
-    double betamax = 1/min_T;
+    double betamax = 1.0/min_T;
     for (int i=0; i<energy_levels; i++) {
       ln_dos[i] = ln_energy_weights[max_entropy_state] - ln_energy_weights[i];
       if (!minE && ln_dos[i-1] - ln_dos[i] > betamax) minE = i;
     }
-    if (!sa_t0) {
+    if (!sa_t0 || use_sad) {
       // Above the max_entropy_state our weights are effectively constant,
       // so the density of states is proportional to our histogram.
       for (int i=0; i<max_entropy_state; i++) {
@@ -851,7 +851,10 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[highest_problem_energy],
                optimistic_samples[highest_problem_energy], min_samples, energy);
         if (use_satmmc) printf(", sa %.2g%% %.2g", 100*sa_weight, wl_factor);
-        else if (use_sad) printf(", sa %.2g", wl_factor);
+        else if (use_sad) printf(", sa %.2g %.4g %.4g %.4g", wl_factor,
+                 double(log(energy_histogram[40])),
+                 double(log(energy_histogram[50])),
+                 double(log(energy_histogram[max_entropy_state])));
         printf(")\n");
         {
           printf("      ");
@@ -1155,7 +1158,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 
 void sw_simulation::initialize_samc(bool am_sad) {
   use_sad = am_sad;
-  assert(sa_t0);
+  assert(sa_t0 || am_sad);
   assert(sa_prefactor);
   assert(!use_satmmc);
 

@@ -15,8 +15,10 @@ hsfiles = """
   C CodeGen Expression ExternalLennardJones ExternalPotentialTest
   FMT functionals HughesSaft IdealGas LatexDouble latex-functionals
   Latex LogN0 NewCode Optimize QuadraticGaussian Quadratic QuadraticN0
-  Rosenfeld SFMT Statement test WaterSaft WhiteBear SW_liquid
+  Rosenfeld SFMT Statement WaterSaft WhiteBear SW_liquid
 """.split()
+
+# see also test
 
 all_objects = sorted([x+'.o' for x in hsfiles])
 
