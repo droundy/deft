@@ -347,34 +347,44 @@ matrices.
 
 
 \subsection{SAD Algorithm}
-The SAD (Stochastic Approximation Dynamic) is a version of the SAMC Algorithm that attempts to dynamically choose the modification factor rather than relying on system dependent parameters such as $t_0$ or $\gamma_0$.  There is an immediate advantage of such an algorithm where parameters are chosen independent of system size or type. SAMC is a dynamic importance sampling algorithm
-
-\jpsays{For my own note:  In statistics, importance sampling is a general technique for estimating properties of a particular distribution, while only having samples generated from a different distribution than the distribution of interest. It is related to umbrella sampling in computational physics.}
-
+The SAD (Dynamic Stochastic Approximation) is a version of the SAMC Algorithm that attempts to dynamically choose the modification factor rather than relying on system dependent parameters such as $t_0$ or $\gamma_0$.  There is an immediate advantage of such an algorithm where parameters are chosen independent of system size or type. SAMC can be applied as a dynamic importance sampling algorithm that uses an update factor to explore energy space~\cite{liang2007stochastic, werlich2015stochastic, schneider2017convergence}.  The update factor is defined in the original implementation~\cite{liang2007stochastic} in terms of an arbitrary tunable parameter $t_0$.
+\begin{align}
+\gamma_{t}^{\text{SA}} = \frac{t_0}{\max(t_0,t)}
+\end{align}
+We argue that it is possible to set this parameter to a system independent parameter such that $t_0 = N_E^2/t$ where $N_E$ is the number of energies that have been found.  This gives an update factor as follows:
+\begin{align}
+\gamma_{t}^{\text{SA}} = \frac{N_E^2}{t}
+\end{align}
+The update factor has the same $1/t$ behavior as the original SAMC algorithm; however now every time a new energy is discovered during the course of the simulation, the update factor experiences a jump.
 
 \subsection{SA-TMMC Algorithm}
 We introduce a new algorithm consisting of the merger of the Stochastic Approximation (SA) method proposed by Liang et al.~\cite{liang2007stochastic} and the TMMC Algorithm with suitable adaptations.  While the Stochastic Approximation method has recently been implemented in comparison with the Wang-Landau Algorithm~\cite{werlich2015stochastic, schneider2017convergence}, it seems quite natural to create a new Monte-Carlo method which we will call SA-TMMC.  Like in the original implementation, we define an update factor where $t_0$ is the number of Monte-Carlo moves and $t$ is the current iteration.  
 \begin{align}
-F_{t}^{\text{SA}} = \frac{t_0}{\max(t_0,t)}
+\gamma_{t}^{\text{SA}} = \frac{t_0}{\max(t_0,t)}
 \end{align}
 One potential problem of merging SA and TMMC is that SA provides no nice transition to the later method due to the lack of a user-controlled cutoff.  Also for SA Monte-Carlo, the choice of parameter $t_0$ proves difficult particularly for complex systems.  Finally, we enforce a minimum temperature probability which prevents the system from sampling states below the minimum temperature.  We discuss here how we resolve all of the potential issues we encountered when integrating both SA and TMMC. 
 
 \subsubsection{Define an adaptive parameter $t_0$}
 It has been shown that if $F_{t}^{\text{SA}}$ satisfies two conditions the estimator is proven to converge to the real DOS~\cite{liang2006theory, liang2007stochastic}.
 \begin{align}
-\sum_{t=1}^\infty F_{t}^{\text{SA}} = \infty \quad\textrm{and}\quad
-\sum_{t=1}^\infty (F_{t}^{\text{SA}})^\zeta < \infty
+\sum_{t=1}^\infty \gamma_{t}^{\text{SA}} = \infty \quad\textrm{and}\quad
+\sum_{t=1}^\infty (\gamma_{t}^{\text{SA}})^\zeta < \infty
 \end{align}
 where $\zeta \in \{1,2\}$.  For practical implementation with TMMC, we find it necessary to reset $t_0$ everytime a new energy state is found.  This ensures that all energy states are sampled before TMMC move probabilities begin to be favored.  
-\jpsays{I have no idea how this impacts convergence!}
 
 \subsubsection{Define a statistical weight to control the transition between SA and TMMC}
 Our algorithm can alternate between SA and TMMC on the fly using weights to determine the probability that a move between adjacent energy states is allowed.  We define the transition probability $\text{SA}_{\text{Weight}}$ as
 \begin{align}
-\text{SA}_{\text{Weight}} =\frac{\sqrt{t_0}}{N_\text{found}} 
-\sqrt{\frac{1}{n_\downarrow}+\frac{1}{n_\uparrow}}
+\delta_{\text{TMMC}}^2 =\frac{1}{n_\downarrow}+\frac{1}{n_\uparrow}, \quad\quad
+\delta_{\text{SA}}^2 = \frac{1}{N_E}
 \end{align}
-where $t_0$ is the number of Monte-Carlo moves, $N_\text{found}$ is the number of energy states that have been found i.e. visited, and $n_{\uparrow\downarrow}$ are the number of upward or downward moves between adjacent energy states respectively.  The rational behind the transition probability is that the transition weight can be related to the fractional uncertainty in upward and downward moves assuming there is no system correlation (the moves are independent).  Although this is not necessarily the case, we find that this definition for the transition weight is satifactory.  The prefactor $\nicefrac{\sqrt{t_0}}{N_\text{found}}$ is justified by the fact that $t_0$ represents how many moves were necessary to randomly sample $N_\text{found}$ energies and $N^2_\text{found}$ is the number of samples necessary to randomly sample all the energies independently.  
+\begin{align}
+\text{SA}_{\text{Weight}} =\frac{\delta_{\text{TMMC}}^2}{\delta_{\text{TMMC}}^2 + \delta_{\text{SA}}^2}
+\end{align}
+where $N_\text{found}$ is the number of energy states that have been found i.e. visited, and $n_{\uparrow\downarrow}$ are the number of upward or downward moves between a pair of energy states respectively.  The rational behind the transition probability is that the transition weight can be related to the fractional uncertainty in upward and downward moves assuming there is no system correlation (the moves are independent).  Although this is not necessarily the case, we find that this definition for the transition weight is satifactory. The probability of a move is then the geometic average of either using the SA or TMMC Algorithm. 
+\begin{align}
+\mathcal{P}_\text{move} = \mathcal{P}_\text{move}^{\text{SA}_\text{Weight}} \mathcal{P}_\text{move}^{1-\text{SA}_\text{Weight}}
+\end{align}
 
 \subsubsection{Enforce a minimum temperature probability}
 One potentially damaging aspect to the convergence of the Stochastic Approximation method is the need to enforce a minimum temperature probability.  We define this probability as 
