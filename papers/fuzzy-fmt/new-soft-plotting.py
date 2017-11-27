@@ -1,12 +1,36 @@
 #!/usr/bin/env python2
 from __future__ import division
+import argparse
+
+# Default data sets to pull from. 
+rhoDefault = [0.7,0.85,0.89,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,
+        1.0,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.1,1.11,1.12,1.13,
+        1.14,1.15,1.16,1.17,1.18,1.19,1.2,1.21,1.22,1.23,1.24]
+TDefault = [2.0]
+
+parser = argparse.ArgumentParser(description='Which plots to make.')
+parser.add_argument('-p','--plot', metavar='PLOT', action ="store",
+                    default='pressure', help='the plot to make')
+parser.add_argument('--no-show', help='do not pop up windows',
+                    action="store_true")
+parser.add_argument('-r','--rho', metavar = 'RHO',type = float, nargs = "+",
+                    default = rhoDefault, help = "List of densities.")
+parser.add_argument('-t','--temp', metavar = 'TEMP',type = float, nargs = "+",
+                    default = TDefault, help = "List of Temperatures")
+args = parser.parse_args()
+
+if args.no_show:
+    # We need the following two lines in order for matplotlib to work
+    # without access to an X server.
+    import matplotlib
+    matplotlib.use('Agg')
+
 from mpl_toolkits.mplot3d import Axes3D
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import math
-import argparse
 ########################################################################
 ## This script reads data from files and plots for new-soft
 ########################################################################
@@ -15,18 +39,14 @@ x = 0
 y = 1
 z = 2
 
-# Default data sets to pull from. 
-rhoDefault = [0.7,0.85,0.89,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,
-        1.0,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.1,1.11,1.12,1.13,
-        1.14,1.15,1.16,1.17,1.18,1.19,1.2,1.21,1.22,1.23,1.24]
-TDefault = [2.0]
+#~ rhoDefault = np.concatenate((np.arange(0.7,1.3,0.1),np.arange(0.91,1.0,0.01)),axis = 0)
 
 def plotPressure(rho,T):
 	plt.figure()
 	for density in rho:
 		pressArray = []
 		for temp in T:
-			pressure = np.loadtxt('data2/ff-'+str(density)+\
+			pressure = np.loadtxt('data/mc/ff-'+str(density)+\
                 '_temp-'+str(temp)+'-press.dat')
                 
                     
@@ -72,7 +92,7 @@ def energy(rho,T):
         pressArray = []
         volumeArray = []
         for density in rho:
-            fname = 'data2/ff-%s_temp-%s-press.dat'%(density,temp)
+            fname = 'data/mc/ff-%s_temp-%s-press.dat'%(density,temp)
             pressArray.append(float(np.loadtxt(fname)))
             Nballs = -1
             with open(fname) as f:
@@ -111,7 +131,7 @@ def energy(rho,T):
         plt.grid()
         
         plt.figure()
-        plt.plot(pn,F + pn*v - 2.8/3*pn,'k-')
+        plt.plot(pn,F + pn*v - (2.8/3)*pn,'k.')
         plt.xlabel('pressure p*')
         plt.ylabel('g(v)')
         plt.title(r' Attempted Reduced Gibbs with weird shift $g = (f-f_0) + pv$')
@@ -125,6 +145,7 @@ def energy(rho,T):
         plt.ylabel('g(v)')
         plt.title(r' Attempted grand with weird shift $g = (f-f_0) + pv$')
         plt.grid()
+        plt.savefig('figs/FIXME.pdf')
         
         
         
@@ -169,15 +190,6 @@ def plotDiffusionCoeff(rho,T):
             plt.ylabel('D (length/iteration)')
             plt.grid()
             #~ plt.ylim(0)
-
-parser = argparse.ArgumentParser(description='Which plots to make.')
-parser.add_argument('-p','--plot', metavar='PLOT', action ="store",
-                    default='diffusion', help='the plot to make')
-parser.add_argument('-r','--rho', metavar = 'RHO',type = float, nargs = "+",
-                    default = rhoDefault, help = "List of densities.")
-parser.add_argument('-t','--temp', metavar = 'TEMP',type = float, nargs = "+",
-                    default = TDefault, help = "List of Temperatures")
-args = parser.parse_args()
 
 print("\nPlot: %s"%args.plot)
 print'Densities: ',args.rho

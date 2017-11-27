@@ -1,0 +1,2 @@
+| python2 new-soft-plotting.py -p energy --no-show
+> figs/FIXME.pdf
