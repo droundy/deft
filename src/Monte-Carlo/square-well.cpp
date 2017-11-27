@@ -493,7 +493,7 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   return error_times_Z/Z;
 }
 
-double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
+double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 
   double *ln_dos = new double[energy_levels]();
 
@@ -509,11 +509,21 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
     // the density of states is determined directly from the weights.
     int minE = 0;
     double betamax = 1.0/min_T;
+    if (use_sad) {
+      // This is hokey, but we just want to ensure that we have a proper
+      // max_entropy_state before computing the ln_dos.
+      max_entropy_state = 0;
+      for (int i=0; i<energy_levels; i++) {
+        if (ln_energy_weights[i] < ln_energy_weights[max_entropy_state]) {
+          max_entropy_state = i;
+        }
+      }
+    }
     for (int i=0; i<energy_levels; i++) {
       ln_dos[i] = ln_energy_weights[max_entropy_state] - ln_energy_weights[i];
       if (!minE && ln_dos[i-1] - ln_dos[i] > betamax) minE = i;
     }
-    if (!sa_t0) {
+    if (use_sad) {
       // Above the max_entropy_state our weights are effectively constant,
       // so the density of states is proportional to our histogram.
       for (int i=0; i<max_entropy_state; i++) {
@@ -526,7 +536,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       // important energy above for extreme clarity.
       for (int i=minE+1; i<energy_levels; i++) {
         if (energy_histogram[i]) {
-          ln_dos[i] = ln_dos[i] + log(energy_histogram[i]/double(energy_histogram[minE]))
+          ln_dos[i] = ln_dos[minE] + log(energy_histogram[i]/double(energy_histogram[minE]))
             - (i-minE)*betamax;  // the last bit gives Boltzmann factor
         }
       }
@@ -1647,7 +1657,7 @@ void sw_simulation::initialize_transitions() {
   set_min_important_energy();
 }
 
-static void write_t_file(const sw_simulation &sw, const char *fname) {
+static void write_t_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1686,7 +1696,7 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
-static void write_d_file(const sw_simulation &sw, const char *fname) {
+static void write_d_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1709,7 +1719,7 @@ static void write_d_file(const sw_simulation &sw, const char *fname) {
   delete[] lndos;
 }
 
-static void write_lnw_file(const sw_simulation &sw, const char *fname) {
+static void write_lnw_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1727,7 +1737,7 @@ static void write_lnw_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
-void sw_simulation::write_transitions_file() const {
+void sw_simulation::write_transitions_file() {
   // silently do not save if there is not file name
   if (transitions_filename) write_t_file(*this, transitions_filename);
 
@@ -1769,7 +1779,9 @@ void sw_simulation::write_transitions_file() const {
   }
 }
 
-void sw_simulation::write_header(FILE *f) const {
+void sw_simulation::write_header(FILE *f) {
+  double *ln_dos = compute_ln_dos(transition_dos);
+
   fprintf(f, "# version: %s\n", version_identifier());
   fprintf(f, "# seed: %ld\n", random::seedval);
   fprintf(f, "# well_width: %g\n", well_width);
@@ -1792,7 +1804,6 @@ void sw_simulation::write_header(FILE *f) const {
 
   fprintf(f, "\n");
 
-  double *ln_dos = compute_ln_dos(transition_dos);
   fprintf(f, "# converged state: %d\n", converged_to_state());
   fprintf(f, "# converged temperature: %g\n", converged_to_temperature(ln_dos));
   delete[] ln_dos;

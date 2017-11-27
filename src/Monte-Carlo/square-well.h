@@ -209,8 +209,8 @@ struct sw_simulation {
   void initialize_transitions();
 
   void initialize_transitions_file(const char *transitions_input_filename);
-  void write_transitions_file() const;
-  void write_header(FILE *f) const;
+  void write_transitions_file();
+  void write_header(FILE *f);
 
   double fractional_dos_precision;
   void update_weights_using_transitions(int version, bool energy_range_fixed = false);
@@ -222,7 +222,7 @@ struct sw_simulation {
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
-  double* compute_ln_dos(dos_types dos_type) const;
+  double* compute_ln_dos(dos_types dos_type);
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy(double *ln_dos = 0);
