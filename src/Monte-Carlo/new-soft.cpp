@@ -285,7 +285,7 @@ int main(int argc, const char *argv[])  {
             }
         if (trialAcceptance){ 
             spheres[movedSphereNum] = movedSpherePos;
-            currentEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall); // update instead
+            currentEnergy += energyChange; // update instead
             // try currentEnergy += energyChange; // rerun totalPotential when saving?
             virial = forceTimesDist(spheres,numOfSpheres,systemLength,wall); // update instead
             // TODO: try timing runs with different N values, and plotting time per move versus N
@@ -375,6 +375,8 @@ int main(int argc, const char *argv[])  {
 				printf("Acceptance Rate: %.5f \n", 
 					100.0*double(acceptedTrials)/double(currentIteration+1));
 				printf("dr: %.5f, drAdjust: %ld\n",dr,drAdjust);
+                double compEnergy = totalPotential(spheres,numOfSpheres,systemLength,wall);
+                printf("Calc Potential Energy: %g\nActual Pot. Energy %g\n",currentEnergy,compEnergy);
 				printf("Running for: %ld days, %ld hrs, %ld min, %ld sec \n"
 						,days,hours-days*24,
 						minutes-hours*60,long(clock)-minutes*60);
@@ -439,7 +441,7 @@ int main(int argc, const char *argv[])  {
                 fclose(struc_out);
 				save = false; 
 			}
-            if ((structureReset == 1) || (structureReset == 3)) {
+            if ((structureReset == 2) || (structureReset == 6)) {
                 structureFactor[kpoints][kpoints] = {0};
                 printf("Structure Factor Reset\n");
                 printf("Reset Time: %s\n\n",ctime(&mytime));

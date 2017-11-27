@@ -17,7 +17,8 @@ z = 2
 
 # Default data sets to pull from. 
 rhoDefault = [0.7,0.85,0.89,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,
-        1.0,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.1,1.15,1.2]
+        1.0,1.01,1.02,1.03,1.04,1.05,1.06,1.07,1.08,1.09,1.1,1.11,1.12,1.13,
+        1.14,1.15,1.16,1.17,1.18,1.19,1.2,1.21,1.22,1.23,1.24]
 TDefault = [2.0]
 
 def plotPressure(rho,T):
@@ -65,22 +66,69 @@ def plotRadialDF(rho,T):
 			plt.ylabel('Nearby Spheres')
                 plt.grid()
 
+def energy(rho,T):
+    for temp in T:
+        plt.figure()
+        pressArray = []
+        volumeArray = []
+        for density in rho:
+            fname = 'data2/ff-%s_temp-%s-press.dat'%(density,temp)
+            pressArray.append(float(np.loadtxt(fname)))
+            Nballs = -1
+            with open(fname) as f:
+                for l in f.readlines():
+                    if l[:10] == '# volume: ':
+                        volumeArray.append(float(l[10:]))
+                        break
+            with open(fname) as f:
+                for l in f.readlines():
+                    if l[:5] == '# N: ':
+                        Nballs = int(l[5:])
+                        break
+        V = np.flip(volumeArray,0)
+        p = np.flip(pressArray,0)
+        plt.plot(V,p,'k.')
+        plt.xlabel('Volume V')
+        plt.ylabel('Pressure p*')
+        plt.title('Pressure v. Volume At Constant Temp: %s'%temp)
+        plt.grid()
 
-#~ def plotEnergyPDF(rho,T):
-	#~ for density in rho:
-		#~ plt.figure()
-		#~ for temp in T:
-			#~ energyData = np.loadtxt('data/ff-'+str(density)+'_temp-'+\
-                #~ str(temp)+'-energy.dat')
-			#~ mu,e2 = energyData
-			#~ sigma = np.sqrt(e2 - mu*mu)
-			#~ x = np.linspace(mu - 4*sigma, mu + 4*sigma, 1000)
-			#~ plt.plot(x,mlab.normpdf(x,mu,sigma))
-			#~ plt.title('Energy Probability Distribution Function Density: '+\
-                #~ str(density))
-			#~ plt.xlabel('Total Internal Energy')
-			#~ plt.ylabel('Probability')
-            
+        F = np.zeros(len(V)-1)
+        pn,v = np.zeros(len(F)),np.zeros(len(F))
+        F[0] = -(p[1]+p[0])*(V[1]-V[0])/(2*Nballs)
+        v[0] = (V[1]+V[0])/(2*Nballs)
+        pn[0] = (p[1]+p[0])/2
+        for n in range(1,len(F)):
+            F[n] += F[n-1]-(p[n+1]+p[n])*(V[n+1]-V[n])/(2*Nballs)
+            v[n] = (V[n+1]+V[n])/(2*Nballs)
+            pn[n] = (p[n+1]+p[n])/2
+
+        plt.figure()
+        plt.plot(v,F,'-.')
+        plt.title(r'$f - f_0$')
+        plt.xlabel('reduced volume v')
+        plt.ylabel('reduced helmholtz')
+        plt.grid()
+        
+        plt.figure()
+        plt.plot(pn,F + pn*v - 2.8/3*pn,'k-')
+        plt.xlabel('pressure p*')
+        plt.ylabel('g(v)')
+        plt.title(r' Attempted Reduced Gibbs with weird shift $g = (f-f_0) + pv$')
+        plt.grid()
+        
+        rho = np.array(rho)
+        mu = -22.0
+        plt.figure()
+        plt.plot(rho[:-1],F - mu*rho[:-1],'k-.')
+        plt.xlabel('rho')
+        plt.ylabel('g(v)')
+        plt.title(r' Attempted grand with weird shift $g = (f-f_0) + pv$')
+        plt.grid()
+        
+        
+        
+        
 def plotStructureFactor(rho,T):
     
     for temp in T:
@@ -139,6 +187,8 @@ if args.plot.lower() == 'diffusion':
         plotDiffusionCoeff(args.rho,args.temp)
 elif args.plot.lower() == 'pressure':
     plotPressure(args.rho,args.temp)
+elif args.plot.lower() == 'energy':
+    energy(args.rho,args.temp)
 elif (len(args.rho) <=5 and len(args.temp) <= 5) \
     and args.plot.lower()!=('diffusion' or 'pressure'):
     #~ if args.plot.lower() == 'energy':
