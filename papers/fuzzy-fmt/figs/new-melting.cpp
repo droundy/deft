@@ -62,7 +62,7 @@ struct vec {
     double z;
 };
 
-//--------------------------------------------
+
 double find_ngaus(double rx, double ry, double rz, double fv, double gwidth, double lattice_constant) {
 double n;
 const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
@@ -150,10 +150,10 @@ const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians c
       printf("calculated ngaus is %g\n", n);
       return n;
 }
-//-----------------------------------
 
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false){
+double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv  
 double lattice_constant = find_lattice_constant(reduced_density, fv);
 const double sigma=2;
 const double epsilon=1;
@@ -238,9 +238,9 @@ printf("free_energy is %g\n", free_energy);
 
 data data_out;
   data_out.diff_free_energy_per_atom=2;
-  data_out.cfree_energy_per_atom=free_energy;
+  data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
   data_out.hfree_energy_per_vol=2;
-  data_out.cfree_energy_per_vol=free_energy/pow(lattice_constant,3);
+  data_out.cfree_energy_per_vol=free_energy/pow(lattice_constant,3);   //ASK!
   
 return data_out;
 }
