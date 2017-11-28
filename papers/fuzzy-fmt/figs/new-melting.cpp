@@ -148,7 +148,7 @@ const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians c
         n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
       }
       //printf("calculated ngaus is %g\n", n);
-      return n;
+      return n;   
 }
 
 
@@ -162,11 +162,11 @@ const double Rad=sigma/pow(2, 5.0/6);
 const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
 const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
 //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
-const double dV = pow(dx,3);
+const double dV = pow(dx,3);    //ASK!
 const int Ntot=30;
-double rx=0, ry=0, rz=0, r=0;
-double rxp=0, ryp=0, rzp=0, rp=0;
-double rdiff;
+double rx=0, ry=0, rz=0, r_magnitude=0;
+double rxp=0, ryp=0, rzp=0, rp_magnitude=0;
+double rdiff_magnitude;
 double phi_1=0, phi_2=0, phi_3=0;
 double free_energy=0;
 for (int i=0; i<Ntot; i++) {
@@ -175,7 +175,7 @@ for (int i=0; i<Ntot; i++) {
     ry=j*dx;
     for (int k=0; k<Ntot; k++) {
       rz=k*dx;
-      r=pow((pow(rx,2)+pow(ry,2)+pow(rz,2)),0.5);  //not needed?
+      r_magnitude=pow((pow(rx,2)+pow(ry,2)+pow(rz,2)),0.5);  //not needed?
       //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);
       
       double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
@@ -186,28 +186,28 @@ for (int i=0; i<Ntot; i++) {
           ryp=m*dx;
           for (int o=0; o<Ntot; o++) {
             rzp=o*dx;
-            rp=pow((pow(rxp,2)+pow(ryp,2)+pow(rzp,2)),0.5);  //not needed?
+            rp_magnitude=pow((pow(rxp,2)+pow(ryp,2)+pow(rzp,2)),0.5);  //not needed?
             //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
             
             double rxdiff=rx-rxp;
             double rydiff=ry-ryp;
             double rzdiff=rz-rzp;
             
-            rdiff=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
-            //printf("rxdiff= %g, rydiff= %g, rzdiff= %g, mag rdiff= %g\n", rxdiff, rydiff, rzdiff, rdiff);
+            rdiff_magnitude=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
+            //printf("rxdiff_magnitude= %g, rydiff_magnitude= %g, rzdiff_magnitude= %g, mag rdiff_magnitude= %g\n", rxdiff_magnitude, rydiff_magnitude, rzdiff_magnitude, rdiff_magnitude);  //debug
         
-            double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff-(alpha/2),2)/pow(zeta,2));
+            double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
             double w_0=w_2/(4*pow(M_PI,2));
             double w_1=w_2/(4*M_PI*Rad);
-            double w_3=(1.0/2)*(1-erf(rdiff));
+            double w_3=(1.0/2)*(1-erf(rdiff_magnitude));
             vec wv_1, wv_2;
-            if (rdiff > 0) {
-              wv_1.x=w_1*(rxdiff/rdiff);
-              wv_1.y=w_1*(rydiff/rdiff);
-              wv_1.z=w_1*(rzdiff/rdiff);
-              wv_2.x=w_2*(rxdiff/rdiff);
-              wv_2.y=w_2*(rydiff/rdiff);
-              wv_2.z=w_2*(rzdiff/rdiff);
+            if (rdiff_magnitude > 0) {
+              wv_1.x=w_1*(rxdiff/rdiff_magnitude);
+              wv_1.y=w_1*(rydiff/rdiff_magnitude);
+              wv_1.z=w_1*(rzdiff/rdiff_magnitude);
+              wv_2.x=w_2*(rxdiff/rdiff_magnitude);
+              wv_2.y=w_2*(rydiff/rdiff_magnitude);
+              wv_2.z=w_2*(rzdiff/rdiff_magnitude);
             } else {
               wv_1.x=0;
               wv_1.y=0;
@@ -217,8 +217,8 @@ for (int i=0; i<Ntot; i++) {
               wv_2.z=0;
             }
             
-            printf("rxdiff=%g, rdiff=%g\n", rxdiff, rdiff);
-            printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
+            //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
+            //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
             
             double dVp=dV;  //CHANGE THIS - ASK!
             
