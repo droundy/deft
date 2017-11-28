@@ -54,6 +54,198 @@ struct data {
 double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
+//%%%%%%%%%%%NEW FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+struct vec {
+    double x;
+    double y;
+    double z;
+};
+
+//--------------------------------------------
+double find_ngaus(double rx, double ry, double rz, double fv, double gwidth, double lattice_constant) {
+double n;
+const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
+                                                       // multiply 4 by (1-fv) to get the reduced number of spheres.
+      {
+       //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0
+       double dist = sqrt(rx*rx + ry*ry+rz*rz);
+       n = norm*exp(-0.5*dist*dist/gwidth/gwidth);
+      }
+      {
+        //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
+        double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                           (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                           rz*rz);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                  (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                    rz*rz);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
+        dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rz*rz);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rz*rz);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+      }
+      {
+        //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
+        double dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                           (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                           rx*rx);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
+        dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    (ry-lattice_constant/2)*(ry-lattice_constant/2) +
+                    rx*rx);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
+        dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rx*rx);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
+        dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
+                    rx*rx);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+      }
+      {
+        //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
+        double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                           (rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                           ry*ry);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                    (rz-lattice_constant/2)*(rz-lattice_constant/2) +
+                    ry*ry);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
+        dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
+                    (rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    ry*ry);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+
+        //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2
+        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
+                    (rz+lattice_constant/2)*(rz+lattice_constant/2) +
+                    ry*ry);
+        n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+      }
+      printf("calculated ngaus is %g\n", n);
+      return n;
+}
+//-----------------------------------
+
+
+data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false){
+double lattice_constant = find_lattice_constant(reduced_density, fv);
+const double sigma=2;
+const double epsilon=1;
+const double Rad=sigma/pow(2, 5.0/6);
+const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
+const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
+//printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
+const double dV = pow(dx,3);
+const int Ntot=3;
+double rx=0, ry=0, rz=0, r=0;
+double rxp=0, ryp=0, rzp=0, rp=0;
+double rxdiff=rx-rxp;
+double rydiff=ry-ryp;
+double rzdiff=rz-rzp;
+double rdiff;
+double phi_1=0, phi_2=0, phi_3=0;
+double free_energy=0;
+for (int i=0; i<Ntot; i++) {
+  rx=i*dx;
+  for (int j=0; j<Ntot; j++) {
+    ry=j*dx;
+    for (int k=0; k<Ntot; k++) {
+      rz=k*dx;
+      r=pow((pow(rx,2)+pow(ry,2)+pow(rz,2)),0.5);  //not needed?
+      printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);
+      
+      double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
+      vec nv_1, nv_2;
+      for (int l=0; l<Ntot; l++) {
+        rxp=l*dx;
+        for (int m=0; m<Ntot; m++) {
+          ryp=m*dx;
+          for (int o=0; o<Ntot; o++) {
+            rzp=o*dx;
+            rp=pow((pow(rxp,2)+pow(ryp,2)+pow(rzp,2)),0.5);  //not needed?
+            printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
+            
+            rdiff=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
+            printf("rxdiff= %g, rydiff= %g, rzdiff= %g, mag rdiff= %g\n", rxdiff, rydiff, rzdiff, rdiff);
+        
+            double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff-(alpha/2),2)/pow(zeta,2));
+            double w_0=w_2/(4*pow(M_PI,2));
+            double w_1=w_2/(4*M_PI*Rad);
+            double w_3=(1.0/2)*(1-erf(rdiff));
+            vec wv_1, wv_2;
+            wv_1.x=w_1*(rxdiff/rdiff);
+            wv_1.y=w_1*(rydiff/rdiff);
+            wv_1.z=w_1*(rzdiff/rdiff);
+            wv_2.x=w_2*(rxdiff/rdiff);
+            wv_2.y=w_2*(rydiff/rdiff);
+            wv_2.z=w_2*(rzdiff/rdiff);
+            
+            double dVp=dV;  //CHANGE THIS - ASK!
+            
+            double n_gaus=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
+            printf("n_guas=%g\n", n_gaus);
+            
+            n_0 += n_gaus*w_0*dVp;
+            n_1 += n_gaus*w_1*dVp;
+            n_2 += n_gaus*w_2*dVp;
+            n_3 += n_gaus*w_3*dVp;
+            
+            nv_1.x += n_gaus*wv_1.x*dVp;
+            nv_1.y += n_gaus*wv_1.y*dVp;
+            nv_1.z += n_gaus*wv_1.z*dVp;
+            nv_2.x += n_gaus*wv_2.x*dVp;
+            nv_2.y += n_gaus*wv_2.y*dVp;
+            nv_2.z += n_gaus*wv_2.z*dVp;
+          }
+        }
+      }
+      phi_1 = -n_0*log(1-n_3);   
+      phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
+      phi_3 = (pow(n_2,3)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/24*M_PI*pow((1-n_3),2);
+      
+      free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;
+    }
+  }
+}
+
+printf("free_energy is %g\n", free_energy);
+
+data data_out;
+  data_out.diff_free_energy_per_atom=2;
+  data_out.cfree_energy_per_atom=free_energy;
+  data_out.hfree_energy_per_vol=2;
+  data_out.cfree_energy_per_vol=free_energy/pow(lattice_constant,3);
+  
+return data_out;
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%END NEW FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
@@ -127,10 +319,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
       // at a position vector (rrx[i],rry[i],rrz[i]) from each Guassian
       // and adds them to get the density at that position vector which
       // is then stored in setn[i].
-      //NOTE! For this code to give proper results, the Gaussians must
-      //have a width that is much smaller than the lattice constant so
-      //that parts of the Gaussians that extend into the cube do not
-      //extend out the other sides of the cube!
       {
         //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0
         double dist = sqrt(rx*rx + ry*ry+rz*rz);
@@ -616,8 +804,16 @@ if (downhill) {
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
+//TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+fv=0.8;
+double gwidth=2;
 
-//return 0;  //for debug
+data e_data2 =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+printf("e_data2 is: %g, %g, %g, %g\n", e_data2.diff_free_energy_per_atom, e_data2.cfree_energy_per_atom, e_data2.hfree_energy_per_vol, e_data2.cfree_energy_per_vol);
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+return 0;  //for debug
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
