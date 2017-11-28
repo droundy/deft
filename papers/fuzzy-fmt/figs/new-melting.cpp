@@ -208,20 +208,21 @@ for (int i=0; i<Ntot; i++) {
             
             double dVp=dV;  //CHANGE THIS - ASK!
             
-            double n_gaus=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
-            printf("n_guas=%g\n", n_gaus);
+            double num_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
+            //For homogeneous, set num_den to constant? ASK!
+            printf("num_den=%g\n", num_den);
             
-            n_0 += n_gaus*w_0*dVp;
-            n_1 += n_gaus*w_1*dVp;
-            n_2 += n_gaus*w_2*dVp;
-            n_3 += n_gaus*w_3*dVp;
+            n_0 += num_den*w_0*dVp;
+            n_1 += num_den*w_1*dVp;
+            n_2 += num_den*w_2*dVp;
+            n_3 += num_den*w_3*dVp;
             
-            nv_1.x += n_gaus*wv_1.x*dVp;
-            nv_1.y += n_gaus*wv_1.y*dVp;
-            nv_1.z += n_gaus*wv_1.z*dVp;
-            nv_2.x += n_gaus*wv_2.x*dVp;
-            nv_2.y += n_gaus*wv_2.y*dVp;
-            nv_2.z += n_gaus*wv_2.z*dVp;
+            nv_1.x += num_den*wv_1.x*dVp;
+            nv_1.y += num_den*wv_1.y*dVp;
+            nv_1.z += num_den*wv_1.z*dVp;
+            nv_2.x += num_den*wv_2.x*dVp;
+            nv_2.y += num_den*wv_2.y*dVp;
+            nv_2.z += num_den*wv_2.z*dVp;
           }
         }
       }
