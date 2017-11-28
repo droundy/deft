@@ -163,7 +163,7 @@ const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
 const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
 //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
 const double dV = pow(dx,3);
-const int Ntot=2;
+const int Ntot=30;
 double rx=0, ry=0, rz=0, r=0;
 double rxp=0, ryp=0, rzp=0, rp=0;
 double rdiff;
@@ -201,13 +201,23 @@ for (int i=0; i<Ntot; i++) {
             double w_1=w_2/(4*M_PI*Rad);
             double w_3=(1.0/2)*(1-erf(rdiff));
             vec wv_1, wv_2;
-            wv_1.x=w_1*(rxdiff/rdiff);
-            wv_1.y=w_1*(rydiff/rdiff);
-            wv_1.z=w_1*(rzdiff/rdiff);
-            wv_2.x=w_2*(rxdiff/rdiff);
-            wv_2.y=w_2*(rydiff/rdiff);
-            wv_2.z=w_2*(rzdiff/rdiff);
+            if (rdiff > 0) {
+              wv_1.x=w_1*(rxdiff/rdiff);
+              wv_1.y=w_1*(rydiff/rdiff);
+              wv_1.z=w_1*(rzdiff/rdiff);
+              wv_2.x=w_2*(rxdiff/rdiff);
+              wv_2.y=w_2*(rydiff/rdiff);
+              wv_2.z=w_2*(rzdiff/rdiff);
+            } else {
+              wv_1.x=0;
+              wv_1.y=0;
+              wv_1.z=0;
+              wv_2.x=0;
+              wv_2.y=0;
+              wv_2.z=0;
+            }
             
+            printf("rxdiff=%g, rdiff=%g\n", rxdiff, rdiff);
             printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
             
             double dVp=dV;  //CHANGE THIS - ASK!
@@ -228,20 +238,20 @@ for (int i=0; i<Ntot; i++) {
             nv_2.y += num_den*wv_2.y*dVp;
             nv_2.z += num_den*wv_2.z*dVp;
             
-            printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
+            //printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
             
-            printf("n_0= %g, n_1=%g, n_2=%g, n_3=%g\n", n_0, n_1, n_2, n_3);
+            //printf("n_0= %g, n_1=%g, n_2=%g, n_3=%g\n", n_0, n_1, n_2, n_3);  //debug
           }
         }
       }
       phi_1 = -n_0*log(1-n_3);   
       phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
-      printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
+      //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
       phi_3 = (pow(n_2,3)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/24*M_PI*pow((1-n_3),2);
-      printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
+      //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
       
       free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;
-      printf("free energy is now... %g\n", free_energy);   //debug
+      //printf("free energy is now... %g\n", free_energy);   //debug
     }
   }
 }
