@@ -183,10 +183,6 @@ for (int i=0; i<Ntot; i++) {
       nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
       //nv_2.x=0, nv2.y=0, nv2.z=0;
       
-      double num_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
-      //For homogeneous, set num_den to constant? ASK!
-      //printf("num_den=%g\n", num_den);
-      
       for (int l=0; l<Ntot; l++) {
         rxp=l*dx;
         for (int m=0; m<Ntot; m++) {
@@ -226,6 +222,10 @@ for (int i=0; i<Ntot; i++) {
             
             //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
             //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
+            
+            double num_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
+            //For homogeneous, set num_den to constant? ASK!
+            //printf("num_den=%g\n", num_den);
             
             double dVp=dV;  //CHANGE THIS - ASK!
             
