@@ -169,6 +169,36 @@ double rxp=0, ryp=0, rzp=0, rp_magnitude=0;
 double rdiff_magnitude;
 double phi_1=0, phi_2=0, phi_3=0;
 double free_energy=0;
+
+//Normalize n(r)
+double N_crystal=0;
+for (int i=0; i<Ntot; i++) {
+  rx=i*dx;
+  for (int j=0; j<Ntot; j++) {
+    ry=j*dx;
+    for (int k=0; k<Ntot; k++) {
+      rz=k*dx;
+      double n_den=find_ngaus(rx, ry, rz, fv, gwidth, lattice_constant);     
+      N_crystal += n_den*dV;
+      
+      if (verbose) {
+      printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+             N_crystal, reduced_num_spheres);
+      }
+      n_den = n_den*(reduced_num_spheres/N_crystal);  //Normalizes n_den - will use this later!
+      if (verbose) {
+      double checking_normalized_num_spheres = 0;
+      for (int i=0; i<Ntot; i++) {
+        checking_normalized_num_spheres += n_den*dV;
+      }
+      printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
+             checking_normalized_num_spheres, reduced_num_spheres);
+      }
+    }
+  }
+}
+
+rx=0, ry=0, rz=0;
 for (int i=0; i<Ntot; i++) {
   rx=i*dx;
   for (int j=0; j<Ntot; j++) {
@@ -223,23 +253,24 @@ for (int i=0; i<Ntot; i++) {
             //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
             //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
             
-            double num_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
-            //For homogeneous, set num_den to constant? ASK!
-            //printf("num_den=%g\n", num_den);
+            double n_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
+            n_den = n_den*(reduced_num_spheres/N_crystal);  //Normalizes n_den   ASK!
+            //printf("Crystal n_den=%g\n", n_den);
+            //For homogeneous, set n_den to constant? ASK!
             
-            double dVp=dV;  //CHANGE THIS - ASK!
+            double dVp=dV;  //CHANGE THIS? - ASK!
             
-            n_0 += num_den*w_0*dVp;
-            n_1 += num_den*w_1*dVp;
-            n_2 += num_den*w_2*dVp;
-            n_3 += num_den*w_3*dVp;
+            n_0 += n_den*w_0*dVp;
+            n_1 += n_den*w_1*dVp;
+            n_2 += n_den*w_2*dVp;
+            n_3 += n_den*w_3*dVp;
             
-            nv_1.x += num_den*wv_1.x*dVp;
-            nv_1.y += num_den*wv_1.y*dVp;
-            nv_1.z += num_den*wv_1.z*dVp;
-            nv_2.x += num_den*wv_2.x*dVp;
-            nv_2.y += num_den*wv_2.y*dVp;
-            nv_2.z += num_den*wv_2.z*dVp;
+            nv_1.x += n_den*wv_1.x*dVp;
+            nv_1.y += n_den*wv_1.y*dVp;
+            nv_1.z += n_den*wv_1.z*dVp;
+            nv_2.x += n_den*wv_2.x*dVp;
+            nv_2.y += n_den*wv_2.y*dVp;
+            nv_2.z += n_den*wv_2.z*dVp;
             
             //printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
             
