@@ -176,10 +176,17 @@ for (int i=0; i<Ntot; i++) {
     for (int k=0; k<Ntot; k++) {
       rz=k*dx;
       r_magnitude=pow((pow(rx,2)+pow(ry,2)+pow(rz,2)),0.5);  //not needed?
-      //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);
+      //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
       
       double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
       vec nv_1, nv_2;
+      nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
+      //nv_2.x=0, nv2.y=0, nv2.z=0;
+      
+      double num_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
+      //For homogeneous, set num_den to constant? ASK!
+      //printf("num_den=%g\n", num_den);
+      
       for (int l=0; l<Ntot; l++) {
         rxp=l*dx;
         for (int m=0; m<Ntot; m++) {
@@ -221,10 +228,6 @@ for (int i=0; i<Ntot; i++) {
             //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
             
             double dVp=dV;  //CHANGE THIS - ASK!
-            
-            double num_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
-            //For homogeneous, set num_den to constant? ASK!
-            //printf("num_den=%g\n", num_den);
             
             n_0 += num_den*w_0*dVp;
             n_1 += num_den*w_1*dVp;
