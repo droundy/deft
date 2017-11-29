@@ -164,7 +164,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
   const double dV = pow(dx,3);    //ASK!
   const int Ntot=30;
-  double rx=0, ry=0, rz=0;
+  double ry=0, rz=0;
   double rxp=0, ryp=0, rzp=0;
   double rdiff_magnitude;
   double phi_1=0, phi_2=0, phi_3=0;
@@ -173,34 +173,25 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 //Normalize n(r)
   double N_crystal=0;
   for (int i=0; i<Ntot; i++) {
-    rx=i*dx;
+    const double rx=i*dx;
     for (int j=0; j<Ntot; j++) {
-      ry=j*dx;
+      const double ry=j*dx;
       for (int k=0; k<Ntot; k++) {
-        rz=k*dx;
+        const double rz=k*dx;
         double n_den=find_ngaus(rx, ry, rz, fv, gwidth, lattice_constant);
         N_crystal += n_den*dV;
-
-        if (verbose) {
-          printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
-                 N_crystal, reduced_num_spheres);
-        }
-        n_den = n_den*(reduced_num_spheres/N_crystal);  //Normalizes n_den - will use this later!
-        if (verbose) {
-          double checking_normalized_num_spheres = 0;
-          for (int i=0; i<Ntot; i++) {
-            checking_normalized_num_spheres += n_den*dV;
-          }
-          printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
-                 checking_normalized_num_spheres, reduced_num_spheres);
-        }
       }
     }
   }
 
-  rx=0, ry=0, rz=0;
+  if (verbose) {
+    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+           N_crystal, reduced_num_spheres);
+  }
+
+  ry=0, rz=0;
   for (int i=0; i<Ntot; i++) {
-    rx=i*dx;
+    const double rx=i*dx;
     for (int j=0; j<Ntot; j++) {
       ry=j*dx;
       for (int k=0; k<Ntot; k++) {
@@ -251,8 +242,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
               //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
 
-              double n_den=find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant);
-              n_den = n_den*(reduced_num_spheres/N_crystal);  //Normalizes n_den   ASK!
+              const double n_den= find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant)
+                *(reduced_num_spheres/N_crystal);
               //printf("Crystal n_den=%g\n", n_den);
               //For homogeneous, set n_den to constant? ASK!
 
