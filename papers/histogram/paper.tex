@@ -108,7 +108,9 @@
 
 \section{Introduction}
 
-We consider the square-well fluid i.e. a system of particles whose interactions are governed by a square-well potential~\cite{singh2003surface, barker2004perturbationSW}.  The square-well potential is an ideal testbed as it is the simplest model that ensures both attractive and repulsive forces are experienced by interacting particles~\cite{barker1967-SW-perturbation, vega1992phase}.  The potential $U(\textbf{r})$ for such a system is given by
+\jpsays{It would be good to address why our SAD algorithm is necessary i.e. explain strengths and weaknesses of each method and a brief historical overview of when they were developed.  We should talk about why our awsome method is so good.  Also, we should talk about why we are testing on square-well fluid vs say some other system.}
+
+We consider the square-well fluid i.e. a system of particles whose interactions are governed by a square-well potential~\cite{singh2003surface, barker2004perturbationSW}.  The square-well potential is an ideal test-bed as it is the simplest model that ensures both attractive and repulsive forces are experienced by interacting particles~\cite{barker1967-SW-perturbation, vega1992phase}.  The potential $U(\textbf{r})$ for such a system is given by
 \begin{equation}
  U(\textbf{r})=\begin{cases} \infty & 
  \lvert\textbf{r}\rvert< \sigma\\-\epsilon & 
@@ -118,12 +120,14 @@ We consider the square-well fluid i.e. a system of particles whose interactions 
 where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
 reduced range of the potential well, and $\epsilon$ is its depth.
 
-The organization of this paper is as follows: In the next section we describe in detail seven flat-histogram methods used to calculate the density of states for the liquid-vapor system.  Section III contains the results and comparison of the methods applied to the square-well fluid.  Section IV is the conclusion as well as an overview of which methods performed well and suggestions for continued improvement. 
+\jpsays{Some papers have this sort of biography of what they are going to talk about but seems like filler if intro ends of being to short?  Not sure it is necessary.}
+
+The organization of this paper is as follows: In Section II, we describe in detail several broad-histogram methods used to calculate the density of states for the liquid-vapor system.  Section III contains the results and comparison of the methods applied to the square-well fluid.  In Section IV, we discuss the performance of the various methods applied to the model system. 
 
 
 \section{Methods}
 
-Here we employ a variety of flat-histogram methods.  We outline the general workings of algorithm we developed in detail and summarize algorithms that can be found elsewhere.  The following alogrithms are introduced and applied to the square-well fluid: Transition Matrix Initialization (TMI), Transition Optimized Ensemble (TOE), Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation Monte-Carlo (SAMC), and Stochastic-Approximation Transition Matrix Monte-Carlo (SA-TMMC).
+Here we employ a variety of broad-histogram methods.  We outline the general workings of algorithm we developed in detail and summarize algorithms that can be found elsewhere.  The following algorithms are introduced and applied to the square-well fluid: Transition Matrix Initialization (TMI), Transition Optimized Ensemble (TOE), Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Dynamic Stochastic Approximation Monte-Carlo (SAD), and Stochastic-Approximation Transition Matrix Monte-Carlo (SA-TMMC).
 
 \subsection{TMI2 Algorithm}
 
@@ -274,7 +278,7 @@ $H(\epsilon)$, the energy occurences should form a flat distribution.  The crite
 \end{equation}
 where $\eta$ is usually set to $0.80$ and determines how many times each energy is sampled relative to the mean number of visits.  Difficulties can occur with this flatness criteria due to the fact that some energies on a given energy range might never be sampled~\cite{haber2014transition}.  Over the past decade much attention was directed at examining the rate of convergence and error saturation~\cite{lee2006convergence, belardinelli2007wang}.  The algorithm is briefly outlined below where $w$ represents the weights:  
 \begin{equation}
-	\ln{w_{t+1}(\epsilon,N)}=\ln{w_{t}(\epsilon,N)}
+	\ln{w_{k+1}(\epsilon,N)}=\ln{w_{k}(\epsilon,N)}
 	+\gamma
 \end{equation}
 \begin{equation}
@@ -382,6 +386,7 @@ Our algorithm can alternate between SA and TMMC on the fly using weights to dete
 \text{SA}_{\text{Weight}} =\frac{\delta_{\text{TMMC}}^2}{\delta_{\text{TMMC}}^2 + \delta_{\text{SA}}^2}
 \end{align}
 where $N_\text{found}$ is the number of energy states that have been found i.e. visited, and $n_{\uparrow\downarrow}$ are the number of upward or downward moves between a pair of energy states respectively.  The rational behind the transition probability is that the transition weight can be related to the fractional uncertainty in upward and downward moves assuming there is no system correlation (the moves are independent).  Although this is not necessarily the case, we find that this definition for the transition weight is satifactory. The probability of a move is then the geometic average of either using the SA or TMMC Algorithm. 
+
 \begin{align}
 \mathcal{P}_\text{move} = \mathcal{P}_\text{move}^{\text{SA}_\text{Weight}} \mathcal{P}_\text{move}^{1-\text{SA}_\text{Weight}}
 \end{align}
