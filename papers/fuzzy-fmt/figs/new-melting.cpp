@@ -164,8 +164,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
   const double dV = pow(dx,3);    //ASK!
   const int Ntot=30;
-  double rx=0, ry=0, rz=0, r_magnitude=0;
-  double rxp=0, ryp=0, rzp=0, rp_magnitude=0;
+  double rx=0, ry=0, rz=0;
+  double rxp=0, ryp=0, rzp=0;
   double rdiff_magnitude;
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
@@ -205,7 +205,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       ry=j*dx;
       for (int k=0; k<Ntot; k++) {
         rz=k*dx;
-        r_magnitude=pow((pow(rx,2)+pow(ry,2)+pow(rz,2)),0.5);  //not needed?
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
@@ -219,7 +218,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             ryp=m*dx;
             for (int o=0; o<Ntot; o++) {
               rzp=o*dx;
-              rp_magnitude=pow((pow(rxp,2)+pow(ryp,2)+pow(rzp,2)),0.5);  //not needed?
               //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
 
               double rxdiff=rx-rxp;
