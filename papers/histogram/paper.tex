@@ -12,7 +12,8 @@
 \newcommand{\jpsays}[1]{{\color{red} [\blue{Jordan:} \emph{#1}]}}
 
 \begin{document}
-\title{Comparing broad histogram methods using the square-well liquid}
+\title{Comparing novel parameter independent broad-histogram methods
+applied to the square-well liquid}
 
 \author{Jordan K. Pommerenck} \author{Michael A. Perlin}
 \author{Tanner T. Simpson} \author{David Roundy}
@@ -110,23 +111,34 @@
 Over the past several decades a number of broad-histogram Monte-Carlo
 simulation algorithms have been developed in order to calculate the
 density of states and phase transitions of increasingly complex
-systems.  \jpsays{talk about Wang-Landau}. Transition Matrix Monte
-Carlo~\cite{wang1999transition, swendsen1999transition,
-fitzgerald2000monte} became an attractive complimentary simulation
-algorithm to Wang-Landau in that, if detailed balance is ensured, the
-system is guaranteed to converge (something which is not guaranteed for
-the Wang-Landau Algorithm).  Unfortunately, the algorithm is
-considerably more difficulte to implement when compared to Wang-Landau
-in particular the infinite temperature transition
-matrix~\cite{wang2002transition}.  Also, the time necessary for the
-density of states to converge could in practice be considerable due to
-the algorithm spending to much time exploring low energy states.  Shell
-et al.~\cite{shell2003improved, shell2004flat} developed Wang-Landau
-Transition Matrix Monte Carlo (WL-TMMC) in an effort to quickly explore
-the energies of a given system using WL then switch over to TMMC to
-guarantee convergence. Considerable effort has been spent trying to
-determine the flatness criteria and cutoff for the WL portion but there
-remains no rigorous systimatic way to determine these
+systems.  Wang and Landau developed an algorithm that uses an update
+factor and a statistical histogram to compute the density of states of
+a given system~\cite{wang2001determining, wang2001efficient}.  While
+the method is incredibly powerful it has several user-defined
+parameters.  This can make its application to a variety of systems
+something of an art-form since the user needs to determine the ideal
+parameters for his particular system.  Also, detailed balance is
+violated (although for only short periods of time), yet the method
+converges in most situations.  This raises several questions such as
+when does the method converges, what rate will the method converge to
+the correct density of states, and how to appropriately decide what
+parameters to choose so that the algorithm solves the problem in the
+best way. Transition Matrix Monte Carlo~\cite{wang1999transition,
+swendsen1999transition, fitzgerald2000monte} became an attractive
+complimentary simulation algorithm to Wang-Landau in that, if detailed
+balance is ensured, the system is guaranteed to converge (something
+which is not guaranteed for the Wang-Landau Algorithm).  Unfortunately,
+the algorithm is considerably more difficulte to implement when
+compared to Wang-Landau in particular the infinite temperature
+transition matrix~\cite{wang2002transition}.  Also, the time necessary
+for the density of states to converge could in practice be considerable
+due to the algorithm spending to much time exploring low energy states.
+Shell et al.~\cite{shell2003improved, shell2004flat} developed
+Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an effort to
+quickly explore the energies of a given system using WL then switch
+over to TMMC to guarantee convergence. Considerable effort has been
+spent trying to determine the flatness criteria and cutoff for the WL
+portion but there remains no rigorous systimatic way to determine these
 parameters~\cite{rane2013monte}.  The algorithm is first run for
 several trial simulations and/or `experience' is used to determine the
 best parameters for a users particular system of
@@ -136,21 +148,36 @@ It was found that utilizing modification factors that decrease faster
 than $1/t^2$ leads to nonconvergence~\cite{belardinelli2007fast}.  This
 lead to the so-called $1/t$ WL algorithm which ensures that excess CPU
 time is not wasted by continuing to perfrom calculations once the error
-in the density of states becomes saturated~\cite{belardinelli2008analysis}.
-An effort to reduce the number of user defined parameters of WL and formulate
-a theory for why the method converges despite detailed balance being violated
-although infrequently was also being udertaken.  Liang, Liu, and Carrol began to
-consider whether WL could be considered a special case of Monte Carlo method whose
-convergence could be mathematically proved~\cite{liang2006theory, liang2007stochastic}.
-In 2007, Liang et al.~\cite{liang2007stochastic} argued that WL can be considered
-a form of Stochastic Approximation Monte Carlo (SAMC).  While SAMC can guarantee convergence,
-the method still has a system specific user-defined variable which makes applying this
-algorithm to systems difficult.
-In our work, we have developed serval noval algorithms that do not require user-defined
-inputs and therefore should be easily applicable to a given system.  These methods can also
-be made to satisfy theoretical requirements guaranteeing convergence.
+in the density of states becomes
+saturated~\cite{belardinelli2008analysis}. An effort to reduce the
+number of user defined parameters of WL and formulate a theory for why
+the method converges despite detailed balance being violated although
+infrequently was also being udertaken.  Liang, Liu, and Carrol began to
+consider whether WL could be considered a special case of Monte Carlo
+method whose convergence could be mathematically
+proved~\cite{liang2006theory, liang2007stochastic}. In 2007, Liang et
+al.~\cite{liang2007stochastic} argued that WL can be considered a form
+of Stochastic Approximation Monte Carlo (SAMC).  While SAMC can
+guarantee convergence, the method still has a system specific
+user-defined variable which makes applying this algorithm to systems
+difficult.
 
-\jpsays{intoducing SAD, SATMMC!}
+In our work, we have developed several novel algorithms that do not
+require user-defined inputs and therefore should be easily applicable
+to a given system.  These methods, each of which will be discussed in
+detail in the methods section, can also be made to satisfy theoretical
+requirements, guaranteeing convergence. These algorithms are Transition
+Matrix Initialization (TMI), Dynamic Stochastic Approximation (SAD),
+and Stochastic Approximation Transition Matrix Monte Carlo (SA-TMMC).
+TMI works by using logical conditionals about changes in the logrithm
+of the density of states to control the weights of the simulation.  SAD
+operates effectively the same as standard SA; however, we claim that
+the user defined parameter can be set independent of the system type or
+size.  SA-TMMC works by performing SA for a system-independent amount
+of time in order to explore the entire energy space.  The simulation
+then switches over to TMMC for the remainder of the simulation.  All of
+these methods have no parameter inputs that depend on the type of
+system or size of system under study.
 
 We consider the square-well fluid i.e. a system of particles whose
 interactions are governed by a square-well
@@ -167,10 +194,6 @@ The potential $U(\textbf{r})$ for such a system is given by
 \end{equation}
 where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
 reduced range of the potential well, and $\epsilon$ is its depth.
-
-\jpsays{Some papers have this sort of biography of what they are going
-to talk about but seems like filler if intro ends of being to short?
-Not sure it is necessary.}
 
 The organization of this paper is as follows: In Section II, we
 describe in detail several broad-histogram methods used to calculate
