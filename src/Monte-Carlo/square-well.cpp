@@ -547,6 +547,17 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
             - (i-minE)*betamax;  // the last bit gives Boltzmann factor
         }
       }
+      // Now let us set the ln_dos for any sites we have never visited
+      // to be equal to the minimum value of ln_dos for sites we
+      // *have* visited.  These are unknown densities of states, and
+      // there is no particular reason to set them to be crazy low.
+      double lowest_ln_dos = 0;
+      for (int i=0; i<energy_levels; i++) {
+        if (energy_histogram[i]) lowest_ln_dos = min(lowest_ln_dos, ln_dos[i]);
+      }
+      for (int i=0; i<energy_levels; i++) {
+        if (!energy_histogram[i]) ln_dos[i] = lowest_ln_dos;
+      }
     }
   } else if(dos_type == transition_dos) {
     ln_dos[0] = 0;
