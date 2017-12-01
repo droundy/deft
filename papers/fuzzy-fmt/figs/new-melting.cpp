@@ -156,23 +156,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  const double sigma=2;
-  const double epsilon=1;
-  const double Rad=sigma/pow(2, 5.0/6);
-  const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
-  const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
-//printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
+  
   const double dV = pow(dx,3);    //ASK!
-  const int Ntot=30;
-  double ry=0, rz=0;
-  double rxp=0, ryp=0, rzp=0;
-  double rdiff_magnitude;
-  double phi_1=0, phi_2=0, phi_3=0;
-  double free_energy=0;
-
-//Normalize n(r)
+  const int Ntot=pow(lattice_constant/dx,3);  //number of position vectors over one cell
+  printf("Ntot is %i\n", Ntot);   //debug
+  
+  //Normalize n(r)
   double N_crystal=0;
-  for (int i=0; i<Ntot; i++) {
+  for (int i=0; i<Ntot; i++) {     //integrate over one cell
     const double rx=i*dx;
     for (int j=0; j<Ntot; j++) {
       const double ry=j*dx;
@@ -189,13 +180,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
            N_crystal, reduced_num_spheres);
   }
 
-  ry=0, rz=0;
-  for (int i=0; i<Ntot; i++) {
+  double phi_1=0, phi_2=0, phi_3=0;
+  double free_energy=0;
+
+  for (int i=0; i<Ntot; i++) {    //integrate over one cell
     const double rx=i*dx;
     for (int j=0; j<Ntot; j++) {
-      ry=j*dx;
+      const double ry=j*dx;
       for (int k=0; k<Ntot; k++) {
-        rz=k*dx;
+        const double rz=k*dx;
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
@@ -203,21 +196,27 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
         //nv_2.x=0, nv2.y=0, nv2.z=0;
 
-        for (int l=0; l<Ntot; l++) {
-          rxp=l*dx;
+        for (int l=0; l<Ntot; l++) {   //integrate over ALL space (not Ntot) FIX!
+          const double rxp=l*dx;
           for (int m=0; m<Ntot; m++) {
-            ryp=m*dx;
+            const double ryp=m*dx;
             for (int o=0; o<Ntot; o++) {
-              rzp=o*dx;
+              const double rzp=o*dx;
               //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
 
               double rxdiff=rx-rxp;
               double rydiff=ry-ryp;
               double rzdiff=rz-rzp;
 
-              rdiff_magnitude=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
+              double rdiff_magnitude=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
               //printf("rxdiff_magnitude= %g, rydiff_magnitude= %g, rzdiff_magnitude= %g, mag rdiff_magnitude= %g\n", rxdiff_magnitude, rydiff_magnitude, rzdiff_magnitude, rdiff_magnitude);  //debug
 
+              const double sigma=2;
+              const double Rad=sigma/pow(2, 5.0/6);
+              const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
+              const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
+              //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
+              
               double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
               double w_0=w_2/(4*pow(M_PI,2));
               double w_1=w_2/(4*M_PI*Rad);
@@ -272,7 +271,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
         phi_3 = (pow(n_2,3)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/24*M_PI*pow((1-n_3),2);
         //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
-
+        const double epsilon=1;
         free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;
         //printf("free energy is now... %g\n", free_energy);   //debug
       }
@@ -849,17 +848,16 @@ int main(int argc, const char **argv) {
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  temp=2;
-  reduced_density=1.2;
-  fv=0.8;
-  double gwidth=0.325;
+//  temp=2;
+//  reduced_density=1.2;
+//  fv=0.8;
+//  double gwidth=0.325;
 
-  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
-  printf("e_data2 is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+//  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+//  printf("e_data2 is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
+//  return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  return 0;  //for debug
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
