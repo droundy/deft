@@ -416,11 +416,18 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
+  static int max_energy_seen = -1;
+  static int min_energy_seen = -1;
   if (sa_t0 || use_sad || use_satmmc) {
     if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
+      if (max_energy_seen < 0 || energy > max_energy_seen) max_energy_seen = energy;
+      if (min_energy_seen < 0 || energy < min_energy_seen) min_energy_seen = energy;
     }
-    if (use_sad || use_satmmc) {
+    if (use_sad && energies_found > 1) {
+      wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
+        /(min_T*moves.total);
+    } else if (use_satmmc) {
       wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
     } else {
       wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
@@ -539,6 +546,17 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
           ln_dos[i] = ln_dos[minE] + log(energy_histogram[i]/double(energy_histogram[minE]))
             - (i-minE)*betamax;  // the last bit gives Boltzmann factor
         }
+      }
+      // Now let us set the ln_dos for any sites we have never visited
+      // to be equal to the minimum value of ln_dos for sites we
+      // *have* visited.  These are unknown densities of states, and
+      // there is no particular reason to set them to be crazy low.
+      double lowest_ln_dos = 0;
+      for (int i=0; i<energy_levels; i++) {
+        if (energy_histogram[i]) lowest_ln_dos = min(lowest_ln_dos, ln_dos[i]);
+      }
+      for (int i=0; i<energy_levels; i++) {
+        if (!energy_histogram[i]) ln_dos[i] = lowest_ln_dos;
       }
     }
   } else if(dos_type == transition_dos) {
