@@ -416,11 +416,18 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
+  static int max_energy_seen = -1;
+  static int min_energy_seen = -1;
   if (sa_t0 || use_sad || use_satmmc) {
     if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
+      if (max_energy_seen < 0 || energy > max_energy_seen) max_energy_seen = energy;
+      if (min_energy_seen < 0 || energy < min_energy_seen) min_energy_seen = energy;
     }
-    if (use_sad || use_satmmc) {
+    if (use_sad && energies_found > 1) {
+      wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
+        /(min_T*moves.total);
+    } else if (use_satmmc) {
       wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
     } else {
       wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
