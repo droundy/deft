@@ -107,29 +107,90 @@
 % \end{table*}
 
 \section{Introduction}
-Over the past several decades a number of broad-histogram Monte-Carlo simulation algorithms have been developed in order to calculate the density of states and phase transitions of increasingly complex systems.  \jpsays{talk about Wang-Landau}.
-Transition Matrix Monte Carlo~\cite{wang1999transition, swendsen1999transition, fitzgerald2000monte} became an attractive complimentary simulation algorithm to Wang-Landau in that, if detailed balance is ensured, the system is guaranteed to converge (something which is not guaranteed for the Wang-Landau Algorithm).  Unfortunately, the algorithm is considerably more difficulte to implement when compared to Wang-Landau in particular the infinite temperature transition matrix~\cite{wang2002transition}.  Also, the time necessary for the density of states to converge could in practice be considerable due to the algorithm spending to much time exploring low energy states.  Shell et al.~\cite{shell2003improved, shell2004flat} developed Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an effort to quickly explore the energies of a given system using WL then switch over to TMMC to guarantee convergence. Considerable effort has been spent trying to determine the flatness criteria and cutoff for the WL portion but there remains no rigorous systimatic way to determine these parameters~\cite{rane2013monte}.  The algorithm is first run for several trial simulations and/or `experience' is used to determine the best parameters for a users particular system of study~\cite{siderius2013use}.  Around the same time, the convergence rate for Wang-Landau was being explored~\cite{zhou2005understanding}.  It was found that utilizing modification factors that decrease faster than $1/t^2$ leads to nonconvergence~\cite{belardinelli2007fast}.  This lead to the so-called $1/t$ WL algorithm which ensures that excess CPU time is not wasted by continuing to perfrom calculations once the error in the density of states becomes saturated~\cite{belardinelli2008analysis}.
+Over the past several decades a number of broad-histogram Monte-Carlo
+simulation algorithms have been developed in order to calculate the
+density of states and phase transitions of increasingly complex
+systems.  \jpsays{talk about Wang-Landau}. Transition Matrix Monte
+Carlo~\cite{wang1999transition, swendsen1999transition,
+fitzgerald2000monte} became an attractive complimentary simulation
+algorithm to Wang-Landau in that, if detailed balance is ensured, the
+system is guaranteed to converge (something which is not guaranteed for
+the Wang-Landau Algorithm).  Unfortunately, the algorithm is
+considerably more difficulte to implement when compared to Wang-Landau
+in particular the infinite temperature transition
+matrix~\cite{wang2002transition}.  Also, the time necessary for the
+density of states to converge could in practice be considerable due to
+the algorithm spending to much time exploring low energy states.  Shell
+et al.~\cite{shell2003improved, shell2004flat} developed Wang-Landau
+Transition Matrix Monte Carlo (WL-TMMC) in an effort to quickly explore
+the energies of a given system using WL then switch over to TMMC to
+guarantee convergence. Considerable effort has been spent trying to
+determine the flatness criteria and cutoff for the WL portion but there
+remains no rigorous systimatic way to determine these
+parameters~\cite{rane2013monte}.  The algorithm is first run for
+several trial simulations and/or `experience' is used to determine the
+best parameters for a users particular system of
+study~\cite{siderius2013use}.  Around the same time, the convergence
+rate for Wang-Landau was being explored~\cite{zhou2005understanding}.
+It was found that utilizing modification factors that decrease faster
+than $1/t^2$ leads to nonconvergence~\cite{belardinelli2007fast}.  This
+lead to the so-called $1/t$ WL algorithm which ensures that excess CPU
+time is not wasted by continuing to perfrom calculations once the error
+in the density of states becomes saturated~\cite{belardinelli2008analysis}.
+An effort to reduce the number of user defined parameters of WL and formulate
+a theory for why the method converges despite detailed balance being violated
+although infrequently was also being udertaken.  Liang, Liu, and Carrol began to
+consider whether WL could be considered a special case of Monte Carlo method whose
+convergence could be mathematically proved~\cite{liang2006theory, liang2007stochastic}.
+In 2007, Liang et al.~\cite{liang2007stochastic} argued that WL can be considered
+a form of Stochastic Approximation Monte Carlo (SAMC).  While SAMC can guarantee convergence,
+the method still has a system specific user-defined variable which makes applying this
+algorithm to systems difficult.
+In our work, we have developed serval noval algorithms that do not require user-defined
+inputs and therefore should be easily applicable to a given system.  These methods can also
+be made to satisfy theoretical requirements guaranteeing convergence.
 
-\jpsays{SA developed SAD, SATMMC!}
+\jpsays{intoducing SAD, SATMMC!}
 
-We consider the square-well fluid i.e. a system of particles whose interactions are governed by a square-well potential~\cite{singh2003surface, barker2004perturbationSW}.  The square-well potential is an ideal test-bed as it is the simplest model that ensures both attractive and repulsive forces are experienced by interacting particles~\cite{barker1967-SW-perturbation, vega1992phase}.  The potential $U(\textbf{r})$ for such a system is given by
+We consider the square-well fluid i.e. a system of particles whose
+interactions are governed by a square-well
+potential~\cite{singh2003surface, barker2004perturbationSW}.  The
+square-well potential is an ideal test-bed as it is the simplest model
+that ensures both attractive and repulsive forces are experienced by
+interacting particles~\cite{barker1967-SW-perturbation, vega1992phase}.
+The potential $U(\textbf{r})$ for such a system is given by
 \begin{equation}
- U(\textbf{r})=\begin{cases} \infty & 
- \lvert\textbf{r}\rvert< \sigma\\-\epsilon & 
- \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 & 
+ U(\textbf{r})=\begin{cases} \infty &
+ \lvert\textbf{r}\rvert< \sigma\\-\epsilon &
+ \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 &
  \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
 \end{equation}
 where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
 reduced range of the potential well, and $\epsilon$ is its depth.
 
-\jpsays{Some papers have this sort of biography of what they are going to talk about but seems like filler if intro ends of being to short?  Not sure it is necessary.}
+\jpsays{Some papers have this sort of biography of what they are going
+to talk about but seems like filler if intro ends of being to short?
+Not sure it is necessary.}
 
-The organization of this paper is as follows: In Section II, we describe in detail several broad-histogram methods used to calculate the density of states for the liquid-vapor system.  Section III contains the results and comparison of the methods applied to the square-well fluid.  In Section IV, we discuss the performance of the various methods applied to the model system. 
+The organization of this paper is as follows: In Section II, we
+describe in detail several broad-histogram methods used to calculate
+the density of states for the liquid-vapor system.  Section III
+contains the results and comparison of the methods applied to the
+square-well fluid.  In Section IV, we discuss the performance of the
+various methods applied to the model system.
 
 
 \section{Methods}
 
-Here we employ a variety of broad-histogram methods.  We outline the general workings of algorithm we developed in detail and summarize algorithms that can be found elsewhere.  The following algorithms are introduced and applied to the square-well fluid: Transition Matrix Initialization (TMI), Transition Optimized Ensemble (TOE), Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Dynamic Stochastic Approximation Monte-Carlo (SAD), and Stochastic-Approximation Transition Matrix Monte-Carlo (SA-TMMC).
+Here we employ a variety of broad-histogram methods.  We outline the
+general workings of algorithm we developed in detail and summarize
+algorithms that can be found elsewhere.  The following algorithms are
+introduced and applied to the square-well fluid: Transition Matrix
+Initialization (TMI), Transition Optimized Ensemble (TOE), Transition
+Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau Transition
+Matrix Monte-Carlo (WL-TMMC), Dynamic Stochastic Approximation
+Monte-Carlo (SAD), and Stochastic-Approximation Transition Matrix
+Monte-Carlo (SA-TMMC).
 
 \subsection{TMI2 Algorithm}
 
@@ -222,8 +283,8 @@ where unlike in the original paper detailing the method, we compute the difusivi
 
 \subsection{TMMC Algorithm}
 The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
-consists of three primary steps.  The first two steps are common to the Metropolis 
-algorithm while the third makes use of the actual transition 
+consists of three primary steps.  The first two steps are common to the Metropolis
+algorithm while the third makes use of the actual transition
 probabilities~\cite{fitzgerald2000monte}.
 
 \subsubsection{define a transition probability}
@@ -235,50 +296,50 @@ is made to a new state denoted new, the probability is defined as
 where we have allowed the probabilies to be equal for simplicity of presentation.
 
 \subsubsection{define an acceptance probability}
-The probability for accepting a transition from an old state to a new one can be 
+The probability for accepting a transition from an old state to a new one can be
 defined
 \begin{align}
   p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
   {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
 \end{align}
-where $\alpha_{new\rightarrow old}$ is the probability of generating a 
-new system configuration the old.  For conventional Monte-Carlo moves 
-$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although 
-for advanced Monte-Carlo moves this would not be the 
-case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of 
-observing the system in the old state can be found based on the 
-ensemble constraints placed on the system.  Fitzgerald et al. 
-considered the system of interest using the canonical ensemble however extension to other ensembles is quite natural.  
+where $\alpha_{new\rightarrow old}$ is the probability of generating a
+new system configuration the old.  For conventional Monte-Carlo moves
+$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although
+for advanced Monte-Carlo moves this would not be the
+case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of
+observing the system in the old state can be found based on the
+ensemble constraints placed on the system.  Fitzgerald et al.
+considered the system of interest using the canonical ensemble however extension to other ensembles is quite natural.
 \begin{align}
   \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
 \end{align}
-The acceptance probability given for TMMC is idential to that introduced by 
+The acceptance probability given for TMMC is idential to that introduced by
 Swendsen and Wang~\cite{wang2002transition}.
 \begin{align}
   p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
 \end{align}
 \subsubsection{define a bookkeeping step}
-The third step in the TMMC algorithm consists of recording the data in a collection 
+The third step in the TMMC algorithm consists of recording the data in a collection
 matrix (analogous to the transition histogram matrix).
 \begin{align}
   C_{N,\delta} = C_{N,\delta} + p_{a}\\
   C_{N,0} = C_{N,0} +(1 - p_{a})
-\end{align}  
-If $\delta=0$, that is, the energy state has not been changed, then only 
+\end{align}
+If $\delta=0$, that is, the energy state has not been changed, then only
 $C_{N,0}$ is incremented by unity. Fitzgerald et al.~\cite{fitzgerald2000monte}
-show that defining the third step this way results in a uniform improvement over 
+show that defining the third step this way results in a uniform improvement over
 using histogram estimators to determine the particle number probability distribution (PNPD).
 
 \subsection{Wang-Landau Algorithm}
 
-The Wang-Landau Algorithm developed by Wang and Landau proposes a random walk in energy space in order to estimate the density of states~\cite{wang2001efficient}. While methods such as Metropolis Sampling and Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution and require sampling at individual temperatures, the Wang-Landau algorithm uses a flat histogram and performs a random walk in energy space to determine the density of states~\cite{wang2001determining, landau2014guide}. Wang-Landau's major tenant is that when counting the histogram 
-$H(\epsilon)$, the energy occurences should form a flat distribution.  The criteria for flat sampling is given by 
+The Wang-Landau Algorithm developed by Wang and Landau proposes a random walk in energy space in order to estimate the density of states~\cite{wang2001efficient}. While methods such as Metropolis Sampling and Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution and require sampling at individual temperatures, the Wang-Landau algorithm uses a flat histogram and performs a random walk in energy space to determine the density of states~\cite{wang2001determining, landau2014guide}. Wang-Landau's major tenant is that when counting the histogram
+$H(\epsilon)$, the energy occurences should form a flat distribution.  The criteria for flat sampling is given by
 \begin{equation}
 	\frac{\min_{\epsilon} H(\epsilon)}
-	{\big\langle H(\epsilon)\big\rangle } 
-	> \eta 
+	{\big\langle H(\epsilon)\big\rangle }
+	> \eta
 \end{equation}
-where $\eta$ is usually set to $0.80$ and determines how many times each energy is sampled relative to the mean number of visits.  Difficulties can occur with this flatness criteria due to the fact that some energies on a given energy range might never be sampled~\cite{haber2014transition}.  Over the past decade much attention was directed at examining the rate of convergence and error saturation~\cite{lee2006convergence, belardinelli2007wang}.  The algorithm is briefly outlined below where $w$ represents the weights:  
+where $\eta$ is usually set to $0.80$ and determines how many times each energy is sampled relative to the mean number of visits.  Difficulties can occur with this flatness criteria due to the fact that some energies on a given energy range might never be sampled~\cite{haber2014transition}.  Over the past decade much attention was directed at examining the rate of convergence and error saturation~\cite{lee2006convergence, belardinelli2007wang}.  The algorithm is briefly outlined below where $w$ represents the weights:
 \begin{equation}
 	\ln{w_{k+1}(\epsilon,N)}=\ln{w_{k}(\epsilon,N)}
 	+\gamma
@@ -287,51 +348,51 @@ where $\eta$ is usually set to $0.80$ and determines how many times each energy 
 	\ln{\gamma_{k+1}}=\frac{u}{2}\ln{\gamma_{k}}
 \end{equation}
 for $u$ typically greater than 1 and $\gamma$ is the modification factor for
-the density of states.  We then accept a new configuration for the density of 
+the density of states.  We then accept a new configuration for the density of
 states with a probability given by the following
 \begin{equation}
-	\mathcal{P}(\epsilon_i \rightarrow \varepsilon_j) 
+	\mathcal{P}(\epsilon_i \rightarrow \varepsilon_j)
 	= \min[1,e^{\ln{w(\epsilon_i)}-\ln{w(\epsilon_j)}}]
 \end{equation}
-Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and 
+Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and
 determined that choosing a large modification factor $\gamma_0 = e^{4}$ and
-rapidly reducing the factor by 10 during each step resulted in reduced statistical 
+rapidly reducing the factor by 10 during each step resulted in reduced statistical
 error~\cite{zhou2005understanding}.
 
 
 \subsection{WL-TMMC Algorithm}
 
-Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed 
-by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes 
-advantage of the ease of implementation and applicability to a variety 
-of systems, while making use of a transition matrix to adress WL 
-weaknesses such as a limited statistical accuracy plateau which is not 
-improved with additional Monte-Carlo steps.  This WL version is more 
+Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
+by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
+advantage of the ease of implementation and applicability to a variety
+of systems, while making use of a transition matrix to adress WL
+weaknesses such as a limited statistical accuracy plateau which is not
+improved with additional Monte-Carlo steps.  This WL version is more
 accurate for a given number of simulation steps.
 
-\paragraph{Initializing Wang-Landau:} We begin the simulation by 
-defining a minimum important energy and a maximum entropy state. In 
-traditional Wang-Landau the WL factor begins at 1.0 and the factor is 
-modified by 2.0 until the simulation is cutoff typically around 
-$10^{-10}$.  Rane et. al. published an implemenation of 
-WL-TMMC~\cite{rane2013monte} that suggested using a WL factor between 1.0 and 
-$10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC, 
-we set the WL factor to be 1 and the cutoff at $10^{-10}$. A single 
-sweep is defined as each macrostate being sampled a number of times in 
-this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a 
-flatness criteria~\cite{wang2001determining, wang2001efficient, 
-hatch2015computational, mahynski2017predicting} for the accumulated 
-histogram usually between 0.75 to 0.90.  For our simulation, it is 
-sufficient that each macrostate is visited at least once (each 
-histogram bin has one entry)~\cite{shell2003improved}.  The goal of 
-this WL initialization is to prefill the transition matrix for the next 
-portion of the simulation. 
-\paragraph{Initializing TMMC:} The purpose of prefilling the transition 
-matrix is apparent because if numerous zeros existed in the collection 
-matrix, the infinite temperature transition matrix would be 
-ill-defined.  Sampling over large ranges of density of states would 
-therefore take an unacceptable length of time to 
-complete~\cite{shell2003improved, shen2014elucidating}.  The transition 
+\paragraph{Initializing Wang-Landau:} We begin the simulation by
+defining a minimum important energy and a maximum entropy state. In
+traditional Wang-Landau the WL factor begins at 1.0 and the factor is
+modified by 2.0 until the simulation is cutoff typically around
+$10^{-10}$.  Rane et. al. published an implemenation of
+WL-TMMC~\cite{rane2013monte} that suggested using a WL factor between 1.0 and
+$10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC,
+we set the WL factor to be 1 and the cutoff at $10^{-10}$. A single
+sweep is defined as each macrostate being sampled a number of times in
+this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a
+flatness criteria~\cite{wang2001determining, wang2001efficient,
+hatch2015computational, mahynski2017predicting} for the accumulated
+histogram usually between 0.75 to 0.90.  For our simulation, it is
+sufficient that each macrostate is visited at least once (each
+histogram bin has one entry)~\cite{shell2003improved}.  The goal of
+this WL initialization is to prefill the transition matrix for the next
+portion of the simulation.
+\paragraph{Initializing TMMC:} The purpose of prefilling the transition
+matrix is apparent because if numerous zeros existed in the collection
+matrix, the infinite temperature transition matrix would be
+ill-defined.  Sampling over large ranges of density of states would
+therefore take an unacceptable length of time to
+complete~\cite{shell2003improved, shen2014elucidating}.  The transition
 matrix in terms of the collection matrix is given as follows:
 \begin{align}
 \widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
@@ -353,33 +414,67 @@ matrices.
 
 
 \subsection{SAD Algorithm}
-The SAD (Dynamic Stochastic Approximation) is a version of the SAMC Algorithm that attempts to dynamically choose the modification factor rather than relying on system dependent parameters such as $t_0$ or $\gamma_0$.  There is an immediate advantage of such an algorithm where parameters are chosen independent of system size or type. SAMC can be applied as a dynamic importance sampling algorithm that uses an update factor to explore energy space~\cite{liang2007stochastic, werlich2015stochastic, schneider2017convergence}.  The update factor is defined in the original implementation~\cite{liang2007stochastic} in terms of an arbitrary tunable parameter $t_0$.
+The SAD (Dynamic Stochastic Approximation) is a version of the SAMC
+Algorithm that attempts to dynamically choose the modification factor
+rather than relying on system dependent parameters such as $t_0$ or
+$\gamma_0$.  There is an immediate advantage of such an algorithm where
+parameters are chosen independent of system size or type. SAMC can be
+applied as a dynamic importance sampling algorithm that uses an update
+factor to explore energy space~\cite{liang2007stochastic,
+werlich2015stochastic, schneider2017convergence}.  The update factor is
+defined in the original implementation~\cite{liang2007stochastic} in
+terms of an arbitrary tunable parameter $t_0$.
 \begin{align}
 \gamma_{t}^{\text{SA}} = \frac{t_0}{\max(t_0,t)}
 \end{align}
-We argue that it is possible to set this parameter to a system independent parameter such that $t_0 = N_E^2/t$ where $N_E$ is the number of energies that have been found.  This gives an update factor as follows:
+We argue that it is possible to set this parameter to a system
+independent parameter such that $t_0 = N_E^2/t$ where $N_E$ is the
+number of energies that have been found.  This gives an update factor
+as follows:
 \begin{align}
 \gamma_{t}^{\text{SA}} = \frac{N_E^2}{t}
 \end{align}
-The update factor has the same $1/t$ behavior as the original SAMC algorithm; however now every time a new energy is discovered during the course of the simulation, the update factor experiences a jump.
+The update factor has the same $1/t$ behavior as the original SAMC
+algorithm; however now every time a new energy is discovered during the
+course of the simulation, the update factor experiences a jump.
 
-\subsection{SA-TMMC Algorithm}
-We introduce a new algorithm consisting of the merger of the Stochastic Approximation (SA) method proposed by Liang et al.~\cite{liang2007stochastic} and the TMMC Algorithm with suitable adaptations.  While the Stochastic Approximation method has recently been implemented in comparison with the Wang-Landau Algorithm~\cite{werlich2015stochastic, schneider2017convergence}, it seems quite natural to create a new Monte-Carlo method which we will call SA-TMMC.  Like in the original implementation, we define an update factor where $t_0$ is the number of Monte-Carlo moves and $t$ is the current iteration.  
-\begin{align}
-\gamma_{t}^{\text{SA}} = \frac{t_0}{\max(t_0,t)}
-\end{align}
-One potential problem of merging SA and TMMC is that SA provides no nice transition to the later method due to the lack of a user-controlled cutoff.  Also for SA Monte-Carlo, the choice of parameter $t_0$ proves difficult particularly for complex systems.  Finally, we enforce a minimum temperature probability which prevents the system from sampling states below the minimum temperature.  We discuss here how we resolve all of the potential issues we encountered when integrating both SA and TMMC. 
+\subsection{SA-TMMC Algorithm} We introduce a new algorithm consisting
+of the merger of the Stochastic Approximation (SA) method proposed by
+Liang et al.~\cite{liang2007stochastic} and the TMMC Algorithm with
+suitable adaptations.  While the Stochastic Approximation method has
+recently been implemented in comparison with the Wang-Landau
+Algorithm~\cite{werlich2015stochastic, schneider2017convergence}, it
+seems quite natural to create a new Monte-Carlo method which we will
+call SA-TMMC.  Like in the original implementation, we define an update
+factor where $t_0$ is the number of Monte-Carlo moves and $t$ is the
+current iteration. \begin{align} \gamma_{t}^{\text{SA}} =
+\frac{t_0}{\max(t_0,t)} \end{align} One potential problem of merging SA
+and TMMC is that SA provides no nice transition to the later method due
+to the lack of a user-controlled cutoff.  Also for SA Monte-Carlo, the
+choice of parameter $t_0$ proves difficult particularly for complex
+systems.  Finally, we enforce a minimum temperature probability which
+prevents the system from sampling states below the minimum temperature.
+We discuss here how we resolve all of the potential issues we
+encountered when integrating both SA and TMMC.
 
 \subsubsection{Define an adaptive parameter $t_0$}
-It has been shown that if $F_{t}^{\text{SA}}$ satisfies two conditions the estimator is proven to converge to the real DOS~\cite{liang2006theory, liang2007stochastic}.
+It has been shown that if $F_{t}^{\text{SA}}$ satisfies two conditions
+the estimator is proven to converge to the real
+DOS~\cite{liang2006theory, liang2007stochastic}.
 \begin{align}
 \sum_{t=1}^\infty \gamma_{t}^{\text{SA}} = \infty \quad\textrm{and}\quad
 \sum_{t=1}^\infty (\gamma_{t}^{\text{SA}})^\zeta < \infty
 \end{align}
-where $\zeta \in \{1,2\}$.  For practical implementation with TMMC, we find it necessary to reset $t_0$ everytime a new energy state is found.  This ensures that all energy states are sampled before TMMC move probabilities begin to be favored.  
+where $\zeta \in \{1,2\}$.  For practical implementation with TMMC, we
+find it necessary to reset $t_0$ everytime a new energy state is found.
+This ensures that all energy states are sampled before TMMC move
+probabilities begin to be favored.
 
 \subsubsection{Define a statistical weight to control the transition between SA and TMMC}
-Our algorithm can alternate between SA and TMMC on the fly using weights to determine the probability that a move between adjacent energy states is allowed.  We define the transition probability $\text{SA}_{\text{Weight}}$ as
+Our algorithm can alternate between SA and TMMC on the fly using
+weights to determine the probability that a move between adjacent
+energy states is allowed.  We define the transition probability
+$\text{SA}_{\text{Weight}}$ as
 \begin{align}
 \delta_{\text{TMMC}}^2 =\frac{1}{n_\downarrow}+\frac{1}{n_\uparrow}, \quad\quad
 \delta_{\text{SA}}^2 = \frac{1}{N_E}
@@ -387,18 +482,31 @@ Our algorithm can alternate between SA and TMMC on the fly using weights to dete
 \begin{align}
 \text{SA}_{\text{Weight}} =\frac{\delta_{\text{TMMC}}^2}{\delta_{\text{TMMC}}^2 + \delta_{\text{SA}}^2}
 \end{align}
-where $N_\text{found}$ is the number of energy states that have been found i.e. visited, and $n_{\uparrow\downarrow}$ are the number of upward or downward moves between a pair of energy states respectively.  The rational behind the transition probability is that the transition weight can be related to the fractional uncertainty in upward and downward moves assuming there is no system correlation (the moves are independent).  Although this is not necessarily the case, we find that this definition for the transition weight is satifactory. The probability of a move is then the geometic average of either using the SA or TMMC Algorithm. 
+where $N_\text{found}$ is the number of energy states that have been
+found i.e. visited, and $n_{\uparrow\downarrow}$ are the number of
+upward or downward moves between a pair of energy states respectively.
+The rational behind the transition probability is that the transition
+weight can be related to the fractional uncertainty in upward and
+downward moves assuming there is no system correlation (the moves are
+independent).  Although this is not necessarily the case, we find that
+this definition for the transition weight is satifactory. The
+probability of a move is then the geometic average of either using the
+SA or TMMC Algorithm.
 
 \begin{align}
 \mathcal{P}_\text{move} = \mathcal{P}_\text{move}^{\text{SA}_\text{Weight}} \mathcal{P}_\text{move}^{1-\text{SA}_\text{Weight}}
 \end{align}
 
 \subsubsection{Enforce a minimum temperature probability}
-One potentially damaging aspect to the convergence of the Stochastic Approximation method is the need to enforce a minimum temperature probability.  We define this probability as 
+One potentially damaging aspect to the convergence of the Stochastic
+Approximation method is the need to enforce a minimum temperature
+probability.  We define this probability as
 \begin{align}
 P_{\text{min}} = e^{\beta_{\text{max}}\Delta\epsilon}
 \end{align}
-where $\beta_{\text{max}} = \nicefrac{1}{k_B T_\text{min}}$.  If the transition probability is ever below the minimum temperature transition probability, we set the former equal to the later.
+where $\beta_{\text{max}} = \nicefrac{1}{k_B T_\text{min}}$.  If the
+transition probability is ever below the minimum temperature transition
+probability, we set the former equal to the later.
 
 \section{Results}
 
@@ -459,7 +567,7 @@ if they're identical.
 The ratio of density of states at two energies should be proportional
 to the ratio of upgoing and downgoing transition rates between those
 two energies.  Thus these transitions give us information about
-$\Delta$$\mathcal{D}$($\varepsilon$) (where $\mathcal{D}$($\varepsilon$) 
+$\Delta$$\mathcal{D}$($\varepsilon$) (where $\mathcal{D}$($\varepsilon$)
 is the density of states).
 
 Figure~\ref{fig:transitions} below shows the transition matrix for a
@@ -478,9 +586,9 @@ interesting to implement.
 One natural approach would use linear algebra.  If the normalized
 transition matrix is $\mathcal{T}$, then the density of states is given by
 \begin{equation}
-  \mathcal{D}(\varepsilon) = \mathcal{T}\mathcal{D}(\varepsilon) 
+  \mathcal{D}(\varepsilon) = \mathcal{T}\mathcal{D}(\varepsilon)
 \end{equation}
-By solving this equation for $\mathcal{D}$($\varepsilon$), we could find a 
+By solving this equation for $\mathcal{D}$($\varepsilon$), we could find a
 good approximation for $w$ to obtain a flat histogram.
 
 I expect that we could use similar math to the optimized ensemble
@@ -581,26 +689,26 @@ does have detailed balance.
 
 %\subsection{TMI1 Algorithm}
 
-%Our proposed transition matrix initilization algorithm TMI$_1$ uses the following 
-%method to determine the histogram weights.  The method periodically recomputes 
-%the weights during the simulation.  Although no bottlenecks result when updating 
-%the weights more frequently, the algorithm will nonetheless introduce additional 
-%computational time.  Because of the potential to increase computational time, the 
+%Our proposed transition matrix initilization algorithm TMI$_1$ uses the following
+%method to determine the histogram weights.  The method periodically recomputes
+%the weights during the simulation.  Although no bottlenecks result when updating
+%the weights more frequently, the algorithm will nonetheless introduce additional
+%computational time.  Because of the potential to increase computational time, the
 %algorithm infrequently but periodically updates the weights such that the central
 %effort of the method allows focusing efforts on exploring new energy
 %configurations.
 
 %\subsubsection{Weights at High Energy}
-%At energies above the maximum in the density of states, the method sets the weights 
-%equal to the weight at the density of states maximum.  This avoids expending 
-%extra computational time on equally sampling states that are not favored at any 
+%At energies above the maximum in the density of states, the method sets the weights
+%equal to the weight at the density of states maximum.  This avoids expending
+%extra computational time on equally sampling states that are not favored at any
 %positive temperature.
 
 %\subsubsection{Weights at Interesting Energy}
-%At energies below the maximum, the method attempts to set the weight equal to the 
-%inverse of the density of states, \emph{unless} there are insufficient statistics 
+%At energies below the maximum, the method attempts to set the weight equal to the
+%inverse of the density of states, \emph{unless} there are insufficient statistics
 %to justify this.  In order to determine when sufficient statistics have been reached,
-%it becomes neccessary to define a modifcation factor, in this case, in terms of a 
+%it becomes neccessary to define a modifcation factor, in this case, in terms of a
 %fractional uncertainty
 %\begin{align}
   %{F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
@@ -623,18 +731,18 @@ does have detailed balance.
 %strongly than a Boltzmann factor at $T_{\min}$ would do.
 
 %\subsection{GC-TMMC Algorithm}
-%Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and 
+%Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and
 %particle number of the system to fluctuate while holding the chemical potential,
-%volume, and temperature constant~\cite{chen2001aggregation, chen2002simulating, 
-%errington2003direct, fenwick2006accurate, fenwick2008direct, errington2005direct}.  
-%The algorithm boasts a lower statistical noise than conventional GCMC due to its 
-%incorporation of a transition matrix to estimate ensemble averages~\cite{siderius2013use, 
-%paluch2008comparing, grzelak2008computation}.  The steps for the algorithm are 
+%volume, and temperature constant~\cite{chen2001aggregation, chen2002simulating,
+%errington2003direct, fenwick2006accurate, fenwick2008direct, errington2005direct}.
+%The algorithm boasts a lower statistical noise than conventional GCMC due to its
+%incorporation of a transition matrix to estimate ensemble averages~\cite{siderius2013use,
+%paluch2008comparing, grzelak2008computation}.  The steps for the algorithm are
 %outlined below:
 
 %\subsubsection{Define particle insertion/deletion}
 %In the system of consideration, the number of particles $\mathcal{N}$ can change
-%by an amount $\delta$.  It is assumed that in the system either no particles can be 
+%by an amount $\delta$.  It is assumed that in the system either no particles can be
 %inserted or deleted, a single insertion takes place, or a single deletion takes place.
 %This yields a condition $\delta={-1,0,+1}$ for particle insertion.
 
@@ -645,15 +753,15 @@ does have detailed balance.
   %p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
   %{\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
 %\end{align}
-%where $\alpha_{new\rightarrow old}$ is the probability of generating an old system 
+%where $\alpha_{new\rightarrow old}$ is the probability of generating an old system
 %configuration from the new.  For conventional Monte-Carlo moves $\alpha_{old \rightarrow new}
-%=\alpha_{new\rightarrow old}$ although for advanced Monte-Carlo moves this would not 
-%be the case~\cite{siepmann1990method}.  The probabilies of actually observing the 
+%=\alpha_{new\rightarrow old}$ although for advanced Monte-Carlo moves this would not
+%be the case~\cite{siepmann1990method}.  The probabilies of actually observing the
 %system in the old state is given by
 %\begin{align}
   %\pi_{old} = \frac{1}{\Xi}\frac{V^{N_{old}}}{\Lambda^{3N_{old}}N_{old}!}
   %e^{-\beta(\epsilon_{old}-\mu N_{old})}
-%\end{align}  
+%\end{align}
 %where $\Xi$ is the grand canonical partition function and $\Lambda$ is the De Broglie
 %wavelength.
 
@@ -664,31 +772,31 @@ does have detailed balance.
 %\begin{align}
   %{C}_{N,\delta} = {C}_{N,\delta} + p_{a}\\
   %{C}_{N,0} = {C}_{N,0} +(1 - p_{a})
-%\end{align}  
-%If $\delta=0$, that is, the number of particles has not been changed, then only 
+%\end{align}
+%If $\delta=0$, that is, the number of particles has not been changed, then only
 %$\mathcal{C}_{N,0}$ is incremented by unity.  The overal transition probability can
-%now be defined as 
+%now be defined as
 %\begin{align}
   %\mathcal{P}_{N,\delta} = \frac{{C}_{N,\delta}}
   %{\sum_{j=-1}^{+1} {C}_{N,j}}
-%\end{align} 
+%\end{align}
 
 %\subsubsection{Define the Particle Number Probability Distribution}
-%The Particle Number Probability Distribution (PNPD) $\Pi(N;\mu,V,T)$ can be found 
+%The Particle Number Probability Distribution (PNPD) $\Pi(N;\mu,V,T)$ can be found
 %by enforcing detailed balance in the system.
 %\begin{align}
   %\ln(\Pi_{N+1}) = \ln(\Pi_{N}) + \ln\bigg(\frac{\mathcal{P}_{N\rightarrow N+1}}
   %{\mathcal{P}_{N+1\rightarrow N}}\bigg)
-%\end{align} 
-%This equation will hold as long as N-space can be sampled sufficiently.  In an 
+%\end{align}
+%This equation will hold as long as N-space can be sampled sufficiently.  In an
 %implemented algorithm $N$, $N_{min}$, and $N_{max}$ are specified for macrostate domain
 %sampling.
 
 %\subsubsection{Define a biasing function}
-%The primary difference between TMMC as defined by Fitzgerald et al. and GC-TMMC as 
+%The primary difference between TMMC as defined by Fitzgerald et al. and GC-TMMC as
 %pioneered by JR Errington et al. is the use of a biasing function to control the acceptance
-%rate of trial moves~\cite{siderius2013use, fitzgerald2000monte}.  This type of 
-%multi-canonical sampling augments the acceptance probability in the following way 
+%rate of trial moves~\cite{siderius2013use, fitzgerald2000monte}.  This type of
+%multi-canonical sampling augments the acceptance probability in the following way
 %\begin{align}
   %p_{\eta,old\rightarrow new} = \min\bigg[1,\frac{e^{\eta(N_{new})}}
   %{e^{\eta(N_{old})}}\frac{\alpha_{new\rightarrow old}}
@@ -697,18 +805,18 @@ does have detailed balance.
 
 %Although $p_{\eta}$ is used to control the actual transitions for trial configurations
 %in GC-TMMC, $p_{a}$ is still used to update the Collection Matrices.  Ideally the biasing
-%function would be given by 
+%function would be given by
 %\begin{align}
   %\eta(N) = -\ln\Pi(N;\mu,V,T)
 %\end{align}
-%Since $\Pi$ is not usually known a priori, the biasing function is usually set to some 
+%Since $\Pi$ is not usually known a priori, the biasing function is usually set to some
 %arbitrary constant for initialization.  The goal of this biasing function is to achieve
 %uniform sampling (a common feature shared by the flat histogram Monte-Carlo family).
 
 %\subsubsection{Histogram reweighting for the PNPD}
-%Once the PNPD has beeen collected for a given chemical potential $\mu_0$, histogram 
-%reweighting is used to determine thermodynamic properties at other chemic potentials.  
-%Since the canonical partition function $Z(N,V,T)$ does not depend on the chemical 
+%Once the PNPD has beeen collected for a given chemical potential $\mu_0$, histogram
+%reweighting is used to determine thermodynamic properties at other chemic potentials.
+%Since the canonical partition function $Z(N,V,T)$ does not depend on the chemical
 %potential, we can write
 %\begin{align}
 %\begin{split}
