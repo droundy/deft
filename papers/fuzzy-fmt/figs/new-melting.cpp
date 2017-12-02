@@ -158,7 +158,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   
   const double dV = pow(dx,3);    //ASK!
-  const int Ntot=pow(lattice_constant/dx,3);  //number of position vectors over one cell
+  const int Ntot=pow(((lattice_constant/dx)+1),3);  //number of position vectors over one cell
   printf("Ntot is %i\n", Ntot);   //debug
   
   //Normalize n(r)
