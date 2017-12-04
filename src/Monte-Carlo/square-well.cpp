@@ -1072,6 +1072,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
                                            double wl_threshold, double wl_cutoff,
                                            bool fixed_energy_range) {
   assert(wl_factor);
+  use_wl = true;
   const double original_wl_factor = wl_factor;
   int weight_updates = 0;
   bool done = false;
@@ -1723,8 +1724,7 @@ static void write_d_file(sw_simulation &sw, const char *fname) {
   sw.write_header(f);
   fprintf(f, "# energy\tlndos\tps\n");
   dos_types how_to_compute_dos = transition_dos;
-  bool using_wl = sw.wl_factor && !(sw.use_sad || sw.use_satmmc || sw.sa_t0);
-  if (sw.use_sad || sw.sa_t0 || using_wl) how_to_compute_dos = weights_dos;
+  if (sw.use_sad || sw.sa_t0 || sw.use_wl) how_to_compute_dos = weights_dos;
   double *lndos = sw.compute_ln_dos(how_to_compute_dos);
   double maxdos = lndos[0];
   for (int i = 0; i < sw.energy_levels; i++) {
