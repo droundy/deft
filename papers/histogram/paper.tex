@@ -108,10 +108,22 @@ applied to the square-well liquid}
 % \end{table*}
 
 \section{Introduction}
-Over the past several decades a number of broad-histogram Monte-Carlo
-simulation algorithms have been developed in order to calculate the
-density of states and phase transitions of increasingly complex
-systems.  Wang and Landau developed an algorithm that uses an update
+Over the past several decades a number of advanced Monte-Carlo
+simulation algorithms have been developed which calculate the
+properties of a thermal system over a range of temperatures.  This
+idea began with the original histogram method, which used a single
+canonical Monte Carlo simulation to predict properties for nearby
+temperatures~\cite{ferrenberg1988new}.  For large simulations this
+approach is limited to a narrow temperature range because a single
+canonical simulation explores only a small range of energies.  This
+led to a variety of ``broad'' (or ``flat'') histogram
+methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
+  wang2001determining, wang2001efficient, trebst2004optimizing}, which
+attempt to explore a wide range of energies.  These methods also
+benefit in that they are unlikely to be trapped in a local energy
+minimum.
+
+Wang and Landau developed an algorithm that uses an update
 factor and a statistical histogram to compute the density of states of
 a given system~\cite{wang2001determining, wang2001efficient}.  While
 the method is incredibly powerful it has several user-defined
