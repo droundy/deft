@@ -163,11 +163,11 @@ weight find_weighted_densities(double rx, double ry, double rz, double sx, doubl
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   weight w_den;
-  for (int l=0; l<Ntot; l++) {   //integrate over ALL space (not Ntot) FIX!
+  for (int l=-(lattice_constant/2)/dx; l<Ntot; l++) {   //integrate over ALL space (not Ntot) FIX!
           const double rxp=l*dx +sx;
-          for (int m=0; m<Ntot; m++) {
+          for (int m=-(lattice_constant/2)/dx; m<Ntot; m++) {
             const double ryp=m*dx +sy;
-            for (int o=0; o<Ntot; o++) {
+            for (int o=-(lattice_constant/2)/dx; o<Ntot; o++) {
               const double rzp=o*dx +sz;
               //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
 
@@ -243,16 +243,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   
   const double dV = pow(dx,3);    //ASK!
-  const int Ntot=pow(((lattice_constant/dx)+1.0),3);  //number of position vectors over one cell
+  const int Ntot=pow((((lattice_constant/2)/dx)+1.0),3);  //number of position vectors over one cell
   printf("Ntot is %i\n", Ntot);   //debug
   
   //Normalize n(r)
   double N_crystal=0;
-  for (int i=0; i<Ntot; i++) {     //integrate over one cell
+  for (int i=-(lattice_constant/2)/dx; i<Ntot; i++) {     //integrate over one cell
     const double rx=i*dx;
-    for (int j=0; j<Ntot; j++) {
+    for (int j=-(lattice_constant/2)/dx; j<Ntot; j++) {
       const double ry=j*dx;
-      for (int k=0; k<Ntot; k++) {
+      for (int k=-(lattice_constant/2)/dx; k<Ntot; k++) {
         const double rz=k*dx;
         double n_den=find_ngaus(rx, ry, rz, fv, gwidth, lattice_constant);
         N_crystal += n_den*dV;
@@ -268,11 +268,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
 
-  for (int i=0; i<Ntot; i++) {    //integrate over one cell
+  for (int i=-(lattice_constant/2)/dx; i<Ntot; i++) {    //integrate over one cell
     const double rx=i*dx;
-    for (int j=0; j<Ntot; j++) {
+    for (int j=-(lattice_constant/2)/dx; j<Ntot; j++) {
       const double ry=j*dx;
-      for (int k=0; k<Ntot; k++) {
+      for (int k=-(lattice_constant/2)/dx; k<Ntot; k++) {
         const double rz=k*dx;
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
