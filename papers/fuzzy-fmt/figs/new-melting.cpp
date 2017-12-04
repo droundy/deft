@@ -159,10 +159,170 @@ double find_ngaus(double rx, double ry, double rz, double fv, double gwidth, dou
   return n;
 }
 
-weight find_weighted_densities(double rx, double ry, double rz, double sx, double sy, double sz, int Ntot, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
+weight find_weighted_den_at_rprime(double rx, double ry, double rz, double rxp, double ryp, double rzp, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
+  double rxdiff=rx-rxp;
+  double rydiff=ry-ryp;
+  double rzdiff=rz-rzp;
+  double rdiff_magnitude=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
+  //printf("rxdiff_magnitude= %g, rydiff_magnitude= %g, rzdiff_magnitude= %g, mag rdiff_magnitude= %g\n", rxdiff_magnitude, rydiff_magnitude, rzdiff_magnitude, rdiff_magnitude);  //debug
+
+  const double sigma=2;
+  const double Rad=sigma/pow(2, 5.0/6);
+  const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
+  const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
+  //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
+              
+  double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
+  double w_0=w_2/(4*pow(M_PI,2));
+  double w_1=w_2/(4*M_PI*Rad);
+  double w_3=(1.0/2)*(1-erf(rdiff_magnitude));
+  vec wv_1, wv_2;
+  if (rdiff_magnitude > 0) {
+  wv_1.x=w_1*(rxdiff/rdiff_magnitude);
+  wv_1.y=w_1*(rydiff/rdiff_magnitude);
+  wv_1.z=w_1*(rzdiff/rdiff_magnitude);
+  wv_2.x=w_2*(rxdiff/rdiff_magnitude);
+  wv_2.y=w_2*(rydiff/rdiff_magnitude);
+  wv_2.z=w_2*(rzdiff/rdiff_magnitude);
+  } else {
+  wv_1.x=0;
+  wv_1.y=0;
+  wv_1.z=0;
+  wv_2.x=0;
+  wv_2.y=0;
+  wv_2.z=0;
+  }
+
+  //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
+  //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
+
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
+  double lattice_constant = find_lattice_constant(reduced_density, fv); 
+  const double n_den= find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant)*(reduced_num_spheres/N_crystal);
+  //printf("Crystal n_den=%g\n", n_den);
+  //For homogeneous, set n_den to constant? ASK!
+
+  double dVp=pow(dx,3);  //CHANGE THIS? - ASK!
+  
+  weight w_den_p;  
+  w_den_p.n_0 = n_den*w_0*dVp;
+  w_den_p.n_1 = n_den*w_1*dVp;
+  w_den_p.n_2 = n_den*w_2*dVp;
+  w_den_p.n_3 = n_den*w_3*dVp;
+
+  w_den_p.nv_1.x = n_den*wv_1.x*dVp;
+  w_den_p.nv_1.y = n_den*wv_1.y*dVp;
+  w_den_p.nv_1.z = n_den*wv_1.z*dVp;
+  w_den_p.nv_2.x = n_den*wv_2.x*dVp;
+  w_den_p.nv_2.y = n_den*wv_2.y*dVp;
+  w_den_p.nv_2.z = n_den*wv_2.z*dVp;
+
+  //printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
+  //printf("n_0= %g, n_1=%g, n_2=%g, n_3=%g\n", n_0, n_1, n_2, n_3);  //debug
+              
+  return w_den_p;  
+}
+
+
+weight find_weighted_den_aboutR(double Rx, double Ry, double Rz, double rx, double ry, double rz, double sx, double sy, double sz, double inclusion_radius, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
+  const int inc_Ntot= (inclusion_radius/dx) +1;    //CAREFUL - could cause error with int ASK!
+  weight w_den_R;
+  for (int l=-(inclusion_radius)/dx; l<inc_Ntot; l++) {   //CAREFUL - couble cause error with int ASK!
+    const double incr_x=l*dx;
+    const double rxp=incr_x+ Rx +sx;    //rxprime=incr_x + Rxlatticepoint shifted 
+    for (int m=-(inclusion_radius)/dx; m<inc_Ntot; m++) {
+      const double incr_y=m*dx;
+      const double ryp=incr_y+ Ry +sy;    //rxprime=incr_y + Rylatticepoint shifted 
+      for (int o=-(inclusion_radius)/dx; o<inc_Ntot; o++) {
+        const double incr_z=m*dx;
+        const double rzp=incr_z+ Rz +sz;    //rxprime=incr_z + Rlzatticepoint shifted 
+  
+        weight w_den_p=find_weighted_den_at_rprime(rx, ry, rz, rxp, ryp, rzp, dx, temp, fv, gwidth, N_crystal, reduced_density);
+        w_den_R.n_0 += w_den_p.n_0;
+        w_den_R.n_1 += w_den_p.n_1;
+        w_den_R.n_2 += w_den_p.n_2;
+        w_den_R.n_3 += w_den_p.n_3;
+
+        w_den_R.nv_1.x += w_den_p.nv_1.x;
+        w_den_R.nv_1.y += w_den_p.nv_1.y;
+        w_den_R.nv_1.z += w_den_p.nv_1.z;
+        w_den_R.nv_2.x += w_den_p.nv_2.x;
+        w_den_R.nv_2.y += w_den_p.nv_2.y;
+        w_den_R.nv_2.z += w_den_p.nv_2.z;
+       }
+    }
+  }
+
+  return w_den_R;
+}
+
+
+  weight find_weighted_densities_efficient(double rx, double ry, double rz, double sx, double sy, double sz, int Ntot, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
+  //More efficient alternative integration limited to small cubes around each lattice point
+
+  const double lattice_constant = find_lattice_constant(reduced_density, fv);
+  const double inclusion_radius = lattice_constant/20; // set value for size of cube of integration around each lattice point
+  
+  double Rx=0, Ry=0, Rz=0;                                //R1
+  weight w_den_1=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=lattice_constant/2; Ry=lattice_constant/2; Rz=0;     //R2
+  weight w_den_2=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=-lattice_constant/2; Ry=lattice_constant/2; Rz=0;    //R3
+  weight w_den_3=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=lattice_constant/2; Ry=-lattice_constant/2; Rz=0;    //R4
+  weight w_den_4=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=-lattice_constant/2; Ry=-lattice_constant/2; Rz=0;   //R5
+  weight w_den_5=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=0; Ry=lattice_constant/2; Rz=lattice_constant/2;     //R6
+  weight w_den_6=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=0; Ry=lattice_constant/2; Rz=-lattice_constant/2;    //R7
+  weight w_den_7=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=0; Ry=-lattice_constant/2; Rz=lattice_constant/2;    //R8
+  weight w_den_8=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=0; Ry=-lattice_constant/2; Rz=-lattice_constant/2;   //R9
+  weight w_den_9=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=lattice_constant/2; Ry=0; Rz=lattice_constant/2;     //R10
+  weight w_den_10=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=-lattice_constant/2; Ry=0; Rz=lattice_constant/2;    //R11
+  weight w_den_11=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=lattice_constant/2; Ry=0; Rz=-lattice_constant/2;    //R12
+  weight w_den_12=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  Rx=-lattice_constant/2; Ry=0; Rz=-lattice_constant/2;   //R13
+  weight w_den_13=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
+
+  weight w_den;
+
+  w_den.n_0 = w_den_1.n_0 + w_den_2.n_0 + w_den_3.n_0 + w_den_4.n_0 + w_den_5.n_0 + w_den_5.n_0 + w_den_6.n_0 + w_den_7.n_0 + w_den_8.n_0 + w_den_9.n_0 + w_den_10.n_0 + w_den_11.n_0 + w_den_12.n_0 + w_den_13.n_0;
+  w_den.n_1 = w_den_1.n_1 + w_den_2.n_1 + w_den_3.n_1 + w_den_4.n_1 + w_den_5.n_1 + w_den_5.n_1 + w_den_6.n_1 + w_den_7.n_1 + w_den_8.n_1 + w_den_9.n_1 + w_den_10.n_1 + w_den_11.n_1 + w_den_12.n_1 + w_den_13.n_1;
+  w_den.n_2 = w_den_1.n_2 + w_den_2.n_2 + w_den_3.n_2 + w_den_4.n_2 + w_den_5.n_2 + w_den_5.n_2 + w_den_6.n_2 + w_den_7.n_2 + w_den_8.n_2 + w_den_9.n_2 + w_den_10.n_2 + w_den_11.n_2 + w_den_12.n_2 + w_den_13.n_2;
+  w_den.n_3 = w_den_1.n_3 + w_den_2.n_3 + w_den_3.n_3 + w_den_4.n_3 + w_den_5.n_3 + w_den_5.n_3 + w_den_6.n_3 + w_den_7.n_3 + w_den_8.n_3 + w_den_9.n_3 + w_den_10.n_3 + w_den_11.n_3 + w_den_12.n_3 + w_den_13.n_3;
+
+  w_den.nv_1.x = w_den_1.nv_1.x + w_den_2.nv_1.x + w_den_3.nv_1.x + w_den_4.nv_1.x + w_den_5.nv_1.x + w_den_6.nv_1.x + w_den_7.nv_1.x + w_den_8.nv_1.x + w_den_9.nv_1.x + w_den_10.nv_1.x + w_den_11.nv_1.x + w_den_12.nv_1.x + w_den_13.nv_1.x;
+  w_den.nv_1.y = w_den_1.nv_1.y + w_den_2.nv_1.y + w_den_3.nv_1.y + w_den_4.nv_1.y + w_den_5.nv_1.y + w_den_6.nv_1.y + w_den_7.nv_1.y + w_den_8.nv_1.y + w_den_9.nv_1.y + w_den_10.nv_1.y + w_den_11.nv_1.y + w_den_12.nv_1.y + w_den_13.nv_1.y;
+  w_den.nv_1.z = w_den_1.nv_1.z + w_den_2.nv_1.z + w_den_3.nv_1.z + w_den_4.nv_1.z + w_den_5.nv_1.z + w_den_6.nv_1.z + w_den_7.nv_1.z + w_den_8.nv_1.z + w_den_9.nv_1.z + w_den_10.nv_1.z + w_den_11.nv_1.z + w_den_12.nv_1.z + w_den_13.nv_1.z;
+  w_den.nv_2.x = w_den_1.nv_2.x + w_den_2.nv_2.x + w_den_3.nv_2.x + w_den_4.nv_2.x + w_den_5.nv_2.x + w_den_6.nv_2.x + w_den_7.nv_2.x + w_den_8.nv_2.x + w_den_9.nv_2.x + w_den_10.nv_2.x + w_den_11.nv_2.x + w_den_12.nv_2.x + w_den_13.nv_2.x;
+  w_den.nv_2.y = w_den_1.nv_2.y + w_den_2.nv_2.y + w_den_3.nv_2.y + w_den_4.nv_2.y + w_den_5.nv_2.y + w_den_6.nv_2.y + w_den_7.nv_2.y + w_den_8.nv_2.y + w_den_9.nv_2.y + w_den_10.nv_2.y + w_den_11.nv_2.y + w_den_12.nv_2.y + w_den_13.nv_2.y;
+  w_den.nv_2.z = w_den_1.nv_2.z + w_den_2.nv_2.z + w_den_3.nv_2.z + w_den_4.nv_2.z + w_den_5.nv_2.z + w_den_6.nv_2.z + w_den_7.nv_2.z + w_den_8.nv_2.z + w_den_9.nv_2.z + w_den_10.nv_2.z + w_den_11.nv_2.z + w_den_12.nv_2.z + w_den_13.nv_2.z;
+
+  return w_den; 
+  }
+
+weight find_weighted_densities(double rx, double ry, double rz, double sx, double sy, double sz, int Ntot, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   weight w_den;
+
   for (int l=-(lattice_constant/2)/dx; l<Ntot; l++) {   //integrates over one shifted cell
           const double rxp=l*dx +sx;
           for (int m=-(lattice_constant/2)/dx; m<Ntot; m++) {
@@ -170,66 +330,83 @@ weight find_weighted_densities(double rx, double ry, double rz, double sx, doubl
             for (int o=-(lattice_constant/2)/dx; o<Ntot; o++) {
               const double rzp=o*dx +sz;
               //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
-
-              double rxdiff=rx-rxp;
-              double rydiff=ry-ryp;
-              double rzdiff=rz-rzp;
-
-              double rdiff_magnitude=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
-              //printf("rxdiff_magnitude= %g, rydiff_magnitude= %g, rzdiff_magnitude= %g, mag rdiff_magnitude= %g\n", rxdiff_magnitude, rydiff_magnitude, rzdiff_magnitude, rdiff_magnitude);  //debug
-
-              const double sigma=2;
-              const double Rad=sigma/pow(2, 5.0/6);
-              const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
-              const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
-              //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
               
-              double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
-              double w_0=w_2/(4*pow(M_PI,2));
-              double w_1=w_2/(4*M_PI*Rad);
-              double w_3=(1.0/2)*(1-erf(rdiff_magnitude));
-              vec wv_1, wv_2;
-              if (rdiff_magnitude > 0) {
-                wv_1.x=w_1*(rxdiff/rdiff_magnitude);
-                wv_1.y=w_1*(rydiff/rdiff_magnitude);
-                wv_1.z=w_1*(rzdiff/rdiff_magnitude);
-                wv_2.x=w_2*(rxdiff/rdiff_magnitude);
-                wv_2.y=w_2*(rydiff/rdiff_magnitude);
-                wv_2.z=w_2*(rzdiff/rdiff_magnitude);
-              } else {
-                wv_1.x=0;
-                wv_1.y=0;
-                wv_1.z=0;
-                wv_2.x=0;
-                wv_2.y=0;
-                wv_2.z=0;
-              }
+              weight w_den_p=find_weighted_den_at_rprime(rx, ry, rz, rxp, ryp, rzp, dx, temp, fv, gwidth, N_crystal, reduced_density);
+//New Function REPLACES FROM HERE...
+//
+//              double rxdiff=rx-rxp;
+//              double rydiff=ry-ryp;
+//              double rzdiff=rz-rzp;
+//
+//              double rdiff_magnitude=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
+//              //printf("rxdiff_magnitude= %g, rydiff_magnitude= %g, rzdiff_magnitude= %g, mag rdiff_magnitude= %g\n", rxdiff_magnitude, rydiff_magnitude, rzdiff_magnitude, rdiff_magnitude);  //debug
+//
+//              const double sigma=2;
+//              const double Rad=sigma/pow(2, 5.0/6);
+//              const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
+//              const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
+//              //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
+//              
+//              double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
+//              double w_0=w_2/(4*pow(M_PI,2));
+//              double w_1=w_2/(4*M_PI*Rad);
+//              double w_3=(1.0/2)*(1-erf(rdiff_magnitude));
+//              vec wv_1, wv_2;
+//              if (rdiff_magnitude > 0) {
+//                wv_1.x=w_1*(rxdiff/rdiff_magnitude);
+//                wv_1.y=w_1*(rydiff/rdiff_magnitude);
+//                wv_1.z=w_1*(rzdiff/rdiff_magnitude);
+//                wv_2.x=w_2*(rxdiff/rdiff_magnitude);
+//                wv_2.y=w_2*(rydiff/rdiff_magnitude);
+//                wv_2.z=w_2*(rzdiff/rdiff_magnitude);
+//               } else {
+//                wv_1.x=0;
+//                wv_1.y=0;
+//                wv_1.z=0;
+//                wv_2.x=0;
+//                wv_2.y=0;
+//                wv_2.z=0;
+//              }
+//
+//              //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
+//              //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
+//
+//              const double n_den= find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant)
+//                *(reduced_num_spheres/N_crystal);
+//              //printf("Crystal n_den=%g\n", n_den);
+//              //For homogeneous, set n_den to constant? ASK!
+//
+//              double dVp=pow(dx,3);  //CHANGE THIS? - ASK!
+//
+//              w_den.n_0 += n_den*w_0*dVp;
+//              w_den.n_1 += n_den*w_1*dVp;
+//              w_den.n_2 += n_den*w_2*dVp;
+//              w_den.n_3 += n_den*w_3*dVp;
+//
+//              w_den.nv_1.x += n_den*wv_1.x*dVp;
+//              w_den.nv_1.y += n_den*wv_1.y*dVp;
+//              w_den.nv_1.z += n_den*wv_1.z*dVp;
+//              w_den.nv_2.x += n_den*wv_2.x*dVp;
+//              w_den.nv_2.y += n_den*wv_2.y*dVp;
+//              w_den.nv_2.z += n_den*wv_2.z*dVp;
+//
+//              //printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
+//
+//              //printf("n_0= %g, n_1=%g, n_2=%g, n_3=%g\n", n_0, n_1, n_2, n_3);  //debug
+// TO HERE
 
-              //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
-              //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
+              w_den.n_0 += w_den_p.n_0;
+              w_den.n_1 += w_den_p.n_1;
+              w_den.n_2 += w_den_p.n_2;
+              w_den.n_3 += w_den_p.n_3;
 
-              const double n_den= find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant)
-                *(reduced_num_spheres/N_crystal);
-              //printf("Crystal n_den=%g\n", n_den);
-              //For homogeneous, set n_den to constant? ASK!
-
-              double dVp=pow(dx,3);  //CHANGE THIS? - ASK!
-
-              w_den.n_0 += n_den*w_0*dVp;
-              w_den.n_1 += n_den*w_1*dVp;
-              w_den.n_2 += n_den*w_2*dVp;
-              w_den.n_3 += n_den*w_3*dVp;
-
-              w_den.nv_1.x += n_den*wv_1.x*dVp;
-              w_den.nv_1.y += n_den*wv_1.y*dVp;
-              w_den.nv_1.z += n_den*wv_1.z*dVp;
-              w_den.nv_2.x += n_den*wv_2.x*dVp;
-              w_den.nv_2.y += n_den*wv_2.y*dVp;
-              w_den.nv_2.z += n_den*wv_2.z*dVp;
-
-              //printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
-
-              //printf("n_0= %g, n_1=%g, n_2=%g, n_3=%g\n", n_0, n_1, n_2, n_3);  //debug
+              w_den.nv_1.x += w_den_p.nv_1.x;
+              w_den.nv_1.y += w_den_p.nv_1.y;
+              w_den.nv_1.z += w_den_p.nv_1.z;
+              w_den.nv_2.x += w_den_p.nv_2.x;
+              w_den.nv_2.y += w_den_p.nv_2.y;
+              w_den.nv_2.z += w_den_p.nv_2.z;
+                
             }
           }
         }
