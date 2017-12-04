@@ -452,10 +452,18 @@ terms of an arbitrary tunable parameter $t_0$.
 \end{align}
 We argue that it is possible to set this parameter to a system
 independent parameter such that $t_0 = N_E^2/t$ where $N_E$ is the
-number of energies that have been found.  This gives an update factor
-as follows:
+number of energies that have been found.  One of the energy found terms
+can be thought of as a change in the entropy $\Delta S$.  The change in
+the entropy can be thought of as a slope of the triangle made by
+connecting the minimum important energy and the maximum entropy state
+divided by the minimum temperature:
 \begin{align}
-\gamma_{t}^{\text{SA}} = \frac{N_E^2}{t}
+\Delta S = \frac{E_{\text{max}}-E_{\text{min}}}{T_{\text{min}}}
+\end{align}
+This gives an update factor as follows:
+\begin{align}
+\gamma_{t}^{\text{SA}} = \frac{N_E\Delta S}{t} =
+\frac{N_E}{t}\frac{E_{\text{max}}-E_{\text{min}}}{T_{\text{min}}}
 \end{align}
 The update factor has the same $1/t$ behavior as the original SAMC
 algorithm; however now every time a new energy is discovered during the
@@ -553,7 +561,7 @@ other!}
 wall}
 
 \subsubsection{A $60\times8\times8$ $(N = 200)$ system with a sticky
-wall} 
+wall}
 
 \subsubsection{A $100\times10\times10$ $(N = 500)$ system with a sticky
 wall}~\jpsays{This is David's simulation which not sure if it is
