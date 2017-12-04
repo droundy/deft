@@ -12,6 +12,7 @@ if os.path.exists('../data'):
     
 energy = int(sys.argv[1])
 filebase = sys.argv[2]
+tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
 methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
@@ -41,7 +42,7 @@ for method in methods:
                 plt.xlabel('# iterations')
                 plt.ylabel('error')
                 plt.legend(loc = 'best')
-                plt.savefig('figs/%s-error-energy-%g.pdf' % (filebase, energy))
+                plt.savefig('figs/%s-error-energy-%g.pdf' % (tex_filebase, energy))
     
                 plt.figure('round-trips-at-energy' )
                 plt.plot(iterations, Nrt_at_energy, label = method[1:])
@@ -49,7 +50,7 @@ for method in methods:
                 plt.xlabel('# iterations')
                 plt.ylabel('Roundy Trips')
                 plt.legend(loc = 'best')
-                plt.savefig('figs/%s-round-trips-%g.pdf' % (filebase, energy))
+                plt.savefig('figs/%s-round-trips-%g.pdf' % (tex_filebase, energy))
         
                 plt.figure('error-at-energy-round-trips')
                 plt.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0], label = method[1:])
@@ -57,7 +58,7 @@ for method in methods:
                 plt.xlabel('Roundy Trips')
                 plt.ylabel('Error')
                 plt.legend(loc = 'best')
-                plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (filebase, energy))
+                plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
     
         plt.figure('maxerror')
         plt.loglog(iterations, maxerror, label = method[1:])
@@ -65,7 +66,7 @@ for method in methods:
         plt.ylabel('Maximum Entropy Error')
         plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         plt.legend(loc = 'best')
-        plt.savefig(('figs/%s-max-entropy-error' % (filebase)).replace('.','_')+'.pdf')
+        plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
         
         plt.figure('errorinentropy')
         plt.loglog(iterations, errorinentropy[0:len(iterations)], label = method[1:])
@@ -73,7 +74,7 @@ for method in methods:
         plt.ylabel('Error in Entropy')
         plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
         plt.legend(loc='best')
-        plt.savefig(('figs/%s-entropy-error' % (filebase)).replace('.','_')+'.pdf')
+        plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
     except:
         raise
 plt.show()
