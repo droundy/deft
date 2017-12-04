@@ -163,7 +163,7 @@ weight find_weighted_densities(double rx, double ry, double rz, double sx, doubl
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   weight w_den;
-  for (int l=-(lattice_constant/2)/dx; l<Ntot; l++) {   //integrate over ALL space (not Ntot) FIX!
+  for (int l=-(lattice_constant/2)/dx; l<Ntot; l++) {   //integrates over one shifted cell
           const double rxp=l*dx +sx;
           for (int m=-(lattice_constant/2)/dx; m<Ntot; m++) {
             const double ryp=m*dx +sy;
@@ -285,7 +285,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         int num_cell_shifts=cell_space/2;  //used to form vectors in shifted unit cell 
         printf("ncell_space is %i, num_cells is %i, num_cell_shifts is %i\n", cell_space, num_cells, num_cell_shifts); //debug - delete later!
         
-        for (int t=-1*num_cell_shifts; t < num_cell_shifts+1; t++) {
+        for (int t=-1*num_cell_shifts; t < num_cell_shifts+1; t++) {      //integrate over "all space" (actually over all cell_space^3 shifted cells)
           for (int u=-1*num_cell_shifts; u < num_cell_shifts+1; u++) {
             for (int v=-1*num_cell_shifts; v < num_cell_shifts+1; v++) {
               double sx=t*lattice_constant, sy=u*lattice_constant, sz=v*lattice_constant;
