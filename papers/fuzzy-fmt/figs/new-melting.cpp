@@ -62,6 +62,14 @@ struct vec {
   double z;
 };
 
+struct weight {
+  double n_0;
+  double n_1;
+  double n_2;
+  double n_3;
+  vec nv_1;
+  vec nv_2;
+};
 
 double find_ngaus(double rx, double ry, double rz, double fv, double gwidth, double lattice_constant) {
   double n;
@@ -151,57 +159,16 @@ double find_ngaus(double rx, double ry, double rz, double fv, double gwidth, dou
   return n;
 }
 
-
-data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
-  printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
+weight find_weighted_densities(double rx, double ry, double rz, double sx, double sy, double sz, int Ntot, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  
-  const double dV = pow(dx,3);    //ASK!
-  const int Ntot=pow(lattice_constant/dx,3);  //number of position vectors over one cell
-  printf("Ntot is %i\n", Ntot);   //debug
-  
-  //Normalize n(r)
-  double N_crystal=0;
-  for (int i=0; i<Ntot; i++) {     //integrate over one cell
-    const double rx=i*dx;
-    for (int j=0; j<Ntot; j++) {
-      const double ry=j*dx;
-      for (int k=0; k<Ntot; k++) {
-        const double rz=k*dx;
-        double n_den=find_ngaus(rx, ry, rz, fv, gwidth, lattice_constant);
-        N_crystal += n_den*dV;
-      }
-    }
-  }
-
-  if (verbose) {
-    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
-           N_crystal, reduced_num_spheres);
-  }
-
-  double phi_1=0, phi_2=0, phi_3=0;
-  double free_energy=0;
-
-  for (int i=0; i<Ntot; i++) {    //integrate over one cell
-    const double rx=i*dx;
-    for (int j=0; j<Ntot; j++) {
-      const double ry=j*dx;
-      for (int k=0; k<Ntot; k++) {
-        const double rz=k*dx;
-        //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
-
-        double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
-        vec nv_1, nv_2;
-        nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
-        //nv_2.x=0, nv2.y=0, nv2.z=0;
-
-        for (int l=0; l<Ntot; l++) {   //integrate over ALL space (not Ntot) FIX!
-          const double rxp=l*dx;
-          for (int m=0; m<Ntot; m++) {
-            const double ryp=m*dx;
-            for (int o=0; o<Ntot; o++) {
-              const double rzp=o*dx;
+  weight w_den;
+  for (int l=-(lattice_constant/2)/dx; l<Ntot; l++) {   //integrates over one shifted cell
+          const double rxp=l*dx +sx;
+          for (int m=-(lattice_constant/2)/dx; m<Ntot; m++) {
+            const double ryp=m*dx +sy;
+            for (int o=-(lattice_constant/2)/dx; o<Ntot; o++) {
+              const double rzp=o*dx +sz;
               //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
 
               double rxdiff=rx-rxp;
@@ -246,23 +213,93 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               //printf("Crystal n_den=%g\n", n_den);
               //For homogeneous, set n_den to constant? ASK!
 
-              double dVp=dV;  //CHANGE THIS? - ASK!
+              double dVp=pow(dx,3);  //CHANGE THIS? - ASK!
 
-              n_0 += n_den*w_0*dVp;
-              n_1 += n_den*w_1*dVp;
-              n_2 += n_den*w_2*dVp;
-              n_3 += n_den*w_3*dVp;
+              w_den.n_0 += n_den*w_0*dVp;
+              w_den.n_1 += n_den*w_1*dVp;
+              w_den.n_2 += n_den*w_2*dVp;
+              w_den.n_3 += n_den*w_3*dVp;
 
-              nv_1.x += n_den*wv_1.x*dVp;
-              nv_1.y += n_den*wv_1.y*dVp;
-              nv_1.z += n_den*wv_1.z*dVp;
-              nv_2.x += n_den*wv_2.x*dVp;
-              nv_2.y += n_den*wv_2.y*dVp;
-              nv_2.z += n_den*wv_2.z*dVp;
+              w_den.nv_1.x += n_den*wv_1.x*dVp;
+              w_den.nv_1.y += n_den*wv_1.y*dVp;
+              w_den.nv_1.z += n_den*wv_1.z*dVp;
+              w_den.nv_2.x += n_den*wv_2.x*dVp;
+              w_den.nv_2.y += n_den*wv_2.y*dVp;
+              w_den.nv_2.z += n_den*wv_2.z*dVp;
 
               //printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
 
               //printf("n_0= %g, n_1=%g, n_2=%g, n_3=%g\n", n_0, n_1, n_2, n_3);  //debug
+            }
+          }
+        }
+return w_den;  
+}
+
+
+data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
+  printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
+  double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
+  double lattice_constant = find_lattice_constant(reduced_density, fv);
+  
+  const double dV = pow(dx,3);    //ASK!
+  const int Ntot=pow((((lattice_constant/2)/dx)+1.0),3);  //number of position vectors over one cell
+  printf("Ntot is %i\n", Ntot);   //debug
+  
+  //Normalize n(r)
+  double N_crystal=0;
+  for (int i=-(lattice_constant/2)/dx; i<Ntot; i++) {     //integrate over one cell
+    const double rx=i*dx;
+    for (int j=-(lattice_constant/2)/dx; j<Ntot; j++) {
+      const double ry=j*dx;
+      for (int k=-(lattice_constant/2)/dx; k<Ntot; k++) {
+        const double rz=k*dx;
+        double n_den=find_ngaus(rx, ry, rz, fv, gwidth, lattice_constant);
+        N_crystal += n_den*dV;
+      }
+    }
+  }
+
+  if (verbose) {
+    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+           N_crystal, reduced_num_spheres);
+  }
+
+  double phi_1=0, phi_2=0, phi_3=0;
+  double free_energy=0;
+
+  for (int i=-(lattice_constant/2)/dx; i<Ntot; i++) {    //integrate over one cell
+    const double rx=i*dx;
+    for (int j=-(lattice_constant/2)/dx; j<Ntot; j++) {
+      const double ry=j*dx;
+      for (int k=-(lattice_constant/2)/dx; k<Ntot; k++) {
+        const double rz=k*dx;
+        //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
+
+        double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
+        vec nv_1, nv_2;
+        nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
+
+        int cell_space=3;  //set cell_space variable to an odd, positive integer greater than 1
+        int num_cells=pow(cell_space,3);  //total number of cells to integrate over (for our own info - not used anywhere)
+        int num_cell_shifts=cell_space/2;  //used to form vectors in shifted unit cell 
+        printf("ncell_space is %i, num_cells is %i, num_cell_shifts is %i\n", cell_space, num_cells, num_cell_shifts); //debug - delete later!
+        
+        for (int t=-1*num_cell_shifts; t < num_cell_shifts+1; t++) {      //integrate over "all space" (actually over all cell_space^3 shifted cells)
+          for (int u=-1*num_cell_shifts; u < num_cell_shifts+1; u++) {
+            for (int v=-1*num_cell_shifts; v < num_cell_shifts+1; v++) {
+              double sx=t*lattice_constant, sy=u*lattice_constant, sz=v*lattice_constant;
+              weight n_weight=find_weighted_densities(rx, ry, rz, sx, sy, sz, Ntot, dx, temp, fv, gwidth, N_crystal, reduced_density);
+              n_0 +=n_weight.n_0;
+              n_1 +=n_weight.n_1;
+              n_2 +=n_weight.n_2;
+              n_3 +=n_weight.n_3;
+              nv_1.x +=n_weight.nv_1.x;
+              nv_1.y +=n_weight.nv_1.y;
+              nv_1.z +=n_weight.nv_1.z;
+              nv_2.x +=n_weight.nv_2.x;
+              nv_2.y +=n_weight.nv_2.y;
+              nv_2.z +=n_weight.nv_2.z;
             }
           }
         }
@@ -846,6 +883,8 @@ int main(int argc, const char **argv) {
   }
 
 //+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
+
+
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //  temp=2;
