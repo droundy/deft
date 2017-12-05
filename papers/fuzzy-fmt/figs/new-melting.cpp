@@ -259,10 +259,11 @@ weight find_weighted_den_aboutR(double Rx, double Ry, double Rz, double rx, doub
 }
 
 
-  weight find_weighted_densities_efficient(double rx, double ry, double rz, double sx, double sy, double sz, double dx, double inclusion_radius, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
+  weight find_weighted_densities_efficient(double rx, double ry, double rz, double sx, double sy, double sz, double dx, double inc_radius, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
   //More efficient alternative integration limited to small cubes around each lattice point
 
   const double lattice_constant = find_lattice_constant(reduced_density, fv);
+  double inclusion_radius=lattice_constant*inc_radius;
   
   double Rx=0, Ry=0, Rz=0;                                //R1
   weight w_den_1=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
@@ -354,7 +355,7 @@ return w_den;
 }
 
 
-data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, double inclusion_radius, int cell_space, bool efficient, bool verbose=false) {
+data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, double inc_radius, int cell_space, bool efficient, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -407,7 +408,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               double sx=t*lattice_constant, sy=u*lattice_constant, sz=v*lattice_constant;
               weight n_weight;
               if (efficient) {
-                n_weight=find_weighted_densities_efficient(rx, ry, rz, sx, sy, sz, dx, inclusion_radius, temp, fv, gwidth, N_crystal, reduced_density);
+                n_weight=find_weighted_densities_efficient(rx, ry, rz, sx, sy, sz, dx, inc_radius, temp, fv, gwidth, N_crystal, reduced_density);
               } else {
                 n_weight=find_weighted_densities(rx, ry, rz, sx, sy, sz, Ntot, dx, temp, fv, gwidth, N_crystal, reduced_density);                
               }
@@ -863,7 +864,7 @@ int main(int argc, const char **argv) {
   int verbose = false;
   int downhill = false;
   int eff_weighted_densities = false;
-  double inclusion_radius = dx*10;
+  double inc_radius = 0.1;
   int cell_space=3;         //set cell_space variable to an odd, positive integer greater than 1
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
@@ -923,7 +924,7 @@ int main(int argc, const char **argv) {
     
     /*** Weighted Density OPTIONS ***/
     {"eff", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &eff_weighted_densities, 0, "Compute weighted densities approximately with fewer rprime vectors", "BOOLEAN"},
-    {"ir", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &inclusion_radius, 0, "inculsion radius for efficient option", "DOUBLE"},
+    {"ir", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &inc_radius, 0, "inc_radius*lattice_constant=inculsion radius for efficient option", "DOUBLE"},
     {"c", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &cell_space, 0, "Set to an odd, positive integer greater than 1. Integration over c cubed cells in efficient option", "DOUBLE"},
 
     /*** GRID OPTIONS ***/
@@ -1021,10 +1022,10 @@ int main(int argc, const char **argv) {
 //  fv=0.8;
 //  double gwidth=0.325;
 //  double lattice_constant = find_lattice_constant(reduced_density, fv);
-//  inclusion_radius = lattice_constant*.05; // set value for size of cube of integration around each lattice point  ASK!
+//  inc_radius = 0.1; // set value for size of cube of integration around each lattice point  ASK!
                                              // or set inclusion_radius to a multilple of dx? see popt and default value!
 
-//  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inclusion_radius, cell_space, bool(efficent), bool(verbose));
+//  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficent), bool(verbose));
 //  printf("e_data2 is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
 //  return 0;  //for debug
