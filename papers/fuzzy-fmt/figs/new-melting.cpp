@@ -323,7 +323,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-        int num_cell_shifts=3*weighting_function_radius/lattice_constant+1;
+        int num_cell_shifts=2*weighting_function_radius/lattice_constant+1;
         //sum over "all atoms" (actually only ones that are close)
         for (int t=-num_cell_shifts; t <= num_cell_shifts; t++) {
           for (int u=-num_cell_shifts; u <= num_cell_shifts; u++) {
@@ -357,8 +357,17 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         const double epsilon=1;
         free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;
         //printf("free energy is now... %g\n", free_energy);   //debug
+        printf("      finished %.7f%% of the integral\n",
+               100*(i + lattice_constant/2/dx)/(lattice_constant/dx)
+               *(j + lattice_constant/2/dx)/(lattice_constant/dx)
+               *(k + lattice_constant/2/dx)/(lattice_constant/dx));
       }
+      printf("   finished %.3f%% of the integral\n",
+             100*(i + lattice_constant/2/dx)/(lattice_constant/dx)
+             *(j + lattice_constant/2/dx)/(lattice_constant/dx));
     }
+    printf("finished %.1f%% of the integral\n",
+           100*(i + lattice_constant/2/dx)/(lattice_constant/dx));
   }
 
   printf("free_energy is %g\n", free_energy);
