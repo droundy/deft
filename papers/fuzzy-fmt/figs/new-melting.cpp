@@ -322,15 +322,15 @@ weight find_weighted_den_aboutR(double Rx, double Ry, double Rz, double rx, doub
   }
   
 
-weight find_weighted_densities(double rx, double ry, double rz, double sx, double sy, double sz, int Ntot, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
+weight find_weighted_densities(double rx, double ry, double rz, double sx, double sy, double sz, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   weight w_den;
 
-  for (int l=-(lattice_constant/2)/dx; l<Ntot; l++) {   //integrates over one shifted cell
+  for (int l=-(lattice_constant/2)/dx; l<((lattice_constant/2)/dx)+1; l++) {   //integrates over one shifted cell
           const double rxp=l*dx +sx;
-          for (int m=-(lattice_constant/2)/dx; m<Ntot; m++) {
+          for (int m=-(lattice_constant/2)/dx; m<((lattice_constant/2)/dx)+1; m++) {
             const double ryp=m*dx +sy;
-            for (int o=-(lattice_constant/2)/dx; o<Ntot; o++) {
+            for (int o=-(lattice_constant/2)/dx; o<((lattice_constant/2)/dx)+1; o++) {
               const double rzp=o*dx +sz;
               //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
               
@@ -361,12 +361,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   
   const double dV = pow(dx,3);    //ASK!
-  const int Ntot=pow((((lattice_constant/2)/dx)+1.0),3);  //number of position vectors over one cell
+  const int Ntot=pow((lattice_constant/dx)+1,3);  //number of position vectors over one cell
   printf("Ntot is %i\n", Ntot);   //debug
   
   //Find N_crystal to normalize reduced density n(r) later
   double N_crystal=0;
-  for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {     //integrate over one cell
+  for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {     //integrate over one cell  ASK!!! lattice_constant won't fall on grid points in general!
     const double rx=i*dx;
     for (int j=-(lattice_constant/2)/dx; j<((lattice_constant/2)/dx)+1; j++) {
       const double ry=j*dx;
@@ -410,7 +410,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               if (efficient) {
                 n_weight=find_weighted_densities_efficient(rx, ry, rz, sx, sy, sz, dx, inc_radius, temp, fv, gwidth, N_crystal, reduced_density);
               } else {
-                n_weight=find_weighted_densities(rx, ry, rz, sx, sy, sz, Ntot, dx, temp, fv, gwidth, N_crystal, reduced_density);                
+                n_weight=find_weighted_densities(rx, ry, rz, sx, sy, sz, dx, temp, fv, gwidth, N_crystal, reduced_density);                
               }
               n_0 +=n_weight.n_0;
               n_1 +=n_weight.n_1;
