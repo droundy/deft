@@ -33,6 +33,8 @@ const double inclusion_radius = 3.0;
 // distance.
 const double weighting_function_radius=3.0;
 
+bool efficient = 1;
+
 static inline void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
@@ -846,9 +848,6 @@ int main(int argc, const char **argv) {
 
     /*** Downhill Simplex OPTIONS ***/
     {"dh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Do a Downhill Simplex", "BOOLEAN"},
-
-    /*** Weighted Density OPTIONS ***/
-    {"eff", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &efficient, 0, "Compute weighted densities approximately with fewer rprime vectors", "BOOLEAN"},
 
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
