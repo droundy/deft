@@ -669,7 +669,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   return data_out;
 }
 
-//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
+//+++++++++++++Downhill Simplex Functions+++++++++++++++
 
 struct point_fe {
   double fv;
@@ -852,9 +852,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   printf("   **simplex shrunken\n");  //debug
   display_simplex(   simplex_fe);  //debug
 }
-
-
-//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
+//+++++++++++++++END Downhill Simplex Fucntions++++++++++++++
 
 
 
@@ -866,27 +864,22 @@ int main(int argc, const char **argv) {
   int downhill = false;
   int efficient = false;
   double inc_radius = 0.1;
-  int cell_space=3;         //set cell_space variable to an odd, positive integer greater than 1
+  int cell_space=3;   //set cell_space variable to an odd, positive integer greater than 1
 
-//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
+  //Downhill Simplex starting guess
   double simplex_fe[3][3] = {{0.8, 0.2, 0},  //best when ordered
-    {0.4, 0.3, 0},   //mid when ordered
-    {0.2, 0.1, 0}    //worst when ordered
+                             {0.4, 0.3, 0},   //mid when ordered
+                             {0.2, 0.1, 0}    //worst when ordered
   };
-
-//  double simplex_fe[3][3] = {{80, 20, 0},  //best when ordered   TEST SIMPLEX
-//                             {40, 30, 0},   //mid when ordered
-//                             {20, 10, 0}    //worst when ordered
-//  };
-
-
-//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
-
+  //double simplex_fe[3][3] = {{80, 20, 0},  //best when ordered   TEST SIMPLEX
+  //                           {40, 30, 0},   //mid when ordered
+  //                           {20, 10, 0}    //worst when ordered
+  //};
 
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
   char *default_data_dir = new char[1024];
-//  sprintf(default_data_dir, "crystallization/data");
+  //sprintf(default_data_dir, "crystallization/data");
   sprintf(default_data_dir, "crystallization");
 
 
@@ -963,7 +956,7 @@ int main(int argc, const char **argv) {
   printf("\n");
   printf("------------------------------------------------------------------\n\n");
 
-//*****************************End POPT Setup**************************************
+  //*****************************End POPT Setup***********************************
 
   printf("git version: %s\n", version_identifier());
   printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
@@ -977,20 +970,13 @@ int main(int argc, const char **argv) {
   }
   mkdir(data_dir, 0777);
 
-//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
-
-// simplex_fe[3][3] = {{0.05, 0.2, 0},   //best when sorted
-//                     {0.2, 0.3, 0},   //mid when sorted
-//                     {0.4, 0.1, 0}};  //worst when sorted
-
+  // Downhill Simplex
   if (downhill) {
-
     display_simplex(simplex_fe);
     printf("Calculating free energies (takes a bit- 14sec x 3 )...\n");
     evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
     display_simplex(simplex_fe);
     printf("starting downhill simplex loop...\n");
-
     for (int i=0; i<50; i++) {
       printf("\nLoop %i of 50 \n", i+1);  //for debug
       printf("sort simplex\n");
@@ -1001,20 +987,15 @@ int main(int argc, const char **argv) {
       advance_simplex(temp, reduced_density, simplex_fe, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
       printf("simplex advanced\n");
       display_simplex(simplex_fe);   //for debug
-//check_convergence_simplex();
+      //check_convergence_simplex();
     }
     sort_simplex(simplex_fe);    //delete when have loop
     display_simplex(simplex_fe);  //delete when have loop
     exit(1);
-
-//printf("best=%g  ", simplex_fe[0][2]);
-//printf("mid=%g  ", simplex_fe[1][2]);
-//printf("worst=%g\n", simplex_fe[2][2]);
-
-  }
-
-//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
-
+    //printf("best=%g  ", simplex_fe[0][2]);
+    //printf("mid=%g  ", simplex_fe[1][2]);
+    //printf("worst=%g\n", simplex_fe[2][2]);
+  } //End Downhill Simplex
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1027,7 +1008,7 @@ int main(int argc, const char **argv) {
                                              // or set inclusion_radius to a multilple of dx? see popt and default value!
 
 //  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
-//  printf("e_data2 is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+//  printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
 //  return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
