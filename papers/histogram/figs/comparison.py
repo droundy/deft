@@ -95,6 +95,8 @@ for method in methods:
         maxentropystate = maxentropystate[:num_frames_to_count]
         Nrt_at_energy = Nrt_at_energy[:num_frames_to_count]
         erroratenergy = erroratenergy[:num_frames_to_count]
+        errorinentropy = errorinentropy[:num_frames_to_count]
+        maxerror = maxerror[:num_frames_to_count]
 
         print 'saving to', dirname
         numpy.savetxt('%s/energy-%d.txt' %(dirname, energy),
