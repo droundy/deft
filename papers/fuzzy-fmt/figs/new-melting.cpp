@@ -364,13 +364,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const int Ntot=pow((((lattice_constant/2)/dx)+1.0),3);  //number of position vectors over one cell
   printf("Ntot is %i\n", Ntot);   //debug
   
-  //Normalize n(r)
+  //Find N_crystal to normalize reduced density n(r) later
   double N_crystal=0;
-  for (int i=-(lattice_constant/2)/dx; i<Ntot; i++) {     //integrate over one cell
+  for (int i=-(lattice_constant/2)/dx; i<(lattice_constant/2)+1; i++) {     //integrate over one cell
     const double rx=i*dx;
-    for (int j=-(lattice_constant/2)/dx; j<Ntot; j++) {
+    for (int j=-(lattice_constant/2)/dx; j<(lattice_constant/2)+1; j++) {
       const double ry=j*dx;
-      for (int k=-(lattice_constant/2)/dx; k<Ntot; k++) {
+      for (int k=-(lattice_constant/2)/dx; k<(lattice_constant/2)+1; k++) {
         const double rz=k*dx; 
         double n_den=find_ngaus(rx, ry, rz, fv, gwidth, lattice_constant);
         N_crystal += n_den*dV;
@@ -386,11 +386,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
 
-  for (int i=-(lattice_constant/2)/dx; i<Ntot; i++) {    //integrate over one cell
+  for (int i=-(lattice_constant/2)/dx; i<(lattice_constant/2)+1; i++) {    //integrate over one cell
     const double rx=i*dx;
-    for (int j=-(lattice_constant/2)/dx; j<Ntot; j++) {
+    for (int j=-(lattice_constant/2)/dx; j<(lattice_constant/2)+1; j++) {
       const double ry=j*dx;
-      for (int k=-(lattice_constant/2)/dx; k<Ntot; k++) {
+      for (int k=-(lattice_constant/2)/dx; k<(lattice_constant/2)+1; k++) {
         const double rz=k*dx;
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
@@ -999,17 +999,17 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  temp=2;
-//  reduced_density=1.2;
-//  fv=0.8;
-//  double gwidth=0.325;
-//  inc_radius = 0.1; // set value for size of cube of integration around each lattice point  ASK!
+  temp=2;
+  reduced_density=1.2;
+  fv=0.8;
+  double gwidth=0.325;
+  inc_radius = 0.1; // set value for size of cube of integration around each lattice point  ASK!
                     // or set inclusion_radius to a multilple of dx? see popt and default value!
 
-//  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
-//  printf("e_data_new is: %g, %g, %g, %g, efficient=%i\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol, bool(efficient));
+  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
+  printf("e_data_new is: %g, %g, %g, %g, efficient=%i\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol, bool(efficient));
 
-//  return 0;  //for debug
+  return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
