@@ -25,8 +25,9 @@
 #include "version-identifier.h"
 #include "vector3d.h"
 
-const double inc_radius = 3.0; // radius we need to integrate around a
-                               // gaussian, in units of gw.
+// radius we need to integrate around a gaussian, in units of gw.
+const double inclusion_radius = 3.0;
+
 // weighting_function_radius is the distance at which we feel we can
 // assume the weighting functions are all zero.  It is in units of
 // distance.
@@ -217,15 +218,18 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
 }
 
 
-weight find_weighted_den_aboutR(vector3d R, vector3d r, vector3d s,
-                                double inclusion_radius, double dx, double temp,
+weight find_weighted_den_aboutR(vector3d r, vector3d R,
+                                double dx, double temp,
                                 double fv, double gwidth, double N_crystal, double reduced_density) {
-  const int inc_Ntot= (inclusion_radius/dx) +1;    //CAREFUL - could cause error with int ASK!
-  weight w_den_R;
-  for (int l=-(inclusion_radius)/dx; l<inc_Ntot; l++) {   //CAREFUL - couble cause error with int ASK!
-    for (int m=-(inclusion_radius)/dx; m<inc_Ntot; m++) {
-      for (int o=-(inclusion_radius)/dx; o<inc_Ntot; o++) {
-        const vector3d rp = vector3d(l,m,o)*dx + R + s;
+  const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; // round up!
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  if ((r-R).norm() > weighting_function_radius + inclusion_radius*gwidth) {
+    return w_den_R;
+  }
+  for (int l=-inc_Ntot; l<=inc_Ntot; l++) {   //CAREFUL - couble cause error with int ASK!
+    for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
+      for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
+        const vector3d rp = vector3d(l,m,o)*dx + R;
 
         weight w_den_p=find_weighted_den_at_rprime(r, rp, dx, temp, fv, gwidth, N_crystal,
                        reduced_density);
@@ -241,99 +245,6 @@ weight find_weighted_den_aboutR(vector3d R, vector3d r, vector3d s,
   }
 
   return w_den_R;
-}
-
-
-weight find_weighted_densities_efficient(vector3d r, vector3d s, double dx,
-    double temp, double fv, double gwidth, double N_crystal,
-    double reduced_density) {
-  //More efficient alternative integration limited to small cubes around each lattice point
-
-  const double lattice_constant = find_lattice_constant(reduced_density, fv);
-  double inclusion_radius=lattice_constant*inc_radius;
-
-  vector3d R(0,0,0);
-  weight w_den_1=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal,
-                                          reduced_density);
-
-  R.x=lattice_constant/2;
-  R.y=lattice_constant/2;
-  R.z=0;     //R2
-  weight w_den_2=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal,
-                                          reduced_density);
-
-  R.x=-lattice_constant/2;
-  R.y=lattice_constant/2;
-  R.z=0;    //R3
-  weight w_den_3=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal,
-                                          reduced_density);
-
-  R.x=lattice_constant/2;
-  R.y=-lattice_constant/2;
-  R.z=0;    //R4
-  weight w_den_4=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal,
-                                          reduced_density);
-
-  R.x=-lattice_constant/2;
-  R.y=-lattice_constant/2;
-  R.z=0;   //R5
-  weight w_den_5=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=0;
-  R.y=lattice_constant/2;
-  R.z=lattice_constant/2;     //R6
-  weight w_den_6=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=0;
-  R.y=lattice_constant/2;
-  R.z=-lattice_constant/2;    //R7
-  weight w_den_7=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=0;
-  R.y=-lattice_constant/2;
-  R.z=lattice_constant/2;    //R8
-  weight w_den_8=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=0;
-  R.y=-lattice_constant/2;
-  R.z=-lattice_constant/2;   //R9
-  weight w_den_9=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=lattice_constant/2;
-  R.y=0;
-  R.z=lattice_constant/2;     //R10
-  weight w_den_10=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=-lattice_constant/2;
-  R.y=0;
-  R.z=lattice_constant/2;    //R11
-  weight w_den_11=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=lattice_constant/2;
-  R.y=0;
-  R.z=-lattice_constant/2;    //R12
-  weight w_den_12=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  R.x=-lattice_constant/2;
-  R.y=0;
-  R.z=-lattice_constant/2;   //R13
-  weight w_den_13=find_weighted_den_aboutR(R, r, s, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
-
-  weight w_den;
-
-  w_den.n_0 = w_den_1.n_0 + w_den_2.n_0 + w_den_3.n_0 + w_den_4.n_0 + w_den_5.n_0 + w_den_5.n_0 + w_den_6.n_0 + w_den_7.n_0 + w_den_8.n_0 + w_den_9.n_0 + w_den_10.n_0 + w_den_11.n_0 + w_den_12.n_0 + w_den_13.n_0;
-  w_den.n_1 = w_den_1.n_1 + w_den_2.n_1 + w_den_3.n_1 + w_den_4.n_1 + w_den_5.n_1 + w_den_5.n_1 + w_den_6.n_1 + w_den_7.n_1 + w_den_8.n_1 + w_den_9.n_1 + w_den_10.n_1 + w_den_11.n_1 + w_den_12.n_1 + w_den_13.n_1;
-  w_den.n_2 = w_den_1.n_2 + w_den_2.n_2 + w_den_3.n_2 + w_den_4.n_2 + w_den_5.n_2 + w_den_5.n_2 + w_den_6.n_2 + w_den_7.n_2 + w_den_8.n_2 + w_den_9.n_2 + w_den_10.n_2 + w_den_11.n_2 + w_den_12.n_2 + w_den_13.n_2;
-  w_den.n_3 = w_den_1.n_3 + w_den_2.n_3 + w_den_3.n_3 + w_den_4.n_3 + w_den_5.n_3 + w_den_5.n_3 + w_den_6.n_3 + w_den_7.n_3 + w_den_8.n_3 + w_den_9.n_3 + w_den_10.n_3 + w_den_11.n_3 + w_den_12.n_3 + w_den_13.n_3;
-
-  w_den.nv_1.x = w_den_1.nv_1.x + w_den_2.nv_1.x + w_den_3.nv_1.x + w_den_4.nv_1.x + w_den_5.nv_1.x + w_den_6.nv_1.x + w_den_7.nv_1.x + w_den_8.nv_1.x + w_den_9.nv_1.x + w_den_10.nv_1.x + w_den_11.nv_1.x + w_den_12.nv_1.x + w_den_13.nv_1.x;
-  w_den.nv_1.y = w_den_1.nv_1.y + w_den_2.nv_1.y + w_den_3.nv_1.y + w_den_4.nv_1.y + w_den_5.nv_1.y + w_den_6.nv_1.y + w_den_7.nv_1.y + w_den_8.nv_1.y + w_den_9.nv_1.y + w_den_10.nv_1.y + w_den_11.nv_1.y + w_den_12.nv_1.y + w_den_13.nv_1.y;
-  w_den.nv_1.z = w_den_1.nv_1.z + w_den_2.nv_1.z + w_den_3.nv_1.z + w_den_4.nv_1.z + w_den_5.nv_1.z + w_den_6.nv_1.z + w_den_7.nv_1.z + w_den_8.nv_1.z + w_den_9.nv_1.z + w_den_10.nv_1.z + w_den_11.nv_1.z + w_den_12.nv_1.z + w_den_13.nv_1.z;
-  w_den.nv_2.x = w_den_1.nv_2.x + w_den_2.nv_2.x + w_den_3.nv_2.x + w_den_4.nv_2.x + w_den_5.nv_2.x + w_den_6.nv_2.x + w_den_7.nv_2.x + w_den_8.nv_2.x + w_den_9.nv_2.x + w_den_10.nv_2.x + w_den_11.nv_2.x + w_den_12.nv_2.x + w_den_13.nv_2.x;
-  w_den.nv_2.y = w_den_1.nv_2.y + w_den_2.nv_2.y + w_den_3.nv_2.y + w_den_4.nv_2.y + w_den_5.nv_2.y + w_den_6.nv_2.y + w_den_7.nv_2.y + w_den_8.nv_2.y + w_den_9.nv_2.y + w_den_10.nv_2.y + w_den_11.nv_2.y + w_den_12.nv_2.y + w_den_13.nv_2.y;
-  w_den.nv_2.z = w_den_1.nv_2.z + w_den_2.nv_2.z + w_den_3.nv_2.z + w_den_4.nv_2.z + w_den_5.nv_2.z + w_den_6.nv_2.z + w_den_7.nv_2.z + w_den_8.nv_2.z + w_den_9.nv_2.z + w_den_10.nv_2.z + w_den_11.nv_2.z + w_den_12.nv_2.z + w_den_13.nv_2.z;
-
-  return w_den;
 }
 
 
@@ -396,6 +307,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
 
+  const vector3d lattice_vectors[3] = {
+    vector3d(lattice_constant/2,lattice_constant/2,0),
+    vector3d(lattice_constant/2,0,lattice_constant/2),
+    vector3d(0,lattice_constant/2,lattice_constant/2),
+  };
+
   for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {    //integrate over one cell
     for (int j=-(lattice_constant/2)/dx; j<((lattice_constant/2)/dx)+1; j++) {
       for (int k=-(lattice_constant/2)/dx; k<((lattice_constant/2)/dx)+1; k++) {
@@ -406,20 +323,18 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-        int cell_space = weighting_function_radius/lattice_constant+1;
-        int num_cells=pow(cell_space,3);  //total number of cells to integrate over (for our own info - not used anywhere)
-        int num_cell_shifts=cell_space/2;  //used to form vectors in shifted unit cell
-        printf("ncell_space is %i, num_cells is %i, num_cell_shifts is %i\n", cell_space, num_cells, num_cell_shifts); //debug - delete later!
-
-        for (int t=-1*num_cell_shifts; t < num_cell_shifts+1; t++) {      //integrate over "all space" (actually over all cell_space^3 shifted cells)
-          for (int u=-1*num_cell_shifts; u < num_cell_shifts+1; u++) {
-            for (int v=-1*num_cell_shifts; v < num_cell_shifts+1; v++) {
-              const vector3d s(t*lattice_constant, u*lattice_constant, v*lattice_constant);
+        int num_cell_shifts=3*weighting_function_radius/lattice_constant+1;
+        //sum over "all atoms" (actually only ones that are close)
+        for (int t=-num_cell_shifts; t <= num_cell_shifts; t++) {
+          for (int u=-num_cell_shifts; u <= num_cell_shifts; u++) {
+            for (int v=-num_cell_shifts; v <= num_cell_shifts; v++) {
+              const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               weight n_weight;
               if (efficient) {
-                n_weight=find_weighted_densities_efficient(r, s, dx, temp, fv, gwidth, N_crystal, reduced_density);
+                n_weight=find_weighted_den_aboutR(R, r, dx, temp, fv, gwidth, N_crystal,
+                                                  reduced_density);
               } else {
-                n_weight=find_weighted_densities(r, s, dx, temp, fv, gwidth, N_crystal, reduced_density);
+                n_weight=find_weighted_densities(r, R, dx, temp, fv, gwidth, N_crystal, reduced_density);
               }
               n_0 +=n_weight.n_0;
               n_1 +=n_weight.n_1;
