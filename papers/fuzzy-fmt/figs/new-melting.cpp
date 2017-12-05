@@ -54,6 +54,7 @@ struct data {
 double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
+
 //%%%%%%%%%%%NEW FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 struct vec {
@@ -159,6 +160,7 @@ double find_ngaus(double rx, double ry, double rz, double fv, double gwidth, dou
   return n;
 }
 
+
 weight find_weighted_den_at_rprime(double rx, double ry, double rz, double rxp, double ryp, double rzp, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
   double rxdiff=rx-rxp;
   double rydiff=ry-ryp;
@@ -257,11 +259,10 @@ weight find_weighted_den_aboutR(double Rx, double Ry, double Rz, double rx, doub
 }
 
 
-  weight find_weighted_densities_efficient(double rx, double ry, double rz, double sx, double sy, double sz, int Ntot, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
+  weight find_weighted_densities_efficient(double rx, double ry, double rz, double sx, double sy, double sz, double dx, double inclusion_radius, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
   //More efficient alternative integration limited to small cubes around each lattice point
 
   const double lattice_constant = find_lattice_constant(reduced_density, fv);
-  const double inclusion_radius = lattice_constant/20; // set value for size of cube of integration around each lattice point
   
   double Rx=0, Ry=0, Rz=0;                                //R1
   weight w_den_1=find_weighted_den_aboutR(Rx, Ry, Rz, rx, ry, rz, sx, sy, sz, inclusion_radius, dx, temp, fv, gwidth, N_crystal, reduced_density);
@@ -318,6 +319,7 @@ weight find_weighted_den_aboutR(double Rx, double Ry, double Rz, double rx, doub
 
   return w_den; 
   }
+  
 
 weight find_weighted_densities(double rx, double ry, double rz, double sx, double sy, double sz, int Ntot, double dx, double temp, double fv, double gwidth, double N_crystal, double reduced_density) {
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -332,68 +334,6 @@ weight find_weighted_densities(double rx, double ry, double rz, double sx, doubl
               //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
               
               weight w_den_p=find_weighted_den_at_rprime(rx, ry, rz, rxp, ryp, rzp, dx, temp, fv, gwidth, N_crystal, reduced_density);
-//New Function REPLACES FROM HERE...
-//
-//              double rxdiff=rx-rxp;
-//              double rydiff=ry-ryp;
-//              double rzdiff=rz-rzp;
-//
-//              double rdiff_magnitude=pow(pow(rxdiff,2)+pow(rydiff,2)+pow(rzdiff,2),0.5);
-//              //printf("rxdiff_magnitude= %g, rydiff_magnitude= %g, rzdiff_magnitude= %g, mag rdiff_magnitude= %g\n", rxdiff_magnitude, rydiff_magnitude, rzdiff_magnitude, rdiff_magnitude);  //debug
-//
-//              const double sigma=2;
-//              const double Rad=sigma/pow(2, 5.0/6);
-//              const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
-//              const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
-//              //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
-//              
-//              double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
-//              double w_0=w_2/(4*pow(M_PI,2));
-//              double w_1=w_2/(4*M_PI*Rad);
-//              double w_3=(1.0/2)*(1-erf(rdiff_magnitude));
-//              vec wv_1, wv_2;
-//              if (rdiff_magnitude > 0) {
-//                wv_1.x=w_1*(rxdiff/rdiff_magnitude);
-//                wv_1.y=w_1*(rydiff/rdiff_magnitude);
-//                wv_1.z=w_1*(rzdiff/rdiff_magnitude);
-//                wv_2.x=w_2*(rxdiff/rdiff_magnitude);
-//                wv_2.y=w_2*(rydiff/rdiff_magnitude);
-//                wv_2.z=w_2*(rzdiff/rdiff_magnitude);
-//               } else {
-//                wv_1.x=0;
-//                wv_1.y=0;
-//                wv_1.z=0;
-//                wv_2.x=0;
-//                wv_2.y=0;
-//                wv_2.z=0;
-//              }
-//
-//              //printf("rxdiff_magnitude=%g, rdiff_magnitude=%g\n", rxdiff_magnitude, rdiff_magnitude);   //debug
-//              //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
-//
-//              const double n_den= find_ngaus(rxp, ryp, rzp, fv, gwidth, lattice_constant)
-//                *(reduced_num_spheres/N_crystal);
-//              //printf("Crystal n_den=%g\n", n_den);
-//              //For homogeneous, set n_den to constant? ASK!
-//
-//              double dVp=pow(dx,3);  //CHANGE THIS? - ASK!
-//
-//              w_den.n_0 += n_den*w_0*dVp;
-//              w_den.n_1 += n_den*w_1*dVp;
-//              w_den.n_2 += n_den*w_2*dVp;
-//              w_den.n_3 += n_den*w_3*dVp;
-//
-//              w_den.nv_1.x += n_den*wv_1.x*dVp;
-//              w_den.nv_1.y += n_den*wv_1.y*dVp;
-//              w_den.nv_1.z += n_den*wv_1.z*dVp;
-//              w_den.nv_2.x += n_den*wv_2.x*dVp;
-//              w_den.nv_2.y += n_den*wv_2.y*dVp;
-//              w_den.nv_2.z += n_den*wv_2.z*dVp;
-//
-//              //printf("nv_1.x=%g, nv_2.x=%g\n", nv_1.x, nv_2.x);  //debug
-//
-//              //printf("n_0= %g, n_1=%g, n_2=%g, n_3=%g\n", n_0, n_1, n_2, n_3);  //debug
-// TO HERE
 
               w_den.n_0 += w_den_p.n_0;
               w_den.n_1 += w_den_p.n_1;
@@ -414,7 +354,7 @@ return w_den;
 }
 
 
-data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
+data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, double inclusion_radius, int cell_space, bool efficient, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -430,7 +370,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     for (int j=-(lattice_constant/2)/dx; j<Ntot; j++) {
       const double ry=j*dx;
       for (int k=-(lattice_constant/2)/dx; k<Ntot; k++) {
-        const double rz=k*dx;
+        const double rz=k*dx; 
         double n_den=find_ngaus(rx, ry, rz, fv, gwidth, lattice_constant);
         N_crystal += n_den*dV;
       }
@@ -457,7 +397,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vec nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-        int cell_space=3;  //set cell_space variable to an odd, positive integer greater than 1
         int num_cells=pow(cell_space,3);  //total number of cells to integrate over (for our own info - not used anywhere)
         int num_cell_shifts=cell_space/2;  //used to form vectors in shifted unit cell 
         printf("ncell_space is %i, num_cells is %i, num_cell_shifts is %i\n", cell_space, num_cells, num_cell_shifts); //debug - delete later!
@@ -466,7 +405,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           for (int u=-1*num_cell_shifts; u < num_cell_shifts+1; u++) {
             for (int v=-1*num_cell_shifts; v < num_cell_shifts+1; v++) {
               double sx=t*lattice_constant, sy=u*lattice_constant, sz=v*lattice_constant;
-              weight n_weight=find_weighted_densities(rx, ry, rz, sx, sy, sz, Ntot, dx, temp, fv, gwidth, N_crystal, reduced_density);
+              weight n_weight;
+              if (efficient) {
+                n_weight=find_weighted_densities_efficient(rx, ry, rz, sx, sy, sz, dx, inclusion_radius, temp, fv, gwidth, N_crystal, reduced_density);
+              } else {
+                n_weight=find_weighted_densities(rx, ry, rz, sx, sy, sz, Ntot, dx, temp, fv, gwidth, N_crystal, reduced_density);                
+              }
               n_0 +=n_weight.n_0;
               n_1 +=n_weight.n_1;
               n_2 +=n_weight.n_2;
@@ -918,6 +862,9 @@ int main(int argc, const char **argv) {
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
   int downhill = false;
+  int eff_weighted_densities = false;
+  double inclusion_radius = dx*10;
+  int cell_space=3;         //set cell_space variable to an odd, positive integer greater than 1
 
 //+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
   double simplex_fe[3][3] = {{0.8, 0.2, 0},  //best when ordered
@@ -955,8 +902,8 @@ int main(int argc, const char **argv) {
     },
 
     /*** FLUID PARAMETERS ***/
-    {"kT", '\0', POPT_ARG_DOUBLE, &temp, 0, "temperature", "DOUBLE"},
-    {"n", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
+    {"kT", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &temp, 0, "temperature", "DOUBLE"},
+    {"n", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &reduced_density, 0, "reduced density", "DOUBLE"},
     {"fv", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
     {"gw", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw, 0, "width of Gaussian", "DOUBLE or -1 for loop (without lattice ref) or -2 loop (with lattice ref)"},
 
@@ -973,6 +920,11 @@ int main(int argc, const char **argv) {
 
     /*** Downhill Simplex OPTIONS ***/
     {"dh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Do a Downhill Simplex", "BOOLEAN"},
+    
+    /*** Weighted Density OPTIONS ***/
+    {"eff", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &eff_weighted_densities, 0, "Compute weighted densities approximately with fewer rprime vectors", "BOOLEAN"},
+    {"ir", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &inclusion_radius, 0, "inculsion radius for efficient option", "DOUBLE"},
+    {"c", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &cell_space, 0, "Set to an odd, positive integer greater than 1. Integration over c cubed cells in efficient option", "DOUBLE"},
 
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
@@ -1068,8 +1020,11 @@ int main(int argc, const char **argv) {
 //  reduced_density=1.2;
 //  fv=0.8;
 //  double gwidth=0.325;
+//  double lattice_constant = find_lattice_constant(reduced_density, fv);
+//  inclusion_radius = lattice_constant*.05; // set value for size of cube of integration around each lattice point  ASK!
+                                             // or set inclusion_radius to a multilple of dx? see popt and default value!
 
-//  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+//  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inclusion_radius, cell_space, bool(efficent), bool(verbose));
 //  printf("e_data2 is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
 //  return 0;  //for debug
