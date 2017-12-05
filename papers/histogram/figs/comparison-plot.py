@@ -26,7 +26,7 @@ for j in range(len(split2)):
 for method in methods:
     try:
         dirname = 'data/comparison/%s%s/' % (filebase,method)
-        if os.listdir(dirname) == []:
+        if not os.path.exists(dirname) or os.listdir(dirname) == []:
             continue
         
         if energy > 0:
