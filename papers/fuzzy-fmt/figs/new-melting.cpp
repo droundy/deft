@@ -356,7 +356,7 @@ return w_den;
 
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, double inc_radius, int cell_space, bool efficient, bool verbose=false) {
-  printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
+  printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g, efficient=%i\n", temp, reduced_density, fv, gwidth, dx, efficient);  //debug
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   
@@ -1007,7 +1007,7 @@ int main(int argc, const char **argv) {
                     // or set inclusion_radius to a multilple of dx? see popt and default value!
 
 //  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
-//  printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+//  printf("e_data_new is: %g, %g, %g, %g, efficient=%i\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol, bool(efficient));
 
 //  return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
