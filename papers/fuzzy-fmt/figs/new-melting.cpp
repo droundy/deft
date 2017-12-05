@@ -1154,7 +1154,7 @@ int main(int argc, const char **argv) {
     delete[] bestdat_filename;
 
   } else {
-    //find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);   //What is this doing???
+    //find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);    //no bestdataout needed for single run 
     find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
   }
 
