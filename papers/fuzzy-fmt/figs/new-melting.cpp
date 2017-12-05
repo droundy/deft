@@ -999,17 +999,17 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  temp=2;
-  reduced_density=1.2;
-  fv=0.8;
-  double gwidth=0.325;
-  inc_radius = 0.1; // set value for size of cube of integration around each lattice point  ASK!
+//  temp=2;
+//  reduced_density=1.2;
+//  fv=0.8;
+//  double gwidth=0.325;
+//  inc_radius = 0.1; // set value for size of cube of integration around each lattice point  ASK!
                     // or set inclusion_radius to a multilple of dx? see popt and default value!
 
-  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
-  printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+//  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
+//  printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
-  return 0;  //for debug
+//  return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
