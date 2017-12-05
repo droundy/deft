@@ -696,10 +696,10 @@ void display_simplex(double simplex_fe[3][3]) {
 
 void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, double inc_radius, double cell_space, bool efficient, bool verbose) {
   for (int k=0; k<3; k++) {
-    data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose); 
-//  data dhill_data=find_energy_new(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, inc_radius, cell_space, efficient, verbose);
+  //data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose); 
+    data dhill_data=find_energy_new(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, inc_radius, cell_space, efficient, verbose);
     simplex_fe[k][2]=dhill_data.diff_free_energy_per_atom;
-//simplex_fe[k][2]=sqrt((simplex_fe[k][0]*simplex_fe[k][0]) + (simplex_fe[k][1]*simplex_fe[k][1]));  //TEST SIMPLEX
+  //simplex_fe[k][2]=sqrt((simplex_fe[k][0]*simplex_fe[k][0]) + (simplex_fe[k][1]*simplex_fe[k][1]));  //TEST SIMPLEX
     printf("simplex_fe[%i][2]=%g\n", k, simplex_fe[k][2]);
   }
 }
@@ -723,9 +723,8 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
   point_fe reflected;
   reflected.fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
   reflected.gw=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
-  data reflect=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose);
-//data reflect=find_energy_new(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose);
-  reflected.fe=reflect.diff_free_energy_per_atom;
+//reflected.fe=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  reflected.fe=find_energy_new(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
 //reflected.fe=sqrt((reflected.fv*reflected.fv) + (reflected.gw*reflected.gw));  //TEST SIMPLEX
   return reflected;
 }
@@ -734,9 +733,8 @@ point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3
   point_fe extended;
   extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-(2.0*simplex_fe[2][0]);
   extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-(2.0*simplex_fe[2][1]);
-  data extend=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose);
-//data extend=find_energy_new(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose);
-  extended.fe=extend.diff_free_energy_per_atom;
+//extended.fe=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  extended.fe=find_energy_new(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
 //extended.fe=sqrt((extended.fv*extended.fv) + (extended.gw*extended.gw));  //TEST SIMPLEX
   return extended;
 }
@@ -750,17 +748,15 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   contracted.out.fv=((3/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
   contracted.out.gw=((3/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
-  data contract_out=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose);
-//data contract_out=find_energy_new(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose);
-  contracted.out.fe=contract_out.diff_free_energy_per_atom;
+//contracted.out.fe=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  contracted.out.fe=find_energy_new(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
 //contracted.out.fe=sqrt((contracted.out.fv*contracted.out.fv) + (contracted.out.gw*contracted.out.gw));  //TEST SIMPLEX
 
   contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))+((1/2.0)*(simplex_fe[2][0]));
   contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))+((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
-  data contract_in=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose);
-//data contract_in=find_energy_new(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose);
-  contracted.in.fe=contract_in.diff_free_energy_per_atom;
+//contracted.in.fe=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  contracted.in.fe=find_energy_new(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
 //contracted.in.fe=sqrt((contracted.in.fv*contracted.in.fv) + (contracted.in.gw*contracted.in.gw));  //TEST SIMPLEX
 
   return contracted;
@@ -771,16 +767,14 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 
   shrunken.out.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
   shrunken.out.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[1][1]);
-  shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw,
-                              data_dir, dx, verbose).diff_free_energy_per_atom;
-//shrunken.out.fe=find_energy_new(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
+//shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  shrunken.out.fe=find_energy_new(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
 //shrunken.out.fe=sqrt((shrunken.out.fv*shrunken.out.fv) + (shrunken.out.gw*shrunken.out.gw));  //TEST SIMPLEX
 
   shrunken.in.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[2][0]);
   shrunken.in.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[2][1]);
-  shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw,
-                             data_dir, dx, verbose).diff_free_energy_per_atom;
-//shrunken.in.fe=find_energy_new(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
+//shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  shrunken.in.fe=find_energy_new(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, inc_radius, cell_space, efficient, verbose).diff_free_energy_per_atom;
 //shrunken.in.fe=sqrt((shrunken.in.fv*shrunken.in.fv) + (shrunken.in.gw*shrunken.in.gw));  //TEST SIMPLEX
 
   return shrunken;
@@ -1073,8 +1067,8 @@ int main(int argc, const char **argv) {
       }
 
       for (double gwidth=gw_start; gwidth < gw_end +0.1*gw_step; gwidth+=gw_step) {
-        data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
-    //  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
+      //data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+        data e_data =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
@@ -1127,8 +1121,8 @@ int main(int argc, const char **argv) {
     printf("gw is %g\n", gw);
     printf ("gwend=%g, gwstep=%g   \n\n", gw_end, gw_step);
     for (double gwidth=gw_start; gwidth < gw_end + 0.1*gw_step; gwidth+=gw_step) {
-      data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
-  //  data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
+    //data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+      data e_data =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
         best_energy_diff = e_data.diff_free_energy_per_atom;
         best_cfree_energy = e_data.cfree_energy_per_atom;
@@ -1160,8 +1154,8 @@ int main(int argc, const char **argv) {
     delete[] bestdat_filename;
 
   } else {
-    find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);   //What is this doing???
-//  find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
+    //find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);   //What is this doing???
+    find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, inc_radius, cell_space, bool(efficient), bool(verbose));
   }
 
   return 0;
