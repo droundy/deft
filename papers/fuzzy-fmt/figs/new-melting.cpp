@@ -366,12 +366,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double free_energy=0;
 
   for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {    //integrate over one cell
-    const double rx=i*dx;
     for (int j=-(lattice_constant/2)/dx; j<((lattice_constant/2)/dx)+1; j++) {
-      const double ry=j*dx;
       for (int k=-(lattice_constant/2)/dx; k<((lattice_constant/2)/dx)+1; k++) {
-        const double rz=k*dx;
-        const vector3d r(rx,ry,rz);
+        const vector3d r = vector3d(i,j,k)*dx;
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
