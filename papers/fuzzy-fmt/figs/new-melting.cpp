@@ -33,7 +33,8 @@ const double inclusion_radius = 3.0;
 // distance.
 const double weighting_function_radius=3.0;
 
-bool efficient = 1;
+//Selects the efficient way of computing weighted densities
+const bool efficient = 1;
 
 static inline void took(const char *name) {
   static clock_t last_time = clock();
@@ -79,7 +80,7 @@ struct weight {
 
 double find_ngaus(vector3d r, double fv, double gwidth, double lattice_constant) {
   double n;
-  const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
+  const double norm = (1-fv)/((sqrt(2*M_PI)*gwidth)*(sqrt(2*M_PI)*gwidth)*(sqrt(2*M_PI)*gwidth)); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
   // multiply 4 by (1-fv) to get the reduced number of spheres.
   {
     //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0
@@ -174,12 +175,12 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
 
   const double sigma=2;
   const double Rad=sigma/pow(2, 5.0/6);
-  const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
-  const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
+  const double alpha = sigma*pow(2/(1+sqrt(temp*log(2))),1.0/6);
+  const double zeta = alpha/(6*sqrt(M_PI)*sqrt(log(2)/temp)+log(2));
   //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
 
-  double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
-  double w_0=w_2/(4*pow(M_PI,2));
+  double w_2=(1/(zeta*M_PI*M_PI))*exp(-((rdiff_magnitude-(alpha/2))*(rdiff_magnitude-(alpha/2)))/(zeta*zeta));
+  double w_0=w_2/(4*M_PI*M_PI);
   double w_1=w_2/(4*M_PI*Rad);
   double w_3=(1.0/2)*(1-erf(rdiff_magnitude));
   vector3d wv_1, wv_2;
@@ -205,7 +206,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   //printf("Crystal n_den=%g\n", n_den);
   //For homogeneous, set n_den to constant? ASK!
 
-  double dVp=pow(dx,3);  //CHANGE THIS? - ASK!
+  double dVp=dx*dx*dx;  //CHANGE THIS? - ASK!
 
   weight w_den_p;
   w_den_p.n_0 = n_den*w_0*dVp;
@@ -283,8 +284,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
 
-  const double dV = pow(dx,3);    //ASK!
-  const int Ntot=pow((lattice_constant/dx)+1,3);  //number of position vectors over one cell
+  const double dV = dx*dx*dx;    //ASK!
+  const int Ntot=((lattice_constant/dx)+1)*((lattice_constant/dx)+1)*((lattice_constant/dx)+1);  //number of position vectors over one cell
   printf("Ntot is %i\n", Ntot);   //debug
 
   //Find N_crystal to normalize reduced density n(r) later
@@ -354,7 +355,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         phi_1 = -n_0*log(1-n_3);
         phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
-        phi_3 = (pow(n_2,3)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/24*M_PI*pow((1-n_3),2);
+        phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
         //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
         const double epsilon=1;
         free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;
@@ -378,7 +379,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.diff_free_energy_per_atom=2;
   data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
   data_out.hfree_energy_per_vol=2;
-  data_out.cfree_energy_per_vol=free_energy/pow(lattice_constant,3);   //ASK!
+  data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
 
   return data_out;
 }
@@ -389,7 +390,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  double dV = pow(dx,3);  //volume element dV
+  double dV = dx*dx*dx;  //volume element dV
 
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
@@ -442,7 +443,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
+    const double norm = (1-fv)/(sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
     // multiply 4 by (1-fv) to get the reduced number of spheres.
     Vector setn = f.n();
 
@@ -562,7 +563,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   data_out.diff_free_energy_per_atom=crystal_free_energy - homogeneous_free_energy;
   data_out.cfree_energy_per_atom=crystal_free_energy;
   data_out.hfree_energy_per_vol=hf.energy();
-  data_out.cfree_energy_per_vol=f.energy()/pow(lattice_constant,3);
+  data_out.cfree_energy_per_vol=f.energy()/(lattice_constant*lattice_constant*lattice_constant);
 
   if (verbose) {
     printf("Crystal free energy is %g\n", crystal_free_energy);
