@@ -123,7 +123,7 @@ attempt to explore a wide range of energies.  These methods also
 benefit in that they are unlikely to be trapped in a local energy
 minimum.
 
-Wang and Landau developed an algorithm that uses an update
+Wang and Landau introduced an algorithm that uses an update
 factor and a statistical histogram to compute the density of states of
 a given system~\cite{wang2001determining, wang2001efficient}.  While
 the method is incredibly powerful it has several user-defined
@@ -140,18 +140,19 @@ swendsen1999transition, fitzgerald2000monte} became an attractive
 complimentary simulation algorithm to Wang-Landau in that, if detailed
 balance is ensured, the system is guaranteed to converge (something
 which is not guaranteed for the Wang-Landau Algorithm).  Unfortunately,
-the algorithm is considerably more difficulte to implement when
+the algorithm can be considerably more difficulte to implement when
 compared to Wang-Landau in particular the infinite temperature
 transition matrix~\cite{wang2002transition}.  Also, the time necessary
 for the density of states to converge could in practice be considerable
-due to the algorithm spending to much time exploring low energy states.
-Shell et al.~\cite{shell2003improved, shell2004flat} developed
-Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an effort to
-quickly explore the energies of a given system using WL then switch
-over to TMMC to guarantee convergence. Considerable effort has been
-spent trying to determine the flatness criteria and cutoff for the WL
-portion but there remains no rigorous systimatic way to determine these
-parameters~\cite{rane2013monte}.  The algorithm is first run for
+due to the algorithm spending too much time exploring low energy states.
+
+Shell et al.~\cite{shell2003improved, shell2004flat} originially
+implemented Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an
+effort to quickly explore the energies of a given system using WL then
+switch over to TMMC to guarantee convergence. Considerable effort has
+been spent trying to determine the flatness criteria and cutoff for the
+WL portion but there remains no rigorous systimatic way to determine
+these parameters~\cite{rane2013monte}.  The algorithm is first run for
 several trial simulations and/or `experience' is used to determine the
 best parameters for a users particular system of
 study~\cite{siderius2013use}.  Around the same time, the convergence
@@ -213,7 +214,6 @@ the density of states for the liquid-vapor system.  Section III
 contains the results and comparison of the methods applied to the
 square-well fluid.  In Section IV, we discuss the performance of the
 various methods applied to the model system.
-
 
 \section{Methods}
 
@@ -291,16 +291,11 @@ through that point.  This ensures that the product of the weight with
 the estimated density of states is always less than or equal one for
 energies below $\epsilon_\text{converged}$.
 
-
-
 \subsection{TMI3 Algorithm}
 The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
 difference, which is that instead of a secant line being used to
 estimate the converged temperature, we use a tangent line, estimated
 using the lowest two ``converged'' energies.
-
-
-
 
 \subsection{TOE3 Algorithm}
 The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses the metric of round trips defined by a walker visiting the extreme energies for the density of states.  The rate for the walker is dependent of the diffusivity $D(\epsilon)$ at a given energy $E$.  The goal of the method is to maximize the number of round trips that the Monte-Carlo simulation makes.  The optimized density of states is given by the following:
@@ -311,10 +306,6 @@ where unlike in the original paper detailing the method, we compute the difusivi
 \begin{align}
   D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
 \end{align}
-
-
-
-
 
 \subsection{TMMC Algorithm}
 The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.

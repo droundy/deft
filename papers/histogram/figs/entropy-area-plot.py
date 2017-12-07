@@ -10,7 +10,8 @@ if os.path.exists('../data'):
     os.chdir('..')
 
 moviedir = sys.argv[1]
-frames = eval(sys.argv[2])
+frames = eval(sys.argv[2]) # a list of integers
+
 
 Ss = []
 labels = []
@@ -31,7 +32,10 @@ for f in frames:
 
 #    plt.stackplot(e[lndos > lndos[0]], lndos[lndos>lndos[0]])#, label='%d iterations' % its)
 plt.stackplot(e, Ss, labels=labels)
-plt.plot(e, lndos)
+plt.plot(e, lndos, color = 'black', linewidth = 2)
+plt.title('Density of States for various iterations')
+plt.xlabel('Energy')
+plt.ylabel(r'$\ln$$DoS$')
 
 plt.ylim(ymin=0)
 plt.legend(loc='best')
