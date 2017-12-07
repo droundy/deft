@@ -49,12 +49,12 @@ except:
 
 for method in methods:
     dirname = 'data/comparison/%s%s' % (filebase,method)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
     try: 
         r = glob('data/%s%s-movie/*lndos.dat' % (filebase,method))
         if len(r)==0:
             continue
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
         iterations = numpy.zeros(len(r))
         Nrt_at_energy = numpy.zeros(len(r))
         maxentropystate = numpy.zeros(len(r))
