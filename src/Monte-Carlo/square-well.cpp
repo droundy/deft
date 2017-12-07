@@ -1722,19 +1722,32 @@ static void write_d_file(sw_simulation &sw, const char *fname) {
     exit(1);
   }
   sw.write_header(f);
-  fprintf(f, "# energy\tlndos\tps\n");
   dos_types how_to_compute_dos = transition_dos;
   if (sw.use_sad || sw.sa_t0 || sw.use_wl) how_to_compute_dos = weights_dos;
   double *lndos = sw.compute_ln_dos(how_to_compute_dos);
+  double *lndos_transitions = sw.compute_ln_dos(transition_dos);
   double maxdos = lndos[0];
-  for (int i = 0; i < sw.energy_levels; i++) {
-    if (maxdos < lndos[i]) maxdos = lndos[i];
+  double maxdos_transitions = lndos_transitions[0];
+  if (how_to_compute_dos != transition_dos) {
+    fprintf(f, "# energy\tlndos\tps\tlndos_tm\n");
+  } else {
+    fprintf(f, "# energy\tlndos\tps\n");
   }
   for (int i = 0; i < sw.energy_levels; i++) {
-    fprintf(f, "%d\t%g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
+    if (maxdos < lndos[i]) maxdos = lndos[i];
+    if (maxdos_transitions < lndos_transitions[i]) maxdos_transitions = lndos_transitions[i];
+  }
+  for (int i = 0; i < sw.energy_levels; i++) {
+    if (how_to_compute_dos != transition_dos) {
+      fprintf(f, "%d\t%g\t%ld\t%g\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i],
+              lndos_transitions[i] - maxdos_transitions);
+    } else {
+      fprintf(f, "%d\t%g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
+    }
   }
   fclose(f);
   delete[] lndos;
+  delete[] lndos_transitions;
 }
 
 static void write_lnw_file(sw_simulation &sw, const char *fname) {
