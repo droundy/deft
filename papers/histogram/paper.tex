@@ -108,10 +108,22 @@ applied to the square-well liquid}
 % \end{table*}
 
 \section{Introduction}
-Over the past several decades a number of broad-histogram Monte-Carlo
-simulation algorithms have been developed in order to calculate the
-density of states and phase transitions of increasingly complex
-systems.  Wang and Landau developed an algorithm that uses an update
+Over the past several decades a number of advanced Monte-Carlo
+simulation algorithms have been developed which calculate the
+properties of a thermal system over a range of temperatures.  This
+idea began with the original histogram method, which used a single
+canonical Monte Carlo simulation to predict properties for nearby
+temperatures~\cite{ferrenberg1988new}.  For large simulations this
+approach is limited to a narrow temperature range because a single
+canonical simulation explores only a small range of energies.  This
+led to a variety of ``broad'' (or ``flat'') histogram
+methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
+  wang2001determining, wang2001efficient, trebst2004optimizing}, which
+attempt to explore a wide range of energies.  These methods also
+benefit in that they are unlikely to be trapped in a local energy
+minimum.
+
+Wang and Landau developed an algorithm that uses an update
 factor and a statistical histogram to compute the density of states of
 a given system~\cite{wang2001determining, wang2001efficient}.  While
 the method is incredibly powerful it has several user-defined
@@ -452,10 +464,18 @@ terms of an arbitrary tunable parameter $t_0$.
 \end{align}
 We argue that it is possible to set this parameter to a system
 independent parameter such that $t_0 = N_E^2/t$ where $N_E$ is the
-number of energies that have been found.  This gives an update factor
-as follows:
+number of energies that have been found.  One of the energy found terms
+can be thought of as a change in the entropy $\Delta S$.  The change in
+the entropy can be thought of as a slope of the triangle made by
+connecting the minimum important energy and the maximum entropy state
+divided by the minimum temperature:
 \begin{align}
-\gamma_{t}^{\text{SA}} = \frac{N_E^2}{t}
+\Delta S = \frac{E_{\text{max}}-E_{\text{min}}}{T_{\text{min}}}
+\end{align}
+This gives an update factor as follows:
+\begin{align}
+\gamma_{t}^{\text{SA}} = \frac{N_E\Delta S}{t} =
+\frac{N_E}{t}\frac{E_{\text{max}}-E_{\text{min}}}{T_{\text{min}}}
 \end{align}
 The update factor has the same $1/t$ behavior as the original SAMC
 algorithm; however now every time a new energy is discovered during the
@@ -533,225 +553,50 @@ probability, we set the former equal to the later.
 
 \section{Results}
 
-Talk about results of simulations and show graphics here...
+For the square-well fluid, our simulations treat systems with a
+well-width of $\text{ww} = 1.30$ and a filling fraction of either
+$\text{ff} = 0.22$ or $\text{ww} = 0.30$.  The simulation explores the
+energy space of the system down to a reduced temperature of
+$T_{\text{min}} = 0.1$.  All simulations lead to the minimum important
+energy $E_{\text{min}}$ and maximum entropy state $S_{\text{max}}$
+being calculated (with the exception of the WL-TMMC method where both
+of these parameters are needed a priori).  In the sections below, we
+examine systems with different particles sizes, system dimensions, and
+sticky-wall. ~\jpsays{explain sticky-wall here or elsewhere?}
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-30x4-entropy-error.pdf}
+  \caption{Average entropy error...}\label{fig:avgS-30x4}
+\end{figure}
+
+\subsubsection{A $30\times4\times4$ $(N = 25)$ system with a sticky
+wall}~\jpsays{this is long and clunky section heading but it seems
+like our various simulations need to be differentiated from each
+other!} See Fig.~\ref{fig:avgS-30x4}.
+
+\subsubsection{A Tanner dimensions? $(N = 50)$ system with no sticky
+wall}
+
+\subsubsection{A $60\times8\times8$ $(N = 200)$ system with a sticky
+wall}~\jpsays{This is Jordan's simulation which is 8 times bigger than
+his other simulation not sure if it will finish in the immediate future!}
+
+\subsubsection{A $100\times10\times10$ $(N = 525)$ system with a sticky
+wall}~\jpsays{This is David's simulation which not sure if it is
+reasonable to expect it to finish ever!}
+
+\subsubsection{A Tanner dimensions? $(N = 500)$ system with no sticky
+wall}~\jpsays{This is Tanner's simulation which not sure if it is
+reasonable to expect it to finish ever!}
+
+We are likely not doing SA-TMMC and/or TMI3 (however still may be worth
+while to mention why these methods are not shown i.e. SAD is so good
+why extend to SA-TMMC etc...?)?
 
 
-\section{New ideas for algorithms}
+\section{Conclusions}
 
-\subsection{Finding maximum probability state}
-
-Technically maximum histogram or maximum entropy.
-
-Loop:
-
-run iterations until we see $N$ energy changes, counting the number of
-returns to the initial energy.  If there are sufficient returns, then
-we are at the maximum, where sufficient returns will be determined by
-a random walk (weighted?) where we compute the expected number of
-returns if the walk is not weighted.  We may want to correct to get
-all the way to the top.
-
-If we are not at the top yet, we try again.  Eventually we will be.
-
-\subsection{Finding variance of the histogram}
-
-I assume we first ran the max-entropy/histogram algorithm, which gives
-us a maximum value of $E_0$.  We then zero the histogram.
-
-We run for a short while, and then compute the mean and standard
-deviation of the energy from the histogram: $\bar E$ and $\sigma$.
-While doing this, we track the number of returns to the initial state
-$n$.  Now the uncertainty in the mean is given by
-\begin{equation}
-  \Delta \bar E \approx \frac{\sigma}{\sqrt{n}}
-\end{equation}
-if $\Delta \bar E \ll (E_0 - \bar E)$ then we can conclude that we are
-certain where the maximum is, and how wide it is.
-
-%\begin{figure*}
-  %\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-transitions}\hfill%
-%\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-transitions}\hfill%
-%\includegraphics[width=0.33\textwidth]{figs/periodic-ww130-ff30-N20-tmmc-golden-tmmc-compare-transitions}
-  %\caption{A plot showing the probability of energy transitions (with
-    %no weighting) from given energy states.\label{fig:transitions}}
-%\end{figure*}
-
-\subsection{Tracking transitions}
-
-We can track the number of attempted transitions from each energy
-eestate to each other energy state.  This statistic has the advantage of
-being approximately independent of the weighting function used
-(although it is highly dependent on the step size).  Thus we could
-continue to refine this statistic, even as we are updating the weight
-array.  Here are two papers that seem highly relevant to this
-method~\cite{wang1999transition, wang2002transition}, but I'm not sure
-if they're identical.
-
-The ratio of density of states at two energies should be proportional
-to the ratio of upgoing and downgoing transition rates between those
-two energies.  Thus these transitions give us information about
-$\Delta$$\mathcal{D}$($\varepsilon$) (where $\mathcal{D}$($\varepsilon$)
-is the density of states).
-
-Figure~\ref{fig:transitions} below shows the transition matrix for a
-20-sphere system, computed during initialization using the Wang-Landau
-algorithm.
-
-How can we use this?
-
-\subsubsection{Generating $w$ from the transition matrix}
-
-We should be able to generate a set of weighting functions directly
-from the transition matrix.  We could do this either by optimizing for
-a flat histogram, or by optimizing the round-trip rate.  Both would be
-interesting to implement.
-
-One natural approach would use linear algebra.  If the normalized
-transition matrix is $\mathcal{T}$, then the density of states is given by
-\begin{equation}
-  \mathcal{D}(\varepsilon) = \mathcal{T}\mathcal{D}(\varepsilon)
-\end{equation}
-By solving this equation for $\mathcal{D}$($\varepsilon$), we could find a
-good approximation for $w$ to obtain a flat histogram.
-
-I expect that we could use similar math to the optimized ensemble
-folks to optimize the round-trip rate.
-
-\subsubsection{Initializing using the transition matrix directly}
-
-An alternative initialization algorithm involves using the transition
-matrix directly during initialization.  This process was proposed by
-Swendsen \emph{et al.} as a modification for their initialization
-procedure~\cite{swendsen1999transition}.  In this case, the transition
-matrix is continually updated, thus modifying the relative weighting
-of different energies as the simulation proceeds.  This strictly
-speaking no longer satisfies detailed balance, but as the simulation
-proceeds this violation will quickly become increasingly small.
-
-This raises the question of how to use the transition matrix to
-directly determine transition probabilities, since the self-consistent
-eigenvalue solution is unsuitable.  The key is to recognize that we do
-not require weights for each energy but only \emph{differences} of
-weights for on pair of energies at a time.  This is a much smaller
-problem.
-
-Swendsen \emph{et al.} find for a flat distribution, the acceptance
-rate for a given transition is equal to the ratio of that element in
-the transition matrix to the element corresponding to the reverse
-transition~\cite{swendsen1999transition}.  Naturally, for a different
-distribution, we can scale the acceptance ratios according to the
-ratio of occupations desired.  We modify this algorithm to always
-accept transitions to a lower energy, thus employing a broad histogram
-method that does not much sample energies above the maximum-entropy
-energy.
-
-Swendsen only uses this approach after a slightly hokey two-stage
-initialization.  It seems to work pretty well, and asymptotically it
-does have detailed balance.
-
-\newpage
-\jpsays{Everything below this is TMI1 and GC-TMMC}
-\subsection{}
-%\begin{figure}[p]
-  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_errors}
-  %\caption{$u$ error scaling.}
-  %\label{fig:scaling-u_err}
-%\end{figure}
-%\begin{figure}[p]
-  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_errors}
-  %\caption{$c_V$ error scaling.}
-  %\label{fig:scaling-cv_err}
-%\end{figure}
-%\begin{figure}[p]
-  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_errors}
-  %\caption{$s$ error scaling.}
-  %\label{fig:scaling-s_err}
-%\end{figure}
-
-%\begin{figure}[p]
-  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-u_error_comp}
-  %\caption{$u$ error comparisons.}
-  %\label{fig:scaling-u_err_comp}
-%\end{figure}
-%\begin{figure}[p]
-  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-cv_error_comp}
-  %\caption{$c_V$ error comparisons.}
-  %\label{fig:scaling-cv_err_comp}
-%\end{figure}
-%\begin{figure}[p]
-  %\includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-s_error_comp}
-  %\caption{$s$ error comparisons.}
-  %\label{fig:scaling-s_err_comp}
-%\end{figure}
-
-
-% \subsection{Convergence tests}
-
-% \begin{figure}
-%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-dos-conv-T10}
-%   \caption{Convergence}
-%   \label{fig:conv-dos}
-% \end{figure}
-
-% \begin{figure}
-%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-u-conv-T10}
-%   \caption{Convergence}
-%   \label{fig:conv-u}
-% \end{figure}
-
-% \begin{figure}
-%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-hc-conv-T10}
-%   \caption{Convergence}
-%   \label{fig:conv-hc}
-% \end{figure}
-% \begin{figure}
-%   \includegraphics[width=\columnwidth]{figs/periodic-ww130-ff30-N20-S-conv-T10}
-%   \caption{Convergence}
-%   \label{fig:conv-S}
-% \end{figure}
-
-%\subsection{TMI1 Algorithm}
-
-%Our proposed transition matrix initilization algorithm TMI$_1$ uses the following
-%method to determine the histogram weights.  The method periodically recomputes
-%the weights during the simulation.  Although no bottlenecks result when updating
-%the weights more frequently, the algorithm will nonetheless introduce additional
-%computational time.  Because of the potential to increase computational time, the
-%algorithm infrequently but periodically updates the weights such that the central
-%effort of the method allows focusing efforts on exploring new energy
-%configurations.
-
-%\subsubsection{Weights at High Energy}
-%At energies above the maximum in the density of states, the method sets the weights
-%equal to the weight at the density of states maximum.  This avoids expending
-%extra computational time on equally sampling states that are not favored at any
-%positive temperature.
-
-%\subsubsection{Weights at Interesting Energy}
-%At energies below the maximum, the method attempts to set the weight equal to the
-%inverse of the density of states, \emph{unless} there are insufficient statistics
-%to justify this.  In order to determine when sufficient statistics have been reached,
-%it becomes neccessary to define a modifcation factor, in this case, in terms of a
-%fractional uncertainty
-%\begin{align}
-  %{F}(\epsilon) &= \frac{1}{\sqrt{N_s(\epsilon)}}
-%\end{align}
-%where $N_s(\epsilon)$ is the number of round-trip samples taken at an energy
-%$\epsilon$.  We assume that our uncertainty in the ratio between the density
-%of states at two adjacent energies is equal to this value.  The weight at each
-%energy can then be set according to
-%\begin{align}
-  %{W}_{\epsilon} &= {W}_{\epsilon+1}\max\left[\frac1{{F}
-  %(\epsilon)},\frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
-  %\\
-   %&= {W}_{\epsilon+1}\max\left[\frac1{\sqrt{N_s(\epsilon)}},
-  %\frac{{D}(\epsilon)}{{D}(\epsilon+1)}\right]
-%\end{align}
-
-%\subsubsection{Weights at Low Energy}
-%We define a minimum interesting temperature $T_{\min}$, and at low
-%energies do some special stuff to avoid weighting things more
-%strongly than a Boltzmann factor at $T_{\min}$ would do.
+% \jpsays{Everything below this is TMI1 and GC-TMMC}
 
 %\subsection{GC-TMMC Algorithm}
 %Grand Canonical Transition Matrix Monte-Carlo (GC-TMMC) allows the energy and

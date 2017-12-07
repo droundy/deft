@@ -104,6 +104,7 @@ struct sw_simulation {
   bool use_satmmc; // if true, reset sa_t0 whenever we encounter a new energy (also do TMMC).
   bool use_sad;  // if true, dynamically update sa_t0 when we encounter new energies.
   double sa_weight; // the most recent sa_weight used in satmmc.
+  bool use_wl; // if true, we are using plain old WL method
 
   /* The following define file names for periodic output files that
      are dumped every so often.  It should contain a single %d style format. */
@@ -297,6 +298,7 @@ struct sw_simulation {
     use_sad = false; // default to not using SAD MC (think happy thoughts!)
     sa_weight = 0.0;
     use_tmmc = false; // default to not using TMMC for accepting moves.
+    use_wl = false; // default to not using WL.
   };
 };
 

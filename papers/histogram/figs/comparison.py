@@ -10,7 +10,8 @@ if os.path.exists('../data'):
 energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
-methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3', '-vanilla_wang_landau', '-samc', '-satmmc']
+methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
+            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
 
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/%s-wltmmc*-movie' % filebase)
@@ -94,7 +95,10 @@ for method in methods:
         maxentropystate = maxentropystate[:num_frames_to_count]
         Nrt_at_energy = Nrt_at_energy[:num_frames_to_count]
         erroratenergy = erroratenergy[:num_frames_to_count]
+        errorinentropy = errorinentropy[:num_frames_to_count]
+        maxerror = maxerror[:num_frames_to_count]
 
+        print 'saving to', dirname
         numpy.savetxt('%s/energy-%d.txt' %(dirname, energy),
                       numpy.c_[Nrt_at_energy, erroratenergy],
                       fmt = ('%.4g'),
