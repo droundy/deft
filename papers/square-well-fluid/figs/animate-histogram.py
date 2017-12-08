@@ -70,7 +70,7 @@ if numframes > 200:
 print 'numframes', numframes
 
 for frame in xrange(numframes):
-    if frame % 10 == 0:
+    if frame % 25 == 0:
         print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
 
