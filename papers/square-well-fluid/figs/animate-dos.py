@@ -83,7 +83,7 @@ if numframes > maxframes:
 print 'numframes', numframes
 
 for frame in xrange(numframes):
-    if frame % 10 == 0:
+    if frame % 25 == 0:
         print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
     ax.plot(best_e, best_lndos, ':', color='0.5')
@@ -93,20 +93,26 @@ for frame in xrange(numframes):
         basename = dataformat % (suffix, frame*skipby)
 
         try:
-            e, lndos = readandcompute.e_lndos(basename)
+            e, lndos, lndostm = readandcompute.e_lndos_lndostm(basename)
             ax.plot(e, lndos, colors[suffix_index]+'-', label=suffix)
+            if lndostm is not None:
+                ax.plot(e, lndostm, colors[suffix_index]+'--', label=suffix+'-tm')
             datname = basename+'-lndos.dat'
             min_T = readandcompute.minT(datname)
             ax.axvline(-readandcompute.max_entropy_state(datname), color='r', linestyle=':')
-            min_important_energy = readandcompute.min_important_energy(datname)
+            min_important_energy = int(readandcompute.min_important_energy(datname))
             ax.axvline(-min_important_energy, color='b', linestyle=':')
-            ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], colors[suffix_index]+'--')
+            # Uncomment the following to plot a line at the
+            # min_important_energy with slope determined by min_T
+            # ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], colors[suffix_index]+'--')
             ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
-            e, lnw = readandcompute.e_lnw(basename)
-            ax.plot(e, -lnw, colors[suffix_index]+':')
+            # Uncomment the following to plot the lnw along with the lndos
+            # e, lnw = readandcompute.e_lnw(basename)
+            # ax.plot(e, -lnw, colors[suffix_index]+':')
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
+            print(sys.exc_info())
             pass
 
     ax.set_xlabel(r'$E$')
