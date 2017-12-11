@@ -1,2 +1,2 @@
 | python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-30x4 noshow
-
+| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-60x8 noshow

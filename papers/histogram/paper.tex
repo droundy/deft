@@ -548,7 +548,7 @@ For the square-well fluid, our simulations treat systems with a
 well-width of $\text{ww} = 1.30$ and a filling fraction of either
 $\text{ff} = 0.22$ or $\text{ww} = 0.30$.  The simulation explores the
 energy space of the system down to a reduced temperature of
-$T_{\text{min}} = 0.1$.  All simulations lead to the minimum important
+$T_{\text{min}} = 0.2$.  All simulations lead to the minimum important
 energy $E_{\text{min}}$ and maximum entropy state $S_{\text{max}}$
 being calculated (with the exception of the WL-TMMC method where both
 of these parameters are needed a priori).  In the sections below, we
@@ -557,13 +557,32 @@ sticky-wall. ~\jpsays{explain sticky-wall here or elsewhere?}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-30x4-entropy-error.pdf}
-  \caption{Average entropy error...}\label{fig:avgS-30x4}
+  \caption{The average entropy error for each method is shown with tmi3 serving as
+  the $`\text{golden'}$ standard.}\label{fig:avgS-30x4}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-60x8-entropy-error.pdf}
+  \caption{The average entropy error for each method is shown with tmi3 serving as
+  the $`\text{golden'}$ standard.}\label{fig:avgS-60x8}
 \end{figure}
 
 \subsubsection{A $30\times4\times4$ $(N = 25)$ system with a sticky
-wall}~\jpsays{this is long and clunky section heading but it seems
-like our various simulations need to be differentiated from each
-other!} See Fig.~\ref{fig:avgS-30x4}.
+wall}
+
+In order to determine how the various methods scale with size,
+simulations are run for systems with different particle numbers.  For
+the $N = 25$ system, a sticky-wall is added to ensure that we see the
+liquid and vapor phase separation.
+~\jpsays{should we include a sticky-wall.py plot or something else or are
+we not going to talk about phase separation in this paper?}
+
+We use the entropy error vs iterations as a metric to compare
+simulation runtimes.  Simulations that take more iterations to reach
+the same entropy error as a different method take longer to converge.
+This behavior is seen in Fig.~\ref{fig:avgS-30x4}.
+~\jpsays{need some discussion about various methods error in entropy decreasing
+vs iterations.  Seems a little premature at this point since SATMMC won't be in
+the mix and SAD will end up using TMMC to calculate DOS.}
 
 \subsubsection{A Tanner dimensions? $(N = 50)$ system with no sticky
 wall}
