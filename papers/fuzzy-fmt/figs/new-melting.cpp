@@ -33,6 +33,9 @@ const double inclusion_radius = 3.0;
 // distance.
 const double weighting_function_radius=3.0;
 
+//Selects the efficient way of computing weighted densities
+const bool efficient = 1;
+
 static inline void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
@@ -64,7 +67,7 @@ double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
 
-//%%%%%%%%%%%NEW FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 struct weight {
   double n_0;
@@ -77,88 +80,132 @@ struct weight {
 
 double find_ngaus(vector3d r, double fv, double gwidth, double lattice_constant) {
   double n;
-  const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
+  const double norm = (1-fv)/((sqrt(2*M_PI)*gwidth)*(sqrt(2*M_PI)*gwidth)*(sqrt(2*M_PI)*gwidth)); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
   // multiply 4 by (1-fv) to get the reduced number of spheres.
   {
-    //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0
+    //R1 primitive cell: Gaussian centered at Rx=0,     Ry=0,    Rz=0
     double dist = sqrt(r.x*r.x + r.y*r.y+r.z*r.z);
     n = norm*exp(-0.5*dist*dist/gwidth/gwidth);
   }
   {
-    //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
-    double dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
-                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-                       r.z*r.z);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0
-    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-                (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-                r.z*r.z);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
-    dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
-                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-                r.z*r.z);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
-    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-                r.z*r.z);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-  }
-  {
-    //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
-    double dist = sqrt((r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-                       r.x*r.x);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
-    dist = sqrt((r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-                (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-                r.x*r.x);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
-    dist = sqrt((r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-                r.x*r.x);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
-    dist = sqrt((r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-                r.x*r.x);
-    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-  }
-  {
-    //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
+    //R2 primitive cell: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
     double dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
                        (r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-                       r.y*r.y);
+                        r.y*r.y);
     n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
-    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-                (r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-                r.y*r.y);
+    
+    //R3 primitive cell:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
+    dist = sqrt((r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
+                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+                        r.x*r.x);
     n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
+    
+    //R4 primitive cell: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
     dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
-                (r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-                r.y*r.y);
+                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+                        r.z*r.z);
     n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-    //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2
-    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-                (r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-                r.y*r.y);
+    
+    //R5 primitive cell: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=a
+    dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
+                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+                       (r.z-lattice_constant)*(r.z-lattice_constant));
     n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-  }
+    
+    //R6 primitive cell: Gaussian centered at Rx=a,   Ry=a/2,  Rz=a/2
+    dist = sqrt((r.x-lattice_constant)*(r.x-lattice_constant) +
+                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+                       (r.z-lattice_constant/2)*(r.z-lattice_constant/2));
+    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+    
+    //R7 primitive cell: Gaussian centered at Rx=a/2,   Ry=a,  Rz=a/2
+    dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
+                       (r.y-lattice_constant)*(r.y-lattice_constant) +
+                       (r.z-lattice_constant/2)*(r.z-lattice_constant/2));
+    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+    
+    //R8 primitive cell: Gaussian centered at Rx=a,   Ry=a,  Rz=a
+    dist = sqrt((r.x-lattice_constant)*(r.x-lattice_constant) +
+                       (r.y-lattice_constant)*(r.y-lattice_constant) +
+                       (r.z-lattice_constant)*(r.z-lattice_constant));
+    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+  } 
+    
+// {
+//    //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
+//    double dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
+//                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+//                       r.z*r.z);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0
+//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
+//                (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+//                r.z*r.z);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
+//    dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
+//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
+//                r.z*r.z);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
+//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
+//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
+//                r.z*r.z);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//  }
+//  {
+//    //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
+//    double dist = sqrt((r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
+//                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+//                       r.x*r.x);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
+//    dist = sqrt((r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
+//                (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
+//                r.x*r.x);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
+//    dist = sqrt((r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
+//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
+//                r.x*r.x);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
+//    dist = sqrt((r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
+//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
+//                r.x*r.x);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//  }
+//  {
+//    //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
+//    double dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
+//                       (r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
+//                       r.y*r.y);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
+//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
+//                (r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
+//                r.y*r.y);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
+//    dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
+//                (r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
+//                r.y*r.y);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//
+//    //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2
+//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
+//                (r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
+//                r.y*r.y);
+//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
+//  }
   //printf("calculated ngaus is %g\n", n);
   return n;
 }
@@ -172,14 +219,14 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
 
   const double sigma=2;
   const double Rad=sigma/pow(2, 5.0/6);
-  const double alpha = sigma*pow(2/(1+pow(temp*log(2),0.5)),1.0/6);
-  const double zeta = alpha/(6*pow(M_PI,0.5)*pow((log(2)/temp),0.5)+log(2));
+  const double alpha = sigma*pow(2/(1+sqrt(temp*log(2))),1.0/6);
+  const double zeta = alpha/(6*sqrt(M_PI)*sqrt(log(2)/temp)+log(2));
   //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
 
-  double w_2=(1/zeta*pow(M_PI,2))*exp(-pow(rdiff_magnitude-(alpha/2),2)/pow(zeta,2));
-  double w_0=w_2/(4*pow(M_PI,2));
+  double w_2=(1/(zeta*sqrt(M_PI)))*exp(-((rdiff_magnitude-(alpha/2))*(rdiff_magnitude-(alpha/2)))/(zeta*zeta));
+  double w_0=w_2/(4*M_PI*Rad*Rad);
   double w_1=w_2/(4*M_PI*Rad);
-  double w_3=(1.0/2)*(1-erf(rdiff_magnitude));
+  double w_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   vector3d wv_1, wv_2;
   if (rdiff_magnitude > 0) {
     wv_1 = w_1*(rdiff/rdiff_magnitude);
@@ -203,7 +250,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   //printf("Crystal n_den=%g\n", n_den);
   //For homogeneous, set n_den to constant? ASK!
 
-  double dVp=pow(dx,3);  //CHANGE THIS? - ASK!
+  double dVp=dx*dx*dx;  //CHANGE THIS? - ASK!
 
   weight w_den_p;
   w_den_p.n_0 = n_den*w_0*dVp;
@@ -218,7 +265,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
 }
 
 
-weight find_weighted_den_aboutR(vector3d r, vector3d R,
+weight find_weighted_den_aboutR(vector3d r, vector3d R,  //COME BACK and update this for parallelepiped?
                                 double dx, double temp,
                                 double fv, double gwidth, double N_crystal, double reduced_density) {
   const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; // round up!
@@ -226,6 +273,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
   if ((r-R).norm() > weighting_function_radius + inclusion_radius*gwidth) {
     return w_den_R;
   }
+  
   for (int l=-inc_Ntot; l<=inc_Ntot; l++) {   //CAREFUL - couble cause error with int ASK!
     for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
       for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
@@ -248,15 +296,27 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
 }
 
 
-weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, double fv,
+weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, double fv,   //NEED to pass lattice_vectors?   ASK!
                                double gwidth, double N_crystal, double reduced_density) {
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   weight w_den;
+  
+  const vector3d lattice_vectors[3] = {
+  vector3d(lattice_constant/2,lattice_constant/2,0),
+  vector3d(lattice_constant/2,0,lattice_constant/2),
+  vector3d(0,lattice_constant/2,lattice_constant/2),
+  };
+  
+  for (int l=0; l<= (lattice_constant/sqrt(2))/dx; l++) {
+    for (int m=0; m<= ((lattice_constant/sqrt(2))/dx)-l; m++) {
+      for (int o=0; o<= (lattice_constant/sqrt(2))/dx; o++) {
 
-  for (int l=-(lattice_constant/2)/dx; l<((lattice_constant/2)/dx)+1; l++) {   //integrates over one shifted cell
-    for (int m=-(lattice_constant/2)/dx; m<((lattice_constant/2)/dx)+1; m++) {
-      for (int o=-(lattice_constant/2)/dx; o<((lattice_constant/2)/dx)+1; o++) {
-        const vector3d rp = vector3d(l,m,o)*dx + s;
+//  for (int l=-(lattice_constant/2)/dx; l<=(lattice_constant/2)/dx; l++) {   //integrates over one shifted cell
+//    for (int m=-(lattice_constant/2)/dx; m<=(lattice_constant/2)/dx; m++) {
+//      for (int o=-(lattice_constant/2)/dx; o<=(lattice_constant/2)/dx; o++) {
+
+      vector3d rp=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-l*lattice_vectors[2]+ m*(lattice_vectors[2]-lattice_vectors[1])+o*lattice_vectors[0])) +s;     
+//        vector3d rp = vector3d(l,m,o)*dx + s;  //ASK! 
         //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
 
         weight w_den_p=find_weighted_den_at_rprime(r, rp, dx,
@@ -269,6 +329,21 @@ weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, d
 
         w_den.nv_1 += w_den_p.nv_1;
         w_den.nv_2 += w_den_p.nv_2;
+        
+        rp=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-l*lattice_vectors[2]+ m*(lattice_vectors[2]-lattice_vectors[1])+o*lattice_vectors[0]))+s;     
+//        rp = vector3d(l,m,o)*dx + s;  //FIX THIS!!
+        
+        w_den_p=find_weighted_den_at_rprime(r, rp, dx,
+                temp, fv, gwidth, N_crystal, reduced_density);
+
+        w_den.n_0 += w_den_p.n_0;
+        w_den.n_1 += w_den_p.n_1;
+        w_den.n_2 += w_den_p.n_2;
+        w_den.n_3 += w_den_p.n_3;
+
+        w_den.nv_1 += w_den_p.nv_1;
+        w_den.nv_2 += w_den_p.nv_2;
+        
       }
     }
   }
@@ -281,19 +356,44 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
 
-  const double dV = pow(dx,3);    //ASK!
-  const int Ntot=pow((lattice_constant/dx)+1,3);  //number of position vectors over one cell
+//const double dV = dx*dx*dx;    //
+  const double dV = (lattice_constant*lattice_constant*lattice_constant/4.0)*dx*dx*dx;    //ASK!
+  //Compute total number of postion vectors (for our info and debug only)
+  int Ntot=0;
+  for (int i=0; i<=(lattice_constant/sqrt(2))/dx; i++) {    //integrate over one cell
+    for (int j=0; j<=((lattice_constant/sqrt(2))/dx)-i; j++) {
+      for (int k=0; k<=(lattice_constant/sqrt(2))/dx; k++) {
+        double Ntot=Ntot+1;
+      }
+    }
+  }
+//const int Ntot=((lattice_constant/dx)+1)*((lattice_constant/dx)+1)*((lattice_constant/dx)+1);  //number of position vectors over one cell
   printf("Ntot is %i\n", Ntot);   //debug
 
   //Find N_crystal to normalize reduced density n(r) later
   double N_crystal=0;
-  for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {     //integrate over one cell  ASK!!! lattice_constant won't fall on grid points in general!
-    const double rx=i*dx;
-    for (int j=-(lattice_constant/2)/dx; j<((lattice_constant/2)/dx)+1; j++) {
-      const double ry=j*dx;
-      for (int k=-(lattice_constant/2)/dx; k<((lattice_constant/2)/dx)+1; k++) {
-        const double rz=k*dx;
-        double n_den=find_ngaus(vector3d(rx, ry, rz), fv, gwidth, lattice_constant);
+  const vector3d lattice_vectors[3] = {
+  vector3d(lattice_constant/2,lattice_constant/2,0),
+  vector3d(lattice_constant/2,0,lattice_constant/2),
+  vector3d(0,lattice_constant/2,lattice_constant/2),
+  };
+   for (int i=0; i<=(lattice_constant/sqrt(2))/dx; i++) {    //integrate over one cell
+    for (int j=0; j<=((lattice_constant/sqrt(2))/dx)-i; j++) {
+      for (int k=0; k<=(lattice_constant/sqrt(2))/dx; k++) {
+        vector3d r=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-i*lattice_vectors[1]+ j*(lattice_vectors[2]-lattice_vectors[1])+k*lattice_vectors[0]));
+ //     const vector3d r = vector3d(i,j,k)*dx;    //?  ASK!
+        double n_den=find_ngaus(r, fv, gwidth, lattice_constant);
+        N_crystal += n_den*dV;
+        r=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-i*lattice_vectors[2]+ j*(lattice_vectors[2]-lattice_vectors[1])+k*lattice_vectors[0]));
+        n_den=find_ngaus(r, fv, gwidth, lattice_constant);
+ //CHECK!
+ // for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {     //integrate over one cell  ASK!!! lattice_constant won't fall on grid points in general!
+ //   const double rx=i*dx;
+ //   for (int j=-(lattice_constant/2)/dx; j<((lattice_constant/2)/dx)+1; j++) {
+ //     const double ry=j*dx;
+ //     for (int k=-(lattice_constant/2)/dx; k<((lattice_constant/2)/dx)+1; k++) {
+ //       const double rz=k*dx;
+ //       double n_den=find_ngaus(vector3d(rx, ry, rz), fv, gwidth, lattice_constant);
         N_crystal += n_den*dV;
       }
     }
@@ -307,27 +407,38 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
 
-  const vector3d lattice_vectors[3] = {
-    vector3d(lattice_constant/2,lattice_constant/2,0),
-    vector3d(lattice_constant/2,0,lattice_constant/2),
-    vector3d(0,lattice_constant/2,lattice_constant/2),
-  };
+//  const vector3d lattice_vectors[3] = {
+//    vector3d(lattice_constant/2,lattice_constant/2,0),
+//    vector3d(lattice_constant/2,0,lattice_constant/2),
+//    vector3d(0,lattice_constant/2,lattice_constant/2),
+//  };
 
-  for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {    //integrate over one cell
-    for (int j=-(lattice_constant/2)/dx; j<((lattice_constant/2)/dx)+1; j++) {
-      for (int k=-(lattice_constant/2)/dx; k<((lattice_constant/2)/dx)+1; k++) {
-        const vector3d r = vector3d(i,j,k)*dx;
+//integrate over one parallelepiped (one primitive cell)
+   for (int i=0; i<=(lattice_constant/sqrt(2))/dx; i++) {    //integrate over one cell
+    for (int j=0; j<=((lattice_constant/sqrt(2))/dx)-i; j++) {
+      for (int k=0; k<=(lattice_constant/sqrt(2))/dx; k++) {
+
+//  for (int i=-(lattice_constant/2)/dx; i<=(lattice_constant/2)/dx; i++) {    //integrate over one cell
+//    for (int j=-(lattice_constant/2)/dx; j<=(lattice_constant/2)/dx; j++) {
+//      for (int k=-(lattice_constant/2)/dx; k<=(lattice_constant/2)/dx; k++) {
+        const vector3d r = vector3d(i,j,k)*dx;  //ASK!
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-        int num_cell_shifts=2*weighting_function_radius/lattice_constant+1;
+//        int num_cell_shifts=2*weighting_function_radius/lattice_constant+1;
         //sum over "all atoms" (actually only ones that are close)
-        for (int t=-num_cell_shifts; t <= num_cell_shifts; t++) {
-          for (int u=-num_cell_shifts; u <= num_cell_shifts; u++) {
-            for (int v=-num_cell_shifts; v <= num_cell_shifts; v++) {
+//        for (int t=-num_cell_shifts; t <= num_cell_shifts; t++) {
+//          for (int u=-num_cell_shifts; u <= num_cell_shifts; u++) {
+//            for (int v=-num_cell_ shifts; v <= num_cell_shifts; v++) {
+
+        int all_space=3;  //FINISH!- relate this to the weighting_function_radius!
+        for (int t=-all_space; t <=all_space; t++) {
+          for(int u=-all_space; u<=all_space; u++)  {
+            for (int v=-all_space; v<= all_space; v++) {
+
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               weight n_weight;
               if (efficient) {
@@ -340,19 +451,23 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               n_1 +=n_weight.n_1;
               n_2 +=n_weight.n_2;
               n_3 +=n_weight.n_3;
-              nv_1.x +=n_weight.nv_1.x;
-              nv_1.y +=n_weight.nv_1.y;
-              nv_1.z +=n_weight.nv_1.z;
-              nv_2.x +=n_weight.nv_2.x;
-              nv_2.y +=n_weight.nv_2.y;
-              nv_2.z +=n_weight.nv_2.z;
+              
+              nv_1 +=n_weight.nv_1;
+              nv_2 +=n_weight.nv_2;  
+ //CHECK!
+ //             nv_1.x +=n_weight.nv_1.x;
+ //             nv_1.y +=n_weight.nv_1.y;
+ //             nv_1.z +=n_weight.nv_1.z;
+ //             nv_2.x +=n_weight.nv_2.x;
+ //             nv_2.y +=n_weight.nv_2.y;
+ //             nv_2.z +=n_weight.nv_2.z;
             }
           }
         }
         phi_1 = -n_0*log(1-n_3);
         phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
-        phi_3 = (pow(n_2,3)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/24*M_PI*pow((1-n_3),2);
+        phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
         //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
         const double epsilon=1;
         free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;
@@ -376,18 +491,18 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.diff_free_energy_per_atom=2;
   data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
   data_out.hfree_energy_per_vol=2;
-  data_out.cfree_energy_per_vol=free_energy/pow(lattice_constant,3);   //ASK!
+  data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
 
   return data_out;
 }
+//%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%END NEW FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  double dV = pow(dx,3);  //volume element dV
+  double dV = dx*dx*dx;  //volume element dV
 
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
@@ -440,7 +555,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
+    const double norm = (1-fv)/(sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
     // multiply 4 by (1-fv) to get the reduced number of spheres.
     Vector setn = f.n();
 
@@ -560,7 +675,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   data_out.diff_free_energy_per_atom=crystal_free_energy - homogeneous_free_energy;
   data_out.cfree_energy_per_atom=crystal_free_energy;
   data_out.hfree_energy_per_vol=hf.energy();
-  data_out.cfree_energy_per_vol=f.energy()/pow(lattice_constant,3);
+  data_out.cfree_energy_per_vol=f.energy()/(lattice_constant*lattice_constant*lattice_constant);
 
   if (verbose) {
     printf("Crystal free energy is %g\n", crystal_free_energy);
@@ -846,9 +961,6 @@ int main(int argc, const char **argv) {
 
     /*** Downhill Simplex OPTIONS ***/
     {"dh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Do a Downhill Simplex", "BOOLEAN"},
-
-    /*** Weighted Density OPTIONS ***/
-    {"eff", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &efficient, 0, "Compute weighted densities approximately with fewer rprime vectors", "BOOLEAN"},
 
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
