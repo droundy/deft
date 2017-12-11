@@ -217,7 +217,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   double rdiff_magnitude=rdiff.norm();
   //printf("r.xdiff_magnitude= %g, r.ydiff_magnitude= %g, r.zdiff_magnitude= %g, mag rdiff_magnitude= %g\n", r.xdiff_magnitude, r.ydiff_magnitude, r.zdiff_magnitude, rdiff_magnitude);  //debug
 
-  const double sigma=2;
+  const double sigma=1;
   const double Rad=sigma/pow(2, 5.0/6);
   const double alpha = sigma*pow(2/(1+sqrt(temp*log(2))),1.0/6);
   const double zeta = alpha/(6*sqrt(M_PI)*sqrt(log(2)/temp)+log(2));
@@ -357,18 +357,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
 
 //const double dV = dx*dx*dx;    //
-  const double dV = (lattice_constant*lattice_constant*lattice_constant/4.0)*dx*dx*dx;    //ASK!
-  //Compute total number of postion vectors (for our info and debug only)
-  int Ntot=0;
-  for (int i=0; i<=(lattice_constant/sqrt(2))/dx; i++) {    //integrate over one cell
-    for (int j=0; j<=((lattice_constant/sqrt(2))/dx)-i; j++) {
-      for (int k=0; k<=(lattice_constant/sqrt(2))/dx; k++) {
-        double Ntot=Ntot+1;
-      }
-    }
-  }
-//const int Ntot=((lattice_constant/dx)+1)*((lattice_constant/dx)+1)*((lattice_constant/dx)+1);  //number of position vectors over one cell
-  printf("Ntot is %i\n", Ntot);   //debug
 
   //Find N_crystal to normalize reduced density n(r) later
   double N_crystal=0;
@@ -377,23 +365,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   vector3d(lattice_constant/2,0,lattice_constant/2),
   vector3d(0,lattice_constant/2,lattice_constant/2),
   };
-   for (int i=0; i<=(lattice_constant/sqrt(2))/dx; i++) {    //integrate over one cell
-    for (int j=0; j<=((lattice_constant/sqrt(2))/dx)-i; j++) {
-      for (int k=0; k<=(lattice_constant/sqrt(2))/dx; k++) {
-        vector3d r=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-i*lattice_vectors[1]+ j*(lattice_vectors[2]-lattice_vectors[1])+k*lattice_vectors[0]));
- //     const vector3d r = vector3d(i,j,k)*dx;    //?  ASK!
+  const int Nl = (lattice_constant/sqrt(2))/dx;
+  const double dV = uipow(lattice_constant/Nl,3)/4.0;
+
+  for (int i=0; i<Nl; i++) {    //integrate over one cell
+    for (int j=0; j<Nl; j++) {
+      for (int k=0; k<Nl; k++) {
+        vector3d r=lattice_vectors[0]*i/double(Nl)
+          + lattice_vectors[1]*j/double(Nl)
+          + lattice_vectors[2]*k/double(Nl);
         double n_den=find_ngaus(r, fv, gwidth, lattice_constant);
-        N_crystal += n_den*dV;
-        r=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-i*lattice_vectors[2]+ j*(lattice_vectors[2]-lattice_vectors[1])+k*lattice_vectors[0]));
-        n_den=find_ngaus(r, fv, gwidth, lattice_constant);
- //CHECK!
- // for (int i=-(lattice_constant/2)/dx; i<((lattice_constant/2)/dx)+1; i++) {     //integrate over one cell  ASK!!! lattice_constant won't fall on grid points in general!
- //   const double rx=i*dx;
- //   for (int j=-(lattice_constant/2)/dx; j<((lattice_constant/2)/dx)+1; j++) {
- //     const double ry=j*dx;
- //     for (int k=-(lattice_constant/2)/dx; k<((lattice_constant/2)/dx)+1; k++) {
- //       const double rz=k*dx;
- //       double n_den=find_ngaus(vector3d(rx, ry, rz), fv, gwidth, lattice_constant);
         N_crystal += n_den*dV;
       }
     }
@@ -414,27 +395,19 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 //  };
 
 //integrate over one parallelepiped (one primitive cell)
-   for (int i=0; i<=(lattice_constant/sqrt(2))/dx; i++) {    //integrate over one cell
-    for (int j=0; j<=((lattice_constant/sqrt(2))/dx)-i; j++) {
-      for (int k=0; k<=(lattice_constant/sqrt(2))/dx; k++) {
-
-//  for (int i=-(lattice_constant/2)/dx; i<=(lattice_constant/2)/dx; i++) {    //integrate over one cell
-//    for (int j=-(lattice_constant/2)/dx; j<=(lattice_constant/2)/dx; j++) {
-//      for (int k=-(lattice_constant/2)/dx; k<=(lattice_constant/2)/dx; k++) {
-        const vector3d r = vector3d(i,j,k)*dx;  //ASK!
+  for (int i=0; i<Nl; i++) {    //integrate over one cell
+    for (int j=0; j<Nl; j++) {
+      for (int k=0; k<Nl; k++) {
+        vector3d r=lattice_vectors[0]*i/double(Nl)
+          + lattice_vectors[1]*j/double(Nl)
+          + lattice_vectors[2]*k/double(Nl);
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-//        int num_cell_shifts=2*weighting_function_radius/lattice_constant+1;
-        //sum over "all atoms" (actually only ones that are close)
-//        for (int t=-num_cell_shifts; t <= num_cell_shifts; t++) {
-//          for (int u=-num_cell_shifts; u <= num_cell_shifts; u++) {
-//            for (int v=-num_cell_ shifts; v <= num_cell_shifts; v++) {
-
-        int all_space=3;  //FINISH!- relate this to the weighting_function_radius!
+        int all_space=2*weighting_function_radius/lattice_constant+1;
         for (int t=-all_space; t <=all_space; t++) {
           for(int u=-all_space; u<=all_space; u++)  {
             for (int v=-all_space; v<= all_space; v++) {
@@ -454,13 +427,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               
               nv_1 +=n_weight.nv_1;
               nv_2 +=n_weight.nv_2;  
- //CHECK!
- //             nv_1.x +=n_weight.nv_1.x;
- //             nv_1.y +=n_weight.nv_1.y;
- //             nv_1.z +=n_weight.nv_1.z;
- //             nv_2.x +=n_weight.nv_2.x;
- //             nv_2.y +=n_weight.nv_2.y;
- //             nv_2.z +=n_weight.nv_2.z;
             }
           }
         }
