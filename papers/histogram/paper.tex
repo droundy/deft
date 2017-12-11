@@ -568,11 +568,18 @@ sticky-wall. ~\jpsays{explain sticky-wall here or elsewhere?}
 
 \subsubsection{A $30\times4\times4$ $(N = 25)$ system with a sticky
 wall}
-
 In order to determine how the various methods scale with size,
 simulations are run for systems with different particle numbers.  For
 the $N = 25$ system, a sticky-wall is added to ensure that we see the
 liquid and vapor phase separation.
+
+A system is configured with dimensions $x = y = 4$ and $z = 30$.  A
+filling fraction $\text{ff} = 0.22$ is chosen which yields $N = 25$
+particles in the rectangular system.  These particles are randomly
+inserted into the system and random moves are proposed (with a
+translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
+periodic while the $z$-axis is not periodic.  A sticky-wall is inserted
+along the $z$-axis at one end to promote phase separation.
 ~\jpsays{should we include a sticky-wall.py plot or something else or are
 we not going to talk about phase separation in this paper?}
 
@@ -587,21 +594,47 @@ the mix and SAD will end up using TMMC to calculate DOS.}
 \subsubsection{A Tanner dimensions? $(N = 50)$ system with no sticky
 wall}
 
+A system is configured with dimensions $x = y = z = ?$.  A
+filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 50$
+particles in the cubical system.  These particles are randomly
+inserted into the system and random moves are proposed (with a
+translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
+periodic while the $z$-axis is not periodic.  A sticky-wall is not inserted
+along the $z$-axis at one end to promote phase separation.
+
 \subsubsection{A $60\times8\times8$ $(N = 200)$ system with a sticky
-wall}~\jpsays{This is Jordan's simulation which is 8 times bigger than
-his other simulation not sure if it will finish in the immediate future!}
+wall}
+
+A system is configured with dimensions $x = y = 8$ and $z = 60$.  A
+filling fraction $\text{ff} = 0.22$ is chosen which yields $N = 202$
+particles in the rectangular system.  These particles are randomly
+inserted into the system and random moves are proposed (with a
+translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
+periodic while the $z$-axis is not periodic.  A sticky-wall is inserted
+along the $z$-axis at one end to promote phase separation.
 
 \subsubsection{A $100\times10\times10$ $(N = 525)$ system with a sticky
-wall}~\jpsays{This is David's simulation which not sure if it is
-reasonable to expect it to finish ever!}
+wall}
+
+A system is configured with dimensions $x = y = 10$ and $z = 100$.  A
+filling fraction $\text{ff} = 0.22$ is chosen which yields $N = 525$
+particles in the rectangular system.  These particles are randomly
+inserted into the system and random moves are proposed (with a
+translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
+periodic while the $z$-axis is not periodic.  A sticky-wall is inserted
+along the $z$-axis at one end to promote phase separation.
 
 \subsubsection{A Tanner dimensions? $(N = 500)$ system with no sticky
-wall}~\jpsays{This is Tanner's simulation which not sure if it is
-reasonable to expect it to finish ever!}
+wall}
 
-We are likely not doing SA-TMMC and/or TMI3 (however still may be worth
-while to mention why these methods are not shown i.e. SAD is so good
-why extend to SA-TMMC etc...?)?
+A system is configured with dimensions $x = y = z = ?$.  A
+filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 500$
+particles in a cubical system.  These particles are randomly
+inserted into the system and random moves are proposed (with a
+translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
+periodic while the $z$-axis is not periodic.  A sticky-wall is not inserted
+along the $z$-axis at one end to promote phase separation.
+
 
 
 \section{Conclusions}
