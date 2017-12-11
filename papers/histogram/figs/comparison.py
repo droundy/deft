@@ -49,12 +49,15 @@ except:
 
 for method in methods:
     dirname = 'data/comparison/%s%s' % (filebase,method)
+    dirnametm = 'data/comparison/%s%s-tm' % (filebase,method)
     try: 
         r = glob('data/%s%s-movie/*lndos.dat' % (filebase,method))
         if len(r)==0:
             continue
         if not os.path.exists(dirname):
             os.makedirs(dirname)
+        if not os.path.exists(dirnametm):
+            os.makedirs(dirnametm)
         iterations = numpy.zeros(len(r))
         Nrt_at_energy = numpy.zeros(len(r))
         maxentropystate = numpy.zeros(len(r))
@@ -63,8 +66,12 @@ for method in methods:
         errorinentropy = numpy.zeros(len(r))
         maxerror = numpy.zeros(len(r))
 
+        erroratenergytm = numpy.zeros(len(r))
+        errorinentropytm = numpy.zeros(len(r))
+        maxerrortm = numpy.zeros(len(r))
+
         for i,f in enumerate(sorted(r)):
-            e,lndos,Nrt = readnew.e_lndos_ps(f)
+            e,lndos,Nrt,lndostm = readnew.e_lndos_ps_lndostm(f)
             maxentropystate[i] = readnew.max_entropy_state(f)
             minimportantenergy[i] = readnew.min_important_energy(f)
             iterations[i] = readnew.iterations(f)
@@ -86,6 +93,16 @@ for method in methods:
             # of fractional errors in the actual (not ln) DOS.
             maxerror[i] = numpy.amax(doserror) - numpy.amin(doserror)
             
+            if lndostm is not None:
+                norm_factor = numpy.mean(lndostm[maxref:minref+1]) - numpy.mean(lndosref[maxref:minref+1])
+                doserror = lndostm[maxref:minref+1] - lndosref[maxref:minref+1] - norm_factor
+                errorinentropytm[i] = numpy.sum(abs(doserror))/len(doserror)
+                erroratenergytm[i] = doserror[energy-maxref]
+                # the following "max" result is independent of how we choose
+                # to normalize doserror, and represents the largest ratio
+                # of fractional errors in the actual (not ln) DOS.
+                maxerrortm[i] = numpy.amax(doserror) - numpy.amin(doserror)
+
         i = 1
         while i < len(iterations) and iterations[i] > iterations[i-1]:
             num_frames_to_count = i+1
@@ -98,6 +115,10 @@ for method in methods:
         errorinentropy = errorinentropy[:num_frames_to_count]
         maxerror = maxerror[:num_frames_to_count]
 
+        erroratenergytm = erroratenergytm[:num_frames_to_count]
+        errorinentropytm = errorinentropytm[:num_frames_to_count]
+        maxerrortm = maxerrortm[:num_frames_to_count]
+
         print 'saving to', dirname
         numpy.savetxt('%s/energy-%d.txt' %(dirname, energy),
                       numpy.c_[Nrt_at_energy, erroratenergy],
@@ -107,6 +128,17 @@ for method in methods:
                       numpy.c_[iterations, errorinentropy, maxerror],
                       fmt = ('%.4g'),
                       delimiter = '\t', header = 'iterations\t errorinentropy\t maxerror')
+        if lndostm is not None:
+            print 'saving to', dirnametm
+            numpy.savetxt('%s/energy-%d.txt' %(dirnametm, energy),
+                        numpy.c_[Nrt_at_energy, erroratenergytm],
+                        fmt = ('%.4g'),
+                        delimiter = '\t', header = 'round trips\t doserror')
+            numpy.savetxt('%s/errors.txt' %(dirnametm),
+                        numpy.c_[iterations, errorinentropytm, maxerrortm],
+                        fmt = ('%.4g'),
+                        delimiter = '\t', header = 'iterations\t errorinentropy\t maxerror')
+            
     except:
         print 'I had trouble with', method
         raise

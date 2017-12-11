@@ -9,7 +9,7 @@ from glob import glob
 
 if os.path.exists('../data'):
     os.chdir('..')
-    
+
 energy = int(sys.argv[1])
 filebase = sys.argv[2]
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
@@ -26,16 +26,17 @@ for j in range(len(split2)):
 for method in methods:
     try:
         dirname = 'data/comparison/%s%s/' % (filebase,method)
+        dirnametm = 'data/comparison/%s%s-tm' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:
-            continue
-        
+                continue
+
         if energy > 0:
                 Nrt_at_energy, erroratenergy = numpy.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
         iterations, errorinentropy, maxerror = numpy.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
-    
+
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
-        if energy > 0: 
+        if energy > 0:
                 plt.figure('error-at-energy-iterations')
                 plt.plot(iterations, erroratenergy, label = method[1:])
                 plt.title('Error at energy %g %s' % (energy,filebase))
@@ -43,7 +44,7 @@ for method in methods:
                 plt.ylabel('error')
                 plt.legend(loc = 'best')
                 plt.savefig('figs/%s-error-energy-%g.pdf' % (tex_filebase, energy))
-    
+
                 plt.figure('round-trips-at-energy' )
                 plt.plot(iterations, Nrt_at_energy, label = method[1:])
                 plt.title('Roundy Trips at energy %g, %s' % (energy,filebase))
@@ -51,7 +52,7 @@ for method in methods:
                 plt.ylabel('Roundy Trips')
                 plt.legend(loc = 'best')
                 plt.savefig('figs/%s-round-trips-%g.pdf' % (tex_filebase, energy))
-        
+
                 plt.figure('error-at-energy-round-trips')
                 plt.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0], label = method[1:])
                 plt.title('Error at energy %g %s' % (energy,filebase))
@@ -59,7 +60,7 @@ for method in methods:
                 plt.ylabel('Error')
                 plt.legend(loc = 'best')
                 plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
-    
+
         plt.figure('maxerror')
         plt.loglog(iterations, maxerror, label = method[1:])
         plt.xlabel('# iterations')
@@ -67,7 +68,7 @@ for method in methods:
         plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         plt.legend(loc = 'best')
         plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
-        
+
         plt.figure('errorinentropy')
         plt.loglog(iterations, errorinentropy[0:len(iterations)], label = method[1:])
         plt.xlabel('#iterations')

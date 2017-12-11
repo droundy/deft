@@ -25,13 +25,26 @@ def e_lndos(f):
 
 def e_lndos_ps(fbase):
     if '.dat' not in fbase:
-        fbase = fbase + "-lndos.dat"    
+        fbase = fbase + "-lndos.dat"
     e_lndos_ps = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
     energy = -e_lndos_ps[:,0]
     lndos = e_lndos_ps[:,1]
     ps = e_lndos_ps[:,2] # pessimistic samples
 
     return energy, lndos, ps
+
+def e_lndos_ps_lndostm(fbase):
+    if '.dat' not in fbase:
+        fbase = fbase + "-lndos.dat"
+    e_lndos_ps = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
+    energy = -e_lndos_ps[:,0]
+    lndos = e_lndos_ps[:,1]
+    ps = e_lndos_ps[:,2] # pessimistic samples
+    lndostm = None
+    if len(e_lndos_ps[0,:]) >= 4:
+        lndostm = e_lndos_ps[:,3]
+
+    return energy, lndos, ps, lndostm
 
 def e_lnw(fbase):
     e_lnw = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2, dtype=numpy.float)
