@@ -217,7 +217,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   double rdiff_magnitude=rdiff.norm();
   //printf("r.xdiff_magnitude= %g, r.ydiff_magnitude= %g, r.zdiff_magnitude= %g, mag rdiff_magnitude= %g\n", r.xdiff_magnitude, r.ydiff_magnitude, r.zdiff_magnitude, rdiff_magnitude);  //debug
 
-  const double sigma=2;
+  const double sigma=1;
   const double Rad=sigma/pow(2, 5.0/6);
   const double alpha = sigma*pow(2/(1+sqrt(temp*log(2))),1.0/6);
   const double zeta = alpha/(6*sqrt(M_PI)*sqrt(log(2)/temp)+log(2));
