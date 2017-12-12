@@ -23,10 +23,10 @@ split2 = [i.split('-m', 1)[0] for i in split1]
 
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
-for method in methods:
+for method in [mm for m in methods for mm in [m, m+'-tm']]:
+    print 'trying method', method
     try:
         dirname = 'data/comparison/%s%s/' % (filebase,method)
-        dirnametm = 'data/comparison/%s%s-tm' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:
                 continue
 
