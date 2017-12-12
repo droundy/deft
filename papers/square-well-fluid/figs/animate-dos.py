@@ -4,7 +4,7 @@ import matplotlib, sys
 if 'show' not in sys.argv:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy, time, os, glob
+import numpy, time, os, glob, colors
 
 matplotlib.rc('text', usetex=True)
 
@@ -37,7 +37,6 @@ def uses_crazy_weights_dos(suffix):
     return 'wl' in suffix or suffix in ['samc', 'sad']
 
 dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
-colors = ['k', 'b', 'r', 'g', 'c', 'm']
 
 lastframe = -1
 alldone = False
@@ -94,9 +93,9 @@ for frame in xrange(numframes):
 
         try:
             e, lndos, lndostm = readandcompute.e_lndos_lndostm(basename)
-            ax.plot(e, lndos, colors[suffix_index]+'-', label=suffix)
+            colors.plot(e, lndos, method=suffix)
             if lndostm is not None:
-                ax.plot(e, lndostm, colors[suffix_index]+'--', label=suffix+'-tm')
+                colors.plot(e, lndostm, method=suffix+'-tm')
             datname = basename+'-lndos.dat'
             min_T = readandcompute.minT(datname)
             ax.axvline(-readandcompute.max_entropy_state(datname), color='r', linestyle=':')
