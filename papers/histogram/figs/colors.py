@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 
 _colors = { 'sad': 'r',
-            'sad-tm': 'tab:orange',
+            'sad-tm': 'r',
+            'sad3': 'tab:orange',
+            'sad3-tm': 'tab:orange',
             'wltmmc-0.8-1e-10': 'k',
             'tmmc': 'b',
             'tmi3': 'g',
@@ -11,12 +13,26 @@ _colors = { 'sad': 'r',
             'wltmmc-1-0.0001': 'tab:pink',
 }
 
-def plot(x, y, method=None):
+_linestyles = {
+    'sad-tm': '--',
+    'sad3-tm': '--',
+}
+
+def color(m):
+    if m in _colors:
+        return _colors[m]
+    return 'k'
+
+def style_args(method):
+    args = {'label': method}
     if method in _colors:
-        return plt.plot(x,y, color=_colors[method], label=method)
-    return plt.plot(x,y, label=method)
+        args['color'] = _colors[method]
+    if method in _linestyles:
+        args['linestyle'] = _linestyles[method]
+    return args
+
+def plot(x, y, method=None):
+    return plt.plot(x,y, **style_args(method))
 
 def loglog(x, y, method=None):
-    if method in _colors:
-        return plt.loglog(x,y, _colors[method], label=method)
-    return plt.loglog(x,y, label=method)
+    return plt.loglog(x,y, **style_args(method))

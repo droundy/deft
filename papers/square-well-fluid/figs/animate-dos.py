@@ -104,14 +104,14 @@ for frame in xrange(numframes):
             # Uncomment the following to plot a line at the
             # min_important_energy with slope determined by min_T
             # ax.plot(e, (e+min_important_energy)/min_T + lndos[min_important_energy], colors[suffix_index]+'--')
-            ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
+            # ax.axvline(-readandcompute.converged_state(datname), color=colors.color(suffix), linestyle=':')
             # Uncomment the following to plot the lnw along with the lndos
             # e, lnw = readandcompute.e_lnw(basename)
             # ax.plot(e, -lnw, colors[suffix_index]+':')
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
-            print(sys.exc_info())
+        except Exception as e:
+            print(e)
             pass
 
     ax.set_xlabel(r'$E$')
