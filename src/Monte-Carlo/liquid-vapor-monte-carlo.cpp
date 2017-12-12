@@ -80,6 +80,7 @@ int main(int argc, const char *argv[]) {
   int satmmc = false;
   int samc = false;
   int sad = false;
+  int sad_fraction = 1;
   int wltmmc = false;
   int generate_movies = false;
 
@@ -202,6 +203,8 @@ int main(int argc, const char *argv[]) {
      "Use stochastic approximation transition matrix monte carlo", "BOOLEAN"},
     {"sad", '\0', POPT_ARG_NONE, &sad, 0,
      "Use stochastic approximation monte carlo dynamical version", "BOOLEAN"},
+    {"sad-fraction", '\0', POPT_ARG_INT, &sad_fraction, 0,
+     "Fraction for stochastic approximation monte carlo dynamical version", "INT"},
     {"samc", '\0', POPT_ARG_NONE, &samc, 0,
      "Use stochastic approximation monte carlo", "BOOLEAN"},
     {"sa-t0", '\0', POPT_ARG_DOUBLE,
@@ -424,8 +427,10 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-satmmc");
     } else if (samc) {
       sprintf(method_tag, "-samc");
-    } else if (sad) {
+    } else if (sad && sad_fraction == 1) {
       sprintf(method_tag, "-sad");
+    } else if (sad) {
+      sprintf(method_tag, "-sad%d", sad_fraction);
     } else {
       printf("We could not identify a method for a method tag.\n");
       return 104;
@@ -743,10 +748,10 @@ int main(int argc, const char *argv[]) {
             "%s# histogram method: samc (t0 = %g)\n",
             headerinfo, sw.sa_t0);
   } else if (sad) {
-    sw.use_sad = true;
+    sw.use_sad = sad_fraction;
     sprintf(headerinfo,
-            "%s# histogram method: sad\n",
-            headerinfo);
+            "%s# histogram method: sad%d\n",
+            headerinfo, sad_fraction);
   } else if (wltmmc) {
     sprintf(headerinfo,
             "%s# histogram method: wltmmc\n",
