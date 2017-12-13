@@ -142,9 +142,10 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   //printf("r.xdiff_magnitude= %g, r.ydiff_magnitude= %g, r.zdiff_magnitude= %g, mag rdiff_magnitude= %g\n", r.xdiff_magnitude, r.ydiff_magnitude, r.zdiff_magnitude, rdiff_magnitude);  //debug
 
   const double sigma=1;
+  const double epsilon=1;
   const double Rad=sigma/pow(2, 5.0/6);
-  const double alpha = sigma*pow(2/(1+sqrt(temp*log(2))),1.0/6);
-  const double zeta = alpha/(6*sqrt(M_PI)*sqrt(log(2)/temp)+log(2));
+  const double alpha = sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);      //temp is actually Boltzman's constant times temperature
+  const double zeta = alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));  
   //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
 
   double w_2=(1/(zeta*sqrt(M_PI)))*exp(-((rdiff_magnitude-(alpha/2))*(rdiff_magnitude-(alpha/2)))/(zeta*zeta));
@@ -348,8 +349,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
         phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
         //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
-        const double epsilon=1;
-        free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;
+        //const double epsilon=1; ASK!!
+        //free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman's constant times temperature 
+        free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         //printf("free energy is now... %g\n", free_energy);   //debug
         printf("      finished %.7f%% of the integral\n",
                100*(i + lattice_constant/2/dx)/(lattice_constant/dx)
