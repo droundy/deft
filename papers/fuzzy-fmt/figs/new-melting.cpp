@@ -132,38 +132,35 @@ double find_ngaus(vector3d r, double fv, double gwidth, double lattice_constant)
 }
 
 
-weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double temp, double fv,
-                                   double gwidth, double N_crystal, double reduced_density) {
+weight find_weights(vector3d r, vector3d rp, double temp) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
-  //printf("r.xdiff_magnitude= %g, r.ydiff_magnitude= %g, r.zdiff_magnitude= %g, mag rdiff_magnitude= %g\n", r.xdiff_magnitude, r.ydiff_magnitude, r.zdiff_magnitude, rdiff_magnitude);  //debug
 
   const double sigma=1;
   const double epsilon=1;
   const double Rad=sigma/pow(2, 5.0/6);
-  const double alpha = sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);      //temp is actually Boltzman's constant times temperature
-  const double zeta = alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));  
-  //printf("alpha= %g, zeta= %g\n", alpha, zeta);   //debug
+  const double alpha = sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
+  const double zeta = alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
 
-  double w_2=(1/(zeta*sqrt(M_PI)))*exp(-((rdiff_magnitude-(alpha/2))*(rdiff_magnitude-(alpha/2)))/(zeta*zeta));
-  double w_0=w_2/(4*M_PI*Rad*Rad);
-  double w_1=w_2/(4*M_PI*Rad);
-  double w_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
-  vector3d wv_1, wv_2;
+  weight w;
+
+  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(rdiff_magnitude-(alpha/2),2)/uipow(zeta,2));
+  w.n_0=w.n_2/(4*M_PI*Rad*Rad);
+  w.n_1=w.n_2/(4*M_PI*Rad);
+  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   if (rdiff_magnitude > 0) {
-    wv_1 = w_1*(rdiff/rdiff_magnitude);
-    wv_2 = w_2*(rdiff/rdiff_magnitude);
+    w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
+    w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
   } else {
-    wv_1.x=0;
-    wv_1.y=0;
-    wv_1.z=0;
-    wv_2.x=0;
-    wv_2.y=0;
-    wv_2.z=0;
+    w.nv_1 = vector3d(0,0,0);
+    w.nv_2 = vector3d(0,0,0);
   }
+  return w;
+}
 
-  //printf("r.xdiff_magnitude=%g, rdiff_magnitude=%g\n", r.xdiff_magnitude, rdiff_magnitude);   //debug
-  //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
+weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double temp, double fv,
+                                   double gwidth, double N_crystal, double reduced_density) {
+  weight w = find_weights(r, rp, temp);
 
   double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -176,13 +173,13 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
                                        // as explained in find_energy_new!
 
   weight w_den_p;
-  w_den_p.n_0 = n_den*w_0*dVp;
-  w_den_p.n_1 = n_den*w_1*dVp;
-  w_den_p.n_2 = n_den*w_2*dVp;
-  w_den_p.n_3 = n_den*w_3*dVp;
+  w_den_p.n_0 = n_den*w.n_0*dVp;
+  w_den_p.n_1 = n_den*w.n_1*dVp;
+  w_den_p.n_2 = n_den*w.n_2*dVp;
+  w_den_p.n_3 = n_den*w.n_3*dVp;
 
-  w_den_p.nv_1 = n_den*wv_1*dVp;
-  w_den_p.nv_2 = n_den*wv_2*dVp;
+  w_den_p.nv_1 = n_den*w.nv_1*dVp;
+  w_den_p.nv_2 = n_den*w.nv_2*dVp;
 
   return w_den_p;
 }
