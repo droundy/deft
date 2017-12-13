@@ -210,18 +210,22 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
   for (int l=-inc_Ntot; l<=inc_Ntot; l++) {
     for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
       for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
-  
-        const vector3d rp = (l*lattice_vectors[0] + m*lattice_vectors[1] + o*lattice_vectors[2])*(dx/(lattice_constant/2)) + R;
+        const vector3d rp_from_R = (l*lattice_vectors[0]
+                                    + m*lattice_vectors[1]
+                                    + o*lattice_vectors[2])*(dx/(lattice_constant/2));
+        const vector3d rp = R + rp_from_R;
+        // only bother including points within the inclusion radius:
+        if (rp_from_R.norm() < inclusion_radius*gwidth) {
+          weight w_den_p=find_weighted_den_at_rprime(r, rp, dx, temp, fv, gwidth, N_crystal,
+                                                     reduced_density);
+          w_den_R.n_0 += w_den_p.n_0;
+          w_den_R.n_1 += w_den_p.n_1;
+          w_den_R.n_2 += w_den_p.n_2;
+          w_den_R.n_3 += w_den_p.n_3;
 
-        weight w_den_p=find_weighted_den_at_rprime(r, rp, dx, temp, fv, gwidth, N_crystal,
-                       reduced_density);
-        w_den_R.n_0 += w_den_p.n_0;
-        w_den_R.n_1 += w_den_p.n_1;
-        w_den_R.n_2 += w_den_p.n_2;
-        w_den_R.n_3 += w_den_p.n_3;
-
-        w_den_R.nv_1 += w_den_p.nv_1;
-        w_den_R.nv_2 += w_den_p.nv_2;
+          w_den_R.nv_1 += w_den_p.nv_1;
+          w_den_R.nv_2 += w_den_p.nv_2;
+        }
       }
     }
   }
@@ -280,7 +284,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-        printf("\n\nworking on densities...\n\n");
         int many_cells=(2*weighting_function_radius/lattice_constant)+1;
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -321,10 +324,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           return data_out;
         }
         //printf("free energy is now... %g\n", free_energy);   //debug
-        printf("      finished %.7f%% of the integral\n",
-               100*((i)/double(Nl)
-                    +(j)/uipow(Nl, 2)
-                    +(k + 1)/uipow(Nl, 3)));
+        // printf("      finished %.5f%% of the integral\n",
+        //        100*((i)/double(Nl)
+        //             +(j)/uipow(Nl, 2)
+        //             +(k + 1)/uipow(Nl, 3)));
       }
       printf("   finished %.3f%% of the integral\n",
              100*((i)/double(Nl)
