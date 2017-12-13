@@ -352,6 +352,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         if (isnan(free_energy)) {
           printf("free energy is a NaN!\n");
+          printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
+          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
           data data_out;
           data_out.diff_free_energy_per_atom=2;
           data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
