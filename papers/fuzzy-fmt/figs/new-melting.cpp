@@ -114,7 +114,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   };
 
   const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; //round up! Number of infinitesimal lengths along one of the lattice_vectors
-  
+
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   if ((r-R).norm() > weighting_function_radius + inclusion_radius*gwidth) {
     return w_den_R;
@@ -154,26 +154,26 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   const vector3d lattice_vectors[3] = {
-  vector3d(lattice_constant/2,lattice_constant/2,0),
-  vector3d(lattice_constant/2,0,lattice_constant/2),
-  vector3d(0,lattice_constant/2,lattice_constant/2),
+    vector3d(lattice_constant/2,lattice_constant/2,0),
+    vector3d(lattice_constant/2,0,lattice_constant/2),
+    vector3d(0,lattice_constant/2,lattice_constant/2),
   };
   const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
-  //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell 
+  //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
   //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
   //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
   //NOTE: dx_proper chops up a, whereas the current definition of dx chops up a/2 to create chunks that
   //correspond to infinitesimal lengths, or chunks, along the lattice_vectors.
-  const double dV = uipow(lattice_constant/Nl,3)/4.0;   
-  
+  const double dV = uipow(lattice_constant/Nl,3)/4.0;
+
   //Find N_crystal to normalize reduced density n(r) later
   double N_crystal=0;
   for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
         vector3d r=lattice_vectors[0]*i/double(Nl)
-          + lattice_vectors[1]*j/double(Nl)
-          + lattice_vectors[2]*k/double(Nl);
+                   + lattice_vectors[1]*j/double(Nl)
+                   + lattice_vectors[2]*k/double(Nl);
 
         const int many_cells=2;
         for (int t=-many_cells; t <=many_cells; t++) {
@@ -197,12 +197,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //Integrate over one primitive cell (a parallelepiped) to find free energy
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
-  for (int i=0; i<Nl; i++) {    
+  for (int i=0; i<Nl; i++) {
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
         vector3d r=lattice_vectors[0]*i/double(Nl)
-          + lattice_vectors[1]*j/double(Nl)
-          + lattice_vectors[2]*k/double(Nl);
+                   + lattice_vectors[1]*j/double(Nl)
+                   + lattice_vectors[2]*k/double(Nl);
         //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
@@ -216,7 +216,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
-                                                       lattice_constant, gwidth, norm);
+                              lattice_constant, gwidth, norm);
               n_0 +=n_weight.n_0;
               n_1 +=n_weight.n_1;
               n_2 +=n_weight.n_2;
@@ -226,7 +226,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                        r.x, r.y, r.z, n_weight.n_3, R.x, R.y, R.z, R.norm(), t, u, v);
 
               nv_1 +=n_weight.nv_1;
-              nv_2 +=n_weight.nv_2;  
+              nv_2 +=n_weight.nv_2;
             }
           }
         }
