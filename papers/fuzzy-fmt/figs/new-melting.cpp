@@ -202,7 +202,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
     vector3d(lattice_constant/2,0,lattice_constant/2),
     vector3d(0,lattice_constant/2,lattice_constant/2),
   };
-  
+
   const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; //round up! Number of infinitesimal lengths along one of the lattice_vectors
   
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -210,11 +210,11 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
     return w_den_R;
   }
   
-  for (int l=0; l<inc_Ntot; l++) {  
-    for (int m=0; m<inc_Ntot; m++) {
-      for (int o=0; o<inc_Ntot; o++) {
+  for (int l=-inc_Ntot; l<=inc_Ntot; l++) {
+    for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
+      for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
   
-        const vector3d rp = (l*dx*lattice_vectors[0] + m*dx*lattice_vectors[1] + o*dx*lattice_vectors[2])/(lattice_constant/2) + R;
+        const vector3d rp = (l*lattice_vectors[0] + m*lattice_vectors[1] + o*lattice_vectors[2])*(dx/(lattice_constant/2)) + R;
 
         weight w_den_p=find_weighted_den_at_rprime(r, rp, dx, temp, fv, gwidth, N_crystal,
                        reduced_density);
