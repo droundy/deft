@@ -789,7 +789,7 @@ int main(int argc, const char **argv) {
   double dx=0.01;        //grid point spacing dx=dy=dz=0.01
   int verbose = false;
   int downhill = false;
-  int efficient = false;
+  int efficient = true;
 
   //Downhill Simplex starting guess
   double simplex_fe[3][3] = {{0.8, 0.2, 0},  //best when ordered
