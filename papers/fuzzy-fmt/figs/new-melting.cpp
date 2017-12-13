@@ -352,13 +352,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         //printf("free energy is now... %g\n", free_energy);   //debug
         printf("      finished %.7f%% of the integral\n",
-               100*(i + 1)/double(Nl)
-               *(j + 1)/double(Nl)
-               *(k + 1)/double(Nl));
+               100*((i)/double(Nl)
+                    +(j)/uipow(Nl, 2)
+                    +(k + 1)/uipow(Nl, 3)));
       }
       printf("   finished %.3f%% of the integral\n",
-             100*(i + 1)/double(Nl)
-             *(j + 1)/double(Nl));
+             100*((i)/double(Nl)
+                  +(j + 1)/uipow(Nl, 2)));
     }
     printf("finished %.1f%% of the integral\n",
            100*(i + 1)/double(Nl));
