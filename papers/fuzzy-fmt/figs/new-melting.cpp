@@ -165,7 +165,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   //printf("r.xdiff_magnitude=%g, rdiff_magnitude=%g\n", r.xdiff_magnitude, rdiff_magnitude);   //debug
   //printf("wv_1.x=%g, wv_2.x=%g\n", wv_1.x, wv_2.x);  //debug
 
-  double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
+  double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   const double n_den= find_ngaus(rp, fv, gwidth,
                                  lattice_constant)*(reduced_num_spheres/N_crystal);
@@ -231,7 +231,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
-  double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
+  double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   const vector3d lattice_vectors[3] = {
   vector3d(lattice_constant/2,lattice_constant/2,0),
