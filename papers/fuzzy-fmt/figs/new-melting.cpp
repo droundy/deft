@@ -245,8 +245,6 @@ weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, d
   
   const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
   //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
-  //const double dV = uipow(lattice_constant/Nl,3)/4.0;  // Volume of one parallelepiped is (a^3)/4    
-                                                         //note that dV=2*dx^3 with current definition of dx!
     
   for (int l=0; l< Nl; l++) {    //integrates over one shifted cell
     for (int m=0; m<  Nl; m++) {
