@@ -176,7 +176,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   //For homogeneous, set n_den to constant? ASK!
 
   const double dVp = 2*uipow(dx,3);    // Volume of one infinitesimal parallelepiped dV=2dx^3
-                                       // as explained earlier!
+                                       // as explained in find_energy_new!
 
   weight w_den_p;
   w_den_p.n_0 = n_den*w_0*dVp;
@@ -349,21 +349,19 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
         phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
         //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
-        //const double epsilon=1; ASK!!
-        //free_energy += temp*epsilon*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman's constant times temperature 
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         //printf("free energy is now... %g\n", free_energy);   //debug
         printf("      finished %.7f%% of the integral\n",
-               100*(i + lattice_constant/2/dx)/(lattice_constant/dx)
-               *(j + lattice_constant/2/dx)/(lattice_constant/dx)
-               *(k + lattice_constant/2/dx)/(lattice_constant/dx));
+               100*(i + 1)/(Nl)
+               *(j + 1)/(Nl)
+               *(k + 1)/Nl);
       }
       printf("   finished %.3f%% of the integral\n",
-             100*(i + lattice_constant/2/dx)/(lattice_constant/dx)
-             *(j + lattice_constant/2/dx)/(lattice_constant/dx));
+             100*(i + 1)/(Nl)
+             *(j + 1)/Nl);
     }
     printf("finished %.1f%% of the integral\n",
-           100*(i + lattice_constant/2/dx)/(lattice_constant/dx));
+           100*(i + 1)/Nl);
   }
 
   printf("free_energy is %g\n", free_energy);
