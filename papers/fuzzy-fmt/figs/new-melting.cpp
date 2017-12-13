@@ -175,7 +175,7 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   //For homogeneous, set n_den to constant? ASK!
 
   const double dVp = 2*uipow(dx,3);    // Volume of one infinitesimal parallelepiped dV=2dx^3
-                                       // with current definition of dx! 
+                                       // as explained earlier!
 
   weight w_den_p;
   w_den_p.n_0 = n_den*w_0*dVp;
@@ -244,7 +244,6 @@ weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, d
   };
   
   const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
-  //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
     
   for (int l=0; l< Nl; l++) {    //integrates over one shifted cell
     for (int m=0; m<  Nl; m++) {
@@ -281,7 +280,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   };
   const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
   //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell 
-  const double dV = uipow(lattice_constant/Nl,3)/4.0;   //note that dV=2*dx^3 with current definition of dx!
+  //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
+  //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
+  //NOTE: dx_proper chops up a, whereas the current definition of dx chops up a/2 to create chunks that
+  //correspond to infinitesimal lengths, or chunks, along the lattice_vectors.
+  const double dV = uipow(lattice_constant/Nl,3)/4.0;   
   
   //Find N_crystal to normalize reduced density n(r) later
   double N_crystal=0;
