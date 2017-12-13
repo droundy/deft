@@ -350,6 +350,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
         //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
+        if (isnan(free_energy)) {
+          printf("free energy is a NaN!\n");
+          data data_out;
+          data_out.diff_free_energy_per_atom=2;
+          data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
+          data_out.hfree_energy_per_vol=2;
+          data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
+          return data_out;
+        }
         //printf("free energy is now... %g\n", free_energy);   //debug
         printf("      finished %.7f%% of the integral\n",
                100*((i)/double(Nl)
