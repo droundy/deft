@@ -10,6 +10,7 @@
 
 \newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
 \newcommand{\jpsays}[1]{{\color{red} [\blue{Jordan:} \emph{#1}]}}
+\newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
 
 \begin{document}
 \title{Comparing novel parameter independent broad-histogram methods
@@ -126,7 +127,7 @@ minimum.
 Wang and Landau introduced an algorithm that uses an update
 factor and a statistical histogram to compute the density of states of
 a given system~\cite{wang2001determining, wang2001efficient}.  While
-the method is incredibly powerful it has several user-defined
+the method is incredibly powerful, it has several user-defined
 parameters.  This can make its application to a variety of systems
 something of an art-form since the user needs to determine the ideal
 parameters for his particular system.  Also, detailed balance is
@@ -140,18 +141,19 @@ swendsen1999transition, fitzgerald2000monte} became an attractive
 complimentary simulation algorithm to Wang-Landau in that, if detailed
 balance is ensured, the system is guaranteed to converge (something
 which is not guaranteed for the Wang-Landau Algorithm).  Unfortunately,
-the algorithm can be considerably more difficulte to implement when
-compared to Wang-Landau in particular the infinite temperature
+the algorithm can be considerably more difficult to implement when
+compared to Wang-Landau: in particular, the infinite temperature
 transition matrix~\cite{wang2002transition}.  Also, the time necessary
-for the density of states to converge could in practice be considerable
+for the density of states to converge could be considerable
 due to the algorithm spending too much time exploring low energy states.
+~\tssays{(note to self) The above paragraph could be condensed a bit}
 
 Shell et al.~\cite{shell2003improved, shell2004flat} originially
 implemented Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an
 effort to quickly explore the energies of a given system using WL then
 switch over to TMMC to guarantee convergence. Considerable effort has
 been spent trying to determine the flatness criteria and cutoff for the
-WL portion but there remains no rigorous systimatic way to determine
+WL portion, but there remains no rigorous systematic way to determine
 these parameters~\cite{rane2013monte}.  The algorithm is first run for
 several trial simulations and/or `experience' is used to determine the
 best parameters for a users particular system of
@@ -167,13 +169,13 @@ number of user defined parameters of WL and formulate a theory for why
 the method converges despite detailed balance being violated although
 infrequently was also being udertaken.  Liang, Liu, and Carrol began to
 consider whether WL could be considered a special case of Monte Carlo
-method whose convergence could be mathematically
-proved~\cite{liang2006theory, liang2007stochastic}. In 2007, Liang et
+whose convergence could be mathematically
+proven~\cite{liang2006theory, liang2007stochastic}. In 2007, Liang et
 al.~\cite{liang2007stochastic} argued that WL can be considered a form
 of Stochastic Approximation Monte Carlo (SAMC).  While SAMC can
 guarantee convergence, the method still has a system specific
-user-defined variable which makes applying this algorithm to systems
-difficult.
+user-defined variable which makes applying this algorithm to arbitrary
+systems difficult.
 
 In our work, we have developed several novel algorithms that do not
 require user-defined inputs and therefore should be easily applicable
@@ -302,7 +304,7 @@ The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses t
 \begin{align}
   n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
 \end{align}
-where unlike in the original paper detailing the method, we compute the difusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the difusivity.
+where unlike in the original paper detailing the method, we compute the diffusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the diffusivity.
 \begin{align}
   D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
 \end{align}
@@ -611,13 +613,13 @@ the mix and SAD will end up using TMMC to calculate DOS.}
 \subsubsection{A Tanner dimensions? $(N = 50)$ system with no sticky
 wall}
 
-A system is configured with dimensions $x = y = z = ?$.  A
-filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 50$
+A system is configured with dimensions $x = y = z = 10?$.  A
+filling fraction $\text{ff} = 0.20$ is chosen which yields $N = 50$
 particles in the cubical system.  These particles are randomly
 inserted into the system and random moves are proposed (with a
 translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
 periodic while the $z$-axis is not periodic.  A sticky-wall is not inserted
-along the $z$-axis at one end to promote phase separation.
+along the $z$-axis.
 
 \subsubsection{A $60\times8\times8$ $(N = 202)$ system with a sticky
 wall}
@@ -644,13 +646,13 @@ along the $z$-axis at one end to promote phase separation.
 \subsubsection{A Tanner dimensions? $(N = 500)$ system with no sticky
 wall}
 
-A system is configured with dimensions $x = y = z = ?$.  A
+A system is configured with dimensions $x = y = z = 19?$.  A
 filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 500$
 particles in a cubical system.  These particles are randomly
 inserted into the system and random moves are proposed (with a
 translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
 periodic while the $z$-axis is not periodic.  A sticky-wall is not inserted
-along the $z$-axis at one end to promote phase separation.
+along the $z$-axis.
 
 
 
