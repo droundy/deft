@@ -130,82 +130,6 @@ double find_ngaus(vector3d r, double fv, double gwidth, double lattice_constant)
                        (r.z-lattice_constant)*(r.z-lattice_constant));
     n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
   } 
-    
-// {
-//    //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
-//    double dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
-//                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-//                       r.z*r.z);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0
-//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-//                (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-//                r.z*r.z);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
-//    dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
-//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-//                r.z*r.z);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
-//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-//                r.z*r.z);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//  }
-//  {
-//    //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
-//    double dist = sqrt((r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-//                       (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-//                       r.x*r.x);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
-//    dist = sqrt((r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-//                (r.y-lattice_constant/2)*(r.y-lattice_constant/2) +
-//                r.x*r.x);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
-//    dist = sqrt((r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-//                r.x*r.x);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
-//    dist = sqrt((r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-//                (r.y+lattice_constant/2)*(r.y+lattice_constant/2) +
-//                r.x*r.x);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//  }
-//  {
-//    //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
-//    double dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
-//                       (r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-//                       r.y*r.y);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
-//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-//                (r.z-lattice_constant/2)*(r.z-lattice_constant/2) +
-//                r.y*r.y);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
-//    dist = sqrt((r.x-lattice_constant/2)*(r.x-lattice_constant/2) +
-//                (r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-//                r.y*r.y);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//
-//    //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2
-//    dist = sqrt((r.x+lattice_constant/2)*(r.x+lattice_constant/2) +
-//                (r.z+lattice_constant/2)*(r.z+lattice_constant/2) +
-//                r.y*r.y);
-//    n += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-//  }
   //printf("calculated ngaus is %g\n", n);
   return n;
 }
@@ -250,7 +174,8 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
   //printf("Crystal n_den=%g\n", n_den);
   //For homogeneous, set n_den to constant? ASK!
 
-  double dVp=dx*dx*dx;  //CHANGE THIS? - ASK!
+  const double dVp = 2*uipow(dx,3);    // Volume of one infinitesimal parallelepiped dV=2dx^3
+                                       // with current definition of dx! 
 
   weight w_den_p;
   w_den_p.n_0 = n_den*w_0*dVp;
@@ -265,19 +190,30 @@ weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double te
 }
 
 
-weight find_weighted_den_aboutR(vector3d r, vector3d R,  //COME BACK and update this for parallelepiped?
+weight find_weighted_den_aboutR(vector3d r, vector3d R,  
                                 double dx, double temp,
                                 double fv, double gwidth, double N_crystal, double reduced_density) {
-  const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; // round up!
+                                  
+  double lattice_constant = find_lattice_constant(reduced_density, fv);  
+                               
+  const vector3d lattice_vectors[3] = {
+    vector3d(lattice_constant/2,lattice_constant/2,0),
+    vector3d(lattice_constant/2,0,lattice_constant/2),
+    vector3d(0,lattice_constant/2,lattice_constant/2),
+  };
+  
+  const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; //round up! Number of infinitesimal lengths along one of the lattice_vectors
+  
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   if ((r-R).norm() > weighting_function_radius + inclusion_radius*gwidth) {
     return w_den_R;
   }
   
-  for (int l=-inc_Ntot; l<=inc_Ntot; l++) {   //CAREFUL - couble cause error with int ASK!
-    for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
-      for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
-        const vector3d rp = vector3d(l,m,o)*dx + R;
+  for (int l=0; l<inc_Ntot; l++) {  
+    for (int m=0; m<inc_Ntot; m++) {
+      for (int o=0; o<inc_Ntot; o++) {
+  
+        const vector3d rp = (l*dx*lattice_vectors[0] + m*dx*lattice_vectors[1] + o*dx*lattice_vectors[2])/(lattice_constant/2) + R;
 
         weight w_den_p=find_weighted_den_at_rprime(r, rp, dx, temp, fv, gwidth, N_crystal,
                        reduced_density);
@@ -307,16 +243,16 @@ weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, d
   vector3d(0,lattice_constant/2,lattice_constant/2),
   };
   
-  for (int l=0; l<= (lattice_constant/sqrt(2))/dx; l++) {
-    for (int m=0; m<= ((lattice_constant/sqrt(2))/dx)-l; m++) {
-      for (int o=0; o<= (lattice_constant/sqrt(2))/dx; o++) {
-
-//  for (int l=-(lattice_constant/2)/dx; l<=(lattice_constant/2)/dx; l++) {   //integrates over one shifted cell
-//    for (int m=-(lattice_constant/2)/dx; m<=(lattice_constant/2)/dx; m++) {
-//      for (int o=-(lattice_constant/2)/dx; o<=(lattice_constant/2)/dx; o++) {
-
-      vector3d rp=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-l*lattice_vectors[2]+ m*(lattice_vectors[2]-lattice_vectors[1])+o*lattice_vectors[0])) +s;     
-//        vector3d rp = vector3d(l,m,o)*dx + s;  //ASK! 
+  const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
+  //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
+  //const double dV = uipow(lattice_constant/Nl,3)/4.0;  // Volume of one parallelepiped is (a^3)/4    
+                                                         //note that dV=2*dx^3 with current definition of dx!
+    
+  for (int l=0; l< Nl; l++) {    //integrates over one shifted cell
+    for (int m=0; m<  Nl; m++) {
+      for (int o=0; o<= Nl; o++) {
+        
+        const vector3d rp = (l*dx*lattice_vectors[0] + m*dx*lattice_vectors[1] + o*dx*lattice_vectors[2])/(lattice_constant/2) + s;
         //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
 
         weight w_den_p=find_weighted_den_at_rprime(r, rp, dx,
@@ -329,21 +265,6 @@ weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, d
 
         w_den.nv_1 += w_den_p.nv_1;
         w_den.nv_2 += w_den_p.nv_2;
-        
-        rp=lattice_vectors[1]+((dx/(lattice_constant)/2)*(-l*lattice_vectors[2]+ m*(lattice_vectors[2]-lattice_vectors[1])+o*lattice_vectors[0]))+s;     
-//        rp = vector3d(l,m,o)*dx + s;  //FIX THIS!!
-        
-        w_den_p=find_weighted_den_at_rprime(r, rp, dx,
-                temp, fv, gwidth, N_crystal, reduced_density);
-
-        w_den.n_0 += w_den_p.n_0;
-        w_den.n_1 += w_den_p.n_1;
-        w_den.n_2 += w_den_p.n_2;
-        w_den.n_3 += w_den_p.n_3;
-
-        w_den.nv_1 += w_den_p.nv_1;
-        w_den.nv_2 += w_den_p.nv_2;
-        
       }
     }
   }
@@ -355,20 +276,18 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g, efficient=%i\n", temp, reduced_density, fv, gwidth, dx, efficient);  //debug
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-
-//const double dV = dx*dx*dx;    //
-
-  //Find N_crystal to normalize reduced density n(r) later
-  double N_crystal=0;
   const vector3d lattice_vectors[3] = {
   vector3d(lattice_constant/2,lattice_constant/2,0),
   vector3d(lattice_constant/2,0,lattice_constant/2),
   vector3d(0,lattice_constant/2,lattice_constant/2),
   };
-  const int Nl = (lattice_constant/sqrt(2))/dx;
-  const double dV = uipow(lattice_constant/Nl,3)/4.0;
-
-  for (int i=0; i<Nl; i++) {    //integrate over one cell
+  const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
+  //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell 
+  const double dV = uipow(lattice_constant/Nl,3)/4.0;   //note that dV=2*dx^3 with current definition of dx!
+  
+  //Find N_crystal to normalize reduced density n(r) later
+  double N_crystal=0;
+  for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
         vector3d r=lattice_vectors[0]*i/double(Nl)
@@ -385,17 +304,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
            N_crystal, reduced_num_spheres);
   }
 
+  //Integrate over one primitive cell (a parallelepiped) to find free energy
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
-
-//  const vector3d lattice_vectors[3] = {
-//    vector3d(lattice_constant/2,lattice_constant/2,0),
-//    vector3d(lattice_constant/2,0,lattice_constant/2),
-//    vector3d(0,lattice_constant/2,lattice_constant/2),
-//  };
-
-//integrate over one parallelepiped (one primitive cell)
-  for (int i=0; i<Nl; i++) {    //integrate over one cell
+  for (int i=0; i<Nl; i++) {    
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
         vector3d r=lattice_vectors[0]*i/double(Nl)
@@ -407,10 +319,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-        int all_space=2*weighting_function_radius/lattice_constant+1;
-        for (int t=-all_space; t <=all_space; t++) {
-          for(int u=-all_space; u<=all_space; u++)  {
-            for (int v=-all_space; v<= all_space; v++) {
+        int many_cells=(2*weighting_function_radius/lattice_constant)+1;
+        for (int t=-many_cells; t <=many_cells; t++) {
+          for(int u=-many_cells; u<=many_cells; u++)  {
+            for (int v=-many_cells; v<= many_cells; v++) {
 
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               weight n_weight;
