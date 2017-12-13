@@ -321,6 +321,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
+        printf("\n\nworking on densities...\n\n");
         int many_cells=(2*weighting_function_radius/lattice_constant)+1;
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -338,7 +339,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               n_1 +=n_weight.n_1;
               n_2 +=n_weight.n_2;
               n_3 +=n_weight.n_3;
-              
+              if (n_weight.n_3 > 0.2)
+                printf("n3(%g,%g,%g) gains %g from %g %g %g  at distance %g  i.e. %d %d %d\n",
+                       r.x, r.y, r.z, n_weight.n_3, R.x, R.y, R.z, R.norm(), t, u, v);
+
               nv_1 +=n_weight.nv_1;
               nv_2 +=n_weight.nv_2;  
             }
@@ -352,6 +356,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         if (isnan(free_energy)) {
           printf("free energy is a NaN!\n");
+          printf("position is: %g %g %g\n", r.x, r.y, r.z);
           printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
           printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
           data data_out;
