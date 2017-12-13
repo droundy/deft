@@ -42,7 +42,7 @@ seed = 0
 
 method = ' --' + method_name
 if method[-1] in "123":
-    method = method[:-1] + ' --tmi-version=' + method[-1]
+    method = method[:-1] + ' --tmi-version=' + method[-1] + ' --sad-fraction=' + method[-1]
 
 n = ff/(4*numpy.pi/3)
 N = round(n*lenyz*lenyz*lenx)

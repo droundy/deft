@@ -11,7 +11,7 @@ energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
 methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
+            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad', '-sad3']
 
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/%s-wltmmc*-movie' % filebase)

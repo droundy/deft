@@ -426,7 +426,7 @@ void sw_simulation::end_move_updates(){
     }
     if (use_sad && energies_found > 1) {
       wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
-        /(min_T*moves.total);
+        /(min_T*moves.total*use_sad);
     } else if (use_satmmc) {
       wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
     } else {
@@ -1182,7 +1182,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 // stochastic_weights is under construction by DR and JP (2017).
 // this is used for Stochastic Approximation Monte Carlo.
 
-void sw_simulation::initialize_samc(bool am_sad) {
+void sw_simulation::initialize_samc(int am_sad) {
   use_sad = am_sad;
   assert(sa_t0 || am_sad);
   assert(sa_prefactor);

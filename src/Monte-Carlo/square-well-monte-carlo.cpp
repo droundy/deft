@@ -102,6 +102,7 @@ int main(int argc, const char *argv[]) {
   int samc = false;
   int satmmc = false;
   int sad = false;
+  int sad_fraction = 1;
   int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
@@ -259,6 +260,8 @@ int main(int argc, const char *argv[]) {
      "Use Stochastic-Approximation Monte-Carlo method", "BOOLEAN"},
     {"sad", '\0', POPT_ARG_NONE, &sad, 0,
      "Use Stochastic-Approximation Monte-Carlo method, dynamic version", "BOOLEAN"},
+    {"sad-fraction", '\0', POPT_ARG_INT, &sad_fraction, 0,
+     "Fraction for stochastic approximation monte carlo dynamical version", "INT"},
     {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
      "Use Stochastic-Approximation Transition Matrix Monte-Carlo method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
@@ -575,8 +578,10 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-wltmmc");
     } else if (samc) {
       sprintf(method_tag, "-samc");
-    } else if (sad) {
+    } else if (sad && sad_fraction == 1) {
       sprintf(method_tag, "-sad");
+    } else if (sad) {
+      sprintf(method_tag, "-sad%d", sad_fraction);
     } else if (satmmc) {
       sprintf(method_tag, "-satmmc");
     } else if (oetmmc) {
@@ -857,8 +862,10 @@ int main(int argc, const char *argv[]) {
   } else if (wltmmc) {
     sw.wl_factor = wl_factor;
     sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
-  } else if (samc || sad) {
-    sw.initialize_samc(bool(sad));
+  } else if (samc) {
+    sw.initialize_samc(0);
+  } else if (sad) {
+    sw.initialize_samc(sad_fraction);
   } else if (satmmc) {
     sw.initialize_satmmc();
   } else if (simple_flat) {
