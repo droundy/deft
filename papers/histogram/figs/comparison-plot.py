@@ -46,7 +46,7 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 plt.title('Error at energy %g %s' % (energy,filebase))
                 plt.xlabel('# iterations')
                 plt.ylabel('error')
-                plt.legend(loc = 'best')
+                colors.legend()
                 plt.savefig('figs/%s-error-energy-%g.pdf' % (tex_filebase, energy))
 
                 plt.figure('round-trips-at-energy' )
@@ -54,7 +54,7 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 plt.title('Roundy Trips at energy %g, %s' % (energy,filebase))
                 plt.xlabel('# iterations')
                 plt.ylabel('Roundy Trips')
-                plt.legend(loc = 'best')
+                colors.legend()
                 plt.savefig('figs/%s-round-trips-%g.pdf' % (tex_filebase, energy))
 
                 plt.figure('error-at-energy-round-trips')
@@ -63,7 +63,7 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 plt.title('Error at energy %g %s' % (energy,filebase))
                 plt.xlabel('Roundy Trips')
                 plt.ylabel('Error')
-                plt.legend(loc = 'best')
+                colors.legend()
                 plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
 
         plt.figure('maxerror')
@@ -71,7 +71,7 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
         plt.xlabel('# iterations')
         plt.ylabel('Maximum Entropy Error')
         plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
-        plt.legend(loc = 'best')
+        colors.legend()
         plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
 
         plt.figure('errorinentropy')
@@ -80,7 +80,7 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
         plt.xlabel('#iterations')
         plt.ylabel('Error in Entropy')
         plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
-        plt.legend(loc='best')
+        colors.legend()
         plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
     except:
         raise
