@@ -135,7 +135,7 @@ double find_ngaus(vector3d r, double fv, double gwidth, double lattice_constant)
 }
 
 
-weight find_weighted_den_at_rprime(vector3d r, vector3d rp, double dx, double temp, double fv,
+weight find_weighted_den_integrand(vector3d r, vector3d rp, double dx, double temp, double fv,
                                    double gwidth, double N_crystal, double reduced_density) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
@@ -216,7 +216,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
   
         const vector3d rp = (l*dx*lattice_vectors[0] + m*dx*lattice_vectors[1] + o*dx*lattice_vectors[2])/(lattice_constant/2) + R;
 
-        weight w_den_p=find_weighted_den_at_rprime(r, rp, dx, temp, fv, gwidth, N_crystal,
+        weight w_den_p=find_weighted_den_integrand(r, rp, dx, temp, fv, gwidth, N_crystal,
                        reduced_density);
         w_den_R.n_0 += w_den_p.n_0;
         w_den_R.n_1 += w_den_p.n_1;
@@ -253,7 +253,7 @@ weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, d
         const vector3d rp = (l*dx*lattice_vectors[0] + m*dx*lattice_vectors[1] + o*dx*lattice_vectors[2])/(lattice_constant/2) + s;
         //printf("rxp = %g, ryp= %g, rzp= %g, mag rp=%g\n", rxp, ryp, rzp, rp);
 
-        weight w_den_p=find_weighted_den_at_rprime(r, rp, dx,
+        weight w_den_p=find_weighted_den_integrand(r, rp, dx,
                        temp, fv, gwidth, N_crystal, reduced_density);
 
         w_den.n_0 += w_den_p.n_0;
