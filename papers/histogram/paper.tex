@@ -233,7 +233,8 @@ Monte-Carlo (SA-TMMC).
 
 The second version of transition matrix initialization algorithm works
 by looking at the logarithm of the density of states.  We begin at
-high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the entropy) and work our way
+high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the
+entropy) and work our way
 downward.
 
 \paragraph{Reaching $T_{\min}$:}
@@ -300,11 +301,20 @@ estimate the converged temperature, we use a tangent line, estimated
 using the lowest two ``converged'' energies.
 
 \subsection{TOE3 Algorithm}
-The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses the metric of round trips defined by a walker visiting the extreme energies for the density of states.  The rate for the walker is dependent of the diffusivity $D(\epsilon)$ at a given energy $E$.  The goal of the method is to maximize the number of round trips that the Monte-Carlo simulation makes.  The optimized density of states is given by the following:
+The TOE$_3$ method desribed by Trebst et.
+al.~\cite{trebst2004optimizing} uses the metric of round trips defined
+by a walker visiting the extreme energies for the density of states.
+The rate for the walker is dependent of the diffusivity $D(\epsilon)$
+at a given energy $E$.  The goal of the method is to maximize the
+number of round trips that the Monte-Carlo simulation makes.  The
+optimized density of states is given by the following:
 \begin{align}
   n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
 \end{align}
-where unlike in the original paper detailing the method, we compute the diffusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the diffusivity.
+where unlike in the original paper detailing the method, we compute the
+diffusivity directly from the transition matrix normalized with
+canonical weights.  The optimal ensemble therefore relates the density
+of states to the inverse of the square root of the diffusivity.
 \begin{align}
   D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
 \end{align}
@@ -316,8 +326,9 @@ algorithm while the third makes use of the actual transition
 probabilities~\cite{fitzgerald2000monte}.
 
 \subsubsection{define a transition probability}
-Assuming that the system under study is in a state denoted old and a proposed transition
-is made to a new state denoted new, the probability is defined as
+Assuming that the system under study is in a state denoted old and a
+proposed transition is made to a new state denoted new, the probability
+is defined as
 \begin{align}
   p_{old \rightarrow new} = p_{new \rightarrow old}
 \end{align}
@@ -337,7 +348,8 @@ for advanced Monte-Carlo moves this would not be the
 case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of
 observing the system in the old state can be found based on the
 ensemble constraints placed on the system.  Fitzgerald et al.
-considered the system of interest using the canonical ensemble however extension to other ensembles is quite natural.
+considered the system of interest using the canonical ensemble however
+extension to other ensembles is quite natural.
 \begin{align}
   \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
 \end{align}
@@ -352,22 +364,37 @@ matrix (analogous to the transition histogram matrix).
 \begin{align}
   C_{N,\delta} = C_{N,\delta} + p_{a}\\
   C_{N,0} = C_{N,0} +(1 - p_{a})
-\end{align}
-If $\delta=0$, that is, the energy state has not been changed, then only
-$C_{N,0}$ is incremented by unity. Fitzgerald et al.~\cite{fitzgerald2000monte}
-show that defining the third step this way results in a uniform improvement over
-using histogram estimators to determine the particle number probability distribution (PNPD).
+\end{align} If $\delta=0$, that is, the energy state has not been
+changed, then only $C_{N,0}$ is incremented by unity. Fitzgerald et
+al.~\cite{fitzgerald2000monte} show that defining the third step this
+way results in a uniform improvement over using histogram estimators to
+determine the particle number probability distribution (PNPD).
 
 \subsection{Wang-Landau Algorithm}
 
-The Wang-Landau Algorithm developed by Wang and Landau proposes a random walk in energy space in order to estimate the density of states~\cite{wang2001efficient}. While methods such as Metropolis Sampling and Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution and require sampling at individual temperatures, the Wang-Landau algorithm uses a flat histogram and performs a random walk in energy space to determine the density of states~\cite{wang2001determining, landau2014guide}. Wang-Landau's major tenant is that when counting the histogram
-$H(\epsilon)$, the energy occurences should form a flat distribution.  The criteria for flat sampling is given by
+The Wang-Landau Algorithm developed by Wang and Landau proposes a
+random walk in energy space in order to estimate the density of
+states~\cite{wang2001efficient}. While methods such as Metropolis
+Sampling and Swendsen-Wang cluster
+flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution
+and require sampling at individual temperatures, the Wang-Landau
+algorithm uses a flat histogram and performs a random walk in energy
+space to determine the density of states~\cite{wang2001determining,
+landau2014guide}. Wang-Landau's major tenant is that when counting the
+histogram $H(\epsilon)$, the energy occurences should form a flat
+distribution.  The criteria for flat sampling is given by
 \begin{equation}
 	\frac{\min_{\epsilon} H(\epsilon)}
 	{\big\langle H(\epsilon)\big\rangle }
 	> \eta
-\end{equation}
-where $\eta$ is usually set to $0.80$ and determines how many times each energy is sampled relative to the mean number of visits.  Difficulties can occur with this flatness criteria due to the fact that some energies on a given energy range might never be sampled~\cite{haber2014transition}.  Over the past decade much attention was directed at examining the rate of convergence and error saturation~\cite{lee2006convergence, belardinelli2007wang}.  The algorithm is briefly outlined below where $w$ represents the weights:
+\end{equation} where $\eta$ is usually set to $0.80$ and determines how
+many times each energy is sampled relative to the mean number of
+visits.  Difficulties can occur with this flatness criteria due to the
+fact that some energies on a given energy range might never be
+sampled~\cite{haber2014transition}.  Over the past decade much
+attention was directed at examining the rate of convergence and error
+saturation~\cite{lee2006convergence, belardinelli2007wang}.  The
+algorithm is briefly outlined below where $w$ represents the weights:
 \begin{equation}
 	\ln{w_{k+1}(\epsilon,N)}=\ln{w_{k}(\epsilon,N)}
 	+\gamma
