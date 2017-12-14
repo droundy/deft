@@ -6,3 +6,9 @@ c .pyc
 
 | python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-100x10 noshow
 c .pyc
+
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N500 noshow
+c .pyc
+
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.20-N50 noshow
+c .pyc
