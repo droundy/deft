@@ -926,6 +926,7 @@ int main(int argc, const char **argv) {
   reduced_density=1.2;
   fv=0.8;
   double gwidth=0.325;
+  efficient = true;
 
   data e_data_new =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(efficient), bool(verbose));
   printf("e_data_new is: %g, %g, %g, %g, efficient=%i\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol, bool(efficient));
