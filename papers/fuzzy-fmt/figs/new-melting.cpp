@@ -231,6 +231,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           }
         }
         phi_1 = -n_0*log(1-n_3);
+        printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g", n_0, n_3, 1-n_3, phi_1);  //debug
         phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
         phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
@@ -260,6 +261,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     }
     printf("finished %.1f%% of the integral\n",
            100*(i + 1)/double(Nl));
+    printf("free_energy=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);   //debug
   }
 
   printf("free_energy is %g\n", free_energy);
