@@ -10,6 +10,7 @@
 
 \newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
 \newcommand{\jpsays}[1]{{\color{red} [\blue{Jordan:} \emph{#1}]}}
+\newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
 
 \begin{document}
 \title{Comparing novel parameter independent broad-histogram methods
@@ -126,7 +127,7 @@ minimum.
 Wang and Landau introduced an algorithm that uses an update
 factor and a statistical histogram to compute the density of states of
 a given system~\cite{wang2001determining, wang2001efficient}.  While
-the method is incredibly powerful it has several user-defined
+the method is incredibly powerful, it has several user-defined
 parameters.  This can make its application to a variety of systems
 something of an art-form since the user needs to determine the ideal
 parameters for his particular system.  Also, detailed balance is
@@ -140,18 +141,19 @@ swendsen1999transition, fitzgerald2000monte} became an attractive
 complimentary simulation algorithm to Wang-Landau in that, if detailed
 balance is ensured, the system is guaranteed to converge (something
 which is not guaranteed for the Wang-Landau Algorithm).  Unfortunately,
-the algorithm can be considerably more difficulte to implement when
-compared to Wang-Landau in particular the infinite temperature
+the algorithm can be considerably more difficult to implement when
+compared to Wang-Landau: in particular, the infinite temperature
 transition matrix~\cite{wang2002transition}.  Also, the time necessary
-for the density of states to converge could in practice be considerable
+for the density of states to converge could be considerable
 due to the algorithm spending too much time exploring low energy states.
+~\tssays{(note to self) The above paragraph could be condensed a bit}
 
 Shell et al.~\cite{shell2003improved, shell2004flat} originially
 implemented Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an
 effort to quickly explore the energies of a given system using WL then
 switch over to TMMC to guarantee convergence. Considerable effort has
 been spent trying to determine the flatness criteria and cutoff for the
-WL portion but there remains no rigorous systimatic way to determine
+WL portion, but there remains no rigorous systematic way to determine
 these parameters~\cite{rane2013monte}.  The algorithm is first run for
 several trial simulations and/or `experience' is used to determine the
 best parameters for a users particular system of
@@ -167,13 +169,13 @@ number of user defined parameters of WL and formulate a theory for why
 the method converges despite detailed balance being violated although
 infrequently was also being udertaken.  Liang, Liu, and Carrol began to
 consider whether WL could be considered a special case of Monte Carlo
-method whose convergence could be mathematically
-proved~\cite{liang2006theory, liang2007stochastic}. In 2007, Liang et
+whose convergence could be mathematically
+proven~\cite{liang2006theory, liang2007stochastic}. In 2007, Liang et
 al.~\cite{liang2007stochastic} argued that WL can be considered a form
 of Stochastic Approximation Monte Carlo (SAMC).  While SAMC can
 guarantee convergence, the method still has a system specific
-user-defined variable which makes applying this algorithm to systems
-difficult.
+user-defined variable which makes applying this algorithm to arbitrary
+systems difficult.
 
 In our work, we have developed several novel algorithms that do not
 require user-defined inputs and therefore should be easily applicable
@@ -231,7 +233,8 @@ Monte-Carlo (SA-TMMC).
 
 The second version of transition matrix initialization algorithm works
 by looking at the logarithm of the density of states.  We begin at
-high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the entropy) and work our way
+high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the
+entropy) and work our way
 downward.
 
 \paragraph{Reaching $T_{\min}$:}
@@ -298,11 +301,20 @@ estimate the converged temperature, we use a tangent line, estimated
 using the lowest two ``converged'' energies.
 
 \subsection{TOE3 Algorithm}
-The TOE$_3$ method desribed by Trebst et. al.~\cite{trebst2004optimizing} uses the metric of round trips defined by a walker visiting the extreme energies for the density of states.  The rate for the walker is dependent of the diffusivity $D(\epsilon)$ at a given energy $E$.  The goal of the method is to maximize the number of round trips that the Monte-Carlo simulation makes.  The optimized density of states is given by the following:
+The TOE$_3$ method desribed by Trebst et.
+al.~\cite{trebst2004optimizing} uses the metric of round trips defined
+by a walker visiting the extreme energies for the density of states.
+The rate for the walker is dependent of the diffusivity $D(\epsilon)$
+at a given energy $E$.  The goal of the method is to maximize the
+number of round trips that the Monte-Carlo simulation makes.  The
+optimized density of states is given by the following:
 \begin{align}
   n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
 \end{align}
-where unlike in the original paper detailing the method, we compute the difusivity directly from the transition matrix normalized with canonical weights.  The optimal ensemble therefore relates the density of states to the inverse of the square root of the difusivity.
+where unlike in the original paper detailing the method, we compute the
+diffusivity directly from the transition matrix normalized with
+canonical weights.  The optimal ensemble therefore relates the density
+of states to the inverse of the square root of the diffusivity.
 \begin{align}
   D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
 \end{align}
@@ -314,8 +326,9 @@ algorithm while the third makes use of the actual transition
 probabilities~\cite{fitzgerald2000monte}.
 
 \subsubsection{define a transition probability}
-Assuming that the system under study is in a state denoted old and a proposed transition
-is made to a new state denoted new, the probability is defined as
+Assuming that the system under study is in a state denoted old and a
+proposed transition is made to a new state denoted new, the probability
+is defined as
 \begin{align}
   p_{old \rightarrow new} = p_{new \rightarrow old}
 \end{align}
@@ -335,7 +348,8 @@ for advanced Monte-Carlo moves this would not be the
 case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of
 observing the system in the old state can be found based on the
 ensemble constraints placed on the system.  Fitzgerald et al.
-considered the system of interest using the canonical ensemble however extension to other ensembles is quite natural.
+considered the system of interest using the canonical ensemble however
+extension to other ensembles is quite natural.
 \begin{align}
   \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
 \end{align}
@@ -350,22 +364,37 @@ matrix (analogous to the transition histogram matrix).
 \begin{align}
   C_{N,\delta} = C_{N,\delta} + p_{a}\\
   C_{N,0} = C_{N,0} +(1 - p_{a})
-\end{align}
-If $\delta=0$, that is, the energy state has not been changed, then only
-$C_{N,0}$ is incremented by unity. Fitzgerald et al.~\cite{fitzgerald2000monte}
-show that defining the third step this way results in a uniform improvement over
-using histogram estimators to determine the particle number probability distribution (PNPD).
+\end{align} If $\delta=0$, that is, the energy state has not been
+changed, then only $C_{N,0}$ is incremented by unity. Fitzgerald et
+al.~\cite{fitzgerald2000monte} show that defining the third step this
+way results in a uniform improvement over using histogram estimators to
+determine the particle number probability distribution (PNPD).
 
 \subsection{Wang-Landau Algorithm}
 
-The Wang-Landau Algorithm developed by Wang and Landau proposes a random walk in energy space in order to estimate the density of states~\cite{wang2001efficient}. While methods such as Metropolis Sampling and Swendsen-Wang cluster flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution and require sampling at individual temperatures, the Wang-Landau algorithm uses a flat histogram and performs a random walk in energy space to determine the density of states~\cite{wang2001determining, landau2014guide}. Wang-Landau's major tenant is that when counting the histogram
-$H(\epsilon)$, the energy occurences should form a flat distribution.  The criteria for flat sampling is given by
+The Wang-Landau Algorithm developed by Wang and Landau proposes a
+random walk in energy space in order to estimate the density of
+states~\cite{wang2001efficient}. While methods such as Metropolis
+Sampling and Swendsen-Wang cluster
+flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution
+and require sampling at individual temperatures, the Wang-Landau
+algorithm uses a flat histogram and performs a random walk in energy
+space to determine the density of states~\cite{wang2001determining,
+landau2014guide}. Wang-Landau's major tenant is that when counting the
+histogram $H(\epsilon)$, the energy occurences should form a flat
+distribution.  The criteria for flat sampling is given by
 \begin{equation}
 	\frac{\min_{\epsilon} H(\epsilon)}
 	{\big\langle H(\epsilon)\big\rangle }
 	> \eta
-\end{equation}
-where $\eta$ is usually set to $0.80$ and determines how many times each energy is sampled relative to the mean number of visits.  Difficulties can occur with this flatness criteria due to the fact that some energies on a given energy range might never be sampled~\cite{haber2014transition}.  Over the past decade much attention was directed at examining the rate of convergence and error saturation~\cite{lee2006convergence, belardinelli2007wang}.  The algorithm is briefly outlined below where $w$ represents the weights:
+\end{equation} where $\eta$ is usually set to $0.80$ and determines how
+many times each energy is sampled relative to the mean number of
+visits.  Difficulties can occur with this flatness criteria due to the
+fact that some energies on a given energy range might never be
+sampled~\cite{haber2014transition}.  Over the past decade much
+attention was directed at examining the rate of convergence and error
+saturation~\cite{lee2006convergence, belardinelli2007wang}.  The
+algorithm is briefly outlined below where $w$ represents the weights:
 \begin{equation}
 	\ln{w_{k+1}(\epsilon,N)}=\ln{w_{k}(\epsilon,N)}
 	+\gamma
@@ -553,9 +582,18 @@ energy $E_{\text{min}}$ and maximum entropy state $S_{\text{max}}$
 being calculated (with the exception of the WL-TMMC method where both
 of these parameters are needed a priori).  In the sections below, we
 examine systems with different particles sizes, system dimensions, and
-sticky-wall. ~\jpsays{explain sticky-wall here or
-  elsewhere?}\davidsays{I would put a subsection here to explain the
-  sticky wall configuration.}
+sticky-wall.
+
+\subsubsection{Sticky-wall configuration}
+A sticky-wall is an attractive wall that impacts particle moves.  Only
+one such wall is inserted into a simulation and the intent is to assist
+in phase separation.  As the temperature of the system decreases, an
+increase in particle aggregation near the sticky-wall becomes evident.
+As the energy of the particles is decreased, the particles are unlikely
+to be able to escape the attractive sticky-wall potential.  By
+examining the particle number density vs the system length (z-axis),
+phase transitions to a liquid-vapor system from a vapor dominated
+system become evident.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-30x4-entropy-error.pdf}
@@ -570,8 +608,18 @@ sticky-wall. ~\jpsays{explain sticky-wall here or
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-100x10-entropy-error}
   \caption{The average entropy error for each method is shown with
-    WLTMMC using a cutoff of 10$^-10$ serving as the
+    WL-TMMC using a cutoff of 10$^{-10}$ serving as the
     standard.}\label{fig:avgS-100x10}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_20-N50-entropy-error.pdf} 
+  \caption{The average entropy error is shown with tmi3 acting as the 
+  'golden' standard.}
+\end{figure}
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error.pdf} 
+  \caption{The average entropy error is shown with tmi3 acting as the 
+  'golden' standard.}
 \end{figure}
 
 \subsubsection{A $30\times4\times4$ $(N = 25)$ system with a sticky
@@ -602,13 +650,13 @@ the mix and SAD will end up using TMMC to calculate DOS.}
 \subsubsection{A Tanner dimensions? $(N = 50)$ system with no sticky
 wall}
 
-A system is configured with dimensions $x = y = z = ?$.  A
-filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 50$
+A system is configured with dimensions $x = y = z = 10?$.  A
+filling fraction $\text{ff} = 0.20$ is chosen which yields $N = 50$
 particles in the cubical system.  These particles are randomly
 inserted into the system and random moves are proposed (with a
 translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
 periodic while the $z$-axis is not periodic.  A sticky-wall is not inserted
-along the $z$-axis at one end to promote phase separation.
+along the $z$-axis.
 
 \subsubsection{A $60\times8\times8$ $(N = 202)$ system with a sticky
 wall}
@@ -635,13 +683,13 @@ along the $z$-axis at one end to promote phase separation.
 \subsubsection{A Tanner dimensions? $(N = 500)$ system with no sticky
 wall}
 
-A system is configured with dimensions $x = y = z = ?$.  A
+A system is configured with dimensions $x = y = z = 19?$.  A
 filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 500$
 particles in a cubical system.  These particles are randomly
 inserted into the system and random moves are proposed (with a
 translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
 periodic while the $z$-axis is not periodic.  A sticky-wall is not inserted
-along the $z$-axis at one end to promote phase separation.
+along the $z$-axis.
 
 
 

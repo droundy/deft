@@ -37,6 +37,9 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
 
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
+
+        if not os.path.exists('figs/s000'):
+                os.makedirs('figs/s000')
         if energy > 0:
                 plt.figure('error-at-energy-iterations')
                 colors.plot(iterations, erroratenergy, method=method[1:])
