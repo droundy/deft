@@ -236,9 +236,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R,
 weight find_weighted_densities(vector3d r, vector3d s, double dx, double temp, double fv,   //NEED to pass lattice_vectors?   ASK!
                                double gwidth, double N_crystal, double reduced_density) {
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  weight w_den;
-  w_den.n_0=0, w_den.n_1=0, w_den.n_2=0, w_den.n_3=0;  
-  w_den.nv_1.x=0, w_den.nv_1.y=0, w_den.nv_1.z=0, w_den.nv_2.x=0, w_den.nv_2.y=0, w_den.nv_2.z=0;
+  weight w_den = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   
   const vector3d lattice_vectors[3] = {
   vector3d(lattice_constant/2,lattice_constant/2,0),
