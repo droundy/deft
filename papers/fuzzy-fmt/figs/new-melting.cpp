@@ -818,9 +818,13 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  temp=2;
+  reduced_density=1.2;
+  fv=0.8;
+  //double gw=0.325;
   printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
-  data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
+  data e_data_new =find_energy_new(temp, reduced_density, fv, 0.325, data_dir, dx, bool(verbose));
   printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
   return 0;  //for debug
