@@ -162,8 +162,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
   //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
   //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
-  //NOTE: dx_proper chops up a, whereas the current definition of dx chops up a/2 to create chunks that
-  //correspond to infinitesimal lengths, or chunks, along the lattice_vectors.
+  //NOTE: dx_proper chops up lattice constant a, whereas the current definition of dx chops up a/2 to create 
+  //chunks that correspond in number to infinitesimal lengths, or chunks, along the lattice_vectors. 
+  //dx_proper=lattice_constant/number of chunks along lattice vector   
+  //dx=(lattice_constant/2)/number of chunks along lattice vector
   const double dV = uipow(lattice_constant/Nl,3)/4.0;
 
   //Find N_crystal to normalize reduced density n(r) later
