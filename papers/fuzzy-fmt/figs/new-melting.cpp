@@ -263,7 +263,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     }
     printf("finished %.1f%% of the integral\n",
            100*(i + 1)/double(Nl));
-    printf("free_energy=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);   //debug
   }
 
   printf("free_energy is %g\n", free_energy);
