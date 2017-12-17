@@ -416,11 +416,18 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
+  static int max_energy_seen = -1;
+  static int min_energy_seen = -1;
   if (sa_t0 || use_sad || use_satmmc) {
     if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
+      if (max_energy_seen < 0 || energy > max_energy_seen) max_energy_seen = energy;
+      if (min_energy_seen < 0 || energy < min_energy_seen) min_energy_seen = energy;
     }
-    if (use_sad || use_satmmc) {
+    if (use_sad && energies_found > 1) {
+      wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
+        /(min_T*moves.total*use_sad);
+    } else if (use_satmmc) {
       wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
     } else {
       wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
@@ -493,7 +500,7 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   return error_times_Z/Z;
 }
 
-double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
+double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 
   double *ln_dos = new double[energy_levels]();
 
@@ -509,11 +516,21 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
     // the density of states is determined directly from the weights.
     int minE = 0;
     double betamax = 1.0/min_T;
+    if (use_sad) {
+      // This is hokey, but we just want to ensure that we have a proper
+      // max_entropy_state before computing the ln_dos.
+      max_entropy_state = 0;
+      for (int i=0; i<energy_levels; i++) {
+        if (ln_energy_weights[i] < ln_energy_weights[max_entropy_state]) {
+          max_entropy_state = i;
+        }
+      }
+    }
     for (int i=0; i<energy_levels; i++) {
       ln_dos[i] = ln_energy_weights[max_entropy_state] - ln_energy_weights[i];
       if (!minE && ln_dos[i-1] - ln_dos[i] > betamax) minE = i;
     }
-    if (!sa_t0) {
+    if (use_sad) {
       // Above the max_entropy_state our weights are effectively constant,
       // so the density of states is proportional to our histogram.
       for (int i=0; i<max_entropy_state; i++) {
@@ -526,9 +543,20 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) const {
       // important energy above for extreme clarity.
       for (int i=minE+1; i<energy_levels; i++) {
         if (energy_histogram[i]) {
-          ln_dos[i] = ln_dos[i] + log(energy_histogram[i]/double(energy_histogram[minE]))
+          ln_dos[i] = ln_dos[minE] + log(energy_histogram[i]/double(energy_histogram[minE]))
             - (i-minE)*betamax;  // the last bit gives Boltzmann factor
         }
+      }
+      // Now let us set the ln_dos for any sites we have never visited
+      // to be equal to the minimum value of ln_dos for sites we
+      // *have* visited.  These are unknown densities of states, and
+      // there is no particular reason to set them to be crazy low.
+      double lowest_ln_dos = 0;
+      for (int i=0; i<energy_levels; i++) {
+        if (energy_histogram[i]) lowest_ln_dos = min(lowest_ln_dos, ln_dos[i]);
+      }
+      for (int i=0; i<energy_levels; i++) {
+        if (!energy_histogram[i]) ln_dos[i] = lowest_ln_dos;
       }
     }
   } else if(dos_type == transition_dos) {
@@ -1044,6 +1072,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
                                            double wl_threshold, double wl_cutoff,
                                            bool fixed_energy_range) {
   assert(wl_factor);
+  use_wl = true;
   const double original_wl_factor = wl_factor;
   int weight_updates = 0;
   bool done = false;
@@ -1153,7 +1182,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 // stochastic_weights is under construction by DR and JP (2017).
 // this is used for Stochastic Approximation Monte Carlo.
 
-void sw_simulation::initialize_samc(bool am_sad) {
+void sw_simulation::initialize_samc(int am_sad) {
   use_sad = am_sad;
   assert(sa_t0 || am_sad);
   assert(sa_prefactor);
@@ -1647,7 +1676,7 @@ void sw_simulation::initialize_transitions() {
   set_min_important_energy();
 }
 
-static void write_t_file(const sw_simulation &sw, const char *fname) {
+static void write_t_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1686,30 +1715,42 @@ static void write_t_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
-static void write_d_file(const sw_simulation &sw, const char *fname) {
+static void write_d_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
     exit(1);
   }
   sw.write_header(f);
-  fprintf(f, "# energy\tlndos\tps\n");
   dos_types how_to_compute_dos = transition_dos;
-  bool using_wl = sw.wl_factor && !(sw.use_sad || sw.use_satmmc || sw.sa_t0);
-  if (sw.use_sad || sw.sa_t0 || using_wl) how_to_compute_dos = weights_dos;
+  if (sw.use_sad || sw.sa_t0 || sw.use_wl) how_to_compute_dos = weights_dos;
   double *lndos = sw.compute_ln_dos(how_to_compute_dos);
+  double *lndos_transitions = sw.compute_ln_dos(transition_dos);
   double maxdos = lndos[0];
-  for (int i = 0; i < sw.energy_levels; i++) {
-    if (maxdos < lndos[i]) maxdos = lndos[i];
+  double maxdos_transitions = lndos_transitions[0];
+  if (how_to_compute_dos != transition_dos) {
+    fprintf(f, "# energy\tlndos\tps\tlndos_tm\n");
+  } else {
+    fprintf(f, "# energy\tlndos\tps\n");
   }
   for (int i = 0; i < sw.energy_levels; i++) {
-    fprintf(f, "%d\t%g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
+    if (maxdos < lndos[i]) maxdos = lndos[i];
+    if (maxdos_transitions < lndos_transitions[i]) maxdos_transitions = lndos_transitions[i];
+  }
+  for (int i = 0; i < sw.energy_levels; i++) {
+    if (how_to_compute_dos != transition_dos) {
+      fprintf(f, "%d\t%g\t%ld\t%g\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i],
+              lndos_transitions[i] - maxdos_transitions);
+    } else {
+      fprintf(f, "%d\t%g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
+    }
   }
   fclose(f);
   delete[] lndos;
+  delete[] lndos_transitions;
 }
 
-static void write_lnw_file(const sw_simulation &sw, const char *fname) {
+static void write_lnw_file(sw_simulation &sw, const char *fname) {
   FILE *f = fopen(fname,"w");
   if (!f) {
     printf("Unable to create file %s!\n", fname);
@@ -1727,7 +1768,7 @@ static void write_lnw_file(const sw_simulation &sw, const char *fname) {
   fclose(f);
 }
 
-void sw_simulation::write_transitions_file() const {
+void sw_simulation::write_transitions_file() {
   // silently do not save if there is not file name
   if (transitions_filename) write_t_file(*this, transitions_filename);
 
@@ -1769,7 +1810,9 @@ void sw_simulation::write_transitions_file() const {
   }
 }
 
-void sw_simulation::write_header(FILE *f) const {
+void sw_simulation::write_header(FILE *f) {
+  double *ln_dos = compute_ln_dos(transition_dos);
+
   fprintf(f, "# version: %s\n", version_identifier());
   fprintf(f, "# seed: %ld\n", random::seedval);
   fprintf(f, "# well_width: %g\n", well_width);
@@ -1792,7 +1835,6 @@ void sw_simulation::write_header(FILE *f) const {
 
   fprintf(f, "\n");
 
-  double *ln_dos = compute_ln_dos(transition_dos);
   fprintf(f, "# converged state: %d\n", converged_to_state());
   fprintf(f, "# converged temperature: %g\n", converged_to_temperature(ln_dos));
   delete[] ln_dos;

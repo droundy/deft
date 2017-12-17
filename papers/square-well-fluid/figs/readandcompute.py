@@ -20,6 +20,20 @@ def e_lndos(fbase):
     lndos = e_lndos[:,1]
     return energy, lndos
 
+def e_lndos_lndostm(fbase):
+    if fbase[-len('-lndos.dat'):] == '-lndos.dat':
+        e_lndos = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
+    else:
+        e_lndos = numpy.loadtxt(fbase+"-lndos.dat", ndmin=2, dtype=numpy.float)
+
+    energy = -e_lndos[:,0] # array of energies
+    lndos = e_lndos[:,1]
+    if len(e_lndos[0,:]) >= 4:
+        lndostm = e_lndos[:,3]
+    else:
+        lndostm = None
+    return energy, lndos, lndostm
+
 def e_lnw(fbase):
     e_lnw = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2, dtype=numpy.float)
 

@@ -4,7 +4,7 @@ import matplotlib, sys
 if 'show' not in sys.argv:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy, time, os
+import numpy, time, os, colors
 
 matplotlib.rc('text', usetex=True)
 
@@ -32,7 +32,6 @@ maxhist = 0
 numframes = 0
 
 dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
-colors = ['k', 'b', 'r', 'g', 'c', 'm']
 
 lastframe = -1
 alldone = False
@@ -70,7 +69,7 @@ if numframes > 200:
 print 'numframes', numframes
 
 for frame in xrange(numframes):
-    if frame % 10 == 0:
+    if frame % 25 == 0:
         print 'working on frame %d/%d' % (frame, numframes)
     plt.cla()
 
@@ -80,16 +79,17 @@ for frame in xrange(numframes):
 
         try:
             e, hist = readandcompute.e_and_total_init_histogram(basename)
-            ax.plot(e, hist, colors[suffix_index]+'-', label=suffix)
+            colors.plot(e, hist, method=suffix)
             datname = basename+'-transitions.dat'
             min_T = readandcompute.minT(datname)
-            ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
-            min_important_energy = readandcompute.min_important_energy(basename)
-            #ax.axvline(-min_important_energy, color='b', linestyle=':')
-            #ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
+            # ax.axvline(-readandcompute.max_entropy_state(basename), color='r', linestyle=':')
+            # min_important_energy = readandcompute.min_important_energy(basename)
+            # ax.axvline(-min_important_energy, color='b', linestyle=':')
+            # ax.axvline(-readandcompute.converged_state(datname), color=colors[suffix_index], linestyle=':')
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except Exception as e:
+            print(e)
             pass
 
     ax.set_xlabel(r'$E$')

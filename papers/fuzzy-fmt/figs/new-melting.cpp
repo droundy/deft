@@ -23,6 +23,15 @@
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 #include "version-identifier.h"
+#include "vector3d.h"
+
+// radius we need to integrate around a gaussian, in units of gw.
+const double inclusion_radius = 3.0;
+
+// weighting_function_radius is the distance at which we feel we can
+// assume the weighting functions are all zero.  It is in units of
+// distance.
+const double weighting_function_radius=3.0;
 
 static inline void took(const char *name) {
   static clock_t last_time = clock();
@@ -55,11 +64,224 @@ double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
 
+//%%%%%%%%%%%NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+struct weight {
+  double n_0;
+  double n_1;
+  double n_2;
+  double n_3;
+  vector3d nv_1;
+  vector3d nv_2;
+};
+
+static inline double density_gaussian(double r, double gwidth, double norm) {
+  return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
+}
+
+weight find_weights(vector3d r, vector3d rp, double temp) {
+  vector3d rdiff=r-rp;
+  double rdiff_magnitude=rdiff.norm();
+
+  const double sigma=1;
+  const double epsilon=1;
+  const double Rad=sigma/pow(2, 5.0/6);
+  const double alpha = sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
+  const double zeta = alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
+
+  weight w;
+
+  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(rdiff_magnitude-(alpha/2),2)/uipow(zeta,2));
+  w.n_0=w.n_2/(4*M_PI*Rad*Rad);
+  w.n_1=w.n_2/(4*M_PI*Rad);
+  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
+  if (rdiff_magnitude > 0) {
+    w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
+    w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
+  } else {
+    w.nv_1 = vector3d(0,0,0);
+    w.nv_2 = vector3d(0,0,0);
+  }
+  return w;
+}
+
+weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
+                                double lattice_constant, double gwidth, double norm) {
+  const vector3d lattice_vectors[3] = {
+    vector3d(lattice_constant/2,lattice_constant/2,0),
+    vector3d(lattice_constant/2,0,lattice_constant/2),
+    vector3d(0,lattice_constant/2,lattice_constant/2),
+  };
+
+  const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; //round up! Number of infinitesimal lengths along one of the lattice_vectors
+
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  if ((r-R).norm() > weighting_function_radius + inclusion_radius*gwidth) {
+    return w_den_R;
+  }
+
+  const double df = dx/(lattice_constant/2);
+  const vector3d da1 = lattice_vectors[0]*df;
+  const vector3d da2 = lattice_vectors[1]*df;
+  const vector3d da3 = lattice_vectors[2]*df;
+  const double dVp = da1.cross(da2).dot(da3);
+  for (int l=-inc_Ntot; l<=inc_Ntot; l++) {
+    for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
+      for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
+        const vector3d rp_from_R = l*da1 + m*da2 + o*da3;
+        const vector3d rp = R + rp_from_R;
+        // only bother including points within the inclusion radius:
+        if (rp_from_R.norm() < inclusion_radius*gwidth) {
+          weight w = find_weights(r, rp, temp);
+          double n_rp = density_gaussian((r-rp).norm(), gwidth, norm);
+          w_den_R.n_0 += w.n_0*n_rp*dVp;
+          w_den_R.n_1 += w.n_1*n_rp*dVp;
+          w_den_R.n_2 += w.n_2*n_rp*dVp;
+          w_den_R.n_3 += w.n_3*n_rp*dVp;
+
+          w_den_R.nv_1 += w.nv_1*n_rp*dVp;
+          w_den_R.nv_2 += w.nv_2*n_rp*dVp;
+        }
+      }
+    }
+  }
+
+  return w_den_R;
+}
+
+data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
+  printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
+  double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
+  double lattice_constant = find_lattice_constant(reduced_density, fv);
+  const vector3d lattice_vectors[3] = {
+    vector3d(lattice_constant/2,lattice_constant/2,0),
+    vector3d(lattice_constant/2,0,lattice_constant/2),
+    vector3d(0,lattice_constant/2,lattice_constant/2),
+  };
+  const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
+  //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
+  //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
+  //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
+  //NOTE: dx_proper chops up a, whereas the current definition of dx chops up a/2 to create chunks that
+  //correspond to infinitesimal lengths, or chunks, along the lattice_vectors.
+  const double dV = uipow(lattice_constant/Nl,3)/4.0;
+
+  //Find N_crystal to normalize reduced density n(r) later
+  double N_crystal=0;
+  for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
+    for (int j=0; j<Nl; j++) {
+      for (int k=0; k<Nl; k++) {
+        vector3d r=lattice_vectors[0]*i/double(Nl)
+                   + lattice_vectors[1]*j/double(Nl)
+                   + lattice_vectors[2]*k/double(Nl);
+
+        const int many_cells=2;
+        for (int t=-many_cells; t <=many_cells; t++) {
+          for(int u=-many_cells; u<=many_cells; u++)  {
+            for (int v=-many_cells; v<= many_cells; v++) {
+              const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+              N_crystal += density_gaussian((r-R).norm(), gwidth, 1)*dV;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (verbose) {
+    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+           N_crystal, reduced_num_spheres);
+  }
+  const double norm = reduced_num_spheres/N_crystal;
+
+  //Integrate over one primitive cell (a parallelepiped) to find free energy
+  double phi_1=0, phi_2=0, phi_3=0;
+  double free_energy=0;
+  for (int i=0; i<Nl; i++) {
+    for (int j=0; j<Nl; j++) {
+      for (int k=0; k<Nl; k++) {
+        vector3d r=lattice_vectors[0]*i/double(Nl)
+                   + lattice_vectors[1]*j/double(Nl)
+                   + lattice_vectors[2]*k/double(Nl);
+        //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
+
+        double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
+        vector3d nv_1, nv_2;
+        nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
+
+        int many_cells=(2*weighting_function_radius/lattice_constant)+1;
+        for (int t=-many_cells; t <=many_cells; t++) {
+          for(int u=-many_cells; u<=many_cells; u++)  {
+            for (int v=-many_cells; v<= many_cells; v++) {
+
+              const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+              weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
+                              lattice_constant, gwidth, norm);
+              n_0 +=n_weight.n_0;
+              n_1 +=n_weight.n_1;
+              n_2 +=n_weight.n_2;
+              n_3 +=n_weight.n_3;
+              if (n_weight.n_3 > 0.2)
+                printf("n3(%g,%g,%g) gains %g from %g %g %g  at distance %g  i.e. %d %d %d\n",
+                       r.x, r.y, r.z, n_weight.n_3, R.x, R.y, R.z, R.norm(), t, u, v);
+
+              nv_1 +=n_weight.nv_1;
+              nv_2 +=n_weight.nv_2;
+            }
+          }
+        }
+        phi_1 = -n_0*log(1-n_3);
+        printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g", n_0, n_3, 1-n_3, phi_1);  //debug
+        phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
+        //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
+        phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
+        //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
+        free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
+        if (isnan(free_energy)) {
+          printf("free energy is a NaN!\n");
+          printf("position is: %g %g %g\n", r.x, r.y, r.z);
+          printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
+          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
+          data data_out;
+          data_out.diff_free_energy_per_atom=2;
+          data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
+          data_out.hfree_energy_per_vol=2;
+          data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
+          return data_out;
+        }
+        //printf("free energy is now... %g\n", free_energy);   //debug
+        // printf("      finished %.5f%% of the integral\n",
+        //        100*((i)/double(Nl)
+        //             +(j)/uipow(Nl, 2)
+        //             +(k + 1)/uipow(Nl, 3)));
+      }
+      printf("   finished %.3f%% of the integral\n",
+             100*((i)/double(Nl)
+                  +(j + 1)/uipow(Nl, 2)));
+    }
+    printf("finished %.1f%% of the integral\n",
+           100*(i + 1)/double(Nl));
+    printf("free_energy=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);   //debug
+  }
+
+  printf("free_energy is %g\n", free_energy);
+
+  data data_out;
+  data_out.diff_free_energy_per_atom=2;
+  data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
+  data_out.hfree_energy_per_vol=2;
+  data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
+
+  return data_out;
+}
+//%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  double dV = pow(dx,3);  //volume element dV
+  double dV = dx*dx*dx;  //volume element dV
 
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
@@ -112,7 +334,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
     const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
     const Vector rry = f.get_ry();
     const Vector rrz = f.get_rz();
-    const double norm = (1-fv)/pow(sqrt(2*M_PI)*gwidth,3); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
+    const double norm = (1-fv)/(sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
     // multiply 4 by (1-fv) to get the reduced number of spheres.
     Vector setn = f.n();
 
@@ -128,10 +350,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
       // at a position vector (rrx[i],rry[i],rrz[i]) from each Guassian
       // and adds them to get the density at that position vector which
       // is then stored in setn[i].
-      //NOTE! For this code to give proper results, the Gaussians must
-      //have a width that is much smaller than the lattice constant so
-      //that parts of the Gaussians that extend into the cube do not
-      //extend out the other sides of the cube!
       {
         //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0
         double dist = sqrt(rx*rx + ry*ry+rz*rz);
@@ -236,7 +454,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   data_out.diff_free_energy_per_atom=crystal_free_energy - homogeneous_free_energy;
   data_out.cfree_energy_per_atom=crystal_free_energy;
   data_out.hfree_energy_per_vol=hf.energy();
-  data_out.cfree_energy_per_vol=f.energy()/pow(lattice_constant,3);
+  data_out.cfree_energy_per_vol=f.energy()/(lattice_constant*lattice_constant*lattice_constant);
 
   if (verbose) {
     printf("Crystal free energy is %g\n", crystal_free_energy);
@@ -278,7 +496,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   return data_out;
 }
 
-//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
+//+++++++++++++Downhill Simplex Functions+++++++++++++++
 
 struct point_fe {
   double fv;
@@ -305,9 +523,10 @@ void display_simplex(double simplex_fe[3][3]) {
 
 void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   for (int k=0; k<3; k++) {
-    data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
+    //data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
+    data dhill_data=find_energy_new(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
     simplex_fe[k][2]=dhill_data.diff_free_energy_per_atom;
-//simplex_fe[k][2]=sqrt((simplex_fe[k][0]*simplex_fe[k][0]) + (simplex_fe[k][1]*simplex_fe[k][1]));  //TEST SIMPLEX
+    //simplex_fe[k][2]=sqrt((simplex_fe[k][0]*simplex_fe[k][0]) + (simplex_fe[k][1]*simplex_fe[k][1]));  //TEST SIMPLEX
     printf("simplex_fe[%i][2]=%g\n", k, simplex_fe[k][2]);
   }
 }
@@ -331,8 +550,8 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
   point_fe reflected;
   reflected.fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
   reflected.gw=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
-  data reflect=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose);
-  reflected.fe=reflect.diff_free_energy_per_atom;
+//reflected.fe=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  reflected.fe=find_energy_new(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //reflected.fe=sqrt((reflected.fv*reflected.fv) + (reflected.gw*reflected.gw));  //TEST SIMPLEX
   return reflected;
 }
@@ -341,30 +560,30 @@ point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3
   point_fe extended;
   extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-(2.0*simplex_fe[2][0]);
   extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-(2.0*simplex_fe[2][1]);
-  data extend=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose);
-  extended.fe=extend.diff_free_energy_per_atom;
+//extended.fe=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  extended.fe=find_energy_new(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //extended.fe=sqrt((extended.fv*extended.fv) + (extended.gw*extended.gw));  //TEST SIMPLEX
   return extended;
 }
 
 points_fe contract_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   points_fe contracted;
-  
+
   printf("working with simplex:\n"); //debug
   display_simplex(   simplex_fe);   //debug
 
   contracted.out.fv=((3/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
   contracted.out.gw=((3/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
-  data contract_out=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose);
-  contracted.out.fe=contract_out.diff_free_energy_per_atom;
+//contracted.out.fe=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  contracted.out.fe=find_energy_new(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //contracted.out.fe=sqrt((contracted.out.fv*contracted.out.fv) + (contracted.out.gw*contracted.out.gw));  //TEST SIMPLEX
 
   contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))+((1/2.0)*(simplex_fe[2][0]));
   contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))+((1/2.0)*(simplex_fe[2][1]));
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
-  data contract_in=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose);
-  contracted.in.fe=contract_in.diff_free_energy_per_atom;
+//contracted.in.fe=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  contracted.in.fe=find_energy_new(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //contracted.in.fe=sqrt((contracted.in.fv*contracted.in.fv) + (contracted.in.gw*contracted.in.gw));  //TEST SIMPLEX
 
   return contracted;
@@ -375,14 +594,14 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 
   shrunken.out.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
   shrunken.out.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[1][1]);
-  shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw,
-                              data_dir, dx, verbose).diff_free_energy_per_atom;
+//shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  shrunken.out.fe=find_energy_new(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.out.fe=sqrt((shrunken.out.fv*shrunken.out.fv) + (shrunken.out.gw*shrunken.out.gw));  //TEST SIMPLEX
 
   shrunken.in.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[2][0]);
   shrunken.in.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[2][1]);
-  shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw,
-                             data_dir, dx, verbose).diff_free_energy_per_atom;
+//shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+  shrunken.in.fe=find_energy_new(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.in.fe=sqrt((shrunken.in.fv*shrunken.in.fv) + (shrunken.in.gw*shrunken.in.gw));  //TEST SIMPLEX
 
   return shrunken;
@@ -392,11 +611,11 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 //}
 
 void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
-      printf("working with simplex:\n"); //debug
-      display_simplex(   simplex_fe);   //debug
-      printf("   reflect simplex\n");  //debug
+  printf("working with simplex:\n"); //debug
+  display_simplex(   simplex_fe);   //debug
+  printf("   reflect simplex\n");  //debug
   point_fe reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-      printf("   reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
+  printf("   reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
   if (simplex_fe[0][2]  < reflected_point.fe && reflected_point.fe < simplex_fe[1][2]) {
     simplex_fe[2][0]=reflected_point.fv;
     simplex_fe[2][1]=reflected_point.gw;
@@ -456,13 +675,11 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   simplex_fe[2][0]=shrunken_points.in.fv;
   simplex_fe[2][1]=shrunken_points.in.gw;
   simplex_fe[2][2]=shrunken_points.in.fe;
-  
+
   printf("   **simplex shrunken\n");  //debug
   display_simplex(   simplex_fe);  //debug
 }
-
-
-//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
+//+++++++++++++++END Downhill Simplex Fucntions++++++++++++++
 
 
 
@@ -473,25 +690,20 @@ int main(int argc, const char **argv) {
   int verbose = false;
   int downhill = false;
 
-//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
+  //Downhill Simplex starting guess
   double simplex_fe[3][3] = {{0.8, 0.2, 0},  //best when ordered
-                             {0.4, 0.3, 0},   //mid when ordered
-                             {0.2, 0.1, 0}    //worst when ordered
+    {0.4, 0.3, 0},   //mid when ordered
+    {0.2, 0.1, 0}    //worst when ordered
   };
-
-//  double simplex_fe[3][3] = {{80, 20, 0},  //best when ordered   TEST SIMPLEX
-//                             {40, 30, 0},   //mid when ordered
-//                             {20, 10, 0}    //worst when ordered
-//  };
-
-
-//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
-
+  //double simplex_fe[3][3] = {{80, 20, 0},  //best when ordered   TEST SIMPLEX
+  //                           {40, 30, 0},   //mid when ordered
+  //                           {20, 10, 0}    //worst when ordered
+  //};
 
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
   char *default_data_dir = new char[1024];
-//  sprintf(default_data_dir, "crystallization/data");
+  //sprintf(default_data_dir, "crystallization/data");
   sprintf(default_data_dir, "crystallization");
 
 
@@ -509,8 +721,8 @@ int main(int argc, const char **argv) {
     },
 
     /*** FLUID PARAMETERS ***/
-    {"kT", '\0', POPT_ARG_DOUBLE, &temp, 0, "temperature", "DOUBLE"},
-    {"n", '\0', POPT_ARG_DOUBLE, &reduced_density, 0, "reduced density", "DOUBLE"},
+    {"kT", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &temp, 0, "temperature", "DOUBLE"},
+    {"n", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &reduced_density, 0, "reduced density", "DOUBLE"},
     {"fv", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
     {"gw", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw, 0, "width of Gaussian", "DOUBLE or -1 for loop (without lattice ref) or -2 loop (with lattice ref)"},
 
@@ -524,10 +736,10 @@ int main(int argc, const char **argv) {
     {"gwlstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_lstep, 0, "step by lattice_constant*gw_lstep", "DOUBLE"},
     {"gwend", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_end, 0, "end gwidth loop at", "DOUBLE"},
     {"gwstep", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw_step, 0, "gwidth loop step", "DOUBLE"},
-    
+
     /*** Downhill Simplex OPTIONS ***/
     {"dh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Do a Downhill Simplex", "BOOLEAN"},
-    
+
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
 
@@ -563,7 +775,7 @@ int main(int argc, const char **argv) {
   printf("\n");
   printf("------------------------------------------------------------------\n\n");
 
-//*****************************End POPT Setup**************************************
+  //*****************************End POPT Setup***********************************
 
   printf("git version: %s\n", version_identifier());
   printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
@@ -577,46 +789,46 @@ int main(int argc, const char **argv) {
   }
   mkdir(data_dir, 0777);
 
-//+++++++++++++++++++++++++++++++Downhill Simplex+++++++++++++++++++++++++++++++
-
-// simplex_fe[3][3] = {{0.05, 0.2, 0},   //best when sorted
-//                     {0.2, 0.3, 0},   //mid when sorted
-//                     {0.4, 0.1, 0}};  //worst when sorted
-
-if (downhill) {
-
-  display_simplex(simplex_fe);
-  printf("Calculating free energies (takes a bit- 14sec x 3 )...\n");
-  evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
-  display_simplex(simplex_fe);
-  printf("starting downhill simplex loop...\n");
-
-  for (int i=0;i<50;i++) {
-    printf("\nLoop %i of 50 \n", i+1);  //for debug
-    printf("sort simplex\n");
-    sort_simplex(simplex_fe);
-    printf("simplex sorted\n");
-    display_simplex(simplex_fe);  //for debug
-    printf("advance simplex\n");
-    advance_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
-    printf("simplex advanced\n");
-    display_simplex(simplex_fe);   //for debug
-//check_convergence_simplex();
-  }
-  sort_simplex(simplex_fe);    //delete when have loop
-  display_simplex(simplex_fe);  //delete when have loop
-  exit(1);
-
-//printf("best=%g  ", simplex_fe[0][2]);
-//printf("mid=%g  ", simplex_fe[1][2]);
-//printf("worst=%g\n", simplex_fe[2][2]);
-
-}
-
-//+++++++++++++++++++++++++++++++END Downhill Simplex+++++++++++++++++++++++++++
+  // Downhill Simplex
+  if (downhill) {
+    display_simplex(simplex_fe);
+    printf("Calculating free energies (takes a bit- 14sec x 3 )...\n");
+    evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+    display_simplex(simplex_fe);
+    printf("starting downhill simplex loop...\n");
+    for (int i=0; i<50; i++) {
+      printf("\nLoop %i of 50 \n", i+1);  //for debug
+      printf("sort simplex\n");
+      sort_simplex(simplex_fe);
+      printf("simplex sorted\n");
+      display_simplex(simplex_fe);  //for debug
+      printf("advance simplex\n");
+      advance_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
+      printf("simplex advanced\n");
+      display_simplex(simplex_fe);   //for debug
+      //check_convergence_simplex();
+    }
+    sort_simplex(simplex_fe);    //delete when have loop
+    display_simplex(simplex_fe);  //delete when have loop
+    exit(1);
+    //printf("best=%g  ", simplex_fe[0][2]);
+    //printf("mid=%g  ", simplex_fe[1][2]);
+    //printf("worst=%g\n", simplex_fe[2][2]);
+  } //End Downhill Simplex
 
 
-//return 0;  //for debug
+//TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  temp=2;
+  reduced_density=1.2;
+  fv=0.8;
+  //double gw=0.325;
+  printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
+
+  data e_data_new =find_energy_new(temp, reduced_density, fv, 0.325, data_dir, dx, bool(verbose));
+  printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+
+  return 0;  //for debug
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
@@ -653,7 +865,8 @@ if (downhill) {
       }
 
       for (double gwidth=gw_start; gwidth < gw_end +0.1*gw_step; gwidth+=gw_step) {
-        data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+        //data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+        data e_data =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
           //printf("We are %.0f%% done, best_energy_diff == %g\n", 100*num_computed/double(num_to_compute),
@@ -706,7 +919,8 @@ if (downhill) {
     printf("gw is %g\n", gw);
     printf ("gwend=%g, gwstep=%g   \n\n", gw_end, gw_step);
     for (double gwidth=gw_start; gwidth < gw_end + 0.1*gw_step; gwidth+=gw_step) {
-      data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+      //data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
+      data e_data =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
         best_energy_diff = e_data.diff_free_energy_per_atom;
         best_cfree_energy = e_data.cfree_energy_per_atom;
@@ -738,7 +952,8 @@ if (downhill) {
     delete[] bestdat_filename;
 
   } else {
-    find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);
+    //find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);    //no bestdataout needed for single run
+    find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
   }
 
   return 0;

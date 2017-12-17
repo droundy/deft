@@ -102,8 +102,11 @@ struct sw_simulation {
   double sa_t0; // if it is non-zero, update wl_factor on each move SA-style.
   double sa_prefactor; // prefactor in computing wl_factor when running SA.
   bool use_satmmc; // if true, reset sa_t0 whenever we encounter a new energy (also do TMMC).
-  bool use_sad;  // if true, dynamically update sa_t0 when we encounter new energies.
+  int use_sad;  // if nonzero, dynamically update sa_t0 when we
+                // encounter new energies, value is the fraction to
+                // use.
   double sa_weight; // the most recent sa_weight used in satmmc.
+  bool use_wl; // if true, we are using plain old WL method
 
   /* The following define file names for periodic output files that
      are dumped every so often.  It should contain a single %d style format. */
@@ -195,7 +198,7 @@ struct sw_simulation {
   void initialize_wltmmc(double wl_fmod,
                          double wl_threshold, double wl_cutoff);
   void initialize_satmmc();
-  void initialize_samc(bool am_sad = false);
+  void initialize_samc(int am_sad = 0);
   void initialize_wang_landau(double wl_fmod,
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
@@ -209,8 +212,8 @@ struct sw_simulation {
   void initialize_transitions();
 
   void initialize_transitions_file(const char *transitions_input_filename);
-  void write_transitions_file() const;
-  void write_header(FILE *f) const;
+  void write_transitions_file();
+  void write_header(FILE *f);
 
   double fractional_dos_precision;
   void update_weights_using_transitions(int version, bool energy_range_fixed = false);
@@ -222,7 +225,7 @@ struct sw_simulation {
   // return fractional error in sample count
   double fractional_sample_error(double T, bool optimistic_sampling);
 
-  double* compute_ln_dos(dos_types dos_type) const;
+  double* compute_ln_dos(dos_types dos_type);
   double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy(double *ln_dos = 0);
@@ -294,9 +297,10 @@ struct sw_simulation {
     sa_t0 = 0.0; // default to no SA method either
     sa_prefactor = 1.0; // default to standard SAMC when using SAMC.
     use_satmmc = false; // default to not using SATMMC.
-    use_sad = false; // default to not using SAD MC (think happy thoughts!)
+    use_sad = 0; // default to not using SAD MC (think happy thoughts!)
     sa_weight = 0.0;
     use_tmmc = false; // default to not using TMMC for accepting moves.
+    use_wl = false; // default to not using WL.
   };
 };
 

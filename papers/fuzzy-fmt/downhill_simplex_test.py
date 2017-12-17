@@ -15,7 +15,8 @@ plt.ylabel("gw")
 plt.scatter(testdata[0::1,0::2], testdata[0::1,1::2], color='blue')
 #print testdata[0::1,0::2]
 #print testdata[0::1,1::2]
-plt.show
+plt.savefig("saveplot")
+#plt.show
 
 #print testdata[0,0::2] #delete
 #print testdata[0,1::2] #delete
