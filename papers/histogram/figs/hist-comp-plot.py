@@ -26,30 +26,28 @@ for j in range(len(split2)):
     methods.append('-%s' %split2[j])
 print 'methods are', methods
 
-mine = 1e100
-maxe = -1e100
-maxhist = 0
-
-
-
+directory = ['000000', '000010', '000025', '000100','000500']
 
 for method in methods:
-    try:
-        print 'trying method', method
-        basename = 'data/lv/%s%s-movie/000000' % (filebase, method)
-        e, hist = readandcompute.e_and_total_init_histogram(basename)
-        datname = basename + '-transitions.dat'
-        min_T = readandcompute.minT(datname)
+    i = 1
+    print 'trying method', method
+    for subdirectory in directory:
+        try:
+            basename = 'data/lv/%s%s-movie/%s' % (filebase, method, subdirectory)
+            e, hist = readandcompute.e_and_total_init_histogram(basename)
+            datname = basename + '-transitions.dat'
+            #min_T = readandcompute.minT(datname)
 
-        hist_max = np.amax(hist)
-        hist_norm = hist/hist_max
+            hist_max = np.amax(hist)
+            hist_norm = hist/hist_max # each method is normalized to itself.
 
-        plt.figure('error-at-energy-iterations')
-        plt.subplot(2,1,1)
-        colors.plot(e, hist_norm, method=method[1:])
-        colors.legend()
-    except:
-        continue
+            plt.figure('error-at-energy-iterations')
+            plt.subplot(len(directory),1,i)
+            colors.plot(e, hist_norm, method=method[1:])
+            colors.legend()
+            i = i + 1 # this is a hokey way to count through frames.
+        except:
+            continue
 
 plt.show()
 
