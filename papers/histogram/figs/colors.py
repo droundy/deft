@@ -5,6 +5,8 @@ _colors = { 'sad': 'r',
             'sad3': 'tab:orange',
             'sad3-tm': 'tab:orange',
             'wltmmc-0.8-1e-10': 'k',
+            'wltmmc': 'k',
+            'vanilla_wang_landau': 'k',
             'tmmc': 'b',
             'tmi3': 'g',
             'toe3': 'c',
@@ -16,7 +18,39 @@ _colors = { 'sad': 'r',
 _linestyles = {
     'sad-tm': '--',
     'sad3-tm': '--',
+    'vanilla_wang_landau': '--',
 }
+
+_legend_order = [
+    'sad', 'sad-tm',
+    'sad3', 'sad3-tm',
+    'tmmc',
+    'wltmmc-0.8-1e-10',
+    'wltmmc',
+    'vanilla_wang_landau',
+    'tmi3', 'toe3',
+    'satmmc',
+]
+
+_legend_label = {
+    'vanilla_wang_landau': 'WL',
+    'sad': 'SAD',
+    'sad-tm': 'SAD-TM',
+    'wltmmc-0.8-1e-10': 'WLTMMC ($10^{-10}$ cutoff)',
+    'tmmc': 'TMMC',
+    'tmi3': 'TMI',
+    'toe3': 'TOE',
+}
+
+def fix_legend(method):
+    if method in _legend_label:
+        return _legend_label[method]
+    return method
+
+def legend_order(method):
+    if method in _legend_order:
+        return _legend_order.index(method)
+    return len(_legend_order)
 
 def color(m):
     if m in _colors:
@@ -36,3 +70,9 @@ def plot(x, y, method=None):
 
 def loglog(x, y, method=None):
     return plt.loglog(x,y, **style_args(method))
+
+def legend():
+    handles, labels = plt.gca().get_legend_handles_labels()
+    labels, handles = zip(*sorted(zip(labels, handles), key = lambda t: legend_order(t[0])))
+    labels = map(fix_legend, labels)
+    plt.legend(handles, labels, loc='best')

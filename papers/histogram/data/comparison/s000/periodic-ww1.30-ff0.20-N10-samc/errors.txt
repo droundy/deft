@@ -1,0 +1,2 @@
+# iterations	 errorinentropy	 maxerror
+4960	9.915	39.23
