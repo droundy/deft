@@ -1,87 +1,58 @@
+#!/usr/bin/python2
 from __future__ import division
-import numpy, sys, os, matplotlib
-
-if 'noshow' in sys.argv:
-        matplotlib.use('Agg')
+import numpy as np
+import matplotlib, sys
+#if 'show' not in sys.argv:
+#    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import numpy, time, os, colors
 from glob import glob
-import colors
 
-if os.path.exists('../data'):
-    os.chdir('..')
+matplotlib.rc('text', usetex=True)
 
-energy = int(sys.argv[1])
-filebase = sys.argv[2]
-tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
+sys.path.insert(0, '../square-well-fluid/figs/')
+import readandcompute
 
+filebase = sys.argv[1]
+#ww1.30-ff0.22-60x8
 methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau', '-samc', '-satmmc', '-sad', '-sad3']
 # For WLTMMC compatibility with LVMC
-lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
+lvextra = glob('data/lv/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
 
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
 print 'methods are', methods
-for method in [mm for m in methods for mm in [m, m+'-tm']]:
-    print 'trying method', method
+
+mine = 1e100
+maxe = -1e100
+maxhist = 0
+
+
+
+
+for method in methods:
     try:
-        dirname = 'data/comparison/%s%s/' % (filebase,method)
-        if not os.path.exists(dirname) or os.listdir(dirname) == []:
-                continue
+        print 'trying method', method
+        basename = 'data/lv/%s%s-movie/000000' % (filebase, method)
+        e, hist = readandcompute.e_and_total_init_histogram(basename)
+        datname = basename + '-transitions.dat'
+        min_T = readandcompute.minT(datname)
 
-        if energy > 0:
-                Nrt_at_energy, erroratenergy = numpy.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
-        iterations, errorinentropy, maxerror = numpy.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
+        hist_max = np.amax(hist)
+        hist_norm = hist/hist_max
 
-        if not os.path.exists('figs/lv'):
-                os.makedirs('figs/lv')
-
-        if not os.path.exists('figs/s000'):
-                os.makedirs('figs/s000')
-        if energy > 0:
-                plt.figure('error-at-energy-iterations')
-                colors.plot(iterations, erroratenergy, method=method[1:])
-                plt.title('Error at energy %g %s' % (energy,filebase))
-                plt.xlabel('# iterations')
-                plt.ylabel('error')
-                colors.legend()
-                plt.savefig('figs/%s-error-energy-%g.pdf' % (tex_filebase, energy))
-
-                plt.figure('round-trips-at-energy' )
-                colors.plot(iterations, Nrt_at_energy, method = method[1:])
-                plt.title('Roundy Trips at energy %g, %s' % (energy,filebase))
-                plt.xlabel('# iterations')
-                plt.ylabel('Roundy Trips')
-                colors.legend()
-                plt.savefig('figs/%s-round-trips-%g.pdf' % (tex_filebase, energy))
-
-                plt.figure('error-at-energy-round-trips')
-                colors.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0],
-                         method = method[1:])
-                plt.title('Error at energy %g %s' % (energy,filebase))
-                plt.xlabel('Roundy Trips')
-                plt.ylabel('Error')
-                colors.legend()
-                plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
-
-        plt.figure('maxerror')
-        colors.loglog(iterations, maxerror, method = method[1:])
-        plt.xlabel('# iterations')
-        plt.ylabel('Maximum Entropy Error')
-        plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
+        plt.figure('error-at-energy-iterations')
+        plt.subplot(2,1,1)
+        colors.plot(e, hist_norm, method=method[1:])
         colors.legend()
-        plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
-
-        plt.figure('errorinentropy')
-        colors.loglog(iterations, errorinentropy[0:len(iterations)],
-                      method = method[1:])
-        plt.xlabel('#iterations')
-        plt.ylabel('Error in Entropy')
-        plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
-        colors.legend()
-        plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
     except:
-        raise
+        continue
+
 plt.show()
+
+
+
+
