@@ -2,8 +2,8 @@
 from __future__ import division
 import numpy as np
 import matplotlib, sys
-#if 'show' not in sys.argv:
-#    matplotlib.use('Agg')
+if 'noshow' in sys.argv:
+        matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy, time, os, colors
 from glob import glob
@@ -41,14 +41,18 @@ for method in methods:
             hist_max = np.amax(hist)
             hist_norm = hist/hist_max # each method is normalized to itself.
 
-            plt.figure('error-at-energy-iterations')
+            plt.figure('Histogram evolution vs Energy')
+            plt.ylabel('Histogram')
+            plt.xlabel('Energy')
             plt.subplot(len(directory),1,i)
-            colors.plot(e, hist_norm, method=method[1:])
+            colors.plot(e, hist, method=method[1:])
             colors.legend()
+
             i = i + 1 # this is a hokey way to count through frames.
         except:
             continue
 
+plt.suptitle('Maximum Entropy Error vs Iterations, %s' %filebase)
 plt.show()
 
 
