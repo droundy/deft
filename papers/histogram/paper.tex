@@ -506,13 +506,13 @@ sticky-wall.
 \subsubsection{Sticky-wall configuration}
 A sticky-wall is an attractive wall that impacts particle moves.  Only
 one such wall is inserted into a simulation and the intent is to assist
-in phase separation.  As the temperature of the system decreases, an
-increase in particle aggregation near the sticky-wall becomes evident.
-As the energy of the particles is decreased, the particles are unlikely
-to be able to escape the attractive sticky-wall potential.  By
-examining the particle number density vs the system length (z-axis),
-phase transitions to a liquid-vapor system from a vapor dominated
-system become evident.
+in visualizing phase separation.  As the temperature of the system
+decreases, an increase in particle aggregation near the sticky-wall
+becomes evident. As the energy of the particles is decreased, the
+particles are unlikely to be able to escape the attractive sticky-wall
+potential.  By examining the particle number density vs the system
+length (z-axis), phase transitions to a liquid-vapor system from a
+vapor dominated system become evident.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-30x4-entropy-error.pdf}
@@ -548,15 +548,15 @@ simulations are run for systems with different particle numbers.  For
 the $N = 25$ system, a sticky-wall is added to ensure that we see the
 liquid and vapor phase separation.
 
-A system is configured with dimensions $x = y = 4$ and $z = 30$.  A
-filling fraction $\text{ff} = 0.22$ is chosen which yields $N = 25$
-particles in the rectangular system.  These particles are randomly
-inserted into the system and random moves are proposed (with a
-translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
-periodic while the $z$-axis is not periodic.  A sticky-wall is inserted
-along the $z$-axis at one end to promote phase separation.
-~\jpsays{should we include a sticky-wall.py plot or something else or are
-we not going to talk about phase separation in this paper?}
+A system is configured with dimensions $x = y = 4\sigma$ and $z =
+30\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
+yields $N = 25$ particles in the rectangular system.  These particles
+are randomly inserted into the system and random moves are proposed
+(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
+$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
+inserted along the $z$-axis at one end to promote phase separation.
+~\jpsays{should we include a sticky-wall.py plot or something else or
+are we not going to talk about phase separation in this paper?}
 
 We use the entropy error vs iterations as a metric to compare
 simulation runtimes.  Simulations that take more iterations to reach
@@ -568,7 +568,7 @@ although this seems to depend on what is used as the `standard'.}
 \subsubsection{A Tanner dimensions? $(N = 50)$ system with no sticky
 wall}
 
-A system is configured with dimensions $x = y = z = 10?$.  A
+A system is configured with dimensions $x = y = z = 10\sigma?$.  A
 filling fraction $\text{ff} = 0.20$ is chosen which yields $N = 50$
 particles in the cubical system.  These particles are randomly
 inserted into the system and random moves are proposed (with a
@@ -579,35 +579,35 @@ along the $z$-axis.
 \subsubsection{A $60\times8\times8$ $(N = 202)$ system with a sticky
 wall}
 
-A system is configured with dimensions $x = y = 8$ and $z = 60$.  A
-filling fraction $\text{ff} = 0.22$ is chosen which yields $N = 202$
-particles in the rectangular system.  These particles are randomly
-inserted into the system and random moves are proposed (with a
-translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
-periodic while the $z$-axis is not periodic.  A sticky-wall is inserted
-along the $z$-axis at one end to promote phase separation.
+A system is configured with dimensions $x = y = 8\sigma$ and $z =
+60\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
+yields $N = 202$ particles in the rectangular system.  These particles
+are randomly inserted into the system and random moves are proposed
+(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
+$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
+inserted along the $z$-axis at one end to promote phase separation.
 
 \subsubsection{A $100\times10\times10$ $(N = 525)$ system with a sticky
 wall}
 
-A system is configured with dimensions $x = y = 10$ and $z = 100$.  A
-filling fraction $\text{ff} = 0.22$ is chosen which yields $N = 525$
-particles in the rectangular system.  These particles are randomly
-inserted into the system and random moves are proposed (with a
-translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
-periodic while the $z$-axis is not periodic.  A sticky-wall is inserted
-along the $z$-axis at one end to promote phase separation.
+A system is configured with dimensions $x = y = 10\sigma$ and $z =
+100\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
+yields $N = 525$ particles in the rectangular system.  These particles
+are randomly inserted into the system and random moves are proposed
+(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
+$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
+inserted along the $z$-axis at one end to promote phase separation.
 
 \subsubsection{A Tanner dimensions? $(N = 500)$ system with no sticky
 wall}
 
-A system is configured with dimensions $x = y = z = 19?$.  A
+A system is configured with dimensions $x = y = z = 19\sigma?$.  A
 filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 500$
-particles in a cubical system.  These particles are randomly
-inserted into the system and random moves are proposed (with a
-translation scale $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are
-periodic while the $z$-axis is not periodic.  A sticky-wall is not inserted
-along the $z$-axis.
+particles in a cubical system.  These particles are randomly inserted
+into the system and random moves are proposed (with a translation scale
+$\delta_0 = 0.05$). The boundaries in $x$ and $y$ are periodic while
+the $z$-axis is not periodic.  A sticky-wall is not inserted along the
+$z$-axis.
 
 \section{Conclusions}
 
@@ -621,7 +621,7 @@ ideal algorithm.
 
 ~\jpsays{We need about a paragraph here that says exactly how much
 better SAD performed than other methods and or how easy it was to
-implement.}
+implement (Likely best added once simulations run a little longer).}
 
 We note that SAD should be tested on additional systems, and the
 accuracy of the method should be examined.  Also, a rigorous
