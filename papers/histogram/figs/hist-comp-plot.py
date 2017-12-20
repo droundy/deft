@@ -44,14 +44,16 @@ for method in methods:
             plt.figure('Histogram evolution vs Energy')
             plt.ylabel('Histogram')
             plt.xlabel('Energy')
+
             plt.subplot(len(directory),1,i)
-            colors.plot(e, hist, method=method[1:])
+            colors.plot(e, hist_norm, method=method[1:])
             colors.legend()
 
             i = i + 1 # this is a hokey way to count through frames.
         except:
             continue
 
+#plt.tight_layout(pad=2, w_pad=0.0, h_pad=0.0)
 plt.suptitle('Maximum Entropy Error vs Iterations, %s' %filebase)
 plt.show()
 
