@@ -57,6 +57,7 @@ for t in temps:
 def all_data():
     ''' Plots many Diffusion and Pressure '''
     density,diffusion_data,pressure_data,volume = {},{},{},{}
+    nsubplot = len(file_dict['temp'])
     for t in file_dict['temp']:
         color = file_dict['temp'].keys().index(t)
         density.update({t:[]})
@@ -91,10 +92,33 @@ def all_data():
                 (volume[t][n+1]-volume[t][n])/(2*Nballs)
             v[n] = (volume[t][n+1]+volume[t][n])/(2*Nballs)
             p[n] = (pressure_data[t][n+1]+pressure_data[t][n])/2
+        gibbs = F + p*v 
+
+        direction_change = [-1,-1]
+        ''' Solves for Crossing point of Gibbs v. Pressure '''
+        for i in range(len(gibbs)-1):
+            greater = gibbs[i+1] > gibbs[i]
+            less= gibbs[i+1] < gibbs[i]
+            if (greater) and (direction_change[0] == -1):
+                direction_change[0] = i
+            elif (less) and (direction_change[0] != -1) :
+                direction_change[1] = i
+                break
+        p_before = p[:direction_change[0]]
+        g_before = gibbs[:direction_change[0]]
+        p_after = p[direction_change[1]:]
+        g_after = gibbs[direction_change[1]:]
+        cross = find_intersect(p_before,g_before,p_after,g_after)
         
-        
-        
-        
+        gdiff = [max(gibbs)-min(gibbs),max(gibbs)-min(gibbs)]
+        nearest = [-1,-1]
+        for i in range(len(gibbs)):
+            tgdiff = gibbs[i]-cross[1]
+            if abs(tgdiff) < gdiff[0]:
+                nearest[1],gdiff[1] = nearest[0],gdiff[0]
+                nearest[0],gdiff[0] = i,tgdiff
+            elif abs(tgdiff) < gdiff[1] and abs(tgdiff) > gdiff[0]:
+                nearest[1],gdiff[1] = i,tgdiff
         ''' Diffusion Coefficient'''
         plt.figure(1)
         plt.semilogy(density[t],diffusion_data[t],'%s.-'%(cpalette[color]))
@@ -106,44 +130,67 @@ def all_data():
         ''' Pressure v. Density'''
         plt.figure(2)
         plt.plot(density[t],pressure_data[t],'%s.-'%(cpalette[color]))
-        plt.title('Pressure v.Density')
         plt.legend(file_dict['temp'])
+        plt.title('Pressure v.Density')
         plt.ylabel('Pressure')
         plt.xlabel('Density')
         plt.grid()
-        #~ plt.savefig('figs/FIXME.pdf')
+        #~ #plt.savefig('figs/FIXME.pdf')
         ''' Pressure v. Volume '''
-        plt.figure(3)
-        plt.plot(volume[t],pressure_data[t],'%s.-'%(cpalette[color]))
-        plt.xlabel('Volume')
-        plt.ylabel('Pressure')
-        plt.title('Pressure v. Volume')
-        plt.legend(file_dict['temp'])
-        plt.grid()
-        
-        plt.figure(4)
-        plt.plot(v,F,'%s.-'%(cpalette[color]))
-        plt.title(r'$f - f_0$')
-        plt.xlabel('reduced volume v')
-        plt.ylabel('reduced helmholtz')
-        plt.legend(file_dict['temp'])
-        plt.grid()
-        
+        #~ plt.figure(3)
+        #~ plt.plot(volume[t],pressure_data[t],'%s.-'%(cpalette[color]))
+        #~ plt.xlabel('Volume')
+        #~ plt.ylabel('Pressure')
+        #~ plt.title('Pressure v. Volume')
+        #~ plt.legend(file_dict['temp'])
+        #~ plt.grid()
+        ''' Helmholtz Free Energy'''
+        #~ plt.figure(4)
+        #~ plt.plot(v,F,'%s.-'%(cpalette[color]))
+        #~ plt.title(r'$f - f_0$')
+        #~ plt.xlabel('reduced volume v')
+        #~ plt.ylabel('reduced helmholtz')
+        #~ plt.legend(file_dict['temp'])
+        #~ plt.grid()
+        ''' Phase Diagram '''
         plt.figure(5)
-        plt.plot(p,F + p*v- (2.8/3)*p,'%s.-'%(cpalette[color])) # - (2.8/3)*p
+        plt.plot(density[t][nearest[0]],float(t),'r.')
+        plt.plot(density[t][nearest[1]],float(t),'b.')
+        plt.title('Freezing and Melting Points')
+        plt.xlabel('Reduced Density')
+        plt.ylabel('Reduced Temperature')
+        ''' Gibbs Free Energy '''
+        plt.figure()
+        plt.plot(p,gibbs,'k.-')
+        plt.plot(cross[0],cross[1],'r.')
+        plt.plot(p[nearest],gibbs[nearest],'m.')
+        plt.annotate(s ='Cross at (p=%.2f,g=%.2f), Nearest Densities: %s, %s'
+            %(cross[0],cross[1],density[t][nearest[0]],density[t][nearest[1]]),
+            xy = [cross[0],cross[1]])
         plt.xlabel('pressure p*')
         plt.ylabel('g(v)')
-        plt.title(r' Reduced Gibbs $g = (f-f_0) + pv$')
-        plt.legend(file_dict['temp'])
+        plt.title(r' Reduced Gibbs Temp: %s'%t)
         plt.grid()
-        
-        plt.figure(6)
-        mu = 0
-        rho = np.array(pressure_data[t][:-1])
-        plt.plot(rho,F - mu*rho,'%s.-'%(cpalette[color]))
-        plt.legend(file_dict['temp'])
-        plt.xlabel('Density')
-        plt.ylabel(r'F - $\mu*\rho$')
+        ''' Helmholtz Free w/ Chemical Potential '''
+        #~ plt.figure()
+        #~ mu = 22
+        #~ rho = np.array(pressure_data[t][:-1])
+        #~ plt.plot(rho,F - mu*rho)
+        #~ plt.xlabel('Density')
+        #~ plt.ylabel(r'F - $\mu*\rho$')
+    
+def find_intersect(p_before,g_before,p_after,g_after):
+    ''' Finds intersection of line segments '''
+    for j in xrange(len(p_before)-1):
+        p0 = np.array([p_before[j],g_before[j]])
+        p1 = np.array([p_before[j+1],g_before[j+1]])
+        for k in xrange(len(p_after)-1):
+            q0 = np.array([p_after[k],g_after[k]])
+            q1 = np.array([p_after[k+1],g_after[k+1]])
+            params = np.linalg.solve(np.column_stack((p1-p0,q0-q1)),q0-p0)
+            if (params[0] >=0) and (params[0]<=1) and (params[1] >=0 ) and (params[1] <= 1):
+                return params[0]*(p1-p0)+p0
+
         
 
 def plotPositions(rho,T):
@@ -190,7 +237,7 @@ def plotStructureFactor(rho,T):
             kvals = dk*np.arange(0.0, len(structureData), 1)
             kx, ky = np.meshgrid(kvals, kvals)
             resolution = 2e3
-            sf_max = structureData[30:][30:].max()/Nballs/4
+            sf_max = structureData[30:][30:].max()/Nballs/2
             ds = sf_max / resolution
             cax =ax.contourf(kx, ky, structureData/(Nballs), levels = np.arange(0,sf_max + ds,ds))
             ax.set_aspect('equal')
