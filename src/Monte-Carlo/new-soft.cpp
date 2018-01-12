@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include <random>
 #include <math.h>
 #include <chrono>
 #include "vector3d.h"
@@ -285,8 +284,7 @@ int main(int argc, const char *argv[])  {
             }
         if (trialAcceptance){ 
             spheres[movedSphereNum] = movedSpherePos;
-            currentEnergy += energyChange; // update instead
-            // try currentEnergy += energyChange; // rerun totalPotential when saving?
+            currentEnergy += energyChange;
             virial = forceTimesDist(spheres,numOfSpheres,systemLength,wall); // update instead
             // TODO: try timing runs with different N values, and plotting time per move versus N
             sphereMoveVec[movedSphereNum] += randMove;
