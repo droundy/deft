@@ -260,8 +260,8 @@ print("\nPlot: %s"%args.plot)
 		
 if args.plot.lower() == '':
         all_data()
-#elif args.plot.lower() == 'energy':
-    #energy(args.rho,args.temp)
+elif args.plot.lower() == 'energy':
+    energy(args.rho,args.temp)
 elif (len(args.rho) <=5 and len(args.temp) <= 5) \
     and args.plot.lower()!=(''):
     print'Densities: ',args.rho
