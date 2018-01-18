@@ -1,4 +1,4 @@
-# iterations	 errorinentropy	 maxerror
+# iterations	 errorinentropy	 maxerror	(generated with python figs/comparison.py 2000 data/lv/ww1.30-ff0.22-100x10-wltmmc-0.8-1e-10-movie/001938-lndos.dat lv/ww1.30-ff0.22-100x10
 6608	557.7	2025
 1.843e+04	425.9	1699
 3.172e+04	350.6	1564
