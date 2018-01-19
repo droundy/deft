@@ -22,7 +22,9 @@ for j in range(len(split2)):
     methods.append('-%s' %split2[j])
 print methods
 
-ref = "data/" + reference
+ref = reference
+if ref[:len('data/')] != 'data/':
+    ref = 'data/' + ref
 maxref = int(readnew.max_entropy_state(ref))
 minref = int(readnew.min_important_energy(ref))
 n_energies = int(minref - maxref+1)
@@ -127,7 +129,8 @@ for method in methods:
         numpy.savetxt('%s/errors.txt' %(dirname),
                       numpy.c_[iterations, errorinentropy, maxerror],
                       fmt = ('%.4g'),
-                      delimiter = '\t', header = 'iterations\t errorinentropy\t maxerror')
+                      delimiter = '\t',
+                      header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
         if lndostm is not None:
             print 'saving to', dirnametm
             numpy.savetxt('%s/energy-%d.txt' %(dirnametm, energy),
@@ -137,7 +140,8 @@ for method in methods:
             numpy.savetxt('%s/errors.txt' %(dirnametm),
                         numpy.c_[iterations, errorinentropytm, maxerrortm],
                         fmt = ('%.4g'),
-                        delimiter = '\t', header = 'iterations\t errorinentropy\t maxerror')
+                        delimiter = '\t',
+                        header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
             
     except:
         print 'I had trouble with', method
