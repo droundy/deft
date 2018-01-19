@@ -325,7 +325,7 @@ for $u$ typically greater than 1 and $\gamma$ is the modification factor for
 the density of states.  We then accept a new configuration for the density of
 states with a probability given by the following
 \begin{equation}
-	\mathcal{P}(\epsilon_i \rightarrow \varepsilon_j)
+	\mathcal{P}(\epsilon_i \rightarrow \epsilon_j)
 	= \min[1,e^{\ln{w(\epsilon_i)}-\ln{w(\epsilon_j)}}]
 \end{equation}
 Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and
@@ -339,7 +339,7 @@ error~\cite{zhou2005understanding}.
 Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
 by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
 advantage of the ease of implementation and applicability to a variety
-of systems, while making use of a transition matrix to adress WL
+of systems, while making use of a transition matrix to address WL
 weaknesses such as a limited statistical accuracy plateau which is not
 improved with additional Monte-Carlo steps.  This WL version is more
 accurate for a given number of simulation steps.
@@ -429,15 +429,18 @@ Algorithm~\cite{werlich2015stochastic, schneider2017convergence}, it
 seems quite natural to create a new Monte-Carlo method which we will
 call SA-TMMC.  Like in the original implementation, we define an update
 factor where $t_0$ is the number of Monte-Carlo moves and $t$ is the
-current iteration. \begin{align} \gamma_{t}^{\text{SA}} =
-\frac{t_0}{\max(t_0,t)} \end{align} One potential problem of merging SA
-and TMMC is that SA provides no nice transition to the later method due
-to the lack of a user-controlled cutoff.  Also for SA Monte-Carlo, the
-choice of parameter $t_0$ proves difficult particularly for complex
-systems.  Finally, we enforce a minimum temperature probability which
-prevents the system from sampling states below the minimum temperature.
-We discuss here how we resolve all of the potential issues we
-encountered when integrating both SA and TMMC.
+current iteration.
+\begin{align} \gamma_{t}^{\text{SA}} =
+\frac{t_0}{\max(t_0,t)}
+\end{align}
+One potential problem of merging SA and TMMC is that SA provides no
+nice transition to the later method due to the lack of a
+user-controlled cutoff.  Also for SA Monte-Carlo, the choice of
+parameter $t_0$ proves difficult particularly for complex systems.
+Finally, we enforce a minimum temperature probability which prevents
+the system from sampling states below the minimum temperature. We
+discuss here how we resolve all of the potential issues we encountered
+when integrating both SA and TMMC.
 
 \subsubsection{Define an adaptive parameter $t_0$}
 It has been shown that if $F_{t}^{\text{SA}}$ satisfies two conditions
