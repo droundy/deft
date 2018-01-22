@@ -51,9 +51,9 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
 
                 plt.figure('round-trips-at-energy' )
                 colors.plot(iterations, Nrt_at_energy, method = method[1:])
-                plt.title('Roundy Trips at energy %g, %s' % (energy,filebase))
+                plt.title('Round Trips at energy %g, %s' % (energy,filebase))
                 plt.xlabel('# iterations')
-                plt.ylabel('Roundy Trips')
+                plt.ylabel('Round Trips')
                 colors.legend()
                 plt.savefig('figs/%s-round-trips-%g.pdf' % (tex_filebase, energy))
 
@@ -61,7 +61,7 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 colors.plot(Nrt_at_energy[Nrt_at_energy > 0], erroratenergy[Nrt_at_energy > 0],
                          method = method[1:])
                 plt.title('Error at energy %g %s' % (energy,filebase))
-                plt.xlabel('Roundy Trips')
+                plt.xlabel('Round Trips')
                 plt.ylabel('Error')
                 colors.legend()
                 plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
