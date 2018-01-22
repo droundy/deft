@@ -84,6 +84,8 @@ int main(int argc, const char *argv[]) {
   int wltmmc = false;
   int generate_movies = false;
 
+  int resume = false;
+
   /* Do not change these here! They are taken directly from the WL paper.
      If you want to change the WL parameters, run this code with appropriate arguments */
   double wl_fmod = 2;
@@ -188,6 +190,9 @@ int main(int argc, const char *argv[]) {
      &max_rdf_radius, 0, "Set maximum radius for RDF data collection", "DOUBLE"},
 
     /*** HISTOGRAM METHOD OPTIONS ***/
+
+    {"resume", '\0', POPT_ARG_NONE, &resume, 0,
+     "Resume previous simulation", "BOOLEAN"},
 
     {"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
      " rather than adjusted weights", "DOUBLE"},
@@ -767,6 +772,12 @@ int main(int argc, const char *argv[]) {
     }
   }
   took("Finishing initialization");
+
+  if (resume) {
+    // We are continuing a previous simulation.
+    printf("I do not know how to resume yet!\n");
+    exit(1);
+  }
 
   // ----------------------------------------------------------------------------
   // MAIN PROGRAM LOOP
