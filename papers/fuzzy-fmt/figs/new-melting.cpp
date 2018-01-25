@@ -26,13 +26,11 @@
 #include "vector3d.h"
 
 // radius we need to integrate around a gaussian, in units of gw.
-const double inclusion_radius = 3.0;
+const double inclusion_radius = 4.0;
 
-// weighting_function_radius is the distance at which we feel we can
-// assume the weighting functions are all zero.  It is in units of
-// distance.
-const double weighting_function_radius=3.0;
-
+static inline double time() {
+  return clock()/double(CLOCKS_PER_SEC);
+}
 static inline void took(const char *name) {
   static clock_t last_time = clock();
   clock_t t = clock();
@@ -79,15 +77,26 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
   return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
 }
 
+static inline double find_alpha(double temp) {
+  const double sigma=1;
+  const double epsilon=1;
+  return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
+}
+
+static inline double find_zeta(double temp) {
+  const double epsilon=1;
+  const double alpha = find_alpha(temp);
+  return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
+}
+
 weight find_weights(vector3d r, vector3d rp, double temp) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
 
   const double sigma=1;
-  const double epsilon=1;
   const double Rad=sigma/pow(2, 5.0/6);
-  const double alpha = sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
-  const double zeta = alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
+  const double alpha = find_alpha(temp);
+  const double zeta = find_zeta(temp);
 
   weight w;
 
@@ -105,18 +114,29 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   return w;
 }
 
+// radius_of_peak tells us how far we need to integrate away from a
+// peak with width gwidth, if the temperature is T, when finding the
+// weighted densities.  This is basically asking when the weighting
+// functions (see find_weights above) are negligible, which thus
+// depends on the alpha and zeta parameters above.
+static inline double radius_of_peak(double gwidth, double T) {
+  const double alpha = find_alpha(T);
+  const double zeta = find_zeta(T);
+  return 0.5*alpha + 3*zeta + inclusion_radius*gwidth;
+}
+
 weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
                                 double lattice_constant, double gwidth, double norm) {
   const vector3d lattice_vectors[3] = {
-    vector3d(lattice_constant/2,lattice_constant/2,0),
-    vector3d(lattice_constant/2,0,lattice_constant/2),
     vector3d(0,lattice_constant/2,lattice_constant/2),
+    vector3d(lattice_constant/2,0,lattice_constant/2),
+    vector3d(lattice_constant/2,lattice_constant/2,0),
   };
 
   const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; //round up! Number of infinitesimal lengths along one of the lattice_vectors
 
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
-  if ((r-R).norm() > weighting_function_radius + inclusion_radius*gwidth) {
+  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
 
@@ -125,6 +145,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   const vector3d da2 = lattice_vectors[1]*df;
   const vector3d da3 = lattice_vectors[2]*df;
   const double dVp = da1.cross(da2).dot(da3);
+  assert(dVp > 0);
   for (int l=-inc_Ntot; l<=inc_Ntot; l++) {
     for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
       for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
@@ -194,6 +215,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   }
   const double norm = reduced_num_spheres/N_crystal;
 
+  const double max_distance_considered = radius_of_peak(gwidth, temp);
+  const int many_cells = 2*max_distance_considered/lattice_constant+1;
+  printf("many_cells is %d based on %g vs %g\n",
+         many_cells, max_distance_considered, lattice_constant);
+
   //Integrate over one primitive cell (a parallelepiped) to find free energy
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
@@ -209,29 +235,30 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-        int many_cells=(2*weighting_function_radius/lattice_constant)+1;
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
             for (int v=-many_cells; v<= many_cells; v++) {
-
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-              weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
-                              lattice_constant, gwidth, norm);
-              n_0 +=n_weight.n_0;
-              n_1 +=n_weight.n_1;
-              n_2 +=n_weight.n_2;
-              n_3 +=n_weight.n_3;
-              if (n_weight.n_3 > 0.2)
-                printf("n3(%g,%g,%g) gains %g from %g %g %g  at distance %g  i.e. %d %d %d\n",
-                       r.x, r.y, r.z, n_weight.n_3, R.x, R.y, R.z, R.norm(), t, u, v);
-
-              nv_1 +=n_weight.nv_1;
-              nv_2 +=n_weight.nv_2;
+              if ((R-r).norm() < max_distance_considered) {
+                weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
+                                                         lattice_constant, gwidth, norm);
+                // printf("Am at distance %g vs %g  with n3 contribution %g\n",
+                //        (R-r).norm(), radius_of_peak(gwidth, temp), n_weight.n_3);
+                n_0 +=n_weight.n_0;
+                n_1 +=n_weight.n_1;
+                n_2 +=n_weight.n_2;
+                n_3 +=n_weight.n_3;
+                // if (n_weight.n_3 > 0.2)
+                //   printf("n3(%g,%g,%g) gains %g from %g %g %g  at distance %g  i.e. %d %d %d\n",
+                //          r.x, r.y, r.z, n_weight.n_3, R.x, R.y, R.z, R.norm(), t, u, v);
+                nv_1 +=n_weight.nv_1;
+                nv_2 +=n_weight.nv_2;
+              }
             }
           }
         }
         phi_1 = -n_0*log(1-n_3);
-        printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g", n_0, n_3, 1-n_3, phi_1);  //debug
+        // printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
         phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
         phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
@@ -255,13 +282,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         //             +(j)/uipow(Nl, 2)
         //             +(k + 1)/uipow(Nl, 3)));
       }
-      printf("   finished %.3f%% of the integral\n",
-             100*((i)/double(Nl)
-                  +(j + 1)/uipow(Nl, 2)));
+      const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
+      const double t = time()/60/60;
+      const double time_total = t/fraction_complete;
+      printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
+             100*fraction_complete, time_total - t, time_total);
     }
     printf("finished %.1f%% of the integral\n",
            100*(i + 1)/double(Nl));
-    printf("free_energy=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);   //debug
+    printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);   //debug
   }
 
   printf("free_energy is %g\n", free_energy);
@@ -818,13 +847,9 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  temp=2;
-  reduced_density=1.2;
-  fv=0.8;
-  //double gw=0.325;
   printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
-  data e_data_new =find_energy_new(temp, reduced_density, fv, 0.325, data_dir, dx, bool(verbose));
+  data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
   printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
   return 0;  //for debug
