@@ -107,7 +107,7 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
 
 weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
                                 double lattice_constant, double gwidth, double norm) {
-  const vector3d lattice_vectors[3] = {
+  const vector3d lattice_vectors[3] = {                   //ASK - should only be defined ONCE!
     vector3d(lattice_constant/2,lattice_constant/2,0),
     vector3d(lattice_constant/2,0,lattice_constant/2),
     vector3d(0,lattice_constant/2,lattice_constant/2),
@@ -120,12 +120,12 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
     return w_den_R;
   }
 
-  const double df = dx/(lattice_constant/2);
-  const vector3d da1 = lattice_vectors[0]*df;
+  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length much smaller than dx - ASK where get this? Problem?
+  const vector3d da1 = lattice_vectors[0]*df; //infinitesimal lattice vectors of length df
   const vector3d da2 = lattice_vectors[1]*df;
   const vector3d da3 = lattice_vectors[2]*df;
-  const double dVp = da1.cross(da2).dot(da3);
-  for (int l=-inc_Ntot; l<=inc_Ntot; l++) {
+  const double dVp = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
+  for (int l=-inc_Ntot; l<=inc_Ntot; l++) {   //integrate only over infinitesimal lattice vectors within 2 x inlusion radius
     for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
       for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
         const vector3d rp_from_R = l*da1 + m*da2 + o*da3;
@@ -134,7 +134,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
         if (rp_from_R.norm() < inclusion_radius*gwidth) {
           weight w = find_weights(r, rp, temp);
           double n_rp = density_gaussian((r-rp).norm(), gwidth, norm);
-          w_den_R.n_0 += w.n_0*n_rp*dVp;
+          w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
           w_den_R.n_3 += w.n_3*n_rp*dVp;
@@ -168,7 +168,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //dx=(lattice_constant/2)/number of chunks along lattice vector
   const double dV = uipow(lattice_constant/Nl,3)/4.0;
 
-  //Find N_crystal to normalize reduced density n(r) later
+  //Find N_crystal (number of spheres in one crystal) to normalize reduced density n(r) later
   double N_crystal=0;
   for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
     for (int j=0; j<Nl; j++) {
@@ -177,12 +177,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                    + lattice_vectors[1]*j/double(Nl)
                    + lattice_vectors[2]*k/double(Nl);
 
-        const int many_cells=2;
+        const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
+                                 //Gaussians father away won't contriubute much 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
             for (int v=-many_cells; v<= many_cells; v++) {
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-              N_crystal += density_gaussian((r-R).norm(), gwidth, 1)*dV;
+              N_crystal += density_gaussian((r-R).norm(), gwidth, 1)*dV;   //norm=1
             }
           }
         }
@@ -194,7 +195,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
            N_crystal, reduced_num_spheres);
   }
-  const double norm = reduced_num_spheres/N_crystal;
+  const double norm = reduced_num_spheres/N_crystal;  //normalization constant
 
   //Integrate over one primitive cell (a parallelepiped) to find free energy
   double phi_1=0, phi_2=0, phi_3=0;
@@ -205,7 +206,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d r=lattice_vectors[0]*i/double(Nl)
                    + lattice_vectors[1]*j/double(Nl)
                    + lattice_vectors[2]*k/double(Nl);
-        //printf("rx = %g, ry= %g, rz= %g, mag r=%g\n", rx, ry, rz, r);    //debug
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
@@ -223,7 +223,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               n_1 +=n_weight.n_1;
               n_2 +=n_weight.n_2;
               n_3 +=n_weight.n_3;
-              if (n_weight.n_3 > 0.2)
+              if (n_weight.n_3 > 0.2)  //ASK why is this here?
                 printf("n3(%g,%g,%g) gains %g from %g %g %g  at distance %g  i.e. %d %d %d\n",
                        r.x, r.y, r.z, n_weight.n_3, R.x, R.y, R.z, R.norm(), t, u, v);
 
