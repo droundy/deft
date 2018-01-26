@@ -1,4 +1,4 @@
-# iterations	 errorinentropy	 maxerror
+# iterations	 errorinentropy	 maxerror	(generated with python figs/comparison.py 2500 s000/periodic-ww1.30-ff0.30-N500-tmi3-golden-movie/004334-lndos.dat s000/periodic-ww1.30-ff0.30-N500
 496	414.4	1556
 861	414.4	1555
 1431	414.3	1553
