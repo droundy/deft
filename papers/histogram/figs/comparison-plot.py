@@ -1,5 +1,6 @@
 from __future__ import division
-import numpy, sys, os, matplotlib
+import sys, os, matplotlib
+import numpy as np
 
 if 'noshow' in sys.argv:
         matplotlib.use('Agg')
@@ -32,8 +33,8 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 continue
 
         if energy > 0:
-                Nrt_at_energy, erroratenergy = numpy.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
-        iterations, errorinentropy, maxerror = numpy.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
+                Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
+        iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
 
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
@@ -65,6 +66,22 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 plt.ylabel('Error')
                 colors.legend()
                 plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
+
+                #------------------------------------------#
+                # Perhaps make a subplot for each method? For now I will test on
+                # just one Monte-Carlo Method.
+
+                if method == methods[3]:
+                        X,Y = np.meshgrid(Nrt_at_energy[Nrt_at_energy > 0], iterations[Nrt_at_energy > 0])
+                        Z = np.outer(erroratenergy[Nrt_at_energy > 0],erroratenergy[Nrt_at_energy > 0])
+
+                        plt.figure('Maxerror-at-energy-round-trips')
+                        plt.contourf(X,Y,Z, 100, cmap=plt.cm.jet)
+                        plt.colorbar() 
+                        plt.title('Error at energy %g %s' % (energy,filebase))
+                        plt.xlabel('Round Trips')
+                        plt.ylabel('iterations')
+                        plt.savefig('figs/%s-Maxerror-energy-Nrt-%g.pdf' % (tex_filebase, energy))
 
         plt.figure('maxerror')
         colors.loglog(iterations, maxerror, method = method[1:])
