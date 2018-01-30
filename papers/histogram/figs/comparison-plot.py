@@ -8,6 +8,14 @@ import matplotlib.pyplot as plt
 from glob import glob
 import colors
 
+from matplotlib.colors import LightSource
+
+densitycolormap = plt.cm.spectral
+densityinterpolation = 'bilinear'
+densityshadedflag = True
+densitybarflag = True
+gridflag = True
+
 if os.path.exists('../data'):
     os.chdir('..')
 
@@ -72,15 +80,19 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 # just one Monte-Carlo Method.
 
                 if method == methods[3]:
-                        X,Y = np.meshgrid(Nrt_at_energy[Nrt_at_energy > 0], iterations[Nrt_at_energy > 0])
-                        Z = np.outer(erroratenergy[Nrt_at_energy > 0],erroratenergy[Nrt_at_energy > 0])
-
                         plt.figure('Maxerror-at-energy-round-trips')
-                        plt.contourf(X,Y,Z, 100, cmap=plt.cm.jet)
-                        plt.colorbar() 
                         plt.title('Error at energy %g %s' % (energy,filebase))
                         plt.xlabel('Round Trips')
                         plt.ylabel('iterations')
+
+                        X,Y = np.meshgrid(Nrt_at_energy[Nrt_at_energy > 0], iterations[Nrt_at_energy > 0])
+                        Z = np.log(X) + np.log(Y)
+                        if densityshadedflag:
+                                ls = LightSource(azdeg=120,altdeg=65)
+                                rgb = ls.shade(Z,densitycolormap)
+                                im = plt.imshow(rgb, vmin = Z.min(), vmax = Z.max(), cmap=densitycolormap)
+                        if densitybarflag:
+                                plt.colorbar(im)
                         plt.savefig('figs/%s-Maxerror-energy-Nrt-%g.pdf' % (tex_filebase, energy))
 
         plt.figure('maxerror')
