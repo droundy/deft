@@ -517,7 +517,6 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       int cols = 2*bet + 1;
       double * M = new double[(emax-emin + 1)*cols];
  
-      int pause; /* variable I use for scanf to pause the simulation */
       for (int e = emin; e <= emax; e++){
 	for (int de  = -bet; de <= bet; de++){
 	  M[(e- emin)*cols + bet + de] = transition_matrix(e,e+de);
@@ -549,18 +548,20 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	    }
 	  }
 	}
-      }
 
-      /*for (int e = emin; e <= emax; e++) {
-	printf("energy = %i; ",e);
-	for (int de = -bet; de <=bet; de ++){
-	  if (de == 0) {
-	    printf("| ");
-	  }
-	  printf("%15g ",M[(e-emin)*cols + bet +de]);
-	}
-	printf("\n");
-      }*/
+        printf("\n");
+        for (int e = emin; e <= emax; e++) {
+          printf(":) final energy = %i; ",e);
+          for (int de = -bet; de <=bet; de ++){
+            if (de == 0) {
+              printf("| ");
+            }
+            printf("%15g ",M[(e-emin)*cols + bet +de]);
+          }
+          printf("\n");
+        }
+
+      }
       /* now we can find dos from final col */
       for (int e = 0; e < energy_levels; e++) {
 	ln_dos[e] = 0;
@@ -568,6 +569,11 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       for (int de = 0; de <= min(bet,emax-emin);  de++){
 	ln_dos[emax-de] = -M[(emax-emin-de)*cols + bet+ de];
       }
+      printf("first dos column:\n");
+      for (int i=0; i<=emax-emin; i++) {
+        printf("%g ", ln_dos[emax-i]);
+      }
+      printf("\n");
       /* make matrix diagonal, keep track of ops*/
       for (int e = emax-1; e >= emin; e--){
 	/*leading index of row we will subtract from other rows */
@@ -595,12 +601,13 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	  }
 	}
       }
+      printf("errors:\n");
       for(int e1 = 0; e1< energy_levels;e1++) { printf("%g ",error[e1]);} printf("\n\n");
       delete [] error;
 
       double dos_min = 0;
       double dos_max = 0;
-      for (int e = emin+1; e < emax; e++) {
+      for (int e = emin; e <= emax; e++) {
 	if (ln_dos[e] !=0){
 	  dos_max = max(abs(ln_dos[e]), dos_max);
 	  if (dos_min == 0){
@@ -610,8 +617,9 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	  }
 	}
       }
-      ln_dos[emax] = -log(dos_max);
+      printf("ln_dos (actually dos):\n");
       for(int e1 = emin; e1<=emax;e1++) { printf("%g ",ln_dos[e1]);} printf("\n\n");
+
       for (int e = 0; e < energy_levels; e++){
 	if (abs(ln_dos[e]) != 0){
 	  ln_dos[e] = log(abs(ln_dos[e]))- log(dos_max);
@@ -622,7 +630,8 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       for(int e1 = 0; e1<energy_levels;e1++) { printf("%g ",ln_dos[e1]);} printf("\n\n");
     
       ln_dos_check(ln_dos);
-      scanf("%i",&pause);
+      //int pause; /* variable I use for scanf to pause the simulation */
+      //scanf("%i",&pause);
       delete[] M;
     }
   } else if(dos_type == transition_dos) {
