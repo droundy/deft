@@ -10,7 +10,7 @@ import colors
 
 from matplotlib.colors import LightSource
 
-densitycolormap = plt.cm.spectral
+densitycolormap = plt.cm.jet
 densityinterpolation = 'bilinear'
 densityshadedflag = True
 densitybarflag = True
@@ -77,7 +77,7 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
 
                 #------------------------------------------#
                 # Perhaps make a subplot for each method? For now I will test on
-                # just one Monte-Carlo Method.
+                # just one Monte-Carlo Method: TMI3.
 
                 if method == methods[3]:
                         plt.figure('Maxerror-at-energy-round-trips')
@@ -86,11 +86,14 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                         plt.ylabel('iterations')
 
                         X,Y = np.meshgrid(Nrt_at_energy[Nrt_at_energy > 0], iterations[Nrt_at_energy > 0])
-                        Z = np.log(X) + np.log(Y)
+                        Z = np.log(X) + np.log(Y) # Z in no way coresponds to MaxError!
                         if densityshadedflag:
                                 ls = LightSource(azdeg=120,altdeg=65)
                                 rgb = ls.shade(Z,densitycolormap)
-                                im = plt.imshow(rgb, vmin = Z.min(), vmax = Z.max(), cmap=densitycolormap)
+                                im = plt.imshow(rgb, vmin = Z.min()/2, vmax = 2*Z.max(), cmap=densitycolormap)
+                                cset = plt.contour(Z, np.arange(Z.min(), Z.max(), (Z.max()-Z.min())/6),
+                                                   linewidths=2, cmap=plt.cm.Set2)
+                                plt.clabel(cset, inline=True, fmt='%1.1f', fontsize=10)
                         if densitybarflag:
                                 plt.colorbar(im)
                         plt.savefig('figs/%s-Maxerror-energy-Nrt-%g.pdf' % (tex_filebase, energy))
