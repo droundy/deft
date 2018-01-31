@@ -892,7 +892,7 @@ int main(int argc, const char *argv[]) {
         // Only output the ln_dos for energies that are essentially
         // converged.  Otherwise we can end up with lots of wrong dos
         // values at very low energies that we have to remove later.
-        fprintf(dos_out, "# energy   counts\n");
+        fprintf(dos_out, "# energy   ln_dos\n");
         for (int i = 0; i <= converged_state; i++) {
           fprintf(dos_out, "%d  %lg\n",i,ln_dos[i]);
         }

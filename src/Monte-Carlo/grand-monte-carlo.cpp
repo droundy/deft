@@ -434,6 +434,7 @@ int main(int argc, const char *argv[]) {
   printf("Energy levels are %d\n",sw.energy_levels);
   sw.energy_histogram = new long[sw.energy_levels]();
   sw.ln_energy_weights = new double[sw.energy_levels]();
+  sw.ln_dos = new double[sw.energy_levels]();
 
   // Observed and sampled energies
   sw.optimistic_samples = new long[sw.energy_levels]();
@@ -491,6 +492,35 @@ int main(int argc, const char *argv[]) {
     sw.lnw_movie_filename_format = new char[1024];
     sprintf((char *)sw.lnw_movie_filename_format,
             "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
+  }
+
+  {
+    printf("biggest_energy_transition: %d\n", sw.biggest_energy_transition);
+    // TESTING ONLY
+    sw.collection(0, 0) = 4;
+    sw.collection(0, 1) = 4;
+
+    sw.collection(1, -1) = 1;
+    sw.collection(1,  0) = 4;
+    sw.collection(1,  1) = 3;
+
+    sw.collection(2, -1) = 1;
+    sw.collection(2,  0) = 4;
+    sw.collection(2,  1) = 3;
+
+    sw.collection(3, -1) = 3;
+    sw.collection(3,  0) = 8;
+
+    for (int i=0;i<4;i++) {
+      for (int j=0;j<4;j++) {
+        printf("%g\t", sw.transition_matrix(i, j));
+      }
+      printf("\n");
+    }
+    printf("\n");
+    double *lndos = sw.compute_ln_dos(transition_dos);
+    for (int i=0;i<4;i++) printf("%d\t%g\n", i, lndos[i]);
+    exit(1);
   }
 
   // ----------------------------------------------------------------------------
