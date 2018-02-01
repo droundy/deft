@@ -93,16 +93,16 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
 
-  const double sigma=1;
-  const double Rad=sigma/pow(2, 5.0/6);
+//const double sigma=1;
+//const double Rad=sigma/pow(2, 5.0/6);
   const double alpha = find_alpha(temp);
   const double zeta = find_zeta(temp);
 
   weight w;
 
   w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(rdiff_magnitude-(alpha/2),2)/uipow(zeta,2));
-  w.n_0=w.n_2/(4*M_PI*Rad*Rad);
-  w.n_1=w.n_2/(4*M_PI*Rad);
+  w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
+  w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   if (rdiff_magnitude > 0) {
     w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
