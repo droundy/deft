@@ -491,17 +491,17 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
     for (int e = 0; e < energy_levels; e++){
       bool nonzero_found = false;
       for(int de = -biggest_energy_transition; de <= biggest_energy_transition; de ++) {
-	//printf("%g \t", transition_matrix(e,e+de));
-	if (transition_matrix(e,e+de)){
-	  bet = max(abs(de),bet);
-	  nonzero_found = true;
-	}
+        //printf("%g \t", transition_matrix(e,e+de));
+        if (transition_matrix(e,e+de)){
+          bet = max(abs(de),bet);
+          nonzero_found = true;
+        }
       }
       //printf("\n");
       if (nonzero_found) {
-	emax = e;
+        emax = e;
       } else if(emax == 0){
-	emin = e;
+        emin = e;
       }
     }
     emin++;
@@ -510,7 +510,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       // know nothing about the density of states.  Just leave it as a
       // constant!
       for (int e = 0; e < energy_levels; e++){
-	ln_dos[e] =0;
+        ln_dos[e] =0;
       }
       return ln_dos; // all done!
     } else {
