@@ -170,6 +170,25 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
+weight stupid_find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
+                                       double lattice_constant, double gwidth, double norm) {
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
+    return w_den_R;
+  }
+
+  weight w = find_weights(r, R, temp);
+  w_den_R.n_0 = w.n_0*norm;
+  w_den_R.n_1 = w.n_1*norm;
+  w_den_R.n_2 = w.n_2*norm;
+  w_den_R.n_3 = w.n_3*norm;
+
+  w_den_R.nv_1 = w.nv_1*norm;
+  w_den_R.nv_2 = w.nv_2*norm;
+
+  return w_den_R;
+}
+
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
   double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
