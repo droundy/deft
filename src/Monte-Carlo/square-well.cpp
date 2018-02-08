@@ -435,9 +435,53 @@ void sw_simulation::end_move_updates(){
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
-  // Note: if not using WL or SA method, wl_factor = 0 and the
-  // following has no effect.
-  ln_energy_weights[energy] -= wl_factor;
+  if (use_sad && energies_found) {
+    if (ln_energy_weights[energy] == 0) {
+      // We have *never* seen this thing before! Set the weight to the
+      // lowest of any energy we have seen.
+      for (int i=0;i<energy_levels;i++) {
+        if (ln_energy_weights[i] != 0) {
+          ln_energy_weights[energy] = min(ln_energy_weights[energy], ln_energy_weights[i]);
+        }
+      }
+    }
+    if (ln_energy_weights[energy+1] < ln_energy_weights[energy]) {
+      // We are at higher energy than the maximum entropy state, so we
+      // need to tweak our weights by even more, since we don't spend
+      // much time here.
+
+      // Figure out what the max_entropy_state is first...
+      max_entropy_state = energy+1;
+      while (ln_energy_weights[max_entropy_state+1] < ln_energy_weights[max_entropy_state]) {
+        max_entropy_state += 1;
+      }
+      // Then we key our change in weights based on that state.
+      ln_energy_weights[energy] -=
+        log(1 + (exp(wl_factor)-1)
+                  *exp(ln_energy_weights[energy]-ln_energy_weights[max_entropy_state]));
+    } else if (ln_energy_weights[energy-1] + 1/min_T < ln_energy_weights[energy]) {
+      // We are below the minimim important energy, and again need to tweak
+      // our updates.
+      min_important_energy = energy-1;
+      while (ln_energy_weights[min_important_energy-1] + 1/min_T < ln_energy_weights[min_important_energy]) {
+        min_important_energy -= 1;
+      }
+      // The following is like the high-energy case, except we have an
+      // extra Boltzmann factor, which accounts for the fact that we do
+      // bias things in favor of low energies (using the Boltzmann factor).
+      ln_energy_weights[energy] -=
+        log(1 + (exp(wl_factor)-1)
+                  *exp((min_important_energy-energy)/min_T +
+                       ln_energy_weights[energy]-ln_energy_weights[min_important_energy]));
+    } else {
+      // We are in the "interesting" region, so use an ordinary SA update.
+      ln_energy_weights[energy] -= wl_factor;
+    }
+  } else {
+    // Note: if not using WL or SA method, wl_factor = 0 and the
+    // following has no effect.
+    ln_energy_weights[energy] -= wl_factor;
+  }
 }
 
 void sw_simulation::energy_change_updates(int energy_change){
@@ -533,20 +577,20 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
     if (use_sad) {
       // Above the max_entropy_state our weights are effectively constant,
       // so the density of states is proportional to our histogram.
-      for (int i=0; i<max_entropy_state; i++) {
-        if (energy_histogram[i]) {
-          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[max_entropy_state]));
-        }
-      }
+      //~ for (int i=0; i<max_entropy_state; i++) {
+        //~ if (energy_histogram[i]) {
+          //~ ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[max_entropy_state]));
+        //~ }
+      //~ }
       // Below the minimum important energy, we also need to use the histogram,
       // only now adjusted by a Boltzmann factor.  We compute the min
       // important energy above for extreme clarity.
-      for (int i=minE+1; i<energy_levels; i++) {
-        if (energy_histogram[i]) {
-          ln_dos[i] = ln_dos[minE] + log(energy_histogram[i]/double(energy_histogram[minE]))
-            - (i-minE)*betamax;  // the last bit gives Boltzmann factor
-        }
-      }
+      //~ for (int i=minE+1; i<energy_levels; i++) {
+        //~ if (energy_histogram[i]) {
+          //~ ln_dos[i] = ln_dos[minE] + log(energy_histogram[i]/double(energy_histogram[minE]))
+            //~ - (i-minE)*betamax;  // the last bit gives Boltzmann factor
+        //~ }
+      //~ }
       // Now let us set the ln_dos for any sites we have never visited
       // to be equal to the minimum value of ln_dos for sites we
       // *have* visited.  These are unknown densities of states, and
@@ -1951,7 +1995,10 @@ void sw_simulation::initialize_transitions_file(const char *transitions_input_fi
   fclose(transitions_infile);
 
   // pretend we have seen the energies for which we have transition data
-  for(int i = min_e; i <= min_energy_state; i++) energy_histogram[i] = 1;
+  for(int i = min_e; i <= min_energy_state; i++) {
+    energies_found++;
+    energy_histogram[i] = 1;
+  }
 
   // now construct the actual weight array
   /* FIXME: it appears that we are reading in the data file properly,
