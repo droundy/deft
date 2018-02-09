@@ -435,16 +435,7 @@ void sw_simulation::end_move_updates(){
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
-  if (use_sad && energies_found) {
-    if (ln_energy_weights[energy] == 0) {
-      // We have *never* seen this thing before! Set the weight to the
-      // lowest of any energy we have seen.
-      for (int i=0;i<energy_levels;i++) {
-        if (ln_energy_weights[i] != 0) {
-          ln_energy_weights[energy] = min(ln_energy_weights[energy], ln_energy_weights[i]);
-        }
-      }
-    }
+  if (use_sad && energies_found > 1 && wl_factor > 0) {
     if (ln_energy_weights[energy+1] < ln_energy_weights[energy]) {
       // We are at higher energy than the maximum entropy state, so we
       // need to tweak our weights by even more, since we don't spend
@@ -456,9 +447,14 @@ void sw_simulation::end_move_updates(){
         max_entropy_state += 1;
       }
       // Then we key our change in weights based on that state.
-      ln_energy_weights[energy] -=
-        log(1 + (exp(wl_factor)-1)
-                  *exp(ln_energy_weights[energy]-ln_energy_weights[max_entropy_state]));
+      // 1/w = 1/w + gamma 1/w0
+      // -lnw = ln(1/w + gamma 1/w0) = ln((w0/w + gamma)/w0)
+      //      = -lnw0 + ln(w0/w + gamma) = -lnw0 + ln(gamma + exp(lnw0-lnw))
+      // lnw = lnw0 - ln(gamma + exp(lnw0-lnw))
+      ln_energy_weights[energy] = ln_energy_weights[max_entropy_state] -
+        log(wl_factor
+            + exp(ln_energy_weights[max_entropy_state]-ln_energy_weights[energy]));
+      assert(isnormal(ln_energy_weights[energy]));
     } else if (ln_energy_weights[energy-1] + 1/min_T < ln_energy_weights[energy]) {
       // We are below the minimim important energy, and again need to tweak
       // our updates.
@@ -469,10 +465,18 @@ void sw_simulation::end_move_updates(){
       // The following is like the high-energy case, except we have an
       // extra Boltzmann factor, which accounts for the fact that we do
       // bias things in favor of low energies (using the Boltzmann factor).
-      ln_energy_weights[energy] -=
-        log(1 + (exp(wl_factor)-1)
-                  *exp((min_important_energy-energy)/min_T +
-                       ln_energy_weights[energy]-ln_energy_weights[min_important_energy]));
+
+      // 1/w = 1/w + gamma 1/w0 e^{(E-E0)/minT} <-- small boltmann
+      // -lnw = ln(1/w + gamma e^{(E-E0)/minT}/w0)
+      //      = ln((w0/w + gamma e^{(E-E0)/minT})/w0)
+      //      = -lnw0 + ln(w0/w + gamma e^{(E-E0)/minT})
+      //      = -lnw0 + ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
+      // lnw = lnw0 - ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
+      ln_energy_weights[energy] =
+        ln_energy_weights[min_important_energy]
+        - log(exp(ln_energy_weights[min_important_energy] - ln_energy_weights[energy])
+              + wl_factor*exp((min_important_energy - energy)/min_T));
+      assert(isnormal(ln_energy_weights[energy]));
     } else {
       // We are in the "interesting" region, so use an ordinary SA update.
       ln_energy_weights[energy] -= wl_factor;
