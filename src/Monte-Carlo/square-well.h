@@ -74,6 +74,7 @@ struct sw_simulation {
      ln_energy_weights is a constant except during initialization. */
 
   int max_entropy_state, min_energy_state, min_important_energy;
+  int too_high_energy, too_low_energy;
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;

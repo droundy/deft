@@ -754,6 +754,8 @@ int main(int argc, const char *argv[]) {
             headerinfo, sw.sa_t0);
   } else if (sad) {
     sw.use_sad = sad_fraction;
+    sw.too_high_energy = sw.energy_levels-1;
+    sw.too_low_energy = 0;
     sprintf(headerinfo,
             "%s# histogram method: sad%d\n",
             headerinfo, sad_fraction);
