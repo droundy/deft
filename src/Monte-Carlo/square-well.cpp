@@ -380,9 +380,9 @@ void sw_simulation::move_a_ball() {
     }
     const double lnPmove = lnw2 - lnw1;
     Pmove = exp(lnPmove);
-    if (e2 < too_high_energy) {
+    if (e2 < too_high_energy && e1 != e2) {
       printf("prob hi %d -> %d = %g\n", e1, e2, Pmove);
-    } else if (e2 > too_low_energy) {
+    } else if (e2 > too_low_energy && e1 != e2) {
       printf("prob lo %d -> %d = %g\n", e1, e2, Pmove);
     }
   } else {
