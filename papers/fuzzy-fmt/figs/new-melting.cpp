@@ -92,9 +92,6 @@ static inline double find_zeta(double temp) {
 weight find_weights(vector3d r, vector3d rp, double temp) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
-
-//const double sigma=1;
-//const double Rad=sigma/pow(2, 5.0/6);
   const double alpha = find_alpha(temp);
   const double zeta = find_zeta(temp);
   weight w;
