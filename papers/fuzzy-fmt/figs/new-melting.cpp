@@ -151,7 +151,8 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
         // only bother including points within the inclusion radius:
         if (rp_from_R.norm() < inclusion_radius*gwidth) {
           weight w = find_weights(r, rp, temp);
-          double n_rp = density_gaussian((r-rp).norm(), gwidth, norm);
+          //double n_rp = density_gaussian((r-rp).norm(), gwidth, norm);  // ASK! error? want density a distance rp-R from center of Gaussian
+          double n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // ASK! want density a distance rp-R from center of Gaussian
           w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
@@ -167,22 +168,35 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight stupid_find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,
                                        double lattice_constant, double gwidth, double norm) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
+  double pt_comp = (gwidth/4)*sqrt(3);  //change to value from chart
+  vector3d pt_about_R[8]= {
+    vector3d(pt_comp,pt_comp,pt_comp),
+    vector3d(pt_comp,pt_comp,-pt_comp),
+    vector3d(pt_comp,-pt_comp,pt_comp),
+    vector3d(pt_comp,-pt_comp,-pt_comp),
+    vector3d(-pt_comp,pt_comp,pt_comp),
+    vector3d(-pt_comp,pt_comp,-pt_comp),
+    vector3d(-pt_comp,-pt_comp,pt_comp),
+    vector3d(-pt_comp,-pt_comp,-pt_comp),
+  };
+  for (int i=0; i <8; i++) {
+    vector3d sample_pt = R + pt_about_R[i];
+    double n_sample=density_gaussian((sample_pt - R).norm(), gwidth, norm);
+    weight w = find_weights(r, sample_pt, temp);
+    w_den_R.n_0 += w.n_0*n_sample;
+    w_den_R.n_1 += w.n_1*n_sample;
+    w_den_R.n_2 += w.n_2*n_sample;
+    w_den_R.n_3 += w.n_3*n_sample;
 
-  weight w = find_weights(r, R, temp);
-  w_den_R.n_0 = w.n_0*norm;
-  w_den_R.n_1 = w.n_1*norm;
-  w_den_R.n_2 = w.n_2*norm;
-  w_den_R.n_3 = w.n_3*norm;
-
-  w_den_R.nv_1 = w.nv_1*norm;
-  w_den_R.nv_2 = w.nv_2*norm;
-
+    w_den_R.nv_1 += w.nv_1*n_sample;
+    w_den_R.nv_2 += w.nv_2*n_sample;
+  }
   return w_den_R;
 }
 
