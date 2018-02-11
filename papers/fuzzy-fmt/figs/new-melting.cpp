@@ -178,19 +178,19 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
     double abscissa;
     double gqweight;
   };
-  //struct chart_entry chart_n2[2];    //from chart on Hermite-Gause Quadrature
-  //chart_n2[0].abscissa=sqrt(2)/2.0;
-  //chart_n2[0].gqweight=0.866227;
-  struct chart_entry chart_n5[2];  //from chart on Hermite-Gause Quadrature
-  chart_n5[0].abscissa=0.0;
-  chart_n5[0].gqweight=0.945309;
-  chart_n5[1].abscissa=0.958572;
-  chart_n5[1].gqweight=0.393619;
-  chart_n5[2].abscissa=2.02018;
-  chart_n5[2].gqweight=0.0199532;
-  for (int j=0; j<3; j++) {
-  //double pt_comp=sqrt((chart_n2[0].abscissa*chart_n2[0].abscissa)*2*gwidth*gwidth/3.0); 
-  double pt_comp=sqrt((chart_n5[j].abscissa*chart_n5[j].abscissa)*2*gwidth*gwidth/3.0); 
+  struct chart_entry chart_n2[2];    //from chart on Hermite-Gause Quadrature
+  chart_n2[0].abscissa=sqrt(2)/2.0;
+  chart_n2[0].gqweight=0.866227;
+  //struct chart_entry chart_n5[2];  //from chart on Hermite-Gause Quadrature
+  //chart_n5[0].abscissa=0.0;  //FIX - only want to do this one once!
+  //chart_n5[0].gqweight=0.945309;
+  //chart_n5[1].abscissa=0.958572;
+  //chart_n5[1].gqweight=0.393619;
+  //chart_n5[2].abscissa=2.02018;
+  //chart_n5[2].gqweight=0.0199532;
+  //for (int j=0; j<3; j++) {
+  double pt_comp=sqrt((chart_n2[0].abscissa*chart_n2[0].abscissa)*2*gwidth*gwidth/3.0); 
+  //double pt_comp=sqrt((chart_n5[j].abscissa*chart_n5[j].abscissa)*2*gwidth*gwidth/3.0); 
   //printf("pt_comp=%g\n",pt_comp);   //debug
   vector3d pt_about_R[8]= {
     vector3d(pt_comp,pt_comp,pt_comp),
@@ -209,24 +209,24 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
     //double n_sample_from_gaus=density_gaussian((sample_pt - R).norm(), gwidth, norm);   //replace this with weight from chart
     //printf("n_sample_from_gaus=%g\n",n_sample_from_gaus);   //debug
     weight w = find_weights(r, sample_pt, temp);
-    //w_den_R.n_0 += w.n_0*norm*chart_n2[0].gqweight;
-    //w_den_R.n_1 += w.n_1*norm*chart_n2[0].gqweight;
-    //w_den_R.n_2 += w.n_2*norm*chart_n2[0].gqweight;
-    //w_den_R.n_3 += w.n_3*norm*chart_n2[0].gqweight;
+    w_den_R.n_0 += w.n_0*norm*chart_n2[0].gqweight;
+    w_den_R.n_1 += w.n_1*norm*chart_n2[0].gqweight;
+    w_den_R.n_2 += w.n_2*norm*chart_n2[0].gqweight;
+    w_den_R.n_3 += w.n_3*norm*chart_n2[0].gqweight;
 
-    //w_den_R.nv_1 += w.nv_1*norm*chart_n2[0].gqweight;
-    //w_den_R.nv_2 += w.nv_2*norm*chart_n2[0].gqweight;
+    w_den_R.nv_1 += w.nv_1*norm*chart_n2[0].gqweight;
+    w_den_R.nv_2 += w.nv_2*norm*chart_n2[0].gqweight;
     
-    w_den_R.n_0 += w.n_0*norm*chart_n5[j].gqweight;
-    w_den_R.n_1 += w.n_1*norm*chart_n5[j].gqweight;
-    w_den_R.n_2 += w.n_2*norm*chart_n5[j].gqweight;
-    w_den_R.n_3 += w.n_3*norm*chart_n5[j].gqweight;
+    //w_den_R.n_0 += w.n_0*norm*chart_n5[j].gqweight;
+    //w_den_R.n_1 += w.n_1*norm*chart_n5[j].gqweight;
+    //w_den_R.n_2 += w.n_2*norm*chart_n5[j].gqweight;
+    //w_den_R.n_3 += w.n_3*norm*chart_n5[j].gqweight;
 
-    w_den_R.nv_1 += w.nv_1*norm*chart_n5[j].gqweight;
-    w_den_R.nv_2 += w.nv_2*norm*chart_n5[j].gqweight;
+    //w_den_R.nv_1 += w.nv_1*norm*chart_n5[j].gqweight;
+    //w_den_R.nv_2 += w.nv_2*norm*chart_n5[j].gqweight;
     printf("w_den_R.n_0=%g  w_den_R.n_1=%g  w_den_R.n_2=%g  w_den_R.n_3=%g\n", w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3);   //debug
   }
- }
+ //}  //j loop
   return w_den_R;
 }
 
