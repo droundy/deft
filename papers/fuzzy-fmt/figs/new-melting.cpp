@@ -274,8 +274,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             for (int v=-many_cells; v<= many_cells; v++) {
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               if ((R-r).norm() < max_distance_considered) {
-                weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
-                                                         lattice_constant, gwidth, norm);
+                //weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
+                //                                         lattice_constant, gwidth, norm);
+                weight n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,     //Gaussian Quadrature
+                                                        lattice_constant, gwidth, norm);
                 // printf("Am at distance %g vs %g  with n3 contribution %g\n",
                 //        (R-r).norm(), radius_of_peak(gwidth, temp), n_weight.n_3);
                 n_0 +=n_weight.n_0;
