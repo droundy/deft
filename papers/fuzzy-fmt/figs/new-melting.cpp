@@ -174,7 +174,8 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
-  double pt_comp = (gwidth/4)*sqrt(3);  //change to value from chart
+  //double pt_comp = (gwidth/4)*sqrt(3);  //replace this with value from chart
+  double pt_comp = sqrt(2)/2.0;   //from chart on Hermite-Gause Quadrature
   vector3d pt_about_R[8]= {
     vector3d(pt_comp,pt_comp,pt_comp),
     vector3d(pt_comp,pt_comp,-pt_comp),
@@ -187,7 +188,8 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   };
   for (int i=0; i <8; i++) {
     vector3d sample_pt = R + pt_about_R[i];
-    double n_sample=density_gaussian((sample_pt - R).norm(), gwidth, norm);
+    //double n_sample=density_gaussian((sample_pt - R).norm(), gwidth, norm);   //replace this with weight from chart
+    double n_sample=0.866227;    //from chart on Hermite-Gause Quadrature
     weight w = find_weights(r, sample_pt, temp);
     w_den_R.n_0 += w.n_0*n_sample;
     w_den_R.n_1 += w.n_1*n_sample;
