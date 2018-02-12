@@ -179,7 +179,6 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
     double gqweight;
   };
   struct chart_entry chart_n2[1];    //from chart on Hermite-Gause Quadrature
-
   chart_n2[0].abscissa=0;
   chart_n2[0].gqweight=0;
   chart_n2[1].abscissa=sqrt(2)/2.0;
@@ -191,11 +190,10 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   //chart_n5[1].gqweight=0.393619;
   //chart_n5[2].abscissa=2.02018;
   //chart_n5[2].gqweight=0.0199532;
-  //add struct of charts
+  //add struct of charts ...
   //int jmax=2;  //set to 2 for n2, 3 for n5
   //for (int j=0; j<jmax; j++) {
   double pt_comp=sqrt((chart_n2[1].abscissa*chart_n2[1].abscissa)*2*gwidth*gwidth/3.0); 
-  //double pt_comp=sqrt((chart_n5[j].abscissa*chart_n5[j].abscissa)*2*gwidth*gwidth/3.0); 
   //printf("pt_comp=%g\n",pt_comp);   //debug
   vector3d pt_about_R[8]= {
     vector3d(pt_comp,pt_comp,pt_comp),
@@ -224,13 +222,6 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
     w_den_R.nv_1 += w.nv_1*norm*change_var_coef*chart_n2[1].gqweight;
     w_den_R.nv_2 += w.nv_2*norm*change_var_coef*chart_n2[1].gqweight;
     
-    //w_den_R.n_0 += w.n_0*norm*change_var_coef*chart_n5[j].gqweight;
-    //w_den_R.n_1 += w.n_1*norm*change_var_coef*chart_n5[j].gqweight;
-    //w_den_R.n_2 += w.n_2*norm*change_var_coef*chart_n5[j].gqweight;
-    //w_den_R.n_3 += w.n_3*norm*change_var_coef*chart_n5[j].gqweight;
-
-    //w_den_R.nv_1 += w.nv_1*norm*change_var_coef*chart_n5[j].gqweight;
-    //w_den_R.nv_2 += w.nv_2*norm*change_var_coef*chart_n5[j].gqweight;
     printf("w_den_R.n_0=%g  w_den_R.n_1=%g  w_den_R.n_2=%g  w_den_R.n_3=%g\n", w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3);   //debug
   }
  //}  //j loop
