@@ -356,12 +356,23 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   }
 
   printf("free_energy is %g\n", free_energy);
+  
+  HomogeneousSFMTFluid hf;
+  hf.sigma() = 1;
+  hf.epsilon() = 1;   //energy constant in the WCA fluid
+  hf.kT() = temp;
+  hf.n() = reduced_density;
+  hf.mu() = 0;
+  //Note: hf.energy() returns energy/volume
+
+  const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
 
   data data_out;
-  data_out.diff_free_energy_per_atom=2;
+  data_out.diff_free_energy_per_atom=(free_energy/reduced_num_spheres) - homogeneous_free_energy;
   data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
-  data_out.hfree_energy_per_vol=2;
+  data_out.hfree_energy_per_vol=hf.energy();
   data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
+
 
   return data_out;
 }
