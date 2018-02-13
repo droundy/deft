@@ -380,11 +380,11 @@ void sw_simulation::move_a_ball() {
     }
     const double lnPmove = lnw2 - lnw1;
     Pmove = exp(lnPmove);
-    if (e2 < too_high_energy && e1 != e2) {
-      printf("prob hi %d -> %d = %g\n", e1, e2, Pmove);
-    } else if (e2 > too_low_energy && e1 != e2) {
-      printf("prob lo %d -> %d = %g\n", e1, e2, Pmove);
-    }
+    //if (e2 < too_high_energy && e1 != e2) {
+      //printf("prob hi %d -> %d = %g\n", e1, e2, Pmove);
+    //} else if (e2 > too_low_energy && e1 != e2) {
+      //printf("prob lo %d -> %d = %g\n", e1, e2, Pmove);
+    //}
   } else {
     if (!sa_t0
         && wl_factor > 0 && (energy + energy_change > min_important_energy
@@ -461,7 +461,7 @@ void sw_simulation::end_move_updates(){
         ln_energy_weights[too_high_energy] -
             log(wl_factor
                 + exp(ln_energy_weights[too_high_energy]-ln_energy_weights[energy]));
-      assert(isnormal(ln_energy_weights[energy]));
+      assert(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0);
     } else if (energy > too_low_energy) {
       // We are below the minimim important energy, and again need to tweak
       // our updates.
@@ -477,10 +477,12 @@ void sw_simulation::end_move_updates(){
       //      = -lnw0 + ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
       // lnw = lnw0 - ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
       ln_energy_weights[energy] =
-        ln_energy_weights[min_important_energy]
-            - log(exp(ln_energy_weights[min_important_energy] - ln_energy_weights[energy])
-                  + wl_factor*exp((min_important_energy - energy)/min_T));
-      assert(isnormal(ln_energy_weights[energy]));
+        min(ln_energy_weights[energy] - wl_factor,
+            ln_energy_weights[too_low_energy]
+                - log(exp(ln_energy_weights[too_low_energy] - ln_energy_weights[energy])
+                      + wl_factor*exp((too_low_energy - energy)/min_T)));
+
+      assert(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0);
     } else {
       // We are in the "interesting" region, so use an ordinary SA update.
       ln_energy_weights[energy] -= wl_factor;
@@ -503,10 +505,11 @@ void sw_simulation::end_move_updates(){
         || energy_histogram[min_important_energy] == 0) {
       // We are above the min_important_energy tangent line, which
       // means we are the new min_important_energy.
+      //if (energy != min_important_energy) print_edges = true;
       min_important_energy = energy;
       if (min_important_energy > too_low_energy) too_low_energy = min_important_energy;
-      // print_edges = true;
     }
+
     if (print_edges) printf(" %5d ...%5d -->%5d ...%5d\n",
                             too_low_energy, min_important_energy, max_entropy_state, too_high_energy);
   }
@@ -806,6 +809,8 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
 }
 
 int sw_simulation::set_min_important_energy(double *input_ln_dos){
+  // sad tracks min_important_energy continually
+  if (use_sad) return min_important_energy;
 
   // We always use the transition matrix to estimate the
   // min_important_energy, since it is more robust at the outset.
@@ -843,6 +848,9 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
 }
 
 void sw_simulation::set_max_entropy_energy() {
+  // sad tracks max_entropy_state continually
+  if (use_sad) return;
+
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   for (int i=energy_levels-1; i >= 0; i--) {
