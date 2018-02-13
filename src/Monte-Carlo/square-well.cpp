@@ -458,9 +458,13 @@ void sw_simulation::end_move_updates(){
       //      = -lnw0 + ln(w0/w + gamma) = -lnw0 + ln(gamma + exp(lnw0-lnw))
       // lnw = lnw0 - ln(gamma + exp(lnw0-lnw))
       ln_energy_weights[energy] =
-        ln_energy_weights[too_high_energy] -
+        min(ln_energy_weights[energy] - wl_factor,
+            ln_energy_weights[too_high_energy] -
             log(wl_factor
-                + exp(ln_energy_weights[too_high_energy]-ln_energy_weights[energy]));
+                + exp(ln_energy_weights[too_high_energy]-ln_energy_weights[energy])));
+      if (!(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0)) {
+        printf("lnw[%d] = %g\n", energy, ln_energy_weights[energy]);
+      }
       assert(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0);
     } else if (energy > too_low_energy) {
       // We are below the minimim important energy, and again need to tweak
