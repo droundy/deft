@@ -49,7 +49,11 @@ N = round(n*lenyz*lenyz*lenx)
 mem_estimate = 10 + 0.15*N # it actually also depends on ww, but I'm ignoring that for now.
 
 datadir = 'papers/histogram/data/lv'
-fname = 'ww%.2f-ff%.2f-%gx%g-%s' % (ww, ff, lenx, lenyz, method_name)
+if 'golden' in sys.argv:
+    suffix = 'golden'
+else:
+    suffix = method_name
+fname = 'ww%.2f-ff%.2f-%gx%g-%s' % (ww, ff, lenx, lenyz, suffix)
 if method_name == 'wltmmc':
     fname += '-%g-%g' % (wl_threshold, wl_cutoff)
 if seed != 0:
