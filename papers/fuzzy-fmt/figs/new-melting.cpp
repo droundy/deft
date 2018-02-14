@@ -189,8 +189,8 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   //chart_n5[2].abscissa=2.02018;
   //chart_n5[2].gqweight=0.0199532;
 
-  double pt_comp=sqrt((chart_n2[0].abscissa*chart_n2[0].abscissa)*2*gwidth*gwidth/3.0); 
-
+  //double pt_comp=sqrt((chart_n2[0].abscissa*chart_n2[0].abscissa)*2*gwidth*gwidth/3.0); //old - not sure how got this?
+  double pt_comp=chart_n2[0].abscissa*sqrt(2)*gwidth); //x component of sample   rprime_from_R ASK!
   vector3d pt_about_R[8]= {
     vector3d(pt_comp,pt_comp,pt_comp),
     vector3d(pt_comp,pt_comp,-pt_comp),
@@ -219,7 +219,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
     w_den_R.nv_2 += w.nv_2*norm*change_var_coef*chart_n2[0].gqweight;
   } 
   return w_den_R;
-}
+}  
 
 
 
