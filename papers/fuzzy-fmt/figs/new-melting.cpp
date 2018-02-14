@@ -168,7 +168,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,    //one cube
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  
                                        double lattice_constant, double gwidth, double norm) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
@@ -188,11 +188,9 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   //chart_n5[1].gqweight=0.393619;
   //chart_n5[2].abscissa=2.02018;
   //chart_n5[2].gqweight=0.0199532;
-  //add struct of charts ...
-  //int jmax=2;  //set to 2 for n2, 3 for n5
-  //for (int j=0; j<jmax; j++) {
+
   double pt_comp=sqrt((chart_n2[0].abscissa*chart_n2[0].abscissa)*2*gwidth*gwidth/3.0); 
-  //printf("pt_comp=%g\n",pt_comp);   //debug
+
   vector3d pt_about_R[8]= {
     vector3d(pt_comp,pt_comp,pt_comp),
     vector3d(pt_comp,pt_comp,-pt_comp),
@@ -203,15 +201,15 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
     vector3d(-pt_comp,-pt_comp,pt_comp),
     vector3d(-pt_comp,-pt_comp,-pt_comp),
   };
-  //printf("next loop\n");  //debug
-  for (int i=0; i <8; i++) {
+  for (int i=0; i <1; i++) {
     vector3d sample_pt = R + pt_about_R[i];
-    //printf("pt_about_R[%i].x=%g, pt_about_R[%i].y=%g, pt_about_R[%i].z=%g, \n", i, pt_about_R[i].x, i, pt_about_R[i].y, i, pt_about_R[i].z); //debug
-    //double n_sample_from_gaus=density_gaussian((sample_pt - R).norm(), gwidth, norm);   //replace this with weight from chart
-    //weight w = find_weights(r, sample_pt, temp);  //sample_pt = rp   rplace with change of variables expression
     double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
-    vector3d change_var_rp=R+((sample_pt-R)/(sqrt(2)*gwidth));
-    weight w = find_weights(r, change_var_rp, temp);
+    weight w = find_weights(r, sample_pt, temp);  //sample_pt = rp   rplace with change of variables expression?
+    //vector3d change_var=sample_pt;  //? not right!
+    //weight w = find_weights(r, change_var, temp);
+    
+    //w_den_R.n_0 +=change_var_coef*chart_n2[0].gqweight;  //for debug only  set w.n to 1
+ 
     w_den_R.n_0 += w.n_0*norm*change_var_coef*chart_n2[0].gqweight;
     w_den_R.n_1 += w.n_1*norm*change_var_coef*chart_n2[0].gqweight;
     w_den_R.n_2 += w.n_2*norm*change_var_coef*chart_n2[0].gqweight;
@@ -219,10 +217,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
 
     w_den_R.nv_1 += w.nv_1*norm*change_var_coef*chart_n2[0].gqweight;
     w_den_R.nv_2 += w.nv_2*norm*change_var_coef*chart_n2[0].gqweight;
-    
-    //printf("w_den_R.n_0=%g  w_den_R.n_1=%g  w_den_R.n_2=%g  w_den_R.n_3=%g\n", w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3);   //debug
-  }
- //}  //j loop
+  } 
   return w_den_R;
 }
 
