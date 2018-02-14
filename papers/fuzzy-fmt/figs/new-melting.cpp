@@ -190,7 +190,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   //chart_n5[2].gqweight=0.0199532;
 
   //double pt_comp=sqrt((chart_n2[0].abscissa*chart_n2[0].abscissa)*2*gwidth*gwidth/3.0); //old - not sure how got this?
-  double pt_comp=chart_n2[0].abscissa*sqrt(2)*gwidth); //x component of sample   rprime_from_R ASK!
+  double pt_comp=chart_n2[0].abscissa*sqrt(2)*gwidth; //x component of sample   rprime_from_R ASK!
   vector3d pt_about_R[8]= {
     vector3d(pt_comp,pt_comp,pt_comp),
     vector3d(pt_comp,pt_comp,-pt_comp),
@@ -918,7 +918,7 @@ int main(int argc, const char **argv) {
   printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
   data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
-  printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+  printf("e_data_new is: diffperatom=%g, cryFEperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
   return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
