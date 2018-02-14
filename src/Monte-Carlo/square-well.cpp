@@ -957,6 +957,8 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
       }
     }
     return iteration >= init_iters;
+  } else if (max_time > 0) {
+    return false;
   }
 
   printf("We are asking whether we are finished initializing without "
