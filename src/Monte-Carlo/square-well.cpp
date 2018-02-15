@@ -481,8 +481,9 @@ void sw_simulation::end_move_updates(){
       //      = (E-E0)/minT} - lnw0 + ln(gamma + e^{lnw0 - lnw - (E-E0)/minT})) <-- large boltzmann
       //  lnw = lnw0 - (E-E0)/minT} - ln(gamma + e^{lnw0 - lnw - (E-E0)/minT})) <-- large boltzmann
       ln_energy_weights[energy] =
-        ln_energy_weights[too_low_energy] + (energy-too_low_energy)/min_T
-        - log(wl_factor + exp(ln_energy_weights[too_low_energy] - ln_energy_weights[energy] + (energy-too_low_energy)/min_T));
+        min(ln_energy_weights[energy] - wl_factor,
+            ln_energy_weights[too_low_energy] + (energy-too_low_energy)/min_T
+            - log(wl_factor + exp(ln_energy_weights[too_low_energy] - ln_energy_weights[energy] + (energy-too_low_energy)/min_T)));
 
       // -lnw = ln(1/w + gamma e^{(E-E0)/minT}/w0)
       //      = ln((w0/w + gamma e^{(E-E0)/minT})/w0)
