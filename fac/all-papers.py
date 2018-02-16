@@ -19,6 +19,8 @@ for paper in papers:
   print("> ../papers/"+paper+"/.figs.fac")
   print("c .pyc\n")
 
+figs_done = set()
+
 for project in ['thesis-roth']:
   print("| python3 latex.py papers/"+project+"/project.tex")
   print("< config.py")
@@ -30,10 +32,10 @@ for project in ['thesis-roth']:
   print("> ../papers/"+project+"/.figs.fac")
   print("c .pyc\n")
 
-# Add thesis-vischer/Thesis.tex here when figures are available
 other_texs = """
    histogram/thesis/thesis.tex
    thesis-vischer/Thesis.tex
+   histogram/sad.tex
 """.split()
 
 for tex in other_texs:
@@ -44,7 +46,8 @@ for tex in other_texs:
   print("> ../papers/"+d+"/.%s.fac" % os.path.basename(tex))
   print("c .pyc\n")
 
-  print("| cd ../papers/%s && python2 %s/figs.py figs/*.py > .figs.fac"
-        % (d, facd))
-  print("> ../papers/"+d+"/.figs.fac")
-  print("c .pyc\n")
+  if d not in papers:
+    print("| cd ../papers/%s && python2 %s/figs.py figs/*.py > .figs.fac"
+          % (d, facd))
+    print("> ../papers/"+d+"/.figs.fac")
+    print("c .pyc\n")
