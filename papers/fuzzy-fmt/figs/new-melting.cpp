@@ -180,13 +180,14 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   for (i=1; i<3; i++) {
     for (j=1; j<3; j++) {
       for (k=1; k<3; k++) {
-        double xi=abscissa*pow(-1,i);
-        double yi=abscissa*pow(-1,j);
-        double zi=abscissa*pow(-1,k);
+        double xi=abscissa*uipow(-1,i);
+        double yi=abscissa*uipow(-1,j);
+        double zi=abscissa*uipow(-1,k);
         vector3d sample_pt = vector3d(xi, yi, zi);
         vector3d change_var = -R-sqrt(2)*gwidth*sample_pt;
         double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
-        weight w = find_weights(r, change_var, temp);   
+        weight w = find_weights(r, change_var, temp);  
+         
         w_den_R.n_0 += w.n_0*norm*change_var_coef*gqweight*gqweight*gqweight;
         w_den_R.n_1 += w.n_1*norm*change_var_coef*gqweight*gqweight*gqweight;
         w_den_R.n_2 += w.n_2*norm*change_var_coef*gqweight*gqweight*gqweight;
@@ -895,7 +896,7 @@ int main(int argc, const char **argv) {
   printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
   data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
-  printf("e_data_new is: diffperatom=%g, cryFEperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+  printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
   return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
