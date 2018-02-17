@@ -317,15 +317,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         //             +(j)/uipow(Nl, 2)
         //             +(k + 1)/uipow(Nl, 3)));
       }
-      const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
-      const double t = time()/60/60;
-      const double time_total = t/fraction_complete;
-      printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
-             100*fraction_complete, time_total - t, time_total);
+      //const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
+      //const double t = time()/60/60;
+      //const double time_total = t/fraction_complete;
+      //printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
+      //       100*fraction_complete, time_total - t, time_total);
     }
-    printf("finished %.1f%% of the integral\n",
-           100*(i + 1)/double(Nl));
-    printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
+    //printf("finished %.1f%% of the integral\n",
+     //      100*(i + 1)/double(Nl));
+    //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
 
   printf("free_energy is %g\n", free_energy);
@@ -893,12 +893,12 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
+  //printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
-  data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
-  printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+  //data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
+  //printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
-  return 0;  //for debug
+  //return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
