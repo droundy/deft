@@ -283,8 +283,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
-int loops=0;  //debug - delete later!
-
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
             for (int v=-many_cells; v<= many_cells; v++) {
@@ -300,11 +298,10 @@ int loops=0;  //debug - delete later!
                           n_weight=find_weighted_den_aboutR(R, r, dx, temp,     //For Crystal Free Energy in real space without Gaussian Quadrature
                                           lattice_constant, gwidth, norm, reduced_density, 1);
                       } 
-                  } else {
+                  } //else {
                       //n_weight=find_weighted_den_aboutR(R, r, dx, temp,  //For Homogeneous Free Energy in real space (no Gaussian Quadrature)
                                          // lattice_constant, gwidth, norm, reduced_density, 0);
-loops+=1;  //debug - delete later!
-                  }
+                  //}
                 
                 // printf("Am at distance %g vs %g  with n3 contribution %g\n",
                 //        (R-r).norm(), radius_of_peak(gwidth, temp), n_weight.n_3);
