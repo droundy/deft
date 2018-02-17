@@ -181,8 +181,8 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
     for (j=1; j<3; j++) {
       for (k=1; k<3; k++) {
         double xi=abscissa*pow(-1,i);
-        double yi=abscissa*pow(-1,i);
-        double zi=abscissa*pow(-1,i);
+        double yi=abscissa*pow(-1,j);
+        double zi=abscissa*pow(-1,k);
         vector3d sample_pt = vector3d(xi, yi, zi);
         vector3d change_var = -R-sqrt(2)*gwidth*sample_pt;
         double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
