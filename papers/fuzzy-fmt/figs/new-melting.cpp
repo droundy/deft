@@ -174,54 +174,31 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
-  struct chart_entry {
-    double abscissa;
-    double gqweight;
-  };
-  struct chart_entry chart_n2[0];    //from chart on Hermite-Gause Quadrature
-  chart_n2[0].abscissa=sqrt(2)/2.0;
-  chart_n2[0].gqweight=0.866227;
-  //struct chart_entry chart_n5[2];  //from chart on Hermite-Gause Quadrature
-  //chart_n5[0].abscissa=0.0;  //FIX - only want to do this one once!
-  //chart_n5[0].gqweight=0.945309;
-  //chart_n5[1].abscissa=0.958572;
-  //chart_n5[1].gqweight=0.393619;
-  //chart_n5[2].abscissa=2.02018;
-  //chart_n5[2].gqweight=0.0199532;
+  double abscissa=sqrt(2)/2.0;    //from chart on Hermite-Gause Quadrature
+  double gqweight=0.866227;       //from chart on Hermite-Gause Quadrature
+  int i, j, k;
+  for (i=1; i<3; i++) {
+    for (j=1; j<3; j++) {
+      for (k=1; k<3; k++) {
+        double xi=abscissa*pow(-1,i);
+        double yi=abscissa*pow(-1,i);
+        double zi=abscissa*pow(-1,i);
+        vector3d sample_pt = vector3d(xi, yi, zi);
+        vector3d change_var = -R-sqrt(2)*gwidth*sample_pt;
+        double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
+        weight w = find_weights(r, change_var, temp);   
+        w_den_R.n_0 += w.n_0*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.n_1 += w.n_1*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.n_2 += w.n_2*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.n_3 += w.n_3*norm*change_var_coef*gqweight*gqweight*gqweight;
 
-  //double pt_comp=sqrt((chart_n2[0].abscissa*chart_n2[0].abscissa)*2*gwidth*gwidth/3.0); //old - not sure how got this?
-  double pt_comp=chart_n2[0].abscissa*sqrt(2)*gwidth; //x component of sample   rprime_from_R ASK!
-  vector3d pt_about_R[8]= {
-    vector3d(pt_comp,pt_comp,pt_comp),
-    vector3d(pt_comp,pt_comp,-pt_comp),
-    vector3d(pt_comp,-pt_comp,pt_comp),
-    vector3d(pt_comp,-pt_comp,-pt_comp),
-    vector3d(-pt_comp,pt_comp,pt_comp),
-    vector3d(-pt_comp,pt_comp,-pt_comp),
-    vector3d(-pt_comp,-pt_comp,pt_comp),
-    vector3d(-pt_comp,-pt_comp,-pt_comp),
-  };
-  for (int i=0; i <1; i++) {
-    vector3d sample_pt = R + pt_about_R[i];
-    double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
-    weight w = find_weights(r, sample_pt, temp);  //sample_pt = rp   rplace with change of variables expression?
-    //vector3d change_var=sample_pt;  //? not right!
-    //weight w = find_weights(r, change_var, temp);
-    
-    //w_den_R.n_0 +=change_var_coef*chart_n2[0].gqweight;  //for debug only  set w.n to 1
- 
-    w_den_R.n_0 += w.n_0*norm*change_var_coef*chart_n2[0].gqweight;
-    w_den_R.n_1 += w.n_1*norm*change_var_coef*chart_n2[0].gqweight;
-    w_den_R.n_2 += w.n_2*norm*change_var_coef*chart_n2[0].gqweight;
-    w_den_R.n_3 += w.n_3*norm*change_var_coef*chart_n2[0].gqweight;
-
-    w_den_R.nv_1 += w.nv_1*norm*change_var_coef*chart_n2[0].gqweight;
-    w_den_R.nv_2 += w.nv_2*norm*change_var_coef*chart_n2[0].gqweight;
-  } 
+        w_den_R.nv_1 += w.nv_1*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.nv_2 += w.nv_2*norm*change_var_coef*gqweight*gqweight*gqweight;
+      }
+    }
+  }
   return w_den_R;
 }  
-
-
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
