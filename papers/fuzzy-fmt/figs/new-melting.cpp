@@ -254,7 +254,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("many_cells is %d based on %g vs %g\n",
          many_cells, max_distance_considered, lattice_constant);
 
-  //Integrate over one primitive cell (a parallelepiped) to find free energy
+  //Integrate over one primitive cell (a parallelepiped) to find crystal free energy
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
   for (int i=0; i<Nl; i++) {
