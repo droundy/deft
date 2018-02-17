@@ -391,7 +391,9 @@ loops+=1;  //debug - delete later!
   //data_out.hfree_energy_per_vol=hf.energy();
   //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
 
-
+  printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", data_out.cfree_energy_per_atom-data_out.diff_free_energy_per_atom, data_out.cfree_energy_per_atom);
+  printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n",  data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
+  printf("data_out is: diffperatom=%g\n", data_out.diff_free_energy_per_atom);
   return data_out;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
