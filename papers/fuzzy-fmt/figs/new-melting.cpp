@@ -123,7 +123,8 @@ static inline double radius_of_peak(double gwidth, double T) {
 }
 
 weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
-                                double lattice_constant, double gwidth, double norm) {
+                                double lattice_constant, double gwidth, double norm, double reduced_density) {
+  const int n_rp_option = 0; //set to 0 for n_rp=reduced_density (homogeneous), set to 1 for n_rp=gaussian(crystal)
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -151,8 +152,11 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
         // only bother including points within the inclusion radius:
         if (rp_from_R.norm() < inclusion_radius*gwidth) {
           weight w = find_weights(r, rp, temp);
-          //double n_rp = density_gaussian((r-rp).norm(), gwidth, norm);  // ASK! error? want density a distance rp-R from center of Gaussian
-          double n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // ASK! want density a distance rp-R from center of Gaussian
+          double n_rp = reduced_density;   // homogeneous density for homogeneous free energy calculation
+          if (n_rp_option > 0) { 
+            //double n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // ASK! want density a distance rp-R from center of Gaussian
+            n_rp = density_gaussian((r-rp).norm(), gwidth, norm);  // ASK! error? want density a distance rp-R from center of Gaussian
+          }
           w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
@@ -274,7 +278,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               if ((R-r).norm() < max_distance_considered) {
                 //weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
-                //                                         lattice_constant, gwidth, norm);
+                //                                         lattice_constant, gwidth, norm, reduced_density);
                 weight n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,     //Gaussian Quadrature
                                                         lattice_constant, gwidth, norm);
                 // printf("Am at distance %g vs %g  with n3 contribution %g\n",
