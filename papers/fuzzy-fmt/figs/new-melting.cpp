@@ -264,11 +264,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
 
-  for (int density_option = 0; density_option <2; density_option++) {
+  for (int density_option = 0; density_option <2; density_option++) {  //0 for homogeneous free energy, 
+                                                                       //1 for crystal free energy 
+  printf("Running density_option = %i  homogenious is 0, crystal is 1\n\n", density_option);
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
-  //int density_option = 0;   //set to 0 for homogeneous free energy, 
-                            //set to 1 for crystal free energy 
 
   int guass_quad_option=1;  //set to 0 for crystal free energy without Gaussian Quadrature
                             //set to 1 for crystal free energy with Gaussian Quadrature, 
@@ -294,14 +294,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                           n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,  //For Crystal Free Energy in real space with Gaussian Quadrature
                                                      lattice_constant, gwidth, norm);
                       } else {
-                          int n_rp_option = 1;
                           n_weight=find_weighted_den_aboutR(R, r, dx, temp,     //For Crystal Free Energy in real space without Gaussian Quadrature
-                                          lattice_constant, gwidth, norm, reduced_density, n_rp_option);
+                                          lattice_constant, gwidth, norm, reduced_density, 1);
                       } 
                   } else {
-                      int n_rp_option = 0;
                       n_weight=find_weighted_den_aboutR(R, r, dx, temp,  //For Homogeneous Free Energy in real space (no Gaussian Quadrature)
-                                          lattice_constant, gwidth, norm, reduced_density, n_rp_option);
+                                          lattice_constant, gwidth, norm, reduced_density, 0);
                   }
                 
                 // printf("Am at distance %g vs %g  with n3 contribution %g\n",
@@ -328,9 +326,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         if (isnan(free_energy)) {
           printf("free energy is a NaN!\n");
-          printf("position is: %g %g %g\n", r.x, r.y, r.z);
-          printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
-          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
+          //printf("position is: %g %g %g\n", r.x, r.y, r.z);
+          //printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
+          //printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
          // data data_out;
          //data_out.diff_free_energy_per_atom=2;  //FIX this!
          // data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
@@ -366,7 +364,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     printf("homogeneous free_energy is %g\n", free_energy);
   }
   
-} //for loop - density_option
+} //end for loop - density_option
   
   //HomogeneousSFMTFluid hf;
   //hf.sigma() = 1;
@@ -935,12 +933,12 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  //printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
+  printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
-  //data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
-  //printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+  data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
+  printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
-  //return 0;  //for debug
+  return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
