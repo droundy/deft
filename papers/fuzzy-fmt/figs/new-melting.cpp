@@ -266,7 +266,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
   for (int density_option = 0; density_option <2; density_option++) {  //0 for homogeneous free energy, 
                                                                        //1 for crystal free energy 
-  printf("Running density_option = %i  homogenious is 0, crystal is 1\n\n", density_option);
+  printf("\nRunning density_option = %i  homogenious option is 0, crystal option is 1\n", density_option);
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
 
@@ -283,9 +283,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
 
+int loops=0;  //debug - delete later!
+
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
             for (int v=-many_cells; v<= many_cells; v++) {
+
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               if ((R-r).norm() < max_distance_considered) {
                   weight n_weight;
@@ -298,8 +301,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                                           lattice_constant, gwidth, norm, reduced_density, 1);
                       } 
                   } else {
-                      n_weight=find_weighted_den_aboutR(R, r, dx, temp,  //For Homogeneous Free Energy in real space (no Gaussian Quadrature)
-                                          lattice_constant, gwidth, norm, reduced_density, 0);
+                      //n_weight=find_weighted_den_aboutR(R, r, dx, temp,  //For Homogeneous Free Energy in real space (no Gaussian Quadrature)
+                                         // lattice_constant, gwidth, norm, reduced_density, 0);
+loops+=1;  //debug - delete later!
                   }
                 
                 // printf("Am at distance %g vs %g  with n3 contribution %g\n",
@@ -317,6 +321,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             }
           }
         }
+        
         phi_1 = -n_0*log(1-n_3);
         //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
         phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
