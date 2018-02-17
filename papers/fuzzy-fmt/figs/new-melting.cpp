@@ -258,7 +258,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("many_cells is %d based on %g vs %g\n",
          many_cells, max_distance_considered, lattice_constant);
 
-  //Integrate over one primitive cell (a parallelepiped) to find crystal free energy
+  //Integrate over one primitive cell (a parallelepiped) to find free energy
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
   int density_option = 0;   //set to 0 for homogeneous free energy, 
@@ -285,16 +285,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                   weight n_weight;
                   if (density_option > 0 ) {
                       if (guass_quad_option > 0 ) {
-                          n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,     //Gaussian Quadrature
+                          n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,  //For Crystal Free Energy in real space with Gaussian Quadrature
                                                      lattice_constant, gwidth, norm);
                       } else {
                           int n_rp_option = 1;
-                          n_weight=find_weighted_den_aboutR(R, r, dx, temp,
+                          n_weight=find_weighted_den_aboutR(R, r, dx, temp,     //For Crystal Free Energy in real space without Gaussian Quadrature
                                           lattice_constant, gwidth, norm, reduced_density, n_rp_option);
                       } 
                   } else {
                       int n_rp_option = 0;
-                      n_weight=find_weighted_den_aboutR(R, r, dx, temp,
+                      n_weight=find_weighted_den_aboutR(R, r, dx, temp,  //For Homogeneous Free Energy in real space (no Gaussian Quadrature)
                                           lattice_constant, gwidth, norm, reduced_density, n_rp_option);
                   }
                 
@@ -327,7 +327,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
           data data_out;
           data_out.diff_free_energy_per_atom=2;  //FIX this!
-          data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
+          data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
           data_out.hfree_energy_per_vol=2;   //FIX this!
           data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
           return data_out;
@@ -349,8 +349,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
 
-  printf("crystal free_energy is %g\n", free_energy);
-  printf("homogeneous free_energy is %g\n", free_energy);
+  printf("free_energy is %g\n", free_energy);
+
   
   HomogeneousSFMTFluid hf;
   hf.sigma() = 1;
