@@ -264,9 +264,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
 
-  for (int density_option = 0; density_option <2; density_option++) {  //0 for homogeneous free energy, 
+  for (int density_option = 1; density_option <2; density_option++) {  //0 for homogeneous free energy, 
                                                                        //1 for crystal free energy 
-  printf("\nRunning density_option = %i  homogenious option is 0, crystal option is 1\n", density_option);
+  printf("\nRunning density_option = %i  homogeneous option is 0, crystal option is 1\n", density_option);
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
 
@@ -368,15 +368,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   
 } //end for loop - density_option
   
-  //HomogeneousSFMTFluid hf;
-  //hf.sigma() = 1;
-  //hf.epsilon() = 1;   //energy constant in the WCA fluid
-  //hf.kT() = temp;
-  //hf.n() = reduced_density;
-  //hf.mu() = 0;
+  HomogeneousSFMTFluid hf;
+  hf.sigma() = 1;
+  hf.epsilon() = 1;   //energy constant in the WCA fluid
+  hf.kT() = temp;
+  hf.n() = reduced_density;
+  hf.mu() = 0;
   //Note: hf.energy() returns energy/volume
 
-  //const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
+  const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
 
   data data_out;
   data_out.diff_free_energy_per_atom= cfree_energy_per_atom - hfree_energy_per_atom;
@@ -388,9 +388,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //data_out.hfree_energy_per_vol=hf.energy();
   //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
 
-  printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", data_out.cfree_energy_per_atom-data_out.diff_free_energy_per_atom, data_out.cfree_energy_per_atom);
-  printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n",  data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
-  printf("data_out is: diffperatom=%g\n", data_out.diff_free_energy_per_atom);
+  printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", homogeneous_free_energy, data_out.cfree_energy_per_atom);
+  printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n",  hf.energy(), data_out.cfree_energy_per_vol);
+  printf("data_out is: diffperatom=%g\n", data_out.cfree_energy_per_atom - homogeneous_free_energy);
   return data_out;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -937,12 +937,12 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
+  //printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
-  data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
-  printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+  //data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
+  //printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
-  return 0;  //for debug
+  //return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
