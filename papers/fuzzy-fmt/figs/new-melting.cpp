@@ -259,9 +259,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          many_cells, max_distance_considered, lattice_constant);
 
   //Integrate over one primitive cell (a parallelepiped) to find free energy
+  double cfree_energy_per_atom;
+  double cfree_energy_per_vol;
+  double hfree_energy_per_atom;
+  double hfree_energy_per_vol;
+
+  for (int density_option = 0; density_option <2; density_option++) {
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
-  int density_option = 0;   //set to 0 for homogeneous free energy, 
+  //int density_option = 0;   //set to 0 for homogeneous free energy, 
                             //set to 1 for crystal free energy 
 
   int guass_quad_option=1;  //set to 0 for crystal free energy without Gaussian Quadrature
@@ -325,12 +331,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           printf("position is: %g %g %g\n", r.x, r.y, r.z);
           printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
           printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
-          data data_out;
-          data_out.diff_free_energy_per_atom=2;  //FIX this!
-          data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
-          data_out.hfree_energy_per_vol=2;   //FIX this!
-          data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
-          return data_out;
+         // data data_out;
+         //data_out.diff_free_energy_per_atom=2;  //FIX this!
+         // data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
+         // data_out.hfree_energy_per_vol=2;   //FIX this!
+         //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
+         // return data_out;
         }
         //printf("free energy is now... %g\n", free_energy);   //debug
         // printf("      finished %.5f%% of the integral\n",
@@ -349,24 +355,38 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
 
-  printf("free_energy is %g\n", free_energy);
 
+  if (density_option > 0) {
+    cfree_energy_per_atom=free_energy/reduced_num_spheres;
+    cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK! 
+    printf("crystal free_energy is %g\n", free_energy);
+  } else {
+    hfree_energy_per_atom=free_energy/reduced_num_spheres;
+    hfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK! 
+    printf("homogeneous free_energy is %g\n", free_energy);
+  }
   
-  HomogeneousSFMTFluid hf;
-  hf.sigma() = 1;
-  hf.epsilon() = 1;   //energy constant in the WCA fluid
-  hf.kT() = temp;
-  hf.n() = reduced_density;
-  hf.mu() = 0;
+} //for loop - density_option
+  
+  //HomogeneousSFMTFluid hf;
+  //hf.sigma() = 1;
+  //hf.epsilon() = 1;   //energy constant in the WCA fluid
+  //hf.kT() = temp;
+  //hf.n() = reduced_density;
+  //hf.mu() = 0;
   //Note: hf.energy() returns energy/volume
 
-  const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
+  //const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
 
   data data_out;
-  data_out.diff_free_energy_per_atom=(free_energy/reduced_num_spheres) - homogeneous_free_energy;
-  data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
-  data_out.hfree_energy_per_vol=hf.energy();
-  data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
+  data_out.diff_free_energy_per_atom= cfree_energy_per_atom - hfree_energy_per_atom;
+  data_out.cfree_energy_per_atom=cfree_energy_per_atom;   
+  data_out.hfree_energy_per_vol=hfree_energy_per_vol;
+  data_out.cfree_energy_per_vol=cfree_energy_per_vol;   
+  //data_out.diff_free_energy_per_atom=(free_energy/reduced_num_spheres) - homogeneous_free_energy;
+  //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
+  //data_out.hfree_energy_per_vol=hf.energy();
+  //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
 
 
   return data_out;
