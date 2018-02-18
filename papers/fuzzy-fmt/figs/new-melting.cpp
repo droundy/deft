@@ -262,7 +262,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //double hfree_energy_per_atom;
   //double hfree_energy_per_vol;
 
-  for (int density_option = 1; density_option <2; density_option++) {  //0 for homogeneous free energy, 
+  for (int density_option = 0; density_option <1; density_option++) {  //0 for homogeneous free energy, 
                                                                        //1 for crystal free energy 
   printf("\nRunning density_option = %i  homogeneous option is 0, crystal option is 1\n", density_option);
   double phi_1=0, phi_2=0, phi_3=0;
