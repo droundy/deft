@@ -336,21 +336,21 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
          // return data_out;
         }
-        //printf("free energy is now... %g\n", free_energy);   //debug
-        // printf("      finished %.5f%% of the integral\n",
-        //        100*((i)/double(Nl)
-        //             +(j)/uipow(Nl, 2)
-        //             +(k + 1)/uipow(Nl, 3)));
+        printf("free energy is now... %g\n", free_energy);   //debug
+         printf("      finished %.5f%% of the integral\n",
+                100*((i)/double(Nl)
+                     +(j)/uipow(Nl, 2)
+                     +(k + 1)/uipow(Nl, 3)));
       }
-      //const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
-      //const double t = time()/60/60;
-      //const double time_total = t/fraction_complete;
-      //printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
-      //       100*fraction_complete, time_total - t, time_total);
+      const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
+      const double t = time()/60/60;
+      const double time_total = t/fraction_complete;
+      printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
+             100*fraction_complete, time_total - t, time_total);
     }
-    //printf("finished %.1f%% of the integral\n",
-     //      100*(i + 1)/double(Nl));
-    //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
+    printf("finished %.1f%% of the integral\n",
+           100*(i + 1)/double(Nl));
+    printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
 
 
