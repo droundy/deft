@@ -51,7 +51,7 @@ impl Expr {
     fn from_inner(i: InnerExpr) -> Expr {
         Expr{ inner: Intern::new(i) }
     }
-    fn var(sym: &'static str) -> Expr {
+    pub fn var(sym: &'static str) -> Expr {
         Expr::from_inner(InnerExpr::Var(Intern::new(sym)))
     }
 
@@ -61,42 +61,6 @@ impl Expr {
 
     fn log(arg: Expr) -> Expr {
         Expr::from_inner(InnerExpr::Log(arg))
-    }
-
-    fn sum(augend: Expr, addend: Expr) -> Expr {
-        use InnerExpr::*;
-
-        let mut sum: TinyMap<Expr, f64> = TinyMap::new();
-
-        match *augend.inner {
-            Sum(terms) => for term in terms.map.iter() {
-                sum.insert(*term.0, *term.1);
-            },
-            _ => {
-                sum.insert(augend, 1.0);
-            },
-        };
-
-        match *addend.inner {
-            Sum(terms) => for term in terms.map.iter() {
-                if sum.contains_key(term.0) {
-                    let coeff = *sum.get(term.0).unwrap() + 1.0;
-                    sum.insert(*term.0, coeff);
-                } else {
-                    sum.insert(*term.0, *term.1);
-                }
-            },
-            _ => {
-                if sum.contains_key(&addend) {
-                    let coeff = *sum.get(&addend).unwrap() + 1.0;
-                    sum.insert(addend, coeff);
-                } else {
-                    sum.insert(addend, 1.0);
-                }
-            },
-        };
-
-        Expr::from_inner(InnerExpr::Sum(Intern::new(TinyMapWrapper { map: sum })))
     }
 
     fn mul(multiplicand: Expr, multiplier: Expr) -> Expr {
@@ -135,7 +99,7 @@ impl Expr {
         Expr::from_inner(InnerExpr::Mul(Intern::new(TinyMapWrapper { map: mul })))
     }
 
-    fn cpp(&self) -> String {
+    pub fn cpp(&self) -> String {
         use InnerExpr::*;
 
         match self.inner.as_ref() {
@@ -191,36 +155,79 @@ impl Expr {
     }
 }
 
+impl std::ops::Add for Expr {
+    type Output = Expr;
+
+    fn add(self, addend: Expr) -> Expr {
+        use InnerExpr::*;
+
+        let mut sum: TinyMap<Expr, f64> = TinyMap::new();
+
+        match *self.inner {
+            Sum(terms) => for term in terms.map.iter() {
+                sum.insert(*term.0, *term.1);
+            },
+            _ => {
+                sum.insert(self, 1.0);
+            },
+        };
+
+        match *addend.inner {
+            Sum(terms) => for term in terms.map.iter() {
+                if sum.contains_key(term.0) {
+                    let coeff = *sum.get(term.0).unwrap() + 1.0;
+                    sum.insert(*term.0, coeff);
+                } else {
+                    sum.insert(*term.0, *term.1);
+                }
+            },
+            _ => {
+                if sum.contains_key(&addend) {
+                    let coeff = *sum.get(&addend).unwrap() + 1.0;
+                    sum.insert(addend, coeff);
+                } else {
+                    sum.insert(addend, 1.0);
+                }
+            },
+        };
+
+        Expr::from_inner(InnerExpr::Sum(Intern::new(TinyMapWrapper { map: sum })))
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn var() {
-        assert_eq!(Expr::var("x").cpp(), String::from("x"));
-        assert_eq!(Expr::var("\\alpha").cpp(), String::from("\\alpha"));
+        assert_eq!(Expr::var("x").cpp(), "x");
+        assert_eq!(Expr::var("\\alpha").cpp(), "\\alpha");
     }
 
     #[test]
     fn unaries() {
-        assert_eq!(Expr::exp(Expr::var("x")).cpp(), String::from("exp(x)"));
-        assert_eq!(Expr::exp(Expr::exp(Expr::var("x"))).cpp(), String::from("exp(exp(x))"));
-        assert_eq!(Expr::log(Expr::var("x")).cpp(), String::from("log(x)"));
-        assert_eq!(Expr::log(Expr::log(Expr::var("x"))).cpp(), String::from("log(log(x))"));
+        assert_eq!(Expr::exp(Expr::var("x")).cpp(), "exp(x)");
+        assert_eq!(Expr::exp(Expr::exp(Expr::var("x"))).cpp(), "exp(exp(x))");
+        assert_eq!(Expr::log(Expr::var("x")).cpp(), "log(x)");
+        assert_eq!(Expr::log(Expr::log(Expr::var("x"))).cpp(), "log(log(x))");
     }
 
     #[test]
-    fn sum() {
-        assert_eq!(Expr::sum(Expr::var("a"), Expr::var("b")).cpp(), String::from("(a + b)"));
-        assert_eq!(Expr::sum(Expr::sum(Expr::var("a"), Expr::var("z")), Expr::var("b")).cpp(),
-                   String::from("(a + b + z)"));
-        assert_eq!(Expr::sum(Expr::var("a"), Expr::var("a")).cpp(), String::from("(2 * a)"));
+    fn add() {
+        let a = Expr::var("a");
+        let b = Expr::var("b");
+        let z = Expr::var("z");
+        assert_eq!((a+b).cpp(), "(a + b)");
+        assert_eq!((a+z+b).cpp(), "(a + b + z)");
+        assert_eq!((a+a).cpp(), "(2 * a)");
     }
 
     #[test]
     fn mul() {
-        assert_eq!(Expr::mul(Expr::var("p"), Expr::var("q")).cpp(), String::from("(p * q)"));
+        assert_eq!(Expr::mul(Expr::var("p"), Expr::var("q")).cpp(), "(p * q)");
         assert_eq!(Expr::mul(Expr::mul(Expr::var("p"), Expr::var("k")), Expr::var("q")).cpp(),
-                   String::from("(k * p * q)"));
+                   "(k * p * q)");
     }
 }
