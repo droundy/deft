@@ -180,13 +180,10 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   }
   double abscissa=sqrt(2)/2.0;    //from chart on Hermite-Gause Quadrature
   double gqweight=0.866227;       //from chart on Hermite-Gause Quadrature
-  for (int i=1; i<3; i++) {
-    for (int j=1; j<3; j++) {
-      for (int k=1; k<3; k++) {
-        double xi=abscissa*uipow(-1,i);
-        double yi=abscissa*uipow(-1,j);
-        double zi=abscissa*uipow(-1,k); 
-        vector3d change_var = -R-sqrt(2)*gwidth*vector3d(xi, yi, zi);
+  for (int i=-1; i<3; i=i+2) {
+    for (int j=-1; j<3; j=j+2) {
+      for (int k=-1; k<3; k=k+2) {
+        vector3d change_var = -R-sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
         double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
         weight w = find_weights(r, change_var, temp);  
          
@@ -261,15 +258,23 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double cfree_energy_per_vol;
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
+  
+  int gauss_quad_option=0;  //set to 0 for crystal free energy in real space
+                            //set to 1 for crystal free energy with Gaussian Quadrature
+                            
+  int FFT_option=0;     // set to 0 for homogeneous free energy in real space
+                        // set to 1 for homogeneous free energy with Fast Fourier Transform
 
-  for (int density_option = 0; density_option <1; density_option++) {  //0 for homogeneous free energy, 
+  for (int density_option = 0; density_option <2; density_option++) {  //0 for homogeneous free energy, 
                                                                        //1 for crystal free energy 
+                                                            
   printf("\nRunning density_option = %i  homogeneous option is 0, crystal option is 1\n", density_option);
+  
+  if ((density_option <1 and FFT_option < 1) or density_option > 0) {
+  
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
-
-  int guass_quad_option=1;  //set to 0 for crystal free energy without Gaussian Quadrature
-                            //set to 1 for crystal free energy with Gaussian Quadrature, 
+  
   for (int i=0; i<Nl; i++) {
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
@@ -289,14 +294,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               if ((R-r).norm() < max_distance_considered) {
                   weight n_weight;
                   if (density_option > 0 ) {
-                      if (guass_quad_option > 0 ) {
+                      if (gauss_quad_option > 0 ) {
                           n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,  //For Crystal Free Energy in real space with Gaussian Quadrature
                                                      lattice_constant, gwidth, norm);
                       } else {
                           n_weight=find_weighted_den_aboutR(R, r, dx, temp,     //For Crystal Free Energy in real space without Gaussian Quadrature
                                           lattice_constant, gwidth, norm, reduced_density, 1);
                       } 
-                  } else {
+                  } else if (FFT_option < 1) {
                       n_weight=find_weighted_den_aboutR(R, r, dx, temp,  //For Homogeneous Free Energy in real space (no Gaussian Quadrature)
                                           lattice_constant, gwidth, norm, reduced_density, 0);
                   }
@@ -329,16 +334,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           //printf("position is: %g %g %g\n", r.x, r.y, r.z);
           //printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
           //printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
-         // data data_out;
-         //data_out.diff_free_energy_per_atom=2;  //FIX this!
-         // data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
-         // data_out.hfree_energy_per_vol=2;   //FIX this!
-         //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
-         // return data_out;
+          //data data_out;
+          //data_out.diff_free_energy_per_atom=2;  //FIX this!
+          //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
+          //data_out.hfree_energy_per_vol=2;   //FIX this!
+          //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
+          //return data_out;
         }
-        //printf("free energy is now... %g\n", free_energy);   //debug
-         //printf("      finished %.5f%% of the integral\n",
-         //       100*((i)/double(Nl)
+          //printf("free energy is now... %g\n", free_energy);   //debug
+          //printf("      finished %.5f%% of the integral\n",
+          //       100*((i)/double(Nl)
           //           +(j)/uipow(Nl, 2)
           //           +(k + 1)/uipow(Nl, 3)));
       }
@@ -353,44 +358,63 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
 
-
   if (density_option > 0) {
-    cfree_energy_per_atom=free_energy/reduced_num_spheres;
-    cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK! 
-    printf("crystal free_energy is %g\n", free_energy);
-  } else {
-    hfree_energy_per_atom=free_energy/reduced_num_spheres;
-    hfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK! 
+    cfree_energy_per_atom=free_energy/reduced_num_spheres;  //CHECK!
+    cfree_energy_per_vol=4*free_energy; //CHECK! 4 primitive cells in 1 cubic cell
+    if (gauss_quad_option > 0) {
+    printf("crystal free energy calculated with Gaussian Quadrature\n");
+    } else {
+    printf("crystal free energy calculated in real space\n"); 
+    }
+    printf("crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
+  } else if (FFT_option < 1) {
+    hfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
+    hfree_energy_per_vol=4*free_energy;   //CHECK! 4 primitive cells in 1 cubic cell
+    printf("homogeneous free energy calculated in real space\n");
     printf("homogeneous free_energy is %g\n", free_energy);
-  }
-  
+     } 
+ } // end if fft < 1   
+   if (density_option < 1 and FFT_option > 0) {
+        printf("homogeneous free energy calculated with FFT method\n");
+        HomogeneousSFMTFluid hf;
+        hf.sigma() = 1;
+        hf.epsilon() = 1;   //energy constant in the WCA fluid
+        hf.kT() = temp;
+        hf.n() = reduced_density;
+        hf.mu() = 0;
+        //Note: hf.energy() returns energy/volume
+    
+        hfree_energy_per_atom = hf.energy()/reduced_density;   // free energy per sphere or "atom"
+        hfree_energy_per_vol = hf.energy();    // free energy per vol
+        printf("homogeneous free_energy per vol is %g\n", hf.energy());
+   }
 } //end for loop - density_option
   
-  //HomogeneousSFMTFluid hf;
-  //hf.sigma() = 1;
-  //hf.epsilon() = 1;   //energy constant in the WCA fluid
-  //hf.kT() = temp;
-  //hf.n() = reduced_density;
-  //hf.mu() = 0;
-  //Note: hf.energy() returns energy/volume
-
-  //const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
-
   data data_out;
-  ////data_out.diff_free_energy_per_atom= cfree_energy_per_atom - homogeneous_free_energy;
   data_out.diff_free_energy_per_atom=cfree_energy_per_atom-hfree_energy_per_atom;
   data_out.cfree_energy_per_atom=cfree_energy_per_atom;   
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
-  data_out.cfree_energy_per_vol=cfree_energy_per_vol;   
-  //data_out.diff_free_energy_per_atom=(free_energy/reduced_num_spheres) - homogeneous_free_energy;
-  //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
-  ////data_out.hfree_energy_per_vol=hf.energy();
-  //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
+  data_out.cfree_energy_per_vol=cfree_energy_per_vol; 
+    
+  if (gauss_quad_option > 0 ) {
+    printf("*Crystal free energy calculated with Gaussian Quadrature\n");
+  } else  printf("*Crystal free energy calculated in real space\n");  
+  
+  if (FFT_option > 0 ) {
+    printf("*Homogeneous free energy calculated with Fast Fourier Transform\n");
+  } else printf("*Homogeneous free energy calculated in real space\n");  
   
   printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", hfree_energy_per_atom, data_out.cfree_energy_per_atom);
   printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n", data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
   printf("data_out is: diffperatom=%g\n", data_out.diff_free_energy_per_atom);
-
+  
+  ////const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
+  ////data_out.diff_free_energy_per_atom= cfree_energy_per_atom - homogeneous_free_energy;  
+  //data_out.diff_free_energy_per_atom=(free_energy/reduced_num_spheres) - homogeneous_free_energy;   //save- old way
+  //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!   save- old way
+  //data_out.hfree_energy_per_vol=hf.energy();   //save- old way
+  //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK! save- old way
+  
   //printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", homogeneous_free_energy, data_out.cfree_energy_per_atom);
   //printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n",  hf.energy(), data_out.cfree_energy_per_vol);
   //printf("data_out is: diffperatom=%g\n", data_out.cfree_energy_per_atom - homogeneous_free_energy);
@@ -469,7 +493,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
       // dist is the magnitude of vector r-vector R=square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)
       // where r is a position vector and R is a vector to the center of a sphere or Gaussian.
       // The following code calculates the contribution to the density
-      // at a position vector (rrx[i],rry[i],rrz[i]) from each Guassian
+      // at a position vector (rrx[i],rry[i],rrz[i]) from each Gaussian
       // and adds them to get the density at that position vector which
       // is then stored in setn[i].
       {
