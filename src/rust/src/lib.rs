@@ -5,11 +5,10 @@ use tinyset::TinyMap;
 use internment::Intern;
 use std::cmp::{PartialEq, Eq};
 use std::hash::{Hash, Hasher};
-use std::mem::discriminant;
 
 #[derive(Clone)]
 struct TinyMapWrapper {
-    map: TinyMap<Intern<Expr>, f64>,
+    map: TinyMap<Expr, f64>,
 }
 
 impl Hash for TinyMapWrapper {
@@ -34,67 +33,42 @@ impl PartialEq for TinyMapWrapper {
 
 impl Eq for TinyMapWrapper {}
 
-#[derive(Clone, Copy)]
-enum Expr {
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+enum InnerExpr {
     Var(Intern<&'static str>),
-    Exp(Intern<Expr>),
-    Log(Intern<Expr>),
+    Exp(Expr),
+    Log(Expr),
     Sum(Intern<TinyMapWrapper>),
     Mul(Intern<TinyMapWrapper>),
 }
 
-impl PartialEq for Expr {
-    fn eq(&self, other: &Expr) -> bool {
-        use Expr::*;
-
-        match self {
-            &Var(sym_l) => match other { &Var(sym_r) => sym_l == sym_r, _ => false, },
-            &Exp(arg_l) => match other { &Exp(arg_r) => arg_l == arg_r, _ => false, },
-            &Log(arg_l) => match other { &Log(arg_r) => arg_l == arg_r, _ => false, },
-            &Sum(map_l) => match other { &Sum(map_r) => map_l == map_r, _ => false, },
-            &Mul(map_l) => match other { &Mul(map_r) => map_l == map_r, _ => false, },
-        }
-    }
-}
-
-impl Eq for Expr {}
-
-impl Hash for Expr {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        use Expr::*;
-
-        discriminant(self).hash(state);
-
-        match self {
-            &Var(ref sym)
-                => sym.hash(state),
-            &Exp(ref arg) | &Log(ref arg)
-                => arg.hash(state),
-            &Sum(ref map) | &Mul(ref map)
-                => map.hash(state),
-        };
-    }
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Expr {
+    inner: Intern<InnerExpr>,
 }
 
 impl Expr {
-    fn var(sym: &'static str) -> Intern<Expr> {
-        Intern::new(Expr::Var(Intern::new(sym)))
+    fn from_inner(i: InnerExpr) -> Expr {
+        Expr{ inner: Intern::new(i) }
+    }
+    fn var(sym: &'static str) -> Expr {
+        Expr::from_inner(InnerExpr::Var(Intern::new(sym)))
     }
 
-    fn exp(arg: Intern<Expr>) -> Intern<Expr> {
-        Intern::new(Expr::Exp(arg))
+    fn exp(arg: Expr) -> Expr {
+        Expr::from_inner(InnerExpr::Exp(arg))
     }
 
-    fn log(arg: Intern<Expr>) -> Intern<Expr> {
-        Intern::new(Expr::Log(arg))
+    fn log(arg: Expr) -> Expr {
+        Expr::from_inner(InnerExpr::Log(arg))
     }
 
-    fn sum(augend: Intern<Expr>, addend: Intern<Expr>) -> Intern<Expr> {
-        use Expr::*;
+    fn sum(augend: Expr, addend: Expr) -> Expr {
+        use InnerExpr::*;
 
-        let mut sum: TinyMap<Intern<Expr>, f64> = TinyMap::new();
+        let mut sum: TinyMap<Expr, f64> = TinyMap::new();
 
-        match *augend {
+        match *augend.inner {
             Sum(terms) => for term in terms.map.iter() {
                 sum.insert(*term.0, *term.1);
             },
@@ -103,7 +77,7 @@ impl Expr {
             },
         };
 
-        match *addend {
+        match *addend.inner {
             Sum(terms) => for term in terms.map.iter() {
                 if sum.contains_key(term.0) {
                     let coeff = *sum.get(term.0).unwrap() + 1.0;
@@ -122,15 +96,15 @@ impl Expr {
             },
         };
 
-        Intern::new(Expr::Sum(Intern::new(TinyMapWrapper { map: sum })))
+        Expr::from_inner(InnerExpr::Sum(Intern::new(TinyMapWrapper { map: sum })))
     }
 
-    fn mul(multiplicand: Intern<Expr>, multiplier: Intern<Expr>) -> Intern<Expr> {
-        use Expr::*;
+    fn mul(multiplicand: Expr, multiplier: Expr) -> Expr {
+        use InnerExpr::*;
 
-        let mut mul: TinyMap<Intern<Expr>, f64> = TinyMap::new();
+        let mut mul: TinyMap<Expr, f64> = TinyMap::new();
 
-        match *multiplicand {
+        match *multiplicand.inner {
             Mul(terms) => for term in terms.map.iter() {
                 mul.insert(*term.0, *term.1);
             },
@@ -139,7 +113,7 @@ impl Expr {
             },
         };
 
-        match *multiplier {
+        match *multiplier.inner {
             Mul(terms) => for term in terms.map.iter() {
                 if mul.contains_key(term.0) {
                     let power = *mul.get(term.0).unwrap() + 1.0;
@@ -158,13 +132,13 @@ impl Expr {
             },
         };
 
-        Intern::new(Expr::Mul(Intern::new(TinyMapWrapper { map: mul })))
+        Expr::from_inner(InnerExpr::Mul(Intern::new(TinyMapWrapper { map: mul })))
     }
 
     fn cpp(&self) -> String {
-        use Expr::*;
+        use InnerExpr::*;
 
-        match self {
+        match self.inner.as_ref() {
             &Var(sym)
                 => String::from(*sym),
             &Exp(arg)
