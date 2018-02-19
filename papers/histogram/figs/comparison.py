@@ -13,6 +13,11 @@ filebase = sys.argv[3]
 methods = [ '-sad3', '-sad3-s1', '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
 
+def running_mean(x, N):
+    cumsum = numpy.cumsum(numpy.insert(x, 0, 0)) 
+    averaged = (cumsum[N:] - cumsum[:-N]) / N
+    return numpy.concatenate((x[:len(x)-len(averaged)], averaged))
+
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/%s-wltmmc*-movie' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
@@ -102,7 +107,11 @@ for method in methods:
         Nrt_at_energy = Nrt_at_energy[:num_frames_to_count]
         erroratenergy = erroratenergy[:num_frames_to_count]
         errorinentropy = errorinentropy[:num_frames_to_count]
+        windows = int(len(iterations)/10 + 1)
+        windows = 10
         maxerror = maxerror[:num_frames_to_count]
+        #uncomment the following line for windowed averages
+        #maxerror = running_mean(maxerror[:num_frames_to_count],windows)
 
         erroratenergytm = erroratenergytm[:num_frames_to_count]
         errorinentropytm = errorinentropytm[:num_frames_to_count]
@@ -133,24 +142,3 @@ for method in methods:
     except:
         print 'I had trouble with', method
         raise
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
