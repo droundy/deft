@@ -1,29 +1,30 @@
 extern crate internment;
 extern crate tinyset;
 
-use tinyset::{TinyMap};
+use tinyset::TinyMap;
 use internment::Intern;
 use std::cmp::{PartialEq, Eq};
 use std::hash::{Hash, Hasher};
+use std::mem::discriminant;
 
 #[derive(Clone)]
-struct TemporaryTinyMapWrapper {
-    tm: TinyMap<Intern<Expr>, f64>,
+struct TinyMapWrapper {
+    map: TinyMap<Intern<Expr>, f64>,
 }
 
-impl Hash for TemporaryTinyMapWrapper {
+impl Hash for TinyMapWrapper {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        for term in self.tm.iter() {
+        for term in self.map.iter() {
             (*term.0).hash(state);
             (*term.1 as u64).hash(state);
         }
     }
 }
 
-impl PartialEq for TemporaryTinyMapWrapper {
-    fn eq(&self, other: &TemporaryTinyMapWrapper) -> bool {
-        for term in self.tm.iter() {
-            if other.tm.get(term.0) != Some(term.1) {
+impl PartialEq for TinyMapWrapper {
+    fn eq(&self, other: &TinyMapWrapper) -> bool {
+        for term in self.map.iter() {
+            if other.map.get(term.0) != Some(term.1) {
                 return false;
             }
         }
@@ -31,15 +32,15 @@ impl PartialEq for TemporaryTinyMapWrapper {
     }
 }
 
-impl Eq for TemporaryTinyMapWrapper {}
+impl Eq for TinyMapWrapper {}
 
 #[derive(Clone, Copy)]
 enum Expr {
     Var(Intern<&'static str>),
     Exp(Intern<Expr>),
     Log(Intern<Expr>),
-    Sum(Intern<TemporaryTinyMapWrapper>),
-    Prod(Intern<TemporaryTinyMapWrapper>),
+    Sum(Intern<TinyMapWrapper>),
+    Mul(Intern<TinyMapWrapper>),
 }
 
 impl PartialEq for Expr {
@@ -47,26 +48,11 @@ impl PartialEq for Expr {
         use Expr::*;
 
         match self {
-            &Var(sym1) => match other {
-                &Var(sym2) => sym1 == sym2,
-                _ => false,
-            },
-            &Exp(arg1) => match other {
-                &Exp(arg2) => arg1 == arg2,
-                _ => false,
-            },
-            &Log(arg1) => match other {
-                &Log(arg2) => arg1 == arg2,
-                _ => false,
-            },
-            &Sum(terms1) => match other {
-                &Sum(terms2) => terms1 == terms2,
-                _ => false,
-            },
-            &Prod(terms1) => match other {
-                &Prod(terms2) => terms1 == terms2,
-                _ => false,
-            },
+            &Var(sym_l) => match other { &Var(sym_r) => sym_l == sym_r, _ => false, },
+            &Exp(arg_l) => match other { &Exp(arg_r) => arg_l == arg_r, _ => false, },
+            &Log(arg_l) => match other { &Log(arg_r) => arg_l == arg_r, _ => false, },
+            &Sum(map_l) => match other { &Sum(map_r) => map_l == map_r, _ => false, },
+            &Mul(map_l) => match other { &Mul(map_r) => map_l == map_r, _ => false, },
         }
     }
 }
@@ -77,36 +63,119 @@ impl Hash for Expr {
     fn hash<H: Hasher>(&self, state: &mut H) {
         use Expr::*;
 
-        match self {
-            &Var(..)  => 1.hash(state),
-            &Exp(..)  => 2.hash(state),
-            &Log(..)  => 3.hash(state),
-            &Sum(..)  => 4.hash(state),
-            &Prod(..) => 5.hash(state),
-        }
+        discriminant(self).hash(state);
 
         match self {
-            &Var(ref sym) => sym.hash(state),
-            &Exp(ref arg) | &Log(ref arg) => arg.hash(state),
-            &Sum(ref map) | &Prod(ref map) => map.hash(state),
-        }
+            &Var(ref sym)
+                => sym.hash(state),
+            &Exp(ref arg) | &Log(ref arg)
+                => arg.hash(state),
+            &Sum(ref map) | &Mul(ref map)
+                => map.hash(state),
+        };
     }
 }
 
 impl Expr {
+    fn var(sym: &'static str) -> Intern<Expr> {
+        Intern::new(Expr::Var(Intern::new(sym)))
+    }
+
+    fn exp(arg: Intern<Expr>) -> Intern<Expr> {
+        Intern::new(Expr::Exp(arg))
+    }
+
+    fn log(arg: Intern<Expr>) -> Intern<Expr> {
+        Intern::new(Expr::Log(arg))
+    }
+
+    fn sum(augend: Intern<Expr>, addend: Intern<Expr>) -> Intern<Expr> {
+        use Expr::*;
+
+        let mut sum: TinyMap<Intern<Expr>, f64> = TinyMap::new();
+
+        match *augend {
+            Sum(terms) => for term in terms.map.iter() {
+                sum.insert(*term.0, *term.1);
+            },
+            _ => {
+                sum.insert(augend, 1.0);
+            },
+        };
+
+        match *addend {
+            Sum(terms) => for term in terms.map.iter() {
+                if sum.contains_key(term.0) {
+                    let coeff = *sum.get(term.0).unwrap() + 1.0;
+                    sum.insert(*term.0, coeff);
+                } else {
+                    sum.insert(*term.0, *term.1);
+                }
+            },
+            _ => {
+                if sum.contains_key(&addend) {
+                    let coeff = *sum.get(&addend).unwrap() + 1.0;
+                    sum.insert(addend, coeff);
+                } else {
+                    sum.insert(addend, 1.0);
+                }
+            },
+        };
+
+        Intern::new(Expr::Sum(Intern::new(TinyMapWrapper { map: sum })))
+    }
+
+    fn mul(multiplicand: Intern<Expr>, multiplier: Intern<Expr>) -> Intern<Expr> {
+        use Expr::*;
+
+        let mut mul: TinyMap<Intern<Expr>, f64> = TinyMap::new();
+
+        match *multiplicand {
+            Mul(terms) => for term in terms.map.iter() {
+                mul.insert(*term.0, *term.1);
+            },
+            _ => {
+                mul.insert(multiplicand, 1.0);
+            },
+        };
+
+        match *multiplier {
+            Mul(terms) => for term in terms.map.iter() {
+                if mul.contains_key(term.0) {
+                    let power = *mul.get(term.0).unwrap() + 1.0;
+                    mul.insert(*term.0, power);
+                } else {
+                    mul.insert(*term.0, *term.1);
+                }
+            },
+            _ => {
+                if mul.contains_key(&multiplier) {
+                    let power = *mul.get(&multiplier).unwrap() + 1.0;
+                    mul.insert(multiplier, power);
+                } else {
+                    mul.insert(multiplier, 1.0);
+                }
+            },
+        };
+
+        Intern::new(Expr::Mul(Intern::new(TinyMapWrapper { map: mul })))
+    }
+
     fn cpp(&self) -> String {
         use Expr::*;
 
         match self {
-            &Var(sym) => String::from(*sym),
-            &Exp(arg) => String::from("exp(") + &arg.cpp() + &")",
-            &Log(arg) => String::from("log(") + &arg.cpp() + &")",
-            &Sum(term_map) => {
-                let mut term_vec: Vec<(String, f64)>
-                    = term_map.tm.iter()
-                              .map(|(s, c)| (s.cpp(), *c))
-                              .collect();
-                term_vec.sort_by(|&(ref s1, _), &(ref s2, _)| s1.cmp(s2));
+            &Var(sym)
+                => String::from(*sym),
+            &Exp(arg)
+                => String::from("exp(") + &arg.cpp() + &")",
+            &Log(arg)
+                => String::from("log(") + &arg.cpp() + &")",
+            &Sum(wrapper) => {
+                let mut terms: Vec<(String, f64)>
+                    = wrapper.map.iter()
+                    .map(|(s, c)| (s.cpp(), *c)).collect();
+                terms.sort_by(|&(ref p, _), &(ref q, _)| p.cmp(q));
 
                 let coeff = |t: &(String, f64)| {
                     if t.1 == 1.0 {
@@ -116,67 +185,68 @@ impl Expr {
                     }
                 };
 
-                match term_vec.first() {
+                match terms.first() {
                     None => String::from("0"),
-                    Some(term1) => term_vec.iter().skip(1).fold(coeff(term1), |acc, term| acc + &" + " + &coeff(term))
+                    Some(first) => String::from("(") + &terms.iter().skip(1)
+                        .fold(coeff(first), |acc, term| acc + &" + " + &coeff(term)) + &")"
                 }
             },
-            &Prod(term_map) => {
-                let mut term_vec: Vec<(String, f64)>
-                    = term_map.tm.iter()
-                              .map(|(s, c)| (s.cpp(), *c))
-                              .collect();
-                term_vec.sort_by(|&(ref s1, _), &(ref s2, _)| s1.cmp(s2));
-                term_vec.iter()
-                         .fold(String::new(), |acc, &(ref s, ref c)|
-                                   acc + &" * pow(" + &s + &", " + &c.to_string() + &")")
+            &Mul(wrapper) => {
+                let mut terms: Vec<(String, f64)>
+                    = wrapper.map.iter()
+                    .map(|(s, c)| (s.cpp(), *c)).collect();
+                terms.sort_by(|&(ref p, _), &(ref q, _)| p.cmp(q));
+
+                let power = |t: &(String, f64)| {
+                    if t.1 == 1.0 {
+                        t.0.clone()
+                    } else if t.1 == 2.0 {
+                        t.0.clone() + &" * " + &t.0
+                    } else {
+                        String::from("pow(") + &t.0 + &", " + &t.1.to_string() + &")"
+                    }
+                };
+
+                match terms.first() {
+                    None => String::from("1"),
+                    Some(first) => String::from("(") + &terms.iter().skip(1)
+                        .fold(power(first), |acc, term| acc + &" * " + &power(term)) + &")"
+                }
             },
         }
-    }
-
-    fn var(sym: &'static str) -> Intern<Expr> {
-        Intern::new(Expr::Var(Intern::new(sym)))
-    }
-
-    fn sum(augend: Intern<Expr>, addend: Intern<Expr>) -> Intern<Expr> {
-        let mut sum: TinyMap<Intern<Expr>, f64> = TinyMap::new();
-
-        match *augend {
-            Expr::Var(..) | Expr::Exp(..) | Expr::Log(..) | Expr::Prod(..) => {
-                sum.insert(augend, 1.0);
-            },
-            Expr::Sum(terms) => for term in terms.tm.iter() {
-                sum.insert(*term.0, *term.1);
-            },
-        };
-
-        match *addend {
-            Expr::Var(..) | Expr::Exp(..) | Expr::Log(..) | Expr::Prod(..) => {
-                if sum.contains_key(&addend) {
-                    let coeff = *sum.get(&addend).unwrap() + 1.0;
-                    sum.insert(addend, coeff);
-                } else {
-                    sum.insert(addend, 1.0);
-                }
-            },
-            Expr::Sum(terms) => for term in terms.tm.iter() {
-                if sum.contains_key(term.0) {
-                    let coeff = *sum.get(term.0).unwrap() + 1.0;
-                    sum.insert(*term.0, coeff);
-                } else {
-                    sum.insert(*term.0, *term.1);
-                }
-            },
-        };
-
-        Intern::new(Expr::Sum(Intern::new(TemporaryTinyMapWrapper { tm: sum })))
     }
 }
 
 #[cfg(test)]
 mod tests {
-}
+    use super::*;
 
-fn main() {
-    println!("{}", Expr::sum(Expr::sum(Intern::new(Expr::Log(Expr::var("z"))), Expr::var("k")), Expr::var("m")).cpp());
+    #[test]
+    fn var() {
+        assert_eq!(Expr::var("x").cpp(), String::from("x"));
+        assert_eq!(Expr::var("\\alpha").cpp(), String::from("\\alpha"));
+    }
+
+    #[test]
+    fn unaries() {
+        assert_eq!(Expr::exp(Expr::var("x")).cpp(), String::from("exp(x)"));
+        assert_eq!(Expr::exp(Expr::exp(Expr::var("x"))).cpp(), String::from("exp(exp(x))"));
+        assert_eq!(Expr::log(Expr::var("x")).cpp(), String::from("log(x)"));
+        assert_eq!(Expr::log(Expr::log(Expr::var("x"))).cpp(), String::from("log(log(x))"));
+    }
+
+    #[test]
+    fn sum() {
+        assert_eq!(Expr::sum(Expr::var("a"), Expr::var("b")).cpp(), String::from("(a + b)"));
+        assert_eq!(Expr::sum(Expr::sum(Expr::var("a"), Expr::var("z")), Expr::var("b")).cpp(),
+                   String::from("(a + b + z)"));
+        assert_eq!(Expr::sum(Expr::var("a"), Expr::var("a")).cpp(), String::from("(2 * a)"));
+    }
+
+    #[test]
+    fn mul() {
+        assert_eq!(Expr::mul(Expr::var("p"), Expr::var("q")).cpp(), String::from("(p * q)"));
+        assert_eq!(Expr::mul(Expr::mul(Expr::var("p"), Expr::var("k")), Expr::var("q")).cpp(),
+                   String::from("(k * p * q)"));
+    }
 }
