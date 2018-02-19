@@ -39,6 +39,13 @@ if method_name == 'wltmmc':
     max_entropy_energy = float(sys.argv[10])
 
 seed = 0
+try:
+    if method_name == 'wltmmc':
+        seed = int(sys.argv[11])
+    else:
+        seed = int(sys.argv[7])
+except:
+    print('defaulting to seed=0')
 
 method = ' --' + method_name
 if method[-1] in "123":
