@@ -1,3 +1,5 @@
+//! This is the deft crate!
+
 extern crate internment;
 extern crate tinyset;
 
@@ -6,7 +8,7 @@ use internment::Intern;
 use std::cmp::{PartialEq, Eq};
 use std::hash::{Hash, Hasher};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct TinyMapWrapper {
     map: TinyMap<Expr, f64>,
 }
@@ -33,7 +35,7 @@ impl PartialEq for TinyMapWrapper {
 
 impl Eq for TinyMapWrapper {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 enum InnerExpr {
     Var(Intern<&'static str>),
     Exp(Expr),
@@ -42,7 +44,14 @@ enum InnerExpr {
     Mul(Intern<TinyMapWrapper>),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+/// This is an expression.  You can use it to do arithmetic.
+///
+/// # Example
+/// ```
+/// use deft::Expr;
+/// assert_eq!(Expr::var("a"), Expr::var("a"));
+/// ```
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Expr {
     inner: Intern<InnerExpr>,
 }
@@ -51,6 +60,7 @@ impl Expr {
     fn from_inner(i: InnerExpr) -> Expr {
         Expr{ inner: Intern::new(i) }
     }
+    /// Create a variable.
     pub fn var(sym: &'static str) -> Expr {
         Expr::from_inner(InnerExpr::Var(Intern::new(sym)))
     }
