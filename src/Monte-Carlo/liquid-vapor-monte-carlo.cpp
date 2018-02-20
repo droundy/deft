@@ -754,6 +754,8 @@ int main(int argc, const char *argv[]) {
             headerinfo, sw.sa_t0);
   } else if (sad) {
     sw.use_sad = sad_fraction;
+    sw.too_high_energy = sw.energy_levels-1;
+    sw.too_low_energy = 0;
     sprintf(headerinfo,
             "%s# histogram method: sad%d\n",
             headerinfo, sad_fraction);
@@ -775,8 +777,30 @@ int main(int argc, const char *argv[]) {
 
   if (resume) {
     // We are continuing a previous simulation.
-    printf("I do not know how to resume yet!\n");
-    exit(1);
+    // Implement SAD or TMMC
+    if (sad) {
+      printf("I'm resuming with the sad method.\n");
+      // Need to read and set: iterations, ln_energy_weights (from ln_dos) (FIXME eventually change this, unless we fix SAD).
+      
+      {
+        FILE *dos_in = fopen((const char *)dos_fname, "r");
+        fprintf(dos_in, "%s", headerinfo);// read about fscanf
+        fprintf(dos_in, "# max_entropy_state: %d\n",sw.max_entropy_state);
+        fprintf(dos_in, "# min_important_energy: %i\n\n",sw.min_important_energy);
+
+        // Only output the ln_dos for energies that are essentially
+        // converged.  Otherwise we can end up with lots of wrong dos
+        // values at very low energies that we have to remove later.
+        fprintf(dos_in, "# energy   ln_dos\n");
+        for (int i = 0; i < sw.energy_levels; i++) {
+          fprintf(dos_in, "%d  %lg\n",i,sw.ln_energy_weights[i]);
+        }
+        fclose(dos_in);
+      }
+    } else {
+      printf("I do not know how to resume yet!\n");
+      exit(1);
+    }
   }
 
   // ----------------------------------------------------------------------------

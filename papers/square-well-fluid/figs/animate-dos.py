@@ -29,12 +29,7 @@ fig, ax = plt.subplots()
 
 mine = 1e100
 maxe = -1e100
-minlndos = 1e100
-maxlndos = -1e100
 numframes = 0
-
-def uses_crazy_weights_dos(suffix):
-    return 'wl' in suffix or suffix in ['samc', 'sad']
 
 dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 
@@ -52,9 +47,6 @@ for frame in xrange(100000):
         except:
             alldone = True
             break
-        if not uses_crazy_weights_dos(suffix):
-            minlndos = min(minlndos, lndos.min())
-            maxlndos = max(maxlndos, lndos.max())
         numframes = frame+1
         mine = min(mine, e[lndos == lndos[-1]].max() - 20)
         maxe = max(maxe, e[lndos == lndos[0]].min())
@@ -67,6 +59,8 @@ bestframe = sorted(glob.glob('data/%s/%s-%s-movie/*-lndos.dat'
 best_e, best_lndos = readandcompute.e_lndos(bestframe)
 print 'best data is', bestframe
 
+maxlndos = best_lndos.max()
+minlndos = best_lndos.min()
 print 'counted %d frames' % numframes
 print 'mine', mine
 print 'maxe', maxe

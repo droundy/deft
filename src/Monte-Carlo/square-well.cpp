@@ -364,16 +364,27 @@ void sw_simulation::move_a_ball() {
       if (Pmove < Pmin) Pmove = Pmin;
     }
   } if (use_sad) {
-    // always allow changes that increase the energy (remember minus sign):
-    if (energy_change < 0) {
-      const double lnPmove =
-        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-      if (lnPmove < 0) Pmove = exp(lnPmove);
-      // Here we enforce the Tmin probability.
-      const double betamax = 1.0/min_T;
-      double Pmin = exp(energy_change*betamax);
-      if (Pmove < Pmin) Pmove = Pmin;
+    const int e1 = energy;
+    const int e2 = energy + energy_change;
+    double lnw1 = ln_energy_weights[e1];
+    if (e1 < too_high_energy) {
+      lnw1 = ln_energy_weights[too_high_energy];
+    } else if (e1 > too_low_energy) {
+      lnw1 = ln_energy_weights[too_low_energy] + (e1 - too_low_energy)/min_T;
     }
+    double lnw2 = ln_energy_weights[e2];
+    if (e2 < too_high_energy) {
+      lnw2 = ln_energy_weights[too_high_energy];
+    } else if (e2 > too_low_energy) {
+      lnw2 = ln_energy_weights[too_low_energy] + (e2 - too_low_energy)/min_T;
+    }
+    const double lnPmove = lnw2 - lnw1;
+    Pmove = exp(lnPmove);
+    //if (e2 < too_high_energy && e1 != e2) {
+      //printf("prob hi %d -> %d = %g\n", e1, e2, Pmove);
+    //} else if (e2 > too_low_energy && e1 != e2) {
+      //printf("prob lo %d -> %d = %g\n", e1, e2, Pmove);
+    //}
   } else {
     if (!sa_t0
         && wl_factor > 0 && (energy + energy_change > min_important_energy
@@ -435,9 +446,96 @@ void sw_simulation::end_move_updates(){
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
-  // Note: if not using WL or SA method, wl_factor = 0 and the
-  // following has no effect.
-  ln_energy_weights[energy] -= wl_factor;
+  if (use_sad && energies_found > 1 && wl_factor > 0) {
+    if (energy < too_high_energy) {
+      // We are at higher energy than the maximum entropy state, so we
+      // need to tweak our weights by even more, since we don't spend
+      // much time here.
+
+      // We key our change in weights based on the max_entropy_state.
+      // 1/w = 1/w + gamma 1/w0
+      // -lnw = ln(1/w + gamma 1/w0) = ln((w0/w + gamma)/w0)
+      //      = -lnw0 + ln(w0/w + gamma) = -lnw0 + ln(gamma + exp(lnw0-lnw))
+      // lnw = lnw0 - ln(gamma + exp(lnw0-lnw))
+      ln_energy_weights[energy] =
+        min(ln_energy_weights[energy] - wl_factor,
+            ln_energy_weights[too_high_energy] -
+            log(wl_factor
+                + exp(ln_energy_weights[too_high_energy]-ln_energy_weights[energy])));
+      if (!(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0)) {
+        printf("lnw[%d] = %g\n", energy, ln_energy_weights[energy]);
+      }
+      assert(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0);
+    } else if (energy > too_low_energy) {
+      // We are below the minimim important energy, and again need to tweak
+      // our updates.
+
+      // The following is like the high-energy case, except we have an
+      // extra Boltzmann factor, which accounts for the fact that we do
+      // bias things in favor of low energies (using the Boltzmann factor).
+
+      // 1/w = 1/w + gamma 1/w0 e^{(E-E0)/minT} <-- small boltmann
+      // -lnw = ln(1/w + gamma e^{(E-E0)/minT}/w0)
+      //      = ln(e^{(E-E0)/minT}/w0 * (gamma + w0/w e^{-(E-E0)/minT})) <-- large boltzmann
+      //      = (E-E0)/minT} - lnw0 + ln(gamma + w0/w e^{-(E-E0)/minT})) <-- large boltzmann
+      //      = (E-E0)/minT} - lnw0 + ln(gamma + e^{lnw0 - lnw - (E-E0)/minT})) <-- large boltzmann
+      //  lnw = lnw0 - (E-E0)/minT} - ln(gamma + e^{lnw0 - lnw - (E-E0)/minT})) <-- large boltzmann
+      ln_energy_weights[energy] =
+        min(ln_energy_weights[energy] - wl_factor,
+            ln_energy_weights[too_low_energy] + (energy-too_low_energy)/min_T
+            - log(wl_factor + exp(ln_energy_weights[too_low_energy] - ln_energy_weights[energy] + (energy-too_low_energy)/min_T)));
+
+      // -lnw = ln(1/w + gamma e^{(E-E0)/minT}/w0)
+      //      = ln((w0/w + gamma e^{(E-E0)/minT})/w0)
+      //      = -lnw0 + ln(w0/w + gamma e^{(E-E0)/minT})
+      //      = -lnw0 + ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
+      // lnw = lnw0 - ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
+      // ln_energy_weights[energy] =
+      //   min(ln_energy_weights[energy] - wl_factor,
+      //       ln_energy_weights[too_low_energy]
+      //           - log(exp(ln_energy_weights[too_low_energy] - ln_energy_weights[energy])
+      //                 + wl_factor*exp((too_low_energy - energy)/min_T)));
+      if (ln_energy_weights[energy] < ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T) {
+        ln_energy_weights[energy] =
+          ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T;
+        too_low_energy = energy;
+        printf("We were almost very cray at energy %d\n", energy);
+      }
+
+      if (!(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0)) {
+        printf("lnw[%d] = %g\n", energy, ln_energy_weights[energy]);
+      }
+      assert(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0);
+    } else {
+      // We are in the "interesting" region, so use an ordinary SA update.
+      ln_energy_weights[energy] -= wl_factor;
+    }
+  } else {
+    // Note: if not using WL or SA method, wl_factor = 0 and the
+    // following has no effect.
+    ln_energy_weights[energy] -= wl_factor;
+  }
+  if (use_sad) {
+    bool print_edges = false;
+    if (ln_energy_weights[energy] < ln_energy_weights[max_entropy_state]
+        || energy_histogram[max_entropy_state] == 0) {
+      // We are now at the max_entropy_state!
+      max_entropy_state = energy;
+      if (max_entropy_state < too_high_energy) too_high_energy = max_entropy_state;
+      // print_edges = true;
+    }
+    if (ln_energy_weights[energy] < ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T
+        || energy_histogram[min_important_energy] == 0) {
+      // We are above the min_important_energy tangent line, which
+      // means we are the new min_important_energy.
+      //if (energy != min_important_energy) print_edges = true;
+      min_important_energy = energy;
+      if (min_important_energy > too_low_energy) too_low_energy = min_important_energy;
+    }
+
+    if (print_edges) printf(" %5d ...%5d -->%5d ...%5d\n",
+                            too_low_energy, min_important_energy, max_entropy_state, too_high_energy);
+  }
 }
 
 void sw_simulation::energy_change_updates(int energy_change){
@@ -533,20 +631,20 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
     if (use_sad) {
       // Above the max_entropy_state our weights are effectively constant,
       // so the density of states is proportional to our histogram.
-      for (int i=0; i<max_entropy_state; i++) {
-        if (energy_histogram[i]) {
-          ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[max_entropy_state]));
-        }
-      }
+      //~ for (int i=0; i<max_entropy_state; i++) {
+        //~ if (energy_histogram[i]) {
+          //~ ln_dos[i] = log(energy_histogram[i]/double(energy_histogram[max_entropy_state]));
+        //~ }
+      //~ }
       // Below the minimum important energy, we also need to use the histogram,
       // only now adjusted by a Boltzmann factor.  We compute the min
       // important energy above for extreme clarity.
-      for (int i=minE+1; i<energy_levels; i++) {
-        if (energy_histogram[i]) {
-          ln_dos[i] = ln_dos[minE] + log(energy_histogram[i]/double(energy_histogram[minE]))
-            - (i-minE)*betamax;  // the last bit gives Boltzmann factor
-        }
-      }
+      //~ for (int i=minE+1; i<energy_levels; i++) {
+        //~ if (energy_histogram[i]) {
+          //~ ln_dos[i] = ln_dos[minE] + log(energy_histogram[i]/double(energy_histogram[minE]))
+            //~ - (i-minE)*betamax;  // the last bit gives Boltzmann factor
+        //~ }
+      //~ }
       // Now let us set the ln_dos for any sites we have never visited
       // to be equal to the minimum value of ln_dos for sites we
       // *have* visited.  These are unknown densities of states, and
@@ -734,6 +832,8 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
 }
 
 int sw_simulation::set_min_important_energy(double *input_ln_dos){
+  // sad tracks min_important_energy continually
+  if (use_sad) return min_important_energy;
 
   // We always use the transition matrix to estimate the
   // min_important_energy, since it is more robust at the outset.
@@ -771,6 +871,9 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
 }
 
 void sw_simulation::set_max_entropy_energy() {
+  // sad tracks max_entropy_state continually
+  if (use_sad) return;
+
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   for (int i=energy_levels-1; i >= 0; i--) {
@@ -957,6 +1060,8 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
       }
     }
     return iteration >= init_iters;
+  } else if (max_time > 0) {
+    return false;
   }
 
   printf("We are asking whether we are finished initializing without "
@@ -1184,6 +1289,8 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 
 void sw_simulation::initialize_samc(int am_sad) {
   use_sad = am_sad;
+  too_high_energy = energy_levels-1;
+  too_low_energy = 0;
   assert(sa_t0 || am_sad);
   assert(sa_prefactor);
   assert(!use_satmmc);
@@ -1951,7 +2058,10 @@ void sw_simulation::initialize_transitions_file(const char *transitions_input_fi
   fclose(transitions_infile);
 
   // pretend we have seen the energies for which we have transition data
-  for(int i = min_e; i <= min_energy_state; i++) energy_histogram[i] = 1;
+  for(int i = min_e; i <= min_energy_state; i++) {
+    energies_found++;
+    energy_histogram[i] = 1;
+  }
 
   // now construct the actual weight array
   /* FIXME: it appears that we are reading in the data file properly,

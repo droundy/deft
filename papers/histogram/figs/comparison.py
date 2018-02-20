@@ -10,16 +10,21 @@ if os.path.exists('../data'):
 energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
-methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad', '-sad3']
+methods = [ '-sad3', '-sad3-s1', '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
+            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
+
+def running_mean(x, N):
+    cumsum = numpy.cumsum(numpy.insert(x, 0, 0)) 
+    averaged = (cumsum[N:] - cumsum[:-N]) / N
+    return numpy.concatenate((x[:len(x)-len(averaged)], averaged))
 
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/%s-wltmmc*-movie' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
-
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
+
 print methods
 
 ref = reference
@@ -29,21 +34,6 @@ maxref = int(readnew.max_entropy_state(ref))
 minref = int(readnew.min_important_energy(ref))
 n_energies = int(minref - maxref+1)
 
-#I commented out associated colors for each method as I wasn't sure how
-#to modify the colors dict to work for lvmc.  I'll work on fixing this
-#in the future.
-'''
-colors = {
-    '-tmi3': 'b',
-    '-tmi2': 'k',
-    '-tmi': 'y',
-    '-toe': 'm',
-    '-toe3': 'r',
-    '-tmmc': 'k',
-    '-toe2': 'c',
-    '-vanilla_wang_landau': 'm',
-    '-wltmmc': 'c'}
-'''
 try:
     eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
 except:
@@ -52,9 +42,11 @@ except:
 for method in methods:
     dirname = 'data/comparison/%s%s' % (filebase,method)
     dirnametm = 'data/comparison/%s%s-tm' % (filebase,method)
-    try: 
+    try:
+        print("trying method %s" % method)
         r = glob('data/%s%s-movie/*lndos.dat' % (filebase,method))
         if len(r)==0:
+            print(" ... but it has no data in data/%s%s-movie/*lndos.dat" % (filebase,method))
             continue
         if not os.path.exists(dirname):
             os.makedirs(dirname)
@@ -115,7 +107,11 @@ for method in methods:
         Nrt_at_energy = Nrt_at_energy[:num_frames_to_count]
         erroratenergy = erroratenergy[:num_frames_to_count]
         errorinentropy = errorinentropy[:num_frames_to_count]
+        windows = int(len(iterations)/10 + 1)
+        windows = 10
         maxerror = maxerror[:num_frames_to_count]
+        #uncomment the following line for windowed averages
+        #maxerror = running_mean(maxerror[:num_frames_to_count],windows)
 
         erroratenergytm = erroratenergytm[:num_frames_to_count]
         errorinentropytm = errorinentropytm[:num_frames_to_count]
@@ -146,24 +142,3 @@ for method in methods:
     except:
         print 'I had trouble with', method
         raise
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

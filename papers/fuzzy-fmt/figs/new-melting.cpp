@@ -92,22 +92,19 @@ static inline double find_zeta(double temp) {
 weight find_weights(vector3d r, vector3d rp, double temp) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
-
-//const double sigma=1;
-//const double Rad=sigma/pow(2, 5.0/6);
   const double alpha = find_alpha(temp);
   const double zeta = find_zeta(temp);
-
   weight w;
-
   w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(rdiff_magnitude-(alpha/2),2)/uipow(zeta,2));
-  w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
-  w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   if (rdiff_magnitude > 0) {
+    w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
+    w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
     w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
     w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
   } else {
+    w.n_0=0;
+    w.n_1=0;
     w.nv_1 = vector3d(0,0,0);
     w.nv_2 = vector3d(0,0,0);
   }
@@ -126,7 +123,9 @@ static inline double radius_of_peak(double gwidth, double T) {
 }
 
 weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
-                                double lattice_constant, double gwidth, double norm) {
+                                double lattice_constant, double gwidth, double norm, 
+                                double reduced_density, int n_rp_option) {
+  //n_rp_option set to 0 for n_rp=reduced_density (homogeneous), set to 1 for n_rp=gaussian(crystal)
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -154,7 +153,10 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
         // only bother including points within the inclusion radius:
         if (rp_from_R.norm() < inclusion_radius*gwidth) {
           weight w = find_weights(r, rp, temp);
-          double n_rp = density_gaussian((r-rp).norm(), gwidth, norm);
+          double n_rp = reduced_density;   // homogeneous density for homogeneous free energy calculation
+          if (n_rp_option > 0) { 
+            n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // CHECK! want density a distance rp-R from center of Gaussian
+          }
           w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
@@ -169,6 +171,39 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
 
   return w_den_R;
 }
+
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  
+                                       double lattice_constant, double gwidth, double norm) {
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
+    return w_den_R;
+  }
+  double abscissa=sqrt(2)/2.0;    //from chart on Hermite-Gause Quadrature
+  double gqweight=0.866227;       //from chart on Hermite-Gause Quadrature
+  int i, j, k;
+  for (i=1; i<3; i++) {
+    for (j=1; j<3; j++) {
+      for (k=1; k<3; k++) {
+        double xi=abscissa*uipow(-1,i);
+        double yi=abscissa*uipow(-1,j);
+        double zi=abscissa*uipow(-1,k);
+        vector3d sample_pt = vector3d(xi, yi, zi);
+        vector3d change_var = -R-sqrt(2)*gwidth*sample_pt;
+        double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
+        weight w = find_weights(r, change_var, temp);  
+         
+        w_den_R.n_0 += w.n_0*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.n_1 += w.n_1*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.n_2 += w.n_2*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.n_3 += w.n_3*norm*change_var_coef*gqweight*gqweight*gqweight;
+
+        w_den_R.nv_1 += w.nv_1*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.nv_2 += w.nv_2*norm*change_var_coef*gqweight*gqweight*gqweight;
+      }
+    }
+  }
+  return w_den_R;
+}  
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
@@ -226,6 +261,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //Integrate over one primitive cell (a parallelepiped) to find free energy
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
+  int density_option = 0;   //set to 0 for homogeneous free energy, 
+                            //set to 1 for crystal free energy 
+
+  int guass_quad_option=1;  //set to 0 for crystal free energy without Gaussian Quadrature
+                            //set to 1 for crystal free energy with Gaussian Quadrature, 
   for (int i=0; i<Nl; i++) {
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
@@ -242,8 +282,22 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             for (int v=-many_cells; v<= many_cells; v++) {
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               if ((R-r).norm() < max_distance_considered) {
-                weight n_weight=find_weighted_den_aboutR(R, r, dx, temp,
-                                                         lattice_constant, gwidth, norm);
+                  weight n_weight;
+                  if (density_option > 0 ) {
+                      if (guass_quad_option > 0 ) {
+                          n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,  //For Crystal Free Energy in real space with Gaussian Quadrature
+                                                     lattice_constant, gwidth, norm);
+                      } else {
+                          int n_rp_option = 1;
+                          n_weight=find_weighted_den_aboutR(R, r, dx, temp,     //For Crystal Free Energy in real space without Gaussian Quadrature
+                                          lattice_constant, gwidth, norm, reduced_density, n_rp_option);
+                      } 
+                  } else {
+                      int n_rp_option = 0;
+                      n_weight=find_weighted_den_aboutR(R, r, dx, temp,  //For Homogeneous Free Energy in real space (no Gaussian Quadrature)
+                                          lattice_constant, gwidth, norm, reduced_density, n_rp_option);
+                  }
+                
                 // printf("Am at distance %g vs %g  with n3 contribution %g\n",
                 //        (R-r).norm(), radius_of_peak(gwidth, temp), n_weight.n_3);
                 n_0 +=n_weight.n_0;
@@ -260,7 +314,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           }
         }
         phi_1 = -n_0*log(1-n_3);
-        // printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
+        //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
         phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
         //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
         phi_3 = ((n_2*n_2*n_2)-(3*n_2*(nv_2.x*nv_2.x + nv_2.y*nv_2.y + nv_2.z*nv_2.z)))/(24*M_PI*(1-n_3)*(1-n_3));
@@ -272,9 +326,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
           printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
           data data_out;
-          data_out.diff_free_energy_per_atom=2;
-          data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
-          data_out.hfree_energy_per_vol=2;
+          data_out.diff_free_energy_per_atom=2;  //FIX this!
+          data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
+          data_out.hfree_energy_per_vol=2;   //FIX this!
           data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
           return data_out;
         }
@@ -284,24 +338,36 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         //             +(j)/uipow(Nl, 2)
         //             +(k + 1)/uipow(Nl, 3)));
       }
-      const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
-      const double t = time()/60/60;
-      const double time_total = t/fraction_complete;
-      printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
-             100*fraction_complete, time_total - t, time_total);
+      //const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
+      //const double t = time()/60/60;
+      //const double time_total = t/fraction_complete;
+      //printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
+      //       100*fraction_complete, time_total - t, time_total);
     }
-    printf("finished %.1f%% of the integral\n",
-           100*(i + 1)/double(Nl));
-    printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
+    //printf("finished %.1f%% of the integral\n",
+     //      100*(i + 1)/double(Nl));
+    //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
 
   printf("free_energy is %g\n", free_energy);
 
+  
+  HomogeneousSFMTFluid hf;
+  hf.sigma() = 1;
+  hf.epsilon() = 1;   //energy constant in the WCA fluid
+  hf.kT() = temp;
+  hf.n() = reduced_density;
+  hf.mu() = 0;
+  //Note: hf.energy() returns energy/volume
+
+  const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
+
   data data_out;
-  data_out.diff_free_energy_per_atom=2;
+  data_out.diff_free_energy_per_atom=(free_energy/reduced_num_spheres) - homogeneous_free_energy;
   data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!
-  data_out.hfree_energy_per_vol=2;
+  data_out.hfree_energy_per_vol=hf.energy();
   data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK!
+
 
   return data_out;
 }
@@ -849,12 +915,12 @@ int main(int argc, const char **argv) {
 
 
 //TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
+  //printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
 
-  data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
-  printf("e_data_new is: %g, %g, %g, %g\n", e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
+  //data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
+  //printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
-  return 0;  //for debug
+  //return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {

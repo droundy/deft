@@ -24,18 +24,20 @@ filebase = sys.argv[2]
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
 methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad', '-sad3']
+            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad', '-sad3', '-sad3-s1']
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
-
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
+
 print 'methods are', methods
 for method in [mm for m in methods for mm in [m, m+'-tm']]:
     print 'trying method', method
     try:
+        if method[-6:] == '-s1-tm':
+                continue
         dirname = 'data/comparison/%s%s/' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:
                 continue
