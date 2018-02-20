@@ -259,10 +259,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
   
-  int gauss_quad_option=1;  //set to 0 for crystal free energy in real space
+  int gauss_quad_option=0;  //set to 0 for crystal free energy in real space
                             //set to 1 for crystal free energy with Gaussian Quadrature
                             
-  int FFT_option=1;     // set to 0 for homogeneous free energy in real space
+  int FFT_option=0;     // set to 0 for homogeneous free energy in real space
                         // set to 1 for homogeneous free energy with Fast Fourier Transform
 
   for (int density_option = 0; density_option <2; density_option++) {  //0 for homogeneous free energy, 
