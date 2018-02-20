@@ -13,6 +13,7 @@ _colors = { 'sad': 'r',
             'tmmc': 'b',
             'tmi3': 'g',
             'toe3': 'tab:orange',
+            'samc': 'm',
             'satmmc': 'y',
             'wltmmc-0.8-0.0001': 'tab:purple',
             'wltmmc-1-0.0001': 'tab:pink',
@@ -34,6 +35,7 @@ _legend_order = [
     'wltmmc',
     'vanilla_wang_landau',
     'tmi3', 'toe3',
+    'samc',
     'satmmc',
 ]
 
@@ -45,6 +47,7 @@ _legend_label = {
     'tmmc': 'TMMC',
     'tmi3': 'TMI',
     'toe3': 'TOE',
+    'samc': 'SAMC',
 }
 
 def fix_legend(method):
