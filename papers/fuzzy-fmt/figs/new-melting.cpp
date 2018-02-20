@@ -338,7 +338,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           //data_out.diff_free_energy_per_atom=2;  //FIX this!
           //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
           //data_out.hfree_energy_per_vol=2;   //FIX this!
-          //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);
+          //data_out.cfree_energy_per_vol=free_energy;
           //return data_out;
         }
           //printf("free energy is now... %g\n", free_energy);   //debug
@@ -407,17 +407,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", hfree_energy_per_atom, data_out.cfree_energy_per_atom);
   printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n", data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
   printf("data_out is: diffperatom=%g\n", data_out.diff_free_energy_per_atom);
-  
-  ////const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere or "atom"
-  ////data_out.diff_free_energy_per_atom= cfree_energy_per_atom - homogeneous_free_energy;  
-  //data_out.diff_free_energy_per_atom=(free_energy/reduced_num_spheres) - homogeneous_free_energy;   //save- old way
-  //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //ASK!   save- old way
-  //data_out.hfree_energy_per_vol=hf.energy();   //save- old way
-  //data_out.cfree_energy_per_vol=free_energy/(lattice_constant*lattice_constant*lattice_constant);   //ASK! save- old way
-  
-  //printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", homogeneous_free_energy, data_out.cfree_energy_per_atom);
-  //printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n",  hf.energy(), data_out.cfree_energy_per_vol);
-  //printf("data_out is: diffperatom=%g\n", data_out.cfree_energy_per_atom - homogeneous_free_energy);
+
   return data_out;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
