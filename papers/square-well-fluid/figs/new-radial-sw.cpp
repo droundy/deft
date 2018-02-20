@@ -28,11 +28,11 @@
 double zmax = 18;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.2;
+double dx = 0.1;
 const double epsilon = 1.0;
 const double radius = 1.0;
 const double sigma = 2*radius;
-double lambda = 1;
+double lambda = 1.0;
 
 static void took(const char *name) {
   static clock_t last_time = 0;
@@ -59,7 +59,7 @@ void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
   snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-Y.dat",
            kT, f->lambda(), ff);
   f->get_ry().dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
-  snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-n.dat",
+  snprintf(dumpname, 5000, "papers/square-well-fluid/data/radial-sw-%.2f-%.2f-%.2f-eta.dat",
            kT, f->lambda(), ff);
 
   char *fname = new char[5000];
@@ -70,7 +70,7 @@ void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
   printf("=====================================================\n");
   printf("| Working on ff = %4g, lambda = %4g and kT = %4g |\n", ff, f->lambda(), kT);
   printf("=====================================================\n");
-  while (min.improve_energy(verbose)) {
+  while (min.improve_energy(gossipy)) {
 
     took("Doing the minimization step");
 
@@ -84,10 +84,11 @@ void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
     Vector r = f->get_r();
     Vector n = f->get_n();
     for (int i=0;i<Nz/2;i++) {
-      fprintf(o, "%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3)/6, Vext[i]);
+      fprintf(o, "%g\t%g\t%g\n", r[i]/sigma, n[i]*M_PI*uipow(sigma, 3)/6, Vext[i]);
     }
     fclose(o);
 
+    n *= M_PI*uipow(sigma, 3)/6;
     n.dumpSliceZ(dumpname, f->Nx(), f->Ny(), f->Nz(), 0);
 
     took("Outputting to file");
@@ -98,7 +99,7 @@ void run_sw_liquid(double ff, SW_liquidVeff *f, double kT) {
 }
 
 int main(int argc, char **argv) {
-  double ff, temp, lambda;
+  double ff, temp;
   if (argc != 4) {
     printf("usage: %s ff lambda kT\n", argv[0]);
     return 1;
@@ -116,14 +117,24 @@ int main(int argc, char **argv) {
   hf.epsilon() = epsilon;
   hf.kT() = temp;
   hf.lambda() = lambda;
-  hf.n() = ff*6/uipow(sigma, 3);
+  hf.n() = ff/(M_PI*uipow(sigma, 3)/6);
   hf.mu() = 0;
   printf("n3 = %g comes from n = %g\n", hf.get_n3(), hf.n());
   printf("bulk energy is not %g\n", hf.energy());
+  printf("mu was arbitrarily %g\n", hf.mu());
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
+  printf("mu is found to be %g\n", hf.mu());
+  printf("our dfdn is now %g\n",  hf.d_by_dn());
   printf("bulk energy is %g\n", hf.energy());
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*xmax*ymax*zmax);
+
+  // const double dn = 0.01*hf.n();
+  // for (double anothern=dn; anothern<150*dn; anothern+=dn) {
+  //   hf.n() = anothern;
+  //   printf("%8g %g\n", anothern*M_PI*uipow(sigma, 3)/6, hf.energy());
+  // }
+  // exit(1);
 
   SW_liquidVeff f(xmax, ymax, zmax, dx);
   f.R() = hf.R();
@@ -146,7 +157,7 @@ int main(int argc, char **argv) {
       }
       if (r[i] <= sigma) {
         f.Vext()[i] = Vmax;
-        f.Veff()[i] += f.Vext()[i];
+        f.Veff()[i] += Vmax;
       }
     }
   }
