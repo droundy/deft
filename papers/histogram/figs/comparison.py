@@ -10,7 +10,8 @@ if os.path.exists('../data'):
 energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
-methods = [ '-sad3', '-sad3-s1', '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
+methods = [ '-sad3', '-sad3-s1', '-sad3-s2',
+            '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
 
 def running_mean(x, N):
@@ -43,10 +44,9 @@ for method in methods:
     dirname = 'data/comparison/%s%s' % (filebase,method)
     dirnametm = 'data/comparison/%s%s-tm' % (filebase,method)
     try:
-        print("trying method %s" % method)
         r = glob('data/%s%s-movie/*lndos.dat' % (filebase,method))
         if len(r)==0:
-            print(" ... but it has no data in data/%s%s-movie/*lndos.dat" % (filebase,method))
+            # print(" ... but it has no data in data/%s%s-movie/*lndos.dat" % (filebase,method))
             continue
         if not os.path.exists(dirname):
             os.makedirs(dirname)

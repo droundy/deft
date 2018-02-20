@@ -23,8 +23,9 @@ energy = int(sys.argv[1])
 filebase = sys.argv[2]
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
-methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad', '-sad3', '-sad3-s1']
+methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
+            '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
+            '-vanilla_wang_landau', '-samc', '-satmmc']
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
@@ -36,7 +37,7 @@ print 'methods are', methods
 for method in [mm for m in methods for mm in [m, m+'-tm']]:
     print 'trying method', method
     try:
-        if method[-6:] == '-s1-tm':
+        if method[-6:] in ['-s1-tm', '-s2-tm']:
                 continue
         dirname = 'data/comparison/%s%s/' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:
