@@ -183,7 +183,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   for (int i=-1; i<3; i=i+2) {
     for (int j=-1; j<3; j=j+2) {
       for (int k=-1; k<3; k=k+2) {
-        vector3d change_var = -R-sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
+        vector3d change_var = R+sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
         double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
         weight w = find_weights(r, change_var, temp);  
          
@@ -259,16 +259,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
   
-  int gauss_quad_option=0;  //set to 0 for crystal free energy in real space
+  int gauss_quad_option=1;  //set to 0 for crystal free energy in real space
                             //set to 1 for crystal free energy with Gaussian Quadrature
                             
-  int FFT_option=0;     // set to 0 for homogeneous free energy in real space
+  int FFT_option=1;     // set to 0 for homogeneous free energy in real space
                         // set to 1 for homogeneous free energy with Fast Fourier Transform
 
   for (int density_option = 0; density_option <2; density_option++) {  //0 for homogeneous free energy, 
                                                                        //1 for crystal free energy 
                                                             
-  printf("\nRunning density_option = %i  homogeneous option is 0, crystal option is 1\n", density_option);
+  printf("\nRunning density_option = %i  (homogeneous option is 0, crystal option is 1)\n", density_option);
   
   if ((density_option <1 and FFT_option < 1) or density_option > 0) {
   
