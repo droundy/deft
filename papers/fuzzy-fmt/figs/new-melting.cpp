@@ -980,9 +980,9 @@ int main(int argc, const char **argv) {
   printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
   double a = find_lattice_constant(reduced_density, fv);
   
-  weight w_R = find_weighted_den_aboutR_guasquad(vector3d(a/2+3*dx,3*dx,a/2+3*dx), vector3d(a/2,0,a/2), dx, temp, a, gw, 1); 
+  weight w_R = find_weighted_den_aboutR_guasquad(vector3d(a/2+4*dx,3*dx,a/2+2*dx), vector3d(a/2,0,a/2), dx, temp, a, gw, 1); 
 
-  printf("\nWeighted Density TEST results for rx=%g ry=%g  rz=%g\n", a/2+3*dx, 3*dx, a/2+3*dx);
+  printf("\nWeighted Density TEST results for rx=%g ry=%g  rz=%g\n", a/2+4*dx, 3*dx, a/2+2*dx);
   printf("and Gaussian point Rx=%g Ry=%g  Rz=%g  :\n", a/2, 0.0, a/2);
   printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_R.n_0, w_R.n_1, w_R.n_2, w_R.n_3);
   printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n", w_R.nv_1.x, w_R.nv_1.y, w_R.nv_1.z);
