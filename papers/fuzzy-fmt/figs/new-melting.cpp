@@ -100,8 +100,8 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   if (rdiff_magnitude > 0) {
     w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
     w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
-    w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
-    w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
+    w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);   
+    w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);   
   } else {
     w.n_0=0;
     w.n_1=0;
@@ -185,7 +185,12 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
       for (int k=-1; k<3; k=k+2) {
         vector3d change_var = R+sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
         double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
-        weight w = find_weights(r, change_var, temp);  
+        weight w = find_weights(r, change_var, temp); 
+         
+        printf("r.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
+        printf("R.x=%g, R.y=%g, R.z=%g\n",R.x, R.y, R.z); //debug - for GQ TEST
+        printf("change_var.x=%g, change_var.y=%g, change_var.z=%g\n",change_var.x, change_var.y, change_var.z); //debug - for GQ TEST
+        printf("w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g\n",w.n_0, w.n_1, w.n_2, w.n_3); //debug - for GQ TEST
          
         w_den_R.n_0 += w.n_0*norm*change_var_coef*gqweight*gqweight*gqweight;
         w_den_R.n_1 += w.n_1*norm*change_var_coef*gqweight*gqweight*gqweight;
@@ -968,9 +973,11 @@ int main(int argc, const char **argv) {
   
   weight w_R = find_weighted_den_aboutR_guasquad(vector3d(a/2+3*dx,3*dx,a/2+3*dx), vector3d(a/2,0,a/2), dx, temp, a, gw, 1); 
 
+  printf("\nWeighted Density TEST results for rx=%g ry=%g  rz=%g\n", a/2+3*dx, 3*dx, a/2+3*dx);
+  printf("and Gaussian point Rx=%g Ry=%g  Rz=%g  :\n", a/2, 0.0, a/2);
   printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_R.n_0, w_R.n_1, w_R.n_2, w_R.n_3);
   printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n", w_R.nv_1.x, w_R.nv_1.y, w_R.nv_1.z);
-  printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
+  printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
   
   return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
