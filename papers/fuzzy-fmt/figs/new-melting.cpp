@@ -974,7 +974,7 @@ int main(int argc, const char **argv) {
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //TEST GAUSSIAN QUADRATURE FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  int do_GQ_Test = 0;  //Turn Gaussian Quadrature Test on/off
+  int do_GQ_Test = 0;  //Turn Gaussian Quadrature Test on(1)/off(0) 
   
   if (do_GQ_Test > 0) {
   printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
