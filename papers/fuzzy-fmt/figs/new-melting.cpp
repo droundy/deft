@@ -960,7 +960,20 @@ int main(int argc, const char **argv) {
   //printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
   //return 0;  //for debug
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+//TEST GAUSSIAN QUADRATURE FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
+  double a = find_lattice_constant(reduced_density, fv);
+  
+  weight w_R = find_weighted_den_aboutR_guasquad(vector3d(a/2+3*dx,3*dx,a/2+3*dx), vector3d(a/2,0,a/2), dx, temp, a, gw, 1); 
+
+  printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_R.n_0, w_R.n_1, w_R.n_2, w_R.n_3);
+  printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n", w_R.nv_1.x, w_R.nv_1.y, w_R.nv_1.z);
+  printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
+  
+  return 0;  //for debug
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
