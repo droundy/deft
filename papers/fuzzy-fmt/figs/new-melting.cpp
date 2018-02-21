@@ -139,7 +139,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
     return w_den_R;
   }
 
-  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length much smaller than dx - ASK where get this? Problem?
+  const double df = dx/(lattice_constant/2);  //sets an infinitesimal larger than dx along lattice vector 
   const vector3d da1 = lattice_vectors[0]*df; //infinitesimal lattice vectors of length df
   const vector3d da2 = lattice_vectors[1]*df;
   const vector3d da3 = lattice_vectors[2]*df;
@@ -342,9 +342,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         if (isnan(free_energy)) {
           printf("free energy is a NaN!\n");
-          //printf("position is: %g %g %g\n", r.x, r.y, r.z);
-          //printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
-          //printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
+          printf("position is: %g %g %g\n", r.x, r.y, r.z);
+          printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
+          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
           //data data_out;
           //data_out.diff_free_energy_per_atom=2;  //FIX this!
           //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
