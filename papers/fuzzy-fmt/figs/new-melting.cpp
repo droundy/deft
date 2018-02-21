@@ -187,8 +187,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
         double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
         weight w = find_weights(r, change_var, temp); 
          
-        printf("r.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
-        printf("R.x=%g, R.y=%g, R.z=%g\n",R.x, R.y, R.z); //debug - for GQ TEST
+        printf("\nr.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
         printf("change_var.x=%g, change_var.y=%g, change_var.z=%g\n",change_var.x, change_var.y, change_var.z); //debug - for GQ TEST
         printf("w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g\n",w.n_0, w.n_1, w.n_2, w.n_3); //debug - for GQ TEST
          
@@ -199,6 +198,8 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
 
         w_den_R.nv_1 += w.nv_1*norm*change_var_coef*gqweight*gqweight*gqweight;
         w_den_R.nv_2 += w.nv_2*norm*change_var_coef*gqweight*gqweight*gqweight;
+        
+        printf("w_den_R.n_0=%g, w_den_R.n_1=%g, w_den_R.n_2=%g, w_den_R.n_3=%g\n",w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3); //debug - for GQ TEST
       }
     }
   }
