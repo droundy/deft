@@ -974,6 +974,9 @@ int main(int argc, const char **argv) {
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //TEST GAUSSIAN QUADRATURE FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  int do_GQ_Test = 0;  //Turn Gaussian Quadrature Test on/off
+  
+  if (do_GQ_Test > 0) {
   printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
   double a = find_lattice_constant(reduced_density, fv);
   
@@ -986,6 +989,7 @@ int main(int argc, const char **argv) {
   printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
   
   return 0;  //for debug
+  }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
