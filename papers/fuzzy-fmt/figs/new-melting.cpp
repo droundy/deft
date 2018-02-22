@@ -160,7 +160,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
           if (n_rp_option > 0) { 
             n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // CHECK! want density a distance rp-R from center of Gaussian
           }
-          printf("n_rp is %g, w.n_3 = %g\n", n_rp, w.n_3);  //debug
+          //printf("n_rp is %g, w.n_3 = %g\n", n_rp, w.n_3);  //debug
           w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
@@ -329,7 +329,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                 n_2 +=n_weight.n_2;
                 n_3 +=n_weight.n_3;
                 //printf("n_weight.n_3=%g\n", n_weight.n_3);  //debug
-                printf("n_3=%g\n", n_3);  //debug
+                //printf("n_3=%g\n", n_3);  //debug
                 if (n_3 > 1) {
                   printf("ERROR: n_3 is greater than 1!\n");
                   data data_out;
@@ -423,7 +423,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.cfree_energy_per_vol=cfree_energy_per_vol; 
     
   if (gauss_quad_option > 0 ) {
-    printf("*Crystal free energy calculated with Gaussian Quadrature\n");
+    printf("\n*Crystal free energy calculated with Gaussian Quadrature\n");
   } else  printf("*Crystal free energy calculated in real space\n");  
   
   if (FFT_option > 0 ) {
