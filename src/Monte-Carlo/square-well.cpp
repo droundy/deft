@@ -499,7 +499,7 @@ void sw_simulation::end_move_updates(){
         ln_energy_weights[energy] =
           ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T;
         too_low_energy = energy;
-        printf("We were almost very cray at energy %d\n", energy);
+        // printf("We were almost very cray at energy %d\n", energy);
       }
 
       if (!(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0)) {
@@ -975,14 +975,12 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
         delete[] ln_dos;
         printf("[%9ld] Have %ld energies to go (down to T=%g or %g)\n",
                iteration, energies_unconverged, nice_T, converged_to_temperature(ln_dos));
-        printf("       <%d - %d vs %d> has samples <%ld(%ld) - %ld(%ld)>/%d (current energy %d",
+        printf("       <%d - %d vs %d> has samples <%ld - %ld>/%d (current energy %d",
                min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
-               optimistic_samples[min_important_energy],
-               pessimistic_samples[highest_problem_energy],
-               optimistic_samples[highest_problem_energy], min_samples, energy);
+               pessimistic_samples[highest_problem_energy], min_samples, energy);
         if (use_satmmc) printf(", sa %.2g%% %.2g", 100*sa_weight, wl_factor);
-        else if (use_sad) printf(", sa %.2g", wl_factor);
+        else if (use_sad) printf(", g %.2g, t0 %.2g", wl_factor, wl_factor*moves.total);
         printf(")\n");
         {
           printf("      ");

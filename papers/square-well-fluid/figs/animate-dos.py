@@ -88,7 +88,7 @@ for frame in xrange(numframes):
         try:
             e, lndos, lndostm = readandcompute.e_lndos_lndostm(basename)
             colors.plot(e, lndos, method=suffix)
-            if lndostm is not None:
+            if lndostm is not None and suffix[:3] != 'sad':
                 colors.plot(e, lndostm, method=suffix+'-tm')
             datname = basename+'-lndos.dat'
             min_T = readandcompute.minT(datname)
