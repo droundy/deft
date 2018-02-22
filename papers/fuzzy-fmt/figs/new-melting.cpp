@@ -160,6 +160,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
           if (n_rp_option > 0) { 
             n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // CHECK! want density a distance rp-R from center of Gaussian
           }
+          printf("n_rp is %g, w.n_3 = %g\n", n_rp, w.n_3);  //debug
           w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
@@ -279,7 +280,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   int FFT_option=0;     // set to 0 for homogeneous free energy in real space
                         // set to 1 for homogeneous free energy with Fast Fourier Transform
 
-  for (int density_option = 1; density_option <2; density_option++) { //loop on 0 only for homogeneous free energy, 
+  for (int density_option = 0; density_option <2; density_option++) { //loop on 0 only for homogeneous free energy, 
                                                                       //loop on 1 only for crystal free energy 
                                                                       //loop on 0 and 1 for both
                                                             
