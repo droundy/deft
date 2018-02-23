@@ -183,11 +183,10 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
-  double abscissa=sqrt(2)/2.0;    //from chart on Hermite-Gause Quadrature
   for (int i=-1; i<3; i=i+2) {
     for (int j=-1; j<3; j=j+2) {
       for (int k=-1; k<3; k=k+2) {
-        vector3d change_var = R+sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
+        vector3d change_var = R+gwidth*vector3d(i, j, k);
         weight w = find_weights(r, change_var, temp); 
          
         printf("\nr.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
