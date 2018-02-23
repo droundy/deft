@@ -989,16 +989,26 @@ int main(int argc, const char **argv) {
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //TEST GAUSSIAN QUADRATURE FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  int do_GQ_Test = 0;  //Turn Gaussian Quadrature Test on(1)/off(0) 
+  int do_GQ_Test = 1;  //Turn Gaussian Quadrature Test on(1)/off(0) 
   
   if (do_GQ_Test > 0) {
   printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
   double a = find_lattice_constant(reduced_density, fv);
-  
-  weight w_R = find_weighted_den_aboutR_guasquad(vector3d(a/2+4*dx,3*dx,a/2+2*dx), vector3d(a/2,0,a/2), dx, temp, a, gw, 1); 
 
-  printf("\nWeighted Density TEST results for rx=%g ry=%g  rz=%g\n", a/2+4*dx, 3*dx, a/2+2*dx);
-  printf("and Gaussian point Rx=%g Ry=%g  Rz=%g  :\n", a/2, 0.0, a/2);
+  vector3d r = vector3d(0,0,0);
+  vector3d R = vector3d(0,0,0);
+  weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, 1);
+
+  printf("\n\nreduced_density = %g, fv = %g, gw = %g  alpha=%g zeta=%g\n", reduced_density, fv, gw,
+         find_alpha(temp), find_zeta(temp));
+
+  weight w = find_weights(r, R, temp);
+  printf("w_0=%g, w_1=%g, w_2=%g, w_3=%g\n", w.n_0, w.n_1, w.n_2, w.n_3);
+  w = find_weights(r+vector3d(gw,0,0), R, temp);
+  printf("next w_0=%g, w_1=%g, w_2=%g, w_3=%g\n\n", w.n_0, w.n_1, w.n_2, w.n_3);
+
+  printf("\nWeighted Density TEST results for rx=%g ry=%g  rz=%g\n", r.x, r.y, r.z);
+  printf("and Gaussian point Rx=%g Ry=%g  Rz=%g  :\n", R.x, R.y, R.z);
   printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_R.n_0, w_R.n_1, w_R.n_2, w_R.n_3);
   printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n", w_R.nv_1.x, w_R.nv_1.y, w_R.nv_1.z);
   printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
