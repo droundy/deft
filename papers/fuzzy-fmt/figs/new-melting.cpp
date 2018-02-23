@@ -195,13 +195,13 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
         printf("w.nv_1.x=%g, w.nv_1.y=%g, w.nv_1.z=%g\n",w.nv_1.x, w.nv_1.y, w.nv_1.z); //debug - for GQ TEST
         printf("w.nv_2.x=%g, w.nv_2.y=%g, w.nv_2.z=%g\n",w.nv_2.x, w.nv_2.y, w.nv_2.z); //debug - for GQ TEST
 
-        w_den_R.n_0 += w.n_0*.125*(1-fv);
-        w_den_R.n_1 += w.n_1*.125*(1-fv);
-        w_den_R.n_2 += w.n_2*.125*(1-fv);
-        w_den_R.n_3 += w.n_3*.125*(1-fv);
+        w_den_R.n_0 += .125*(1-fv)*w.n_0;
+        w_den_R.n_1 += .125*(1-fv)*w.n_1;
+        w_den_R.n_2 += .125*(1-fv)*w.n_2;
+        w_den_R.n_3 += .125*(1-fv)*w.n_3;
 
-        w_den_R.nv_1 += w.nv_1*.125*(1-fv);
-        w_den_R.nv_2 += w.nv_2*.125*(1-fv);
+        w_den_R.nv_1 += .125*(1-fv)*w.nv_1;
+        w_den_R.nv_2 += .125*(1-fv)*w.nv_2;
         
         printf("Sum so far...  :\n");
         printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n",w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3); //debug - for GQ TEST
