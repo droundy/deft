@@ -176,19 +176,18 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  
-                                       double lattice_constant, double gwidth, double norm) {
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,
+                                         double lattice_constant,
+                                         double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
   double abscissa=sqrt(2)/2.0;    //from chart on Hermite-Gause Quadrature
-  double gqweight=0.866227;       //from chart on Hermite-Gause Quadrature
   for (int i=-1; i<3; i=i+2) {
     for (int j=-1; j<3; j=j+2) {
       for (int k=-1; k<3; k=k+2) {
         vector3d change_var = R+sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
-        double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
         weight w = find_weights(r, change_var, temp); 
          
         printf("\nr.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
@@ -196,14 +195,14 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
         printf("w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g\n",w.n_0, w.n_1, w.n_2, w.n_3); //debug - for GQ TEST
         printf("w.nv_1.x=%g, w.nv_1.y=%g, w.nv_1.z=%g\n",w.nv_1.x, w.nv_1.y, w.nv_1.z); //debug - for GQ TEST
         printf("w.nv_2.x=%g, w.nv_2.y=%g, w.nv_2.z=%g\n",w.nv_2.x, w.nv_2.y, w.nv_2.z); //debug - for GQ TEST
-         
-        w_den_R.n_0 += w.n_0*norm*change_var_coef*gqweight*gqweight*gqweight;
-        w_den_R.n_1 += w.n_1*norm*change_var_coef*gqweight*gqweight*gqweight;
-        w_den_R.n_2 += w.n_2*norm*change_var_coef*gqweight*gqweight*gqweight;
-        w_den_R.n_3 += w.n_3*norm*change_var_coef*gqweight*gqweight*gqweight;
 
-        w_den_R.nv_1 += w.nv_1*norm*change_var_coef*gqweight*gqweight*gqweight;
-        w_den_R.nv_2 += w.nv_2*norm*change_var_coef*gqweight*gqweight*gqweight;
+        w_den_R.n_0 += w.n_0*.125*(1-fv);
+        w_den_R.n_1 += w.n_1*.125*(1-fv);
+        w_den_R.n_2 += w.n_2*.125*(1-fv);
+        w_den_R.n_3 += w.n_3*.125*(1-fv);
+
+        w_den_R.nv_1 += w.nv_1*.125*(1-fv);
+        w_den_R.nv_2 += w.nv_2*.125*(1-fv);
         
         printf("Sum so far...  :\n");
         printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n",w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3); //debug - for GQ TEST
@@ -312,7 +311,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                   if (density_option > 0 ) {
                       if (gauss_quad_option > 0 ) {
                           n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,  //For Crystal Free Energy in real space with Gaussian Quadrature
-                                                     lattice_constant, gwidth, norm);
+                                                     lattice_constant, gwidth, fv);
                       } else {
                           n_weight=find_weighted_den_aboutR(R, r, dx, temp,     //For Crystal Free Energy in real space without Gaussian Quadrature
                                           lattice_constant, gwidth, norm, reduced_density, 1);
@@ -997,7 +996,7 @@ int main(int argc, const char **argv) {
 
   vector3d r = vector3d(0,0,0);
   vector3d R = vector3d(0,0,0);
-  weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, 1);
+  weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
 
   printf("\n\nreduced_density = %g, fv = %g, gw = %g  alpha=%g zeta=%g\n", reduced_density, fv, gw,
          find_alpha(temp), find_zeta(temp));
