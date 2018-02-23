@@ -97,11 +97,14 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   weight w;
   w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(rdiff_magnitude-(alpha/2),2)/uipow(zeta,2));
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
+  //printf("erf=%g\n", erf((rdiff_magnitude-(alpha/2))/zeta));  //debug
+  //printf("w.n_3=%g\n", w.n_3);  //debug
+  //printf("arguement of erf is %g, alpha=%g, zeta=%g, rdiff_magnitude=%g\n", rdiff_magnitude-(alpha/2)/zeta, alpha, zeta, rdiff_magnitude);  //debug
   if (rdiff_magnitude > 0) {
     w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
     w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
-    w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
-    w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
+    w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);   
+    w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);   
   } else {
     w.n_0=0;
     w.n_1=0;
@@ -139,7 +142,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
     return w_den_R;
   }
 
-  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length much smaller than dx - ASK where get this? Problem?
+  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length larger than dx along lattice vector 
   const vector3d da1 = lattice_vectors[0]*df; //infinitesimal lattice vectors of length df
   const vector3d da2 = lattice_vectors[1]*df;
   const vector3d da3 = lattice_vectors[2]*df;
@@ -157,10 +160,11 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
           if (n_rp_option > 0) { 
             n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // CHECK! want density a distance rp-R from center of Gaussian
           }
+          //printf("n_rp is %g, w.n_3 = %g\n", n_rp, w.n_3);  //debug
           w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
-          w_den_R.n_3 += w.n_3*n_rp*dVp;
+          w_den_R.n_3 += w.n_3*n_rp*dVp; 
 
           w_den_R.nv_1 += w.nv_1*n_rp*dVp;
           w_den_R.nv_2 += w.nv_2*n_rp*dVp;
@@ -183,9 +187,15 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   for (int i=-1; i<3; i=i+2) {
     for (int j=-1; j<3; j=j+2) {
       for (int k=-1; k<3; k=k+2) {
-        vector3d change_var = -R-sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
+        vector3d change_var = R+sqrt(2)*gwidth*vector3d(i*abscissa, j*abscissa, k*abscissa);
         double change_var_coef=sqrt(2)*2*gwidth*gwidth*gwidth;
-        weight w = find_weights(r, change_var, temp);  
+        weight w = find_weights(r, change_var, temp); 
+         
+        printf("\nr.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
+        printf("change_var.x=%g, change_var.y=%g, change_var.z=%g\n",change_var.x, change_var.y, change_var.z); //debug - for GQ TEST
+        printf("w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g\n",w.n_0, w.n_1, w.n_2, w.n_3); //debug - for GQ TEST
+        printf("w.nv_1.x=%g, w.nv_1.y=%g, w.nv_1.z=%g\n",w.nv_1.x, w.nv_1.y, w.nv_1.z); //debug - for GQ TEST
+        printf("w.nv_2.x=%g, w.nv_2.y=%g, w.nv_2.z=%g\n",w.nv_2.x, w.nv_2.y, w.nv_2.z); //debug - for GQ TEST
          
         w_den_R.n_0 += w.n_0*norm*change_var_coef*gqweight*gqweight*gqweight;
         w_den_R.n_1 += w.n_1*norm*change_var_coef*gqweight*gqweight*gqweight;
@@ -194,6 +204,11 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
 
         w_den_R.nv_1 += w.nv_1*norm*change_var_coef*gqweight*gqweight*gqweight;
         w_den_R.nv_2 += w.nv_2*norm*change_var_coef*gqweight*gqweight*gqweight;
+        
+        printf("Sum so far...  :\n");
+        printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n",w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3); //debug - for GQ TEST
+        printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n",w_den_R.nv_1.x, w_den_R.nv_1.y, w_den_R.nv_1.z); //debug - for GQ TEST
+        printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n",w_den_R.nv_2.x, w_den_R.nv_2.y, w_den_R.nv_2.z); //debug - for GQ TEST
       }
     }
   }
@@ -265,10 +280,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   int FFT_option=0;     // set to 0 for homogeneous free energy in real space
                         // set to 1 for homogeneous free energy with Fast Fourier Transform
 
-  for (int density_option = 0; density_option <2; density_option++) {  //0 for homogeneous free energy, 
-                                                                       //1 for crystal free energy 
+  for (int density_option = 0; density_option <2; density_option++) { //loop on 0 only for homogeneous free energy, 
+                                                                      //loop on 1 only for crystal free energy 
+                                                                      //loop on 0 and 1 for both
                                                             
-  printf("\nRunning density_option = %i  homogeneous option is 0, crystal option is 1\n", density_option);
+  printf("\nRunning density_option = %i  (homogeneous option is 0, crystal option is 1)\n", density_option);
   
   if ((density_option <1 and FFT_option < 1) or density_option > 0) {
   
@@ -285,6 +301,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
+        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //CHECK! Initialize here?
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -292,7 +309,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               if ((R-r).norm() < max_distance_considered) {
-                  weight n_weight;
                   if (density_option > 0 ) {
                       if (gauss_quad_option > 0 ) {
                           n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,  //For Crystal Free Energy in real space with Gaussian Quadrature
@@ -312,6 +328,17 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                 n_1 +=n_weight.n_1;
                 n_2 +=n_weight.n_2;
                 n_3 +=n_weight.n_3;
+                //printf("n_weight.n_3=%g\n", n_weight.n_3);  //debug
+                //printf("n_3=%g\n", n_3);  //debug
+                if (n_3 > 1) {
+                  printf("ERROR: n_3 is greater than 1!\n");
+                  data data_out;
+                  data_out.diff_free_energy_per_atom=0;
+                  data_out.cfree_energy_per_atom=0;   
+                  data_out.hfree_energy_per_vol=0;
+                  data_out.cfree_energy_per_vol=0; 
+                  return data_out;
+                }
                 // if (n_weight.n_3 > 0.2)
                 //   printf("n3(%g,%g,%g) gains %g from %g %g %g  at distance %g  i.e. %d %d %d\n",
                 //          r.x, r.y, r.z, n_weight.n_3, R.x, R.y, R.z, R.norm(), t, u, v);
@@ -321,7 +348,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             }
           }
         }
-        
         phi_1 = -n_0*log(1-n_3);
         //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
         phi_2 = (n_1*n_2 -(nv_1.x*nv_2.x + nv_1.y*nv_2.y + nv_1.z*nv_2.z))/(1-n_3);
@@ -331,15 +357,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
         if (isnan(free_energy)) {
           printf("free energy is a NaN!\n");
-          //printf("position is: %g %g %g\n", r.x, r.y, r.z);
-          //printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
-          //printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
-          //data data_out;
-          //data_out.diff_free_energy_per_atom=2;  //FIX this!
-          //data_out.cfree_energy_per_atom=free_energy/reduced_num_spheres;   //CHECK!
-          //data_out.hfree_energy_per_vol=2;   //FIX this!
-          //data_out.cfree_energy_per_vol=free_energy;
-          //return data_out;
+          printf("position is: %g %g %g\n", r.x, r.y, r.z);
+          printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
+          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
+          data data_out;
+          data_out.diff_free_energy_per_atom=0; 
+          data_out.cfree_energy_per_atom=0;   
+          data_out.hfree_energy_per_vol=0;   
+          data_out.cfree_energy_per_vol=0;
+          return data_out;
         }
           //printf("free energy is now... %g\n", free_energy);   //debug
           //printf("      finished %.5f%% of the integral\n",
@@ -397,7 +423,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.cfree_energy_per_vol=cfree_energy_per_vol; 
     
   if (gauss_quad_option > 0 ) {
-    printf("*Crystal free energy calculated with Gaussian Quadrature\n");
+    printf("\n*Crystal free energy calculated with Gaussian Quadrature\n");
   } else  printf("*Crystal free energy calculated in real space\n");  
   
   if (FFT_option > 0 ) {
@@ -960,7 +986,26 @@ int main(int argc, const char **argv) {
   //printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
 
   //return 0;  //for debug
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+//TEST GAUSSIAN QUADRATURE FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  int do_GQ_Test = 0;  //Turn Gaussian Quadrature Test on(1)/off(0) 
+  
+  if (do_GQ_Test > 0) {
+  printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
+  double a = find_lattice_constant(reduced_density, fv);
+  
+  weight w_R = find_weighted_den_aboutR_guasquad(vector3d(a/2+4*dx,3*dx,a/2+2*dx), vector3d(a/2,0,a/2), dx, temp, a, gw, 1); 
+
+  printf("\nWeighted Density TEST results for rx=%g ry=%g  rz=%g\n", a/2+4*dx, 3*dx, a/2+2*dx);
+  printf("and Gaussian point Rx=%g Ry=%g  Rz=%g  :\n", a/2, 0.0, a/2);
+  printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_R.n_0, w_R.n_1, w_R.n_2, w_R.n_3);
+  printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n", w_R.nv_1.x, w_R.nv_1.y, w_R.nv_1.z);
+  printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
+  
+  return 0;  //for debug
+  }
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
