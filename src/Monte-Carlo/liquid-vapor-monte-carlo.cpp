@@ -784,6 +784,10 @@ int main(int argc, const char *argv[]) {
       
       {
         FILE *dos_in = fopen((const char *)dos_fname, "r");
+        char * line = new char[1000];
+        while (fscanf(dos_in, " #%[^\n] ", line) == 1) {
+          printf("line: %s\n", line);
+        }
         fprintf(dos_in, "%s", headerinfo);// read about fscanf
         fprintf(dos_in, "# max_entropy_state: %d\n",sw.max_entropy_state);
         fprintf(dos_in, "# min_important_energy: %i\n\n",sw.min_important_energy);
