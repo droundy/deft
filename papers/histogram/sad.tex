@@ -319,7 +319,7 @@ course of the simulation, the update factor experiences a jump.
 
 For the square-well fluid, our simulations treat systems with a
 well-width of $\text{ww} = 1.30$ and a filling fraction of either
-$\text{ff} = 0.10, 0.20$ or $\text{ww} = 0.20$.  The simulation explores the
+$\text{ff} = 0.10, 0.20,$ or $0.30$.  The simulation explores the
 energy space of the system down to a reduced temperature of
 $T_{\text{min}} = 0.2$.  All simulations lead to the minimum important
 energy $E_{\text{min}}$ and maximum entropy state $S_{\text{max}}$
@@ -327,28 +327,21 @@ being calculated (with the exception of the WL-TMMC method where both
 of these parameters are needed a priori).  In the sections below, we
 examine systems with different particles numbers and filling fractions.
 
-~\jpsays{Add N50 ff0.1 and N50 ff0.3 and remove sticky-wall!}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-max-entropy-error.pdf}
   \caption{The average entropy error for each method is shown with
   SAD serving as the `golden'
-  standard.}\label{fig:avgS-30x4}
+  standard.}\label{fig:N50-ff0.3-max-error}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_10-N50-max-entropy-error.pdf}
   \caption{The average entropy error for each method is shown with SAD serving as
-  the `golden' standard.}\label{fig:avgS-60x8}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-100x10-max-entropy-error}
-  \caption{The average entropy error for each method is shown with
-    WL-TMMC using a cutoff of 10$^{-10}$ serving as the
-    standard.}\label{fig:avgS-100x10}
+  the `golden' standard.}\label{fig:N50-ff0.1-max-error}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_20-N50-max-entropy-error.pdf}
   \caption{The average entropy error is shown with TMI acting as the
-  `golden' standard.}\label{fig:N50-mean-error}
+  `golden' standard.}\label{fig:N50-ff0.2-max-error}
 \end{figure}
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-max-entropy-error.pdf}
@@ -356,70 +349,45 @@ examine systems with different particles numbers and filling fractions.
   `golden' standard.}
 \end{figure}
 
-\subsubsection{A $30\times4\times4$ $(N = 25)$ system with a sticky
-wall}
+\subsubsection{A periodic system with 10\% filling fraction and $(N = 50)$}
 In order to determine how the various methods scale with size,
-simulations are run for systems with different particle numbers.  For
-the $N = 25$ system, a sticky-wall is added to ensure that we see the
-liquid and vapor phase separation.
+simulations are run for systems with different particle numbers. A filling
+fraction $\text{ff} = 0.10$ is chosen which yields $N = 50$ particles
+in the cubical system.  These particles are randomly inserted into the
+system and random moves are proposed (with a translation scale
+$\delta_0 = 0.05$). The boundaries in $x$ and $y$ are periodic while
+the $z$-axis is not periodic.
 
-A system is configured with dimensions $x = y = 4\sigma$ and $z =
-30\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
-yields $N = 25$ particles in the rectangular system.  These particles
-are randomly inserted into the system and random moves are proposed
-(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
-$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
-inserted along the $z$-axis at one end to promote phase separation.
-~\jpsays{should we include a sticky-wall.py plot or something else or
-are we not going to talk about phase separation in this paper?}
-
-We use the entropy error vs iterations as a metric to compare
-simulation runtimes.  Simulations that take more iterations to reach
-the same entropy error as a different method take longer to converge.
-This behavior is seen in Fig.~\ref{fig:avgS-30x4}.
-~\jpsays{SAD appears to do pretty well as does WL-TMMC for a cutoff of $10^{-10}$
-although this seems to depend on what is used as the `standard'.}
+We use the maximum entropy error vs iterations as a metric to compare
+simulation runtimes and overall convergence.  Simulations that take
+more iterations to reach the same entropy error as a different method
+take longer to converge. This behavior is seen in
+Fig.~\ref{fig:N50-ff0.1-max-error}.
 
 \subsubsection{A periodic system with 20\% filling fraction and $N = 50$}
 
-Figure~\ref{fig:N50-mean-error} shows a system consisting of 50 atoms
-are placed in a periodic simple cubic unit cell with lattice constant
+Figure~\ref{fig:N50-ff0.2-max-error} shows a system consisting of 50 atoms
+that are placed in a periodic simple cubic unit cell with lattice constant
 chosen to give a filling fraction of 0.20.  These particles are
 randomly inserted into the system and random moves are proposed (with
 a translation scale $\delta_0 = 0.05$).
 
-\subsubsection{A $60\times8\times8$ $(N = 202)$ system with a sticky
-wall}
+\subsubsection{A periodic system with 30\% filling fraction and $N = 50$}
 
-A system is configured with dimensions $x = y = 8\sigma$ and $z =
-60\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
-yields $N = 202$ particles in the rectangular system.  These particles
-are randomly inserted into the system and random moves are proposed
-(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
-$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
-inserted along the $z$-axis at one end to promote phase separation.
+Figure~\ref{fig:N50-ff0.3-max-error} shows a system consisting of 50 atoms
+that are placed in a periodic simple cubic unit cell with lattice constant
+chosen to give a filling fraction of 0.30.  These particles are
+randomly inserted into the system and random moves are proposed (with
+a translation scale $\delta_0 = 0.05$).
 
-\subsubsection{A $100\times10\times10$ $(N = 525)$ system with a sticky
-wall}
+\subsubsection{A periodic system with 30\% filling fraction and $N = 500$}
 
-A system is configured with dimensions $x = y = 10\sigma$ and $z =
-100\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
-yields $N = 525$ particles in the rectangular system.  These particles
-are randomly inserted into the system and random moves are proposed
-(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
-$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
-inserted along the $z$-axis at one end to promote phase separation.
-
-\subsubsection{A Tanner dimensions? $(N = 500)$ system with no sticky
-wall}
-
-A system is configured with dimensions $x = y = z = 19\sigma?$.  A
+A system is configured with dimensions $x = y = z = 19\sigma$.  A
 filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 500$
 particles in a cubical system.  These particles are randomly inserted
 into the system and random moves are proposed (with a translation scale
 $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are periodic while
-the $z$-axis is not periodic.  A sticky-wall is not inserted along the
-$z$-axis.
+the $z$-axis is not periodic.
 
 \section{Conclusions}
 
