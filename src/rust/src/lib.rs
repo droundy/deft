@@ -3,21 +3,22 @@
 extern crate internment;
 extern crate tinyset;
 
-use tinyset::TinyMap;
+use tinyset::{Map64,Fits64};
 use internment::Intern;
 use std::cmp::{PartialEq, Eq};
 use std::hash::{Hash, Hasher};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
-struct TinyMapWrapper {
-    map: TinyMap<Expr, f64>,
+struct HashMapWrapper {
+    map: HashMap<Expr, f64>,
 }
 
-impl Hash for TinyMapWrapper {
+impl Hash for HashMapWrapper {
     fn hash<H: Hasher>(&self, state: &mut H) {
     let mut terms: Vec<(*const InnerExpr, u64)>
         = self.map.iter()
-                  .map(|(&t, &c)| (t.inner.as_ref() as *const InnerExpr, c as u64))
+                  .map(|(t, &c)| (t.inner.as_ref() as *const InnerExpr, c as u64))
                   .collect();
     terms.sort();
         for term in terms {
@@ -27,10 +28,10 @@ impl Hash for TinyMapWrapper {
     }
 }
 
-impl PartialEq for TinyMapWrapper {
-    fn eq(&self, other: &TinyMapWrapper) -> bool {
+impl PartialEq for HashMapWrapper {
+    fn eq(&self, other: &HashMapWrapper) -> bool {
         for term in self.map.iter() {
-            if other.map.get(term.0) != Some(term.1) {
+            if other.map.get(&term.0) != Some(term.1) {
                 return false;
             }
         }
@@ -38,15 +39,15 @@ impl PartialEq for TinyMapWrapper {
     }
 }
 
-impl Eq for TinyMapWrapper {}
+impl Eq for HashMapWrapper {}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 enum InnerExpr {
     Var(Intern<&'static str>),
     Exp(Expr),
     Log(Expr),
-    Sum(Intern<TinyMapWrapper>),
-    Mul(Intern<TinyMapWrapper>),
+    Sum(Intern<HashMapWrapper>),
+    Mul(Intern<HashMapWrapper>),
 }
 
 /// This is an expression.  You can use it to do arithmetic.
@@ -59,6 +60,15 @@ enum InnerExpr {
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Expr {
     inner: Intern<InnerExpr>,
+}
+
+impl Fits64 for Expr {
+    fn to_u64(self) -> u64 {
+        self.inner.to_u64()
+    }
+    unsafe fn from_u64(x: u64) -> Self {
+        Expr { inner: unsafe { Intern::<InnerExpr>::from_u64(x) } }
+    }
 }
 
 impl Expr {
@@ -79,17 +89,17 @@ impl Expr {
     }
 
     fn zero() -> Expr {
-        Expr::from_inner(InnerExpr::Sum(Intern::new(TinyMapWrapper { map: TinyMap::new() })))
+        Expr::from_inner(InnerExpr::Sum(Intern::new(HashMapWrapper { map: HashMap::new() })))
     }
 
     fn one() -> Expr {
-        Expr::from_inner(InnerExpr::Mul(Intern::new(TinyMapWrapper { map: TinyMap::new() })))
+        Expr::from_inner(InnerExpr::Mul(Intern::new(HashMapWrapper { map: HashMap::new() })))
     }
 
     fn cnst(x: f64) -> Expr {
-        let mut term = TinyMap::new();
+        let mut term = HashMap::new();
         term.insert(Expr::one(), x);
-        Expr::from_inner(InnerExpr::Sum(Intern::new(TinyMapWrapper { map: term })))
+        Expr::from_inner(InnerExpr::Sum(Intern::new(HashMapWrapper { map: term })))
     }
 
     pub fn cpp(&self) -> String {
@@ -105,7 +115,7 @@ impl Expr {
             &Sum(wrapper) => {
                 let mut terms: Vec<(String, f64)>
                     = wrapper.map.iter()
-                    .map(|(s, c)| (s.cpp(), *c)).collect();
+                    .map(|(s, &c)| (s.cpp(), c)).collect();
 
                 // cannot just .sort() because f64 is not Ord
                 terms.sort_by(|&(ref p, _), &(ref q, _)| p.cmp(q));
@@ -149,7 +159,7 @@ impl Expr {
 
                 let mut terms: Vec<(String, f64)>
                     = wrapper.map.iter()
-                                 .map(|(s, c)| (parens(s), *c))
+                                 .map(|(s, c)| (parens(&s), *c))
                                  .collect();
                 terms.sort_by(|&(ref p, _), &(ref q, _)| p.cmp(q));
 
@@ -192,7 +202,7 @@ impl std::ops::Add for Expr {
     fn add(self, addend: Expr) -> Expr {
         use InnerExpr::*;
 
-        let mut sum: TinyMap<Expr, f64> = TinyMap::new();
+        let mut sum: HashMap<Expr, f64> = HashMap::new();
 
         match *self.inner {
             Sum(terms) => for term in terms.map.iter() {
@@ -205,8 +215,8 @@ impl std::ops::Add for Expr {
 
         match *addend.inner {
             Sum(terms) => for term in terms.map.iter() {
-                if sum.contains_key(term.0) {
-                    let coeff = *sum.get(term.0).unwrap() + *term.1;
+                if sum.contains_key(&term.0) {
+                    let coeff = *sum.get(&term.0).unwrap() + *term.1;
                     sum.insert(*term.0, coeff);
                 } else {
                     sum.insert(*term.0, *term.1);
@@ -222,7 +232,7 @@ impl std::ops::Add for Expr {
             },
         };
 
-        Expr::from_inner(InnerExpr::Sum(Intern::new(TinyMapWrapper { map: sum })))
+        Expr::from_inner(InnerExpr::Sum(Intern::new(HashMapWrapper { map: sum })))
     }
 }
 
@@ -232,7 +242,7 @@ impl std::ops::Mul for Expr {
     fn mul(self, multiplier: Expr) -> Expr {
         use InnerExpr::*;
 
-        let mut mul: TinyMap<Expr, f64> = TinyMap::new();
+        let mut mul: HashMap<Expr, f64> = HashMap::new();
 
         match *self.inner {
             Mul(terms) => for term in terms.map.iter() {
@@ -245,8 +255,8 @@ impl std::ops::Mul for Expr {
 
         match *multiplier.inner {
             Mul(terms) => for term in terms.map.iter() {
-                if mul.contains_key(term.0) {
-                    let power = *mul.get(term.0).unwrap() + *term.1;
+                if mul.contains_key(&term.0) {
+                    let power = *mul.get(&term.0).unwrap() + *term.1;
                     mul.insert(*term.0, power);
                 } else {
                     mul.insert(*term.0, *term.1);
@@ -262,7 +272,7 @@ impl std::ops::Mul for Expr {
             },
         };
 
-        Expr::from_inner(InnerExpr::Mul(Intern::new(TinyMapWrapper { map: mul })))
+        Expr::from_inner(InnerExpr::Mul(Intern::new(HashMapWrapper { map: mul })))
     }
 }
 
@@ -270,9 +280,9 @@ impl std::ops::Sub for Expr {
     type Output = Expr;
 
     fn sub(self, subtrahend: Expr) -> Expr {
-        let mut term: TinyMap<Expr, f64> = TinyMap::new();
+        let mut term: HashMap<Expr, f64> = HashMap::new();
         term.insert(subtrahend, -1.0);
-        self + Expr::from_inner(InnerExpr::Sum(Intern::new(TinyMapWrapper { map: term })))
+        self + Expr::from_inner(InnerExpr::Sum(Intern::new(HashMapWrapper { map: term })))
     }
 }
 
@@ -280,9 +290,9 @@ impl std::ops::Div for Expr {
     type Output = Expr;
 
     fn div(self, divisor: Expr) -> Expr {
-        let mut term: TinyMap<Expr, f64> = TinyMap::new();
+        let mut term: HashMap<Expr, f64> = HashMap::new();
         term.insert(divisor, -1.0);
-        self * Expr::from_inner(InnerExpr::Mul(Intern::new(TinyMapWrapper { map: term })))
+        self * Expr::from_inner(InnerExpr::Mul(Intern::new(HashMapWrapper { map: term })))
     }
 }
 
@@ -309,6 +319,8 @@ mod tests {
         let a = Expr::var("a");
         let b = Expr::var("b");
         let z = Expr::var("z");
+        println!("a: {:?}", a);
+        println!("b: {:?}", b);
         assert_eq!((a+b).cpp(), "a + b");
         assert_eq!((a+z+b).cpp(), "a + b + z");
         assert_eq!((a+a).cpp(), "2 * a");
