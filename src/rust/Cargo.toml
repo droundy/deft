@@ -4,5 +4,6 @@ version = "0.1.0"
 authors = ["droundy <roundyd@physics.oregonstate.edu>"]
 
 [dependencies]
-internment = "^0.3.3"
+internment = "^0.3.4"
 tinyset = "^0.2.1"
+
