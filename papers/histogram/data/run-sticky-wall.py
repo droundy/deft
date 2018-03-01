@@ -38,10 +38,15 @@ if method_name == 'wltmmc':
     min_important_energy = float(sys.argv[9])
     max_entropy_energy = float(sys.argv[10])
 
+if method_name == 'samc':
+    sa_t0 = float(sys.argv[7])
+
 seed = 0
 try:
     if method_name == 'wltmmc':
         seed = int(sys.argv[11])
+    elif method_name == 'samc':
+        seed = int(sys.argv[8])
     else:
         seed = int(sys.argv[7])
 except:
@@ -63,6 +68,8 @@ else:
 fname = 'ww%.2f-ff%.2f-%gx%g-%s' % (ww, ff, lenx, lenyz, suffix)
 if method_name == 'wltmmc':
     fname += '-%g-%g' % (wl_threshold, wl_cutoff)
+elif method_name == 'samc':
+    fname += '-%g' % (sa_t0)
 if seed != 0:
     fname += '-s%d' % seed
 
@@ -78,6 +85,8 @@ cmd += " --ww %g --ff %g --N %d" % (ww, ff, N)
 if method_name == 'wltmmc':
   cmd += " --wl-factor %g --wl-threshold %g --wl-cutoff %g" % (wl_factor, wl_threshold, wl_cutoff)
   cmd += " --min-important-energy %g --max-entropy-energy %g" % (min_important_energy, max_entropy_energy)
+elif method_name == 'samc':
+  cmd += ' --sa-t0 %g' % sa_t0
 
 cmd += ' --lenz %g --leny %g --lenx %g --sticky-wall --walls 1' % (lenyz, lenyz, lenx)
 

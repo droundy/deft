@@ -574,7 +574,7 @@ int main(int argc, const char *argv[]) {
     } else if (wltmmc) {
       sprintf(method_tag, "-wltmmc-%g", wl_cutoff);
     } else if (samc) {
-      sprintf(method_tag, "-samc");
+      sprintf(method_tag, "-samc-%g", sw.sa_t0);
     } else if (sad && sad_fraction == 1) {
       sprintf(method_tag, "-sad");
     } else if (sad) {
