@@ -212,6 +212,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
+  printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   const vector3d lattice_vectors[3] = {
@@ -275,11 +276,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   for (int density_option = 0; density_option <2; density_option++) { //loop on 0 only for homogeneous free energy, 
                                                                       //loop on 1 only for crystal free energy 
                                                                       //loop on 0 and 1 for both
-                                                            
-  printf("\nRunning density_option = %i  (homogeneous option is 0, crystal option is 1)\n", density_option);
   
   if (density_option > 0) {
-  
+    if (gauss_quad_option < 1) {
+      printf("\nCalculating Crystal Free Energy by brute-force integration...\n");
+    } else printf("\nCalculating Crystal Free Energy with Gaussian Quadrature...\n");
+
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
   
@@ -373,15 +375,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
     cfree_energy_per_atom=free_energy/reduced_num_spheres;  //CHECK!
     cfree_energy_per_vol=4*free_energy; //CHECK! 4 primitive cells in 1 cubic cell
-    if (gauss_quad_option > 0) {
-    printf("crystal free energy calculated with Gaussian Quadrature\n");
-    } else {
-    printf("crystal free energy calculated with brute-force integration\n"); 
-    }
-    printf("crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
+    printf("total crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
  }  //end if density_option > 0    
    if (density_option < 1) {
-        printf("homogeneous free energy calculated analytically\n");
+        printf("\nCalculating Homogeneous Free Energy analytically ...\n");
         HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
         hf.sigma() = 1;
         hf.epsilon() = 1;   //energy constant in the WCA fluid
