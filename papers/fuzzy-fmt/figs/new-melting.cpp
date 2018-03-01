@@ -269,7 +269,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
   
-  int gauss_quad_option=0;  //set to 0 for crystal free energy with brute-force integration
+  int gauss_quad_option=1;  //set to 0 for crystal free energy with brute-force integration
                             //set to 1 for crystal free energy with Gaussian Quadrature
 
   for (int density_option = 0; density_option <2; density_option++) { //loop on 0 only for homogeneous free energy, 
@@ -360,15 +360,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           //           +(j)/uipow(Nl, 2)
           //           +(k + 1)/uipow(Nl, 3)));
       }
-      const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
-      const double t = time()/60/60;
-      const double time_total = t/fraction_complete;
-      printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
-             100*fraction_complete, time_total - t, time_total);
+      ////const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
+      ////const double t = time()/60/60;
+      ////const double time_total = t/fraction_complete;
+      ////printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
+      ////       100*fraction_complete, time_total - t, time_total);
     }
     //printf("finished %.1f%% of the integral\n",
     //       100*(i + 1)/double(Nl));
-    printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
+    //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
 
     cfree_energy_per_atom=free_energy/reduced_num_spheres;  //CHECK!
@@ -382,7 +382,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
  }  //end if density_option > 0    
    if (density_option < 1) {
         printf("homogeneous free energy calculated analytically\n");
-        HomogeneousSFMTFluid hf;
+        HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
         hf.sigma() = 1;
         hf.epsilon() = 1;   //energy constant in the WCA fluid
         hf.kT() = temp;
@@ -405,7 +405,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   if (gauss_quad_option > 0 ) {
     printf("\n*Crystal free energy calculated with Gaussian Quadrature\n");
   } else  printf("*Crystal free energy calculated with brute-force integration\n");  
-  
+
   printf("*Homogeneous free energy calculated analytically\n");
 
   printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", hfree_energy_per_atom, data_out.cfree_energy_per_atom);
