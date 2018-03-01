@@ -315,53 +315,51 @@ void sw_simulation::move_a_ball() {
   const int energy_change = new_interaction_count - old_interaction_count;
   transitions(energy, energy_change) += 1; // update the transition histogram
   double Pmove = 1;
-  if (use_tmmc || use_satmmc) {
+  if ((use_wl||use_wltmmc)
+      && (energy + energy_change > min_important_energy
+          || energy+energy_change<max_entropy_state)) {
+      // This means we are using a WL method, and the system is trying
+      // to leave the energy range specified.  We cannot permit this!
+      Pmove = 0;
+  } else if (use_tmmc || use_satmmc) {
     assert(sa_t0 == 0.0); // these methods should *not* have t0 set!
-    if (energy_change < 0) { // "Interactions" are decreasing, so energy is increasing.
-      /* I note that Swendson 1999 uses essentially this method
-           *after* two stages of initialization. */
-      long tup_norm = 0;
-      long tdown_norm = 0;
-      for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
-        tup_norm += transitions(energy, de);
-        tdown_norm += transitions(energy+energy_change, de);
+    /* I note that Swendson 1999 uses essentially this method
+       *after* two stages of initialization. */
+    long tup_norm = 0;
+    long tdown_norm = 0;
+    for (int de=-biggest_energy_transition; de<=biggest_energy_transition; de++) {
+      tup_norm += transitions(energy, de);
+      tdown_norm += transitions(energy+energy_change, de);
+    }
+    const long ncounts_up = transitions(energy, energy_change);
+    const long ncounts_down = transitions(energy+energy_change, -energy_change);
+    const double tup = ncounts_up/double(tup_norm);
+    const double tdown = ncounts_down/double(tdown_norm);
+    // If the TMMC data looks remotely plausible, set Pmove appropriately
+    if (tdown < tup && tdown > 0) Pmove = tdown/tup;
+    if (use_satmmc) {
+      // We are using our new SATMMC so we want a weighted average
+      // of the TMMC probability and the SAMC probability.
+      double lnPmove =
+        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+      double saPmove = 1.0;
+      if (lnPmove < 0) {
+        saPmove = exp(lnPmove);
       }
-      const long ncounts_up = transitions(energy, energy_change);
-      const long ncounts_down = transitions(energy+energy_change, -energy_change);
-      const double tup = ncounts_up/double(tup_norm);
-      const double tdown = ncounts_down/double(tdown_norm);
-      // If the TMMC data looks remotely plausible, set Pmove appropriately
-      if (tdown < tup && tdown > 0) Pmove = tdown/tup;
-      if (use_satmmc) {
-        // We are using our new SATMMC so we want a weighted average
-        // of the TMMC probability and the SAMC probability.
-        double lnPmove =
-          ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-        double saPmove = 1.0;
-        if (lnPmove < 0) {
-          saPmove = exp(lnPmove);
-        }
-        sa_weight = 1.0;
-        if (ncounts_up > 1 && ncounts_down > 1) {
-          // We need the following *fractional* uncertainty in TMMC in
-          // order to ensure that the cumulative error in the weights
-          // over the entire energy range is reasonable.
-          const double needed_uncert_sqr = 1.0/energies_found;
-          // The following is our reasonably optimistic (uncorrelated)
-          // estimate for the fractional uncertainty for the TM
-          // probability.
-          const double tm_uncert_sqr = 1.0/ncounts_up+1.0/ncounts_down;
-          sa_weight = tm_uncert_sqr/(needed_uncert_sqr + tm_uncert_sqr);
-        }
-        // Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
-        Pmove = pow(saPmove, sa_weight)*pow(Pmove, 1-sa_weight); // use a geometric average
+      sa_weight = 1.0;
+      if (ncounts_up > 1 && ncounts_down > 1) {
+        // We need the following *fractional* uncertainty in TMMC in
+        // order to ensure that the cumulative error in the weights
+        // over the entire energy range is reasonable.
+        const double needed_uncert_sqr = 1.0/energies_found;
+        // The following is our reasonably optimistic (uncorrelated)
+        // estimate for the fractional uncertainty for the TM
+        // probability.
+        const double tm_uncert_sqr = 1.0/ncounts_up+1.0/ncounts_down;
+        sa_weight = tm_uncert_sqr/(needed_uncert_sqr + tm_uncert_sqr);
       }
-
-      // Here we enforce the Tmin probability.  Note that in SATMMC
-      // this is a potentially scary change.
-      const double betamax = 1.0/min_T;
-      double Pmin = exp(energy_change*betamax);
-      if (Pmove < Pmin) Pmove = Pmin;
+      // Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
+      Pmove = pow(saPmove, sa_weight)*pow(Pmove, 1-sa_weight); // use a geometric average
     }
   } if (use_sad) {
     const int e1 = energy;
@@ -386,17 +384,9 @@ void sw_simulation::move_a_ball() {
       //printf("prob lo %d -> %d = %g\n", e1, e2, Pmove);
     //}
   } else {
-    if (!sa_t0
-        && wl_factor > 0 && (energy + energy_change > min_important_energy
-                                    || energy+energy_change<max_entropy_state)) {
-      // This means we are using a WL method, and the system is trying
-      // to leave the energy range specified.  We cannot permit this!
-      Pmove = 0;
-    } else {
-      const double lnPmove =
-        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-      if (lnPmove < 0) Pmove = exp(lnPmove);
-    }
+    const double lnPmove =
+      ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
+    if (lnPmove < 0) Pmove = exp(lnPmove);
   }
   if (Pmove < 1) {
     if (random::ran() > Pmove) {
@@ -1157,6 +1147,7 @@ void sw_simulation::initialize_canonical(double T, int reference) {
 void sw_simulation::initialize_wltmmc(double wl_fmod,
                                       double wl_threshold, double wl_cutoff) {
   int check_how_often =  N; // update WL stuff only so often
+  assert(use_wltmmc);
   bool verbose = false;
   do {
     for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
@@ -1175,7 +1166,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
                                            double wl_threshold, double wl_cutoff,
                                            bool fixed_energy_range) {
   assert(wl_factor);
-  use_wl = true;
+  assert(use_wl);
   const double original_wl_factor = wl_factor;
   int weight_updates = 0;
   bool done = false;
@@ -1648,7 +1639,7 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
                                                    double wl_threshold,
                                                    double wl_cutoff,
                                                    bool verbose) {
-
+  assert(use_wltmmc);
   assert(min_important_energy);
   if (wl_factor < wl_cutoff) {
     if (wl_factor > 0.0) {
@@ -1656,7 +1647,6 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
     }
     wl_factor = 0.0; // We are done with WL portion!  :)
     use_tmmc = true; // Now we will be doing TMMC like anyone else!
-    set_min_important_energy();
     return;
   }
 

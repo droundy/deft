@@ -107,7 +107,8 @@ struct sw_simulation {
                 // encounter new energies, value is the fraction to
                 // use.
   double sa_weight; // the most recent sa_weight used in satmmc.
-  bool use_wl; // if true, we are using plain old WL method
+  bool use_wl; // if true, we are using WL
+  bool use_wltmmc; // if true, we are using WLTMMC
 
   /* The following define file names for periodic output files that
      are dumped every so often.  It should contain a single %d style format. */
@@ -302,6 +303,7 @@ struct sw_simulation {
     sa_weight = 0.0;
     use_tmmc = false; // default to not using TMMC for accepting moves.
     use_wl = false; // default to not using WL.
+    use_wltmmc = false; // default to not using WLTMMC.
   };
 };
 

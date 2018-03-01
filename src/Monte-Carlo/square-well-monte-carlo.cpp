@@ -857,9 +857,11 @@ int main(int argc, const char *argv[]) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau || vanilla_wang_landau) {
     sw.wl_factor = wl_factor;
+    sw.use_wl = true;
     sw.initialize_wang_landau(wl_fmod, wl_threshold, wl_cutoff,
                               vanilla_wang_landau);
   } else if (wltmmc) {
+    sw.use_wltmmc = true;
     sw.wl_factor = wl_factor;
     sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
   } else if (samc) {

@@ -427,6 +427,7 @@ int main(int argc, const char *argv[]) {
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (wltmmc) {
+      sw.use_wltmmc = true;
       sprintf(method_tag, "-wltmmc");
     } else if (satmmc) {
       sprintf(method_tag, "-satmmc");
