@@ -76,3 +76,4 @@ log/
 *.css.map
 .sass-cache
 new-soft
+*.exe
