@@ -321,8 +321,7 @@ void sw_simulation::move_a_ball() {
       // This means we are using a WL method, and the system is trying
       // to leave the energy range specified.  We cannot permit this!
       Pmove = 0;
-  } else if (use_tmmc || use_satmmc) {
-    assert(sa_t0 == 0.0); // these methods should *not* have t0 set!
+  } else if (use_tmmc) {
     /* I note that Swendson 1999 uses essentially this method
        *after* two stages of initialization. */
     long tup_norm = 0;
@@ -337,30 +336,6 @@ void sw_simulation::move_a_ball() {
     const double tdown = ncounts_down/double(tdown_norm);
     // If the TMMC data looks remotely plausible, set Pmove appropriately
     if (tdown < tup && tdown > 0) Pmove = tdown/tup;
-    if (use_satmmc) {
-      // We are using our new SATMMC so we want a weighted average
-      // of the TMMC probability and the SAMC probability.
-      double lnPmove =
-        ln_energy_weights[energy + energy_change] - ln_energy_weights[energy];
-      double saPmove = 1.0;
-      if (lnPmove < 0) {
-        saPmove = exp(lnPmove);
-      }
-      sa_weight = 1.0;
-      if (ncounts_up > 1 && ncounts_down > 1) {
-        // We need the following *fractional* uncertainty in TMMC in
-        // order to ensure that the cumulative error in the weights
-        // over the entire energy range is reasonable.
-        const double needed_uncert_sqr = 1.0/energies_found;
-        // The following is our reasonably optimistic (uncorrelated)
-        // estimate for the fractional uncertainty for the TM
-        // probability.
-        const double tm_uncert_sqr = 1.0/ncounts_up+1.0/ncounts_down;
-        sa_weight = tm_uncert_sqr/(needed_uncert_sqr + tm_uncert_sqr);
-      }
-      // Pmove = sa_weight*saPmove + (1-sa_weight)*Pmove;
-      Pmove = pow(saPmove, sa_weight)*pow(Pmove, 1-sa_weight); // use a geometric average
-    }
   } if (use_sad) {
     const int e1 = energy;
     const int e2 = energy + energy_change;
@@ -419,7 +394,7 @@ void sw_simulation::end_move_updates(){
   if(moves.total % N == 0) iteration++;
   static int max_energy_seen = -1;
   static int min_energy_seen = -1;
-  if (sa_t0 || use_sad || use_satmmc) {
+  if (sa_t0 || use_sad) {
     if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
       if (max_energy_seen < 0 || energy > max_energy_seen) max_energy_seen = energy;
@@ -428,8 +403,6 @@ void sw_simulation::end_move_updates(){
     if (use_sad && energies_found > 1) {
       wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
         /(min_T*moves.total*use_sad);
-    } else if (use_satmmc) {
-      wl_factor = sa_prefactor*(energies_found*energies_found)/moves.total;
     } else {
       wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
     }
@@ -940,7 +913,6 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                pessimistic_samples[lowest_problem_energy],
                optimistic_samples[highest_problem_energy],
                pessimistic_samples[highest_problem_energy], min_samples, energy);
-        if (use_tmmc) printf(", sa %.0f%% %g", 100*sa_weight, wl_factor);
         printf(")\n");
         fflush(stdout);
       }
@@ -969,8 +941,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
                pessimistic_samples[highest_problem_energy], min_samples, energy);
-        if (use_satmmc) printf(", sa %.2g%% %.2g", 100*sa_weight, wl_factor);
-        else if (use_sad) printf(", g %.2g, t0 %.2g", wl_factor, wl_factor*moves.total);
+        if (use_sad) printf(", g %.2g, t0 %.2g", wl_factor, wl_factor*moves.total);
         printf(")\n");
         {
           printf("      ");
@@ -1282,7 +1253,6 @@ void sw_simulation::initialize_samc(int am_sad) {
   too_low_energy = 0;
   assert(sa_t0 || am_sad);
   assert(sa_prefactor);
-  assert(!use_satmmc);
 
   int check_how_often =  N*N; // check if finished only so often
   bool verbose = false;
@@ -1300,32 +1270,6 @@ void sw_simulation::initialize_samc(int am_sad) {
 
   initialize_canonical(min_T,min_important_energy);
 }
-
-
-// this method is under construction by DR and JP (2017).
-// initialize the weight array using the satmmc method.
-void sw_simulation::initialize_satmmc() {
-  use_satmmc = true;
-  assert(!sa_t0);
-  assert(sa_prefactor);
-
-  int check_how_often =  N*N; // check if finished only so often
-  bool verbose = false;
-  do {
-    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) move_a_ball();
-    check_how_often += N*N; // try a little harder next time...
-
-    verbose = printing_allowed();
-    if (verbose) {
-      set_min_important_energy();
-      set_max_entropy_energy();
-      write_transitions_file();
-    }
-  } while(!finished_initializing(verbose));
-
-  initialize_canonical(min_T,min_important_energy);
-}
-
 
 // initialize the weight array using the optimized ensemble method.
 void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,

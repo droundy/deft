@@ -77,7 +77,6 @@ int main(int argc, const char *argv[]) {
   int tmi_version = 1;
   int toe = false;
   int tmmc = false;
-  int satmmc = false;
   int samc = false;
   int sad = false;
   int sad_fraction = 1;
@@ -204,8 +203,6 @@ int main(int argc, const char *argv[]) {
      "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
-    {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
-     "Use stochastic approximation transition matrix monte carlo", "BOOLEAN"},
     {"sad", '\0', POPT_ARG_NONE, &sad, 0,
      "Use stochastic approximation monte carlo dynamical version", "BOOLEAN"},
     {"sad-fraction", '\0', POPT_ARG_INT, &sad_fraction, 0,
@@ -304,9 +301,9 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if (tmi + toe + tmmc + satmmc + sad + samc + wltmmc + (fix_kT != 0) != 1) {
-    printf("Exactly one histogram method must be selected! (%d %d %d %d %d %g)\n",
-           tmi, toe, tmmc, satmmc, wltmmc, fix_kT);
+  if (tmi + toe + tmmc + sad + samc + wltmmc + (fix_kT != 0) != 1) {
+    printf("Exactly one histogram method must be selected! (%d %d %d %d %g)\n",
+           tmi, toe, tmmc, wltmmc, fix_kT);
     return 254;
   }
 
@@ -429,8 +426,6 @@ int main(int argc, const char *argv[]) {
     } else if (wltmmc) {
       sw.use_wltmmc = true;
       sprintf(method_tag, "-wltmmc");
-    } else if (satmmc) {
-      sprintf(method_tag, "-satmmc");
     } else if (samc) {
       sprintf(method_tag, "-samc");
     } else if (sad && sad_fraction == 1) {
@@ -742,11 +737,6 @@ int main(int argc, const char *argv[]) {
     sw.use_tmmc = true;
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
-            headerinfo);
-  } else if (satmmc) {
-    sw.use_satmmc = true;
-    sprintf(headerinfo,
-            "%s# histogram method: satmmc\n",
             headerinfo);
   } else if (samc) {
     if (sw.sa_t0 == 0) sw.sa_t0 = 1;
