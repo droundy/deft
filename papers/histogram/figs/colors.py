@@ -17,10 +17,12 @@ _colors = { 'sad': 'r',
             'tmi3': 'g',
             'toe3': 'tab:orange',
             'samc': 'm',
-            'satmmc': 'y',
             'wltmmc-0.8-0.0001': 'tab:purple',
             'wltmmc-0.0001': 'tab:purple',
             'wltmmc-1-0.0001': 'tab:pink',
+            'samc-1000': 'r',
+            'samc-10000': 'tab:orange',
+            'samc-100000': 'y',
 }
 
 _linestyles = {
@@ -47,7 +49,9 @@ _legend_order = [
     'vanilla_wang_landau',
     'tmi3', 'toe3',
     'samc',
-    'satmmc',
+    'samc-1000',
+    'samc-10000',
+    'samc-100000',
 ]
 
 _legend_label = {
@@ -62,6 +66,9 @@ _legend_label = {
     'tmi3': 'TMI',
     'toe3': 'TOE',
     'samc': 'SAMC',
+    'samc-1000': 'SAMC ($10^{3}$ factor)',
+    'samc-10000': 'SAMC ($10^{4}$ factor)',
+    'samc-100000': 'SAMC ($10^{5}$ factor)',
 }
 
 def fix_legend(method):

@@ -25,7 +25,7 @@ tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
 methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc']
+            '-vanilla_wang_landau']
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
@@ -33,13 +33,21 @@ split2 = [i.split('-m', 1)[0] for i in split1]
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
 
+# For SAMC compatibility with LVMC
+lvextra1 = glob('data/comparison/%s-samc*' % filebase)
+split3 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra1]
+split4 = [i.split('-m', 1)[0] for i in split3]
+for j in range(len(split4)):
+    methods.append('-%s' %split4[j])
+
 print 'methods are', methods
 for method in [mm for m in methods for mm in [m, m+'-tm']]:
     print 'trying method', method
     try:
         if method[-6:] in ['-s1-tm', '-s2-tm']:
                 continue
-        if method in ['-samc-tm', '-vanilla_wang_landau-tm']:
+        if method in ['-samc-tm','-samc-1000-tm','-samc-10000-tm',
+                      '-samc-100000-tm', '-vanilla_wang_landau-tm']:
                 continue
         dirname = 'data/comparison/%s%s/' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:

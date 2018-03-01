@@ -12,7 +12,7 @@ reference = sys.argv[2]
 filebase = sys.argv[3]
 methods = [ '-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
+            '-vanilla_wang_landau', '-sad']
 
 def running_mean(x, N):
     cumsum = numpy.cumsum(numpy.insert(x, 0, 0)) 
@@ -25,6 +25,13 @@ split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
+
+# For SAMC compatibility with LVMC
+lvextra1 = glob('data/%s-samc*-movie' % filebase)
+split3 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra1]
+split4 = [i.split('-m', 1)[0] for i in split3]
+for j in range(len(split4)):
+    methods.append('-%s' %split4[j])
 
 print methods
 
