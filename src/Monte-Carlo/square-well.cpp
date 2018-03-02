@@ -399,6 +399,12 @@ void sw_simulation::end_move_updates(){
       energies_found++; // we found a new energy!
       if (max_energy_seen < 0 || energy > max_energy_seen) max_energy_seen = energy;
       if (min_energy_seen < 0 || energy < min_energy_seen) min_energy_seen = energy;
+      if (use_sad) {
+        printf("  (moves %ld, energies_found %d, erange: %d -> %d effective t0 = %g)\n",
+               moves.total, energies_found, min_energy_seen, max_energy_seen,
+               sa_prefactor*energies_found
+                 *(max_energy_seen-min_energy_seen)/(min_T*use_sad));
+      }
     }
     if (use_sad && energies_found > 1) {
       wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
@@ -1207,9 +1213,10 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
     // check whether our histogram is flat enough to update wl_factor
     if (min_over_mean >= wl_threshold) {
       weight_updates += 1;
-      printf("We reached WL flatness!\n");
       be_verbose = true;
       wl_factor /= wl_fmod;
+      printf("We reached WL flatness (%ld moves, wl_factor %g)!\n",
+             moves.total, wl_factor);
       flush_weight_array();
       for (int i = 0; i < energy_levels; i++) {
         if (energy_histogram[i] > 0) energy_histogram[i] = 1;
@@ -1629,9 +1636,9 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
     // everything has been visited once we are permitted to move on.
     if (min_over_mean >= wl_threshold || wl_threshold == 1) {
       we_changed = true;
-      printf("We reached WL flatness from %d to %d!\n",
-             min_important_energy, max_entropy_state);
       wl_factor /= wl_fmod;
+      printf("We reached WL flatness (%ld moves, wl_factor %g)!\n",
+             moves.total, wl_factor);
       flush_weight_array();
       for (int i = 0; i < energy_levels; i++) {
         energy_histogram[i] = 0;
