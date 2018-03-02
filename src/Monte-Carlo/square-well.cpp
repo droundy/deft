@@ -941,7 +941,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
                min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
                pessimistic_samples[highest_problem_energy], min_samples, energy);
-        if (use_sad) printf(", g %.2g, t0 %.2g", wl_factor, wl_factor*moves.total);
+        if (use_sad) printf(", %.2g, t0 %.2g", wl_factor, wl_factor*moves.total);
         printf(")\n");
         {
           printf("      ");
@@ -1866,6 +1866,10 @@ void sw_simulation::write_header(FILE *f) {
   fprintf(f, "# min_important_energy: %d\n", min_important_energy);
 
   fprintf(f, "\n");
+
+  if (use_sad || sa_t0 || use_wl) {
+    fprintf(f, "# WL Factor: %g\n", wl_factor);
+  }
 
   fprintf(f, "# iterations: %ld\n", iteration);
   fprintf(f, "# working moves: %ld\n", moves.working);
