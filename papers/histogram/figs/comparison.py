@@ -138,11 +138,13 @@ for method in methods:
                       fmt = ('%.4g'),
                       delimiter = '\t',
                       header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
-        numpy.savetxt('%s/wl-factor.txt' %(dirname),
-                      numpy.c_[iterations, wl_factor],
-                      fmt = ('%.4g'),
-                      delimiter = '\t',
-                      header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
+        if not numpy.isnan(numpy.sum(wl_factor)):
+            numpy.savetxt('%s/wl-factor.txt' %(dirname),
+                        numpy.c_[iterations, wl_factor],
+                        fmt = ('%.4g'),
+                        delimiter = '\t',
+                        header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
+
         if lndostm is not None:
             print 'saving to', dirnametm
             numpy.savetxt('%s/energy-%d.txt' %(dirnametm, energy),
@@ -154,7 +156,7 @@ for method in methods:
                         fmt = ('%.4g'),
                         delimiter = '\t',
                         header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
-            if min(wl_factor) > 0:
+            if not numpy.isnan(numpy.sum(wl_factor)):
                 numpy.savetxt('%s/wl-factor.txt' %(dirnametm),
                         numpy.c_[iterations, wl_factor],
                         fmt = ('%.4g'),
