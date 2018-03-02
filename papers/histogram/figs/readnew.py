@@ -140,6 +140,14 @@ def iterations(f):
             if "iterations:" in line:
                 return int(line.split()[-1])
 
+def wl_factor(f):
+    if '.dat' not in f:
+        f = f+"-lndos.dat"
+    with open(f) as file:
+        for line in file:
+            if "# WL Factor: " in line:
+                return eval(line.split(': ')[-1])
+
 def dr_g(fbase):
     with open(fbase+"-E.dat") as file:
         for line in file:

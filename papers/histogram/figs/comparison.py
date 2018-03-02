@@ -59,6 +59,7 @@ for method in methods:
             os.makedirs(dirname)
         if not os.path.exists(dirnametm):
             os.makedirs(dirnametm)
+        wl_factor = numpy.zeros(len(r))
         iterations = numpy.zeros(len(r))
         Nrt_at_energy = numpy.zeros(len(r))
         maxentropystate = numpy.zeros(len(r))
@@ -75,6 +76,8 @@ for method in methods:
             e,lndos,Nrt,lndostm = readnew.e_lndos_ps_lndostm(f)
             maxentropystate[i] = readnew.max_entropy_state(f)
             minimportantenergy[i] = readnew.min_important_energy(f)
+
+            wl_factor[i] = readnew.wl_factor(f)
             iterations[i] = readnew.iterations(f)
             Nrt_at_energy[i] = Nrt[energy]
             # The following norm_factor is designed to shift our lndos
@@ -108,6 +111,7 @@ for method in methods:
         while i < len(iterations) and iterations[i] > iterations[i-1]:
             num_frames_to_count = i+1
             i+=1
+        wl_factor = wl_factor[:num_frames_to_count]
         iterations = iterations[:num_frames_to_count]
         minimportantenergy = minimportantenergy[:num_frames_to_count]
         maxentropystate = maxentropystate[:num_frames_to_count]
@@ -134,6 +138,11 @@ for method in methods:
                       fmt = ('%.4g'),
                       delimiter = '\t',
                       header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
+        numpy.savetxt('%s/wl-factor.txt' %(dirname),
+                      numpy.c_[iterations, wl_factor],
+                      fmt = ('%.4g'),
+                      delimiter = '\t',
+                      header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
         if lndostm is not None:
             print 'saving to', dirnametm
             numpy.savetxt('%s/energy-%d.txt' %(dirnametm, energy),
@@ -145,7 +154,12 @@ for method in methods:
                         fmt = ('%.4g'),
                         delimiter = '\t',
                         header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
-            
+            if min(wl_factor) > 0:
+                numpy.savetxt('%s/wl-factor.txt' %(dirnametm),
+                        numpy.c_[iterations, wl_factor],
+                        fmt = ('%.4g'),
+                        delimiter = '\t',
+                        header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
     except:
         print 'I had trouble with', method
         raise

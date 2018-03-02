@@ -57,6 +57,10 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
                 Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
         iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
 
+        if os.path.isfile(dirname + 'wl-factor.txt'):
+            iterations, wl_factor = np.loadtxt(dirname + 'wl-factor.txt', delimiter = '\t', unpack = True)
+
+
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
 
@@ -127,6 +131,16 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
         plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
         colors.legend()
         plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
+
+        if os.path.isfile(dirname + 'wl-factor.txt'):
+            plt.figure('wl-factor')
+            colors.loglog(iterations, wl_factor,
+                      method = method[1:])
+            plt.xlabel('#iterations')
+            plt.ylabel('WL factor')
+            plt.title('WL Factor at Each Iteration, %s' %filebase)
+            colors.legend()
+            plt.savefig('figs/%s-wl-factor.pdf' % tex_filebase)
     except:
         raise
 plt.show()
