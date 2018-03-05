@@ -992,6 +992,22 @@ int main(int argc, const char **argv) {
   }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+//TEST GAUSSIAN QUADRATURE FUNCTION 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//use to compare a value of weighted density caluclated analytically to that computed by Gaussain Quadrature function
+
+  int do_GQcompare_Test = 0;  //Turn Gaussian Quadrature Compare Test on(1)/off(0) 
+  if (do_GQcompare_Test > 0) {
+  double r = 4;  //r=(0,0,4)  //choose a value for r along the z-axis
+  double alpha=find_alpha(temp);
+  double zeta=find_zeta(temp);
+  double n2_of_r = exp(-((r-(alpha/2))/zeta)*((r-(alpha/2))/zeta))*((M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(r*r-(1+alpha)*r +(alpha/2)+(alpha*alpha/4))));
+  printf("n2_of_r = %g\n", n2_of_r);
+  
+  return 0;  //for debug
+  }
+  
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
   }
