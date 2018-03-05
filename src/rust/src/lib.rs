@@ -236,10 +236,19 @@ impl Expr {
     }
 }
 
-impl std::ops::Add for Expr {
+// Want to implement From<f64> and From<i64> etc for Expr.  Then
+// change Add etc, to use Into.
+//
+// #[test]
+// fn adding_f64() {
+//     assert_eq!((Expr::zero() + 0.0).cpp(), "0");
+// }
+
+impl<RHS: Into<Expr>> std::ops::Add<RHS> for Expr {
     type Output = Self;
 
-    fn add(self, other: Self) -> Self {
+    fn add(self, other: RHS) -> Self {
+        let other = other.into();
         let mut sum = CommutativeMap::new();
 
         match *self.inner {
