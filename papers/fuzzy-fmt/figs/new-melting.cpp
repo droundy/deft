@@ -970,7 +970,7 @@ int main(int argc, const char **argv) {
   printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
   double a = find_lattice_constant(reduced_density, fv);
 
-  vector3d r = vector3d(0,0,40);
+  vector3d r = vector3d(0,0,.5);
   vector3d R = vector3d(0,0,0);
   weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
 
@@ -997,14 +997,17 @@ int main(int argc, const char **argv) {
 
   int do_GQcompare_Test = 1;  //Turn Gaussian Quadrature Compare Test on(1)/off(0) 
   if (do_GQcompare_Test > 0) {
-  double rz = 40;  //r=(0,0,rz)  choose a value for r along the z-axis
+  double rz = .5;  //r=(0,0,rz)  choose a value for r along the z-axis
   double alpha=find_alpha(temp);
   double zeta=find_zeta(temp);
-  double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*((M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4))));
+  double norm=gw*M_PI*sqrt(M_PI)*sqrt(2);
+  double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*((M_PI*2*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4))))/norm;
+  //double n_2_of_r = (rz-(alpha/2))/zeta; 
+  //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta)); 
   //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*(-328.754); 
   //double n_2_of_r =(M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4)));
   printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
-  printf("n_2 = %g  for r=%g\n", n_2_of_r, rz);
+  printf("n_2 = %g  for rz=%g\n", n_2_of_r, rz);
   
   return 0;  //for debug
   }
