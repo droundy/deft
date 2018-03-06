@@ -494,7 +494,7 @@ int main(int argc, const char *argv[]) {
             "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
   }
 
-  {
+  if (true) {
     printf("biggest_energy_transition: %d\n", sw.biggest_energy_transition);
     // TESTING ONLY
     sw.collection(0, 0) = 4;
@@ -508,8 +508,8 @@ int main(int argc, const char *argv[]) {
     sw.collection(2,  0) = 4;
     sw.collection(2,  1) = 3;
 
-    sw.collection(3, -1) = 3;
-    sw.collection(3,  0) = 8;
+    sw.collection(3, -1) = 4;
+    sw.collection(3,  0) = 4;
 
     for (int i=0;i<4;i++) {
       for (int j=0;j<4;j++) {
