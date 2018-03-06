@@ -1000,8 +1000,8 @@ int main(int argc, const char **argv) {
   double rz = 40;  //r=(0,0,rz)  choose a value for r along the z-axis
   double alpha=find_alpha(temp);
   double zeta=find_zeta(temp);
-  //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*((M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4))));
-  double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*(-328.754); 
+  double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*((M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4))));
+  //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*(-328.754); 
   //double n_2_of_r =(M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4)));
   printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
   printf("n_2 = %g  for r=%g\n", n_2_of_r, rz);
