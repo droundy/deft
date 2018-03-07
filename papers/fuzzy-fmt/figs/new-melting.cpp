@@ -1001,7 +1001,7 @@ int main(int argc, const char **argv) {
   double alpha=find_alpha(temp);
   double zeta=find_zeta(temp);
   double norm=gw*M_PI*sqrt(M_PI)*sqrt(2);
-  double n_2_of_r = 2*M_PI*sqrt(M_PI)*exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*(sqrt(2)*gw +(gw*gw*gw/(3*sqrt(2)))*(4*(((-2*rz+alpha)/zeta)+1)-16*((rz-(alpha/2))/(zeta*zeta*rz))))/norm;
+  double n_2_of_r = ((2*M_PI)/zeta)*exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*(sqrt(2)*gw +(gw*gw*gw/(3*sqrt(2)))*(4*(((-2*rz+alpha)/zeta)+1)-16*((rz-(alpha/2))/(zeta*zeta*rz))))/norm;
   //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*((M_PI*2*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4))))/norm; //error
   //double n_2_of_r = (rz-(alpha/2))/zeta; 
   //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta)); 
