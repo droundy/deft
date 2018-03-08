@@ -15,8 +15,8 @@
 \begin{document}
 \title{Dynamical Stochastic Approximation Monte Carlo}
 
-\author{Jordan K. Pommerenck} \author{Michael A. Perlin}
-\author{Tanner T. Simpson} \author{David Roundy}
+\author{Jordan K. Pommerenck} \author{Tanner T. Simpson}
+\author{Michael A. Perlin} \author{David Roundy}
 \affiliation{Department of Physics, Oregon State University,
   Corvallis, OR 97331}
 
@@ -95,22 +95,12 @@ guarantee convergence, the method still has a system specific
 user-defined variable which makes applying this algorithm to arbitrary
 systems difficult.
 
-In our work, we have developed several novel algorithms that do not
-require user-defined inputs and therefore should be easily applicable
-to a given system.  These methods, each of which will be discussed in
-detail in the methods section, can also be made to satisfy theoretical
-requirements, guaranteeing convergence. These algorithms are Transition
-Matrix Initialization (TMI), Dynamic Stochastic Approximation (SAD),
-and Stochastic Approximation Transition Matrix Monte Carlo (SA-TMMC).
-TMI works by using logical conditionals about changes in the logrithm
-of the density of states to control the weights of the simulation.  SAD
-operates effectively the same as standard SA; however, we claim that
-the user defined parameter can be set independent of the system type or
-size.  SA-TMMC works by performing SA for a system-independent amount
-of time in order to explore the entire energy space.  The simulation
-then switches over to TMMC for the remainder of the simulation.  All of
-these methods have no parameter inputs that depend on the type of
-system or size of system under study.
+In our work, we have developed a novel algorithm based on SAMC that
+does not require user-defined inputs and therefore should be easily
+applicable to a given system.  We call this method SAD (Dynamical
+Stochastic Approximation), and will discuss it in detail in the methods
+section. We compare it along with several histogram methods including TMMC,
+WL, WL-TMMC, and SAMC.
 
 We consider the square-well fluid i.e. a system of particles whose
 interactions are governed by a square-well
@@ -140,102 +130,10 @@ various methods applied to the model system.
 Here we employ a variety of broad-histogram methods.  We outline the
 general workings of algorithm we developed in detail and summarize
 algorithms that can be found elsewhere.  The following algorithms are
-introduced and applied to the square-well fluid: Transition Matrix
-Initialization (TMI), Transition Optimized Ensemble (TOE), Transition
+introduced and applied to the square-well fluid:  Transition
 Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau Transition
-Matrix Monte-Carlo (WL-TMMC), Dynamic Stochastic Approximation
-Monte-Carlo (SAD), and Stochastic-Approximation Transition Matrix
-Monte-Carlo (SA-TMMC).
-
-\subsection{TMI2 Algorithm}
-
-The second version of transition matrix initialization algorithm works
-by looking at the logarithm of the density of states.  We begin at
-high energies ($\epsilon_{S_{\max}}$ the energy that maximizes the
-entropy) and work our way
-downward.
-
-\paragraph{Reaching $T_{\min}$:}
-If the change in the logarithm of the density of states is greater
-than the reciprocal of the minimum temperature, i.e. if
-\begin{align}
-  \ln\frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
-  \frac{\epsilon_{i-1} - \epsilon_i}{k_BT_{\min}}
-  \\
-  \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} &>
-  e^{\beta_{\max}(\epsilon_{i-1} - \epsilon_i)}
-\end{align}
-then the algorithm has reached the minimum temperature of interest.
-In this case, we set the log weights at all lower energies using a
-Boltzmann ratio relative to this energy.
-\paragraph{Confident at $\epsilon_i$:} We are confident in our density
-of states at energy $\epsilon_i$ provided two conditions are true.
-\begin{enumerate}
-\item The density of states must be decreasing as the energy decreases
-  from its next-higher energy.
-\item The change in density of states (relative to the next higher
-  energy) must be smaller than a pessimistic estimate of the counting
-  uncertainty at the energy we are examining:
-  \begin{align}
-    \frac{D(\epsilon_i)}{D(\epsilon_{i-1})} < \frac1{\sqrt{N_i}}
-  \end{align}
-  where $N_i$ is the number of ``pessimistic
-  samples'' at $\epsilon_i$, the lower of the two energies under
-  consideration.
-\end{enumerate}
-If both of these are true, we believe we know the density of states at
-this energy well, and the weights are set by
-\begin{align}
-  \ln w(\epsilon_i) = -\ln{D}(\epsilon_i)
-\end{align}
-\paragraph{Reached $T_\text{converged}$:}
-If this is not the case, $\epsilon_i$ is the lowest energy that is
-adequately converged.  We set the weights for energies lower than this
-to a Boltzmann ratio with a temperature determined using the slope of
-a secant line on the $\ln w$ versus $\epsilon$ graph.
-\begin{align}
-  \beta_\text{secant} = \bigg(\frac{\ln{D}(\epsilon_{S_{\max}}) - \ln{D}
-  (\epsilon_\text{pivot})}{\epsilon_{S_{\max}}-\epsilon_\text{pivot}}\bigg)
-\end{align}
-This ``slope'' is a positive quantity.  The weights at energies below
-$\epsilon_\text{pivot}$ are given by
-\begin{align}
-  \ln w(\epsilon) = \ln w(\epsilon_\text{pivot}) -
-  \beta_\text{secant}(\epsilon - \epsilon_\text{pivot})
-\end{align}
-indicating that there are higher weights at lower energies, since
-$\beta$ is positive.  We have one additional caveat: we examine the
-lower energies for which we have samples (``pessimistic'' samples),
-and if we find any energy at which the density of states is greater
-than the inverse of the weight, we adjust $\beta$ to cause it to pass
-through that point.  This ensures that the product of the weight with
-the estimated density of states is always less than or equal one for
-energies below $\epsilon_\text{converged}$.
-
-\subsection{TMI3 Algorithm}
-The TMI$_3$ algorithm is like the TMI$_2$ algorithm, with one
-difference, which is that instead of a secant line being used to
-estimate the converged temperature, we use a tangent line, estimated
-using the lowest two ``converged'' energies.
-
-\subsection{TOE3 Algorithm}
-The TOE$_3$ method desribed by Trebst et.
-al.~\cite{trebst2004optimizing} uses the metric of round trips defined
-by a walker visiting the extreme energies for the density of states.
-The rate for the walker is dependent of the diffusivity $D(\epsilon)$
-at a given energy $E$.  The goal of the method is to maximize the
-number of round trips that the Monte-Carlo simulation makes.  The
-optimized density of states is given by the following:
-\begin{align}
-  n_{w}^{(opt)} = \frac{1}{\sqrt{D(E)}}
-\end{align}
-where unlike in the original paper detailing the method, we compute the
-diffusivity directly from the transition matrix normalized with
-canonical weights.  The optimal ensemble therefore relates the density
-of states to the inverse of the square root of the diffusivity.
-\begin{align}
-  D(E) = \mid (T(\Delta\epsilon)^2 - (T(\Delta\epsilon))^2) \mid
-\end{align}
+Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation Monte-Carlo
+Monte-Carlo (SAMC), and Dynamical Stochastic-Approximation (SAD).
 
 \subsection{TMMC Algorithm}
 The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
@@ -383,9 +281,6 @@ rate of trial moves but we probably could/should? at some point.
 this is only used to control actual transitions not update the collection
 matrices.
 
-
-
-
 \subsection{SAD Algorithm}
 The SAD (Dynamic Stochastic Approximation) is a version of the SAMC
 Algorithm that attempts to dynamically choose the modification factor
@@ -418,125 +313,35 @@ This gives an update factor as follows:
 The update factor has the same $1/t$ behavior as the original SAMC
 algorithm; however now every time a new energy is discovered during the
 course of the simulation, the update factor experiences a jump.
-
-\subsection{SA-TMMC Algorithm} We introduce a new algorithm consisting
-of the merger of the Stochastic Approximation (SA) method proposed by
-Liang et al.~\cite{liang2007stochastic} and the TMMC Algorithm with
-suitable adaptations.  While the Stochastic Approximation method has
-recently been implemented in comparison with the Wang-Landau
-Algorithm~\cite{werlich2015stochastic, schneider2017convergence}, it
-seems quite natural to create a new Monte-Carlo method which we will
-call SA-TMMC.  Like in the original implementation, we define an update
-factor where $t_0$ is the number of Monte-Carlo moves and $t$ is the
-current iteration.
-\begin{align} \gamma_{t}^{\text{SA}} =
-\frac{t_0}{\max(t_0,t)}
-\end{align}
-One potential problem of merging SA and TMMC is that SA provides no
-nice transition to the later method due to the lack of a
-user-controlled cutoff.  Also for SA Monte-Carlo, the choice of
-parameter $t_0$ proves difficult particularly for complex systems.
-Finally, we enforce a minimum temperature probability which prevents
-the system from sampling states below the minimum temperature. We
-discuss here how we resolve all of the potential issues we encountered
-when integrating both SA and TMMC.
-
-\subsubsection{Define an adaptive parameter $t_0$}
-It has been shown that if $F_{t}^{\text{SA}}$ satisfies two conditions
-the estimator is proven to converge to the real
-DOS~\cite{liang2006theory, liang2007stochastic}.
-\begin{align}
-\sum_{t=1}^\infty \gamma_{t}^{\text{SA}} = \infty \quad\textrm{and}\quad
-\sum_{t=1}^\infty (\gamma_{t}^{\text{SA}})^\zeta < \infty
-\end{align}
-where $\zeta \in \{1,2\}$.  For practical implementation with TMMC, we
-find it necessary to reset $t_0$ everytime a new energy state is found.
-This ensures that all energy states are sampled before TMMC move
-probabilities begin to be favored.
-
-\subsubsection{Define a statistical weight to control the transition between SA and TMMC}
-Our algorithm can alternate between SA and TMMC on the fly using
-weights to determine the probability that a move between adjacent
-energy states is allowed.  We define the transition probability
-$\text{SA}_{\text{Weight}}$ as
-\begin{align}
-\delta_{\text{TMMC}}^2 =\frac{1}{n_\downarrow}+\frac{1}{n_\uparrow}, \quad\quad
-\delta_{\text{SA}}^2 = \frac{1}{N_E}
-\end{align}
-\begin{align}
-\text{SA}_{\text{Weight}} =\frac{\delta_{\text{TMMC}}^2}{\delta_{\text{TMMC}}^2 + \delta_{\text{SA}}^2}
-\end{align}
-where $N_\text{found}$ is the number of energy states that have been
-found i.e. visited, and $n_{\uparrow\downarrow}$ are the number of
-upward or downward moves between a pair of energy states respectively.
-The rational behind the transition probability is that the transition
-weight can be related to the fractional uncertainty in upward and
-downward moves assuming there is no system correlation (the moves are
-independent).  Although this is not necessarily the case, we find that
-this definition for the transition weight is satifactory. The
-probability of a move is then the geometic average of either using the
-SA or TMMC Algorithm.
-
-\begin{align}
-\mathcal{P}_\text{move} = \mathcal{P}_\text{move}^{\text{SA}_\text{Weight}} \mathcal{P}_\text{move}^{1-\text{SA}_\text{Weight}}
-\end{align}
-
-\subsubsection{Enforce a minimum temperature probability}
-One potentially damaging aspect to the convergence of the Stochastic
-Approximation method is the need to enforce a minimum temperature
-probability.  We define this probability as
-\begin{align}
-P_{\text{min}} = e^{\beta_{\text{max}}\Delta\epsilon}
-\end{align}
-where $\beta_{\text{max}} = \nicefrac{1}{k_B T_\text{min}}$.  If the
-transition probability is ever below the minimum temperature transition
-probability, we set the former equal to the later.
+~\jpsays{Add in additional material for SAD!}
 
 \section{Results}
 
 For the square-well fluid, our simulations treat systems with a
 well-width of $\text{ww} = 1.30$ and a filling fraction of either
-$\text{ff} = 0.22$ or $\text{ww} = 0.30$.  The simulation explores the
+$\text{ff} = 0.10, 0.20,$ or $0.30$.  The simulation explores the
 energy space of the system down to a reduced temperature of
 $T_{\text{min}} = 0.2$.  All simulations lead to the minimum important
 energy $E_{\text{min}}$ and maximum entropy state $S_{\text{max}}$
 being calculated (with the exception of the WL-TMMC method where both
 of these parameters are needed a priori).  In the sections below, we
-examine systems with different particles sizes, system dimensions, and
-sticky-wall.
-
-\subsubsection{Sticky-wall configuration}
-A sticky-wall is an attractive wall that impacts particle moves.  Only
-one such wall is inserted into a simulation and the intent is to assist
-in visualizing phase separation.  As the temperature of the system
-decreases, an increase in particle aggregation near the sticky-wall
-becomes evident. As the energy of the particles is decreased, the
-particles are unlikely to be able to escape the attractive sticky-wall
-potential.  By examining the particle number density vs the system
-length (z-axis), phase transitions to a liquid-vapor system from a
-vapor dominated system become evident.
+examine systems with different particles numbers and filling fractions.
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-30x4-max-entropy-error.pdf}
+  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-max-entropy-error.pdf}
   \caption{The average entropy error for each method is shown with
   SAD serving as the `golden'
-  standard.}\label{fig:avgS-30x4}
+  standard.}\label{fig:N50-ff0.3-max-error}
 \end{figure}
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-60x8-max-entropy-error.pdf}
+  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_10-N50-max-entropy-error.pdf}
   \caption{The average entropy error for each method is shown with SAD serving as
-  the `golden' standard.}\label{fig:avgS-60x8}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/lv/ww1_30-ff0_22-100x10-max-entropy-error}
-  \caption{The average entropy error for each method is shown with
-    WL-TMMC using a cutoff of 10$^{-10}$ serving as the
-    standard.}\label{fig:avgS-100x10}
+  the `golden' standard.}\label{fig:N50-ff0.1-max-error}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_20-N50-max-entropy-error.pdf}
   \caption{The average entropy error is shown with TMI acting as the
-  `golden' standard.}\label{fig:N50-mean-error}
+  `golden' standard.}\label{fig:N50-ff0.2-max-error}
 \end{figure}
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-max-entropy-error.pdf}
@@ -544,70 +349,45 @@ vapor dominated system become evident.
   `golden' standard.}
 \end{figure}
 
-\subsubsection{A $30\times4\times4$ $(N = 25)$ system with a sticky
-wall}
+\subsubsection{A periodic system with 10\% filling fraction and $(N = 50)$}
 In order to determine how the various methods scale with size,
-simulations are run for systems with different particle numbers.  For
-the $N = 25$ system, a sticky-wall is added to ensure that we see the
-liquid and vapor phase separation.
+simulations are run for systems with different particle numbers. A filling
+fraction $\text{ff} = 0.10$ is chosen which yields $N = 50$ particles
+in the cubical system.  These particles are randomly inserted into the
+system and random moves are proposed (with a translation scale
+$\delta_0 = 0.05$). The boundaries in $x$ and $y$ are periodic while
+the $z$-axis is not periodic.
 
-A system is configured with dimensions $x = y = 4\sigma$ and $z =
-30\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
-yields $N = 25$ particles in the rectangular system.  These particles
-are randomly inserted into the system and random moves are proposed
-(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
-$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
-inserted along the $z$-axis at one end to promote phase separation.
-~\jpsays{should we include a sticky-wall.py plot or something else or
-are we not going to talk about phase separation in this paper?}
-
-We use the entropy error vs iterations as a metric to compare
-simulation runtimes.  Simulations that take more iterations to reach
-the same entropy error as a different method take longer to converge.
-This behavior is seen in Fig.~\ref{fig:avgS-30x4}.
-~\jpsays{SAD appears to do pretty well as does WL-TMMC for a cutoff of $10^{-10}$
-although this seems to depend on what is used as the `standard'.}
+We use the maximum entropy error vs iterations as a metric to compare
+simulation runtimes and overall convergence.  Simulations that take
+more iterations to reach the same entropy error as a different method
+take longer to converge. This behavior is seen in
+Fig.~\ref{fig:N50-ff0.1-max-error}.
 
 \subsubsection{A periodic system with 20\% filling fraction and $N = 50$}
 
-Figure~\ref{fig:N50-mean-error} shows a system consisting of 50 atoms
-are placed in a periodic simple cubic unit cell with lattice constant
+Figure~\ref{fig:N50-ff0.2-max-error} shows a system consisting of 50 atoms
+that are placed in a periodic simple cubic unit cell with lattice constant
 chosen to give a filling fraction of 0.20.  These particles are
 randomly inserted into the system and random moves are proposed (with
 a translation scale $\delta_0 = 0.05$).
 
-\subsubsection{A $60\times8\times8$ $(N = 202)$ system with a sticky
-wall}
+\subsubsection{A periodic system with 30\% filling fraction and $N = 50$}
 
-A system is configured with dimensions $x = y = 8\sigma$ and $z =
-60\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
-yields $N = 202$ particles in the rectangular system.  These particles
-are randomly inserted into the system and random moves are proposed
-(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
-$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
-inserted along the $z$-axis at one end to promote phase separation.
+Figure~\ref{fig:N50-ff0.3-max-error} shows a system consisting of 50 atoms
+that are placed in a periodic simple cubic unit cell with lattice constant
+chosen to give a filling fraction of 0.30.  These particles are
+randomly inserted into the system and random moves are proposed (with
+a translation scale $\delta_0 = 0.05$).
 
-\subsubsection{A $100\times10\times10$ $(N = 525)$ system with a sticky
-wall}
+\subsubsection{A periodic system with 30\% filling fraction and $N = 500$}
 
-A system is configured with dimensions $x = y = 10\sigma$ and $z =
-100\sigma$.  A filling fraction $\text{ff} = 0.22$ is chosen which
-yields $N = 525$ particles in the rectangular system.  These particles
-are randomly inserted into the system and random moves are proposed
-(with a translation scale $\delta_0 = 0.05$). The boundaries in $x$ and
-$y$ are periodic while the $z$-axis is not periodic.  A sticky-wall is
-inserted along the $z$-axis at one end to promote phase separation.
-
-\subsubsection{A Tanner dimensions? $(N = 500)$ system with no sticky
-wall}
-
-A system is configured with dimensions $x = y = z = 19\sigma?$.  A
+A system is configured with dimensions $x = y = z = 19\sigma$.  A
 filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 500$
 particles in a cubical system.  These particles are randomly inserted
 into the system and random moves are proposed (with a translation scale
 $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are periodic while
-the $z$-axis is not periodic.  A sticky-wall is not inserted along the
-$z$-axis.
+the $z$-axis is not periodic.
 
 \section{Conclusions}
 

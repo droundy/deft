@@ -23,8 +23,9 @@ energy = int(sys.argv[1])
 filebase = sys.argv[2]
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
-methods = [ '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad', '-sad3', '-sad3-s1']
+methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
+            '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
+            '-vanilla_wang_landau']
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
@@ -32,11 +33,21 @@ split2 = [i.split('-m', 1)[0] for i in split1]
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
 
+# For SAMC compatibility with LVMC
+lvextra1 = glob('data/comparison/%s-samc*' % filebase)
+split3 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra1]
+split4 = [i.split('-m', 1)[0] for i in split3]
+for j in range(len(split4)):
+    methods.append('-%s' %split4[j])
+
 print 'methods are', methods
 for method in [mm for m in methods for mm in [m, m+'-tm']]:
     print 'trying method', method
     try:
-        if method[-6:] == '-s1-tm':
+        if method[-6:] in ['-s1-tm', '-s2-tm']:
+                continue
+        if method in ['-samc-tm','-samc-1000-tm','-samc-10000-tm',
+                      '-samc-100000-tm', '-vanilla_wang_landau-tm']:
                 continue
         dirname = 'data/comparison/%s%s/' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:
@@ -45,6 +56,10 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
         if energy > 0:
                 Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
         iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
+
+        if os.path.isfile(dirname + 'wl-factor.txt'):
+            iterations, wl_factor = np.loadtxt(dirname + 'wl-factor.txt', delimiter = '\t', unpack = True)
+
 
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
@@ -116,6 +131,16 @@ for method in [mm for m in methods for mm in [m, m+'-tm']]:
         plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
         colors.legend()
         plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
+
+        if os.path.isfile(dirname + 'wl-factor.txt'):
+            plt.figure('wl-factor')
+            colors.loglog(iterations, wl_factor,
+                      method = method[1:])
+            plt.xlabel('#iterations')
+            plt.ylabel('WL factor')
+            plt.title('WL Factor at Each Iteration, %s' %filebase)
+            colors.legend()
+            plt.savefig('figs/%s-wl-factor.pdf' % tex_filebase)
     except:
         raise
 plt.show()

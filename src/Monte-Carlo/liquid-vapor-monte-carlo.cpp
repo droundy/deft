@@ -77,7 +77,6 @@ int main(int argc, const char *argv[]) {
   int tmi_version = 1;
   int toe = false;
   int tmmc = false;
-  int satmmc = false;
   int samc = false;
   int sad = false;
   int sad_fraction = 1;
@@ -204,8 +203,6 @@ int main(int argc, const char *argv[]) {
      "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
-    {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
-     "Use stochastic approximation transition matrix monte carlo", "BOOLEAN"},
     {"sad", '\0', POPT_ARG_NONE, &sad, 0,
      "Use stochastic approximation monte carlo dynamical version", "BOOLEAN"},
     {"sad-fraction", '\0', POPT_ARG_INT, &sad_fraction, 0,
@@ -304,9 +301,9 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if (tmi + toe + tmmc + satmmc + sad + samc + wltmmc + (fix_kT != 0) != 1) {
-    printf("Exactly one histogram method must be selected! (%d %d %d %d %d %g)\n",
-           tmi, toe, tmmc, satmmc, wltmmc, fix_kT);
+  if (tmi + toe + tmmc + sad + samc + wltmmc + (fix_kT != 0) != 1) {
+    printf("Exactly one histogram method must be selected! (%d %d %d %d %g)\n",
+           tmi, toe, tmmc, wltmmc, fix_kT);
     return 254;
   }
 
@@ -427,11 +424,10 @@ int main(int argc, const char *argv[]) {
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (wltmmc) {
+      sw.use_wltmmc = true;
       sprintf(method_tag, "-wltmmc");
-    } else if (satmmc) {
-      sprintf(method_tag, "-satmmc");
     } else if (samc) {
-      sprintf(method_tag, "-samc");
+      sprintf(method_tag, "-samc-%g", sw.sa_t0);
     } else if (sad && sad_fraction == 1) {
       sprintf(method_tag, "-sad");
     } else if (sad) {
@@ -742,11 +738,6 @@ int main(int argc, const char *argv[]) {
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
             headerinfo);
-  } else if (satmmc) {
-    sw.use_satmmc = true;
-    sprintf(headerinfo,
-            "%s# histogram method: satmmc\n",
-            headerinfo);
   } else if (samc) {
     if (sw.sa_t0 == 0) sw.sa_t0 = 1;
     sprintf(headerinfo,
@@ -756,9 +747,7 @@ int main(int argc, const char *argv[]) {
     sw.use_sad = sad_fraction;
     sw.too_high_energy = sw.energy_levels-1;
     sw.too_low_energy = 0;
-    sprintf(headerinfo,
-            "%s# histogram method: sad%d\n",
-            headerinfo, sad_fraction);
+    sprintf(headerinfo + strlen(headerinfo), "# histogram method: sad%d\n", sad_fraction);
   } else if (wltmmc) {
     sprintf(headerinfo,
             "%s# histogram method: wltmmc\n",
@@ -784,18 +773,22 @@ int main(int argc, const char *argv[]) {
       
       {
         FILE *dos_in = fopen((const char *)dos_fname, "r");
-        fprintf(dos_in, "%s", headerinfo);// read about fscanf
-        fprintf(dos_in, "# max_entropy_state: %d\n",sw.max_entropy_state);
-        fprintf(dos_in, "# min_important_energy: %i\n\n",sw.min_important_energy);
-
-        // Only output the ln_dos for energies that are essentially
-        // converged.  Otherwise we can end up with lots of wrong dos
-        // values at very low energies that we have to remove later.
-        fprintf(dos_in, "# energy   ln_dos\n");
-        for (int i = 0; i < sw.energy_levels; i++) {
-          fprintf(dos_in, "%d  %lg\n",i,sw.ln_energy_weights[i]);
-        }
-        fclose(dos_in);
+	if (dos_in == NULL) {
+	  printf("Unable to resume, because %s does not exist.  Proceeding anyhow!\n", dos_fname);
+	} else {
+	  char * line = new char[1000];
+	  while (fscanf(dos_in, " #%[^\n] ", line) == 1) {
+	    printf("line: %s\n", line);
+	    // TODO HERE: search in "line" using sscanf for total moves: %ld or working moves: %ld
+	  }
+	  int energy;
+	  double dos;
+	  while (fscanf(dos_in, " %u %lf ", &energy, &dos) == 2) {
+	    // printf(" %u %lf\n ", energy, dos);
+	    sw.ln_energy_weights[energy]=-dos;
+	  }
+	  fclose(dos_in);
+	}
       }
     } else {
       printf("I do not know how to resume yet!\n");

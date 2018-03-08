@@ -10,8 +10,9 @@ if os.path.exists('../data'):
 energy = int(sys.argv[1])
 reference = sys.argv[2]
 filebase = sys.argv[3]
-methods = [ '-sad3', '-sad3-s1', '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
-            '-vanilla_wang_landau', '-samc', '-satmmc', '-sad']
+methods = [ '-sad3', '-sad3-s1', '-sad3-s2',
+            '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
+            '-vanilla_wang_landau', '-sad']
 
 def running_mean(x, N):
     cumsum = numpy.cumsum(numpy.insert(x, 0, 0)) 
@@ -24,6 +25,13 @@ split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
+
+# For SAMC compatibility with LVMC
+lvextra1 = glob('data/%s-samc*-movie' % filebase)
+split3 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra1]
+split4 = [i.split('-m', 1)[0] for i in split3]
+for j in range(len(split4)):
+    methods.append('-%s' %split4[j])
 
 print methods
 
@@ -43,15 +51,15 @@ for method in methods:
     dirname = 'data/comparison/%s%s' % (filebase,method)
     dirnametm = 'data/comparison/%s%s-tm' % (filebase,method)
     try:
-        print("trying method %s" % method)
         r = glob('data/%s%s-movie/*lndos.dat' % (filebase,method))
         if len(r)==0:
-            print(" ... but it has no data in data/%s%s-movie/*lndos.dat" % (filebase,method))
+            # print(" ... but it has no data in data/%s%s-movie/*lndos.dat" % (filebase,method))
             continue
         if not os.path.exists(dirname):
             os.makedirs(dirname)
         if not os.path.exists(dirnametm):
             os.makedirs(dirnametm)
+        wl_factor = numpy.zeros(len(r))
         iterations = numpy.zeros(len(r))
         Nrt_at_energy = numpy.zeros(len(r))
         maxentropystate = numpy.zeros(len(r))
@@ -68,6 +76,8 @@ for method in methods:
             e,lndos,Nrt,lndostm = readnew.e_lndos_ps_lndostm(f)
             maxentropystate[i] = readnew.max_entropy_state(f)
             minimportantenergy[i] = readnew.min_important_energy(f)
+
+            wl_factor[i] = readnew.wl_factor(f)
             iterations[i] = readnew.iterations(f)
             Nrt_at_energy[i] = Nrt[energy]
             # The following norm_factor is designed to shift our lndos
@@ -101,6 +111,7 @@ for method in methods:
         while i < len(iterations) and iterations[i] > iterations[i-1]:
             num_frames_to_count = i+1
             i+=1
+        wl_factor = wl_factor[:num_frames_to_count]
         iterations = iterations[:num_frames_to_count]
         minimportantenergy = minimportantenergy[:num_frames_to_count]
         maxentropystate = maxentropystate[:num_frames_to_count]
@@ -127,6 +138,13 @@ for method in methods:
                       fmt = ('%.4g'),
                       delimiter = '\t',
                       header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
+        if not numpy.isnan(numpy.sum(wl_factor)):
+            numpy.savetxt('%s/wl-factor.txt' %(dirname),
+                        numpy.c_[iterations, wl_factor],
+                        fmt = ('%.4g'),
+                        delimiter = '\t',
+                        header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
+
         if lndostm is not None:
             print 'saving to', dirnametm
             numpy.savetxt('%s/energy-%d.txt' %(dirnametm, energy),
@@ -138,7 +156,12 @@ for method in methods:
                         fmt = ('%.4g'),
                         delimiter = '\t',
                         header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
-            
+            if not numpy.isnan(numpy.sum(wl_factor)):
+                numpy.savetxt('%s/wl-factor.txt' %(dirnametm),
+                        numpy.c_[iterations, wl_factor],
+                        fmt = ('%.4g'),
+                        delimiter = '\t',
+                        header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
     except:
         print 'I had trouble with', method
         raise

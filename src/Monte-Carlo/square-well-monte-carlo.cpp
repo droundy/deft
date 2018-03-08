@@ -100,7 +100,6 @@ int main(int argc, const char *argv[]) {
   int vanilla_wang_landau = false;
   int wltmmc = false;
   int samc = false;
-  int satmmc = false;
   int sad = false;
   int sad_fraction = 1;
   int simple_flat = false;
@@ -262,8 +261,6 @@ int main(int argc, const char *argv[]) {
      "Use Stochastic-Approximation Monte-Carlo method, dynamic version", "BOOLEAN"},
     {"sad-fraction", '\0', POPT_ARG_INT, &sad_fraction, 0,
      "Fraction for stochastic approximation monte carlo dynamical version", "INT"},
-    {"satmmc", '\0', POPT_ARG_NONE, &satmmc, 0,
-     "Use Stochastic-Approximation Transition Matrix Monte-Carlo method", "BOOLEAN"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
     {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
@@ -384,7 +381,7 @@ int main(int argc, const char *argv[]) {
 
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
-     + vanilla_wang_landau + tmi + toe + wltmmc + samc + sad + satmmc + tmmc
+     + vanilla_wang_landau + tmi + toe + wltmmc + samc + sad + tmmc
      + oetmmc + (fix_kT != 0)
      + reading_in_transition_matrix + golden != 1){
     printf("Exactly one histogram method must be selected!\n");
@@ -575,15 +572,13 @@ int main(int argc, const char *argv[]) {
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (wltmmc) {
-      sprintf(method_tag, "-wltmmc");
+      sprintf(method_tag, "-wltmmc-%g", wl_cutoff);
     } else if (samc) {
-      sprintf(method_tag, "-samc");
+      sprintf(method_tag, "-samc-%g", sw.sa_t0);
     } else if (sad && sad_fraction == 1) {
       sprintf(method_tag, "-sad");
     } else if (sad) {
       sprintf(method_tag, "-sad%d", sad_fraction);
-    } else if (satmmc) {
-      sprintf(method_tag, "-satmmc");
     } else if (oetmmc) {
       sprintf(method_tag, "-oetmmc");
     } else if (wang_landau) {
@@ -857,17 +852,17 @@ int main(int argc, const char *argv[]) {
     sw.initialize_canonical(fix_kT);
   } else if (wang_landau || vanilla_wang_landau) {
     sw.wl_factor = wl_factor;
+    sw.use_wl = true;
     sw.initialize_wang_landau(wl_fmod, wl_threshold, wl_cutoff,
                               vanilla_wang_landau);
   } else if (wltmmc) {
+    sw.use_wltmmc = true;
     sw.wl_factor = wl_factor;
     sw.initialize_wltmmc(wl_fmod, wl_threshold, wl_cutoff);
   } else if (samc) {
     sw.initialize_samc(0);
   } else if (sad) {
     sw.initialize_samc(sad_fraction);
-  } else if (satmmc) {
-    sw.initialize_satmmc();
   } else if (simple_flat) {
     sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {
