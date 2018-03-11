@@ -233,16 +233,43 @@ impl Expr {
         Expr::from_inner(InnerExpr::Sum(Intern::new(CommutativeMap::new())))
     }
 
+    /// Raise an expression to a constant power.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use deft::Expr;
+    /// let a = Expr::var("a");
+    /// assert_eq!(Expr::pow(a, 2) / a, a);
+    /// ```
+    pub fn pow<P: Into<f64>>(base: Expr, power: P) -> Expr {
+        let mut mul = CommutativeMap::new();
+        mul.insert(base, power.into());
+        Expr::from_mul_map(mul)
+    }
+
     /// Differentiate symbolically.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use deft::Expr;
+    /// let x = Expr::var("x");
+    /// assert_eq!((x * x).deriv("x"), x * 2);
+    /// ```
     pub fn deriv(&self, wrt: &'static str) -> Expr {
         match *self.inner {
             InnerExpr::Var(s) => if *s == wrt { Expr::one() } else { Expr::zero() },
             InnerExpr::Exp(a) => *self * a.deriv(wrt),
             InnerExpr::Log(a) => a.deriv(wrt) / a,
             InnerExpr::Sum(a)
-                => a.map.iter().fold(Expr::zero(), |a, (b, &c)| a + b.deriv(wrt) * c),
+                => a.map.iter()
+                        .fold(Expr::zero(),
+                              |a, (b, &c)| a + Expr::pow(b, c - 1.0) * c * b.deriv(wrt)),
             InnerExpr::Mul(a)
-                => a.map.iter().fold(Expr::zero(), |a, (b, &c)| a + b.deriv(wrt) * c * *self / b),
+                => a.map.iter()
+                        .fold(Expr::zero(),
+                              |a, (b, &c)| a + b.deriv(wrt) * c * *self / b),
         }
     }
 
@@ -306,18 +333,12 @@ impl Expr {
     }
 }
 
-// Want to implement From<f64> and From<i64> etc for Expr.  Then
-// change Add etc, to use Into.
-//
-// #[test]
-// fn adding_f64() {
-//     assert_eq!((Expr::zero() + 0.0).cpp(), "0");
-// }
-
-impl From<f64> for Expr {
-    fn from(f: f64) -> Self {
+impl<N: Into<f64>> From<N> for Expr {
+    fn from(n: N) -> Self {
         let mut m = CommutativeMap::new();
-        m.insert(Expr::one(), f);
+        let n = n.into();
+        assert!(!n.is_nan());
+        m.insert(Expr::one(), n);
         Expr::from_sum_map(m)
     }
 }
@@ -364,11 +385,12 @@ impl<RHS: Into<Expr>> std::ops::Mul<RHS> for Expr {
     }
 }
 
-impl std::ops::Sub for Expr {
+impl<RHS: Into<Expr>> std::ops::Sub<RHS> for Expr {
     type Output = Self;
 
-    fn sub(self, other: Self) -> Self {
+    fn sub(self, other: RHS) -> Self {
         let mut subtrahend = CommutativeMap::new();
+        let other = other.into();
 
         match *other.inner {
             InnerExpr::Sum(m) => subtrahend.union(&(*m).negate()),
@@ -379,11 +401,12 @@ impl std::ops::Sub for Expr {
     }
 }
 
-impl std::ops::Div for Expr {
+impl<RHS: Into<Expr>> std::ops::Div<RHS> for Expr {
     type Output = Self;
 
-    fn div(self, other: Self) -> Self {
+    fn div(self, other: RHS) -> Self {
         let mut divisor = CommutativeMap::new();
+        let other = other.into();
 
         match *other.inner {
             InnerExpr::Mul(m) => divisor.union(&(*m).negate()),
@@ -447,5 +470,7 @@ mod tests {
         assert_eq!(Expr::log(a * a).deriv("a").cpp(), "2 / a");
         assert_eq!(Expr::exp(a).deriv("a").cpp(), "exp(a)");
         assert_eq!(Expr::exp(a * a).deriv("a").cpp(), "2 * a * exp(pow(a, 2))");
+        assert_eq!(Expr::pow(Expr::log(a) + a, 3).deriv("a"),
+                   Expr::pow(Expr::log(a) + a, 2) * 3 * (Expr::one() / a + 1));
     }
 }
