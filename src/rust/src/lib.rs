@@ -270,6 +270,9 @@ impl Expr {
                 => a.map.iter()
                         .fold(Expr::zero(),
                               |a, (b, &c)| a + b.deriv(wrt) * c * *self / b),
+            // InnerExpr::Mul(a)
+            //     => a.map.iter()
+            //             .map(|(expr, &power)| expr.deriv(wrt) * power * *self / expr).sum(),
         }
     }
 
