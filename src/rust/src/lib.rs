@@ -214,8 +214,8 @@ impl Expr {
     }
 
     /// Express an exponential.
-    pub fn exp(arg: Expr) -> Expr {
-        Expr::from_inner(InnerExpr::Exp(arg))
+    pub fn exp(self) -> Expr {
+        Expr::from_inner(InnerExpr::Exp(self))
     }
 
     /// Express a logarithm.
