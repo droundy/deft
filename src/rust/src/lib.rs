@@ -347,20 +347,30 @@ impl<RHS: Into<Expr>> std::ops::Add<RHS> for Expr {
     type Output = Self;
 
     fn add(self, other: RHS) -> Self {
-        let mut sum = CommutativeMap::new();
         let other = other.into();
-
-        match *self.inner {
-            InnerExpr::Sum(m) => sum.union(&*m),
-            _ => sum.insert(self, 1.0),
-        };
-
-        match *other.inner {
-            InnerExpr::Sum(m) => sum.union(&*m),
-            _ => sum.insert(other, 1.0),
-        };
-
-        Expr::from_sum_map(sum)
+        match (*self.inner, *other.inner) {
+            (InnerExpr::Sum(a), InnerExpr::Sum(b)) => {
+                let mut sum = (*a).clone();
+                sum.union(&*b);
+                Expr::from_sum_map(sum)
+            },
+            (InnerExpr::Sum(m), _) => {
+                let mut sum = (*m).clone();
+                sum.insert(other, 1.0);
+                Expr::from_sum_map(sum)
+            },
+            (_, InnerExpr::Sum(m)) => {
+                let mut sum = (*m).clone();
+                sum.insert(self, 1.0);
+                Expr::from_sum_map(sum)
+            },
+            _ => {
+                let mut sum = CommutativeMap::new();
+                sum.insert(self, 1.0);
+                sum.insert(other, 1.0);
+                Expr::from_sum_map(sum)
+            },
+        }
     }
 }
 
