@@ -474,8 +474,8 @@ mod tests {
     fn derivatives() {
         let a = Expr::var("a");
         let b = Expr::var("b");
-        assert_eq!(a.deriv("a").cpp(), "1");
-        assert_eq!((a * a).deriv("a").cpp(), "2 * a");
+        assert_eq!(a.deriv("a"), Expr::one());
+        assert_eq!((a * a).deriv("a"), a*2);
         assert_eq!((a * a * a).deriv("a").cpp(), "3 * pow(a, 2)");
         assert_eq!(a.deriv("b").cpp(), "0");
         assert_eq!((a + b).deriv("a").cpp(), "1");
