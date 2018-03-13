@@ -424,7 +424,6 @@ int main(int argc, const char *argv[]) {
     } else if (tmmc) {
       sprintf(method_tag, "-tmmc");
     } else if (wltmmc) {
-      sw.use_wltmmc = true;
       sprintf(method_tag, "-wltmmc");
     } else if (samc) {
       sprintf(method_tag, "-samc-%g", sw.sa_t0);
@@ -749,6 +748,7 @@ int main(int argc, const char *argv[]) {
     sw.too_low_energy = 0;
     sprintf(headerinfo + strlen(headerinfo), "# histogram method: sad%d\n", sad_fraction);
   } else if (wltmmc) {
+    sw.use_wltmmc = true;
     sprintf(headerinfo,
             "%s# histogram method: wltmmc\n",
             headerinfo);
