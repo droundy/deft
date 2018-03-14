@@ -117,6 +117,8 @@ class vector3d {
     sprintf(str, "(%6.2f, %6.2f, %6.2f)", x, y, z);
   }
 
+  // ran generates a random vector with a gaussian distribution with
+  // standard deviation = scale.
   static vector3d ran(double scale);
   // expran generates a random vector with an exponential probability
   // distribution in radius, which thus has a diverging probability
