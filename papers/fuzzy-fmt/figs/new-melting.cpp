@@ -183,8 +183,8 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   for (int i=-1; i<3; i=i+2) {
     for (int j=-1; j<3; j=j+2) {
       for (int k=-1; k<3; k=k+2) {
-        vector3d change_var = R+gwidth*vector3d(i, j, k);  //note: GQ abscissa=sqrt(2)/2 and this times sqrt(2)*gw = gw
-        weight w = find_weights(r, change_var, temp); 
+        vector3d r_prime = R+gwidth*vector3d(i, j, k);  //note: GQ abscissa=sqrt(2)/2 and this times sqrt(2)*gw = gw
+        weight w = find_weights(r, r_prime, temp);
          
         //printf("\nr.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
         //printf("change_var.x=%g, change_var.y=%g, change_var.z=%g\n",change_var.x, change_var.y, change_var.z); //debug - for GQ TEST
@@ -209,6 +209,29 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   }
   return w_den_R;
 }  
+
+weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,
+                                   double lattice_constant,
+                                   double gwidth, double fv) {
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
+    return w_den_R;
+  }
+  const int NUM_POINTS = 8;
+  for (int i=0; i<NUM_POINTS; i++) {
+    vector3d r_prime = R + vector3d::ran(gwidth);
+    weight w = find_weights(r, r_prime, temp);
+
+    w_den_R.n_0 += (1.0/NUM_POINTS)*(1-fv)*w.n_0;
+    w_den_R.n_1 += (1.0/NUM_POINTS)*(1-fv)*w.n_1;
+    w_den_R.n_2 += (1.0/NUM_POINTS)*(1-fv)*w.n_2;
+    w_den_R.n_3 += (1.0/NUM_POINTS)*(1-fv)*w.n_3;
+
+    w_den_R.nv_1 += (1.0/NUM_POINTS)*(1-fv)*w.nv_1;
+    w_den_R.nv_2 += (1.0/NUM_POINTS)*(1-fv)*w.nv_2;
+  }
+  return w_den_R;
+}
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
@@ -973,6 +996,7 @@ int main(int argc, const char **argv) {
     vector3d r = vector3d(0,0,.5);
     vector3d R = vector3d(0,0,0);
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
+    weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, a, gw, fv);
 
     printf("\n\nreduced_density = %g, fv = %g, gw = %g  alpha=%g zeta=%g\n", reduced_density, fv, gw,
            find_alpha(temp), find_zeta(temp));
@@ -984,9 +1008,11 @@ int main(int argc, const char **argv) {
 
     printf("\nWeighted Density TEST results for rx=%g ry=%g  rz=%g\n", r.x, r.y, r.z);
     printf("and Gaussian point Rx=%g Ry=%g  Rz=%g  :\n", R.x, R.y, R.z);
-    printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_R.n_0, w_R.n_1, w_R.n_2, w_R.n_3);
+    printf("GC: n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_R.n_0, w_R.n_1, w_R.n_2, w_R.n_3);
+    printf("MC: n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_MC.n_0, w_MC.n_1, w_MC.n_2, w_MC.n_3);
     printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n", w_R.nv_1.x, w_R.nv_1.y, w_R.nv_1.z);
     printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
+
 
     //TEST GAUSSIAN QUADRATURE FUNCTION 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     //use to compare a value of weighted density caluclated analytically to that computed by Gaussain Quadrature function
@@ -1006,7 +1032,8 @@ int main(int argc, const char **argv) {
       //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*(-328.754); 
       //double n_2_of_r =(M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4)));
       printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
-      printf("analytic n_2 = %g  for rz=%g (compare with quadrature %g ...double is %g)\n", n_2_of_r, rz, w_R.n_2, 2*w_R.n_2);
+      printf("analytic n_2 = %g  for rz=%g (compare with quadrature %g or mc %g)\n",
+             n_2_of_r, rz, w_R.n_2, w_MC.n_2);
 
       return 0;  //for debug
     }
