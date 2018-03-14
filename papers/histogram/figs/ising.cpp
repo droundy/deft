@@ -21,10 +21,10 @@ double E = 0;  // Define our initial system energy.
 double M = 0;  // Define our initial system magnetization.
 double J = 0;  // Define our spin coupling.
 
-const int N = 25;  // Define number of spin sites.
+const int N = 10;  // Define number of spin sites.
 const int Q = 2;   // Define number of spin states.
 
-double minT = 0; // Define minimum Temperature.
+double minT = 0.1; // Define minimum Temperature.
 
 // ---------------------------------------------------------------------
 // ising.h files -- this could likely go into an ising.h file
@@ -34,13 +34,20 @@ struct ising_simulation {
   long iteration;   // the current iteration number
 
   int spin_number;        // the current spin number
-  int site_numberI;
-  int site_numberJ;
+  int spin_number_at_site[N*N];
+  int I;                  // random I coord spin number
+  int J;                  // random J coord spin number
   int spin_lattice[N][N]; // the size of the spin system
-  
+  int neighbor_spins;
+
+  double prob;
+
   void flip_a_spin(); // attempt to flip a spin
-  void initialize_spin_lattice(); // generate the spin lattice
+  int* initialize_spin_lattice(); // generate the spin lattice
   void random_site_flip(); // flip the spin of a random site
+
+  void canonical_move(double minT);
+  double calculate_energy(double E);
 };
 
 // ---------------------------------------------------------------------
@@ -68,15 +75,18 @@ void ising_simulation::flip_a_spin() {
 // Generate 2D Spin Lattice 
 // ---------------------------------------------------------------------
 
-void ising_simulation::initialize_spin_lattice() {
+// I want to make this a pointer so I can calculate energy from each
+// spin number at a lattice site.
+int* ising_simulation::initialize_spin_lattice(void) {
   assert (Q%2 == 0);  // terminate program if Q is odd!
 
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
       flip_a_spin();
       spin_lattice[i][j] = spin_number;
+      spin_number_at_site[i*j] = spin_lattice[i][j];
     }
-  }
+  } return 0;
 }
 
 // ---------------------------------------------------------------------
@@ -89,14 +99,48 @@ void ising_simulation::random_site_flip() {
     std::uniform_int_distribution<int> site_distI(1, N);
     std::uniform_int_distribution<int> site_distJ(1, N);
     
-    site_numberI = site_distI(engine); // currently ranges from 1 --> N
-    site_numberJ = site_distJ(engine); // currently ranges from 1 --> N
+    I = site_distI(engine); // currently ranges from 1 --> N
+    J = site_distJ(engine); // currently ranges from 1 --> N
     
     flip_a_spin();
 
-    spin_lattice[site_numberI][site_numberJ] = spin_number;
+    spin_lattice[I][J] = spin_number;
 }
 
+// ---------------------------------------------------------------------
+// Canonical Monte-Carlo
+// ---------------------------------------------------------------------
+
+void ising_simulation::canonical_move(double minT) {
+
+  random_site_flip();
+  // we want to enforce periodic boundary conditions.
+  neighbor_spins = spin_lattice[N*(I+1)][J] + spin_lattice[N*(I-1)][J] + 
+                   spin_lattice[I*N][J+1] + spin_lattice[I*N][J-1];
+  prob = 2*spin_lattice[I][J]*neighbor_spins;
+
+  if (prob < 0) {
+    spin_lattice[I][J] *= -1;
+  } else if (rand() < exp(-prob*minT)) {
+    spin_lattice[I][J] *= -1;
+  }
+}
+
+double ising_simulation::calculate_energy(double E) {
+
+  initialize_spin_lattice();
+
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      // we want to enforce periodic boundary conditions.
+      I = (i + N) % N; // coerce in range: takes care of wrapping
+      J = (j + N) % N;
+      neighbor_spins = spin_number_at_site[N*(I+1) + J] + spin_number_at_site[N*(I-1) + J] + 
+                          spin_number_at_site[I*N + (J+1)] + spin_number_at_site[I*N + (J-1)];
+      E += neighbor_spins*spin_lattice[i][j];
+    }
+  } return E;
+}
 // ---------------------------------------------------------------------
 // Initialize Main
 // ---------------------------------------------------------------------
@@ -124,5 +168,7 @@ static double took(const char *name) {
 int main(int argc, const char *argv[]) {
   took("Starting program");
   printf("version: %s\n",version_identifier());
+  double calculate_energy(double E);
+  printf("the energy is %g\n", E);
 }
 
