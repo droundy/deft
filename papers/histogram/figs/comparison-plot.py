@@ -41,14 +41,9 @@ for j in range(len(split4)):
     methods.append('-%s' %split4[j])
 
 print 'methods are', methods
-for method in [mm for m in methods for mm in [m, m+'-tm']]:
+for method in methods:
     print 'trying method', method
     try:
-        if method[-6:] in ['-s1-tm', '-s2-tm']:
-                continue
-        if method in ['-samc-tm','-samc-1000-tm','-samc-10000-tm',
-                      '-samc-100000-tm', '-vanilla_wang_landau-tm']:
-                continue
         dirname = 'data/comparison/%s%s/' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:
                 continue
