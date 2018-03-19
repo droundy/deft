@@ -29,12 +29,14 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
         for i in range(len(gamma)):
             if ts[i] > t[j]:
                 gamma[i] = energies_found[j]*(elo[j]-ehi[j])/ts[i]/3/Tmin
-    colors.loglog(ts, gamma,'sad')
+    sadname = sad.split('/')[-1].split('.')[0]
+    colors.loglog(ts, gamma,sadname)
     plt.xlabel('Moves')
     plt.ylabel('$\gamma$')
     plt.title('Gamma versus Time')
     colors.legend()
-plt.show()
 
-    
+plt.savefig('figs/gamma-%s.pdf' % filename.replace('.','_'))
+if 'noshow' not in sys.argv:
+    plt.show()
 
