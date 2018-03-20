@@ -23,6 +23,7 @@ _colors = { 'sad': 'r',
             'samc-1000': 'r',
             'samc-10000': 'tab:orange',
             'samc-100000': 'y',
+            'samc-1e+06': 'g',
 }
 
 _linestyles = {
@@ -33,6 +34,10 @@ _linestyles = {
     'sad3-s2': '-.',
     'sad3-s2-tm': '--',
     'vanilla_wang_landau': '--',
+    'samc-1000': ':',
+    'samc-10000': ':',
+    'samc-100000': ':',
+    'samc-1e+06': ':',
 }
 
 _legend_order = [
@@ -52,6 +57,7 @@ _legend_order = [
     'samc-1000',
     'samc-10000',
     'samc-100000',
+    'samc-1e+06',
 ]
 
 _legend_label = {
@@ -69,6 +75,7 @@ _legend_label = {
     'samc-1000': 'SAMC ($10^{3}$ factor)',
     'samc-10000': 'SAMC ($10^{4}$ factor)',
     'samc-100000': 'SAMC ($10^{5}$ factor)',
+    'samc-1e+06': 'SAMC ($10^{6}$ factor)',
 }
 
 def fix_legend(method):

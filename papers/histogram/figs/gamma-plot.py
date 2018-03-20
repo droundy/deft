@@ -36,16 +36,16 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     plt.title('Gamma versus Time')
     colors.legend()
 
-plt.savefig('figs/gamma-%s.pdf' % filename.replace('.','_'))
-
 def gamma_sa(t,t0):
     return t0/np.maximum(t, t0)
 
 t0s = [1e3,1e4,1e5,1e6]
 for t0 in t0s:
-    colors.loglog(ts,gamma_sa(ts, t0),'samc-t0-%e' %t0) 
+    colors.loglog(ts,gamma_sa(ts, t0),'samc-%g' %t0)
     colors.legend()
 
+
+plt.savefig('figs/gamma-%s.pdf' % filename.replace('.','_'))
 if 'noshow' not in sys.argv:
     plt.show()
 
