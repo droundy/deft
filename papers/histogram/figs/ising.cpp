@@ -9,7 +9,6 @@
 #include <errno.h>
 #include "handymath.h"
 #include "vector3d.h"
-#include "random"
 
 #include "version-identifier.h"
 
@@ -17,12 +16,10 @@
 // Define "Constants" -- set from arguments then unchanged
 // ---------------------------------------------------------------------
 
-double E = 0;      // Define our initial system energy.
 double M = 0;      // Define our initial system magnetization.
-double Jc = 1;      // Define our spin coupling.
+double J = 1;      // Define our spin coupling.
 double minT = 0.2; // Define minimum Temperature.
 
-const int N = 20;  // Define number of spin sites.
 const int Q = 2;   // Define number of spin states.
 
 // ---------------------------------------------------------------------
@@ -31,113 +28,80 @@ const int Q = 2;   // Define number of spin states.
 
 struct ising_simulation {
   long iteration;   // the current iteration number
+  int N;
+  int *S;
+  double E;      // system energy.
+  double T;      // canonical temperature.
 
-  int spin_number;        // the current spin number
-  int spin_number_at_site[N*N];
-  int I;                  // random row coord spin number
-  int J;                  // random col coord spin number
-  int spin_lattice[N][N]; // the size of the spin system
-  int neighbor_spins;
+  explicit ising_simulation(int N); // generate the spin lattice
 
-  double prob;
+  int flip_a_spin(int oldspin) const; // pick a new random (but changed) spin
 
-  void flip_a_spin(); // attempt to flip a spin
-  int* initialize_spin_lattice(); // generate the spin lattice
-
-  int* canonical_flip();
+  void canonical_flip();
   double calculate_energy();
 };
 
-// ---------------------------------------------------------------------
-// Mersenne Twister Engine -- build the random seed generator
-// ---------------------------------------------------------------------
 
 // ising_simulation methods
 
-void ising_simulation::flip_a_spin() {
-  //the random device that will seed the generator
-  std::random_device seeder;
-  // The Mersenne twister engine which has a distinct advantage
-  // over rand().  Only for c++11 compilers.
-  std::mt19937 engine(seeder());
-  std::uniform_int_distribution<int> spin_dist(1, Q);
+int ising_simulation::flip_a_spin(int oldspin) const {
+  if (Q==2) return -oldspin;
 
-  spin_number = spin_dist(engine); // currently ranges from 1 --> Q
-
-  if (spin_number > Q/2.0) {
-    spin_number += - Q - 1;
-  }
+  return random::ran64() % Q - Q/2; // gives value -Q/2 to Q/2-1?
 }
 
-// ---------------------------------------------------------------------
-// Generate 2D Spin Lattice
-// ---------------------------------------------------------------------
-
-// I want to make this a pointer so I can calculate energy from each
-// spin number at a lattice site.
-int* ising_simulation::initialize_spin_lattice() {
-  assert (Q%2 == 0);  // terminate program if Q is odd!
+ising_simulation::ising_simulation(int NN) {
+  iteration = 0;
+  E = 0;
+  T = 0;
+  N = NN;
+  S = new int[N*N];
 
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
-      flip_a_spin();
-      spin_lattice[i][j] = spin_number;
-      spin_number_at_site[i*j] = spin_lattice[i][j];
+      S[i+N*j] = 1; // initialize to all 1s
     }
-  } return spin_number_at_site;
+  }
 }
 
 // ---------------------------------------------------------------------
 // Canonical Monte-Carlo
 // ---------------------------------------------------------------------
 
-int* ising_simulation::canonical_flip() {
+void ising_simulation::canonical_flip() {
+  iteration += 1;
+  int k = random::ran64() % (N*N);
+  int i = k % N;
+  int j = k / N;
+  int old = S[j + i*N];
+  S[j + i*N] = flip_a_spin(S[j + i*N]);
 
-  int i;
-  int j;
+  int neighbor_spins = S[j + ((i+1) % N)*N] + S[j + ((i-1+N) % N)*N] +
+                       S[((j+1) % N) + i*N] + S[((j-1+N) % N) + i*N];
 
-  std::random_device seeder;
-  std::mt19937 engine(seeder());
-  std::uniform_int_distribution<int> site_distI(1, N);
-  std::uniform_int_distribution<int> site_distJ(1, N);
+  const double deltaE = J*(old - S[j + i*N])*neighbor_spins;
+  const double lnprob = -deltaE/T;
 
-  I = site_distI(engine); // currently ranges from 1 --> N
-  J = site_distJ(engine); // currently ranges from 1 --> N
-
-  flip_a_spin();
-  //printf("spin number is really %d\n", spin_number);
-  spin_lattice[i][j] = spin_number;
-
-  // we want to enforce periodic boundary conditions.
-  i = (I + N) % N; // coerce in range: takes care of wrapping
-  j = (J + N) % N;
-  neighbor_spins = spin_lattice[i+1][j] + spin_lattice[i-1][j] +
-                   spin_lattice[i][j+1] + spin_lattice[i][j-1];
-
-  prob = 2*spin_lattice[I][J]*neighbor_spins;
-
-  if (prob < 0) {
-    spin_lattice[I][J] *= -1;
-  } else if (rand() < exp(-prob*minT)) {
-    spin_lattice[I][J] *= -1;
+  if (lnprob < 0 && random::ran() > exp(lnprob)) {
+    S[j + i*N] = old;
+    //printf("not flipping from E=%g\n", E);
+  } else {
+    E += deltaE;
+    //printf("flipping gives E=%g\n", E);
   }
-  return spin_number_at_site;
 }
 
 double ising_simulation::calculate_energy() {
-
+  E = 0;
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
       // we want to enforce periodic boundary conditions.
-      I = (i + N) % N; // coerce in range: takes care of wrapping
-      J = (j + N) % N;
-      neighbor_spins = spin_lattice[I+1][J] + spin_lattice[I-1][J] +
-                       spin_lattice[I][J+1] + spin_lattice[I][J-1];
-      
-      printf("spin number is %d\n at (%d,%d)\n", spin_lattice[I+1][J], I+1,J);
-      E += -Jc*neighbor_spins*spin_lattice[i][j];
+      int neighbor_spins = S[(i+1) % N + j*N] + S[i + ((j+1) % N)*N];
+
+      E += -J*neighbor_spins*S[i+j*N];
     }
-  } return E;
+  }
+  return E;
 }
 // ---------------------------------------------------------------------
 // Initialize Main
@@ -165,19 +129,23 @@ static double took(const char *name) {
 
 int main(int argc, const char *argv[]) {
 
-  ising_simulation ising;
+  ising_simulation ising(4);
+  ising.T = 2;
 
   took("Starting program");
   printf("version: %s\n",version_identifier());
 
-  long iteration = 500;
-  ising.initialize_spin_lattice();
+  long totaliteration = 5900;
 
-  for (int i = 0; i < iteration; i++) {
+  ising.calculate_energy();
+  for (long i = 0; i < totaliteration; i++) {
     ising.canonical_flip();
   }
+  printf("I think the energy is %g\n", ising.E);
   ising.calculate_energy();
-  printf("the energy is %g\n", E/iteration);
+  printf("the energy is %g\n", ising.E);
+  
+  took("Running");
 
 }
 
