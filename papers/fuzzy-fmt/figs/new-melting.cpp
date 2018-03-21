@@ -217,18 +217,21 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
-  const int NUM_POINTS = 8;
-  for (int i=0; i<NUM_POINTS; i++) {
-    vector3d r_prime = R + vector3d::ran(gwidth);
+  const long NUM_POINTS = 8;
+  for (long i=0; i<NUM_POINTS; i++) {
+    vector3d dr = vector3d::ran(gwidth);
+    vector3d r_prime = R + dr;
+    vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
     weight w = find_weights(r, r_prime, temp);
+    weight w2 = find_weights(r, r_prime2, temp);
 
-    w_den_R.n_0 += (1.0/NUM_POINTS)*(1-fv)*w.n_0;
-    w_den_R.n_1 += (1.0/NUM_POINTS)*(1-fv)*w.n_1;
-    w_den_R.n_2 += (1.0/NUM_POINTS)*(1-fv)*w.n_2;
-    w_den_R.n_3 += (1.0/NUM_POINTS)*(1-fv)*w.n_3;
+    w_den_R.n_0 += (0.5/NUM_POINTS)*(1-fv)*(w.n_0 + w2.n_0);
+    w_den_R.n_1 += (0.5/NUM_POINTS)*(1-fv)*(w.n_1 + w2.n_1);
+    w_den_R.n_2 += (0.5/NUM_POINTS)*(1-fv)*(w.n_2 + w2.n_2);
+    w_den_R.n_3 += (0.5/NUM_POINTS)*(1-fv)*(w.n_3 + w2.n_3);
 
-    w_den_R.nv_1 += (1.0/NUM_POINTS)*(1-fv)*w.nv_1;
-    w_den_R.nv_2 += (1.0/NUM_POINTS)*(1-fv)*w.nv_2;
+    w_den_R.nv_1 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_1 + w2.nv_1);
+    w_den_R.nv_2 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_2 + w2.nv_2);
   }
   return w_den_R;
 }
@@ -993,7 +996,7 @@ int main(int argc, const char **argv) {
     printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
     double a = find_lattice_constant(reduced_density, fv);
 
-    vector3d r = vector3d(0,0,.5);
+    vector3d r = vector3d(0,0,.55);
     vector3d R = vector3d(0,0,0);
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
     weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, a, gw, fv);
