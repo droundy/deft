@@ -28,23 +28,33 @@ const int Q = 2;   // Define number of spin states.
 
 struct ising_simulation {
   long iteration;   // the current iteration number
-  int N;
+  int N;            // N*N is the number of sites
   int *S;
   double E;      // system energy.
   double T;      // canonical temperature.
 
+  long energy_levels;
+  long *energy_histogram;
+
   explicit ising_simulation(int N); // generate the spin lattice
 
-  int flip_a_spin(int oldspin) const; // pick a new random (but changed) spin
+  int random_flip(int oldspin) const; // pick a new random (but changed) spin
 
-  void canonical_flip();
+  void reset_histograms();
+  void flip_a_spin();
   double calculate_energy();
 };
 
-
 // ising_simulation methods
 
-int ising_simulation::flip_a_spin(int oldspin) const {
+void ising_simulation::reset_histograms(){
+
+  for(int i = 0; i < energy_levels; i++){
+    energy_histogram[i] = 0;
+  }
+}
+
+int ising_simulation::random_flip(int oldspin) const {
   if (Q==2) return -oldspin;
 
   return random::ran64() % Q - Q/2; // gives value -Q/2 to Q/2-1?
@@ -56,6 +66,15 @@ ising_simulation::ising_simulation(int NN) {
   T = 0;
   N = NN;
   S = new int[N*N];
+  // Energy histogram
+  // abs. ground state energy for 2D Ising model.  But with new long rather
+  // than just long for energy_histogram could I keep track of energy levels
+  // found and update as needed?
+  // i.e. if H(E) == 0 then energy_levels ++ "we have found a new energy".
+  energy_levels = 2*J*N*N;
+  energy_histogram = new long[energy_levels]();
+  //printf("energy_levels %ld\n", energy_levels);
+  reset_histograms();
 
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
@@ -64,20 +83,20 @@ ising_simulation::ising_simulation(int NN) {
   }
 }
 
-// ---------------------------------------------------------------------
-// Canonical Monte-Carlo
-// ---------------------------------------------------------------------
-
-void ising_simulation::canonical_flip() {
+void ising_simulation::flip_a_spin() {
   iteration += 1;
   int k = random::ran64() % (N*N);
   int i = k % N;
   int j = k / N;
   int old = S[j + i*N];
-  S[j + i*N] = flip_a_spin(S[j + i*N]);
+  S[j + i*N] = random_flip(S[j + i*N]);
 
   int neighbor_spins = S[j + ((i+1) % N)*N] + S[j + ((i-1+N) % N)*N] +
                        S[((j+1) % N) + i*N] + S[((j-1+N) % N) + i*N];
+
+// ---------------------------------------------------------------------
+// Canonical Monte-Carlo
+// ---------------------------------------------------------------------
 
   const double deltaE = J*(old - S[j + i*N])*neighbor_spins;
   const double lnprob = -deltaE/T;
@@ -89,6 +108,11 @@ void ising_simulation::canonical_flip() {
     E += deltaE;
     //printf("flipping gives E=%g\n", E);
   }
+
+  energy_histogram[abs(lround(E))] += 1;
+// ---------------------------------------------------------------------
+// Broad-Histogram Methods
+// ---------------------------------------------------------------------
 }
 
 double ising_simulation::calculate_energy() {
@@ -103,6 +127,7 @@ double ising_simulation::calculate_energy() {
   }
   return E;
 }
+
 // ---------------------------------------------------------------------
 // Initialize Main
 // ---------------------------------------------------------------------
@@ -135,17 +160,25 @@ int main(int argc, const char *argv[]) {
   took("Starting program");
   printf("version: %s\n",version_identifier());
 
-  long totaliteration = 5900;
+  long totaliteration = 12000;
 
   ising.calculate_energy();
   for (long i = 0; i < totaliteration; i++) {
-    ising.canonical_flip();
+    ising.flip_a_spin();
   }
   printf("I think the energy is %g\n", ising.E);
   ising.calculate_energy();
   printf("the energy is %g\n", ising.E);
   
   took("Running");
+  for(int i = 0; i <= ising.energy_levels; i++){
+    printf("energy histogram at %d is %ld\n",i,ising.energy_histogram[i]);
+  }
+  // -------------------------------------------------------------------
+  // END OF MAIN PROGRAM LOOP
+  // -------------------------------------------------------------------
+
+  delete[] ising.energy_histogram;
 
 }
 
