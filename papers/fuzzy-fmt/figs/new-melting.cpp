@@ -236,6 +236,65 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   return w_den_R;
 }
 
+weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,
+                                   double lattice_constant,
+                                   double gwidth, double fv) {
+  weight w_den_sqr_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
+    return w_den_sqr_R;
+  }
+  const long NUM_POINTS = 8;
+  
+  //Compute average of squared weight:
+  for (long i=0; i<NUM_POINTS; i++) {
+    vector3d dr = vector3d::ran(gwidth);
+    vector3d r_prime = R + dr;
+    vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+    weight w = find_weights(r, r_prime, temp);
+    weight w2 = find_weights(r, r_prime2, temp);
+    
+    w_den_sqr_R.n_0 += (0.5/NUM_POINTS)*(1-fv)*(w.n_0*w.n_0 + w2.n_0*w2.n_0);
+    w_den_sqr_R.n_1 += (0.5/NUM_POINTS)*(1-fv)*(w.n_1*w.n_1 + w2.n_1*w2.n_1);
+    w_den_sqr_R.n_2 += (0.5/NUM_POINTS)*(1-fv)*(w.n_2*w.n_2 + w2.n_2*w2.n_2);
+    w_den_sqr_R.n_3 += (0.5/NUM_POINTS)*(1-fv)*(w.n_3*w.n_3 + w2.n_3*w2.n_3);
+
+    w_den_sqr_R.nv_1.x += (0.5/NUM_POINTS)*(1-fv)*(w.nv_1.x*w.nv_1.x + w2.nv_1.x*w2.nv_1.x);
+    w_den_sqr_R.nv_1.y += (0.5/NUM_POINTS)*(1-fv)*(w.nv_1.y*w.nv_1.y + w2.nv_1.y*w2.nv_1.y);
+    w_den_sqr_R.nv_1.z += (0.5/NUM_POINTS)*(1-fv)*(w.nv_1.z*w.nv_1.z + w2.nv_1.z*w2.nv_1.z);
+    w_den_sqr_R.nv_2.x += (0.5/NUM_POINTS)*(1-fv)*(w.nv_2.x*w.nv_2.x + w2.nv_2.x*w2.nv_2.x);
+    w_den_sqr_R.nv_2.y += (0.5/NUM_POINTS)*(1-fv)*(w.nv_2.y*w.nv_2.y + w2.nv_2.y*w2.nv_2.y);
+    w_den_sqr_R.nv_2.z += (0.5/NUM_POINTS)*(1-fv)*(w.nv_2.z*w.nv_2.z + w2.nv_2.z*w2.nv_2.z);
+  }
+  
+  //Compute square of average weight:
+  weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, lattice_constant, gwidth, fv);
+  weight sqr_w_MC = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+
+  sqr_w_MC.n_0 = w_MC.n_0*w_MC.n_0;
+  sqr_w_MC.n_1 = w_MC.n_1*w_MC.n_1;
+  sqr_w_MC.n_2 = w_MC.n_2*w_MC.n_2;
+  sqr_w_MC.n_3 = w_MC.n_3*w_MC.n_3;
+
+  sqr_w_MC.nv_1.x = w_MC.nv_1.x*w_MC.nv_1.x;
+  sqr_w_MC.nv_1.y = w_MC.nv_1.y*w_MC.nv_1.y;
+  sqr_w_MC.nv_1.z = w_MC.nv_1.z*w_MC.nv_1.z;
+  sqr_w_MC.nv_2.x = w_MC.nv_2.x*w_MC.nv_2.x;
+  sqr_w_MC.nv_2.y = w_MC.nv_2.y*w_MC.nv_2.y;
+  sqr_w_MC.nv_2.z = w_MC.nv_2.z*w_MC.nv_2.z;    
+  
+  //Compute variance = average of squared weight - square of average weight 
+  weight variance = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  variance.n_0 =  w_den_sqr_R.n_0 - sqr_w_MC.n_0;
+  variance.n_1 =  w_den_sqr_R.n_1 - sqr_w_MC.n_1;
+  variance.n_2 =  w_den_sqr_R.n_2 - sqr_w_MC.n_2;
+  variance.n_3 =  w_den_sqr_R.n_3 - sqr_w_MC.n_3;
+  
+  variance.nv_1 = w_den_sqr_R.nv_1 - sqr_w_MC.nv_1;
+  variance.nv_2 = w_den_sqr_R.nv_2 - sqr_w_MC.nv_2;
+  
+  return variance;
+}
+
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
   printf("\nCalculating many_cells...\n");
@@ -989,13 +1048,15 @@ int main(int argc, const char **argv) {
   //return 0;  //for debug
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-//TEST GAUSSIAN QUADRATURE FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//TEST Weighted Density Calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//Use to compare a value of weighted density caluclated analytically to that computed by 
+//Gaussain Quadrature and Monte-Carlo techniques
+
   int do_GQ_Test = 1;  //Turn Gaussian Quadrature Test on(1)/off(0) 
   
   if (do_GQ_Test > 0) {
     printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
     double a = find_lattice_constant(reduced_density, fv);
-
     vector3d r = vector3d(0,0,.55);
     vector3d R = vector3d(0,0,0);
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
@@ -1015,33 +1076,25 @@ int main(int argc, const char **argv) {
     printf("MC: n_0=%g, n_1=%g, n_2=%g, n_3=%g\n", w_MC.n_0, w_MC.n_1, w_MC.n_2, w_MC.n_3);
     printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n", w_R.nv_1.x, w_R.nv_1.y, w_R.nv_1.z);
     printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n\n", w_R.nv_2.x, w_R.nv_2.y, w_R.nv_2.z);
-
-
-    //TEST GAUSSIAN QUADRATURE FUNCTION 2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    //use to compare a value of weighted density caluclated analytically to that computed by Gaussain Quadrature function
-
-    int do_GQcompare_Test = 1;  //Turn Gaussian Quadrature Compare Test on(1)/off(0) 
-    if (do_GQcompare_Test > 0) {
-      double rz = .5;  //r=(0,0,rz)  choose a value for r along the z-axis
-      double alpha=find_alpha(temp);
-      double zeta=find_zeta(temp);
-      double norm=uipow(gw*sqrt(2*M_PI), 3);
-      double n_2_of_r = ((2*M_PI)/zeta)*exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))
-        *(sqrt(2)*gw +(gw*gw*gw/(3*sqrt(2)))*(4*(((-2*rz+alpha)/zeta)+1)-16*((rz-(alpha/2))/(zeta*zeta*rz))))/norm;
-      n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))/(zeta*sqrt(M_PI));
-      //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*((M_PI*2*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4))))/norm; //error
-      //double n_2_of_r = (rz-(alpha/2))/zeta; 
-      //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta)); 
-      //double n_2_of_r = exp(-((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta))*(-328.754); 
-      //double n_2_of_r =(M_PI*sqrt(2)*gw/zeta)-((4*M_PI*sqrt(2)*gw*gw*gw/(3*zeta*zeta*zeta*zeta))*(rz*rz-(1+alpha)*rz +(alpha/2)+(alpha*alpha/4)));
-      printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
-      printf("analytic n_2 = %g  for rz=%g (compare with quadrature %g or mc %g)\n",
-             n_2_of_r, rz, w_R.n_2, w_MC.n_2);
-
-      return 0;  //for debug
-    }
-  }
   
+    //Anayltic Solution
+    double alpha=find_alpha(temp);
+    double zeta=find_zeta(temp);
+    double norm=uipow(gw*sqrt(2*M_PI),3);
+    double n_2_of_r = (uipow(gw*sqrt(2*M_PI),3)/(norm*zeta*sqrt(M_PI)))*exp(-((r.z-(alpha/2))/zeta)*((r.z-(alpha/2))/zeta));   //Uses first Term of w2 Taylor expansion
+    printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
+    printf("analytic n_2 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
+             n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
+             
+    //Variances
+    weight variance=find_weighted_den_variances_aboutR_mc(r, R, dx, temp, a, gw, fv);
+    printf("variance in w0 = %g\n", variance.n_0);
+    printf("variance in w1 = %g\n", variance.n_1);
+    printf("variance in w2 = %g\n", variance.n_2);
+    printf("variance in w3 = %g\n", variance.n_3);
+
+    return 0;  //for debug
+  }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   if (fv == -1) {
