@@ -26,6 +26,8 @@ const int Q = 2;   // Define number of spin states.
 // ising.h files -- this could likely go into an ising.h file
 // ---------------------------------------------------------------------
 
+enum dos_types { histogram_dos, transition_dos, weights_dos };
+
 struct ising_simulation {
   long iteration;   // the current iteration number
   int N;            // N*N is the number of sites
@@ -34,6 +36,7 @@ struct ising_simulation {
   double T;      // canonical temperature.
 
   long energy_levels;
+  long energies_found;
   long *energy_histogram;
 
   explicit ising_simulation(int N); // generate the spin lattice
@@ -43,6 +46,11 @@ struct ising_simulation {
   void reset_histograms();
   void flip_a_spin();
   double calculate_energy();
+  
+  double* compute_ln_dos(dos_types dos_type);
+  double *ln_energy_weights;
+  double *ln_dos;
+  int max_entropy_state;
 };
 
 // ising_simulation methods
@@ -72,7 +80,9 @@ ising_simulation::ising_simulation(int NN) {
   // found and update as needed?
   // i.e. if H(E) == 0 then energy_levels ++ "we have found a new energy".
   energy_levels = 2*J*N*N;
+  ln_energy_weights = new double[energy_levels]();
   energy_histogram = new long[energy_levels]();
+  max_entropy_state = 0;
   //printf("energy_levels %ld\n", energy_levels);
   reset_histograms();
 
@@ -97,7 +107,6 @@ void ising_simulation::flip_a_spin() {
 // ---------------------------------------------------------------------
 // Canonical Monte-Carlo
 // ---------------------------------------------------------------------
-
   const double deltaE = J*(old - S[j + i*N])*neighbor_spins;
   const double lnprob = -deltaE/T;
 
@@ -106,10 +115,16 @@ void ising_simulation::flip_a_spin() {
     //printf("not flipping from E=%g\n", E);
   } else {
     E += deltaE;
+
+//  if (energy_histogram[abs(lround(E))] == 0) {
+//    energies_found++;  // we have found a new energy!
+//  };
     //printf("flipping gives E=%g\n", E);
   }
 
   energy_histogram[abs(lround(E))] += 1;
+  //energy_histogram[energies_found] += 1;
+
 // ---------------------------------------------------------------------
 // Broad-Histogram Methods
 // ---------------------------------------------------------------------
@@ -128,6 +143,21 @@ double ising_simulation::calculate_energy() {
   return E;
 }
 
+double* ising_simulation::compute_ln_dos(dos_types dos_type) {
+
+  double *ln_dos = new double[energy_levels]();
+
+  if(dos_type == histogram_dos){
+    for(int i = max_entropy_state; i < energy_levels; i++){
+      if(energy_histogram[i] != 0){
+        ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
+      }
+      else ln_dos[i] = -1; //DBL_max
+    }
+  }
+  return ln_dos;
+}
+  
 // ---------------------------------------------------------------------
 // Initialize Main
 // ---------------------------------------------------------------------
@@ -156,14 +186,15 @@ int main(int argc, const char *argv[]) {
 
   ising_simulation ising(4);
   ising.T = 2;
+  ising.energies_found = 0; // we haven't found any energies yet.
 
   took("Starting program");
   printf("version: %s\n",version_identifier());
 
-  long totaliteration = 12000;
+  long total_iteration = 12000;
 
   ising.calculate_energy();
-  for (long i = 0; i < totaliteration; i++) {
+  for (long i = 0; i < total_iteration; i++) {
     ising.flip_a_spin();
   }
   printf("I think the energy is %g\n", ising.E);
@@ -171,8 +202,18 @@ int main(int argc, const char *argv[]) {
   printf("the energy is %g\n", ising.E);
   
   took("Running");
+  
+  ising.ln_dos = ising.compute_ln_dos(histogram_dos);
   for(int i = 0; i <= ising.energy_levels; i++){
-    printf("energy histogram at %d is %ld\n",i,ising.energy_histogram[i]);
+    printf("lndos is %f\n", ising.ln_dos[i]);
+  }
+  //printf("lndos is %f\n", ising.ln_dos[1]);
+  for(int i = 0; i <= ising.energy_levels; i++){
+    if (ising.energy_histogram[i] > 0) {
+      ising.energies_found++;
+      printf("energy histogram at %ld is %ld\n",
+              ising.energies_found,ising.energy_histogram[i]);
+    }
   }
   // -------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
