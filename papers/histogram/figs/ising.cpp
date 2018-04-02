@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <float.h>
 #include <time.h>
 #include <cassert>
 #include <math.h>
@@ -7,6 +8,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
+#include <popt.h>
 #include "handymath.h"
 #include "vector3d.h"
 
@@ -152,12 +154,12 @@ double* ising_simulation::compute_ln_dos(dos_types dos_type) {
       if(energy_histogram[i] != 0){
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
       }
-      else ln_dos[i] = -1; //DBL_max
+      else ln_dos[i] = -DBL_MAX; //apparently in float.h?
     }
   }
   return ln_dos;
 }
-  
+
 // ---------------------------------------------------------------------
 // Initialize Main
 // ---------------------------------------------------------------------
@@ -184,6 +186,78 @@ static double took(const char *name) {
 
 int main(int argc, const char *argv[]) {
 
+  poptContext optCon;
+
+  // -------------------------------------------------------------------
+  // Parse input options
+  // -------------------------------------------------------------------
+
+  poptOption optionsTable[] = {
+
+    /*** ISING MODEL PARAMETERS ***/
+
+    //{"N", '\0', POPT_ARG_INT, &ising.N, 0, "N*N is the number of spin sites", "INT"},
+    //{"Q", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &ising.Q, 0,
+     //"The number of spin states", "INT"},
+
+    /*** SIMULATION ITERATIONS ***/
+
+    //{"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
+     //0, "Number of iterations for which to run the simulation", "INT"},
+    //{"round_trips", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_round_trips,
+     //0, "Number of round trips (pessimistic samples) to run the simulation", "INT"},
+
+    /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
+
+    //{"data_dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
+     //"Directory in which to save data", "data_dir"},
+    //{"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
+     //"Base of output file names", "STRING"},
+    //{"filename_suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
+     //&filename_suffix, 0, "Output file name suffix", "STRING"},
+
+    /*** HISTOGRAM METHOD OPTIONS ***/
+
+    //{"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
+     //" rather than adjusted weights", "DOUBLE"},
+
+    /*** HISTOGRAM METHOD PARAMETERS ***/
+
+    //{"wl_factor", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &wl_factor,
+     //0, "Initial value of Wang-Landau factor", "DOUBLE"},
+
+    /*** END CONDITION PARAMETERS ***/
+
+    //{"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
+     //"Number of times to sample mininum energy", "INT"},
+    //{"init_iters", '\0', POPT_ARG_INT, &sw.init_iters, 0,
+     //"Number of iterations for initialization", "INT"},
+    //{"min_T", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+     //&ising.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
+
+    POPT_AUTOHELP
+    POPT_TABLEEND
+  };
+  optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+  poptSetOtherOptionHelp(optCon, "[OPTION...]\nRequired arguments: square-root of number of sites (N), "
+                         "and the number of spin states (Q)");
+
+  int c = 0;
+  // go through arguments, set them based on optionsTable
+  while((c = poptGetNextOpt(optCon)) >= 0);
+  if (c < -1) {
+    fprintf(stderr, "\n%s: %s\n", poptBadOption(optCon, 0), poptStrerror(c));
+    return 1;
+  }
+  poptFreeContext(optCon);
+
+  printf("------------------------------------------------------------------\n");
+  printf("Running %s with parameters:\n", argv[0]);
+  for(int i = 1; i < argc; i++) {
+    if(argv[i][0] == '-') printf("\n");
+    printf("%s ", argv[i]);
+  }
+
   ising_simulation ising(4);
   ising.T = 2;
   ising.energies_found = 0; // we haven't found any energies yet.
@@ -200,12 +274,13 @@ int main(int argc, const char *argv[]) {
   printf("I think the energy is %g\n", ising.E);
   ising.calculate_energy();
   printf("the energy is %g\n", ising.E);
-  
+
   took("Running");
-  
+
   ising.ln_dos = ising.compute_ln_dos(histogram_dos);
+
   for(int i = 0; i <= ising.energy_levels; i++){
-    printf("lndos is %f\n", ising.ln_dos[i]);
+    printf("histogram is %ld\n while lndos is %g\n", ising.energy_histogram[i], ising.ln_dos[i]);
   }
   //printf("lndos is %f\n", ising.ln_dos[1]);
   for(int i = 0; i <= ising.energy_levels; i++){
