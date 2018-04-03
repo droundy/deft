@@ -95,7 +95,7 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   const double alpha = find_alpha(temp);
   const double zeta = find_zeta(temp);
   weight w;
-  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(rdiff_magnitude-(alpha/2),2)/uipow(zeta,2));  //ASK - should these be in the if statement below as well?
+  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(r.norm()-(alpha/2),2)/uipow(zeta,2));  //ASK - should these be in the if statement below as well?
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   //printf("erf=%g\n", erf((rdiff_magnitude-(alpha/2))/zeta));  //debug
   //printf("w.n_3=%g\n", w.n_3);  //debug
@@ -1057,7 +1057,7 @@ int main(int argc, const char **argv) {
   if (do_GQ_Test > 0) {
     printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
     double a = find_lattice_constant(reduced_density, fv);
-    vector3d r = vector3d(0,0,.55);
+    vector3d r = vector3d(0,0,.56);
     vector3d R = vector3d(0,0,0);
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
     weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, a, gw, fv);
@@ -1087,11 +1087,20 @@ int main(int argc, const char **argv) {
              n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
              
     //Variances
+    printf("\nVariances:\n");
     weight variance=find_weighted_den_variances_aboutR_mc(r, R, dx, temp, a, gw, fv);
     printf("variance in w0 = %g\n", variance.n_0);
     printf("variance in w1 = %g\n", variance.n_1);
     printf("variance in w2 = %g\n", variance.n_2);
     printf("variance in w3 = %g\n", variance.n_3);
+    
+    printf("\nCompare calculated variances with 1/Nmc (want values to be close to zero):\n");
+    int Nmc = 8;   //monte-carlo number of sample points 
+    printf("For Nmc=%i:\n",Nmc);
+    printf("variance in w0 - 1/Nmc=%g\n", variance.n_0-(1.0/Nmc));
+    printf("variance in w1 - 1/Nmc=%g\n", variance.n_1-(1.0/Nmc));
+    printf("variance in w2 - 1/Nmc=%g\n", variance.n_2-(1.0/Nmc));
+    printf("variance in w3 - 1/Nmc=%g\n", variance.n_3-(1.0/Nmc));
 
     return 0;  //for debug
   }
