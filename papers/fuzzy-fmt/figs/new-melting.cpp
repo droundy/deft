@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-const long NUM_POINTS = 800;
+const long NUM_POINTS = 80;
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
@@ -98,7 +98,7 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   const double alpha = find_alpha(temp);
   const double zeta = find_zeta(temp);
   weight w;
-  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow(rdiff_magnitude-(alpha/2),2)/uipow(zeta,2));  //ASK - should these be in the if statement below as well?
+  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude-(alpha/2))/zeta,2));  //ASK - should these be in the if statement below as well?
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   //printf("erf=%g\n", erf((rdiff_magnitude-(alpha/2))/zeta));  //debug
   //printf("w.n_3=%g\n", w.n_3);  //debug
@@ -1084,7 +1084,10 @@ int main(int argc, const char **argv) {
     double alpha=find_alpha(temp);
     double zeta=find_zeta(temp);
     double norm=uipow(gw*sqrt(2*M_PI),3);
-    double n_2_of_r = (uipow(gw*sqrt(2*M_PI),3)/(norm*zeta*sqrt(M_PI)))*exp(-((r.z-(alpha/2))/zeta)*((r.z-(alpha/2))/zeta));   //Uses first Term of w2 Taylor expansion
+    double n_2_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w2 Taylor expansion
+    double n_2_of_r_3rdterm = 6*sqrt(2)*M_PI*gw*gw*gw*gw*gw/(norm*zeta*zeta*r.z)*exp(-uipow((r.z-(alpha/2))/zeta,2))*(2*uipow((r.z-(alpha/2))/zeta,2)-1);
+    double n_2_of_r = n_2_of_r_1stterm + n_2_of_r_3rdterm;
+    printf("3rd term of n_2=%g\n",n_2_of_r_3rdterm);
     printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
     printf("analytic n_2 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
