@@ -150,7 +150,7 @@ enum InnerExpr {
 /// use deft::Expr;
 /// assert_eq!(Expr::var("a"), Expr::var("a"));
 /// ```
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, Eq, Hash, Debug)]
 pub struct Expr {
     inner: Intern<InnerExpr>,
     subx: Intern<Subexprs>,
@@ -349,6 +349,13 @@ impl<N: Into<f64>> From<N> for Expr {
     }
 }
 
+impl<RHS: Into<Expr>+Clone> std::cmp::PartialEq<RHS> for Expr {
+    fn eq(&self, other: &RHS) -> bool {
+        let other: Expr = other.clone().into();
+        other.inner == self.inner
+    }
+}
+
 impl<RHS: Into<Expr>> std::ops::Add<RHS> for Expr {
     type Output = Self;
 
@@ -432,6 +439,24 @@ impl<RHS: Into<Expr>> std::ops::Div<RHS> for Expr {
         self * Expr::from_mul_map(divisor)
     }
 }
+// The following to impls allow us to write code like either 1/x or
+// 1.0/x.
+impl std::ops::Div<Expr> for f64 {
+    type Output = Expr;
+
+    fn div(self, other: Expr) -> Expr {
+        let e: Expr = self.into();
+        e / other
+    }
+}
+impl std::ops::Div<Expr> for i32 {
+    type Output = Expr;
+
+    fn div(self, other: Expr) -> Expr {
+        let e: Expr = self.into();
+        e / other
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -478,12 +503,12 @@ mod tests {
         let a = Expr::var("a");
         let b = Expr::var("b");
 
-        assert_eq!(a.deriv(a), Expr::one());
+        assert_eq!(a.deriv(a), 1);
         assert_eq!((a * a).deriv(a), a*2);
         assert_eq!((a * a * a).deriv(a), a*a*3);
         assert_eq!(a.deriv(b), a*0);
-        assert_eq!((a + b).deriv(a).cpp(), "1");
-        assert_eq!(Expr::log(a).deriv(a).cpp(), "1 / a");
+        assert_eq!((a + b).deriv(a), 1);
+        assert_eq!(Expr::log(a).deriv(a), 1.0 / a);
         assert_eq!(Expr::log(a * a).deriv(a).cpp(), "2 / a");
         assert_eq!(Expr::exp(a).deriv(a).cpp(), "exp(a)");
         assert_eq!(Expr::exp(a * a).deriv(a).cpp(), "2 * a * exp(pow(a, 2))");
