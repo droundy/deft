@@ -1057,7 +1057,7 @@ int main(int argc, const char **argv) {
   if (do_GQ_Test > 0) {
     printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
     double a = find_lattice_constant(reduced_density, fv);
-    vector3d r = vector3d(0,0,.56);
+    vector3d r = vector3d(0,0,.55);
     vector3d R = vector3d(0,0,0);
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
     weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, a, gw, fv);
