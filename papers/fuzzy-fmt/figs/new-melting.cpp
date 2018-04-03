@@ -25,6 +25,9 @@
 #include "version-identifier.h"
 #include "vector3d.h"
 
+//Number of points for Monte-Carlo
+const long NUM_POINTS = 800;
+
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
 
@@ -217,7 +220,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
-  const long NUM_POINTS = 8;
+//  const long NUM_POINTS = 8;
   for (long i=0; i<NUM_POINTS; i++) {
     vector3d dr = vector3d::ran(gwidth);
     vector3d r_prime = R + dr;
@@ -243,7 +246,7 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_sqr_R;
   }
-  const long NUM_POINTS = 8;
+  //const long NUM_POINTS = 8;
   
   //Compute average of squared weight:
   for (long i=0; i<NUM_POINTS; i++) {
@@ -1095,12 +1098,11 @@ int main(int argc, const char **argv) {
     printf("variance in w3 = %g\n", variance.n_3);
     
     printf("\nCompare calculated variances with 1/Nmc (want values to be close to zero):\n");
-    int Nmc = 8;   //monte-carlo number of sample points 
-    printf("For Nmc=%i:\n",Nmc);
-    printf("variance in w0 - 1/Nmc=%g\n", variance.n_0-(1.0/Nmc));
-    printf("variance in w1 - 1/Nmc=%g\n", variance.n_1-(1.0/Nmc));
-    printf("variance in w2 - 1/Nmc=%g\n", variance.n_2-(1.0/Nmc));
-    printf("variance in w3 - 1/Nmc=%g\n", variance.n_3-(1.0/Nmc));
+    printf("For NUM_POINTS=%li :\n", NUM_POINTS);
+    printf("variance in w0 - 1/Nmc=%g\n", variance.n_0-(1.0/NUM_POINTS));
+    printf("variance in w1 - 1/Nmc=%g\n", variance.n_1-(1.0/NUM_POINTS));
+    printf("variance in w2 - 1/Nmc=%g\n", variance.n_2-(1.0/NUM_POINTS));
+    printf("variance in w3 - 1/Nmc=%g\n", variance.n_3-(1.0/NUM_POINTS));
 
     return 0;  //for debug
   }
