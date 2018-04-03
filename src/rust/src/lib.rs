@@ -255,11 +255,14 @@ impl Expr {
     /// ```
     /// use deft::Expr;
     /// let x = Expr::var("x");
-    /// assert_eq!((x * x).deriv("x"), x * 2);
+    /// assert_eq!((x * x).deriv(x), x * 2);
     /// ```
-    pub fn deriv(&self, wrt: &'static str) -> Expr {
+    pub fn deriv(&self, wrt: Expr) -> Expr {
+        if *self == wrt {
+            return Expr::one();
+        }
         match *self.inner {
-            InnerExpr::Var(s) => if *s == wrt { Expr::one() } else { Expr::zero() },
+            InnerExpr::Var(..) => Expr::zero(),
             InnerExpr::Exp(a) => *self * a.deriv(wrt),
             InnerExpr::Log(a) => a.deriv(wrt) / a,
             InnerExpr::Sum(a)
@@ -474,16 +477,19 @@ mod tests {
     fn derivatives() {
         let a = Expr::var("a");
         let b = Expr::var("b");
-        assert_eq!(a.deriv("a"), Expr::one());
-        assert_eq!((a * a).deriv("a"), a*2);
-        assert_eq!((a * a * a).deriv("a").cpp(), "3 * pow(a, 2)");
-        assert_eq!(a.deriv("b").cpp(), "0");
-        assert_eq!((a + b).deriv("a").cpp(), "1");
-        assert_eq!(Expr::log(a).deriv("a").cpp(), "1 / a");
-        assert_eq!(Expr::log(a * a).deriv("a").cpp(), "2 / a");
-        assert_eq!(Expr::exp(a).deriv("a").cpp(), "exp(a)");
-        assert_eq!(Expr::exp(a * a).deriv("a").cpp(), "2 * a * exp(pow(a, 2))");
-        assert_eq!(Expr::pow(Expr::log(a) + a, 3).deriv("a"),
+
+        assert_eq!(a.deriv(a), Expr::one());
+        assert_eq!((a * a).deriv(a), a*2);
+        assert_eq!((a * a * a).deriv(a), a*a*3);
+        assert_eq!(a.deriv(b), a*0);
+        assert_eq!((a + b).deriv(a).cpp(), "1");
+        assert_eq!(Expr::log(a).deriv(a).cpp(), "1 / a");
+        assert_eq!(Expr::log(a * a).deriv(a).cpp(), "2 / a");
+        assert_eq!(Expr::exp(a).deriv(a).cpp(), "exp(a)");
+        assert_eq!(Expr::exp(a * a).deriv(a).cpp(), "2 * a * exp(pow(a, 2))");
+        assert_eq!(Expr::pow(Expr::log(a) + a, 3).deriv(a),
                    Expr::pow(Expr::log(a) + a, 2) * 3 * (Expr::one() / a + 1));
+        assert_eq!((Expr::log(a) + Expr::log(a) * Expr::log(a)).deriv(Expr::log(a)),
+                   Expr::one() + Expr::log(a) * 2);
     }
 }
