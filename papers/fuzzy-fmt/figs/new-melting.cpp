@@ -1060,7 +1060,7 @@ int main(int argc, const char **argv) {
   if (do_GQ_Test > 0) {
     printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
     double a = find_lattice_constant(reduced_density, fv);
-    vector3d r = vector3d(0,0,.55);
+    vector3d r = vector3d(0,0,.4);
     vector3d R = vector3d(0,0,0);
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
     weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, a, gw, fv);
@@ -1086,11 +1086,22 @@ int main(int argc, const char **argv) {
     double norm=uipow(gw*sqrt(2*M_PI),3);
     double n_2_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w2 Taylor expansion
     double n_2_of_r_3rdterm = 6*sqrt(2)*M_PI*gw*gw*gw*gw*gw/(norm*zeta*zeta*r.z)*exp(-uipow((r.z-(alpha/2))/zeta,2))*(2*uipow((r.z-(alpha/2))/zeta,2)-1);
-    double n_2_of_r = n_2_of_r_1stterm + n_2_of_r_3rdterm;
-    printf("3rd term of n_2=%g\n",n_2_of_r_3rdterm);
-    printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
+    double n_2_of_r = n_2_of_r_1stterm + n_2_of_r_3rdterm;   //2nd term (and all even terms) = zero
+    printf("Analytic Solution:\n");
     printf("analytic n_2 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
+    printf("1st term of n_2= %g   2nd term of n_2= 0   3rd term of n_2= %g\n", n_2_of_r_1stterm, n_2_of_r_3rdterm);
+    double n_1_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_1_of_r = n_1_of_r_1stterm; 
+    printf("analytic n_1 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
+             n_1_of_r, r.z, w_R.n_1, w_MC.n_1);
+    printf("1st term of n_1= %g\n", n_1_of_r_1stterm);
+    double n_0_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_0_of_r = n_0_of_r_1stterm; 
+    printf("analytic n_0 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
+             n_0_of_r, r.z, w_R.n_0, w_MC.n_0);
+    printf("1st term of n_0= %g\n", n_0_of_r_1stterm);
+    printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
              
     //Variances
     printf("\nVariances:\n");
@@ -1100,7 +1111,7 @@ int main(int argc, const char **argv) {
     printf("variance in w2 = %g\n", variance.n_2);
     printf("variance in w3 = %g\n", variance.n_3);
     
-    printf("\nCompare calculated variances with 1/Nmc (want values to be close to zero):\n");
+    printf("\nCompare calculated variances with 1/NUM_POINTS (want values to be close to zero):\n");
     printf("For NUM_POINTS=%li :\n", NUM_POINTS);
     printf("variance in w0 - 1/Nmc=%g\n", variance.n_0-(1.0/NUM_POINTS));
     printf("variance in w1 - 1/Nmc=%g\n", variance.n_1-(1.0/NUM_POINTS));
