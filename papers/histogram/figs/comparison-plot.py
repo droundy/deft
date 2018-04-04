@@ -30,8 +30,9 @@ methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
-for j in range(len(split2)):
-    methods.append('-%s' %split2[j])
+for meth in split2:
+    if meth[-3:] != '-tm':
+        methods.append('-%s' % meth)
 
 # For SAMC compatibility with LVMC
 lvextra1 = glob('data/comparison/%s-samc*' % filebase)
