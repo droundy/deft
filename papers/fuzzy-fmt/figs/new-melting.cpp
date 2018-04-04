@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-const long NUM_POINTS = 80;
+const long NUM_POINTS = 80000;
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
@@ -1060,7 +1060,7 @@ int main(int argc, const char **argv) {
   if (do_GQ_Test > 0) {
     printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
     double a = find_lattice_constant(reduced_density, fv);
-    vector3d r = vector3d(0,0,.4);
+    vector3d r = vector3d(0,0,.55);
     vector3d R = vector3d(0,0,0);
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
     weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, a, gw, fv);
@@ -1104,7 +1104,7 @@ int main(int argc, const char **argv) {
     printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
              
     //Variances
-    printf("\nVariances:\n");
+    printf("\nVariances for NUM_POINTS=%li:\n", NUM_POINTS);
     weight variance=find_weighted_den_variances_aboutR_mc(r, R, dx, temp, a, gw, fv);
     printf("variance in w0 = %g\n", variance.n_0);
     printf("variance in w1 = %g\n", variance.n_1);
@@ -1112,7 +1112,6 @@ int main(int argc, const char **argv) {
     printf("variance in w3 = %g\n", variance.n_3);
     
     printf("\nCompare calculated variances with 1/NUM_POINTS (want values to be close to zero):\n");
-    printf("For NUM_POINTS=%li :\n", NUM_POINTS);
     printf("variance in w0 - 1/Nmc=%g\n", variance.n_0-(1.0/NUM_POINTS));
     printf("variance in w1 - 1/Nmc=%g\n", variance.n_1-(1.0/NUM_POINTS));
     printf("variance in w2 - 1/Nmc=%g\n", variance.n_2-(1.0/NUM_POINTS));
