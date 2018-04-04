@@ -108,7 +108,7 @@ for method in methods:
                 maxerrortm[i] = numpy.amax(doserror) - numpy.amin(doserror)
 
         i = 1
-        while i < len(iterations) and iterations[i] > iterations[i-1]:
+        while i < len(iterations) and iterations[i] >= iterations[i-1]:
             num_frames_to_count = i+1
             i+=1
         #wl_factor = wl_factor[:num_frames_to_count]
