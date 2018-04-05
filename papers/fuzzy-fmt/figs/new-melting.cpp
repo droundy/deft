@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-const long NUM_POINTS = 8;
+const long NUM_POINTS = 800;
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
@@ -326,6 +326,13 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
     
   return n_var;
 }
+
+//find_free_energy_variance(double ?) {
+//  n_var=find weighted_den_variance_aboutR_mc(r, R, dx, temp, lattice_constant, gwidth, fv);
+//  double f_var += uipow(ln(1-n_3),2)*n_var.n_0 + (n_2(1-cos?)/(1-n_3))*n_var.n_1+((n_1(1-cos?)/(1-n_3))-n_2*n_2/4*M_PI*(1-n_3)*(1-n_3))*n_var.n_2+(n_0/(1-n_3)-n_1*n_2*(1-cos?)/(1-n_3)*(1-n_3)-n_2*n_2/6*M_PI*uipow(1-n_3),3))*n_var.n_3;
+//}
+
+
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
