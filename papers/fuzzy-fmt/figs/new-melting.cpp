@@ -358,17 +358,20 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
   
-  int gauss_quad_option=1;  //set to 0 for crystal free energy with brute-force integration
-                            //set to 1 for crystal free energy with Gaussian Quadrature
+  int crystal_calc_option=1;  //set to 0 for crystal free energy with brute-force integration
+                              //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
+                              //set to 2 for crystal free energy with Monte-Carlo (more accurate)
 
   for (int density_option = 0; density_option <2; density_option++) { //loop on 0 only for homogeneous free energy, 
                                                                       //loop on 1 only for crystal free energy 
                                                                       //loop on 0 and 1 for both
   
   if (density_option > 0) {
-    if (gauss_quad_option < 1) {
+    if (crystal_calc_option < 1) {
       printf("\nCalculating Crystal Free Energy by brute-force integration...\n");
-    } else printf("\nCalculating Crystal Free Energy with Gaussian Quadrature...\n");
+    } else if (crystal_calc_option < 2 ){
+      printf("\nCalculating Crystal Free Energy with Gaussian Quadrature...\n");
+    } else printf("\nCalculating Crystal Free Energy with Monte-Carlo...\n");
 
   double phi_1=0, phi_2=0, phi_3=0;
   double free_energy=0;
@@ -391,7 +394,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               if ((R-r).norm() < max_distance_considered) {
-                      if (gauss_quad_option > 0 ) {
+                      if (crystal_calc_option > 1 ) {
+                          n_weight=find_weighted_den_aboutR_mc(R, r, dx, temp,  //For Crystal Free Energy in real space with Monte-Carlo
+                                                     lattice_constant, gwidth, fv);
+                      } else if (crystal_calc_option > 0 ) {
                           n_weight=find_weighted_den_aboutR_guasquad(R, r, dx, temp,  //For Crystal Free Energy in real space with Gaussian Quadrature
                                                      lattice_constant, gwidth, fv);
                       } else {
@@ -487,7 +493,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
   data_out.cfree_energy_per_vol=cfree_energy_per_vol; 
     
-  if (gauss_quad_option > 0 ) {
+  if (crystal_calc_option > 1) {
+    printf("\n*Crystal free energy calculated with Monte-Carlo\n");
+  } else if (crystal_calc_option > 0) {
     printf("\n*Crystal free energy calculated with Gaussian Quadrature\n");
   } else  printf("*Crystal free energy calculated with brute-force integration\n");  
 
@@ -1053,7 +1061,7 @@ int main(int argc, const char **argv) {
 
 //TEST Weighted Density Calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //Use to compare a value of weighted density caluclated analytically to that computed by 
-//Gaussain Quadrature and Monte-Carlo techniques
+//Gaussain Quadrature (fast) and Monte-Carlo (accurate) techniques
 
   int do_GQ_Test = 1;  //Turn Gaussian Quadrature Test on(1)/off(0) 
   
@@ -1084,38 +1092,48 @@ int main(int argc, const char **argv) {
     double alpha=find_alpha(temp);
     double zeta=find_zeta(temp);
     double norm=uipow(gw*sqrt(2*M_PI),3);
+    printf("Analytic Solution:\n");
+    //n_0
+    double n_0_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_0_of_r = n_0_of_r_1stterm; 
+    printf("n_0   analytic n_0 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
+             n_0_of_r, r.z, w_R.n_0, w_MC.n_0);
+    printf("      1st term of n_0= %g\n", n_0_of_r_1stterm);
+    //n_1
+    double n_1_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_1_of_r = n_1_of_r_1stterm; 
+    printf("n_1   analytic n_1 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
+             n_1_of_r, r.z, w_R.n_1, w_MC.n_1);
+    printf("      1st term of n_1= %g\n", n_1_of_r_1stterm);
+    //n_2
     double n_2_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w2 Taylor expansion
     double n_2_of_r_3rdterm = 6*sqrt(2)*M_PI*gw*gw*gw*gw*gw/(norm*zeta*zeta*r.z)*exp(-uipow((r.z-(alpha/2))/zeta,2))*(2*uipow((r.z-(alpha/2))/zeta,2)-1);
     double n_2_of_r = n_2_of_r_1stterm + n_2_of_r_3rdterm;   //2nd term (and all even terms) = zero
-    printf("Analytic Solution:\n");
-    printf("analytic n_2 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
+    printf("n_2   analytic n_2 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
-    printf("1st term of n_2= %g   2nd term of n_2= 0   3rd term of n_2= %g\n", n_2_of_r_1stterm, n_2_of_r_3rdterm);
-    double n_1_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
-    double n_1_of_r = n_1_of_r_1stterm; 
-    printf("analytic n_1 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
-             n_1_of_r, r.z, w_R.n_1, w_MC.n_1);
-    printf("1st term of n_1= %g\n", n_1_of_r_1stterm);
-    double n_0_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
-    double n_0_of_r = n_0_of_r_1stterm; 
-    printf("analytic n_0 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
-             n_0_of_r, r.z, w_R.n_0, w_MC.n_0);
-    printf("1st term of n_0= %g\n", n_0_of_r_1stterm);
+    printf("      1st term of n_2= %g   2nd term of n_2= 0   3rd term of n_2= %g\n", n_2_of_r_1stterm, n_2_of_r_3rdterm);
+    //n_3
+    double n_3_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)*(1-erf((r.z-(alpha/2))/zeta))/(2*norm))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_3_of_r = n_3_of_r_1stterm; 
+    printf("n_3   analytic n_3 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
+             n_3_of_r, r.z, w_R.n_3, w_MC.n_3);
+    printf("      1st term of n_3= %g\n", n_3_of_r_1stterm);
+    
     printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
              
     //Variances
-    printf("\nVariances for NUM_POINTS=%li:\n", NUM_POINTS);
-    weight variance=find_weighted_den_variances_aboutR_mc(r, R, dx, temp, a, gw, fv);
-    printf("variance in w0 = %g\n", variance.n_0);
-    printf("variance in w1 = %g\n", variance.n_1);
-    printf("variance in w2 = %g\n", variance.n_2);
-    printf("variance in w3 = %g\n", variance.n_3);
+    printf("\nMonte-Carlo Variances for NUM_POINTS=%li:\n", NUM_POINTS);
+    weight variance_w=find_weighted_den_variances_aboutR_mc(r, R, dx, temp, a, gw, fv);
+    printf("variance in w0 = %g\n", variance_w.n_0);
+    printf("variance in w1 = %g\n", variance_w.n_1);
+    printf("variance in w2 = %g\n", variance_w.n_2);
+    printf("variance in w3 = %g\n", variance_w.n_3);
     
     printf("\nCompare calculated variances with 1/NUM_POINTS (want values to be close to zero):\n");
-    printf("variance in w0 - 1/Nmc=%g\n", variance.n_0-(1.0/NUM_POINTS));
-    printf("variance in w1 - 1/Nmc=%g\n", variance.n_1-(1.0/NUM_POINTS));
-    printf("variance in w2 - 1/Nmc=%g\n", variance.n_2-(1.0/NUM_POINTS));
-    printf("variance in w3 - 1/Nmc=%g\n", variance.n_3-(1.0/NUM_POINTS));
+    printf("variance in w0 - 1/Nmc=%g\n", variance_w.n_0-(1.0/NUM_POINTS));
+    printf("variance in w1 - 1/Nmc=%g\n", variance_w.n_1-(1.0/NUM_POINTS));
+    printf("variance in w2 - 1/Nmc=%g\n", variance_w.n_2-(1.0/NUM_POINTS));
+    printf("variance in w3 - 1/Nmc=%g\n", variance_w.n_3-(1.0/NUM_POINTS));
 
     return 0;  //for debug
   }
