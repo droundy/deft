@@ -142,18 +142,27 @@ enum InnerExpr {
     Mul(Intern<CommutativeMap>),
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Kind {
+    Scalar,
+    RealSpace,
+    KSpace,
+    Vector,
+}
+
 /// This is an expression. You can use it to do arithmetic.
 ///
 /// # Example
 ///
 /// ```
-/// use deft::Expr;
-/// assert_eq!(Expr::var("a"), Expr::var("a"));
+/// use deft::{Expr, Kind};
+/// assert_eq!(Expr::var("a", Kind::Scalar), Expr::var("a", Kind::Scalar));
 /// ```
 #[derive(Clone, Copy, Eq, Hash, Debug)]
 pub struct Expr {
     inner: Intern<InnerExpr>,
     subx: Intern<Subexprs>,
+    kind: Kind,
 }
 
 impl Fits64 for Expr {
@@ -165,12 +174,13 @@ impl Fits64 for Expr {
         Expr {
             inner: Intern::<InnerExpr>::from_u64(x),
             subx: Subexprs::new_interned(),
+            kind: Kind::Scalar,
         }
     }
 }
 
 impl Expr {
-    fn from_inner(i: InnerExpr) -> Expr {
+    fn from_inner(i: InnerExpr, k: Kind) -> Expr {
         Expr {
             inner: Intern::new(i),
             subx: match i {
@@ -181,23 +191,28 @@ impl Expr {
                                     .fold(Set64::new(), |a, (e, _)| &a | &e.subx.set);
                     Intern::new(Subexprs::from(subx))
                 },
-            }
+            },
+            kind: k,
         }
     }
 
-    fn from_sum_map(m: CommutativeMap) -> Expr {
+    fn get_kind(&self) -> Kind {
+        self.kind
+    }
+
+    fn from_sum_map(m: CommutativeMap, k: Kind) -> Expr {
         if m.len() == 1 {
             let (k, &v) = m.map.iter().next().unwrap();
             if v == 1.0 {
                 return k;
             }
         }
-        Expr::from_inner(InnerExpr::Sum(Intern::new(m)))
+        Expr::from_inner(InnerExpr::Sum(Intern::new(m)), k)
     }
 
-    fn from_mul_map(m: CommutativeMap) -> Expr {
-        if m.get(Expr::zero()).is_some() {
-            return Expr::zero();
+    fn from_mul_map(m: CommutativeMap, k: Kind) -> Expr {
+        if m.get(Expr::zero(k)).is_some() {
+            return Expr::zero(k);
         }
         if m.len() == 1 {
             let (k, &v) = m.map.iter().next().unwrap();
@@ -205,32 +220,32 @@ impl Expr {
                 return k;
             }
         }
-        Expr::from_inner(InnerExpr::Mul(Intern::new(m)))
+        Expr::from_inner(InnerExpr::Mul(Intern::new(m)), k)
     }
 
     /// Express a variable.
-    pub fn var(sym: &'static str) -> Expr {
-        Expr::from_inner(InnerExpr::Var(Intern::new(sym)))
+    pub fn var(sym: &'static str, k: Kind) -> Expr {
+        Expr::from_inner(InnerExpr::Var(Intern::new(sym)), k)
     }
 
     /// Express an exponential.
-    pub fn exp(self) -> Expr {
-        Expr::from_inner(InnerExpr::Exp(self))
+    pub fn exp(arg: Expr) -> Expr {
+        Expr::from_inner(InnerExpr::Exp(arg), arg.get_kind())
     }
 
     /// Express a logarithm.
     pub fn log(arg: Expr) -> Expr {
-        Expr::from_inner(InnerExpr::Log(arg))
+        Expr::from_inner(InnerExpr::Log(arg), arg.get_kind())
     }
 
     /// Express unity/one.
-    pub fn one() -> Expr {
-        Expr::from_inner(InnerExpr::Mul(Intern::new(CommutativeMap::new())))
+    pub fn one(k: Kind) -> Expr {
+        Expr::from_inner(InnerExpr::Mul(Intern::new(CommutativeMap::new())), k)
     }
 
     /// Express zero.
-    pub fn zero() -> Expr {
-        Expr::from_inner(InnerExpr::Sum(Intern::new(CommutativeMap::new())))
+    pub fn zero(k: Kind) -> Expr {
+        Expr::from_inner(InnerExpr::Sum(Intern::new(CommutativeMap::new())), k)
     }
 
     /// Raise an expression to a constant power.
@@ -238,14 +253,14 @@ impl Expr {
     /// # Example
     ///
     /// ```
-    /// use deft::Expr;
-    /// let a = Expr::var("a");
+    /// use deft::{Expr, Kind};
+    /// let a = Expr::var("a", Kind::Scalar);
     /// assert_eq!(Expr::pow(a, 2) / a, a);
     /// ```
     pub fn pow<P: Into<f64>>(base: Expr, power: P) -> Expr {
         let mut mul = CommutativeMap::new();
         mul.insert(base, power.into());
-        Expr::from_mul_map(mul)
+        Expr::from_mul_map(mul, base.get_kind())
     }
 
     /// Differentiate symbolically.
@@ -253,25 +268,25 @@ impl Expr {
     /// # Example
     ///
     /// ```
-    /// use deft::Expr;
-    /// let x = Expr::var("x");
+    /// use deft::{Expr, Kind};
+    /// let x = Expr::var("x", Kind::Scalar);
     /// assert_eq!((x * x).deriv(x), x * 2);
     /// ```
     pub fn deriv(&self, wrt: Expr) -> Expr {
         if *self == wrt {
-            return Expr::one();
+            return Expr::one(self.get_kind());
         }
         match *self.inner {
-            InnerExpr::Var(..) => Expr::zero(),
+            InnerExpr::Var(..) => Expr::zero(self.get_kind()),
             InnerExpr::Exp(a) => *self * a.deriv(wrt),
             InnerExpr::Log(a) => a.deriv(wrt) / a,
             InnerExpr::Sum(a)
                 => a.map.iter()
-                        .fold(Expr::zero(),
+                        .fold(Expr::zero(self.get_kind()),
                               |a, (b, &c)| a + Expr::pow(b, c - 1.0) * c * b.deriv(wrt)),
             InnerExpr::Mul(a)
                 => a.map.iter()
-                        .fold(Expr::zero(),
+                        .fold(Expr::zero(self.get_kind()),
                               |a, (b, &c)| a + b.deriv(wrt) * c * *self / b),
             // InnerExpr::Mul(a)
             //     => a.map.iter()
@@ -281,6 +296,11 @@ impl Expr {
 
     /// Creates a fragment of C++ code which evaluates the expression.
     pub fn cpp(&self) -> String {
+        match self.get_kind() {
+            Kind::Scalar => {},
+            _ => return String::from("#error unimplemented"),
+        };
+
         match *self.inner {
             InnerExpr::Var(s) => String::from(*s),
             InnerExpr::Exp(a) => String::from("exp(") + &a.cpp() + &")",
@@ -344,8 +364,8 @@ impl<N: Into<f64>> From<N> for Expr {
         let mut m = CommutativeMap::new();
         let n = n.into();
         assert!(!n.is_nan());
-        m.insert(Expr::one(), n);
-        Expr::from_sum_map(m)
+        m.insert(Expr::one(Kind::Scalar), n);
+        Expr::from_sum_map(m, Kind::Scalar)
     }
 }
 
@@ -361,27 +381,30 @@ impl<RHS: Into<Expr>> std::ops::Add<RHS> for Expr {
 
     fn add(self, other: RHS) -> Self {
         let other = other.into();
+
+        assert!(self.get_kind() == other.get_kind());
+
         match (*self.inner, *other.inner) {
             (InnerExpr::Sum(a), InnerExpr::Sum(b)) => {
                 let mut sum = (*a).clone();
                 sum.union(&*b);
-                Expr::from_sum_map(sum)
+                Expr::from_sum_map(sum, self.get_kind())
             },
             (InnerExpr::Sum(m), _) => {
                 let mut sum = (*m).clone();
                 sum.insert(other, 1.0);
-                Expr::from_sum_map(sum)
+                Expr::from_sum_map(sum, self.get_kind())
             },
             (_, InnerExpr::Sum(m)) => {
                 let mut sum = (*m).clone();
                 sum.insert(self, 1.0);
-                Expr::from_sum_map(sum)
+                Expr::from_sum_map(sum, self.get_kind())
             },
             _ => {
                 let mut sum = CommutativeMap::new();
                 sum.insert(self, 1.0);
                 sum.insert(other, 1.0);
-                Expr::from_sum_map(sum)
+                Expr::from_sum_map(sum, self.get_kind())
             },
         }
     }
@@ -391,20 +414,33 @@ impl<RHS: Into<Expr>> std::ops::Mul<RHS> for Expr {
     type Output = Self;
 
     fn mul(self, other: RHS) -> Self {
-        let mut mul = CommutativeMap::new();
         let other = other.into();
 
-        match *self.inner {
-            InnerExpr::Mul(m) => mul.union(&*m),
-            _ => mul.insert(self, 1.0),
-        };
+        assert!(self.get_kind() == other.get_kind());
 
-        match *other.inner {
-            InnerExpr::Mul(m) => mul.union(&*m),
-            _ => mul.insert(other, 1.0),
-        };
-
-        Expr::from_mul_map(mul)
+        match (*self.inner, *other.inner) {
+            (InnerExpr::Mul(a), InnerExpr::Mul(b)) => {
+                let mut mul = (*a).clone();
+                mul.union(&*b);
+                Expr::from_mul_map(mul, self.get_kind())
+            },
+            (InnerExpr::Mul(m), _) => {
+                let mut mul = (*m).clone();
+                mul.insert(other, 1.0);
+                Expr::from_mul_map(mul, self.get_kind())
+            },
+            (_, InnerExpr::Mul(m)) => {
+                let mut mul = (*m).clone();
+                mul.insert(self, 1.0);
+                Expr::from_mul_map(mul, self.get_kind())
+            },
+            _ => {
+                let mut mul = CommutativeMap::new();
+                mul.insert(self, 1.0);
+                mul.insert(other, 1.0);
+                Expr::from_mul_map(mul, self.get_kind())
+            },
+        }
     }
 }
 
@@ -420,7 +456,7 @@ impl<RHS: Into<Expr>> std::ops::Sub<RHS> for Expr {
             _ => subtrahend.insert(other, -1.0),
         };
 
-        self + Expr::from_sum_map(subtrahend)
+        self + Expr::from_sum_map(subtrahend, self.get_kind())
     }
 }
 
@@ -436,7 +472,7 @@ impl<RHS: Into<Expr>> std::ops::Div<RHS> for Expr {
             _ => divisor.insert(other, -1.0),
         };
 
-        self * Expr::from_mul_map(divisor)
+        self * Expr::from_mul_map(divisor, self.get_kind())
     }
 }
 // The following to impls allow us to write code like either 1/x or
@@ -459,23 +495,23 @@ impl std::ops::Div<Expr> for i32 {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests_scalar {
     use super::*;
 
     #[test]
     fn basics() {
-        let a = Expr::var("a");
+        let a = Expr::var("a", Kind::Scalar);
 
         assert_eq!(a.cpp(), "a");
-        assert_eq!(Expr::var("\\aleph").cpp(), "\\aleph");
-        assert_eq!(Expr::one().cpp(), "1");
-        assert_eq!(Expr::zero().cpp(), "0");
+        assert_eq!(Expr::var("\\aleph", Kind::Scalar).cpp(), "\\aleph");
+        assert_eq!(Expr::one(Kind::Scalar).cpp(), "1");
+        assert_eq!(Expr::zero(Kind::Scalar).cpp(), "0");
     }
 
     #[test]
     fn commutatives() {
-        let a = Expr::var("a");
-        let b = Expr::var("b");
+        let a = Expr::var("a", Kind::Scalar);
+        let b = Expr::var("b", Kind::Scalar);
 
         assert_eq!((a + a).cpp(), "2 * a");
         assert_eq!((a + b).cpp(), "a + b");
@@ -488,20 +524,20 @@ mod tests {
 
     #[test]
     fn constants() {
-        assert_eq!((Expr::zero() + 0.0).cpp(), "0");
-        assert_eq!((Expr::one() + 0.0).cpp(), "1");
-        assert_eq!((Expr::zero() + 1.0).cpp(), "1");
-        assert_eq!((Expr::one() + 1.0).cpp(), "2");
-        assert_eq!((Expr::zero() * 0.0).cpp(), "0");
-        assert_eq!((Expr::one() * 0.0).cpp(), "0");
-        assert_eq!((Expr::zero() * 1.0).cpp(), "0");
-        assert_eq!((Expr::one() * 1.0).cpp(), "1");
+        assert_eq!((Expr::zero(Kind::Scalar) + 0.0).cpp(), "0");
+        assert_eq!((Expr::one(Kind::Scalar) + 0.0).cpp(), "1");
+        assert_eq!((Expr::zero(Kind::Scalar) + 1.0).cpp(), "1");
+        assert_eq!((Expr::one(Kind::Scalar) + 1.0).cpp(), "2");
+        assert_eq!((Expr::zero(Kind::Scalar) * 0.0).cpp(), "0");
+        assert_eq!((Expr::one(Kind::Scalar) * 0.0).cpp(), "0");
+        assert_eq!((Expr::zero(Kind::Scalar) * 1.0).cpp(), "0");
+        assert_eq!((Expr::one(Kind::Scalar) * 1.0).cpp(), "1");
     }
 
     #[test]
     fn derivatives() {
-        let a = Expr::var("a");
-        let b = Expr::var("b");
+        let a = Expr::var("a", Kind::Scalar);
+        let b = Expr::var("b", Kind::Scalar);
 
         assert_eq!(a.deriv(a), 1);
         assert_eq!((a * a).deriv(a), a*2);
@@ -513,8 +549,12 @@ mod tests {
         assert_eq!(Expr::exp(a).deriv(a).cpp(), "exp(a)");
         assert_eq!(Expr::exp(a * a).deriv(a).cpp(), "2 * a * exp(pow(a, 2))");
         assert_eq!(Expr::pow(Expr::log(a) + a, 3).deriv(a),
-                   Expr::pow(Expr::log(a) + a, 2) * 3 * (Expr::one() / a + 1));
+                   Expr::pow(Expr::log(a) + a, 2) * 3 * (Expr::one(Kind::Scalar) / a + 1));
         assert_eq!((Expr::log(a) + Expr::log(a) * Expr::log(a)).deriv(Expr::log(a)),
-                   Expr::one() + Expr::log(a) * 2);
+                   Expr::one(Kind::Scalar) + Expr::log(a) * 2);
     }
+}
+
+#[cfg(test)]
+mod tests_vector {
 }
