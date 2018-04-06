@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-const long NUM_POINTS = 800;
+const long NUM_POINTS = 16;
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
@@ -966,8 +966,8 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 
 int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
-  double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1;
-  double dx=0.01;        //grid point spacing dx=dy=dz=0.01
+  double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
+  double dx=0.01;        //default grid point spacing dx=dy=dz=0.01
   int verbose = false;
   int downhill = false;
 
