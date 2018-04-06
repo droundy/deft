@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-const long NUM_POINTS = 16;
+const long NUM_POINTS = 8;
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
@@ -220,7 +220,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
-//  const long NUM_POINTS = 8;
+
   for (long i=0; i<NUM_POINTS; i++) {
     vector3d dr = vector3d::ran(gwidth);
     vector3d r_prime = R + dr;
@@ -242,15 +242,11 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
 weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,
                                    double lattice_constant,
                                    double gwidth, double fv) {
- // weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
- // weight sqr_avg_w = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
-  weight w_var = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
-  weight n_var = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight avg_w = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
- //   return avg_w_sqr;
-     return n_var;
+     return {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   }
-  //const long NUM_POINTS = 8;
 
   for (long i=0; i<NUM_POINTS; i++) {
     vector3d dr = vector3d::ran(gwidth);
@@ -258,72 +254,27 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
     vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
     weight w = find_weights(r, r_prime, temp);
     weight w2 = find_weights(r, r_prime2, temp);
-    
-  //Compute average of squared weight:
-    //avg_w_sqr.n_0 += (0.5/NUM_POINTS)*(w.n_0*w.n_0 + w2.n_0*w2.n_0);
-    //avg_w_sqr.n_1 += (0.5/NUM_POINTS)*(w.n_1*w.n_1 + w2.n_1*w2.n_1);
-    //avg_w_sqr.n_2 += (0.5/NUM_POINTS)*(w.n_2*w.n_2 + w2.n_2*w2.n_2);
-    //avg_w_sqr.n_3 += (0.5/NUM_POINTS)*(w.n_3*w.n_3 + w2.n_3*w2.n_3);
 
-    //avg_w_sqr.nv_1.x += (0.5/NUM_POINTS)*(w.nv_1.x*w.nv_1.x + w2.nv_1.x*w2.nv_1.x);
-    //avg_w_sqr.nv_1.y += (0.5/NUM_POINTS)*(w.nv_1.y*w.nv_1.y + w2.nv_1.y*w2.nv_1.y);
-    //avg_w_sqr.nv_1.z += (0.5/NUM_POINTS)*(w.nv_1.z*w.nv_1.z + w2.nv_1.z*w2.nv_1.z);
-    //avg_w_sqr.nv_2.x += (0.5/NUM_POINTS)*(w.nv_2.x*w.nv_2.x + w2.nv_2.x*w2.nv_2.x);
-    //avg_w_sqr.nv_2.y += (0.5/NUM_POINTS)*(w.nv_2.y*w.nv_2.y + w2.nv_2.y*w2.nv_2.y);
-    //avg_w_sqr.nv_2.z += (0.5/NUM_POINTS)*(w.nv_2.z*w.nv_2.z + w2.nv_2.z*w2.nv_2.z);
+    //Compute average of squared weight:
+    avg_w_sqr.n_0 += (0.25/NUM_POINTS)*sqr(w.n_0 + w2.n_0);
+    avg_w_sqr.n_1 += (0.25/NUM_POINTS)*sqr(w.n_1 + w2.n_1);
+    avg_w_sqr.n_2 += (0.25/NUM_POINTS)*sqr(w.n_2 + w2.n_2);
+    avg_w_sqr.n_3 += (0.25/NUM_POINTS)*sqr(w.n_3 + w2.n_3);
 
-   //Compute square of average weight:
-    //sqr_avg_w.n_0 += uipow((0.5/NUM_POINTS)*(w.n_0 + w2.n_0),2);
-    //sqr_avg_w.n_1 += uipow((0.5/NUM_POINTS)*(w.n_1 + w2.n_1),2);
-    //sqr_avg_w.n_2 += uipow((0.5/NUM_POINTS)*(w.n_2 + w2.n_2),2);
-    //sqr_avg_w.n_3 += uipow((0.5/NUM_POINTS)*(w.n_3 + w2.n_3),2);
-
-    //sqr_avg_w.nv_1.x += uipow((0.5/NUM_POINTS)*(w.nv_1.x + w2.nv_1.x),2);
-    //sqr_avg_w.nv_1.y += uipow((0.5/NUM_POINTS)*(w.nv_1.y + w2.nv_1.y),2);
-    //sqr_avg_w.nv_1.z += uipow((0.5/NUM_POINTS)*(w.nv_1.z + w2.nv_1.z),2);
-    //sqr_avg_w.nv_2.x += uipow((0.5/NUM_POINTS)*(w.nv_2.x + w2.nv_2.x),2);
-    //sqr_avg_w.nv_2.y += uipow((0.5/NUM_POINTS)*(w.nv_2.y + w2.nv_2.y),2);
-    //sqr_avg_w.nv_2.z += uipow((0.5/NUM_POINTS)*(w.nv_2.z + w2.nv_2.z),2);
-  
-  //Compute var = average of squared weight - square of average weight at current rprime
-    w_var.n_0 = sqrt((0.5/NUM_POINTS)*(w.n_0*w.n_0 + w2.n_0*w2.n_0) - uipow((0.5/NUM_POINTS)*(w.n_0 + w2.n_0),2));
-    w_var.n_1 = sqrt((0.5/NUM_POINTS)*(w.n_1*w.n_1 + w2.n_1*w2.n_1) - uipow((0.5/NUM_POINTS)*(w.n_1 + w2.n_1),2));
-    w_var.n_2 = sqrt((0.5/NUM_POINTS)*(w.n_2*w.n_2 + w2.n_2*w2.n_2) - uipow((0.5/NUM_POINTS)*(w.n_2 + w2.n_2),2));
-    w_var.n_3 = sqrt((0.5/NUM_POINTS)*(w.n_3*w.n_3 + w2.n_3*w2.n_3) - uipow((0.5/NUM_POINTS)*(w.n_3 + w2.n_3),2));
-   
-    w_var.nv_1.x = sqrt((0.5/NUM_POINTS)*(w.nv_1.x*w.nv_1.x + w2.nv_1.x*w2.nv_1.x) - uipow((0.5/NUM_POINTS)*(w.nv_1.x + w2.nv_1.x),2));
-    w_var.nv_1.y = sqrt((0.5/NUM_POINTS)*(w.nv_1.y*w.nv_1.y + w2.nv_1.y*w2.nv_1.y) - uipow((0.5/NUM_POINTS)*(w.nv_1.y + w2.nv_1.y),2));
-    w_var.nv_1.z = sqrt((0.5/NUM_POINTS)*(w.nv_1.z*w.nv_1.z + w2.nv_1.z*w2.nv_1.z) - uipow((0.5/NUM_POINTS)*(w.nv_1.z + w2.nv_1.z),2));
-    w_var.nv_2.x = sqrt((0.5/NUM_POINTS)*(w.nv_2.x*w.nv_2.x + w2.nv_2.x*w2.nv_2.x) - uipow((0.5/NUM_POINTS)*(w.nv_2.x + w2.nv_2.x),2));
-    w_var.nv_2.y = sqrt((0.5/NUM_POINTS)*(w.nv_2.y*w.nv_2.y + w2.nv_2.y*w2.nv_2.y) - uipow((0.5/NUM_POINTS)*(w.nv_2.y + w2.nv_2.y),2));
-    w_var.nv_2.z = sqrt((0.5/NUM_POINTS)*(w.nv_2.z*w.nv_2.z + w2.nv_2.z*w2.nv_2.z) - uipow((0.5/NUM_POINTS)*(w.nv_2.z + w2.nv_2.z),2));
-  
-  //Compute variance in weighted density
-    n_var.n_0 += uipow((1.0/NUM_POINTS)*(1-fv)*w_var.n_0,2);
-    n_var.n_1 += uipow((1.0/NUM_POINTS)*(1-fv)*w_var.n_1,2);
-    n_var.n_2 += uipow((1.0/NUM_POINTS)*(1-fv)*w_var.n_2,2);
-    n_var.n_3 += uipow((1.0/NUM_POINTS)*(1-fv)*w_var.n_3,2);
-    
-    n_var.nv_1.x += uipow((1.0/NUM_POINTS)*(1-fv)*(w_var.nv_1.x),2);
-    n_var.nv_1.y += uipow((1.0/NUM_POINTS)*(1-fv)*(w_var.nv_1.y),2);
-    n_var.nv_1.z += uipow((1.0/NUM_POINTS)*(1-fv)*(w_var.nv_1.z),2);
-    n_var.nv_2.x += uipow((1.0/NUM_POINTS)*(1-fv)*(w_var.nv_2.x),2);
-    n_var.nv_2.y += uipow((1.0/NUM_POINTS)*(1-fv)*(w_var.nv_2.y),2);
-    n_var.nv_2.z += uipow((1.0/NUM_POINTS)*(1-fv)*(w_var.nv_2.z),2);   
+    //Compute square of average weight:
+    avg_w.n_0 += (0.5/NUM_POINTS)*(w.n_0 + w2.n_0);
+    avg_w.n_1 += (0.5/NUM_POINTS)*(w.n_1 + w2.n_1);
+    avg_w.n_2 += (0.5/NUM_POINTS)*(w.n_2 + w2.n_2);
+    avg_w.n_3 += (0.5/NUM_POINTS)*(w.n_3 + w2.n_3);
   }
-  
-  //Compute total w variance = average of squared weight - square of average weight
-  //weight w_variance = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
-  //w_variance.n_0 =  avg_w_sqr.n_0 - sqr_avg_w.n_0;
-  //w_variance.n_1 =  avg_w_sqr.n_1 - sqr_avg_w.n_1;
-  //w_variance.n_2 =  avg_w_sqr.n_2 - sqr_avg_w.n_2;
-  //w_variance.n_3 =  avg_w_sqr.n_3 - sqr_avg_w.n_3;
-  
-  //w_variance.nv_1 = avg_w_sqr.nv_1 - sqr_avg_w.nv_1;
-  //w_variance.nv_2 = avg_w_sqr.nv_2 - sqr_avg_w.nv_2;
-  
-  //return w_variance;
-    
+
+  // Compute total w variance = average of squared weight - square of average weight
+  weight n_var = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  n_var.n_0 = (1-fv)*(avg_w_sqr.n_0 - sqr(avg_w.n_0))/NUM_POINTS;
+  n_var.n_1 = (1-fv)*(avg_w_sqr.n_1 - sqr(avg_w.n_1))/NUM_POINTS;
+  n_var.n_2 = (1-fv)*(avg_w_sqr.n_2 - sqr(avg_w.n_2))/NUM_POINTS;
+  n_var.n_3 = (1-fv)*(avg_w_sqr.n_3 - sqr(avg_w.n_3))/NUM_POINTS;
+
   return n_var;
 }
 
@@ -1166,22 +1117,16 @@ int main(int argc, const char **argv) {
     printf("n_3   analytic n_3 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_3_of_r, r.z, w_R.n_3, w_MC.n_3);
     printf("      1st term of n_3= %g\n", n_3_of_r_1stterm);
-    
+
     printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
-             
+
     //Variances
     printf("\nMonte-Carlo Variances for NUM_POINTS=%li:\n", NUM_POINTS);
     weight variance_n=find_weighted_den_variances_aboutR_mc(r, R, dx, temp, a, gw, fv);
-    printf("variance in n0 = %g\n", variance_n.n_0);
-    printf("variance in n1 = %g\n", variance_n.n_1);
-    printf("variance in n2 = %g\n", variance_n.n_2);
-    printf("variance in n3 = %g\n", variance_n.n_3);
-    
-    printf("\nCompare calculated variances with 1/NUM_POINTS (want values to be close to zero):\n");
-    printf("variance in n0 - 1/Nmc=%g\n", variance_n.n_0-(1.0/NUM_POINTS));
-    printf("variance in n1 - 1/Nmc=%g\n", variance_n.n_1-(1.0/NUM_POINTS));
-    printf("variance in n2 - 1/Nmc=%g\n", variance_n.n_2-(1.0/NUM_POINTS));
-    printf("variance in n3 - 1/Nmc=%g\n", variance_n.n_3-(1.0/NUM_POINTS));
+    printf("stdev in n0 = %12g vs %12g\n", sqrt(variance_n.n_0), n_0_of_r - w_MC.n_0);
+    printf("stdev in n1 = %12g vs %12g\n", sqrt(variance_n.n_1), n_1_of_r - w_MC.n_1);
+    printf("stdev in n2 = %12g vs %12g\n", sqrt(variance_n.n_2), n_2_of_r - w_MC.n_2);
+    printf("stdev in n3 = %12g vs %12g\n", sqrt(variance_n.n_3), n_3_of_r - w_MC.n_3);
 
     return 0;  //for debug
   }
