@@ -1112,7 +1112,7 @@ int main(int argc, const char **argv) {
              n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
     printf("      1st term of n_2= %g   2nd term of n_2= 0   3rd term of n_2= %g\n", n_2_of_r_1stterm, n_2_of_r_3rdterm);
     //n_3
-    double n_3_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)*(1-erf((r.z-(alpha/2))/zeta))/(2*norm))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_3_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)*(1-erf((r.z-(alpha/2))/zeta))/(2*norm));   //Uses first Term of w1 Taylor expansion
     double n_3_of_r = n_3_of_r_1stterm; 
     printf("n_3   analytic n_3 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_3_of_r, r.z, w_R.n_3, w_MC.n_3);
@@ -1126,7 +1126,7 @@ int main(int argc, const char **argv) {
     printf("stdev in n0 = %12g vs %12g\n", sqrt(variance_n.n_0), n_0_of_r - w_MC.n_0);
     printf("stdev in n1 = %12g vs %12g\n", sqrt(variance_n.n_1), n_1_of_r - w_MC.n_1);
     printf("stdev in n2 = %12g vs %12g\n", sqrt(variance_n.n_2), n_2_of_r - w_MC.n_2);
-    printf("stdev in n3 = %12g vs %12g\n", sqrt(variance_n.n_3), n_3_of_r - w_MC.n_3);
+    printf("stdev in n3 = %12g vs %12g (compare %g)\n", sqrt(variance_n.n_3), n_3_of_r - w_MC.n_3, w_MC.n_3);
 
     return 0;  //for debug
   }
