@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 
 #RUN this program from the directory it is listed in
-#with command ./testplot2.py
+#with command ./plot_w3_w2_w1_w0.py
 
 from scipy import special
 import numpy as np
@@ -16,15 +16,18 @@ sigma=1
 epsilon=1
 PI=np.pi
 
-##weight functions w2, w1, and w0 are spherical shells (or rings in 2D)
-##with max value at alpha/2 when centered about origin
-##For rprime=0, and magnitude of r=rz :  
+#Note: the weight functions w2, w1, and w0 are spherical shells (or rings in 2D)
+#with max value at alpha/2 for w2 (when centered about origin) and slightly below
+#alpha/2 for w1 and even more slightly below alpha/2 for w0. 
+#Weight function w3 is a sphere of constant value that tapers off at the edge, 
+#and the middle of the tapering occurs at alpha/2.
 
+#Weight functions are calculated for rprime=0, and magnitude of r=rz (where rx=ry=0).
 
-#Plot w0, w1, w2, w3 vs KbT at rz=.55
-KbT=np.linspace(.01, 4, 20000) #replace with a range of values
+#Plot w0, w1, w2, w3 vs KbT at rz=.55 
+KbT=np.linspace(.0005, 1, 20000) #replace with a range of values
 rz=.55
-
+ 
 alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  
 zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
 w2=(1/(zeta*np.sqrt(PI)))*np.exp(-(((rz-(alpha/2))/zeta)*((rz-(alpha/2))/zeta)))

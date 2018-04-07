@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-const long NUM_POINTS = 8;
+const long NUM_POINTS = 80;
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
@@ -286,8 +286,8 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
 
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
-  printf("\nNew find_energy function with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
-  printf("\nCalculating many_cells...\n");
+  printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
+  //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   const vector3d lattice_vectors[3] = {
@@ -304,33 +304,41 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //dx_proper=lattice_constant/number of chunks along lattice vector   
   //dx=(lattice_constant/2)/number of chunks along lattice vector
   const double dV = uipow(lattice_constant/Nl,3)/4.0;
+  
+  int crystal_calc_option=1;  //set to 0 for crystal free energy with brute-force integration
+                              //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
+                              //set to 2 for crystal free energy with Monte-Carlo (more accurate)
+                              
+  double N_crystal = 1;  //dummy value not used if not doing brute-force integration
+  if (crystal_calc_option < 1) {  // N_crystal only needs to be calculated for brute-force integration
 
-  //Find N_crystal (number of spheres in one crystal) to normalize reduced density n(r) later
-  double N_crystal=0;
-  for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
-    for (int j=0; j<Nl; j++) {
-      for (int k=0; k<Nl; k++) {
-        vector3d r=lattice_vectors[0]*i/double(Nl)
-                   + lattice_vectors[1]*j/double(Nl)
-                   + lattice_vectors[2]*k/double(Nl);
-
-        const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
-                                 //Gaussians father away won't contriubute much 
-        for (int t=-many_cells; t <=many_cells; t++) {
-          for(int u=-many_cells; u<=many_cells; u++)  {
-            for (int v=-many_cells; v<= many_cells; v++) {
+    //Find N_crystal (number of spheres in one crystal) to normalize reduced density n(r) later
+    double N_crystal=0;
+    for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
+      for (int j=0; j<Nl; j++) {
+        for (int k=0; k<Nl; k++) {
+          vector3d r=lattice_vectors[0]*i/double(Nl)
+                     + lattice_vectors[1]*j/double(Nl)
+                     + lattice_vectors[2]*k/double(Nl);
+  
+          const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
+                                   //Gaussians father away won't contriubute much 
+          for (int t=-many_cells; t <=many_cells; t++) {
+            for(int u=-many_cells; u<=many_cells; u++)  {
+              for (int v=-many_cells; v<= many_cells; v++) {
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-              N_crystal += density_gaussian((r-R).norm(), gwidth, 1)*dV;   //norm=1
+               N_crystal += density_gaussian((r-R).norm(), gwidth, 1)*dV;   //norm=1
             }
+           }
           }
+         }
         }
-      }
-    }
-  }
+       }
+  }  //end if for N_crystal calculation
 
   if (verbose) {
     printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
-           N_crystal, reduced_num_spheres);
+          N_crystal, reduced_num_spheres);
   }
   const double norm = reduced_num_spheres/N_crystal;  //normalization constant
 
@@ -345,9 +353,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
   
-  int crystal_calc_option=1;  //set to 0 for crystal free energy with brute-force integration
-                              //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
-                              //set to 2 for crystal free energy with Monte-Carlo (more accurate)
 
   for (int density_option = 0; density_option <2; density_option++) { //loop on 0 only for homogeneous free energy, 
                                                                       //loop on 1 only for crystal free energy 
@@ -504,6 +509,31 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n", data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
   printf("data_out is: diffperatom=%g\n", data_out.diff_free_energy_per_atom);
 
+  // Create all output data filename
+  char *alldat_filename = new char[1024];
+  char *alldat_filedescriptor = new char[1024];
+  sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
+          temp, reduced_density, fv, gwidth);
+  sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
+  //sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
+  //        data_dir, temp, reduced_density, fv, gwidth);
+  printf("Create data file: %s\n", alldat_filename);
+
+  //Create dataout file
+  FILE *newmeltoutfile = fopen(alldat_filename, "w");
+  if (newmeltoutfile) {
+    fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
+    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFreeEnergy/atom\tcFreeEnergy/atom\tFEdiff/atom\tlattice_constant\tNsph\n");
+    fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+            temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
+            cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
+            lattice_constant, reduced_num_spheres);
+    fclose(newmeltoutfile);
+  } else {
+    printf("Unable to open file %s!\n", alldat_filename);
+  }
+  delete[] alldat_filename;  
+  
   return data_out;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -724,7 +754,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   } else {
     printf("Unable to open file %s!\n", alldat_filename);
   }
-  delete[] alldat_filename;
+  delete[] alldat_filename;  //ASK
   return data_out;
 }
 
@@ -754,10 +784,13 @@ void display_simplex(double simplex_fe[3][3]) {
 
 
 void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
+  printf("Evaluating Downhill Simplex Free Energies...\n");
   for (int k=0; k<3; k++) {
     //data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
     data dhill_data=find_energy_new(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
-    simplex_fe[k][2]=dhill_data.diff_free_energy_per_atom;
+    if (isnan(dhill_data.cfree_energy_per_vol)) {   //If crystal energy is NaN
+      simplex_fe[k][2]=1e100;  //ASK David!
+    } else simplex_fe[k][2]=dhill_data.diff_free_energy_per_atom;
     //simplex_fe[k][2]=sqrt((simplex_fe[k][0]*simplex_fe[k][0]) + (simplex_fe[k][1]*simplex_fe[k][1]));  //TEST SIMPLEX
     printf("simplex_fe[%i][2]=%g\n", k, simplex_fe[k][2]);
   }
@@ -782,6 +815,12 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
   point_fe reflected;
   reflected.fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
   reflected.gw=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
+  if (reflected.gw == 0) {  //ASK DAVID
+    reflected.gw = 0.0001;
+  }
+    if (reflected.fv < 0) {  //ASK DAVID
+    reflected.fv = 0;
+  }
 //reflected.fe=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   reflected.fe=find_energy_new(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //reflected.fe=sqrt((reflected.fv*reflected.fv) + (reflected.gw*reflected.gw));  //TEST SIMPLEX
@@ -792,6 +831,12 @@ point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3
   point_fe extended;
   extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-(2.0*simplex_fe[2][0]);
   extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-(2.0*simplex_fe[2][1]);
+  if (extended.gw == 0) {  //ASK DAVID
+      extended.gw = 0.0001;
+  }
+  if (extended.fv < 0) {  //ASK DAVID
+      extended.fv = 0;
+  }
 //extended.fe=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   extended.fe=find_energy_new(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //extended.fe=sqrt((extended.fv*extended.fv) + (extended.gw*extended.gw));  //TEST SIMPLEX
@@ -806,6 +851,12 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
 
   contracted.out.fv=((3/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
   contracted.out.gw=((3/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
+  if (contracted.out.gw == 0) {  //ASK DAVID
+      contracted.out.gw = 0.0001;
+  }
+  if (contracted.out.fv < 0) {  //ASK DAVID
+      contracted.out.fv = 0;
+  }
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
 //contracted.out.fe=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   contracted.out.fe=find_energy_new(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
@@ -813,6 +864,12 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
 
   contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))+((1/2.0)*(simplex_fe[2][0]));
   contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))+((1/2.0)*(simplex_fe[2][1]));
+  if (contracted.in.gw == 0) {  //ASK DAVID
+      contracted.in.gw = 0.0001;
+  }
+  if (contracted.in.fv < 0) {  //ASK DAVID
+      contracted.in.fv = 0;
+  }
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
 //contracted.in.fe=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   contracted.in.fe=find_energy_new(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
@@ -826,12 +883,24 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 
   shrunken.out.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
   shrunken.out.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[1][1]);
+  if (shrunken.out.gw == 0) {  //ASK DAVID
+      shrunken.out.gw = 0.0001;
+  }
+  if (shrunken.out.fv < 0) {  //ASK DAVID
+      shrunken.out.fv = 0;
+  }
 //shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.out.fe=find_energy_new(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.out.fe=sqrt((shrunken.out.fv*shrunken.out.fv) + (shrunken.out.gw*shrunken.out.gw));  //TEST SIMPLEX
 
   shrunken.in.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[2][0]);
   shrunken.in.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[2][1]);
+  if (shrunken.in.gw == 0) {  //ASK DAVID
+      shrunken.in.gw = 0.0001;
+  }
+  if (shrunken.in.fv < 0) {  //ASK DAVID
+      shrunken.in.fv = 0;
+  }
 //shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.in.fe=find_energy_new(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.in.fe=sqrt((shrunken.in.fv*shrunken.in.fv) + (shrunken.in.gw*shrunken.in.gw));  //TEST SIMPLEX
@@ -845,41 +914,41 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   printf("working with simplex:\n"); //debug
   display_simplex(   simplex_fe);   //debug
-  printf("   reflect simplex\n");  //debug
+  printf("reflect simplex...\n");  //debug
   point_fe reflected_point=reflect_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-  printf("   reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
+  printf("reflected_point.fv=%g, reflected_point.gw=%g, reflected_point.fe=%g\n", reflected_point.fv, reflected_point.gw, reflected_point.fe);  //debug
   if (simplex_fe[0][2]  < reflected_point.fe && reflected_point.fe < simplex_fe[1][2]) {
     simplex_fe[2][0]=reflected_point.fv;
     simplex_fe[2][1]=reflected_point.gw;
     simplex_fe[2][2]=reflected_point.fe;
-    printf("   **simplex reflected A\n");  //debug
+    printf("**simplex reflected (A):\n");  //debug
     display_simplex(   simplex_fe);   //debug
     return;
   }
   if (reflected_point.fe < simplex_fe[0][2]) {
     point_fe extended_point=extend_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-    printf("   extended_point.fv=%g, extended_point.gw=%g, extended_point.fe=%g\n", extended_point.fv, extended_point.gw, extended_point.fe);  //debug
+    printf("extended_point.fv=%g, extended_point.gw=%g, extended_point.fe=%g\n", extended_point.fv, extended_point.gw, extended_point.fe);  //debug
     if (extended_point.fe < reflected_point.fe) {
       simplex_fe[2][0]=extended_point.fv;
       simplex_fe[2][1]=extended_point.gw;
       simplex_fe[2][2]=extended_point.fe;
-      printf("   **simplex reflected B and extended\n");  //debug
+      printf("**simplex reflected (B) and extended:\n");  //debug
       display_simplex(   simplex_fe);   //debug
     } else {
       simplex_fe[2][0]=reflected_point.fv;
       simplex_fe[2][1]=reflected_point.gw;
       simplex_fe[2][2]=reflected_point.fe;
-      printf("   **simplex reflected C but not extended\n");  //debug
+      printf("**simplex reflected (C) but not extended:\n");  //debug
       display_simplex(   simplex_fe);  //debug
     }
     return;
   }
-  printf("   contract simplex\n");  //debug
+  printf("contract simplex...\n");  //debug
   printf("working with simplex:\n"); //debug
   display_simplex(   simplex_fe);   //debug
   points_fe contracted_points=contract_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-  printf("   contracted_points.in.fv=%g, contracted_points.in.gw=%g, contracted_points.in.fe=%g\n", contracted_points.in.fv, contracted_points.in.gw, contracted_points.in.fe);  //debug
-  printf("   contracted_points.out.fv=%g, contracted_points.out.gw=%g, contracted_points.out.fe=%g\n", contracted_points.out.fv, contracted_points.out.gw, contracted_points.out.fe);  //debug
+  printf("contracted_points.in.fv=%g, contracted_points.in.gw=%g, contracted_points.in.fe=%g\n", contracted_points.in.fv, contracted_points.in.gw, contracted_points.in.fe);  //debug
+  printf("contracted_points.out.fv=%g, contracted_points.out.gw=%g, contracted_points.out.fe=%g\n", contracted_points.out.fv, contracted_points.out.gw, contracted_points.out.fe);  //debug
   point_fe better_contracted_point;
   if (contracted_points.out.fe < contracted_points.in.fe) {
     better_contracted_point=contracted_points.out;  //there's probably a problem with this!
@@ -887,19 +956,19 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   }  else {
     better_contracted_point=contracted_points.in;
   }
-  printf("   better_contracted_point.fv=%g, better_contracted_point.gw=%g, better_contracted_point.fe=%g\n", better_contracted_point.fv, better_contracted_point.gw, better_contracted_point.fe);  //debug
+  printf("better_contracted_point.fv=%g, better_contracted_point.gw=%g, better_contracted_point.fe=%g\n", better_contracted_point.fv, better_contracted_point.gw, better_contracted_point.fe);  //debug
   if (better_contracted_point.fe < simplex_fe[1][2]) {
     simplex_fe[2][0]=better_contracted_point.fv;
     simplex_fe[2][1]=better_contracted_point.gw;
     simplex_fe[2][2]=better_contracted_point.fe;
-    printf("   **simplex contracted\n");  //debug
+    printf("**simplex contracted\n");  //debug
     display_simplex(   simplex_fe);  //debug
     return;
   }
-  printf("   shrink simplex\n");  //debug
+  printf("shrink simplex...\n");  //debug
   points_fe shrunken_points=shrink_simplex(temp, reduced_density, simplex_fe, data_dir, dx, verbose);
-  printf("   shrunken_points.in.fv=%g, shrunken_points.in.gw=%g, shrunken_points.in.fe=%g\n", shrunken_points.in.fv, shrunken_points.in.gw, shrunken_points.in.fe);  //debug
-  printf("   shrunken_points.out.fv=%g, shrunken_points.out.gw=%g, shrunken_points.out.fe=%g\n", shrunken_points.out.fv, shrunken_points.out.gw, shrunken_points.out.fe);  //debug
+  printf("shrunken_points.in.fv=%g, shrunken_points.in.gw=%g, shrunken_points.in.fe=%g\n", shrunken_points.in.fv, shrunken_points.in.gw, shrunken_points.in.fe);  //debug
+  printf("shrunken_points.out.fv=%g, shrunken_points.out.gw=%g, shrunken_points.out.fe=%g\n", shrunken_points.out.fv, shrunken_points.out.gw, shrunken_points.out.fe);  //debug
   simplex_fe[1][0]=shrunken_points.out.fv;
   simplex_fe[1][1]=shrunken_points.out.gw;
   simplex_fe[1][2]=shrunken_points.out.fe;
@@ -908,7 +977,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
   simplex_fe[2][1]=shrunken_points.in.gw;
   simplex_fe[2][2]=shrunken_points.in.fe;
 
-  printf("   **simplex shrunken\n");  //debug
+  printf("**simplex shrunken\n");  //debug
   display_simplex(   simplex_fe);  //debug
 }
 //+++++++++++++++END Downhill Simplex Fucntions++++++++++++++
@@ -917,15 +986,22 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 
 int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
-  double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
+  
+  //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
+  double fv_start=0.0, fv_end=.2, fv_step=0.001, gw_start=0.01, gw_end=.2, gw_step=0.01, gw_lend=0.5, gw_lstep=0.1; //default settings
+  
   double dx=0.01;        //default grid point spacing dx=dy=dz=0.01
   int verbose = false;
   int downhill = false;
 
-  //Downhill Simplex starting guess
-  double simplex_fe[3][3] = {{0.8, 0.2, 0},  //best when ordered
-    {0.4, 0.3, 0},   //mid when ordered
-    {0.2, 0.1, 0}    //worst when ordered
+  //Downhill Simplex starting guess  
+  //1st col = fv,  2nd col = gw,  3rd col= Diff in Free Energy  (Crystal FE-Homogeneous FE)
+  //When sorted, the first row will contain the BEST value of Free Energy Diff (lowest value), 
+  //the middle row will contain the MIDDLE Free Energy Diff, 
+  //and the last row will contain the WORST value of Free Energy Diff(highest value).
+  double simplex_fe[3][3] = {{0.8,  0.1,   0},   
+                             {0.4,  0.2,   0},  
+                             {0.2,  0.05,  0}   
   };
   //double simplex_fe[3][3] = {{80, 20, 0},  //best when ordered   TEST SIMPLEX
   //                           {40, 30, 0},   //mid when ordered
@@ -1023,21 +1099,22 @@ int main(int argc, const char **argv) {
 
   // Downhill Simplex
   if (downhill) {
+    printf("\nInitial Downhill Simplex (1st col=fv, 2nd col=gw, 3rd col=diff free energy): \n");
     display_simplex(simplex_fe);
-    printf("Calculating free energies (takes a bit- 14sec x 3 )...\n");
+    //printf("Evaluating Simplex free energies (takes a bit- 14sec x 3 )...\n");
     evaluate_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
     display_simplex(simplex_fe);
-    printf("starting downhill simplex loop...\n");
+    printf("------STARTING Downhill Simplex LOOP -----\n");
     for (int i=0; i<50; i++) {
-      printf("\nLoop %i of 50 \n", i+1);  //for debug
-      printf("sort simplex\n");
+      printf("\nLOOP %i of 50 \n", i+1);  //for debug
+      printf("sort simplex...");
       sort_simplex(simplex_fe);
-      printf("simplex sorted\n");
+      printf("simplex sorted:\n");
       display_simplex(simplex_fe);  //for debug
-      printf("advance simplex\n");
+      printf("advance simplex...");
       advance_simplex(temp, reduced_density, simplex_fe, data_dir, dx, bool(verbose));
-      printf("simplex advanced\n");
-      display_simplex(simplex_fe);   //for debug
+      //printf("simplex advanced\n");  //for debug
+      //display_simplex(simplex_fe);   //for debug
       //check_convergence_simplex();
     }
     sort_simplex(simplex_fe);    //delete when have loop
@@ -1062,7 +1139,7 @@ int main(int argc, const char **argv) {
 //Use to compare a value of weighted density caluclated analytically to that computed by 
 //Gaussain Quadrature (fast) and Monte-Carlo (accurate) techniques
 
-  int do_GQ_Test = 1;  //Turn Gaussian Quadrature Test on(1)/off(0) 
+  int do_GQ_Test = 0;  //Turn Gaussian Quadrature Test on(1)/off(0) 
   
   if (do_GQ_Test > 0) {
     printf("reduced_density = %g, fv = %g, gw = %g\n", reduced_density, fv, gw);
@@ -1097,28 +1174,28 @@ int main(int argc, const char **argv) {
     double n_0_of_r = n_0_of_r_1stterm; 
     printf("n_0   analytic n_0 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_0_of_r, r.z, w_R.n_0, w_MC.n_0);
-    printf("      1st term of n_0= %g\n", n_0_of_r_1stterm);
+    //printf("      1st term of n_0= %g\n", n_0_of_r_1stterm);
     //n_1
     double n_1_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
     double n_1_of_r = n_1_of_r_1stterm; 
     printf("n_1   analytic n_1 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_1_of_r, r.z, w_R.n_1, w_MC.n_1);
-    printf("      1st term of n_1= %g\n", n_1_of_r_1stterm);
+    //printf("      1st term of n_1= %g\n", n_1_of_r_1stterm);
     //n_2
     double n_2_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w2 Taylor expansion
     double n_2_of_r_3rdterm = 6*sqrt(2)*M_PI*gw*gw*gw*gw*gw/(norm*zeta*zeta*r.z)*exp(-uipow((r.z-(alpha/2))/zeta,2))*(2*uipow((r.z-(alpha/2))/zeta,2)-1);
     double n_2_of_r = n_2_of_r_1stterm + n_2_of_r_3rdterm;   //2nd term (and all even terms) = zero
     printf("n_2   analytic n_2 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
-    printf("      1st term of n_2= %g   2nd term of n_2= 0   3rd term of n_2= %g\n", n_2_of_r_1stterm, n_2_of_r_3rdterm);
+    //printf("      1st term of n_2= %g   2nd term of n_2= 0   3rd term of n_2= %g\n", n_2_of_r_1stterm, n_2_of_r_3rdterm);
     //n_3
     double n_3_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)*(1-erf((r.z-(alpha/2))/zeta))/(2*norm));   //Uses first Term of w1 Taylor expansion
     double n_3_of_r = n_3_of_r_1stterm; 
     printf("n_3   analytic n_3 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
              n_3_of_r, r.z, w_R.n_3, w_MC.n_3);
-    printf("      1st term of n_3= %g\n", n_3_of_r_1stterm);
+    //printf("      1st term of n_3= %g\n", n_3_of_r_1stterm);
 
-    printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
+    //printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
 
     //Variances
     printf("\nMonte-Carlo Variances for NUM_POINTS=%li:\n", NUM_POINTS);
