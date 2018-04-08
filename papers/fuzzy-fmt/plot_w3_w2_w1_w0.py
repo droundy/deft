@@ -25,7 +25,7 @@ PI=np.pi
 #Weight functions are calculated for rprime=0, and magnitude of r=rz (where rx=ry=0).
 
 #Plot w0, w1, w2, w3 vs KbT at rz=.55 
-KbT=np.linspace(.0005, 1, 20000) #replace with a range of values
+KbT=np.linspace(.0005, 1, 20000) 
 rz=.55
  
 alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  

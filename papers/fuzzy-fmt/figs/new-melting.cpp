@@ -988,7 +988,7 @@ int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
-  double fv_start=0.0, fv_end=.2, fv_step=0.001, gw_start=0.01, gw_end=.2, gw_step=0.01, gw_lend=0.5, gw_lstep=0.1; //default settings
+  double fv_start=0.0, fv_end=.6, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.1; //default settings
   
   double dx=0.01;        //default grid point spacing dx=dy=dz=0.01
   int verbose = false;
