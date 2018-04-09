@@ -3,376 +3,165 @@
 extern crate internment;
 extern crate tinyset;
 
-use tinyset::{Set64, Map64, Fits64};
+use tinyset::{Map64, Fits64};
 use internment::Intern;
 
-#[derive(Clone, Debug)]
-struct CommutativeMap {
-    map: Map64<Expr, f64>,
-}
-
-impl std::hash::Hash for CommutativeMap {
-    fn hash<H>(&self, hasher: &mut H) where H: std::hash::Hasher {
-        let mut terms: Vec<(u64, u64)>
-            = self.map.iter()
-                      .map(|(k, &v)| (k.inner.to_u64(), v as u64))
-                      .collect();
-        terms.sort();
-        for (k, v) in terms {
-            k.hash(hasher);
-            v.hash(hasher);
-        }
-    }
-}
-
-impl std::cmp::PartialEq for CommutativeMap {
-    fn eq(&self, other: &CommutativeMap) -> bool {
-        for (k, v) in self.map.iter() {
-            if other.get(k) != Some(v) {
-                return false
-            }
-        }
-        true
-    }
-}
-
-impl std::cmp::Eq for CommutativeMap {}
-
-impl CommutativeMap {
-    fn new() -> CommutativeMap {
-        CommutativeMap { map: Map64::new() }
-    }
-
-    fn len(&self) -> usize {
-        self.map.len()
-    }
-
-    fn get(&self, k: Expr) -> Option<&f64> {
-        self.map.get(&k)
-    }
-
-    fn insert(&mut self, k: Expr, v: f64) {
-        let v = self.map.get(&k).unwrap_or(&0.0) + v;
-        if v == 0.0 {
-            self.map.remove(&k);
-        } else {
-            self.map.insert(k, v);
-        }
-    }
-
-    fn union(&mut self, other: &CommutativeMap) {
-        for (k, &v) in other.map.iter() {
-            self.insert(k, v);
-        }
-    }
-
-    fn negate(&self) -> CommutativeMap {
-        let mut neg = CommutativeMap::new();
-        for (k, &v) in self.map.iter() {
-            neg.insert(k, -v);
-        }
-        neg
-    }
-
-    fn to_string<F>(&self, operator: &'static str, coeff: F) -> String where
-        F: FnMut(&(String, f64)) -> String {
-        let mut terms: Vec<(String, f64)>
-            = self.map.iter()
-                      .map(|(k, &v)| (k.cpp(), v))
-                      .collect();
-        terms.sort_by(|&(ref p, _), &(ref q, _)| p.cmp(&q));
-        terms.iter()
-             .map(coeff)
-             .collect::<Vec<String>>()
-             .join(operator)
-    }
-
-    fn split_by_sign(&self) -> (CommutativeMap, CommutativeMap) {
-        let mut plusses = CommutativeMap::new();
-        let mut minuses = CommutativeMap::new();
-
-        for (k, &v) in self.map.iter() {
-            if v > 0.0 {
-                plusses.insert(k, v)
-            } else if v < 0.0 {
-                minuses.insert(k, v)
-            }
-        }
-
-        (plusses, minuses)
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Debug)]
-struct Subexprs {
-    set: Set64<Expr>,
-}
-
-impl std::hash::Hash for Subexprs {
-    fn hash<H>(&self, hasher: &mut H) where H: std::hash::Hasher {
-        let mut membs: Vec<u64>
-            = self.set.iter()
-                      .map(|i| i.inner.to_u64())
-                      .collect();
-        membs.sort();
-        for i in membs {
-            i.hash(hasher);
-        }
-    }
-}
-
-impl Subexprs {
-    fn new_interned() -> Intern<Self> {
-        Intern::new(Self { set: Set64::new() })
-    }
-}
-
-impl From<Set64<Expr>> for Subexprs {
-    fn from(set: Set64<Expr>) -> Self {
-        Self { set: set }
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-enum InnerExpr {
-    Var(Intern<&'static str>),
-    Exp(Expr),
-    Log(Expr),
-    Sum(Intern<CommutativeMap>),
-    Mul(Intern<CommutativeMap>),
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum Kind {
-    Scalar,
-    RealSpace,
-    KSpace,
-    Vector,
-}
-
-/// This is an expression. You can use it to do arithmetic.
+/// This is an expression.
 ///
-/// # Example
-///
-/// ```
-/// use deft::{Expr, Kind};
-/// assert_eq!(Expr::var("a", Kind::Scalar), Expr::var("a", Kind::Scalar));
-/// ```
-#[derive(Clone, Copy, Eq, Hash, Debug)]
+/// It implements `Copy` and so is efficient to use.
+#[derive(Debug, Clone, Copy, Eq, Hash)]
 pub struct Expr {
     inner: Intern<InnerExpr>,
-    subx: Intern<Subexprs>,
-    kind: Kind,
 }
 
-impl Fits64 for Expr {
-    fn to_u64(self) -> u64 {
-        self.inner.to_u64()
-    }
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct InnerExpr {
+    et: ExprType,
+    op: ExprOp,
+}
 
-    unsafe fn from_u64(x: u64) -> Self {
-        Expr {
-            inner: Intern::<InnerExpr>::from_u64(x),
-            subx: Subexprs::new_interned(),
-            kind: Kind::Scalar,
-        }
-    }
+/// This is the type an `Expr` will have in generated code.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ExprType {
+    Scalar,
+    Vector,
+    RealSpace,
+    RealSpaceVector,
+    KSpace,
+    KSpaceVector,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum ExprOp {
+    Var(&'static str),
+    Exp(Expr),
+    Log(Expr),
+    Sum(CommutativeMap),
+    Mul(CommutativeMap),
+}
+
+#[derive(Debug, Clone)]
+struct CommutativeMap {
+    inner: Map64<Expr, f64>,
 }
 
 impl Expr {
-    fn from_inner(i: InnerExpr, k: Kind) -> Expr {
-        Expr {
-            inner: Intern::new(i),
-            subx: match i {
-                InnerExpr::Var(_) => Subexprs::new_interned(),
-                InnerExpr::Exp(a) | InnerExpr::Log(a) => a.subx.clone(),
-                InnerExpr::Sum(m) | InnerExpr::Mul(m) => {
-                    let subx = m.map.iter()
-                                    .fold(Set64::new(), |a, (e, _)| &a | &e.subx.set);
-                    Intern::new(Subexprs::from(subx))
-                },
-            },
-            kind: k,
-        }
-    }
-
-    fn get_kind(&self) -> Kind {
-        self.kind
-    }
-
-    fn from_sum_map(m: CommutativeMap, k: Kind) -> Expr {
-        if m.len() == 1 {
-            let (k, &v) = m.map.iter().next().unwrap();
-            if v == 1.0 {
-                return k;
-            }
-        }
-        Expr::from_inner(InnerExpr::Sum(Intern::new(m)), k)
-    }
-
-    fn from_mul_map(m: CommutativeMap, k: Kind) -> Expr {
-        if m.get(Expr::zero(k)).is_some() {
-            return Expr::zero(k);
-        }
-        if m.len() == 1 {
-            let (k, &v) = m.map.iter().next().unwrap();
-            if v == 1.0 {
-                return k;
-            }
-        }
-        Expr::from_inner(InnerExpr::Mul(Intern::new(m)), k)
-    }
-
     /// Express a variable.
-    pub fn var(sym: &'static str, k: Kind) -> Expr {
-        Expr::from_inner(InnerExpr::Var(Intern::new(sym)), k)
+    pub fn var(sym: &'static str, et: ExprType) -> Expr {
+        Expr::from_inner(InnerExpr {
+            et: et,
+            op: ExprOp::Var(sym),
+        })
     }
 
     /// Express an exponential.
     pub fn exp(arg: Expr) -> Expr {
-        Expr::from_inner(InnerExpr::Exp(arg), arg.get_kind())
+        Expr::from_inner(InnerExpr {
+            et: arg.get_type(),
+            op: ExprOp::Exp(arg),
+        })
     }
 
     /// Express a logarithm.
     pub fn log(arg: Expr) -> Expr {
-        Expr::from_inner(InnerExpr::Log(arg), arg.get_kind())
-    }
-
-    /// Express unity/one.
-    pub fn one(k: Kind) -> Expr {
-        Expr::from_inner(InnerExpr::Mul(Intern::new(CommutativeMap::new())), k)
-    }
-
-    /// Express zero.
-    pub fn zero(k: Kind) -> Expr {
-        Expr::from_inner(InnerExpr::Sum(Intern::new(CommutativeMap::new())), k)
+        Expr::from_inner(InnerExpr {
+            et: arg.get_type(),
+            op: ExprOp::Log(arg),
+        })
     }
 
     /// Raise an expression to a constant power.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use deft::{Expr, Kind};
-    /// let a = Expr::var("a", Kind::Scalar);
-    /// assert_eq!(Expr::pow(a, 2) / a, a);
-    /// ```
-    pub fn pow<P: Into<f64>>(base: Expr, power: P) -> Expr {
-        let mut mul = CommutativeMap::new();
-        mul.insert(base, power.into());
-        Expr::from_mul_map(mul, base.get_kind())
+    pub fn pow<T: Into<f64>>(base: Expr, power: T) -> Expr {
+        let power = power.into();
+        if power == 0.0 {
+            Expr::one(base.get_type())
+        } else if power == 1.0 {
+            base
+        } else {
+            Expr::mul_from_map(CommutativeMap::from_pair(base, power), base.get_type())
+        }
     }
 
-    /// Differentiate symbolically.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use deft::{Expr, Kind};
-    /// let x = Expr::var("x", Kind::Scalar);
-    /// assert_eq!((x * x).deriv(x), x * 2);
-    /// ```
+    /// Differentiate symbolically with respect to `wrt`.
     pub fn deriv(&self, wrt: Expr) -> Expr {
         if *self == wrt {
-            return Expr::one(self.get_kind());
+            return Expr::one(self.get_type());
         }
-        match *self.inner {
-            InnerExpr::Var(..) => Expr::zero(self.get_kind()),
-            InnerExpr::Exp(a) => *self * a.deriv(wrt),
-            InnerExpr::Log(a) => a.deriv(wrt) / a,
-            InnerExpr::Sum(a)
-                => a.map.iter()
-                        .fold(Expr::zero(self.get_kind()),
-                              |a, (b, &c)| a + Expr::pow(b, c - 1.0) * c * b.deriv(wrt)),
-            InnerExpr::Mul(a)
-                => a.map.iter()
-                        .fold(Expr::zero(self.get_kind()),
-                              |a, (b, &c)| a + b.deriv(wrt) * c * *self / b),
-            // InnerExpr::Mul(a)
-            //     => a.map.iter()
-            //             .map(|(expr, &power)| expr.deriv(wrt) * power * *self / expr).sum(),
+        match &self.inner.op {
+            &ExprOp::Var(..) => Expr::zero(self.get_type()),
+            &ExprOp::Exp(a) => *self * a.deriv(wrt),
+            &ExprOp::Log(a) => a.deriv(wrt) / a,
+            &ExprOp::Sum(ref a) =>
+                a.inner.iter()
+                       .fold(Expr::zero(self.get_type()),
+                             |a, (b, &c)| a + Expr::pow(b, c - 1.0) * c * b.deriv(wrt)),
+            &ExprOp::Mul(ref a) =>
+                a.inner.iter()
+                       .fold(Expr::zero(self.get_type()),
+                             |a, (b, &c)| a + b.deriv(wrt) * c * *self / b),
         }
     }
 
-    /// Creates a fragment of C++ code which evaluates the expression.
-    pub fn cpp(&self) -> String {
-        match self.get_kind() {
-            Kind::Scalar => {},
-            _ => return String::from("#error unimplemented"),
-        };
+    fn zero(et: ExprType) -> Expr {
+        Expr::sum_from_map(CommutativeMap::new(), et)
+    }
 
-        match *self.inner {
-            InnerExpr::Var(s) => String::from(*s),
-            InnerExpr::Exp(a) => String::from("exp(") + &a.cpp() + &")",
-            InnerExpr::Log(a) => String::from("log(") + &a.cpp() + &")",
-            InnerExpr::Sum(m) => {
-                if (*m).len() == 0 {
-                    return String::from("0");
-                }
+    fn one(et: ExprType) -> Expr {
+        Expr::mul_from_map(CommutativeMap::new(), et)
+    }
 
-                let coeff = |&(ref s, c): &(String, f64)| -> String {
-                    if s == "1" {
-                        c.abs().to_string()
-                    } else if c.abs() == 1.0 {
-                        s.clone()
-                    } else {
-                        c.abs().to_string() + &" * " + &s
-                    }
-                };
+    fn from_inner(i: InnerExpr) -> Expr {
+        Expr { inner: Intern::new(i), }
+    }
 
-                let (p, n) = (*m).split_by_sign();
-                let p = p.to_string(" + ", &coeff);
-                if n.len() != 0 {
-                    let n = n.to_string(" - ", &coeff);
-                    p + &" - " + &n
-                } else {
-                    p
-                }
-            },
-            InnerExpr::Mul(m) => {
-                if (*m).len() == 0 {
-                    return String::from("1");
-                }
+    fn sum_from_map(map: CommutativeMap, et: ExprType) -> Expr {
+        Expr::from_inner(InnerExpr {
+            et: et,
+            op: ExprOp::Sum(map),
+        })
+    }
 
-                let (n, d) = (*m).split_by_sign();
-                let power = |&(ref s, p): &(String, f64)| -> String {
-                    if p.abs() == 1.0 {
-                        s.clone()
-                    } else {
-                        String::from("pow(") + &s + &", " + &p.abs().to_string() + &")"
-                    }
-                };
+    fn mul_from_map(map: CommutativeMap, et: ExprType) -> Expr {
+        Expr::from_inner(InnerExpr {
+            et: et,
+            op: ExprOp::Mul(map),
+        })
+    }
 
-                let n = if n.len() != 0 {
-                    n.to_string(" * ", &power)
-                } else {
-                    String::from("1")
-                };
+    fn get_type(&self) -> ExprType {
+        self.inner.et
+    }
 
-                match d.len() {
-                    0 => n,
-                    1 => n + &" / " + &d.to_string(" * ", &power),
-                    _ => n + &" / (" + &d.to_string(" * ", &power) + &")",
-                }
-            },
+    /// Creates a fragment of C++ code which evalutes the expression.
+    ///
+    /// If `assignto` is not `""`, the C++ code will also instantiate a variable
+    /// named the value of `assignto` and assign the result of the expression to
+    /// it.
+    pub fn cpp(&self, assignto: &'static str) -> String {
+        if assignto != "" {
+            match self.get_type() {
+                ExprType::Scalar =>
+                    String::from("double ") + assignto + &" = " + &self.cpp(""),
+                ExprType::Vector =>
+                    String::from("double ") + assignto
+                        + &"[3]; for (int i = 0; i < 3; ++i) { "
+                        + assignto + &"[i] = " + &self.cpp("") + &"; }",
+                _ =>
+                    String::from("\n#error unimplemented"),
+            }
+        } else {
+            match &self.inner.op {
+                &ExprOp::Var(s) =>
+                    match self.get_type() {
+                        ExprType::Vector => String::from(s) + &"[i]",
+                        _ => String::from(s),
+                    },
+                &ExprOp::Exp(a) => String::from("exp(") + &a.cpp("") + &")",
+                &ExprOp::Log(a) => String::from("log(") + &a.cpp("") + &")",
+                &ExprOp::Sum(ref m) => m.sum_string(),
+                &ExprOp::Mul(ref m) => m.mul_string(),
+            }
         }
-    }
-}
-
-impl<N: Into<f64>> From<N> for Expr {
-    fn from(n: N) -> Self {
-        let mut m = CommutativeMap::new();
-        let n = n.into();
-        assert!(!n.is_nan());
-        m.insert(Expr::one(Kind::Scalar), n);
-        Expr::from_sum_map(m, Kind::Scalar)
-    }
-}
-
-impl<RHS: Into<Expr>+Clone> std::cmp::PartialEq<RHS> for Expr {
-    fn eq(&self, other: &RHS) -> bool {
-        let other: Expr = other.clone().into();
-        other.inner == self.inner
     }
 }
 
@@ -382,31 +171,83 @@ impl<RHS: Into<Expr>> std::ops::Add<RHS> for Expr {
     fn add(self, other: RHS) -> Self {
         let other = other.into();
 
-        assert!(self.get_kind() == other.get_kind());
+        assert_eq!(self.get_type(), other.get_type());
 
-        match (*self.inner, *other.inner) {
-            (InnerExpr::Sum(a), InnerExpr::Sum(b)) => {
-                let mut sum = (*a).clone();
-                sum.union(&*b);
-                Expr::from_sum_map(sum, self.get_kind())
+        let mut sum: CommutativeMap;
+        match (&self.inner.op, &other.inner.op) {
+            (&ExprOp::Sum(ref lhs), &ExprOp::Sum(ref rhs)) => {
+                sum = lhs.clone();
+                sum.union(&rhs);
             },
-            (InnerExpr::Sum(m), _) => {
-                let mut sum = (*m).clone();
-                sum.insert(other, 1.0);
-                Expr::from_sum_map(sum, self.get_kind())
+
+            (&ExprOp::Sum(ref lhs), _) => {
+                sum = lhs.clone();
+                if other != Expr::zero(other.get_type()) {
+                    sum.insert(other, 1.0);
+                }
             },
-            (_, InnerExpr::Sum(m)) => {
-                let mut sum = (*m).clone();
-                sum.insert(self, 1.0);
-                Expr::from_sum_map(sum, self.get_kind())
+
+            (_, &ExprOp::Sum(ref rhs)) => {
+                sum = rhs.clone();
+                if self != Expr::zero(self.get_type()) {
+                    sum.insert(self, 1.0);
+                }
             },
-            _ => {
-                let mut sum = CommutativeMap::new();
-                sum.insert(self, 1.0);
-                sum.insert(other, 1.0);
-                Expr::from_sum_map(sum, self.get_kind())
+
+            (_, _) => {
+                if self != Expr::zero(self.get_type()) {
+                    sum = CommutativeMap::from_pair(self, 1.0);
+                } else {
+                    sum = CommutativeMap::new()
+                }
+                if other != Expr::zero(other.get_type()) {
+                    sum.insert(other, 1.0);
+                }
             },
         }
+
+        if sum.inner.len() == 1 {
+            let (x, &c) = sum.inner.iter().next().unwrap();
+            if c == 1.0 {
+                return x
+            }
+        }
+        Expr::sum_from_map(sum, self.get_type())
+    }
+}
+
+impl<RHS: Into<Expr>> std::ops::Sub<RHS> for Expr {
+    type Output = Self;
+
+    fn sub(self, other: RHS) -> Self {
+        let other = other.into();
+
+        assert_eq!(self.get_type(), other.get_type());
+
+        let mut difference: CommutativeMap;
+        match (&self.inner.op, &other.inner.op) {
+            (&ExprOp::Sum(ref lhs), &ExprOp::Sum(ref rhs)) => {
+                difference = lhs.clone();
+                difference.union(&rhs.negate());
+            },
+
+            (&ExprOp::Sum(ref lhs), _) => {
+                difference = lhs.clone();
+                difference.insert(other, -1.0);
+            },
+
+            (_, &ExprOp::Sum(ref rhs)) => {
+                difference = rhs.negate();
+                difference.insert(self, 1.0);
+            },
+
+            (_, _) => {
+                difference = CommutativeMap::from_pair(self, 1.0);
+                difference.insert(other, -1.0);
+            },
+        }
+
+        Expr::sum_from_map(difference, self.get_type())
     }
 }
 
@@ -416,47 +257,57 @@ impl<RHS: Into<Expr>> std::ops::Mul<RHS> for Expr {
     fn mul(self, other: RHS) -> Self {
         let other = other.into();
 
-        assert!(self.get_kind() == other.get_kind());
+        assert_eq!(self.get_type(), other.get_type());
 
-        match (*self.inner, *other.inner) {
-            (InnerExpr::Mul(a), InnerExpr::Mul(b)) => {
-                let mut mul = (*a).clone();
-                mul.union(&*b);
-                Expr::from_mul_map(mul, self.get_kind())
+        let mut mul: CommutativeMap;
+        match (&self.inner.op, &other.inner.op) {
+            (&ExprOp::Mul(ref lhs), &ExprOp::Mul(ref rhs)) => {
+                mul = lhs.clone();
+                mul.union(&rhs);
             },
-            (InnerExpr::Mul(m), _) => {
-                let mut mul = (*m).clone();
-                mul.insert(other, 1.0);
-                Expr::from_mul_map(mul, self.get_kind())
+
+            (&ExprOp::Mul(ref lhs), _) => {
+                mul = lhs.clone();
+                if other != Expr::one(other.get_type()) {
+                    if other == Expr::zero(other.get_type()) {
+                        return Expr::zero(other.get_type());
+                    }
+                    mul.insert(other, 1.0);
+                }
             },
-            (_, InnerExpr::Mul(m)) => {
-                let mut mul = (*m).clone();
-                mul.insert(self, 1.0);
-                Expr::from_mul_map(mul, self.get_kind())
+
+            (_, &ExprOp::Mul(ref rhs)) => {
+                mul = rhs.clone();
+                if self != Expr::one(self.get_type()) {
+                    if self == Expr::zero(self.get_type()) {
+                        return Expr::zero(self.get_type());
+                    }
+                    mul.insert(self, 1.0);
+                }
             },
-            _ => {
-                let mut mul = CommutativeMap::new();
-                mul.insert(self, 1.0);
-                mul.insert(other, 1.0);
-                Expr::from_mul_map(mul, self.get_kind())
+
+            (_, _) => {
+                if self == Expr::zero(self.get_type()) || other == Expr::zero(other.get_type()) {
+                    return Expr::zero(self.get_type());
+                }
+                if self != Expr::one(self.get_type()) {
+                    mul = CommutativeMap::from_pair(self, 1.0);
+                } else {
+                    mul = CommutativeMap::new()
+                }
+                if other != Expr::one(other.get_type()) {
+                    mul.insert(other, 1.0);
+                }
             },
         }
-    }
-}
 
-impl<RHS: Into<Expr>> std::ops::Sub<RHS> for Expr {
-    type Output = Self;
-
-    fn sub(self, other: RHS) -> Self {
-        let mut subtrahend = CommutativeMap::new();
-        let other = other.into();
-
-        match *other.inner {
-            InnerExpr::Sum(m) => subtrahend.union(&(*m).negate()),
-            _ => subtrahend.insert(other, -1.0),
-        };
-
-        self + Expr::from_sum_map(subtrahend, self.get_kind())
+        if mul.inner.len() == 1 {
+            let (x, &p) = mul.inner.iter().next().unwrap();
+            if p == 1.0 {
+                return x
+            }
+        }
+        Expr::mul_from_map(mul, self.get_type())
     }
 }
 
@@ -464,97 +315,351 @@ impl<RHS: Into<Expr>> std::ops::Div<RHS> for Expr {
     type Output = Self;
 
     fn div(self, other: RHS) -> Self {
-        let mut divisor = CommutativeMap::new();
         let other = other.into();
 
-        match *other.inner {
-            InnerExpr::Mul(m) => divisor.union(&(*m).negate()),
-            _ => divisor.insert(other, -1.0),
-        };
+        assert_eq!(self.get_type(), other.get_type());
 
-        self * Expr::from_mul_map(divisor, self.get_kind())
+        let mut quotient: CommutativeMap;
+        match (&self.inner.op, &other.inner.op) {
+            (&ExprOp::Mul(ref lhs), &ExprOp::Mul(ref rhs)) => {
+                quotient = lhs.clone();
+                quotient.union(&rhs.negate());
+            },
+
+            (&ExprOp::Mul(ref lhs), _) => {
+                quotient = lhs.clone();
+                quotient.insert(other, -1.0);
+            },
+
+            (_, &ExprOp::Mul(ref rhs)) => {
+                quotient = rhs.negate();
+                quotient.insert(self, 1.0);
+            },
+
+            (_, _) => {
+                quotient = CommutativeMap::from_pair(self, 1.0);
+                quotient.insert(other, -1.0);
+            },
+        }
+
+        Expr::mul_from_map(quotient, self.get_type())
     }
 }
-// The following to impls allow us to write code like either 1/x or
-// 1.0/x.
+
+impl std::ops::Neg for Expr {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        match &self.inner.op {
+            &ExprOp::Sum(ref sum) =>
+                Expr::sum_from_map(sum.negate(), self.get_type()),
+            _ =>
+                Expr::sum_from_map(CommutativeMap::from_pair(self, -1.0), self.get_type()),
+        }
+    }
+}
+
+impl std::ops::Sub<Expr> for f64 {
+    type Output = Expr;
+
+    fn sub(self, other: Expr) -> Expr {
+        let x: Expr = self.into();
+        x - other
+    }
+}
+
+impl std::ops::Sub<Expr> for i32 {
+    type Output = Expr;
+
+    fn sub(self, other: Expr) -> Expr {
+        let x: Expr = self.into();
+        x - other
+    }
+}
+
 impl std::ops::Div<Expr> for f64 {
     type Output = Expr;
 
     fn div(self, other: Expr) -> Expr {
-        let e: Expr = self.into();
-        e / other
+        let x: Expr = self.into();
+        x / other
     }
 }
+
 impl std::ops::Div<Expr> for i32 {
     type Output = Expr;
 
     fn div(self, other: Expr) -> Expr {
-        let e: Expr = self.into();
-        e / other
+        let x: Expr = self.into();
+        x / other
     }
 }
 
+impl CommutativeMap {
+    fn new() -> Self {
+        CommutativeMap { inner: Map64::new(), }
+    }
+
+    fn as_vec(&self) -> Vec<(u64, u64)> {
+        self.inner.iter().map(|(k, &v)| (k.inner.to_u64(), v as u64)).collect()
+    }
+
+    // This lets you create a `CommutativeMap` without wasting time checking if
+    // the first term was already there.
+    fn from_pair(k: Expr, v: f64) -> CommutativeMap {
+        let mut map = CommutativeMap::new();
+        map.inner.insert(k, v);
+        map
+    }
+
+    fn insert(&mut self, k: Expr, v: f64) {
+        let v = self.inner.get(&k).unwrap_or(&0.0) + v;
+        if v == 0.0 {
+            self.inner.remove(&k);
+        } else {
+            self.inner.insert(k, v);
+        }
+    }
+
+    fn union(&mut self, other: &CommutativeMap) {
+        for (k, &v) in other.inner.iter() {
+            self.insert(k, v);
+        }
+    }
+
+    // This is used for negation, subtraction, reciprocals, division.
+    fn negate(&self) -> Self {
+        let mut neg = CommutativeMap::new();
+        for (k, &v) in self.inner.iter() {
+            neg.inner.insert(k, -v);
+        }
+        neg
+    }
+
+    // Returns a result useful for generating code.
+    // Splits the map by sign, sorts each by c++ string, and returns the two vectors.
+    fn pre_string(&self) -> (Vec<(String, f64)>, Vec<(String, f64)>) {
+        let mut plusses: Vec<(String, f64)>;
+        let mut minuses: Vec<(String, f64)>;
+        plusses = self.inner.iter().filter_map(|(k, &v)| {
+            if v > 0.0 {
+                Some((k.cpp(""), v))
+            } else {
+                None
+            }
+        }).collect();
+        minuses = self.inner.iter().filter_map(|(k, &v)| {
+            if v < 0.0 {
+                Some((k.cpp(""), v))
+            } else {
+                None
+            }
+        }).collect();
+        plusses.sort_by(|&(ref p, _), &(ref q, _)| p.cmp(&q));
+        minuses.sort_by(|&(ref p, _), &(ref q, _)| p.cmp(&q));
+        // Would use .sort() here but can't sort f64
+        (plusses, minuses)
+    }
+
+    fn sum_string(&self) -> String {
+        let (p, n) = self.pre_string();
+        let positive_coefficient = |&(ref x, ref c): &(String, f64)| -> String {
+            if x == "1" {
+                c.to_string()
+            } else if *c == 1.0 {
+                x.clone()
+            } else {
+                c.to_string() + &" * " + &x
+            }
+        };
+        let negative_coefficient = |&(ref x, ref c): &(String, f64)| -> String {
+            if x == "1" {
+                c.abs().to_string()
+            } else if *c == -1.0 {
+                x.clone()
+            } else {
+                c.abs().to_string() + &" * " + &x
+            }
+        };
+        match (p.len(), n.len()) {
+            (0, 0) => String::from("0"),
+            (_, 0) => p.iter()
+                       .map(positive_coefficient)
+                       .collect::<Vec<String>>()
+                       .join(" + "),
+            (0, _) => String::from("-")
+                      + &n.iter()
+                          .map(negative_coefficient)
+                          .collect::<Vec<String>>()
+                          .join(" - "),
+            (_, _) => p.iter()
+                       .map(positive_coefficient)
+                       .collect::<Vec<String>>()
+                       .join(" + ")
+                      + &" - "
+                      + &n.iter()
+                          .map(negative_coefficient)
+                          .collect::<Vec<String>>()
+                          .join(" - "),
+        }
+    }
+
+    fn mul_string(&self) -> String {
+        let (n, d) = self.pre_string();
+        let power = |&(ref x, ref p): &(String, f64)| -> String {
+            if x == "1" || p.abs() == 1.0 {
+                x.clone()
+            } else if p.abs() == 2.0 {
+                x.clone() + &" * " + &x
+            } else {
+                String::from("pow(") + &x + &", " + &p.abs().to_string() + &")"
+            }
+        };
+        match (n.len(), d.len()) {
+            (0, 0) => String::from("1"),
+            (_, 0) => n.iter()
+                       .map(power)
+                       .collect::<Vec<String>>()
+                       .join(" * "),
+            (0, _) => String::from("1 / (")
+                      + &d.iter()
+                          .map(power)
+                          .collect::<Vec<String>>()
+                          .join(" * ")
+                      + &")",
+            (_, _) => n.iter()
+                       .map(&power)
+                       .collect::<Vec<String>>()
+                       .join(" * ")
+                      + &" / "
+                      + &d.iter()
+                          .map(&power)
+                          .collect::<Vec<String>>()
+                          .join(" * ")
+                      + &")",
+        }
+    }
+}
+
+/// This lets numbers easily become `Expr`s of type `ExprType::Scalar`.
+impl<N: Into<f64>> From<N> for Expr {
+    fn from(n: N) -> Self {
+        let n = n.into();
+        if n == 0.0 {
+            Expr::sum_from_map(CommutativeMap::new(), ExprType::Scalar)
+        } else if n == 1.0 {
+            Expr::mul_from_map(CommutativeMap::new(), ExprType::Scalar)
+        } else {
+            Expr::sum_from_map(CommutativeMap::from_pair(1.into(), n), ExprType::Scalar)
+        }
+    }
+}
+
+/// This lets you compare `Expr`s for equality.
+impl PartialEq for Expr {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
+// This lets `Expr`s be keys in `CommutativeMap`s.
+impl Fits64 for Expr {
+    fn to_u64(self) -> u64 {
+        self.inner.to_u64()
+    }
+
+    unsafe fn from_u64(x: u64) -> Self {
+        Expr { inner: Intern::from_u64(x), }
+    }
+}
+
+// Everything in `InnerExpr` must be `Hash` so that `InnerExpr` can be
+// interned, but only `CommutativeMap` needs a manual implementation.
+impl std::hash::Hash for CommutativeMap {
+    fn hash<H: std::hash::Hasher>(&self, hasher: &mut H) {
+        let mut terms = self.as_vec();
+        terms.sort();
+        for (k, v) in terms {
+            k.hash(hasher);
+            v.hash(hasher);
+        }
+    }
+}
+
+// Everything in `InnerExpr` must be `Eq` so that `InnerExpr` can be
+// interned, but only `CommutativeMap` needs a manual implementation.
+impl PartialEq for CommutativeMap {
+    fn eq(&self, other: &Self) -> bool {
+        let (mut lhs, mut rhs) = (self.as_vec(), other.as_vec());
+        lhs.sort();
+        rhs.sort();
+        lhs == rhs
+    }
+}
+
+impl Eq for CommutativeMap {}
+
 #[cfg(test)]
-mod tests_scalar {
+mod tests {
     use super::*;
 
     #[test]
     fn basics() {
-        let a = Expr::var("a", Kind::Scalar);
+        let a = Expr::var("a", ExprType::Scalar);
+        let b = Expr::var("b", ExprType::Scalar);
 
-        assert_eq!(a.cpp(), "a");
-        assert_eq!(Expr::var("\\aleph", Kind::Scalar).cpp(), "\\aleph");
-        assert_eq!(Expr::one(Kind::Scalar).cpp(), "1");
-        assert_eq!(Expr::zero(Kind::Scalar).cpp(), "0");
+        assert_eq!(Expr::from(1) + 0, Expr::from(1));
+        assert_eq!(a + 0, a);
+        assert_eq!(a, a);
+        assert!(a != b);
+        assert_eq!(a + a, a + a);
+        assert_eq!(a + b, a + b);
+        assert_eq!(a + b, b + a);
+        assert_eq!(a * a, a * a);
+        assert_eq!(a * b, a * b);
+        assert_eq!(a * b, b * a);
+        assert!(a + a != b + b);
+        assert!(a * a != b * b);
+        assert_eq!(a - a, 0.into());
+        assert_eq!(a / a, 1.into());
+        assert!(a - b != 0.into());
+        assert!(a / b != 0.into());
+        assert_eq!(a - a - a, Expr::from(0) - a);
+        assert_eq!(a - a - a, 0 - a);
+        assert_eq!(a - a - a, -a);
+        assert_eq!(a / a, 1.into());
+        assert_eq!(a / a / a, Expr::from(1) / a);
+        assert_eq!(a / a / a, 1 / a);
     }
 
     #[test]
-    fn commutatives() {
-        let a = Expr::var("a", Kind::Scalar);
-        let b = Expr::var("b", Kind::Scalar);
+    fn strings() {
+        let a = Expr::var("a", ExprType::Scalar);
+        let u = Expr::var("u", ExprType::Vector);
 
-        assert_eq!((a + a).cpp(), "2 * a");
-        assert_eq!((a + b).cpp(), "a + b");
-        assert_eq!((a - a).cpp(), "0");
-        assert_eq!((a * a).cpp(), "pow(a, 2)");
-        assert_eq!((a * b).cpp(), "a * b");
-        assert_eq!((a / a).cpp(), "1");
-        assert_eq!((a / b).cpp(), "a / b");
-    }
-
-    #[test]
-    fn constants() {
-        assert_eq!((Expr::zero(Kind::Scalar) + 0.0).cpp(), "0");
-        assert_eq!((Expr::one(Kind::Scalar) + 0.0).cpp(), "1");
-        assert_eq!((Expr::zero(Kind::Scalar) + 1.0).cpp(), "1");
-        assert_eq!((Expr::one(Kind::Scalar) + 1.0).cpp(), "2");
-        assert_eq!((Expr::zero(Kind::Scalar) * 0.0).cpp(), "0");
-        assert_eq!((Expr::one(Kind::Scalar) * 0.0).cpp(), "0");
-        assert_eq!((Expr::zero(Kind::Scalar) * 1.0).cpp(), "0");
-        assert_eq!((Expr::one(Kind::Scalar) * 1.0).cpp(), "1");
+        assert_eq!(a.cpp(""), "a");
+        assert_eq!(u.cpp("t"), "double t[3]; for (int i = 0; i < 3; ++i) { t[i] = u[i]; }");
     }
 
     #[test]
     fn derivatives() {
-        let a = Expr::var("a", Kind::Scalar);
-        let b = Expr::var("b", Kind::Scalar);
+        let a = Expr::var("a", ExprType::Scalar);
+        let b = Expr::var("b", ExprType::Scalar);
 
-        assert_eq!(a.deriv(a), 1);
-        assert_eq!((a * a).deriv(a), a*2);
+        assert_eq!(a.deriv(a), Expr::from(1));
+        assert_eq!((a * a).deriv(a), a * 2);
         assert_eq!((a * a * a).deriv(a), a*a*3);
-        assert_eq!(a.deriv(b), a*0);
-        assert_eq!((a + b).deriv(a), 1);
-        assert_eq!(Expr::log(a).deriv(a), 1.0 / a);
-        assert_eq!(Expr::log(a * a).deriv(a).cpp(), "2 / a");
-        assert_eq!(Expr::exp(a).deriv(a).cpp(), "exp(a)");
-        assert_eq!(Expr::exp(a * a).deriv(a).cpp(), "2 * a * exp(pow(a, 2))");
-        assert_eq!(Expr::pow(Expr::log(a) + a, 3).deriv(a),
-                   Expr::pow(Expr::log(a) + a, 2) * 3 * (Expr::one(Kind::Scalar) / a + 1));
-        assert_eq!((Expr::log(a) + Expr::log(a) * Expr::log(a)).deriv(Expr::log(a)),
-                   Expr::one(Kind::Scalar) + Expr::log(a) * 2);
-    }
-}
+        assert_eq!(a.deriv(b), 0.into());
+        assert_eq!(a.deriv(b), a * 0);
+        assert_eq!((a + b).deriv(a), Expr::from(1));
 
-#[cfg(test)]
-mod tests_vector {
+        assert_eq!(Expr::log(a).deriv(a), 1.0 / a);
+        assert_eq!(Expr::log(a * a).deriv(a), 2 / a);
+        assert_eq!(Expr::exp(a).deriv(a), Expr::exp(a));
+        assert_eq!(Expr::exp(a * a).deriv(a), a * Expr::exp(Expr::pow(a, 2)) * 2);
+        assert_eq!(Expr::pow(Expr::log(a) + a, 3).deriv(a),
+                   Expr::pow(Expr::log(a) + a, 2) * 3 * (Expr::from(1) / a + 1));
+        assert_eq!((Expr::log(a) + Expr::log(a) * Expr::log(a)).deriv(Expr::log(a)),
+                   Expr::from(1) + Expr::log(a) * 2);
+    }
 }
