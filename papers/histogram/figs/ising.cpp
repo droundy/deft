@@ -19,7 +19,7 @@
 // ---------------------------------------------------------------------
 
 double M = 0;      // Define our initial system magnetization.
-double J = 1;      // Define our spin coupling.
+int J = 1;      // Define our spin coupling.
 double minT = 0.2; // Define minimum Temperature.
 
 const int Q = 2;   // Define number of spin states.
@@ -31,10 +31,10 @@ const int Q = 2;   // Define number of spin states.
 enum dos_types { histogram_dos, transition_dos, weights_dos };
 
 struct ising_simulation {
-  long iteration;   // the current iteration number
+  long moves;   // the current number of moves
   int N;            // N*N is the number of sites
   int *S;
-  double E;      // system energy.
+  int E;      // system energy.
   double T;      // canonical temperature.
 
   long energy_levels;
@@ -42,13 +42,13 @@ struct ising_simulation {
   long *energy_histogram;
 
   explicit ising_simulation(int N); // generate the spin lattice
+  ~ising_simulation();
 
   int random_flip(int oldspin) const; // pick a new random (but changed) spin
 
-  void reset_histograms();
   void flip_a_spin();
   double calculate_energy();
-  
+
   double* compute_ln_dos(dos_types dos_type);
   double *ln_energy_weights;
   double *ln_dos;
@@ -57,13 +57,6 @@ struct ising_simulation {
 
 // ising_simulation methods
 
-void ising_simulation::reset_histograms(){
-
-  for(int i = 0; i < energy_levels; i++){
-    energy_histogram[i] = 0;
-  }
-}
-
 int ising_simulation::random_flip(int oldspin) const {
   if (Q==2) return -oldspin;
 
@@ -71,7 +64,7 @@ int ising_simulation::random_flip(int oldspin) const {
 }
 
 ising_simulation::ising_simulation(int NN) {
-  iteration = 0;
+  moves = 0;
   E = 0;
   T = 0;
   N = NN;
@@ -85,8 +78,8 @@ ising_simulation::ising_simulation(int NN) {
   ln_energy_weights = new double[energy_levels]();
   energy_histogram = new long[energy_levels]();
   max_entropy_state = 0;
+  energies_found = 0; // we haven't found any energies yet.
   //printf("energy_levels %ld\n", energy_levels);
-  reset_histograms();
 
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
@@ -95,8 +88,14 @@ ising_simulation::ising_simulation(int NN) {
   }
 }
 
+ising_simulation::~ising_simulation() {
+  delete[] energy_histogram;
+  delete[] ln_energy_weights;
+  delete[] S;
+}
+
 void ising_simulation::flip_a_spin() {
-  iteration += 1;
+  moves += 1;
   int k = random::ran64() % (N*N);
   int i = k % N;
   int j = k / N;
@@ -109,7 +108,7 @@ void ising_simulation::flip_a_spin() {
 // ---------------------------------------------------------------------
 // Canonical Monte-Carlo
 // ---------------------------------------------------------------------
-  const double deltaE = J*(old - S[j + i*N])*neighbor_spins;
+  const int deltaE = J*(old - S[j + i*N])*neighbor_spins;
   const double lnprob = -deltaE/T;
 
   if (lnprob < 0 && random::ran() > exp(lnprob)) {
@@ -124,8 +123,7 @@ void ising_simulation::flip_a_spin() {
     //printf("flipping gives E=%g\n", E);
   }
 
-  energy_histogram[abs(lround(E))] += 1;
-  //energy_histogram[energies_found] += 1;
+  energy_histogram[abs(E)] += 1;
 
 // ---------------------------------------------------------------------
 // Broad-Histogram Methods
@@ -149,12 +147,13 @@ double* ising_simulation::compute_ln_dos(dos_types dos_type) {
 
   double *ln_dos = new double[energy_levels]();
 
-  if(dos_type == histogram_dos){
-    for(int i = max_entropy_state; i < energy_levels; i++){
-      if(energy_histogram[i] != 0){
+  if (dos_type == histogram_dos) {
+    for (int i = max_entropy_state; i < energy_levels; i++) {
+      if (energy_histogram[i] != 0) {
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
+      } else {
+        ln_dos[i] = -DBL_MAX; //apparently in <float.h>?
       }
-      else ln_dos[i] = -DBL_MAX; //apparently in float.h?
     }
   }
   return ln_dos;
@@ -186,6 +185,13 @@ static double took(const char *name) {
 
 int main(int argc, const char *argv[]) {
 
+  // some miscellaneous default or dummy simulation parameters
+
+  int NN = 10;
+  int resume = false;
+  long total_moves = 12000;
+  //int Q = 2;  // defualt to ising model
+
   poptContext optCon;
 
   // -------------------------------------------------------------------
@@ -193,17 +199,19 @@ int main(int argc, const char *argv[]) {
   // -------------------------------------------------------------------
 
   poptOption optionsTable[] = {
+    {"resume", '\0', POPT_ARG_NONE, &resume, 0,
+     "Resume previous simulation", "BOOLEAN"},
 
     /*** ISING MODEL PARAMETERS ***/
 
-    //{"N", '\0', POPT_ARG_INT, &ising.N, 0, "N*N is the number of spin sites", "INT"},
+    {"N", '\0', POPT_ARG_INT, &NN, 0, "N*N is the number of spin sites", "INT"},
     //{"Q", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &ising.Q, 0,
-     //"The number of spin states", "INT"},
+    // "The number of spin states", "INT"},
 
     /*** SIMULATION ITERATIONS ***/
 
-    //{"iterations", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_iterations,
-     //0, "Number of iterations for which to run the simulation", "INT"},
+    {"total-moves", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &total_moves,
+     0, "Number of moves for which to run the simulation", "INT"},
     //{"round_trips", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_round_trips,
      //0, "Number of round trips (pessimistic samples) to run the simulation", "INT"},
 
@@ -258,22 +266,20 @@ int main(int argc, const char *argv[]) {
     printf("%s ", argv[i]);
   }
 
-  ising_simulation ising(4);
+  ising_simulation ising(NN);
   ising.T = 2;
-  ising.energies_found = 0; // we haven't found any energies yet.
 
   took("Starting program");
   printf("version: %s\n",version_identifier());
 
-  long total_iteration = 12000;
-
   ising.calculate_energy();
-  for (long i = 0; i < total_iteration; i++) {
+  for (long i = 0; i < total_moves; i++) {
     ising.flip_a_spin();
   }
-  printf("I think the energy is %g\n", ising.E);
+
+  printf("I think the energy is %d\n", ising.E);
   ising.calculate_energy();
-  printf("the energy is %g\n", ising.E);
+  printf("the energy is %d\n", ising.E);
 
   took("Running");
 
@@ -282,19 +288,16 @@ int main(int argc, const char *argv[]) {
   for(int i = 0; i <= ising.energy_levels; i++){
     printf("histogram is %ld\n while lndos is %g\n", ising.energy_histogram[i], ising.ln_dos[i]);
   }
-  //printf("lndos is %f\n", ising.ln_dos[1]);
+
   for(int i = 0; i <= ising.energy_levels; i++){
     if (ising.energy_histogram[i] > 0) {
       ising.energies_found++;
-      printf("energy histogram at %ld is %ld\n",
-              ising.energies_found,ising.energy_histogram[i]);
+      printf("energy histogram at %ld is %ld with lndos %g\n",
+              ising.energies_found,ising.energy_histogram[i],ising.ln_dos[i]);
     }
   }
   // -------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // -------------------------------------------------------------------
-
-  delete[] ising.energy_histogram;
-
 }
 
