@@ -216,41 +216,6 @@ impl<RHS: Into<Expr>> std::ops::Add<RHS> for Expr {
     }
 }
 
-impl<RHS: Into<Expr>> std::ops::Sub<RHS> for Expr {
-    type Output = Self;
-
-    fn sub(self, other: RHS) -> Self {
-        let other = other.into();
-
-        assert_eq!(self.get_type(), other.get_type());
-
-        let mut difference: CommutativeMap;
-        match (&self.inner.op, &other.inner.op) {
-            (&ExprOp::Sum(ref lhs), &ExprOp::Sum(ref rhs)) => {
-                difference = lhs.clone();
-                difference.union(&rhs.negate());
-            },
-
-            (&ExprOp::Sum(ref lhs), _) => {
-                difference = lhs.clone();
-                difference.insert(other, -1.0);
-            },
-
-            (_, &ExprOp::Sum(ref rhs)) => {
-                difference = rhs.negate();
-                difference.insert(self, 1.0);
-            },
-
-            (_, _) => {
-                difference = CommutativeMap::from_pair(self, 1.0);
-                difference.insert(other, -1.0);
-            },
-        }
-
-        Expr::sum_from_map(difference, self.get_type())
-    }
-}
-
 impl<RHS: Into<Expr>> std::ops::Mul<RHS> for Expr {
     type Output = Self;
 
@@ -311,38 +276,38 @@ impl<RHS: Into<Expr>> std::ops::Mul<RHS> for Expr {
     }
 }
 
+impl<RHS: Into<Expr>> std::ops::Sub<RHS> for Expr {
+    type Output = Self;
+
+    fn sub(self, other: RHS) -> Self {
+        let other = other.into();
+        if other == Expr::zero(other.get_type()) {
+            return self;
+        }
+        match &other.inner.op {
+            &ExprOp::Sum(ref map) =>
+                self + Expr::sum_from_map(map.negate(), other.get_type()),
+            _ =>
+                self + Expr::sum_from_map(CommutativeMap::from_pair(other, -1.0), other.get_type()),
+        }
+    }
+}
+
 impl<RHS: Into<Expr>> std::ops::Div<RHS> for Expr {
     type Output = Self;
 
     fn div(self, other: RHS) -> Self {
         let other = other.into();
-
-        assert_eq!(self.get_type(), other.get_type());
-
-        let mut quotient: CommutativeMap;
-        match (&self.inner.op, &other.inner.op) {
-            (&ExprOp::Mul(ref lhs), &ExprOp::Mul(ref rhs)) => {
-                quotient = lhs.clone();
-                quotient.union(&rhs.negate());
-            },
-
-            (&ExprOp::Mul(ref lhs), _) => {
-                quotient = lhs.clone();
-                quotient.insert(other, -1.0);
-            },
-
-            (_, &ExprOp::Mul(ref rhs)) => {
-                quotient = rhs.negate();
-                quotient.insert(self, 1.0);
-            },
-
-            (_, _) => {
-                quotient = CommutativeMap::from_pair(self, 1.0);
-                quotient.insert(other, -1.0);
-            },
+        assert!(other != Expr::zero(other.get_type()));
+        if other == Expr::one(other.get_type()) {
+            return self;
         }
-
-        Expr::mul_from_map(quotient, self.get_type())
+        match &other.inner.op {
+            &ExprOp::Mul(ref map) =>
+                self * Expr::mul_from_map(map.negate(), other.get_type()),
+            _ =>
+                self * Expr::mul_from_map(CommutativeMap::from_pair(other, -1.0), other.get_type()),
+        }
     }
 }
 
@@ -437,7 +402,8 @@ impl CommutativeMap {
     }
 
     // Returns a result useful for generating code.
-    // Splits the map by sign, sorts each by c++ string, and returns the two vectors.
+    // Splits the map by sign, sorts each by c++ string, and returns the two vectors;
+    // .0 are the positives, .1 are the negatives
     fn pre_string(&self) -> (Vec<(String, f64)>, Vec<(String, f64)>) {
         let mut plusses: Vec<(String, f64)>;
         let mut minuses: Vec<(String, f64)>;
