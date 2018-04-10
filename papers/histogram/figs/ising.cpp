@@ -159,10 +159,6 @@ double* ising_simulation::compute_ln_dos(dos_types dos_type) {
   return ln_dos;
 }
 
-// ---------------------------------------------------------------------
-// Initialize Main
-// ---------------------------------------------------------------------
-
 static double took(const char *name) {
   assert(name); // so it'll count as being used...
   static clock_t last_time = clock();
@@ -183,15 +179,29 @@ static double took(const char *name) {
   return exp(ceil(log(seconds)));
 }
 
+// ---------------------------------------------------------------------
+// Initialize Main
+// ---------------------------------------------------------------------
+
 int main(int argc, const char *argv[]) {
 
   // some miscellaneous default or dummy simulation parameters
 
+  bool Jordan = true;
   int NN = 10;
   int resume = false;
-  long total_moves = 12000;
-  //int Q = 2;  // defualt to ising model
+  long total_moves = 10000;
 
+  char *data_dir = new char[1024];
+  sprintf(data_dir,"none");
+  char *default_data_dir = new char[1024];
+  sprintf(default_data_dir, "papers/histogram/data/ising");
+  char *filename = new char[1024];
+  sprintf(filename, "none");
+  char *filename_suffix = new char[1024];
+  sprintf(filename_suffix, "none");
+
+  //int Q = 2;  // defualt to ising model
   poptContext optCon;
 
   // -------------------------------------------------------------------
@@ -212,22 +222,18 @@ int main(int argc, const char *argv[]) {
 
     {"total-moves", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &total_moves,
      0, "Number of moves for which to run the simulation", "INT"},
-    //{"round_trips", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_round_trips,
-     //0, "Number of round trips (pessimistic samples) to run the simulation", "INT"},
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
 
-    //{"data_dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
-     //"Directory in which to save data", "data_dir"},
-    //{"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
-     //"Base of output file names", "STRING"},
-    //{"filename_suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-     //&filename_suffix, 0, "Output file name suffix", "STRING"},
+    {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
+     "Directory in which to save data", "data_dir"},
+    {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
+     "Base of output file names", "STRING"},
 
     /*** HISTOGRAM METHOD OPTIONS ***/
 
     //{"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
-     //" rather than adjusted weights", "DOUBLE"},
+    // " rather than adjusted weights", "DOUBLE"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/
 
@@ -238,10 +244,6 @@ int main(int argc, const char *argv[]) {
 
     //{"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
      //"Number of times to sample mininum energy", "INT"},
-    //{"init_iters", '\0', POPT_ARG_INT, &sw.init_iters, 0,
-     //"Number of iterations for initialization", "INT"},
-    //{"min_T", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     //&ising.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
 
     POPT_AUTOHELP
     POPT_TABLEEND
@@ -264,6 +266,58 @@ int main(int argc, const char *argv[]) {
   for(int i = 1; i < argc; i++) {
     if(argv[i][0] == '-') printf("\n");
     printf("%s ", argv[i]);
+  }
+
+  // ----------------------------------------------------------------------------
+  // Generate save file info
+  // ----------------------------------------------------------------------------
+
+  // Set default data directory
+  if (strcmp(data_dir,"none") == 0) {
+    sprintf(data_dir,"%s",default_data_dir);
+    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
+  }
+
+  mkdir(data_dir, 0777); // create save directory
+
+  char *dos_fname = new char[1024];
+  sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
+
+  char *headerinfo = new char[4096];
+  sprintf(headerinfo,
+          "# version: %s\n"
+          "# NN: %i\n"
+          "# total-moves: %li\n"
+          "# minT: %g\n\n",
+          version_identifier(),
+          NN, total_moves, minT);
+
+  char *countinfo = new char[4096];
+  sprintf(countinfo,
+          //"# moves: %li\n"
+          "# total-moves: %li\n",
+          total_moves);
+
+  //if (fix_kT) {
+  //  sprintf(headerinfo,
+  //          "%s# histogram method: canonical (fixed temperature)\n"
+  //          "# kT: %g\n",
+  //          headerinfo, fix_kT);
+  //}
+
+  // ----------------------------------------------------------------------------
+  // Resume functionality
+  // ----------------------------------------------------------------------------
+
+  if (resume) {
+     // We are continuing a previous simulation.
+    if (Jordan) {
+      printf("I'm resuming with the method.\n");
+      // Need to read and set: iterations, ln_energy_weights (from ln_dos)
+      } else {
+      printf("I do not know how to resume yet!\n");
+      exit(1);
+      }
   }
 
   ising_simulation ising(NN);
@@ -296,6 +350,15 @@ int main(int argc, const char *argv[]) {
               ising.energies_found,ising.energy_histogram[i],ising.ln_dos[i]);
     }
   }
+
+  // Save energy histogram
+      {
+        FILE *dos_out = fopen((const char *)dos_fname, "w");
+        fprintf(dos_out, "%s", headerinfo);
+        fprintf(dos_out, "%s", countinfo);
+
+        fclose(dos_out);
+      }
   // -------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // -------------------------------------------------------------------
