@@ -55,30 +55,30 @@ impl Expr {
     }
 
     /// Express an exponential.
-    pub fn exp(arg: Expr) -> Expr {
+    pub fn exp(self) -> Expr {
         Expr::from_inner(InnerExpr {
-            et: arg.get_type(),
-            op: ExprOp::Exp(arg),
+            et: self.get_type(),
+            op: ExprOp::Exp(self),
         })
     }
 
     /// Express a logarithm.
-    pub fn log(arg: Expr) -> Expr {
+    pub fn log(self) -> Expr {
         Expr::from_inner(InnerExpr {
-            et: arg.get_type(),
-            op: ExprOp::Log(arg),
+            et: self.get_type(),
+            op: ExprOp::Log(self),
         })
     }
 
     /// Raise an expression to a constant power.
-    pub fn pow<T: Into<f64>>(base: Expr, power: T) -> Expr {
+    pub fn pow<T: Into<f64>>(self, power: T) -> Expr {
         let power = power.into();
         if power == 0.0 {
-            Expr::one(base.get_type())
+            Expr::one(self.get_type())
         } else if power == 1.0 {
-            base
+            self
         } else {
-            Expr::mul_from_map(CommutativeMap::from_pair(base, power), base.get_type())
+            Expr::mul_from_map(CommutativeMap::from_pair(self, power), self.get_type())
         }
     }
 
@@ -624,8 +624,8 @@ mod tests {
         assert_eq!(Expr::exp(a).deriv(a), Expr::exp(a));
         assert_eq!(Expr::exp(a * a).deriv(a), a * Expr::exp(Expr::pow(a, 2)) * 2);
         assert_eq!(Expr::pow(Expr::log(a) + a, 3).deriv(a),
-                   Expr::pow(Expr::log(a) + a, 2) * 3 * (Expr::from(1) / a + 1));
-        assert_eq!((Expr::log(a) + Expr::log(a) * Expr::log(a)).deriv(Expr::log(a)),
+                   (a.log() + a).pow(2) * 3 * (Expr::from(1) / a + 1));
+        assert_eq!((a.log() + Expr::log(a) * Expr::log(a)).deriv(Expr::log(a)),
                    Expr::from(1) + Expr::log(a) * 2);
     }
 }
