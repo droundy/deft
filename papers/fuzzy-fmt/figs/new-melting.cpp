@@ -509,30 +509,34 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n", data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
   printf("data_out is: diffperatom=%g\n", data_out.diff_free_energy_per_atom);
 
-  // Create all output data filename
-  char *alldat_filename = new char[1024];
-  char *alldat_filedescriptor = new char[1024];
-  sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
-          temp, reduced_density, fv, gwidth);
-  sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
-  //sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
-  //        data_dir, temp, reduced_density, fv, gwidth);
-  printf("Create data file: %s\n", alldat_filename);
+  int create_alldat_file = 1;  //set to 0 for no alldat file, set to 1 to create alldat file
+                               // that saves data for every combination of gw and fv values ran
+  if (create_alldat_file > 0)  {
+    // Create all output data filename
+    char *alldat_filename = new char[1024];
+    char *alldat_filedescriptor = new char[1024];
+    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
+            temp, reduced_density, fv, gwidth);
+    sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
+    //sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
+    //        data_dir, temp, reduced_density, fv, gwidth);
+    printf("Create data file: %s\n", alldat_filename);
 
-  //Create dataout file
-  FILE *newmeltoutfile = fopen(alldat_filename, "w");
-  if (newmeltoutfile) {
-    fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
-    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFreeEnergy/atom\tcFreeEnergy/atom\tFEdiff/atom\tlattice_constant\tNsph\n");
-    fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-            temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
-            cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
-            lattice_constant, reduced_num_spheres);
-    fclose(newmeltoutfile);
-  } else {
-    printf("Unable to open file %s!\n", alldat_filename);
-  }
-  delete[] alldat_filename;  
+    //Create dataout file
+    FILE *newmeltoutfile = fopen(alldat_filename, "w");
+    if (newmeltoutfile) {
+      fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
+      fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFreeEnergy/atom\tcFreeEnergy/atom\tFEdiff/atom\tlattice_constant\tNsph\n");
+      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+              temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
+              cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
+              lattice_constant, reduced_num_spheres);
+      fclose(newmeltoutfile);
+    } else {
+      printf("Unable to open file %s!\n", alldat_filename);
+    }
+    delete[] alldat_filename; 
+  } 
   
   return data_out;
 }
@@ -988,7 +992,7 @@ int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
-  double fv_start=0.0, fv_end=.2, fv_step=0.001, gw_start=0.01, gw_end=.2, gw_step=0.01, gw_lend=0.5, gw_lstep=0.1; //default settings
+  double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.1; //default settings
   
   double dx=0.01;        //default grid point spacing dx=dy=dz=0.01
   int verbose = false;
