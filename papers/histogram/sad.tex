@@ -27,44 +27,45 @@
 \maketitle
 
 \section{Introduction}
-Over the past several decades a number of advanced Monte-Carlo
+Over the past several decades a number of broad histogram Monte-Carlo
 simulation algorithms have been developed which calculate the
-properties of a thermal system over a range of temperatures.  This
-idea began with the original histogram method, which used a single
-canonical Monte Carlo simulation to predict properties for nearby
-temperatures~\cite{ferrenberg1988new}.  For large simulations this
-approach is limited to a narrow temperature range because a single
-canonical simulation explores only a small range of energies.  This
-led to a variety of ``broad'' (or ``flat'') histogram
+thermodynamic properties of various systems for all temperatures.  The
+development began with the original histogram method, which used a
+single canonical Monte Carlo simulation to predict properties for
+nearby temperatures~\cite{ferrenberg1988new}.  For large simulations
+this approach is limited to a narrow temperature range because a single
+canonical simulation explores only a small range of energies.  This led
+to a variety of ``broad'' (or ``flat'') histogram
 methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
-  wang2001determining, wang2001efficient, trebst2004optimizing}, which
+wang2001determining, wang2001efficient, trebst2004optimizing}, which
 attempt to explore a wide range of energies.  These methods also
-benefit in that they are unlikely to be trapped in a local energy
-minimum.
+benefit in that they are unlikely to be trapped in a low enetropy state.
 
-Wang and Landau introduced an algorithm that uses an update
-factor and a statistical histogram to compute the density of states of
-a given system~\cite{wang2001determining, wang2001efficient}.  While
-the method is incredibly powerful, it has several user-defined
-parameters.  This can make its application to a variety of systems
-something of an art-form since the user needs to determine the ideal
-parameters for his particular system.  Also, detailed balance is
-violated (although for only short periods of time), yet the method
-converges in most situations.  This raises several questions such as
-when does the method converges, what rate will the method converge to
-the correct density of states, and how to appropriately decide what
+Wang and Landau introduced an algorithm that uses an update factor and
+a statistical histogram to compute the density of states of a given
+system~\cite{wang2001determining, wang2001efficient}.  While the method
+is incredibly powerful, it has several user-defined parameters.  This
+can make its application to a variety of systems something of an
+art-form since the user needs to determine the ideal parameters for the
+particular system being studied.  Also, detailed balance is violated
+(although only for short periods of time), ensuring that convergence is
+not guaranteed.  This raises several questions such as when the method
+does converge, what rate will the method converge to the correct
+density of states. Also, how can the user appropriately decide what
 parameters to choose so that the algorithm solves the problem in the
-best way. Transition Matrix Monte Carlo~\cite{wang1999transition,
+most ideal way.
+
+Transition Matrix Monte Carlo~\cite{wang1999transition,
 swendsen1999transition, fitzgerald2000monte} became an attractive
-complimentary simulation algorithm to Wang-Landau in that, if detailed
-balance is ensured, the system is guaranteed to converge (something
-which is not guaranteed for the Wang-Landau Algorithm).  Unfortunately,
+complimentary simulation algorithm to Wang-Landau, in that, if detailed
+balance is ensured, the system is guaranteed to converge.  Unfortunately,
 the algorithm can be considerably more difficult to implement when
-compared to Wang-Landau: in particular, the infinite temperature
+compared to Wang-Landau: in particular, due to the infinite temperature
 transition matrix~\cite{wang2002transition}.  Also, the time necessary
 for the density of states to converge could be considerable
 due to the algorithm spending too much time exploring low energy states.
-~\tssays{(note to self) The above paragraph could be condensed a bit}
+Unlike WL, TMMC does not require a prior knowledge of the energy range of
+the system.
 
 Shell et al.~\cite{shell2003improved, shell2004flat} originially
 implemented Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an
@@ -75,32 +76,35 @@ WL portion, but there remains no rigorous systematic way to determine
 these parameters~\cite{rane2013monte}.  The algorithm is first run for
 several trial simulations and/or `experience' is used to determine the
 best parameters for a users particular system of
-study~\cite{siderius2013use}.  Around the same time, the convergence
-rate for Wang-Landau was being explored~\cite{zhou2005understanding}.
-It was found that utilizing modification factors that decrease faster
-than $1/t^2$ leads to nonconvergence~\cite{belardinelli2007fast}.  This
-lead to the so-called $1/t$-WL algorithm which ensures that excess CPU
-time is not wasted by continuing to perfrom calculations once the error
-in the density of states becomes
-saturated~\cite{belardinelli2008analysis}. An effort to reduce the
-number of user defined parameters of WL and formulate a theory for why
-the method converges despite detailed balance being violated although
-infrequently was also being udertaken.  Liang, Liu, and Carrol began to
-consider whether WL could be considered a special case of Monte Carlo
-whose convergence could be mathematically
-proven~\cite{liang2006theory, liang2007stochastic}. In 2007, Liang et
-al.~\cite{liang2007stochastic} argued that WL can be considered a form
-of Stochastic Approximation Monte Carlo (SAMC).  While SAMC can
-guarantee convergence, the method still has a system specific
+study~\cite{siderius2013use}.
+
+Around the same time, the convergence rate for WL was being
+explored~\cite{zhou2005understanding,lee2006convergence,
+belardinelli2007wang}. It was found that utilizing modification factors
+that decrease faster than $1/t^2$ leads to
+nonconvergence~\cite{belardinelli2007fast}.  This lead to the so-called
+$1/t$-WL algorithm which ensures that excess CPU time is not wasted by
+continuing to perfrom calculations once the error in the density of
+states becomes saturated~\cite{belardinelli2008analysis}. An effort to
+reduce the number of user defined parameters of WL and formulate a
+theory for why the method converges despite detailed balance being
+violated although infrequently was also being udertaken.
+
+Liang, Liu, and Carrol began to consider whether WL could be considered
+a special case of Stochastic Approximation whose convergence could be
+mathematically proven~\cite{liang2006theory, liang2007stochastic}. In
+2007, Liang et al.~\cite{liang2007stochastic} argued that WL can be
+considered a form of Stochastic Approximation Monte Carlo (SAMC). While
+SAMC can guarantee convergence, the method still has a system specific
 user-defined variable which makes applying this algorithm to arbitrary
 systems difficult.
 
-In our work, we have developed a novel algorithm based on SAMC that
+In this work, we have developed a novel algorithm based on SAMC that
 does not require user-defined inputs and therefore should be easily
 applicable to a given system.  We call this method SAD (Dynamical
 Stochastic Approximation), and will discuss it in detail in the methods
-section. We compare it along with several histogram methods including TMMC,
-WL, WL-TMMC, and SAMC.
+section. We compare it along with several broad histogram methods
+which include TMMC, WL, WL-TMMC, and SAMC.
 
 We consider the square-well fluid i.e. a system of particles whose
 interactions are governed by a square-well
@@ -127,32 +131,34 @@ various methods applied to the model system.
 
 \section{Methods}
 
-Here we employ a variety of broad-histogram methods.  We outline the
-general workings of algorithm we developed in detail and summarize
-algorithms that can be found elsewhere.  The following algorithms are
-introduced and applied to the square-well fluid:  Transition
-Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau Transition
-Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation Monte-Carlo
-Monte-Carlo (SAMC), and Dynamical Stochastic-Approximation (SAD).
+In this work, We compare a variety of broad-histogram methods.  We
+outline the general workings of each algorithm that we developed in
+detail while summarizing algorithms that can be found elsewhere.  The
+following methods are introduced and applied to the square-well fluid:
+Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau
+Transition Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation
+Monte-Carlo (SAMC), and Dynamical Stochastic-Approximation
+(SAD).
 
 \subsection{TMMC Algorithm}
-The Transition Matrix Monte-Carlo (TMMC) method as introduced by Fitzgerald et al.
-consists of three primary steps.  The first two steps are common to the Metropolis
-algorithm while the third makes use of the actual transition
-probabilities~\cite{fitzgerald2000monte}.
+The Transition Matrix Monte-Carlo (TMMC) method as introduced by
+Fitzgerald et al. consists of three primary steps.  The first two steps
+are common to the Metropolis algorithm while the third makes use of the
+actual transition probabilities~\cite{fitzgerald2000monte}.
 
 \subsubsection{define a transition probability}
-Assuming that the system under study is in a state denoted old and a
+Assuming that the system under study is in a state denoted old, and a
 proposed transition is made to a new state denoted new, the probability
 is defined as
 \begin{align}
   p_{old \rightarrow new} = p_{new \rightarrow old}
 \end{align}
-where we have allowed the probabilies to be equal for simplicity of presentation.
+where we have allowed the probabilies to be equal for simplicity of
+presentation.
 
 \subsubsection{define an acceptance probability}
-The probability for accepting a transition from an old state to a new one can be
-defined
+The probability for accepting a transition from an old state to a new
+one can be defined
 \begin{align}
   p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
   {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
@@ -164,25 +170,25 @@ for advanced Monte-Carlo moves this would not be the
 case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of
 observing the system in the old state can be found based on the
 ensemble constraints placed on the system.  Fitzgerald et al.
-considered the system of interest using the canonical ensemble however
-extension to other ensembles is quite natural.
+considered the system of interest using the canonical ensemble;
+however, the extension to other ensembles is quite natural.
 \begin{align}
   \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
 \end{align}
-The acceptance probability given for TMMC is idential to that introduced by
-Swendsen and Wang~\cite{wang2002transition}.
+The acceptance probability given for TMMC is idential to that
+introduced by Swendsen and Wang~\cite{wang2002transition}.
 \begin{align}
   p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
 \end{align}
 \subsubsection{define a bookkeeping step}
-The third step in the TMMC algorithm consists of recording the data in a collection
-matrix (analogous to the transition histogram matrix).
+The third step in the TMMC algorithm consists of recording the data in
+a collection matrix (the unormalized transition histogram matrix).
 \begin{align}
   C_{N,\delta} = C_{N,\delta} + p_{a}\\
   C_{N,0} = C_{N,0} +(1 - p_{a})
 \end{align} If $\delta=0$, that is, the energy state has not been
 changed, then only $C_{N,0}$ is incremented by unity. Fitzgerald et
-al.~\cite{fitzgerald2000monte} show that defining the third step this
+al.~\cite{fitzgerald2000monte} showed that defining the third step this
 way results in a uniform improvement over using histogram estimators to
 determine the particle number probability distribution (PNPD).
 
@@ -190,46 +196,36 @@ determine the particle number probability distribution (PNPD).
 
 The Wang-Landau Algorithm developed by Wang and Landau proposes a
 random walk in energy space in order to estimate the density of
-states~\cite{wang2001efficient}. While methods such as Metropolis
-Sampling and Swendsen-Wang cluster
-flipping~\cite{swendsen1987nonuniversal} generate a narrow distribution
-and require sampling at individual temperatures, the Wang-Landau
-algorithm uses a flat histogram and performs a random walk in energy
-space to determine the density of states~\cite{wang2001determining,
-landau2014guide}. Wang-Landau's major tenant is that when counting the
-histogram $H(\epsilon)$, the energy occurences should form a flat
-distribution.  The criteria for flat sampling is given by
+states~\cite{wang2001efficient,wang2001determining, landau2014guide}.
+Wang-Landau's major tenant is that when counting the histogram
+$H(\epsilon)$, the energy occurences should form a flat distribution.
+The criteria for flat sampling is given by
 \begin{equation}
 	\frac{\min_{\epsilon} H(\epsilon)}
 	{\big\langle H(\epsilon)\big\rangle }
 	> \eta
-\end{equation} where $\eta$ is usually set to $0.80$ and determines how
-many times each energy is sampled relative to the mean number of
-visits.  Difficulties can occur with this flatness criteria due to the
-fact that some energies on a given energy range might never be
-sampled~\cite{haber2014transition}.  Over the past decade much
-attention was directed at examining the rate of convergence and error
-saturation~\cite{lee2006convergence, belardinelli2007wang}.  The
-algorithm is briefly outlined below where $w$ represents the weights:
+\end{equation}
+where $\eta$ is usually set to $0.80$ and determines how many times
+each energy is sampled relative to the mean number of visits.
+Difficulties can occur with this flatness criteria due to the fact that
+some energies on a given energy range might never be
+sampled~\cite{haber2014transition}. The algorithm is briefly outlined
+below where $w$ represents the weights:
 \begin{equation}
-	\ln{w_{k+1}(\epsilon,N)}=\ln{w_{k}(\epsilon,N)}
+	\ln{D_{i+1}(\epsilon,N)}=\ln{D_{i}(\epsilon,N)}
 	+\gamma
 \end{equation}
 \begin{equation}
-	\ln{\gamma_{k+1}}=\frac{u}{2}\ln{\gamma_{k}}
+	\ln{\gamma_{i+1}}=\frac{u}{2}\ln{\gamma_{i}}
 \end{equation}
-for $u$ typically greater than 1 and $\gamma$ is the modification factor for
-the density of states.  We then accept a new configuration for the density of
-states with a probability given by the following
+for $u$ typically greater than 1 and $\gamma$ is the modification
+factor for the density of states.  A new configuration for the density
+of states with a probability given by the following is chosen:
 \begin{equation}
-	\mathcal{P}(\epsilon_i \rightarrow \epsilon_j)
-	= \min[1,e^{\ln{w(\epsilon_i)}-\ln{w(\epsilon_j)}}]
+	\mathcal{P}(\epsilon_\text{old} \rightarrow \epsilon_\text{new})
+	= \min[1,e^{\ln{D(\epsilon_\text{old})}-\ln{D(\epsilon_\text{new})}}]
 \end{equation}
-Zhou and Bhatt explored the convergence of the Wang-Landau algorithm and
-determined that choosing a large modification factor $\gamma_0 = e^{4}$ and
-rapidly reducing the factor by 10 during each step resulted in reduced statistical
-error~\cite{zhou2005understanding}.
-
+The entire process is repeated until a desired cutoff is reached.
 
 \subsection{WL-TMMC Algorithm}
 
@@ -246,74 +242,149 @@ defining a minimum important energy and a maximum entropy state. In
 traditional Wang-Landau the WL factor begins at 1.0 and the factor is
 modified by 2.0 until the simulation is cutoff typically around
 $10^{-10}$.  Rane et. al. published an implemenation of
-WL-TMMC~\cite{rane2013monte} that suggested using a WL factor between 1.0 and
-$10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of WL-TMMC,
-we set the WL factor to be 1 and the cutoff at $10^{-10}$. A single
-sweep is defined as each macrostate being sampled a number of times in
-this case 10,000 (Siderius et. al. does 100). Wang-Landau sets a
-flatness criteria~\cite{wang2001determining, wang2001efficient,
+WL-TMMC~\cite{rane2013monte} that suggested using a WL factor between
+1.0 and $10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of
+WL-TMMC, we set the WL factor to be 1 and the cutoff to be either
+$10^{-4}$ or $10^{-10}$. A single sweep is defined as each macrostate
+being sampled a number of times in this case 10,000 (although 100 is
+often sufficient for small systems). Wang-Landau sets a flatness
+criteria~\cite{wang2001determining, wang2001efficient,
 hatch2015computational, mahynski2017predicting} for the accumulated
-histogram usually between 0.75 to 0.90.  For our simulation, it is
-sufficient that each macrostate is visited at least once (each
-histogram bin has one entry)~\cite{shell2003improved}.  The goal of
-this WL initialization is to prefill the transition matrix for the next
-portion of the simulation.
+histogram usually between 0.75 to 0.90.  In the original
+implementation, it was found to be sufficient that each macrostate is
+visited at least once (each histogram bin has one
+entry)~\cite{shell2003improved}; however, for other systems this is
+rarely sufficient.  The goal of this WL initialization is to prefill
+the transition matrix for the next portion of the simulation.
 \paragraph{Initializing TMMC:} The purpose of prefilling the transition
 matrix is apparent because if numerous zeros existed in the collection
 matrix, the infinite temperature transition matrix would be
 ill-defined.  Sampling over large ranges of density of states would
 therefore take an unacceptable length of time to
 complete~\cite{shell2003improved, shen2014elucidating}.  The transition
-matrix in terms of the collection matrix is given as follows:
+matrix in terms of the collection matrix is given as
+follows:
 \begin{align}
 \widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
 {\sum_{K} C(I,K)}
 \end{align}
-We now run the TMMC portion of the simulation.  Siderius does this for
-20 additional sweeps (does about 8 sweeps for WL).  We do this until we
-reach a specified temperature of interest.
-We have not yet implemented a biasing function to control acceptance
-rate of trial moves but we probably could/should? at some point.
+We now run the TMMC portion of the simulation.
+%Siderius does this for 20 additional sweeps (does about 8 sweeps for
+%WL).  We do this until we reach a specified temperature of interest. We
+%have not yet implemented a biasing function to control acceptance rate
+%of trial moves but we probably could/should? at some point.
+The acceptance probability is written in terms of the infinite temperature
+transition matrix.
 \begin{align}
   P_{acc}(i\rightarrow j) = \min\bigg[1,\frac{\widetilde{T}_{\infty}(J\rightarrow I)}
   {\widetilde{T}_{\infty}(I\rightarrow J)}\bigg]
 \end{align}
-this is only used to control actual transitions not update the collection
-matrices.
+This probability is only used to control actual transitions not update
+the collection matrices.
 
-\subsection{SAD Algorithm}
+\subsection{SAMC Algorithm}
+SAMC can be applied as a dynamic importance sampling algorithm that
+uses an update factor to explore energy
+space~\cite{liang2007stochastic, werlich2015stochastic,
+schneider2017convergence}.  The update factor is defined in the
+original implementation~\cite{liang2007stochastic} in terms of an
+arbitrary tunable parameter $t_0$ and a scale factor $\gamma_0$.
+\begin{align}
+\gamma_{t}^{\text{SA}} =\gamma_0 \frac{t_0}{\max(t_0,t)}
+\end{align}
+SAMC offers several advantages over other broad histogram methods
+including proven convergence. It has been shown that if
+$F_{t}^{\text{SA}}$ satisfies two conditions the estimator is proven to
+converge to the real DOS~\cite{liang2006theory, liang2007stochastic}.
+\begin{align}
+\sum_{t=1}^\infty \gamma_{t}^{\text{SA}} = \infty \quad\textrm{and}\quad
+\sum_{t=1}^\infty (\gamma_{t}^{\text{SA}})^\zeta < \infty
+\end{align}
+where $\zeta \in \{1,2\}$.  Unlike WL and WL-TMMC, the energy range need
+not be known a priori.  The time to converge depends only on the choice of
+parameters $t_0$ and $\gamma_0$.
+Unfortunately, only by performing many computational runs might the user
+determine what SAMC arbitrary parameters to choose.  This has lead us
+to develop a systematic way (which we will discuss in the next section)
+for the simulation to determine what $t_0$ should be.
+
+\section{SAD Algorithm}
+\subsubsection{The theory behind SAD}
 The SAD (Dynamic Stochastic Approximation) is a version of the SAMC
 Algorithm that attempts to dynamically choose the modification factor
 rather than relying on system dependent parameters such as $t_0$ or
 $\gamma_0$.  There is an immediate advantage of such an algorithm where
-parameters are chosen independent of system size or type. SAMC can be
-applied as a dynamic importance sampling algorithm that uses an update
-factor to explore energy space~\cite{liang2007stochastic,
-werlich2015stochastic, schneider2017convergence}.  The update factor is
-defined in the original implementation~\cite{liang2007stochastic} in
-terms of an arbitrary tunable parameter $t_0$.
+parameters are chosen independent of system size or type. While for
+SAMC the update factor is defined in the original
+implementation~\cite{liang2007stochastic} in terms of an arbitrary
+tunable parameter $t_0$,
 \begin{align}
 \gamma_{t}^{\text{SA}} = \frac{t_0}{\max(t_0,t)}
 \end{align}
-We argue that it is possible to set this parameter to a system
-independent parameter such that $t_0 = N_E^2/t$ where $N_E$ is the
-number of energies that have been found.  One of the energy found terms
-can be thought of as a change in the entropy $\Delta S$.  The change in
-the entropy can be thought of as a slope of the triangle made by
-connecting the minimum important energy and the maximum entropy state
-divided by the minimum temperature:
+The update factor $\gamma_{t}^{\text{SA}}$ can be thought of as
+$\nicefrac{\text{d}S}{\text{d}t}$. This tells us that $t_0$ should have
+dimensions of entropy.  We argue that we can write this entropy `term'
+geometrically as an area bounded by the $\ln{D(E)}$ i.e. the entropy.  This
+gives the following
 \begin{align}
-\Delta S = \frac{E_{\text{max}}-E_{\text{min}}}{T_{\text{min}}}
+\gamma_{t}^{\text{SA}} =
+\frac{N_E}{t}\frac{E_{\text{max}}-E_{\text{min}}}{3T_{\text{min}}}
 \end{align}
-This gives an update factor as follows:
-\begin{align}
-\gamma_{t}^{\text{SA}} = \frac{N_E\Delta S}{t} =
-\frac{N_E}{t}\frac{E_{\text{max}}-E_{\text{min}}}{T_{\text{min}}}
-\end{align}
-The update factor has the same $1/t$ behavior as the original SAMC
-algorithm; however now every time a new energy is discovered during the
-course of the simulation, the update factor experiences a jump.
-~\jpsays{Add in additional material for SAD!}
+where $N_E$ is the number of energies that have been found. The change
+in the entropy the minimum temperature can be thought of as a slope of
+the triangle made by connecting the minimum important energy and the
+maximum entropy state .  The factor of $3$ comes from the area bounded
+by the $\ln{D(E)}$ The update factor has the same $1/t$ behavior as the
+original SAMC algorithm; however now every time a new energy is
+discovered during the course of the simulation, the
+update factor experiences a jump.
+
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/gamma-ww1_30-ff0_22-100x10}
+  \caption{The update factor $\gamma$ versus iteration for three
+    different methods: WL, SAMC, and SAD.
+    method.}\label{fig:gamma-vs-t}
+\end{figure}
+
+Fig.~\ref{fig:gamma-vs-t}. shows the monotonic decrease of the update
+factor for SAMC.  The update factor for WL decreases like a step
+function while the update factor for SAD dynamically fluctuates around
+a value less than 1 for early MC moves (while finding new energy
+states).  Ultimately once all energy states have been found, the update
+factor for SAD decreases in the same monotonic fashion as SAMC.
+
+\subsubsection{Energy binning with SAD}
+
+Energy binning is an important consideration for complex continous
+systems. Coarse binning yields fewer energy states for the walker to
+explore but more time spent in the individual bin. Fine binning yields
+more energy states to explore but less time spent in each bin.  Some
+methods such as AdaWL~\cite{koh2013dynamically} (discussed elsewhere)
+employ a tunable mechanism for controlling the binning for low entropic
+states in order to ensure the exploration of all energies. A
+significant advantage of SAD over other broad histogram methods is that
+energy binning is solved dynamically. SAD should perform independently
+for a reasonable range of binning because $\gamma \propto
+\nicefrac{N_{E}}{t}$.  As the number of energy states found $N_{E}$
+increases (fine binning), the time spent $t$ in each bin will decrease.
+This argument explains why SAD should perform well for complex systems
+in terms of binning. SAMC has a prefactor $\gamma_0$ to aid in a
+similar way but this adds yet another parameter for the user to choose.
+
+\subsubsection{Scaling, step size, and SAD}
+Methods such as WL can fail to converge for complex systems in part
+because the same random MC moves are performed for the entire energy
+range.  The main problem lies in trying to determine how to optimize
+the step size such that the time to explore all energies is reasonable.
+Small step sizes lead to improved sampling at the expense of slow
+convergence. Koh et al. proposed multiplying $\gamma$ by an energy
+dependent factor in order to improve the converge of WL in regards to
+convergence and scaling~\cite{koh2013dynamically}.  Because the update
+factor for SAD has an energy dependent factor already present (and
+dynamically adjusted), we expect that SAD will perform consitently
+scaling free for a reasonable choice of step size.  SAD should perform
+extremely well compared with other broad histogram methods when applied
+to complex continuous systems such as polymers/proteins and spin models.
 
 \section{Results}
 

@@ -77,3 +77,4 @@ log/
 .sass-cache
 new-soft
 *.exe
+*.swp
