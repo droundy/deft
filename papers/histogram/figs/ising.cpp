@@ -69,11 +69,7 @@ ising_simulation::ising_simulation(int NN) {
   T = 0;
   N = NN;
   S = new int[N*N];
-  // Energy histogram
-  // abs. ground state energy for 2D Ising model.  But with new long rather
-  // than just long for energy_histogram could I keep track of energy levels
-  // found and update as needed?
-  // i.e. if H(E) == 0 then energy_levels ++ "we have found a new energy".
+  // energy histogram
   energy_levels = 2*J*N*N;
   ln_energy_weights = new double[energy_levels]();
   energy_histogram = new long[energy_levels]();
@@ -152,7 +148,7 @@ double* ising_simulation::compute_ln_dos(dos_types dos_type) {
       if (energy_histogram[i] != 0) {
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
       } else {
-        ln_dos[i] = -DBL_MAX; //apparently in <float.h>?
+        ln_dos[i] = -DBL_MAX; // located in <float.h>.
       }
     }
   }
@@ -268,58 +264,6 @@ int main(int argc, const char *argv[]) {
     printf("%s ", argv[i]);
   }
 
-  // ----------------------------------------------------------------------------
-  // Generate save file info
-  // ----------------------------------------------------------------------------
-
-  // Set default data directory
-  if (strcmp(data_dir,"none") == 0) {
-    sprintf(data_dir,"%s",default_data_dir);
-    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
-  }
-
-  mkdir(data_dir, 0777); // create save directory
-
-  char *dos_fname = new char[1024];
-  sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
-
-  char *headerinfo = new char[4096];
-  sprintf(headerinfo,
-          "# version: %s\n"
-          "# NN: %i\n"
-          "# total-moves: %li\n"
-          "# minT: %g\n\n",
-          version_identifier(),
-          NN, total_moves, minT);
-
-  char *countinfo = new char[4096];
-  sprintf(countinfo,
-          //"# moves: %li\n"
-          "# total-moves: %li\n",
-          total_moves);
-
-  //if (fix_kT) {
-  //  sprintf(headerinfo,
-  //          "%s# histogram method: canonical (fixed temperature)\n"
-  //          "# kT: %g\n",
-  //          headerinfo, fix_kT);
-  //}
-
-  // ----------------------------------------------------------------------------
-  // Resume functionality
-  // ----------------------------------------------------------------------------
-
-  if (resume) {
-     // We are continuing a previous simulation.
-    if (Jordan) {
-      printf("I'm resuming with the method.\n");
-      // Need to read and set: iterations, ln_energy_weights (from ln_dos)
-      } else {
-      printf("I do not know how to resume yet!\n");
-      exit(1);
-      }
-  }
-
   ising_simulation ising(NN);
   ising.T = 2;
 
@@ -351,11 +295,73 @@ int main(int argc, const char *argv[]) {
     }
   }
 
+  // ----------------------------------------------------------------------------
+  // Generate save file info
+  // ----------------------------------------------------------------------------
+
+  // Set default data directory
+  if (strcmp(data_dir,"none") == 0) {
+    sprintf(data_dir,"%s",default_data_dir);
+    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
+  }
+
+  mkdir(data_dir, 0777); // create save directory
+
+  char *dos_fname = new char[1024];
+  sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
+
+  //if (fix_kT) {
+  //  sprintf(headerinfo,
+  //          "%s# histogram method: canonical (fixed temperature)\n"
+  //          "# kT: %g\n",
+  //          headerinfo, fix_kT);
+  //}
+
+  // ----------------------------------------------------------------------------
+  // Resume functionality
+  // ----------------------------------------------------------------------------
+
+  if (resume) {
+     // We are continuing a previous simulation.
+    if (Jordan) {// This will be a Monte Carlo method eventually.
+      // Open the file!
+      FILE *rfile = fopen((const char *)dos_fname, "r");
+      if (rfile != NULL) {
+        printf("I'm resuming with the method.\n");
+        char * line = new char[1000];
+        if (fscanf(rfile, " %[^\n]\n", line) != 1) {
+          printf("error reading headerinfo!\n");
+          exit(1);
+        }
+        printf("line: '%s'\n",line);
+        if (fscanf(rfile, " NN = %d\n", &NN) != 1) {
+          printf("error reading NN!\n");
+          exit(1);
+        }
+        printf("NN is now %d\n", NN);
+        fclose(rfile);
+      }
+      // Need to read and set: iterations, ln_energy_weights (from ln_dos)
+      } else {
+      printf("I do not know how to resume yet!\n");
+      exit(1);
+      }
+  }
+
   // Save energy histogram
       {
         FILE *dos_out = fopen((const char *)dos_fname, "w");
-        fprintf(dos_out, "%s", headerinfo);
-        fprintf(dos_out, "%s", countinfo);
+
+        fprintf(dos_out,"version = %s\n\n",version_identifier());
+
+        fprintf(dos_out,"NN = %i\n",NN);
+        fprintf(dos_out,"total-moves = %li\n",total_moves);
+        fprintf(dos_out,"minT = %g\n",minT);
+        fprintf(dos_out,"moves = %li\n",ising.moves);
+        fprintf(dos_out,"E = %i\n",ising.E);
+        fprintf(dos_out,"J = %i\n", J);
+        //fprintf(dos_out,"lndos = %g\n",ising.ln_dos[1]); //print as list? array?
+        //lnw, S(E?), histogram as lists/array?
 
         fclose(dos_out);
       }
