@@ -69,11 +69,7 @@ ising_simulation::ising_simulation(int NN) {
   T = 0;
   N = NN;
   S = new int[N*N];
-  // Energy histogram
-  // abs. ground state energy for 2D Ising model.  But with new long rather
-  // than just long for energy_histogram could I keep track of energy levels
-  // found and update as needed?
-  // i.e. if H(E) == 0 then energy_levels ++ "we have found a new energy".
+  // energy histogram
   energy_levels = 2*J*N*N;
   ln_energy_weights = new double[energy_levels]();
   energy_histogram = new long[energy_levels]();
@@ -152,16 +148,12 @@ double* ising_simulation::compute_ln_dos(dos_types dos_type) {
       if (energy_histogram[i] != 0) {
         ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
       } else {
-        ln_dos[i] = -DBL_MAX; //apparently in <float.h>?
+        ln_dos[i] = -DBL_MAX; // located in <float.h>.
       }
     }
   }
   return ln_dos;
 }
-
-// ---------------------------------------------------------------------
-// Initialize Main
-// ---------------------------------------------------------------------
 
 static double took(const char *name) {
   assert(name); // so it'll count as being used...
@@ -183,15 +175,29 @@ static double took(const char *name) {
   return exp(ceil(log(seconds)));
 }
 
+// ---------------------------------------------------------------------
+// Initialize Main
+// ---------------------------------------------------------------------
+
 int main(int argc, const char *argv[]) {
 
   // some miscellaneous default or dummy simulation parameters
 
+  bool Jordan = true;
   int NN = 10;
   int resume = false;
-  long total_moves = 12000;
-  //int Q = 2;  // defualt to ising model
+  long total_moves = 10000;
 
+  char *data_dir = new char[1024];
+  sprintf(data_dir,"none");
+  char *default_data_dir = new char[1024];
+  sprintf(default_data_dir, "papers/histogram/data/ising");
+  char *filename = new char[1024];
+  sprintf(filename, "none");
+  char *filename_suffix = new char[1024];
+  sprintf(filename_suffix, "none");
+
+  //int Q = 2;  // defualt to ising model
   poptContext optCon;
 
   // -------------------------------------------------------------------
@@ -212,22 +218,18 @@ int main(int argc, const char *argv[]) {
 
     {"total-moves", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &total_moves,
      0, "Number of moves for which to run the simulation", "INT"},
-    //{"round_trips", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &simulation_round_trips,
-     //0, "Number of round trips (pessimistic samples) to run the simulation", "INT"},
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
 
-    //{"data_dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
-     //"Directory in which to save data", "data_dir"},
-    //{"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
-     //"Base of output file names", "STRING"},
-    //{"filename_suffix", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-     //&filename_suffix, 0, "Output file name suffix", "STRING"},
+    {"dir", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
+     "Directory in which to save data", "data_dir"},
+    {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
+     "Base of output file names", "STRING"},
 
     /*** HISTOGRAM METHOD OPTIONS ***/
 
     //{"kT", '\0', POPT_ARG_DOUBLE, &fix_kT, 0, "Use a fixed temperature of kT"
-     //" rather than adjusted weights", "DOUBLE"},
+    // " rather than adjusted weights", "DOUBLE"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/
 
@@ -238,10 +240,6 @@ int main(int argc, const char *argv[]) {
 
     //{"min_samples", '\0', POPT_ARG_INT, &sw.min_samples, 0,
      //"Number of times to sample mininum energy", "INT"},
-    //{"init_iters", '\0', POPT_ARG_INT, &sw.init_iters, 0,
-     //"Number of iterations for initialization", "INT"},
-    //{"min_T", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-     //&ising.min_T, 0, "The minimum temperature that we care about", "DOUBLE"},
 
     POPT_AUTOHELP
     POPT_TABLEEND
@@ -296,6 +294,77 @@ int main(int argc, const char *argv[]) {
               ising.energies_found,ising.energy_histogram[i],ising.ln_dos[i]);
     }
   }
+
+  // ----------------------------------------------------------------------------
+  // Generate save file info
+  // ----------------------------------------------------------------------------
+
+  // Set default data directory
+  if (strcmp(data_dir,"none") == 0) {
+    sprintf(data_dir,"%s",default_data_dir);
+    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
+  }
+
+  mkdir(data_dir, 0777); // create save directory
+
+  char *dos_fname = new char[1024];
+  sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
+
+  //if (fix_kT) {
+  //  sprintf(headerinfo,
+  //          "%s# histogram method: canonical (fixed temperature)\n"
+  //          "# kT: %g\n",
+  //          headerinfo, fix_kT);
+  //}
+
+  // ----------------------------------------------------------------------------
+  // Resume functionality
+  // ----------------------------------------------------------------------------
+
+  if (resume) {
+     // We are continuing a previous simulation.
+    if (Jordan) {// This will be a Monte Carlo method eventually.
+      // Open the file!
+      FILE *rfile = fopen((const char *)dos_fname, "r");
+      if (rfile != NULL) {
+        printf("I'm resuming with the method.\n");
+        char * line = new char[1000];
+        if (fscanf(rfile, " %[^\n]\n", line) != 1) {
+          printf("error reading headerinfo!\n");
+          exit(1);
+        }
+        printf("line: '%s'\n",line);
+        if (fscanf(rfile, " NN = %d\n", &NN) != 1) {
+          printf("error reading NN!\n");
+          exit(1);
+        }
+        printf("NN is now %d\n", NN);
+        fclose(rfile);
+      }
+      // Need to read and set: iterations, ln_energy_weights (from ln_dos)
+      } else {
+      printf("I do not know how to resume yet!\n");
+      exit(1);
+      }
+  }
+
+  // Save energy histogram
+      {
+        FILE *dos_out = fopen((const char *)dos_fname, "w");
+
+        fprintf(dos_out,"version = %s\n\n",version_identifier());
+
+        fprintf(dos_out,"NN = %i\n",NN);
+        fprintf(dos_out,"total-moves = %li\n",total_moves);
+        fprintf(dos_out,"minT = %g\n",minT);
+        fprintf(dos_out,"moves = %li\n",ising.moves);
+        fprintf(dos_out,"E = %i\n",ising.E);
+        fprintf(dos_out,"J = %i\n", J);
+        //fprintf(dos_out,"lndos = %g\n",ising.ln_dos[1]); //print as list? array?
+        //lnw, S(E?), histogram as lists/array?
+
+        fclose(dos_out);
+      }
   // -------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // -------------------------------------------------------------------

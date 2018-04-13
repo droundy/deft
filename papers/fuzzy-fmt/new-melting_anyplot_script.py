@@ -2,7 +2,8 @@
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt with command
 # ./new-melting_anyplot_script.py [directory where data stored] --f[fixed quantity] [value of fixed quantity] --x[] --y[]
 #to create plots from plot.dat files already in the data directory
-#ie. ENTER ./new-melting_anyplot_script.py  pears --ftemp 2 --ydiff --xgw   to plot  diff_free_enery vs gw at fixed T=2
+#ie. ENTER ./new-melting_anyplot_script.py  pears --ftemp 2 --ydiff --xgw  --ptname addsomethingtoplotname   
+#to plot  diff_free_enery vs gw at fixed T=2
 
 import os
 import argparse
@@ -27,6 +28,8 @@ parser.add_argument('--xlab', metavar='label for x-axis', type=str,
                     help='label for x-axis. use with --xcol.') 
 parser.add_argument('--ylab', metavar='label for y-axis', type=str,
                     help='label for y-axis. use with --ycol.') 
+parser.add_argument('--ptname', metavar='include in name of plot', type=str,
+                    help='info added to plot name') 
                     
                      
 groupx.add_argument('--xtemp', action="store_true",
@@ -39,8 +42,6 @@ groupx.add_argument('--xhfe', action="store_true",
                     help='homogeneous free energy/atom on x-axis') 
 groupx.add_argument('--xdiff', action="store_true",
                     help='diff in free energy on x-axis')   
-#groupx.add_argument('--xcfev', action="store_true",
-#                    help='crystal energy/volume on x-axis') 
 groupx.add_argument('--xfv', action="store_true",
                     help='fraction of vacancies (fv) on x-axis') 
 groupx.add_argument('--xgw', action="store_true",
@@ -58,8 +59,6 @@ groupy.add_argument('--yhfe', action="store_true",
                     help='homogeneous free energy/atom on y-axis') 
 groupy.add_argument('--ydiff', action="store_true",
                     help='diff in free energy on y-axis')   
-#groupy.add_argument('--ycfev', action="store_true",
-#                    help='crystal energy/volume on y-axis') 
 groupy.add_argument('--yfv', action="store_true",
                     help='fraction of vacancies (fv) on y-axis') 
 groupy.add_argument('--ygw', action="store_true",
@@ -115,10 +114,6 @@ elif args.xdiff:
     x_axis=thisdata[:,6]     
     x_label="Diff=(cFE-hFE)/atom" 
     x_plot="DiffFE"
-#elif args.xcfev:  
-#    x_axis=thisdata[:,10]     
-#    x_label="Crystal Free Energy/volume"
-#    x_plot="cFEv"
 elif args.xcol:   
     x_axis=thisdata[:,args.xcol]     
     x_label=args.xlab
@@ -152,16 +147,15 @@ elif args.ydiff:
     y_axis=thisdata[:,6]  
     y_label="Diff=(cFE-hFE)/atom" 
     y_plot="DiffFE"
-#elif args.ycfev:  
-#    y_axis=thisdata[:,10]    
-#    y_label="Crystal Free Energy/volume"
-#    y_plot="cFEv"
 elif args.ycol:   
     y_axis=thisdata[:,args.ycol]     
     y_label=args.ylab
     y_plot=args.ylab
+    
+#if args.ptname:
+plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+"_"+args.ptname+".png"
+#else plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+".png"
 
-plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+".png"
 plot_title=y_label+" vs "+x_label+" at Fixed "+fixed_quantity+"="+fixed_value
 
 #Plot x-axis vs y-axis
@@ -171,6 +165,6 @@ plt.xlabel(x_label)
 plt.ylabel(y_label)
 plt.savefig(plot_name)
 
-plt.show()
+#plt.show()
 
 

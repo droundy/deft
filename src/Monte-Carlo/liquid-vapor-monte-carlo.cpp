@@ -773,22 +773,23 @@ int main(int argc, const char *argv[]) {
       
       {
         FILE *dos_in = fopen((const char *)dos_fname, "r");
-	if (dos_in == NULL) {
-	  printf("Unable to resume, because %s does not exist.  Proceeding anyhow!\n", dos_fname);
-	} else {
-	  char * line = new char[1000];
-	  while (fscanf(dos_in, " #%[^\n] ", line) == 1) {
-	    printf("line: %s\n", line);
-	    // TODO HERE: search in "line" using sscanf for total moves: %ld or working moves: %ld
-	  }
-	  int energy;
-	  double dos;
-	  while (fscanf(dos_in, " %u %lf ", &energy, &dos) == 2) {
-	    // printf(" %u %lf\n ", energy, dos);
-	    sw.ln_energy_weights[energy]=-dos;
-	  }
-	  fclose(dos_in);
-	}
+        if (dos_in == NULL) {
+          printf("Unable to resume, because %s does not exist.  Proceeding anyhow!\n", dos_fname);
+        } else {
+          char * line = new char[1000];
+          while (fscanf(dos_in, " #%[^\n] ", line) == 1) {
+            printf("line: %s\n", line);
+            sscanf(line , " working moves: %ld " , &sw.moves.working);
+            sscanf(line , " total moves: %ld " , &sw.moves.total);
+          }
+          int energy;
+          double dos;
+          while (fscanf(dos_in, " %u %lf ", &energy, &dos) == 2) {
+            // printf(" %u %lf\n ", energy, dos);
+            sw.ln_energy_weights[energy]=-dos;
+          }
+          fclose(dos_in);
+        }
       }
     } else {
       printf("I do not know how to resume yet!\n");
