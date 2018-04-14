@@ -151,14 +151,18 @@ elif args.ycol:
     y_axis=thisdata[:,args.ycol]     
     y_label=args.ylab
     y_plot=args.ylab
-    
-#if args.ptname:
-plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+"_"+args.ptname+".png"
-#else plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+".png"
+
+plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+".png"    
+if args.ptname:
+    plot_name=data_directory+"/plot_"+y_plot+"vs"+x_plot+"_"+fixed_quantity+fixed_value+"_"+args.ptname+".png"
+
 
 plot_title=y_label+" vs "+x_label+" at Fixed "+fixed_quantity+"="+fixed_value
+a=0 
+b=-40
 
 #Plot x-axis vs y-axis
+plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
 plt.plot(x_axis, y_axis, color="purple")
 plt.title(plot_title)
 plt.xlabel(x_label)

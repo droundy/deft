@@ -305,7 +305,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //dx=(lattice_constant/2)/number of chunks along lattice vector
   const double dV = uipow(lattice_constant/Nl,3)/4.0;
   
-  int crystal_calc_option=1;  //set to 0 for crystal free energy with brute-force integration
+  int crystal_calc_option=2;  //set to 0 for crystal free energy with brute-force integration
                               //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
                               //set to 2 for crystal free energy with Monte-Carlo (more accurate)
                               
