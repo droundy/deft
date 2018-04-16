@@ -13,6 +13,8 @@ filebase = sys.argv[3]
 methods = [ '-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau', '-sad']
+if 'allmethods' not in sys.argv:
+    methods = ['sad3','-tmmc', '-sad']
 
 def running_mean(x, N):
     cumsum = numpy.cumsum(numpy.insert(x, 0, 0)) 

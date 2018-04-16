@@ -18,6 +18,9 @@ tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
+if 'allmethods' not in sys.argv:
+    methods = ['sad3','-tmmc', '-sad']
+    
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
