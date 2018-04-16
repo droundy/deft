@@ -19,7 +19,7 @@ methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['sad3','-tmmc', '-sad']
+    methods = ['-sad3','-tmmc', '-vanilla_wang_landau']
     
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
