@@ -51,31 +51,34 @@ for method in methods:
 
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
+
+        if not os.path.exists('figs/s000'):
+                os.makedirs('figs/s000')
+               
+        if filebase.startswith('lv'):
                 NxN = filebase.split('-')
                 # Formula to calculate N from title i.e. 100x10
                 # and use floor to always round up.
                 N = np.floor(0.25*0.20*NxN[0]*NxN[-1]*NxN[-1])
                 moves = iterations * float(N)
-
-        if not os.path.exists('figs/s000'):
-                os.makedirs('figs/s000')
+        if filebase.startswith('s000'):
                 N = filebase.split('-N')[-1]
                 # Get N directly from title.
                 moves = iterations * float(N)
-
+                
         if energy > 0:
                 plt.figure('error-at-energy-iterations')
-                colors.plot(iterations, erroratenergy, method=method[1:])
+                colors.plot(moves, erroratenergy, method=method[1:])
                 plt.title('Error at energy %g %s' % (energy,filebase))
-                plt.xlabel('# iterations')
+                plt.xlabel('# moves')
                 plt.ylabel('error')
                 colors.legend()
                 plt.savefig('figs/%s-error-energy-%g.pdf' % (tex_filebase, energy))
 
                 plt.figure('round-trips-at-energy' )
-                colors.plot(iterations, Nrt_at_energy, method = method[1:])
+                colors.plot(moves, Nrt_at_energy, method = method[1:])
                 plt.title('Round Trips at energy %g, %s' % (energy,filebase))
-                plt.xlabel('# iterations')
+                plt.xlabel('# moves')
                 plt.ylabel('Round Trips')
                 colors.legend()
                 plt.savefig('figs/%s-round-trips-%g.pdf' % (tex_filebase, energy))
@@ -90,15 +93,15 @@ for method in methods:
                 plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
 
         plt.figure('maxerror')
-        colors.loglog(iterations, maxerror, method = method[1:])
-        plt.xlabel('# iterations')
+        colors.loglog(moves, maxerror, method = method[1:])
+        plt.xlabel('# moves')
         plt.ylabel('Maximum Entropy Error')
         plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         colors.legend()
         plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
 
         plt.figure('errorinentropy')
-        colors.loglog(iterations, errorinentropy[0:len(iterations)],
+        colors.loglog(moves, errorinentropy[0:len(iterations)],
                       method = method[1:])
         plt.xlabel('#Moves')
         plt.ylabel('Average Entropy Error')
@@ -108,4 +111,7 @@ for method in methods:
 
     except:
         raise
+plt.figure('errorinentropy')
+colors.loglog(moves, 10000/np.sqrt(moves), method = '1/sqrt(t)')
+colors.legend()
 plt.show()

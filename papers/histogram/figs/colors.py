@@ -24,6 +24,7 @@ _colors = { 'sad': 'r',
             'samc-10000': 'tab:orange',
             'samc-100000': 'y',
             'samc-1e+06': 'g',
+            '1/sqrt(t)': 'r'
 }
 
 _linestyles = {
@@ -77,6 +78,7 @@ _legend_label = {
     'samc-10000': 'SAMC ($10^{4}$ $t_0$)',
     'samc-100000': 'SAMC ($10^{5}$ $t_0$)',
     'samc-1e+06': 'SAMC ($10^{6}$ $t_0$)',
+    '1/sqrt(t)': r'$\frac{1}{\sqrt{t}}$'
 }
 
 def fix_legend(method):
