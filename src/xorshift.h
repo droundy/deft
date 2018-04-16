@@ -35,6 +35,30 @@ public:
     return *this;
   }
 
+  void dump_resume_info(FILE *f) {
+    fprintf(f, "# ");
+    for (int i=0;i<16;i++) {
+      fprintf(f, "%016lx ", s[i]);
+    }
+    fprintf(f, "%x\n", p);
+  }
+  void resume_from_dump(FILE *f) {
+    if (fscanf(f, "# %lx", &s[0]) != 1) {
+      fprintf(stderr, "Unable to read random resume information!\n");
+      exit(1);
+    }
+    for (int i=1; i<16; i++) {
+      if (fscanf(f, " %lx", &s[i]) != 1) {
+        fprintf(stderr, "Unable to read random resume information!\n");
+        exit(1);
+      }
+    }
+    if (fscanf(f, " %x\n", &p) != 1) {
+      fprintf(stderr, "Unable to read random resume information!\n");
+      exit(1);
+    }
+  }
+
   uint64_t rand64() {
     uint64_t s0 = s[ p ];
     uint64_t s1 = s[ p = (p+1) & 15 ];

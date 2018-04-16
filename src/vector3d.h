@@ -17,6 +17,12 @@ struct random {
   static uint64_t ran64() {
     return my_rand.rand64();
   }
+  static void dump_resume_info(FILE *f) {
+    my_rand.dump_resume_info(f);
+  }
+  static void resume_from_dump(FILE *f) {
+    my_rand.resume_from_dump(f);
+  }
   static unsigned long seed_randomly() {
     seedval = clock(); // in case reading /dev/urandom fails?
     FILE *f = fopen("/dev/urandom", "r");
