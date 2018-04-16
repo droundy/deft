@@ -11,7 +11,7 @@
 #include <popt.h>
 #include "handymath.h"
 #include "vector3d.h"
-
+#include <iostream>
 #include "version-identifier.h"
 
 // ---------------------------------------------------------------------
@@ -183,7 +183,7 @@ int main(int argc, const char *argv[]) {
 
   // some miscellaneous default or dummy simulation parameters
 
-  bool Jordan = true;
+  bool Jordan = true; 
   int NN = 10;
   int resume = false;
   long total_moves = 10000;
@@ -207,6 +207,8 @@ int main(int argc, const char *argv[]) {
   poptOption optionsTable[] = {
     {"resume", '\0', POPT_ARG_NONE, &resume, 0,
      "Resume previous simulation", "BOOLEAN"},
+    //{"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
+    // "Seed for the random number generator", "INT"},
 
     /*** ISING MODEL PARAMETERS ***/
 
@@ -225,6 +227,7 @@ int main(int argc, const char *argv[]) {
      "Directory in which to save data", "data_dir"},
     {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &filename, 0,
      "Base of output file names", "STRING"},
+     
 
     /*** HISTOGRAM METHOD OPTIONS ***/
 
@@ -265,7 +268,7 @@ int main(int argc, const char *argv[]) {
   }
 
   ising_simulation ising(NN);
-  ising.T = 2;
+  ising.T = 6;
 
   took("Starting program");
   printf("version: %s\n",version_identifier());
@@ -283,9 +286,9 @@ int main(int argc, const char *argv[]) {
 
   ising.ln_dos = ising.compute_ln_dos(histogram_dos);
 
-  for(int i = 0; i <= ising.energy_levels; i++){
-    printf("histogram is %ld\n while lndos is %g\n", ising.energy_histogram[i], ising.ln_dos[i]);
-  }
+//  for(int i = 0; i <= ising.energy_levels; i++){
+//    printf("histogram is %ld\n while lndos is %g\n", ising.energy_histogram[i], ising.ln_dos[i]);
+//  }
 
   for(int i = 0; i <= ising.energy_levels; i++){
     if (ising.energy_histogram[i] > 0) {
@@ -328,6 +331,8 @@ int main(int argc, const char *argv[]) {
       FILE *rfile = fopen((const char *)dos_fname, "r");
       if (rfile != NULL) {
         printf("I'm resuming with the method.\n");
+        fscanf(rfile, "import numpy as np\n");
+        random::resume_from_dump(rfile);
         char * line = new char[1000];
         if (fscanf(rfile, " %[^\n]\n", line) != 1) {
           printf("error reading headerinfo!\n");
@@ -343,15 +348,18 @@ int main(int argc, const char *argv[]) {
       }
       // Need to read and set: iterations, ln_energy_weights (from ln_dos)
       } else {
-      printf("I do not know how to resume yet!\n");
-      exit(1);
+        printf("I do not know how to resume yet!\n");
+        exit(1);
       }
   }
+
 
   // Save energy histogram
       {
         FILE *dos_out = fopen((const char *)dos_fname, "w");
 
+        fprintf(dos_out, "import numpy as np\n\n");
+        random::dump_resume_info(dos_out);
         fprintf(dos_out,"version = %s\n\n",version_identifier());
 
         fprintf(dos_out,"NN = %i\n",NN);
@@ -360,6 +368,13 @@ int main(int argc, const char *argv[]) {
         fprintf(dos_out,"moves = %li\n",ising.moves);
         fprintf(dos_out,"E = %i\n",ising.E);
         fprintf(dos_out,"J = %i\n", J);
+        // insert array into text file.
+        fprintf(dos_out, "lndos = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; ++i) {
+          fprintf(dos_out,"\t%.17g,\n", ising.ln_dos[i]);
+        }
+        fprintf(dos_out, "])\n");
+        
         //fprintf(dos_out,"lndos = %g\n",ising.ln_dos[1]); //print as list? array?
         //lnw, S(E?), histogram as lists/array?
 
