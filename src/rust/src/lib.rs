@@ -1,88 +1,163 @@
-//! This is the deft crate!
-
 extern crate internment;
 extern crate tinyset;
 
 use tinyset::{Map64, Fits64};
 use internment::Intern;
 
-/// This is an expression.
-///
-/// It implements `Copy`, making it efficient to use.
-#[derive(Debug, Hash, Clone, PartialEq, Eq)]
-pub struct Expr<T: ExprKind + Cpp<T>> {
-    inner: Intern<ExprOp<T>>,
+pub trait InnerExpr: 'static + Send + Clone + Eq + std::fmt::Debug + std::hash::Hash {
+    fn cpp(&self) -> String;
 }
 
-impl<T: ExprKind + Cpp<T>> Copy for Expr<T> {}
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Expr<T: InnerExpr> {
+    inner: Intern<T>,
+}
 
-impl<T: ExprKind + Cpp<T>> Fits64 for Expr<T> {
+impl<T: InnerExpr> Expr<T> {
+    fn cpp(&self) -> String {
+        self.inner.cpp()
+    }
+}
+
+impl<T: InnerExpr> Copy for Expr<T> {}
+
+impl<T: InnerExpr> Fits64 for Expr<T> {
     fn to_u64(self) -> u64 {
         self.inner.to_u64()
     }
+
     unsafe fn from_u64(x: u64) -> Self {
         Expr { inner: Intern::from_u64(x), }
     }
 }
 
-pub trait Cpp<T: ExprKind + Cpp<T>> {
-    fn cpp(op: Expr<T>, assignto: &'static str) -> String;
+impl<T: InnerExpr> From<T> for Expr<T> {
+    fn from(inner: T) -> Self {
+        Expr { inner: Intern::new(inner) }
+    }
 }
 
-pub trait ExprKind: PartialEq + Eq + Clone + std::fmt::Debug {
-    type SpecificOps: std::hash::Hash + PartialEq + Eq + Clone + std::fmt::Debug;
+trait ExprAdd: InnerExpr {
+    fn add(&self, other: &Self) -> Self;
+    fn neg(&self) -> Self;
+    fn zero() -> Self;
 }
 
-#[derive(Debug, Hash)]
-enum ExprOp<T: ExprKind + Cpp<T>> {
-    Add(CommutativeMap<T>),
-    ScalarMul(Scalar, Expr<T>),
-    Specific(T::SpecificOps),
+trait ExprMul {
+    fn mul(&self, other: &Self) -> Self;
+    fn one() -> Self;
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash)]
-struct Scalar;
-impl ExprKind for Scalar { type SpecificOps = ScalarOps; }
-#[derive(Hash, PartialEq, Eq, Clone, Debug)]
-enum ScalarOps {
-    Mul(CommutativeMap<Scalar>),
+trait ExprField: ExprAdd + ExprMul {
+    fn reciprocal(&self) -> Self;
+}
+
+impl<T: InnerExpr + ExprAdd> std::ops::Add for Expr<T> {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        (*self.inner).add(&*other.inner).into()
+    }
+}
+
+impl<T: InnerExpr + ExprAdd> std::ops::Sub for Expr<T> {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        (*self.inner).add(&other.inner.neg()).into()
+    }
+}
+
+impl<T: InnerExpr + ExprMul> std::ops::Mul for Expr<T> {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        (*self.inner).mul(&*other.inner).into()
+    }
+}
+
+impl<T: InnerExpr + ExprField> std::ops::Div for Expr<T> {
+    type Output = Self;
+
+    fn div(self, other: Self) -> Self {
+        (*self.inner).mul(&other.inner.reciprocal()).into()
+    }
+}
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+enum Scalar {
+    Var(&'static str),
     Exp(Expr<Scalar>),
     Log(Expr<Scalar>),
+    Add(AbelianMap<Scalar>),
+    Mul(AbelianMap<Scalar>),
 }
-impl Cpp<Scalar> for Scalar {
-    fn cpp(op: Expr<Scalar>, assignto: &'static str) -> String {
-        match &*op.inner {
-            &ExprOp::Add(ref map) => { unimplemented!() },
-            &ExprOp::Specific(ref spec_op) =>
-                match spec_op {
-                    &ScalarOps::Mul(ref map) => { unimplemented!() },
-                    otherwise => { unimplemented!() },
-                },
-            otherwise => { unimplemented!() }
+
+impl InnerExpr for Scalar {
+    fn cpp(&self) -> String { unimplemented!() }
+}
+
+impl ExprAdd for Scalar {
+    fn add(&self, other: &Self) -> Self {
+        let mut sum: AbelianMap<Scalar>;
+        match (self, other) {
+            (&Scalar::Add(ref lhs), &Scalar::Add(ref rhs)) => {
+                sum = lhs.clone();
+                sum.union(&rhs);
+            },
+            (&Scalar::Add(ref lhs), _) => {
+                sum = lhs.clone();
+                if *other != Scalar::zero() {
+                    sum.insert(other.clone().into(), 1.0);
+                }
+            },
+            (_, &Scalar::Add(ref rhs)) => {
+                sum = rhs.clone();
+                if *self != Scalar::zero() {
+                    sum.insert(self.clone().into(), 1.0);
+                }
+            },
+            (_, _) => {
+                sum = (self.clone().into(), 1.0).into();
+                sum.insert(other.clone().into(), 1.0);
+            }
         }
+        if sum.inner.len() == 1 {
+            let (k, &v) = sum.inner.iter().next().unwrap();
+            if v == 1.0 {
+                return (*k.inner).clone();
+            }
+        }
+        Scalar::Add(sum.into())
+    }
+
+    fn neg(&self) -> Self {
+        match self {
+            &Scalar::Add(ref map) =>
+                Scalar::Add(map.inner.iter().map(|(k, &v)| (k, -v)).collect()),
+            _ => {
+                if *self == Scalar::zero() {
+                    Scalar::zero()
+                } else {
+                    Scalar::Add((self.clone().into(), -1.0).into())
+                }
+            },
+        }
+    }
+
+    fn zero() -> Self {
+        Scalar::Mul(AbelianMap::new())
     }
 }
 
 #[derive(Debug, Clone)]
-struct CommutativeMap<T: ExprKind + Cpp<T>> {
+struct AbelianMap<T: InnerExpr> {
     inner: Map64<Expr<T>, f64>,
 }
 
-impl<T: ExprKind + Cpp<T>> CommutativeMap<T> {
+impl<T: InnerExpr> AbelianMap<T> {
     fn new() -> Self {
-        CommutativeMap { inner: Map64::new(), }
-    }
-
-    fn as_vec(&self) -> Vec<(u64, u64)> {
-        self.inner.iter().map(|(k, &v)| (k.inner.to_u64(), v as u64)).collect()
-    }
-
-    // This lets you create a `CommutativeMap` without wasting time checking if
-    // the first term was already there.
-    fn from_pair(k: Expr<T>, v: f64) -> Self {
-        let mut map = CommutativeMap::new();
-        map.inner.insert(k, v);
-        map
+        Self { inner: Map64::new(), }
     }
 
     fn insert(&mut self, k: Expr<T>, v: f64) {
@@ -99,20 +174,38 @@ impl<T: ExprKind + Cpp<T>> CommutativeMap<T> {
             self.insert(k, v);
         }
     }
+}
 
-    // This is used for negation, subtraction, reciprocals, division.
-    fn negate(&self) -> Self {
-        let mut neg = CommutativeMap::new();
-        for (k, &v) in self.inner.iter() {
-            neg.inner.insert(k, -v);
+impl<T: InnerExpr> std::iter::FromIterator<(Expr<T>, f64)> for AbelianMap<T> {
+    fn from_iter<I: IntoIterator<Item = (Expr<T>, f64)>>(iter: I) -> Self {
+        let mut map = AbelianMap::new();
+        for (k, v) in iter {
+            map.insert(k, v);
         }
-        neg
+        map
     }
 }
 
-impl<T: ExprKind + Cpp<T>> std::hash::Hash for CommutativeMap<T> {
+impl<T: InnerExpr> From<(Expr<T>, f64)> for AbelianMap<T> {
+    fn from((k, v): (Expr<T>, f64)) -> Self {
+        let mut inner = Map64::new();
+        inner.insert(k, v);
+        Self { inner, }
+    }
+}
+
+impl<T: InnerExpr> From<Map64<Expr<T>, f64>> for AbelianMap<T> {
+    fn from(inner: Map64<Expr<T>, f64>) -> Self {
+        Self { inner, }
+    }
+}
+
+impl<T: InnerExpr> std::hash::Hash for AbelianMap<T> {
     fn hash<H: std::hash::Hasher>(&self, hasher: &mut H) {
-        let mut terms = self.as_vec();
+        let mut terms: Vec<_>
+            = self.inner.iter()
+                        .map(|(k, &v)| (k.inner.to_u64(), v as u64))
+                        .collect();
         terms.sort();
         for (k, v) in terms {
             k.hash(hasher);
@@ -121,13 +214,20 @@ impl<T: ExprKind + Cpp<T>> std::hash::Hash for CommutativeMap<T> {
     }
 }
 
-impl<T: ExprKind + Cpp<T>> PartialEq for CommutativeMap<T> {
+impl<T: InnerExpr> PartialEq for AbelianMap<T> {
     fn eq(&self, other: &Self) -> bool {
-        let (mut lhs, mut rhs) = (self.as_vec(), other.as_vec());
+        let mut lhs: Vec<_>
+            = self.inner.iter()
+                        .map(|(k, &v)| (k.inner.to_u64(), v as u64))
+                        .collect();
+        let mut rhs: Vec<_>
+            = other.inner.iter()
+                         .map(|(k, &v)| (k.inner.to_u64(), v as u64))
+                         .collect();
         lhs.sort();
         rhs.sort();
         lhs == rhs
     }
 }
 
-impl<T: ExprKind + Cpp<T>> Eq for CommutativeMap<T> {}
+impl<T: InnerExpr> Eq for AbelianMap<T> {}
