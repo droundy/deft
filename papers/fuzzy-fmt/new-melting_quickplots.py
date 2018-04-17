@@ -38,7 +38,10 @@ if args.dx:
 
 #for fv in [0, 0.01, 0.1]:
 for fv in [0]:
-    os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_fv%g_dx%g --fv %g --gwstart .001 --gwend .7 --gwstep .01  --dx %g' % (kT, n, directory, kT, n, fv, dx, fv, dx))
+    #os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_fv%g_dx%g --fv %g --gwstart .001 --gwend .7 --gwstep .01  --dx %g' % (kT, n, directory, kT, n, fv, dx, fv, dx))
+    #os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_fv%g_dx%g --fv %g --gwstart .371 --gwend .5 --gwstep .01  --dx %g' % (kT, n, directory, kT, n, fv, dx, fv, dx))  #finish mc mirror plot
+    os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_fv%g_dx%g --fv %g --gwstart .661 --gwend .7 --gwstep .01  --dx %g' % (kT, n, directory, kT, n, fv, dx, fv, dx))  #finish mc mirror plot
+    os.system('cat %s_kT%g_n%g_fv%g_dx%g/*alldat.dat >> %s_kT%g_n%g_fv%g_dx%g/plot.dat' % (directory, kT, n, fv, dx, directory, kT, n, fv, dx))
     os.system('cat %s_kT%g_n%g_fv%g_dx%g/*alldat.dat >> %s_kT%g_n%g_fv%g_dx%g/plot.dat' % (directory, kT, n, fv, dx, directory, kT, n, fv, dx))
     os.system('./new-melting_anyplot_script.py %s_kT%g_n%g_fv%g_dx%g --ftemp %g --ydiff --xgw --ptname n%g_fv%g_dx%g' % (directory, kT, n, fv, dx, kT, n, fv, dx))
     os.system('cp %s_kT%g_n%g_fv%g_dx%g/plot_DiffFEvsgw_kT%g_n%g_fv%g_dx%g.png %s_plots/plot_DiffFEvsgw_kT%g_n%g_fv%g_dx%g.png' % (directory, kT, n, fv, dx, kT, n, fv, dx, directory, kT, n, fv, dx))
