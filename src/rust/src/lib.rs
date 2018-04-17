@@ -163,6 +163,7 @@ impl ClosedAdd for Scalar {
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 enum RealSpaceScalar {
     Var(&'static str),
+    ScalarVar(&'static str),
     Exp(Expr<RealSpaceScalar>),
     Log(Expr<RealSpaceScalar>),
     Add(AbelianMap<RealSpaceScalar>),
