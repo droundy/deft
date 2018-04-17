@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 #This program is for plotting FE vs Density
 #Run this program from /deft/papers/fuzzy-fmt by entering (example):
-#  ./new-melting_FEvsDen_quickplot.py  --kT 2 --fv 0 --gw 0.001 --nstart 0.1 --nstop 2.0 --nstep 0.1 --d carrots --dx 0.001 (optional)
+#  ./new-melting_kTvsDen_quickplot.py  --kT 2 --fv 0 --gw 0.001 --nstart 0.1 --nstop 2.0 --nstep 0.1 --d carrots --dx 0.001 (optional)
 
 
 import os
@@ -55,19 +55,22 @@ x_axis=thisdata[:,1]
 x_label="Reduced Density (n)"
 x_plot="n"
 
-y_axis=thisdata[:,6]  
-y_label="Diff=(cFE-hFE)/atom" 
-y_plot="DiffFE"
+y_axis=thisdata[:,0]     
+y_label="Temperature (kT)"
+y_plot="kT"
+
+z_axis=thisdata[:,6]  
+#z_label="Diff=(cFE-hFE)/atom" 
+#z_plot="DiffFE"
 
 plot_name=directory+"/plot_"+y_plot+"vs"+x_plot+"_"+"kT"+kT+"fv"+fv+"gw"+gwidth+".png"
-plot_title=y_label+" vs "+x_label+" at kT"+kT+"fv"+fv+"gw"+gwidth
-a=0 
-b=-50
+plot_title=y_label+" vs "+x_label+"with DiffFE(cFE-hFE)/atom shown by color"+"at fv"+fv+"gw"+gwidth
 
-##Plot x-axis vs y-axis
-plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
-plt.plot(x_axis, y_axis, color="purple")
-#plt.scatter(x_axis, y_axis, color="blue")
+#Plot x-axis vs y-axis
+#plt.plot(x_axis, y_axis, color="purple")
+#levels=[-40,-30,-20,-10,0]
+#plt.colorbar()
+plt.scatter(x_axis, y_axis, c=z_axis)
 plt.title(plot_title)
 plt.xlabel(x_label)
 plt.ylabel(y_label)
