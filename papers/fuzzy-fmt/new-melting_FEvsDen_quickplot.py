@@ -43,10 +43,10 @@ if args.dx:
     
 directory=args.d+"kT"+kT+"fv"+fv+"gw"+gwidth+"dx"+dx
 
-for n in np.arange(nstart, nstop, nstep): 
-     os.system('figs/new-melting.mkdat --kT %s --n %s --d %s --fv %s --gw %s  --dx %s' % (kT, n, directory, fv, gwidth, dx))
+#for n in np.arange(nstart, nstop, nstep): 
+#     os.system('figs/new-melting.mkdat --kT %s --n %s --d %s --fv %s --gw %s  --dx %s' % (kT, n, directory, fv, gwidth, dx))
      
-os.system('cat %s/*alldat.dat >> %s/plot.dat' % (directory, directory))
+#os.system('cat %s/*alldat.dat >> %s/plot.dat' % (directory, directory))
 
 data_file=directory+"/plot.dat"
 thisdata = np.loadtxt(data_file)
@@ -62,12 +62,12 @@ y_plot="DiffFE"
 plot_name=directory+"/plot_"+y_plot+"vs"+x_plot+"_"+"kT"+kT+"fv"+fv+"gw"+gwidth+".png"
 plot_title=y_label+" vs "+x_label+" at kT"+kT+"fv"+fv+"gw"+gwidth
 a=0 
-b=-40
+b=-50
 
 #Plot x-axis vs y-axis
 plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
-plt.plot(x_axis, y_axis, color="purple")
-#plt.scatter(x_axis, y_axis, color="blue")
+#plt.plot(x_axis, y_axis, color="purple")
+plt.scatter(x_axis, y_axis, color="blue")
 plt.title(plot_title)
 plt.xlabel(x_label)
 plt.ylabel(y_label)
