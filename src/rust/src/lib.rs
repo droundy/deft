@@ -148,11 +148,37 @@ impl Kind for Scalar {
 }
 
 impl ClosedAdd for Scalar {
-    fn sum_from_map(m: AbelianMap<Scalar>) -> Self {
+    fn sum_from_map(m: AbelianMap<Self>) -> Self {
         Scalar::Add(m)
     }
-    fn borrow_sum_map(&self) -> Option<&AbelianMap<Scalar>> {
+    fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>> {
         if let &Scalar::Add(ref m) = self {
+            Some(m)
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+enum RealSpaceScalar {
+    Var(&'static str),
+    Exp(Expr<RealSpaceScalar>),
+    Log(Expr<RealSpaceScalar>),
+    Add(AbelianMap<RealSpaceScalar>),
+    Mul(AbelianMap<RealSpaceScalar>),
+}
+
+impl Kind for RealSpaceScalar {
+    fn cpp(&self) -> String { unimplemented!() }
+}
+
+impl ClosedAdd for RealSpaceScalar {
+    fn sum_from_map(m: AbelianMap<Self>) -> Self {
+        RealSpaceScalar::Add(m)
+    }
+    fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>> {
+        if let &RealSpaceScalar::Add(ref m) = self {
             Some(m)
         } else {
             None
