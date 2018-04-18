@@ -590,7 +590,11 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       for (int e = 0; e < energy_levels; e++) {
 	ln_dos[e] = 0;
       }
-      for (int de = -bet; de <= 0; de++){
+      for (int de = -bet; de <= 0; de++) {
+        if (M[(emax-emin)*cols + bet + de]) {
+          printf("yikes Patrick was right and it was negative!\n");
+          exit(1);
+        }
 	ln_dos[emax + de] = log(M[(emax-emin)*cols + bet + de]);
       }
       ln_dos[emax] = 0;
