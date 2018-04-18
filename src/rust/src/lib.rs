@@ -38,6 +38,9 @@ impl<T: Kind> From<T> for Expr<T> {
 }
 
 trait ClosedAdd: Kind {
+    fn sum_from_map(x: AbelianMap<Self>) -> Self;
+    fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>>;
+
     fn add(&self, other: &Self) -> Self {
         let mut sum: AbelianMap<Self>;
         match (self.borrow_sum_map(), other.borrow_sum_map()) {
@@ -89,17 +92,64 @@ trait ClosedAdd: Kind {
         Self::sum_from_map(AbelianMap::new())
     }
 
-    fn sum_from_map(x: AbelianMap<Self>) -> Self;
-    fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>>;
 }
 
-trait ClosedMul {
-    fn mul(&self, other: &Self) -> Self;
-    fn one() -> Self;
+trait ClosedMul: Kind {
+    fn product_from_map(x: AbelianMap<Self>) -> Self;
+    fn borrow_product_map(&self) -> Option<&AbelianMap<Self>>;
+
+    fn mul(&self, other: &Self) -> Self {
+        let mut product: AbelianMap<Self>;
+        match (self.borrow_product_map(), other.borrow_product_map()) {
+            (Some(lhs), Some(rhs)) => {
+                product = lhs.clone();
+                product.union(&rhs);
+            },
+            (Some(lhs), _) => {
+                product = lhs.clone();
+                if *other != Self::one() {
+                    product.insert(other.clone().into(), 1.0);
+                }
+            },
+            (_, Some(rhs)) => {
+                product = rhs.clone();
+                if *self != Self::one() {
+                    product.insert(other.clone().into(), 1.0);
+                }
+            },
+            (_, _) => {
+                product = (self.clone().into(), 1.0).into();
+                product.insert(other.clone().into(), 1.0);
+            },
+        }
+        if product.inner.len() == 1 {
+            let (k, &v) = product.inner.iter().next().unwrap();
+            if v == 1.0 {
+                return (*k.inner).clone();
+            }
+        }
+        Self::product_from_map(product)
+    }
+
+    fn one() -> Self {
+        Self::product_from_map(AbelianMap::new())
+    }
 }
 
 trait ClosedArithmetic: ClosedAdd + ClosedMul {
-    fn reciprocal(&self) -> Self;
+    fn reciprocal(&self) -> Self {
+        match self.borrow_product_map() {
+            Some(ref map) =>
+                Self::product_from_map(map.inner.iter().map(|(k, &v)| (k, -v)).collect()),
+            _ => {
+                if *self == Self::zero() {
+                    Self::zero()
+                } else {
+                    Self::product_from_map((self.clone().into(), -1.0).into())
+                }
+            },
+        }
+    }
 }
 
 impl<T: Kind + ClosedAdd> std::ops::Add for Expr<T> {
@@ -159,6 +209,21 @@ impl ClosedAdd for Scalar {
         }
     }
 }
+
+impl ClosedMul for Scalar {
+    fn product_from_map(m: AbelianMap<Self>) -> Self {
+        Scalar::Mul(m)
+    }
+    fn borrow_product_map(&self) -> Option<&AbelianMap<Self>> {
+        if let &Scalar::Mul(ref m) = self {
+            Some(m)
+        } else {
+            None
+        }
+    }
+}
+
+impl ClosedArithmetic for Scalar {}
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 enum RealSpaceScalar {
@@ -268,3 +333,26 @@ impl<T: Kind> PartialEq for AbelianMap<T> {
 }
 
 impl<T: Kind> Eq for AbelianMap<T> {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn scalar() {
+        let a: Expr<Scalar> = Scalar::Var("a").into();
+        let b: Expr<Scalar> = Scalar::Var("b").into();
+
+        let zero: Expr<Scalar> = Scalar::zero().into();
+        let one: Expr<Scalar> = Scalar::zero().into();
+
+        assert_eq!(a + b, a + b);
+        assert_eq!(a + b, b + a);
+        assert!(a + a != b + b);
+        assert_eq!(a - a, zero);
+        assert_eq!(a + a - a - a, zero);
+        assert_eq!(a + b - a - b, zero);
+        assert_eq!(a + b - b - a, zero);
+        assert!(b - a != a - b);
+    }
+}
