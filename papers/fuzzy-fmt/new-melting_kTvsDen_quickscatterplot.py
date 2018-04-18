@@ -43,8 +43,8 @@ if args.dx:
     
 directory=args.d+"kT"+kT+"fv"+fv+"gw"+gwidth+"dx"+dx
 
-for n in np.arange(nstart, nstop, nstep): 
-     os.system('figs/new-melting.mkdat --kT %s --n %s --d %s --fv %s --gw %s  --dx %s' % (kT, n, directory, fv, gwidth, dx))
+#for n in np.arange(nstart, nstop, nstep): 
+#     os.system('figs/new-melting.mkdat --kT %s --n %s --d %s --fv %s --gw %s  --dx %s' % (kT, n, directory, fv, gwidth, dx))
      
 os.system('cat %s/*alldat.dat >> %s/plot.dat' % (directory, directory))
 
