@@ -591,7 +591,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	ln_dos[e] = 0;
       }
       for (int de = -bet; de <= 0; de++) {
-        if (M[(emax-emin)*cols + bet + de]) {
+        if (M[(emax-emin)*cols + bet + de] < 0) {
           printf("yikes Patrick was right and it was negative!\n");
           exit(1);
         }
