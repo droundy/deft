@@ -613,6 +613,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	for (int de = 1; de <= min(bet,e); de++) { // WE ARE HERE!
 	  /* use info from up the column to modify solution*/
 	  //~ ln_dos[e-de] = ln_dos[e-de] - M[(e-emin-de)*cols + bet + de]*ln_dos[e];
+          assert(1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de]) > 0);
           ln_dos[e-de] += log(1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de]));
 	}
       }
