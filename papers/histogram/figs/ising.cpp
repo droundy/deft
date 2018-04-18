@@ -35,9 +35,15 @@ struct ising_simulation {
   int N;            // N*N is the number of sites
   int *S;
   int E;      // system energy.
+
+  void canonical_temperature(double t);
   double T;      // canonical temperature.
 
   long energy_levels;
+  long index_from_energy(long E) const {
+    return J*N*N/2 + E/4;
+  }
+
   long energies_found;
   long *energy_histogram;
 
@@ -70,7 +76,7 @@ ising_simulation::ising_simulation(int NN) {
   N = NN;
   S = new int[N*N];
   // energy histogram
-  energy_levels = 2*J*N*N;
+  energy_levels = J*N*N;
   ln_energy_weights = new double[energy_levels]();
   energy_histogram = new long[energy_levels]();
   max_entropy_state = 0;
@@ -90,6 +96,13 @@ ising_simulation::~ising_simulation() {
   delete[] S;
 }
 
+void ising_simulation::canonical_temperature(double t) {
+  T = t;
+  for (int i=0; i<energy_levels; i++) {
+    ln_energy_weights[i] = 4*i/T;
+  }
+}
+
 void ising_simulation::flip_a_spin() {
   moves += 1;
   int k = random::ran64() % (N*N);
@@ -105,7 +118,12 @@ void ising_simulation::flip_a_spin() {
 // Canonical Monte-Carlo
 // ---------------------------------------------------------------------
   const int deltaE = J*(old - S[j + i*N])*neighbor_spins;
-  const double lnprob = -deltaE/T;
+  const double lnprob = -deltaE/T; // ln_energy_weights[-E] - ln_energy_weights[-(E+deltaE)];
+
+  //printf("compare %g with %g %d->%d\n", -deltaE/T,
+        //ln_energy_weights[index_from_energy(E)]
+         //- ln_energy_weights[index_from_energy(E+deltaE)],
+        //E, E+deltaE);
 
   if (lnprob < 0 && random::ran() > exp(lnprob)) {
     S[j + i*N] = old;
@@ -119,7 +137,7 @@ void ising_simulation::flip_a_spin() {
     //printf("flipping gives E=%g\n", E);
   }
 
-  energy_histogram[abs(E)] += 1;
+  energy_histogram[index_from_energy(E)] += 1;
 
 // ---------------------------------------------------------------------
 // Broad-Histogram Methods
@@ -146,7 +164,7 @@ double* ising_simulation::compute_ln_dos(dos_types dos_type) {
   if (dos_type == histogram_dos) {
     for (int i = max_entropy_state; i < energy_levels; i++) {
       if (energy_histogram[i] != 0) {
-        ln_dos[i] = log(energy_histogram[i]) - ln_energy_weights[i];
+        ln_dos[i] = log(energy_histogram[i]) + ln_energy_weights[i];
       } else {
         ln_dos[i] = -DBL_MAX; // located in <float.h>.
       }
@@ -180,7 +198,7 @@ static double took(const char *name) {
 // ---------------------------------------------------------------------
 
 int main(int argc, const char *argv[]) {
-
+  random::seed(0);
   // some miscellaneous default or dummy simulation parameters
 
   bool Jordan = true; 
@@ -268,7 +286,7 @@ int main(int argc, const char *argv[]) {
   }
 
   ising_simulation ising(NN);
-  ising.T = 6;
+  ising.canonical_temperature(6);
 
   took("Starting program");
   printf("version: %s\n",version_identifier());
@@ -344,6 +362,11 @@ int main(int argc, const char *argv[]) {
           exit(1);
         }
         printf("NN is now %d\n", NN);
+        if (fscanf(rfile, " total-moves = %ld\n", &total_moves) != 1) {
+          printf("error reading total-moves!\n");
+          exit(1);
+        }
+        printf("total-moves is now %ld\n", total_moves);
         fclose(rfile);
       }
       // Need to read and set: iterations, ln_energy_weights (from ln_dos)
@@ -368,15 +391,27 @@ int main(int argc, const char *argv[]) {
         fprintf(dos_out,"moves = %li\n",ising.moves);
         fprintf(dos_out,"E = %i\n",ising.E);
         fprintf(dos_out,"J = %i\n", J);
-        // insert array into text file.
+        // inserting arrays into text file.
         fprintf(dos_out, "lndos = np.array([\n");
-        for (int i = 0; i < ising.energy_levels; ++i) {
+        for (int i = 0; i < ising.energy_levels; i++) {
           fprintf(dos_out,"\t%.17g,\n", ising.ln_dos[i]);
         }
         fprintf(dos_out, "])\n");
-        
-        //fprintf(dos_out,"lndos = %g\n",ising.ln_dos[1]); //print as list? array?
-        //lnw, S(E?), histogram as lists/array?
+        fprintf(dos_out, "lnw = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          fprintf(dos_out,"\t%.17g,\n", ising.ln_energy_weights[i]);
+        }
+        fprintf(dos_out, "])\n");
+        fprintf(dos_out, "histogram = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          fprintf(dos_out,"\t%ld,\n", ising.energy_histogram[i]);
+        }
+        fprintf(dos_out, "])\n");
+        fprintf(dos_out, "S = np.array([\n");
+        for (int i = 0; i < NN*NN; i++) {
+          fprintf(dos_out,"\t%d,\n", ising.S[i]);
+        }
+        fprintf(dos_out, "])\n");
 
         fclose(dos_out);
       }
