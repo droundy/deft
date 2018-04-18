@@ -491,17 +491,17 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
     for (int e = 0; e < energy_levels; e++){
       bool nonzero_found = false;
       for(int de = -biggest_energy_transition; de <= biggest_energy_transition; de ++) {
-	//printf("%g \t", transition_matrix(e,e+de));
-	if (transition_matrix(e,e+de)){
-	  bet = max(abs(de),bet);
-	  nonzero_found = true;
-	}
+        //printf("%g \t", transition_matrix(e,e+de));
+        if (transition_matrix(e,e+de)){
+          bet = max(abs(de),bet);
+          nonzero_found = true;
+        }
       }
       //printf("\n");
       if (nonzero_found) {
-	emax = e;
+        emax = e;
       } else if(emax == 0){
-	emin = e;
+        emin = e;
       }
     }
     emin++;
@@ -510,7 +510,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       // know nothing about the density of states.  Just leave it as a
       // constant!
       for (int e = 0; e < energy_levels; e++){
-	ln_dos[e] =0;
+        ln_dos[e] =0;
       }
       return ln_dos; // all done!
     } else {
@@ -519,7 +519,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
  
       for (int e = emin; e <= emax; e++){
 	for (int de  = -bet; de <= bet; de++){
-	  M[(e- emin)*cols + bet + de] = transition_matrix(e,e+de);
+	  M[(e- emin)*cols + bet + de] = transition_matrix(e+de,e);
 	}
 	M[(e-emin)*cols + bet] -= 1;
       }
@@ -532,43 +532,69 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	printf("\n");
       }*/
 
-   
+
+
+      printf("\n");
+      for (int e = emin; e <= emax; e++) {
+	printf(":) final energy = %i; ",e);
+	for (int de = -bet; de <=bet; de ++){
+	  if (de == 0) {
+	    printf("| ");
+	  }
+	  printf("%15g ",M[(e-emin)*cols + bet +de]);
+	}
+	printf("\n");
+      }
+
+      
       /* make matrix upper triangular up to last column */
       for (int e = emin; e < emax; e++){
-	/*leading index of row we will subtract from other rows */
+	int ind1 = (e-emin)*cols + bet;
+	for (int de = 1; de <= bet; de++) {
+	  int ind2 = ind1 + de;
+	  if (M[ind2] != 0) {
+	    double c = M[ind2]/M[ind1];
+	    for (int de1 = 0; de1 <= min(bet,emax-e); de1++){
+	      M[(e-emin+de1)*cols + bet + de - de1] -= c*M[(e-emin+de1)*cols + bet - de1];
+	    }
+	  }
+	}
+      }
+      /*
+      for (int e = emin; e < emax; e++){
 	int ind1 = (e-emin)*cols + bet;
 	for (int de = 1; de <= min(bet,emax-e); de++) {
-	  /* index of entry we want to eliminate*/
 	  int ind2 = (e-emin+de)*cols + bet -de;
 	  if (M[ind2] != 0){
-	    /* coefficient to multiply upper row by */
 	    double c = M[ind2]/M[ind1];
 	    for (int de1 = 0; de1 <= bet; de1++){
 	      M[ind2+de1] -= c*M[ind1+de1];
 	    }
 	  }
 	}
-
-        printf("\n");
-        for (int e = emin; e <= emax; e++) {
-          printf(":) final energy = %i; ",e);
-          for (int de = -bet; de <=bet; de ++){
-            if (de == 0) {
-              printf("| ");
-            }
-            printf("%15g ",M[(e-emin)*cols + bet +de]);
-          }
-          printf("\n");
-        }
-
+      */
+      
+      printf("\n");
+      for (int e = emin; e <= emax; e++) {
+	printf(":) final energy = %i; ",e);
+	for (int de = -bet; de <=bet; de ++){
+	  if (de == 0) {
+	    printf("| ");
+	  }
+	  printf("%15g ",M[(e-emin)*cols + bet +de]);
+	}
+	printf("\n");
       }
+      
       /* now we can find dos from final col */
       for (int e = 0; e < energy_levels; e++) {
 	ln_dos[e] = 0;
       }
-      for (int de = 0; de <= min(bet,emax-emin);  de++){
-	ln_dos[emax-de] = -M[(emax-emin-de)*cols + bet+ de];
+      for (int de = -bet; de <= 0; de++){
+	ln_dos[emax + de] = M[(emax-emin)*cols + bet + de];
       }
+      ln_dos[emax] = 1;
+      
       printf("first dos column:\n");
       for (int i=0; i<=emax-emin; i++) {
         printf("%g ", ln_dos[emax-i]);
@@ -578,15 +604,12 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       for (int e = emax-1; e >= emin; e--){
 	/*leading index of row we will subtract from other rows */
 
-	if (M[(e-emin)*cols + bet] != 0) {
-	  ln_dos[e] = ln_dos[e]/M[(e-emin)*cols+bet];
-	  for (int de = 1; de <= min(bet,e); de++) {
-	    /* use info from up the column to modify solution*/
-	    ln_dos[e-de] = ln_dos[e-de] - M[(e-emin-de)*cols + bet + de]*ln_dos[e];
-	  }
-	} 
-	else {
-	  ln_dos[e] = 0;
+	assert(M[(e-emin)*cols + bet] != 0); // It is an ergodic system, so this shouldn't happen.
+	ln_dos[e] = ln_dos[e]/M[(e-emin)*cols+bet];
+	for (int de = 1; de <= min(bet,e); de++) { // WE ARE HERE!
+	  /* use info from up the column to modify solution*/
+	  //~ ln_dos[e-de] = ln_dos[e-de] - M[(e-emin-de)*cols + bet + de]*ln_dos[e];
+      ln_dos[e-de] += ln_dos[1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de])]
 	}
       }
       
