@@ -305,7 +305,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //dx=(lattice_constant/2)/number of chunks along lattice vector
   const double dV = uipow(lattice_constant/Nl,3)/4.0;
   
-  int crystal_calc_option=1;  //set to 0 for crystal free energy with brute-force integration
+  int crystal_calc_option=2;  //set to 0 for crystal free energy with brute-force integration
                               //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
                               //set to 2 for crystal free energy with Monte-Carlo (more accurate)
                               
@@ -992,7 +992,7 @@ int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
-  double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.1; //default settings
+  double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.01; //default settings
   
   double dx=0.01;        //default grid point spacing dx=dy=dz=0.01
   int verbose = false;

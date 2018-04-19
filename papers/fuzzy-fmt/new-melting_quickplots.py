@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-#Run this program from /deft/papers/fuzzy-fmt by entering ./new-melting_quickplots.py  --kT 2 --n 1.2  --d directory --dx 0.001
+#Run this program from /deft/papers/fuzzy-fmt by entering ./new-melting_quickplots.py  --kT 2 --n 1.2  --d carrots --dx 0.001 (optional)
 #Generates 8 plot.dat files and plots
 
 import os
@@ -31,13 +31,14 @@ if args.dx:
 #Try values of n: 0.95, 1.08, 1.2  and  kT: 1, 2, 20, 200
 
 for gwidth in [0.001, 0.01, 0.1, .2]: 
-    os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_gw%g_dx%g --fvstart 0 --fvend .9 --fvstep 0.01 --gw %g  --dx %g' % (kT, n, directory, kT, n, gwidth, dx, gwidth, dx))
+    os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_gw%g_dx%g --fvstart 0 --fvend .1 --fvstep 0.01 --gw %g  --dx %g' % (kT, n, directory, kT, n, gwidth, dx, gwidth, dx))
     os.system('cat %s_kT%g_n%g_gw%g_dx%g/*alldat.dat >> %s_kT%g_n%g_gw%g_dx%g/plot.dat' % (directory, kT, n, gwidth, dx, directory, kT, n, gwidth, dx))
     os.system('./new-melting_anyplot_script.py %s_kT%g_n%g_gw%g_dx%g --ftemp %g --ydiff --xfv --ptname n%g_gw%g_dx%g' % (directory, kT, n, gwidth, dx, kT, n, gwidth, dx))
     os.system('cp %s_kT%g_n%g_gw%g_dx%g/plot_DiffFEvsfv_kT%g_n%g_gw%g_dx%g.png %s_plots/plot_DiffFEvsfv_kT%g_n%g_gw%g_dx%g.png' % (directory, kT, n, gwidth, dx, kT, n, gwidth, dx, directory, kT, n, gwidth, dx))
 
-for fv in [0, 0.01, 0.1, 0.2]:
-    os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_fv%g_dx%g --fv %g --gwstart .001 --gwend .3 --gwstep .005  --dx %g' % (kT, n, directory, kT, n, fv, dx, fv, dx))
+for fv in [0, 0.01, 0.1]:
+    os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_fv%g_dx%g --fv %g --gwstart .001 --gwend .7 --gwstep .01  --dx %g' % (kT, n, directory, kT, n, fv, dx, fv, dx))
+    os.system('cat %s_kT%g_n%g_fv%g_dx%g/*alldat.dat >> %s_kT%g_n%g_fv%g_dx%g/plot.dat' % (directory, kT, n, fv, dx, directory, kT, n, fv, dx))
     os.system('cat %s_kT%g_n%g_fv%g_dx%g/*alldat.dat >> %s_kT%g_n%g_fv%g_dx%g/plot.dat' % (directory, kT, n, fv, dx, directory, kT, n, fv, dx))
     os.system('./new-melting_anyplot_script.py %s_kT%g_n%g_fv%g_dx%g --ftemp %g --ydiff --xgw --ptname n%g_fv%g_dx%g' % (directory, kT, n, fv, dx, kT, n, fv, dx))
     os.system('cp %s_kT%g_n%g_fv%g_dx%g/plot_DiffFEvsgw_kT%g_n%g_fv%g_dx%g.png %s_plots/plot_DiffFEvsgw_kT%g_n%g_fv%g_dx%g.png' % (directory, kT, n, fv, dx, kT, n, fv, dx, directory, kT, n, fv, dx))
