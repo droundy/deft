@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 #Run this program from /deft/papers/fuzzy-fmt by entering ./new-melting_quickplots.py  --kT 2 --n 1.2  --d carrots --dx 0.001 (optional)
-#Generates 8 plot.dat files and plots
+#after making directory (ie. carrots_plots)
+#Generates 8 plot.dat files and plots and puts them in the existing directory carrots_plots
 
 import os
 import argparse
