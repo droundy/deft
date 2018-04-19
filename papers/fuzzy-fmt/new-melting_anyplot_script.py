@@ -159,7 +159,7 @@ if args.ptname:
 
 plot_title=y_label+" vs "+x_label+" at Fixed "+fixed_quantity+"="+fixed_value
 a=0 
-b=-40
+b=-50
 
 #Plot x-axis vs y-axis
 plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
