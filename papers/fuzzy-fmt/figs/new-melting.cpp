@@ -819,12 +819,20 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
   point_fe reflected;
   reflected.fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
   reflected.gw=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
+  
   if (reflected.gw == 0) {  //ASK DAVID
     reflected.gw = 0.0001;
+  } else if (reflected.gw < 1) {
+    reflected.gw = (-1)*reflected.gw;
   }
-    if (reflected.fv < 0) {  //ASK DAVID
+  if (reflected.fv < 0) {  //ASK DAVID
     reflected.fv = 0;
+  } else if (reflected.fv > 1) {
+    reflected.fv = .99;
+//  } else if (reflected.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    reflected.fv = .99;
   }
+  
 //reflected.fe=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   reflected.fe=find_energy_new(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //reflected.fe=sqrt((reflected.fv*reflected.fv) + (reflected.gw*reflected.gw));  //TEST SIMPLEX
@@ -835,12 +843,20 @@ point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3
   point_fe extended;
   extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-(2.0*simplex_fe[2][0]);
   extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-(2.0*simplex_fe[2][1]);
+  
   if (extended.gw == 0) {  //ASK DAVID
-      extended.gw = 0.0001;
+    extended.gw = 0.0001;
+  } else if (extended.gw < 1) {
+    extended.gw = (-1)*extended.gw;
   }
   if (extended.fv < 0) {  //ASK DAVID
-      extended.fv = 0;
+    extended.fv = 0;
+  } else if (extended.fv > 1) {
+    extended.fv = .99;
+//  } else if (extended.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    extended.fv = .99;
   }
+  
 //extended.fe=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   extended.fe=find_energy_new(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //extended.fe=sqrt((extended.fv*extended.fv) + (extended.gw*extended.gw));  //TEST SIMPLEX
@@ -855,12 +871,20 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
 
   contracted.out.fv=((3/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
   contracted.out.gw=((3/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
+  
   if (contracted.out.gw == 0) {  //ASK DAVID
       contracted.out.gw = 0.0001;
+  } else if (contracted.out.gw < 1) {
+    contracted.out.gw = (-1)*contracted.out.gw;
   }
   if (contracted.out.fv < 0) {  //ASK DAVID
       contracted.out.fv = 0;
+  } else if (contracted.out.fv > 1) {
+    contracted.out.fv = .99;
+//  } else if (contracted.out.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    contracted.out.fv = .99;
   }
+  
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
 //contracted.out.fe=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   contracted.out.fe=find_energy_new(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
@@ -868,12 +892,20 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
 
   contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))+((1/2.0)*(simplex_fe[2][0]));
   contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))+((1/2.0)*(simplex_fe[2][1]));
+  
   if (contracted.in.gw == 0) {  //ASK DAVID
       contracted.in.gw = 0.0001;
+  } else if (contracted.in.gw < 1) {
+    contracted.in.gw = (-1)*contracted.in.gw;
   }
   if (contracted.in.fv < 0) {  //ASK DAVID
       contracted.in.fv = 0;
+  } else if (contracted.in.fv > 1) {
+    contracted.in.fv = .99;
+//  } else if (contracted.in.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    contracted.in.fv = .99;
   }
+  
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
 //contracted.in.fe=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   contracted.in.fe=find_energy_new(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
@@ -887,24 +919,40 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 
   shrunken.out.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
   shrunken.out.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[1][1]);
+  
   if (shrunken.out.gw == 0) {  //ASK DAVID
       shrunken.out.gw = 0.0001;
+  } else if (shrunken.out.gw < 1) {
+    shrunken.out.gw = (-1)*shrunken.out.gw;
   }
   if (shrunken.out.fv < 0) {  //ASK DAVID
       shrunken.out.fv = 0;
+  } else if (shrunken.out.fv > 1) {
+    shrunken.out.fv = .99;
+//  } else if (shrunken.out.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    shrunken.out.fv = .99;
   }
+  
 //shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.out.fe=find_energy_new(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.out.fe=sqrt((shrunken.out.fv*shrunken.out.fv) + (shrunken.out.gw*shrunken.out.gw));  //TEST SIMPLEX
 
   shrunken.in.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[2][0]);
   shrunken.in.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[2][1]);
+  
   if (shrunken.in.gw == 0) {  //ASK DAVID
       shrunken.in.gw = 0.0001;
+  } else if (shrunken.in.gw < 1) {
+    shrunken.in.gw = (-1)*shrunken.in.gw;
   }
   if (shrunken.in.fv < 0) {  //ASK DAVID
       shrunken.in.fv = 0;
+  } else if (shrunken.in.fv > 1) {
+    shrunken.in.fv = .99;
+//  } else if (shrunken.in.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    shrunken.in.fv = .99;
   }
+  
 //shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.in.fe=find_energy_new(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.in.fe=sqrt((shrunken.in.fv*shrunken.in.fv) + (shrunken.in.gw*shrunken.in.gw));  //TEST SIMPLEX
