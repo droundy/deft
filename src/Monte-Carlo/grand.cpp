@@ -519,7 +519,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
  
       for (int e = emin; e <= emax; e++){
 	for (int de  = -bet; de <= bet; de++){
-	  M[(e- emin)*cols + bet + de] = transition_matrix(e+de,e);
+	  M[(e- emin)*cols + bet + de] = transition_matrix(e,e+de);
 	}
 	M[(e-emin)*cols + bet] -= 1;
       }
@@ -532,73 +532,47 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	printf("\n");
       }*/
 
-
-
-      printf("\n");
-      for (int e = emin; e <= emax; e++) {
-	printf(":) final energy = %i; ",e);
-	for (int de = -bet; de <=bet; de ++){
-	  if (de == 0) {
-	    printf("| ");
-	  }
-	  printf("%15g ",M[(e-emin)*cols + bet +de]);
-	}
-	printf("\n");
-      }
-
-      
+   
       /* make matrix upper triangular up to last column */
       for (int e = emin; e < emax; e++){
-	int ind1 = (e-emin)*cols + bet;
-	for (int de = 1; de <= bet; de++) {
-	  int ind2 = ind1 + de;
-	  if (M[ind2] != 0) {
-	    double c = M[ind2]/M[ind1];
-	    for (int de1 = 0; de1 <= min(bet,emax-e); de1++){
-	      M[(e-emin+de1)*cols + bet + de - de1] -= c*M[(e-emin+de1)*cols + bet - de1];
-	    }
-	  }
+	/*leading index of row we will subtract from other rows */
+	int ind1 = (e-emin)*cols + bet; 
+	for (int de = 1; de <= min(bet,emax-e); de++){
+	  M[ind1 +de] /= M[ind1];
 	}
-      }
-      /*
-      for (int e = emin; e < emax; e++){
-	int ind1 = (e-emin)*cols + bet;
+	M[ind1] = 1;
 	for (int de = 1; de <= min(bet,emax-e); de++) {
+	  /* index of entry we want to eliminate*/
 	  int ind2 = (e-emin+de)*cols + bet -de;
 	  if (M[ind2] != 0){
-	    double c = M[ind2]/M[ind1];
+	    /* coefficient to multiply upper row by */
+	    double c = M[ind2];
 	    for (int de1 = 0; de1 <= bet; de1++){
 	      M[ind2+de1] -= c*M[ind1+de1];
 	    }
 	  }
 	}
-      */
-      
-      printf("\n");
-      for (int e = emin; e <= emax; e++) {
-	printf(":) final energy = %i; ",e);
-	for (int de = -bet; de <=bet; de ++){
-	  if (de == 0) {
-	    printf("| ");
-	  }
-	  printf("%15g ",M[(e-emin)*cols + bet +de]);
-	}
-	printf("\n");
+
+        printf("\n");
+        for (int e = emin; e <= emax; e++) {
+          printf(":) final energy = %i; ",e);
+          for (int de = -bet; de <=bet; de ++){
+            if (de == 0) {
+              printf("| ");
+            }
+            printf("%15g ",M[(e-emin)*cols + bet +de]);
+          }
+          printf("\n");
+        }
+
       }
-      
       /* now we can find dos from final col */
       for (int e = 0; e < energy_levels; e++) {
 	ln_dos[e] = 0;
       }
-      for (int de = -bet; de <= 0; de++) {
-        if (M[(emax-emin)*cols + bet + de] < 0) {
-          printf("yikes Patrick was right and it was negative!\n");
-          exit(1);
-        }
-	ln_dos[emax + de] = log(M[(emax-emin)*cols + bet + de]);
+      for (int de = 0; de <= min(bet,emax-emin);  de++){
+	ln_dos[emax-de] = -M[(emax-emin-de)*cols + bet+ de];
       }
-      ln_dos[emax] = 0;
-      
       printf("first dos column:\n");
       for (int i=0; i<=emax-emin; i++) {
         printf("%g ", ln_dos[emax-i]);
@@ -607,50 +581,74 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       /* make matrix diagonal, keep track of ops*/
       for (int e = emax-1; e >= emin; e--){
 	/*leading index of row we will subtract from other rows */
-
-	assert(M[(e-emin)*cols + bet] != 0); // It is an ergodic system, so this shouldn't happen.
-	ln_dos[e] = ln_dos[e] - log(M[(e-emin)*cols+bet]);
-	for (int de = 1; de <= min(bet,e); de++) { // WE ARE HERE!
-	  /* use info from up the column to modify solution*/
-	  //~ ln_dos[e-de] = ln_dos[e-de] - M[(e-emin-de)*cols + bet + de]*ln_dos[e];
-          assert(1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de]) > 0);
-          ln_dos[e-de] += log(1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de]));
+	if (M[(e-emin)*cols + bet] != 0) {
+	  if (ln_dos[e] <=0) {
+	    printf("interesting %g\n", ln_dos[e]);
+	  } else {
+	    printf("boring(%d) %g normalize %g\n", e, ln_dos[e], M[(e-emin)*cols+bet]);
+	  }
+	  for (int de = 1; de <= min(bet,e); de++) {
+	    /* use info from up the column to modify solution*/
+	    ln_dos[e-de] += -M[(e-emin-de)*cols + bet + de]*ln_dos[e];
+	 
+	    if (ln_dos[e-de] <= 0) {
+	      printf("Interesting(%d) %g\n", e-de, ln_dos[e-de]);
+	    } else {
+	      printf("Boring %g\n", ln_dos[e-de]);
+	    }
+	  }
+	} 
+	else {
+	  ln_dos[e] = log(0);
 	}
+	
+      }
+      for  (int e = emax; e >= emin; e--){
+	printf("after(%d) %g\n", e, ln_dos[e]);
       }
       
-      ln_dos[emax] = 0;
+      ln_dos[emax] = 1;
       double * error = new double[energy_levels]();
 
       for (int e = 0; e<energy_levels; e++){
-	error[e] = -exp(ln_dos[e]);
+	error[e] = -ln_dos[e];
 	for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de ++){
-	  if (e+de < energy_levels && e + de >=0){
-	    error[e] += transition_matrix(e,e+de)*exp(ln_dos[e+de]);
+	  if (transition_matrix(e,e+de)){
+	    error[e] += transition_matrix(e,e+de)*ln_dos[e+de] ;
 	  }
-	}
+	}                                               
       }
       printf("errors:\n");
       for(int e1 = 0; e1< energy_levels;e1++) { printf("%g ",error[e1]);} printf("\n\n");
       delete [] error;
 
-      double dos_min = 0;
+        double dos_min = 0;
+      double dos_max = 0;
       for (int e = emin; e <= emax; e++) {
-        if (ln_dos[e] !=0){
-          if (dos_min == 0) {
-            dos_min = ln_dos[e];
-          } else if (ln_dos[e] != 0) {
-            dos_min = min(ln_dos[e], dos_min);
-          }
-        }
+	if (ln_dos[e] !=0){
+	  dos_max = max(abs(ln_dos[e]), dos_max);
+	  if (dos_min == 0){
+	    dos_min = abs(ln_dos[e]);
+	  } else {
+	    dos_min = min(abs(ln_dos[e]), dos_min);
+	  }
+	}
       }
-      for (int i=0; i<energy_levels; i++) {
-        if (i < emin || i > emax) {
-          ln_dos[i] = dos_min;
-        }
+      printf("ln_dos (actually dos):\n");
+        for(int e1 = emin; e1<=emax;e1++) { printf("%g ",ln_dos[e1]);} printf("\n\n");
+
+      for (int e = 0; e < energy_levels; e++){
+	if (abs(ln_dos[e]) != 0){
+	  ln_dos[e] = log(abs(ln_dos[e]))- log(dos_max);
+	} else {
+	  ln_dos[e] = (log(dos_min) -log(dos_max));
+	}
       }
       for(int e1 = 0; e1<energy_levels;e1++) { printf("%g ",ln_dos[e1]);} printf("\n\n");
-
+    
       ln_dos_check(ln_dos);
+      //int pause; /* variable I use for scanf to pause the simulation */
+      //scanf("%i",&pause);
       delete[] M;
     }
   } else if(dos_type == transition_dos) {
