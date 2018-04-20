@@ -32,7 +32,7 @@ if args.dx:
 #Try values of n: 0.95, 1.08, 1.2  and  kT: 1, 2, 20, 200
 
 #for gwidth in [0.001, 0.01, 0.1, .2]: 
-for gwidth in [0.001]: 
+for gwidth in [0.01]: 
     #os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_gw%g_dx%g --fvstart 0 --fvend .9 --fvstep 0.01 --gw %g  --dx %g' % (kT, n, directory, kT, n, gwidth, dx, gwidth, dx))
     os.system('figs/new-melting.mkdat --kT %g --n %g --d %s_kT%g_n%g_gw%g_dx%g --fvstart .4 --fvend .9 --fvstep 0.01 --gw %g  --dx %g' % (kT, n, directory, kT, n, gwidth, dx, gwidth, dx))
     os.system('cat %s_kT%g_n%g_gw%g_dx%g/*alldat.dat >> %s_kT%g_n%g_gw%g_dx%g/plot.dat' % (directory, kT, n, gwidth, dx, directory, kT, n, gwidth, dx))
