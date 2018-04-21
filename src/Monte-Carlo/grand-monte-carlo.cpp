@@ -494,7 +494,7 @@ int main(int argc, const char *argv[]) {
             "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
   }
 
-  if (true) {
+  /* if (true) {
     printf("biggest_energy_transition: %d\n", sw.biggest_energy_transition);
     // TESTING ONLY
     sw.collection(0, 0) = 4;
@@ -521,7 +521,7 @@ int main(int argc, const char *argv[]) {
     double *lndos = sw.compute_ln_dos(transition_dos);
     for (int i=0;i<4;i++) printf("%d\t%g\n", i, lndos[i]);
     exit(1);
-  }
+  } */
 
   // ----------------------------------------------------------------------------
   // Set up the initial grid of balls

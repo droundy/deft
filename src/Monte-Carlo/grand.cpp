@@ -553,7 +553,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	  int ind1 = (e-emin)*cols + bet;
 
 	  /* normalize to get leading entry of each row of M to 1 */
-	  for (int de = 1; de <= bet; de++) {
+	  for (int de = 1; de <= min(bet,emax-e); de++) {
 	    M[(e - emin + de)*cols + bet -de] /= M[(e-emin)*cols + bet];
 	  }
 	  M[(e-emin)*cols +bet]  = 1;
@@ -619,7 +619,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 
 	assert(M[(e-emin)*cols + bet] != 0); // It is an ergodic system, so this shouldn't happen
 	// ln_dos[e] = ln_dos[e] - log(M[(e-emin)*cols+bet]);
-	for (int de = 1; de <= bet; de++) { // WE ARE HERE!
+	for (int de = 1; de <= min (bet, e-emin); de++) { // WE ARE HERE!
 	  /* use info from up the column to modify solution*/
 	  //~ ln_dos[e-de] = ln_dos[e-de] - M[(e-emin-de)*cols + bet + de]*ln_dos[e];
 	  //  ln_dos[e-de] += log(1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de]));
@@ -630,22 +630,26 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	  }
 	}
       }
-      
       ln_dos[emax] = 0;
-      double * error = new double[energy_levels]();
 
-      for (int e = 0; e<energy_levels; e++){
-	error[e] = 0;
-	for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de ++){
-	  if (transition_matrix(e,e+de) != 0){
-	    error[e] += transition_matrix(e,e+de)*exp(ln_dos[e+de]-ln_dos[e]);
+      printf("\n\n"); for(int e1 = 0; e1<energy_levels;e1++) { printf("%d: %g \n",e1,ln_dos[e1]);} printf("\n\n");
+
+      printf("trying to allocate memory...\n");
+      double * error = new double[energy_levels]();
+      printf("computing error\n");
+
+      for (int i = 0; i<energy_levels; i++){
+	error[i] = 0;
+	for (int j = 0; j<energy_levels; j++){
+	  if (transition_matrix(i,j) != 0){
+	    error[i] += transition_matrix(i,j)*exp(ln_dos[j]-ln_dos[i]);
 	  }
 	}
       }
       printf("errors:\n");
       for(int e1 = 0; e1< energy_levels;e1++) { printf("%g ",error[e1]);} printf("\n\n");
       delete [] error;
-
+      
       /* double dos_min = 0;
       for (int e = emin; e <= emax; e++) {
         if (ln_dos[e] !=0){
@@ -661,9 +665,9 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
           ln_dos[i] = dos_min;
         }
 	}*/
-      for(int e1 = 0; e1<energy_levels;e1++) { printf("%g ",ln_dos[e1]);} printf("\n\n");
 
-      ln_dos_check(ln_dos);
+      //ln_dos_check(ln_dos);
+      printf("trying to delete M:\n");
       delete[] M;
     }
   } else if(dos_type == transition_dos) {
