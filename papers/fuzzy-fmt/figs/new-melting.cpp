@@ -288,8 +288,9 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
   //printf("\nCalculating many_cells...\n");
-  double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
+  double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
+  double   Fideal_per_vol = temp*reduced_density*(log(2.646476976618268e-6*reduced_density/(sqrt(temp)*temp)) - 1.0);  //ASK! Fideal takes into account vacancies. Fideal/vol from HomogeneousSFMTFluidFast.cpp  cubic vol? or parallelepiped?
   const vector3d lattice_vectors[3] = {
     vector3d(lattice_constant/2,lattice_constant/2,0),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -470,9 +471,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //       100*(i + 1)/double(Nl));
     //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
-
-    cfree_energy_per_atom=free_energy/reduced_num_spheres;  //CHECK!
-    cfree_energy_per_vol=4*free_energy; //CHECK! 4 primitive cells in 1 cubic cell
+    
+    //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube; 
+    //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
+    //free_energy = the free energy over one parallelepiped with 1-fv atoms
+    cfree_energy_per_atom=free_energy/reduced_num_spheres + Fideal_per_vol*lattice_constant*lattice_constant*lattice_constant/4*(1-fv); //CHECK!
+    cfree_energy_per_vol=(free_energy*4/lattice_constant*lattice_constant*lattice_constant) + Fideal_per_vol; //CHECK!
+    //  --->> PUT SAME CHANGES IN find_energy!!
+    
     printf("total crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
  }  //end if density_option > 0    
    if (density_option < 1) {
@@ -485,11 +491,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         hf.mu() = 0;
         //Note: hf.energy() returns energy/volume
     
-        hfree_energy_per_atom = hf.energy()/reduced_density;   // free energy per sphere or "atom"
-        hfree_energy_per_vol = hf.energy();    // free energy per vol
+        hfree_energy_per_atom = hf.energy()/reduced_num_spheres;   // ASK! FIX!!  free energy per sphere or "atom"
+        hfree_energy_per_vol = hf.energy();    // free energy per vol  
         printf("homogeneous free_energy per vol is %g\n", hf.energy());
    }
 } //end for loop - density_option
+  
+
   
   data data_out;
   data_out.diff_free_energy_per_atom=cfree_energy_per_atom-hfree_energy_per_atom;
