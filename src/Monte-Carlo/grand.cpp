@@ -510,7 +510,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       // know nothing about the density of states.  Just leave it as a
       // constant!
       for (int e = 0; e < energy_levels; e++){
-        ln_dos[e] =0;
+        ln_dos[e] =-DBL_MAX;
       }
       return ln_dos; // all done!
     } else {
@@ -549,13 +549,22 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       
       /* make matrix upper triangular up to last column */
       for (int e = emin; e < emax; e++){
-	int ind1 = (e-emin)*cols + bet;
-	for (int de = 1; de <= bet; de++) {
-	  int ind2 = ind1 + de;
-	  if (M[ind2] != 0) {
-	    double c = M[ind2]/M[ind1];
-	    for (int de1 = 0; de1 <= min(bet,emax-e); de1++){
-	      M[(e-emin+de1)*cols + bet + de - de1] -= c*M[(e-emin+de1)*cols + bet - de1];
+	if (M[(e -emin) * cols + bet] != 0) {
+	  int ind1 = (e-emin)*cols + bet;
+
+	  /* normalize to get leading entry of each row of M to 1 */
+	  for (int de = 1; de <= bet; de++) {
+	    M[(e - emin + de)*cols + bet -de] /= M[(e-emin)*cols + bet];
+	  }
+	  M[(e-emin)*cols +bet]  = 1;
+
+	  for (int de = 1; de <= bet; de++) {
+	    int ind2 = ind1 + de;
+	    if (M[ind2] != 0) {
+	      double c = M[ind2]/M[ind1];
+	      for (int de1 = 0; de1 <= min(bet,emax-e); de1++){
+		M[(e-emin+de1)*cols + bet + de - de1] -= c*M[(e-emin+de1)*cols + bet - de1];
+	      }
 	    }
 	  }
 	}
@@ -588,14 +597,14 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       
       /* now we can find dos from final col */
       for (int e = 0; e < energy_levels; e++) {
-	ln_dos[e] = 0;
+	ln_dos[e] = -DBL_MAX;
       }
-      for (int de = -bet; de <= 0; de++) {
-        if (M[(emax-emin)*cols + bet + de] < 0) {
-          printf("yikes Patrick was right and it was negative!\n");
-          exit(1);
-        }
-	ln_dos[emax + de] = log(M[(emax-emin)*cols + bet + de]);
+      for (int de = 0; de <= bet; de++) {
+	if (M[(emax-emin)*cols + bet-de] < 0) { 
+	  ln_dos[emax-de] = log(-M[(emax-emin)*cols + bet - de]); }
+	else {
+	  ln_dos[emax-de] = -DBL_MAX;
+	}
       }
       ln_dos[emax] = 0;
       
@@ -608,12 +617,17 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       for (int e = emax-1; e >= emin; e--){
 	/*leading index of row we will subtract from other rows */
 
-	assert(M[(e-emin)*cols + bet] != 0); // It is an ergodic system, so this shouldn't happen.
-	ln_dos[e] = ln_dos[e] - log(M[(e-emin)*cols+bet]);
-	for (int de = 1; de <= min(bet,e); de++) { // WE ARE HERE!
+	assert(M[(e-emin)*cols + bet] != 0); // It is an ergodic system, so this shouldn't happen
+	// ln_dos[e] = ln_dos[e] - log(M[(e-emin)*cols+bet]);
+	for (int de = 1; de <= bet; de++) { // WE ARE HERE!
 	  /* use info from up the column to modify solution*/
 	  //~ ln_dos[e-de] = ln_dos[e-de] - M[(e-emin-de)*cols + bet + de]*ln_dos[e];
-          ln_dos[e-de] += log(1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de]));
+	  //  ln_dos[e-de] += log(1 - M[e-de]*exp(ln_dos[e] - ln_dos[e-de]));
+	  if (ln_dos[e-de] > -DBL_MAX/2){
+	    ln_dos[e-de] = ln_dos[e-de] + log(1-M[(e-emin)*cols + bet - de]*exp(ln_dos[e]-ln_dos[e-de]));
+	  } else {
+	    ln_dos[e-de] = log(-M[(e-emin)*cols + bet - de]) + ln_dos[e];
+	  }
 	}
       }
       
@@ -621,10 +635,10 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       double * error = new double[energy_levels]();
 
       for (int e = 0; e<energy_levels; e++){
-	error[e] = -exp(ln_dos[e]);
+	error[e] = 0;
 	for (int de = -biggest_energy_transition; de <= biggest_energy_transition; de ++){
-	  if (e+de < energy_levels && e + de >=0){
-	    error[e] += transition_matrix(e,e+de)*exp(ln_dos[e+de]);
+	  if (transition_matrix(e,e+de) != 0){
+	    error[e] += transition_matrix(e,e+de)*exp(ln_dos[e+de]-ln_dos[e]);
 	  }
 	}
       }
@@ -632,7 +646,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       for(int e1 = 0; e1< energy_levels;e1++) { printf("%g ",error[e1]);} printf("\n\n");
       delete [] error;
 
-      double dos_min = 0;
+      /* double dos_min = 0;
       for (int e = emin; e <= emax; e++) {
         if (ln_dos[e] !=0){
           if (dos_min == 0) {
@@ -641,12 +655,12 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
             dos_min = min(ln_dos[e], dos_min);
           }
         }
-      }
+	}
       for (int i=0; i<energy_levels; i++) {
         if (i < emin || i > emax) {
           ln_dos[i] = dos_min;
         }
-      }
+	}*/
       for(int e1 = 0; e1<energy_levels;e1++) { printf("%g ",ln_dos[e1]);} printf("\n\n");
 
       ln_dos_check(ln_dos);
