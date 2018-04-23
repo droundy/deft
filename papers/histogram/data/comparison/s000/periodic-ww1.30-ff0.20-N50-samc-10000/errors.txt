@@ -1,4 +1,4 @@
-# iterations	 errorinentropy	 maxerror	(generated with python figs/comparison.py 0 s000/periodic-ww1.30-ff0.20-N50-tmi3-golden-movie/001090-lndos.dat s000/periodic-ww1.30-ff0.20-N50
+# iterations	 errorinentropy	 maxerror	(generated with python figs/comparison.py 0 s000/periodic-ww1.30-ff0.20-N50-tmi3-golden-movie/001090-lndos.dat s000/periodic-ww1.30-ff0.20-N50 allmethods
 2.48e+04	85.34	491.6
 1.398e+06	3.097	84.19
 1.911e+06	1.41	19.51

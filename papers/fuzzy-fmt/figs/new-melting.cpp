@@ -288,8 +288,9 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
   printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g\n", temp, reduced_density, fv, gwidth, dx);  //debug
   //printf("\nCalculating many_cells...\n");
-  double reduced_num_spheres = 1-fv; // number of spheres in one cell based on input vacancy fraction fv
+  double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
+  double   Fideal_per_vol = temp*reduced_density*(log(2.646476976618268e-6*reduced_density/(sqrt(temp)*temp)) - 1.0);  //ASK! Fideal takes into account vacancies. Fideal/vol from HomogeneousSFMTFluidFast.cpp  cubic vol? or parallelepiped?
   const vector3d lattice_vectors[3] = {
     vector3d(lattice_constant/2,lattice_constant/2,0),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -305,7 +306,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //dx=(lattice_constant/2)/number of chunks along lattice vector
   const double dV = uipow(lattice_constant/Nl,3)/4.0;
   
-  int crystal_calc_option=1;  //set to 0 for crystal free energy with brute-force integration
+  int crystal_calc_option=2;  //set to 0 for crystal free energy with brute-force integration
                               //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
                               //set to 2 for crystal free energy with Monte-Carlo (more accurate)
                               
@@ -470,9 +471,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //       100*(i + 1)/double(Nl));
     //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
   }
-
-    cfree_energy_per_atom=free_energy/reduced_num_spheres;  //CHECK!
-    cfree_energy_per_vol=4*free_energy; //CHECK! 4 primitive cells in 1 cubic cell
+    
+    //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube; 
+    //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
+    //free_energy = the free energy over one parallelepiped with 1-fv atoms
+    cfree_energy_per_atom=free_energy/reduced_num_spheres + Fideal_per_vol*lattice_constant*lattice_constant*lattice_constant/4*(1-fv); //CHECK!
+    cfree_energy_per_vol=(free_energy*4/lattice_constant*lattice_constant*lattice_constant) + Fideal_per_vol; //CHECK!
+    //  --->> PUT SAME CHANGES IN find_energy!!
+    
     printf("total crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
  }  //end if density_option > 0    
    if (density_option < 1) {
@@ -485,11 +491,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         hf.mu() = 0;
         //Note: hf.energy() returns energy/volume
     
-        hfree_energy_per_atom = hf.energy()/reduced_density;   // free energy per sphere or "atom"
-        hfree_energy_per_vol = hf.energy();    // free energy per vol
+        hfree_energy_per_atom = hf.energy()/reduced_num_spheres;   // ASK! FIX!!  free energy per sphere or "atom"
+        hfree_energy_per_vol = hf.energy();    // free energy per vol  
         printf("homogeneous free_energy per vol is %g\n", hf.energy());
    }
 } //end for loop - density_option
+  
+
   
   data data_out;
   data_out.diff_free_energy_per_atom=cfree_energy_per_atom-hfree_energy_per_atom;
@@ -819,12 +827,20 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
   point_fe reflected;
   reflected.fv=simplex_fe[0][0]+simplex_fe[1][0]-simplex_fe[2][0];
   reflected.gw=simplex_fe[0][1]+simplex_fe[1][1]-simplex_fe[2][1];
+  
   if (reflected.gw == 0) {  //ASK DAVID
     reflected.gw = 0.0001;
+  } else if (reflected.gw < 1) {
+    reflected.gw = (-1)*reflected.gw;
   }
-    if (reflected.fv < 0) {  //ASK DAVID
+  if (reflected.fv < 0) {  //ASK DAVID
     reflected.fv = 0;
+  } else if (reflected.fv > 1) {
+    reflected.fv = .99;
+//  } else if (reflected.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    reflected.fv = .99;
   }
+  
 //reflected.fe=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   reflected.fe=find_energy_new(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //reflected.fe=sqrt((reflected.fv*reflected.fv) + (reflected.gw*reflected.gw));  //TEST SIMPLEX
@@ -835,12 +851,20 @@ point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3
   point_fe extended;
   extended.fv=(3/2.0)*(simplex_fe[0][0]+simplex_fe[1][0])-(2.0*simplex_fe[2][0]);
   extended.gw=(3/2.0)*(simplex_fe[0][1]+simplex_fe[1][1])-(2.0*simplex_fe[2][1]);
+  
   if (extended.gw == 0) {  //ASK DAVID
-      extended.gw = 0.0001;
+    extended.gw = 0.0001;
+  } else if (extended.gw < 1) {
+    extended.gw = (-1)*extended.gw;
   }
   if (extended.fv < 0) {  //ASK DAVID
-      extended.fv = 0;
+    extended.fv = 0;
+  } else if (extended.fv > 1) {
+    extended.fv = .99;
+//  } else if (extended.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    extended.fv = .99;
   }
+  
 //extended.fe=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   extended.fe=find_energy_new(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //extended.fe=sqrt((extended.fv*extended.fv) + (extended.gw*extended.gw));  //TEST SIMPLEX
@@ -855,12 +879,20 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
 
   contracted.out.fv=((3/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))-((1/2.0)*(simplex_fe[2][0]));
   contracted.out.gw=((3/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))-((1/2.0)*(simplex_fe[2][1]));
+  
   if (contracted.out.gw == 0) {  //ASK DAVID
       contracted.out.gw = 0.0001;
+  } else if (contracted.out.gw < 1) {
+    contracted.out.gw = (-1)*contracted.out.gw;
   }
   if (contracted.out.fv < 0) {  //ASK DAVID
       contracted.out.fv = 0;
+  } else if (contracted.out.fv > 1) {
+    contracted.out.fv = .99;
+//  } else if (contracted.out.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    contracted.out.fv = .99;
   }
+  
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
 //contracted.out.fe=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   contracted.out.fe=find_energy_new(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
@@ -868,12 +900,20 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
 
   contracted.in.fv=((1/4.0)*(simplex_fe[0][0]+simplex_fe[1][0]))+((1/2.0)*(simplex_fe[2][0]));
   contracted.in.gw=((1/4.0)*(simplex_fe[0][1]+simplex_fe[1][1]))+((1/2.0)*(simplex_fe[2][1]));
+  
   if (contracted.in.gw == 0) {  //ASK DAVID
       contracted.in.gw = 0.0001;
+  } else if (contracted.in.gw < 1) {
+    contracted.in.gw = (-1)*contracted.in.gw;
   }
   if (contracted.in.fv < 0) {  //ASK DAVID
       contracted.in.fv = 0;
+  } else if (contracted.in.fv > 1) {
+    contracted.in.fv = .99;
+//  } else if (contracted.in.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    contracted.in.fv = .99;
   }
+  
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
 //contracted.in.fe=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   contracted.in.fe=find_energy_new(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
@@ -887,24 +927,40 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 
   shrunken.out.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[1][0]);   //using in/out so don't have to make another structure
   shrunken.out.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[1][1]);
+  
   if (shrunken.out.gw == 0) {  //ASK DAVID
       shrunken.out.gw = 0.0001;
+  } else if (shrunken.out.gw < 1) {
+    shrunken.out.gw = (-1)*shrunken.out.gw;
   }
   if (shrunken.out.fv < 0) {  //ASK DAVID
       shrunken.out.fv = 0;
+  } else if (shrunken.out.fv > 1) {
+    shrunken.out.fv = .99;
+//  } else if (shrunken.out.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    shrunken.out.fv = .99;
   }
+  
 //shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.out.fe=find_energy_new(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.out.fe=sqrt((shrunken.out.fv*shrunken.out.fv) + (shrunken.out.gw*shrunken.out.gw));  //TEST SIMPLEX
 
   shrunken.in.fv=(1/2.0)*(simplex_fe[0][0] + simplex_fe[2][0]);
   shrunken.in.gw=(1/2.0)*(simplex_fe[0][1] + simplex_fe[2][1]);
+  
   if (shrunken.in.gw == 0) {  //ASK DAVID
       shrunken.in.gw = 0.0001;
+  } else if (shrunken.in.gw < 1) {
+    shrunken.in.gw = (-1)*shrunken.in.gw;
   }
   if (shrunken.in.fv < 0) {  //ASK DAVID
       shrunken.in.fv = 0;
+  } else if (shrunken.in.fv > 1) {
+    shrunken.in.fv = .99;
+//  } else if (shrunken.in.fv == 1) {   //ASK DAVID  think this condition is already taken care of somewhere else
+//    shrunken.in.fv = .99;
   }
+  
 //shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.in.fe=find_energy_new(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.in.fe=sqrt((shrunken.in.fv*shrunken.in.fv) + (shrunken.in.gw*shrunken.in.gw));  //TEST SIMPLEX
@@ -992,7 +1048,7 @@ int main(int argc, const char **argv) {
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
   
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
-  double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.1; //default settings
+  double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.01; //default settings
   
   double dx=0.01;        //default grid point spacing dx=dy=dz=0.01
   int verbose = false;

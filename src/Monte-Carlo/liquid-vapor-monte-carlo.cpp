@@ -700,6 +700,9 @@ int main(int argc, const char *argv[]) {
   char *dos_fname = new char[1024];
   sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
 
+  char *resume_fname = new char[1024];
+  sprintf(resume_fname, "%s/%s-resume.dat", data_dir, filename);
+
   char *ps_fname = new char[1024];
   sprintf(ps_fname, "%s/%s-ps.dat", data_dir, filename);
 
@@ -772,23 +775,27 @@ int main(int argc, const char *argv[]) {
       // Need to read and set: iterations, ln_energy_weights (from ln_dos) (FIXME eventually change this, unless we fix SAD).
       
       {
-        FILE *dos_in = fopen((const char *)dos_fname, "r");
-        if (dos_in == NULL) {
-          printf("Unable to resume, because %s does not exist.  Proceeding anyhow!\n", dos_fname);
+        FILE *resume_in = fopen((const char *)resume_fname, "r");
+        if (resume_in == NULL) {
+          printf("Unable to resume, because %s does not exist.  Proceeding anyhow!\n", resume_fname);
         } else {
+          random::resume_from_dump(resume_in);
           char * line = new char[1000];
-          while (fscanf(dos_in, " #%[^\n] ", line) == 1) {
+          while (fscanf(resume_in, " #%[^\n] ", line) == 1) {
             printf("line: %s\n", line);
             sscanf(line , " working moves: %ld " , &sw.moves.working);
             sscanf(line , " total moves: %ld " , &sw.moves.total);
+            sscanf(line , " iterations: %ld " , &sw.iteration);
           }
+          // TODO;
+          // or [eventually] write our and read in energy_histogram, density, etc. values
           int energy;
-          double dos;
-          while (fscanf(dos_in, " %u %lf ", &energy, &dos) == 2) {
+          double lnw;
+          while (fscanf(resume_in, " %u %lf ", &energy, &lnw) == 2) {
             // printf(" %u %lf\n ", energy, dos);
-            sw.ln_energy_weights[energy]=-dos;
+            sw.ln_energy_weights[energy]=lnw;
           }
-          fclose(dos_in);
+          fclose(resume_in);
         }
       }
     } else {
@@ -915,6 +922,22 @@ int main(int argc, const char *argv[]) {
           fprintf(dos_out, "%d  %lg\n",i,ln_dos[i]);
         }
         fclose(dos_out);
+      }
+
+      // save resume information
+      {
+        FILE *resume_out = fopen((const char *)resume_fname, "w");
+        random::dump_resume_info(resume_out);
+        fprintf(resume_out, "%s", headerinfo);
+        fprintf(resume_out, "%s", countinfo);
+        fprintf(resume_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
+        fprintf(resume_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
+
+        fprintf(resume_out, "# energy   lnw\n");
+        for (int i = 0; i <= converged_state; i++) {
+          fprintf(resume_out, "%d  %.16lg\n",i,sw.ln_energy_weights[i]);
+        }
+        fclose(resume_out);
       }
 
       // Save pessimistic sample counts

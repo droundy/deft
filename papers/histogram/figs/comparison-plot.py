@@ -15,7 +15,7 @@ energy = int(sys.argv[1])
 filebase = sys.argv[2]
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
-methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
+methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
@@ -37,6 +37,9 @@ for meth in split4:
     if meth[-3:] != '-tm':
             methods.append('-%s' % meth)
 
+best_ever_error = 1e100
+best_ever_max = 1e100
+max_time = 0
 print 'methods are', methods
 for method in methods:
     print 'trying method', method
@@ -48,6 +51,8 @@ for method in methods:
         if energy > 0:
                 Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
         iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
+        best_ever_error = min(best_ever_error, errorinentropy.min())
+        best_ever_max = min(best_ever_max, maxerror.min())
 
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
@@ -66,6 +71,7 @@ for method in methods:
                 N = filebase.split('-N')[-1]
                 # Get N directly from title.
                 moves = iterations * float(N)
+        max_time = max(max_time, moves.max())
 
         if energy > 0:
                 plt.figure('error-at-energy-iterations')
@@ -95,23 +101,29 @@ for method in methods:
 
         plt.figure('maxerror')
         colors.loglog(moves, maxerror, method = method[1:])
-        plt.xlabel('# moves')
+        plt.xlabel('Moves')
         plt.ylabel('Maximum Entropy Error')
-        plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
+        #plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         colors.legend()
-        plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
 
         plt.figure('errorinentropy')
         colors.loglog(moves, errorinentropy[0:len(iterations)],
                       method = method[1:])
-        colors.loglog(moves, 10000/np.sqrt(moves), method = '1/sqrt(t)')
-        plt.xlabel('#Moves')
+        plt.xlabel('Moves')
         plt.ylabel('Average Entropy Error')
-        plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
+        #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
         colors.legend()
-        plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
 
     except:
         raise
+plt.figure('maxerror')
+colors.loglog(moves, best_ever_max/np.sqrt(moves/max_time), method = '1/sqrt(t)')
+colors.legend()
+plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
+
+plt.figure('errorinentropy')
+colors.loglog(moves, best_ever_error/np.sqrt(moves/max_time), method = '1/sqrt(t)')
+colors.legend()
+plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
 
 plt.show()
