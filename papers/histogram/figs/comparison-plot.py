@@ -15,7 +15,7 @@ energy = int(sys.argv[1])
 filebase = sys.argv[2]
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
-methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
+methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
@@ -101,20 +101,18 @@ for method in methods:
 
         plt.figure('maxerror')
         colors.loglog(moves, maxerror, method = method[1:])
-        plt.xlabel('# moves')
+        plt.xlabel('Moves')
         plt.ylabel('Maximum Entropy Error')
-        plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
+        #plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         colors.legend()
-        plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
 
         plt.figure('errorinentropy')
         colors.loglog(moves, errorinentropy[0:len(iterations)],
                       method = method[1:])
-        plt.xlabel('#Moves')
+        plt.xlabel('Moves')
         plt.ylabel('Average Entropy Error')
-        plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
+        #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
         colors.legend()
-        plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
 
     except:
         raise
