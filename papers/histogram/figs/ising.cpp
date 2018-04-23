@@ -55,7 +55,7 @@ struct ising_simulation {
   void flip_a_spin();
   double calculate_energy();
 
-  double* compute_ln_dos(dos_types dos_type);
+  void compute_ln_dos(dos_types dos_type);
   double *ln_energy_weights;
   double *ln_dos;
   int max_entropy_state;
@@ -78,6 +78,7 @@ ising_simulation::ising_simulation(int NN) {
   // energy histogram
   energy_levels = J*N*N;
   ln_energy_weights = new double[energy_levels]();
+  ln_dos = new double[energy_levels]();
   energy_histogram = new long[energy_levels]();
   max_entropy_state = 0;
   energies_found = 0; // we haven't found any energies yet.
@@ -93,6 +94,7 @@ ising_simulation::ising_simulation(int NN) {
 ising_simulation::~ising_simulation() {
   delete[] energy_histogram;
   delete[] ln_energy_weights;
+  delete[] ln_dos;
   delete[] S;
 }
 
@@ -157,10 +159,7 @@ double ising_simulation::calculate_energy() {
   return E;
 }
 
-double* ising_simulation::compute_ln_dos(dos_types dos_type) {
-
-  double *ln_dos = new double[energy_levels]();
-
+void ising_simulation::compute_ln_dos(dos_types dos_type) {
   if (dos_type == histogram_dos) {
     for (int i = max_entropy_state; i < energy_levels; i++) {
       if (energy_histogram[i] != 0) {
@@ -170,7 +169,6 @@ double* ising_simulation::compute_ln_dos(dos_types dos_type) {
       }
     }
   }
-  return ln_dos;
 }
 
 static double took(const char *name) {
@@ -208,8 +206,7 @@ int main(int argc, const char *argv[]) {
 
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
-  char *default_data_dir = new char[1024];
-  sprintf(default_data_dir, "papers/histogram/data/ising");
+  const char *default_data_dir = "papers/histogram/data/ising";
   char *filename = new char[1024];
   sprintf(filename, "none");
   char *filename_suffix = new char[1024];
@@ -285,10 +282,122 @@ int main(int argc, const char *argv[]) {
     printf("%s ", argv[i]);
   }
 
+  // Set default data directory
+  if (strcmp(data_dir,"none") == 0) {
+    sprintf(data_dir,"%s",default_data_dir);
+    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
+  }
+
+  mkdir(data_dir, 0777); // create save directory
+
+  char *ising_fname = new char[1024];
+  sprintf(ising_fname, "%s/%s.dat", data_dir, filename);
+
   ising_simulation ising(NN);
   ising.canonical_temperature(6);
 
   took("Starting program");
+
+  // ----------------------------------------------------------------------------
+  // Resume functionality
+  // ----------------------------------------------------------------------------
+
+  if (resume) {
+     // We are continuing a previous simulation.
+    if (Jordan) {// This will be a Monte Carlo method eventually.
+      // Open the file!
+      FILE *rfile = fopen((const char *)ising_fname, "r");
+      if (rfile != NULL) {
+        printf("I'm resuming with the method.\n");
+        fscanf(rfile, "import numpy as np\n");
+        random::resume_from_dump(rfile);
+        char * line = new char[1000];
+        if (fscanf(rfile, " %[^\n]\n", line) != 1) {
+          printf("error reading headerinfo!\n");
+          exit(1);
+        }
+        printf("line: '%s'\n",line);
+        int resumeNN = 0;
+        if (fscanf(rfile, " NN = %d\n", &resumeNN) != 1) {
+          printf("error reading NN!\n");
+          exit(1);
+        }
+        if (resumeNN != NN) {
+          printf("Error:  must specify same N value when resuming! %d != %d\n",
+                 NN, resumeNN);
+          exit(1);
+        }
+        printf("NN is now %d\n", NN);
+        if (fscanf(rfile, "total-moves = %ld\n", &total_moves) != 1) {
+          printf("error reading total-moves!\n");
+          exit(1);
+        }
+        printf("total-moves is now %ld\n", total_moves);
+        if (fscanf(rfile, "minT = %lg\n", &minT) != 1) {
+          printf("error reading minT!\n");
+          exit(1);
+        }
+        if (fscanf(rfile, "moves = %ld\n", &ising.moves) != 1) {
+          printf("error reading ising.moves!\n");
+          exit(1);
+        }
+        if (fscanf(rfile, "E = %d\n", &ising.E) != 1) {
+          printf("error reading E!\n");
+          exit(1);
+        }
+        if (fscanf(rfile, "J = %d\n", &J) != 1) {
+          printf("error reading J!\n");
+          exit(1);
+        }
+
+        printf("lndos is now {\n");
+        fscanf(rfile, " lndos = np.array([");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          if (fscanf(rfile,"\t%lg,\n", &ising.ln_dos[i]) != 1) {
+            printf("error reading lndos at energy #%d!\n", i);
+            exit(1);
+          }
+        }
+        fscanf(rfile, " ])\n");
+        printf("}\n");
+
+        fscanf(rfile, " lnw = np.array([");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          if (fscanf(rfile,"\t%lg,\n", &ising.ln_energy_weights[i]) != 1) {
+            printf("error reading lnw at energy #%d!\n", i);
+            exit(1);
+          }
+        }
+        fscanf(rfile, " ])\n");
+
+        fscanf(rfile, " histogram = np.array([");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          if (fscanf(rfile,"\t%ld,\n", &ising.energy_histogram[i]) != 1) {
+            printf("error reading histogram at energy #%d!\n", i);
+            exit(1);
+          }
+        }
+        fscanf(rfile, " ])\n");
+
+        fscanf(rfile, " S = np.array([\n");
+        for (int i=0; i<NN; i++) {
+          fscanf(rfile, "\t[");
+          for (int j=0; j<NN; j++) {
+            fscanf(rfile,"%2d,", &ising.S[i+NN*j]);
+          }
+          fscanf(rfile, "],\n");
+        }
+        fscanf(rfile, "])\n");
+
+        fclose(rfile);
+      }
+      } else {
+        printf("I do not know how to resume yet!\n");
+        exit(1);
+      }
+      took("Reading resume file");
+  }
+
   printf("version: %s\n",version_identifier());
 
   ising.calculate_energy();
@@ -302,13 +411,13 @@ int main(int argc, const char *argv[]) {
 
   took("Running");
 
-  ising.ln_dos = ising.compute_ln_dos(histogram_dos);
+  ising.compute_ln_dos(histogram_dos);
 
 //  for(int i = 0; i <= ising.energy_levels; i++){
 //    printf("histogram is %ld\n while lndos is %g\n", ising.energy_histogram[i], ising.ln_dos[i]);
 //  }
 
-  for(int i = 0; i <= ising.energy_levels; i++){
+  for(int i = 0; i < ising.energy_levels; i++){
     if (ising.energy_histogram[i] > 0) {
       ising.energies_found++;
       printf("energy histogram at %ld is %ld with lndos %g\n",
@@ -320,17 +429,6 @@ int main(int argc, const char *argv[]) {
   // Generate save file info
   // ----------------------------------------------------------------------------
 
-  // Set default data directory
-  if (strcmp(data_dir,"none") == 0) {
-    sprintf(data_dir,"%s",default_data_dir);
-    printf("\nUsing default data directory: [deft]/%s\n",data_dir);
-  }
-
-  mkdir(data_dir, 0777); // create save directory
-
-  char *dos_fname = new char[1024];
-  sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
-
   //if (fix_kT) {
   //  sprintf(headerinfo,
   //          "%s# histogram method: canonical (fixed temperature)\n"
@@ -338,83 +436,49 @@ int main(int argc, const char *argv[]) {
   //          headerinfo, fix_kT);
   //}
 
-  // ----------------------------------------------------------------------------
-  // Resume functionality
-  // ----------------------------------------------------------------------------
-
-  if (resume) {
-     // We are continuing a previous simulation.
-    if (Jordan) {// This will be a Monte Carlo method eventually.
-      // Open the file!
-      FILE *rfile = fopen((const char *)dos_fname, "r");
-      if (rfile != NULL) {
-        printf("I'm resuming with the method.\n");
-        fscanf(rfile, "import numpy as np\n");
-        random::resume_from_dump(rfile);
-        char * line = new char[1000];
-        if (fscanf(rfile, " %[^\n]\n", line) != 1) {
-          printf("error reading headerinfo!\n");
-          exit(1);
-        }
-        printf("line: '%s'\n",line);
-        if (fscanf(rfile, " NN = %d\n", &NN) != 1) {
-          printf("error reading NN!\n");
-          exit(1);
-        }
-        printf("NN is now %d\n", NN);
-        if (fscanf(rfile, " total-moves = %ld\n", &total_moves) != 1) {
-          printf("error reading total-moves!\n");
-          exit(1);
-        }
-        printf("total-moves is now %ld\n", total_moves);
-        fclose(rfile);
-      }
-      // Need to read and set: iterations, ln_energy_weights (from ln_dos)
-      } else {
-        printf("I do not know how to resume yet!\n");
-        exit(1);
-      }
-  }
-
-
   // Save energy histogram
       {
-        FILE *dos_out = fopen((const char *)dos_fname, "w");
+        FILE *ising_out = fopen((const char *)ising_fname, "w");
 
-        fprintf(dos_out, "import numpy as np\n\n");
-        random::dump_resume_info(dos_out);
-        fprintf(dos_out,"version = %s\n\n",version_identifier());
+        fprintf(ising_out, "import numpy as np\n\n");
+        random::dump_resume_info(ising_out);
+        fprintf(ising_out,"version = %s\n\n",version_identifier());
 
-        fprintf(dos_out,"NN = %i\n",NN);
-        fprintf(dos_out,"total-moves = %li\n",total_moves);
-        fprintf(dos_out,"minT = %g\n",minT);
-        fprintf(dos_out,"moves = %li\n",ising.moves);
-        fprintf(dos_out,"E = %i\n",ising.E);
-        fprintf(dos_out,"J = %i\n", J);
+        fprintf(ising_out,"NN = %i\n",NN);
+        fprintf(ising_out,"total-moves = %li\n",total_moves);
+        fprintf(ising_out,"minT = %g\n",minT);
+        fprintf(ising_out,"moves = %li\n",ising.moves);
+        fprintf(ising_out,"E = %i\n",ising.E);
+        fprintf(ising_out,"J = %i\n", J);
         // inserting arrays into text file.
-        fprintf(dos_out, "lndos = np.array([\n");
+        fprintf(ising_out, "lndos = np.array([\n");
         for (int i = 0; i < ising.energy_levels; i++) {
-          fprintf(dos_out,"\t%.17g,\n", ising.ln_dos[i]);
+          fprintf(ising_out,"\t%.17g,\n", ising.ln_dos[i]);
         }
-        fprintf(dos_out, "])\n");
-        fprintf(dos_out, "lnw = np.array([\n");
+        fprintf(ising_out, "])\n");
+        fprintf(ising_out, "lnw = np.array([\n");
         for (int i = 0; i < ising.energy_levels; i++) {
-          fprintf(dos_out,"\t%.17g,\n", ising.ln_energy_weights[i]);
+          fprintf(ising_out,"\t%.17g,\n", ising.ln_energy_weights[i]);
         }
-        fprintf(dos_out, "])\n");
-        fprintf(dos_out, "histogram = np.array([\n");
+        fprintf(ising_out, "])\n");
+        fprintf(ising_out, "histogram = np.array([\n");
         for (int i = 0; i < ising.energy_levels; i++) {
-          fprintf(dos_out,"\t%ld,\n", ising.energy_histogram[i]);
+          fprintf(ising_out,"\t%ld,\n", ising.energy_histogram[i]);
         }
-        fprintf(dos_out, "])\n");
-        fprintf(dos_out, "S = np.array([\n");
-        for (int i = 0; i < NN*NN; i++) {
-          fprintf(dos_out,"\t%d,\n", ising.S[i]);
+        fprintf(ising_out, "])\n");
+        fprintf(ising_out, "S = np.array([\n");
+        for (int i=0; i<NN; i++) {
+          fprintf(ising_out, "\t[");
+          for (int j=0; j<NN; j++) {
+            fprintf(ising_out,"%2d,", ising.S[i+NN*j]);
+          }
+          fprintf(ising_out, "],\n");
         }
-        fprintf(dos_out, "])\n");
+        fprintf(ising_out, "])\n");
 
-        fclose(dos_out);
+        fclose(ising_out);
       }
+
   // -------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
   // -------------------------------------------------------------------
