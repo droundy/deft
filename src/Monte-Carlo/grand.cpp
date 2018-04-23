@@ -535,9 +535,8 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
    
       /* make matrix upper triangular up to last column */
       for (int e = emin; e < emax; e++){
+        int ind1 = (e-emin)*cols + bet;
 	if (M[(e -emin) * cols + bet] != 0) {
-	  int ind1 = (e-emin)*cols + bet;
-
 	  /* normalize to get leading entry of each row of M to 1 */
 	  for (int de = 1; de <= min(bet,emax-e); de++) {
 	    M[(e - emin + de)*cols + bet -de] /= M[(e-emin)*cols + bet];
