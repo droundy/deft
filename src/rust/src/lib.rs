@@ -61,13 +61,7 @@ trait ClosedAdd: Kind {
                 sum.insert(other.clone().into(), 1.0);
             }
         }
-        if sum.inner.len() == 1 {
-            let (k, &v) = sum.inner.iter().next().unwrap();
-            if v == 1.0 {
-                return (*k.inner).clone();
-            }
-        }
-        Self::sum_from_map(sum.into())
+        Self::sum_from_map(sum)
     }
 
     fn neg(&self) -> Self {
@@ -142,6 +136,15 @@ trait ClosedArithmetic: ClosedAdd + ClosedMul {
             },
         }
     }
+    fn from_f64<F: Into<f64>>(f: F) -> Self {
+        Self::sum_from_map((Expr::from(Self::one()), f.into()).into())
+    }
+}
+
+impl<F: Into<f64>> From<F> for Expr<Scalar> {
+    fn from(f: F) -> Self {
+        Scalar::from_f64(f).into()
+    }
 }
 
 impl<T: Kind + ClosedAdd> std::ops::Add for Expr<T> {
@@ -160,11 +163,11 @@ impl<T: Kind + ClosedAdd> std::ops::Sub for Expr<T> {
     }
 }
 
-impl<T: Kind + ClosedMul> std::ops::Mul for Expr<T> {
+impl<T: Kind + ClosedMul, O: Into<Expr<T>>> std::ops::Mul<O> for Expr<T> {
     type Output = Self;
 
-    fn mul(self, other: Self) -> Self {
-        (*self.inner).mul(&*other.inner).into()
+    fn mul(self, other: O) -> Self {
+        (*self.inner).mul(&*other.into().inner).into()
     }
 }
 
@@ -274,6 +277,12 @@ impl Kind for Scalar {
 
 impl ClosedAdd for Scalar {
     fn sum_from_map(m: AbelianMap<Self>) -> Self {
+        if m.inner.len() == 1 {
+            let (k, &v) = m.inner.iter().next().unwrap();
+            if v == 1.0 {
+                return (*k.inner).clone();
+            }
+        }
         Scalar::Add(m)
     }
 
@@ -453,13 +462,18 @@ mod tests {
         assert!(a + a != b + b);
         assert_eq!(a + zero, a);
 
-        if let Scalar::Mul(ref map) = *(a * one).inner {
+        if let Scalar::Mul(ref map) = *(a * 1).inner {
             for (k, &v) in map.inner.iter() {
                 println!("{} {}", k.cpp(), v);
             }
         }
 
+        println!("1 is {:?}", Expr::<Scalar>::from(1));
+
         assert_eq!(a * one, a);
+        println!("a*1 = {:?}", a*1);
+        println!("a*1 = {:?}", (a*1).cpp());
+        assert_eq!(a * 1, a);
 
         assert_eq!(a - a, zero);
         assert_eq!(a + a - a, a);
