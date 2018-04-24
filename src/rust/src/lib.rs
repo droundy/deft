@@ -446,7 +446,7 @@ mod tests {
         let b: Expr<Scalar> = Scalar::Var("b").into();
 
         let zero: Expr<Scalar> = Scalar::zero().into();
-        let one: Expr<Scalar> = Scalar::zero().into();
+        let one: Expr<Scalar> = Scalar::one().into();
 
         assert_eq!(a + b, a + b);
         assert_eq!(a + b, b + a);
