@@ -15,7 +15,11 @@ gridflag = True
 filename = sys.argv[1]
 Tmin = float(sys.argv[2])
 
-wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, delimiter = '\t', unpack = True)
+try:
+    wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, delimiter = '\t', unpack = True)
+    colors.loglog(wlmoves, wlfactor,'WL')
+except:
+    pass
 
 for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     data = np.loadtxt(sad)
@@ -31,7 +35,7 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
             if ts[i] > t[j]:
                 gamma[i] = energies_found[j]*(elo[j]-ehi[j])/ts[i]/3/Tmin
     sadname = sad.split('/')[-1].split('.')[0]
-    plt.figure(gammas)
+
     colors.loglog(ts, gamma,sadname)
     plt.xlabel('Moves')
     plt.ylabel('$\gamma$')
