@@ -13,7 +13,7 @@
 \newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
 
 \begin{document}
-\title{Dynamical Stochastic Approximation Monte Carlo}
+\title{Dynamic Stochastic Approximation Monte Carlo}
 
 \author{Jordan K. Pommerenck} \author{Tanner T. Simpson}
 \author{Michael A. Perlin} \author{David Roundy}
@@ -101,7 +101,7 @@ systems difficult.
 
 In this work, we have developed a novel algorithm based on SAMC that
 does not require user-defined inputs and therefore should be easily
-applicable to a given system.  We call this method SAD (Dynamical
+applicable to a given system.  We call this method SAD (Dynamic
 Stochastic Approximation), and will discuss it in detail in the methods
 section. We compare it along with several broad histogram methods
 which include TMMC, WL, WL-TMMC, and SAMC.
@@ -131,13 +131,13 @@ various methods applied to the model system.
 
 \section{Methods}
 
-In this work, We compare a variety of broad-histogram methods.  We
+In this work, We compare a variety of broad histogram methods.  We
 outline the general workings of each algorithm that we developed in
-detail while summarizing algorithms that can be found elsewhere.  The
+detail while summarizing algorithms that originated elsewhere.  The
 following methods are introduced and applied to the square-well fluid:
 Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau
 Transition Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation
-Monte-Carlo (SAMC), and Dynamical Stochastic-Approximation
+Monte-Carlo (SAMC), and Dynamic Stochastic Approximation 
 (SAD).
 
 \subsection{TMMC Algorithm}
@@ -176,7 +176,8 @@ however, the extension to other ensembles is quite natural.
   \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
 \end{align}
 The acceptance probability given for TMMC is idential to that
-introduced by Swendsen and Wang~\cite{wang2002transition}.
+introduced by Swendsen and Wang~\cite{wang2002transition}. \tssays{Isn't
+this not quite right? Not sure if needed.}
 \begin{align}
   p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
 \end{align}
@@ -218,9 +219,10 @@ below where $w$ represents the weights:
 \begin{equation}
 	\ln{\gamma_{i+1}}=\frac{u}{2}\ln{\gamma_{i}}
 \end{equation}
-for $u$ typically greater than 1 and $\gamma$ is the modification
-factor for the density of states.  A new configuration for the density
-of states with a probability given by the following is chosen:
+\tssays{Should this be just $\gamma$, not $\ln{\gamma}$?}for $u$ typically 
+greater than 1 and $\gamma$ is the modification factor for the density of 
+states.  A new configuration for the density of states with a probability 
+given by the following is chosen:
 \begin{equation}
 	\mathcal{P}(\epsilon_\text{old} \rightarrow \epsilon_\text{new})
 	= \min[1,e^{\ln{D(\epsilon_\text{old})}-\ln{D(\epsilon_\text{new})}}]
@@ -233,9 +235,8 @@ Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
 by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
 advantage of the ease of implementation and applicability to a variety
 of systems, while making use of a transition matrix to address WL
-weaknesses such as a limited statistical accuracy plateau which is not
-improved with additional Monte-Carlo steps.  This WL version is more
-accurate for a given number of simulation steps.
+weaknesses, such as its limited statistical accuracy plateau.  
+This WL version is more accurate for a given number of simulation steps.
 
 \paragraph{Initializing Wang-Landau:} We begin the simulation by
 defining a minimum important energy and a maximum entropy state. In
@@ -256,8 +257,8 @@ visited at least once (each histogram bin has one
 entry)~\cite{shell2003improved}; however, for other systems this is
 rarely sufficient.  The goal of this WL initialization is to prefill
 the transition matrix for the next portion of the simulation.
-\paragraph{Initializing TMMC:} The purpose of prefilling the transition
-matrix is apparent because if numerous zeros existed in the collection
+\paragraph{Initializing TMMC:} Prefilling the transition
+matrix is necessary because if numerous zeros existed in the collection
 matrix, the infinite temperature transition matrix would be
 ill-defined.  Sampling over large ranges of density of states would
 therefore take an unacceptable length of time to
@@ -333,11 +334,11 @@ gives the following
 where $N_E$ is the number of energies that have been found. The change
 in the entropy the minimum temperature can be thought of as a slope of
 the triangle made by connecting the minimum important energy and the
-maximum entropy state .  The factor of $3$ comes from the area bounded
-by the $\ln{D(E)}$ The update factor has the same $1/t$ behavior as the
-original SAMC algorithm; however now every time a new energy is
-discovered during the course of the simulation, the
-update factor experiences a jump.
+maximum entropy state.  The factor of $3$ comes from the ratio of areas bounded
+by the $\ln{D(E)}$ and the minimum temperature line.
+The update factor has the same $1/t$ behavior as the original SAMC algorithm; 
+however now every time a new energy is discovered during the course 
+of the simulation, the update factor experiences a jump.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-ww1_30-ff0_22-100x10}
