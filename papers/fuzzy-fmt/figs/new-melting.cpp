@@ -309,8 +309,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                               //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
                               //set to 2 for crystal free energy with Monte-Carlo (more accurate)
                               
-  double N_crystal = 1;  //dummy value not used if not doing brute-force integration
-  if (crystal_calc_option < 1) {  // N_crystal only needs to be calculated for brute-force integration
+  //double N_crystal = 1;  //dummy value not used if not doing brute-force integration
+  //if (crystal_calc_option < 1) {  // N_crystal only needs to be calculated for brute-force integration
 
     //Find N_crystal (number of spheres in one crystal primitive cell) to normalize reduced density n(r) later
     double N_crystal=0;
@@ -334,9 +334,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          }
         }
        }
-  }  //end if for N_crystal calculation
+  //}  //end if for N_crystal calculation
+
+  if (verbose) {
+    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
+          N_crystal, reduced_num_spheres);
+  }
+  const double norm = reduced_num_spheres/N_crystal;  //normalization constant
   
-   
   //Find inhomogeneous Fideal of one crystal primitive cell
   double Fideal=0;
   for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
@@ -352,19 +357,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           for(int u=-many_cells; u<=many_cells; u++)  {
             for (int v=-many_cells; v<= many_cells; v++) {
             const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-              Fideal += -temp*density_gaussian((r-R).norm(), gwidth, 1)*(log(2.646476976618268e-6*density_gaussian((r-R).norm(), gwidth, 1)/(sqrt(temp)*temp))-1)*dV;   //norm=1
+            //Fideal += -temp*density_gaussian((r-R).norm(), gwidth, norm)*(log(2.646476976618268e-6*density_gaussian((r-R).norm(), gwidth, norm)/(sqrt(temp)*temp))-1)*dV;   //Ask about norm!
+            Fideal += -temp*density_gaussian((r-R).norm(), gwidth, norm)*((-(r-R).norm()*(r-R).norm()*(0.5/(gwidth*gwidth))) - log(2.646476976618268e-6/(sqrt(temp)*temp))-1)*dV; //Ask about norm!
+            //printf("Fideal = %g\n", Fideal);  //debug
             }
           }
         }
       }
     }
   }  //End inhomogeneous Fideal calculation
-
-  if (verbose) {
-    printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
-          N_crystal, reduced_num_spheres);
-  }
-  const double norm = reduced_num_spheres/N_crystal;  //normalization constant
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
