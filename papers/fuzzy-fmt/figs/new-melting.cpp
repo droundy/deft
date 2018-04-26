@@ -290,7 +290,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  double   Fideal_per_vol = temp*reduced_density*(log(2.646476976618268e-6*reduced_density/(sqrt(temp)*temp)) - 1.0);  //ASK! Fideal takes into account vacancies. Fideal/vol from HomogeneousSFMTFluidFast.cpp  cubic vol? or parallelepiped?
+  double Fideal = temp*reduced_density*(log(2.646476976618268e-6*reduced_density/(sqrt(temp)*temp)) - 1.0);  //CHANGE THIS DUMMY VARIABLE Fideal per vol takes into account vacancies. 
   const vector3d lattice_vectors[3] = {
     vector3d(lattice_constant/2,lattice_constant/2,0),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -475,8 +475,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube; 
     //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
     //free_energy = the free energy over one parallelepiped with 1-fv atoms
-    cfree_energy_per_atom=free_energy/reduced_num_spheres + Fideal_per_vol*lattice_constant*lattice_constant*lattice_constant/4*(1-fv); //CHECK!
-    cfree_energy_per_vol=(free_energy*4/lattice_constant*lattice_constant*lattice_constant) + Fideal_per_vol; //CHECK!
+    //NO- we don't compute Fideal_per_vol for inhomogen case!  cfree_energy_per_atom=free_energy/reduced_num_spheres + Fideal_per_vol*lattice_constant*lattice_constant*lattice_constant/4*(1-fv); //CHECK!
+    //NO- we don't compute Fideal_per_vol for inhomogen case! cfree_energy_per_vol=(free_energy*4/lattice_constant*lattice_constant*lattice_constant) + Fideal_per_vol; //CHECK!
+    cfree_energy_per_atom=(Fideal + free_energy)/reduced_num_spheres; //CHECK!
+    cfree_energy_per_vol=(Fideal + free_energy)*4.0/lattice_constant*lattice_constant*lattice_constant; //CHECK!
     //  --->> PUT SAME CHANGES IN find_energy!!
     
     printf("total crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
