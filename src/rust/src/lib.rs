@@ -136,8 +136,16 @@ trait ClosedArithmetic: ClosedAdd + ClosedMul {
             },
         }
     }
+
     fn from_f64<F: Into<f64>>(f: F) -> Self {
-        Self::sum_from_map((Expr::from(Self::one()), f.into()).into())
+        let f = f.into();
+        if f == 0.0 {
+            Self::zero()
+        } else if f == 1.0 {
+            Self::one()
+        } else {
+            Self::sum_from_map((Expr::from(Self::one()), f).into())
+        }
     }
 }
 
@@ -147,34 +155,38 @@ impl<F: Into<f64>> From<F> for Expr<Scalar> {
     }
 }
 
-impl<T: Kind + ClosedAdd> std::ops::Add for Expr<T> {
+impl<T: Kind + ClosedAdd, RHS: Into<Expr<T>>> std::ops::Add<RHS> for Expr<T> {
     type Output = Self;
 
-    fn add(self, other: Self) -> Self {
+    fn add(self, other: RHS) -> Self {
+        let other = other.into();
         (*self.inner).add(&*other.inner).into()
     }
 }
 
-impl<T: Kind + ClosedAdd> std::ops::Sub for Expr<T> {
+impl<T: Kind + ClosedAdd, RHS: Into<Expr<T>>> std::ops::Sub<RHS> for Expr<T> {
     type Output = Self;
 
-    fn sub(self, other: Self) -> Self {
+    fn sub(self, other: RHS) -> Self {
+        let other = other.into();
         (*self.inner).add(&other.inner.neg()).into()
     }
 }
 
-impl<T: Kind + ClosedMul, O: Into<Expr<T>>> std::ops::Mul<O> for Expr<T> {
+impl<T: Kind + ClosedMul, RHS: Into<Expr<T>>> std::ops::Mul<RHS> for Expr<T> {
     type Output = Self;
 
-    fn mul(self, other: O) -> Self {
-        (*self.inner).mul(&*other.into().inner).into()
+    fn mul(self, other: RHS) -> Self {
+        let other = other.into();
+        (*self.inner).mul(&other.inner).into()
     }
 }
 
-impl<T: Kind + ClosedArithmetic> std::ops::Div for Expr<T> {
+impl<T: Kind + ClosedArithmetic, RHS: Into<Expr<T>>> std::ops::Div<RHS> for Expr<T> {
     type Output = Self;
 
-    fn div(self, other: Self) -> Self {
+    fn div(self, other: RHS) -> Self {
+        let other = other.into();
         (*self.inner).mul(&other.inner.reciprocal()).into()
     }
 }
@@ -454,32 +466,19 @@ mod tests {
         let a: Expr<Scalar> = Scalar::Var("a").into();
         let b: Expr<Scalar> = Scalar::Var("b").into();
 
-        let zero: Expr<Scalar> = Scalar::zero().into();
-        let one: Expr<Scalar> = Scalar::one().into();
-
         assert_eq!(a + b, a + b);
         assert_eq!(a + b, b + a);
         assert!(a + a != b + b);
-        assert_eq!(a + zero, a);
+        assert_eq!(a + 0, a);
 
-        if let Scalar::Mul(ref map) = *(a * 1).inner {
-            for (k, &v) in map.inner.iter() {
-                println!("{} {}", k.cpp(), v);
-            }
-        }
-
-        println!("1 is {:?}", Expr::<Scalar>::from(1));
-
-        assert_eq!(a * one, a);
-        println!("a*1 = {:?}", a*1);
-        println!("a*1 = {:?}", (a*1).cpp());
+        assert_eq!(a * 1, a);
         assert_eq!(a * 1, a);
 
-        assert_eq!(a - a, zero);
+        assert_eq!(a - a, 0.into());
         assert_eq!(a + a - a, a);
-        assert_eq!(a + a - a - a, zero);
-        assert_eq!(a + b - a - b, zero);
-        assert_eq!(a + b - b - a, zero);
+        assert_eq!(a + a - a - a, 0.into());
+        assert_eq!(a + b - a - b, 0.into());
+        assert_eq!(a + b - b - a, 0.into());
         assert!(b - a != a - b);
 
         assert_eq!(a.cpp(), "a");
