@@ -290,7 +290,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  double Fideal = temp*reduced_density*(log(2.646476976618268e-6*reduced_density/(sqrt(temp)*temp)) - 1.0);  //CHANGE THIS DUMMY VARIABLE Fideal per vol takes into account vacancies. 
   const vector3d lattice_vectors[3] = {
     vector3d(lattice_constant/2,lattice_constant/2,0),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -313,7 +312,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double N_crystal = 1;  //dummy value not used if not doing brute-force integration
   if (crystal_calc_option < 1) {  // N_crystal only needs to be calculated for brute-force integration
 
-    //Find N_crystal (number of spheres in one crystal) to normalize reduced density n(r) later
+    //Find N_crystal (number of spheres in one crystal primitive cell) to normalize reduced density n(r) later
     double N_crystal=0;
     for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
       for (int j=0; j<Nl; j++) {
@@ -336,6 +335,30 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         }
        }
   }  //end if for N_crystal calculation
+  
+   
+  //Find inhomogeneous Fideal of one crystal primitive cell
+  double Fideal=0;
+  for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
+    for (int j=0; j<Nl; j++) {
+      for (int k=0; k<Nl; k++) {
+        vector3d r=lattice_vectors[0]*i/double(Nl)
+                    + lattice_vectors[1]*j/double(Nl)
+                    + lattice_vectors[2]*k/double(Nl);
+  
+        const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
+                                 //Gaussians father away won't contriubute much 
+        for (int t=-many_cells; t <=many_cells; t++) {
+          for(int u=-many_cells; u<=many_cells; u++)  {
+            for (int v=-many_cells; v<= many_cells; v++) {
+            const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+              Fideal += -temp*density_gaussian((r-R).norm(), gwidth, 1)*(log(2.646476976618268e-6*density_gaussian((r-R).norm(), gwidth, 1)/(sqrt(temp)*temp))-1)*dV;   //norm=1
+            }
+          }
+        }
+      }
+    }
+  }  //End inhomogeneous Fideal calculation
 
   if (verbose) {
     printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
@@ -474,11 +497,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     
     //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube; 
     //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
-    //free_energy = the free energy over one parallelepiped with 1-fv atoms
-    //NO- we don't compute Fideal_per_vol for inhomogen case!  cfree_energy_per_atom=free_energy/reduced_num_spheres + Fideal_per_vol*lattice_constant*lattice_constant*lattice_constant/4*(1-fv); //CHECK!
-    //NO- we don't compute Fideal_per_vol for inhomogen case! cfree_energy_per_vol=(free_energy*4/lattice_constant*lattice_constant*lattice_constant) + Fideal_per_vol; //CHECK!
-    cfree_energy_per_atom=(Fideal + free_energy)/reduced_num_spheres; //CHECK!
-    cfree_energy_per_vol=(Fideal + free_energy)*4.0/lattice_constant*lattice_constant*lattice_constant; //CHECK!
+    //free_energy and Fideal are over one parallelepiped with 1-fv atoms
+    cfree_energy_per_atom=(Fideal + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
+    cfree_energy_per_vol=(Fideal + free_energy)*4.0/lattice_constant*lattice_constant*lattice_constant; //
     //  --->> PUT SAME CHANGES IN find_energy!!
     
     printf("total crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
