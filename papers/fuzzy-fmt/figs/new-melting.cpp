@@ -500,7 +500,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //free_energy and Fideal are over one parallelepiped with 1-fv atoms
     cfree_energy_per_atom=(Fideal + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
     cfree_energy_per_vol=(Fideal + free_energy)*4.0/lattice_constant*lattice_constant*lattice_constant; //
-    //  --->> PUT SAME CHANGES IN find_energy!!
+    //  --->> PUT SAME CHANGES IN find_energy?
     
     printf("total crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
  }  //end if density_option > 0    
