@@ -100,9 +100,6 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   weight w;
   w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude-(alpha/2))/zeta,2));  //ASK - should these be in the if statement below as well?
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
-  //printf("erf=%g\n", erf((rdiff_magnitude-(alpha/2))/zeta));  //debug
-  //printf("w.n_3=%g\n", w.n_3);  //debug
-  //printf("arguement of erf is %g, alpha=%g, zeta=%g, rdiff_magnitude=%g\n", rdiff_magnitude-(alpha/2)/zeta, alpha, zeta, rdiff_magnitude);  //debug
   if (rdiff_magnitude > 0) {
     w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
     w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
@@ -131,7 +128,6 @@ static inline double radius_of_peak(double gwidth, double T) {
 weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
                                 double lattice_constant, double gwidth, double norm, 
                                 double reduced_density) {
-  //n_rp_option set to 0 for n_rp=reduced_density (homogeneous), set to 1 for n_rp=gaussian(crystal)
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -160,7 +156,6 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
         if (rp_from_R.norm() < inclusion_radius*gwidth) {
           weight w = find_weights(r, rp, temp);
           double n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // want density a distance rp-R from center of Gaussian
-          //printf("n_rp is %g, w.n_3 = %g\n", n_rp, w.n_3);  //debug
           w_den_R.n_0 += w.n_0*n_rp*dVp; 
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
@@ -188,12 +183,6 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
       for (int k=-1; k<3; k=k+2) {
         vector3d r_prime = R+gwidth*vector3d(i, j, k);  //note: GQ abscissa=sqrt(2)/2 and this times sqrt(2)*gw = gw
         weight w = find_weights(r, r_prime, temp);
-         
-        //printf("\nr.x=%g, r.y=%g, r.z=%g\n",r.x, r.y, r.z); //debug - for GQ TEST
-        //printf("change_var.x=%g, change_var.y=%g, change_var.z=%g\n",change_var.x, change_var.y, change_var.z); //debug - for GQ TEST
-        //printf("w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g\n",w.n_0, w.n_1, w.n_2, w.n_3); //debug - for GQ TEST
-        //printf("w.nv_1.x=%g, w.nv_1.y=%g, w.nv_1.z=%g\n",w.nv_1.x, w.nv_1.y, w.nv_1.z); //debug - for GQ TEST
-        //printf("w.nv_2.x=%g, w.nv_2.y=%g, w.nv_2.z=%g\n",w.nv_2.x, w.nv_2.y, w.nv_2.z); //debug - for GQ TEST
 
         w_den_R.n_0 += .125*(1-fv)*w.n_0;
         w_den_R.n_1 += .125*(1-fv)*w.n_1;
@@ -202,11 +191,6 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
 
         w_den_R.nv_1 += .125*(1-fv)*w.nv_1;
         w_den_R.nv_2 += .125*(1-fv)*w.nv_2;
-        
-        //printf("Sum so far...  :\n");
-        //printf("n_0=%g, n_1=%g, n_2=%g, n_3=%g\n",w_den_R.n_0, w_den_R.n_1, w_den_R.n_2, w_den_R.n_3); //debug - for GQ TEST
-        //printf("nv_1.x=%g, nv_1.y=%g, nv_1.z=%g\n",w_den_R.nv_1.x, w_den_R.nv_1.y, w_den_R.nv_1.z); //debug - for GQ TEST
-        //printf("nv_2.x=%g, nv_2.y=%g, nv_2.z=%g\n",w_den_R.nv_2.x, w_den_R.nv_2.y, w_den_R.nv_2.z); //debug - for GQ TEST
       }
     }
   }
@@ -282,7 +266,6 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
 //  n_var=find weighted_den_variance_aboutR_mc(r, R, dx, temp, lattice_constant, gwidth, fv);
 //  double f_var += uipow(ln(1-n_3),2)*n_var.n_0 + (n_2(1-cos?)/(1-n_3))*n_var.n_1+((n_1(1-cos?)/(1-n_3))-n_2*n_2/4*M_PI*(1-n_3)*(1-n_3))*n_var.n_2+(n_0/(1-n_3)-n_1*n_2*(1-cos?)/(1-n_3)*(1-n_3)-n_2*n_2/6*M_PI*uipow(1-n_3),3))*n_var.n_3;
 //}
-
 
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
@@ -499,7 +482,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     cfree_energy_per_atom=(Fideal + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
     cfree_energy_per_vol=(Fideal + free_energy)*4.0/lattice_constant*lattice_constant*lattice_constant; //
     printf("Fideal = %g\n", Fideal);
-    //  --->> PUT SAME CHANGES IN find_energy?
+    //  --->> PUT SAME CHANGES IN find_energy? no that uses FFT - check
     
     printf("total crystal free_energy is %g, lattice_constant is %g\n", free_energy, lattice_constant);
  }  //end if density_option > 0    
