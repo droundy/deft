@@ -519,7 +519,7 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
  
       for (int e = emin; e <= emax; e++){
 	for (int de  = -bet; de <= bet; de++){
-	  M[(e- emin)*cols + bet + de] = transition_matrix(e,e+de);
+	  M[(e- emin)*cols + bet + de] = transition_matrix(e+de,e);
 	}
 	M[(e-emin)*cols + bet] -= 1;
       }
@@ -532,11 +532,26 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	printf("\n");
       }*/
 
-   
+
+
+      printf("\n");
+      for (int e = emin; e <= emax; e++) {
+	printf(":) final energy = %i; ",e);
+	for (int de = -bet; de <=bet; de ++){
+	  if (de == 0) {
+	    printf("| ");
+	  }
+	  printf("%15g ",M[(e-emin)*cols + bet +de]);
+	}
+	printf("\n");
+      }
+
+      
       /* make matrix upper triangular up to last column */
       for (int e = emin; e < emax; e++){
-        int ind1 = (e-emin)*cols + bet;
 	if (M[(e -emin) * cols + bet] != 0) {
+	  int ind1 = (e-emin)*cols + bet;
+
 	  /* normalize to get leading entry of each row of M to 1 */
 	  for (int de = 1; de <= min(bet,emax-e); de++) {
 	    M[(e - emin + de)*cols + bet -de] /= M[(e-emin)*cols + bet];
@@ -553,32 +568,33 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	    }
 	  }
 	}
-	M[ind1] = 1;
+      }
+      /*
+      for (int e = emin; e < emax; e++){
+	int ind1 = (e-emin)*cols + bet;
 	for (int de = 1; de <= min(bet,emax-e); de++) {
-	  /* index of entry we want to eliminate*/
 	  int ind2 = (e-emin+de)*cols + bet -de;
 	  if (M[ind2] != 0){
-	    /* coefficient to multiply upper row by */
-	    double c = M[ind2];
+	    double c = M[ind2]/M[ind1];
 	    for (int de1 = 0; de1 <= bet; de1++){
 	      M[ind2+de1] -= c*M[ind1+de1];
 	    }
 	  }
 	}
-
-        printf("\n");
-        for (int e = emin; e <= emax; e++) {
-          printf(":) final energy = %i; ",e);
-          for (int de = -bet; de <=bet; de ++){
-            if (de == 0) {
-              printf("| ");
-            }
-            printf("%15g ",M[(e-emin)*cols + bet +de]);
-          }
-          printf("\n");
-        }
-
+      */
+      
+      printf("\n");
+      for (int e = emin; e <= emax; e++) {
+	printf(":) final energy = %i; ",e);
+	for (int de = -bet; de <=bet; de ++){
+	  if (de == 0) {
+	    printf("| ");
+	  }
+	  printf("%15g ",M[(e-emin)*cols + bet +de]);
+	}
+	printf("\n");
       }
+      
       /* now we can find dos from final col */
       for (int e = 0; e < energy_levels; e++) {
 	ln_dos[e] = -DBL_MAX;
@@ -590,6 +606,8 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	  ln_dos[emax-de] = -DBL_MAX;
 	}
       }
+      ln_dos[emax] = 0;
+      
       printf("first dos column:\n");
       for (int i=0; i<=emax-emin; i++) {
         printf("%g ", ln_dos[emax-i]);
@@ -612,12 +630,12 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	  }
 	}
       }
-      for  (int e = emax; e >= emin; e--){
-	printf("after(%d) %g\n", e, ln_dos[e]);
-      }
       ln_dos[emax] = 0;
 
-      printf("\n\n"); for(int e1 = 0; e1<energy_levels;e1++) { printf("%d: %g \n",e1,ln_dos[e1]);} printf("\n\n");
+      printf("\n\n"); for(int e1 = 0; e1<energy_levels;e1++) {
+        if (ln_dos[e1] != -DBL_MAX) printf("%d: %g \n",e1,ln_dos[e1]);
+      }
+      printf("\n\n");
 
       printf("trying to allocate memory...\n");
       double * error = new double[energy_levels]();
@@ -629,12 +647,12 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 	  if (transition_matrix(i,j) != 0){
 	    error[i] += transition_matrix(i,j)*exp(ln_dos[j]-ln_dos[i]);
 	  }
-	}                                               
+	}
       }
       printf("errors:\n");
       for(int e1 = 0; e1< energy_levels;e1++) { printf("%g ",error[e1]);} printf("\n\n");
       delete [] error;
-
+      
       /* double dos_min = 0;
       for (int e = emin; e <= emax; e++) {
         if (ln_dos[e] !=0){

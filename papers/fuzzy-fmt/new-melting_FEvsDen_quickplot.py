@@ -62,7 +62,7 @@ y_plot="DiffFE"
 plot_name=directory+"/plot_"+y_plot+"vs"+x_plot+"_"+"kT"+kT+"fv"+fv+"gw"+gwidth+".png"
 plot_title=y_label+" vs "+x_label+" at kT"+kT+"fv"+fv+"gw"+gwidth
 a=0 
-b=-50
+b=-80
 
 ##Plot x-axis vs y-axis
 plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
