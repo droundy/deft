@@ -1070,6 +1070,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 
 
 int main(int argc, const char **argv) {
+  random::seed(1);
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
 
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
