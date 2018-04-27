@@ -348,21 +348,27 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                     + lattice_vectors[2]*k/double(Nl);
   
         const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
-                                 //Gaussians father away won't contriubute much 
+                                 //Gaussians father away won't contriubute much
+        double n = 0;
+        const double kT = temp;
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
             for (int v=-many_cells; v<= many_cells; v++) {
-            const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-            //Fideal += -temp*density_gaussian((r-R).norm(), gwidth, norm)*(log(2.646476976618268e-6*density_gaussian((r-R).norm(), gwidth, norm)/(sqrt(temp)*temp))-1)*dV;   //Ask about norm!
-            Fideal += temp*density_gaussian((r-R).norm(), gwidth, norm)*((-(r-R).norm()*(r-R).norm()*(0.5/(gwidth*gwidth))) - log(2.646476976618268e-6/(sqrt(temp)*temp))-1)*dV; //Ask about norm!
-            //ASK - negative sign? not in book!
-            //printf("Fideal = %g\n", Fideal);  //debug
+              const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+              double deltar = (r-R).norm();
+              n += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3); // FIXME check analytic norm
             }
           }
+        }
+        if (n > 1e-200) { // avoid underflow and n=0 issues
+          // double dF = kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0);
+          // printf("n = %g  dF = %g\n", n, dF);
+          Fideal += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
         }
       }
     }
   }  //End inhomogeneous Fideal calculation
+  printf("ideal gas free energy = %g\n", Fideal);
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
@@ -440,13 +446,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                 //printf("n_weight.n_3=%g\n", n_weight.n_3);  //debug
                 //printf("n_3=%g\n", n_3);  //debug
                 if (n_3 > 1) {
-                  printf("ERROR: n_3 is greater than 1!\n");
-                  data data_out;
-                  data_out.diff_free_energy_per_atom=0;
-                  data_out.cfree_energy_per_atom=0;   
-                  data_out.hfree_energy_per_vol=0;
-                  data_out.cfree_energy_per_vol=0; 
-                  return data_out;
+                  printf("ERROR: n_3 is greater than 1 (see %g)!\n", n_3);
+                  exit(1);
                 }
                 // if (n_weight.n_3 > 0.2)
                 //   printf("n3(%g,%g,%g) gains %g from %g %g %g  at distance %g  i.e. %d %d %d\n",
