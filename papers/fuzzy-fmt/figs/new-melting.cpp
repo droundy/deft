@@ -447,6 +447,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                     //printf("n_3=%g\n", n_3);  //debug
                     if (n_3 > 1) {
                       printf("ERROR: n_3 is greater than 1 (see %g)!\n", n_3);
+                      printf("  position is %g %g %g\n", r.x, r.y, r.z);
+                      printf("  from just R = %g %g %g gives %g\n", R.x, R.y, R.z, n_weight.n_3);
                       exit(1);
                     }
                     // if (n_weight.n_3 > 0.2)
