@@ -632,7 +632,10 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
       }
       ln_dos[emax] = 0;
 
-      printf("\n\n"); for(int e1 = 0; e1<energy_levels;e1++) { printf("%d: %g \n",e1,ln_dos[e1]);} printf("\n\n");
+      printf("\n\n"); for(int e1 = 0; e1<energy_levels;e1++) {
+        if (ln_dos[e1] != -DBL_MAX) printf("%d: %g \n",e1,ln_dos[e1]);
+      }
+      printf("\n\n");
 
       printf("trying to allocate memory...\n");
       double * error = new double[energy_levels]();
