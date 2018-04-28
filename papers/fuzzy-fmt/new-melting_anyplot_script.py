@@ -165,6 +165,7 @@ b=plt.gca().get_ylim()[0]
 #Plot x-axis vs y-axis
 if b < 0 :
     plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
+else : plt.axhspan(a, -10, color='b', alpha=0.15, lw=0)
 plt.plot(x_axis, y_axis, color="purple")
 plt.title(plot_title)
 plt.xlabel(x_label)
