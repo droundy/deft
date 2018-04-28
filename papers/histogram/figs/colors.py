@@ -20,10 +20,12 @@ _colors = { 'sad': 'r',
             'wltmmc-0.8-0.0001': 'tab:purple',
             'wltmmc-0.0001': 'tab:purple',
             'wltmmc-1-0.0001': 'tab:pink',
+            'wltmmc': 'tab:purple',
             'samc-1000': 'r',
             'samc-10000': 'tab:orange',
             'samc-100000': 'y',
             'samc-1e+06': 'g',
+            '1/sqrt(t)': 'r'
 }
 
 _linestyles = {
@@ -48,9 +50,9 @@ _legend_order = [
     'tmmc',
     'wltmmc-0.8-0.0001',
     'wltmmc-0.0001',
+    'wltmmc',
     'wltmmc-0.8-1e-10',
     'wltmmc-1e-10',
-    'wltmmc',
     'vanilla_wang_landau',
     'tmi3', 'toe3',
     'samc',
@@ -64,6 +66,8 @@ _legend_label = {
     'vanilla_wang_landau': 'WL',
     'sad': 'SAD',
     'sad-tm': 'SAD-TM',
+    'sad3': 'SAD',
+    'wltmmc': 'WLTMMC ($10^{-4}$ cutoff)',
     'wltmmc-0.8-0.0001': 'WLTMMC ($10^{-4}$ cutoff)',
     'wltmmc-0.0001': 'WLTMMC ($10^{-4}$ cutoff)',
     'wltmmc-0.8-1e-10': 'WLTMMC ($10^{-10}$ cutoff)',
@@ -72,10 +76,11 @@ _legend_label = {
     'tmi3': 'TMI',
     'toe3': 'TOE',
     'samc': 'SAMC',
-    'samc-1000': 'SAMC ($10^{3}$ factor)',
-    'samc-10000': 'SAMC ($10^{4}$ factor)',
-    'samc-100000': 'SAMC ($10^{5}$ factor)',
-    'samc-1e+06': 'SAMC ($10^{6}$ factor)',
+    'samc-1000': 'SAMC ($10^{3}$ $t_0$)',
+    'samc-10000': 'SAMC ($10^{4}$ $t_0$)',
+    'samc-100000': 'SAMC ($10^{5}$ $t_0$)',
+    'samc-1e+06': 'SAMC ($10^{6}$ $t_0$)',
+    '1/sqrt(t)': r'$\frac{1}{\sqrt{t}}$'
 }
 
 def fix_legend(method):

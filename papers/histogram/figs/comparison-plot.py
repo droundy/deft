@@ -8,14 +8,6 @@ import matplotlib.pyplot as plt
 from glob import glob
 import colors
 
-from matplotlib.colors import LightSource
-
-densitycolormap = plt.cm.jet
-densityinterpolation = 'bilinear'
-densityshadedflag = True
-densitybarflag = True
-gridflag = True
-
 if os.path.exists('../data'):
     os.chdir('..')
 
@@ -23,9 +15,12 @@ energy = int(sys.argv[1])
 filebase = sys.argv[2]
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
-methods = [ '-sad', '-sad3', '-sad3-s1', '-sad3-s2',
+methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
+if 'allmethods' not in sys.argv:
+    methods = ['-sad3','-tmmc', '-vanilla_wang_landau']
+
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
@@ -42,6 +37,9 @@ for meth in split4:
     if meth[-3:] != '-tm':
             methods.append('-%s' % meth)
 
+best_ever_error = 1e100
+best_ever_max = 1e100
+max_time = 0
 print 'methods are', methods
 for method in methods:
     print 'trying method', method
@@ -53,29 +51,41 @@ for method in methods:
         if energy > 0:
                 Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
         iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
-
-        #if os.path.isfile(dirname + 'wl-factor.txt'):
-            #iterations, wl_factor = np.loadtxt(dirname + 'wl-factor.txt', delimiter = '\t', unpack = True)
-
+        best_ever_error = min(best_ever_error, errorinentropy.min())
+        best_ever_max = min(best_ever_max, maxerror.min())
 
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
 
         if not os.path.exists('figs/s000'):
                 os.makedirs('figs/s000')
+
+        if filebase.startswith('lv'):
+                NxNsplit = filebase.split('-')
+                NxN = NxNsplit[-1].split('x')
+                # Formula to calculate N from title i.e. 100x10
+                # and use floor to always round up.
+                N = np.floor(0.25*0.20*float(NxN[0])*float(NxN[-1])*float(NxN[-1]))
+                moves = iterations * N
+        if filebase.startswith('s000'):
+                N = filebase.split('-N')[-1]
+                # Get N directly from title.
+                moves = iterations * float(N)
+        max_time = max(max_time, moves.max())
+
         if energy > 0:
                 plt.figure('error-at-energy-iterations')
-                colors.plot(iterations, erroratenergy, method=method[1:])
+                colors.plot(moves, erroratenergy, method=method[1:])
                 plt.title('Error at energy %g %s' % (energy,filebase))
-                plt.xlabel('# iterations')
+                plt.xlabel('# moves')
                 plt.ylabel('error')
                 colors.legend()
                 plt.savefig('figs/%s-error-energy-%g.pdf' % (tex_filebase, energy))
 
                 plt.figure('round-trips-at-energy' )
-                colors.plot(iterations, Nrt_at_energy, method = method[1:])
+                colors.plot(moves, Nrt_at_energy, method = method[1:])
                 plt.title('Round Trips at energy %g, %s' % (energy,filebase))
-                plt.xlabel('# iterations')
+                plt.xlabel('# moves')
                 plt.ylabel('Round Trips')
                 colors.legend()
                 plt.savefig('figs/%s-round-trips-%g.pdf' % (tex_filebase, energy))
@@ -89,55 +99,31 @@ for method in methods:
                 colors.legend()
                 plt.savefig('figs/%s-error-energy-Nrt-%g.pdf' % (tex_filebase, energy))
 
-                #------------------------------------------#
-                # Perhaps make a subplot for each method? For now I will test on
-                # just one Monte-Carlo Method: TMI3.
-
-                #if method == methods[3]:
-                        #plt.figure('Maxerror-at-energy-round-trips')
-                        #plt.title('Error at energy %g %s' % (energy,filebase))
-                        #plt.xlabel('Round Trips')
-                        #plt.ylabel('iterations')
-
-                        #X,Y = np.meshgrid(Nrt_at_energy[Nrt_at_energy > 0], iterations[Nrt_at_energy > 0])
-                        #Z = np.log(X) + np.log(Y) # Z in no way coresponds to MaxError!
-                        #if densityshadedflag:
-                                #ls = LightSource(azdeg=120,altdeg=65)
-                                #rgb = ls.shade(Z,densitycolormap)
-                                #im = plt.imshow(rgb, vmin = Z.min()/2, vmax = 2*Z.max(), cmap=densitycolormap)
-                                #cset = plt.contour(Z, np.arange(Z.min(), Z.max(), (Z.max()-Z.min())/6),
-                                                   #linewidths=2, cmap=plt.cm.Set2)
-                                #plt.clabel(cset, inline=True, fmt='%1.1f', fontsize=10)
-                        #if densitybarflag:
-                                #plt.colorbar(im)
-                        #plt.savefig('figs/%s-Maxerror-energy-Nrt-%g.pdf' % (tex_filebase, energy))
-
         plt.figure('maxerror')
-        colors.loglog(iterations, maxerror, method = method[1:])
-        plt.xlabel('# iterations')
+        colors.loglog(moves, maxerror, method = method[1:])
+        plt.xlabel('Moves')
         plt.ylabel('Maximum Entropy Error')
-        plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
+        #plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         colors.legend()
-        plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
 
         plt.figure('errorinentropy')
-        colors.loglog(iterations, errorinentropy[0:len(iterations)],
+        colors.loglog(moves, errorinentropy[0:len(iterations)],
                       method = method[1:])
-        plt.xlabel('#iterations')
-        plt.ylabel('Error in Entropy')
-        plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
+        plt.xlabel('Moves')
+        plt.ylabel('Average Entropy Error')
+        #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
         colors.legend()
-        plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
 
-        #if os.path.isfile(dirname + 'wl-factor.txt'):
-            #plt.figure('wl-factor')
-            #colors.loglog(iterations, wl_factor,
-                      #method = method[1:])
-            #plt.xlabel('#iterations')
-            #plt.ylabel('WL factor')
-            #plt.title('WL Factor at Each Iteration, %s' %filebase)
-            #colors.legend()
-            #plt.savefig('figs/%s-wl-factor.pdf' % tex_filebase)
     except:
         raise
+plt.figure('maxerror')
+colors.loglog(moves, best_ever_max/np.sqrt(moves/max_time), method = '1/sqrt(t)')
+colors.legend()
+plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
+
+plt.figure('errorinentropy')
+colors.loglog(moves, best_ever_error/np.sqrt(moves/max_time), method = '1/sqrt(t)')
+colors.legend()
+plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
+
 plt.show()
