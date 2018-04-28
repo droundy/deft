@@ -291,31 +291,35 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   int crystal_calc_option=2;  //set to 0 for crystal free energy with brute-force integration
                               //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
                               //set to 2 for crystal free energy with Monte-Carlo (more accurate)
+                              
+  double N_crystal = 1;  //dummy value not used if not doing brute-force integration
+  if (crystal_calc_option < 1) {  // N_crystal only needs to be calculated for brute-force integration
 
-  //Find N_crystal (number of spheres in one crystal primitive cell) to normalize reduced density n(r) later
-  double N_crystal=0;
-  for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
-    for (int j=0; j<Nl; j++) {
-      for (int k=0; k<Nl; k++) {
-        vector3d r=lattice_vectors[0]*i/double(Nl)
-                    + lattice_vectors[1]*j/double(Nl)
-                    + lattice_vectors[2]*k/double(Nl);
+    //Find N_crystal (number of spheres in one crystal primitive cell) to normalize reduced density n(r) later
+    double N_crystal=0;
+    for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
+      for (int j=0; j<Nl; j++) {
+        for (int k=0; k<Nl; k++) {
+          vector3d r=lattice_vectors[0]*i/double(Nl)
+                      + lattice_vectors[1]*j/double(Nl)
+                      + lattice_vectors[2]*k/double(Nl);
   
-        const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
-                                 //Gaussians father away won't contriubute much 
+          const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
+                                   //Gaussians father away won't contriubute much 
 
-        for (int t=-many_cells; t <=many_cells; t++) {
-          for(int u=-many_cells; u<=many_cells; u++)  {
-            for (int v=-many_cells; v<= many_cells; v++) {
-              const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-              N_crystal += density_gaussian((r-R).norm(), gwidth, 1)*dV;   //norm=1
+          for (int t=-many_cells; t <=many_cells; t++) {
+            for(int u=-many_cells; u<=many_cells; u++)  {
+              for (int v=-many_cells; v<= many_cells; v++) {
+                const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+                N_crystal += density_gaussian((r-R).norm(), gwidth, 1)*dV;   //norm=1
+              }
             }
           }
         }
       }
     }
-  }
-
+  }  //end if for N_crystal calculation
+  
   if (verbose) {
     printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
            N_crystal, reduced_num_spheres);
