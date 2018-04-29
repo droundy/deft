@@ -160,7 +160,7 @@ if args.ptname:
 plot_title=y_label+" vs "+x_label+" at Fixed "+fixed_quantity+"="+fixed_value
 a=0
 plt.plot(x_axis, y_axis, color="purple")
-b=plt.gca().get_ylim()[0]
+b=plt.gca().get_ylim()[0]-10
 
 #Plot x-axis vs y-axis
 if b < 0 :

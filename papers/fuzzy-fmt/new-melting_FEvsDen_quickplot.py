@@ -63,7 +63,7 @@ plot_name=directory+"/plot_"+y_plot+"vs"+x_plot+"_"+"kT"+kT+"fv"+fv+"gw"+gwidth+
 plot_title=y_label+" vs "+x_label+" at kT"+kT+"fv"+fv+"gw"+gwidth
 a=0 
 plt.plot(x_axis, y_axis, color="purple")
-b=plt.gca().get_ylim()[0]
+b=plt.gca().get_ylim()[0]-10
 
 ##Plot x-axis vs y-axis
 if b < 0 :
