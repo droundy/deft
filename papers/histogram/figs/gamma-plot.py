@@ -15,9 +15,12 @@ gridflag = True
 filename = sys.argv[1]
 Tmin = float(sys.argv[2])
 
+try:
+    wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, dtype = float, unpack = True)
+    colors.loglog(wlmoves, wlfactor,'WL')
 
-wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, dtype = float, unpack = True)
-colors.loglog(wlmoves, wlfactor,'WL')
+except:
+    pass
 
 
 for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
