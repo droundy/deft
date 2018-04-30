@@ -15,11 +15,10 @@ gridflag = True
 filename = sys.argv[1]
 Tmin = float(sys.argv[2])
 
-try:
-    wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, delimiter = '\t', unpack = True)
-    colors.loglog(wlmoves, wlfactor,'WL')
-except:
-    pass
+
+wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, dtype = float, unpack = True)
+colors.loglog(wlmoves, wlfactor,'WL')
+
 
 for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     data = np.loadtxt(sad)
@@ -37,10 +36,6 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     sadname = sad.split('/')[-1].split('.')[0]
 
     colors.loglog(ts, gamma,sadname)
-    plt.xlabel('Moves')
-    plt.ylabel('$\gamma$')
-    plt.title('Gamma versus Time')
-    colors.legend()
 
 def gamma_sa(t,t0):
     return t0/np.maximum(t, t0)
@@ -48,9 +43,9 @@ def gamma_sa(t,t0):
 t0s = [1e3,1e4,1e5,1e6]
 for t0 in t0s:
     colors.loglog(ts,gamma_sa(ts, t0),'samc-%g' %t0)
+    plt.xlabel('Moves')
+    plt.ylabel('Gamma')
     colors.legend()
-
-
 plt.savefig('figs/gamma-%s.pdf' % filename.replace('.','_'))
 if 'noshow' not in sys.argv:
     plt.show()
