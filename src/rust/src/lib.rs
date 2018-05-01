@@ -353,7 +353,9 @@ impl From<Scalar> for RealSpaceScalar {
             Scalar::Var(sym) => RealSpaceScalar::ScalarVar(sym),
             Scalar::Exp(arg) => RealSpaceScalar::Exp(RealSpaceScalar::from((*arg.inner).clone()).into()),
             Scalar::Log(arg) => RealSpaceScalar::Log(RealSpaceScalar::from((*arg.inner).clone()).into()),
-            Scalar::Add(map) => RealSpaceScalar::Add(RealSpaceScalar::sum_from_map(map)),
+            Scalar::Add(map) =>
+                RealSpaceScalar::sum_from_map(map.inner.iter()
+                                              .map(|(k,&v)| (k.into(), v)).collect()),
             _ => panic!(),
         }
     }
@@ -538,7 +540,7 @@ mod tests {
         let a: Expr<RealSpaceScalar> = RealSpaceScalar::Var("a").into();
         let s: Expr<Scalar> = <Expr<Scalar>>::from(Scalar::Var("s"));
 
-        assert_eq!(a * s, a * <Expr<RealSpaceScalar>>::from(RealSpaceScalar::Var("s")));
+        assert_eq!(a * s, a * <Expr<RealSpaceScalar>>::from(RealSpaceScalar::ScalarVar("s")));
     }
 }
 
