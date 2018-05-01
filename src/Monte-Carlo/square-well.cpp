@@ -468,6 +468,7 @@ void sw_simulation::end_move_updates(){
         ln_energy_weights[energy] =
           ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T;
         too_low_energy = energy;
+        printf("we are setting too_low_energy here to %d\n", energy);
         // printf("We were almost very cray at energy %d\n", energy);
       }
 
@@ -499,8 +500,12 @@ void sw_simulation::end_move_updates(){
       // means we are the new min_important_energy.
       //if (energy != min_important_energy) print_edges = true;
       min_important_energy = energy;
-      if (min_important_energy > too_low_energy) too_low_energy = min_important_energy;
     }
+    // FIXME it seems like the following should be inside the above if statement,
+    // which is more efficient, and we only need to update the too_low_energy
+    // when the min_important_energy changes, but somewhere else the min_important_energy
+    // is being adjusted and I don't know where.  -- David
+    if (min_important_energy > too_low_energy) too_low_energy = min_important_energy;
 
     if (print_edges) printf(" %5d ...%5d -->%5d ...%5d\n",
                             too_low_energy, min_important_energy, max_entropy_state, too_high_energy);
@@ -836,6 +841,7 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
   }
 
   if (!input_ln_dos) delete[] ln_dos;
+
   return min_important_energy;
 }
 
