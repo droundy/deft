@@ -4,6 +4,22 @@ extern crate tinyset;
 use tinyset::{Map64, Fits64};
 use internment::Intern;
 
+pub enum SingleStatement<T: Kind> {
+    Init(&'static str, Expr<T>),
+    Assign(&'static str, Expr<T>),
+    Free(&'static str),
+}
+
+pub enum Statement {
+    Block(Vec<Statement>),
+    S(SingleStatement<Scalar>),
+    RSS(SingleStatement<RealSpaceScalar>),
+    InitScalar(&'static str, Expr<Scalar>),
+    InitRealSpaceScalar(&'static str, Expr<RealSpaceScalar>),
+    AssignRealSpaceScalar(&'static str, Expr<RealSpaceScalar>),
+    FreeRealSpaceScalar(&'static str),
+}
+
 pub trait Kind: 'static + Send + Clone + Eq + std::fmt::Debug + std::hash::Hash {
     fn cpp(&self) -> String;
 }
