@@ -392,22 +392,20 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
-  static int max_energy_seen = -1;
-  static int min_energy_seen = -1;
   if (sa_t0 || use_sad) {
     if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
-      if (max_energy_seen < 0 || energy > max_energy_seen) max_energy_seen = energy;
-      if (min_energy_seen < 0 || energy < min_energy_seen) min_energy_seen = energy;
+      if (max_energy < 0 || energy > max_energy) max_energy = energy;
+      if (min_energy < 0 || energy < min_energy) min_energy = energy;
       if (use_sad) {
         printf("  (moves %ld, energies_found %d, erange: %d -> %d effective t0 = %g)\n",
-               moves.total, energies_found, min_energy_seen, max_energy_seen,
+               moves.total, energies_found, min_energy, max_energy,
                sa_prefactor*energies_found
-                 *(max_energy_seen-min_energy_seen)/(min_T*use_sad));
+                 *(max_energy-min_energy)/(min_T*use_sad));
       }
     }
     if (use_sad && energies_found > 1) {
-      wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
+      wl_factor = sa_prefactor*energies_found*(max_energy-min_energy)
         /(min_T*moves.total*use_sad);
     } else {
       wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
