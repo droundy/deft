@@ -17,7 +17,16 @@ Tmin = float(sys.argv[2])
 
 try:
     wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, dtype = float, unpack = True)
-    colors.loglog(wlmoves, wlfactor,'WL')
+    moves = np.zeros(len(wlmoves)*2+2)
+    factor = np.zeros_like(moves)
+    factor[0] = 1
+    moves[0] = 1
+    for i in range(len(wlmoves)):
+        moves[2*i+1] = wlmoves[i]
+        moves[2*i+2] = wlmoves[i]
+        factor[2*i+1] = wlfactor[i]*2
+        factor[2*i+2] = wlfactor[i]
+    colors.loglog(moves, factor,'WL')
 
 except:
     pass
