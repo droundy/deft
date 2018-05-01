@@ -8,7 +8,7 @@ pub trait Kind: 'static + Send + Clone + Eq + std::fmt::Debug + std::hash::Hash 
     fn cpp(&self) -> String;
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Eq, Hash)]
 pub struct Expr<T: Kind> {
     inner: Intern<T>,
 }
@@ -16,6 +16,12 @@ pub struct Expr<T: Kind> {
 impl<T: Kind> Expr<T> {
     fn cpp(&self) -> String {
         self.inner.cpp()
+    }
+}
+
+impl<T: Kind, RHS: Clone + Into<Expr<T>>> PartialEq<RHS> for Expr<T> {
+    fn eq(&self, other: &RHS) -> bool {
+        self.inner == other.clone().into().inner
     }
 }
 
@@ -88,8 +94,9 @@ trait ClosedMul: Kind {
     fn product_from_map(x: AbelianMap<Self>) -> Self;
     fn borrow_product_map(&self) -> Option<&AbelianMap<Self>>;
 
-    fn mul(&self, other: &Self) -> Self {
+    fn mul<T: ClosedMul + Into<Self>>(&self, other: &T) -> Self {
         let mut product: AbelianMap<Self>;
+        let other: &Self = &other.clone().into();
         match (self.borrow_product_map(), other.borrow_product_map()) {
             (Some(lhs), Some(rhs)) => {
                 product = lhs.clone();
@@ -155,6 +162,12 @@ impl<F: Into<f64>> From<F> for Expr<Scalar> {
     }
 }
 
+// impl<T: Kind, U: Kind + From<T>> From<Expr<T>> for Expr<U> {
+//     fn from(f: Expr<T>) -> Self {
+//         f.into().into()
+//     }
+// }
+
 impl<T: Kind + ClosedAdd, RHS: Into<Expr<T>>> std::ops::Add<RHS> for Expr<T> {
     type Output = Self;
 
@@ -178,7 +191,7 @@ impl<T: Kind + ClosedMul, RHS: Into<Expr<T>>> std::ops::Mul<RHS> for Expr<T> {
 
     fn mul(self, other: RHS) -> Self {
         let other = other.into();
-        (*self.inner).mul(&other.inner).into()
+        (*self.inner).mul(&*other.inner).into()
     }
 }
 
@@ -338,13 +351,24 @@ impl From<Scalar> for RealSpaceScalar {
     fn from(s: Scalar) -> Self {
         match s {
             Scalar::Var(sym) => RealSpaceScalar::ScalarVar(sym),
+            Scalar::Exp(arg) => RealSpaceScalar::Exp(RealSpaceScalar::from((*arg.inner).clone()).into()),
+            Scalar::Log(arg) => RealSpaceScalar::Log(RealSpaceScalar::from((*arg.inner).clone()).into()),
+            Scalar::Add(map) => RealSpaceScalar::Add(RealSpaceScalar::sum_from_map(map)),
             _ => panic!(),
         }
     }
 }
 
+// impl Into<Scalar> for RealSpaceScalar {
+//     fn into(s: Self) -> Scalar {
+// 
+//     }
+// }
+
 impl Kind for RealSpaceScalar {
-    fn cpp(&self) -> String { unimplemented!() }
+    fn cpp(&self) -> String {
+        unimplemented!()
+    }
 }
 
 impl ClosedAdd for RealSpaceScalar {
@@ -354,6 +378,20 @@ impl ClosedAdd for RealSpaceScalar {
 
     fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>> {
         if let &RealSpaceScalar::Add(ref m) = self {
+            Some(m)
+        } else {
+            None
+        }
+    }
+}
+
+impl ClosedMul for RealSpaceScalar {
+    fn product_from_map(m: AbelianMap<Self>) -> Self {
+        RealSpaceScalar::Mul(m)
+    }
+
+    fn borrow_product_map(&self) -> Option<&AbelianMap<Self>> {
+        if let &RealSpaceScalar::Mul(ref m) = self {
             Some(m)
         } else {
             None
@@ -457,6 +495,12 @@ impl<T: Kind> PartialEq for AbelianMap<T> {
 
 impl<T: Kind> Eq for AbelianMap<T> {}
 
+// impl<F: Kind, T: Kind + From<F>> From<AbelianMap<F>> for AbelianMap<T> {
+//     fn from(f: AbelianMap<F>) -> Self {
+//          <AbelianMap<T>>::from(f.inner.iter().map(|(k, &v)| (k.into(), v)).collect());
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -474,11 +518,11 @@ mod tests {
         assert_eq!(a * 1, a);
         assert_eq!(a * 1, a);
 
-        assert_eq!(a - a, 0.into());
+        assert_eq!(a - a, 0);
         assert_eq!(a + a - a, a);
-        assert_eq!(a + a - a - a, 0.into());
-        assert_eq!(a + b - a - b, 0.into());
-        assert_eq!(a + b - b - a, 0.into());
+        assert_eq!(a + a - a - a, 0);
+        assert_eq!(a + b - a - b, 0);
+        assert_eq!(a + b - b - a, 0);
         assert!(b - a != a - b);
 
         assert_eq!(a.cpp(), "a");
@@ -488,4 +532,26 @@ mod tests {
         assert_eq!((a + a).cpp(), "2 * a");
         assert_eq!((a + a - a).cpp(), a.cpp());
     }
+
+    #[test]
+    fn realspace() {
+        let a: Expr<RealSpaceScalar> = RealSpaceScalar::Var("a").into();
+        let s: Expr<Scalar> = <Expr<Scalar>>::from(Scalar::Var("s"));
+
+        assert_eq!(a * s, a * <Expr<RealSpaceScalar>>::from(RealSpaceScalar::Var("s")));
+    }
 }
+
+impl From<Expr<Scalar>> for Expr<RealSpaceScalar> {
+    fn from(f: Expr<Scalar>) -> Self {
+        let f: RealSpaceScalar = (*f.inner).clone().into();
+        f.into()
+    }
+}
+
+// impl<F: Kind, T: Kind + Into<F>> From<Expr<F>> for Expr<T> {
+//     fn from(f: Expr<F>) -> Self {
+//         let f: T = (*f.inner).clone().into();
+//         f.into()
+//     }
+// }
