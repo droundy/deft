@@ -138,7 +138,7 @@ detail while summarizing algorithms that originated elsewhere.  The
 following methods are introduced and applied to the square-well fluid:
 Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau
 Transition Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation
-Monte-Carlo (SAMC), and Dynamic Stochastic Approximation 
+Monte-Carlo (SAMC), and Dynamic Stochastic Approximation
 (SAD).
 
 \subsection{TMMC Algorithm}
@@ -176,12 +176,6 @@ however, the extension to other ensembles is quite natural.
 \begin{align}
   \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
 \end{align}
-The acceptance probability given for TMMC is idential to that
-introduced by Swendsen and Wang~\cite{wang2002transition}. \tssays{Isn't
-this not quite right? Not sure if needed.}
-\begin{align}
-  p_{a} = \min\bigg[1,e^{-\frac{\delta\epsilon}{k_{B} T}}\bigg]
-\end{align}
 \subsubsection{define a bookkeeping step}
 The third step in the TMMC algorithm consists of recording the data in
 a collection matrix (the unormalized transition histogram matrix).
@@ -218,12 +212,11 @@ below where $w$ represents the weights:
 	+\gamma
 \end{equation}
 \begin{equation}
-	\ln{\gamma_{i+1}}=\frac{u}{2}\ln{\gamma_{i}}
+	\gamma_{i+1}=\frac{u}{2} \gamma_{i}
 \end{equation}
-\tssays{Should this be just $\gamma$, not $\ln{\gamma}$?}for $u$ typically 
-greater than 1 and $\gamma$ is the modification factor for the density of 
-states.  A new configuration for the density of states with a probability 
-given by the following is chosen:
+for $u$ typically greater than 1 and $\gamma$ is the modification
+factor for the density of states.  A new configuration for the density
+of states with a probability given by the following is chosen:
 \begin{equation}
 	\mathcal{P}(\epsilon_\text{old} \rightarrow \epsilon_\text{new})
 	= \min[1,e^{\ln{D(\epsilon_\text{old})}-\ln{D(\epsilon_\text{new})}}]
@@ -236,7 +229,7 @@ Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
 by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
 advantage of the ease of implementation and applicability to a variety
 of systems, while making use of a transition matrix to address WL
-weaknesses, such as its limited statistical accuracy plateau.  
+weaknesses, such as its limited statistical accuracy plateau.
 This WL version is more accurate for a given number of simulation steps.
 
 \paragraph{Initializing Wang-Landau:} We begin the simulation by
@@ -337,14 +330,14 @@ in the entropy the minimum temperature can be thought of as a slope of
 the triangle made by connecting the minimum important energy and the
 maximum entropy state.  The factor of $3$ comes from the ratio of areas bounded
 by the $\ln{D(E)}$ and the minimum temperature line.
-The update factor has the same $1/t$ behavior as the original SAMC algorithm; 
-however now every time a new energy is discovered during the course 
+The update factor has the same $1/t$ behavior as the original SAMC algorithm;
+however now every time a new energy is discovered during the course
 of the simulation, the update factor experiences a jump.
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/gamma-ww1_30-ff0_22-100x10}
-  \caption{The update factor $\gamma$ versus iteration for three
-    different methods: WL, SAMC, and SAD.
+  \includegraphics[width=\columnwidth]{figs/gamma-n500.pdf}
+  \caption{The update factor $\gamma$ for N = 500 versus iteration for
+  three different methods: WL, SAMC, and SAD.
     method.}\label{fig:gamma-vs-t}
 \end{figure}
 
@@ -402,24 +395,24 @@ examine systems with different particles numbers and filling fractions.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error.pdf}
-  \caption{The average entropy error for each method is shown with
-  SAD serving as the `golden'
-  standard.}\label{fig:N50-ff0.3-max-error}
+  \caption{The average entropy error for each method is shown for a filling fraction of 0.30 with
+  SAMC followed by TMMC serving as the `golden'
+  standard.}\label{fig:N50-ff0.3-avg-error}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_10-N50-entropy-error.pdf}
-  \caption{The average entropy error for each method is shown with SAD serving as
-  the `golden' standard.}\label{fig:N50-ff0.1-max-error}
+  \caption{The average entropy error for each method is shown for a filling fraction of 0.10 with
+  SAMC followed by TMMC serving as the `golden' standard.}\label{fig:N50-ff0.1-avg-error}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_20-N50-entropy-error.pdf}
-  \caption{The average entropy error is shown with TMI acting as the
-  `golden' standard.}\label{fig:N50-ff0.2-max-error}
+  \caption{The average entropy error is shown for a filling fraction of 0.20 with TMI acting as the
+  `golden' standard.}\label{fig:N50-ff0.2-avg-error}
 \end{figure}
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error.pdf}
-  \caption{The average entropy error is shown with TMI acting as the
-  `golden' standard.}
+  \caption{The average entropy error is shown for a filling fraction of 0.30 with TMI acting as the
+  `golden' standard.}\label{fig:n500-ff0.2}
 \end{figure}
 
 \subsubsection{A periodic system with 10\% filling fraction and $(N = 50)$}
@@ -431,15 +424,15 @@ system and random moves are proposed (with a translation scale
 $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are periodic while
 the $z$-axis is not periodic.
 
-We use the maximum entropy error vs iterations as a metric to compare
-simulation runtimes and overall convergence.  Simulations that take
-more iterations to reach the same entropy error as a different method
-take longer to converge. This behavior is seen in
-Fig.~\ref{fig:N50-ff0.1-max-error}.
+We use the average entropy error vs iterations~\jpsays{we should
+explain how we do this.} as a metric to compare simulation runtimes and
+overall convergence.  Simulations that take more iterations to reach
+the same entropy error as a different method take longer to converge.
+This behavior is seen in Fig.~\ref{fig:N50-ff0.1-avg-error}.
 
 \subsubsection{A periodic system with 20\% filling fraction and $N = 50$}
 
-Figure~\ref{fig:N50-ff0.2-max-error} shows a system consisting of 50 atoms
+Figure~\ref{fig:N50-ff0.2-avg-error} shows a system consisting of 50 atoms
 that are placed in a periodic simple cubic unit cell with lattice constant
 chosen to give a filling fraction of 0.20.  These particles are
 randomly inserted into the system and random moves are proposed (with
@@ -447,7 +440,7 @@ a translation scale $\delta_0 = 0.05$).
 
 \subsubsection{A periodic system with 30\% filling fraction and $N = 50$}
 
-Figure~\ref{fig:N50-ff0.3-max-error} shows a system consisting of 50 atoms
+Figure~\ref{fig:N50-ff0.3-avg-error} shows a system consisting of 50 atoms
 that are placed in a periodic simple cubic unit cell with lattice constant
 chosen to give a filling fraction of 0.30.  These particles are
 randomly inserted into the system and random moves are proposed (with
@@ -461,6 +454,21 @@ particles in a cubical system.  These particles are randomly inserted
 into the system and random moves are proposed (with a translation scale
 $\delta_0 = 0.05$). The boundaries in $x$ and $y$ are periodic while
 the $z$-axis is not periodic.
+
+\subsubsection{Discussion on convergence and update factor}
+
+A close examination of Fig.~\ref{fig:gamma-vs-t} shows that $\gamma$ for the 
+Wang-Landau algorithm decreases much more rapidly than $\nicefrac{1}{\sqrt{t}}$.
+It can be observed that all the methods from this family struggle to converge if
+the update factor decreases faster than $\nicefrac{10^5}{\sqrt{t}}$. Fig.~\ref{fig:n500-ff0.2}
+shows both WL and SAMC with inappropriate choices of $t_0$ i.e. less than 
+$\nicefrac{10^5}{\sqrt{t}}$ failing to converge in a reasonable amount of time.
+Thus, the update factor $\gamma$, shown as a function of simulation moves
+in Fig.~\ref{fig:gamma-vs-t}, proves useful in determining which methods will 
+converge in a reasonable amount of time.
+We compare each method to a `golden' standard which we define to be an ideal choice
+of SAMC for $10^11$ moves followed by TMMC.  This gives an unbiased comparison with
+our developed method SAD.
 
 \section{Conclusions}
 

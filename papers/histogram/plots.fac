@@ -21,3 +21,6 @@ c .pyc
 
 | python2 figs/gamma-plot.py ww1.30-ff0.22-100x10 0.6 noshow
 c .pyc
+
+| python2 figs/gamma-plot.py n500 0.5 noshow
+c .pyc
