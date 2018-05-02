@@ -786,15 +786,45 @@ int main(int argc, const char *argv[]) {
             sscanf(line , " working moves: %ld " , &sw.moves.working);
             sscanf(line , " total moves: %ld " , &sw.moves.total);
             sscanf(line , " iterations: %ld " , &sw.iteration);
+            sscanf(line , " energies found: %d " , &sw.energies_found);
+            sscanf(line , " too high energy: %d " , &sw.too_high_energy);
+            sscanf(line , " too low energy: %d " , &sw.too_low_energy);
           }
           // TODO;
-          // or [eventually] write our and read in energy_histogram, density, etc. values
+          // or [eventually] write our and read in energy_histogram, density, pessimistic_samples etc. values
+          //TODO (important): min_important_energy,
+          //                  max_entropy_state, min_energy_state,
+          ////Ex:
+        ////  printf("lndos is now {\n");
+       //// fscanf(rfile, " lndos = np.array([");
+        //for (int i = 0; i < ising.energy_levels; i++) {
+          //if (fscanf(rfile,"\t%lg,\n", &ising.ln_dos[i]) != 1) {
+            //printf("error reading lndos at energy #%d!\n", i);
+            //exit(1);
+          //}
+        ////}
+        ////to print:
+          //for (int i = 0; i < ising.energy_levels; i++) {
+          //fprintf(ising_out,"\t%ld,\n", ising.energy_histogram[i]);
+        //}
           int energy;
-          double lnw;
-          while (fscanf(resume_in, " %u %lf ", &energy, &lnw) == 2) {
-            // printf(" %u %lf\n ", energy, dos);
-            sw.ln_energy_weights[energy]=lnw;
+          for (int i = 0; i <= sw.energy_levels; i++) {
+            if (fscanf(resume_in, "%d  %lg\n",&energy,&sw.ln_energy_weights[i]) != 2) {
+              printf("error reading lnw!\n");
+              exit(1);
+            }
           }
+          fscanf(resume_in, "# Ball positions\n");
+          
+          for (int i=0; i<sw.N; i++) {
+            if (fscanf(resume_in, "%lg %lg %lg\n",
+                       &sw.balls[i].pos.x, &sw.balls[i].pos.y, &sw.balls[i].pos.z) != 3) {
+              printf("error reading balls!\n");
+              exit(1);
+            }
+          }
+          initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R,
+                                     sw.max_neighbors, sw.len, sw.walls);
           fclose(resume_in);
         }
       }
@@ -927,16 +957,29 @@ int main(int argc, const char *argv[]) {
       // save resume information
       {
         FILE *resume_out = fopen((const char *)resume_fname, "w");
+        printf("saving resume output as %s\n", resume_fname);
         random::dump_resume_info(resume_out);
         fprintf(resume_out, "%s", headerinfo);
         fprintf(resume_out, "%s", countinfo);
         fprintf(resume_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
+        fprintf(resume_out, "# energies found: %d\n", sw.energies_found);
+        fprintf(resume_out, "# too low energy: %d\n",sw.too_low_energy);
+        fprintf(resume_out, "# too high energy: %d\n", sw.too_high_energy);
         fprintf(resume_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
 
         fprintf(resume_out, "# energy   lnw\n");
-        for (int i = 0; i <= converged_state; i++) {
+        for (int i = 0; i <= sw.energy_levels; i++) {
           fprintf(resume_out, "%d  %.16lg\n",i,sw.ln_energy_weights[i]);
         }
+        fprintf(resume_out, "# Ball positions\n");
+        for (int i=0; i<sw.N; i++) {
+          fprintf(resume_out, "%.16g %.16g %.16g\n",
+           sw.balls[i].pos.x, sw.balls[i].pos.y, sw.balls[i].pos.z);
+        }
+        //printf("ball positions now = N");{
+        //if (fscanf(rfile,"\t%lg,\n", &square-well.struct_ball[i]) {
+        //printf("error reading balls at resume #%ld!\n", i);
+        //exit(1); }
         fclose(resume_out);
       }
 

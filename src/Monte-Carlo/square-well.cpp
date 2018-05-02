@@ -392,22 +392,20 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
-  static int max_energy_seen = -1;
-  static int min_energy_seen = -1;
   if (sa_t0 || use_sad) {
     if (energy_histogram[energy] == 0) {
       energies_found++; // we found a new energy!
-      if (max_energy_seen < 0 || energy > max_energy_seen) max_energy_seen = energy;
-      if (min_energy_seen < 0 || energy < min_energy_seen) min_energy_seen = energy;
+      if (max_energy < 0 || energy > max_energy) max_energy = energy;
+      if (min_energy < 0 || energy < min_energy) min_energy = energy;
       if (use_sad) {
         printf("  (moves %ld, energies_found %d, erange: %d -> %d effective t0 = %g)\n",
-               moves.total, energies_found, min_energy_seen, max_energy_seen,
+               moves.total, energies_found, min_energy, max_energy,
                sa_prefactor*energies_found
-                 *(max_energy_seen-min_energy_seen)/(min_T*use_sad));
+                 *(max_energy-min_energy)/(min_T*use_sad));
       }
     }
     if (use_sad && energies_found > 1) {
-      wl_factor = sa_prefactor*energies_found*(max_energy_seen-min_energy_seen)
+      wl_factor = sa_prefactor*energies_found*(max_energy-min_energy)
         /(min_T*moves.total*use_sad);
     } else {
       wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
@@ -468,6 +466,7 @@ void sw_simulation::end_move_updates(){
         ln_energy_weights[energy] =
           ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T;
         too_low_energy = energy;
+        printf("we are setting too_low_energy here to %d\n", energy);
         // printf("We were almost very cray at energy %d\n", energy);
       }
 
@@ -499,8 +498,12 @@ void sw_simulation::end_move_updates(){
       // means we are the new min_important_energy.
       //if (energy != min_important_energy) print_edges = true;
       min_important_energy = energy;
-      if (min_important_energy > too_low_energy) too_low_energy = min_important_energy;
     }
+    // FIXME it seems like the following should be inside the above if statement,
+    // which is more efficient, and we only need to update the too_low_energy
+    // when the min_important_energy changes, but somewhere else the min_important_energy
+    // is being adjusted and I don't know where.  -- David
+    if (min_important_energy > too_low_energy) too_low_energy = min_important_energy;
 
     if (print_edges) printf(" %5d ...%5d -->%5d ...%5d\n",
                             too_low_energy, min_important_energy, max_entropy_state, too_high_energy);
@@ -836,6 +839,7 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
   }
 
   if (!input_ln_dos) delete[] ln_dos;
+
   return min_important_energy;
 }
 
