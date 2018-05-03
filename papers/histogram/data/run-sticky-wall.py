@@ -75,6 +75,9 @@ if seed != 0:
 
 os.system('mkdir -p ' + datadir)
 
+with open('%s/%s.out' % (datadir, fname), 'w') as f:
+    f.write('# python %s\n' % (' '.join(sys.argv)))
+
 cmd = "rq run -o %s/%s.out -J lv/%s ./liquid-vapor-monte-carlo" % (datadir, fname, fname)
 
 cmd += ' --movies' # generate movie data
