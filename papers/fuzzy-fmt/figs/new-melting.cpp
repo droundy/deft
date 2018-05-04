@@ -156,7 +156,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
         if (rp_from_R.norm() < inclusion_radius*gwidth) {
           weight w = find_weights(r, rp, temp);
           double n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // want density a distance rp-R from center of Gaussian
-          w_den_R.n_0 += w.n_0*n_rp*dVp; 
+          w_den_R.n_0 += w.n_0*n_rp*dVp;
           w_den_R.n_1 += w.n_1*n_rp*dVp;
           w_den_R.n_2 += w.n_2*n_rp*dVp;
           w_den_R.n_3 += w.n_3*n_rp*dVp;
@@ -289,9 +289,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double dV = uipow(lattice_constant/Nl,3)/4.0;
 
   int crystal_calc_option=2;  //set to 0 for crystal free energy with brute-force integration
-                              //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
-                              //set to 2 for crystal free energy with Monte-Carlo (more accurate)
-                              
+  //set to 1 for crystal free energy with Gaussian Quadrature (fastest)
+  //set to 2 for crystal free energy with Monte-Carlo (more accurate)
+
   double N_crystal = 1;  //dummy value not used if not doing brute-force integration
   if (crystal_calc_option < 1) {  // N_crystal only needs to be calculated for brute-force integration
 
@@ -301,11 +301,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       for (int j=0; j<Nl; j++) {
         for (int k=0; k<Nl; k++) {
           vector3d r=lattice_vectors[0]*i/double(Nl)
-                      + lattice_vectors[1]*j/double(Nl)
-                      + lattice_vectors[2]*k/double(Nl);
-  
+                     + lattice_vectors[1]*j/double(Nl)
+                     + lattice_vectors[2]*k/double(Nl);
+
           const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
-                                   //Gaussians father away won't contriubute much 
+          //Gaussians father away won't contriubute much
 
           for (int t=-many_cells; t <=many_cells; t++) {
             for(int u=-many_cells; u<=many_cells; u++)  {
@@ -319,7 +319,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       }
     }
   }  //end if for N_crystal calculation
-  
+
   if (verbose) {
     printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
            N_crystal, reduced_num_spheres);
@@ -1129,7 +1129,7 @@ int main(int argc, const char **argv) {
 
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
-    
+
     /*** MONTE-CARLO SEED OPTION ***/
     {"seed", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0, "Monte-Carlo seed", "DOUBLE"},
 
