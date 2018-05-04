@@ -26,7 +26,7 @@ try:
         moves[2*i+2] = wlmoves[i]
         factor[2*i+1] = wlfactor[i]*2
         factor[2*i+2] = wlfactor[i]
-    colors.loglog(moves, factor,'WL')
+    colors.loglog(moves, factor,'vanilla_wang_landau')
 
 except:
     pass
