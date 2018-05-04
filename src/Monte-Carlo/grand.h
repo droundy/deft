@@ -113,20 +113,20 @@ struct sw_simulation {
      sample all states of a given energy equally. */
   int biggest_energy_transition;
   long *collection_matrix;
-  long &collection(int energy, int energy_change) {
+  long &collection(int from_energy, int energy_change) {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
-    assert(energy >= 0);
-    assert(energy < energy_levels);
-    return collection_matrix[energy*(2*biggest_energy_transition+1)
+    assert(from_energy >= 0);
+    assert(from_energy < energy_levels);
+    return collection_matrix[from_energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
-  long collection(int energy, int energy_change) const {
+  long collection(int from_energy, int energy_change) const {
     assert(energy_change >= -biggest_energy_transition);
     assert(energy_change <= biggest_energy_transition);
-    assert(energy >= 0);
-    assert(energy < energy_levels);
-    return collection_matrix[energy*(2*biggest_energy_transition+1)
+    assert(from_energy >= 0);
+    assert(from_energy < energy_levels);
+    return collection_matrix[from_energy*(2*biggest_energy_transition+1)
                              + energy_change+biggest_energy_transition];
   };
   /* "transition_matrix" is a read-only sloppy and normalized version
