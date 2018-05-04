@@ -478,7 +478,8 @@ void sw_simulation::ln_dos_check(double * ln_dos) const {
 
 // 1. Remove debug prints from compute_ln_dos
 
-// 2. Move this compute_ln_dos to square-well.cpp
+// 2. Move this compute_ln_dos to square-well.cpp, and then copy and
+//    rename to grand.cpp.
 
 // 3. Think about actually making this grand.
 
@@ -494,6 +495,9 @@ void sw_simulation::ln_dos_check(double * ln_dos) const {
 //    adding things up once per column.
 
 // 7. Remove computing of errors from compute_ln_dos.
+
+// 8. Track histogram that represents the sum of the collection matrix
+//    we normalize by.
 
 double* sw_simulation::compute_ln_dos(dos_types dos_type) {
   if(dos_type == histogram_dos){
