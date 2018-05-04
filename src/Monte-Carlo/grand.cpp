@@ -474,6 +474,27 @@ void sw_simulation::ln_dos_check(double * ln_dos) const {
   delete [] eq_error;
 }
 
+// TODO
+
+// 1. Remove debug prints from compute_ln_dos
+
+// 2. Move this compute_ln_dos to square-well.cpp
+
+// 3. Think about actually making this grand.
+
+// 4. Keep track of actual biggest energy transition dynamically,
+//    updating it each iteration.  This could then be used to make
+//    e.g. transition_matrix faster.
+
+// 5. Consider using collection rather than transition_matrix when
+//    determining bet, since we don't need things normalized.
+
+// 6. Consider using collection rather than transition_matrix when
+//    copying over into M, and doing the normalization ourselves, only
+//    adding things up once per column.
+
+// 7. Remove computing of errors from compute_ln_dos.
+
 double* sw_simulation::compute_ln_dos(dos_types dos_type) {
   if(dos_type == histogram_dos){
     for(int i = max_entropy_state; i < energy_levels; i++){
