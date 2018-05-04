@@ -451,9 +451,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                   //printf("n_weight.n_3=%g\n", n_weight.n_3);  //debug
                   //printf("n_3=%g\n", n_3);  //debug
                   if (n_3 > 1) {
-                    printf("ERROR: n_3 is greater than 1 (see %g)!\n", n_3);
+                    printf("ERROR: n_3 is greater than 1 (see %g, with difference %g)!\n", n_3, n_3-1);
                     printf("  position is %g %g %g\n", r.x, r.y, r.z);
-                    printf("  from just R = %g %g %g gives %g\n", R.x, R.y, R.z, n_weight.n_3);
+                    printf("  from just R = %g %g %g gives %g = 1 + %g\n", R.x, R.y, R.z, n_weight.n_3, n_weight.n_3-1);
                     data data_out;
                     data_out.diff_free_energy_per_atom=0;
                     data_out.cfree_energy_per_atom=0;
