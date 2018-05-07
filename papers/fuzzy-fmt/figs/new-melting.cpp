@@ -577,7 +577,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     if (newmeltoutfile) {
       fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
       fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcpt\tmcseed\n");
-      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\n",
+      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t%g\t%li\t%g\n",
               temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
               cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
               lattice_constant, reduced_num_spheres, dx, NUM_POINTS, seed);
@@ -1385,7 +1385,7 @@ int main(int argc, const char **argv) {
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
       fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcpt\tmcseed\thFE/volume\tbest_cFE/volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
               best_lattice_constant, 1-fv, dx, NUM_POINTS, seed, hfree_energy_pervol, cfree_energy_pervol);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
@@ -1431,7 +1431,7 @@ int main(int argc, const char **argv) {
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());      
       fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcpt\tmcseed\thFE/volume\tbest_cFE/volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
               best_lattice_constant, 1-fv, dx, NUM_POINTS, seed, hfree_energy_pervol, cfree_energy_pervol);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
