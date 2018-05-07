@@ -26,7 +26,8 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-const long NUM_POINTS = 80;
+long NUM_POINTS = 80;   //ASK - can't set this to const if in popt?
+double seed=1;
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 4.0;
@@ -575,11 +576,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     FILE *newmeltoutfile = fopen(alldat_filename, "w");
     if (newmeltoutfile) {
       fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
-      fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFreeEnergy/atom\tcFreeEnergy/atom\tFEdiff/atom\tlattice_constant\tNsph\n");
-      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+      fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcpt\tmcseed\n");
+      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\n",
               temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
               cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
-              lattice_constant, reduced_num_spheres);
+              lattice_constant, reduced_num_spheres, dx, NUM_POINTS, seed);
       fclose(newmeltoutfile);
     } else {
       printf("Unable to open file %s!\n", alldat_filename);
@@ -798,11 +799,11 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   FILE *newmeltoutfile = fopen(alldat_filename, "w");
   if (newmeltoutfile) {
     fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
-    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFreeEnergy/atom\tcFreeEnergy/atom\tFEdiff/atom\tlattice_constant\tNsph\n");
-    fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\n");
+    fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
             temp, reduced_density, fv, gwidth, homogeneous_free_energy,
             crystal_free_energy, crystal_free_energy-homogeneous_free_energy,
-            lattice_constant, reduced_num_spheres);
+            lattice_constant, reduced_num_spheres, dx);
     fclose(newmeltoutfile);
   } else {
     printf("Unable to open file %s!\n", alldat_filename);
@@ -1086,7 +1087,7 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 
 
 int main(int argc, const char **argv) {
-  double seed=1;
+  //double seed=1;
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
 
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
@@ -1153,7 +1154,8 @@ int main(int argc, const char **argv) {
     /*** GRID OPTIONS ***/
     {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0, "grid spacing dx", "DOUBLE"},
 
-    /*** MONTE-CARLO SEED OPTION ***/
+    /*** MONTE-CARLO SEED OPTIONS ***/
+    {"mc", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &NUM_POINTS, 0, "Number of Points for Monte-Carlo", "INT"},
     {"seed", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0, "Monte-Carlo seed", "DOUBLE"},
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
@@ -1382,10 +1384,10 @@ int main(int argc, const char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\tGaussian_width\thomogeneous_energy/atom\t\tbest_crystal_free_energy/atom\tbest_energy_difference/atom\tbest_lattice_constant\thomogeneous_energy/volume\tbest_crystal_energy/volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
+      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcpt\tmcseed\thFE/volume\tbest_cFE/volume\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
+              best_lattice_constant, 1-fv, dx, NUM_POINTS, seed, hfree_energy_pervol, cfree_energy_pervol);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -1427,10 +1429,11 @@ int main(int argc, const char **argv) {
     printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
-      fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tvacancy_fraction\tGaussian_width\thomogeneous_energy/atom\t\tbest_crystal_free_energy/atom\tbest_energy_difference/atom\tbest_lattice_constant\thomogeneous_energy/volume\tbest_crystal_energy/volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t%g\n",
-              temp, reduced_density, best_fv, best_gwidth, best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff, best_lattice_constant, hfree_energy_pervol, cfree_energy_pervol);
+      fprintf(newmeltbest, "# git version: %s\n", version_identifier());      
+      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcpt\tmcseed\thFE/volume\tbest_cFE/volume\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
+              best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
+              best_lattice_constant, 1-fv, dx, NUM_POINTS, seed, hfree_energy_pervol, cfree_energy_pervol);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
