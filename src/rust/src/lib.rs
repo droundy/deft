@@ -1,5 +1,7 @@
 extern crate internment;
 extern crate tinyset;
+#[macro_use]
+extern crate expr_derive;
 
 use internment::Intern;
 use tinyset::{Map64, Fits64};
@@ -204,7 +206,7 @@ impl<T: ExprMul, U: Into<Expr<T>>> std::ops::Div<U> for Expr<T> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
 pub enum Scalar {
     Var(&'static str),
     Exp(Expr<Scalar>),
@@ -292,47 +294,7 @@ impl ExprType for Scalar {
     }
 }
 
-impl ExprAdd for Scalar {
-    fn sum_from_map(map: AbelianMap<Self>) -> Self {
-        if map.len() == 1 {
-            let (k, &v) = map.iter().next().unwrap();
-            if v == 1.0 {
-                return k.inner.deref().clone();
-            }
-        }
-        Scalar::Add(map)
-    }
-
-    fn map_from_sum(&self) -> Option<&AbelianMap<Self>> {
-        if let &Scalar::Add(ref map) = self {
-            Some(&map)
-        } else {
-            None
-        }
-    }
-}
-
-impl ExprMul for Scalar {
-    fn mul_from_map(map: AbelianMap<Self>) -> Self {
-        if map.len() == 1 {
-            let (k, &v) = map.iter().next().unwrap();
-            if v == 1.0 {
-                return k.inner.deref().clone();
-            }
-        }
-        Scalar::Mul(map)
-    }
-
-    fn map_from_mul(&self) -> Option<&AbelianMap<Self>> {
-        if let &Scalar::Mul(ref map) = self {
-            Some(&map)
-        } else {
-            None
-        }
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
 pub enum RealSpaceScalar {
     Var(&'static str),
     ScalarVar(&'static str),
@@ -348,49 +310,9 @@ impl RealSpaceScalar {
     fn log(&self) -> Self { RealSpaceScalar::Exp(Expr::new(self)) }
 }
 
-impl ExprAdd for RealSpaceScalar {
-    fn sum_from_map(map: AbelianMap<Self>) -> Self {
-        if map.len() == 1 {
-            let (k, &v) = map.iter().next().unwrap();
-            if v == 1.0 {
-                return k.inner.deref().clone();
-            }
-        }
-        RealSpaceScalar::Add(map)
-    }
-
-    fn map_from_sum(&self) -> Option<&AbelianMap<Self>> {
-        if let &RealSpaceScalar::Add(ref map) = self {
-            Some(&map)
-        } else {
-            None
-        }
-    }
-}
-
-impl ExprMul for RealSpaceScalar {
-    fn mul_from_map(map: AbelianMap<Self>) -> Self {
-        if map.len() == 1 {
-            let (k, &v) = map.iter().next().unwrap();
-            if v == 1.0 {
-                return k.inner.deref().clone();
-            }
-        }
-        RealSpaceScalar::Mul(map)
-    }
-
-    fn map_from_mul(&self) -> Option<&AbelianMap<Self>> {
-        if let &RealSpaceScalar::Mul(ref map) = self {
-            Some(&map)
-        } else {
-            None
-        }
-    }
-}
-
 impl ExprType for RealSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
 pub enum KSpaceScalar {
     Var(&'static str),
     ScalarVar(&'static str),
@@ -404,46 +326,6 @@ pub enum KSpaceScalar {
 impl KSpaceScalar {
     fn exp(&self) -> Self { KSpaceScalar::Exp(Expr::new(self)) }
     fn log(&self) -> Self { KSpaceScalar::Exp(Expr::new(self)) }
-}
-
-impl ExprAdd for KSpaceScalar {
-    fn sum_from_map(map: AbelianMap<Self>) -> Self {
-        if map.len() == 1 {
-            let (k, &v) = map.iter().next().unwrap();
-            if v == 1.0 {
-                return k.inner.deref().clone();
-            }
-        }
-        KSpaceScalar::Add(map)
-    }
-
-    fn map_from_sum(&self) -> Option<&AbelianMap<Self>> {
-        if let &KSpaceScalar::Add(ref map) = self {
-            Some(&map)
-        } else {
-            None
-        }
-    }
-}
-
-impl ExprMul for KSpaceScalar {
-    fn mul_from_map(map: AbelianMap<Self>) -> Self {
-        if map.len() == 1 {
-            let (k, &v) = map.iter().next().unwrap();
-            if v == 1.0 {
-                return k.inner.deref().clone();
-            }
-        }
-        KSpaceScalar::Mul(map)
-    }
-
-    fn map_from_mul(&self) -> Option<&AbelianMap<Self>> {
-        if let &KSpaceScalar::Mul(ref map) = self {
-            Some(&map)
-        } else {
-            None
-        }
-    }
 }
 
 impl ExprType for KSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
