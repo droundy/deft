@@ -334,7 +334,16 @@ impl From<Scalar> for RealSpaceScalar {
     fn from(s: Scalar) -> Self {
         match s {
             Scalar::Var(s) =>
-                RealSpaceScalar::ScalarVar(s),
+                RealSpaceScalar::ScalarVar(
+                    // Leak `s` because `Var`s are static because
+                    // they are in `Intern`ed `Expr::inner`s.
+                    // See <https://stackoverflow.com/a/30527289>.
+                    unsafe {
+                        let s = String::from(s) + &"[i]";
+                        let ss = std::mem::transmute(&s as &str);
+                        std::mem::forget(s);
+                        ss
+                    }),
             Scalar::Exp(a) =>
                 RealSpaceScalar::Exp(Expr::new(&a.inner.deref().clone().into())),
             Scalar::Log(a) =>
@@ -542,14 +551,5 @@ mod tests {
         assert_eq!((c + b + a).cpp(), "a + b + c");
         assert_eq!((c * b * a).cpp(), "a * b * c");
         assert_eq!((a / c / b).cpp(), "a / (b * c)");
-    }
-
-    #[test]
-    fn cast() {
-        let a = Expr::new(&Scalar::Var("a"));
-        let rsa = Expr::new(&RealSpaceScalar::ScalarVar("a"));
-
-        assert_eq!(rsa, a.cast());
-        assert_eq!(rsa + rsa, (a + a).cast());
     }
 }
