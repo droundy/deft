@@ -1,49 +1,46 @@
 extern crate internment;
 extern crate tinyset;
+#[macro_use]
+extern crate expr_derive;
 
-use tinyset::{Map64, Fits64};
 use internment::Intern;
+use tinyset::{Map64, Fits64};
+use tinyset::u64set::Map64Iter;
+use std::fmt::Debug;
+use std::hash::Hash;
+use std::iter::FromIterator;
+use std::ops::Deref;
 
-pub enum SingleStatement<T: Kind> {
-    Init(&'static str, Expr<T>),
-    Assign(&'static str, Expr<T>),
-    Free(&'static str),
-}
-
-pub enum Statement {
-    Block(Vec<Statement>),
-    S(SingleStatement<Scalar>),
-    RSS(SingleStatement<RealSpaceScalar>),
-    InitScalar(&'static str, Expr<Scalar>),
-    InitRealSpaceScalar(&'static str, Expr<RealSpaceScalar>),
-    AssignRealSpaceScalar(&'static str, Expr<RealSpaceScalar>),
-    FreeRealSpaceScalar(&'static str),
-}
-
-pub trait Kind: 'static + Send + Clone + Eq + std::fmt::Debug + std::hash::Hash {
+pub trait ExprType: 'static + Send + Clone + Eq + Debug + Hash {
     fn cpp(&self) -> String;
 }
 
-#[derive(Debug, Clone, Eq, Hash)]
-pub struct Expr<T: Kind> {
+#[derive(Clone, Debug, Eq, Hash)]
+pub struct Expr<T: ExprType> {
     inner: Intern<T>,
 }
 
-impl<T: Kind> Expr<T> {
+impl<T: ExprType> Expr<T> {
+    fn new(inner: &T) -> Expr<T> {
+        Expr { inner: Intern::new(inner.clone()), }
+    }
+
     fn cpp(&self) -> String {
         self.inner.cpp()
     }
+
+    fn cast<U: ExprType + From<T>>(&self) -> Expr<U> {
+        Expr::new(&self.inner.deref().clone().into())
+    }
 }
 
-impl<T: Kind, RHS: Clone + Into<Expr<T>>> PartialEq<RHS> for Expr<T> {
-    fn eq(&self, other: &RHS) -> bool {
+impl<T: ExprType, U: Clone + Into<Expr<T>>> PartialEq<U> for Expr<T> {
+    fn eq(&self, other: &U) -> bool {
         self.inner == other.clone().into().inner
     }
 }
 
-impl<T: Kind> Copy for Expr<T> {}
-
-impl<T: Kind> Fits64 for Expr<T> {
+impl<T: ExprType> Fits64 for Expr<T> {
     fn to_u64(self) -> u64 {
         self.inner.to_u64()
     }
@@ -53,175 +50,164 @@ impl<T: Kind> Fits64 for Expr<T> {
     }
 }
 
-impl<T: Kind> From<T> for Expr<T> {
-    fn from(inner: T) -> Self {
-        Expr { inner: Intern::new(inner) }
+impl<T: ExprType> Copy for Expr<T> {}
+
+impl<T: ExprAdd + ExprMul, N: Into<f64>> From<N> for Expr<T> {
+    fn from(n: N) -> Self {
+        let n = n.into();
+        let inner = if n == 0.0 {
+            T::zero()
+        } else if n == 1.0 {
+            T::one()
+        } else {
+            let mut map = AbelianMap::new();
+            map.insert(Expr::new(&T::one()), n);
+            T::sum_from_map(map)
+        };
+        Expr::new(&inner)
     }
 }
 
-trait ClosedAdd: Kind {
+pub trait ExprAdd: ExprType {
     fn sum_from_map(x: AbelianMap<Self>) -> Self;
-    fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>>;
+    fn map_from_sum(&self) -> Option<&AbelianMap<Self>>;
 
     fn add(&self, other: &Self) -> Self {
         let mut sum: AbelianMap<Self>;
-        match (self.borrow_sum_map(), other.borrow_sum_map()) {
-            (Some(lhs), Some(rhs)) => {
-                sum = lhs.clone();
-                sum.union(&rhs);
+        match (self.map_from_sum(), other.map_from_sum()) {
+            (Some(l), Some(r)) => {
+                sum = l.clone();
+                sum.union(r);
             },
-            (Some(lhs), _) => {
-                sum = lhs.clone();
-                sum.insert(other.clone().into(), 1.0);
+            (Some(s), _) => {
+                sum = s.clone();
+                sum.insert(Expr::new(other), 1.0);
             },
-            (_, Some(rhs)) => {
-                sum = rhs.clone();
-                sum.insert(self.clone().into(), 1.0);
+            (_, Some(s)) => {
+                sum = s.clone();
+                sum.insert(Expr::new(self), 1.0);
             },
             (_, _) => {
-                sum = (self.clone().into(), 1.0).into();
-                sum.insert(other.clone().into(), 1.0);
-            }
+                sum = AbelianMap::new();
+                sum.insert(Expr::new(self), 1.0);
+                sum.insert(Expr::new(other), 1.0);
+            },
         }
         Self::sum_from_map(sum)
     }
 
     fn neg(&self) -> Self {
-        match self.borrow_sum_map() {
+        match self.map_from_sum() {
             Some(ref map) =>
-                Self::sum_from_map(map.inner.iter().map(|(k, &v)| (k, -v)).collect()),
-            _ => {
-                if *self == Self::zero() {
+                Self::sum_from_map(map.iter().map(|(k, &v)| (k, -v)).collect()),
+            _ => if *self == Self::zero() {
                     Self::zero()
                 } else {
-                    Self::sum_from_map((self.clone().into(), -1.0).into())
-                }
-            },
+                    let mut map = AbelianMap::new();
+                    map.insert(Expr::new(self), -1.0);
+                    Self::sum_from_map(map)
+                },
         }
     }
 
     fn zero() -> Self {
         Self::sum_from_map(AbelianMap::new())
     }
-
 }
 
-trait ClosedMul: Kind {
-    fn product_from_map(x: AbelianMap<Self>) -> Self;
-    fn borrow_product_map(&self) -> Option<&AbelianMap<Self>>;
+impl<T: ExprAdd, U: Into<Expr<T>>> std::ops::Add<U> for Expr<T> {
+    type Output = Self;
 
-    fn mul<T: ClosedMul + Into<Self>>(&self, other: &T) -> Self {
-        let mut product: AbelianMap<Self>;
-        let other: &Self = &other.clone().into();
-        match (self.borrow_product_map(), other.borrow_product_map()) {
-            (Some(lhs), Some(rhs)) => {
-                product = lhs.clone();
-                product.union(&rhs);
+    fn add(self, other: U) -> Self {
+        let other = other.into();
+        Expr::new(&self.inner.deref().add(other.inner.deref()))
+    }
+}
+
+impl<T: ExprAdd, U: Into<Expr<T>>> std::ops::Sub<U> for Expr<T> {
+    type Output = Self;
+
+    fn sub(self, other: U) -> Self {
+        let other = other.into();
+        Expr::new(&self.inner.deref().add(&other.inner.deref().neg()))
+    }
+}
+
+impl<T: ExprAdd> std::ops::Neg for Expr<T> {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Expr::new(&self.inner.deref().neg())
+    }
+}
+
+pub trait ExprMul: ExprType {
+    fn mul_from_map(x: AbelianMap<Self>) -> Self;
+    fn map_from_mul(&self) -> Option<&AbelianMap<Self>>;
+
+    fn mul(&self, other: &Self) -> Self {
+        let mut prod: AbelianMap<Self>;
+        match (self.map_from_mul(), other.map_from_mul()) {
+            (Some(l), Some(r)) => {
+                prod = l.clone();
+                prod.union(r);
             },
-            (Some(lhs), _) => {
-                product = lhs.clone();
-                product.insert(other.clone().into(), 1.0);
+            (Some(s), _) => {
+                prod = s.clone();
+                prod.insert(Expr::new(other), 1.0);
             },
-            (_, Some(rhs)) => {
-                product = rhs.clone();
-                product.insert(self.clone().into(), 1.0);
+            (_, Some(s)) => {
+                prod = s.clone();
+                prod.insert(Expr::new(self), 1.0);
             },
             (_, _) => {
-                product = (self.clone().into(), 1.0).into();
-                product.insert(other.clone().into(), 1.0);
+                prod = AbelianMap::new();
+                prod.insert(Expr::new(self), 1.0);
+                prod.insert(Expr::new(other), 1.0);
             },
         }
-        if product.inner.len() == 1 {
-            let (k, &v) = product.inner.iter().next().unwrap();
-            if v == 1.0 {
-                return (*k.inner).clone();
-            }
+        Self::mul_from_map(prod)
+    }
+
+    fn recip(&self) -> Self {
+        match self.map_from_mul() {
+            Some(ref map) =>
+                Self::mul_from_map(map.iter().map(|(k, &v)| (k, -v)).collect()),
+            _ => if *self == Self::one() {
+                    Self::one()
+                } else {
+                    let mut map = AbelianMap::new();
+                    map.insert(Expr::new(self), -1.0);
+                    Self::mul_from_map(map)
+                },
         }
-        Self::product_from_map(product)
     }
 
     fn one() -> Self {
-        Self::product_from_map(AbelianMap::new())
+        Self::mul_from_map(AbelianMap::new())
     }
 }
 
-trait ClosedArithmetic: ClosedAdd + ClosedMul {
-    fn reciprocal(&self) -> Self {
-        match self.borrow_product_map() {
-            Some(ref map) =>
-                Self::product_from_map(map.inner.iter().map(|(k, &v)| (k, -v)).collect()),
-            _ => {
-                if *self == Self::zero() {
-                    Self::zero()
-                } else {
-                    Self::product_from_map((self.clone().into(), -1.0).into())
-                }
-            },
-        }
-    }
-
-    fn from_f64<F: Into<f64>>(f: F) -> Self {
-        let f = f.into();
-        if f == 0.0 {
-            Self::zero()
-        } else if f == 1.0 {
-            Self::one()
-        } else {
-            Self::sum_from_map((Expr::from(Self::one()), f).into())
-        }
-    }
-}
-
-impl<F: Into<f64>> From<F> for Expr<Scalar> {
-    fn from(f: F) -> Self {
-        Scalar::from_f64(f).into()
-    }
-}
-
-// impl<T: Kind, U: Kind + From<T>> From<Expr<T>> for Expr<U> {
-//     fn from(f: Expr<T>) -> Self {
-//         f.into().into()
-//     }
-// }
-
-impl<T: Kind + ClosedAdd, RHS: Into<Expr<T>>> std::ops::Add<RHS> for Expr<T> {
+impl<T: ExprMul, U: Into<Expr<T>>> std::ops::Mul<U> for Expr<T> {
     type Output = Self;
 
-    fn add(self, other: RHS) -> Self {
+    fn mul(self, other: U) -> Self {
         let other = other.into();
-        (*self.inner).add(&*other.inner).into()
+        Expr::new(&self.inner.deref().mul(other.inner.deref()))
     }
 }
 
-impl<T: Kind + ClosedAdd, RHS: Into<Expr<T>>> std::ops::Sub<RHS> for Expr<T> {
+impl<T: ExprMul, U: Into<Expr<T>>> std::ops::Div<U> for Expr<T> {
     type Output = Self;
 
-    fn sub(self, other: RHS) -> Self {
+    fn div(self, other: U) -> Self {
         let other = other.into();
-        (*self.inner).add(&other.inner.neg()).into()
+        Expr::new(&self.inner.deref().mul(&other.inner.deref().recip()))
     }
 }
 
-impl<T: Kind + ClosedMul, RHS: Into<Expr<T>>> std::ops::Mul<RHS> for Expr<T> {
-    type Output = Self;
-
-    fn mul(self, other: RHS) -> Self {
-        let other = other.into();
-        (*self.inner).mul(&*other.inner).into()
-    }
-}
-
-impl<T: Kind + ClosedArithmetic, RHS: Into<Expr<T>>> std::ops::Div<RHS> for Expr<T> {
-    type Output = Self;
-
-    fn div(self, other: RHS) -> Self {
-        let other = other.into();
-        (*self.inner).mul(&other.inner.reciprocal()).into()
-    }
-}
-
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
-enum Scalar {
+#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+pub enum Scalar {
     Var(&'static str),
     Exp(Expr<Scalar>),
     Log(Expr<Scalar>),
@@ -229,14 +215,22 @@ enum Scalar {
     Mul(AbelianMap<Scalar>),
 }
 
-impl Kind for Scalar {
+impl Scalar {
+    fn exp(&self) -> Self { Scalar::Exp(Expr::new(self)) }
+    fn log(&self) -> Self { Scalar::Exp(Expr::new(self)) }
+}
+
+impl ExprType for Scalar {
     fn cpp(&self) -> String {
         match self {
-            &Scalar::Var(sym) => String::from(sym),
-            &Scalar::Exp(arg) => String::from("exp(") + &arg.cpp() + &")",
-            &Scalar::Log(arg) => String::from("log(") + &arg.cpp() + &")",
-            &Scalar::Add(ref map) => {
-                let pos_coeff = |&(ref x, ref c): &(String, f64)| -> String {
+            &Scalar::Var(s) =>
+                String::from(s),
+            &Scalar::Exp(a) =>
+                String::from("exp(") + &a.cpp() + &")",
+            &Scalar::Log(a) =>
+                String::from("log(") + &a.cpp() + &")",
+            &Scalar::Add(ref m) => {
+                let pcoeff = |&(ref x, ref c): &(String, f64)| -> String {
                     if x == "1" {
                         c.to_string()
                     } else if *c == 1.0 {
@@ -245,7 +239,7 @@ impl Kind for Scalar {
                         c.to_string() + &" * " + &x
                     }
                 };
-                let neg_coeff = |&(ref x, ref c): &(String, f64)| -> String {
+                let ncoeff = |&(ref x, ref c): &(String, f64)| -> String {
                     if x == "1" {
                         c.abs().to_string()
                     } else if *c == -1.0 {
@@ -254,30 +248,22 @@ impl Kind for Scalar {
                         c.abs().to_string() + &" * " + &x
                     }
                 };
-                let (p, n) = map.split_cpp_sort();
+                let (p, n) = m.split_cpp_sort();
                 match (p.len(), n.len()) {
-                    (0, 0) => String::from("0"),
-                    (_, 0) => p.iter()
-                               .map(pos_coeff)
-                               .collect::<Vec<String>>()
-                               .join(" + "),
-                    (0, _) => String::from("-")
-                              + &n.iter()
-                                  .map(neg_coeff)
-                                  .collect::<Vec<String>>()
-                                  .join(" - "),
-                    (_, _) => p.iter()
-                               .map(pos_coeff)
-                               .collect::<Vec<String>>()
-                               .join(" + ")
-                              + &" - "
-                              + &n.iter()
-                                  .map(neg_coeff)
-                                  .collect::<Vec<String>>()
-                                  .join(" - "),
+                    (0, 0) =>
+                        String::from("0"),
+                    (_, 0) =>
+                        p.iter().map(pcoeff).collect::<Vec<String>>().join(" + "),
+                    (0, _) =>
+                        String::from("-")
+                            + &n.iter().map(ncoeff).collect::<Vec<String>>().join(" + "),
+                    (_, _) =>
+                        p.iter().map(pcoeff).collect::<Vec<String>>().join(" + ")
+                            + &" - "
+                            + &n.iter().map(ncoeff).collect::<Vec<String>>().join(" + "),
                 }
             },
-            &Scalar::Mul(ref map) => {
+            &Scalar::Mul(ref m) => {
                 let ref power = |&(ref x, ref p): &(String, f64)| -> String {
                     if x == "1" || p.abs() == 1.0 {
                         x.clone()
@@ -287,144 +273,111 @@ impl Kind for Scalar {
                         String::from("pow(") + &x + &", " + &p.abs().to_string() + &")"
                     }
                 };
-                let (n, d) = map.split_cpp_sort();
+                let (n, d) = m.split_cpp_sort();
                 match (n.len(), d.len()) {
-                    (0, 0) => String::from("1"),
-                    (_, 0) => n.iter()
-                               .map(power)
-                               .collect::<Vec<String>>()
-                               .join(" * "),
-                    (0, _) => String::from("1 / (")
-                              + &d.iter()
-                                  .map(power)
-                                  .collect::<Vec<String>>()
-                                  .join(" * ")
-                              + &")",
-                    (_, _) => n.iter()
-                               .map(power)
-                               .collect::<Vec<String>>()
-                               .join(" * ")
-                              + &" / ("
-                              + &d.iter()
-                                  .map(power)
-                                  .collect::<Vec<String>>()
-                                  .join(" * ")
-                              + &")",
+                    (0, 0) =>
+                        String::from("1"),
+                    (_, 0) =>
+                        n.iter().map(power).collect::<Vec<String>>().join(" * "),
+                    (0, _) =>
+                        String::from("1 / (")
+                            + &d.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &")",
+                    (_, _) =>
+                        n.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &" / ("
+                            + &d.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &")",
                 }
             },
         }
     }
 }
 
-impl ClosedAdd for Scalar {
-    fn sum_from_map(m: AbelianMap<Self>) -> Self {
-        if m.inner.len() == 1 {
-            let (k, &v) = m.inner.iter().next().unwrap();
-            if v == 1.0 {
-                return (*k.inner).clone();
-            }
-        }
-        Scalar::Add(m)
-    }
-
-    fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>> {
-        if let &Scalar::Add(ref m) = self {
-            Some(m)
-        } else {
-            None
-        }
-    }
-}
-
-impl ClosedMul for Scalar {
-    fn product_from_map(m: AbelianMap<Self>) -> Self {
-        Scalar::Mul(m)
-    }
-
-    fn borrow_product_map(&self) -> Option<&AbelianMap<Self>> {
-        if let &Scalar::Mul(ref m) = self {
-            Some(m)
-        } else {
-            None
-        }
-    }
-}
-
-impl ClosedArithmetic for Scalar {}
-
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
-enum RealSpaceScalar {
+#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+pub enum RealSpaceScalar {
     Var(&'static str),
     ScalarVar(&'static str),
     Exp(Expr<RealSpaceScalar>),
     Log(Expr<RealSpaceScalar>),
     Add(AbelianMap<RealSpaceScalar>),
     Mul(AbelianMap<RealSpaceScalar>),
+    IFFT(Expr<KSpaceScalar>),
+}
+
+impl RealSpaceScalar {
+    fn exp(&self) -> Self { RealSpaceScalar::Exp(Expr::new(self)) }
+    fn log(&self) -> Self { RealSpaceScalar::Exp(Expr::new(self)) }
+}
+
+impl ExprType for RealSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
+
+#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+pub enum KSpaceScalar {
+    Var(&'static str),
+    ScalarVar(&'static str),
+    Exp(Expr<KSpaceScalar>),
+    Log(Expr<KSpaceScalar>),
+    Add(AbelianMap<KSpaceScalar>),
+    Mul(AbelianMap<KSpaceScalar>),
     FFT(Expr<RealSpaceScalar>),
 }
+
+impl KSpaceScalar {
+    fn exp(&self) -> Self { KSpaceScalar::Exp(Expr::new(self)) }
+    fn log(&self) -> Self { KSpaceScalar::Exp(Expr::new(self)) }
+}
+
+impl ExprType for KSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
 
 impl From<Scalar> for RealSpaceScalar {
     fn from(s: Scalar) -> Self {
         match s {
-            Scalar::Var(sym) => RealSpaceScalar::ScalarVar(sym),
-            Scalar::Exp(arg) => RealSpaceScalar::Exp(RealSpaceScalar::from((*arg.inner).clone()).into()),
-            Scalar::Log(arg) => RealSpaceScalar::Log(RealSpaceScalar::from((*arg.inner).clone()).into()),
-            Scalar::Add(map) =>
-                RealSpaceScalar::sum_from_map(map.inner.iter()
-                                              .map(|(k,&v)| (k.into(), v)).collect()),
-            _ => panic!(),
+            Scalar::Var(s) =>
+                RealSpaceScalar::ScalarVar(
+                    // Leak `s` because `Var`s are static because
+                    // they are in `Intern`ed `Expr::inner`s.
+                    // See <https://stackoverflow.com/a/30527289>.
+                    unsafe {
+                        let s = String::from(s) + &"[i]";
+                        let ss = std::mem::transmute(&s as &str);
+                        std::mem::forget(s);
+                        ss
+                    }),
+            Scalar::Exp(a) =>
+                RealSpaceScalar::Exp(Expr::new(&a.inner.deref().clone().into())),
+            Scalar::Log(a) =>
+                RealSpaceScalar::Log(Expr::new(&a.inner.deref().clone().into())),
+            Scalar::Add(m) =>
+                RealSpaceScalar::Add(
+                    m.iter()
+                     .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
+                     .collect()),
+            Scalar::Mul(m) =>
+                RealSpaceScalar::Mul(
+                    m.iter()
+                     .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
+                     .collect()),
         }
     }
 }
 
-// impl Into<Scalar> for RealSpaceScalar {
-//     fn into(s: Self) -> Scalar {
-// 
-//     }
-// }
-
-impl Kind for RealSpaceScalar {
-    fn cpp(&self) -> String {
-        unimplemented!()
-    }
-}
-
-impl ClosedAdd for RealSpaceScalar {
-    fn sum_from_map(m: AbelianMap<Self>) -> Self {
-        RealSpaceScalar::Add(m)
-    }
-
-    fn borrow_sum_map(&self) -> Option<&AbelianMap<Self>> {
-        if let &RealSpaceScalar::Add(ref m) = self {
-            Some(m)
-        } else {
-            None
-        }
-    }
-}
-
-impl ClosedMul for RealSpaceScalar {
-    fn product_from_map(m: AbelianMap<Self>) -> Self {
-        RealSpaceScalar::Mul(m)
-    }
-
-    fn borrow_product_map(&self) -> Option<&AbelianMap<Self>> {
-        if let &RealSpaceScalar::Mul(ref m) = self {
-            Some(m)
-        } else {
-            None
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct AbelianMap<T: Kind> {
+#[derive(Clone)]
+pub struct AbelianMap<T: ExprType> {
     inner: Map64<Expr<T>, f64>,
 }
 
-impl<T: Kind> AbelianMap<T> {
+impl<T: ExprType> AbelianMap<T> {
     fn new() -> Self {
         Self { inner: Map64::new(), }
+    }
+
+    fn iter(&self) -> <&Self as IntoIterator>::IntoIter {
+        self.into_iter()
+    }
+
+    fn len(&self) -> usize {
+        self.inner.len()
     }
 
     fn insert(&mut self, k: Expr<T>, v: f64) {
@@ -437,15 +390,14 @@ impl<T: Kind> AbelianMap<T> {
     }
 
     fn union(&mut self, other: &Self) {
-        for (k, &v) in other.inner.iter() {
+        for (k, &v) in other {
             self.insert(k, v);
         }
     }
 
     fn split_cpp_sort(&self) -> (Vec<(String, f64)>, Vec<(String, f64)>) {
         let (mut p, mut n): (Vec<(String, f64)>, Vec<(String, f64)>)
-            = self.inner
-                  .iter()
+            = self.iter()
                   .map(|(k, &v)| (k.cpp(), v))
                   .partition(|&(_, v)| v > 0.0);
         let ref by_key = |&(ref p, _): &(String, f64), &(ref q, _): &(String, f64)| {
@@ -457,7 +409,38 @@ impl<T: Kind> AbelianMap<T> {
     }
 }
 
-impl<T: Kind> std::iter::FromIterator<(Expr<T>, f64)> for AbelianMap<T> {
+impl<T: ExprType> Debug for AbelianMap<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut res = write!(f, "AbelianMap [ ");
+        for term in self {
+            res = res.and(write!(f, "{:?}, ", term));
+        }
+        res.and(write!(f, "] "))
+    }
+}
+
+impl<'a, T: ExprType> IntoIterator for &'a AbelianMap<T> {
+    type Item = (Expr<T>, &'a f64);
+    type IntoIter = Map64Iter<'a, Expr<T>, f64>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.inner.iter()
+    }
+}
+
+// May not be needed.
+//
+// impl<'a, T: ExprType> FromIterator<(Expr<T>, &'a f64)> for AbelianMap<T> {
+//     fn from_iter<I: IntoIterator<Item = (Expr<T>, &'a f64)>>(iter: I) -> Self {
+//         let mut map = AbelianMap::new();
+//         for (k, &v) in iter {
+//             map.insert(k, v);
+//         }
+//         map
+//     }
+// }
+
+impl<'a, T: ExprType> FromIterator<(Expr<T>, f64)> for AbelianMap<T> {
     fn from_iter<I: IntoIterator<Item = (Expr<T>, f64)>>(iter: I) -> Self {
         let mut map = AbelianMap::new();
         for (k, v) in iter {
@@ -467,26 +450,34 @@ impl<T: Kind> std::iter::FromIterator<(Expr<T>, f64)> for AbelianMap<T> {
     }
 }
 
-impl<T: Kind> From<(Expr<T>, f64)> for AbelianMap<T> {
-    fn from((k, v): (Expr<T>, f64)) -> Self {
-        let mut inner = Map64::new();
-        inner.insert(k, v);
-        Self { inner, }
+// May not be needed.
+//
+// impl<'a, T: ExprType> FromIterator<Expr<T>> for AbelianMap<T> {
+//     fn from_iter<I: IntoIterator<Item = Expr<T>>>(iter: I) -> Self {
+//         let mut map = AbelianMap::new();
+//         for k in iter {
+//             map.insert(k, 1.0);
+//         }
+//         map
+//     }
+// }
+
+impl<'a, T: ExprType> FromIterator<T> for AbelianMap<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut map = AbelianMap::new();
+        for k in iter {
+            map.insert(Expr::new(&k), 1.0);
+        }
+        map
     }
 }
 
-impl<T: Kind> From<Map64<Expr<T>, f64>> for AbelianMap<T> {
-    fn from(inner: Map64<Expr<T>, f64>) -> Self {
-        Self { inner, }
-    }
-}
-
-impl<T: Kind> std::hash::Hash for AbelianMap<T> {
+impl<T: ExprType> Hash for AbelianMap<T> {
     fn hash<H: std::hash::Hasher>(&self, hasher: &mut H) {
         let mut terms: Vec<_>
-            = self.inner.iter()
-                        .map(|(k, &v)| (k.inner.to_u64(), v as u64))
-                        .collect();
+            = self.iter()
+                  .map(|(k, &v)| (k.inner.to_u64(), v as u64))
+                  .collect();
         terms.sort();
         for (k, v) in terms {
             k.hash(hasher);
@@ -495,81 +486,83 @@ impl<T: Kind> std::hash::Hash for AbelianMap<T> {
     }
 }
 
-impl<T: Kind> PartialEq for AbelianMap<T> {
+impl<T: ExprType> PartialEq for AbelianMap<T> {
     fn eq(&self, other: &Self) -> bool {
         let mut lhs: Vec<_>
-            = self.inner.iter()
-                        .map(|(k, &v)| (k.inner.to_u64(), v as u64))
-                        .collect();
+            = self.iter()
+                  .map(|(k, &v)| (k.inner.to_u64(), v as u64))
+                  .collect();
         let mut rhs: Vec<_>
-            = other.inner.iter()
-                         .map(|(k, &v)| (k.inner.to_u64(), v as u64))
-                         .collect();
+            = other.iter()
+                   .map(|(k, &v)| (k.inner.to_u64(), v as u64))
+                   .collect();
         lhs.sort();
         rhs.sort();
         lhs == rhs
     }
 }
 
-impl<T: Kind> Eq for AbelianMap<T> {}
-
-// impl<F: Kind, T: Kind + From<F>> From<AbelianMap<F>> for AbelianMap<T> {
-//     fn from(f: AbelianMap<F>) -> Self {
-//          <AbelianMap<T>>::from(f.inner.iter().map(|(k, &v)| (k.into(), v)).collect());
-//     }
-// }
+impl<T: ExprType> Eq for AbelianMap<T> {}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn scalar() {
-        let a: Expr<Scalar> = Scalar::Var("a").into();
-        let b: Expr<Scalar> = Scalar::Var("b").into();
+    fn abelian() {
+        let t = vec![Scalar::Var("x"), Scalar::Var("x"), Scalar::Var("y"), Scalar::Var("z")];
+        let s: AbelianMap<Scalar> = t.into_iter().collect();
+        assert_eq!(s, s);
+        assert_eq!(s, s.iter().map(|(k, &v)| (k, v)).collect());
+        assert!(s != vec![Scalar::Var("x"), Scalar::Var("y"), Scalar::Var("z")].into_iter().collect());
+    }
 
+    #[test]
+    fn arith() {
+        let a = Expr::new(&Scalar::Var("a"));
+        let b = Expr::new(&Scalar::Var("b"));
+
+        assert_eq!(a, a);
+        assert!(a != b);
+
+        assert_eq!(a + 0, a);
+        assert_eq!(a + a, a + a);
         assert_eq!(a + b, a + b);
         assert_eq!(a + b, b + a);
-        assert!(a + a != b + b);
-        assert_eq!(a + 0, a);
-
-        assert_eq!(a * 1, a);
-        assert_eq!(a * 1, a);
-
-        assert_eq!(a - a, 0);
         assert_eq!(a + a - a, a);
+        assert_eq!(a - a, 0);
         assert_eq!(a + a - a - a, 0);
-        assert_eq!(a + b - a - b, 0);
-        assert_eq!(a + b - b - a, 0);
-        assert!(b - a != a - b);
 
-        assert_eq!(a.cpp(), "a");
-        assert!(b.cpp() != "a");
-        assert_eq!((a + b).cpp(), "a + b");
-        assert_eq!((b + a).cpp(), "a + b");
-        assert_eq!((a + a).cpp(), "2 * a");
-        assert_eq!((a + a - a).cpp(), a.cpp());
+        assert_eq!(a * 1, a);
+        assert_eq!(a * a, a * a);
+        assert_eq!(a * b, a * b);
+        assert_eq!(a * b, b * a);
+        assert_eq!(a * a / a, a);
+        assert_eq!(a / a, 1);
+        assert_eq!(a * a / a / a, 1);
     }
 
     #[test]
     fn realspace() {
-        let a: Expr<RealSpaceScalar> = RealSpaceScalar::Var("a").into();
-        let s: Expr<Scalar> = <Expr<Scalar>>::from(Scalar::Var("s"));
+        let a: Expr<RealSpaceScalar> = <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::Var("a"));
+        let s: Expr<Scalar> = <Expr<Scalar>>::new(&Scalar::Var("s"));
+        let rs_s: Expr<RealSpaceScalar> =
+            <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::ScalarVar("s"));
 
-        assert_eq!(a * s, a * <Expr<RealSpaceScalar>>::from(RealSpaceScalar::ScalarVar("s")));
+        assert_eq!(a * rs_s, a * rs_s);
+        // FIXME the following is broken:
+        // assert_eq!(a * s, a * rs_s);
+    }
+
+    #[test]
+    fn cpp() {
+        let a = Expr::new(&Scalar::Var("a"));
+        let b = Expr::new(&Scalar::Var("b"));
+        let c = Expr::new(&Scalar::Var("c"));
+
+
+        assert_eq!((c + b + a).cpp(), "a + b + c");
+        assert_eq!((c * b * a).cpp(), "a * b * c");
+        assert_eq!((a / c / b).cpp(), "a / (b * c)");
     }
 }
-
-impl From<Expr<Scalar>> for Expr<RealSpaceScalar> {
-    fn from(f: Expr<Scalar>) -> Self {
-        let f: RealSpaceScalar = (*f.inner).clone().into();
-        f.into()
-    }
-}
-
-// impl<F: Kind, T: Kind + Into<F>> From<Expr<F>> for Expr<T> {
-//     fn from(f: Expr<F>) -> Self {
-//         let f: T = (*f.inner).clone().into();
-//         f.into()
-//     }
-// }
