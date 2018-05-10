@@ -158,11 +158,14 @@ if args.ptname:
 
 
 plot_title=y_label+" vs "+x_label+" at Fixed "+fixed_quantity+"="+fixed_value
-a=0 
-b=-50
+a=0
+plt.plot(x_axis, y_axis, color="purple")
+b=plt.gca().get_ylim()[0]-10
 
 #Plot x-axis vs y-axis
-plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
+if b < 0 :
+    plt.axhspan(a, b, color='b', alpha=0.15, lw=0)
+else : plt.axhspan(a, -10, color='b', alpha=0.15, lw=0)
 plt.plot(x_axis, y_axis, color="purple")
 plt.title(plot_title)
 plt.xlabel(x_label)

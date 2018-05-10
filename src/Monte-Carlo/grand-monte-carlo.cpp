@@ -494,7 +494,7 @@ int main(int argc, const char *argv[]) {
             "%s/%s-movie/%%06d-lnw.dat", data_dir, filename);
   }
 
-  if (true) {
+  if (false) {
     printf("biggest_energy_transition: %d\n", sw.biggest_energy_transition);
     // TESTING ONLY
     sw.collection(0, 0) = 4;
@@ -963,7 +963,6 @@ int main(int argc, const char *argv[]) {
         fclose(densityout);
       }
 
-      delete[] ln_dos;
       delete[] countinfo;
     }
   } while (!am_all_done);

@@ -74,7 +74,20 @@ struct sw_simulation {
      ln_energy_weights is a constant except during initialization. */
 
   int max_entropy_state, min_energy_state, min_important_energy;
-  int too_high_energy, too_low_energy;
+  int min_energy; // The lowest energy we have ever found for this
+                  // system.  This must be kept up-to-date because
+                  // it is used by SAD to compute the delta E.
+  int max_energy; // The highest energy we have ever found for this
+                  // system.  This must be kept up-to-date because
+                  // it is used by SAD to compute the delta E.
+  int too_high_energy; // too_high_energy is used in SAD, and is the
+                       // highest ever value that max_entropy_state has
+                       // taken.  It is used to define the range over
+                       // which our histogram is made flat.
+  int too_low_energy; // too_low_energy is used in SAD, and is the
+                      // lowest ever value that min_important_energy has
+                      // taken.  It is used to define the range over
+                      // which our histogram is made flat.
   move_info moves;
   long *energy_histogram;
   double *ln_energy_weights;
@@ -299,6 +312,8 @@ struct sw_simulation {
     use_tmmc = false; // default to not using TMMC for accepting moves.
     use_wl = false; // default to not using WL.
     use_wltmmc = false; // default to not using WLTMMC.
+    min_energy = -1;
+    max_energy = -1;
   };
 };
 

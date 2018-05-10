@@ -830,7 +830,7 @@ int main(int argc, const char *argv[]) {
   sw.iteration = 0;
 
   // Now let's initialize our weight array
-  if (toe || tmi || golden || wang_landau) {
+  if (toe || tmi || tmmc || golden || wang_landau) {
     sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
 
     FILE *transitions_infile = fopen(transitions_input_filename,"r");
