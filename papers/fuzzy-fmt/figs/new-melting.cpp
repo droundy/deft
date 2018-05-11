@@ -483,7 +483,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
 
           // This is the fixed version, which comes from dimensional crossover
-          double phi_3 = uipow(n_2,3)*(1 - nv_2.normsquared()/sqr(n_2))/(24*M_PI*uipow(1-n_3,2));
+          double phi_3 = uipow(n_2,3)*uipow(1 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1-n_3,2));
           if (n_2 == 0 || sqr(n_2) <= nv_2.normsquared()) phi_3 = 0;
 
           //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
