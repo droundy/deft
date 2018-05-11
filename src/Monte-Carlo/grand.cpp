@@ -476,7 +476,7 @@ void sw_simulation::ln_dos_check(double * ln_dos) const {
 
 // TODO
 
-// 1. Remove debug prints from compute_ln_dos
+// 1. Remove debug prints from compute_ln_dos (Trotter)
 
 // 2. Move this compute_ln_dos to square-well.cpp, and then copy and
 //    rename to grand.cpp.
@@ -485,19 +485,23 @@ void sw_simulation::ln_dos_check(double * ln_dos) const {
 
 // 4. Keep track of actual biggest energy transition dynamically,
 //    updating it each iteration.  This could then be used to make
-//    e.g. transition_matrix faster.
+//    e.g. transition_matrix faster.  (Delay)
 
 // 5. Consider using collection rather than transition_matrix when
-//    determining bet, since we don't need things normalized.
+//    determining bet, since we don't need things
+//    normalized. (Trotter)
 
 // 6. Consider using collection rather than transition_matrix when
 //    copying over into M, and doing the normalization ourselves, only
-//    adding things up once per column.
+//    adding things up once per column. (Trotter)
 
-// 7. Remove computing of errors from compute_ln_dos.
+// 7. Remove computing of errors from compute_ln_dos. (Trotter)
 
 // 8. Track histogram that represents the sum of the collection matrix
-//    we normalize by.
+//    we normalize by.  The idea here is when normalizing the
+//    collection matrix, we could just use the histogram value.
+//    Updating the histogram value would only require one increment
+//    per move.  (Delay)
 
 double* sw_simulation::compute_ln_dos(dos_types dos_type) {
   if(dos_type == histogram_dos){
