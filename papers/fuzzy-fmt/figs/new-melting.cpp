@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-long NUM_POINTS = 80;   //ASK - can't set this to const if in popt?
+long NUM_POINTS = 80;
 double seed=1;
 
 // radius we need to integrate around a gaussian, in units of gw.
@@ -99,13 +99,13 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   const double alpha = find_alpha(temp);
   const double zeta = find_zeta(temp);
   weight w;
-  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/zeta,2));  //ASK - should these be in the if statement below as well?
-  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   if (rdiff_magnitude > 0) {
     w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
     w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
     w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
     w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
+    w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/zeta,2));
+    w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
   } else {
     w.n_0=0;
     w.n_1=0;
@@ -270,6 +270,7 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
 
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
+  double start_time = time();
   printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g, mc NUM_POINTS=%li\n", temp, reduced_density, fv, gwidth, dx, NUM_POINTS);  //debug
   //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
@@ -561,6 +562,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
   int create_alldat_file = 1;  //set to 0 for no alldat file, set to 1 to create alldat file
   // that saves data for every combination of gw and fv values ran
+  double run_time = time() - start_time; // run time in seconds
   if (create_alldat_file > 0)  {
     // Create all output data filename
     char *alldat_filename = new char[1024];
@@ -576,17 +578,19 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     FILE *newmeltoutfile = fopen(alldat_filename, "w");
     if (newmeltoutfile) {
       fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
-      fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcpt\tmcseed\n");
-      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t      %g\t\t%g\t\t%g\t%g\t%li\t%g\n",
+      fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcpt\tmcseed\ttime(h)\n");
+      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t      %g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\n",
               temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
               cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
-              lattice_constant, reduced_num_spheres, dx, NUM_POINTS, seed);
+              lattice_constant, reduced_num_spheres, dx, NUM_POINTS, seed,
+              run_time/60/60);
       fclose(newmeltoutfile);
     } else {
       printf("Unable to open file %s!\n", alldat_filename);
     }
     delete[] alldat_filename;
   }
+  printf("run time is %g hours\n", run_time/60/60);
 
   return data_out;
 }
@@ -808,7 +812,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   } else {
     printf("Unable to open file %s!\n", alldat_filename);
   }
-  delete[] alldat_filename;  //ASK
+  delete[] alldat_filename;
   return data_out;
 }
 
@@ -843,7 +847,7 @@ void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][
     //data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
     data dhill_data=find_energy_new(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
     if (isnan(dhill_data.cfree_energy_per_vol)) {   //If crystal energy is NaN
-      simplex_fe[k][2]=1e100;  //ASK David!
+      simplex_fe[k][2]=1e100;
     } else simplex_fe[k][2]=dhill_data.diff_free_energy_per_atom;
     //simplex_fe[k][2]=sqrt((simplex_fe[k][0]*simplex_fe[k][0]) + (simplex_fe[k][1]*simplex_fe[k][1]));  //TEST SIMPLEX
     printf("simplex_fe[%i][2]=%g\n", k, simplex_fe[k][2]);
