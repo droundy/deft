@@ -337,7 +337,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double norm = reduced_num_spheres/N_crystal;  //normalization constant
 
   //Find inhomogeneous Fideal of one crystal primitive cell
-  double Fideal=0;
+  double cFideal_of_primitive_cell=0;
   for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
@@ -359,13 +359,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         if (n > 1e-200) { // avoid underflow and n=0 issues
           // double dF = kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0);
           // printf("n = %g  dF = %g\n", n, dF);
-          Fideal += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
+          cFideal_of_primitive_cell += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
         }
       }
     }
   }  //End inhomogeneous Fideal calculation
-  //printf("crystal ideal gas free energy = %g\n", Fideal);
-  //printf("crystal ideal gas free energy per volume = %g\n", Fideal/primitive_cell_volume);
+  //printf("crystal ideal gas free energy of one primitive cell= %g\n", cFideal_of_primitive_cell);
+  //printf("crystal ideal gas free energy per volume = %g\n", cFideal_of_primitive_cell/primitive_cell_volume);
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
@@ -405,7 +405,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("\nCalculating Crystal Free Energy with Gaussian Quadrature...\n");
     } else printf("\nCalculating Crystal Free Energy with Monte-Carlo...\n");
 
-    double free_energy=0;
+    double free_energy=0;  //Crystal Excess Free Energy over one primitive cell
     double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0;
 
     for (int i=0; i<Nl; i++) {
@@ -533,19 +533,19 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
     //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
     //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
-    //free_energy and Fideal are over one parallelepiped with 1-fv atoms
-    cfree_energy_per_atom=(Fideal + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
-    cfree_energy_per_vol=(Fideal + free_energy)/primitive_cell_volume; //
+    //free_energy and Fideal are over one parallelepiped (one primitive cell) with 1-fv atoms
+    cfree_energy_per_atom=(cFideal_of_primitive_cell + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
+    cfree_energy_per_vol=(cFideal_of_primitive_cell + free_energy)/primitive_cell_volume; //
     printf("primitive cell volume = %g\n", primitive_cell_volume); //
     printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
     printf("             phi_1 per volume = %g\n", total_phi_1/primitive_cell_volume); //
     printf("             phi_2 per volume = %g\n", total_phi_2/primitive_cell_volume); //
     printf("             phi_3 per volume = %g\n", total_phi_3/primitive_cell_volume); //
     
-    printf("Crystal Ideal free energy per volume = %g\n", Fideal/primitive_cell_volume); //
+    printf("Crystal Ideal free energy per volume = %g\n", cFideal_of_primitive_cell/primitive_cell_volume); //
     printf("Crystal Excess free energy per volume = %g\n", free_energy/primitive_cell_volume); //
     printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol); //
-    //printf("Fideal = %g\n", Fideal);
+    printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
   }
 
   data data_out;
