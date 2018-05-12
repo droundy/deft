@@ -391,7 +391,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     hf.mu() = 0;
     //Note: hf.energy() returns energy/volume
 
-    hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! FIX!!  free energy per sphere or "atom"
+    hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom"
     hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
     hf.printme("     homogeneous:");
     printf("homogeneous free_energy per vol is %g\n", hf.energy());
@@ -495,12 +495,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
           if (temp*(phi_1 + phi_2 + phi_3) < -10.0) {
             printf("    Free energy here: %g\n", temp*(phi_1 + phi_2 + phi_3));
-            printf("                  n0: %g\n", n_0);
-            printf("                  n1: %g\n", n_1);
-            printf("                  n2: %g\n", n_2);
-            printf("                  n3: %g\n", n_3);
-            printf("                 n1v: %g\n", nv_1.norm());
-            printf("                 n2v: %g\n", nv_2.norm());
+            //printf("                  n0: %g\n", n_0);
+            //printf("                  n1: %g\n", n_1);
+            //printf("                  n2: %g\n", n_2);
+            //printf("                  n3: %g\n", n_3);
+            //printf("                 n1v: %g\n", nv_1.norm());
+            //printf("                 n2v: %g\n", nv_2.norm());
           }
           if (isnan(free_energy)) {
             printf("free energy is a NaN!\n");
@@ -537,7 +537,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     cfree_energy_per_atom=(Fideal + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
     cfree_energy_per_vol=(Fideal + free_energy)/primitive_cell_volume; //
     printf("primitive cell volume = %g\n", primitive_cell_volume); //
-    printf("cubic cell volume = %g cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
+    printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
     printf("             phi_1 per volume = %g\n", total_phi_1/primitive_cell_volume); //
     printf("             phi_2 per volume = %g\n", total_phi_2/primitive_cell_volume); //
     printf("             phi_3 per volume = %g\n", total_phi_3/primitive_cell_volume); //
@@ -607,6 +607,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
   double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
   double lattice_constant = find_lattice_constant(reduced_density, fv);
+  printf("lattice_constant= %g", lattice_constant);
   double dV = dx*dx*dx;  //volume element dV
 
   HomogeneousSFMTFluid hf;
