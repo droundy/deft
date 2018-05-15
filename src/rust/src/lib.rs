@@ -386,17 +386,8 @@ impl ExprType for KSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
 impl From<Scalar> for RealSpaceScalar {
     fn from(s: Scalar) -> Self {
         match s {
-            Scalar::Var(s) =>
-                RealSpaceScalar::ScalarVar(
-                    // Leak `s` because `Var`s are static because
-                    // they are in `Intern`ed `Expr::inner`s.
-                    // See <https://stackoverflow.com/a/30527289>.
-                    unsafe {
-                        let s = String::from(s) + &"[i]";
-                        let ss = std::mem::transmute(&s as &str);
-                        std::mem::forget(s);
-                        ss
-                    }),
+            Scalar::Var(name) =>
+                RealSpaceScalar::ScalarVar(name),
             Scalar::Exp(a) =>
                 RealSpaceScalar::Exp(Expr::new(&a.inner.deref().clone().into())),
             Scalar::Log(a) =>
