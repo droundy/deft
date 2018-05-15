@@ -147,6 +147,7 @@ int main(int argc, const char *argv[]) {
   sw.sample_error = 0;
   sw.flatness = 0;
   sw.init_iters = 0;
+  sw.max_entropy_state = 0;
 
   const int wall_dim = 0; // this is hard-coded all over the place:  you can't change it!
   unsigned long int seed = 0;
@@ -623,7 +624,6 @@ int main(int argc, const char *argv[]) {
 
   sw.balls = new ball[sw.N];
   sw.iteration = 0;
-  sw.max_entropy_state = 0;
 
   // initialize ball radii
   for(int i = 0; i < sw.N; i++)
@@ -823,8 +823,13 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
                            sw.walls, sw.sticky_wall);
 
-  // First, let us figure out what the max entropy point is (and move to it)
-  sw.max_entropy_state = sw.initialize_max_entropy(acceptance_goal);
+  if (sw.max_entropy_state == 0) {
+    // First, let us figure out what the max entropy point is (and
+    // move to it) if the user did not specify the max_entropy_state.
+    sw.max_entropy_state = sw.initialize_max_entropy(acceptance_goal);
+  } else {
+    printf("Leaving the max_entropy_state at %d\n", sw.max_entropy_state);
+  }
   sw.reset_histograms();
   sw.iteration = 0;
 
