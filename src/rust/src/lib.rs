@@ -1,7 +1,5 @@
 extern crate internment;
 extern crate tinyset;
-#[macro_use]
-extern crate expr_derive;
 
 use internment::Intern;
 use tinyset::{Map64, Fits64};
@@ -206,7 +204,55 @@ impl<T: ExprMul, U: Into<Expr<T>>> std::ops::Div<U> for Expr<T> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+macro_rules! impl_expr_add {
+    ( $name:ident ) => {
+        impl ExprAdd for $name {
+            fn sum_from_map(map: AbelianMap<Self>) -> Self {
+                if map.len() == 1 {
+                    let (k, &v) = map.iter().next().unwrap();
+                    if v == 1.0 {
+                        return k.inner.deref().clone();
+                    }
+                }
+                $name::Add(map)
+            }
+
+            fn map_from_sum(&self) -> Option<&AbelianMap<Self>> {
+                if let &$name::Add(ref map) = self {
+                    Some(&map)
+                } else {
+                    None
+                }
+            }
+        }
+    }
+}
+
+macro_rules! impl_expr_mul {
+    ( $name:ident ) => {
+        impl ExprMul for $name {
+            fn mul_from_map(map: AbelianMap<Self>) -> Self {
+                if map.len() == 1 {
+                    let (k, &v) = map.iter().next().unwrap();
+                    if v == 1.0 {
+                        return k.inner.deref().clone();
+                    }
+                }
+                $name::Mul(map)
+            }
+
+            fn map_from_mul(&self) -> Option<&AbelianMap<Self>> {
+                if let &$name::Mul(ref map) = self {
+                    Some(&map)
+                } else {
+                    None
+                }
+            }
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub enum Scalar {
     Var(&'static str),
     Exp(Expr<Scalar>),
@@ -214,6 +260,13 @@ pub enum Scalar {
     Add(AbelianMap<Scalar>),
     Mul(AbelianMap<Scalar>),
 }
+
+impl_expr_add!(Scalar);
+impl_expr_mul!(Scalar);
+impl_expr_add!(RealSpaceScalar);
+impl_expr_mul!(RealSpaceScalar);
+impl_expr_add!(KSpaceScalar);
+impl_expr_mul!(KSpaceScalar);
 
 impl Scalar {
     fn exp(&self) -> Self { Scalar::Exp(Expr::new(self)) }
@@ -294,7 +347,7 @@ impl ExprType for Scalar {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub enum RealSpaceScalar {
     Var(&'static str),
     ScalarVar(&'static str),
@@ -312,7 +365,7 @@ impl RealSpaceScalar {
 
 impl ExprType for RealSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub enum KSpaceScalar {
     Var(&'static str),
     ScalarVar(&'static str),
