@@ -624,7 +624,6 @@ int main(int argc, const char *argv[]) {
   sw.balls = new ball[sw.N];
   sw.iteration = 0;
   sw.max_entropy_state = 0;
-  sw.min_energy_state = 0;
 
   // initialize ball radii
   for(int i = 0; i < sw.N; i++)
@@ -912,7 +911,7 @@ int main(int argc, const char *argv[]) {
 
   if (false) {
     int E1 = sw.max_entropy_state;
-    int E2 = sw.min_energy_state;
+    int E2 = sw.min_energy;
     switch (sw.N) {
     case 20:
       E2 = 95;
