@@ -789,10 +789,13 @@ int main(int argc, const char *argv[]) {
             sscanf(line , " energies found: %d " , &sw.energies_found);
             sscanf(line , " too high energy: %d " , &sw.too_high_energy);
             sscanf(line , " too low energy: %d " , &sw.too_low_energy);
+            sscanf(line , " minimum important energy: %d " , &sw.min_important_energy);
+            sscanf(line , " minimum energy: %d " , &sw.min_energy);
+            sscanf(line , " maximum energy: %d " , &sw.max_energy);
           }
           // TODO;
           // or [eventually] write our and read in energy_histogram, density, pessimistic_samples etc. values
-          //TODO (important): min_important_energy,
+          //TODO (important):
           //                  max_entropy_state, min_energy_state,
           ////Ex:
         ////  printf("lndos is now {\n");
@@ -961,11 +964,13 @@ int main(int argc, const char *argv[]) {
         random::dump_resume_info(resume_out);
         fprintf(resume_out, "%s", headerinfo);
         fprintf(resume_out, "%s", countinfo);
-        fprintf(resume_out, "# max_entropy_state: %d\n",sw.max_entropy_state);
+        fprintf(resume_out, "# max_entropy_state: %d\n", sw.max_entropy_state);
         fprintf(resume_out, "# energies found: %d\n", sw.energies_found);
-        fprintf(resume_out, "# too low energy: %d\n",sw.too_low_energy);
+        fprintf(resume_out, "# too low energy: %d\n", sw.too_low_energy);
         fprintf(resume_out, "# too high energy: %d\n", sw.too_high_energy);
-        fprintf(resume_out, "# min_important_energy: %i\n\n",sw.min_important_energy);
+        fprintf(resume_out, "# minimum important energy: %d\n", sw.min_important_energy);
+        fprintf(resume_out, "# minimum energy: %d\n", sw.min_energy);
+        fprintf(resume_out, "# maximum energy: %d\n", sw.max_energy);
 
         fprintf(resume_out, "# energy   lnw\n");
         for (int i = 0; i <= sw.energy_levels; i++) {
