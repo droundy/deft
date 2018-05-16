@@ -273,7 +273,6 @@ int main(int argc, const char *argv[]) {
 
   sw.iteration = 0; // start at zeroeth iteration
   sw.max_entropy_state = 0;
-  sw.min_energy_state = 0;
   sw.energy = 0;
 
   // translation distance should scale with ball radius

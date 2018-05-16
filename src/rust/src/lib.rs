@@ -1,7 +1,5 @@
 extern crate internment;
 extern crate tinyset;
-#[macro_use]
-extern crate expr_derive;
 
 use internment::Intern;
 use tinyset::{Map64, Fits64};
@@ -206,25 +204,81 @@ impl<T: ExprMul, U: Into<Expr<T>>> std::ops::Div<U> for Expr<T> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+macro_rules! impl_expr_add {
+    ( $name:ident ) => {
+        impl ExprAdd for $name {
+            fn sum_from_map(map: AbelianMap<Self>) -> Self {
+                if map.len() == 1 {
+                    let (k, &v) = map.iter().next().unwrap();
+                    if v == 1.0 {
+                        return k.inner.deref().clone();
+                    }
+                }
+                $name::Add(map)
+            }
+
+            fn map_from_sum(&self) -> Option<&AbelianMap<Self>> {
+                if let &$name::Add(ref map) = self {
+                    Some(&map)
+                } else {
+                    None
+                }
+            }
+        }
+    }
+}
+
+macro_rules! impl_expr_mul {
+    ( $name:ident ) => {
+        impl ExprMul for $name {
+            fn mul_from_map(map: AbelianMap<Self>) -> Self {
+                if map.len() == 1 {
+                    let (k, &v) = map.iter().next().unwrap();
+                    if v == 1.0 {
+                        return k.inner.deref().clone();
+                    }
+                }
+                $name::Mul(map)
+            }
+
+            fn map_from_mul(&self) -> Option<&AbelianMap<Self>> {
+                if let &$name::Mul(ref map) = self {
+                    Some(&map)
+                } else {
+                    None
+                }
+            }
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub enum Scalar {
-    Var(&'static str),
+    Var(Intern<String>),
     Exp(Expr<Scalar>),
     Log(Expr<Scalar>),
     Add(AbelianMap<Scalar>),
     Mul(AbelianMap<Scalar>),
 }
 
+impl_expr_add!(Scalar);
+impl_expr_mul!(Scalar);
+impl_expr_add!(RealSpaceScalar);
+impl_expr_mul!(RealSpaceScalar);
+impl_expr_add!(KSpaceScalar);
+impl_expr_mul!(KSpaceScalar);
+
 impl Scalar {
     fn exp(&self) -> Self { Scalar::Exp(Expr::new(self)) }
     fn log(&self) -> Self { Scalar::Exp(Expr::new(self)) }
+    fn var(name: &str) -> Self { Scalar::Var(Intern::new(String::from(name))) }
 }
 
 impl ExprType for Scalar {
     fn cpp(&self) -> String {
         match self {
             &Scalar::Var(s) =>
-                String::from(s),
+                (*s).clone(),
             &Scalar::Exp(a) =>
                 String::from("exp(") + &a.cpp() + &")",
             &Scalar::Log(a) =>
@@ -294,10 +348,10 @@ impl ExprType for Scalar {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub enum RealSpaceScalar {
-    Var(&'static str),
-    ScalarVar(&'static str),
+    Var(Intern<String>),
+    ScalarVar(Intern<String>),
     Exp(Expr<RealSpaceScalar>),
     Log(Expr<RealSpaceScalar>),
     Add(AbelianMap<RealSpaceScalar>),
@@ -308,14 +362,16 @@ pub enum RealSpaceScalar {
 impl RealSpaceScalar {
     fn exp(&self) -> Self { RealSpaceScalar::Exp(Expr::new(self)) }
     fn log(&self) -> Self { RealSpaceScalar::Exp(Expr::new(self)) }
+    fn var(name: &str) -> Self { RealSpaceScalar::Var(Intern::new(String::from(name))) }
+    fn scalar_var(name: &str) -> Self { RealSpaceScalar::ScalarVar(Intern::new(String::from(name))) }
 }
 
 impl ExprType for RealSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
 
-#[derive(Clone, PartialEq, Eq, Debug, Hash, ExprAdd, ExprMul)]
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub enum KSpaceScalar {
-    Var(&'static str),
-    ScalarVar(&'static str),
+    Var(Intern<String>),
+    ScalarVar(Intern<String>),
     Exp(Expr<KSpaceScalar>),
     Log(Expr<KSpaceScalar>),
     Add(AbelianMap<KSpaceScalar>),
@@ -326,6 +382,8 @@ pub enum KSpaceScalar {
 impl KSpaceScalar {
     fn exp(&self) -> Self { KSpaceScalar::Exp(Expr::new(self)) }
     fn log(&self) -> Self { KSpaceScalar::Exp(Expr::new(self)) }
+    fn var(name: &str) -> Self { KSpaceScalar::Var(Intern::new(String::from(name))) }
+    fn scalar_var(name: &str) -> Self { KSpaceScalar::ScalarVar(Intern::new(String::from(name))) }
 }
 
 impl ExprType for KSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
@@ -333,17 +391,8 @@ impl ExprType for KSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
 impl From<Scalar> for RealSpaceScalar {
     fn from(s: Scalar) -> Self {
         match s {
-            Scalar::Var(s) =>
-                RealSpaceScalar::ScalarVar(
-                    // Leak `s` because `Var`s are static because
-                    // they are in `Intern`ed `Expr::inner`s.
-                    // See <https://stackoverflow.com/a/30527289>.
-                    unsafe {
-                        let s = String::from(s) + &"[i]";
-                        let ss = std::mem::transmute(&s as &str);
-                        std::mem::forget(s);
-                        ss
-                    }),
+            Scalar::Var(name) =>
+                RealSpaceScalar::ScalarVar(name),
             Scalar::Exp(a) =>
                 RealSpaceScalar::Exp(Expr::new(&a.inner.deref().clone().into())),
             Scalar::Log(a) =>
@@ -361,6 +410,38 @@ impl From<Scalar> for RealSpaceScalar {
         }
     }
 }
+
+// impl RealSpaceScalar {
+//     fn fake_scalar(&self) -> Scalar {
+//         match s {
+//             RealSpaceScalar::Var(name) =>
+//                 Scalar::ScalarVar(
+//                     // Leak `s` because `Var`s are static because
+//                     // they are in `Intern`ed `Expr::inner`s.
+//                     // See <https://stackoverflow.com/a/30527289>.
+//                     unsafe {
+//                         let s = String::from(s) + &"[i]";
+//                         let ss = std::mem::transmute(&s as &str);
+//                         std::mem::forget(s);
+//                         ss
+//                     }),
+//             RealSpaceScalar::Exp(a) =>
+//                 Scalar::Exp(Expr::new(&a.inner.deref().clone().into())),
+//             RealSpaceScalar::Log(a) =>
+//                 Scalar::Log(Expr::new(&a.inner.deref().clone().into())),
+//             RealSpaceScalar::Add(m) =>
+//                 Scalar::Add(
+//                     m.iter()
+//                      .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
+//                      .collect()),
+//             RealSpaceScalar::Mul(m) =>
+//                 Scalar::Mul(
+//                     m.iter()
+//                      .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
+//                      .collect()),
+//         }
+//     }
+// }
 
 #[derive(Clone)]
 pub struct AbelianMap<T: ExprType> {
@@ -510,17 +591,17 @@ mod tests {
 
     #[test]
     fn abelian() {
-        let t = vec![Scalar::Var("x"), Scalar::Var("x"), Scalar::Var("y"), Scalar::Var("z")];
+        let t = vec![Scalar::var("x"), Scalar::var("x"), Scalar::var("y"), Scalar::var("z")];
         let s: AbelianMap<Scalar> = t.into_iter().collect();
         assert_eq!(s, s);
         assert_eq!(s, s.iter().map(|(k, &v)| (k, v)).collect());
-        assert!(s != vec![Scalar::Var("x"), Scalar::Var("y"), Scalar::Var("z")].into_iter().collect());
+        assert!(s != vec![Scalar::var("x"), Scalar::var("y"), Scalar::var("z")].into_iter().collect());
     }
 
     #[test]
     fn arith() {
-        let a = Expr::new(&Scalar::Var("a"));
-        let b = Expr::new(&Scalar::Var("b"));
+        let a = Expr::new(&Scalar::var("a"));
+        let b = Expr::new(&Scalar::var("b"));
 
         assert_eq!(a, a);
         assert!(a != b);
@@ -544,10 +625,10 @@ mod tests {
 
     #[test]
     fn realspace() {
-        let a: Expr<RealSpaceScalar> = <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::Var("a"));
-        let s: Expr<Scalar> = <Expr<Scalar>>::new(&Scalar::Var("s"));
+        let a: Expr<RealSpaceScalar> = <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::var("a"));
+        let s: Expr<Scalar> = <Expr<Scalar>>::new(&Scalar::var("s"));
         let rs_s: Expr<RealSpaceScalar> =
-            <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::ScalarVar("s"));
+            <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::scalar_var("s"));
 
         assert_eq!(a * rs_s, a * rs_s);
         // FIXME the following is broken:
@@ -556,9 +637,9 @@ mod tests {
 
     #[test]
     fn cpp() {
-        let a = Expr::new(&Scalar::Var("a"));
-        let b = Expr::new(&Scalar::Var("b"));
-        let c = Expr::new(&Scalar::Var("c"));
+        let a = Expr::new(&Scalar::var("a"));
+        let b = Expr::new(&Scalar::var("b"));
+        let c = Expr::new(&Scalar::var("c"));
 
 
         assert_eq!((c + b + a).cpp(), "a + b + c");
