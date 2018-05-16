@@ -392,24 +392,22 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
-  if (sa_t0 || use_sad) {
-    if (energy_histogram[energy] == 0) {
-      energies_found++; // we found a new energy!
-      if (max_energy < 0 || energy > max_energy) max_energy = energy;
-      if (min_energy < 0 || energy < min_energy) min_energy = energy;
-      if (use_sad) {
-        printf("  (moves %ld, energies_found %d, erange: %d -> %d effective t0 = %g)\n",
-               moves.total, energies_found, min_energy, max_energy,
-               sa_prefactor*energies_found
-                 *(max_energy-min_energy)/(min_T*use_sad));
-      }
+  if (energy_histogram[energy] == 0) {
+    energies_found++; // we found a new energy!
+    if (max_energy < 0 || energy < max_energy) max_energy = energy;
+    if (min_energy < 0 || energy > min_energy) min_energy = energy;
+    if (use_sad) {
+      printf("  (moves %ld, energies_found %d, erange: %d -> %d effective t0 = %g)\n",
+             moves.total, energies_found, min_energy, max_energy,
+             sa_prefactor*energies_found
+             *(min_energy-max_energy)/(min_T*use_sad));
     }
-    if (use_sad && energies_found > 1) {
-      wl_factor = sa_prefactor*energies_found*(max_energy-min_energy)
-        /(min_T*moves.total*use_sad);
-    } else {
-      wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
-    }
+  }
+  if (use_sad && energies_found > 1) {
+    wl_factor = sa_prefactor*energies_found*(min_energy-max_energy)
+      /(min_T*moves.total*use_sad);
+  } else if (sa_t0) {
+    wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
@@ -523,7 +521,7 @@ void sw_simulation::energy_change_updates(int energy_change){
 
   if (energy_change > 0) optimistic_samples[energy]++;
 
-  // Update observation of minimum energy
+  // Update observation of minimum energy (this *ought* to be redundant)
   if (energy > min_energy) min_energy = energy;
 }
 
