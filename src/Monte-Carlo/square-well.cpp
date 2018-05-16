@@ -1153,12 +1153,6 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
   int old_min_important_energy = min_important_energy;
   while (!done) {
 
-    if(fixed_energy_range){
-      // If we have a fixed energy range, don't allow going below it
-      initialize_canonical(-1e-2,min_important_energy);
-    }
-
-
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
       move_a_ball();
     }
