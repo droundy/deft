@@ -305,6 +305,12 @@ for the simulation to determine what $t_0$ should be.
 
 \section{SAD Algorithm}
 \subsubsection{The theory behind SAD}
+~\jpsays{We need to define or talk about Tmin.  This is a disadvantage
+of of SAD. WL requires an energy range. SAMC removes the energy range
+requirement but requires simulating every possible energy.  For SAD,
+Tmax set to $\infty$ is fine.  Easy to simulate this way. SAD focuses
+on energies between Tmin and infinity.}
+
 The SAD (Dynamic Stochastic Approximation) is a version of the SAMC
 Algorithm that attempts to dynamically choose the modification factor
 rather than relying on system dependent parameters such as $t_0$ or
@@ -328,32 +334,77 @@ gives the following
 where $N_E$ is the number of energies that have been found. The change
 in the entropy the minimum temperature can be thought of as a slope of
 the triangle made by connecting the minimum important energy and the
-maximum entropy state.  The factor of $3$ comes from the ratio of areas bounded
-by the $\ln{D(E)}$ and the minimum temperature line.
-The update factor has the same $1/t$ behavior as the original SAMC algorithm;
-however now every time a new energy is discovered during the course
-of the simulation, the update factor experiences a jump. This behavior allows
-SAD to dynamically prevent the update factor from decreasing too rapidly.
-
-Fig.~\ref{fig:gamma-vs-t}. shows the monotonic decrease of the update
-factor for SAMC.  The update factor for WL decreases like a step
-function while the update factor for SAD dynamically fluctuates around
-a value less than 1 for early MC moves (while finding new energy
-states).  Ultimately once all energy states have been found, the update
-factor for SAD decreases in the same monotonic fashion as SAMC.
+maximum entropy state.  The factor of $3$ comes from the ratio of areas
+bounded by the $\ln{D(E)}$ and the minimum temperature line. The update
+factor has the same $1/t$ behavior as the original SAMC algorithm;
+however now every time a new energy is discovered during the course of
+the simulation, the update factor experiences a jump. This behavior
+allows SAD to dynamically prevent the update factor from decreasing too
+rapidly. In contrast to SAD, Fig.~\ref{fig:gamma-vs-t}. shows the
+monotonic decrease of the update factor for SAMC.  The update factor
+for WL decreases like a step function while the update factor for SAD
+dynamically fluctuates around a value less than 1 for early MC moves
+(while finding new energy states).  Ultimately once all energy states
+have been found, the update factor for SAD decreases in the same
+monotonic fashion as SAMC.
 
 \subsubsection{High and Low energy racheting}
-Since SAD explores all energy states it is imperative that the method have
-a reasonable idea about where the minimum important energy and maximum
-entropy state are located in energy space. Since these are not user input
-parameters like for methods suchas WL-TMMC, the simulation is responsible
-for determining and updating these energy locations. In order to prevent,
-the method from experiencing errors near the energy extrema, we employ a 
-high energy and a low energy to define the range over which the energy 
-histogram is made flat. The high energy is the highest ever value that the
-maximum entropy state has taken while the low energy is the lowest ever value
-that the minimum important energy has taken. Together these two energies serve
-as a kind of ratcheting effect to determine the energy landscape boundaries.
+~\jpsays{change name to $\epsilon_H$ and $\epsilon_L$. Include formula
+for updating weights above and below high/low energy.  Explain how we
+compute the maximum entropy state and minimum important energy.  Then
+we are in a position to talk about racheting.} Since SAD explores all
+energy states it is imperative that the method have a reasonable idea
+about where the minimum important energy and maximum entropy state are
+located in energy space. Since these are not user input parameters like
+for methods suchas WL-TMMC, the simulation is responsible for
+determining and updating these energy locations. In order to prevent,
+the method from experiencing errors near the energy extrema, we employ
+a high energy $\epsilon_H$ and a low energy $\epsilon_L$ to define the
+range over which the energy histogram is made flat. $\epsilon_H$ is the
+highest ever value that the maximum entropy state has taken while
+$\epsilon_L$ is the lowest ever value that the minimum important energy
+has taken. SAD uses these two energies to control the weights $w(E)$
+above $\epsilon_H$ and $\epsilon_L$. If the energy $E$ is less than
+$\epsilon_H$ ~\jpsays{greater than sign backward} then the weights can
+be calculated as ~\jpsays{equation formatting problems!}
+\begin{equation}
+\begin{aligned}
+\ln w(E) = \min(\ln w(E) - \gamma, \\
+    \ln w(\epsilon_H) - \log(e^{\ln w(\epsilon_H) -w(E)}))
+\end{aligned}
+\end{equation}
+If the energy $E$ is greater than $\epsilon_L$ ~\jpsays{greater than
+sign backward} then the weights can be calculated as
+\begin{equation}
+\begin{aligned}
+\ln w(E) = \min(\ln w(E) - \gamma, \ln w(\epsilon_L) \\
+    + \frac{E-\epsilon_L}{T_\text{min}}
+    - \log(\gamma + e^{\ln w(\epsilon_L) -w(E)
+    + \frac{E-\epsilon_L}{T_\text{min}}}))
+\end{aligned}
+\end{equation}
+Sad sets the maximum entropy state equal to the energy if either of the
+following is true.~\jpsays{less than sign backward}
+\begin{align}
+\ln w(E) < \ln w(S_\text{max}) \; \text{or} \; H(S_\text{max}) = 0
+\end{align}
+Thus if the method is beyond the maximum entropy state or has collected no
+statistics at the maximum entropy state then it is set equal to the energy.
+Similarly, Sad sets the minimum important energy equal to the energy if
+either of the following is true.~\jpsays{check less than sign}
+~\jpsays{equation formatting problems!}
+\begin{align}
+\ln w(E) < \ln w(E_\text{min}) + \frac{E-E_\text{min}}{T_\text{min}} 
+\; \text{or} \; H(E_\text{min}) = 0
+\end{align}
+Thus if the method is beyond the minimum important energy or has collected no
+statistics at the minimum important energy then it is set equal to the energy.
+
+Together these two
+energies serve as a kind of ratcheting effect to determine the energy
+landscape boundaries.
+~\jpsays{So outside the range set by the weights $w(E)$, the maximum entropy
+state is set to the energy $E$. Likewise with minimum important energy.}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n500}
@@ -407,16 +458,16 @@ being calculated (with the exception of the WL-TMMC method where both
 of these parameters are needed a priori).  In the sections below, we
 examine systems with different particles numbers and filling fractions.
 
-We use the average entropy error vs moves a metric to compare 
+We use the average entropy error vs moves a metric to compare
 simulation runtimes and overall convergence. The overall accuracy
 is determined by examining the fractional error of a particular method to
 a `golden' standard. For each simulation, the `golden' standard is
-SAMC for the best choice of $t_0$ for $10^{11}$ moves followed by TMMC.  
+SAMC for the best choice of $t_0$ for $10^{11}$ moves followed by TMMC.
 \begin{align}
 \epsilon_\text{avg} = 1 - \bigg\lvert\frac{S_\text{method}}{S_\text{golden}}\bigg\rvert
 \end{align}
-Simulations that take more iterations to reach the same entropy error as a 
-different method take longer to converge. This behavior is seen in 
+Simulations that take more iterations to reach the same entropy error as a
+different method take longer to converge. This behavior is seen in
 Fig.~\ref{fig:N50-ff0.1-avg-error}.
 
 \begin{figure}
@@ -443,7 +494,7 @@ Fig.~\ref{fig:N50-ff0.1-avg-error}.
 
 \subsubsection{A periodic system with 10\% filling fraction and $(N = 50)$}
 In order to determine how the various methods scale with size,
-simulations are run for systems with different particle numbers. 
+simulations are run for systems with different particle numbers.
 Figure~\ref{fig:N50-ff0.1-avg-error} shows the average entropy vs moves for
 a system consisting of 50 atoms that are placed in a periodic simple cubic unit
 cell with lattice constant chosen to give a filling fraction of 0.10.  These particles
