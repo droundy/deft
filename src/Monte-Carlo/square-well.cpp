@@ -335,7 +335,7 @@ void sw_simulation::move_a_ball() {
     const double tup = ncounts_up/double(tup_norm);
     const double tdown = ncounts_down/double(tdown_norm);
     // If the TMMC data looks remotely plausible, set Pmove appropriately
-    if (tdown < tup && tdown > 0) Pmove = tdown/tup;
+    if (tup > 0) Pmove = tdown/tup;
   } else if (use_sad) {
     const int e1 = energy;
     const int e2 = energy + energy_change;
