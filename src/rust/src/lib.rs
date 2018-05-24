@@ -259,6 +259,8 @@ pub enum Scalar {
     Log(Expr<Scalar>),
     Add(AbelianMap<Scalar>),
     Mul(AbelianMap<Scalar>),
+    FakeIFFT(Expr<Scalar>),
+    FakeFFT(Expr<Scalar>),
 }
 
 impl_expr_add!(Scalar);
@@ -283,6 +285,15 @@ impl ExprType for Scalar {
                 String::from("exp(") + &a.cpp() + &")",
             &Scalar::Log(a) =>
                 String::from("log(") + &a.cpp() + &")",
+
+// friend ComplexVector fft(long Nx, long Ny, long Nz, double dV, Vector f);
+// friend Vector ifft(long Nx, long Ny, long Nz, double dV, ComplexVector f);
+
+            &Scalar::FakeFFT(a) =>
+                String::from("fft(Nx, Ny, Nz, dV, ") + &a.cpp() + &")",
+            &Scalar::FakeIFFT(a) =>
+                String::from("ifft(Nx, Ny, Nz, dV, ") + &a.cpp() + &")",
+
             &Scalar::Add(ref m) => {
                 let pcoeff = |&(ref x, ref c): &(String, f64)| -> String {
                     if x == "1" {
@@ -364,9 +375,14 @@ impl RealSpaceScalar {
     fn log(&self) -> Self { RealSpaceScalar::Exp(Expr::new(self)) }
     fn var(name: &str) -> Self { RealSpaceScalar::Var(Intern::new(String::from(name))) }
     fn scalar_var(name: &str) -> Self { RealSpaceScalar::ScalarVar(Intern::new(String::from(name))) }
+    fn fft(&self) -> KSpaceScalar { KSpaceScalar::FFT(Expr::new(self)) }
 }
 
-impl ExprType for RealSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
+impl ExprType for RealSpaceScalar {
+    fn cpp(&self) -> String {
+        self.fake_scalar().cpp()
+    }
+}
 
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
 pub enum KSpaceScalar {
@@ -386,7 +402,11 @@ impl KSpaceScalar {
     fn scalar_var(name: &str) -> Self { KSpaceScalar::ScalarVar(Intern::new(String::from(name))) }
 }
 
-impl ExprType for KSpaceScalar { fn cpp(&self) -> String { unimplemented!() } }
+impl ExprType for KSpaceScalar {
+    fn cpp(&self) -> String {
+        self.fake_scalar().cpp()
+    }
+}
 
 impl From<Scalar> for RealSpaceScalar {
     fn from(s: Scalar) -> Self {
@@ -407,41 +427,69 @@ impl From<Scalar> for RealSpaceScalar {
                     m.iter()
                      .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
                      .collect()),
+            _ =>
+                panic!("Attempting to convert a fake (syntax-hack) Scalar to a RealSpaceScalar"),
         }
     }
 }
 
-// impl RealSpaceScalar {
-//     fn fake_scalar(&self) -> Scalar {
-//         match s {
-//             RealSpaceScalar::Var(name) =>
-//                 Scalar::ScalarVar(
-//                     // Leak `s` because `Var`s are static because
-//                     // they are in `Intern`ed `Expr::inner`s.
-//                     // See <https://stackoverflow.com/a/30527289>.
-//                     unsafe {
-//                         let s = String::from(s) + &"[i]";
-//                         let ss = std::mem::transmute(&s as &str);
-//                         std::mem::forget(s);
-//                         ss
-//                     }),
-//             RealSpaceScalar::Exp(a) =>
-//                 Scalar::Exp(Expr::new(&a.inner.deref().clone().into())),
-//             RealSpaceScalar::Log(a) =>
-//                 Scalar::Log(Expr::new(&a.inner.deref().clone().into())),
-//             RealSpaceScalar::Add(m) =>
-//                 Scalar::Add(
-//                     m.iter()
-//                      .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
-//                      .collect()),
-//             RealSpaceScalar::Mul(m) =>
-//                 Scalar::Mul(
-//                     m.iter()
-//                      .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
-//                      .collect()),
-//         }
-//     }
-// }
+trait FakeScalar {
+    fn fake_scalar(&self) -> Scalar;
+}
+
+impl FakeScalar for RealSpaceScalar {
+    fn fake_scalar(&self) -> Scalar {
+        match self {
+            &RealSpaceScalar::Var(ref name) =>
+                Scalar::Var(Intern::new(String::new() + name.deref() + &"[i]")),
+            &RealSpaceScalar::ScalarVar(ref name) =>
+                Scalar::Var(name.clone()),
+            &RealSpaceScalar::Exp(ref a) =>
+                Scalar::Exp(Expr::new(&a.inner.deref().fake_scalar())),
+            &RealSpaceScalar::Log(ref a) =>
+                Scalar::Log(Expr::new(&a.inner.deref().fake_scalar())),
+            &RealSpaceScalar::Add(ref m) =>
+                Scalar::Add(
+                    m.iter()
+                     .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
+                     .collect()),
+            &RealSpaceScalar::Mul(ref m) =>
+                Scalar::Mul(
+                    m.iter()
+                     .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
+                     .collect()),
+            &RealSpaceScalar::IFFT(ref a) =>
+                Scalar::FakeIFFT(Expr::new(&a.inner.deref().fake_scalar())),
+        }
+    }
+}
+
+impl FakeScalar for KSpaceScalar {
+    fn fake_scalar(&self) -> Scalar {
+        match self {
+            &KSpaceScalar::Var(ref name) =>
+                Scalar::Var(Intern::new(String::new() + name.deref() + &"[i]")),
+            &KSpaceScalar::ScalarVar(ref name) =>
+                Scalar::Var(name.clone()),
+            &KSpaceScalar::Exp(ref a) =>
+                Scalar::Exp(Expr::new(&a.inner.deref().fake_scalar())),
+            &KSpaceScalar::Log(ref a) =>
+                Scalar::Log(Expr::new(&a.inner.deref().fake_scalar())),
+            &KSpaceScalar::Add(ref m) =>
+                Scalar::Add(
+                    m.iter()
+                     .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
+                     .collect()),
+            &KSpaceScalar::Mul(ref m) =>
+                Scalar::Mul(
+                    m.iter()
+                     .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
+                     .collect()),
+            &KSpaceScalar::FFT(ref a) =>
+                Scalar::FakeFFT(Expr::new(&a.inner.deref().fake_scalar())),
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct AbelianMap<T: ExprType> {
@@ -641,9 +689,13 @@ mod tests {
         let b = Expr::new(&Scalar::var("b"));
         let c = Expr::new(&Scalar::var("c"));
 
-
         assert_eq!((c + b + a).cpp(), "a + b + c");
         assert_eq!((c * b * a).cpp(), "a * b * c");
         assert_eq!((a / c / b).cpp(), "a / (b * c)");
+    }
+
+    #[test]
+    fn fakes() {
+        assert_eq!(Expr::new(&RealSpaceScalar::var("a").fft()).cpp(), "fft(Nx, Ny, Nz, dV, a)");
     }
 }

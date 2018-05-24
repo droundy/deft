@@ -34,7 +34,7 @@ lvextra1 = glob('data/comparison/%s-samc*' % filebase)
 split3 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra1]
 split4 = [i.split('-m', 1)[0] for i in split3]
 for meth in split4:
-    if meth[-3:] != '-tm':
+    if meth[-3:] != '-tmx':
             methods.append('-%s' % meth)
 
 best_ever_error = 1e100

@@ -335,7 +335,7 @@ void sw_simulation::move_a_ball() {
     const double tup = ncounts_up/double(tup_norm);
     const double tdown = ncounts_down/double(tdown_norm);
     // If the TMMC data looks remotely plausible, set Pmove appropriately
-    if (tdown < tup && tdown > 0) Pmove = tdown/tup;
+    if (tup > 0) Pmove = tdown/tup;
   } else if (use_sad) {
     const int e1 = energy;
     const int e2 = energy + energy_change;
@@ -392,24 +392,22 @@ void sw_simulation::move_a_ball() {
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
   if(moves.total % N == 0) iteration++;
-  if (sa_t0 || use_sad) {
-    if (energy_histogram[energy] == 0) {
-      energies_found++; // we found a new energy!
-      if (max_energy < 0 || energy > max_energy) max_energy = energy;
-      if (min_energy < 0 || energy < min_energy) min_energy = energy;
-      if (use_sad) {
-        printf("  (moves %ld, energies_found %d, erange: %d -> %d effective t0 = %g)\n",
-               moves.total, energies_found, min_energy, max_energy,
-               sa_prefactor*energies_found
-                 *(max_energy-min_energy)/(min_T*use_sad));
-      }
+  if (energy_histogram[energy] == 0) {
+    energies_found++; // we found a new energy!
+    if (max_energy < 0 || energy < max_energy) max_energy = energy;
+    if (min_energy < 0 || energy > min_energy) min_energy = energy;
+    if (use_sad) {
+      printf("  (moves %ld, energies_found %d, erange: %d -> %d effective t0 = %g)\n",
+             moves.total, energies_found, min_energy, max_energy,
+             sa_prefactor*energies_found
+             *(min_energy-max_energy)/(min_T*use_sad));
     }
-    if (use_sad && energies_found > 1) {
-      wl_factor = sa_prefactor*energies_found*(max_energy-min_energy)
-        /(min_T*moves.total*use_sad);
-    } else {
-      wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
-    }
+  }
+  if (use_sad && energies_found > 1) {
+    wl_factor = sa_prefactor*energies_found*(min_energy-max_energy)
+      /(min_T*moves.total*use_sad);
+  } else if (sa_t0) {
+    wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
   }
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
@@ -523,8 +521,8 @@ void sw_simulation::energy_change_updates(int energy_change){
 
   if (energy_change > 0) optimistic_samples[energy]++;
 
-  // Update observation of minimum energy
-  if(energy > min_energy_state) min_energy_state = energy;
+  // Update observation of minimum energy (this *ought* to be redundant)
+  if (energy > min_energy) min_energy = energy;
 }
 
 int sw_simulation::simulate_energy_changes(int num_moves) {
@@ -557,8 +555,8 @@ double sw_simulation::fractional_sample_error(double T, bool optimistic_sampling
   double error_times_Z = 0;
   double Z = 0;
   const double *ln_dos = compute_ln_dos(sim_dos_type);
-  for(int i = max_entropy_state; i <= min_energy_state; i++){
-    const double boltz = exp(ln_dos[i]+(i-min_energy_state)/T);
+  for(int i = max_entropy_state; i <= min_energy; i++){
+    const double boltz = exp(ln_dos[i]+(i-min_energy)/T);
     Z += boltz;
     // fixme: what should we do if samples=0?
     if(optimistic_sampling)
@@ -660,7 +658,7 @@ double *sw_simulation::compute_walker_density_using_transitions(double *sample_r
   double *ln_downwalkers = new double[energy_levels]();
   double *ln_dos = compute_ln_dos(transition_dos);
 
-  const int energies_observed = min_energy_state+1;
+  const int energies_observed = min_energy+1;
   double *TD_over_D = new double[energies_observed];
   double norm = 1, oldnorm = 0;
 
@@ -815,7 +813,7 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
 
   min_important_energy = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state+1; i <= min_energy_state; i++) {
+  for (int i = max_entropy_state+1; i <= min_energy; i++) {
     if (ln_dos[i-1] - ln_dos[i] < 1.0/min_T
         && ln_dos[i] != ln_dos[i-1]) {
       // This is an important energy if the DOS is high enough, and we
@@ -835,7 +833,7 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
   }
   /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
   if (min_important_energy == 0) {
-    min_important_energy = min_energy_state;
+    min_important_energy = min_energy;
   }
 
   if (!input_ln_dos) delete[] ln_dos;
@@ -874,7 +872,7 @@ double sw_simulation::converged_to_temperature(double *ln_dos) const {
 }
 
 int sw_simulation::converged_to_state() const {
-  for (int i = max_entropy_state+1; i < min_energy_state; i++) {
+  for (int i = max_entropy_state+1; i < min_energy; i++) {
     if (pessimistic_samples[i] < 10) {
       if (i == 1) {
         // This is a special case for when we have only ever seen one
@@ -906,7 +904,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
     if(end_condition == optimistic_min_samples){
       if (be_verbose) {
         long num_to_go = 0, energies_unconverged = 0;
-        int lowest_problem_energy = 0, highest_problem_energy = min_energy_state;
+        int lowest_problem_energy = 0, highest_problem_energy = min_energy;
         for (int i = min_important_energy; i > max_entropy_state; i--){
           if (optimistic_samples[i] < min_samples) {
             num_to_go += min_samples - optimistic_samples[i];
@@ -935,7 +933,7 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
     } else { // if end_condition == pessimistic_min_samples
       if (be_verbose) {
         long energies_unconverged = 0;
-        int highest_problem_energy = min_energy_state;
+        int highest_problem_energy = min_energy;
         for (int i = min_important_energy; i > max_entropy_state; i--){
           if (pessimistic_samples[i] < min_samples) {
             energies_unconverged += 1;
@@ -977,13 +975,13 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
     int hist_min = int(1e20);
     int hist_total = 0;
     int most_weighted_energy = 0;
-    for(int i = max_entropy_state; i <= min_energy_state; i++){
+    for(int i = max_entropy_state; i <= min_energy; i++){
       hist_total += energy_histogram[i];
       if(energy_histogram[i] < hist_min) hist_min = energy_histogram[i];
       if(ln_energy_weights[i] > ln_energy_weights[most_weighted_energy])
         most_weighted_energy = i;
     }
-    const double hist_mean = hist_total/(min_energy_state-max_entropy_state);
+    const double hist_mean = hist_total/(min_energy-max_entropy_state);
     /* First, make sure that the histogram is sufficiently flat. In addition,
        make sure we didn't just get stuck at the most heavily weighted energy. */
     return hist_min >= flatness*hist_mean && energy != most_weighted_energy;
@@ -1002,15 +1000,15 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
            min_important_energy, which assumes a method such as tmmc,
            which puts a bound on the "effective temperature" at
            min_T. */
-        int min_maybe_important_energy = min_energy_state;
-        for (int i=min_energy_state; i>max_entropy_state;i--) {
+        int min_maybe_important_energy = min_energy;
+        for (int i=min_energy; i>max_entropy_state;i--) {
           if (pessimistic_samples[i] && pessimistic_samples[i-1] &&
               energy_histogram[i]/double(energy_histogram[i-1]) > exp(-1.0/min_T)) {
             min_maybe_important_energy = i-1;
             break;
           }
         }
-        int lowest_problem_energy = 0, highest_problem_energy = min_energy_state;
+        int lowest_problem_energy = 0, highest_problem_energy = min_energy;
         for (int i = min_maybe_important_energy; i > max_entropy_state; i--){
           if (pessimistic_samples[i] < 5 && energy_histogram[i]) {
             if (i > lowest_problem_energy) lowest_problem_energy = i;
@@ -1155,12 +1153,6 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
   int old_min_important_energy = min_important_energy;
   while (!done) {
 
-    if(fixed_energy_range){
-      // If we have a fixed energy range, don't allow going below it
-      initialize_canonical(-1e-2,min_important_energy);
-    }
-
-
     for (int i=0; i < N*energy_levels && !reached_iteration_cap(); i++) {
       move_a_ball();
     }
@@ -1228,7 +1220,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 
       // repeat until terminal condition is met,
       // and make sure we're not stuck at a newly introduced minimum energy state
-      if (wl_factor < wl_cutoff && energy != min_energy_state
+      if (wl_factor < wl_cutoff && energy != min_energy
           && end_condition != init_iter_limit) {
         printf("Took %ld iterations and %i updates to initialize with Wang-Landau method.\n",
                iteration, weight_updates);
@@ -1245,8 +1237,8 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
       printf("  round trips at min E: %ld (max S - 1): %ld (counts at minE: %ld)\n\n",
              pessimistic_samples[min_important_energy], pessimistic_samples[max_entropy_state+1],
              min_interesting_energy_count);
-      // printf("  min_energy_state: %d,  max_entropy_state: %d,  min_important_energy %d, energies visited: %d\n",
-      //        min_energy_state, max_entropy_state, min_important_energy, num_nonzero);
+      // printf("  min_energy: %d,  max_entropy_state: %d,  min_important_energy %d, energies visited: %d\n",
+      //        min_energy, max_entropy_state, min_important_energy, num_nonzero);
       // printf("  current energy: %d\n", energy);
       // printf("  hist_mean: %g,  total_counts: %g\n", hist_mean, total_counts);
     }
@@ -1345,7 +1337,7 @@ void sw_simulation::initialize_optimized_ensemble(int first_update_iterations,
     flush_weight_array();
 
     printf("Optimized ensemble update: %i (%ld iters)\n", weight_updates, update_iters);
-    for(int e = max_entropy_state; e <= min_energy_state; e++){
+    for(int e = max_entropy_state; e <= min_energy; e++){
       printf("h[%3d] = %10ld,  ps[%3d] = %10ld,  lnw[%3d]: %g\n",
              e, energy_histogram[e], e, pessimistic_samples[e], e, ln_energy_weights[e]);
     }
@@ -1364,19 +1356,19 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     set_max_entropy_energy();
 
     // Update the weight array.
-    for (int e = max_entropy_state; e <= min_energy_state; e++) {
+    for (int e = max_entropy_state; e <= min_energy; e++) {
       if (energy_histogram[e]) {
         ln_energy_weights[e] -= log(energy_histogram[e]);
       }
     }
     // Now ensure that we never bias downward more strongly than at
     // the minimum temperature.
-    for (int e = max_entropy_state+1; e <= min_energy_state; e++) {
+    for (int e = max_entropy_state+1; e <= min_energy; e++) {
       if (ln_energy_weights[e] - ln_energy_weights[e-1] > 1.0/min_T) {
         // Once we find the energy at which the minimum temperature
         // gives the slope of the density of states, use this slope
         // for all lower energies that we have explored.
-        for (int i=e; i<min_energy_state; i++) {
+        for (int i=e; i<min_energy; i++) {
           if (energy_histogram[i]) ln_energy_weights[i] = ln_energy_weights[i-1] + 1.0/min_T;
         }
         break;
@@ -1407,7 +1399,7 @@ void sw_simulation::initialize_simple_flat(int flat_update_factor){
     if (am_verbose) {
       double *tmmc_dos = compute_ln_dos(transition_dos);
       printf("simple flat status update:\n");
-      for (int e = max_entropy_state; e <= min_energy_state; e++) {
+      for (int e = max_entropy_state; e <= min_energy; e++) {
         if (energy_histogram[e]) {
           printf("h[%3d] = %10ld,  os[%3d] = %10ld,  ps[%3d] = %10ld,  lnw[%3d]: %10g,  tmmc: %g\n",
                  e, energy_histogram[e], e, optimistic_samples[e], e,
@@ -1438,7 +1430,7 @@ void sw_simulation::optimize_weights_using_transitions(int version) {
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   double diffusivity = 1;
-  for(int i = max_entropy_state; i <= min_energy_state; i++) {
+  for(int i = max_entropy_state; i <= min_energy; i++) {
     double norm = 0, mean_sqr_de = 0, mean_de = 0;
     for (int de=-biggest_energy_transition;de<=biggest_energy_transition;de++) {
       // cap the ratio of weights at 1
@@ -1999,13 +1991,13 @@ void sw_simulation::initialize_transitions_file(const char *transitions_input_fi
       }
     }
   }
-  min_energy_state = e;
+  min_energy = e;
 
   // we are done with the data file
   fclose(transitions_infile);
 
   // pretend we have seen the energies for which we have transition data
-  for(int i = min_e; i <= min_energy_state; i++) {
+  for(int i = min_e; i <= min_energy; i++) {
     energies_found++;
     energy_histogram[i] = 1;
   }

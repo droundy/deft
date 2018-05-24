@@ -73,7 +73,7 @@ struct sw_simulation {
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
 
-  int max_entropy_state, min_energy_state, min_important_energy;
+  int max_entropy_state, min_important_energy;
   int min_energy; // The lowest energy we have ever found for this
                   // system.  This must be kept up-to-date because
                   // it is used by SAD to compute the delta E.

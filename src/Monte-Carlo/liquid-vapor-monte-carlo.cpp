@@ -459,7 +459,6 @@ int main(int argc, const char *argv[]) {
 
   sw.balls = new ball[sw.N];
   sw.iteration = 0;
-  sw.min_energy_state = 0;
 
   // initialize ball radii
   for (int i = 0; i < sw.N; i++)
