@@ -259,8 +259,6 @@ pub enum Scalar {
     Log(Expr<Scalar>),
     Add(AbelianMap<Scalar>),
     Mul(AbelianMap<Scalar>),
-    FakeIFFT(Expr<Scalar>),
-    FakeFFT(Expr<Scalar>),
 }
 
 impl_expr_add!(Scalar);
@@ -285,15 +283,6 @@ impl ExprType for Scalar {
                 String::from("exp(") + &a.cpp() + &")",
             &Scalar::Log(a) =>
                 String::from("log(") + &a.cpp() + &")",
-
-// friend ComplexVector fft(long Nx, long Ny, long Nz, double dV, Vector f);
-// friend Vector ifft(long Nx, long Ny, long Nz, double dV, ComplexVector f);
-
-            &Scalar::FakeFFT(a) =>
-                String::from("fft(Nx, Ny, Nz, dV, ") + &a.cpp() + &")",
-            &Scalar::FakeIFFT(a) =>
-                String::from("ifft(Nx, Ny, Nz, dV, ") + &a.cpp() + &")",
-
             &Scalar::Add(ref m) => {
                 let pcoeff = |&(ref x, ref c): &(String, f64)| -> String {
                     if x == "1" {
@@ -376,11 +365,97 @@ impl RealSpaceScalar {
     fn var(name: &str) -> Self { RealSpaceScalar::Var(Intern::new(String::from(name))) }
     fn scalar_var(name: &str) -> Self { RealSpaceScalar::ScalarVar(Intern::new(String::from(name))) }
     fn fft(&self) -> KSpaceScalar { KSpaceScalar::FFT(Expr::new(self)) }
+
+    fn contains_ifft(&self) -> bool {
+        match self {
+            &RealSpaceScalar::IFFT(_) => true,
+            &RealSpaceScalar::Var(_) | &RealSpaceScalar::ScalarVar(_) => false,
+            &RealSpaceScalar::Exp(a) | &RealSpaceScalar::Log(a) => a.inner.deref().contains_ifft(),
+            &RealSpaceScalar::Add(ref m) | &RealSpaceScalar::Mul(ref m) => m.into_iter().any(|(k, &_)| k.inner.deref().contains_ifft()),
+        }
+    }
 }
 
 impl ExprType for RealSpaceScalar {
     fn cpp(&self) -> String {
-        self.fake_scalar().cpp()
+        if !self.contains_ifft() {
+            return String::from("Vector temp(Nx*Ny*Nz);\nfor (int i = 0; i < Nx * Ny * Nz; i++)\n\ttemp[i] = ") + &self.fake_scalar().cpp() + &"\n";
+        }
+        match self {
+            &RealSpaceScalar::IFFT(a) =>
+                match a.inner.deref() {
+                    &KSpaceScalar::Var(s) =>
+                        String::from("ifft(Nx, Ny, Nz, dV, ") + s.deref() + &")",
+                    _ =>
+                        String::from("ifft(Nx, Ny, Nz, dV, temp)"),
+                }
+            &RealSpaceScalar::Var(s) | &RealSpaceScalar::ScalarVar(s) =>
+                (*s).clone(),
+            &RealSpaceScalar::Exp(a) | &RealSpaceScalar::Log(a) =>
+                a.cpp(),
+            &RealSpaceScalar::Add(ref m) => {
+                let pcoeff = |&(ref x, ref c): &(String, f64)| -> String {
+                    if x == "1" {
+                        c.to_string()
+                    } else if *c == 1.0 {
+                        x.clone()
+                    } else {
+                        c.to_string() + &" * " + &x
+                    }
+                };
+                let ncoeff = |&(ref x, ref c): &(String, f64)| -> String {
+                    if x == "1" {
+                        c.abs().to_string()
+                    } else if *c == -1.0 {
+                        x.clone()
+                    } else {
+                        c.abs().to_string() + &" * " + &x
+                    }
+                };
+                let (p, n) = m.split_cpp_sort();
+                match (p.len(), n.len()) {
+                    (0, 0) =>
+                        String::from("0"),
+                    (_, 0) =>
+                        p.iter().map(pcoeff).collect::<Vec<String>>().join(" + "),
+                    (0, _) =>
+                        String::from("-")
+                            + &n.iter().map(ncoeff).collect::<Vec<String>>().join(" + "),
+                    (_, _) =>
+                        p.iter().map(pcoeff).collect::<Vec<String>>().join(" + ")
+                            + &" - "
+                            + &n.iter().map(ncoeff).collect::<Vec<String>>().join(" + "),
+                }
+            },
+            &RealSpaceScalar::Mul(ref m) => {
+                let ref power = |&(ref x, ref p): &(String, f64)| -> String {
+                    if x == "1" || p.abs() == 1.0 {
+                        x.clone()
+                    } else if p.abs() == 2.0 {
+                        x.clone() + &" * " + &x
+                    } else {
+                        String::from("pow(") + &x + &", " + &p.abs().to_string() + &")"
+                    }
+                };
+                let (n, d) = m.split_cpp_sort();
+                match (n.len(), d.len()) {
+                    (0, 0) =>
+                        String::from("1"),
+                    (_, 0) =>
+                        n.iter().map(power).collect::<Vec<String>>().join(" * "),
+                    (0, _) =>
+                        String::from("1 / (")
+                            + &d.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &")",
+                    (_, _) =>
+                        n.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &" / ("
+                            + &d.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &")",
+                }
+            },
+        }
+
     }
 }
 
@@ -400,11 +475,97 @@ impl KSpaceScalar {
     fn log(&self) -> Self { KSpaceScalar::Exp(Expr::new(self)) }
     fn var(name: &str) -> Self { KSpaceScalar::Var(Intern::new(String::from(name))) }
     fn scalar_var(name: &str) -> Self { KSpaceScalar::ScalarVar(Intern::new(String::from(name))) }
+    fn ifft(&self) -> RealSpaceScalar { RealSpaceScalar::IFFT(Expr::new(self)) }
+
+    fn contains_fft(&self) -> bool {
+        match self {
+            &KSpaceScalar::FFT(_) => true,
+            &KSpaceScalar::Var(_) | &KSpaceScalar::ScalarVar(_) => false,
+            &KSpaceScalar::Exp(a) | &KSpaceScalar::Log(a) => a.inner.deref().contains_fft(),
+            &KSpaceScalar::Add(ref m) | &KSpaceScalar::Mul(ref m) => m.into_iter().any(|(k, &_)| k.inner.deref().contains_fft()),
+        }
+    }
 }
 
 impl ExprType for KSpaceScalar {
     fn cpp(&self) -> String {
-        self.fake_scalar().cpp()
+        if !self.contains_fft() {
+            return String::from("Vector temp(Nx*Ny*(int(Nz)/2+1));\nfor (int i = 0; i < Nx * Ny * Nz; i++)\n\ttemp[i] = ") + &self.fake_scalar().cpp() + &"\n";
+        }
+        match self {
+            &KSpaceScalar::FFT(a) =>
+                match a.inner.deref() {
+                    &RealSpaceScalar::Var(s) =>
+                        String::from("fft(Nx, Ny, Nz, dV, ") + s.deref() + &")",
+                    _ =>
+                        String::from("fft(Nx, Ny, Nz, dV, temp)"),
+                }
+            &KSpaceScalar::Var(s) | &KSpaceScalar::ScalarVar(s) =>
+                (*s).clone(),
+            &KSpaceScalar::Exp(a) | &KSpaceScalar::Log(a) =>
+                a.cpp(),
+            &KSpaceScalar::Add(ref m) => {
+                let pcoeff = |&(ref x, ref c): &(String, f64)| -> String {
+                    if x == "1" {
+                        c.to_string()
+                    } else if *c == 1.0 {
+                        x.clone()
+                    } else {
+                        c.to_string() + &" * " + &x
+                    }
+                };
+                let ncoeff = |&(ref x, ref c): &(String, f64)| -> String {
+                    if x == "1" {
+                        c.abs().to_string()
+                    } else if *c == -1.0 {
+                        x.clone()
+                    } else {
+                        c.abs().to_string() + &" * " + &x
+                    }
+                };
+                let (p, n) = m.split_cpp_sort();
+                match (p.len(), n.len()) {
+                    (0, 0) =>
+                        String::from("0"),
+                    (_, 0) =>
+                        p.iter().map(pcoeff).collect::<Vec<String>>().join(" + "),
+                    (0, _) =>
+                        String::from("-")
+                            + &n.iter().map(ncoeff).collect::<Vec<String>>().join(" + "),
+                    (_, _) =>
+                        p.iter().map(pcoeff).collect::<Vec<String>>().join(" + ")
+                            + &" - "
+                            + &n.iter().map(ncoeff).collect::<Vec<String>>().join(" + "),
+                }
+            },
+            &KSpaceScalar::Mul(ref m) => {
+                let ref power = |&(ref x, ref p): &(String, f64)| -> String {
+                    if x == "1" || p.abs() == 1.0 {
+                        x.clone()
+                    } else if p.abs() == 2.0 {
+                        x.clone() + &" * " + &x
+                    } else {
+                        String::from("pow(") + &x + &", " + &p.abs().to_string() + &")"
+                    }
+                };
+                let (n, d) = m.split_cpp_sort();
+                match (n.len(), d.len()) {
+                    (0, 0) =>
+                        String::from("1"),
+                    (_, 0) =>
+                        n.iter().map(power).collect::<Vec<String>>().join(" * "),
+                    (0, _) =>
+                        String::from("1 / (")
+                            + &d.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &")",
+                    (_, _) =>
+                        n.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &" / ("
+                            + &d.iter().map(power).collect::<Vec<String>>().join(" * ")
+                            + &")",
+                }
+            },
+        }
     }
 }
 
@@ -459,7 +620,7 @@ impl FakeScalar for RealSpaceScalar {
                      .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
                      .collect()),
             &RealSpaceScalar::IFFT(ref a) =>
-                Scalar::FakeIFFT(Expr::new(&a.inner.deref().fake_scalar())),
+                panic!(),
         }
     }
 }
@@ -486,7 +647,7 @@ impl FakeScalar for KSpaceScalar {
                      .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
                      .collect()),
             &KSpaceScalar::FFT(ref a) =>
-                Scalar::FakeFFT(Expr::new(&a.inner.deref().fake_scalar())),
+                panic!(),
         }
     }
 }
@@ -695,7 +856,8 @@ mod tests {
     }
 
     #[test]
-    fn fakes() {
-        assert_eq!(Expr::new(&RealSpaceScalar::var("a").fft()).cpp(), "fft(Nx, Ny, Nz, dV, a)");
+    fn fourier() {
+        assert_eq!(Expr::new(&KSpaceScalar::var("k").ifft()).cpp(), "ifft(Nx, Ny, Nz, dV, k)");
+        assert_eq!(Expr::new(&RealSpaceScalar::var("r").fft()).cpp(), "fft(Nx, Ny, Nz, dV, r)");
     }
 }
