@@ -794,6 +794,18 @@ impl<T: ExprType> PartialEq for AbelianMap<T> {
 
 impl<T: ExprType> Eq for AbelianMap<T> {}
 
+impl Expr<KSpaceScalar> {
+    fn ifft(&self) -> Expr<RealSpaceScalar> {
+        Expr::new(&self.inner.ifft())
+    }
+}
+
+impl Expr<RealSpaceScalar> {
+    fn fft(&self) -> Expr<KSpaceScalar> {
+        Expr::new(&self.inner.fft())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
