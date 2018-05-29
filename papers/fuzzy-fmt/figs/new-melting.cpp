@@ -26,7 +26,7 @@
 #include "vector3d.h"
 
 //Number of points for Monte-Carlo
-long NUM_POINTS = 80;
+long NUM_POINTS = 800;
 double seed=1;
 
 // radius we need to integrate around a gaussian, in units of gw.
@@ -207,7 +207,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   }
 
   for (long i=0; i<NUM_POINTS; i++) {
-    vector3d dr = vector3d::ran(gwidth);
+    vector3d dr = vector3d::ran(gwidth);  //ASK! is this changing our seed all the time?! I think this should be ran(seed)
     vector3d r_prime = R + dr;
     vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
     weight w = find_weights(r, r_prime, temp);
@@ -352,12 +352,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             for (int v=-many_cells; v<= many_cells; v++) {
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               double deltar = (r-R).norm();
-              n += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3); // FIXME check analytic norm
+              n += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3); // ASK! FIXME check analytic norm
             }
           }
         }
         if (n > 1e-200) { // avoid underflow and n=0 issues
-          // double dF = kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0);
           // printf("n = %g  dF = %g\n", n, dF);
           cFideal_of_primitive_cell += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
         }
@@ -388,10 +387,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     hf.epsilon() = 1;   //energy constant in the WCA fluid
     hf.kT() = temp;
     hf.n() = reduced_density;
-    hf.mu() = 0;
+    hf.mu() = 0;   //ASK! what is this??
     //Note: hf.energy() returns energy/volume
 
-    hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom"
+    hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom" (I think this is fixed now -check)
     hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
     hf.printme("     homogeneous:");
     printf("homogeneous free_energy per vol is %g\n", hf.energy());
@@ -476,16 +475,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             }
           }
 
-          double phi_1 = -n_0*log(1-n_3);
+          double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   // ASK! added the 1.0's like in HomogeneousSFMTFLuidFast.cpp
           //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
-          double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
+          double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1.0-1.0*n_3);
           //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
 
           // The following was Rosenfelds early vector version of the functional
           //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
 
           // This is the fixed version, which comes from dimensional crossover
-          double phi_3 = uipow(n_2,3)*uipow(1 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1-n_3,2));
+          double phi_3 = uipow(n_2,3)*uipow(1.0 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1.0-1.0*n_3,2));
           if (n_2 == 0 || sqr(n_2) <= nv_2.normsquared()) phi_3 = 0;
 
           //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
@@ -535,6 +534,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
     //free_energy and Fideal are over one parallelepiped (one primitive cell) with 1-fv atoms
     cfree_energy_per_atom=(cFideal_of_primitive_cell + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
+    //ASK! is there another term to add? SEE homogeneousSFMTFastFluid.cpp has -mu*n term whatever that is!
     cfree_energy_per_vol=(cFideal_of_primitive_cell + free_energy)/primitive_cell_volume; //
     printf("primitive cell volume = %g\n", primitive_cell_volume); //
     printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
