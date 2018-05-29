@@ -798,11 +798,19 @@ impl Expr<KSpaceScalar> {
     fn ifft(&self) -> Expr<RealSpaceScalar> {
         Expr::new(&self.inner.ifft())
     }
+
+    fn var<T: Into<String>>(s: T) -> Self {
+        Expr::new(&KSpaceScalar::var(&s.into()))
+    }
 }
 
 impl Expr<RealSpaceScalar> {
     fn fft(&self) -> Expr<KSpaceScalar> {
         Expr::new(&self.inner.fft())
+    }
+
+    fn var<T: Into<String>>(s: T) -> Self {
+        Expr::new(&RealSpaceScalar::var(&s.into()))
     }
 }
 
