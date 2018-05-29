@@ -887,6 +887,11 @@ mod tests {
     }
 }
 
+// CAN WE MAKE A MAP FUNCTION?
+//fn<T: ExprType> expr_map_scalar(Expr<T>, impl Fn(Expr<Scalar>) -> Expr<Scalar>) -> Expr<T> {
+//}
+// WANT: substitute, has_subexpr, has_fft, has_ifft, has_integrate, find_set_of_variables?
+
 /// Maybe the following should not be a trait? impl for Expr<ExprType>?
 pub trait ToStmts: ExprType {
     fn to_stmts(&self) -> (Vec<Stmt>, Expr<Self>) {
