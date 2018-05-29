@@ -82,7 +82,7 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
 }
 
 static inline double find_alpha(double temp) {
-  const double sigma=2;
+  const double sigma=3;  //CHANGED SIGMA
   const double epsilon=1;
   return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
 }
@@ -383,7 +383,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   if (compute_homogeneous_free_energy) {
     printf("\nCalculating Homogeneous Free Energy analytically ...\n");
     HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
-    hf.sigma() = 2;
+    hf.sigma() = 3;   //CHANGED SIGMA
     hf.epsilon() = 1;   //energy constant in the WCA fluid
     hf.kT() = temp;
     hf.n() = reduced_density;
@@ -611,7 +611,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   double dV = dx*dx*dx;  //volume element dV
 
   HomogeneousSFMTFluid hf;
-  hf.sigma() = 2;
+  hf.sigma() = 3;   //CHANGED SIGMA
   hf.epsilon() = 1;   //energy constant in the WCA fluid
   hf.kT() = temp;
   hf.n() = reduced_density;
