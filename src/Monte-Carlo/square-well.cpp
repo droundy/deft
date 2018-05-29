@@ -544,8 +544,9 @@ int sw_simulation::simulate_energy_changes(int num_moves) {
 }
 
 void sw_simulation::flush_weight_array(){
+  const double max_entropy_weight = ln_energy_weights[max_entropy_state];
   for (int i = 0; i < energy_levels; i++)
-    ln_energy_weights[i] -= ln_energy_weights[max_entropy_state];
+    ln_energy_weights[i] -= max_entropy_weight;
   // floor weights above state of max entropy
   for (int i = 0; i < max_entropy_state; i++)
     ln_energy_weights[i] = 0;
@@ -1186,7 +1187,7 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
     double lowest_hist = 1e200; // lowest histogram value
     double total_counts = 0; // total counts in energy histogram
     int num_nonzero = 0; // number of nonzero bins
-    for(int i = max_entropy_state+1; i <= min_important_energy; i++){
+    for (int i = max_entropy_state; i <= min_important_energy; i++) {
       num_nonzero += 1;
       total_counts += energy_histogram[i];
       if(energy_histogram[i] > highest_hist){
@@ -1635,7 +1636,6 @@ void sw_simulation::calculate_weights_using_wltmmc(double wl_fmod,
       wl_factor /= wl_fmod;
       printf("We reached WL flatness (%ld moves, wl_factor %g)!\n",
              moves.total, wl_factor);
-      flush_weight_array();
       for (int i = 0; i < energy_levels; i++) {
         energy_histogram[i] = 0;
       }
