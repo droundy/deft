@@ -18,6 +18,12 @@ pub struct Expr<T: ExprType> {
     inner: Intern<T>,
 }
 
+pub enum Stmt {
+    AllocKspaceScalar(String, Expr<KSpaceScalar>),
+    AllocRealSpaceScalar(String, Expr<RealSpaceScalar>),
+    AllocScalar(String, Expr<Scalar>),
+}
+
 impl<T: ExprType> Expr<T> {
     fn new(inner: &T) -> Expr<T> {
         Expr { inner: Intern::new(inner.clone()), }
@@ -29,6 +35,10 @@ impl<T: ExprType> Expr<T> {
 
     fn cast<U: ExprType + From<T>>(&self) -> Expr<U> {
         Expr::new(&self.inner.deref().clone().into())
+    }
+    // fn contains_fft(&self) -> impl Iter<Item=Expr<RealSpaceScalar>> { ???
+    fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>> {
+        Vec::new() // FIXME
     }
 }
 
@@ -877,7 +887,37 @@ mod tests {
 
     #[test]
     fn fourier() {
-        assert_eq!(Expr::new(&KSpaceScalar::var("k").ifft()).cpp(), "ifft(Nx, Ny, Nz, dV, k)");
+        let k = Expr::new(&KSpaceScalar::var("k"));
+        assert_eq!(k.ifft().cpp(), "ifft(Nx, Ny, Nz, dV, k)");
+        let k2 = Expr::new(&KSpaceScalar::var("k2"));
+        assert_eq!((k+k2).ifft().cpp(), "ifft(Nx, Ny, Nz, dV, temp)");
         assert_eq!(Expr::new(&RealSpaceScalar::var("r").fft()).cpp(), "fft(Nx, Ny, Nz, dV, r)");
     }
+}
+
+// CAN WE MAKE A MAP FUNCTION?
+//fn<T: ExprType> expr_map_scalar(Expr<T>, impl Fn(Expr<Scalar>) -> Expr<Scalar>) -> Expr<T> {
+//}
+// WANT: substitute, has_subexpr, has_fft, has_ifft, has_integrate, find_set_of_variables?
+
+/// Maybe the following should not be a trait? impl for Expr<ExprType>?
+pub trait ToStmts: ExprType {
+    fn to_stmts(&self) -> (Vec<Stmt>, Expr<Self>) {
+        if Expr::new(self).contains_fft().len() > 0 {
+            ()
+        }
+        (Vec::new(), Expr::new(self))
+    }
+}
+
+impl ToStmts for Scalar {
+}
+
+impl ToStmts for KSpaceScalar {
+}
+
+#[test]
+fn test_stmts() {
+    let x = Scalar::var("x");
+    assert_eq!(x.to_stmts().0.len(), 0);
 }
