@@ -811,50 +811,42 @@ int main(int argc, const char *argv[]) {
           //for (int i = 0; i < ising.energy_levels; i++) {
           //fprintf(ising_out,"\t%ld,\n", ising.energy_histogram[i]);
         //}
-  //        int energy;
-          //for (int i = 0; i <= sw.energy_levels; i++) {
-            //if (fscanf(resume_in, "%d  %lg\n",&energy,&sw.ln_energy_weights[i]) != 2) {
-              //printf("error reading lnw!\n");
-              //exit(1);
-            //}
-          //}
-          //fscanf(resume_in, "# Ball positions\n");
+          int energy;
+          for (int i = 0; i < sw.energy_levels; i++) {
+            if (fscanf(resume_in, "%d  %lg\n",&energy,&sw.ln_energy_weights[i]) != 2) {
+              printf("error reading lnw!\n");
+              exit(1);
+            }
+          }
+          fscanf(resume_in, "# Ball positions\n");
           
-          //for (int i=0; i<sw.N; i++) {
-            //if (fscanf(resume_in, "%lg %lg %lg\n",
-                       //&sw.balls[i].pos.x, &sw.balls[i].pos.y, &sw.balls[i].pos.z) != 3) {
-              //printf("error reading balls!\n");
-              //exit(1);
-            //}
-          //}
-          //initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R,
-                                     //sw.max_neighbors, sw.len, sw.walls);
-          //fclose(resume_in); //should this go before or after the energy histogram resume_in?
+          for (int i=0; i<sw.N; i++) {
+            if (fscanf(resume_in, "%lg %lg %lg\n",
+                       &sw.balls[i].pos.x, &sw.balls[i].pos.y, &sw.balls[i].pos.z) != 3) {
+              printf("error reading balls!\n");
+              exit(1);
+            }
+          }
+          initialize_neighbor_tables(sw.balls, sw.N, sw.neighbor_R,
+                                     sw.max_neighbors, sw.len, sw.walls);
 
-         //for (int = 0; i<sw.N; i++) {
-           //if (fscanf(resume_in, "%d %d\n", &energy,&sw.density[i]) != 2){
-             //printf("error reading density!\n");
-             //exit(1);
-             //}
-            //}
-         //fscanf(resume_in, "#density\n");
+          fscanf(resume_in, "# energy histogram\n");
+          for (int i= 0; i < sw.energy_levels; i++) {
+            if (fscanf(resume_in, "%d %ld\n",&energy,&sw.energy_histogram[i]) != 2){
+              printf("error reading energy histogram at i == %d!\n", i);
+              exit(1);
+            }
+          }
 
-         //for (int = 0; i <= sw.energy_histogram; i++) {
-           //if (fscanf(resume_in, "%d %d\n",&energy,&sw.energy_histogram[i]) != 2){
-             //prinftf("error reading energy histogram!\n");
-             //exit(1);
-            //}
-           //}
-         //fscanf(resume_in, "#energy histogram\n");
+          fscanf(resume_in, "# pessimistic samples\n"); //well, when I went to build this PuTTY broke, not the file ...
+          for (int i= 0; i < sw.energy_levels; i++) {
+            if (fscanf(resume_in, "%d %ld\n",&energy,&sw.pessimistic_samples[i]) != 2){
+              printf("error reading pessimistic samples!\n");
+              exit(1);
+            }
+          }
 
-         //for (int = 0; i <= pessimistic_samples; i++) {
-           //if (fscanf(resume_in, "%d %d\n",&energy,&sw.pessimistic_samples[i]) != 2){
-             //prinftf("error reading pessimistic samples!\n");
-             //exit(1);
-            //}
-           //}
-         //fscanf(resume_in, "#pessimistic samples\n"); //well, when I went to build this PuTTY broke, not the file ...
-
+          fclose(resume_in);
         }
       }
     } else {
@@ -1000,7 +992,7 @@ int main(int argc, const char *argv[]) {
         fprintf(resume_out, "# maximum entropy: %d\n", sw.max_entropy_state);
 
         fprintf(resume_out, "# energy   lnw\n");
-        for (int i = 0; i <= sw.energy_levels; i++) {
+        for (int i = 0; i < sw.energy_levels; i++) {
           fprintf(resume_out, "%d  %.16lg\n",i,sw.ln_energy_weights[i]);
         }
         fprintf(resume_out, "# Ball positions\n");
@@ -1008,21 +1000,15 @@ int main(int argc, const char *argv[]) {
           fprintf(resume_out, "%.16g %.16g %.16g\n",
            sw.balls[i].pos.x, sw.balls[i].pos.y, sw.balls[i].pos.z);
         }
-        //fprintf(resume_out, "# energy   histogram\n");
-        //for (int i = 0; i <= sw.energy_levels; i++) {
-          //fprintf(resume_out, "%d  %ld\n",i,sw.energy_histogram[i]);
-        //}
-        //fprintf(resume_out, "# density\n");
-        //for (int i = 0; i <= sw.density; i++) {
-          //fprintf(resume_out, "%d  %ld\n",i,sw.density[i]);
-        //)
-        //fprintf(resume_out, "# pessimistic samples\n");
-        //for (int i = 0; i <= sw.pessimistic_samples; i++) {
-          //fprintf(resume_out, "%d  %ld\n",i,sw.pessimistic_samples[i]);
-        //printf("ball positions now = N");{
-        //if (fscanf(rfile,"\t%lg,\n", &square-well.struct_ball[i]) {
-        //printf("error reading balls at resume #%ld!\n", i);
-        //exit(1); }
+        fprintf(resume_out, "# energy histogram\n");
+        for (int i = 0; i < sw.energy_levels; i++) {
+          fprintf(resume_out, "%d  %ld\n",i,sw.energy_histogram[i]);
+        }
+        fprintf(resume_out, "# pessimistic samples\n");
+        for (int i = 0; i < sw.energy_levels; i++) {
+          fprintf(resume_out, "%d  %ld\n",i,sw.pessimistic_samples[i]);
+        }
+        printf("ball positions now = N\n");
         fclose(resume_out);
       }
 
