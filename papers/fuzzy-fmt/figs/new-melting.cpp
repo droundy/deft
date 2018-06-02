@@ -82,7 +82,7 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
 }
 
 static inline double find_alpha(double temp) {
-  const double sigma=3;  //CHANGED SIGMA
+  const double sigma=1;  //sigma must be 1 - changing it would invalidate other equations in the program!
   const double epsilon=1;
   return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
 }
@@ -383,7 +383,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   if (compute_homogeneous_free_energy) {
     printf("\nCalculating Homogeneous Free Energy analytically ...\n");
     HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
-    hf.sigma() = 3;   //CHANGED SIGMA
+    hf.sigma() = 1; 
     hf.epsilon() = 1;   //energy constant in the WCA fluid
     hf.kT() = temp;
     hf.n() = reduced_density;
@@ -611,7 +611,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   double dV = dx*dx*dx;  //volume element dV
 
   HomogeneousSFMTFluid hf;
-  hf.sigma() = 3;   //CHANGED SIGMA
+  hf.sigma() = 1;   
   hf.epsilon() = 1;   //energy constant in the WCA fluid
   hf.kT() = temp;
   hf.n() = reduced_density;
@@ -1099,8 +1099,13 @@ void advance_simplex(double temp, double reduced_density, double simplex_fe[3][3
 
 int main(int argc, const char **argv) {
   //double seed=1;
-  double reduced_density=1.0, gw=-1, fv=-1, temp=1.0; //reduced density is the homogeneous (flat) density accounting for sphere vacancies
+  double reduced_density=1.0, gw=-1, fv=-1, temp=1.0;
+  //gw is standard deviation of a Gaussian function typically called "sigma" (not to be confused with the sigma of the WCA potential!)
+  //in this program the term sigma means the sigma of the WCA potential
+  //reduced_density is the homogeneous (flat) number density accounting for sphere vacancies MULTIPLIED BY the WCA sigma^3 to make it dimensionless
+  //temp is the Boltzman constant MULTIPLIED BY the temperature in Kelvin
 
+                                                      
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
   double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.01; //default settings
 
@@ -1144,7 +1149,7 @@ int main(int argc, const char **argv) {
 
     /*** FLUID PARAMETERS ***/
     {"kT", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &temp, 0, "temperature", "DOUBLE"},
-    {"n", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &reduced_density, 0, "reduced density", "DOUBLE"},
+    {"n", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &reduced_density, 0, "number density times WCA sigma^3", "DOUBLE"},
     {"fv", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
     {"gw", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw, 0, "width of Gaussian", "DOUBLE or -1 for loop (without lattice ref) or -2 loop (with lattice ref)"},
 
