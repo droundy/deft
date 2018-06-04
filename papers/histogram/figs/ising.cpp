@@ -48,7 +48,7 @@ struct ising_simulation {
   int N;            // N*N is the number of sites
   int *S;
   energy E;      // system energy.
-  
+
   // the last time we printed status text (i.e. from initialization)
   double estimated_time_per_iteration; // in units of seconds per iteration
 
@@ -106,6 +106,9 @@ struct ising_simulation {
   void initialize_samc(int am_sad);
   bool printing_allowed();
   bool reached_iteration_cap();
+  void initialize_canonical(double T, int reference);
+  energy set_min_important_energy(double *input_ln_dos);
+  void set_max_entropy_energy();
 };
 
 // ising_simulation methods
@@ -336,8 +339,8 @@ void ising_simulation::compute_ln_dos(dos_types dos_type) {
     // the density of states is determined directly from the weights.
     double max_entropy = ln_energy_weights[index_from_energy(max_entropy_energy)];
     for (int i=0; i<energy_levels; i++) {
-      //if (energy_histogram[i] != 0) {ERROR: WORKING HERE NOW!!! 
-      //ERROR: PROGRAM MUST BE RUN FROM DEFT DIRECTORY TO AVOID A SEG FAULT!!!
+      //if (energy_histogram[i] != 0) {FIXME: WORKING HERE NOW!!!
+      //FIXME: PROGRAM MUST BE RUN FROM DEFT DIRECTORY TO AVOID A SEG FAULT!!!
       ln_dos[i] = ln_energy_weights[i] - max_entropy;
     }
     if (use_sad) {
@@ -356,32 +359,63 @@ void ising_simulation::compute_ln_dos(dos_types dos_type) {
   }
 }
 
-//bool ising_simulation::reached_iteration_cap(){
-//  return moves >= total_moves;  // ERROR: I CHANGED THIS TO MAKE IT SIMPLER.
-//}
-//
-//void ising_simulation::initialize_samc(int am_sad) {
-//  use_sad = am_sad;
-//  too_high_energy.value = energy_levels-1;
-//  too_low_energy.value = 0;
-//  assert(sa_t0 || am_sad);
-//  assert(sa_prefactor);
-//
-//  int check_how_often =  N*N; // check if finished only so often
-//  bool verbose = false;
-//  do {
-//    for (int i = 0; i < check_how_often && !reached_iteration_cap(); i++) flip_a_spin();
-//    check_how_often += N*N; // try a little harder next time...
-//
-//    verbose = printing_allowed();
-//    if (verbose) {
-////      set_min_important_energy();
-////      set_max_entropy_energy();
-////      write_transitions_file();
-//    }
-//  } //while(!finished_initializing(verbose));
-//
-//  //initialize_canonical(minT,min_important_energy);
+// initialize the weight array using the specified temperature.
+void ising_simulation::initialize_canonical(double T, int reference) {
+  for(int i=reference+1; i < energy_levels; i++){
+    ln_energy_weights[i] = ln_energy_weights[reference] + (i-reference)/T;
+  }
+}
+
+energy ising_simulation::set_min_important_energy(double *input_ln_dos){
+  // sad tracks min_important_energy continually
+  if (use_sad) return min_important_energy;
+
+  // We always use the transition matrix to estimate the
+  // min_important_energy, since it is more robust at the outset.
+  double *ln_dos;
+  if (input_ln_dos) ln_dos = input_ln_dos;
+  //else ln_dos = compute_ln_dos(transition_dos); FIXME: Check we are not doing Transition Matrix methods in ising.cpp!
+
+  min_important_energy.value = 0;
+  /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
+  for (int i = max_entropy_energy.value+1; i <= min_energy.value; i++) { // changed to max_entropy_energy
+    if (ln_dos[i-1] - ln_dos[i] < 1.0/minT
+        && ln_dos[i] != ln_dos[i-1]) {
+      // This is an important energy if the DOS is high enough, and we
+      // have some decent statistics here.
+      min_important_energy.value = i;
+    } else if (ln_dos[i-1] == ln_dos[i]) {
+      // We have no information about this state, so let us keep
+      // looking, in case there is a nice state at lower energy...
+    } else {
+      // Adjust ln_dos for the next state to match the "canonical"
+      // value.  This allows us to handle situations where there is a
+      // drop in the density of states followed by a peak that is
+      // large enough to warrant considering the lower energy
+      // important.
+      ln_dos[i] = ln_dos[i-1] - 1.0/minT;
+    }
+  }
+  /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
+  if (min_important_energy.value == 0) {
+    min_important_energy = min_energy;
+  }
+
+  if (!input_ln_dos) delete[] ln_dos;
+
+  return min_important_energy;
+}
+
+//void ising_simulation::set_max_entropy_energy() {
+  //// sad tracks max_entropy_state continually
+  //if (use_sad) return;
+
+  //const double *ln_dos = compute_ln_dos(transition_dos);
+
+  //for (int i=energy_levels-1; i >= 0; i--) {
+    //if (ln_dos[i] > ln_dos[max_entropy_energy]) max_entropy_energy.value = i;
+  //}
+  //delete[] ln_dos;
 //}
 
 static double took(const char *name) {
@@ -404,33 +438,33 @@ static double took(const char *name) {
   return exp(ceil(log(seconds)));
 }
 
-//bool ising_simulation::printing_allowed(){
-//  const double max_time_skip = 60*30; // 1/2 hour
-//  const double initial_time_skip = 3; // seconds
-//  static double time_skip = initial_time_skip;
-//  static int every_so_often = 0;
-//
-//  static clock_t last_output = clock(); // when we last output data
-//
-//  if (++every_so_often > time_skip/estimated_time_per_iteration) {
-//    fflush(stdout); // flushing once a second will be no problem and can be helpful
-//    clock_t now = clock();
-//    time_skip = min(time_skip + initial_time_skip, max_time_skip);
-//
-//    // update our setimated time per iteration based on actual time
-//    // spent in this round of iterations
-//    double elapsed_time = (now - last_output)/double(CLOCKS_PER_SEC);
-//    if (now > last_output) {
-//      estimated_time_per_iteration = elapsed_time / every_so_often;
-//    } else {
-//      estimated_time_per_iteration = 0.1 / every_so_often / double(CLOCKS_PER_SEC);
-//    }
-//    last_output = now;
-//    every_so_often = 0;
-//    return true;
-//  }
-//  return false;
-//}
+bool ising_simulation::printing_allowed(){
+  const double max_time_skip = 60*30; // 1/2 hour
+  const double initial_time_skip = 3; // seconds
+  static double time_skip = initial_time_skip;
+  static int every_so_often = 0;
+
+  static clock_t last_output = clock(); // when we last output data
+
+  if (++every_so_often > time_skip/estimated_time_per_iteration) {
+    fflush(stdout); // flushing once a second will be no problem and can be helpful
+    clock_t now = clock();
+    time_skip = min(time_skip + initial_time_skip, max_time_skip);
+
+    // update our setimated time per iteration based on actual time
+    // spent in this round of iterations
+    double elapsed_time = (now - last_output)/double(CLOCKS_PER_SEC);
+    if (now > last_output) {
+      estimated_time_per_iteration = elapsed_time / every_so_often;
+    } else {
+      estimated_time_per_iteration = 0.1 / every_so_often / double(CLOCKS_PER_SEC);
+    }
+    last_output = now;
+    every_so_often = 0;
+    return true;
+  }
+  return false;
+}
 
 // ---------------------------------------------------------------------
 // Initialize Main
@@ -553,7 +587,7 @@ int main(int argc, const char *argv[]) {
 
   if (resume) {
     // We are continuing a previous simulation.
-    // ERROR: THIS IS MY ATTEMPT SO FAR TO READ IN SAD AND SET TO TRUE!!!
+    // FIXME: THIS IS MY ATTEMPT SO FAR TO READ IN SAD AND SET USE_SAD!!!
     FILE *rfile = fopen((const char *)ising_fname, "r");
 //    if (rfile != NULL) {
 //      if (fscanf(rfile, " method = '%i'", &sad) != 1) {
@@ -657,9 +691,27 @@ int main(int argc, const char *argv[]) {
 
   printf("version: %s\n",version_identifier());
 
+  // MAIN CODE EXECUTION HERE!
   ising.calculate_energy();
   for (long i = 0; i < total_moves; i++) {
     ising.flip_a_spin();
+    //set_min_important_energy();
+    //set_max_entropy_energy();
+  } 
+
+  if (samc) {
+      if (ising.sa_t0 == 0) {
+        ising.sa_t0 = 1;
+        //ising.use_sad = am_sad;
+        ising.too_high_energy.value = ising.energy_levels-1;
+        ising.too_low_energy.value = 0;
+        //assert(sa_t0 || am_sad);
+        //assert(sa_prefactor);
+  } else if (sad) {
+    //ising.use_sad = sad_fraction;
+    ising.too_high_energy.value = ising.energy_levels-1;
+    ising.too_low_energy.value = 0;
+    }
   }
 
   printf("I think the energy is %d\n", ising.E.value);
