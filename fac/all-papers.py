@@ -33,7 +33,6 @@ for project in ['thesis-roth']:
   print("c .pyc\n")
 
 other_texs = """
-   histogram/thesis/thesis.tex
    thesis-vischer/Thesis.tex
    histogram/sad.tex
 """.split()
