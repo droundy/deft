@@ -95,7 +95,6 @@ int main(int argc, const char *argv[]) {
   int tmi_version = 1;
   int toe = false;
   int tmmc = false;
-  int oetmmc = false;
   int wang_landau = false;
   int vanilla_wang_landau = false;
   int wltmmc = false;
@@ -249,8 +248,6 @@ int main(int argc, const char *argv[]) {
      "Use transition optimized ensemble", "BOOLEAN"},
     {"tmmc", '\0', POPT_ARG_NONE, &tmmc, 0,
      "Use transition matrix monte carlo", "BOOLEAN"},
-    {"oetmmc", '\0', POPT_ARG_NONE, &oetmmc, 0,
-     "Use optimized-ensemble transition matrix monte carlo", "BOOLEAN"},
     {"wang_landau", '\0', POPT_ARG_NONE, &wang_landau, 0,
      "Use Wang-Landau histogram method", "BOOLEAN"},
     {"wltmmc", '\0', POPT_ARG_NONE, &wltmmc, 0,
@@ -380,7 +377,7 @@ int main(int argc, const char *argv[]) {
   // Check that only one histogram method is used
   if(bool(no_weights) + bool(wang_landau)
      + vanilla_wang_landau + tmi + toe + wltmmc + samc + sad + tmmc
-     + oetmmc + (fix_kT != 0)
+     + (fix_kT != 0)
      + reading_in_transition_matrix + golden != 1){
     printf("Exactly one histogram method must be selected!\n");
     return 254;
@@ -481,7 +478,7 @@ int main(int argc, const char *argv[]) {
   }
 
   // Choose necessary but unspecified parameters
-  if(tmmc || oetmmc | tmi | toe){
+  if(tmmc || tmi | toe){
     sw.sim_dos_type = transition_dos;
   } else {
     sw.sim_dos_type = histogram_dos;
@@ -499,7 +496,7 @@ int main(int argc, const char *argv[]) {
     sw.min_samples = default_optimistic_min_samples;
     // different default for tmmc methods because they keep
     // accumulating statistics without doing resets.
-    if (tmmc || oetmmc) sw.min_samples = tmmc_min_samples;
+    if (tmmc) sw.min_samples = tmmc_min_samples;
     printf("Defaulting min_samples to %d\n", sw.min_samples);
   } else if (sw.end_condition == pessimistic_min_samples && !sw.min_samples) {
     sw.min_samples = default_pessimistic_min_samples;
@@ -575,8 +572,6 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-sad");
     } else if (sad) {
       sprintf(method_tag, "-sad%d", sad_fraction);
-    } else if (oetmmc) {
-      sprintf(method_tag, "-oetmmc");
     } else if (wang_landau) {
       sprintf(method_tag, "-wang_landau");
     } else if (vanilla_wang_landau) {
@@ -869,9 +864,6 @@ int main(int argc, const char *argv[]) {
   } else if (tmmc) {
     sw.use_tmmc = true;
     sw.initialize_transitions();
-  } else if (oetmmc) {
-    sw.initialize_transitions();
-    sw.optimize_weights_using_transitions(tmi_version);
   }
 
   // If we wish to optimize the ensemble or set transition matrix weights, do so
@@ -1000,8 +992,6 @@ int main(int argc, const char *argv[]) {
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",
             headerinfo);
-  } else if (oetmmc){
-    sprintf(headerinfo, "%s# histogram method: oetmmc\n", headerinfo);
   }
 
   if(sw.end_condition != none){
