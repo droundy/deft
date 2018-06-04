@@ -102,7 +102,6 @@ int main(int argc, const char *argv[]) {
   int samc = false;
   int sad = false;
   int sad_fraction = 1;
-  int simple_flat = false;
   int optimized_ensemble = false;
   int transition_override = false;
 
@@ -264,8 +263,6 @@ int main(int argc, const char *argv[]) {
      "Fraction for stochastic approximation monte carlo dynamical version", "INT"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
-    {"simple_flat", '\0', POPT_ARG_NONE, &simple_flat, 0,
-     "Use simple flat histogram method", "BOOLEAN"},
     {"optimized_ensemble", '\0', POPT_ARG_NONE, &optimized_ensemble, 0,
      "Use a optimized ensemble weight histogram method", "BOOLEAN"},
     {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
@@ -381,7 +378,7 @@ int main(int argc, const char *argv[]) {
   const bool reading_in_transition_matrix = (strcmp(transitions_input_filename,"none") != 0);
 
   // Check that only one histogram method is used
-  if(bool(no_weights) + bool(simple_flat) + bool(wang_landau)
+  if(bool(no_weights) + bool(wang_landau)
      + vanilla_wang_landau + tmi + toe + wltmmc + samc + sad + tmmc
      + oetmmc + (fix_kT != 0)
      + reading_in_transition_matrix + golden != 1){
@@ -562,8 +559,6 @@ int main(int argc, const char *argv[]) {
       sprintf(method_tag, "-kT%g", fix_kT);
     } else if (no_weights) {
       sprintf(method_tag, "-nw");
-    } else if (simple_flat) {
-      sprintf(method_tag, "-simple_flat");
     } else if (tmi) {
       if (tmi_version == 1) sprintf(method_tag, "-tmi");
       else sprintf(method_tag, "-tmi%d", tmi_version);
@@ -867,8 +862,6 @@ int main(int argc, const char *argv[]) {
     sw.initialize_samc(0);
   } else if (sad) {
     sw.initialize_samc(sad_fraction);
-  } else if (simple_flat) {
-    sw.initialize_simple_flat(flat_update_factor);
   } else if (tmi) {
     sw.initialize_tmi();
   } else if (toe) {
@@ -1003,9 +996,6 @@ int main(int argc, const char *argv[]) {
             "# wl_threshold: %g\n"
             "# wl_cutoff: %g\n",
             headerinfo, wl_factor, wl_fmod, wl_threshold, wl_cutoff);
-  } else if(simple_flat){
-    sprintf(headerinfo,
-            "%s# histogram method: simple flat\n", headerinfo);
   } else if (tmmc){
     sprintf(headerinfo,
             "%s# histogram method: tmmc\n",

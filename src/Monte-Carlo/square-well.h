@@ -217,8 +217,6 @@ struct sw_simulation {
 
   void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
 
-  void initialize_simple_flat(int flat_update_factor);
-
   void initialize_tmi(int version=1);
   void initialize_toe(int version=1);
   void initialize_transitions();
