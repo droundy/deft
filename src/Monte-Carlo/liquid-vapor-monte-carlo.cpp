@@ -1008,7 +1008,6 @@ int main(int argc, const char *argv[]) {
         for (int i = 0; i < sw.energy_levels; i++) {
           fprintf(resume_out, "%d  %ld\n",i,sw.pessimistic_samples[i]);
         }
-        printf("ball positions now = N\n");
         fclose(resume_out);
       }
 
