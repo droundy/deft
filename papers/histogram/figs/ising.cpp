@@ -41,6 +41,10 @@ struct energy {
   energy operator-(energy other) const { return energy(value - other.value); }
 };
 
+enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
+                      optimistic_sample_error, pessimistic_sample_error, flat_histogram,
+                      init_iter_limit };
+
 enum dos_types { histogram_dos, transition_dos, weights_dos };
 
 struct ising_simulation {
@@ -102,11 +106,11 @@ struct ising_simulation {
     return energy(4*(i - J*N*N/2));
   }
 
+  end_conditions end_condition;
+
   void compute_ln_dos(dos_types dos_type);
   void initialize_samc(int am_sad);
-  bool printing_allowed();
   bool reached_iteration_cap();
-  void initialize_canonical(double T, int reference);
   energy set_min_important_energy(double *input_ln_dos);
   void set_max_entropy_energy();
 };
@@ -340,7 +344,6 @@ void ising_simulation::compute_ln_dos(dos_types dos_type) {
     double max_entropy = ln_energy_weights[index_from_energy(max_entropy_energy)];
     for (int i=0; i<energy_levels; i++) {
       //if (energy_histogram[i] != 0) {FIXME: WORKING HERE NOW!!!
-      //FIXME: PROGRAM MUST BE RUN FROM DEFT DIRECTORY TO AVOID A SEG FAULT!!!
       ln_dos[i] = ln_energy_weights[i] - max_entropy;
     }
     if (use_sad) {
@@ -359,13 +362,6 @@ void ising_simulation::compute_ln_dos(dos_types dos_type) {
   }
 }
 
-// initialize the weight array using the specified temperature.
-void ising_simulation::initialize_canonical(double T, int reference) {
-  for(int i=reference+1; i < energy_levels; i++){
-    ln_energy_weights[i] = ln_energy_weights[reference] + (i-reference)/T;
-  }
-}
-
 energy ising_simulation::set_min_important_energy(double *input_ln_dos){
   // sad tracks min_important_energy continually
   if (use_sad) return min_important_energy;
@@ -374,7 +370,7 @@ energy ising_simulation::set_min_important_energy(double *input_ln_dos){
   // min_important_energy, since it is more robust at the outset.
   double *ln_dos;
   if (input_ln_dos) ln_dos = input_ln_dos;
-  //else ln_dos = compute_ln_dos(transition_dos); FIXME: Check we are not doing Transition Matrix methods in ising.cpp!
+  //else ln_dos = compute_ln_dos(transition_dos); FIXME: We are not doing Transition Matrix methods in ising.cpp!
 
   min_important_energy.value = 0;
   /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
@@ -407,15 +403,15 @@ energy ising_simulation::set_min_important_energy(double *input_ln_dos){
 }
 
 //void ising_simulation::set_max_entropy_energy() {
-  //// sad tracks max_entropy_state continually
-  //if (use_sad) return;
-
-  //const double *ln_dos = compute_ln_dos(transition_dos);
-
-  //for (int i=energy_levels-1; i >= 0; i--) {
-    //if (ln_dos[i] > ln_dos[max_entropy_energy]) max_entropy_energy.value = i;
-  //}
-  //delete[] ln_dos;
+//  // sad tracks max_entropy_state continually
+//  if (use_sad) return;
+//
+//  const double *ln_dos = compute_ln_dos(transition_dos);
+//
+//  for (int i=energy_levels-1; i >= 0; i--) {
+//    if (ln_dos[i] > ln_dos[max_entropy_energy]) max_entropy_energy.value = i;
+//  }
+//  delete[] ln_dos;
 //}
 
 static double took(const char *name) {
@@ -438,34 +434,6 @@ static double took(const char *name) {
   return exp(ceil(log(seconds)));
 }
 
-bool ising_simulation::printing_allowed(){
-  const double max_time_skip = 60*30; // 1/2 hour
-  const double initial_time_skip = 3; // seconds
-  static double time_skip = initial_time_skip;
-  static int every_so_often = 0;
-
-  static clock_t last_output = clock(); // when we last output data
-
-  if (++every_so_often > time_skip/estimated_time_per_iteration) {
-    fflush(stdout); // flushing once a second will be no problem and can be helpful
-    clock_t now = clock();
-    time_skip = min(time_skip + initial_time_skip, max_time_skip);
-
-    // update our setimated time per iteration based on actual time
-    // spent in this round of iterations
-    double elapsed_time = (now - last_output)/double(CLOCKS_PER_SEC);
-    if (now > last_output) {
-      estimated_time_per_iteration = elapsed_time / every_so_often;
-    } else {
-      estimated_time_per_iteration = 0.1 / every_so_often / double(CLOCKS_PER_SEC);
-    }
-    last_output = now;
-    every_so_often = 0;
-    return true;
-  }
-  return false;
-}
-
 // ---------------------------------------------------------------------
 // Initialize Main
 // ---------------------------------------------------------------------
@@ -477,6 +445,7 @@ int main(int argc, const char *argv[]) {
   double fix_kT = 0;
   int samc = false;
   int sad = false;
+  double sa_t0 = 0.0; // default to no SA method either
 
   int NN = 10;
   int resume = false;
@@ -498,8 +467,6 @@ int main(int argc, const char *argv[]) {
   // -------------------------------------------------------------------
 
   poptOption optionsTable[] = {
-    {"resume", '\0', POPT_ARG_NONE, &resume, 0,
-     "Resume previous simulation", "BOOLEAN"},
     //{"seed", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0,
     // "Seed for the random number generator", "INT"},
 
@@ -523,9 +490,15 @@ int main(int argc, const char *argv[]) {
 
 
     /*** HISTOGRAM METHOD OPTIONS ***/
+    {"resume", '\0', POPT_ARG_NONE, &resume, 0,
+     "Resume previous simulation", "BOOLEAN"},
 
     {"sad", '\0', POPT_ARG_NONE, &sad, 0,
      "Use stochastic approximation monte carlo dynamical version", "BOOLEAN"},
+    {"samc", '\0', POPT_ARG_NONE, &samc, 0,
+     "Use stochastic approximation monte carlo", "BOOLEAN"},
+    {"sa-t0", '\0', POPT_ARG_DOUBLE,
+     &sa_t0, 0, "t0 value used in SAMC", "DOUBLE"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/
 
@@ -587,15 +560,7 @@ int main(int argc, const char *argv[]) {
 
   if (resume) {
     // We are continuing a previous simulation.
-    // FIXME: THIS IS MY ATTEMPT SO FAR TO READ IN SAD AND SET USE_SAD!!!
     FILE *rfile = fopen((const char *)ising_fname, "r");
-//    if (rfile != NULL) {
-//      if (fscanf(rfile, " method = '%i'", &sad) != 1) {
-//        printf("sad = %i\n",sad);
-//        printf("error reading method sad!\n");
-//        exit(1);
-//      }
-//    }
     if (sad) {
       // Open the file!
       //FILE *rfile = fopen((const char *)ising_fname, "r");
