@@ -11,6 +11,8 @@ use std::ops::Deref;
 
 pub trait ExprType: 'static + Send + Clone + Eq + Debug + Hash {
     fn cpp(&self) -> String;
+    fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>>;
+    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self>;
 }
 
 #[derive(Clone, Debug, Eq, Hash)]
@@ -35,10 +37,6 @@ impl<T: ExprType> Expr<T> {
 
     fn cast<U: ExprType + From<T>>(&self) -> Expr<U> {
         Expr::new(&self.inner.deref().clone().into())
-    }
-    // fn contains_fft(&self) -> impl Iter<Item=Expr<RealSpaceScalar>> { ???
-    fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>> {
-        Vec::new() // FIXME
     }
 }
 
@@ -269,6 +267,7 @@ pub enum Scalar {
     Log(Expr<Scalar>),
     Add(AbelianMap<Scalar>),
     Mul(AbelianMap<Scalar>),
+    Integrate(Intern<String>, Expr<RealSpaceScalar>),
 }
 
 impl_expr_add!(Scalar);
@@ -354,6 +353,37 @@ impl ExprType for Scalar {
                             + &")",
                 }
             },
+            &Scalar::Integrate(s, integrand) =>
+                String::from("for (int i = 0, integrand = 0.0; i < Nx * Ny * Nz; i++)\n\t")
+                    + &s.deref() + &" += " + &integrand.cpp() + &";\n",
+        }
+    }
+
+    fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>> {
+        match self {
+            &Scalar::Var(_) =>
+                Vec::new(),
+            &Scalar::Exp(a) | &Scalar::Log(a)  =>
+                a.inner.deref().contains_fft(),
+            &Scalar::Integrate(_, a) =>
+                a.inner.deref().contains_fft(),
+            &Scalar::Add(ref m) | &Scalar::Mul(ref m) =>
+                m.into_iter().flat_map(|(k, _)| k.inner.deref().contains_fft()).collect(),
+        }
+    }
+
+    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self> {
+        match x.inner.deref() {
+            &Scalar::Var(_) | &Scalar::Integrate(_, _) =>
+                f(x),
+            &Scalar::Exp(a) =>
+                Expr::new(&Scalar::Exp(f(&a))),
+            &Scalar::Log(a) =>
+                Expr::new(&Scalar::Log(f(&a))),
+            &Scalar::Add(ref m) =>
+                Expr::new(&Scalar::Add(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (f(&k), v))))),
+            &Scalar::Mul(ref m) =>
+                Expr::new(&Scalar::Mul(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (f(&k), v))))),
         }
     }
 }
@@ -467,6 +497,38 @@ impl ExprType for RealSpaceScalar {
         }
 
     }
+
+    fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>> {
+        match self {
+            &RealSpaceScalar::Var(_) | &RealSpaceScalar::ScalarVar(_) =>
+                Vec::new(),
+            &RealSpaceScalar::Exp(a) | &RealSpaceScalar::Log(a) =>
+                a.inner.deref().contains_fft(),
+            &RealSpaceScalar::IFFT(a) =>
+                a.inner.deref().contains_fft(),
+            &RealSpaceScalar::Add(ref m) | &RealSpaceScalar::Mul(ref m) =>
+                m.into_iter().flat_map(|(k, _)| k.inner.deref().contains_fft()).collect(),
+        }
+    }
+
+    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self> {
+        match x.inner.deref() {
+            &RealSpaceScalar::Var(_) =>
+                f(x),
+            &RealSpaceScalar::ScalarVar(_) =>
+                f(x),
+            &RealSpaceScalar::Exp(a) =>
+                Expr::new(&RealSpaceScalar::Exp(f(&a))),
+            &RealSpaceScalar::Log(a) =>
+                Expr::new(&RealSpaceScalar::Log(f(&a))),
+            &RealSpaceScalar::IFFT(_) =>
+                f(x),
+            &RealSpaceScalar::Add(ref m) =>
+                Expr::new(&RealSpaceScalar::Add(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (f(&k), v))))),
+            &RealSpaceScalar::Mul(ref m) =>
+                Expr::new(&RealSpaceScalar::Mul(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (f(&k), v))))),
+        }
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Hash)]
@@ -486,20 +548,11 @@ impl KSpaceScalar {
     fn var(name: &str) -> Self { KSpaceScalar::Var(Intern::new(String::from(name))) }
     fn scalar_var(name: &str) -> Self { KSpaceScalar::ScalarVar(Intern::new(String::from(name))) }
     fn ifft(&self) -> RealSpaceScalar { RealSpaceScalar::IFFT(Expr::new(self)) }
-
-    fn contains_fft(&self) -> bool {
-        match self {
-            &KSpaceScalar::FFT(_) => true,
-            &KSpaceScalar::Var(_) | &KSpaceScalar::ScalarVar(_) => false,
-            &KSpaceScalar::Exp(a) | &KSpaceScalar::Log(a) => a.inner.deref().contains_fft(),
-            &KSpaceScalar::Add(ref m) | &KSpaceScalar::Mul(ref m) => m.into_iter().any(|(k, &_)| k.inner.deref().contains_fft()),
-        }
-    }
 }
 
 impl ExprType for KSpaceScalar {
     fn cpp(&self) -> String {
-        if !self.contains_fft() {
+        if !(self.contains_fft().len() > 0) {
             return String::from("Vector temp(Nx*Ny*(int(Nz)/2+1));\nfor (int i = 0; i < Nx * Ny * Nz; i++)\n\ttemp[i] = ") + &self.fake_scalar().cpp() + &"\n";
         }
         match self {
@@ -577,6 +630,38 @@ impl ExprType for KSpaceScalar {
             },
         }
     }
+
+    fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>> {
+        match self {
+            &KSpaceScalar::Var(_) | &KSpaceScalar::ScalarVar(_) =>
+                Vec::new(),
+            &KSpaceScalar::Exp(a) | &KSpaceScalar::Log(a) =>
+                a.inner.deref().contains_fft(),
+            &KSpaceScalar::FFT(a) =>
+                a.inner.deref().contains_fft(),
+            &KSpaceScalar::Add(ref m) | &KSpaceScalar::Mul(ref m) =>
+                m.into_iter().flat_map(|(k, _)| k.inner.deref().contains_fft()).collect(),
+        }
+    }
+
+    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self> {
+        match x.inner.deref() {
+            &KSpaceScalar::Var(_) =>
+                f(x),
+            &KSpaceScalar::ScalarVar(_) =>
+                f(x),
+            &KSpaceScalar::Exp(a) =>
+                Expr::new(&KSpaceScalar::Exp(f(&a))),
+            &KSpaceScalar::Log(a) =>
+                Expr::new(&KSpaceScalar::Log(f(&a))),
+            &KSpaceScalar::FFT(_) =>
+                f(x),
+            &KSpaceScalar::Add(ref m) =>
+                Expr::new(&KSpaceScalar::Add(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (f(&k), v))))),
+            &KSpaceScalar::Mul(ref m) =>
+                Expr::new(&KSpaceScalar::Mul(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (f(&k), v))))),
+        }
+    }
 }
 
 impl From<Scalar> for RealSpaceScalar {
@@ -584,6 +669,8 @@ impl From<Scalar> for RealSpaceScalar {
         match s {
             Scalar::Var(name) =>
                 RealSpaceScalar::ScalarVar(name),
+            Scalar::Integrate(s, a) =>
+                panic!("Tried to convert a Scalar expression involving integration into a RealSpaceScalar"),
             Scalar::Exp(a) =>
                 RealSpaceScalar::Exp(Expr::new(&a.inner.deref().clone().into())),
             Scalar::Log(a) =>
@@ -598,8 +685,6 @@ impl From<Scalar> for RealSpaceScalar {
                     m.iter()
                      .map(|(k, &v)| (Expr::new(&k.inner.deref().clone().into()), v))
                      .collect()),
-            _ =>
-                panic!("Attempting to convert a fake (syntax-hack) Scalar to a RealSpaceScalar"),
         }
     }
 }
@@ -629,7 +714,7 @@ impl FakeScalar for RealSpaceScalar {
                     m.iter()
                      .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
                      .collect()),
-            &RealSpaceScalar::IFFT(ref a) =>
+            &RealSpaceScalar::IFFT(_) =>
                 panic!(),
         }
     }
@@ -656,7 +741,7 @@ impl FakeScalar for KSpaceScalar {
                     m.iter()
                      .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
                      .collect()),
-            &KSpaceScalar::FFT(ref a) =>
+            &KSpaceScalar::FFT(_) =>
                 panic!(),
         }
     }
@@ -808,11 +893,19 @@ impl Expr<KSpaceScalar> {
     fn ifft(&self) -> Expr<RealSpaceScalar> {
         Expr::new(&self.inner.ifft())
     }
+
+    fn var<T: Into<String>>(s: T) -> Self {
+        Expr::new(&KSpaceScalar::var(&s.into()))
+    }
 }
 
 impl Expr<RealSpaceScalar> {
     fn fft(&self) -> Expr<KSpaceScalar> {
         Expr::new(&self.inner.fft())
+    }
+
+    fn var<T: Into<String>>(s: T) -> Self {
+        Expr::new(&RealSpaceScalar::var(&s.into()))
     }
 }
 
@@ -862,6 +955,7 @@ mod tests {
             <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::scalar_var("s"));
 
         assert_eq!(a * rs_s, a * rs_s);
+
         // FIXME the following is broken:
         // assert_eq!(a * s, a * rs_s);
     }
@@ -885,6 +979,26 @@ mod tests {
         assert_eq!((k+k2).ifft().cpp(), "ifft(Nx, Ny, Nz, dV, temp)");
         assert_eq!(Expr::new(&RealSpaceScalar::var("r").fft()).cpp(), "fft(Nx, Ny, Nz, dV, r)");
     }
+
+    #[test]
+    fn replacer() {
+        let a = Expr::new(&Scalar::var("a"));
+        let b = Expr::new(&Scalar::var("b"));
+        let x = Expr::new(&Scalar::var("x"));
+        let y = Expr::new(&Scalar::var("y"));
+        assert_eq!((x + y).cpp(), Scalar::map_leaves(&(a + b), |&x| {
+            match x.inner.deref() {
+                &Scalar::Var(s) => {
+                    if s.deref() == "a" {
+                        Expr::new(&Scalar::var("x"))
+                    } else {
+                        Expr::new(&Scalar::var("y"))
+                    }
+                },
+                _ => x,
+            }
+        }).cpp());
+    }
 }
 
 // CAN WE MAKE A MAP FUNCTION?
@@ -895,7 +1009,7 @@ mod tests {
 /// Maybe the following should not be a trait? impl for Expr<ExprType>?
 pub trait ToStmts: ExprType {
     fn to_stmts(&self) -> (Vec<Stmt>, Expr<Self>) {
-        if Expr::new(self).contains_fft().len() > 0 {
+        if Expr::new(self).inner.deref().contains_fft().len() > 0 {
             ()
         }
         (Vec::new(), Expr::new(self))
