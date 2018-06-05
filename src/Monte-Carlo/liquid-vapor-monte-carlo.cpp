@@ -79,7 +79,7 @@ int main(int argc, const char *argv[]) {
   int tmmc = false;
   int samc = false;
   int sad = false;
-  int sad_fraction = 1;
+  int sad_fraction = 3;
   int wltmmc = false;
   int generate_movies = false;
 
