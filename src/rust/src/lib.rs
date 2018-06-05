@@ -267,6 +267,7 @@ pub enum Scalar {
     Log(Expr<Scalar>),
     Add(AbelianMap<Scalar>),
     Mul(AbelianMap<Scalar>),
+    Integrate(Intern<String>, Expr<RealSpaceScalar>),
 }
 
 impl_expr_add!(Scalar);
@@ -352,6 +353,9 @@ impl ExprType for Scalar {
                             + &")",
                 }
             },
+            &Scalar::Integrate(s, integrand) =>
+                String::from("for (int i = 0, integrand = 0.0; i < Nx * Ny * Nz; i++)\n\t")
+                    + &s.deref() + &" += " + &integrand.cpp() + &";\n",
         }
     }
 
@@ -359,7 +363,9 @@ impl ExprType for Scalar {
         match self {
             &Scalar::Var(_) =>
                 Vec::new(),
-            &Scalar::Exp(a) | &Scalar::Log(a) =>
+            &Scalar::Exp(a) | &Scalar::Log(a)  =>
+                a.inner.deref().contains_fft(),
+            &Scalar::Integrate(_, a) =>
                 a.inner.deref().contains_fft(),
             &Scalar::Add(ref m) | &Scalar::Mul(ref m) =>
                 m.into_iter().flat_map(|(k, _)| k.inner.deref().contains_fft()).collect(),
@@ -368,7 +374,7 @@ impl ExprType for Scalar {
 
     fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self> {
         match x.inner.deref() {
-            &Scalar::Var(_) =>
+            &Scalar::Var(_) | &Scalar::Integrate(_, _) =>
                 f(x),
             &Scalar::Exp(a) =>
                 Expr::new(&Scalar::Exp(f(&a))),
@@ -663,6 +669,8 @@ impl From<Scalar> for RealSpaceScalar {
         match s {
             Scalar::Var(name) =>
                 RealSpaceScalar::ScalarVar(name),
+            Scalar::Integrate(s, a) =>
+                panic!("Tried to convert a Scalar expression involving integration into a RealSpaceScalar"),
             Scalar::Exp(a) =>
                 RealSpaceScalar::Exp(Expr::new(&a.inner.deref().clone().into())),
             Scalar::Log(a) =>
@@ -947,6 +955,7 @@ mod tests {
             <Expr<RealSpaceScalar>>::new(&RealSpaceScalar::scalar_var("s"));
 
         assert_eq!(a * rs_s, a * rs_s);
+
         // FIXME the following is broken:
         // assert_eq!(a * s, a * rs_s);
     }
@@ -969,6 +978,26 @@ mod tests {
         let k2 = Expr::new(&KSpaceScalar::var("k2"));
         assert_eq!((k+k2).ifft().cpp(), "ifft(Nx, Ny, Nz, dV, temp)");
         assert_eq!(Expr::new(&RealSpaceScalar::var("r").fft()).cpp(), "fft(Nx, Ny, Nz, dV, r)");
+    }
+
+    #[test]
+    fn replacer() {
+        let a = Expr::new(&Scalar::var("a"));
+        let b = Expr::new(&Scalar::var("b"));
+        let x = Expr::new(&Scalar::var("x"));
+        let y = Expr::new(&Scalar::var("y"));
+        assert_eq!((x + y).cpp(), Scalar::map_leaves(&(a + b), |&x| {
+            match x.inner.deref() {
+                &Scalar::Var(s) => {
+                    if s.deref() == "a" {
+                        Expr::new(&Scalar::var("x"))
+                    } else {
+                        Expr::new(&Scalar::var("y"))
+                    }
+                },
+                _ => x,
+            }
+        }).cpp());
     }
 }
 
