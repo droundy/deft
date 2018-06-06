@@ -14,13 +14,25 @@
 #include <iostream>
 #include "version-identifier.h"
 
+// TODO items:
+
+// 1. Write a script that tests whether resume works.  (And fix
+//    resume.)  i.e. the script will run the code once with fixed #
+//    moves, then run again resuming.  Then it'll run with twice the
+//    moves and confirm the results agree.  Eventually we'll need the
+//    test to work with all methods.
+
+// 2. Make sure the min_important_energy is always up-to-date (but
+//    keep it cheap).
+
+// 3. Make sure the max_entropy_energy is always up-to-date (but keep
+//    it cheap).
+
+// 4. Fix FIXMEs.
+
 // ---------------------------------------------------------------------
 // Define "Constants" -- set from arguments then unchanged
 // ---------------------------------------------------------------------
-
-double M = 0;      // Define our initial system magnetization.
-int J = 1;      // Define our spin coupling.
-double minT = 0.2; // Define minimum Temperature.
 
 const int Q = 2;   // Define number of spin states.
 
@@ -41,15 +53,39 @@ struct energy {
   energy operator-(energy other) const { return energy(value - other.value); }
 };
 
-enum end_conditions { none, optimistic_min_samples, pessimistic_min_samples,
-                      optimistic_sample_error, pessimistic_sample_error, flat_histogram,
-                      init_iter_limit };
-
 enum dos_types { histogram_dos, transition_dos, weights_dos };
 
-struct ising_simulation {
-  long moves;   // the current number of moves
+struct simulation_parameters {
   int N;            // N*N is the number of sites
+
+  int J;       // Define our spin coupling.
+  double minT; // Define minimum Temperature.
+
+  /* The following determine how we perform an ising flip */
+  double sa_t0; // if it is non-zero, update gamma on each move SA-style.
+  double sa_prefactor; // prefactor in computing gamma when running SA.
+
+  int use_sad;  // use sad method.
+  int use_wl; // if true, we are using WL
+
+  double T;      // canonical temperature.
+  simulation_parameters() {
+    N=0;
+    J=1;
+    T = 0;
+    minT=0.2;
+    sa_t0 = 0;
+    sa_prefactor = 1;
+    use_sad = false;
+    use_wl = false;
+  }
+};
+
+
+struct ising_simulation {
+  simulation_parameters param; // the parameters that specify how to simulate
+
+  long moves;   // the current number of moves
   int *S;
   energy E;      // system energy.
 
@@ -58,12 +94,6 @@ struct ising_simulation {
 
   /* The following determine how we perform an ising flip */
   double gamma; // if it is non-zero, update weights on each move WL-style.
-  double sa_t0; // if it is non-zero, update gamma on each move SA-style.
-  double sa_prefactor; // prefactor in computing gamma when running SA.
-  bool use_sad;  // use sad method.
-  bool use_wl; // if true, we are using WL
-
-  double T;      // canonical temperature.
 
   long energy_levels;
 
@@ -79,40 +109,34 @@ struct ising_simulation {
   energy max_energy; // The highest energy we have ever found for this
                   // system.  This must be kept up-to-date because
                   // it is used by SAD to compute the delta E.
-  energy too_high_energy; // too_high_energy is used in SAD, and is the
+  energy too_hi_energy; // too_hi_energy is used in SAD, and is the
                        // highest ever value that max_entropy_energy has
                        // taken.  It is used to define the range over
                        // which our histogram is made flat.
-  energy too_low_energy; // too_low_energy is used in SAD, and is the
+  energy too_lo_energy; // too_lo_energy is used in SAD, and is the
                       // lowest ever value that min_important_energy has
                       // taken.  It is used to define the range over
                       // which our histogram is made flat.
 
-  explicit ising_simulation(int N); // generate the spin lattice
+  explicit ising_simulation(simulation_parameters par); // generate the spin lattice
   ~ising_simulation();
 
   int random_flip(int oldspin) const; // pick a new random (but changed) spin
-
-  void canonical_temperature(double t);
 
   void flip_a_spin();
   void end_flip_updates();
   double calculate_energy();
 
   long index_from_energy(energy E) const {
-    return J*N*N/2 + E.value/4;
+    return param.J*param.N*param.N/2 + E.value/4;
   }
   energy energy_from_index(int i) const {
-    return energy(4*(i - J*N*N/2));
+    return energy(4*(i - param.J*param.N*param.N/2));
   }
-
-  end_conditions end_condition;
 
   void compute_ln_dos(dos_types dos_type);
   void initialize_samc(int am_sad);
   bool reached_iteration_cap();
-  energy set_min_important_energy(double *input_ln_dos);
-  void set_max_entropy_energy();
 };
 
 // ising_simulation methods
@@ -123,15 +147,15 @@ int ising_simulation::random_flip(int oldspin) const {
   return random::ran64() % Q - Q/2; // gives value -Q/2 to Q/2-1?
 }
 
-ising_simulation::ising_simulation(int NN) : E(0), max_entropy_energy(0),
-          min_important_energy(0), min_energy(0), max_energy(0), too_high_energy(0),
-          too_low_energy(0) {
+ising_simulation::ising_simulation(simulation_parameters par)
+  : param(par), E(0), max_entropy_energy(0), min_important_energy(0),
+    min_energy(0), max_energy(0), too_hi_energy(0), too_lo_energy(0) {
+
   // seconds per iteration (will be adjusted from actual timing)
   estimated_time_per_iteration = 0.1;
-  use_sad = 0; // default to not using SAD MC (think happy thoughts!)
   moves = 0;
-  T = 0;
-  N = NN;
+  const int J = param.J;
+  const int N = param.N;
   S = new int[N*N];
   // energy histogram
   energy_levels = J*N*N;
@@ -149,7 +173,18 @@ ising_simulation::ising_simulation(int NN) : E(0), max_entropy_energy(0),
   min_energy = E;
   max_energy = E;
   max_entropy_energy = E;
+  too_hi_energy = E;
+  too_lo_energy = E;
   energies_found = 1; // we found just one energy
+
+  if (param.T > 0) {
+    // We are doing a canonical simulation, so set up the weights
+    // appropriately!
+    for (int i=0; i<energy_levels; i++) {
+      ln_energy_weights[i] = 4*i/param.T;
+    }
+  }
+
 }
 
 ising_simulation::~ising_simulation() {
@@ -159,14 +194,9 @@ ising_simulation::~ising_simulation() {
   delete[] S;
 }
 
-void ising_simulation::canonical_temperature(double t) {
-  T = t;
-  for (int i=0; i<energy_levels; i++) {
-    ln_energy_weights[i] = 4*i/T;
-  }
-}
-
 void ising_simulation::flip_a_spin() {
+  const int J = param.J;
+  const int N = param.N;
   moves += 1;
   int k = random::ran64() % (N*N);
   int i = k % N;
@@ -180,22 +210,22 @@ void ising_simulation::flip_a_spin() {
   const energy deltaE = energy(J*(old - S[j + i*N])*neighbor_spins);
 
   double lnprob = 0;
-  if (use_sad) {
+  if (param.use_sad) {
     const energy e1 = E;
     const energy e2 = E + deltaE;
     double lnw1 = ln_energy_weights[index_from_energy(e1)];
-    if (e1 > too_high_energy) {
-      lnw1 = ln_energy_weights[index_from_energy(too_high_energy)];
-    } else if (e1 < too_low_energy) {
-      lnw1 = ln_energy_weights[index_from_energy(too_low_energy)]
-             - (too_low_energy - e1).value/minT;
+    if (e1 > too_hi_energy) {
+      lnw1 = ln_energy_weights[index_from_energy(too_hi_energy)];
+    } else if (e1 < too_lo_energy) {
+      lnw1 = ln_energy_weights[index_from_energy(too_lo_energy)]
+             - (too_lo_energy - e1).value/param.minT;
     }
     double lnw2 = ln_energy_weights[index_from_energy(e2)];
-    if (e2 > too_high_energy) {
-      lnw2 = ln_energy_weights[index_from_energy(too_high_energy)];
-    } else if (e2 < too_low_energy) {
-      lnw2 = ln_energy_weights[index_from_energy(too_low_energy)]
-             - (too_low_energy - e2).value/minT;
+    if (e2 > too_hi_energy) {
+      lnw2 = ln_energy_weights[index_from_energy(too_hi_energy)];
+    } else if (e2 < too_lo_energy) {
+      lnw2 = ln_energy_weights[index_from_energy(too_lo_energy)]
+             - (too_lo_energy - e2).value/param.minT;
     }
     lnprob = lnw1 - lnw2;
   } else {
@@ -216,61 +246,59 @@ void ising_simulation::flip_a_spin() {
 
 void ising_simulation::end_flip_updates(){
   // update iteration counter, energy histogram, etc
-  if (sa_t0 || use_sad) {
+  if (param.sa_t0 || param.use_sad) {
     if (energy_histogram[index_from_energy(E)] == 0) {
       energies_found++; // we found a new energy!
       if (E > max_energy) max_energy = E;
       if (E < min_energy) min_energy = E;
-      if (use_sad) {
-        printf("  (moves %ld, energies_found %ld, erange: %d -> %d effective t0 = %g)\n",
-               moves, energies_found, min_energy.value, max_energy.value,
-               sa_prefactor*energies_found
-                 *(max_energy.value-min_energy.value)/(minT*use_sad));
+      if (param.use_sad) {
+        printf("  (moves %ld, energies_found %ld, erange: %d -> %d)\n",
+               moves, energies_found, min_energy.value, max_energy.value);
       }
     }
-    if (use_sad && energies_found > 1) {
-      gamma = sa_prefactor*energies_found*(max_energy.value-min_energy.value)
-        /(3*minT*moves);
+    if (param.use_sad && energies_found > 1) {
+      gamma = param.sa_prefactor*energies_found*(max_energy.value-min_energy.value)
+        /(3*param.minT*moves);
     } else {
-      gamma = sa_prefactor*sa_t0/max(sa_t0, moves);
+      gamma = param.sa_prefactor*param.sa_t0/max(param.sa_t0, moves);
     }
   }
   energy_histogram[index_from_energy(E)]++;
-  if (use_sad && energies_found > 1) {
-    if (E > too_high_energy) {
+  if (param.use_sad && energies_found > 1) {
+    if (E > too_hi_energy) {
       // We are at higher energy than the maximum entropy state, so we
       // need to tweak our weights by even more, since we don't spend
       // much time here.
       ln_energy_weights[index_from_energy(E)] =
         max(ln_energy_weights[index_from_energy(E)] + gamma,
-            ln_energy_weights[index_from_energy(too_high_energy)] +
+            ln_energy_weights[index_from_energy(too_hi_energy)] +
             log(gamma
                 + exp(ln_energy_weights[index_from_energy(E)]
-                      - ln_energy_weights[index_from_energy(too_high_energy)])));
+                      - ln_energy_weights[index_from_energy(too_hi_energy)])));
       if (!(isnormal(ln_energy_weights[index_from_energy(E)])
             || ln_energy_weights[index_from_energy(E)] == 0)) {
         printf("lnw[%d] = %g\n", E.value, ln_energy_weights[index_from_energy(E)]);
       }
       assert(isnormal(ln_energy_weights[index_from_energy(E)])
               || ln_energy_weights[index_from_energy(E)] == 0);
-    } else if (E < too_low_energy) {
+    } else if (E < too_lo_energy) {
 
       ln_energy_weights[index_from_energy(E)] =
         max(ln_energy_weights[index_from_energy(E)] + gamma,
-            ln_energy_weights[index_from_energy(too_low_energy)]
-            + (too_low_energy - E).value/minT
+            ln_energy_weights[index_from_energy(too_lo_energy)]
+            + (too_lo_energy - E).value/param.minT
             + log(gamma + exp(ln_energy_weights[index_from_energy(E)]
-                              - ln_energy_weights[index_from_energy(too_low_energy)]
-                              + (too_low_energy - E).value/minT)));
+                              - ln_energy_weights[index_from_energy(too_lo_energy)]
+                              + (too_lo_energy - E).value/param.minT)));
 
       if (ln_energy_weights[index_from_energy(E)] >
             ln_energy_weights[index_from_energy(min_important_energy)]
-            - (min_important_energy - E).value/minT) {
+            - (min_important_energy - E).value/param.minT) {
         // FIXME Think about whether this is needed.
         ln_energy_weights[index_from_energy(E)] =
             ln_energy_weights[index_from_energy(min_important_energy)]
-            - (min_important_energy - E).value/minT;
-        too_low_energy = E;
+            - (min_important_energy - E).value/param.minT;
+        too_lo_energy = E;
         // printf("We were almost very cray at energy %d\n", energy);
       }
 
@@ -289,34 +317,36 @@ void ising_simulation::end_flip_updates(){
     // following has no effect.
     ln_energy_weights[index_from_energy(E)] += gamma;
   }
-  if (use_sad) {
+  if (param.use_sad) {
     bool print_edges = false;
     if (ln_energy_weights[index_from_energy(E)] >
         ln_energy_weights[index_from_energy(max_entropy_energy)]
         || energy_histogram[index_from_energy(max_entropy_energy)] == 0) {
       // We are now at the max_entropy_energy!
       max_entropy_energy = E;
-      if (max_entropy_energy > too_high_energy) too_high_energy = max_entropy_energy;
+      if (max_entropy_energy > too_hi_energy) too_hi_energy = max_entropy_energy;
       // print_edges = true;
     }
     if (ln_energy_weights[index_from_energy(E)] >
         ln_energy_weights[index_from_energy(min_important_energy)]
-        - (min_important_energy - E).value/minT
+        - (min_important_energy - E).value/param.minT
         || energy_histogram[index_from_energy(min_important_energy)] == 0) {
       // We are above the min_important_energy tangent line, which
       // means we are the new min_important_energy.
       //if (energy != min_important_energy) print_edges = true;
       min_important_energy = E;
-      if (min_important_energy < too_low_energy) too_low_energy = min_important_energy;
+      if (min_important_energy < too_lo_energy) too_lo_energy = min_important_energy;
     }
 
     if (print_edges) printf(" %5d ...%5d -->%5d ...%5d\n",
-                            too_low_energy.value, min_important_energy.value,
-                            max_entropy_energy.value, too_high_energy.value);
+                            too_lo_energy.value, min_important_energy.value,
+                            max_entropy_energy.value, too_hi_energy.value);
   }
 }
 
 double ising_simulation::calculate_energy() {
+  const int N = param.N;
+  const int J = param.J;
   E.value = 0;
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
@@ -346,7 +376,7 @@ void ising_simulation::compute_ln_dos(dos_types dos_type) {
       //if (energy_histogram[i] != 0) {FIXME: WORKING HERE NOW!!!
       ln_dos[i] = ln_energy_weights[i] - max_entropy;
     }
-    if (use_sad) {
+    if (param.use_sad) {
       // Now let us set the ln_dos for any sites we have never visited
       // to be equal to the minimum value of ln_dos for sites we
       // *have* visited.  These are unknown densities of states, and
@@ -361,58 +391,6 @@ void ising_simulation::compute_ln_dos(dos_types dos_type) {
     }
   }
 }
-
-energy ising_simulation::set_min_important_energy(double *input_ln_dos){
-  // sad tracks min_important_energy continually
-  if (use_sad) return min_important_energy;
-
-  // We always use the transition matrix to estimate the
-  // min_important_energy, since it is more robust at the outset.
-  double *ln_dos;
-  if (input_ln_dos) ln_dos = input_ln_dos;
-  //else ln_dos = compute_ln_dos(transition_dos); FIXME: We are not doing Transition Matrix methods in ising.cpp!
-
-  min_important_energy.value = 0;
-  /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_energy.value+1; i <= min_energy.value; i++) { // changed to max_entropy_energy
-    if (ln_dos[i-1] - ln_dos[i] < 1.0/minT
-        && ln_dos[i] != ln_dos[i-1]) {
-      // This is an important energy if the DOS is high enough, and we
-      // have some decent statistics here.
-      min_important_energy.value = i;
-    } else if (ln_dos[i-1] == ln_dos[i]) {
-      // We have no information about this state, so let us keep
-      // looking, in case there is a nice state at lower energy...
-    } else {
-      // Adjust ln_dos for the next state to match the "canonical"
-      // value.  This allows us to handle situations where there is a
-      // drop in the density of states followed by a peak that is
-      // large enough to warrant considering the lower energy
-      // important.
-      ln_dos[i] = ln_dos[i-1] - 1.0/minT;
-    }
-  }
-  /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
-  if (min_important_energy.value == 0) {
-    min_important_energy = min_energy;
-  }
-
-  if (!input_ln_dos) delete[] ln_dos;
-
-  return min_important_energy;
-}
-
-//void ising_simulation::set_max_entropy_energy() {
-//  // sad tracks max_entropy_state continually
-//  if (use_sad) return;
-//
-//  const double *ln_dos = compute_ln_dos(transition_dos);
-//
-//  for (int i=energy_levels-1; i >= 0; i--) {
-//    if (ln_dos[i] > ln_dos[max_entropy_energy]) max_entropy_energy.value = i;
-//  }
-//  delete[] ln_dos;
-//}
 
 static double took(const char *name) {
   assert(name); // so it'll count as being used...
@@ -442,12 +420,8 @@ int main(int argc, const char *argv[]) {
   random::seed(0);
   // some miscellaneous default or dummy simulation parameters
 
-  double fix_kT = 0;
-  int samc = false;
-  int sad = false;
-  double sa_t0 = 0.0; // default to no SA method either
+  simulation_parameters param;
 
-  int NN = 10;
   int resume = false;
   long total_moves = 10000;
 
@@ -459,7 +433,6 @@ int main(int argc, const char *argv[]) {
   char *filename_suffix = new char[1024];
   sprintf(filename_suffix, "none");
 
-  //int Q = 2;  // defualt to ising model
   poptContext optCon;
 
   // -------------------------------------------------------------------
@@ -472,9 +445,7 @@ int main(int argc, const char *argv[]) {
 
     /*** ISING MODEL PARAMETERS ***/
 
-    {"N", '\0', POPT_ARG_INT, &NN, 0, "N*N is the number of spin sites", "INT"},
-    //{"Q", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &ising.Q, 0,
-    // "The number of spin states", "INT"},
+    {"N", '\0', POPT_ARG_INT, &param.N, 0, "N*N is the number of spin sites", "INT"},
 
     /*** SIMULATION ITERATIONS ***/
 
@@ -493,12 +464,14 @@ int main(int argc, const char *argv[]) {
     {"resume", '\0', POPT_ARG_NONE, &resume, 0,
      "Resume previous simulation", "BOOLEAN"},
 
-    {"sad", '\0', POPT_ARG_NONE, &sad, 0,
+    {"sad", '\0', POPT_ARG_NONE, &param.use_sad, 0,
      "Use stochastic approximation monte carlo dynamical version", "BOOLEAN"},
-    {"samc", '\0', POPT_ARG_NONE, &samc, 0,
-     "Use stochastic approximation monte carlo", "BOOLEAN"},
+    {"wl", '\0', POPT_ARG_NONE, &param.use_wl, 0,
+     "Use Wang-Landau method", "BOOLEAN"},
+    {"minT", '\0', POPT_ARG_DOUBLE, &param.minT, 0,
+     "The minimum temperature we care about", "DOUBLE"},
     {"sa-t0", '\0', POPT_ARG_DOUBLE,
-     &sa_t0, 0, "t0 value used in SAMC", "DOUBLE"},
+     &param.sa_t0, 0, "use SAMC with specified t0 value", "DOUBLE"},
 
     /*** HISTOGRAM METHOD PARAMETERS ***/
 
@@ -534,9 +507,9 @@ int main(int argc, const char *argv[]) {
   }
 
   // Check that only one histogram method is used
-  if (sad + samc + (fix_kT != 0) + resume != 1) {
-    printf("Exactly one histogram method must be selected! (%d %d %g)\n",
-           sad, samc, fix_kT);
+  if (param.use_sad + (param.sa_t0 != 0) + (param.T != 0) != 1) {
+    printf("Exactly one histogram method must be selected! (%d %g %g)\n",
+           param.use_sad, param.sa_t0, param.T);
     return 254;
   }
   // Set default data directory
@@ -550,8 +523,7 @@ int main(int argc, const char *argv[]) {
   char *ising_fname = new char[1024];
   sprintf(ising_fname, "%s/%s.dat", data_dir, filename);
 
-  ising_simulation ising(NN);
-  ising.canonical_temperature(6);
+  ising_simulation ising(param);
   took("Starting program");
 
   // ----------------------------------------------------------------------------
@@ -561,7 +533,7 @@ int main(int argc, const char *argv[]) {
   if (resume) {
     // We are continuing a previous simulation.
     FILE *rfile = fopen((const char *)ising_fname, "r");
-    if (sad) {
+    if (param.use_sad) {
       // Open the file!
       //FILE *rfile = fopen((const char *)ising_fname, "r");
       if (rfile != NULL) {
@@ -574,17 +546,18 @@ int main(int argc, const char *argv[]) {
           exit(1);
         }
         printf("line: '%s'\n",line);
-        int resumeNN = 0;
-        if (fscanf(rfile, " NN = %d\n", &resumeNN) != 1) {
-          printf("error reading NN!\n");
-          exit(1);
+        {
+          int resumeN = 0;
+          if (fscanf(rfile, " N = %d\n", &resumeN) != 1) {
+            printf("error reading N!\n");
+            exit(1);
+          }
+          if (resumeN != param.N) {
+            printf("Error:  must specify same N value when resuming! %d != %d\n",
+                   param.N, resumeN);
+            exit(1);
+          }
         }
-        if (resumeNN != NN) {
-          printf("Error:  must specify same N value when resuming! %d != %d\n",
-                 NN, resumeNN);
-          exit(1);
-        }
-        printf("NN is now %d\n", NN);
         if (fscanf(rfile, "total-moves = %ld\n", &total_moves) != 1) {
           printf("error reading total-moves!\n");
           exit(1);
@@ -597,13 +570,25 @@ int main(int argc, const char *argv[]) {
           printf("error reading E!\n");
           exit(1);
         }
-        if (fscanf(rfile, "J = %d\n", &J) != 1) {
-          printf("error reading J!\n");
+        {
+          int resumeJ;
+          if (fscanf(rfile, "J = %d\n", &resumeJ) != 1) {
+            printf("error reading J!\n");
+            exit(1);
+          }
+          if (resumeJ != param.J) {
+            printf("Error:  must specify same J value when resuming! %d != %d\n",
+                   param.J, resumeJ);
+            exit(1);
+          }
+        }
+        if (fscanf(rfile, "E_found = %li\n", &ising.energies_found) != 1) {
+          printf("error reading E_found!\n");
           exit(1);
         }
-        if (fscanf(rfile, "E-found = %li\n", &ising.energies_found) != 1) {
-          printf("error reading E-found!\n");
-          exit(1);
+        if (param.use_sad) {
+          fscanf(rfile," too_hi_energy = %i\n", &ising.too_hi_energy.value); // NAME?
+          fscanf(rfile," too_lo_energy = %i\n", &ising.too_lo_energy.value); // NAME?
         }
 
         printf("lndos is now {\n");
@@ -636,10 +621,10 @@ int main(int argc, const char *argv[]) {
         fscanf(rfile, " ])\n");
 
         fscanf(rfile, " S = np.array([\n");
-        for (int i=0; i<NN; i++) {
+        for (int i=0; i<param.N; i++) {
           fscanf(rfile, "\t[");
-          for (int j=0; j<NN; j++) {
-            fscanf(rfile,"%2d,", &ising.S[i+NN*j]);
+          for (int j=0; j<param.N; j++) {
+            fscanf(rfile,"%2d,", &ising.S[i+param.N*j]);
           }
           fscanf(rfile, "],\n");
         }
@@ -660,23 +645,6 @@ int main(int argc, const char *argv[]) {
   ising.calculate_energy();
   for (long i = 0; i < total_moves; i++) {
     ising.flip_a_spin();
-    //set_min_important_energy();
-    //set_max_entropy_energy();
-  } 
-
-  if (samc) {
-      if (ising.sa_t0 == 0) {
-        ising.sa_t0 = 1;
-        //ising.use_sad = am_sad;
-        ising.too_high_energy.value = ising.energy_levels-1;
-        ising.too_low_energy.value = 0;
-        //assert(sa_t0 || am_sad);
-        //assert(sa_prefactor);
-  } else if (sad) {
-    //ising.use_sad = sad_fraction;
-    ising.too_high_energy.value = ising.energy_levels-1;
-    ising.too_low_energy.value = 0;
-    }
   }
 
   printf("I think the energy is %d\n", ising.E.value);
@@ -685,7 +653,7 @@ int main(int argc, const char *argv[]) {
 
   took("Running");
 
-  if (ising.use_sad) {
+  if (param.use_sad) {
     ising.compute_ln_dos(weights_dos);
   } else {
     ising.compute_ln_dos(histogram_dos);
@@ -710,67 +678,60 @@ int main(int argc, const char *argv[]) {
   // ----------------------------------------------------------------------------
 
   // Save resume file
-      {
-        FILE *ising_out = fopen((const char *)ising_fname, "w");
+  {
+    FILE *ising_out = fopen((const char *)ising_fname, "w");
 
-        fprintf(ising_out, "import numpy as np\n\n");
-        random::dump_resume_info(ising_out);
-        fprintf(ising_out,"version = %s\n\n",version_identifier());
+    fprintf(ising_out, "import numpy as np\n\n");
+    random::dump_resume_info(ising_out);
+    fprintf(ising_out,"version = %s\n\n",version_identifier());
 
-        if (fix_kT) {
-          fprintf(ising_out,"method = 'canonical'\nkT = %g\n", fix_kT);
-        } else if (samc) {
-            fprintf(ising_out,"method = 'samc'\n");
-            // fprintf(ising_out,"samc_t0 = %g\n",ising.sa_t0);
-        } else if (sad) {
-            fprintf(ising_out,"method = 'sad'\n");
-            // fprintf(ising_out,"too_high_energy = %d\n", ising.too_high_energy);
-        }
+    if (param.T) {
+      fprintf(ising_out,"method = 'canonical'\nkT = %g\n", param.T);
+    } else if (param.sa_t0) {
+      fprintf(ising_out,"method = 'samc'\n");
+      // fprintf(ising_out,"samc_t0 = %g\n",ising.sa_t0);
+    } else if (param.use_sad) {
+      fprintf(ising_out,"method = 'sad'\n");
+    }
 
-        fprintf(ising_out,"NN = %i\n",NN);
-        fprintf(ising_out,"minT = %g\n",minT);
-        fprintf(ising_out,"moves = %li\n",ising.moves);
-        fprintf(ising_out,"E = %i\n",ising.E.value);
-        fprintf(ising_out,"J = %i\n", J);
-        fprintf(ising_out,"E-found = %li\n", ising.energies_found); // NAME?
-        if (sad) {
-        fprintf(ising_out,"high-energy = %i\n", ising.too_high_energy.value); // NAME?
-        fprintf(ising_out,"low-energy = %i\n", ising.too_low_energy.value); // NAME?
-        }
-        // inserting arrays into text file.
-        fprintf(ising_out, "lndos = np.array([\n");
-        for (int i = 0; i < ising.energy_levels; i++) {
-          fprintf(ising_out,"\t%.17g,\n", ising.ln_dos[i]);
-        }
-        fprintf(ising_out, "])\n");
-        fprintf(ising_out, "lnw = np.array([\n");
-        for (int i = 0; i < ising.energy_levels; i++) {
-          fprintf(ising_out,"\t%.17g,\n", ising.ln_energy_weights[i]);
-        }
-        fprintf(ising_out, "])\n");
-        fprintf(ising_out, "histogram = np.array([\n");
-        for (int i = 0; i < ising.energy_levels; i++) {
-          fprintf(ising_out,"\t%ld,\n", ising.energy_histogram[i]);
-        }
-        fprintf(ising_out, "])\n");
-        fprintf(ising_out, "S = np.array([\n");
-        for (int i=0; i<NN; i++) {
-          fprintf(ising_out, "\t[");
-          for (int j=0; j<NN; j++) {
-            fprintf(ising_out,"%2d,", ising.S[i+NN*j]);
-          }
-          fprintf(ising_out, "],\n");
-        }
-        fprintf(ising_out, "])\n");
-
-        //fprintf(ising_out, "E = np.array([\n");
-        //for (int i = 0; i < ising.energy_levels; i++) {
-          //printf(ising_out,"%2d,", ising.energy_from_index(i).value);
-        //}
-        //fprintf(ising_out, "])\n");
-
-        fclose(ising_out);
+    fprintf(ising_out,"N = %i\n",param.N);
+    fprintf(ising_out,"minT = %g\n",param.minT);
+    fprintf(ising_out,"moves = %li\n",ising.moves);
+    fprintf(ising_out,"E = %i\n",ising.E.value);
+    fprintf(ising_out,"J = %i\n", param.J);
+    fprintf(ising_out,"E_found = %li\n", ising.energies_found); // NAME?
+    if (param.use_sad) {
+      fprintf(ising_out,"too_hi_energy = %i\n", ising.too_hi_energy.value); // NAME?
+      fprintf(ising_out,"too_lo_energy = %i\n", ising.too_lo_energy.value); // NAME?
+    }
+    // inserting arrays into text file.
+    fprintf(ising_out, "lndos = np.array([\n");
+    for (int i = 0; i < ising.energy_levels; i++) {
+      fprintf(ising_out,"\t%.17g,\n", ising.ln_dos[i]);
+    }
+    fprintf(ising_out, "])\n");
+    fprintf(ising_out, "lnw = np.array([\n");
+    for (int i = 0; i < ising.energy_levels; i++) {
+      fprintf(ising_out,"\t%.17g,\n", ising.ln_energy_weights[i]);
+    }
+    fprintf(ising_out, "])\n");
+    fprintf(ising_out, "histogram = np.array([\n");
+    for (int i = 0; i < ising.energy_levels; i++) {
+      fprintf(ising_out,"\t%ld,\n", ising.energy_histogram[i]);
+    }
+    fprintf(ising_out, "])\n");
+    fprintf(ising_out, "S = np.array([\n");
+    for (int i=0; i<param.N; i++) {
+      fprintf(ising_out, "\t[");
+      for (int j=0; j<param.N; j++) {
+        fprintf(ising_out,"%2d,", ising.S[i+param.N*j]);
       }
+      fprintf(ising_out, "],\n");
+    }
+    fprintf(ising_out, "])\n");
+
+    fclose(ising_out);
+  }
 
   // -------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
