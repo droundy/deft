@@ -404,7 +404,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("\nCalculating Crystal Free Energy with Gaussian Quadrature...\n");
     } else printf("\nCalculating Crystal Free Energy with Monte-Carlo...\n");
 
-    double free_energy=0;  //Crystal Excess Free Energy over one primitive cell
+    double cFexcess_of_primitive_cell=0;  //Crystal Excess Free Energy over one primitive cell
     double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0;
 
     for (int i=0; i<Nl; i++) {
@@ -491,7 +491,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           total_phi_1 += temp*phi_1*dV;
           total_phi_2 += temp*phi_2*dV;
           total_phi_3 += temp*phi_3*dV;
-          free_energy += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
+          cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
           if (temp*(phi_1 + phi_2 + phi_3) < -10.0) {
             printf("    Free energy here: %g\n", temp*(phi_1 + phi_2 + phi_3));
             //printf("                  n0: %g\n", n_0);
@@ -501,7 +501,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             //printf("                 n1v: %g\n", nv_1.norm());
             //printf("                 n2v: %g\n", nv_2.norm());
           }
-          if (isnan(free_energy)) {
+          if (isnan(cFexcess_of_primitive_cell)) {
             printf("free energy is a NaN!\n");
             printf("position is: %g %g %g\n", r.x, r.y, r.z);
             printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%g\n", n_0, n_1, n_2, n_3);
@@ -513,7 +513,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             data_out.cfree_energy_per_vol=0;
             return data_out;
           }
-          //printf("free energy is now... %g\n", free_energy);   //debug
+          //printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell);   //debug  
           //printf("      finished %.5f%% of the integral\n",
           //       100*((i)/double(Nl)
           //           +(j)/uipow(Nl, 2)
@@ -527,15 +527,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       }
       //printf("finished %.1f%% of the integral\n",
       //       100*(i + 1)/double(Nl));
-      //printf("free_energy so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",free_energy, phi_1, phi_2, phi_3);
+      //printf("cFexcess_of_primitive_cell so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",cFexcess_of_primitive_cell, phi_1, phi_2, phi_3);
     }
 
     //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
     //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
-    //free_energy and Fideal are over one parallelepiped (one primitive cell) with 1-fv atoms
-    cfree_energy_per_atom=(cFideal_of_primitive_cell + free_energy)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
+    //cFexcess_of_primitive_cell and Fideal are over one parallelepiped (one primitive cell) with 1-fv atoms
+    cfree_energy_per_atom=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
     //ASK! is there another term to add? SEE homogeneousSFMTFastFluid.cpp has -mu*n term whatever that is!
-    cfree_energy_per_vol=(cFideal_of_primitive_cell + free_energy)/primitive_cell_volume; //
+    cfree_energy_per_vol=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/primitive_cell_volume; //
     printf("primitive cell volume = %g\n", primitive_cell_volume); //
     printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
     printf("             phi_1 per volume = %g\n", total_phi_1/primitive_cell_volume); //
@@ -543,7 +543,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     printf("             phi_3 per volume = %g\n", total_phi_3/primitive_cell_volume); //
     
     printf("Crystal Ideal free energy per volume = %g\n", cFideal_of_primitive_cell/primitive_cell_volume); //
-    printf("Crystal Excess free energy per volume = %g\n", free_energy/primitive_cell_volume); //
+    printf("Crystal Excess free energy per volume = %g\n", cFexcess_of_primitive_cell/primitive_cell_volume); //
     printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol); //
     printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
   }
