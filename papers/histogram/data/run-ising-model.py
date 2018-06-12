@@ -57,9 +57,12 @@ os.system('mkdir -p ' + datadir) # create ising folder in directory
 #    f.write('# python %s\n' % (' '.join(sys.argv)))
 
 isingdir = 'papers/histogram/figs'
-cmd = "%s/ising.exe --N=%i --total-moves=%g --filename=ising-complete %s" % (isingdir, N, total_moves, method)
-cmd += "&& %s/ising.exe --N=%i --total-moves=%g --filename=ising-test %s" % (isingdir, N, test_moves, method)
-cmd += "&& %s/ising.exe --N=%i --total-moves=%g --filename=ising-test %s --resume" % (isingdir, N, total_moves - test_moves, method)
+cmd = ("%s/ising.exe --N=%i --total-moves=%g --filename=ising-complete %s" 
+       % (isingdir, N, total_moves, method))
+cmd += (" && %s/ising.exe --N=%i --total-moves=%g --filename=ising-test %s" 
+        % (isingdir, N, test_moves, method))
+cmd += (" && %s/ising.exe --N=%i --total-moves=%g --filename=ising-test %s --resume" 
+        % (isingdir, N, total_moves - test_moves, method))
 
 #if method_name == 'samc':
 #  cmd += ' --sa-t0 %g' % sa_t0

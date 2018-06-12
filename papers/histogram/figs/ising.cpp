@@ -239,23 +239,28 @@ void ising_simulation::flip_a_spin() {
     E += deltaE;
   }
 
-  energy_histogram[index_from_energy(E)] += 1;
   end_flip_updates();
 
 }
 
 void ising_simulation::end_flip_updates(){
   // update iteration counter, energy histogram, etc
-  if (param.sa_t0 || param.use_sad) {
-    if (energy_histogram[index_from_energy(E)] == 0) {
-      energies_found++; // we found a new energy!
-      if (E > max_energy) max_energy = E;
-      if (E < min_energy) min_energy = E;
-      if (param.use_sad) {
-        printf("  (moves %ld, energies_found %ld, erange: %d -> %d)\n",
-               moves, energies_found, min_energy.value, max_energy.value);
-      }
+  if (energy_histogram[index_from_energy(E)] == 0) {
+    energies_found++; // we found a new energy!
+    if (E > max_energy) {
+      //printf("new max: %d from %d\n", E.value, max_energy.value);
+      max_energy = E;
     }
+    if (E < min_energy) {
+      //printf("new min: %d from %d\n", E.value, min_energy.value);
+      min_energy = E;
+    }
+    if (param.use_sad) {
+      printf("  (moves %ld, energies_found %ld, erange: %d -> %d)\n",
+             moves, energies_found, min_energy.value, max_energy.value);
+    }
+  }
+  if (param.sa_t0 || param.use_sad) {
     if (param.use_sad && energies_found > 1) {
       gamma = param.sa_prefactor*energies_found*(max_energy.value-min_energy.value)
         /(3*param.minT*moves);
@@ -547,6 +552,22 @@ int main(int argc, const char *argv[]) {
         }
         printf("line: '%s'\n",line);
         {
+          char *methodname = new char[4096];
+          if (fscanf(rfile, " method = '%[^']'\n", methodname) != 1) {
+            printf("error reading method name!\n");
+            exit(1);
+          }
+          if (param.sa_t0 && strcmp(methodname, "samc") != 0) {
+            printf("wrong method, %s should be samc!\n", methodname);
+            exit(1);
+          } else if (param.use_sad && strcmp(methodname, "sad") != 0) {
+            printf("wrong method, %s should be sad!\n", methodname);
+            exit(1);
+          }
+          delete[] methodname;
+        }
+
+        {
           int resumeN = 0;
           if (fscanf(rfile, " N = %d\n", &resumeN) != 1) {
             printf("error reading N!\n");
@@ -558,8 +579,8 @@ int main(int argc, const char *argv[]) {
             exit(1);
           }
         }
-        if (fscanf(rfile, "total-moves = %ld\n", &total_moves) != 1) {
-          printf("error reading total-moves!\n");
+        if (fscanf(rfile, "minT = %lg\n", &ising.param.minT) != 1) {
+          printf("error reading ising.params.minT!\n");
           exit(1);
         }
         if (fscanf(rfile, "moves = %ld\n", &ising.moves) != 1) {
@@ -657,20 +678,6 @@ int main(int argc, const char *argv[]) {
     ising.compute_ln_dos(weights_dos);
   } else {
     ising.compute_ln_dos(histogram_dos);
-  }
-
-  for(int i = 0; i < ising.energy_levels; i++){
-    if (ising.energy_histogram[i] > 0) {
-      ising.energies_found++;
-      if (ising.energy_from_index(i) > ising.max_energy) {
-       ising.max_energy = ising.energy_from_index(i);
-      }
-      if (ising.energy_from_index(i) < ising.min_energy) {
-       ising.min_energy = ising.energy_from_index(i);
-      }
-      printf("energy histogram at %ld is %ld with lndos %g\n",
-              ising.energies_found,ising.energy_histogram[i],ising.ln_dos[i]);
-    }
   }
 
   // ----------------------------------------------------------------------------
