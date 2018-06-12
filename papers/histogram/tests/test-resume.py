@@ -1,24 +1,19 @@
 #!/usr/bin/env python2
 
-from __future__ import division
+from __future__ import division, print_function
 import os, numpy, sys, re
 
 # RUN FROM DEFT
 # python papers/histogram/data/run-ising-model.py 10 10E3 40E3 sad
 
 if len(sys.argv) < 4:
-    print "usage:  python2 %s N test-moves total-moves method" % sys.argv[0]
+    print("usage:  python3 %s N test-moves total-moves method" % sys.argv[0])
     exit(1)
 
 #if os.path.exists('paper.tex'):
 #    os.chdir('../..')
 
-if os.path.exists('run-ising-model.py'):
-    os.chdir('../../..')
-
-assert os.path.exists('papers')
-# switch to deft project directory and build ising.exe
-assert not os.system('fac papers/histogram/figs/ising.exe')
+assert os.path.exists('../data')
 
 N = int(sys.argv[1])
 test_moves = float(sys.argv[2])
@@ -39,7 +34,7 @@ except:
 
 method = ' --' + method_name
 
-datadir = 'papers/histogram/data/ising'
+datadir = 'results'
 if 'golden' in sys.argv:
     suffix = 'golden'
 else:
@@ -52,17 +47,15 @@ if seed != 0:
 
 os.system('mkdir -p ' + datadir) # create ising folder in directory
 
-# create a file in datadir with fname
-#with open('%s/%s.out' % (datadir, fname), 'w') as f:
-#    f.write('# python %s\n' % (' '.join(sys.argv)))
+filenamebase = '%s-%d-%g-%g' % (method_name, N, test_moves, total_moves)
 
-isingdir = 'papers/histogram/figs'
-cmd = ("%s/ising.exe --N=%i --total-moves=%g --filename=ising-complete %s" 
-       % (isingdir, N, total_moves, method))
-cmd += (" && %s/ising.exe --N=%i --total-moves=%g --filename=ising-test %s" 
-        % (isingdir, N, test_moves, method))
-cmd += (" && %s/ising.exe --N=%i --total-moves=%g --filename=ising-test %s --resume" 
-        % (isingdir, N, total_moves - test_moves, method))
+isingdir = '../figs'
+cmd = ("%s/ising.exe --dir %s --N=%i --total-moves=%g --filename=%s-complete %s" 
+       % (isingdir, datadir, N, total_moves, filenamebase, method))
+cmd += (" && %s/ising.exe --dir %s --N=%i --total-moves=%g --filename=%s-test %s" 
+        % (isingdir, datadir, N, test_moves, filenamebase, method))
+cmd += (" && %s/ising.exe --dir %s --N=%i --total-moves=%g --filename=%s-test %s --resume" 
+        % (isingdir, datadir, N, total_moves - test_moves, filenamebase, method))
 
 #if method_name == 'samc':
 #  cmd += ' --sa-t0 %g' % sa_t0
@@ -70,4 +63,9 @@ cmd += (" && %s/ising.exe --N=%i --total-moves=%g --filename=ising-test %s --res
 
 print(cmd)
 # os.system('echo %s > %s/%s.out' % (cmd, datadir, fname))
-os.system(cmd)
+assert(os.system(cmd) == 0)
+print("checking that both results are identical...")
+assert(os.system('diff -u %s/%s-complete.dat %s/%s-test.dat'
+                 % (datadir, filenamebase, datadir, filenamebase)) == 0)
+
+print("\nAll is good!!!")

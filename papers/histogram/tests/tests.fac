@@ -1,0 +1,6 @@
+| python3 test-resume.py 4 1 2 sad
+< ../figs/ising.exe
+
+| python3 test-resume.py 4 4 5 sad
+< ../figs/ising.exe
+
