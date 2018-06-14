@@ -742,7 +742,7 @@ impl FakeScalar for KSpaceScalar {
                      .map(|(k, &v)| (Expr::new(&k.inner.deref().fake_scalar()), v))
                      .collect()),
             &KSpaceScalar::FFT(_) =>
-                panic!(),
+                panic!("It is invalid to make fake_scalar with an FFT!"),
         }
     }
 }
