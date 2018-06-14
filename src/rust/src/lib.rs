@@ -8,11 +8,14 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::iter::FromIterator;
 use std::ops::Deref;
+use std::any::Any;
 
-pub trait ExprType: 'static + Send + Clone + Eq + Debug + Hash {
+pub trait ExprType: 'static + Send + Clone + Eq + Debug + Hash + Any {
     fn cpp(&self) -> String;
     fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>>;
     fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self>;
+
+    fn substitute<S: ExprType>(&self, old: Expr<S>, new: Expr<S>) -> Expr<Self>;
 }
 
 #[derive(Clone, Debug, Eq, Hash)]
@@ -37,6 +40,15 @@ impl<T: ExprType> Expr<T> {
 
     fn cast<U: ExprType + From<T>>(&self) -> Expr<U> {
         Expr::new(&self.inner.deref().clone().into())
+    }
+    fn substitute<S: ExprType>(&self, old: Expr<S>, new: Expr<S>) -> Expr<T> {
+        // self.inner.substitute(change)
+        if let Some(ref o) = (&old as &Any).downcast_ref::<Expr<T>>() {
+            if self == *o {
+                return *(&new as &Any).downcast_ref::<Expr<T>>().unwrap();
+            }
+        }
+        unimplemented!()
     }
 }
 
@@ -372,6 +384,21 @@ impl ExprType for Scalar {
         }
     }
 
+    fn substitute<S: ExprType>(&self, old: Expr<S>, new: Expr<S>) -> Expr<Self> {
+        match self {
+            &Scalar::Integrate(dx,e) =>
+                Expr::new(&Scalar::Integrate(dx, e.substitute(old,new))),
+            &Scalar::Exp(a) =>
+                Expr::new(&Scalar::Exp(a.substitute(old,new))),
+            &Scalar::Log(a) =>
+                Expr::new(&Scalar::Log(a.substitute(old,new))),
+            &Scalar::Add(ref m) =>
+                Expr::new(&Scalar::Add(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (k.substitute(old,new), v))))), // FIXME
+            &Scalar::Mul(ref m) =>
+                Expr::new(&Scalar::Mul(AbelianMap::from_iter(m.into_iter().map(|(k, &v)| (k.substitute(old,new), v))))), // FIXME
+            _ => Expr::new(self)
+        }
+    }
     fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self> {
         match x.inner.deref() {
             &Scalar::Var(_) | &Scalar::Integrate(_, _) =>
@@ -414,11 +441,14 @@ impl RealSpaceScalar {
             &RealSpaceScalar::Add(ref m) | &RealSpaceScalar::Mul(ref m) => m.into_iter().any(|(k, &_)| k.inner.deref().contains_ifft()),
         }
     }
+
+    // in Expr<RSS> fn fix_top_level(&self) maybe?
 }
 
 impl ExprType for RealSpaceScalar {
     fn cpp(&self) -> String {
         if !self.contains_ifft() {
+            // match self.fake_scalar() { Ok(s) => same stuff, Err(todo) => { code to do todo first } }
             return String::from("Vector temp(Nx*Ny*Nz);\nfor (int i = 0; i < Nx * Ny * Nz; i++)\n\ttemp[i] = ") + &self.fake_scalar().cpp() + &"\n";
         }
         match self {
@@ -511,6 +541,9 @@ impl ExprType for RealSpaceScalar {
         }
     }
 
+    fn substitute<S: ExprType>(&self, old: Expr<S>, new: Expr<S>) -> Expr<Self> {
+        unimplemented!()
+    }
     fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self> {
         match x.inner.deref() {
             &RealSpaceScalar::Var(_) =>
@@ -644,6 +677,9 @@ impl ExprType for KSpaceScalar {
         }
     }
 
+    fn substitute<S: ExprType>(&self, old: Expr<S>, new: Expr<S>) -> Expr<Self> {
+        unimplemented!()
+    }
     fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self> {
         match x.inner.deref() {
             &KSpaceScalar::Var(_) =>
@@ -690,7 +726,7 @@ impl From<Scalar> for RealSpaceScalar {
 }
 
 trait FakeScalar {
-    fn fake_scalar(&self) -> Scalar;
+    fn fake_scalar(&self) -> Scalar; // FIXME consider -> Result<Scalar, Expr<Self>>?
 }
 
 impl FakeScalar for RealSpaceScalar {
