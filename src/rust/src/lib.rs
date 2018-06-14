@@ -12,7 +12,7 @@ use std::ops::Deref;
 pub trait ExprType: 'static + Send + Clone + Eq + Debug + Hash {
     fn cpp(&self) -> String;
     fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>>;
-    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self>;
+    fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self>;
 }
 
 #[derive(Clone, Debug, Eq, Hash)]
@@ -372,7 +372,7 @@ impl ExprType for Scalar {
         }
     }
 
-    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self> {
+    fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self> {
         match x.inner.deref() {
             &Scalar::Var(_) | &Scalar::Integrate(_, _) =>
                 f(x),
@@ -511,7 +511,7 @@ impl ExprType for RealSpaceScalar {
         }
     }
 
-    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self> {
+    fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self> {
         match x.inner.deref() {
             &RealSpaceScalar::Var(_) =>
                 f(x),
@@ -644,7 +644,7 @@ impl ExprType for KSpaceScalar {
         }
     }
 
-    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self> {
+    fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self> {
         match x.inner.deref() {
             &KSpaceScalar::Var(_) =>
                 f(x),
