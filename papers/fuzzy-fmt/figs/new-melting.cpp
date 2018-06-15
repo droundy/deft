@@ -142,7 +142,8 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
     return w_den_R;
   }
 
-  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length larger than dx along lattice vector
+  const double df = dx/(lattice_constant/2);  // fraction of lattice vector corresponding to dx
+  printf("df=dx/(lattice_constant/2))=%g\n", df);
   const vector3d da1 = lattice_vectors[0]*df; //infinitesimal lattice vectors of length df
   const vector3d da2 = lattice_vectors[1]*df;
   const vector3d da3 = lattice_vectors[2]*df;
@@ -172,7 +173,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
     double lattice_constant,
     double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -198,7 +199,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,
+weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,   //ASK - remove dx?
                                    double lattice_constant,
                                    double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -224,7 +225,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   return w_den_R;
 }
 
-weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,
+weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
     double lattice_constant,
     double gwidth, double fv) {
   weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -297,6 +298,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const vector3d da1 = lattice_vectors[0]/Nl; //infinitesimal lattice vectors 1/Nl of lattice vector
   const vector3d da2 = lattice_vectors[1]/Nl;
   const vector3d da3 = lattice_vectors[2]/Nl;
+  printf("da1x = %g vs dx = %g\n", da1.x, dx);
   const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
   // set crystal_calc_option to 0 for crystal free energy with brute-force integration
@@ -492,15 +494,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           total_phi_2 += temp*phi_2*dV;
           total_phi_3 += temp*phi_3*dV;
           cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
-          if (temp*(phi_1 + phi_2 + phi_3) < -10.0) {
-            printf("    Free energy here: %g\n", temp*(phi_1 + phi_2 + phi_3));
-            //printf("                  n0: %g\n", n_0);
-            //printf("                  n1: %g\n", n_1);
-            //printf("                  n2: %g\n", n_2);
-            //printf("                  n3: %g\n", n_3);
-            //printf("                 n1v: %g\n", nv_1.norm());
-            //printf("                 n2v: %g\n", nv_2.norm());
-          }
           if (isnan(cFexcess_of_primitive_cell)) {
             printf("free energy is a NaN!\n");
             printf("position is: %g %g %g\n", r.x, r.y, r.z);
