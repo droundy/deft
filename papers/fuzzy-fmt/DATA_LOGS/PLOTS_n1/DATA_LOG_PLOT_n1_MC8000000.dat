@@ -1,0 +1,9 @@
+#git version: 0.0.0-1996-gae4897fa (and simliar later versions… upto git version: 0.0.0-1998-g52a568be)
+#Data for:      KT=2      N=1      Fv=0      gw=0.1       inclusion radius = 4.0             lattice_constant = 1.587401     
+#
+#Numpts/seed	hFideal/vol		hphi_1			hphi_2			hphi_3			hFE/vol		cFideal/vol
+#8000000/1	-29.764004032169	1.44398240718802	6.31410552085355	3.35808298366232	-18.6478	-24.4622
+#
+#dx	Cphi_1_8000000	Cphi_2_8000000	Cphi_3_8000000	cFE/vol_8000000
+0.01	2.35044		7.57025		4.69927		-9.84227
+
