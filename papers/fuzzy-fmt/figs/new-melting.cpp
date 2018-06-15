@@ -142,7 +142,8 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
     return w_den_R;
   }
 
-  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length larger than dx along lattice vector
+  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length larger than dx along (parallelipiped?) lattice vector  //ASK! - WRONG? shouldn't df=(a/sqrt(2))/Nl = sqrt(2)*dx ?? see line288
+  printf("df=dx/(lattice_constant/2))=%g\n", df);
   const vector3d da1 = lattice_vectors[0]*df; //infinitesimal lattice vectors of length df
   const vector3d da2 = lattice_vectors[1]*df;
   const vector3d da3 = lattice_vectors[2]*df;
@@ -172,7 +173,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
     double lattice_constant,
     double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -198,7 +199,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,
+weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,   //ASK - remove dx?
                                    double lattice_constant,
                                    double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -224,7 +225,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   return w_den_R;
 }
 
-weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,
+weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
     double lattice_constant,
     double gwidth, double fv) {
   weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -285,6 +286,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //const double cubic_cell_volume=lattice_constant*lattice_constant*lattice_constant;
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
   const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
+  printf("Nl=(lattice_constant/2)/dx = %i\n",Nl);
   //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
   //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
   //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
