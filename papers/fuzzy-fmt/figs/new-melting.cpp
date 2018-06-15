@@ -142,7 +142,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
     return w_den_R;
   }
 
-  const double df = dx/(lattice_constant/2);  //sets an infinitesimal length larger than dx along (parallelipiped?) lattice vector  //ASK! - WRONG? shouldn't df=(a/sqrt(2))/Nl = sqrt(2)*dx ?? see line288
+  const double df = dx/(lattice_constant/2);  // fraction of lattice vector corresponding to dx
   printf("df=dx/(lattice_constant/2))=%g\n", df);
   const vector3d da1 = lattice_vectors[0]*df; //infinitesimal lattice vectors of length df
   const vector3d da2 = lattice_vectors[1]*df;
@@ -286,7 +286,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //const double cubic_cell_volume=lattice_constant*lattice_constant*lattice_constant;
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
   const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
-  printf("Nl=(lattice_constant/2)/dx = %i\n",Nl);
   //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
   //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
   //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
@@ -299,6 +298,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const vector3d da1 = lattice_vectors[0]/Nl; //infinitesimal lattice vectors 1/Nl of lattice vector
   const vector3d da2 = lattice_vectors[1]/Nl;
   const vector3d da3 = lattice_vectors[2]/Nl;
+  printf("da1x = %g vs dx = %g\n", da1.x, dx);
   const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
   // set crystal_calc_option to 0 for crystal free energy with brute-force integration
@@ -494,15 +494,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           total_phi_2 += temp*phi_2*dV;
           total_phi_3 += temp*phi_3*dV;
           cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
-          if (temp*(phi_1 + phi_2 + phi_3) < -10.0) {
-            printf("    Free energy here: %g\n", temp*(phi_1 + phi_2 + phi_3));
-            //printf("                  n0: %g\n", n_0);
-            //printf("                  n1: %g\n", n_1);
-            //printf("                  n2: %g\n", n_2);
-            //printf("                  n3: %g\n", n_3);
-            //printf("                 n1v: %g\n", nv_1.norm());
-            //printf("                 n2v: %g\n", nv_2.norm());
-          }
           if (isnan(cFexcess_of_primitive_cell)) {
             printf("free energy is a NaN!\n");
             printf("position is: %g %g %g\n", r.x, r.y, r.z);
