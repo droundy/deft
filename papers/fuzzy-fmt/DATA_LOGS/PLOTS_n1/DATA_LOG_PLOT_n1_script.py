@@ -195,23 +195,24 @@ for i in range(len(MC)):
 
 cFEpervol=1  #plots cFEperVol vs dx for all MCpoints
 
-cphi_1=0     #plots cphi_1 vs dx for all MCpoints
-cphi_2=0
-cphi_3=0
+cphi_1=1     #plots cphi_1 vs dx for all MCpoints
+cphi_2=1
+cphi_3=1
 
-MC8=0     #plots cphi_1, cphi2 and cphi3 vs dx for specified MCpoints
-MC80=0
-MC400=0
-MC800=0
-MC8000=0
-MC80000=0
-MC800000=0
+MC8=1     #plots cphi_1, cphi2 and cphi3 vs dx for specified MCpoints
+MC80=1
+MC400=1
+MC800=1
+MC8000=1
+MC80000=1
+MC800000=1
 MC8000000=0
 
 custom=0
 
 
 if custom > 0 :
+  plt.figure()
   MC=[800, 8000, 80000]   #CHOSE enteries
   for i in range(len(MC)):
     print MC[i]
@@ -235,9 +236,9 @@ if custom > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 if cFEpervol > 0 :
+  plt.figure()
   #plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,4], label = 'cFEperVol_MC8')
   #plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,4], label = 'cFEperVol_MC80')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,4], label = 'cFEperVol_MC400')
@@ -254,11 +255,8 @@ if cFEpervol > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
-
-
-
 if cphi_1 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,1], label = 'cphi_1_MC8')
   plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,1], label = 'cphi_1_MC80')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,1], label = 'cphi_1_MC400')
@@ -276,9 +274,9 @@ if cphi_1 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 if cphi_2 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,2], label = 'cphi_2_MC8')
   plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,2], label = 'cphi_2_MC80')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,2], label = 'cphi_2_MC400')
@@ -295,9 +293,9 @@ if cphi_2 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 if cphi_3 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,3], label = 'cphi_3_MC8')
   plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,3], label = 'cphi_3_MC80')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,3], label = 'cphi_3_MC400')
@@ -314,9 +312,9 @@ if cphi_3 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 if MC8 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,1], label = 'cphi_1_MC8')
   plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,2], label = 'cphi_2_MC8')
   plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,3], label = 'cphi_3_MC8')
@@ -328,9 +326,9 @@ if MC8 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 if MC80 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,1], label = 'cphi_1_MC80')
   plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,2], label = 'cphi_2_MC80')
   plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,3], label = 'cphi_3_MC80')
@@ -342,9 +340,9 @@ if MC80 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 if MC400 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,1], label = 'cphi_1_MC400')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,2], label = 'cphi_2_MC400')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,3], label = 'cphi_3_MC400')
@@ -356,10 +354,10 @@ if MC400 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 
 if MC800 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_800[:,0], thisdata_n1_800[:,1], label = 'cphi_1_MC800')
   plt.plot(thisdata_n1_800[:,0], thisdata_n1_800[:,2], label = 'cphi_2_MC800')
   plt.plot(thisdata_n1_800[:,0], thisdata_n1_800[:,3], label = 'cphi_3_MC800')
@@ -371,10 +369,10 @@ if MC800 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 
 if MC8000 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_8000[:,0], thisdata_n1_8000[:,1], label = 'cphi_1_MC8000')
   plt.plot(thisdata_n1_8000[:,0], thisdata_n1_8000[:,2], label = 'cphi_2_MC8000')
   plt.plot(thisdata_n1_8000[:,0], thisdata_n1_8000[:,3], label = 'cphi_3_MC8000')
@@ -386,10 +384,11 @@ if MC8000 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
+
 
 
 if MC80000 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_80000[:,0], thisdata_n1_80000[:,1], label = 'cphi_1_MC80000')
   plt.plot(thisdata_n1_80000[:,0], thisdata_n1_80000[:,2], label = 'cphi_2_MC80000')
   plt.plot(thisdata_n1_80000[:,0], thisdata_n1_80000[:,3], label = 'cphi_3_MC80000')
@@ -401,10 +400,8 @@ if MC80000 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
-
-
 if MC800000 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_800000[:,0], thisdata_n1_800000[:,1], label = 'cphi_1_MC800000')
   plt.plot(thisdata_n1_800000[:,0], thisdata_n1_800000[:,2], label = 'cphi_2_MC800000')
   plt.plot(thisdata_n1_800000[:,0], thisdata_n1_800000[:,3], label = 'cphi_3_MC800000')
@@ -416,10 +413,10 @@ if MC800000 > 0 :
   plt.legend()
   plt.savefig(plot_name)
 
-plt.show()
 
 
 if MC8000000 > 0 :
+  plt.figure()
   plt.plot(thisdata_n1_8000000[:,0], thisdata_n1_8000000[:,1], label = 'cphi_1_MC8000000')
   plt.plot(thisdata_n1_8000000[:,0], thisdata_n1_8000000[:,2], label = 'cphi_2_MC8000000')
   plt.plot(thisdata_n1_8000000[:,0], thisdata_n1_8000000[:,3], label = 'cphi_3_MC8000000')
@@ -430,10 +427,6 @@ if MC8000000 > 0 :
   plt.ylabel("cphi")
   plt.legend()
   plt.savefig(plot_name)
-
-plt.show()
-
-
 
 #plt.scatter(thisdata_n1_8[:,0], thisdata_n1_8[:,1], label = 'cphi_1_MC8')
 #plt.scatter(thisdata_n1_80[:,0], thisdata_n1_80[:,1], label = 'cphi_1_MC80')
@@ -458,6 +451,5 @@ plt.show()
 
 #plt.savefig(plot_name)
 
-#plt.show()
-
+plt.show()
 

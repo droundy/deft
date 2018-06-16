@@ -285,7 +285,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   // Note: the primitive cell volume is precisely 25% of the cubic_cell_volume.
   //const double cubic_cell_volume=lattice_constant*lattice_constant*lattice_constant;
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
-  const int Nl = (lattice_constant/2)/dx; // number of infinitesimal lengths along one of the lattice vectors
+  const int Nl = (lattice_constant/2)/dx+1; // number of infinitesimal lengths along one of the lattice vectors
   //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
   //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
   //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
@@ -298,7 +298,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const vector3d da1 = lattice_vectors[0]/Nl; //infinitesimal lattice vectors 1/Nl of lattice vector
   const vector3d da2 = lattice_vectors[1]/Nl;
   const vector3d da3 = lattice_vectors[2]/Nl;
-  printf("da1x = %g vs dx = %g\n", da1.x, dx);
+  printf("da1x = %g vs dx = %g\n", da2.x, dx);
   const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
   // set crystal_calc_option to 0 for crystal free energy with brute-force integration
@@ -366,7 +366,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     }
   }  //End inhomogeneous Fideal calculation
   //printf("crystal ideal gas free energy of one primitive cell= %g\n", cFideal_of_primitive_cell);
-  //printf("crystal ideal gas free energy per volume = %g\n", cFideal_of_primitive_cell/primitive_cell_volume);
+  // printf("XXXXX\ncrystal ideal gas free energy per volume = %g\nXXXX\n",
+  //        cFideal_of_primitive_cell/primitive_cell_volume);
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
@@ -527,7 +528,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
     //cFexcess_of_primitive_cell and Fideal are over one parallelepiped (one primitive cell) with 1-fv atoms
     cfree_energy_per_atom=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
-    //ASK! is there another term to add? SEE homogeneousSFMTFastFluid.cpp has -mu*n term whatever that is!
     cfree_energy_per_vol=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/primitive_cell_volume; //
     printf("primitive cell volume = %g\n", primitive_cell_volume); //
     printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
