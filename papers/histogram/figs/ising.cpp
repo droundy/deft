@@ -210,6 +210,7 @@ void ising_simulation::flip_a_spin() {
   const energy deltaE = energy(J*(old - S[j + i*N])*neighbor_spins);
 
   double lnprob = 0;
+
   if (param.use_sad) {
     const energy e1 = E;
     const energy e2 = E + deltaE;
@@ -240,7 +241,6 @@ void ising_simulation::flip_a_spin() {
   }
 
   end_flip_updates();
-
 }
 
 void ising_simulation::end_flip_updates(){
@@ -260,6 +260,7 @@ void ising_simulation::end_flip_updates(){
              moves, energies_found, min_energy.value, max_energy.value);
     }
   }
+
   if (param.sa_t0 || param.use_sad) {
     if (param.use_sad && energies_found > 1) {
       gamma = param.sa_prefactor*energies_found*(max_energy.value-min_energy.value)
@@ -608,8 +609,10 @@ int main(int argc, const char *argv[]) {
           exit(1);
         }
         if (param.use_sad) {
-          fscanf(rfile," too_hi_energy = %i\n", &ising.too_hi_energy.value); // NAME?
-          fscanf(rfile," too_lo_energy = %i\n", &ising.too_lo_energy.value); // NAME?
+          fscanf(rfile," too_hi_energy = %i\n", &ising.too_hi_energy.value);
+          fscanf(rfile," too_lo_energy = %i\n", &ising.too_lo_energy.value);
+          fscanf(rfile," max_energy = %i\n", &ising.max_energy.value);
+          fscanf(rfile," min_energy = %i\n", &ising.min_energy.value);
         }
 
         printf("lndos is now {\n");
@@ -664,6 +667,7 @@ int main(int argc, const char *argv[]) {
 
   // MAIN CODE EXECUTION HERE!
   ising.calculate_energy();
+
   for (long i = 0; i < total_moves; i++) {
     ising.flip_a_spin();
   }
@@ -706,10 +710,12 @@ int main(int argc, const char *argv[]) {
     fprintf(ising_out,"moves = %li\n",ising.moves);
     fprintf(ising_out,"E = %i\n",ising.E.value);
     fprintf(ising_out,"J = %i\n", param.J);
-    fprintf(ising_out,"E_found = %li\n", ising.energies_found); // NAME?
+    fprintf(ising_out,"E_found = %li\n", ising.energies_found);
     if (param.use_sad) {
-      fprintf(ising_out,"too_hi_energy = %i\n", ising.too_hi_energy.value); // NAME?
-      fprintf(ising_out,"too_lo_energy = %i\n", ising.too_lo_energy.value); // NAME?
+      fprintf(ising_out,"too_hi_energy = %i\n", ising.too_hi_energy.value);
+      fprintf(ising_out,"too_lo_energy = %i\n", ising.too_lo_energy.value);
+      fprintf(ising_out,"max_energy = %i\n", ising.max_energy.value);
+      fprintf(ising_out,"min_energy = %i\n", ising.min_energy.value);
     }
     // inserting arrays into text file.
     fprintf(ising_out, "lndos = np.array([\n");
