@@ -371,10 +371,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("XXXXX\ncrystal ideal gas free energy per volume = %g\nXXXX\n",
          cFideal_of_primitive_cell/primitive_cell_volume);
   printf("YYYYY\nanalytic ideal gas free energy per vol   = %g\nYYYY\n",
-         temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp)) - 1
+         temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
                - 3*log(sqrt(2*M_PI)*gwidth)
-               - 3*M_PI*sqrt(2*M_PI)*uipow(gwidth,3))/primitive_cell_volume);
-  printf("Nl is %d, testN is %.16g\n", Nl, testN);
+               - 5.0/2)/primitive_cell_volume);
+    printf("Nl is %d, testN is %.16g\n", Nl, testN);
   exit(1);
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
