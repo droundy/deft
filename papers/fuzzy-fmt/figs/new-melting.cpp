@@ -373,7 +373,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("YYYYY\nanalytic ideal gas free energy per vol   = %g\nYYYY\n",
          temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp)) - 1
                - 3*log(sqrt(2*M_PI)*gwidth)
-               - M_PI*sqrt(2*M_PI)*uipow(gwidth,3))/primitive_cell_volume);
+               - 3*M_PI*sqrt(2*M_PI)*uipow(gwidth,3))/primitive_cell_volume);
   printf("Nl is %d, testN is %.16g\n", Nl, testN);
   exit(1);
 
