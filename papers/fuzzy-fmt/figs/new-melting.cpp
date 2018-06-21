@@ -276,7 +276,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
-  printf("lattice_constant=%g", lattice_constant);
+  printf("lattice_constant=%g\n", lattice_constant);
   // const double cubic_cell_volume = uipow(lattice_constant, 3);
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
