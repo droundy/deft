@@ -173,7 +173,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
     double lattice_constant,
     double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -199,7 +199,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,   //ASK - remove dx?
+weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
                                    double lattice_constant,
                                    double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -225,7 +225,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   return w_den_R;
 }
 
-weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
+weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
     double lattice_constant,
     double gwidth, double fv) {
   weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -276,6 +276,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
+  printf("lattice_constant=%g", lattice_constant);
   // const double cubic_cell_volume = uipow(lattice_constant, 3);
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
@@ -398,7 +399,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     hf.epsilon() = 1;   //energy constant in the WCA fluid
     hf.kT() = temp;
     hf.n() = reduced_density;
-    hf.mu() = 0;   //ASK! what is this??
+    hf.mu() = 0;   //chemical potential is zero so the Grand Canonical Ensemble becomes a Canonical Ensemble
     //Note: hf.energy() returns energy/volume
 
     hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom" (I think this is fixed now -check)
