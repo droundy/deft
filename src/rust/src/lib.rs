@@ -24,9 +24,48 @@ pub struct Expr<T: ExprType> {
 }
 
 pub enum Stmt {
-    AllocKspaceScalar(String, Expr<KSpaceScalar>),
+    AllocKSpaceScalar(String, Expr<KSpaceScalar>),
     AllocRealSpaceScalar(String, Expr<RealSpaceScalar>),
     AllocScalar(String, Expr<Scalar>),
+}
+
+impl Stmt {
+    fn alloc_k_space_scalar<T: Into<String>>(s: T, e: Expr<KSpaceScalar>) -> Stmt {
+        Stmt::AllocKSpaceScalar(s.into(), e)
+    }
+
+    fn cpp(&self) -> String {
+        match self {
+            &Stmt::AllocKSpaceScalar(ref s, ref e) => {
+                match e.inner.deref() {
+                    KSpaceScalar::Var(v) => {
+                        if s == v.deref() {
+                            String::from("ComplexVector ")
+                                + &s + &"(Nx*Ny*(int(Nz)/2+1);"
+                        } else {
+                            panic!("Tried to allocate a KSpaceScalar under a different name");
+                        }
+                    },
+                    _ =>
+                        String::from("ComplexVector ") + &s
+                        + &"(Nx*Ny*(int(Nz)/2+1);\nfor (int i=0; i<Nx*Ny*Nz; i++) {\n"
+                        + &s + &"[i] = " + &e.cpp() + &";\n}",
+                }
+            }
+            &Stmt::AllocRealSpaceScalar(ref s, ref e) =>
+                String::from("Vector") + &s
+                + &"(Nx*Ny*Nz);\nfor (int i=0; i<Nx*Ny*Nz; i++) {\n"
+                + &s + &"[i] = " + &e.cpp() + &";\n}",
+            &Stmt::AllocScalar(ref s, ref e) =>
+                String::from("double ") + &s + &" = " + &e.cpp() + &";\n",
+        }
+    }
+}
+
+fn test_stmt() {
+    let k = Expr::new(&KSpaceScalar::var("k"));
+    assert_eq!(Stmt::alloc_k_space_scalar("k", k).cpp(),
+               "ComplexVector ktemp1(Nx*Ny*(int(Nz)/2+1));");
 }
 
 impl<T: ExprType> Expr<T> {
