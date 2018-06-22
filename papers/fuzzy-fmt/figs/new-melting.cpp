@@ -486,7 +486,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
           double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   // ASK! added the 1.0's like in HomogeneousSFMTFLuidFast.cpp
           //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
-          double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1.0-1.0*n_3);
+          double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
           //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
 
           // The following was Rosenfelds early vector version of the functional
