@@ -173,7 +173,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
+weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
     double lattice_constant,
     double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -199,7 +199,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,   //ASK - remove dx?
+weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
                                    double lattice_constant,
                                    double gwidth, double fv) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -225,7 +225,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   return w_den_R;
 }
 
-weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //ASK - remove dx?
+weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
     double lattice_constant,
     double gwidth, double fv) {
   weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
@@ -276,6 +276,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
+  printf("lattice_constant=%g\n", lattice_constant);
   // const double cubic_cell_volume = uipow(lattice_constant, 3);
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
@@ -286,6 +287,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //const double cubic_cell_volume=lattice_constant*lattice_constant*lattice_constant;
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
   const int Nl = (lattice_constant/2)/dx+1; // number of infinitesimal lengths along one of the lattice vectors
+  printf("New length Nl*dx is off from a/2 by a factor of (Nl*dx)/(a/2)=%g\n", (Nl*dx)/(lattice_constant/2));  //Looking for source of errors
   //Nl^3 is total number of infinitesimal parallelepipeds (of volume dV) in one primitive cell
   //The volume of one infinitesimal parallelepiped dV=2dx^3 with the current definition of dx="dx_proper"/2
   //where dV=(dx_proper^3)/4 just as V=(a^3)/4 is the volume of one parallelepiped with lattice_constant=a.
@@ -300,7 +302,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const vector3d da3 = lattice_vectors[2]/Nl;
   printf("da1x = %g vs dx = %g\n", da2.x, dx);
   const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
-
+  //printf("", );
   // set crystal_calc_option to 0 for crystal free energy with brute-force integration
   // set crystal_calc_option to 1 for crystal free energy with Gaussian Quadrature (fastest)
   // set crystal_calc_option to 2 for crystal free energy with Monte-Carlo (more accurate)
@@ -336,7 +338,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     }
   }  //end if for N_crystal calculation
 
-  const double norm = reduced_num_spheres/N_crystal;  //normalization constant
+  const double norm = reduced_num_spheres/N_crystal;  //normalization constant used in brute-force integration method only
 
   double testN = 0;
   //Find inhomogeneous Fideal of one crystal primitive cell
@@ -375,7 +377,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                - 3*log(sqrt(2*M_PI)*gwidth)
                - 5.0/2)/primitive_cell_volume);
     printf("Nl is %d, testN is %.16g\n", Nl, testN);
-  exit(1);
+  ///////exit(1);  //LOOKING FOR PROBLEMS!
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
@@ -398,7 +400,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     hf.epsilon() = 1;   //energy constant in the WCA fluid
     hf.kT() = temp;
     hf.n() = reduced_density;
-    hf.mu() = 0;   //ASK! what is this??
+    hf.mu() = 0;   //chemical potential is zero so the Grand Canonical Ensemble becomes a Canonical Ensemble
     //Note: hf.energy() returns energy/volume
 
     hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom" (I think this is fixed now -check)
