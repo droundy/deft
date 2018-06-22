@@ -340,7 +340,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
   const double norm = reduced_num_spheres/N_crystal;  //normalization constant used in brute-force integration method only
 
-  double testN = 0;
   //Find inhomogeneous Fideal of one crystal primitive cell
   double cFideal_of_primitive_cell=0;
   for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
@@ -361,7 +360,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             }
           }
         }
-        testN += n*dV;
         if (n > 1e-200) { // avoid underflow and n=0 issues
           // printf("n = %g  dF = %g\n", n, dF);
           cFideal_of_primitive_cell += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
@@ -376,8 +374,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
                - 3*log(sqrt(2*M_PI)*gwidth)
                - 5.0/2)/primitive_cell_volume);
-    printf("Nl is %d, testN is %.16g\n", Nl, testN);
-  ///////exit(1);  //LOOKING FOR PROBLEMS!
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
