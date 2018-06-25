@@ -30,6 +30,10 @@
 
 // 4. Fix FIXMEs.
 
+// 5. Histogram double counting error from ground state energy!
+
+// 6. When max is removed and exp(gamma) - 1 is inserted for gamma,
+//    test-resume is violated!
 // ---------------------------------------------------------------------
 // Define "Constants" -- set from arguments then unchanged
 // ---------------------------------------------------------------------
@@ -258,6 +262,7 @@ void ising_simulation::end_flip_updates(){
     if (param.use_sad) {
       printf("  (moves %ld, energies_found %ld, erange: %d -> %d)\n",
              moves, energies_found, min_energy.value, max_energy.value);
+             printf("current energy = %d\n", E.value);
     }
   }
 
@@ -275,15 +280,48 @@ void ising_simulation::end_flip_updates(){
       // We are at higher energy than the maximum entropy state, so we
       // need to tweak our weights by even more, since we don't spend
       // much time here.
-      ln_energy_weights[index_from_energy(E)] =
-        max(ln_energy_weights[index_from_energy(E)] + gamma,
-            ln_energy_weights[index_from_energy(too_hi_energy)] +
-            log(gamma
-                + exp(ln_energy_weights[index_from_energy(E)]
-                      - ln_energy_weights[index_from_energy(too_hi_energy)])));
+      //printf("\n\nold value = %g\n", ln_energy_weights[index_from_energy(E)]);
+      //printf("log(stuff) = %g\n",
+          //log(gamma
+                //+ exp(ln_energy_weights[index_from_energy(E)]
+                      //- ln_energy_weights[index_from_energy(too_hi_energy)])));
+      //printf("exp = %g\n", exp(ln_energy_weights[index_from_energy(E)]
+                      //- ln_energy_weights[index_from_energy(too_hi_energy)]));
+      //printf("stuff in exp = %g\n", ln_energy_weights[index_from_energy(E)]
+                      //- ln_energy_weights[index_from_energy(too_hi_energy)]);
+      //printf("ln_energy_weights[index_from_energy(E)] = %g\n",
+             //ln_energy_weights[index_from_energy(E)]);
+      //printf("ln_energy_weights[index_from_energy(too_hi_energy)] = %g\n",
+              //ln_energy_weights[index_from_energy(too_hi_energy)]);
+      //printf("E = %d\n", E.value);
+      //printf("too_high_energy = %d\n", too_hi_energy.value);
+      //printf("max S e = %d\n", max_entropy_energy.value);
+      // We key our change in weights based on the too-high-energy state w0.
+      // w = w + gamma w0
+      // lnw = ln(w + gamma w0)
+
+      const double lnw0 = ln_energy_weights[index_from_energy(too_hi_energy)];
+      const double lnw = ln_energy_weights[index_from_energy(E)];
+      if (lnw0 > lnw) {
+        // If w0 > w then we can turn into logs like so:
+        // lnw = ln((w/w0 + gamma)*w0)
+        //     = lnw0 + ln(w/w0 + gamma) = lnw0 + ln(gamma + exp(lnw-lnw0))
+        // lnw = lnw0 + ln(gamma + exp(lnw-lnw0))
+        ln_energy_weights[index_from_energy(E)] =
+                  max(lnw + gamma,lnw0 + log(gamma + exp(lnw - lnw0)));
+      } else {
+        // If w > w0 then we can turn into logs like so:
+        // lnw = ln((1 + gamma*w0/w)*w)
+        //     = lnw + ln(1 + gamma*w0/w) = lnw + ln(1 + gamma exp(lnw0-lnw))
+        // lnw = lnw + ln(1 + gamma exp(lnw0-lnw))
+        ln_energy_weights[index_from_energy(E)] =
+          max(lnw + gamma,lnw + log(1 + gamma*exp(lnw0 - lnw)));
+      }
+      printf("lnW(index_energy) -> %g, index_energy %ld\n", ln_energy_weights[index_from_energy(E)],index_from_energy(E)); //FIXME: Assertion Error for N > 14!
       if (!(isnormal(ln_energy_weights[index_from_energy(E)])
             || ln_energy_weights[index_from_energy(E)] == 0)) {
-        printf("lnw[%d] = %g\n", E.value, ln_energy_weights[index_from_energy(E)]);
+        printf("gamma is %g\n", gamma);
+        printf("xx  lnw[%d] = %g\n", E.value, ln_energy_weights[index_from_energy(E)]);
       }
       assert(isnormal(ln_energy_weights[index_from_energy(E)])
               || ln_energy_weights[index_from_energy(E)] == 0);
