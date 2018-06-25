@@ -135,16 +135,143 @@ contains the results and comparison of the methods applied to the
 square-well fluid.  In Section IV, we discuss the performance of the
 various methods applied to the model system.
 
-\section{Methods}
-
-In this work, We compare a variety of broad histogram methods.  We
-outline the general workings of each algorithm that we developed in
-detail while summarizing algorithms that originated elsewhere.  The
-following methods are introduced and applied to the square-well fluid:
-Transition Matrix Monte-Carlo (TMMC), Wang-Landau (WL), Wang-Landau
-Transition Matrix Monte-Carlo (WL-TMMC), Stochastic Approximation
-Monte-Carlo (SAMC), and Dynamic Stochastic Approximation
+\davidsays{Fix this, it was moved when I reorganized the methods
+  section} In this work, We compare a variety of broad histogram
+methods.  We outline the general workings of each algorithm that we
+developed in detail while summarizing algorithms that originated
+elsewhere.  The following methods are introduced and applied to the
+square-well fluid: Transition Matrix Monte-Carlo (TMMC), Wang-Landau
+(WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Stochastic
+Approximation Monte-Carlo (SAMC), and Dynamic Stochastic Approximation
 (SAD).
+
+\section{Broad histogram methods}
+
+The goal of broad histogram methods (also called \emph{flat histogram}
+or \emph{multicanonical} methods) is to simulate each energy with
+similar accuracy, so as to accurately determine the density of states
+over a broad range of energies.  Once the density of states is known,
+a number of thermodynamic quantities---such as heat capacity or
+internal energy---can be easily computed for any temperature.
+Properties that require more information---such as a spatial
+correlation function or a response function---can still be computed
+for any temperature, provided statistics are collected for each
+individual energy, which can then be reweighted for any temperature.
+
+Each broad histogram Monte Carlo method uses a given set of ``moves''
+which change a system and should satisfy detailed balance.  Each
+algorithm differs in how it determines the probability of accepting a
+move, and in what additional statistics (if any) must be collected in
+order decide on that probability.  The methods we will compare fall in
+two categories:  weight-based methods, which only require a set of
+weights $w(E)$ be collected, and transition-matrix methods that
+require that statistics be collected for any transitions between pairs
+of energies.
+
+\davidsays{We should discuss continuous energies and binning somewhere
+  here...}
+
+\section{Weight-based methods}
+
+We will begin by introducing two related weight-based methods which
+rely on a weight function $w(E)$, noting that the method proposed in
+this paper (discussed in Section~\ref{sec:sad}) also falls in this
+category.  In these algorithms, the probability of accepting a move is
+given by
+\begin{equation}
+	\mathcal{P}(\epsilon_\text{old} \rightarrow \epsilon_\text{new})
+	= \min\left[1,\frac{w(\epsilon_\text{old})}{w(\epsilon_\text{new})}\right]
+\end{equation}
+This biases the simulation in favor of energies with low weights.  A
+set of weights that are proportional to the density of states of the
+system $D(\epsilon)$ will result in an entirely flat histogram.  Thus
+the goal of each of these methods is to achieve a flat histogram.  For
+numerical reasons, it is common to store and work with the natural
+logarithm of the weights, since the weights may vary over more than a
+few hundred orders of magnitude.  Note that the logarithm of the
+density of states is the entropy at that energy, so we can think of
+the logarithm of the weights as an approximation of the entropy
+\davidsays{make this less colloquial}.
+
+Each weighted density approach use a random walk in energy space to
+estimate the density of states.  The core of these approaches
+is to continuously update the weights at each step of the simulation
+\begin{equation}
+	\ln{w_{t+1}(\epsilon)}=\ln{w_{t}(\epsilon)}
+	+\gamma
+\end{equation}
+where $t$ is number of the current move, and $\gamma$ is an update
+factor.  This update causes the random walk to avoid energies that
+have been frequently sampled, leading to a rapid exploration of energy
+space.  This approach, however, violates detailed balance, due to the
+acceptance probabilities changing with each move.  The severity of
+this violation decreased as we decrease $\gamma$.  The various
+weight-based methods discussed here differ in how the schedule the
+decreasing of $\gamma$.
+
+\subsection{Wang-Landau}
+
+Wang-Landau's approach~\cite{wang2001efficient,wang2001determining,
+  landau2014guide} begins with $\gamma=1$, and then decreases $\gamma$
+in discrete stages.  We track the number of steps at each energy during
+each stage in a histogram.  When that histogram is sufficiently flat,
+$\gamma$ is decreased by a specified factor, which is usually
+$\frac12$.  The flatness is defined by the ratio between the minimum
+value of the histogram and its average value.  When this flatness
+reaches a specified threshold (typically 0.8), the $\gamma$ value is
+decreased.  This approach requires that the energy range of interest
+be known in advance, and difficulties can occur with this flatness
+criteria due to the fact that some energies in this energy range might
+never be sampled~\cite{haber2014transition}.  The entire process is
+repeated until $\gamma$ reaches a desired cutoff is reached.
+
+The Wang-Landau approach thus has three parameters that need be
+specified: the factor by which to decrease $\gamma$ when flatness is
+acheived, the flatness criterion, and the cutoff that determines when
+the computation is complete.  In addition, an energy range (or more
+specifically, a set of energies) must be supplied, so that the
+flatness criterion can be defined.
+
+\davidsays{We need to look up these references.}  While this approach
+is very efficient and has been widely uses, it suffers a few
+shortcomings.  Firstly, the set of energies must be specified, which
+may require multiple simulations.  Secondly, while Wang-Landau
+converges quickly, it does not in general converge to the true density
+of states.  It can and does decrease $\gamma$ so quickly that it will
+never (for any cutoff value) decrease the error in the density of
+states beyond a given value.
+
+\subsection{SAMC}
+The Stochastic Approximation Monte Carlo (SAMC) algorithm addresses
+the lack of convergence of Wang-Landau's approach with a simple
+schedule by which the update factor $\gamma$ is continuously
+decreased~\cite{liang2007stochastic, werlich2015stochastic,
+  schneider2017convergence}.  The update factor is defined in the
+original implementation~\cite{liang2007stochastic} in terms of an
+arbitrary tunable parameter $t_0$ and a scale factor
+$\gamma_0$. \davidsays{Did it originally have a scale factor?}
+\begin{align}
+\gamma_{t}^{\text{SA}} =\gamma_0 \frac{t_0}{\max(t_0,t)}
+\end{align}
+where as above $t$ is the number of moves that have been attempted.
+The major advantage that SAMC offers is its proven convergence.
+Provided the update factor satisfies
+\begin{align}
+\sum_{t=1}^\infty \gamma_{t} = \infty \quad\textrm{and}\quad
+\sum_{t=1}^\infty \gamma_{t}^\zeta < \infty
+\end{align}
+where $\zeta \in \{1,2\}$, Liang has shown that the weights are proven
+to converge to the true density of states~\cite{liang2006theory,
+  liang2007stochastic}.  In addition, the energy range need not be
+known a priori.  The time to converge depends only on the choice of
+parameters $t_0$ and $\gamma_0$.  Unfortunately, there is no
+prescription for finding acceptable values for these parameters, and
+while the algorithm formally converges, for a poor choice of $t_0$
+that convergence may be far too slow to be practical.  This work
+proposes a means for dynamically setting the update factor $\gamma_t$
+that should robustly converge on a variety of systems.
+
+\section{Transition-matrix methods}
 
 \subsection{TMMC Algorithm}
 The Transition Matrix Monte-Carlo (TMMC) method as introduced by
@@ -192,41 +319,6 @@ changed, then only $C_{N,0}$ is incremented by unity. Fitzgerald et
 al.~\cite{fitzgerald2000monte} showed that defining the third step this
 way results in a uniform improvement over using histogram estimators to
 determine the particle number probability distribution (PNPD).
-
-\subsection{Wang-Landau Algorithm}
-
-The Wang-Landau Algorithm developed by Wang and Landau proposes a
-random walk in energy space in order to estimate the density of
-states~\cite{wang2001efficient,wang2001determining, landau2014guide}.
-Wang-Landau's major tenant is that when counting the histogram
-$H(\epsilon)$, the energy occurrences should form a flat distribution.
-The criteria for flat sampling is given by
-\begin{equation}
-	\frac{\min_{\epsilon} H(\epsilon)}
-	{\big\langle H(\epsilon)\big\rangle }
-	> \eta
-\end{equation}
-where $\eta$ is usually set to $0.80$ and determines how many times
-each energy is sampled relative to the mean number of visits.
-Difficulties can occur with this flatness criteria due to the fact that
-some energies on a given energy range might never be
-sampled~\cite{haber2014transition}. The algorithm is briefly outlined
-below where $w$ represents the weights:
-\begin{equation}
-	\ln{D_{i+1}(\epsilon,N)}=\ln{D_{i}(\epsilon,N)}
-	+\gamma
-\end{equation}
-\begin{equation}
-	\gamma_{i+1}=\frac{u}{2} \gamma_{i}
-\end{equation}
-for $u$ typically greater than 1 and $\gamma$ is the modification
-factor for the density of states.  A new configuration for the density
-of states with a probability given by the following is chosen:
-\begin{equation}
-	\mathcal{P}(\epsilon_\text{old} \rightarrow \epsilon_\text{new})
-	= \min[1,e^{\ln{D(\epsilon_\text{old})}-\ln{D(\epsilon_\text{new})}}]
-\end{equation}
-The entire process is repeated until a desired cutoff is reached.
 
 \subsection{WL-TMMC Algorithm}
 
@@ -282,33 +374,7 @@ transition matrix.
 This probability is only used to control actual transitions not update
 the collection matrices.
 
-\subsection{SAMC Algorithm}
-SAMC can be applied as a dynamic importance sampling algorithm that
-uses an update factor to explore energy
-space~\cite{liang2007stochastic, werlich2015stochastic,
-schneider2017convergence}.  The update factor is defined in the
-original implementation~\cite{liang2007stochastic} in terms of an
-arbitrary tunable parameter $t_0$ and a scale factor $\gamma_0$.
-\begin{align}
-\gamma_{t}^{\text{SA}} =\gamma_0 \frac{t_0}{\max(t_0,t)}
-\end{align}
-SAMC offers several advantages over other broad histogram methods
-including proven convergence. It has been shown that if
-$F_{t}^{\text{SA}}$ satisfies two conditions the estimator is proven to
-converge to the real DOS~\cite{liang2006theory, liang2007stochastic}.
-\begin{align}
-\sum_{t=1}^\infty \gamma_{t}^{\text{SA}} = \infty \quad\textrm{and}\quad
-\sum_{t=1}^\infty (\gamma_{t}^{\text{SA}})^\zeta < \infty
-\end{align}
-where $\zeta \in \{1,2\}$.  Unlike WL and WL-TMMC, the energy range need
-not be known a priori.  The time to converge depends only on the choice of
-parameters $t_0$ and $\gamma_0$.
-Unfortunately, only by performing many computational runs might the user
-determine what SAMC arbitrary parameters to choose.  This has lead us
-to develop a systematic way (which we will discuss in the next section)
-for the simulation to determine what $t_0$ should be.
-
-\section{SAD Algorithm}
+\section{SAD Algorithm}\label{sec:sad}
 \subsubsection{The theory behind SAD}
 The SAD (Dynamic Stochastic Approximation) method is a version of the SAMC
 Algorithm that attempts to dynamically choose the modification factor
