@@ -371,7 +371,7 @@ weights can be calculated as ~\jpsays{equation formatting problems!}
 \begin{equation}
 \begin{aligned}
 \ln w(E) = \max(\ln w(E) + \gamma, \\
-    \ln w(\epsilon_H) + \log(e^{w(E)-\ln w(\epsilon_H)}))
+    \ln w(\epsilon_H) + \log(\gamma + e^{\ln w(E)-\ln w(\epsilon_H)}))
 \end{aligned}
 \end{equation}
 If the energy $E$ is less than $\epsilon_L$ then the weights can be
@@ -380,7 +380,7 @@ calculated as
 \begin{aligned}
 \ln w(E) = \max(\ln w(E) + \gamma, \ln w(\epsilon_L) \\
     + \frac{\epsilon_L - E}{T_\text{min}}
-    + \log(\gamma + e^{w(E) -\ln w(\epsilon_L)
+    + \log(\gamma + e^{\ln w(E) -\ln w(\epsilon_L)
     + \frac{\epsilon_L -E}{T_\text{min}}}))
 \end{aligned}
 \end{equation}
@@ -405,6 +405,45 @@ determine the energy landscape boundaries. Outside the range set by the
 weights $w(E)$, the maximum entropy state is set to the energy $E$. The
 minimum important energy is also set to the energy when outside the
 calculated range.
+
+\paragraph{Accepting moves above and below}
+We do \emph{not} use the weights to determine move acceptance outside
+the middle range.  FIXME WRITE THIS SECTION.
+
+\paragraph{Above $\epsilon_H$}
+Each energy $E>\epsilon_H$, should be visited at a rate that
+is proportional to the density of states at that energy, as in a
+simulation with constant weights.  Thus the weight at each energy
+needs to be proportional to the number of times that weight has been
+visited.  In order to ensure that $w(E) \propto D(E)$, the change in
+weight with each visit should be equal to the change in weight at
+the border energy $E=\epsilon_H$.
+\begin{align}
+  \Delta w(E) &= \Delta w(\epsilon_H) \\
+  w_{\text{new}}(E)-w_{\text{old}}(E)
+    &= e^\gamma w(\epsilon_H) - w(\epsilon_H) \\
+    &= (e^\gamma-1) w(\epsilon_H)
+\end{align}
+This ensures that although we visit each energy above $\epsilon_H$ only
+in proportion to its density of states, the weights at these energies
+will approach the entropy as the simulation progresses.
+
+\paragraph{Below $\epsilon_L$}
+For energies $E<\epsilon_L$, we will visit each state in proportion to
+the Boltzmann distribution at temperature $T_{\min}$.  This ensures that
+we have adequate statistics to describe the system at temperature
+$T_{\min}$ while not wasting time simulating extremely low energies with
+correspondingly low entropy.  This means that we need to shift the
+weights at lower energies by a smaller amount in proportion to the
+Boltzmann factor.
+\begin{align}
+  \Delta w(E) &= \Delta w(\epsilon_L)e^{(E-\epsilon_L)/T_{\min}} \\
+  w_{\text{new}}(E)-w_{\text{old}}(E)
+    %&= \left(e^\gamma w(\epsilon_L) - w(\epsilon_L)\right)e^{(E-\epsilon_L)/T_{\min}} \\
+    &= (e^\gamma-1) w(\epsilon_L)e^{(E-\epsilon_L)/T_{\min}}
+\end{align}
+We note that when updating the natural logarithms of the weights, care
+is required in order to ensure that overflow does not occur.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n500}

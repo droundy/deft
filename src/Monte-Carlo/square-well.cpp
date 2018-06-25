@@ -412,6 +412,7 @@ void sw_simulation::end_move_updates(){
   energy_histogram[energy]++;
   if(pessimistic_observation[min_important_energy]) walkers_up[energy]++;
   if (use_sad && energies_found > 1 && wl_factor > 0) {
+    const double lnw = ln_energy_weights[energy];
     if (energy < too_high_energy) {
       // We are at higher energy than the maximum entropy state, so we
       // need to tweak our weights by even more, since we don't spend
@@ -422,11 +423,21 @@ void sw_simulation::end_move_updates(){
       // -lnw = ln(1/w + gamma 1/w0) = ln((w0/w + gamma)/w0)
       //      = -lnw0 + ln(w0/w + gamma) = -lnw0 + ln(gamma + exp(lnw0-lnw))
       // lnw = lnw0 - ln(gamma + exp(lnw0-lnw))
-      double lnw = ln_energy_weights[energy];
-      double lnw0 = ln_energy_weights[too_high_energy];
-      ln_energy_weights[energy] =
-        min(lnw - wl_factor,
-            lnw0 - log(wl_factor + exp(lnw0-lnw)));
+      const double lnw0 = ln_energy_weights[too_high_energy];
+      const double gamma = exp(wl_factor) - 1;
+      if (lnw0 < lnw) {
+        // If 1/w0 > 1/w then we can turn into logs like so:
+        // -lnw = ln((w0/w + gamma)/w0)
+        //      = -lnw0 + ln(w0/w + gamma)
+        // lnw = lnw0 - ln(gamma + exp(lnw0-lnw))
+        ln_energy_weights[energy] = lnw0 - log(gamma + exp(lnw0 - lnw));
+      } else {
+        // If 1/w > 1/w0 then we can turn into logs like so:
+        // -lnw = ln((1 + gamma*w/w0)/w)
+        //      = -lnw + ln(1 + gamma*w/w0)
+        // lnw = lnw - ln(1 + gamma exp(lnw-lnw0))
+        ln_energy_weights[energy] = lnw - log(1 + gamma*exp(lnw - lnw0));
+      }
       if (!(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0)) {
         printf("lnw[%d] = %g\n", energy, ln_energy_weights[energy]);
       }
@@ -438,34 +449,34 @@ void sw_simulation::end_move_updates(){
       // The following is like the high-energy case, except we have an
       // extra Boltzmann factor, which accounts for the fact that we do
       // bias things in favor of low energies (using the Boltzmann factor).
+      
+      // Let w0 = weights at too_low_energy
+      // Let w = weights at energy
+      // Let g = e^gamma - 1
+      // The probability of sampling energy E is proportional to S(E)e^(-E/Tmin)
+      // Therefore we want 1/w = 1/w + g 1/w0 e^((E-E0)/Tmin) <- small boltzmann
 
-      // 1/w = 1/w + gamma 1/w0 e^{(E-E0)/minT} <-- small boltmann
-      // -lnw = ln(1/w + gamma e^{(E-E0)/minT}/w0)
-      //      = ln(e^{(E-E0)/minT}/w0 * (gamma + w0/w e^{-(E-E0)/minT})) <-- large boltzmann
-      //      = (E-E0)/minT} - lnw0 + ln(gamma + w0/w e^{-(E-E0)/minT})) <-- large boltzmann
-      //      = (E-E0)/minT} - lnw0 + ln(gamma + e^{lnw0 - lnw - (E-E0)/minT})) <-- large boltzmann
-      //  lnw = lnw0 - (E-E0)/minT} - ln(gamma + e^{lnw0 - lnw - (E-E0)/minT})) <-- large boltzmann
-      ln_energy_weights[energy] =
-        min(ln_energy_weights[energy] - wl_factor,
-            ln_energy_weights[too_low_energy] + (energy-too_low_energy)/min_T
-            - log(wl_factor + exp(ln_energy_weights[too_low_energy] - ln_energy_weights[energy] + (energy-too_low_energy)/min_T)));
-
-      // -lnw = ln(1/w + gamma e^{(E-E0)/minT}/w0)
-      //      = ln((w0/w + gamma e^{(E-E0)/minT})/w0)
-      //      = -lnw0 + ln(w0/w + gamma e^{(E-E0)/minT})
-      //      = -lnw0 + ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
-      // lnw = lnw0 - ln(gamma e^{(E-E0)/minT} + exp(lnw0-lnw))
-      // ln_energy_weights[energy] =
-      //   min(ln_energy_weights[energy] - wl_factor,
-      //       ln_energy_weights[too_low_energy]
-      //           - log(exp(ln_energy_weights[too_low_energy] - ln_energy_weights[energy])
-      //                 + wl_factor*exp((too_low_energy - energy)/min_T)));
-      if (ln_energy_weights[energy] < ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T) {
+      // -lnw = ln(1/w + g 1/w0 e^((E-E0)/Tmin))
+      //      = ln(1/w + g boltz / w0)
+      // where boltz = e^((E-E0)/Tmin) (note that boltz < 1, "small boltz")
+      const double dEoTmin = (too_low_energy-energy)/min_T;
+      const double lnw0 = ln_energy_weights[too_low_energy];
+      const double gamma = exp(wl_factor) - 1;
+      // dEoTmin is negative, and boltz = exp(dEoTmin)
+      if (-lnw < -lnw0 + dEoTmin) {
+        // -lnw = ln((boltz/w0) (w0/(w boltz) + g))
+        //      = ln(boltz/w0) + ln(g + w0/(w boltz))
+        //      = (E-E0)/Tmin - lnw0 + ln(g + w0/(w boltz))
+        // lnw = lnw0 - (E-E0)/Tmin - ln(g + e^(lnw0 - lnw - (E-E0)/Tmin))
         ln_energy_weights[energy] =
-          ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T;
-        too_low_energy = energy;
-        printf("we are setting too_low_energy here to %d\n", energy);
-        // printf("We were almost very cray at energy %d\n", energy);
+          lnw0 - dEoTmin - log(gamma + exp(lnw0-lnw-dEoTmin));
+      } else {
+        // This is the less common case...
+        // -lnw = ln(1/w (1 + g w boltz / w0))
+        //      = -lnw + ln(1 + g w boltz / w0)
+        // lnw = lnw - ln(1 + g e^(lnw - lnw0 + (E-E0)/Tmin))
+        ln_energy_weights[energy] =
+          lnw - log(1 + gamma*exp(lnw-lnw0+dEoTmin));
       }
 
       if (!(isnormal(ln_energy_weights[energy]) || ln_energy_weights[energy] == 0)) {

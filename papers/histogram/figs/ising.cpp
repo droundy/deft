@@ -55,6 +55,8 @@ struct energy {
   energy operator+(energy other) const { return energy(value + other.value); }
   void operator-=(energy other) { value -= other.value; }
   energy operator-(energy other) const { return energy(value - other.value); }
+  double operator*(double other) const { return value*other; }
+  double operator/(double other) const { return value/other; }
 };
 
 enum dos_types { histogram_dos, transition_dos, weights_dos };
@@ -308,16 +310,17 @@ void ising_simulation::end_flip_updates(){
         //     = lnw0 + ln(w/w0 + gamma) = lnw0 + ln(gamma + exp(lnw-lnw0))
         // lnw = lnw0 + ln(gamma + exp(lnw-lnw0))
         ln_energy_weights[index_from_energy(E)] =
-                  max(lnw + gamma,lnw0 + log(gamma + exp(lnw - lnw0)));
+                  lnw0 + log((exp(gamma)-1) + exp(lnw - lnw0));
       } else {
         // If w > w0 then we can turn into logs like so:
         // lnw = ln((1 + gamma*w0/w)*w)
         //     = lnw + ln(1 + gamma*w0/w) = lnw + ln(1 + gamma exp(lnw0-lnw))
         // lnw = lnw + ln(1 + gamma exp(lnw0-lnw))
         ln_energy_weights[index_from_energy(E)] =
-          max(lnw + gamma,lnw + log(1 + gamma*exp(lnw0 - lnw)));
+          lnw + log(1 + (exp(gamma)-1)*exp(lnw0 - lnw));
       }
-      printf("lnW(index_energy) -> %g, index_energy %ld\n", ln_energy_weights[index_from_energy(E)],index_from_energy(E)); //FIXME: Assertion Error for N > 14!
+      printf("lnW(%ld) -> %g\n",
+             index_from_energy(E), ln_energy_weights[index_from_energy(E)]); //FIXME: Assertion Error for N > 14!
       if (!(isnormal(ln_energy_weights[index_from_energy(E)])
             || ln_energy_weights[index_from_energy(E)] == 0)) {
         printf("gamma is %g\n", gamma);
@@ -326,24 +329,31 @@ void ising_simulation::end_flip_updates(){
       assert(isnormal(ln_energy_weights[index_from_energy(E)])
               || ln_energy_weights[index_from_energy(E)] == 0);
     } else if (E < too_lo_energy) {
-
-      ln_energy_weights[index_from_energy(E)] =
-        max(ln_energy_weights[index_from_energy(E)] + gamma,
-            ln_energy_weights[index_from_energy(too_lo_energy)]
-            + (too_lo_energy - E).value/param.minT
-            + log(gamma + exp(ln_energy_weights[index_from_energy(E)]
-                              - ln_energy_weights[index_from_energy(too_lo_energy)]
-                              + (too_lo_energy - E).value/param.minT)));
-
-      if (ln_energy_weights[index_from_energy(E)] >
-            ln_energy_weights[index_from_energy(min_important_energy)]
-            - (min_important_energy - E).value/param.minT) {
-        // FIXME Think about whether this is needed.
+      // Let w0 = weights at too_low_energy
+      // Let w = weights at energy
+      // Let g = e^gamma - 1
+      // The probability of sampling energy E is proportional to S(E)e^(-E/Tmin)
+      // Therefore we want w = w + g w0 e^((E-E0)/Tmin) <- small boltzmann
+      
+      // lnw = ln(w + g w0 e^((E-E0)/Tmin))
+      //     = ln(w + g w0 boltz)
+      // where boltz = e^((E-E0)/Tmin) (note that boltz < 1, "small boltz")
+      const double lnw0 = ln_energy_weights[index_from_energy(too_lo_energy)];
+      const double lnw = ln_energy_weights[index_from_energy(E)];
+      const double dEoTmin = (E-too_lo_energy)/param.minT;
+      if (lnw < lnw0 + dEoTmin) {
+        // lnw = ln((w0 boltz) (w/(w0 boltz) + g))
+        //     = ln(w0 boltz) + ln(g + w/(w0 boltz))
+        //     = lnw0 + (E-E0)/Tmin + ln(g + e^(lnw - lnw0 - (E-E0)/Tmin))
         ln_energy_weights[index_from_energy(E)] =
-            ln_energy_weights[index_from_energy(min_important_energy)]
-            - (min_important_energy - E).value/param.minT;
-        too_lo_energy = E;
-        // printf("We were almost very cray at energy %d\n", energy);
+          lnw0 + dEoTmin + log((exp(gamma)-1) + exp(lnw-lnw0 -dEoTmin));
+      } else {
+        // This is the less common case...
+        // lnw = ln(w (1 + g w0 boltz / w))
+        //     = lnw + ln(1 + g w0 boltz / w)
+        //     = lnw + ln(1 + g e^(lnw0 - lnw + (E-E0)/Tmin))
+        ln_energy_weights[index_from_energy(E)] =
+          lnw + log(1 + (exp(gamma)-1)*exp(lnw0-lnw+dEoTmin));
       }
 
       if (!(isnormal(ln_energy_weights[index_from_energy(E)])
