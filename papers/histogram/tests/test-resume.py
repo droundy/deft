@@ -10,8 +10,8 @@ if len(sys.argv) < 4:
     print("usage:  python3 %s N test-moves total-moves method" % sys.argv[0])
     exit(1)
 
-#if os.path.exists('paper.tex'):
-#    os.chdir('../..')
+if os.path.exists('sad.tex'):
+    os.chdir('tests')
 
 assert os.path.exists('../data')
 
