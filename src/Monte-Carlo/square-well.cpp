@@ -403,8 +403,8 @@ void sw_simulation::end_move_updates(){
              *(min_energy-max_energy)/(min_T*use_sad));
     }
   }
-  if (use_sad && energies_found > 1) {
-    wl_factor = sa_prefactor*energies_found*(min_energy-max_energy)
+  if (use_sad && too_low_energy > too_high_energy) {
+    wl_factor = sa_prefactor*energies_found*(too_low_energy-too_high_energy)
       /(min_T*moves.total*use_sad);
   } else if (sa_t0) {
     wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);

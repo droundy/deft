@@ -58,6 +58,9 @@ struct energy {
   double operator*(double other) const { return value*other; }
   double operator/(double other) const { return value/other; }
 };
+double operator*(double other, energy e) {
+  return other*e.value;
+}
 
 enum dos_types { histogram_dos, transition_dos, weights_dos };
 
@@ -269,8 +272,8 @@ void ising_simulation::end_flip_updates(){
   }
 
   if (param.sa_t0 || param.use_sad) {
-    if (param.use_sad && energies_found > 1) {
-      gamma = param.sa_prefactor*energies_found*(max_energy.value-min_energy.value)
+    if (param.use_sad && too_hi_energy > too_lo_energy) {
+      gamma = param.sa_prefactor*energies_found*(too_hi_energy-too_lo_energy)
         /(3*param.minT*moves);
     } else {
       gamma = param.sa_prefactor*param.sa_t0/max(param.sa_t0, moves);
