@@ -417,7 +417,6 @@ void ising_simulation::compute_ln_dos(dos_types dos_type) {
     // the density of states is determined directly from the weights.
     double max_entropy = ln_energy_weights[index_from_energy(max_entropy_energy)];
     for (int i=0; i<energy_levels; i++) {
-      //if (energy_histogram[i] != 0) {FIXME: WORKING HERE NOW!!!
       ln_dos[i] = ln_energy_weights[i] - max_entropy;
     }
     if (param.use_sad) {
@@ -651,7 +650,21 @@ int main(int argc, const char *argv[]) {
           fscanf(rfile," too_lo_energy = %i\n", &ising.too_lo_energy.value);
           fscanf(rfile," max_energy = %i\n", &ising.max_energy.value);
           fscanf(rfile," min_energy = %i\n", &ising.min_energy.value);
+          fscanf(rfile," max_entropy_energy = %i\n",
+                       &ising.max_entropy_energy.value);
+          fscanf(rfile," min_important_energy = %i\n",
+                       &ising.min_important_energy.value);
         }
+
+        fscanf(rfile, " energy = np.array([");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          double dummy_energy;
+          if (fscanf(rfile,"\t%lg,\n", &dummy_energy) != 1) {
+            printf("error reading energy at index #%d!\n", i);
+            exit(1);
+          }
+        }
+        fscanf(rfile, " ])\n");
 
         printf("lndos is now {\n");
         fscanf(rfile, " lndos = np.array([");
@@ -754,8 +767,17 @@ int main(int argc, const char *argv[]) {
       fprintf(ising_out,"too_lo_energy = %i\n", ising.too_lo_energy.value);
       fprintf(ising_out,"max_energy = %i\n", ising.max_energy.value);
       fprintf(ising_out,"min_energy = %i\n", ising.min_energy.value);
+      fprintf(ising_out,"max_entropy_energy = %i\n",
+                        ising.max_entropy_energy.value);
+      fprintf(ising_out,"min_important_energy = %i\n",
+                        ising.min_important_energy.value);
     }
     // inserting arrays into text file.
+    fprintf(ising_out, "energy = np.array([\n");
+    for (int i = 0; i < ising.energy_levels; i++) {
+      fprintf(ising_out,"\t%d,\n", ising.energy_from_index(i).value);
+    }
+    fprintf(ising_out, "])\n");
     fprintf(ising_out, "lndos = np.array([\n");
     for (int i = 0; i < ising.energy_levels; i++) {
       fprintf(ising_out,"\t%.17g,\n", ising.ln_dos[i]);
