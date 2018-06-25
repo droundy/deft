@@ -675,18 +675,6 @@ int main(int argc, const char *argv[]) {
   char *transitions_input_filename = new char[1024];
   sprintf(transitions_input_filename, "%s/%s-transitions.dat", data_dir, filename);
 
-  FILE *transitions_infile = fopen(transitions_input_filename,"r");
-  if (transitions_infile != NULL) {
-    fclose(transitions_infile);
-    sw.initialize_transitions_file(transitions_input_filename);
-    seed = random::seed_randomly();
-    printf("Initializing from transitions file '%s' and using random seed %lu\n",
-           transitions_input_filename, seed);
-  } else {
-    printf("NOT initializing from transitions file '%s', since it doesn't seem to exist\n",
-           transitions_input_filename);
-  }
-
   if (fix_kT) {
     sw.initialize_canonical(fix_kT);
   }
@@ -849,6 +837,21 @@ int main(int argc, const char *argv[]) {
           fclose(resume_in);
         }
       }
+    } else if (tmmc) {
+      FILE *transitions_infile = fopen(transitions_input_filename,"r");
+      if (transitions_infile != NULL) {
+        fclose(transitions_infile);
+        sw.initialize_transitions_file(transitions_input_filename);
+        seed = random::seed_randomly();
+        printf("Initializing from transitions file '%s' and using random seed %lu\n",
+              transitions_input_filename, seed);
+      } else {
+        printf("NOT initializing from transitions file '%s', since it doesn't seem to exist\n",
+               transitions_input_filename);
+        exit(1);
+      }
+      printf("Not finished setting up resume for tmmc.\n");
+      exit(1);
     } else {
       printf("I do not know how to resume yet!\n");
       exit(1);
