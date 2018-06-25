@@ -88,13 +88,13 @@ Around the same time, the convergence rate for WL was being
 explored~\cite{zhou2005understanding,lee2006convergence,
 belardinelli2007wang}. It was found that utilizing modification factors
 that decrease faster than $1/t^2$ leads to
-nonconvergence~\cite{belardinelli2007fast}.  This lead to the so-called
+nonconvergence~\cite{belardinelli2007fast}.  This leads to the so-called
 $1/t$-WL algorithm which ensures that excess CPU time is not wasted by
-continuing to perfrom calculations once the error in the density of
+continuing to perform calculations once the error in the density of
 states becomes saturated~\cite{belardinelli2008analysis}. An effort to
 reduce the number of user defined parameters of WL and formulate a
 theory for why the method converges despite detailed balance being
-violated although infrequently was also being udertaken.
+violated although infrequently was also being undertaken.
 
 Liang, Liu, and Carrol began to consider whether WL could be considered
 a special case of Stochastic Approximation whose convergence could be
@@ -199,7 +199,7 @@ The Wang-Landau Algorithm developed by Wang and Landau proposes a
 random walk in energy space in order to estimate the density of
 states~\cite{wang2001efficient,wang2001determining, landau2014guide}.
 Wang-Landau's major tenant is that when counting the histogram
-$H(\epsilon)$, the energy occurences should form a flat distribution.
+$H(\epsilon)$, the energy occurrences should form a flat distribution.
 The criteria for flat sampling is given by
 \begin{equation}
 	\frac{\min_{\epsilon} H(\epsilon)}
@@ -310,7 +310,7 @@ for the simulation to determine what $t_0$ should be.
 
 \section{SAD Algorithm}
 \subsubsection{The theory behind SAD}
-The SAD (Dynamic Stochastic Approximation) is a version of the SAMC
+The SAD (Dynamic Stochastic Approximation) method is a version of the SAMC
 Algorithm that attempts to dynamically choose the modification factor
 rather than relying on system dependent parameters such as $t_0$ or
 $\gamma_0$.  There is an immediate advantage of such an algorithm where
@@ -320,7 +320,7 @@ Wang-Landau requires an energy range for initialization.  SAMC removes
 this energy range requirement but requires simulating every possible
 energy. Our proposed method SAD requires the user to input
 $T_\text{min}$ which is an immediate disadvantage of the method;
-however, this allows the simulating to define an energy simulation
+however, this allows the user to define an energy simulation
 range between $T_\text{min}$ and $\infty$. Setting a physical parameter
 such as a minimum temperature $T_\text{min}$ is intuitive vs. a user
 needing to know a prior either an energy range or some unphysical
