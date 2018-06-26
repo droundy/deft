@@ -207,7 +207,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   }
 
   for (long i=0; i<NUM_POINTS; i++) {
-    vector3d dr = vector3d::ran(gwidth);  //ASK! is this changing our seed all the time?! I think this should be ran(seed)
+    vector3d dr = vector3d::ran(gwidth);
     vector3d r_prime = R + dr;
     vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
     weight w = find_weights(r, r_prime, temp);
