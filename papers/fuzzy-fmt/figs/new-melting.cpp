@@ -367,9 +367,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     }
   }  //End inhomogeneous Fideal calculation
   //printf("crystal ideal gas free energy of one primitive cell= %g\n", cFideal_of_primitive_cell);
-  printf("XXXXX\ncrystal ideal gas free energy per volume = %g\nXXXX\n",
+  printf("crystal ideal gas free energy per volume = %g\n",
          cFideal_of_primitive_cell/primitive_cell_volume);
-  printf("YYYYY\nanalytic ideal gas free energy per vol   = %g\nYYYY\n",
+  printf("analytic ideal gas free energy per vol   = %g\n",
          temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
                - 3*log(sqrt(2*M_PI)*gwidth)
                - 5.0/2)/primitive_cell_volume);
