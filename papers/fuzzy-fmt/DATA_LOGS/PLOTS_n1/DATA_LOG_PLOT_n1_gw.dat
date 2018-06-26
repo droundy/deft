@@ -1,0 +1,21 @@
+#NEW DATA!
+#git version: 0.0.0-2084-g2d66cfdb
+#Data for:      KT=2      N=1      Fv=0      MCNumpts=80000       inclusion radius = 4.0             lattice_constant = 1.587401     
+#
+#Numpts/seed	hFideal/vol		hphi_1			hphi_2			hphi_3			hFE/vol		cFideal/vol
+#400/1		-29.76400403216937818	1.44398240718802739	6.31410552085355370	3.35808298366232139	-18.6478	-24.4621
+#
+#gw	FEdiffperatom	
+0.7	0.347687
+0.6	0.100673
+0.5	0.022364
+0.4	0.0120389
+0.35	0.0324674
+0.3	0.0582324
+0.2	0.312368
+0.1	0.619745
+
+
+
+
+
