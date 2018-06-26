@@ -87,7 +87,7 @@ static inline double find_alpha(double temp) {
   return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
 }
 
-static inline double find_zeta(double temp) {
+static inline double find_Xi(double temp) {
   const double epsilon=1;
   const double alpha = find_alpha(temp);
   return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
@@ -97,14 +97,14 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   const double alpha = find_alpha(temp);
-  const double zeta = find_zeta(temp);
+  const double Xi = find_Xi(temp);
   weight w;
-  w.n_2=(1/(zeta*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/zeta,2));
+  w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
   w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/zeta));
+  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
     w.n_1=0;
@@ -118,11 +118,11 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
 // peak with width gwidth, if the temperature is T, when finding the
 // weighted densities.  This is basically asking when the weighting
 // functions (see find_weights above) are negligible, which thus
-// depends on the alpha and zeta parameters above.
+// depends on the alpha and Xi parameters above.
 static inline double radius_of_peak(double gwidth, double T) {
   const double alpha = find_alpha(T);
-  const double zeta = find_zeta(T);
-  return 0.5*alpha + 3*zeta + inclusion_radius*gwidth;
+  const double Xi = find_Xi(T);
+  return 0.5*alpha + 3*Xi + inclusion_radius*gwidth;
 }
 
 weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
@@ -355,7 +355,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             for (int v=-many_cells; v<= many_cells; v++) {
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
               double deltar = (r-R).norm();
-              n += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3); // ASK! FIXME check analytic norm
+              n += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3);
             }
           }
         }
@@ -1272,8 +1272,8 @@ int main(int argc, const char **argv) {
     weight w_R = find_weighted_den_aboutR_guasquad(r, R, dx, temp, a, gw, fv);
     weight w_MC = find_weighted_den_aboutR_mc(r, R, dx, temp, a, gw, fv);
 
-    printf("\n\nreduced_density = %g, fv = %g, gw = %g  alpha=%g zeta=%g\n", reduced_density, fv, gw,
-           find_alpha(temp), find_zeta(temp));
+    printf("\n\nreduced_density = %g, fv = %g, gw = %g  alpha=%g Xi=%g\n", reduced_density, fv, gw,
+           find_alpha(temp), find_Xi(temp));
 
     weight w = find_weights(r, R, temp);
     printf("w_0=%g, w_1=%g, w_2=%g, w_3=%g\n", w.n_0, w.n_1, w.n_2, w.n_3);
@@ -1289,36 +1289,36 @@ int main(int argc, const char **argv) {
 
     //Anayltic Solution
     double alpha=find_alpha(temp);
-    double zeta=find_zeta(temp);
+    double Xi=find_Xi(temp);
     double norm=uipow(gw*sqrt(2*M_PI),3);
     printf("Analytic Solution:\n");
     //n_0
-    double n_0_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_0_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*r.z*norm*Xi*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/Xi,2));   //Uses first Term of w1 Taylor expansion
     double n_0_of_r = n_0_of_r_1stterm;
     printf("n_0   analytic n_0 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
            n_0_of_r, r.z, w_R.n_0, w_MC.n_0);
     //printf("      1st term of n_0= %g\n", n_0_of_r_1stterm);
     //n_1
-    double n_1_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w1 Taylor expansion
+    double n_1_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(4*M_PI*r.z*norm*Xi*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/Xi,2));   //Uses first Term of w1 Taylor expansion
     double n_1_of_r = n_1_of_r_1stterm;
     printf("n_1   analytic n_1 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
            n_1_of_r, r.z, w_R.n_1, w_MC.n_1);
     //printf("      1st term of n_1= %g\n", n_1_of_r_1stterm);
     //n_2
-    double n_2_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(norm*zeta*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/zeta,2));   //Uses first Term of w2 Taylor expansion
-    double n_2_of_r_3rdterm = 6*sqrt(2)*M_PI*gw*gw*gw*gw*gw/(norm*zeta*zeta*r.z)*exp(-uipow((r.z-(alpha/2))/zeta,2))*(2*uipow((r.z-(alpha/2))/zeta,2)-1);
+    double n_2_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)/(norm*Xi*sqrt(M_PI)))*exp(-uipow((r.z-(alpha/2))/Xi,2));   //Uses first Term of w2 Taylor expansion
+    double n_2_of_r_3rdterm = 6*sqrt(2)*M_PI*gw*gw*gw*gw*gw/(norm*Xi*Xi*r.z)*exp(-uipow((r.z-(alpha/2))/Xi,2))*(2*uipow((r.z-(alpha/2))/Xi,2)-1);
     double n_2_of_r = n_2_of_r_1stterm + n_2_of_r_3rdterm;   //2nd term (and all even terms) = zero
     printf("n_2   analytic n_2 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
            n_2_of_r, r.z, w_R.n_2, w_MC.n_2);
     //printf("      1st term of n_2= %g   2nd term of n_2= 0   3rd term of n_2= %g\n", n_2_of_r_1stterm, n_2_of_r_3rdterm);
     //n_3
-    double n_3_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)*(1-erf((r.z-(alpha/2))/zeta))/(2*norm));   //Uses first Term of w1 Taylor expansion
+    double n_3_of_r_1stterm = (uipow(gw*sqrt(2*M_PI),3)*(1-erf((r.z-(alpha/2))/Xi))/(2*norm));   //Uses first Term of w1 Taylor expansion
     double n_3_of_r = n_3_of_r_1stterm;
     printf("n_3   analytic n_3 = %g  for r.z=%g (compare with quadrature %g or mc %g)\n",
            n_3_of_r, r.z, w_R.n_3, w_MC.n_3);
     //printf("      1st term of n_3= %g\n", n_3_of_r_1stterm);
 
-    //printf("alpha = %g,  zeta=%g, temp=%g\n", alpha, zeta, temp);
+    //printf("alpha = %g,  Xi=%g, temp=%g\n", alpha, Xi, temp);
 
     //Variances
     printf("\nMonte-Carlo Variances for NUM_POINTS=%li:\n", NUM_POINTS);
