@@ -83,14 +83,14 @@ import sys
 #n=args.n
 
 
-#thisdata_n1_8000000 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC8000000.dat")
+##thisdata_n1_8000000 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC8000000.dat")
 thisdata_n1_800000 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC800000.dat")
 thisdata_n1_80000 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC80000.dat")
 thisdata_n1_8000 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC8000.dat")
 thisdata_n1_800 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC800.dat")
 thisdata_n1_400 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC400.dat")
-thisdata_n1_80 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC80.dat")
-thisdata_n1_8 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC8.dat")
+#thisdata_n1_80 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC80.dat")
+#thisdata_n1_8 = np.loadtxt("DATA_LOGS/PLOTS_n1/DATA_LOG_PLOT_n1_MC8.dat")
 
 
 MC=[8]
@@ -108,7 +108,7 @@ MC=[8]
 
 new_array = []
 
-MC=[8, 80, 400, 800, 8000, 80000, 800000]
+MC=[400, 800, 8000, 80000, 800000]
 
 for i in range(len(MC)):
 #    print MC[i]
@@ -199,8 +199,8 @@ cphi_1=1     #plots cphi_1 vs dx for all MCpoints
 cphi_2=1
 cphi_3=1
 
-MC8=1     #plots cphi_1, cphi2 and cphi3 vs dx for specified MCpoints
-MC80=1
+#MC8=0     #plots cphi_1, cphi2 and cphi3 vs dx for specified MCpoints
+#MC80=0
 MC400=1
 MC800=1
 MC8000=1
@@ -257,8 +257,8 @@ if cFEpervol > 0 :
 
 if cphi_1 > 0 :
   plt.figure()
-  plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,1], label = 'cphi_1_MC8')
-  plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,1], label = 'cphi_1_MC80')
+  #plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,1], label = 'cphi_1_MC8')
+  #plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,1], label = 'cphi_1_MC80')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,1], label = 'cphi_1_MC400')
   plt.plot(thisdata_n1_800[:,0], thisdata_n1_800[:,1], label = 'cphi_1_MC800')
   plt.plot(thisdata_n1_8000[:,0], thisdata_n1_8000[:,1], label = 'cphi_1_MC8000')
@@ -277,8 +277,8 @@ if cphi_1 > 0 :
 
 if cphi_2 > 0 :
   plt.figure()
-  plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,2], label = 'cphi_2_MC8')
-  plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,2], label = 'cphi_2_MC80')
+  #plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,2], label = 'cphi_2_MC8')
+  #plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,2], label = 'cphi_2_MC80')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,2], label = 'cphi_2_MC400')
   plt.plot(thisdata_n1_800[:,0], thisdata_n1_800[:,2], label = 'cphi_2_MC800')
   plt.plot(thisdata_n1_8000[:,0], thisdata_n1_8000[:,2], label = 'cphi_2_MC8000')
@@ -296,8 +296,6 @@ if cphi_2 > 0 :
 
 if cphi_3 > 0 :
   plt.figure()
-  plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,3], label = 'cphi_3_MC8')
-  plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,3], label = 'cphi_3_MC80')
   plt.plot(thisdata_n1_400[:,0], thisdata_n1_400[:,3], label = 'cphi_3_MC400')
   plt.plot(thisdata_n1_800[:,0], thisdata_n1_800[:,3], label = 'cphi_3_MC800')
   plt.plot(thisdata_n1_8000[:,0], thisdata_n1_8000[:,3], label = 'cphi_3_MC8000')
@@ -309,34 +307,6 @@ if cphi_3 > 0 :
   plt.title(plot_title)
   plt.xlabel("dx")
   plt.ylabel("cphi_3")
-  plt.legend()
-  plt.savefig(plot_name)
-
-
-if MC8 > 0 :
-  plt.figure()
-  plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,1], label = 'cphi_1_MC8')
-  plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,2], label = 'cphi_2_MC8')
-  plt.plot(thisdata_n1_8[:,0], thisdata_n1_8[:,3], label = 'cphi_3_MC8')
-  plot_name="DATA_LOGS/PLOTS_n1/plot_DATA_LOG_MC8_cphi123"
-  plot_title="cphi123 vs dx with MC8"
-  plt.title(plot_title)
-  plt.xlabel("dx")
-  plt.ylabel("cphi")
-  plt.legend()
-  plt.savefig(plot_name)
-
-
-if MC80 > 0 :
-  plt.figure()
-  plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,1], label = 'cphi_1_MC80')
-  plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,2], label = 'cphi_2_MC80')
-  plt.plot(thisdata_n1_80[:,0], thisdata_n1_80[:,3], label = 'cphi_3_MC80')
-  plot_name="DATA_LOGS/PLOTS_n1/plot_DATA_LOG_MC80_cphi123"
-  plot_title="cphi123 vs dx with MC80"
-  plt.title(plot_title)
-  plt.xlabel("dx")
-  plt.ylabel("cphi")
   plt.legend()
   plt.savefig(plot_name)
 
