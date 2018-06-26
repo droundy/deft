@@ -27,6 +27,7 @@
 
 //Number of points for Monte-Carlo
 long NUM_POINTS = 800;
+double MC_ERROR = 0.0;
 double seed=1;
 
 // radius we need to integrate around a gaussian, in units of gw.
@@ -224,6 +225,50 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   return w_den_R;
 }
 
+weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R, double temp,
+                                              double gwidth, double fv) {
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  double n3_sqr = 0;
+  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
+    return w_den_R;
+  }
+
+  long num_points = 5;
+  long i=0;
+  double my_error;
+  do {
+    num_points *= 4;
+    for (; i<num_points; i++) {
+      vector3d dr = vector3d::ran(gwidth);  //ASK! is this changing our seed all the time?! I think this should be ran(seed)
+      vector3d r_prime = R + dr;
+      vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+      weight w = find_weights(r, r_prime, temp);
+      weight w2 = find_weights(r, r_prime2, temp);
+
+      w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
+      w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
+      w_den_R.n_2 += 0.5*(1-fv)*(w.n_2 + w2.n_2);
+      w_den_R.n_3 += 0.5*(1-fv)*(w.n_3 + w2.n_3);
+
+      w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
+      w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
+
+      n3_sqr += 0.25*(1-fv)*sqr(w.n_3 + w2.n_3);
+    }
+    // we only consider error in n3, because it is dimensionless and
+    // pretty easy to reason about, and the others are closely
+    // related.
+    my_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);
+  } while (my_error > MC_ERROR || my_error > fabs(1-w_den_R.n_3/num_points));
+  w_den_R.n_0 /= num_points;
+  w_den_R.n_1 /= num_points;
+  w_den_R.n_2 /= num_points;
+  w_den_R.n_3 /= num_points;
+  w_den_R.nv_1 /= num_points;
+  w_den_R.nv_2 /= num_points;
+  return w_den_R;
+}
+
 weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
     double lattice_constant,
     double gwidth, double fv) {
@@ -407,8 +452,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               for (int v=-many_cells; v<= many_cells; v++) {
                 const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
                 if ((R-r).norm() < max_distance_considered) {
-                  n_weight=find_weighted_den_aboutR_mc(r, R, dx, temp,  // Crystal Free Energy in real space with Monte-Carlo
-                                                       lattice_constant, gwidth, fv);
+                  if (MC_ERROR == 0) {
+                    n_weight=find_weighted_den_aboutR_mc(r, R, dx, temp,
+                                                         lattice_constant, gwidth, fv);
+                  } else {
+                    n_weight=find_weighted_den_aboutR_mc_accurately(r, R, temp, gwidth, fv);
+                  }
                   //variance_n_weight=find_weighted_den_variances_aboutR_mc(r, R, dx, temp,   //REMOVE?
                   //                           lattice_constant, gwidth, fv);
 
@@ -1125,6 +1174,7 @@ int main(int argc, const char **argv) {
 
     /*** MONTE-CARLO SEED OPTIONS ***/
     {"mc", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &NUM_POINTS, 0, "Number of Points for Monte-Carlo", "INT"},
+    {"mc-error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &MC_ERROR, 0, "Desired error in Monte-Carlo", "DOUBLE"},
     {"seed", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0, "Monte-Carlo seed", "DOUBLE"},
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
