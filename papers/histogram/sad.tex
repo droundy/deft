@@ -128,24 +128,24 @@ The potential $U(\textbf{r})$ for such a system is given by
 where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
 reduced range of the potential well, and $\epsilon$ is its depth.
 
-The organization of this paper is as follows: In Section II, we
-describe in detail several broad-histogram methods used to calculate
-the density of states for the liquid-vapor system.  Section III
-contains the results and comparison of the methods applied to the
-square-well fluid.  In Section IV, we discuss the performance of the
-various methods applied to the model system.
+The organization of this paper is as follows: In Section~\ref{sec:histogram}, we
+describe in detail broad-histogram methods.  Section~\ref{sec:weight} outlines
+weight-based histogram methods used in this work. Section~\ref{sec:transition}
+details the workings of the transition-matrix methods studied in this work.
+Section~\ref{sec:sad} introduces the dynamic stochastic approximation method.
+In Section~\ref{sec:results}, we discuss the performance of the various methods 
+applied to the model system.
 
-\davidsays{Fix this, it was moved when I reorganized the methods
-  section} In this work, We compare a variety of broad histogram
+In this work, We compare a variety of broad histogram
 methods.  We outline the general workings of each algorithm that we
-developed in detail while summarizing algorithms that originated
-elsewhere.  The following methods are introduced and applied to the
+developed in detail while summarizing algorithms that were developed in other
+works.  The following methods are introduced and applied to the
 square-well fluid: Transition Matrix Monte-Carlo (TMMC), Wang-Landau
 (WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Stochastic
 Approximation Monte-Carlo (SAMC), and Dynamic Stochastic Approximation
 (SAD).
 
-\section{Broad histogram methods}
+\section{Broad histogram methods}\label{sec:histogram}
 
 The goal of broad histogram methods (also called \emph{flat histogram}
 or \emph{multicanonical} methods) is to simulate each energy with
@@ -170,8 +170,10 @@ of energies.
 
 \davidsays{We should discuss continuous energies and binning somewhere
   here...}
+\jpsays{I put some text about this but it was under a sad subsection also
+may need reworked and/or edited.}
 
-\section{Weight-based methods}
+\section{Weight-based methods}\label{sec:weight}
 
 We will begin by introducing two related weight-based methods which
 rely on a weight function $w(E)$, noting that the method proposed in
@@ -182,18 +184,16 @@ given by
 	\mathcal{P}(\epsilon_\text{old} \rightarrow \epsilon_\text{new})
 	= \min\left[1,\frac{w(\epsilon_\text{old})}{w(\epsilon_\text{new})}\right]
 \end{equation}
-This biases the simulation in favor of energies with low weights.  A
-set of weights that are proportional to the density of states of the
+the probability biases the simulation in favor of energies with low weights.  
+A set of weights that are proportional to the density of states of the
 system $D(\epsilon)$ will result in an entirely flat histogram.  Thus
-the goal of each of these methods is to achieve a flat histogram.  For
-numerical reasons, it is common to store and work with the natural
-logarithm of the weights, since the weights may vary over more than a
-few hundred orders of magnitude.  Note that the logarithm of the
-density of states is the entropy at that energy, so we can think of
-the logarithm of the weights as an approximation of the entropy
-\davidsays{make this less colloquial}.
+flat histogram is a criteria for convergence for these methods.  To avoid 
+overflow error , since the weights may vary over more than a
+few hundred orders of magnitude, the natural logarithm of the weights are used 
+in this work.  Since $D(\epsilon) = S(\epsilon)$, the logarithm of the weights 
+can be thought of as an approximation of the entropy.
 
-Each weighted density approach use a random walk in energy space to
+Each weighted density approach uses a random walk in energy space to
 estimate the density of states.  The core of these approaches
 is to continuously update the weights at each step of the simulation
 \begin{equation}
@@ -206,8 +206,8 @@ have been frequently sampled, leading to a rapid exploration of energy
 space.  This approach, however, violates detailed balance, due to the
 acceptance probabilities changing with each move.  The severity of
 this violation decreased as we decrease $\gamma$.  The various
-weight-based methods discussed here differ in how the schedule the
-decreasing of $\gamma$.
+weight-based methods discussed here differ in how the decreasing of $\gamma$
+is scheduled.
 
 \subsection{Wang-Landau}
 
@@ -223,7 +223,7 @@ decreased.  This approach requires that the energy range of interest
 be known in advance, and difficulties can occur with this flatness
 criteria due to the fact that some energies in this energy range might
 never be sampled~\cite{haber2014transition}.  The entire process is
-repeated until $\gamma$ reaches a desired cutoff is reached.
+repeated until $\gamma$ reaches a desired cutoff.
 
 The Wang-Landau approach thus has three parameters that need be
 specified: the factor by which to decrease $\gamma$ when flatness is
@@ -232,14 +232,15 @@ the computation is complete.  In addition, an energy range (or more
 specifically, a set of energies) must be supplied, so that the
 flatness criterion can be defined.
 
-\davidsays{We need to look up these references.}  While this approach
-is very efficient and has been widely uses, it suffers a few
-shortcomings.  Firstly, the set of energies must be specified, which
-may require multiple simulations.  Secondly, while Wang-Landau
-converges quickly, it does not in general converge to the true density
-of states.  It can and does decrease $\gamma$ so quickly that it will
-never (for any cutoff value) decrease the error in the density of
-states beyond a given value.
+While this approach
+is very efficient and has been widely used, it suffers a few
+shortcomings.  Firstly, the set of energies must be specified
+~\cite{wang2001efficient, schulz2003avoiding, yan2003fast}, which may 
+require multiple simulations. Secondly, while Wang-Landau converges quickly, 
+it does not in general converge to the true density of states
+~\cite{belardinelli2008analysis, zhou2008optimal}.  It can and does decrease
+$\gamma$ so quickly that it will never (for any cutoff value) decrease the 
+error in the density of states beyond a given value.
 
 \subsection{SAMC}
 The Stochastic Approximation Monte Carlo (SAMC) algorithm addresses
@@ -248,8 +249,8 @@ schedule by which the update factor $\gamma$ is continuously
 decreased~\cite{liang2007stochastic, werlich2015stochastic,
   schneider2017convergence}.  The update factor is defined in the
 original implementation~\cite{liang2007stochastic} in terms of an
-arbitrary tunable parameter $t_0$ and a scale factor
-$\gamma_0$. \davidsays{Did it originally have a scale factor?}
+arbitrary tunable parameter $t_0$ and in future works~\cite{werlich2015stochastic} with a scale factor
+$\gamma_0$.
 \begin{align}
 \gamma_{t}^{\text{SA}} =\gamma_0 \frac{t_0}{\max(t_0,t)}
 \end{align}
@@ -271,7 +272,7 @@ that convergence may be far too slow to be practical.  This work
 proposes a means for dynamically setting the update factor $\gamma_t$
 that should robustly converge on a variety of systems.
 
-\section{Transition-matrix methods}
+\section{Transition-matrix methods}\label{sec:transition}
 
 \subsection{TMMC Algorithm}
 The Transition Matrix Monte-Carlo (TMMC) method as introduced by
@@ -551,7 +552,7 @@ scaling free for a reasonable choice of step size.  SAD should perform
 extremely well compared with other broad histogram methods when applied
 to complex continuous systems such as polymers/proteins and spin models.
 
-\section{Results}
+\section{Results}\label{sec:results}
 
 For the square-well fluid, our simulations treat systems with a
 well-width of $\text{ww} = 1.30$ and a filling fraction of either
