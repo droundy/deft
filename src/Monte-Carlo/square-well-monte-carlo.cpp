@@ -813,13 +813,6 @@ int main(int argc, const char *argv[]) {
     count_all_interactions(sw.balls, sw.N, sw.interaction_distance, sw.len,
                            sw.walls, sw.sticky_wall);
 
-  if (sw.max_entropy_state == 0) {
-    // First, let us figure out what the max entropy point is (and
-    // move to it) if the user did not specify the max_entropy_state.
-    sw.max_entropy_state = sw.initialize_max_entropy(acceptance_goal);
-  } else {
-    printf("Leaving the max_entropy_state at %d\n", sw.max_entropy_state);
-  }
   sw.reset_histograms();
   sw.iteration = 0;
 
