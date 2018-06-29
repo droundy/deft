@@ -10,12 +10,49 @@ use std::iter::FromIterator;
 use std::ops::Deref;
 use std::any::Any;
 
-pub trait ExprType: 'static + Send + Clone + Eq + Debug + Hash + Any {
+#[derive(Debug, Eq, PartialEq)]
+pub enum GenericExpr {
+    Scalar(Expr<Scalar>),
+    RealSpaceScalar(Expr<RealSpaceScalar>),
+    KSpaceScalar(Expr<KSpaceScalar>),
+}
+
+impl GenericExpr {
+    fn find(self, needle: GenericExpr) -> Option<GenericExpr> {
+        if self == needle {
+            return Some(self);
+        }
+        match self {
+            GenericExpr::Scalar(s) =>
+                match s.inner.deref() {
+                    Scalar::Log(a) | Scalar::Exp(a) => GenericExpr::Scalar(*a).find(needle),
+                    Scalar::Add(ref m) | Scalar::Mul(ref m) => m.iter().map(|(k, &_)| k.to_generic()).find(|k| *k == self),
+                    Scalar::Integrate(_, b) => GenericExpr::RealSpaceScalar(*b).find(needle),
+                    _ => None,
+                },
+            GenericExpr::RealSpaceScalar(rs) =>
+                match rs.inner.deref() {
+                    RealSpaceScalar::Log(a) | RealSpaceScalar::Exp(a) => GenericExpr::RealSpaceScalar(*a).find(needle),
+                    RealSpaceScalar::Add(ref m) | RealSpaceScalar::Mul(ref m) => m.iter().map(|(k, &_)| k.to_generic()).find(|k| *k == self),
+                    RealSpaceScalar::IFFT(b) => GenericExpr::KSpaceScalar(*b).find(needle),
+                    _ => None,
+                },
+            GenericExpr::KSpaceScalar(ks) =>
+                match ks.inner.deref() {
+                    KSpaceScalar::Log(a) | KSpaceScalar::Exp(a) => GenericExpr::KSpaceScalar(*a).find(needle),
+                    KSpaceScalar::Add(ref m) | KSpaceScalar::Mul(ref m) => m.iter().map(|(k, &_)| k.to_generic()).find(|k| *k == self),
+                    KSpaceScalar::FFT(b) => GenericExpr::RealSpaceScalar(*b).find(needle),
+                    _ => None,
+                },
+        }
+    }
+}
+
+pub trait ExprType: 'static + Send + Clone + Eq + Debug + Hash {
     fn cpp(&self) -> String;
     fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>>;
-    fn map_leaves(x: &Expr<Self>, f: impl Fn(&Expr<Self>) -> Expr<Self>) -> Expr<Self>;
-
-    fn substitute<S: ExprType>(&self, old: Expr<S>, new: Expr<S>) -> Expr<Self>;
+    fn map_leaves<F: Fn(&Expr<Self>) -> Expr<Self>>(x: &Expr<Self>, f: F) -> Expr<Self>;
+    fn to_generic(self) -> GenericExpr;
 }
 
 #[derive(Clone, Debug, Eq, Hash)]
@@ -32,6 +69,14 @@ pub enum Stmt {
 impl Stmt {
     fn alloc_k_space_scalar<T: Into<String>>(s: T, e: Expr<KSpaceScalar>) -> Stmt {
         Stmt::AllocKSpaceScalar(s.into(), e)
+    }
+
+    fn alloc_real_space_scalar<T: Into<String>>(s: T, e: Expr<RealSpaceScalar>) -> Stmt {
+        Stmt::AllocRealSpaceScalar(s.into(), e)
+    }
+
+    fn alloc_scalar<T: Into<String>>(s: T, e: Expr<Scalar>) -> Stmt {
+        Stmt::AllocScalar(s.into(), e)
     }
 
     fn cpp(&self) -> String {
@@ -80,14 +125,9 @@ impl<T: ExprType> Expr<T> {
     fn cast<U: ExprType + From<T>>(&self) -> Expr<U> {
         Expr::new(&self.inner.deref().clone().into())
     }
-    fn substitute<S: ExprType>(&self, old: Expr<S>, new: Expr<S>) -> Expr<T> {
-        // self.inner.substitute(change)
-        if let Some(ref o) = (&old as &Any).downcast_ref::<Expr<T>>() {
-            if self == *o {
-                return *(&new as &Any).downcast_ref::<Expr<T>>().unwrap();
-            }
-        }
-        unimplemented!()
+
+    fn to_generic(self) -> GenericExpr {
+        self.inner.deref().clone().to_generic()
     }
 }
 
@@ -335,6 +375,10 @@ impl Scalar {
 }
 
 impl ExprType for Scalar {
+    fn to_generic(self) -> GenericExpr {
+        GenericExpr::Scalar(Expr::new(&self))
+    }
+
     fn cpp(&self) -> String {
         match self {
             &Scalar::Var(s) =>
@@ -485,6 +529,10 @@ impl RealSpaceScalar {
 }
 
 impl ExprType for RealSpaceScalar {
+    fn to_generic(self) -> GenericExpr {
+        GenericExpr::RealSpaceScalar(Expr::new(&self))
+    }
+
     fn cpp(&self) -> String {
         if !self.contains_ifft() {
             // match self.fake_scalar() { Ok(s) => same stuff, Err(todo) => { code to do todo first } }
@@ -564,7 +612,6 @@ impl ExprType for RealSpaceScalar {
                 }
             },
         }
-
     }
 
     fn contains_fft(&self) -> Vec<Expr<RealSpaceScalar>> {
@@ -623,6 +670,10 @@ impl KSpaceScalar {
 }
 
 impl ExprType for KSpaceScalar {
+    fn to_generic(self) -> GenericExpr {
+        GenericExpr::KSpaceScalar(Expr::new(&self))
+    }
+
     fn cpp(&self) -> String {
         if !(self.contains_fft().len() > 0) {
             return String::from("Vector temp(Nx*Ny*(int(Nz)/2+1));\nfor (int i = 0; i < Nx * Ny * Nz; i++)\n\ttemp[i] = ") + &self.fake_scalar().cpp() + &"\n";
