@@ -300,9 +300,6 @@ int main(int argc, const char *argv[]) {
   sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
-  // Walker histograms
-  sw.walkers_up = new long[sw.energy_levels]();
-
   sw.balls = new ball[sw.N];
 
   if(totime < 0) totime = 10*sw.N;
@@ -530,8 +527,6 @@ int main(int argc, const char *argv[]) {
   delete[] sw.energy_histogram;
 
   delete[] sw.collection_matrix;
-
-  delete[] sw.walkers_up;
 
   delete[] sw.pessimistic_observation;
   delete[] sw.pessimistic_samples;

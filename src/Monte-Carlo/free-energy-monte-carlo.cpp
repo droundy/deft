@@ -359,10 +359,6 @@ int main(int argc, const char *argv[]) {
   sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
-  // Walker histograms
-  sw.walkers_up = new long[sw.energy_levels]();
-
-
   printf("memory use estimate = %.2g G\n\n",
          8*double(6*sw.energy_levels)/1024/1024/1024);
 
@@ -575,7 +571,7 @@ int main(int argc, const char *argv[]) {
   // Initialization of cell
   // ----------------------------------------------------------------------------
 
-  sw.initialize_translation_distance();
+  sw.translation_scale = 0.05;
 
   // --------------------------------------------------------------------------
   // end initilization routine.
@@ -746,8 +742,6 @@ int main(int argc, const char *argv[]) {
   delete[] sw.energy_histogram;
 
   delete[] sw.collection_matrix;
-
-  delete[] sw.walkers_up;
 
   delete[] sw.pessimistic_observation;
   delete[] sw.pessimistic_samples;
