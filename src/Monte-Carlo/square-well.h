@@ -177,9 +177,6 @@ struct sw_simulation {
     return 0;
   };
 
-  /* Up-moving walkers for optimized ensemble method */
-  long *walkers_up;
-
   void reset_histograms();
   void move_a_ball(); // attempt to move one ball
   void end_move_updates(); // updates to run at the end of every move
@@ -204,8 +201,6 @@ struct sw_simulation {
                               double wl_threshold, double wl_cutoff,
                               bool fixed_energy_range);
 
-  void initialize_optimized_ensemble(int first_update_iterations, int oe_update_factor);
-
   void initialize_tmi(int version=1);
   void initialize_toe(int version=1);
   void initialize_transitions();
@@ -225,7 +220,6 @@ struct sw_simulation {
   double fractional_sample_error(double T, bool optimistic_sampling);
 
   double* compute_ln_dos(dos_types dos_type);
-  double *compute_walker_density_using_transitions(double *sample_rate = 0);
 
   int set_min_important_energy(double *ln_dos = 0);
   void set_max_entropy_energy();
@@ -237,8 +231,6 @@ struct sw_simulation {
   // 10 pessimistic samples.
   double converged_to_temperature(double *ln_dos) const;
   int converged_to_state() const;
-
-  double estimate_trip_time(int E1, int E2);
 
   // check whether we may print, to prevent dumping obscene amounts of text into the console
   bool printing_allowed();

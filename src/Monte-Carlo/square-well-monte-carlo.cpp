@@ -101,8 +101,6 @@ int main(int argc, const char *argv[]) {
   int samc = false;
   int sad = false;
   int sad_fraction = 1;
-  int optimized_ensemble = false;
-  int transition_override = false;
 
   char *transitions_input_filename = new char[1024];
   sprintf(transitions_input_filename, "none");
@@ -260,11 +258,6 @@ int main(int argc, const char *argv[]) {
      "Fraction for stochastic approximation monte carlo dynamical version", "INT"},
     {"vanilla_wang_landau", '\0', POPT_ARG_NONE, &vanilla_wang_landau, 0,
      "Use Wang-Landau histogram method with vanilla settings", "BOOLEAN"},
-    {"optimized_ensemble", '\0', POPT_ARG_NONE, &optimized_ensemble, 0,
-     "Use a optimized ensemble weight histogram method", "BOOLEAN"},
-    {"transition_override", '\0', POPT_ARG_NONE, &transition_override, 0,
-     "Override initialized weights with weights generated from the transition matrix",
-     "BOOLEAN"},
 
     {"transitions_input_filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
      &transitions_input_filename, 0, "File from which to read in transition matrix, "
@@ -382,11 +375,6 @@ int main(int argc, const char *argv[]) {
     printf("Exactly one histogram method must be selected!\n");
     return 254;
   }
-  // Check that no more than one secondary method is used
-  if(optimized_ensemble + transition_override > 1){
-    printf("Cannot use more than one secondary histogram method!\n");
-    return 254;
-  }
 
   // use tmmc for golden calculations
   if (golden) tmmc = true;
@@ -395,14 +383,6 @@ int main(int argc, const char *argv[]) {
   if(sw.min_samples && sw.sample_error && sw.flatness){
     printf("Can only use one end condition!\n");
     return 157;
-  }
-
-  /* If we are going to optimized the ensemble after initializing via some other method,
-     initialize "half way" each time */
-  if(optimized_ensemble && sw.flatness){
-    printf("It does not make sense to optimize the ensemble with a "
-           "flat histogram end condition!\n");
-    return 175;
   }
 
   if (sw.len[x]<0 || sw.len[y]<0 || sw.len[x]<0){
@@ -583,12 +563,6 @@ int main(int argc, const char *argv[]) {
       return 104;
     }
 
-    if(optimized_ensemble){
-      sprintf(method_tag, "%s_oe", method_tag);
-    } else if(transition_override){
-      sprintf(method_tag, "%s_to", method_tag);
-    }
-
     if (golden) sprintf(method_tag, "%s-golden", method_tag);
 
     sprintf(filename, "%s-ww%04.2f-ff%04.2f-N%i%s",
@@ -654,9 +628,6 @@ int main(int argc, const char *argv[]) {
   sw.biggest_energy_transition = max_balls_within(sw.interaction_distance + 1);
   sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
-
-  // Walker histograms
-  sw.walkers_up = new long[sw.energy_levels]();
 
   // ----------------------------------------------------------------------------
   // Define data arrays
@@ -858,28 +829,6 @@ int main(int argc, const char *argv[]) {
     sw.use_tmmc = true;
     sw.initialize_transitions();
   }
-
-  // If we wish to optimize the ensemble or set transition matrix weights, do so
-  if (optimized_ensemble) {
-    printf("\nOptimizing the ensemble!\n");
-    // We need to know the minimum important energy to get optimized_ensemble right.
-    if(!vanilla_wang_landau) sw.set_min_important_energy(); // because vanilla fixes min_e
-    delete[] sw.compute_walker_density_using_transitions(); // to print the sample rate
-    sw.reset_histograms();
-    sw.iteration = 0;
-
-    // a guess for the number of iterations for which to initially run
-    //   optimized ensemble initialization
-    int first_update_iterations = sw.N*sw.energy_levels;
-
-    sw.initialize_optimized_ensemble(first_update_iterations, oe_update_factor);
-    delete[] sw.compute_walker_density_using_transitions(); // to print the sample rate
-  } else if(transition_override){
-    printf("\nOptimizing the weight array using the transition matrix!\n");
-    sw.set_min_important_energy();
-    sw.optimize_weights_using_transitions(tmi_version);
-    took("Optimizing with tmmc");
-  }
   sw.flush_weight_array();
 
   took("Actual initialization");
@@ -890,18 +839,6 @@ int main(int argc, const char *argv[]) {
     printf("Using canonical energies below %d (E/N = %g)\n",
            sw.min_important_energy, -sw.min_important_energy/double(sw.N));
     sw.initialize_canonical(sw.min_T,sw.min_important_energy);
-  }
-
-  if (false) {
-    int E1 = sw.max_entropy_state;
-    int E2 = sw.min_energy;
-    switch (sw.N) {
-    case 20:
-      E2 = 95;
-      break;
-    }
-    printf("Round trip should take %g and %g moves going down and up from %d to %d.\n",
-           sw.estimate_trip_time(E1, E2), sw.estimate_trip_time(E2, E1), E1, E2);
   }
 
   double fractional_sample_error = sw.fractional_sample_error(sw.min_T,optimistic_sampling);
@@ -1259,8 +1196,6 @@ int main(int argc, const char *argv[]) {
   delete[] sw.energy_histogram;
 
   delete[] sw.collection_matrix;
-
-  delete[] sw.walkers_up;
 
   delete[] sw.optimistic_samples;
   delete[] sw.pessimistic_samples;

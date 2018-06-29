@@ -500,9 +500,6 @@ int main(int argc, const char *argv[]) {
   sw.collection_matrix =
     new long[sw.energy_levels*(2*sw.biggest_energy_transition+1)]();
 
-  // Walker histograms
-  sw.walkers_up = new long[sw.energy_levels]();
-
   // ----------------------------------------------------------------------------
   // Define data arrays
   // ----------------------------------------------------------------------------
@@ -1114,8 +1111,6 @@ int main(int argc, const char *argv[]) {
   delete[] sw.energy_histogram;
 
   delete[] sw.collection_matrix;
-
-  delete[] sw.walkers_up;
 
   delete[] sw.optimistic_samples;
   delete[] sw.pessimistic_samples;
