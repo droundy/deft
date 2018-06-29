@@ -536,24 +536,6 @@ void sw_simulation::energy_change_updates(int energy_change){
   if (energy > min_energy) min_energy = energy;
 }
 
-int sw_simulation::simulate_energy_changes(int num_moves) {
-  int num_moved = 0, num_up = 0;
-  while (num_moved < num_moves) {
-    int old_energy = energy;
-    move_a_ball();
-    if (moves.total > init_iters && init_iters > 0){
-      // Need to end initialization early, took too many iterations;
-      // negative value indicates error
-      return -1;
-    } 
-    if (energy != old_energy) {
-      num_moved++;
-      if (energy > old_energy) num_up++;
-    }
-  }
-  return num_up;
-}
-
 void sw_simulation::flush_weight_array(){
   const double max_entropy_weight = ln_energy_weights[max_entropy_state];
   for (int i = 0; i < energy_levels; i++)
@@ -1050,80 +1032,6 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
 
 bool sw_simulation::reached_iteration_cap(){
   return end_condition == init_iter_limit && iteration >= init_iters;
-}
-
-int sw_simulation::initialize_max_entropy(double acceptance_goal) {
-  printf("Moving to most probable state.\n");
-  int num_moves = 500;
-  const double mean_allowance = 1.0;
-  const int starting_iterations = iteration;
-  int attempts_to_go = 4; // always try this many times, to get translation_scale right.
-  double mean = 0, variance = 0;
-  int last_energy = 0;
-  int counted_in_mean;
-  while (abs(last_energy-energy) > max(2,mean_allowance*sqrt(variance)) ||
-         attempts_to_go >= 0) {
-    attempts_to_go -= 1;
-    last_energy = energy;
-    if (simulate_energy_changes(num_moves) < 0){
-      // Negative return value indicates we've used up our init_iters
-      // already; so returns a "guess"
-      return energy;
-    }
-    mean = 0;
-    counted_in_mean = 0;
-    for (int i = 0; i < energy_levels; i++) {
-      counted_in_mean += energy_histogram[i];
-      mean += i*energy_histogram[i];
-    }
-    mean /= counted_in_mean;
-    variance = 0;
-    for (int i = 0; i < energy_levels; i++) {
-      variance += (i-mean)*(i-mean)*energy_histogram[i];
-      energy_histogram[i] = 0; // clear it out for the next attempt
-    }
-    variance /= counted_in_mean;
-
-    num_moves *= 2;
-  }
-  printf("Took %ld iterations to find most probable state: %d with width %.2g\n",
-         iteration - starting_iterations, max_entropy_state, sqrt(variance));
-  // here we use our preferred ln_dos function to find the max entropy
-  // state...
-  set_max_entropy_energy();
-  return max_entropy_state;
-}
-
-void sw_simulation::initialize_translation_distance(double acceptance_goal) {
-  printf("Tuning translation distance.\n");
-  const int max_tries = 5;
-  const int num_moves = 100*N*N;
-  const int starting_iterations = iteration;
-  double dscale = 0.1;
-  double acceptance_rate = 0;
-  for (int num_tries=0;
-       fabs(acceptance_rate - acceptance_goal) > 0.05 && num_tries < max_tries;
-       num_tries++) {
-    // ---------------------------------------------------------------
-    // Fine-tune translation scale to reach acceptance goal
-    // ---------------------------------------------------------------
-    for (int i=0;i<num_moves;i++) move_a_ball();
-    acceptance_rate =
-      double(moves.working-moves.working_old)/(moves.total-moves.total_old);
-    moves.working_old = moves.working;
-    moves.total_old = moves.total;
-    if (acceptance_rate < acceptance_goal)
-      translation_scale /= 1+dscale;
-    else
-      translation_scale *= 1+dscale;
-    // hokey heuristic for tuning dscale
-    const double closeness = fabs(acceptance_rate - acceptance_goal)/acceptance_rate;
-    if(closeness > 0.5) dscale *= 2;
-    else if(closeness < dscale*2 && dscale > 0.01) dscale/=2;
-  }
-  printf("Took %ld iterations to find acceptance rate of %.2g with translation scale %.2g\n",
-         iteration - starting_iterations,
-         acceptance_rate, translation_scale);
 }
 
 // initialize the weight array using the specified temperature.

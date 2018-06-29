@@ -188,17 +188,6 @@ struct sw_simulation {
   // the last time we printed status text (i.e. from initialization)
   double estimated_time_per_iteration; // in units of seconds per iteration
 
-  // iterate long enough to find the max entropy state and initialize
-  // the translation distance. return most probable energy
-  int initialize_max_entropy(double acceptance_goal = 0.4);
-
-  // initialize the translation distance. return most probable energy
-  void initialize_translation_distance(double acceptance_goal = 0.4);
-
-  // iterate enough times for the energy to change n times.  Return
-  // the number of "up" moves.
-  int simulate_energy_changes(int num_moves);
-
   // flatten weights at energies above the maximum entropy state,
   // and subtract off minimum weight so that our weights don't get out of hand
   void flush_weight_array();
