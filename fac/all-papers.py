@@ -4,7 +4,7 @@ import os
 
 papers = """
    histogram pair-correlation contact hard-sphere-free-energy
-   square-well-fluid
+   square-well-fluid grand
    fuzzy-fmt water-saft polyhedra electrostatics renormalization
 """.split()
 
