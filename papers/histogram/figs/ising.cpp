@@ -16,24 +16,16 @@
 
 // TODO items:
 
-// 1. Write a script that tests whether resume works.  (And fix
-//    resume.)  i.e. the script will run the code once with fixed #
-//    moves, then run again resuming.  Then it'll run with twice the
-//    moves and confirm the results agree.  Eventually we'll need the
-//    test to work with all methods.
-
-// 2. Make sure the min_important_energy is always up-to-date (but
+// 1. Make sure the min_important_energy is always up-to-date (but
 //    keep it cheap).
 
-// 3. Make sure the max_entropy_energy is always up-to-date (but keep
+// 2. Make sure the max_entropy_energy is always up-to-date (but keep
 //    it cheap).
 
-// 4. Fix FIXMEs.
+// 3. Fix FIXMEs.
 
-// 5. Histogram double counting error from ground state energy!
+// 4. Add printing output.
 
-// 6. When max is removed and exp(gamma) - 1 is inserted for gamma,
-//    test-resume is violated!
 // ---------------------------------------------------------------------
 // Define "Constants" -- set from arguments then unchanged
 // ---------------------------------------------------------------------
@@ -99,7 +91,7 @@ struct ising_simulation {
   energy E;      // system energy.
 
   // the last time we printed status text (i.e. from initialization)
-  double estimated_time_per_iteration; // in units of seconds per iteration
+  double estimated_time_per_iteration = 0.1; // in units of seconds per iteration
 
   /* The following determine how we perform an ising flip */
   double gamma; // if it is non-zero, update weights on each move WL-style.
@@ -146,6 +138,7 @@ struct ising_simulation {
   void compute_ln_dos(dos_types dos_type);
   void initialize_samc(int am_sad);
   bool reached_iteration_cap();
+  bool printing_allowed();
 };
 
 // ising_simulation methods
@@ -468,6 +461,34 @@ static double took(const char *name) {
   return exp(ceil(log(seconds)));
 }
 
+bool ising_simulation::printing_allowed(){
+  const double max_time_skip = 60*30; // 1/2 hour
+  const double initial_time_skip = 3; // seconds
+  static double time_skip = initial_time_skip;
+  static int every_so_often = 0;
+
+  static clock_t last_output = clock(); // when we last output data
+
+  if (++every_so_often > time_skip/estimated_time_per_iteration) {
+    fflush(stdout); // flushing once a second will be no problem and can be helpful
+    clock_t now = clock();
+    time_skip = min(time_skip + initial_time_skip, max_time_skip);
+
+    // update our setimated time per iteration based on actual time
+    // spent in this round of iterations
+    double elapsed_time = (now - last_output)/double(CLOCKS_PER_SEC);
+    if (now > last_output) {
+      estimated_time_per_iteration = elapsed_time / every_so_often;
+    } else {
+      estimated_time_per_iteration = 0.1 / every_so_often / double(CLOCKS_PER_SEC);
+    }
+    last_output = now;
+    every_so_often = 0;
+    return true;
+  }
+  return false;
+}
+
 // ---------------------------------------------------------------------
 // Initialize Main
 // ---------------------------------------------------------------------
@@ -479,6 +500,8 @@ int main(int argc, const char *argv[]) {
   simulation_parameters param;
 
   int resume = false;
+  //bool am_all_done = false;
+  //long how_often_to_check_finish = param.N;
   long total_moves = 10000;
 
   char *data_dir = new char[1024];
@@ -730,8 +753,36 @@ int main(int argc, const char *argv[]) {
   printf("version: %s\n",version_identifier());
 
   // MAIN CODE EXECUTION HERE!
-  ising.calculate_energy();
+  
+//  char *dos_fname = new char[1024];
+//  sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
+//  
+//  bool verbose = ising.printing_allowed();
+//  am_all_done = ((ising.moves % how_often_to_check_finish == 0) || verbose); // removed finished_initializing
+//  how_often_to_check_finish += param.N; // As simulation progresses,
+//                                          // check for completion lees
+//                                          // frequently.
+//  if ((verbose || am_all_done) && ising.moves > 10*param.N) {
+//    // Save lndos to file...
+//    //double *ln_dos = ising.compute_ln_dos(transition_dos);
+//    printf("Wow did we make it???");
+//    {
+//      FILE *dos_out = fopen((const char *)dos_fname, "w");
+//
+//      fprintf(dos_out, "lndos = np.array([\n");
+//      for (int i = 0; i < ising.energy_levels; i++) {
+//        fprintf(dos_out,"\t%.17g,", ising.ln_dos[i]);
+//      }
+//      fprintf(dos_out, "])\n");
+//      fclose(dos_out);
+//    }
+//    //delete[] ln_dos;
+//    } while (!am_all_done);
 
+  ising.calculate_energy();
+// I think I need a do loop here and then do flip a spin for a while
+// check if it is time to output file (if it is then do so) if not 
+// then run some more.
   for (long i = 0; i < total_moves; i++) {
     ising.flip_a_spin();
   }
@@ -823,4 +874,3 @@ int main(int argc, const char *argv[]) {
   // END OF MAIN PROGRAM LOOP
   // -------------------------------------------------------------------
 }
-
