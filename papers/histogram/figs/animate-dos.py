@@ -128,7 +128,10 @@ for frame in range(numframes):
     ax.set_xlim(mine, maxe)
     ax.set_ylabel(r'$\ln DOS$')
     # ax.legend(loc='best').get_frame().set_alpha(0.25)
-    plt.title(r'lv movie from %s ($T_{min} = %g$)' % (filename, min_T))
+    if too_lo is not None:
+      plt.title(r'lv movie from %s ($T_{\min} = %g$, $E_{\text{lo}} = %g$)' % (filename, min_T, too_lo))
+    else:
+      plt.title(r'lv movie from %s ($T_{\min} = %g$)' % (filename, min_T))
     plt.legend(loc='lower right')
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
