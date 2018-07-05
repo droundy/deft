@@ -943,7 +943,9 @@ int main(int argc, const char *argv[]) {
       sw.write_transitions_file();
 
       char *countinfo = new char[4096];
-      double *ln_dos = sw.compute_ln_dos(transition_dos);
+      dos_types how_to_compute_dos = transition_dos;
+      if (sw.use_sad || sw.sa_t0 || sw.use_wl) how_to_compute_dos = weights_dos;
+      double *ln_dos = sw.compute_ln_dos(how_to_compute_dos);
       int converged_state = sw.converged_to_state();
       sprintf(countinfo,
               "# iterations: %li\n"
