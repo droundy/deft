@@ -109,14 +109,15 @@ for method in methods:
         #plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         colors.legend()
 
-        plt.figure('errorinentropy')
-        colors.loglog(moves, errorinentropy[0:len(iterations)],
-                      method = method[1:])
-        plt.xlabel('Moves')
-        plt.ylabel('Average Entropy Error')
-        #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
-        plt.title(r'$N=%d$, $\eta = %g$' % (int(N), ff))
-        colors.legend()
+        if type(iterations) is not np.float64:
+                plt.figure('errorinentropy')
+                colors.loglog(moves, errorinentropy[0:len(iterations)],
+                              method = method[1:])
+                plt.xlabel('Moves')
+                plt.ylabel('Average Entropy Error')
+                #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
+                plt.title(r'$N=%d$, $\eta = %g$' % (int(N), ff))
+                colors.legend()
 
     except:
         raise
