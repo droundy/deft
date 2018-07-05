@@ -20,6 +20,9 @@ for method, fname in inputs:
     e, lndos = readnew.e_lndos(fname)
     colors.plot(e, lndos, method=method)
 
+plt.ylabel('$S(E)/k_B$')
+plt.ylim(-2000, 0)
+plt.xlabel('E')
 colors.legend()
 
 plt.savefig('figs/N500-lndos-comparison.pdf')
