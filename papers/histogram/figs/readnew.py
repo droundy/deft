@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-from __future__ import division
+
 import numpy
 
 def e_hist(fbase):
@@ -130,7 +130,7 @@ def converged_state(f):
         for line in file:
             if "converged state:" in line:
                 return int(line.split()[-1])
-    print 'ERROR FINDING converged_state in', f
+    print('ERROR FINDING converged_state in', f)
 
 def iterations(f):
     if '.dat' not in f:
@@ -184,6 +184,23 @@ def min_important_energy(f):
             if("min_important_energy" in line):
                 return float(line.split()[-1])
 
+def too_low_high_energy(f):
+    if not '.dat' in f:
+        f = f+"-transitions.dat"
+    too_low = None
+    too_high = None
+    with open(f) as file:
+        for line in file:
+            if("too_low_energy" in line or "too_lo_energy" in line):
+                too_low = float(line.split()[-1])
+                if too_high is not None:
+                  return too_low, too_high
+            if("too_high_energy" in line or "too_hi_energy" in line):
+                too_high = float(line.split()[-1])
+                if too_low is not None:
+                  return too_low, too_high
+    return too_low, too_high
+
 def max_entropy_state(f):
     if not '.dat' in f:
         f = f+"-transitions.dat"
@@ -214,7 +231,7 @@ def g_r(fbase, T):
     dos_boltz[hist == 0] = 0
 
     # now let's normalize the density of states
-    for i in xrange(n_r):
+    for i in range(n_r):
         dos_boltz[:,i] /= sum(dos_boltz[:,i])
 
     dr = r[0,1] - r[0,0]
@@ -227,7 +244,7 @@ def g_r(fbase, T):
     g = numpy.zeros(n_r)
 
     counts = 0
-    for i in xrange(n_E):
+    for i in range(n_E):
         if hist[i,0]:
             g += dos_boltz[i,:]*g_of_E[i,:]
             counts += dos_boltz[i,0]*hist[i,0]
@@ -252,7 +269,7 @@ def density_x(fdensity, T):
     n_E = len(E_1d)
     n_x = len(x_1d)
     N = read_N(fdensity)
-    for i in xrange(n_E):
+    for i in range(n_E):
         hist_1d[i] = sum(denshist[i,:])/N
     x, E = numpy.meshgrid(x_1d, E_1d)
     x, ln_dos = numpy.meshgrid(x_1d, ln_dos_1d)
@@ -272,7 +289,7 @@ def density_x(fdensity, T):
     density = numpy.zeros(n_x)
 
     counts = 0
-    for i in xrange(n_E):
+    for i in range(n_E):
         if hist_1d[i]:
             density += dos_boltz_1d[i]*density_of_E[i,:]
             counts += dos_boltz_1d[i]*hist_1d[i]
@@ -294,7 +311,7 @@ def e_de_transitions(basename):
     e = -trans[:,0]/N
     de /= -N
     trans = trans[:,1:]
-    for i in xrange(len(e)):
+    for i in range(len(e)):
         trans[i,:] /= sum(trans[i,:])
     e,de = numpy.meshgrid(e, de)
     return e, de, trans
@@ -316,7 +333,7 @@ def e_diffusion_estimate(basename):
     e = e[0,:]
     de = de[:,0]
     diffusion = numpy.zeros_like(e)
-    for i in xrange(len(e)):
+    for i in range(len(e)):
         meane = sum(de*trans[i,:])/len(de)
         meane2 = sum(de**2*trans[i,:])/len(de)
         norm = sum(trans[i,:])

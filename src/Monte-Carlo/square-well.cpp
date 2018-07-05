@@ -1492,6 +1492,8 @@ void sw_simulation::write_header(FILE *f) {
   fprintf(f, "# min_T: %g\n", min_T);
   fprintf(f, "# max_entropy_state: %d\n", max_entropy_state);
   fprintf(f, "# min_important_energy: %d\n", min_important_energy);
+  fprintf(f, "# too_high_energy: %d\n", too_high_energy);
+  fprintf(f, "# too_low_energy: %d\n", too_low_energy);
 
   fprintf(f, "\n");
 
