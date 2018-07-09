@@ -57,8 +57,10 @@ for frame in range(100000):
             alldone = True
             break
         numframes = frame+1
-        mine = min(mine, e[lndos != lndos[-1]].min() - 5)
-        maxe = max(maxe, e[lndos != lndos[0]].max()+5)
+        if len(e[lndos != lndos[-1]]) > 1:
+            mine = min(mine, e[lndos != lndos[-1]].min() - 5)
+        if len(e[lndos != lndos[0]]):
+            maxe = max(maxe, e[lndos != lndos[0]].max()+5)
     if numframes % 25 == 0 and frame != lastframe:
         print('counting %dth frame' % numframes)
         lastframe = frame
@@ -97,8 +99,8 @@ for frame in range(numframes):
         try:
             e, lndos, ps, lndostm = readnew.e_lndos_ps_lndostm(basename)
             colors.plot(e, lndos, method=suffix)
-            if lndostm is not None and suffix[:2] != 'sa':
-                colors.plot(e, lndostm, method=suffix+'-tm')
+            #if lndostm is not None and suffix[:2] != 'sa':
+            #    colors.plot(e, lndostm, method=suffix+'-tm')
             datname = basename+'-lndos.dat'
             min_T = readnew.minT(datname)
             too_lo, too_hi = readnew.too_low_high_energy(datname)
