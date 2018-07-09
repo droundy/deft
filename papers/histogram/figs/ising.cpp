@@ -168,7 +168,7 @@ ising_simulation::ising_simulation(simulation_parameters par)
 
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < N; j++) {
-      S[i+N*j] = 1; // initialize to all 1s
+      S[i+N*j] = ((random::ran64()/8) % 2)*2-1; // initialize to random
     }
   }
   calculate_energy();
@@ -260,7 +260,8 @@ void ising_simulation::end_flip_updates(){
     if (param.use_sad) {
       printf("  (moves %ld, energies_found %ld, erange: %d -> %d)\n",
              moves, energies_found, min_energy.value, max_energy.value);
-             printf("current energy = %d\n", E.value);
+      printf("              \t\t\t\t\t\tcurrent energy = %d, gamma = %g\n",
+             E.value, gamma);
     }
   }
 
@@ -306,14 +307,14 @@ void ising_simulation::end_flip_updates(){
         //     = lnw0 + ln(w/w0 + gamma) = lnw0 + ln(gamma + exp(lnw-lnw0))
         // lnw = lnw0 + ln(gamma + exp(lnw-lnw0))
         ln_energy_weights[index_from_energy(E)] =
-                  lnw0 + log((exp(gamma)-1) + exp(lnw - lnw0));
+                  lnw0 + log(gamma + exp(lnw - lnw0));
       } else {
         // If w > w0 then we can turn into logs like so:
         // lnw = ln((1 + gamma*w0/w)*w)
         //     = lnw + ln(1 + gamma*w0/w) = lnw + ln(1 + gamma exp(lnw0-lnw))
         // lnw = lnw + ln(1 + gamma exp(lnw0-lnw))
         ln_energy_weights[index_from_energy(E)] =
-          lnw + log(1 + (exp(gamma)-1)*exp(lnw0 - lnw));
+          lnw + log(1 + gamma*exp(lnw0 - lnw));
       }
       //printf("lnW(%ld) -> %g\n",
       //      index_from_energy(E), ln_energy_weights[index_from_energy(E)]); //FIXME: Assertion Error for N > 14!
@@ -342,14 +343,14 @@ void ising_simulation::end_flip_updates(){
         //     = ln(w0 boltz) + ln(g + w/(w0 boltz))
         //     = lnw0 + (E-E0)/Tmin + ln(g + e^(lnw - lnw0 - (E-E0)/Tmin))
         ln_energy_weights[index_from_energy(E)] =
-          lnw0 + dEoTmin + log((exp(gamma)-1) + exp(lnw-lnw0 -dEoTmin));
+          lnw0 + dEoTmin + log(gamma + exp(lnw-lnw0 -dEoTmin));
       } else {
         // This is the less common case...
         // lnw = ln(w (1 + g w0 boltz / w))
         //     = lnw + ln(1 + g w0 boltz / w)
         //     = lnw + ln(1 + g e^(lnw0 - lnw + (E-E0)/Tmin))
         ln_energy_weights[index_from_energy(E)] =
-          lnw + log(1 + (exp(gamma)-1)*exp(lnw0-lnw+dEoTmin));
+          lnw + log(1 + gamma*exp(lnw0-lnw+dEoTmin));
       }
 
       if (!(isnormal(ln_energy_weights[index_from_energy(E)])
