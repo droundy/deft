@@ -112,8 +112,8 @@ def plot(x, y, method=None):
 def loglog(x, y, method=None):
     return plt.loglog(x,y, **style_args(method))
 
-def legend():
+def legend(loc='best'):
     handles, labels = plt.gca().get_legend_handles_labels()
     labels, handles = zip(*sorted(zip(labels, handles), key = lambda t: legend_order(t[0])))
     labels = map(fix_legend, labels)
-    plt.legend(handles, labels, loc='best')
+    plt.legend(handles, labels, loc=loc)

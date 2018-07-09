@@ -134,7 +134,7 @@ for frame in range(numframes):
       plt.title(r'lv movie from %s ($T_{\min} = %g$, $E_{\text{lo}} = %g$)' % (filename, min_T, too_lo))
     else:
       plt.title(r'lv movie from %s ($T_{\min} = %g$)' % (filename, min_T))
-    plt.legend(loc='lower right')
+    colors.legend(loc='lower right')
 
     fname = '%s/frame%06d.png' % (moviedir, frame)
     plt.savefig(fname)
