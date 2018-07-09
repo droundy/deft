@@ -315,8 +315,8 @@ void ising_simulation::end_flip_updates(){
         ln_energy_weights[index_from_energy(E)] =
           lnw + log(1 + (exp(gamma)-1)*exp(lnw0 - lnw));
       }
-      printf("lnW(%ld) -> %g\n",
-             index_from_energy(E), ln_energy_weights[index_from_energy(E)]); //FIXME: Assertion Error for N > 14!
+      //printf("lnW(%ld) -> %g\n",
+      //      index_from_energy(E), ln_energy_weights[index_from_energy(E)]); //FIXME: Assertion Error for N > 14!
       if (!(isnormal(ln_energy_weights[index_from_energy(E)])
             || ln_energy_weights[index_from_energy(E)] == 0)) {
         printf("gamma is %g\n", gamma);
@@ -487,6 +487,13 @@ bool ising_simulation::printing_allowed(){
     return true;
   }
   return false;
+}
+
+// Decide the next time we want to write output.  We arbitrarily chose
+// to arrange it so if the machine crashes we lose no more than 1/4 of
+// our results.  Hopefully this won't make us too sad.
+long get_next_output(long next_output) {
+  return 2*next_output;
 }
 
 // ---------------------------------------------------------------------
@@ -752,123 +759,148 @@ int main(int argc, const char *argv[]) {
 
   printf("version: %s\n",version_identifier());
 
-  // MAIN CODE EXECUTION HERE!
-  
-//  char *dos_fname = new char[1024];
-//  sprintf(dos_fname, "%s/%s-dos.dat", data_dir, filename);
-//  
-//  bool verbose = ising.printing_allowed();
-//  am_all_done = ((ising.moves % how_often_to_check_finish == 0) || verbose); // removed finished_initializing
-//  how_often_to_check_finish += param.N; // As simulation progresses,
-//                                          // check for completion lees
-//                                          // frequently.
-//  if ((verbose || am_all_done) && ising.moves > 10*param.N) {
-//    // Save lndos to file...
-//    //double *ln_dos = ising.compute_ln_dos(transition_dos);
-//    printf("Wow did we make it???");
-//    {
-//      FILE *dos_out = fopen((const char *)dos_fname, "w");
-//
-//      fprintf(dos_out, "lndos = np.array([\n");
-//      for (int i = 0; i < ising.energy_levels; i++) {
-//        fprintf(dos_out,"\t%.17g,", ising.ln_dos[i]);
-//      }
-//      fprintf(dos_out, "])\n");
-//      fclose(dos_out);
-//    }
-//    //delete[] ln_dos;
-//    } while (!am_all_done);
+// MAIN CODE EXECUTION HERE!
 
-  ising.calculate_energy();
-// I think I need a do loop here and then do flip a spin for a while
-// check if it is time to output file (if it is then do so) if not 
-// then run some more.
-  for (long i = 0; i < total_moves; i++) {
+  char *w_fname = new char[1024];
+  sprintf(w_fname, "%s/%s-lnw.dat", data_dir, filename);
+
+  long next_output = 1;
+  long next_resume = 1;
+  while (next_output < ising.moves) next_output = get_next_output(next_output);
+  long next_pause = max(min(next_output, min(next_resume, total_moves)),
+                        ising.moves+1);
+  long moves_per_second = 1;
+  const long initial_moves = ising.moves;
+  while (ising.moves < total_moves) {
     ising.flip_a_spin();
+
+    if (ising.moves == next_pause) {
+      clock_t now = clock();
+      moves_per_second = (ising.moves - initial_moves)*CLOCKS_PER_SEC/now;
+      long fraction_done = 100*ising.moves/total_moves;
+      const double secs_done = double(now)/CLOCKS_PER_SEC;
+      const int seconds = int(secs_done) % 60;
+      const int minutes = int(secs_done / 60) % 60;
+      const int hours = int(secs_done / 3600) % 24;
+      const int days = int(secs_done / 86400);
+      printf("Saving data after %i days, %02i:%02i:%02i, %ld iterations"
+             " (%ld%%) complete, current energy %i.\n",
+             days, hours, minutes, seconds, ising.moves,
+             fraction_done, ising.E.value);
+      fflush(stdout);
+
+      if (ising.moves == next_output) {
+        // Save energy histogram
+        FILE *w_out = fopen((const char *)w_fname, "w");
+        fprintf(w_out, "# max_entropy_state: %d\n",ising.max_entropy_energy.value);
+        fprintf(w_out, "# min_important_energy: %i\n\n",ising.min_important_energy.value);
+        fprintf(w_out, "# energy   counts\n");
+  
+        fprintf(w_out, "lndos = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          fprintf(w_out,"\t%.17g,\n", ising.ln_dos[i]);
+        }
+        fprintf(w_out, "])\n");
+        fclose(w_out);
+        
+        if (param.use_sad) {
+          ising.compute_ln_dos(weights_dos);
+        } else {
+          ising.compute_ln_dos(histogram_dos);
+        }
+      }
+    
+      if (ising.moves == next_output) next_output = get_next_output(next_output);
+      // Since we will be storing resume data now, we don't need to do
+      // so for another hour:
+      next_resume = ising.moves + moves_per_second*60*60;
+      // Find out when we next want to stop...
+      next_pause = max(min(next_resume, min(next_output, total_moves)),
+                       ising.moves+1);
+
+      // ----------------------------------------------------------------------------
+      // Generate save file info
+      // ----------------------------------------------------------------------------
+    
+      // Save resume file
+      {
+        FILE *ising_out = fopen((const char *)ising_fname, "w");
+    
+        fprintf(ising_out, "import numpy as np\n\n");
+        random::dump_resume_info(ising_out);
+        fprintf(ising_out,"version = %s\n\n",version_identifier());
+    
+        if (param.T) {
+          fprintf(ising_out,"method = 'canonical'\nkT = %g\n", param.T);
+        } else if (param.sa_t0) {
+          fprintf(ising_out,"method = 'samc'\n");
+          // fprintf(ising_out,"samc_t0 = %g\n",ising.sa_t0);
+        } else if (param.use_sad) {
+          fprintf(ising_out,"method = 'sad'\n");
+        }
+    
+        fprintf(ising_out,"N = %i\n",param.N);
+        fprintf(ising_out,"minT = %g\n",param.minT);
+        fprintf(ising_out,"moves = %li\n",ising.moves);
+        fprintf(ising_out,"E = %i\n",ising.E.value);
+        fprintf(ising_out,"J = %i\n", param.J);
+        fprintf(ising_out,"E_found = %li\n", ising.energies_found);
+        if (param.use_sad) {
+          fprintf(ising_out,"too_hi_energy = %i\n", ising.too_hi_energy.value);
+          fprintf(ising_out,"too_lo_energy = %i\n", ising.too_lo_energy.value);
+          fprintf(ising_out,"max_energy = %i\n", ising.max_energy.value);
+          fprintf(ising_out,"min_energy = %i\n", ising.min_energy.value);
+          fprintf(ising_out,"max_entropy_energy = %i\n",
+                            ising.max_entropy_energy.value);
+          fprintf(ising_out,"min_important_energy = %i\n",
+                            ising.min_important_energy.value);
+        }
+        // inserting arrays into text file.
+        fprintf(ising_out, "energy = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          fprintf(ising_out,"\t%d,\n", ising.energy_from_index(i).value);
+        }
+        fprintf(ising_out, "])\n");
+        fprintf(ising_out, "lndos = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          fprintf(ising_out,"\t%.17g,\n", ising.ln_dos[i]);
+        }
+        fprintf(ising_out, "])\n");
+        fprintf(ising_out, "lnw = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          fprintf(ising_out,"\t%.17g,\n", ising.ln_energy_weights[i]);
+        }
+        fprintf(ising_out, "])\n");
+        fprintf(ising_out, "histogram = np.array([\n");
+        for (int i = 0; i < ising.energy_levels; i++) {
+          fprintf(ising_out,"\t%ld,\n", ising.energy_histogram[i]);
+        }
+        fprintf(ising_out, "])\n");
+        fprintf(ising_out, "S = np.array([\n");
+        for (int i=0; i<param.N; i++) {
+          fprintf(ising_out, "\t[");
+          for (int j=0; j<param.N; j++) {
+            fprintf(ising_out,"%2d,", ising.S[i+param.N*j]);
+          }
+          fprintf(ising_out, "],\n");
+        }
+        fprintf(ising_out, "])\n");
+    
+        fclose(ising_out);
+      }
+    }
   }
 
-  printf("I think the energy is %d\n", ising.E.value);
-  ising.calculate_energy();
-  printf("the energy is %d\n", ising.E.value);
+  //ising.calculate_energy();
+  //for (long i = 0; i < total_moves; i++) {
+    //ising.flip_a_spin();
+  //}
+
+  //printf("I think the energy is %d\n", ising.E.value);
+  //ising.calculate_energy();
+  //printf("the energy is %d\n", ising.E.value);
 
   took("Running");
-
-  if (param.use_sad) {
-    ising.compute_ln_dos(weights_dos);
-  } else {
-    ising.compute_ln_dos(histogram_dos);
-  }
-
-  // ----------------------------------------------------------------------------
-  // Generate save file info
-  // ----------------------------------------------------------------------------
-
-  // Save resume file
-  {
-    FILE *ising_out = fopen((const char *)ising_fname, "w");
-
-    fprintf(ising_out, "import numpy as np\n\n");
-    random::dump_resume_info(ising_out);
-    fprintf(ising_out,"version = %s\n\n",version_identifier());
-
-    if (param.T) {
-      fprintf(ising_out,"method = 'canonical'\nkT = %g\n", param.T);
-    } else if (param.sa_t0) {
-      fprintf(ising_out,"method = 'samc'\n");
-      // fprintf(ising_out,"samc_t0 = %g\n",ising.sa_t0);
-    } else if (param.use_sad) {
-      fprintf(ising_out,"method = 'sad'\n");
-    }
-
-    fprintf(ising_out,"N = %i\n",param.N);
-    fprintf(ising_out,"minT = %g\n",param.minT);
-    fprintf(ising_out,"moves = %li\n",ising.moves);
-    fprintf(ising_out,"E = %i\n",ising.E.value);
-    fprintf(ising_out,"J = %i\n", param.J);
-    fprintf(ising_out,"E_found = %li\n", ising.energies_found);
-    if (param.use_sad) {
-      fprintf(ising_out,"too_hi_energy = %i\n", ising.too_hi_energy.value);
-      fprintf(ising_out,"too_lo_energy = %i\n", ising.too_lo_energy.value);
-      fprintf(ising_out,"max_energy = %i\n", ising.max_energy.value);
-      fprintf(ising_out,"min_energy = %i\n", ising.min_energy.value);
-      fprintf(ising_out,"max_entropy_energy = %i\n",
-                        ising.max_entropy_energy.value);
-      fprintf(ising_out,"min_important_energy = %i\n",
-                        ising.min_important_energy.value);
-    }
-    // inserting arrays into text file.
-    fprintf(ising_out, "energy = np.array([\n");
-    for (int i = 0; i < ising.energy_levels; i++) {
-      fprintf(ising_out,"\t%d,\n", ising.energy_from_index(i).value);
-    }
-    fprintf(ising_out, "])\n");
-    fprintf(ising_out, "lndos = np.array([\n");
-    for (int i = 0; i < ising.energy_levels; i++) {
-      fprintf(ising_out,"\t%.17g,\n", ising.ln_dos[i]);
-    }
-    fprintf(ising_out, "])\n");
-    fprintf(ising_out, "lnw = np.array([\n");
-    for (int i = 0; i < ising.energy_levels; i++) {
-      fprintf(ising_out,"\t%.17g,\n", ising.ln_energy_weights[i]);
-    }
-    fprintf(ising_out, "])\n");
-    fprintf(ising_out, "histogram = np.array([\n");
-    for (int i = 0; i < ising.energy_levels; i++) {
-      fprintf(ising_out,"\t%ld,\n", ising.energy_histogram[i]);
-    }
-    fprintf(ising_out, "])\n");
-    fprintf(ising_out, "S = np.array([\n");
-    for (int i=0; i<param.N; i++) {
-      fprintf(ising_out, "\t[");
-      for (int j=0; j<param.N; j++) {
-        fprintf(ising_out,"%2d,", ising.S[i+param.N*j]);
-      }
-      fprintf(ising_out, "],\n");
-    }
-    fprintf(ising_out, "])\n");
-
-    fclose(ising_out);
-  }
 
   // -------------------------------------------------------------------
   // END OF MAIN PROGRAM LOOP
