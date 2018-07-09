@@ -55,7 +55,7 @@ cmd = ("%s/ising.exe --dir %s --N=%i --total-moves=%g --filename=%s-complete %s"
 cmd += (" && %s/ising.exe --dir %s --N=%i --total-moves=%g --filename=%s-test %s" 
         % (isingdir, datadir, N, test_moves, filenamebase, method))
 cmd += (" && %s/ising.exe --dir %s --N=%i --total-moves=%g --filename=%s-test %s --resume" 
-        % (isingdir, datadir, N, total_moves - test_moves, filenamebase, method))
+        % (isingdir, datadir, N, total_moves, filenamebase, method))
 
 #if method_name == 'samc':
 #  cmd += ' --sa-t0 %g' % sa_t0
