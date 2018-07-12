@@ -13,7 +13,11 @@
 \newcommand{\jpsays}[1]{{\color{red} [\blue{Jordan:} \emph{#1}]}}
 \newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
 
-\newcommand{\Int}{\int\limits}
+\newcommand{\Int}{\int}
+\newcommand\Emin{E_{\min}}
+\newcommand\Nmax{N_{\max}}
+\newcommand\Tmin{T_{\min}}
+\newcommand\mumax{\mu_{\max}}
 
 \begin{document}
 \title{Two-dimensional Broad Histogram Monte Carlo}
@@ -36,14 +40,14 @@ In component notation, the free energy can be broken down into its constituent c
 \overrightharp{g} = \bigg(\frac{\partial S}{\partial U}\bigg)_N \hat{U} + \bigg(\frac{\partial S}{\partial S}\bigg)_U \hat{N}
 \end{align}
 \begin{align}
-\overrightharp{g} = \frac{1}{T_{\min}} \hat{U} - \frac{\mu_{\max}}{T_{\min}}  \hat{N}
+\overrightharp{g} = \frac{1}{\Tmin} \hat{U} - \frac{\mumax}{\Tmin}  \hat{N}
 \end{align}
 The gradient of the free energy can be written as follows (thinking of a $\Delta S$ near the minimum entropy $S_{\min}$:
 \begin{align}
-\Delta S = \left|\overrightharp{g} \cdot \overrightharp{r} \right| = \left|\frac{E_{\min}}{T_{\min}} \right| + \left|\frac{\mu_{\max}N_{\max}}{T_{\min}} \right|
+\Delta S = \left|\overrightharp{g} \cdot \overrightharp{r} \right| = \left|\frac{\Emin}{\Tmin} \right| + \left|\frac{\mumax\Nmax}{\Tmin} \right|
 \end{align}
 \begin{align}
-\langle\Delta S \rangle = \frac{1}{3}\bigg( \left|\frac{E_{\min}}{T_{\min}} \right| + \left|\frac{\mu_{\max}N_{\max}}{T_{\min}} \right| \bigg)
+\langle\Delta S \rangle = \frac{1}{3}\bigg( \left|\frac{\Emin}{\Tmin} \right| + \left|\frac{\mumax\Nmax}{\Tmin} \right| \bigg)
 \end{align}
 We can write the entropy as a parabolic function with free parameters $A$ and $B$ in terms of the energy and particle number of the
 system.
@@ -52,27 +56,51 @@ S = -A E^2 - B N^2
 \end{align}
 By taking to partial derivatives of the entropy, we can solve for the free parameters.
 \begin{align}
-\bigg(\frac{\partial S}{\partial E}\bigg)_N = \frac{1}{T_{\min}} = - 2AE
+\bigg(\frac{\partial S}{\partial E}\bigg)_N = \frac{1}{\Tmin}
+    = - 2A\Emin
 \end{align}
 \begin{align}
-\bigg(\frac{\partial S}{\partial N}\bigg)_E = - \frac{\mu_{\max}}{T_{\min}} = - 2BN
+\bigg(\frac{\partial S}{\partial N}\bigg)_E = - \frac{\mumax}{\Tmin}
+    = - 2B\Nmax
 \end{align}
 Therefore the parabolic equation can now be written in terms of known parameters.
 \begin{align}
-S = \bigg( \frac{1}{2 T_{\min} E}\bigg) E^2 - \bigg( \frac{\mu_{\max}}{2 T_{\min} N}\bigg) N^2 \\
-S = \bigg( \frac{1}{2 T_{\min}}\bigg) E - \bigg( \frac{\mu_{\max}}{2 T_{\min}}\bigg) N
+S &= \left( \frac{1}{2 \Tmin \Emin}\right) E^2
+    - \left( \frac{\mumax}{2 \Tmin \Nmax}\right) N^2
 \end{align}
 Now we integrate this functional form of entropy in terms of the internal energy $E$ and particle number $N$.
 \begin{align}
-\Int_{0}^{N_{\max}} \Int_{E_{\min}}^{0} \bigg( S - S_{\min}\bigg) \,dE\,dN
+\left<S-S_{\min}\right>
+  &=\frac{1}{|\Emin|\Nmax}\Int_{0}^{\Nmax} \Int_{\Emin}^{0} \bigg( S - S_{\min}\bigg) \,dE\,dN
 \end{align}
 Now we insert our derived expressions into the integral and obtain a functional form for the update factor $\gamma$.
+\begin{multline}
+\left<S-S_{\min}\right>
+  = \frac1{2|\Emin|\Nmax}\times\\
+  \Int_{0}^{\Nmax} \!\!\!\!\!\int_{\Emin}^{0}\!\!
+   \Bigg(\left( \frac{E^2}{\Tmin\Emin}
+         - \frac{\mumax N^2}{\Tmin\Nmax}\right)
+    \\
+    - \bigg( \frac{\Emin}{\Tmin}  - \frac{\mumax\Nmax}{\Tmin} \bigg)\Bigg) \,dE\,dN
+\end{multline}
+We integrate this!
+\begin{multline}
+\left<S-S_{\min}\right>
+  =
+   \frac1{2}\times\Bigg(\frac13\left(\frac{\Emin}{\Tmin}
+    -\frac{\mumax \Nmax}{\Tmin}
+  \right)
+    \\
+    - \frac{\Emin}{\Tmin}  + \frac{\mumax\Nmax}{\Tmin} \Bigg)
+\end{multline}
+With a little algebra...
 \begin{align}
-\Int_{0}^{N_{\max}} \Int_{E_{\min}}^{0} \bigg( \bigg( \frac{1}{2 T_{\min}}\bigg) E - \bigg( \frac{\mu_{\max}}{2 T_{\min}}\bigg) N \\- \frac{1}{3}\bigg( \frac{E_{\min}}{T_{\min}}  + \frac{\mu_{\max}N_{\max}}{T_{\min}} \bigg) \,dE\,dN
+\left<S-S_{\min}\right>
+  = \frac13\frac{|\Emin|}{\Tmin}  + \frac13\frac{\mumax\Nmax}{\Tmin}
 \end{align}
 We then find that the result of the integral is equal to the following:
 \begin{align}
-\gamma =\frac{1}{t} \frac{E_{\min}N_{\max}}{T_{\min}}\bigg(E_{\min} + 7 \mu_{\max}N_{\max} \bigg)
+\gamma =\frac{1}{t} \frac{\Emin\Nmax}{\Tmin}\bigg(\Emin + 7 \mumax\Nmax \bigg)
 \end{align}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
