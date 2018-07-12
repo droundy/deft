@@ -555,14 +555,15 @@ to complex continuous systems such as polymers/proteins and spin models.
 \section{Results}\label{sec:results}
 
 For the square-well fluid, our simulations treat systems with a
-well-width of $\text{ww} = 1.30$ and a filling fraction of either
-$\text{ff} = 0.10, 0.20,$ or $0.30$.  The simulation explores the
-energy space of the system down to a reduced temperature of
-$T_{\text{min}} = 0.2$.  All simulations lead to the minimum important
-energy $E_{\text{min}}$ and maximum entropy state $S_{\text{max}}$
-being calculated (with the exception of the WL-TMMC method where both
+well-width of $\lambda = 1.30$ and a filling fraction of
+$\eta = 0.30$. We also explore various translation scales $\delta_0 = 0.005,
+0.05,$ and $0.5$. The simulation explores the
+energy space of the system at a reduced temperature of
+$T_{\text{min}} = 0.2$ and $0.5$.  All simulations lead to the minimum important
+energy $E_{\min}$ and maximum entropy energy $E_{\max}$
+being calculated (with the exception of the WL methods where both
 of these parameters are needed a priori).  In the sections below, we
-examine systems with different particles numbers and filling fractions.
+examine systems parameters on the convergence of the methods.
 
 We use the average entropy error vs moves a metric to compare
 simulation runtimes and overall convergence. The overall accuracy
@@ -574,60 +575,52 @@ SAMC for the best choice of $t_0$ for $10^{11}$ moves followed by TMMC.
 \end{align}
 Simulations that take more iterations to reach the same entropy error as a
 different method take longer to converge. This behavior is seen in
-Fig.~\ref{fig:N50-ff0.1-avg-error}.
+Fig.~\ref{fig:N50-ff0.3-avg-error}.
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_10-N50-entropy-error.pdf}
-  \caption{The average entropy error for each method is shown for a filling fraction of 0.10 with
-  SAMC followed by TMMC serving as the `golden' standard.}\label{fig:N50-ff0.1-avg-error}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_20-N50-entropy-error.pdf}
-  \caption{The average entropy error is shown for a filling fraction of 0.20 with TMI acting as the
-  `golden' standard.}\label{fig:N50-ff0.2-avg-error}
-\end{figure}
-\begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error.pdf}
-  \caption{The average entropy error for each method is shown for a filling fraction of 0.30 with
+  \caption{The average entropy error for each method is shown for $\lambda = 0.30$ with
   SAMC followed by TMMC serving as the `golden'
   standard.}\label{fig:N50-ff0.3-avg-error}
 \end{figure}
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error.pdf}
-  \caption{The average entropy error is shown for a filling fraction of 0.30 with TMI acting as the
-  `golden' standard.}\label{fig:n500-ff0.2}
+  \caption{The average entropy error is shown for $\lambda = 0.30$ with TMI acting as the
+  `golden' standard.}\label{fig:n500-ff0.3}
 \end{figure}
 
-\subsubsection{A periodic system with 10\% filling fraction and $(N = 50)$}
-In order to determine how the various methods scale with size,
-simulations are run for systems with different particle numbers.
-Figure~\ref{fig:N50-ff0.1-avg-error} shows the average entropy vs moves for
-a system consisting of 50 atoms that are placed in a periodic simple cubic unit
-cell with lattice constant chosen to give a filling fraction of 0.10.  These particles
-are randomly inserted into the system and random moves are proposed (with
-a translation scale $\delta_0 = 0.05$).
+~\jpsays{We have discussed including a figure for the $\lambda = 30\%$ and $N = 50$
+showing translation scale impact. Also a figure for the $\lambda = 30\%$ and $N = 50$
+showing the impact of choice of minimum temperature.}
 
-\subsubsection{A periodic system with 20\% filling fraction and $N = 50$}
-
-Figure~\ref{fig:N50-ff0.2-avg-error} shows the average entropy vs moves for
-a system consisting of 50 atoms that are placed in a periodic simple cubic unit
-cell with lattice constant chosen to give a filling fraction of 0.20.  These particles
-are randomly inserted into the system and random moves are proposed (with
-a translation scale $\delta_0 = 0.05$).
-
-\subsubsection{A periodic system with 30\% filling fraction and $N = 50$}
+\subsection{A periodic system with $\lambda = 30\%$ and $N = 50$}
 
 Figure~\ref{fig:N50-ff0.3-avg-error} shows the average entropy vs moves for
 a system consisting of 50 atoms that are placed in a periodic simple cubic unit
-cell with lattice constant chosen to give a filling fraction of 0.30.  These particles
+cell with lattice constant chosen to give a $\lambda = 0.30$.  These particles
 are randomly inserted into the system and random moves are proposed (with
 a translation scale $\delta_0 = 0.05$).
 
-\subsubsection{A periodic system with 30\% filling fraction and $N = 500$}
+\subsubsection{translation scale}
+For the $\lambda = 30\%$ and $N = 50$ system, we explore the choice of $\delta_0$
+as a parameter. Smaller translation scales should cause the given method to take
+additional time to explore all energies.  A larger translation scale could result 
+in the simulation taking shorter or longer (because longer distance moves may end up
+not being allowed). Ideal methods should scale linearly with the $\delta_0$, that is,
+a decrease in the translation scale should result in a proportional increase in convergence
+time. Some methods such as WL may not be able to handle arbitrary $\delta_0$.
+
+\subsubsection{minimum temperature}
+For the $\lambda = 30\%$ and $N = 50$ system, we explore the choice of $T_{\min}$
+as a parameter. We have theoretically postulated that a dynamic version of SAMC which
+we call SAD should depend upon this physically meaningful parameter. We thus explore
+the behaviour of SAD for two different reduced temperatures.
+
+\subsection{A periodic system with $\lambda = 30\%$ and $N = 500$}
 
 A system is configured with dimensions $x = y = z = 19\sigma$.  A
-filling fraction $\text{ff} = 0.30$ is chosen which yields $N = 500$
-particles in a cubical system.  These particles are randomly inserted
+filling fraction $\lambda = 0.30$ is chosen which yields $N = 500$
+particles in a cubical lattice system.  These particles are randomly inserted
 into the system and random moves are proposed (with a translation scale
 $\delta_0 = 0.05$).
 
@@ -637,7 +630,7 @@ A close examination of Fig.~\ref{fig:gamma-vs-t} shows that $\gamma$
 for the Wang-Landau algorithm decreases much more rapidly than
 $\nicefrac{1}{\sqrt{t}}$. It can be observed that all the methods from
 this family struggle to converge if the update factor decreases faster
-than $\nicefrac{10^5}{\sqrt{t}}$. Fig.~\ref{fig:n500-ff0.2} shows both
+than $\nicefrac{10^5}{\sqrt{t}}$. Fig.~\ref{fig:n500-ff0.3} shows both
 WL and SAMC with inappropriate choices of $t_0$ i.e. less than
 $\nicefrac{10^5}{\sqrt{t}}$ failing to converge in a reasonable amount
 of time. Thus, the update factor $\gamma$, shown as a function of
