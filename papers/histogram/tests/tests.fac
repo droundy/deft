@@ -4,3 +4,6 @@
 | python3 test-resume.py 4 50 100 sad
 < ../figs/ising.exe
 
+| python3 test-resume.py 20 100 1000 sad
+< ../figs/ising.exe
+
