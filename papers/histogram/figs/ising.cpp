@@ -178,6 +178,7 @@ ising_simulation::ising_simulation(simulation_parameters par)
   too_hi_energy = E;
   too_lo_energy = E;
   energies_found = 1; // we found just one energy
+  gamma = 0;
 
   if (param.T > 0) {
     // We are doing a canonical simulation, so set up the weights
