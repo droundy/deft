@@ -178,6 +178,7 @@ ising_simulation::ising_simulation(simulation_parameters par)
   too_hi_energy = E;
   too_lo_energy = E;
   energies_found = 1; // we found just one energy
+  gamma = 0;
 
   if (param.T > 0) {
     // We are doing a canonical simulation, so set up the weights
@@ -792,8 +793,15 @@ int main(int argc, const char *argv[]) {
 
       if (ising.moves == next_output) {
         // Save energy histogram
+
         FILE *w_out = fopen((const char *)w_fname, "a");
         fprintf(w_out, "lndos = np.array([");
+
+        if (w_out == 0) {
+          printf("unable to create file named \"%s\"\n", w_fname);
+          exit(1);
+        }
+
         for (int i = 0; i < ising.energy_levels; i++) {
           fprintf(w_out,"%.17g,", ising.ln_dos[i]);
         }
