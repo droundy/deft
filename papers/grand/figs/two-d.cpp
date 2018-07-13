@@ -261,12 +261,8 @@ void ising_simulation::end_flip_updates(){
     if (param.use_sad) {
       printf("  (moves %ld, energies_found %ld, erange: %d -> %d)\n",
              moves, energies_found, min_energy.value, max_energy.value);
-      // printf("              \t\t\t\t\t\tcurrent energy = %d, gamma = %g\n",
-      //        E.value, gamma);
-      printf("              gamma = %g\n",
-             gamma);
-      printf("              current energy = %d\n",
-             E.value);
+      printf("              \t\t\t\t\t\tcurrent energy = %d, gamma = %g\n",
+             E.value, gamma);
     }
   }
 
@@ -798,6 +794,10 @@ int main(int argc, const char *argv[]) {
       if (ising.moves == next_output) {
         // Save energy histogram
         FILE *w_out = fopen((const char *)w_fname, "w");
+        if (w_out == 0) {
+          printf("unable to create file named \"%s\"\n", w_fname);
+          exit(1);
+        }
         fprintf(w_out, "# max_entropy_state: %d\n",ising.max_entropy_energy.value);
         fprintf(w_out, "# min_important_energy: %i\n\n",ising.min_important_energy.value);
         fprintf(w_out, "# energy   counts\n");

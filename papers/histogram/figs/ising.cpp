@@ -794,6 +794,10 @@ int main(int argc, const char *argv[]) {
       if (ising.moves == next_output) {
         // Save energy histogram
         FILE *w_out = fopen((const char *)w_fname, "w");
+        if (w_out == 0) {
+          printf("unable to create file named \"%s\"\n", w_fname);
+          exit(1);
+        }
         fprintf(w_out, "# max_entropy_state: %d\n",ising.max_entropy_energy.value);
         fprintf(w_out, "# min_important_energy: %i\n\n",ising.min_important_energy.value);
         fprintf(w_out, "# energy   counts\n");
