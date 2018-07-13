@@ -792,14 +792,10 @@ int main(int argc, const char *argv[]) {
 
       if (ising.moves == next_output) {
         // Save energy histogram
-        FILE *w_out = fopen((const char *)w_fname, "w");
-        fprintf(w_out, "# max_entropy_state: %d\n",ising.max_entropy_energy.value);
-        fprintf(w_out, "# min_important_energy: %i\n\n",ising.min_important_energy.value);
-        fprintf(w_out, "# energy   counts\n");
-  
-        fprintf(w_out, "lndos = np.array([\n");
+        FILE *w_out = fopen((const char *)w_fname, "a");
+        fprintf(w_out, "lndos = np.array([");
         for (int i = 0; i < ising.energy_levels; i++) {
-          fprintf(w_out,"\t%.17g,\n", ising.ln_dos[i]);
+          fprintf(w_out,"%.17g,", ising.ln_dos[i]);
         }
         fprintf(w_out, "])\n");
         fclose(w_out);
