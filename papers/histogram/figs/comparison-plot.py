@@ -13,6 +13,8 @@ if os.path.exists('../data'):
 
 energy = int(sys.argv[1])
 filebase = sys.argv[2]
+transcale = sys.argv[3] 
+
 tex_filebase = filebase.replace('.','_') # latex objects to extra "." characters
 
 methods = ['-sad3', '-sad3-s1', '-sad3-s2',
@@ -20,22 +22,43 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
     methods = ['-sad3','-tmmc', '-vanilla_wang_landau']
+    if transcale == 'slow':
+        methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow']
+    if transcale == 'fast':
+        methods = ['-sad3-fast','-tmmc-fast', '-vanilla_wang_landau-fast']
 
 # For WLTMMC compatibility with LVMC
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
+
 for meth in split2:
-    if meth[-3:] != '-tm':
-        methods.append('-%s' % meth)
+    if "default" in transcale:
+        if meth[-3:] != '-tm' and "slow" not in meth and "fast" not in meth:
+            methods.append('-%s' % meth)
+    if "slow" in transcale: 
+        if meth[-3:] != '-tm' and "slow" in meth:
+            methods.append('-%s' % meth)
+    if "fast" in transcale:
+        if meth[-3:] != '-tm' and "fast" in meth:
+            methods.append('-%s' % meth)
 
 # For SAMC compatibility with LVMC
 lvextra1 = glob('data/comparison/%s-samc*' % filebase)
 split3 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra1]
 split4 = [i.split('-m', 1)[0] for i in split3]
+
 for meth in split4:
-    if meth[-3:] != '-tm':
+    if "default" in transcale:
+        if meth[-3:] != '-tm' and "slow" not in meth and "fast" not in meth:
             methods.append('-%s' % meth)
+    if "slow" in transcale: 
+        if meth[-3:] != '-tm' and "slow" in meth:
+            methods.append('-%s' % meth)
+    if "fast" in transcale:
+        if meth[-3:] != '-tm' and "fast" in meth:
+            methods.append('-%s' % meth)
+
 
 best_ever_error = 1e100
 best_ever_max = 1e100
@@ -116,7 +139,10 @@ for method in methods:
                 plt.xlabel('Moves')
                 plt.ylabel('Average Entropy Error')
                 #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
-                plt.title(r'$N=%d$, $\eta = %g$' % (int(N), ff))
+                if transcale == "default":
+                    plt.title(r'$N=%d$, $\eta = %g$' % (int(N), ff))
+                else:
+                    plt.title(r'$N=%d$, $\eta = %g$ %s' % (int(N), ff, transcale))
                 colors.legend()
 
     except:
@@ -124,11 +150,11 @@ for method in methods:
 plt.figure('maxerror')
 colors.loglog(moves, best_ever_max/np.sqrt(moves/max_time), method = '1/sqrt(t)')
 colors.legend()
-plt.savefig('figs/%s-max-entropy-error.pdf' % tex_filebase)
+plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
 plt.figure('errorinentropy')
 colors.loglog(moves, best_ever_error/np.sqrt(moves/max_time), method = '1/sqrt(t)')
 colors.legend()
-plt.savefig('figs/%s-entropy-error.pdf' % tex_filebase)
+plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
 plt.show()

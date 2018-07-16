@@ -1,26 +1,35 @@
-| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-30x4 noshow
+| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-30x4 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-60x8 noshow
+| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-60x8 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-100x10 noshow
+| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-100x10 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N500 noshow
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N500 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.10-N50 noshow
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.10-N50 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.20-N50 noshow
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.20-N50 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 noshow
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 default noshow
+c .pyc
+
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 slow noshow
+c .pyc
+
+| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 fast noshow
 c .pyc
 
 | python2 figs/gamma-plot.py ww1.30-ff0.22-100x10 0.6 noshow
 c .pyc
 
 | python2 figs/gamma-plot.py n500 0.5 noshow
+c .pyc
+
+| python2 figs/gamma-plot.py n50 0.2 noshow
 c .pyc

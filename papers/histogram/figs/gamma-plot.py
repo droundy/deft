@@ -16,17 +16,20 @@ filename = sys.argv[1]
 Tmin = float(sys.argv[2])
 
 try:
-    wlmoves, wlfactor = np.loadtxt('data/gamma/%s/wl.txt' % filename, dtype = float, unpack = True)
-    moves = np.zeros(len(wlmoves)*2+2)
-    factor = np.zeros_like(moves)
-    factor[0] = 1
-    moves[0] = 1
-    for i in range(len(wlmoves)):
-        moves[2*i+1] = wlmoves[i]
-        moves[2*i+2] = wlmoves[i]
-        factor[2*i+1] = wlfactor[i]*2
-        factor[2*i+2] = wlfactor[i]
-    colors.loglog(moves, factor,'vanilla_wang_landau')
+    for wl in glob.glob("data/gamma/%s/wl*.txt" % filename):
+        wlmoves, wlfactor = np.loadtxt(wl, dtype = float, unpack = True)
+        moves = np.zeros(len(wlmoves)*2+2)
+        factor = np.zeros_like(moves)
+        factor[0] = 1
+        moves[0] = 1
+        for i in range(len(wlmoves)):
+            moves[2*i+1] = wlmoves[i]
+            moves[2*i+2] = wlmoves[i]
+            factor[2*i+1] = wlfactor[i]*2
+            factor[2*i+2] = wlfactor[i]
+        colors.loglog(moves, factor,
+                      'vanilla_wang_landau'
+                         + wl[len("data/gamma/%s/wl" % filename):-4])
 
 except:
     pass
@@ -44,7 +47,7 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     for j in range(len(t)):
         for i in range(len(gamma)):
             if ts[i] > t[j]:
-                gamma[i] = energies_found[j]*(elo[j]-ehi[j])/ts[i]/3/Tmin
+                gamma[i] = energies_found[j]*abs(elo[j]-ehi[j])/ts[i]/3/Tmin
     sadname = sad.split('/')[-1].split('.')[0]
 
     colors.loglog(ts, gamma,sadname)

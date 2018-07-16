@@ -518,6 +518,12 @@ is required in order to ensure that overflow does not occur.
     different methods: WL, SAMC, and SAD.
     method.}\label{fig:gamma-vs-t}
 \end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/gamma-n50}
+  \caption{The update factor $\gamma$ for $N=50$ versus iteration for three
+    different methods: WL, SAMC, and SAD.  This is exciting because we
+    have different MC moves (slow, etc).}
+\end{figure}
 
 \subsubsection{Energy binning with SAD}
 
@@ -578,13 +584,25 @@ different method take longer to converge. This behavior is seen in
 Fig.~\ref{fig:N50-ff0.3-avg-error}.
 
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error.pdf}
+  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-default.pdf}
   \caption{The average entropy error for each method is shown for $\lambda = 0.30$ with
   SAMC followed by TMMC serving as the `golden'
   standard.}\label{fig:N50-ff0.3-avg-error}
 \end{figure}
 \begin{figure}
-\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error.pdf}
+  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-slow.pdf}
+  \caption{The average entropy error for each method is shown for $\lambda = 0.30$ with
+  SAMC followed by TMMC serving as the `golden'
+  standard.}\label{fig:N50-ff0.3-avg-error}
+\end{figure}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-fast.pdf}
+  \caption{The average entropy error for each method is shown for $\lambda = 0.30$ with
+  SAMC followed by TMMC serving as the `golden'
+  standard.}\label{fig:N50-ff0.3-avg-error}
+\end{figure}
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error-default.pdf}
   \caption{The average entropy error is shown for $\lambda = 0.30$ with TMI acting as the
   `golden' standard.}\label{fig:n500-ff0.3}
 \end{figure}

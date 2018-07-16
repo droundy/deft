@@ -25,6 +25,14 @@ _colors = { 'sad': 'r',
             'samc-10000': 'tab:orange',
             'samc-100000': 'y',
             'samc-1e+06': 'g',
+            'samc-1000-slow': 'r',
+            'samc-10000-slow': 'tab:orange',
+            'samc-100000-slow': 'y',
+            'samc-1000-fast': 'r',
+            'samc-10000-fast': 'tab:orange',
+            'samc-100000-fast': 'y',
+            'samc-1e+06': 'g',
+            'samc-1e+06': 'g',
             '1/sqrt(t)': 'r'
 }
 
@@ -39,6 +47,12 @@ _linestyles = {
     'samc-1000': ':',
     'samc-10000': ':',
     'samc-100000': ':',
+    'samc-1000-slow': ':',
+    'samc-10000-slow': ':',
+    'samc-100000-slow': ':',
+    'samc-1000-fast': ':',
+    'samc-10000-fast': ':',
+    'samc-100000-fast': ':',
     'samc-1e+06': ':',
 }
 
@@ -79,6 +93,12 @@ _legend_label = {
     'samc-1000': 'SAMC ($10^{3}$ $t_0$)',
     'samc-10000': 'SAMC ($10^{4}$ $t_0$)',
     'samc-100000': 'SAMC ($10^{5}$ $t_0$)',
+    'samc-1000-slow': 'SAMC ($10^{3}$ $t_0$)',
+    'samc-10000-slow': 'SAMC ($10^{4}$ $t_0$)',
+    'samc-100000-slow': 'SAMC ($10^{5}$ $t_0$)',
+    'samc-1000-fast': 'SAMC ($10^{3}$ $t_0$)',
+    'samc-10000-fast': 'SAMC ($10^{4}$ $t_0$)',
+    'samc-100000-fast': 'SAMC ($10^{5}$ $t_0$)',
     'samc-1e+06': 'SAMC ($10^{6}$ $t_0$)',
     '1/sqrt(t)': r'$\frac{1}{\sqrt{t}}$'
 }

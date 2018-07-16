@@ -15,6 +15,9 @@ methods = [ '-sad3', '-sad3-s1', '-sad3-s2',
             '-vanilla_wang_landau', '-sad']
 if 'allmethods' not in sys.argv:
     methods = ['-sad3','-tmmc', '-vanilla_wang_landau']
+fast_methods = [m+'-fast' for m in methods]
+slow_methods = [m+'-slow' for m in methods]
+methods = methods + fast_methods + slow_methods
 
 def running_mean(x, N):
     cumsum = numpy.cumsum(numpy.insert(x, 0, 0)) 
