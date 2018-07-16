@@ -87,6 +87,7 @@ struct ising_simulation {
   simulation_parameters param; // the parameters that specify how to simulate
 
   long moves;   // the current number of moves
+  long time_L = 1; // last time we have found an energy
   int *S;
   energy E;      // system energy.
 
@@ -250,6 +251,7 @@ void ising_simulation::end_flip_updates(){
   // update iteration counter, energy histogram, etc
   if (energy_histogram[index_from_energy(E)] == 0) {
     energies_found++; // we found a new energy!
+    time_L = moves;
     if (E > max_energy) {
       //printf("new max: %d from %d\n", E.value, max_energy.value);
       max_energy = E;
@@ -268,8 +270,10 @@ void ising_simulation::end_flip_updates(){
 
   if (param.sa_t0 || param.use_sad) {
     if (param.use_sad && too_hi_energy > too_lo_energy) {
-      gamma = param.sa_prefactor*energies_found*(too_hi_energy-too_lo_energy)
-        /(3*param.minT*moves);
+      gamma = param.sa_prefactor*(too_hi_energy-too_lo_energy)
+        /(3*param.minT*moves)*(energies_found*energies_found + energies_found*moves 
+        + moves*(moves/time_L - 1))/(energies_found*energies_found + moves 
+        + moves*(moves/time_L - 1));
     } else {
       gamma = param.sa_prefactor*param.sa_t0/max(param.sa_t0, moves);
     }
@@ -670,6 +674,10 @@ int main(int argc, const char *argv[]) {
           printf("error reading ising.moves!\n");
           exit(1);
         }
+        if (fscanf(rfile, "time_L = %ld\n", &ising.time_L) != 1) {
+          printf("error reading time since last move!\n");
+          exit(1);
+        }
         if (fscanf(rfile, "E = %d\n", &ising.E.value) != 1) {
           printf("error reading E!\n");
           exit(1);
@@ -847,6 +855,7 @@ int main(int argc, const char *argv[]) {
         fprintf(ising_out,"N = %i\n",param.N);
         fprintf(ising_out,"minT = %g\n",param.minT);
         fprintf(ising_out,"moves = %li\n",ising.moves);
+        fprintf(ising_out,"time_L = %li\n",ising.time_L);
         fprintf(ising_out,"E = %i\n",ising.E.value);
         fprintf(ising_out,"J = %i\n", param.J);
         fprintf(ising_out,"E_found = %li\n", ising.energies_found);
