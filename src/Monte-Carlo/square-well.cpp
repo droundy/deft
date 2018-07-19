@@ -393,6 +393,7 @@ void sw_simulation::end_move_updates(){
   if(moves.total % N == 0) iteration++;
   if (energy_histogram[energy] == 0) {
     energies_found++; // we found a new energy!
+    time_L = moves.total;
     if (max_energy < 0 || energy < max_energy) max_energy = energy;
     if (min_energy < 0 || energy > min_energy) min_energy = energy;
     if (use_sad) {
@@ -403,8 +404,11 @@ void sw_simulation::end_move_updates(){
     }
   }
   if (use_sad && too_low_energy > too_high_energy) {
-    wl_factor = sa_prefactor*energies_found*(too_low_energy-too_high_energy)
-      /(min_T*moves.total*use_sad);
+    wl_factor = sa_prefactor*(too_low_energy-too_high_energy)
+      /(min_T*moves.total*use_sad)*(energies_found*energies_found 
+      + energies_found*moves.total + moves.total*(moves.total/time_L - 1))
+      /(energies_found*energies_found + moves.total 
+        + moves.total*(moves.total/time_L - 1));;
   } else if (sa_t0) {
     wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
   }

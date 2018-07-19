@@ -89,6 +89,7 @@ struct sw_simulation {
                       // taken.  It is used to define the range over
                       // which our histogram is made flat.
   move_info moves;
+  long time_L = 1;
   long *energy_histogram;
   double *ln_energy_weights;
   dos_types sim_dos_type;
