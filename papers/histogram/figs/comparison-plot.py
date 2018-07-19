@@ -139,10 +139,12 @@ for method in methods:
                 plt.xlabel('Moves')
                 plt.ylabel('Average Entropy Error')
                 #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
-                if transcale == "default":
-                    plt.title(r'$N=%d$, $\eta = %g$' % (int(N), ff))
-                else:
-                    plt.title(r'$N=%d$, $\eta = %g$ %s' % (int(N), ff, transcale))
+                if "default" in transcale:
+                    plt.title(r'$N=%d$, $\eta = %g$ $\delta_0 = 0.05$' % (int(N), ff))
+                elif "slow" in transcale:
+                    plt.title(r'$N=%d$, $\eta = %g$ $\delta_0 = 0.005$' % (int(N), ff))
+                elif "fast" in transcale:
+                    plt.title(r'$N=%d$, $\eta = %g$ $\delta_0 = 0.5$' % (int(N), ff))
                 colors.legend()
 
     except:
