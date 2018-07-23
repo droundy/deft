@@ -33,7 +33,7 @@
 \end{figure}
 
 \section{Introduction}
-Over the past several decades a number of broad histogram Monte-Carlo
+Over the past several decades a number of flat histogram Monte-Carlo
 simulation algorithms have been developed which calculate the
 thermodynamic properties of various systems for all temperatures.  The
 development began with the original histogram method, which used a
@@ -109,7 +109,7 @@ In this work, we have developed a novel algorithm based on SAMC that
 does not require user-defined inputs and therefore should be easily
 applicable to a given system.  We call this method SAD (Dynamic
 Stochastic Approximation), and will discuss it in detail in the methods
-section. We compare it along with several broad histogram methods
+section. We compare it along with several flat histogram methods
 which include TMMC, WL, WL-TMMC, and SAMC.
 
 We consider the square-well fluid i.e. a system of particles whose
@@ -129,14 +129,14 @@ where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
 reduced range of the potential well, and $\epsilon$ is its depth.
 
 The organization of this paper is as follows: In Section~\ref{sec:histogram}, we
-describe in detail broad-histogram methods.  Section~\ref{sec:weight} outlines
+describe in detail flat-histogram methods.  Section~\ref{sec:weight} outlines
 weight-based histogram methods used in this work. Section~\ref{sec:transition}
 details the workings of the transition-matrix methods studied in this work.
 Section~\ref{sec:sad} introduces the dynamic stochastic approximation method.
 In Section~\ref{sec:results}, we discuss the performance of the various methods 
 applied to the model system.
 
-In this work, We compare a variety of broad histogram
+In this work, We compare a variety of flat histogram
 methods.  We outline the general workings of each algorithm that we
 developed in detail while summarizing algorithms that were developed in other
 works.  The following methods are introduced and applied to the
@@ -145,9 +145,9 @@ square-well fluid: Transition Matrix Monte-Carlo (TMMC), Wang-Landau
 Approximation Monte-Carlo (SAMC), and Dynamic Stochastic Approximation
 (SAD).
 
-\section{Broad histogram methods}\label{sec:histogram}
+\section{Flat histogram methods}\label{sec:histogram}
 
-The goal of broad histogram methods (also called \emph{flat histogram}
+The goal of flat histogram methods (also called \emph{broad histogram}
 or \emph{multicanonical} methods) is to simulate each energy with
 similar accuracy, so as to accurately determine the density of states
 over a broad range of energies.  Once the density of states is known,
@@ -158,7 +158,7 @@ correlation function or a response function---can still be computed
 for any temperature, provided statistics are collected for each
 individual energy, which can then be reweighted for any temperature.
 
-Each broad histogram Monte Carlo method uses a given set of ``moves''
+Each flat histogram Monte Carlo method uses a given set of ``moves''
 which change a system and should satisfy detailed balance.  Each
 algorithm differs in how it determines the probability of accepting a
 move, and in what additional statistics (if any) must be collected in
@@ -181,23 +181,23 @@ this paper (discussed in Section~\ref{sec:sad}) also falls in this
 category.  In these algorithms, the probability of accepting a move is
 given by
 \begin{equation}
-	\mathcal{P}(\epsilon_\text{old} \rightarrow \epsilon_\text{new})
-	= \min\left[1,\frac{w(\epsilon_\text{old})}{w(\epsilon_\text{new})}\right]
+	\mathcal{P}(E_\text{old} \rightarrow E_\text{new})
+	= \min\left[1,\frac{w(E_\text{old})}{w(E_\text{new})}\right]
 \end{equation}
 the probability biases the simulation in favor of energies with low weights.  
 A set of weights that are proportional to the density of states of the
-system $D(\epsilon)$ will result in an entirely flat histogram.  Thus
+system $D(E)$ will result in an entirely flat histogram.  Thus
 flat histogram is a criteria for convergence for these methods.  To avoid 
 overflow error , since the weights may vary over more than a
-few hundred orders of magnitude, the natural logarithm of the weights are used 
-in this work.  Since $D(\epsilon) = S(\epsilon)$, the logarithm of the weights 
+few hundred orders of magnitude, the natural logarithm of the weights are used
+in this work.  Since $D(E) = S(E)$, the logarithm of the weights
 can be thought of as an approximation of the entropy.
 
 Each weighted density approach uses a random walk in energy space to
 estimate the density of states.  The core of these approaches
 is to continuously update the weights at each step of the simulation
 \begin{equation}
-	\ln{w_{t+1}(\epsilon)}=\ln{w_{t}(\epsilon)}
+	\ln{w_{t+1}(E)}=\ln{w_{t}(E)}
 	+\gamma
 \end{equation}
 where $t$ is number of the current move, and $\gamma$ is an update
@@ -249,10 +249,9 @@ schedule by which the update factor $\gamma$ is continuously
 decreased~\cite{liang2007stochastic, werlich2015stochastic,
   schneider2017convergence}.  The update factor is defined in the
 original implementation~\cite{liang2007stochastic} in terms of an
-arbitrary tunable parameter $t_0$ and in future works~\cite{werlich2015stochastic} with a scale factor
-$\gamma_0$.
+arbitrary tunable parameter $t_0$.
 \begin{align}
-\gamma_{t}^{\text{SA}} =\gamma_0 \frac{t_0}{\max(t_0,t)}
+\gamma_{t}^{\text{SA}} =\frac{t_0}{\max(t_0,t)}
 \end{align}
 where as above $t$ is the number of moves that have been attempted.
 The major advantage that SAMC offers is its proven convergence.
@@ -265,12 +264,17 @@ where $\zeta \in \{1,2\}$, Liang has shown that the weights are proven
 to converge to the true density of states~\cite{liang2006theory,
   liang2007stochastic}.  In addition, the energy range need not be
 known a priori.  The time to converge depends only on the choice of
-parameters $t_0$ and $\gamma_0$.  Unfortunately, there is no
-prescription for finding acceptable values for these parameters, and
+parameters $t_0$.  Unfortunately, there is no
+prescription for finding an acceptable value for $t_0$, and
 while the algorithm formally converges, for a poor choice of $t_0$
-that convergence may be far too slow to be practical.  This work
-proposes a means for dynamically setting the update factor $\gamma_t$
-that should robustly converge on a variety of systems.
+that convergence can be far too slow to be practical.
+
+Werlich \emph{et al.} proposed scaling the SAMC $\gamma_t$ by a factor
+$\gamma_0$.  While this may result in an improved rate of convergence,
+it adds yet another parameter that must be empirically determined.
+
+%This work proposes a means for dynamically setting the update factor
+%$\gamma_t$ that should robustly converge on a variety of systems.
 
 \section{Transition-matrix methods}\label{sec:transition}
 
@@ -382,7 +386,7 @@ Algorithm that attempts to dynamically choose the modification factor
 rather than relying on system dependent parameters such as $t_0$ or
 $\gamma_0$.  There is an immediate advantage of such an algorithm where
 parameters are chosen independent of system size or type. Each
-Broad-Histogram method has unique advantages and disadvantages.
+Flat-Histogram method has unique advantages and disadvantages.
 Wang-Landau requires an energy range for initialization.  SAMC removes
 this energy range requirement but requires simulating every possible
 energy. Our proposed method SAD requires the user to input
@@ -401,7 +405,7 @@ this entropy `term' geometrically as an area bounded by the $\ln{D(E)}$
 i.e. the entropy. This gives the following
 \begin{align}
 \gamma_{t}^{\text{SAD}} =
-\frac{N_E}{t}\frac{\epsilon_{H}-\epsilon_{L}}{3T_{\text{min}}}
+\frac{N_E}{t}\frac{E_{H}-E_{L}}{3T_{\text{min}}}
 \end{align}
 where $N_E$ is the number of energies that have been found. The change
 in the entropy the minimum temperature can be thought of as a slope of
@@ -529,12 +533,13 @@ will approach the entropy as the simulation progresses.
 
 Energy binning is an important consideration for complex continous
 systems. Coarse binning yields fewer energy states for the walker to
-explore but more time spent in the individual bin. Fine binning yields
-more energy states to explore but less time spent in each bin.  Some
+explore but more time spent in each individual bin. Fine binning yields
+more energy states to explore with less time spent in each bin.
+\davidsays{move this discussion earlier.} Some
 methods such as AdaWL~\cite{koh2013dynamically} (discussed elsewhere)
 employ a tunable mechanism for controlling the binning for low entropic
 states in order to ensure the exploration of all energies. A
-significant advantage of SAD over other broad histogram methods is that
+significant advantage of SAD over other flat histogram methods is that
 energy binning is solved dynamically. SAD should perform independently
 for a reasonable range of binning because $\gamma \propto
 \nicefrac{N_{E}}{t}$.  As the number of energy states found $N_{E}$
@@ -555,7 +560,7 @@ convergence and scaling~\cite{koh2013dynamically}.  Because the update
 factor for SAD has an energy dependent factor already present (and
 dynamically adjusted), we expect that SAD will perform consitently
 scaling free for a reasonable choice of step size.  SAD should perform
-extremely well compared with other broad histogram methods when applied
+extremely well compared with other flat histogram methods when applied
 to complex continuous systems such as polymers/proteins and spin models.
 
 \section{Results}\label{sec:results}
@@ -693,7 +698,7 @@ necessary to ensure the most optimal convergence of the algorithm.
 
 \section{Acknowledgement}
 
-J.K. Pommerenck would like to gratefully acknowledge D.W. Siderius and
+We gratefully acknowledge D.W. Siderius and
 J.R. Errington for helpful communications regarding the implementation
 of WL-TMMC.
 
