@@ -400,7 +400,7 @@ $t_0$ should have dimensions of entropy.  We argue that we can write
 this entropy `term' geometrically as an area bounded by the $\ln{D(E)}$
 i.e. the entropy. This gives the following
 \begin{align}
-\gamma_{t}^{\text{SA}} =
+\gamma_{t}^{\text{SAD}} =
 \frac{N_E}{t}\frac{\epsilon_{H}-\epsilon_{L}}{3T_{\text{min}}}
 \end{align}
 where $N_E$ is the number of energies that have been found. The change
@@ -420,97 +420,47 @@ dynamically fluctuates around a value less than 1 for early MC moves
 have been found, the update factor for SAD decreases in the same
 monotonic fashion as SAMC.
 
-\subsubsection{High and Low energy racheting}
-Since SAD explores all energy states it is imperative that the method
-have a reasonable idea about where the minimum important energy and
-maximum entropy state are located in energy space. Since these are not
-user input parameters such as they are for methods like WL-TMMC, the
-simulation is responsible for determining and updating these energy
-locations. In order to prevent, the method from experiencing errors
-near the energy extrema, we employ a high energy $\epsilon_H$ and a low
-energy $\epsilon_L$ to define the range over which the energy histogram
-is made flat. $\epsilon_H$ is the highest ever value that the maximum
-entropy state has taken while $\epsilon_L$ is the lowest ever value
-that the minimum important energy has taken. SAD uses these two
-energies to control the weights $w(E)$ above $\epsilon_H$ and
-$\epsilon_L$. If the energy $E$ is greater than $\epsilon_H$ then the
-weights can be calculated as ~\jpsays{equation formatting problems!}
-\begin{equation}
-\begin{aligned}
-\ln w(E) = \max(\ln w(E) + \gamma, \\
-    \ln w(\epsilon_H) + \log(\gamma + e^{\ln w(E)-\ln w(\epsilon_H)}))
-\end{aligned}
-\end{equation}
-If the energy $E$ is less than $\epsilon_L$ then the weights can be
-calculated as
-\begin{equation}
-\begin{aligned}
-\ln w(E) = \max(\ln w(E) + \gamma, \ln w(\epsilon_L) \\
-    + \frac{\epsilon_L - E}{T_\text{min}}
-    + \log(\gamma + e^{\ln w(E) -\ln w(\epsilon_L)
-    + \frac{\epsilon_L -E}{T_\text{min}}}))
-\end{aligned}
-\end{equation}
-Sad sets the maximum entropy state equal to the energy if either of the
-following is true.
+\subsubsection{The ``interesting'' energy range}
+Since SAD explores all energy states it needs to have a reasonable idea
+of what energy range corresponds to the temperature range of interest,
+defined by $T_{\min}<T<\infty$.
+The
+simulation is responsible for determining and updating this energy
+range.
+Given the true entropy $S(E)$, we can define the interesting energy
+range as
 \begin{align}
-\ln w(E) > \ln w(S_\text{max}) \; \text{or} \; H(S_\text{max}) = 0
+  E(T_{\min}) <E< E(T=\infty)
 \end{align}
-Thus if the method is beyond the maximum entropy state or has collected no
-statistics at the maximum entropy state then it is set equal to the energy.
-Similarly, Sad sets the minimum important energy equal to the energy if
-either of the following is true.
-~\jpsays{equation formatting problems!}
-\begin{align}
-\ln w(E) > \ln w(E_\text{min}) - \frac{E_\text{min}-E}{T_\text{min}}
-\; \text{or} \; H(E_\text{min}) = 0
-\end{align}
-Thus if the method is beyond the minimum important energy or has collected no
-statistics at the minimum important energy then it is set equal to the energy.
-Together these two energies serve as a kind of ratcheting effect to
-determine the energy landscape boundaries. Outside the range set by the
-weights $w(E)$, the maximum entropy state is set to the energy $E$. The
-minimum important energy is also set to the energy when outside the
-calculated range.
+where $E(T)$ is the energy that maximizes $S-E/T$.  In the course of the
+simulation this precise energy may be challenging to evaluate accurately.
+In order to ensure that we sample this entire energy range adequately,
+we define two energy limits:  a high energy $E_H$ and a low
+energy $E_L$ to define the range over which the energy histogram
+is made flat. $E_H$ is chosen to be the greatest energy that
+maximized the entropy at any time during the simulation.  Similarly,
+$E_L$ is the lowest energy that ever maximized $S(E)-E/T_{\min}$ during
+the simulation.  This creates a ``ratcheting'' effect, in which $E_H$
+may only increase, while $E_L$ may only decrease over the course of the
+simulation, which results in a conservative estimate of the range of
+energies that need be sampled.
 
-\paragraph{Accepting moves above and below}
-We do \emph{not} use the weights to determine move acceptance outside
-the middle range.  FIXME WRITE THIS SECTION.
-
-\paragraph{Above $\epsilon_H$}
-Each energy $E>\epsilon_H$, should be visited at a rate that
-is proportional to the density of states at that energy, as in a
-simulation with constant weights.  Thus the weight at each energy
-needs to be proportional to the number of times that weight has been
-visited.  In order to ensure that $w(E) \propto D(E)$, the change in
+Outside of the energy range $E_L \le E \le E_H$, the weights are ignored
+when computing acceptance probabilities, and the weights $w(E_L)$ or
+$w(E_H)$ are used instead.  This means that the histogram is \emph{not}
+flat in this region, but instead is proportional to the density of
+states.  In order to ensure that $w(E) \propto D(E)$, the change in
 weight with each visit should be equal to the change in weight at
-the border energy $E=\epsilon_H$.
+the border energy $E=E_{H/L}$.
 \begin{align}
-  \Delta w(E) &= \Delta w(\epsilon_H) \\
-  w_{\text{new}}(E)-w_{\text{old}}(E)
-    &= e^\gamma w(\epsilon_H) - w(\epsilon_H) \\
-    &= (e^\gamma-1) w(\epsilon_H)
+  w_{t+1}(E)-w_t(E) &= w_{t+1}(E_{H/L}) -w_t(E_{H/L}) \\
+    &= e^\gamma w(E_{H/L}) - w(E_{H/L}) \\
+    &= (e^\gamma-1) w(E_{H/L})
 \end{align}
-This ensures that although we visit each energy above $\epsilon_H$ only
+This ensures that although we visit each energy above $E_H$ or
+below $E_L$ only
 in proportion to its density of states, the weights at these energies
 will approach the entropy as the simulation progresses.
-
-\paragraph{Below $\epsilon_L$}
-For energies $E<\epsilon_L$, we will visit each state in proportion to
-the Boltzmann distribution at temperature $T_{\min}$.  This ensures that
-we have adequate statistics to describe the system at temperature
-$T_{\min}$ while not wasting time simulating extremely low energies with
-correspondingly low entropy.  This means that we need to shift the
-weights at lower energies by a smaller amount in proportion to the
-Boltzmann factor.
-\begin{align}
-  \Delta w(E) &= \Delta w(\epsilon_L)e^{(E-\epsilon_L)/T_{\min}} \\
-  w_{\text{new}}(E)-w_{\text{old}}(E)
-    %&= \left(e^\gamma w(\epsilon_L) - w(\epsilon_L)\right)e^{(E-\epsilon_L)/T_{\min}} \\
-    &= (e^\gamma-1) w(\epsilon_L)e^{(E-\epsilon_L)/T_{\min}}
-\end{align}
-We note that when updating the natural logarithms of the weights, care
-is required in order to ensure that overflow does not occur.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n500}
