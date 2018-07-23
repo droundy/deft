@@ -505,8 +505,7 @@ weight with each visit should be equal to the change in weight at
 the border energy $E=E_{H/L}$.
 \begin{align}
   w_{t+1}(E)-w_t(E) &= w_{t+1}(E_{H/L}) -w_t(E_{H/L}) \\
-    &= e^\gamma w(E_{H/L}) - w(E_{H/L}) \\
-    &= (e^\gamma-1) w(E_{H/L})
+    &= (e^{\gamma_t}-1) w_t(E_{H/L})
 \end{align}
 This ensures that although we visit each energy above $E_H$ or
 below $E_L$ only
@@ -515,13 +514,13 @@ will approach the entropy as the simulation progresses.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n500}
-  \caption{The update factor $\gamma$ for $N=500$ versus iteration for three
+  \caption{The update factor $\gamma_t$ for $N=500$ versus iteration for three
     different methods: WL, SAMC, and SAD.
     method.}\label{fig:gamma-vs-t}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n50}
-  \caption{The update factor $\gamma$ for $N=50$ versus iteration for three
+  \caption{The update factor $\gamma_t$ for $N=50$ versus iteration for three
     different methods: WL, SAMC, and SAD.  This is exciting because we
     have different MC moves (slow, etc).}
 \end{figure}
