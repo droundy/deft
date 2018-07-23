@@ -89,7 +89,7 @@ struct sw_simulation {
                       // taken.  It is used to define the range over
                       // which our histogram is made flat.
   move_info moves;
-  long time_L = 1;
+  long time_L;
   long *energy_histogram;
   double *ln_energy_weights;
   dos_types sim_dos_type;
@@ -294,6 +294,7 @@ struct sw_simulation {
     use_wltmmc = false; // default to not using WLTMMC.
     min_energy = -1;
     max_energy = -1;
+    time_L = 1;
   };
 };
 
