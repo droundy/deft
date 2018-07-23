@@ -23,5 +23,5 @@ for x in utility_files:
 for x in monte_carlos:
     src.link('src/Monte-Carlo/%s.cpp' % x, x)
 
-for x in ['papers/histogram/figs/ising', 'papers/grand/figs/two-d']:
+for x in ['papers/ising/figs/ising', 'papers/grand/figs/two-d']:
     src.link(x+'.cpp', x+'.exe')

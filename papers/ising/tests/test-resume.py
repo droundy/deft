@@ -3,9 +3,6 @@
 from __future__ import division, print_function
 import os, numpy, sys, re
 
-# RUN FROM DEFT
-# python papers/histogram/data/run-ising-model.py 10 10E3 40E3 sad
-
 if len(sys.argv) < 4:
     print("usage:  python3 %s N test-moves total-moves method" % sys.argv[0])
     exit(1)
@@ -13,7 +10,7 @@ if len(sys.argv) < 4:
 if os.path.exists('sad.tex'):
     os.chdir('tests')
 
-assert os.path.exists('../data')
+assert os.path.exists('test-resume.py')
 
 N = int(sys.argv[1])
 test_moves = float(sys.argv[2])

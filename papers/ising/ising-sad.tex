@@ -1,0 +1,40 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
+\usepackage{graphicx} % Include figure files
+\usepackage{color}
+\usepackage{nicefrac} % Include for in-line fractions
+\usepackage{harpoon}% <---
+
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\cyan}[1]{{\bf \color{cyan} #1}}
+
+\newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
+\newcommand{\jpsays}[1]{{\color{red} [\blue{Jordan:} \emph{#1}]}}
+\newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
+
+\newcommand{\Int}{\int}
+\newcommand\Emin{E_{\min}}
+\newcommand\Nmax{N_{\max}}
+\newcommand\Tmin{T_{\min}}
+\newcommand\mumax{\mu_{\max}}
+
+\begin{document}
+\title{SAD Monte Carlo}
+
+\author{Jordan K. Pommerenck}
+\author{David Roundy}
+\affiliation{Department of Physics, Oregon State University,
+  Corvallis, OR 97331}
+
+\begin{abstract}
+We present several histogram methods and compare the performance and
+efficiency at treating the Ising model.
+\end{abstract}
+
+\maketitle
+
+
+\bibliography{paper}% Produces the bibliography via BibTeX.
+
+\end{document}

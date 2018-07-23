@@ -35,6 +35,7 @@ for project in ['thesis-roth']:
 other_texs = """
    thesis-vischer/Thesis.tex
    histogram/sad.tex
+   ising/ising-sad.tex
 """.split()
 
 for tex in other_texs:
