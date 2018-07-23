@@ -222,15 +222,13 @@ void ising_simulation::flip_a_spin() {
     if (e1 > too_hi_energy) {
       lnw1 = ln_energy_weights[index_from_energy(too_hi_energy)];
     } else if (e1 < too_lo_energy) {
-      lnw1 = ln_energy_weights[index_from_energy(too_lo_energy)]
-             - (too_lo_energy - e1).value/param.minT;
+      lnw1 = ln_energy_weights[index_from_energy(too_lo_energy)];
     }
     double lnw2 = ln_energy_weights[index_from_energy(e2)];
     if (e2 > too_hi_energy) {
       lnw2 = ln_energy_weights[index_from_energy(too_hi_energy)];
     } else if (e2 < too_lo_energy) {
-      lnw2 = ln_energy_weights[index_from_energy(too_lo_energy)]
-             - (too_lo_energy - e2).value/param.minT;
+      lnw2 = ln_energy_weights[index_from_energy(too_lo_energy)];
     }
     lnprob = lnw1 - lnw2;
   } else {
@@ -270,7 +268,7 @@ void ising_simulation::end_flip_updates(){
 
   if (param.sa_t0 || param.use_sad) {
     if (param.use_sad && too_hi_energy > too_lo_energy) {
-      gamma = param.sa_prefactor*(too_hi_energy-too_lo_energy)
+      gamma = (too_hi_energy-too_lo_energy)
         /(3*param.minT*moves)*(energies_found*energies_found + energies_found*moves 
         + moves*(moves/time_L - 1))/(energies_found*energies_found + moves 
         + moves*(moves/time_L - 1));
@@ -280,7 +278,7 @@ void ising_simulation::end_flip_updates(){
   }
   energy_histogram[index_from_energy(E)]++;
   if (param.use_sad && energies_found > 1) {
-    if (E > too_hi_energy) {
+    if (E > too_hi_energy || E < too_lo_energy) {
       // We are at higher energy than the maximum entropy state, so we
       // need to tweak our weights by even more, since we don't spend
       // much time here.
@@ -303,8 +301,12 @@ void ising_simulation::end_flip_updates(){
       // We key our change in weights based on the too-high-energy state w0.
       // w = w + gamma w0
       // lnw = ln(w + gamma w0)
-
-      const double lnw0 = ln_energy_weights[index_from_energy(too_hi_energy)];
+      double lnw0;
+      if (E > too_hi_energy) {
+        lnw0 = ln_energy_weights[index_from_energy(too_hi_energy)];
+      } else {
+        lnw0 = ln_energy_weights[index_from_energy(too_lo_energy)];
+      }
       const double lnw = ln_energy_weights[index_from_energy(E)];
       if (lnw0 > lnw) {
         // If w0 > w then we can turn into logs like so:
@@ -327,40 +329,6 @@ void ising_simulation::end_flip_updates(){
             || ln_energy_weights[index_from_energy(E)] == 0)) {
         printf("gamma is %g\n", gamma);
         printf("xx  lnw[%d] = %g\n", E.value, ln_energy_weights[index_from_energy(E)]);
-      }
-      assert(isnormal(ln_energy_weights[index_from_energy(E)])
-              || ln_energy_weights[index_from_energy(E)] == 0);
-    } else if (E < too_lo_energy) {
-      // Let w0 = weights at too_low_energy
-      // Let w = weights at energy
-      // Let g = e^gamma - 1
-      // The probability of sampling energy E is proportional to S(E)e^(-E/Tmin)
-      // Therefore we want w = w + g w0 e^((E-E0)/Tmin) <- small boltzmann
-      
-      // lnw = ln(w + g w0 e^((E-E0)/Tmin))
-      //     = ln(w + g w0 boltz)
-      // where boltz = e^((E-E0)/Tmin) (note that boltz < 1, "small boltz")
-      const double lnw0 = ln_energy_weights[index_from_energy(too_lo_energy)];
-      const double lnw = ln_energy_weights[index_from_energy(E)];
-      const double dEoTmin = (E-too_lo_energy)/param.minT;
-      if (lnw < lnw0 + dEoTmin) {
-        // lnw = ln((w0 boltz) (w/(w0 boltz) + g))
-        //     = ln(w0 boltz) + ln(g + w/(w0 boltz))
-        //     = lnw0 + (E-E0)/Tmin + ln(g + e^(lnw - lnw0 - (E-E0)/Tmin))
-        ln_energy_weights[index_from_energy(E)] =
-          lnw0 + dEoTmin + log((exp(gamma)-1) + exp(lnw-lnw0 -dEoTmin));
-      } else {
-        // This is the less common case...
-        // lnw = ln(w (1 + g w0 boltz / w))
-        //     = lnw + ln(1 + g w0 boltz / w)
-        //     = lnw + ln(1 + g e^(lnw0 - lnw + (E-E0)/Tmin))
-        ln_energy_weights[index_from_energy(E)] =
-          lnw + log(1 + (exp(gamma)-1)*exp(lnw0-lnw+dEoTmin));
-      }
-
-      if (!(isnormal(ln_energy_weights[index_from_energy(E)])
-            || ln_energy_weights[index_from_energy(E)] == 0)) {
-        printf("lnw[%d] = %g\n", E.value, ln_energy_weights[index_from_energy(E)]);
       }
       assert(isnormal(ln_energy_weights[index_from_energy(E)])
               || ln_energy_weights[index_from_energy(E)] == 0);
@@ -772,7 +740,23 @@ int main(int argc, const char *argv[]) {
 // MAIN CODE EXECUTION HERE!
 
   char *w_fname = new char[1024];
-  sprintf(w_fname, "%s/%s-lnw.dat", data_dir, filename);
+  sprintf(w_fname, "%s/%s-lnw.py", data_dir, filename);
+  {
+    FILE *w_out = fopen((const char *)w_fname, "w");
+    if (w_out == 0) {
+      printf("unable to create file named \"%s\"\n", w_fname);
+      exit(1);
+    }
+    fprintf(w_out, "import numpy as np\n");
+    fprintf(w_out, "E = np.array([");
+    for (int i=0;i<ising.energy_levels; i++) {
+      fprintf(w_out, "%d, ", ising.energy_from_index(i).value);
+    }
+    fprintf(w_out, "])\n");
+    fprintf(w_out, "lndos = np.zeros(%ld)\n", ising.energy_levels);
+    fprintf(w_out, "t = np.array([])\n");
+    fclose(w_out);
+  }
 
   long next_output = 1;
   long next_resume = 1;
@@ -803,17 +787,18 @@ int main(int argc, const char *argv[]) {
         // Save energy histogram
 
         FILE *w_out = fopen((const char *)w_fname, "a");
-        fprintf(w_out, "lndos = np.array([");
-
         if (w_out == 0) {
           printf("unable to create file named \"%s\"\n", w_fname);
           exit(1);
         }
 
+        fprintf(w_out, "lndos = np.vstack((lndos, np.array([");
         for (int i = 0; i < ising.energy_levels; i++) {
           fprintf(w_out,"%.17g,", ising.ln_dos[i]);
         }
-        fprintf(w_out, "])\n");
+        fprintf(w_out, "])))\n");
+
+        fprintf(w_out, "t = np.append(t, %ld)\n", ising.moves);
         fclose(w_out);
         
         if (param.use_sad) {
