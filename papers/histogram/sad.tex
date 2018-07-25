@@ -279,7 +279,51 @@ it adds yet another parameter that must be empirically determined.
 \section{Transition-matrix methods}\label{sec:transition}
 
 \subsection{TMMC Algorithm}
-The Transition Matrix Monte-Carlo (TMMC) method as introduced by
+{\color{red}
+The flat-histogram Wang  and  Landau method utilizes a so-called
+``visited states'' approach to calculate  thermodynamic
+properties~\cite{errington2003direct}. The algorithm is fundamentally
+based on the number of times a given state is visited while the
+system is being sampled. The Transition Matrix Monte Carlo (TMMC) method operates
+differently than the visited states approach~\cite{fitzgerald2000monte}. The method
+uses attempted transitions between states to obtain an estimate of transition probabilities.
+
+Say something about detailed balance here?...
+
+For problems that sample states where the relative probabilities
+vary by many orders of magnitude, all of the states will
+not be sampled efficiently within reasonable simulation
+time without introducing a bias in the sampling distribution.
+
+While the current algorithm is highly efficient, a weighting function $\eta_t$
+is introduced to ensure that the system samples all states
+evenly~\cite{mahynski2017multivariable, blanco2016effect}.
+As for the Flat-histogram approach, the weighting function is
+set inversely proportional to the current macrostate probability.
+\begin{align}
+  \eta(I) = - \ln(D(I))
+\end{align}
+The probability is defined in terms of this biasing function:
+\begin{align}
+  p(I\rightarrow J) = \min\bigg[1,\frac{\eta(J)}
+  {\eta(I)} e^{\beta (E(I)-E(J))}\bigg]
+\end{align}
+The TMMC algorithm consists of recording the data in a collection matrix
+(the unormalized transition histogram matrix).
+\begin{align}
+  C(I \rightarrow J) = C(I \rightarrow J) + p(I \rightarrow J)\\
+  C(I \rightarrow I) = C(I \rightarrow I) +(1 - p(I \rightarrow J))
+\end{align}
+If the energy state has not been changed, then $C$ is still incremented by
+unity. Fitzgerald et al.~\cite{fitzgerald2000monte} showed that defining
+the third step this way results in a uniform improvement over using
+histogram estimators to determine the particle number probability
+distribution (PNPD). The algorithm is highly efficient due to the ability
+to bias the simulation while keeping the criteria used to update the
+collection matrix $C(I\rightarrow J)$.
+}
+
+The Transition Matrix Monte-Carlo (TMMC) method as outlined by
 Fitzgerald et al. consists of three primary steps.  The first two steps
 are common to the Metropolis algorithm while the third makes use of the
 actual transition probabilities~\cite{fitzgerald2000monte}.
