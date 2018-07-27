@@ -13,7 +13,10 @@
 \newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
 
 \begin{document}
-\title{Dynamic Stochastic Approximation Monte Carlo}
+\title{Dynamic Stochastic Approximation Monte Carlo
+\jpsays{DSA for stochastic optimization (not Monte Carlo) is actually a 
+thing (1965, 2017) although unrealated to what we are doing}
+}
 
 \author{Jordan K. Pommerenck} \author{Tanner T. Simpson}
 \author{Michael A. Perlin} \author{David Roundy}
@@ -168,10 +171,18 @@ weights $w(E)$ be collected, and transition-matrix methods that
 require that statistics be collected for any transitions between pairs
 of energies.
 
-\davidsays{We should discuss continuous energies and binning somewhere
-  here...}
-\jpsays{I put some text about this but it was under a sad subsection also
-may need reworked and/or edited.}
+{\color{red} Both weight-based and transition matrix methods have
+calculate the density of states $D(E)$ for discrete energy
+levels~\cite{haber2018performance}. Energy binning becomes an important
+consideration for complex continous systems for this reason. Energy
+bins are typically of uniform size for the entire energy
+continuum~\cite{fasnacht2004adaptive}. Coarse binning yields fewer
+energy states to explore but more time spent in each individual bin.
+Fine binning yields more energy states to explore with less time spent
+in each bin. Some methods such as AdaWL~\cite{koh2013dynamically}
+employ a tunable mechanism for controlling the binning for low entropic
+states in order to ensure the exploration of all energies.
+} 
 
 \section{Weight-based methods}\label{sec:weight}
 
@@ -288,6 +299,7 @@ system is being sampled. The Transition Matrix Monte Carlo (TMMC) method operate
 differently than the visited states approach~\cite{fitzgerald2000monte}. The method
 uses attempted transitions between states to obtain an estimate of transition probabilities.
 
+Say something about collecting statistics vs WL?
 Say something about detailed balance here?...
 
 For problems that sample states where the relative probabilities
@@ -295,7 +307,7 @@ vary by many orders of magnitude, all of the states will
 not be sampled efficiently within reasonable simulation
 time without introducing a bias in the sampling distribution.
 
-While the current algorithm is highly efficient, a weighting function $\eta_t$
+While the current algorithm is highly efficient, a weighting function $\eta(I)$
 is introduced to ensure that the system samples all states
 evenly~\cite{mahynski2017multivariable, blanco2016effect}.
 As for the Flat-histogram approach, the weighting function is
