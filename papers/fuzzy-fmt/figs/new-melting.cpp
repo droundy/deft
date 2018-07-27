@@ -354,11 +354,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     printf("da1x = %g vs dx = %g\n", da2.x, dx);
     const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
+    const double analytic_ideal_free_energy =
+      (1-fv)*temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
+                   - 3*log(sqrt(2*M_PI)*gwidth)
+                   - 5.0/2);
     if (gwidth < 0.01*lattice_constant) {
       printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
-      cFideal_of_primitive_cell = temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
-                                        - 3*log(sqrt(2*M_PI)*gwidth)
-                                        - 5.0/2);
+      cFideal_of_primitive_cell = analytic_ideal_free_energy;
       printf("analytic crystal ideal gas free energy per volume = %g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
     } else {
@@ -390,9 +392,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("crystal ideal gas free energy per volume = %g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
       printf("analytic ideal gas free energy per vol   = %g\n",
-             temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
-                   - 3*log(sqrt(2*M_PI)*gwidth)
-                   - 5.0/2)/primitive_cell_volume);
+             analytic_ideal_free_energy/primitive_cell_volume);
     }
   }
 
