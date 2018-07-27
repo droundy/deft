@@ -259,7 +259,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R, double tem
     // pretty easy to reason about, and the others are closely
     // related.
     my_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);
-  } while (my_error > MC_ERROR || my_error > fabs(1-w_den_R.n_3/num_points));
+  } while (my_error > MC_ERROR || my_error > 0.25*fabs(1-w_den_R.n_3/num_points));
   w_den_R.n_0 /= num_points;
   w_den_R.n_1 /= num_points;
   w_den_R.n_2 /= num_points;
