@@ -548,7 +548,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     printf("             phi_1 per volume = %g\n", total_phi_1/primitive_cell_volume); //
     printf("             phi_2 per volume = %g\n", total_phi_2/primitive_cell_volume); //
     printf("             phi_3 per volume = %g\n", total_phi_3/primitive_cell_volume); //
-    
+
+    printf("#dx\tphi1\tphi2\tphi3\tF\tFideal\n");
+    printf("#%g\t%g\t%g\t%g\t%g\t%g\n", dx_input,
+           total_phi_1/primitive_cell_volume,
+           total_phi_2/primitive_cell_volume,
+           total_phi_3/primitive_cell_volume,
+           cfree_energy_per_vol,
+           cFideal_of_primitive_cell/primitive_cell_volume);
+
     printf("Crystal Ideal free energy per volume = %g\n", cFideal_of_primitive_cell/primitive_cell_volume); //
     printf("Crystal Excess free energy per volume = %g\n", cFexcess_of_primitive_cell/primitive_cell_volume); //
     printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol); //
