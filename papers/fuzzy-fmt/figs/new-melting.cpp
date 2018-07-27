@@ -399,169 +399,154 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
 
-  bool compute_crystal_free_energy = true;
-  bool compute_homogeneous_free_energy = true;
+  printf("\nCalculating Homogeneous Free Energy analytically ...\n");
+  HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
+  hf.sigma() = 1; 
+  hf.epsilon() = 1;   //energy constant in the WCA fluid
+  hf.kT() = temp;
+  hf.n() = reduced_density;
+  hf.mu() = 0;   //chemical potential is zero so the Grand Canonical Ensemble becomes a Canonical Ensemble
+  //Note: hf.energy() returns energy/volume
 
-  if (compute_homogeneous_free_energy) {
-    printf("\nCalculating Homogeneous Free Energy analytically ...\n");
-    HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
-    hf.sigma() = 1; 
-    hf.epsilon() = 1;   //energy constant in the WCA fluid
-    hf.kT() = temp;
-    hf.n() = reduced_density;
-    hf.mu() = 0;   //chemical potential is zero so the Grand Canonical Ensemble becomes a Canonical Ensemble
-    //Note: hf.energy() returns energy/volume
+  hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom" (I think this is fixed now -check)
+  hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
+  hf.printme("     homogeneous:");
+  printf("homogeneous free_energy per vol is %g\n", hf.energy());
+  printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);  //delete
 
-    hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom" (I think this is fixed now -check)
-    hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
-    hf.printme("     homogeneous:");
-    printf("homogeneous free_energy per vol is %g\n", hf.energy());
-    printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);  //delete
-  }
+  // scale our dx by Xi or w, whichever is larger.
+  const double dx = dx_input*(find_Xi(temp) + gwidth);
+  printf("using dx = %g for excess free energy integral\n", dx);
 
-  if (compute_crystal_free_energy) {
-    // scale our dx by Xi or w, whichever is larger.
-    const double dx = dx_input*(find_Xi(temp) + gwidth);
-    printf("using dx = %g for excess free energy integral\n", dx);
+  const int Nl = (lattice_constant/2)/dx+1; // number of infinitesimal lengths along one of the latt
 
-    const int Nl = (lattice_constant/2)/dx+1; // number of infinitesimal lengths along one of the latt
+  const vector3d da1 = lattice_vectors[0]/Nl; //infinitesimal lattice vectors 1/Nl of lattice vector
+  const vector3d da2 = lattice_vectors[1]/Nl;
+  const vector3d da3 = lattice_vectors[2]/Nl;
+  printf("da1x = %g vs dx = %g\n", da2.x, dx);
+  const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
-    const vector3d da1 = lattice_vectors[0]/Nl; //infinitesimal lattice vectors 1/Nl of lattice vector
-    const vector3d da2 = lattice_vectors[1]/Nl;
-    const vector3d da3 = lattice_vectors[2]/Nl;
-    printf("da1x = %g vs dx = %g\n", da2.x, dx);
-    const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
+  double cFexcess_of_primitive_cell=0;  //Crystal Excess Free Energy over one primitive cell
+  double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0;
 
-    double cFexcess_of_primitive_cell=0;  //Crystal Excess Free Energy over one primitive cell
-    double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0;
+  for (int i=0; i<Nl; i++) {
+    for (int j=0; j<Nl; j++) {
+      for (int k=0; k<Nl; k++) {
+        vector3d r= i*da1 + j*da2 + k*da3;
 
-    for (int i=0; i<Nl; i++) {
-      for (int j=0; j<Nl; j++) {
-        for (int k=0; k<Nl; k++) {
-          vector3d r= i*da1 + j*da2 + k*da3;
+        double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
+        //double var_n_0=0, var_n_1=0, var_n_2=0, var_n_3=0;  //variances in the weighted densities  REMOVE?
+        vector3d nv_1, nv_2;
+        nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
+        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //CHECK! Initialize here?
+        //weight variance_n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //REMOVE?
 
-          double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
-          //double var_n_0=0, var_n_1=0, var_n_2=0, var_n_3=0;  //variances in the weighted densities  REMOVE?
-          vector3d nv_1, nv_2;
-          nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
-          weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //CHECK! Initialize here?
-          //weight variance_n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //REMOVE?
-
-          for (int t=-many_cells; t <=many_cells; t++) {
-            for(int u=-many_cells; u<=many_cells; u++)  {
-              for (int v=-many_cells; v<= many_cells; v++) {
-                const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-                if ((R-r).norm() < max_distance_considered) {
-                  if (MC_ERROR == 0) {
-                    n_weight=find_weighted_den_aboutR_mc(r, R, dx, temp,
-                                                         lattice_constant, gwidth, fv);
-                  } else {
-                    n_weight=find_weighted_den_aboutR_mc_accurately(r, R, temp, gwidth, fv);
-                  }
-                  //variance_n_weight=find_weighted_den_variances_aboutR_mc(r, R, dx, temp,   //REMOVE?
-                  //                           lattice_constant, gwidth, fv);
-
-                  n_0 +=n_weight.n_0;
-                  n_1 +=n_weight.n_1;
-                  n_2 +=n_weight.n_2;
-                  n_3 +=n_weight.n_3;
-
-                  //if (crystal_calc_option > 1 ) {   //Calculate variances when use Monte-Carlo method  REMOVE?
-                  //var_n_0 +=variance_n_weight.n_0;
-                  //var_n_1 +=variance_n_weight.n_1;
-                  //var_n_2 +=variance_n_weight.n_2;
-                  //var_n_3 +=variance_n_weight.n_3;
-                  //}
-
-                  //printf("n_weight.n_3=%g\n", n_weight.n_3);  //debug
-                  //printf("n_3=%g\n", n_3);  //debug
-                  nv_1 +=n_weight.nv_1;
-                  nv_2 +=n_weight.nv_2;
+        for (int t=-many_cells; t <=many_cells; t++) {
+          for(int u=-many_cells; u<=many_cells; u++)  {
+            for (int v=-many_cells; v<= many_cells; v++) {
+              const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+              if ((R-r).norm() < max_distance_considered) {
+                if (MC_ERROR == 0) {
+                  n_weight=find_weighted_den_aboutR_mc(r, R, dx, temp,
+                                                       lattice_constant, gwidth, fv);
+                } else {
+                  n_weight=find_weighted_den_aboutR_mc_accurately(r, R, temp, gwidth, fv);
                 }
+                //variance_n_weight=find_weighted_den_variances_aboutR_mc(r, R, dx, temp,   //REMOVE?
+                //                           lattice_constant, gwidth, fv);
+
+                n_0 +=n_weight.n_0;
+                n_1 +=n_weight.n_1;
+                n_2 +=n_weight.n_2;
+                n_3 +=n_weight.n_3;
+
+                //if (crystal_calc_option > 1 ) {   //Calculate variances when use Monte-Carlo method  REMOVE?
+                //var_n_0 +=variance_n_weight.n_0;
+                //var_n_1 +=variance_n_weight.n_1;
+                //var_n_2 +=variance_n_weight.n_2;
+                //var_n_3 +=variance_n_weight.n_3;
+                //}
+
+                //printf("n_weight.n_3=%g\n", n_weight.n_3);  //debug
+                //printf("n_3=%g\n", n_3);  //debug
+                nv_1 +=n_weight.nv_1;
+                nv_2 +=n_weight.nv_2;
               }
             }
           }
-
-          double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   // ASK! added the 1.0's like in HomogeneousSFMTFLuidFast.cpp
-          //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
-          double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
-          //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
-
-          // The following was Rosenfelds early vector version of the functional
-          //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
-
-          // This is the fixed version, which comes from dimensional crossover
-          double phi_3 = uipow(n_2,3)*uipow(1.0 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1.0-1.0*n_3,2));
-          if (n_2 == 0 || sqr(n_2) <= nv_2.normsquared()) phi_3 = 0;
-          if (n_0 < 1e-5*reduced_density && n_3 >= 1 && n_3 < 1 + 1e-14) {
-            // This is a case where the prefactor on each of our free
-            // energy contributions is within roundoff error of zero.
-            // Sadly, n_3 may be greater than 1, in which case we
-            // would get a NaN when the true contribution to the free
-            // energy is probably actually zero.
-            phi_1 = 0;
-            phi_2 = 0;
-            phi_3 = 0;
-          }
-
-          //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
-          total_phi_1 += temp*phi_1*dV;
-          total_phi_2 += temp*phi_2*dV;
-          total_phi_3 += temp*phi_3*dV;
-          cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
-          if (isnan(cFexcess_of_primitive_cell)) {
-            printf("free energy is a NaN!\n");
-            printf("position is: %g %g %g\n", r.x, r.y, r.z);
-            printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%.17g = 1+%g\n", n_0, n_1, n_2, n_3, n_3-1);
-            printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
-            data data_out;
-            data_out.diff_free_energy_per_atom=0;
-            data_out.cfree_energy_per_atom=0;
-            data_out.hfree_energy_per_vol=0;
-            data_out.cfree_energy_per_vol=0;
-            return data_out;
-          }
-          //printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell);   //debug  
-          //printf("      finished %.5f%% of the integral\n",
-          //       100*((i)/double(Nl)
-          //           +(j)/uipow(Nl, 2)
-          //           +(k + 1)/uipow(Nl, 3)));
         }
-        ////const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
-        ////const double t = time()/60/60;
-        ////const double time_total = t/fraction_complete;
-        ////printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
-        ////       100*fraction_complete, time_total - t, time_total);
+
+        double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   // ASK! added the 1.0's like in HomogeneousSFMTFLuidFast.cpp
+        //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
+        double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
+        //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
+
+        // The following was Rosenfelds early vector version of the functional
+        //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
+
+        // This is the fixed version, which comes from dimensional crossover
+        double phi_3 = uipow(n_2,3)*uipow(1.0 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1.0-1.0*n_3,2));
+        if (n_2 == 0 || sqr(n_2) <= nv_2.normsquared()) phi_3 = 0;
+        if (n_0 < 1e-5*reduced_density && n_3 >= 1 && n_3 < 1 + 1e-14) {
+          // This is a case where the prefactor on each of our free
+          // energy contributions is within roundoff error of zero.
+          // Sadly, n_3 may be greater than 1, in which case we would
+          // get a NaN when the true contribution to the free energy
+          // is probably actually zero.
+          phi_1 = 0;
+          phi_2 = 0;
+          phi_3 = 0;
+        }
+
+        //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
+        total_phi_1 += temp*phi_1*dV;
+        total_phi_2 += temp*phi_2*dV;
+        total_phi_3 += temp*phi_3*dV;
+        cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
+        if (isnan(cFexcess_of_primitive_cell)) {
+          printf("free energy is a NaN!\n");
+          printf("position is: %g %g %g\n", r.x, r.y, r.z);
+          printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%.17g = 1+%g\n", n_0, n_1, n_2, n_3, n_3-1);
+          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
+          data data_out;
+          data_out.diff_free_energy_per_atom=0;
+          data_out.cfree_energy_per_atom=0;
+          data_out.hfree_energy_per_vol=0;
+          data_out.cfree_energy_per_vol=0;
+          return data_out;
+        }
+        //printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell);   //debug  
+        //printf("      finished %.5f%% of the integral\n",
+        //       100*((i)/double(Nl)
+        //           +(j)/uipow(Nl, 2)
+        //           +(k + 1)/uipow(Nl, 3)));
       }
-      //printf("finished %.1f%% of the integral\n",
-      //       100*(i + 1)/double(Nl));
-      //printf("cFexcess_of_primitive_cell so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",cFexcess_of_primitive_cell, phi_1, phi_2, phi_3);
+      ////const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
+      ////const double t = time()/60/60;
+      ////const double time_total = t/fraction_complete;
+      ////printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
+      ////       100*fraction_complete, time_total - t, time_total);
     }
-
-    //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
-    //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
-    //cFexcess_of_primitive_cell and Fideal are over one parallelepiped (one primitive cell) with 1-fv atoms
-    cfree_energy_per_atom=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
-    cfree_energy_per_vol=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/primitive_cell_volume; //
-    printf("primitive cell volume = %g\n", primitive_cell_volume); //
-    printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
-    printf("             phi_1 per volume = %g\n", total_phi_1/primitive_cell_volume); //
-    printf("             phi_2 per volume = %g\n", total_phi_2/primitive_cell_volume); //
-    printf("             phi_3 per volume = %g\n", total_phi_3/primitive_cell_volume); //
-
-    printf("#dx\tphi1\tphi2\tphi3\tF\tFideal\n");
-    printf("#%g\t%g\t%g\t%g\t%g\t%g\n", dx_input,
-           total_phi_1/primitive_cell_volume,
-           total_phi_2/primitive_cell_volume,
-           total_phi_3/primitive_cell_volume,
-           cfree_energy_per_vol,
-           cFideal_of_primitive_cell/primitive_cell_volume);
-
-    printf("Crystal Ideal free energy per volume = %g\n", cFideal_of_primitive_cell/primitive_cell_volume); //
-    printf("Crystal Excess free energy per volume = %g\n", cFexcess_of_primitive_cell/primitive_cell_volume); //
-    printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol); //
-    printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
+    //printf("finished %.1f%% of the integral\n",
+    //       100*(i + 1)/double(Nl));
+    //printf("cFexcess_of_primitive_cell so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",cFexcess_of_primitive_cell, phi_1, phi_2, phi_3);
   }
+
+  //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
+  //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
+  //cFexcess_of_primitive_cell and Fideal are over one parallelepiped (one primitive cell) with 1-fv atoms
+  cfree_energy_per_atom=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
+  cfree_energy_per_vol=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/primitive_cell_volume; //
+  printf("primitive cell volume = %g\n", primitive_cell_volume); //
+  printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
+  printf("             phi_1 per volume = %g\n", total_phi_1/primitive_cell_volume); //
+  printf("             phi_2 per volume = %g\n", total_phi_2/primitive_cell_volume); //
+  printf("             phi_3 per volume = %g\n", total_phi_3/primitive_cell_volume); //
+
+  printf("Crystal Ideal free energy per volume = %g\n", cFideal_of_primitive_cell/primitive_cell_volume);
+  printf("Crystal Excess free energy per volume = %g\n", cFexcess_of_primitive_cell/primitive_cell_volume);
+  printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol);
+  printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
 
   data data_out;
   data_out.diff_free_energy_per_atom=cfree_energy_per_atom-hfree_energy_per_atom;
@@ -606,6 +591,17 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     delete[] alldat_filename;
   }
   printf("run time is %g hours\n", run_time/60/60);
+
+  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\tmin\n");
+  printf("#%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+         dx_input,
+         MC_ERROR,
+         total_phi_1/primitive_cell_volume,
+         total_phi_2/primitive_cell_volume,
+         total_phi_3/primitive_cell_volume,
+         cfree_energy_per_vol,
+         cFideal_of_primitive_cell/primitive_cell_volume,
+         run_time/60);
 
   return data_out;
 }
