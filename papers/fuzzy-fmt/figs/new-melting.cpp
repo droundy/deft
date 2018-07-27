@@ -354,39 +354,47 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     printf("da1x = %g vs dx = %g\n", da2.x, dx);
     const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
-    for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
-      for (int j=0; j<Nl; j++) {
-        for (int k=0; k<Nl; k++) {
-          vector3d r=i*da1 + j*da2 + k*da3;
+    if (gwidth < 0.01*lattice_constant) {
+      printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
+      cFideal_of_primitive_cell = temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
+                                        - 3*log(sqrt(2*M_PI)*gwidth)
+                                        - 5.0/2);
+      printf("analytic crystal ideal gas free energy per volume = %g\n",
+             cFideal_of_primitive_cell/primitive_cell_volume);
+    } else {
+      for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
+        for (int j=0; j<Nl; j++) {
+          for (int k=0; k<Nl; k++) {
+            vector3d r=i*da1 + j*da2 + k*da3;
 
-          const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
-          //Gaussians father away won't contriubute much
-          double n = 0;
-          const double kT = temp;
-          for (int t=-many_cells; t <=many_cells; t++) {
-            for(int u=-many_cells; u<=many_cells; u++)  {
-              for (int v=-many_cells; v<= many_cells; v++) {
-                const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
-                double deltar = (r-R).norm();
-                n += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3);
+            const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
+            //Gaussians father away won't contriubute much
+            double n = 0;
+            const double kT = temp;
+            for (int t=-many_cells; t <=many_cells; t++) {
+              for(int u=-many_cells; u<=many_cells; u++)  {
+                for (int v=-many_cells; v<= many_cells; v++) {
+                  const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+                  double deltar = (r-R).norm();
+                  n += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3);
+                }
               }
             }
-          }
-          if (n > 1e-200) { // avoid underflow and n=0 issues
-            // printf("n = %g  dF = %g\n", n, dF);
-            cFideal_of_primitive_cell += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
+            if (n > 1e-200) { // avoid underflow and n=0 issues
+              // printf("n = %g  dF = %g\n", n, dF);
+              cFideal_of_primitive_cell += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
+            }
           }
         }
-      }
-    }  //End inhomogeneous Fideal calculation
+      }  //End inhomogeneous Fideal calculation
+      printf("crystal ideal gas free energy per volume = %g\n",
+             cFideal_of_primitive_cell/primitive_cell_volume);
+      printf("analytic ideal gas free energy per vol   = %g\n",
+             temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
+                   - 3*log(sqrt(2*M_PI)*gwidth)
+                   - 5.0/2)/primitive_cell_volume);
+    }
   }
-  //printf("crystal ideal gas free energy of one primitive cell= %g\n", cFideal_of_primitive_cell);
-  printf("crystal ideal gas free energy per volume = %g\n",
-         cFideal_of_primitive_cell/primitive_cell_volume);
-  printf("analytic ideal gas free energy per vol   = %g\n",
-         temp*(log(2.646476976618268e-6/sqrt(temp*temp*temp))
-               - 3*log(sqrt(2*M_PI)*gwidth)
-               - 5.0/2)/primitive_cell_volume);
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
