@@ -1,0 +1,9 @@
+# git version: 0.0.0-2154-ge1712eac
+# fac figs/new-melting.mkdat && figs/new-melting.mkdat --kT 2 --n 1.3 --gw=0.15 --fv 0 --mc-error 1e-3 --dx 1 | tail -1 >> DATA_LOGS/n1.3_T2_gw_0.15_fv_0.dat
+
+# FROZEN!
+
+# homogeneous free energy: -3.31428
+
+#dx	mc-err	phi1	phi2	phi3	Ftot	Fideal	time-in-min
+1	0.001	2.79117	14.3076	13.219	-4.61921	-34.9371	0.119603
