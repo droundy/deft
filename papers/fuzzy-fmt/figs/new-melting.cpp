@@ -593,7 +593,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("run time is %g hours\n", run_time/60/60);
 
   printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\tmin\n");
-  printf("#%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+  printf("%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
          dx_input,
          MC_ERROR,
          total_phi_1/primitive_cell_volume,
