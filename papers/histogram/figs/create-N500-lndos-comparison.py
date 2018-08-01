@@ -10,8 +10,8 @@ import readnew
 
 inputs = [
     ('vanilla_wang_landau',
-       'data/s000/periodic-ww1.30-ff0.30-N500-vanilla_wang_landau-movie/000509-lndos.dat'),
-    ('golden', 'data/s000/periodic-ww1.30-ff0.30-N500-tmmc-golden-movie/000324-lndos.dat'),
+       'data/s000/periodic-ww1.30-ff0.30-N500-vanilla_wang_landau-movie/000001-lndos.dat'),
+    ('golden', 'data/s000/periodic-ww1.30-ff0.30-N500-tmmc-golden-movie/000001-lndos.dat'),
     ('sad3', 'data/s000/periodic-ww1.30-ff0.30-N500-sad3-movie/000001-lndos.dat'),
 ]
 

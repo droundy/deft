@@ -3,6 +3,7 @@ import re
 import sys
 
 moves = re.compile(r"moves (\d+), energies_found (\d+), erange: (\d+) -> (\d+)")
+
 print "# energies_found, t, ehi, elo"
 for line in sys.stdin.readlines():
     match = moves.search(line)

@@ -131,7 +131,8 @@ for frame in range(numframes):
     ax.set_ylabel(r'$\ln DOS$')
     # ax.legend(loc='best').get_frame().set_alpha(0.25)
     if too_lo is not None:
-      plt.title(r'lv movie from %s ($T_{\min} = %g$, $E_{\text{lo}} = %g$)' % (filename, min_T, too_lo))
+      plt.title(r'lv movie from %s ($T_{\min} = %g$, $E_{\text{lo}} = %g$)'
+                % (filename, min_T, too_lo))
     else:
       plt.title(r'lv movie from %s ($T_{\min} = %g$)' % (filename, min_T))
     colors.legend(loc='lower right')

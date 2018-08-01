@@ -75,6 +75,9 @@ _legend_order = [
     'sad3-fast', 'sad3-fast-tm',
     'sad3-s1',
     'sad3-s2',
+    'vanilla_wang_landau',
+    'vanilla_wang_landau-slow',
+    'vanilla_wang_landau-fast',
     'tmmc',
     'wltmmc-0.8-0.0001',
     'wltmmc-0.0001',
@@ -85,9 +88,6 @@ _legend_order = [
     'wltmmc-1e-10',
     'wltmmc-1e-10-slow',
     'wltmmc-1e-10-fast',
-    'vanilla_wang_landau',
-    'vanilla_wang_landau-slow',
-    'vanilla_wang_landau-fast',
     'tmi3', 'toe3',
     'samc',
     'samc-1000',
@@ -158,6 +158,7 @@ def style_args(method):
         args['color'] = _colors[method]
     if method in _linestyles:
         args['linestyle'] = _linestyles[method]
+    args['zorder'] = -legend_order(method)
     return args
 
 def plot(x, y, method=None):

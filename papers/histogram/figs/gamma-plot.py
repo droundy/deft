@@ -30,6 +30,7 @@ try:
         colors.loglog(moves, factor,
                       'vanilla_wang_landau'
                          + wl[len("data/gamma/%s/wl" % filename):-4])
+        plt.ylim(ymin=1e-10)
 
 except:
     pass
@@ -38,17 +39,22 @@ except:
 for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     data = np.loadtxt(sad)
     energies_found = data[:,0]
-    t = data[:,1]
+    time = data[:,1]
     ehi = data[:,2]
     elo = data[:,3]
-    ts = np.exp(np.linspace(0, np.log(max(t)*5), 1000))
+    ts = np.exp(np.linspace(0, np.log(max(time)*5), 1000))
     gamma = np.zeros_like(ts)
-    
-    for j in range(len(t)):
+    print sad, time
+    for j in range(len(time)):
         for i in range(len(gamma)):
-            if ts[i] > t[j]:
-                gamma[i] = energies_found[j]*abs(elo[j]-ehi[j])/ts[i]/3/Tmin
+            if ts[i] > time[j]:
+                t = ts[i]
+                tL = time[j]
+                NE = energies_found[j]
+                gamma[i] = abs(elo[j]-ehi[j])/(3*Tmin*t)*(
+                  NE**2 + NE*t + (t/tL-1)*t)/(NE**2 + t + (t/tL-1)*t)
     sadname = sad.split('/')[-1].split('.')[0]
+
 
     colors.loglog(ts, gamma,sadname)
 
