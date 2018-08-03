@@ -13,9 +13,8 @@
 \newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
 
 \begin{document}
-\title{Dynamic Stochastic Approximation Monte Carlo
-\jpsays{DSA for stochastic optimization (not Monte Carlo) is actually a 
-thing (1965, 2017) although unrealated to what we are doing}
+\title{Stochastic Approximation Monte Carlo with Dynamic Update
+Factor (SAD)
 }
 
 \author{Jordan K. Pommerenck} \author{Tanner T. Simpson}
@@ -136,7 +135,7 @@ describe in detail flat-histogram methods.  Section~\ref{sec:weight} outlines
 weight-based histogram methods used in this work. Section~\ref{sec:transition}
 details the workings of the transition-matrix methods studied in this work.
 Section~\ref{sec:sad} introduces the dynamic stochastic approximation method.
-In Section~\ref{sec:results}, we discuss the performance of the various methods 
+In Section~\ref{sec:results}, we discuss the performance of the various methods
 applied to the model system.
 
 In this work, We compare a variety of flat histogram
@@ -171,18 +170,17 @@ weights $w(E)$ be collected, and transition-matrix methods that
 require that statistics be collected for any transitions between pairs
 of energies.
 
-{\color{red} Both weight-based and transition matrix methods have
-calculate the density of states $D(E)$ for discrete energy
-levels~\cite{haber2018performance}. Energy binning becomes an important
-consideration for complex continous systems for this reason. Energy
-bins are typically of uniform size for the entire energy
+{\color{red} Both weight-based and transition matrix methods calculate
+the density of states $D(E)$ for discrete energy
+levels~\cite{haber2018performance}. For this reason, energy binning
+becomes an important consideration for complex continous systems.
+Energy bins are typically of uniform size for the entire energy
 continuum~\cite{fasnacht2004adaptive}. Coarse binning yields fewer
 energy states to explore but more time spent in each individual bin.
 Fine binning yields more energy states to explore with less time spent
 in each bin. Some methods such as AdaWL~\cite{koh2013dynamically}
 employ a tunable mechanism for controlling the binning for low entropic
-states in order to ensure the exploration of all energies.
-} 
+states in order to ensure the exploration of all energies. }
 
 \section{Weight-based methods}\label{sec:weight}
 
@@ -195,10 +193,10 @@ given by
 	\mathcal{P}(E_\text{old} \rightarrow E_\text{new})
 	= \min\left[1,\frac{w(E_\text{old})}{w(E_\text{new})}\right]
 \end{equation}
-the probability biases the simulation in favor of energies with low weights.  
+the probability biases the simulation in favor of energies with low weights.
 A set of weights that are proportional to the density of states of the
 system $D(E)$ will result in an entirely flat histogram.  Thus
-flat histogram is a criteria for convergence for these methods.  To avoid 
+flat histogram is a criteria for convergence for these methods.  To avoid
 overflow error , since the weights may vary over more than a
 few hundred orders of magnitude, the natural logarithm of the weights are used
 in this work.  Since $D(E) = S(E)$, the logarithm of the weights
@@ -246,11 +244,11 @@ flatness criterion can be defined.
 While this approach
 is very efficient and has been widely used, it suffers a few
 shortcomings.  Firstly, the set of energies must be specified
-~\cite{wang2001efficient, schulz2003avoiding, yan2003fast}, which may 
-require multiple simulations. Secondly, while Wang-Landau converges quickly, 
+~\cite{wang2001efficient, schulz2003avoiding, yan2003fast}, which may
+require multiple simulations. Secondly, while Wang-Landau converges quickly,
 it does not in general converge to the true density of states
 ~\cite{belardinelli2008analysis, zhou2008optimal}.  It can and does decrease
-$\gamma$ so quickly that it will never (for any cutoff value) decrease the 
+$\gamma$ so quickly that it will never (for any cutoff value) decrease the
 error in the density of states beyond a given value.
 
 \subsection{SAMC}
@@ -290,154 +288,90 @@ it adds yet another parameter that must be empirically determined.
 \section{Transition-matrix methods}\label{sec:transition}
 
 \subsection{TMMC Algorithm}
-{\color{red}
-The flat-histogram Wang  and  Landau method utilizes a so-called
+The previously described weight-based flat-histogram methods utilizes a so-called
 ``visited states'' approach to calculate  thermodynamic
 properties~\cite{errington2003direct}. The algorithm is fundamentally
 based on the number of times a given state is visited while the
 system is being sampled. The Transition Matrix Monte Carlo (TMMC) method operates
-differently than the visited states approach~\cite{fitzgerald2000monte}. The method
-uses attempted transitions between states to obtain an estimate of transition probabilities.
+differently than the visited states approach~\cite{fitzgerald2000monte}.
+The method uses attempted transitions between states to obtain an estimate of
+the probability that a given transition will be proposed.  The density
+of states is computed from the resulting transition matrix.  An advantage
+of collecting the transition matrix is that this matrix may be collected
+while another method is employed to compute acceptance probabilities, as
+in Wang-Landau TMMC, discussed below.
 
-Say something about collecting statistics vs WL?
-Say something about detailed balance here?...
-
-For problems that sample states where the relative probabilities
-vary by many orders of magnitude, all of the states will
-not be sampled efficiently within reasonable simulation
-time without introducing a bias in the sampling distribution.
-
-While the current algorithm is highly efficient, a weighting function $\eta(I)$
-is introduced to ensure that the system samples all states
-evenly~\cite{mahynski2017multivariable, blanco2016effect}.
-As for the Flat-histogram approach, the weighting function is
-set inversely proportional to the current macrostate probability.
+The TMMC algorithm records the transition data in a \emph{collection matrix},
+i.e. the unnormalized transition histogram matrix, which stores the number
+of times a transition between two energy states has been proposed.
 \begin{align}
-  \eta(I) = - \ln(D(I))
+  C(E_{\text{old}} \rightarrow E_{\text{new}},t+1)
+     = C(E_{\text{old}} \rightarrow E_{\text{new}},t) + 1
 \end{align}
-The probability is defined in terms of this biasing function:
+The transition matrix is computed from the collection matrix via
 \begin{align}
-  p(I\rightarrow J) = \min\bigg[1,\frac{\eta(J)}
-  {\eta(I)} e^{\beta (E(I)-E(J))}\bigg]
+  T(E_{\text{old}} \rightarrow E_{\text{new}})
+   = \frac{C(E_{\text{old}} \rightarrow E_{\text{new}})}{
+     \sum_E C(E_{\text{old}} \rightarrow E)
+  }
 \end{align}
-The TMMC algorithm consists of recording the data in a collection matrix
-(the unormalized transition histogram matrix).
+The acceptance probability is defined in terms of this biasing function:
 \begin{align}
-  C(I \rightarrow J) = C(I \rightarrow J) + p(I \rightarrow J)\\
-  C(I \rightarrow I) = C(I \rightarrow I) +(1 - p(I \rightarrow J))
+  \mathcal{P}(E_{\text{old}} \rightarrow E_{\text{new}}) =
+  \max\left(1,\frac{T(E_{\text{old}} \rightarrow E_{\text{new}})}{
+       T(E_{\text{new}} \rightarrow E_{\text{old}})}\right)
 \end{align}
-If the energy state has not been changed, then $C$ is still incremented by
-unity. Fitzgerald et al.~\cite{fitzgerald2000monte} showed that defining
-the third step this way results in a uniform improvement over using
-histogram estimators to determine the particle number probability
-distribution (PNPD). The algorithm is highly efficient due to the ability
-to bias the simulation while keeping the criteria used to update the
-collection matrix $C(I\rightarrow J)$.
-}
-
-The Transition Matrix Monte-Carlo (TMMC) method as outlined by
-Fitzgerald et al. consists of three primary steps.  The first two steps
-are common to the Metropolis algorithm while the third makes use of the
-actual transition probabilities~\cite{fitzgerald2000monte}.
-
-\subsubsection{define a transition probability}
-Assuming that the system under study is in a state denoted old, and a
-proposed transition is made to a new state denoted new, the probability
-is defined as
-\begin{align}
-  p_{old \rightarrow new} = p_{new \rightarrow old}
-\end{align}
-where we have allowed the probabilies to be equal for simplicity of
-presentation.
-
-\subsubsection{define an acceptance probability}
-The probability for accepting a transition from an old state to a new
-one can be defined
-\begin{align}
-  p_{a} = \min\bigg[1,\frac{\alpha_{new\rightarrow old}}
-  {\alpha_{old \rightarrow new}}\frac{\pi_{new}}{\pi_{old}}\bigg]
-\end{align}
-where $\alpha_{new\rightarrow old}$ is the probability of generating a
-new system configuration the old.  For conventional Monte-Carlo moves
-$\alpha_{old \rightarrow new} =\alpha_{new\rightarrow old}$ although
-for advanced Monte-Carlo moves this would not be the
-case~\cite{paluch2008comparing, siepmann1990method}.  The probabily of
-observing the system in the old state can be found based on the
-ensemble constraints placed on the system.  Fitzgerald et al.
-considered the system of interest using the canonical ensemble;
-however, the extension to other ensembles is quite natural.
-\begin{align}
-  \pi_{old} = \frac{e^{-\beta E_{old}}}{Z}
-\end{align}
-\subsubsection{define a bookkeeping step}
-The third step in the TMMC algorithm consists of recording the data in
-a collection matrix (the unormalized transition histogram matrix).
-\begin{align}
-  C_{N,\delta} = C_{N,\delta} + p_{a}\\
-  C_{N,0} = C_{N,0} +(1 - p_{a})
-\end{align} If $\delta=0$, that is, the energy state has not been
-changed, then only $C_{N,0}$ is incremented by unity. Fitzgerald et
-al.~\cite{fitzgerald2000monte} showed that defining the third step this
-way results in a uniform improvement over using histogram estimators to
-determine the particle number probability distribution (PNPD).
+where we note that the transition matrix is updated to reflect the
+transition under consideration \emph{prior} to computing the acceptance
+probability.  The TMMC method suffers from poor convergence primarily
+because it is sensitive to poor statistics in less probable energy
+transitions.  Like the weight-based methods above, the TMMC method violates
+detailed balance, with the level of violation decreasing as the simulation
+progresses and a difference of 1 in the collection matrix has a smaller
+impact on the acceptance probabilities.
 
 \subsection{WL-TMMC Algorithm}
-
 Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
 by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
-advantage of the ease of implementation and applicability to a variety
-of systems, while making use of a transition matrix to address WL
-weaknesses, such as its limited statistical accuracy plateau.
-This WL version is more accurate for a given number of simulation steps.
+advantage of the WL methods ease of implementation, while making use of
+a transition matrix to address WL weaknesses, such as its limited
+statistical accuracy convergence.
 
-\paragraph{Initializing Wang-Landau:} We begin the simulation by
-defining a minimum important energy and a maximum entropy state. In
-traditional Wang-Landau the WL factor begins at 1.0 and the factor is
-modified by 2.0 until the simulation is cutoff typically around
-$10^{-10}$.  Rane et. al. published an implemenation of
-WL-TMMC~\cite{rane2013monte} that suggested using a WL factor between
-1.0 and $10^{-2}$ with a cutoff $<10^{-5}$. In our implementation of
-WL-TMMC, we set the WL factor to be 1 and the cutoff to be either
-$10^{-4}$ or $10^{-10}$. A single sweep is defined as each macrostate
-being sampled a number of times in this case 10,000 (although 100 is
-often sufficient for small systems). Wang-Landau sets a flatness
-criteria~\cite{wang2001determining, wang2001efficient,
+\paragraph{Initializing Wang-Landau:}
+We set the energy range along which the method may sample as
+$E(T_{\min}) <E< E(T=\infty)$. Conventional Wang-Landau prescribes
+updating the WL factor $\gamma$ by starting at 1.0 and reducing by
+$\frac12$ until the simulation is cutoff typically around $10^{-10}$.
+While variants of this approach appear in the literature, Rane et. al.
+published an implemenation of WL-TMMC~\cite{rane2013monte} that
+suggested using a WL factor between 1.0 and $10^{-2}$ with a cutoff
+$<10^{-5}$, We implement WL-TMMC by setting the WL factor to be 1.0 and
+the cutoff to be either $10^{-4}$ or $10^{-10}$.
+
+A single sweep ``roundtrip'' is defined as each macrostate being
+sampled a number of times in this case 100,000 times. Wang-Landau sets
+a flatness criteria~\cite{wang2001determining, wang2001efficient,
 hatch2015computational, mahynski2017predicting} for the accumulated
-histogram usually between 0.75 to 0.90.  In the original
-implementation, it was found to be sufficient that each macrostate is
-visited at least once (each histogram bin has one
-entry)~\cite{shell2003improved}; however, for other systems this is
-rarely sufficient.  The goal of this WL initialization is to prefill
-the transition matrix for the next portion of the simulation.
-\paragraph{Initializing TMMC:} Prefilling the transition
-matrix is necessary because if numerous zeros existed in the collection
-matrix, the infinite temperature transition matrix would be
-ill-defined.  Sampling over large ranges of density of states would
-therefore take an unacceptable length of time to
-complete~\cite{shell2003improved, shen2014elucidating}.  The transition
-matrix in terms of the collection matrix is given as
-follows:
-\begin{align}
-\widetilde{T}_{\infty}(I\rightarrow J) = \frac{C(I,J)}
-{\sum_{K} C(I,K)}
-\end{align}
-We now run the TMMC portion of the simulation.
-%Siderius does this for 20 additional sweeps (does about 8 sweeps for
-%WL).  We do this until we reach a defined number of iterations. We
-%have not yet implemented a biasing function to control acceptance rate
-%of trial moves but we could? at some point.
-The acceptance probability is written in terms of the infinite temperature
-transition matrix.
-\begin{align}
-  P_{acc}(i\rightarrow j) = \min\bigg[1,\frac{\widetilde{T}_{\infty}(J\rightarrow I)}
-  {\widetilde{T}_{\infty}(I\rightarrow J)}\bigg]
-\end{align}
-This probability is only used to control actual transitions not update
-the collection matrices.
+histogram usually to be 0.8.  In the original implementation, it was
+found to be sufficient that each macrostate is visited at least once
+(each histogram bin has one entry)~\cite{shell2003improved}; however,
+for other systems this is rarely sufficient~\cite{bhar2009computer}.
+The goal of this WL initialization is to prefill the transition matrix
+for the next portion of the simulation.
+
+\paragraph{Initializing TMMC:} Prefilling the transition matrix is
+necessary because if numerous zeros existed in the collection matrix,
+the infinite temperature transition matrix would be ill-defined.
+Sampling over large ranges of density of states would therefore take an
+unacceptable length of time to complete~\cite{shell2003improved,
+shen2014elucidating}.  The TMMC portion of the algorithm is run only
+after WL has reached the specified cutoff. An important note is that
+the acceptatnce probability for TMMC is only used to control actual
+transitions not update the collection matrices.
 
 \section{SAD Algorithm}\label{sec:sad}
-\subsubsection{The theory behind SAD}
-The SAD (Dynamic Stochastic Approximation) method is a version of the SAMC
+The Stochastic Approximation with Dynamic update factor (SAD) method
+is a variant of the SAMC
 Algorithm that attempts to dynamically choose the modification factor
 rather than relying on system dependent parameters such as $t_0$ or
 $\gamma_0$.  There is an immediate advantage of such an algorithm where
@@ -531,8 +465,8 @@ dynamically around a value less than 1 for early MC moves
 to SAD, but described after we see the plot}.
 }
 
-\subsubsection{The ``interesting'' energy range}\label{sec:EHL}
-Since SAD explores all energy states it needs to have a reasonable idea
+Since SAD does not explore \emph{all} energy states it needs to have a
+reasonable idea
 of what energy range corresponds to the temperature range of interest,
 defined by $T_{\min}<T<\infty$.
 The
@@ -585,7 +519,7 @@ will approach the entropy as the simulation progresses.
     have different MC moves (slow, etc).}
 \end{figure}
 
-\subsubsection{Energy binning with SAD}
+\paragraph{Energy binning with SAD}
 
 Energy binning is an important consideration for complex continous
 systems. Coarse binning yields fewer energy states for the walker to
@@ -604,7 +538,7 @@ This argument explains why SAD should perform well for complex systems
 in terms of binning. SAMC has a prefactor $\gamma_0$ to aid in a
 similar way but this adds yet another parameter for the user to choose.
 
-\subsubsection{Scaling, step size, and SAD}
+\paragraph{Scaling, step size, and SAD}
 Methods such as WL can fail to converge for complex systems in part
 because the same random MC moves are performed for the entire energy
 range.  The main problem lies in trying to determine how to optimize
@@ -683,7 +617,7 @@ a translation scale $\delta_0 = 0.05$).
 \subsubsection{translation scale}
 For the $\lambda = 30\%$ and $N = 50$ system, we explore the choice of $\delta_0$
 as a parameter. Smaller translation scales should cause the given method to take
-additional time to explore all energies.  A larger translation scale could result 
+additional time to explore all energies.  A larger translation scale could result
 in the simulation taking shorter or longer (because longer distance moves may end up
 not being allowed). Ideal methods should scale linearly with the $\delta_0$, that is,
 a decrease in the translation scale should result in a proportional increase in convergence
