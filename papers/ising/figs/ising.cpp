@@ -487,7 +487,7 @@ int main(int argc, const char *argv[]) {
 
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
-  const char *default_data_dir = "papers/histogram/data/ising";
+  const char *default_data_dir = "ising/tests/results";
   char *filename = new char[1024];
   sprintf(filename, "none");
   char *filename_suffix = new char[1024];
