@@ -430,7 +430,7 @@ $E_H -E_L$ where these energies are defined below in the following
 section.  Early in the simulation, when the energy range is still
 expanding, this average entropy is a good choice
 for $t_0$.  However, as the simulation progresses, our entropy factor
-needs to scale with the total number of energy states that have been
+needs to scale with the total number of \davidsays{interesting} energy states that have been
 found $N_S$, since the product $N_S\langle S\rangle$ corresponds to the
 total change of entropy required, given that each of the $N_S$ states
 will has a separate weight $w(E)$.  Finally, at \emph{long} times, after
@@ -443,16 +443,16 @@ as $\gamma_t \propto 1/t$ to ensure eventual convergence).  The SAD
 expression for $\gamma_t$ which incorporates these ideas is:
 \begin{align}
   \gamma_{t}^{\text{SAD}} =
-     \frac{E_{H}-E_{L}}{3T_{\text{min}}t}
-    \frac{
-      E_S^2 + E_S t + \left(t/t_L-1\right)t
-    }{
-      E_S^2 + t + \left(t/t_L-1\right)t
-    }
+     N_S \frac{
+       \frac{E_{H}-E_{L}}{3T_{\text{min}}} + \frac{t}{t_L}
+     }{
+       N_S^2 + \frac{t^2}{t_L}
+     }
 \end{align}
 This factor asymptotically has the same $1/t$ behavior as the original
 SAMC algorithm;
-however now every time a new energy is discovered during the course of
+however now every time a new energy is found in the
+\davidsays{interesting energy range} during the course of
 the simulation, the update factor experiences a jump. This behavior
 allows SAD to dynamically prevent the update factor from decreasing too
 rapidly. Figure~\ref{fig:gamma-vs-t} compares $\gamma_t$ for SAD, WL,
