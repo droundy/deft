@@ -286,6 +286,8 @@ struct sw_simulation {
     use_wltmmc = false; // default to not using WLTMMC.
     time_L = 1;
     highest_hist = 0;
+    too_low_energy = -1;
+    too_high_energy = -1;
   };
 };
 

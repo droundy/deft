@@ -390,7 +390,7 @@ void sw_simulation::move_a_ball() {
 
 void sw_simulation::end_move_updates(){
    // update iteration counter, energy histogram, and walker counters
-  if(moves.total % N == 0) iteration++;
+  if (moves.total % N == 0) iteration++;
   if (sa_t0) {
     wl_factor = sa_prefactor*sa_t0/max(sa_t0, moves.total);
   }
@@ -398,6 +398,12 @@ void sw_simulation::end_move_updates(){
   if (use_sad) {
     if (energy_histogram[energy] == 1) {
       // This is the first time we ever got here!
+      if (too_low_energy < 0 || too_high_energy < 0) {
+        // This is our first ever move!
+        too_low_energy = energy;
+        too_high_energy = energy;
+        num_sad_states = 1;
+      }
       if (energy < too_low_energy && energy > too_high_energy) {
         num_sad_states++; // We just discovered a new interesting state!
         time_L = moves.total;
@@ -477,31 +483,6 @@ void sw_simulation::end_move_updates(){
     // Note: if not using WL or SA method, wl_factor = 0 and the
     // following has no effect.
     ln_energy_weights[energy] -= wl_factor;
-  }
-  if (use_sad) {
-    bool print_edges = false;
-    if (ln_energy_weights[energy] < ln_energy_weights[max_entropy_state]
-        || energy_histogram[max_entropy_state] == 0) {
-      // We are now at the max_entropy_state!
-      max_entropy_state = energy;
-      if (max_entropy_state < too_high_energy) too_high_energy = max_entropy_state;
-      // print_edges = true;
-    }
-    if (ln_energy_weights[energy] < ln_energy_weights[min_important_energy] + (energy-min_important_energy)/min_T
-        || energy_histogram[min_important_energy] == 0) {
-      // We are above the min_important_energy tangent line, which
-      // means we are the new min_important_energy.
-      //if (energy != min_important_energy) print_edges = true;
-      min_important_energy = energy;
-    }
-    // FIXME it seems like the following should be inside the above if statement,
-    // which is more efficient, and we only need to update the too_low_energy
-    // when the min_important_energy changes, but somewhere else the min_important_energy
-    // is being adjusted and I don't know where.  -- David
-    if (min_important_energy > too_low_energy) too_low_energy = min_important_energy;
-
-    if (print_edges) printf(" %5d ...%5d -->%5d ...%5d\n",
-                            too_low_energy, min_important_energy, max_entropy_state, too_high_energy);
   }
 }
 
@@ -617,9 +598,6 @@ double* sw_simulation::compute_ln_dos(dos_types dos_type) {
 }
 
 int sw_simulation::set_min_important_energy(double *input_ln_dos){
-  // sad tracks min_important_energy continually
-  if (use_sad) return min_important_energy;
-
   // We always use the transition matrix to estimate the
   // min_important_energy, since it is more robust at the outset.
   double *ln_dos;
@@ -627,29 +605,14 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
   else ln_dos = compute_ln_dos(transition_dos);
 
   min_important_energy = 0;
-  /* Look for a the highest significant energy at which the slope in ln_dos is 1/min_T */
-  for (int i = max_entropy_state+1; i <= energy_levels; i++) {
-    if (ln_dos[i-1] - ln_dos[i] < 1.0/min_T
-        && ln_dos[i] != ln_dos[i-1]) {
-      // This is an important energy if the DOS is high enough, and we
-      // have some decent statistics here.
+  // Look for a energy which maximizes the free energy at temperature min_T
+  for (int i=0; i < energy_levels; i++) {
+    if (energy_histogram[i] &&
+        ln_dos[i] + i/min_T > ln_dos[min_important_energy] + min_important_energy/min_T) {
       min_important_energy = i;
-    } else if (ln_dos[i-1] == ln_dos[i]) {
-      // We have no information about this state, so let us keep
-      // looking, in case there is a nice state at lower energy...
-    } else {
-      // Adjust ln_dos for the next state to match the "canonical"
-      // value.  This allows us to handle situations where there is a
-      // drop in the density of states followed by a peak that is
-      // large enough to warrant considering the lower energy
-      // important.
-      ln_dos[i] = ln_dos[i-1] - 1.0/min_T;
     }
-  }
-  /* If we never found a slope of 1/min_T, just use the lowest energy we've seen */
-  if (min_important_energy == 0) {
-    for (int i=max_entropy_state; i<energy_levels; i++) {
-      if (energy_histogram[i]) min_important_energy = i;
+    if (energy_histogram[i] && !energy_histogram[min_important_energy]) {
+      min_important_energy = i;
     }
   }
 
@@ -659,9 +622,6 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
 }
 
 void sw_simulation::set_max_entropy_energy() {
-  // sad tracks max_entropy_state continually
-  if (use_sad) return;
-
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   for (int i=energy_levels-1; i >= 0; i--) {
@@ -743,6 +703,8 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
       return true;
     } else { // if end_condition == pessimistic_min_samples
       if (be_verbose) {
+        set_max_entropy_energy();
+        set_min_important_energy();
         long energies_unconverged = 0;
         int highest_problem_energy = energy_levels-1;
         for (int i = min_important_energy; i > max_entropy_state; i--){
@@ -753,13 +715,13 @@ bool sw_simulation::finished_initializing(bool be_verbose) {
         }
         double *ln_dos = compute_ln_dos(transition_dos);
         const double nice_T = 1.0/(ln_dos[highest_problem_energy] - ln_dos[highest_problem_energy+1]);
-        delete[] ln_dos;
         printf("[%9ld] Have %ld energies to go (down to T=%g or %g)\n",
                iteration, energies_unconverged, nice_T, converged_to_temperature(ln_dos));
         printf("       <%d - %d vs %d> has samples <%ld - %ld>/%d (current energy %d",
                min_important_energy, highest_problem_energy, max_entropy_state,
                pessimistic_samples[min_important_energy],
                pessimistic_samples[highest_problem_energy], min_samples, energy);
+        delete[] ln_dos;
         if (use_sad) printf(", %.2g, t0 %.2g", wl_factor, wl_factor*moves.total);
         printf(")\n");
         {
@@ -983,8 +945,6 @@ void sw_simulation::initialize_wang_landau(double wl_fmod,
 
 void sw_simulation::initialize_samc(int am_sad) {
   use_sad = am_sad;
-  too_high_energy = energy_levels-1;
-  too_low_energy = 0;
   assert(sa_t0 || am_sad);
   assert(sa_prefactor);
 
