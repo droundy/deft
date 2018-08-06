@@ -462,11 +462,9 @@ void sw_simulation::end_move_updates(){
       if (too_low_energy > too_high_energy) {
         const double t = moves.total;
         const double dE = too_low_energy-too_high_energy;
-    
-        wl_factor = dE/(min_T*t*use_sad)
-          *(num_sad_states*num_sad_states + num_sad_states*t + t*(t/time_L - 1))
-          /(num_sad_states*num_sad_states + t + t*(t/time_L - 1));
-    
+        const double Smean = dE/(min_T*use_sad);
+        const double Ns = num_sad_states;
+        wl_factor = Ns*(Smean + t/time_L)/(Ns*Ns + t*t/time_L);
         /*
           printf("       gamma = %g, oldgamma = %g   ratio %f num_sad_states %d\n",
                  wl_factor,
