@@ -770,12 +770,10 @@ int main(int argc, const char *argv[]) {
             sscanf(line , " working moves: %ld " , &sw.moves.working);
             sscanf(line , " total moves: %ld " , &sw.moves.total);
             sscanf(line , " iterations: %ld " , &sw.iteration);
-            sscanf(line , " energies found: %d " , &sw.energies_found);
+            sscanf(line , " num sad states: %d " , &sw.num_sad_states);
             sscanf(line , " too high energy: %d " , &sw.too_high_energy);
             sscanf(line , " too low energy: %d " , &sw.too_low_energy);
             sscanf(line , " minimum important energy: %d " , &sw.min_important_energy);
-            sscanf(line , " minimum energy: %d " , &sw.min_energy);
-            sscanf(line , " maximum energy: %d " , &sw.max_energy);
             sscanf(line , " maximum entropy: %d " , &sw.max_entropy_state);
 
             
@@ -985,12 +983,10 @@ int main(int argc, const char *argv[]) {
         fprintf(resume_out, "%s", headerinfo);
         fprintf(resume_out, "%s", countinfo);
         fprintf(resume_out, "# max_entropy_state: %d\n", sw.max_entropy_state);
-        fprintf(resume_out, "# energies found: %d\n", sw.energies_found);
+        fprintf(resume_out, "# num sad states: %d\n", sw.num_sad_states);
         fprintf(resume_out, "# too low energy: %d\n", sw.too_low_energy);
         fprintf(resume_out, "# too high energy: %d\n", sw.too_high_energy);
         fprintf(resume_out, "# minimum important energy: %d\n", sw.min_important_energy);
-        fprintf(resume_out, "# minimum energy: %d\n", sw.min_energy);
-        fprintf(resume_out, "# maximum energy: %d\n", sw.max_energy);
         fprintf(resume_out, "# maximum entropy: %d\n", sw.max_entropy_state);
 
         fprintf(resume_out, "# energy   lnw\n");

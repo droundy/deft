@@ -841,8 +841,6 @@ int main(int argc, const char *argv[]) {
     sw.initialize_canonical(sw.min_T,sw.min_important_energy);
   }
 
-  double fractional_sample_error = sw.fractional_sample_error(sw.min_T,optimistic_sampling);
-
   // ----------------------------------------------------------------------------
   // Generate save file info
   // ----------------------------------------------------------------------------
@@ -879,13 +877,12 @@ int main(int argc, const char *argv[]) {
           "# neighbor_scale: %g\n"
           "# energy_levels: %i\n"
           "# min_T: %g\n"
-          "# fractional_sample_error after initialization: %g\n"
           "# max_entropy_state: %d\n"
           "# min_important_energy after initialization: %i\n\n",
           version_identifier(),
           sw.well_width, sw.filling_fraction, sw.N, sw.walls, sw.len[0], sw.len[1],
           sw.len[2], seed, de_g, de_density, sw.translation_scale, neighbor_scale,
-          sw.energy_levels, sw.min_T, fractional_sample_error,
+          sw.energy_levels, sw.min_T,
           sw.max_entropy_state,
           sw.set_min_important_energy());
 

@@ -68,18 +68,12 @@ struct sw_simulation {
   double neighbor_R; // radius of our neighbor sphere
   double translation_scale; // scale for how far to move balls
   int energy_levels; // total number of energy levels
-  int energies_found; // number of energy levels that have been visited
+  int num_sad_states; // number of energy levels between too low and high
 
   /* The following accumulate results of the simulation. Although
      ln_energy_weights is a constant except during initialization. */
 
   int max_entropy_state, min_important_energy;
-  int min_energy; // The lowest energy we have ever found for this
-                  // system.  This must be kept up-to-date because
-                  // it is used by SAD to compute the delta E.
-  int max_energy; // The highest energy we have ever found for this
-                  // system.  This must be kept up-to-date because
-                  // it is used by SAD to compute the delta E.
   int too_high_energy; // too_high_energy is used in SAD, and is the
                        // highest ever value that max_entropy_state has
                        // taken.  It is used to define the range over
@@ -88,6 +82,7 @@ struct sw_simulation {
                       // lowest ever value that min_important_energy has
                       // taken.  It is used to define the range over
                       // which our histogram is made flat.
+  long highest_hist;
   move_info moves;
   long time_L;
   long *energy_histogram;
@@ -217,9 +212,6 @@ struct sw_simulation {
                                       bool verbose); // added by JP in 2017 for wltmmc.
   void optimize_weights_using_transitions(int version);
 
-  // return fractional error in sample count
-  double fractional_sample_error(double T, bool optimistic_sampling);
-
   double* compute_ln_dos(dos_types dos_type);
 
   int set_min_important_energy(double *ln_dos = 0);
@@ -273,7 +265,7 @@ struct sw_simulation {
   }
 
   sw_simulation(){
-    energies_found = 0; // we have not yet found any!
+    num_sad_states = 0; // we have not yet found any!
     // seconds per iteration (will be adjusted from actual timing)
     estimated_time_per_iteration = 0.1;
     transitions_filename = 0; // default to NULL pointer here for safety.
@@ -292,9 +284,8 @@ struct sw_simulation {
     use_tmmc = false; // default to not using TMMC for accepting moves.
     use_wl = false; // default to not using WL.
     use_wltmmc = false; // default to not using WLTMMC.
-    min_energy = -1;
-    max_energy = -1;
     time_L = 1;
+    highest_hist = 0;
   };
 };
 

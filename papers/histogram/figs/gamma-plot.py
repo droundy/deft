@@ -38,7 +38,7 @@ except:
 
 for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     data = np.loadtxt(sad)
-    energies_found = data[:,0]
+    num_sad_states = data[:,0]
     time = data[:,1]
     ehi = data[:,2]
     elo = data[:,3]
@@ -50,7 +50,7 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
             if ts[i] > time[j]:
                 t = ts[i]
                 tL = time[j]
-                NE = energies_found[j]
+                NE = num_sad_states[j]
                 gamma[i] = abs(elo[j]-ehi[j])/(3*Tmin*t)*(
                   NE**2 + NE*t + (t/tL-1)*t)/(NE**2 + t + (t/tL-1)*t)
     sadname = sad.split('/')[-1].split('.')[0]
