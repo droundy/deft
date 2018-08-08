@@ -278,6 +278,51 @@ prescription for finding an acceptable value for $t_0$, and
 while the algorithm formally converges, for a poor choice of $t_0$
 that convergence can be far too slow to be practical.
 
+{\color{red}
+It is for this reason that we propose a way to determine the update factor
+``dynamically'' while still satisfying the criteria for convergence.
+For the update factor to scale well across both discrete and continuous systems,
+it must include the number of states $N_S$. We define the average entropy as
+$\bar S$ and the time since the simulation last found a new energy state $t_L$.
+We then can write the following expression for the \emph{proposed} update factor.
+\begin{align}
+\gamma = N_S \frac{\bar S + \nicefrac{t}{t_L}}{N_{S}^2 + \nicefrac{t^2}{t_L}}
+\end{align}
+We now consider the following limiting cases:
+\subsubsection{$t \propto N_S \approx t_L$ and $ t << N_S$}
+In this limiting case, we find that the update factor reduces to
+\begin{align}
+\gamma \approx \frac{\bar S}{N_S} \approx \frac{\bar S}{t} 
+\end{align}
+Because $t \propto N_S$, the update factor scales as 1/t which is consistent
+with the requirement for SAMC convergence.
+\subsubsection{$t >> N_{S}^2$ and $ t\approx t_L$}
+In this limiting case, we find that the update factor reduces to
+\begin{align}
+\gamma \approx \frac{N_S \bar S t_L}{t^2} \approx \frac{N_S \bar S}{t} 
+\end{align}
+\subsubsection{$t >> t_L \bar S$}
+In this limiting case, we find that the update factor reduces to
+\begin{align}
+\gamma \approx \frac{N_S}{t}
+\end{align}
+We now integrate (sum) the update factor from the last time an energy state was found
+to the final simulation time to ensure that convergence is guaranteed.
+\begin{align}
+\int_{t_L}^{t_f} \gamma dt \approx t_L N_S \left[ \int_{t_L}^{t_f} 
+\frac{\bar S -1}{t^2} dt + \frac{1}{t_L}\int_{t_L}^{t_f} \frac{1}{t} dt \right]
+\end{align}
+From this we obtain
+\begin{align}
+\int_{t_L}^{t_f} \gamma dt \approx t_L N_S \left[\left(\bar S -1\right)\left(\frac{1}{t_L}-\frac{1}{t_f}\right) + \frac{1}{t_L} \ln\left(\frac{t_f}{t_L}\right) \right]
+\end{align}
+Simplifying, we see that as $t_f \rightarrow \infty$ then $\gamma \rightarrow \infty$ satisfying
+the requirement for SAMC convergence.
+\begin{align}
+\gamma \approx \left(1-\frac{t_L}{t_f}\right)N_S\left(\bar S -1\right) + N_S \ln\left(\frac{t_f}{t_L}\right)
+\end{align}
+}
+
 Werlich \emph{et al.} proposed scaling the SAMC $\gamma_t$ by a factor
 $\gamma_0$.  While this may result in an improved rate of convergence,
 it adds yet another parameter that must be empirically determined.
