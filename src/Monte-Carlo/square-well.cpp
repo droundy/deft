@@ -424,11 +424,11 @@ void sw_simulation::end_move_updates(){
         num_sad_states = 0;
         // We need to update the number of states between the too high
         // and too low energies.
+        too_high_energy = energy;
         for (int i=too_high_energy; i<=too_low_energy; i++) {
           if (energy_histogram[i]) num_sad_states++;
         }
         time_L = moves.total;
-        too_high_energy = energy;
       } else if (energy > too_low_energy) {
         //printf("In low!\n");
         for (int i = too_low_energy; i <= energy; i++) {
@@ -442,12 +442,12 @@ void sw_simulation::end_move_updates(){
         }
         // We need to update the number of states between the too high
         // and too low energies.
+        too_low_energy = energy;
         num_sad_states = 0;
         for (int i=too_high_energy; i<=too_low_energy; i++) {
           if (energy_histogram[i]) num_sad_states++;
         }
         time_L = moves.total;
-        too_low_energy = energy;
       }
     }
     if (moves.total == time_L) {
