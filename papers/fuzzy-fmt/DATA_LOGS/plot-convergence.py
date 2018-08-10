@@ -36,7 +36,7 @@ def create_fig(dataname, energy_column):
     energy_name = energy_names[energy_column]
     print dataname, energy_name
     data = np.loadtxt('DATA_LOGS/%s.dat' % dataname)
-    plot_name="DATA_LOGS/PLOTS/Plots_n1.0/%s_vs_%s.png" % (dataname, energy_name)
+    plot_name="DATA_LOGS/PLOTS/%s_vs_%s.png" % (dataname, energy_name)
 
     dx = data[:,0]
     mcerror = data[:,1]
