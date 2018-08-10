@@ -2,6 +2,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+
+os.system('mkdir -p DATA_LOGS/PLOTS/Plots_n1.0')
 
 #gw=0.10 Ftot
 plt.figure()
