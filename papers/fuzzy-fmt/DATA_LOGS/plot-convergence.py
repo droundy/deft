@@ -4,20 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os, argparse
 
-parser = argparse.ArgumentParser(description='Creates plots.')
-parser.add_argument('-w', type=float, action='append')
-parser.add_argument('-n', type=float, action='append')
-
-args = parser.parse_args()
-if args.w is None:
-    args.w = [0.1]
-if args.n is None:
-    args.n = [1.0]
-
-print(args)
-
-os.system('mkdir -p DATA_LOGS/PLOTS/Plots_n1.0')
-
 energy_names = {
     2: 'Phi1',
     3: 'Phi2',
@@ -30,6 +16,23 @@ energy_latex = {
     4: r'$\Phi_3$',
     5: r'$F_{tot}$',
 }
+
+parser = argparse.ArgumentParser(description='Creates plots.')
+parser.add_argument('-w', type=float, action='append')
+parser.add_argument('-n', type=float, action='append')
+parser.add_argument('-p', action='append')
+
+args = parser.parse_args()
+if args.w is None:
+    args.w = [0.1]
+if args.n is None:
+    args.n = [1.0]
+if args.p is None:
+    args.p = list(energy_names.values())
+
+print(args)
+
+os.system('mkdir -p DATA_LOGS/PLOTS/Plots_n1.0')
 
 def create_fig(dataname, energy_column):
     plt.figure()
@@ -61,7 +64,8 @@ def create_fig(dataname, energy_column):
 
 def create_plots(dataname):
     for column in [2,3,4,5]:
-        create_fig(dataname, column)
+        if energy_names[column] in args.p:
+            create_fig(dataname, column)
 
 for n in args.n:
     for w in args.w:
