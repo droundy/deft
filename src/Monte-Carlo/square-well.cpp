@@ -602,18 +602,20 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
   if (input_ln_dos) ln_dos = input_ln_dos;
   else ln_dos = compute_ln_dos(transition_dos);
 
-  min_important_energy = 0;
   // Look for a energy which maximizes the free energy at temperature min_T
-  for (int i=0; i < energy_levels; i++) {
-    if (energy_histogram[i] &&
-        ln_dos[i] + i/min_T > ln_dos[min_important_energy] + min_important_energy/min_T) {
-      min_important_energy = i;
-    }
-    if (energy_histogram[i] && !energy_histogram[min_important_energy]) {
-      min_important_energy = i;
+  if (!use_wltmmc && !use_wl) {
+    min_important_energy = 0;
+    for (int i=0; i < energy_levels; i++) {
+      if (energy_histogram[i] &&
+          ln_dos[i] + i/min_T > ln_dos[min_important_energy] + min_important_energy/min_T) {
+        min_important_energy = i;
+      }
+
+      if (energy_histogram[i] && !energy_histogram[min_important_energy]) {
+        min_important_energy = i;
+      }
     }
   }
-
   if (!input_ln_dos) delete[] ln_dos;
 
   return min_important_energy;
@@ -623,7 +625,9 @@ void sw_simulation::set_max_entropy_energy() {
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   for (int i=energy_levels-1; i >= 0; i--) {
-    if (ln_dos[i] > ln_dos[max_entropy_state]) max_entropy_state = i;
+    if (ln_dos[i] > ln_dos[max_entropy_state] && energy_histogram[i]) {
+      max_entropy_state = i;
+    }
   }
   delete[] ln_dos;
 }
