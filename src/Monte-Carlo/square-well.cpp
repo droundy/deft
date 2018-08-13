@@ -412,11 +412,9 @@ void sw_simulation::end_move_updates(){
     if (energy_histogram[energy] > highest_hist) {
       highest_hist = energy_histogram[energy];
       if (energy < too_high_energy) {
-        //printf("In High!\n");
         for (int i = energy; i < too_high_energy; i++) {
           if (energy_histogram[i]) {
-              ln_energy_weights[i] = ln_energy_weights[too_high_energy]
-                - log(energy_histogram[i]/double(highest_hist));
+              ln_energy_weights[i] = ln_energy_weights[too_high_energy];
           } else {
             ln_energy_weights[i] = 0;
           }
@@ -430,12 +428,11 @@ void sw_simulation::end_move_updates(){
         }
         time_L = moves.total;
       } else if (energy > too_low_energy) {
-        //printf("In low!\n");
         for (int i = too_low_energy; i <= energy; i++) {
           if (energy_histogram[i]) {
             ln_energy_weights[i] = ln_energy_weights[too_low_energy]
-                - log(energy_histogram[i]/double(highest_hist))
                 + (energy-too_low_energy)/min_T;
+            if (ln_energy_weights[i] > 0) ln_energy_weights[i] = 0;
           } else {
             ln_energy_weights[i] = 0;
           }
@@ -457,7 +454,6 @@ void sw_simulation::end_move_updates(){
          /(min_T*use_sad*moves.total));
     }
     if (energy >= too_high_energy && energy <= too_low_energy) {
-      //printf("In Interesting!\n");
       // We are in the "interesting" region, so use an ordinary SA update.
       if (too_low_energy > too_high_energy) {
         const double t = moves.total;
