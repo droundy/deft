@@ -433,36 +433,9 @@ needing to know a prior either an energy range or some unphysical
 parameter $t_0$.
 
 While for SAMC the update factor is defined in the original
-implementation, for SAD the update factor $\gamma_{t}^{\text{SA}}$ can
-be thought of as $\nicefrac{\text{d}S}{\text{d}t}$. This tells us that
-$t_0$ should have dimensions of entropy.  We argue that we can write
-this entropy `term' geometrically as an area bounded by the $\ln{D(E)}$
-i.e. the entropy. This gives the following
-\begin{align}
-\gamma_{t}^{\text{SAD}} =
-\frac{N_E}{t}\frac{E_{H}-E_{L}}{3T_{\text{min}}}
-\end{align}
-where $N_E$ is the number of energies that have been found. The change
-in the entropy the minimum temperature can be thought of as a slope of
-the triangle made by connecting the minimum important energy and the
-maximum entropy state.  The factor of $3$ comes from the ratio of areas
-bounded by the $\ln{D(E)}$ and the minimum temperature line. The update
-factor has the same $1/t$ behavior as the original SAMC algorithm;
-however now every time a new energy is discovered during the course of
-the simulation, the update factor experiences a jump. This behavior
-allows SAD to dynamically prevent the update factor from decreasing too
-rapidly. In contrast to SAD, Fig.~\ref{fig:gamma-vs-t}. shows the
-monotonic decrease of the update factor for SAMC.  The update factor
-for WL decreases like a step function while the update factor for SAD
-dynamically fluctuates around a value less than 1 for early MC moves
-(while finding new energy states).  Ultimately once all energy states
-have been found, the update factor for SAD decreases in the same
-monotonic fashion as SAMC.
-
-{\color{red}
-While for SAMC the update factor is defined in the original
 implementation, for SAD the update factor $\gamma_{t}^{\text{SAD}}$ is
 thought of as $\nicefrac{\text{d}S}{\text{d}t}$. This tells us that
+the SAMC parameter
 $t_0$ should have dimensions of entropy.
 We begin with an estimate of the average value of the entropy (relative
 to the lowest entropy at $T_{\min}$).  If we assume a quadratic
@@ -470,37 +443,42 @@ dependence on energy, this is given by
 \begin{align}
 \langle S\rangle \approx \frac13 \frac{E({T=\infty}) - E(T_{\min})}{T_{\min}}
 \end{align}
-We approximate this energy difference by the energy difference
-$E_H -E_L$ where these energies are defined below in the following
-section.  Early in the simulation, when the energy range is still
-expanding, this average entropy is a good choice
-for $t_0$.  However, as the simulation progresses, our entropy factor
-needs to scale with the total number of \davidsays{interesting} energy states that have been
-found $N_S$, since the product $N_S\langle S\rangle$ corresponds to the
-total change of entropy required, given that each of the $N_S$ states
-will has a separate weight $w(E)$.  Finally, at \emph{long} times, after
-all the energies have been found and the weights are being refined
-we wish for a lower $t_0$ in order to reduce the fluctuations in the
-weights that result from large values for $\gamma_t$.  We enable this
+We approximate this energy difference by
+$E_H -E_L$ where $E_H$ and $E_L$ are defined below.
+The entropy numerator of the update factor
+in general should scale with the total number of interesting
+energy states $N_S$, since updates to the weights are distributed between
+that many energy states.  The product $N_S\langle S\rangle$ is the
+total change of entropy required (starting from constant weights) to find
+the true entropy, and puts a lower bound on the convergence time.
+After \emph{long} times, when
+all the energies have been long ago found,
+we wish for a lower $t_0$ in order to more rapidly refine the remaining
+error in entropy.  We enable this
 by tracking the last time we encountered a new energy $t_L$, and
 gradually transition to lower $t_0$ (but still asymptotically scaling
-as $\gamma_t \propto 1/t$ to ensure eventual convergence).  The SAD
+as $\gamma_t \propto 1/t$ to ensure eventual convergence).  Finally,
+we wish for an update factor that is \emph{never} greater than 1, because
+a very large update factor could introduce errors in entropy that may take
+many iterations to remove.  The SAD
 expression for $\gamma_t$ which incorporates these ideas is:
 \begin{align}
   \gamma_{t}^{\text{SAD}} =
-     N_S \frac{
+     \frac{
        \frac{E_{H}-E_{L}}{3T_{\text{min}}} + \frac{t}{t_L}
      }{
-       N_S^2 + \frac{t^2}{t_L}
+       \frac{E_{H}-E_{L}}{3T_{\text{min}}} + \frac{t}{N_S}\frac{t}{t_L}
      }
 \end{align}
 This factor asymptotically has the same $1/t$ behavior as the original
 SAMC algorithm;
-however now every time a new energy is found in the
-\davidsays{interesting energy range} during the course of
-the simulation, the update factor experiences a jump. This behavior
+however now every time a new energy is found to be important
+during the course of
+the simulation, the update factor will experience a jump. This behavior
 allows SAD to dynamically prevent the update factor from decreasing too
-rapidly. Figure~\ref{fig:gamma-vs-t} compares $\gamma_t$ for SAD, WL,
+rapidly.
+
+Figure~\ref{fig:gamma-vs-t} compares $\gamma_t$ for SAD, WL,
 and SAMC.  The update factor
 for WL remains high for many iterations, and then decreases very rapidly,
 while the SAMC $\gamma_t$ remains constant before dropping as $1/t$.
@@ -508,11 +486,9 @@ The update factor for SAD in contrast fluctuates
 dynamically around a value less than 1 for early MC moves
 (while finding new energy states), before dropping in a \davidsays{similar
 to SAD, but described after we see the plot}.
-}
 
-Since SAD does not explore \emph{all} energy states it needs to have a
-reasonable idea
-of what energy range corresponds to the temperature range of interest,
+Since SAD does not explore \emph{all} energy states it needs determine
+what energy range corresponds to the temperature range of interest,
 defined by $T_{\min}<T<\infty$.
 The
 simulation is responsible for determining and updating this energy
@@ -523,32 +499,42 @@ range as
   $E(T_{\min}) <E< E(T=\infty)$
 %\end{align}
 where $E(T)$ is the energy that maximizes $S-E/T$.  In the course of the
-simulation this precise energy may be challenging to evaluate accurately.
+simulation this precise energy is challenging to evaluate accurately.
 In order to ensure that we sample this entire energy range adequately,
 we define two energy limits:  a high energy $E_H$ and a low
-energy $E_L$ to define the range over which the energy histogram
-is made flat. $E_H$ is chosen to be the greatest energy that
-maximized the entropy at any time during the simulation.  Similarly,
-$E_L$ is the lowest energy that ever maximized $S(E)-E/T_{\min}$ during
-the simulation.  This creates a ``ratcheting'' effect, in which $E_H$
+energy $E_L$, which define the range over which the energy histogram
+is made flat. At move $t$, $E_H$ and $E_L$ are the greatest and lowest
+energy that has prior to that move
+had the highest histogram value (i.e. been visited the most times) in
+the course of the simulation.
+This definition results in a ``ratcheting'' effect, in which $E_H$
 may only increase, while $E_L$ may only decrease over the course of the
 simulation, which results in a conservative estimate of the range of
 energies that need be sampled.
 
-Outside of the energy range $E_L \le E \le E_H$, the weights are
-determined from the accumulated energy histogram. For each energy $E_i
-> E_H$, the energy weights are calculated
-\begin{align}
-w(E_i)_{t+1} = w(E_H)_{t} + \ln\left(\frac{H(E_i)}{H_{\max}}\right)
+During the simulation when considering a move outside of the energy
+range $E_L \le E \le E_H$, Boltzmann weights are used.  If $E\ge E_H$,
+the weight is taken to be
+\begin{align}\label{eq:highw}
+  w(E>E_H) &= w(E_H),
 \end{align}
-assuming of course that the simulation has collected statistics at that energy.
-For each energy $E_i
-< E_L$, the energy weights are calculated
-\begin{align}
-w(E_i)_{t+1} = w(E_L)_{t} + \ln\left(\frac{H(E_i)}{H_{\max}}\right) +
-\frac{E_i - E_L}{T_{\min}}
+which corresponds to an infinite temperature.
+This choice ensures that
+if the maximum in entropy is at an energy $E_{\max}>E_H$, then the energy
+$E_{\max}$
+will eventually have the highest number of counts and the ratcheting will
+result in $E_H\ge E_{\max}$ .
+At lower energies, Boltzmann weights corresponding to the minimum temperature
+are used:
+\begin{align}\label{eq:loww}
+  w(E<E_L) &= w(E_L)e^{-\frac{E_L-E}{T_{\min}}}.
 \end{align}
-
+This choice has the result that if the energy $E_{\min}$ at which the free
+energy at $T_{\min}$ is minimized is less than $E_L$, the lower energy
+limit will ratchet down to include $E_{\min}$.
+Each time we change the value of $E_H$ or $E_L$, the weights within the
+new portion of the interesting energy range are set to the expressions
+in Equations~\ref{eq:highw} and~\ref{eq:loww}.  
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n500}
