@@ -1365,7 +1365,7 @@ void sw_simulation::write_transitions_file() {
       // This loop increments transitions_movie_count until it reaches
       // an unused file name.  The idea is to enable two or more
       // simulations to contribute together to a single movie.
-      sprintf(fname, transitions_movie_filename_format, transitions_movie_count++);
+      sprintf(fname, transitions_movie_filename_format, ++transitions_movie_count);
     } while (!stat(fname, &st));
     write_t_file(*this, fname);
     delete[] fname;
@@ -1377,7 +1377,7 @@ void sw_simulation::write_transitions_file() {
       // This loop increments dos_movie_count until it reaches
       // an unused file name.  The idea is to enable two or more
       // simulations to contribute together to a single movie.
-      sprintf(fname, dos_movie_filename_format, dos_movie_count++);
+      sprintf(fname, dos_movie_filename_format, ++dos_movie_count);
     } while (!stat(fname, &st));
     write_d_file(*this, fname);
     delete[] fname;
@@ -1389,7 +1389,7 @@ void sw_simulation::write_transitions_file() {
       // This loop increments lnw_movie_count until it reaches
       // an unused file name.  The idea is to enable two or more
       // simulations to contribute together to a single movie.
-      sprintf(fname, lnw_movie_filename_format, lnw_movie_count++);
+      sprintf(fname, lnw_movie_filename_format, ++lnw_movie_count);
     } while (!stat(fname, &st));
     write_lnw_file(*this, fname);
     delete[] fname;
