@@ -460,7 +460,7 @@ void sw_simulation::end_move_updates(){
         const double dE = too_low_energy-too_high_energy;
         const double Smean = dE/(min_T*use_sad);
         const double Ns = num_sad_states;
-        wl_factor = Ns*(Smean + t/time_L)/(Ns*Ns + t*t/time_L);
+        wl_factor = (Smean + t/time_L)/(Smean + t/Ns * t/time_L);
         /*
           printf("       gamma = %g, oldgamma = %g   ratio %f num_sad_states %d\n",
                  wl_factor,

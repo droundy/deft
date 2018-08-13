@@ -316,7 +316,7 @@ void ising_simulation::end_flip_updates(){
         const double dE = (too_lo_energy-too_hi_energy).value;
         const double Smean = dE/(param.minT*param.use_sad);
         const double Ns = num_sad_states;
-        gamma = Ns*(Smean + t/time_L)/(Ns*Ns + t*t/time_L);
+        gamma  = (Smean + t/time_L)/(Smean + t/Ns * t/time_L);
         /*
           printf("       gamma = %g, oldgamma = %g   ratio %f num_sad_states %d\n",
                  wl_factor,
