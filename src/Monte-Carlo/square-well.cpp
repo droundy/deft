@@ -618,7 +618,7 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
 }
 
 void sw_simulation::set_max_entropy_energy() {
-  if (use_wl || use_wltmmc) return max_entropy state;
+  if (use_wl || use_wltmmc) return;
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   for (int i=energy_levels-1; i >= 0; i--) {
