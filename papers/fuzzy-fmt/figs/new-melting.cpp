@@ -31,7 +31,7 @@ double MC_ERROR = 0.0;
 double seed=1;
 
 // radius we need to integrate around a gaussian, in units of gw.
-const double inclusion_radius = 4.0;
+const double inclusion_radius = 6.0;
 
 static inline double time() {
   return clock()/double(CLOCKS_PER_SEC);
@@ -396,11 +396,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     }
   }
 
-  const double max_distance_considered = radius_of_peak(gwidth, temp);
-  const int many_cells = 2*max_distance_considered/lattice_constant+1;
-  //printf("many_cells is %d based on %g vs %g\n",
-   //      many_cells, max_distance_considered, lattice_constant);
-
   //Integrate over one primitive cell (a parallelepiped) to find free energy
   double cfree_energy_per_atom;
   double cfree_energy_per_vol;
@@ -437,6 +432,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double cFexcess_of_primitive_cell=0;  //Crystal Excess Free Energy over one primitive cell
   double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0;
 
+  const double max_distance_considered = radius_of_peak(gwidth, temp);
+  const int many_cells = 2*max_distance_considered/lattice_constant+1;
+  printf("XXXXXXXXXXXX many_cells is %d based on %g vs %g XXXXXXXXXXXXXX\n",
+         many_cells, max_distance_considered, lattice_constant);
+  printf("Nl is %d\n", Nl);
+
+  double mean_n0 = 0, mean_n1 = 0, mean_n2 = 0, mean_n3 = 0;
   for (int i=0; i<Nl; i++) {
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
@@ -507,6 +509,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         }
 
         //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
+        //printf("n0=%g, n1=%g, n2=%g, n3=%g\n", n_0, n_1, n_2, n_3);    //debug
+        mean_n0 += n_0*dV;
+        mean_n1 += n_1*dV;
+        mean_n2 += n_2*dV;
+        mean_n3 += n_3*dV;
         total_phi_1 += temp*phi_1*dV;
         total_phi_2 += temp*phi_2*dV;
         total_phi_3 += temp*phi_3*dV;
@@ -539,6 +546,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     //       100*(i + 1)/double(Nl));
     //printf("cFexcess_of_primitive_cell so far=%g, phi_1=%g, phi_2=%g, phi_3=%g\n",cFexcess_of_primitive_cell, phi_1, phi_2, phi_3);
   }
+  mean_n0 /= primitive_cell_volume;
+  mean_n1 /= primitive_cell_volume;
+  mean_n2 /= primitive_cell_volume;
+  mean_n3 /= primitive_cell_volume;
+  printf("mean n0 = %g, mean n1 = %g, mean n2 = %g, mean n3 = %g\n",
+         mean_n0, mean_n1, mean_n2, mean_n3);
+  printf("homo n0 = %g, homo n1 = %g, homo n2 = %g, homo n3 = %g\n",
+         hf.get_n0(), hf.get_n1(), hf.get_n2(), hf.get_n3());
 
   //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
   //4*Vol_parallelepiped=Vol_cube=lattice_constant^3

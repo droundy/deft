@@ -412,11 +412,9 @@ void sw_simulation::end_move_updates(){
     if (energy_histogram[energy] > highest_hist) {
       highest_hist = energy_histogram[energy];
       if (energy < too_high_energy) {
-        //printf("In High!\n");
         for (int i = energy; i < too_high_energy; i++) {
           if (energy_histogram[i]) {
-              ln_energy_weights[i] = ln_energy_weights[too_high_energy]
-                - log(energy_histogram[i]/double(highest_hist));
+              ln_energy_weights[i] = ln_energy_weights[too_high_energy];
           } else {
             ln_energy_weights[i] = 0;
           }
@@ -430,12 +428,11 @@ void sw_simulation::end_move_updates(){
         }
         time_L = moves.total;
       } else if (energy > too_low_energy) {
-        //printf("In low!\n");
         for (int i = too_low_energy; i <= energy; i++) {
           if (energy_histogram[i]) {
             ln_energy_weights[i] = ln_energy_weights[too_low_energy]
-                - log(energy_histogram[i]/double(highest_hist))
                 + (energy-too_low_energy)/min_T;
+            if (ln_energy_weights[i] > 0) ln_energy_weights[i] = 0;
           } else {
             ln_energy_weights[i] = 0;
           }
@@ -457,14 +454,13 @@ void sw_simulation::end_move_updates(){
          /(min_T*use_sad*moves.total));
     }
     if (energy >= too_high_energy && energy <= too_low_energy) {
-      //printf("In Interesting!\n");
       // We are in the "interesting" region, so use an ordinary SA update.
       if (too_low_energy > too_high_energy) {
         const double t = moves.total;
         const double dE = too_low_energy-too_high_energy;
         const double Smean = dE/(min_T*use_sad);
         const double Ns = num_sad_states;
-        wl_factor = Ns*(Smean + t/time_L)/(Ns*Ns + t*t/time_L);
+        wl_factor = (Smean + t/time_L)/(Smean + t/Ns * t/time_L);
         /*
           printf("       gamma = %g, oldgamma = %g   ratio %f num_sad_states %d\n",
                  wl_factor,
@@ -622,6 +618,7 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
 }
 
 void sw_simulation::set_max_entropy_energy() {
+  if (use_wl || use_wltmmc) return;
   const double *ln_dos = compute_ln_dos(transition_dos);
 
   for (int i=energy_levels-1; i >= 0; i--) {
@@ -1368,7 +1365,7 @@ void sw_simulation::write_transitions_file() {
       // This loop increments transitions_movie_count until it reaches
       // an unused file name.  The idea is to enable two or more
       // simulations to contribute together to a single movie.
-      sprintf(fname, transitions_movie_filename_format, transitions_movie_count++);
+      sprintf(fname, transitions_movie_filename_format, ++transitions_movie_count);
     } while (!stat(fname, &st));
     write_t_file(*this, fname);
     delete[] fname;
@@ -1380,7 +1377,7 @@ void sw_simulation::write_transitions_file() {
       // This loop increments dos_movie_count until it reaches
       // an unused file name.  The idea is to enable two or more
       // simulations to contribute together to a single movie.
-      sprintf(fname, dos_movie_filename_format, dos_movie_count++);
+      sprintf(fname, dos_movie_filename_format, ++dos_movie_count);
     } while (!stat(fname, &st));
     write_d_file(*this, fname);
     delete[] fname;
@@ -1392,7 +1389,7 @@ void sw_simulation::write_transitions_file() {
       // This loop increments lnw_movie_count until it reaches
       // an unused file name.  The idea is to enable two or more
       // simulations to contribute together to a single movie.
-      sprintf(fname, lnw_movie_filename_format, lnw_movie_count++);
+      sprintf(fname, lnw_movie_filename_format, ++lnw_movie_count);
     } while (!stat(fname, &st));
     write_lnw_file(*this, fname);
     delete[] fname;

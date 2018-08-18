@@ -101,6 +101,7 @@ int main(int argc, const char *argv[]) {
   int samc = false;
   int sad = false;
   int sad_fraction = 1;
+  int resume = false;
 
   char *transitions_input_filename = new char[1024];
   sprintf(transitions_input_filename, "none");
@@ -252,6 +253,8 @@ int main(int argc, const char *argv[]) {
      "Use Wang-Landau TMMC method", "BOOLEAN"},
     {"samc", '\0', POPT_ARG_NONE, &samc, 0,
      "Use Stochastic-Approximation Monte-Carlo method", "BOOLEAN"},
+    {"resume", '\0', POPT_ARG_NONE, &resume, 0,
+     "Resume where we left off, only works for SAMC", "BOOLEAN"},
     {"sad", '\0', POPT_ARG_NONE, &sad, 0,
      "Use Stochastic-Approximation Monte-Carlo method, dynamic version", "BOOLEAN"},
     {"sad-fraction", '\0', POPT_ARG_INT, &sad_fraction, 0,
@@ -802,6 +805,55 @@ int main(int argc, const char *argv[]) {
       printf("NOT initializing from transitions file '%s', since it doesn't seem to exist\n",
              transitions_input_filename);
     }
+  }
+  if (resume) {
+    seed = random::seed_randomly();
+    printf("Resuming from previous computation using random seed %ld\n", seed);
+    if (!samc) {
+      printf("I can only resume with SAMC!\n");
+      exit(1);
+    }
+    if (!sw.lnw_movie_filename_format) {
+      printf("I cannot resume unless I know the movie format!\n");
+      exit(1);
+    }
+    char *fname = new char[4096];
+    struct stat st;
+    do {
+      // This loop increments lnw_movie_count until it reaches
+      // an unused file name.  The idea is to enable two or more
+      // simulations to contribute together to a single movie.
+      sprintf(fname, sw.lnw_movie_filename_format, ++sw.lnw_movie_count);
+    } while (!stat(fname, &st));
+    sw.lnw_movie_count -= 1;
+    sprintf(fname, sw.lnw_movie_filename_format, sw.lnw_movie_count++);
+    FILE *f = fopen(fname,"r");
+    if (!f) {
+      printf("Unable to read file %s for resuming!\n", fname);
+      exit(1);
+    }
+    char *buffer = new char[4096];
+    buffer[0] = 0;
+    while (strcmp(buffer, "total")) {
+      if (fscanf(f, " %s ", buffer) != 1) {
+        printf("'total' does not appear in %s?!\n", fname);
+        exit(1);
+      }
+    }
+    fscanf(f, " %s ", buffer);
+    fscanf(f, " %ld ", &sw.moves.total);
+    while (strcmp(buffer, "lnw")) {
+      if (fscanf(f, " %s ", buffer) != 1) {
+        printf("'lnw' does not appear in %s?!\n", fname);
+        exit(1);
+      }
+    }
+    for (int i = 0; i < sw.energy_levels; i++) {
+      fscanf(f, " %*d %lg ", &sw.ln_energy_weights[i]);
+    }
+    fclose(f);
+    delete[] fname;
+    delete[] buffer;
   }
 
   if (reading_in_transition_matrix){
