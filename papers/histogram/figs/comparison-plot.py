@@ -62,6 +62,7 @@ for meth in split4:
 
 best_ever_error = 1e100
 best_ever_max = 1e100
+scaling_error = 1e200
 max_time = 0
 print 'methods are', methods
 for method in methods:
@@ -134,8 +135,10 @@ for method in methods:
 
         if type(iterations) is not np.float64:
                 plt.figure('errorinentropy')
-                colors.loglog(moves, errorinentropy[0:len(iterations)],
-                              method = method[1:])
+                my_S_error = errorinentropy[0:len(iterations)]
+                colors.loglog(moves, my_S_error, method = method[1:])
+                my_scaling_error = (my_S_error[len(iterations)//2:]*np.sqrt(moves[len(iterations)//2:])).min()
+                scaling_error = min(my_scaling_error, scaling_error)
                 plt.xlabel('Moves')
                 plt.ylabel('Average Entropy Error')
                 #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
@@ -150,12 +153,13 @@ for method in methods:
     except:
         raise
 plt.figure('maxerror')
-colors.loglog(moves, best_ever_max/np.sqrt(moves/max_time), method = '1/sqrt(t)')
+colors.loglog([1e6,max_time], [best_ever_max*np.sqrt(max_time/1e6), best_ever_max], method = '1/sqrt(t)')
 colors.legend()
 plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
 plt.figure('errorinentropy')
-colors.loglog(moves, best_ever_error/np.sqrt(moves/max_time), method = '1/sqrt(t)')
+colors.loglog(moves, scaling_error/np.sqrt(moves), method = '1/sqrt(t)')
+#colors.loglog(moves, best_ever_error/np.sqrt(moves/max_time), method = '1/sqrt(t)')
 colors.legend()
 plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
