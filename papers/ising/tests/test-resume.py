@@ -62,7 +62,7 @@ print(cmd)
 # os.system('echo %s > %s/%s.out' % (cmd, datadir, fname))
 assert(os.system(cmd) == 0)
 print("checking that both results are identical...")
-assert(os.system('diff -u %s/%s-complete.dat %s/%s-test.dat'
+assert(os.system('diff -u %s/%s-complete.py %s/%s-test.py'
                  % (datadir, filenamebase, datadir, filenamebase)) == 0)
 
 print("\nAll is good!!!")
