@@ -46,7 +46,7 @@ if ref[:len('data/')] != 'data/':
 maxref = int(readnew.max_entropy_state(ref))
 minref = int(readnew.min_important_energy(ref))
 n_energies = int(minref - maxref+1)
-
+print maxref, minref
 try:
     eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
 except:
