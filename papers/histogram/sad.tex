@@ -278,57 +278,55 @@ prescription for finding an acceptable value for $t_0$, and
 while the algorithm formally converges, for a poor choice of $t_0$
 that convergence can be far too slow to be practical.
 
-{\color{red}
-It is for this reason that we propose a way to determine the update factor
-``dynamically'' while still satisfying the criteria for convergence.
-For the update factor to scale well across both discrete and continuous systems,
-it must include the number of states $N_S$. We define the average entropy as
-$\bar S$ and the time since the simulation last found a new energy state $t_L$.
-We then can write the following expression for the \emph{proposed} update factor.
-\begin{align}
-\gamma = N_S \frac{\bar S + \nicefrac{t}{t_L}}{N_{S}^2 + \nicefrac{t^2}{t_L}}
-\end{align}
-We now consider the following limiting cases:
-\subsubsection{$t \propto N_S \approx t_L$ and $ t << N_S$}
-In this limiting case, we find that the update factor reduces to
-\begin{align}
-\gamma \approx \frac{\bar S}{N_S} \approx \frac{\bar S}{t}
-\end{align}
-Because $t \propto N_S$, the update factor scales as 1/t which is consistent
-with the requirement for SAMC convergence.
-\subsubsection{$t >> N_{S}^2$ and $ t\approx t_L$}
-In this limiting case, we find that the update factor reduces to
-\begin{align}
-\gamma \approx \frac{N_S \bar S t_L}{t^2} \approx \frac{N_S \bar S}{t}
-\end{align}
-\subsubsection{$t >> t_L \bar S$}
-In this limiting case, we find that the update factor reduces to
-\begin{align}
-\gamma \approx \frac{N_S}{t}
-\end{align}
-We now integrate (sum) the update factor from the last time an energy state was found
-to the final simulation time to ensure that convergence is guaranteed.
-\begin{align}
-\int_{t_L}^{t_f} \gamma dt \approx t_L N_S \left[ \int_{t_L}^{t_f}
-\frac{\bar S -1}{t^2} dt + \frac{1}{t_L}\int_{t_L}^{t_f} \frac{1}{t} dt \right]
-\end{align}
-From this we obtain
-\begin{align}
-\int_{t_L}^{t_f} \gamma dt \approx t_L N_S \left[\left(\bar S -1\right)\left(\frac{1}{t_L}-\frac{1}{t_f}\right) + \frac{1}{t_L} \ln\left(\frac{t_f}{t_L}\right) \right]
-\end{align}
-Simplifying, we see that as $t_f \rightarrow \infty$ then $\gamma \rightarrow \infty$ satisfying
-the requirement for SAMC convergence.
-\begin{align}
-\gamma \approx \left(1-\frac{t_L}{t_f}\right)N_S\left(\bar S -1\right) + N_S \ln\left(\frac{t_f}{t_L}\right)
-\end{align}
-}
-
 Werlich \emph{et al.} proposed scaling the SAMC $\gamma_t$ by a factor
 $\gamma_0$.  While this may result in an improved rate of convergence,
 it adds yet another parameter that must be empirically determined.
 
 %This work proposes a means for dynamically setting the update factor
 %$\gamma_t$ that should robustly converge on a variety of systems.
+
+\subsubsection{Convergence}
+The difficulty in using the SAMC method lies in identifying an appropriate
+value for $t_0$.  A value that is either too high or too low will result
+in slow convergence to the true entropy.  It is instructive to consider
+separately values of $t_0$ that are too low or too high.
+
+We can place a rigorous \emph{lower} bound $t_{\min}$ on the number of
+moves required to find the true energy by considering the total change
+that needs to be made to the entropy.
+\begin{align}
+  \Delta S_{\text{tot}} \equiv \sum_E S(E) - S_{\min}
+\end{align}
+The minimum number of moves that could converge the entropy is
+the number of moves that will enable the above total entropy change,
+which we can approximate using an integral:
+\begin{align}
+   \Delta S_{\text{tot}} &= \sum_{t=0}^{t_{\min}} \gamma_t \\
+  &= \int_0^{t_{\min}} \gamma(t)dt \\
+  &= t_0 + \int_{t_0}^{t_{\min}} \frac{t_0}{t}dt
+  \\
+  &= t_0\left(1 + \ln\left(\frac{t_{\min}}{t_0}\right)\right)
+\end{align}
+Solving for ${t_{\min}}$ we find that
+\begin{align}
+  {t_{\min}} &= t_0 e^{\frac{\Delta S_{\text{tot}}}{t_0} - 1}
+\end{align}
+which means that the minimum time to convergence grows exponentially
+as $t_0$ is made smaller.  You \emph{seriously} don't want to underestimate
+$t_0$!
+
+One might reasonably choose to err on the high side when selecting a $t_0$.
+The rate of convergence is harder to estimate when $t_0$ is large, but
+in general $\gamma_t$ itself forms a lower bound on the accuracy with which
+the entropy may be known, with an unknown prefactor which is roughly
+the coherence time of the Monte Carlo simulation.  Since $\gamma_t$ is
+given by $t_0/t$, the time to converge to a given accuracy is increased
+in proportion to the ratio by which we overestimate $t_0$.  Thus, while
+it is exponentially painful to underestimate $t_0$, overestimating by
+several orders of magnitude is also not acceptable.  We should note
+that these extreme limiting cases do not preclude the possibility that there
+is a wide range of $t_0$ values that lead to an acceptable convergence
+rate.
 
 \section{Transition-matrix methods}\label{sec:transition}
 
@@ -574,6 +572,53 @@ dynamically adjusted), we expect that SAD will perform consitently
 scaling free for a reasonable choice of step size.  SAD should perform
 extremely well compared with other flat histogram methods when applied
 to complex continuous systems such as polymers/proteins and spin models.
+
+\subsection{Convergence}
+{\color{red}
+It is for this reason that we propose a way to determine the update factor
+``dynamically'' while still satisfying the criteria for convergence.
+For the update factor to scale well across both discrete and continuous systems,
+it must include the number of states $N_S$. We define the average entropy as
+$\bar S$ and the time since the simulation last found a new energy state $t_L$.
+We then can write the following expression for the \emph{proposed} update factor.
+\begin{align}
+\gamma = N_S \frac{\bar S + \nicefrac{t}{t_L}}{N_{S}^2 + \nicefrac{t^2}{t_L}}
+\end{align}
+We now consider the following limiting cases:
+\subsubsection{$t \propto N_S \approx t_L$ and $ t << N_S$}
+In this limiting case, we find that the update factor reduces to
+\begin{align}
+\gamma \approx \frac{\bar S}{N_S} \approx \frac{\bar S}{t}
+\end{align}
+Because $t \propto N_S$, the update factor scales as 1/t which is consistent
+with the requirement for SAMC convergence.
+\subsubsection{$t >> N_{S}^2$ and $ t\approx t_L$}
+In this limiting case, we find that the update factor reduces to
+\begin{align}
+\gamma \approx \frac{N_S \bar S t_L}{t^2} \approx \frac{N_S \bar S}{t}
+\end{align}
+\subsubsection{$t >> t_L \bar S$}
+In this limiting case, we find that the update factor reduces to
+\begin{align}
+\gamma \approx \frac{N_S}{t}
+\end{align}
+We now integrate (sum) the update factor from the last time an energy state was found
+to the final simulation time to ensure that convergence is guaranteed.
+\begin{align}
+\int_{t_L}^{t_f} \gamma dt \approx t_L N_S \left[ \int_{t_L}^{t_f}
+\frac{\bar S -1}{t^2} dt + \frac{1}{t_L}\int_{t_L}^{t_f} \frac{1}{t} dt \right]
+\end{align}
+From this we obtain
+\begin{align}
+\int_{t_L}^{t_f} \gamma dt \approx t_L N_S \left[\left(\bar S -1\right)\left(\frac{1}{t_L}-\frac{1}{t_f}\right) + \frac{1}{t_L} \ln\left(\frac{t_f}{t_L}\right) \right]
+\end{align}
+Simplifying, we see that as $t_f \rightarrow \infty$ then $\gamma \rightarrow \infty$ satisfying
+the requirement for SAMC convergence.
+\begin{align}
+\gamma \approx \left(1-\frac{t_L}{t_f}\right)N_S\left(\bar S -1\right) + N_S \ln\left(\frac{t_f}{t_L}\right)
+\end{align}
+}
+
 
 \section{Results}\label{sec:results}
 
