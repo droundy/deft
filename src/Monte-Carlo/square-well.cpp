@@ -595,8 +595,13 @@ int sw_simulation::set_min_important_energy(double *input_ln_dos){
   // We always use the transition matrix to estimate the
   // min_important_energy, since it is more robust at the outset.
   double *ln_dos;
-  if (input_ln_dos) ln_dos = input_ln_dos;
-  else ln_dos = compute_ln_dos(transition_dos);
+  if (input_ln_dos) {
+    ln_dos = input_ln_dos;
+  } else if (sa_t0 || use_sad) {
+    ln_dos = compute_ln_dos(weights_dos);
+  } else {
+    ln_dos = compute_ln_dos(transition_dos);
+  }
 
   // Look for a energy which maximizes the free energy at temperature min_T
   if (!use_wltmmc && !use_wl) {
@@ -1325,10 +1330,10 @@ static void write_d_file(sw_simulation &sw, const char *fname) {
   }
   for (int i = 0; i < sw.energy_levels; i++) {
     if (how_to_compute_dos != transition_dos) {
-      fprintf(f, "%d\t%g\t%ld\t%g\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i],
+      fprintf(f, "%d\t%.10g\t%ld\t%g\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i],
               lndos_transitions[i] - maxdos_transitions);
     } else {
-      fprintf(f, "%d\t%g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
+      fprintf(f, "%d\t%.10g\t%ld\n", i, lndos[i] - maxdos, sw.pessimistic_samples[i]);
     }
   }
   fclose(f);
@@ -1344,12 +1349,8 @@ static void write_lnw_file(sw_simulation &sw, const char *fname) {
   }
   sw.write_header(f);
   fprintf(f, "# energy\tlnw\n");
-  double minw = sw.ln_energy_weights[0];
   for (int i = 0; i < sw.energy_levels; i++) {
-    if (minw > sw.ln_energy_weights[i]) minw = sw.ln_energy_weights[i];
-  }
-  for (int i = 0; i < sw.energy_levels; i++) {
-    fprintf(f, "%d\t%g\n", i, sw.ln_energy_weights[i] - minw);
+    fprintf(f, "%d\t%.16g\n", i, sw.ln_energy_weights[i]);
   }
   fclose(f);
 }

@@ -832,6 +832,7 @@ int main(int argc, const char *argv[]) {
       printf("Unable to read file %s for resuming!\n", fname);
       exit(1);
     }
+    printf("Resuming using SAMC and file %s\n", fname);
     char *buffer = new char[4096];
     buffer[0] = 0;
     while (strcmp(buffer, "total")) {
@@ -842,16 +843,24 @@ int main(int argc, const char *argv[]) {
     }
     fscanf(f, " %s ", buffer);
     fscanf(f, " %ld ", &sw.moves.total);
+    sw.iteration = sw.moves.total/sw.N;
     while (strcmp(buffer, "lnw")) {
       if (fscanf(f, " %s ", buffer) != 1) {
         printf("'lnw' does not appear in %s?!\n", fname);
         exit(1);
       }
     }
+    double min_lnw = 1e300;
     for (int i = 0; i < sw.energy_levels; i++) {
       fscanf(f, " %*d %lg ", &sw.ln_energy_weights[i]);
+      min_lnw = min(min_lnw, sw.ln_energy_weights[i]);
     }
     fclose(f);
+    for (int i = 0; i < sw.energy_levels; i++) {
+      sw.ln_energy_weights[i] += min_lnw;
+      if (sw.ln_energy_weights > 0) sw.energy_histogram[i] = 1; // HOKEY!
+    }
+    sw.set_min_important_energy();
     delete[] fname;
     delete[] buffer;
   }
