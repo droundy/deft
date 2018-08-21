@@ -115,6 +115,25 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   return w;
 }
 
+weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
+  vector3d rdiff=r-rp;
+  double rdiff_magnitude=rdiff.norm();
+  weight w;
+  w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
+  w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
+  w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
+  w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
+  w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
+  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
+  if (rdiff_magnitude == 0) {
+    w.n_0=0;
+    w.n_1=0;
+    w.nv_1 = vector3d(0,0,0);
+    w.nv_2 = vector3d(0,0,0);
+  }
+  return w;
+}
+
 // radius_of_peak tells us how far we need to integrate away from a
 // peak with width gwidth, if the temperature is T, when finding the
 // weighted densities.  This is basically asking when the weighting
@@ -232,6 +251,8 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R, double tem
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
+  const double alpha = find_alpha(temp);
+  const double Xi = find_Xi(temp);
 
   long num_points = 5;
   long i=0;
@@ -242,8 +263,8 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R, double tem
       vector3d dr = vector3d::ran(gwidth);  //ASK! is this changing our seed all the time?! I think this should be ran(seed)
       vector3d r_prime = R + dr;
       vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
-      weight w = find_weights(r, r_prime, temp);
-      weight w2 = find_weights(r, r_prime2, temp);
+      weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
+      weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
 
       w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
       w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
