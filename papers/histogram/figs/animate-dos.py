@@ -44,7 +44,7 @@ dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 
 lastframe = -1
 alldone = False
-for frame in range(100000):
+for frame in range(1,100000):
     if alldone:
         break
     for suffix in suffixes:
@@ -86,7 +86,7 @@ if numframes > maxframes and not args.all_frames:
     print('only showing 1/%d of the frames' % skipby)
 print('numframes', numframes)
 
-for frame in range(numframes):
+for frame in range(1, numframes+1):
     if frame % 25 == 0:
         print('working on frame %d/%d' % (frame, numframes))
     plt.cla()

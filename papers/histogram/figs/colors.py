@@ -169,6 +169,8 @@ def loglog(x, y, method=None):
 
 def legend(loc='best'):
     handles, labels = plt.gca().get_legend_handles_labels()
-    labels, handles = zip(*sorted(zip(labels, handles), key = lambda t: legend_order(t[0])))
-    labels = map(fix_legend, labels)
-    plt.legend(handles, labels, loc=loc)
+    labels_and_handles = list(zip(*sorted(zip(labels, handles), key = lambda t: legend_order(t[0]))))
+    if len(labels_and_handles) == 2:
+      labels, handles = labels_and_handles
+      labels = map(fix_legend, labels)
+      plt.legend(handles, labels, loc=loc)
