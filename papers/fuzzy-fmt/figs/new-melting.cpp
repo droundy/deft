@@ -227,7 +227,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   }
 
   for (long i=0; i<NUM_POINTS; i++) {
-    vector3d dr = vector3d::ran(gwidth);
+    vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
     vector3d r_prime = R + dr;
     vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
     weight w = find_weights(r, r_prime, temp);
@@ -254,13 +254,15 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R, double tem
   const double alpha = find_alpha(temp);
   const double Xi = find_Xi(temp);
 
-  long num_points = 5;
+  long num_points = 20+200*gwidth;   //Set higher for higher gw   HERE!
+  //long num_points = 50000; 
+  //long num_points = 5; 
   long i=0;
   double my_error;
   do {
     num_points *= 4;
     for (; i<num_points; i++) {
-      vector3d dr = vector3d::ran(gwidth);  //ASK! is this changing our seed all the time?! I think this should be ran(seed)
+      vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
       vector3d r_prime = R + dr;
       vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
       weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
@@ -300,7 +302,7 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
   }
 
   for (long i=0; i<NUM_POINTS; i++) {
-    vector3d dr = vector3d::ran(gwidth);
+    vector3d dr = vector3d::ran(gwidth); //A vector is randomly selected from a Gaussian distribution of width gwidth
     vector3d r_prime = R + dr;
     vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
     weight w = find_weights(r, r_prime, temp);
@@ -328,11 +330,6 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
 
   return n_var;
 }
-
-//find_free_energy_variance(double ?) {
-//  n_var=find weighted_den_variance_aboutR_mc(r, R, dx, temp, lattice_constant, gwidth, fv);
-//  double f_var += uipow(ln(1-n_3),2)*n_var.n_0 + (n_2(1-cos?)/(1-n_3))*n_var.n_1+((n_1(1-cos?)/(1-n_3))-n_2*n_2/4*M_PI*(1-n_3)*(1-n_3))*n_var.n_2+(n_0/(1-n_3)-n_1*n_2*(1-cos?)/(1-n_3)*(1-n_3)-n_2*n_2/6*M_PI*uipow(1-n_3),3))*n_var.n_3;
-//}
 
 
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx_input, bool verbose=false) {
@@ -405,7 +402,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             }
             if (n > 1e-200) { // avoid underflow and n=0 issues
               // printf("n = %g  dF = %g\n", n, dF);
-              cFideal_of_primitive_cell += kT*n*(log(2.646476976618268e-6*n/(sqrt(kT)*kT)) - 1.0)*dV;
+              cFideal_of_primitive_cell += kT*n*(log(n*2.646476976618268e-6/(sqrt(kT)*kT)) - 1.0)*dV;
             }
           }
         }
@@ -432,11 +429,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   hf.mu() = 0;   //chemical potential is zero so the Grand Canonical Ensemble becomes a Canonical Ensemble
   //Note: hf.energy() returns energy/volume
 
-  hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;   // ASK! free energy per sphere or "atom" (I think this is fixed now -check)
+  hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;  
   hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
   hf.printme("     homogeneous:");
   printf("homogeneous free_energy per vol is %g\n", hf.energy());
-  printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);  //delete
+  printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);  
 
   // scale our dx by Xi or w, whichever is larger.
   const double dx = dx_input*(find_Xi(temp) + gwidth);
@@ -466,11 +463,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d r= i*da1 + j*da2 + k*da3;
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
-        //double var_n_0=0, var_n_1=0, var_n_2=0, var_n_3=0;  //variances in the weighted densities  REMOVE?
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
         weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //CHECK! Initialize here?
-        //weight variance_n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //REMOVE?
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -483,23 +478,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                 } else {
                   n_weight=find_weighted_den_aboutR_mc_accurately(r, R, temp, gwidth, fv);
                 }
-                //variance_n_weight=find_weighted_den_variances_aboutR_mc(r, R, dx, temp,   //REMOVE?
-                //                           lattice_constant, gwidth, fv);
 
                 n_0 +=n_weight.n_0;
                 n_1 +=n_weight.n_1;
                 n_2 +=n_weight.n_2;
                 n_3 +=n_weight.n_3;
 
-                //if (crystal_calc_option > 1 ) {   //Calculate variances when use Monte-Carlo method  REMOVE?
-                //var_n_0 +=variance_n_weight.n_0;
-                //var_n_1 +=variance_n_weight.n_1;
-                //var_n_2 +=variance_n_weight.n_2;
-                //var_n_3 +=variance_n_weight.n_3;
-                //}
-
-                //printf("n_weight.n_3=%g\n", n_weight.n_3);  //debug
-                //printf("n_3=%g\n", n_3);  //debug
                 nv_1 +=n_weight.nv_1;
                 nv_2 +=n_weight.nv_2;
               }
@@ -507,16 +491,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           }
         }
 
-        double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   // ASK! added the 1.0's like in HomogeneousSFMTFLuidFast.cpp
-        //printf("n_0=%g, n_3=%g, 1-n_3=%g, phi_1=%g\n", n_0, n_3, 1-n_3, phi_1);  //debug
+        double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
-        //printf("n_1*n_2=%g, nv_1.x*nv_2.x=%g, 1-n_3=%g\n",n_1*n_2, nv_1.x*nv_2.x, 1-n_3);  //debug
 
         // The following was Rosenfelds early vector version of the functional
         //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
 
         // This is the fixed version, which comes from dimensional crossover
-        double phi_3 = uipow(n_2,3)*uipow(1.0 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1.0-1.0*n_3,2));
+        double phi_3 = uipow(n_2,3)*uipow(1.0 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1.0-1.0*n_3,2));  //CHECK THIS!
         if (n_2 == 0 || sqr(n_2) <= nv_2.normsquared()) phi_3 = 0;
         if (n_0 < 1e-5*reduced_density && n_3 >= 1 && n_3 < 1 + 1e-14) {
           // This is a case where the prefactor on each of our free
@@ -529,8 +511,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           phi_3 = 0;
         }
 
-        //printf("phi_1=%g, phi_2=%g, phi_3=%g\n",phi_1, phi_2, phi_3);    //debug
-        //printf("n0=%g, n1=%g, n2=%g, n3=%g\n", n_0, n_1, n_2, n_3);    //debug
         mean_n0 += n_0*dV;
         mean_n1 += n_1*dV;
         mean_n2 += n_2*dV;
@@ -538,8 +518,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         total_phi_1 += temp*phi_1*dV;
         total_phi_2 += temp*phi_2*dV;
         total_phi_3 += temp*phi_3*dV;
-        cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is actually Boltzman constant times temperature
-        if (isnan(cFexcess_of_primitive_cell)) {
+        cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is Bolatzman constant times temperature divided by epsilon (which is 1)
+        if (isnan(cFexcess_of_primitive_cell)) {                        // temp is a reduced temperature given by t* in the paper
           printf("free energy is a NaN!\n");
           printf("position is: %g %g %g\n", r.x, r.y, r.z);
           printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%.17g = 1+%g\n", n_0, n_1, n_2, n_3, n_3-1);
@@ -575,6 +555,38 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          mean_n0, mean_n1, mean_n2, mean_n3);
   printf("homo n0 = %g, homo n1 = %g, homo n2 = %g, homo n3 = %g\n",
          hf.get_n0(), hf.get_n1(), hf.get_n2(), hf.get_n3());
+         
+  double diff_n0=mean_n0- hf.get_n0();
+  double diff_n1=mean_n1- hf.get_n1();
+  double diff_n2=mean_n2- hf.get_n2();
+  double diff_n3=mean_n3- hf.get_n3();
+  printf("mean_n0-homo_n0=%g\n", diff_n0);    // HERE! 
+  printf("mean_n1-homo_n1=%g\n", diff_n1);
+  printf("mean_n2-homo_n2=%g\n", diff_n2);
+  printf("mean_n3-homo_n3=%g\n", diff_n3);
+  
+  double array[4] = {diff_n0, diff_n1, diff_n2, diff_n3};
+  int i, j;
+  double tem;
+   for (i=0; i < 4; ++i)
+     if (array[i] < 0) 
+         array[i]=-array[i];  //take absolute value of difference
+   //for (i=0; i < 4; ++i)     
+   //  printf("array[%i]: %g\n", i, array[i]);
+   
+   for (i=0; i < 4-1; ++i)   //sort to find greatest difference
+     for (j=i+1; j<4; ++j) 
+        if (array[i] < array[j]) {
+          tem = array[i];
+          array[i] = array[j];
+          array[j] = tem;
+        }
+   //for (i=0; i < 4; ++i)     
+   //  printf("array[%i]: %g\n", i, array[i]);
+      
+  printf(">>>LARGEST diff in mean_n-homo_n=%g\n\n",array[0]);
+  
+  //printf("average of all mean_n-homo_n=%g\n", (mean_n0-hf.get_n0() + mean_n1-hf.get_n1()+mean_n2-hf.get_n2()+mean_n3-hf.get_n3())/4);// HERE! DELETE
 
   //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
   //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
@@ -614,8 +626,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
             temp, reduced_density, fv, gwidth);
     sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
-    //sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
-    //        data_dir, temp, reduced_density, fv, gwidth);
     printf("Create data file: %s\n", alldat_filename);
 
     //Create dataout file
@@ -646,7 +656,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          cfree_energy_per_vol,
          cFideal_of_primitive_cell/primitive_cell_volume,
          run_time/60);
-
+  printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
+  //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -851,8 +862,6 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
           temp, reduced_density, fv, gwidth);
   sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
-  //sprintf(alldat_filename, "%s/kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f-alldat.dat",
-  //        data_dir, temp, reduced_density, fv, gwidth);
   printf("Create data file: %s\n", alldat_filename);
 
   //Create dataout file
@@ -900,7 +909,6 @@ void display_simplex(double simplex_fe[3][3]) {
 void evaluate_simplex(double temp, double reduced_density, double simplex_fe[3][3], char *data_dir, double dx, bool verbose) {
   printf("Evaluating Downhill Simplex Free Energies...\n");
   for (int k=0; k<3; k++) {
-    //data dhill_data=find_energy(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
     data dhill_data=find_energy_new(temp, reduced_density, simplex_fe[k][0], simplex_fe[k][1], data_dir, dx, verbose);
     if (isnan(dhill_data.cfree_energy_per_vol)) {   //If crystal energy is NaN
       simplex_fe[k][2]=1e100;
@@ -943,7 +951,6 @@ point_fe reflect_simplex(double temp, double reduced_density, double simplex_fe[
 //    reflected.fv = .99;
   }
 
-//reflected.fe=find_energy(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   reflected.fe=find_energy_new(temp, reduced_density, reflected.fv, reflected.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //reflected.fe=sqrt((reflected.fv*reflected.fv) + (reflected.gw*reflected.gw));  //TEST SIMPLEX
   return reflected;
@@ -967,7 +974,6 @@ point_fe extend_simplex(double temp, double reduced_density, double simplex_fe[3
 //    extended.fv = .99;
   }
 
-//extended.fe=find_energy(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   extended.fe=find_energy_new(temp, reduced_density, extended.fv, extended.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //extended.fe=sqrt((extended.fv*extended.fv) + (extended.gw*extended.gw));  //TEST SIMPLEX
   return extended;
@@ -996,7 +1002,7 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   }
 
   printf("contracted.out.fv=%g, contracted.out.gw=%g\n", contracted.out.fv, contracted.out.gw);   //debug
-//contracted.out.fe=find_energy(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+
   contracted.out.fe=find_energy_new(temp, reduced_density, contracted.out.fv, contracted.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //contracted.out.fe=sqrt((contracted.out.fv*contracted.out.fv) + (contracted.out.gw*contracted.out.gw));  //TEST SIMPLEX
 
@@ -1017,7 +1023,7 @@ points_fe contract_simplex(double temp, double reduced_density, double simplex_f
   }
 
   printf("contracted.in.fv=%g, contracted.in.gw=%g\n", contracted.in.fv, contracted.in.gw);   //debug
-//contracted.in.fe=find_energy(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
+
   contracted.in.fe=find_energy_new(temp, reduced_density, contracted.in.fv, contracted.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //contracted.in.fe=sqrt((contracted.in.fv*contracted.in.fv) + (contracted.in.gw*contracted.in.gw));  //TEST SIMPLEX
 
@@ -1043,7 +1049,6 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 //    shrunken.out.fv = .99;
   }
 
-//shrunken.out.fe=find_energy(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.out.fe=find_energy_new(temp, reduced_density, shrunken.out.fv, shrunken.out.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.out.fe=sqrt((shrunken.out.fv*shrunken.out.fv) + (shrunken.out.gw*shrunken.out.gw));  //TEST SIMPLEX
 
@@ -1063,7 +1068,6 @@ points_fe shrink_simplex(double temp, double reduced_density, double simplex_fe[
 //    shrunken.in.fv = .99;
   }
 
-//shrunken.in.fe=find_energy(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
   shrunken.in.fe=find_energy_new(temp, reduced_density, shrunken.in.fv, shrunken.in.gw, data_dir, dx, verbose).diff_free_energy_per_atom;
 //shrunken.in.fe=sqrt((shrunken.in.fv*shrunken.in.fv) + (shrunken.in.gw*shrunken.in.gw));  //TEST SIMPLEX
 
@@ -1301,15 +1305,6 @@ int main(int argc, const char **argv) {
     //printf("worst=%g\n", simplex_fe[2][2]);
   } //End Downhill Simplex
 
-
-//TEST NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  //printf("reduced_density = %g, fv = %g\n", reduced_density, fv);
-
-  //data e_data_new =find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
-  //printf("e_data_new is: homFEperatom=%g, cryFEperatom=%g, diffperatom=%g, homFEpervol=%g, cryFEpervol=%g\n", e_data_new.cfree_energy_per_atom-e_data_new.diff_free_energy_per_atom, e_data_new.cfree_energy_per_atom, e_data_new.diff_free_energy_per_atom, e_data_new.hfree_energy_per_vol, e_data_new.cfree_energy_per_vol);
-
-  //return 0;  //for debug
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //TEST Weighted Density Calculations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //Use to compare a value of weighted density caluclated analytically to that computed by
