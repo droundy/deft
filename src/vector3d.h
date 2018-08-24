@@ -132,8 +132,6 @@ class vector3d {
   static vector3d expran();
 };
 
-
-
 inline vector3d operator*(const double scalar, const vector3d &v) {
   return v*scalar; }
 
