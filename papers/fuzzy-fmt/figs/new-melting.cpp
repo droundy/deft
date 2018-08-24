@@ -232,8 +232,9 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R, double tem
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
-
-  long num_points = 5;
+  long num_points = 20+200*gwidth;   //Set higher for higher gw   HERE!
+  //long num_points = 50000; 
+  //long num_points = 5; 
   long i=0;
   double my_error;
   do {
@@ -532,6 +533,38 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          mean_n0, mean_n1, mean_n2, mean_n3);
   printf("homo n0 = %g, homo n1 = %g, homo n2 = %g, homo n3 = %g\n",
          hf.get_n0(), hf.get_n1(), hf.get_n2(), hf.get_n3());
+         
+  double diff_n0=mean_n0- hf.get_n0();
+  double diff_n1=mean_n1- hf.get_n1();
+  double diff_n2=mean_n2- hf.get_n2();
+  double diff_n3=mean_n3- hf.get_n3();
+  printf("mean_n0-homo_n0=%g\n", diff_n0);    // HERE! 
+  printf("mean_n1-homo_n1=%g\n", diff_n1);
+  printf("mean_n2-homo_n2=%g\n", diff_n2);
+  printf("mean_n3-homo_n3=%g\n", diff_n3);
+  
+  double array[4] = {diff_n0, diff_n1, diff_n2, diff_n3};
+  int i, j;
+  double tem;
+   for (i=0; i < 4; ++i)
+     if (array[i] < 0) 
+         array[i]=-array[i];  //take absolute value of difference
+   //for (i=0; i < 4; ++i)     
+   //  printf("array[%i]: %g\n", i, array[i]);
+   
+   for (i=0; i < 4-1; ++i)   //sort to find greatest difference
+     for (j=i+1; j<4; ++j) 
+        if (array[i] < array[j]) {
+          tem = array[i];
+          array[i] = array[j];
+          array[j] = tem;
+        }
+   //for (i=0; i < 4; ++i)     
+   //  printf("array[%i]: %g\n", i, array[i]);
+      
+  printf(">>>LARGEST diff in mean_n-homo_n=%g\n\n",array[0]);
+  
+  //printf("average of all mean_n-homo_n=%g\n", (mean_n0-hf.get_n0() + mean_n1-hf.get_n1()+mean_n2-hf.get_n2()+mean_n3-hf.get_n3())/4);// HERE! DELETE
 
   //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
   //4*Vol_parallelepiped=Vol_cube=lattice_constant^3
@@ -601,7 +634,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          cfree_energy_per_vol,
          cFideal_of_primitive_cell/primitive_cell_volume,
          run_time/60);
-
+  printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
+  //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
