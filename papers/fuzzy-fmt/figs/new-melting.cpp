@@ -256,7 +256,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   long num_points = 5 + 100*uipow(gwidth/(0.5*alpha), 3);
   // printf("Starting with num_points = %ld\n", num_points*4);
   long i=0;
-  double my_error;
+  double n3_error;
   do {
     num_points *= 4;
     for (; i<num_points; i++) {
@@ -279,8 +279,8 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
     // related.
-    my_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);
-  } while (my_error > MC_ERROR || my_error > 0.25*fabs(1-w_den_R.n_3/num_points));
+    n3_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);
+  } while (n3_error > MC_ERROR || n3_error > 0.25*fabs(1-w_den_R.n_3/num_points));
   w_den_R.n_0 /= num_points;
   w_den_R.n_1 /= num_points;
   w_den_R.n_2 /= num_points;
@@ -377,7 +377,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     if (gwidth < 0.01*lattice_constant) {
       printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
       cFideal_of_primitive_cell = analytic_ideal_free_energy;
-      printf("analytic crystal ideal gas free energy per volume = %g\n",
+      printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
     } else {
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
@@ -405,7 +405,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           }
         }
       }  //End inhomogeneous Fideal calculation
-      printf("crystal ideal gas free energy per volume = %g\n",
+      printf("crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
       printf("analytic ideal gas free energy per vol   = %g\n",
              analytic_ideal_free_energy/primitive_cell_volume);
