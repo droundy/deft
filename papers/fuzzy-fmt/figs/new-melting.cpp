@@ -385,7 +385,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           for (int k=0; k<Nl; k++) {
             vector3d r=i*da1 + j*da2 + k*da3;
 
-            const int many_cells=2;  //Gaussians centered at lattice points in 5x5x5 primitive cells
+            const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over
             //Gaussians father away won't contriubute much
             double n = 0;
             const double kT = temp;
