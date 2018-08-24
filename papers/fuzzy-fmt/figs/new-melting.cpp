@@ -244,19 +244,17 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R, double temp,
-                                              double gwidth, double fv) {
+weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
+                                              double gwidth, double fv, double alpha, double Xi) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   double n3_sqr = 0;
-  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
-    return w_den_R;
-  }
-  const double alpha = find_alpha(temp);
-  const double Xi = find_Xi(temp);
 
-  long num_points = 20+200*gwidth;   //Set higher for higher gw   HERE!
-  //long num_points = 50000; 
-  //long num_points = 5; 
+  // On the following line, we include the ratio of gaussian peak
+  // volume to the weight function volume so as to increase the odds
+  // that we get a random point that overlaps with the weight
+  // functions on our first try.
+  long num_points = 5 + 100*uipow(gwidth/(0.5*alpha), 3);
+  // printf("Starting with num_points = %ld\n", num_points*4);
   long i=0;
   double my_error;
   do {
@@ -456,6 +454,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          many_cells, max_distance_considered, lattice_constant);
   printf("Nl is %d\n", Nl);
 
+  const double alpha = find_alpha(temp);
+  const double Xi = find_Xi(temp);
+
   double mean_n0 = 0, mean_n1 = 0, mean_n2 = 0, mean_n3 = 0;
   for (int i=0; i<Nl; i++) {
     for (int j=0; j<Nl; j++) {
@@ -476,7 +477,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                   n_weight=find_weighted_den_aboutR_mc(r, R, dx, temp,
                                                        lattice_constant, gwidth, fv);
                 } else {
-                  n_weight=find_weighted_den_aboutR_mc_accurately(r, R, temp, gwidth, fv);
+                  n_weight=find_weighted_den_aboutR_mc_accurately(r, R, gwidth, fv, alpha, Xi);
                 }
 
                 n_0 +=n_weight.n_0;
