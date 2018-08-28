@@ -253,7 +253,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   // volume to the weight function volume so as to increase the odds
   // that we get a random point that overlaps with the weight
   // functions on our first try.
-  long num_points = 5 + 100*uipow(gwidth/(0.5*alpha), 3);
+  long num_points = 5 + 100*uipow(gwidth/(0.5*alpha), 3);   // HERE!
   // printf("Starting with num_points = %ld\n", num_points*4);
   long i=0;
   double n3_error;
@@ -274,7 +274,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
       w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
       w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
 
-      n3_sqr += 0.25*(1-fv)*sqr(w.n_3 + w2.n_3);
+      n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
     }
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
