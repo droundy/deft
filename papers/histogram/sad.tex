@@ -532,7 +532,7 @@ energy at $T_{\min}$ is minimized is less than $E_L$, the lower energy
 limit will ratchet down to include $E_{\min}$.
 Each time we change the value of $E_H$ or $E_L$, the weights within the
 new portion of the interesting energy range are set to the expressions
-in Equations~\ref{eq:highw} and~\ref{eq:loww}.  
+in Equations~\ref{eq:highw} and~\ref{eq:loww}.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n500}
@@ -574,69 +574,57 @@ extremely well compared with other flat histogram methods when applied
 to complex continuous systems such as polymers/proteins and spin models.
 
 \subsection{Convergence}
-{\color{red}
-Although SAD determines the update factor ``dynamically'', the method must still 
+Although SAD determines the update factor ``dynamically'', the method must still
 satisfy the criteria for convergence. Similar to the discussion that was presented
 on the convergence for SAMC, we approximate the total entropy change using an integral.
 The update factor is integrated from the last time an energy has been discovered $t_L$ to
 some minimum time $t_{\min}$ necessary for convergence.
 \begin{align}
-\Delta S_{\text{tot}} = \int_{t_L}^{t_{\min}} \gamma dt \approx t_L + t_L \ln\left(\frac{t_{\min}}{t_L}\right) \\
-+ N_S t_L \Delta S_{\text{tot}} \left(\frac{1}{t_{\min}}-\frac{1}{t_L}\right) 
+\Delta S_{\text{tot}} &= \int_{t_L}^{t_{\min}} \gamma dt \\
+&\approx N_S \ln\left(\frac{t_{\min}}{t_L}\right)
+   + \Delta S_{\text{tot}} \left(1-\frac{t_L}{t_{\min}}\right)
 \end{align}
-
 Simplifying, we see that as $t_{\min} \rightarrow \infty$ then $\gamma \rightarrow \infty$ satisfying
 the requirement for SAMC convergence. We can solve for the minimum time
 \begin{align}
-\Delta S_{\text{tot}} = \Delta S_{\text{SAMC}} + N_S t_L \Delta S_{\text{tot}} \left(\frac{1}{t_{\min}}-\frac{1}{t_L}\right)
+\Delta S_{\text{tot}} \approx N_S \ln\left(\frac{t_{\min}}{t_L}\right)
++ \Delta S_{\text{tot}} \left(1-\frac{t_L}{t_{\min}}\right)
 \end{align}
 Solving for the minimum time necessary $t_{\min}$, we find that
 \begin{align}
-t_{\min} = t_L \left( \frac{N_S \Delta S_{\text{tot}}}{\Delta S_{\text{tot}} + \Delta S_{\text{SAMC}}} + 1\right)
+\frac{t_{\min}}{t_L} = e^{\frac{\langle S\rangle t_L}{t_{\min}}}
 \end{align}
-Immediately we see that the minimum time necessary is roughly proportional
-to the last time the simulation has found an energy times a ratio of entropies.
+The solution for $t_{\min}$ can be written in terms of the Lambert-W function
+\begin{align}
+t_{\min} = \frac{3\langle S\rangle}{W(3\langle S\rangle e^{2\langle S\rangle})} t_L
+\end{align}
+For $\langle S\rangle \rightarrow 0$, we find that the minimum time
+$t_{\min} \rightarrow t_L$ and for $\langle S\rangle \rightarrow \infty$,
+we find that the minimum time $t_{\min} \rightarrow \frac{3}{2} t_L$.
 
-\jpsays{Are these right??? Check!}
-We now consider the following limiting cases:
-\subsubsection{$t \propto N_S \approx t_L$ and $ t << N_S$}
-In this limiting case, we find that the update factor reduces to
-\begin{align}
-\gamma \approx \frac{\bar S}{N_S} \approx \frac{\bar S}{t}
-\end{align}
-Because $t \propto N_S$, the update factor scales as 1/t which is consistent
-with the requirement for SAMC convergence.
-\subsubsection{$t >> N_{S}^2$ and $ t\approx t_L$}
-In this limiting case, we find that the update factor reduces to
-\begin{align}
-\gamma \approx \frac{N_S \bar S t_L}{t^2} \approx \frac{N_S \bar S}{t}
-\end{align}
-\subsubsection{$t >> t_L \bar S$}
-In this limiting case, we find that the update factor reduces to
-\begin{align}
-\gamma \approx \frac{N_S}{t}
-\end{align}
-
-}
+We can examine the limiting cases for SAD and see that the behavior at
+short times is analogous to the weight-based family algorithms $\gamma \approx 1$.
+In the limit that the number of moves $t >> t_L$, $\gamma \approx \nicefrac{N_S}{t}$
+which has a familiar 1/t form.
 
 \section{Results}\label{sec:results}
 
 For the square-well fluid, our simulations treat systems with a
 well-width of $\lambda = 1.30$ and a filling fraction of
-$\eta = 0.30$. We also explore various translation scales $\delta_0 = 0.005,
-0.05,$ and $0.5$. The simulation explores the
-energy space of the system at a reduced temperature of
+$\eta = 0.30$. We also explore various translation scales $\delta_0 = 0.005 and
+0.05$. The simulations explore the
+energy space of the systems at reduced temperatures of
 $T_{\text{min}} = 0.2$ and $0.5$.  All simulations lead to the minimum important
 energy $E_{\min}$ and maximum entropy energy $E_{\max}$
 being calculated (with the exception of the WL methods where both
 of these parameters are needed a priori).  In the sections below, we
-examine systems parameters on the convergence of the methods.
+examine the systems parameters impact on the convergence of the methods.
 
-We use the average entropy error vs moves a metric to compare
+We use the average entropy error vs moves as a metric to compare
 simulation runtimes and overall convergence. The overall accuracy
 is determined by examining the fractional error of a particular method to
 a `golden' standard. For each simulation, the `golden' standard is
-SAMC for the best choice of $t_0$ for $10^{11}$ moves followed by TMMC.
+SAMC for the best choice of $t_0$.
 \begin{align}
 \epsilon_\text{avg} = 1 - \bigg\lvert\frac{S_\text{method}}{S_\text{golden}}\bigg\rvert
 \end{align}
@@ -646,80 +634,74 @@ Fig.~\ref{fig:N50-ff0.3-avg-error}.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-default.pdf}
-  \caption{The average entropy error for each method is shown for $\lambda = 0.30$ with
-  SAMC followed by TMMC serving as the `golden'
-  standard.}\label{fig:N50-ff0.3-avg-error}
+  \caption{The average entropy error for each MC method is shown for $\eta = 0.30$ and $T_{\min} = 0.2$ with
+  SAMC $t_0 = 10^5$ serving as the `golden' standard.}\label{fig:N50-ff0.3-avg-error}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-slow.pdf}
-  \caption{The average entropy error for each method is shown for $\lambda = 0.30$ with
-  SAMC followed by TMMC serving as the `golden'
-  standard.}\label{fig:N50-ff0.3-avg-error}
+  \caption{The average entropy error for each MC method is shown for $\eta = 0.30$ and $T_{\min} = 0.2$ with
+  SAMC $t_0 = 10^5$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
+  serving as the `golden' standard.}\label{fig:N50-ff0.3-avg-error-slow}
 \end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-fast.pdf}
-  \caption{The average entropy error for each method is shown for $\lambda = 0.30$ with
-  SAMC followed by TMMC serving as the `golden'
-  standard.}\label{fig:N50-ff0.3-avg-error}
-\end{figure}
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-fast.pdf}
+  %\caption{The average entropy error for each method is shown for $\eta = 0.30$ with
+  %SAMC followed by TMMC serving as the `golden'
+  %standard.}\label{fig:N50-ff0.3-avg-error-fast}
+%\end{figure}
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error-default.pdf}
-  \caption{The average entropy error is shown for $\lambda = 0.30$ with TMI acting as the
-  `golden' standard.}\label{fig:n500-ff0.3}
+  \caption{The average entropy error for each MC method is shown for $\eta = 0.30$ and $T_{\min} = 0.5$ with
+  SAMC $t_0 = 10^6$ serving as the `golden' standard.}\label{fig:n500-ff0.3}
 \end{figure}
 
-~\jpsays{We have discussed including a figure for the $\lambda = 30\%$ and $N = 50$
-showing translation scale impact. Also a figure for the $\lambda = 30\%$ and $N = 50$
-showing the impact of choice of minimum temperature.}
+\subsection{A periodic system with $\eta = 30\%$ and $N = 50$}
 
-\subsection{A periodic system with $\lambda = 30\%$ and $N = 50$}
+Figure~\ref{fig:N50-ff0.3-avg-error} shows the average entropy vs moves
+for a system consisting of 50 atoms that are placed in a periodic
+simple cubic unit cell with lattice constant chosen to give a $\eta =
+0.30$.  These particles are randomly inserted into the system and
+random moves are proposed (with a translation scale $\delta_0 = 0.05$).
+For the $\eta = 30\%$ and $N = 50$ system, we explore the choice of
+$\delta_0$ as a parameter. Smaller translation scales cause the given
+method to take additional time to explore all energies. Ideal methods
+should scale linearly with the $\delta_0$, that is, a decrease in the
+translation scale should result in a proportional increase in
+convergence time. However, as can be seen from
+Fig.~\ref{fig:N50-ff0.3-avg-error-slow} SAMC methods that rapidly
+converged for $\delta = 0.05$ do not proportionaly converge for a
+translation scale of $\delta = 0.005$. We see that SAD handles
+arbitrary translation scales and proportionaly converges based on the
+translation scale that is chosen.
 
-Figure~\ref{fig:N50-ff0.3-avg-error} shows the average entropy vs moves for
-a system consisting of 50 atoms that are placed in a periodic simple cubic unit
-cell with lattice constant chosen to give a $\lambda = 0.30$.  These particles
-are randomly inserted into the system and random moves are proposed (with
-a translation scale $\delta_0 = 0.05$).
-
-\subsubsection{translation scale}
-For the $\lambda = 30\%$ and $N = 50$ system, we explore the choice of $\delta_0$
-as a parameter. Smaller translation scales should cause the given method to take
-additional time to explore all energies.  A larger translation scale could result
-in the simulation taking shorter or longer (because longer distance moves may end up
-not being allowed). Ideal methods should scale linearly with the $\delta_0$, that is,
-a decrease in the translation scale should result in a proportional increase in convergence
-time. Some methods such as WL may not be able to handle arbitrary $\delta_0$.
-
-\subsubsection{minimum temperature}
-For the $\lambda = 30\%$ and $N = 50$ system, we explore the choice of $T_{\min}$
-as a parameter. We have theoretically postulated that a dynamic version of SAMC which
-we call SAD should depend upon this physically meaningful parameter. We thus explore
-the behaviour of SAD for two different reduced temperatures.
-
-\subsection{A periodic system with $\lambda = 30\%$ and $N = 500$}
+\subsection{A periodic system with $\eta = 30\%$ and $N = 500$}
 
 A system is configured with dimensions $x = y = z = 19\sigma$.  A
-filling fraction $\lambda = 0.30$ is chosen which yields $N = 500$
+filling fraction $\eta = 0.30$ is chosen which yields $N = 500$
 particles in a cubical lattice system.  These particles are randomly inserted
 into the system and random moves are proposed (with a translation scale
 $\delta_0 = 0.05$).
+
+For the larger system, SAMC parameter values of $t_0$ that gave rapid convergence for
+the $N = 50$ system with $\delta = 0.05$ are too small.  Several additional
+larger $t_0$ parameters are chosen to compare with SAD.  SAD has significantly smaller
+fluctuations in the average entropy error for a given number of moves.
 
 \subsubsection{Discussion on convergence and update factor}
 
 A close examination of Fig.~\ref{fig:gamma-vs-t} shows that $\gamma$
 for the Wang-Landau algorithm decreases much more rapidly than
-$\nicefrac{1}{\sqrt{t}}$. It can be observed that all the methods from
-this family struggle to converge if the update factor decreases faster
-than $\nicefrac{10^5}{\sqrt{t}}$. Fig.~\ref{fig:n500-ff0.3} shows both
+$\nicefrac{1}{\sqrt{t}}$. It can be observed  for the simulations that were carried out that all the methods from
+the weight-based family struggle to converge if the update factor decreases too rapidlly. Fig.~\ref{fig:n500-ff0.3} shows
 WL and SAMC with inappropriate choices of $t_0$ i.e. less than
 $\nicefrac{10^5}{\sqrt{t}}$ failing to converge in a reasonable amount
 of time. Thus, the update factor $\gamma$, shown as a function of
 simulation moves in Fig.~\ref{fig:gamma-vs-t}, proves useful in
 determining which methods will converge in a reasonable amount of time.
-We compare each method to a `golden' standard which we define to be an
-ideal choice of SAMC for $10^{11}$ moves followed by TMMC.  This gives an
+We compare each method to a `golden' standard SAMC simulation for an ideal choice of $t_0$.  This gives an
 unbiased comparison with our developed method SAD. The dynamic version
 of SAMC which we call SAD performs as well as SAMC (assuming the user
-can correctly identify an appropriate choice of $t_0$).  SAD
+can correctly identify an appropriate choice of $t_0$ for SAMC).  SAD
 outperforms WL and WL-TMMC for the same given number of moves. The
 absence of user defined parameters makes SAD an exciting alternative to
 methods where user experience or successive implementation iteration
@@ -727,8 +709,8 @@ are needed to achieve reasonable results.
 
 \section{Conclusions}
 
-We have introduced a new algorithm SAD (which is Stochastic Approximation
-with the modification factor dynamically chosen) that effectively
+We have introduced a new algorithm SAD (Stochastic Approximation
+with a Dynamic $\gamma$) that effectively
 samples the entire energy space for a variety of system sizes.  Also,
 SAD proves effective in comparison with other Monte-Carlo methods at
 converging to the correct density of states.  The ease of
@@ -737,8 +719,7 @@ ideal algorithm. SAD converges as quickly as SAMC (in the case of an ideally
 chosen $t_0$ for our simulations. SAD doesn't suffer from the weakness of SAMC,
 i.e. the user choosing parameters that could lead to the simulation not
 converging in a reasonable amount of time. SAD also converges more quickly
-than TMMC (the reader will remember that SAMC followed by TMMC is what each
-method is compared against) and much more quickly than WL-TMMC.
+than Wl, TMMC, and WL-TMMC.
 
 SAD decreases $\gamma$ in a controlled way that prevents the algorithm
 from taking too long to converge (as in the case of SAMC with a poor choice
