@@ -279,7 +279,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
     // related.
-    n3_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);
+    n3_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
   } while (n3_error > MC_ERROR || n3_error > 0.25*fabs(1-w_den_R.n_3/num_points));
   w_den_R.n_0 /= num_points;
   w_den_R.n_1 /= num_points;
@@ -338,6 +338,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   printf("lattice_constant=%g\n", lattice_constant);
   // const double cubic_cell_volume = uipow(lattice_constant, 3);
+      
+
+  
+  
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -380,13 +384,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
     } else {
+      
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
         for (int j=0; j<Nl; j++) {
           for (int k=0; k<Nl; k++) {
             vector3d r=i*da1 + j*da2 + k*da3;
 
             const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over
-            //Gaussians father away won't contriubute much
+                                                                        //Gaussians father away won't contriubute much            
             double n = 0;
             const double kT = temp;
             for (int t=-many_cells; t <=many_cells; t++) {
@@ -398,7 +403,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                 }
               }
             }
-            if (n > 1e-200) { // avoid underflow and n=0 issues
+            if (n > 1e-200) { // Only use n values that are large enough - avoid underflow and n=0 issues ln(0)=ERROR
               // printf("n = %g  dF = %g\n", n, dF);
               cFideal_of_primitive_cell += kT*n*(log(n*2.646476976618268e-6/(sqrt(kT)*kT)) - 1.0)*dV;
             }
