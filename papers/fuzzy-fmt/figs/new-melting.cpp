@@ -30,6 +30,9 @@ long NUM_POINTS = 800;
 double MC_ERROR = 0.0;
 double seed=1;
 
+int num_points_calc = 1;    // set to 0 for num_points scaled with gwidth
+                            // set to 1 for my experimental num_points
+
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 6.0;
 
@@ -248,23 +251,111 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
                                               double gwidth, double fv, double alpha, double Xi) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   double n3_sqr = 0;
+  
+  //For test ...
+  //w_4 is a test weight function (a step function) similar to w_3
+  //used to test the Monte-Carlo integration since the weighted density
+  //can be solved for w_4 analytically and the results compared,
+  //especially when gwidth is varied.
+  double w_den_R_n_4=0;  
+  double n4_sqr = 0; 
+  double n4_error;
+  int R0num_points;
+  //End test stuff
+  
+  //vector3d rdiff = r - R;
+  long num_points;
+  //int num_points_calc = 0;  // set to 0 for num_points scaled with gwidth
+  //                          // set to 1 for my experimental num_points
+  if (num_points_calc > 0) {
+    num_points = 25;
+    //num_points = 25 + 10*uipow(rdiff.norm()/(0.5*alpha), 3);  //scale with r and R rather than with gwidth? No
+    //printf("num_points=%li  ", num_points);
+    //printf("extra=%g  ", 10*uipow(rdiff.norm()/(0.5*alpha), 3));
+    //printf("rdiff.norm()=%g  ", rdiff.norm());
+    //printf("rdiff.x=%g, rdiff.y=%g, rdiff.z=%g  ", rdiff.x, rdiff.y, rdiff.z);
+    //printf("r.x=%g, r.y=%g, r.z=%g  ", r.x, r.y, r.z);
+    //printf("R.x=%g, R.y=%g, R.z=%g  ", R.x, R.y, R.z);
+    //printf("r.norm()=%.15g  ", r.norm());
+    //printf("R.norm()=%.15g  ", R.norm());
 
-  // On the following line, we include the ratio of gaussian peak
-  // volume to the weight function volume so as to increase the odds
-  // that we get a random point that overlaps with the weight
-  // functions on our first try.
-  long num_points = 5 + 100*uipow(gwidth/(0.5*alpha), 3);
+  } else {
+    // On the following line, we include the ratio of gaussian peak
+    // volume to the weight function volume so as to increase the odds
+    // that we get a random point that overlaps with the weight
+    // functions on our first try.
+    num_points = 25 + 100*uipow(gwidth/(0.5*alpha), 3);   // HERE!  scales with gwidth
+    //printf("num_points=%li  ", num_points);
+  }
+
+  
   // printf("Starting with num_points = %ld\n", num_points*4);
   long i=0;
   double n3_error;
+  //printf("again, num_points=%li  ", num_points);
   do {
     num_points *= 4;
     for (; i<num_points; i++) {
-      vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
-      vector3d r_prime = R + dr;
-      vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+      
+      //vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
+    
+      
+     vector3d dr;
+     vector3d r_prime;
+     vector3d r_prime2;
+     
+     //New experimenatal sampling technique 
+     //This uses a "sampling sphere" of radius |Amax| about weight functions within which points 
+     //generated randomly must fall in order to be included in the Monte-Carlo 
+     //average weight calculation. |Amax| was 3*(sqrt(Xi/2)) + alpha/2 but
+     //now |Amax|=2*(sqrt(Xi/2)) + alpha/2 as the data fits this better
+     vector3d A;
+     int count=0;
+    if (num_points_calc  > 0) {
+     do { 
+         dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth        
+         count += 1;
+         A=r-R-dr;   //Sample Shpere is of radius |Amax|
+         } while (A.norm() > 2*sqrt(Xi/2) + alpha/2); 
+      r_prime = R + dr;
+      r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+      if (R.norm() == 0) {
+        R0num_points += 1; }
+       } else {
+      dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
+      r_prime = R + dr;
+      r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+     }
+     //printf("COUNT=%i\n", count); 
+     
+     // vector3d r_prime = R + dr;
+      //vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+      
       weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
       weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
+      
+      //Check weighting function data:
+      printf("A.norm=%g, w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g, 3*sqrt(Xi/2)=%g, Amax3=%g, Amax2=%g, Amax1=%g, alpha/2=%g, Amin1=%g, Amin2=%g \n", 
+              A.norm(), w.n_0, w.n_1, w.n_2, w.n_3, 3*sqrt(Xi/2), (alpha/2)+(3*sqrt(Xi/2)), (alpha/2)+(2*sqrt(Xi/2)), (alpha/2)+(1*sqrt(Xi/2)),
+              alpha/2, (alpha/2)-(1*sqrt(Xi/2)), (alpha/2)-(2*sqrt(Xi/2)));
+      
+      /////// TEST
+      double w_4;
+      double w2_4;
+      if (R.norm() == 0) {
+        if (A.norm() < alpha/2){
+          w_4=1;
+          w2_4=1;
+        } else {
+          w_4=0;
+          w2_4=0;
+        }
+        w_den_R_n_4 += 0.5*(1-fv)*(w_4 + w2_4);
+        n4_sqr += 0.25*(1-fv)*(1-fv)*sqr(w_4 + w2_4);
+        //printf("R=0\n");
+      }
+      ////// END TEST
+
 
       w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
       w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
@@ -274,12 +365,18 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
       w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
       w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
 
-      n3_sqr += 0.25*(1-fv)*sqr(w.n_3 + w2.n_3);
+      n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
     }
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
     // related.
-    n3_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);
+    n3_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
+  
+    //TEST
+    n4_error = sqrt((n4_sqr/num_points - sqr(w_den_R_n_4/num_points))/num_points);  //Standard Error of the Mean (SEM)
+    //printf("n4_error is %g\n", n4_error);
+    //END TEST
+  
   } while (n3_error > MC_ERROR || n3_error > 0.25*fabs(1-w_den_R.n_3/num_points));
   w_den_R.n_0 /= num_points;
   w_den_R.n_1 /= num_points;
@@ -287,6 +384,15 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   w_den_R.n_3 /= num_points;
   w_den_R.nv_1 /= num_points;
   w_den_R.nv_2 /= num_points;
+  
+  //for TEST...
+  if (R.norm() == 0) {
+     printf("R.norm()=%g, w_den_R_n_4= %g, n4_error=%g\n", R.norm(), w_den_R_n_4 /= R0num_points, n4_error);
+   }
+  //end test stuff
+  //vector3d rdiff=r-R;
+  //printf("Total num_points is %li for |r-R|=%g\n", num_points, rdiff.norm());
+  
   return w_den_R;
 }
 
@@ -338,6 +444,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   printf("lattice_constant=%g\n", lattice_constant);
   // const double cubic_cell_volume = uipow(lattice_constant, 3);
+      
+
+  
+  
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -380,13 +490,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
     } else {
+      
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
         for (int j=0; j<Nl; j++) {
           for (int k=0; k<Nl; k++) {
             vector3d r=i*da1 + j*da2 + k*da3;
 
             const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over
-            //Gaussians father away won't contriubute much
+                                                                        //Gaussians father away won't contriubute much            
             double n = 0;
             const double kT = temp;
             for (int t=-many_cells; t <=many_cells; t++) {
@@ -398,7 +509,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                 }
               }
             }
-            if (n > 1e-200) { // avoid underflow and n=0 issues
+            if (n > 1e-200) { // Only use n values that are large enough - avoid underflow and n=0 issues ln(0)=ERROR
               // printf("n = %g  dF = %g\n", n, dF);
               cFideal_of_primitive_cell += kT*n*(log(n*2.646476976618268e-6/(sqrt(kT)*kT)) - 1.0)*dV;
             }
@@ -657,7 +768,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          cfree_energy_per_vol,
          cFideal_of_primitive_cell/primitive_cell_volume,
          run_time/60);
-  printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
+  printf("num_points_calc=%i  (0 for scale w/ gw, 1 for my experiment)\n", num_points_calc);
+  //printf("\nexper num_points = %i\n", 25); 
+  //int num_points=5 + 100*uipow(gwidth/(0.5*alpha),3);
+  //printf("scaled num_points = %i\n\n", num_points);
+  //printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
   //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
 }
