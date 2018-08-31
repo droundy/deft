@@ -268,7 +268,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   //int num_points_calc = 0;  // set to 0 for num_points scaled with gwidth
   //                          // set to 1 for my experimental num_points
   if (num_points_calc > 0) {
-    num_points = 25;
+    num_points = 5;
     //num_points = 25 + 10*uipow(rdiff.norm()/(0.5*alpha), 3);  //scale with r and R rather than with gwidth? No
     //printf("num_points=%li  ", num_points);
     //printf("extra=%g  ", 10*uipow(rdiff.norm()/(0.5*alpha), 3));
@@ -293,6 +293,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   long i=0;
   double n3_error;
   //printf("again, num_points=%li  ", num_points);
+  int count=0;
   do {
     num_points *= 4;
     for (; i<num_points; i++) {
@@ -310,13 +311,12 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
      //average weight calculation. |Amax| was 3*(sqrt(Xi/2)) + alpha/2 but
      //now |Amax|=2*(sqrt(Xi/2)) + alpha/2 as the data fits this better
      vector3d A;
-     int count=0;
     if (num_points_calc  > 0) {
      do { 
          dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth        
          count += 1;
          A=r-R-dr;   //Sample Shpere is of radius |Amax|
-         } while (A.norm() > 2*sqrt(Xi/2) + alpha/2); 
+         } while (A.norm() > 3*Xi + alpha/2); 
       r_prime = R + dr;
       r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
       if (R.norm() == 0) {
@@ -335,9 +335,8 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
       weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
       
       //Check weighting function data:
-      printf("A.norm=%g, w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g, 3*sqrt(Xi/2)=%g, Amax3=%g, Amax2=%g, Amax1=%g, alpha/2=%g, Amin1=%g, Amin2=%g \n", 
-              A.norm(), w.n_0, w.n_1, w.n_2, w.n_3, 3*sqrt(Xi/2), (alpha/2)+(3*sqrt(Xi/2)), (alpha/2)+(2*sqrt(Xi/2)), (alpha/2)+(1*sqrt(Xi/2)),
-              alpha/2, (alpha/2)-(1*sqrt(Xi/2)), (alpha/2)-(2*sqrt(Xi/2)));
+      // printf("A.norm=%g, w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g, 3*Xi=%g, Amax3=%g, Amax2=%g, Amax1=%g\n", 
+      //         A.norm(), w.n_0, w.n_1, w.n_2, w.n_3, 3*Xi, alpha/2+3*Xi);
       
       /////// TEST
       double w_4;
@@ -370,20 +369,21 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
     // related.
-    n3_error = sqrt((n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
+    n3_error = sqrt((n3_sqr/count - sqr(w_den_R.n_3/count))/count);  //Standard Error of the Mean (SEM)
   
     //TEST
-    n4_error = sqrt((n4_sqr/num_points - sqr(w_den_R_n_4/num_points))/num_points);  //Standard Error of the Mean (SEM)
+    n4_error = sqrt((n4_sqr/count - sqr(w_den_R_n_4/count))/count);  //Standard Error of the Mean (SEM)
     //printf("n4_error is %g\n", n4_error);
     //END TEST
   
-  } while (n3_error > MC_ERROR || n3_error > 0.25*fabs(1-w_den_R.n_3/num_points));
-  w_den_R.n_0 /= num_points;
-  w_den_R.n_1 /= num_points;
-  w_den_R.n_2 /= num_points;
-  w_den_R.n_3 /= num_points;
-  w_den_R.nv_1 /= num_points;
-  w_den_R.nv_2 /= num_points;
+  } while (n3_error > MC_ERROR || n3_error > 0.25*fabs(1-w_den_R.n_3/count));
+  w_den_R.n_0 /= count;
+  w_den_R.n_1 /= count;
+  w_den_R.n_2 /= count;
+  w_den_R.n_3 /= count;
+  w_den_R.nv_1 /= count;
+  w_den_R.nv_2 /= count;
+  printf("num_points = %ld and count = %d gives n3 = %g\n", num_points, count, w_den_R.n_3);
   
   //for TEST...
   if (R.norm() == 0) {
