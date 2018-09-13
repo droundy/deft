@@ -705,8 +705,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   }
   printf("run time is %g hours\n", run_time/60/60);
 
-  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\tmin\n");
-  printf("%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tmean_n3\t\trelerr\t\tmin\n");
+  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
          dx_input,
          MC_ERROR,
          total_phi_1/primitive_cell_volume,
@@ -714,6 +714,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          total_phi_3/primitive_cell_volume,
          cfree_energy_per_vol,
          cFideal_of_primitive_cell/primitive_cell_volume,
+         mean_n3,
+         diff_n3/hf.get_n3(),
          run_time/60);
   printf("mc_constant=%ld, mc_prefactor=%ld\n", mc_constant, mc_prefactor); // HERE!    
   //printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
