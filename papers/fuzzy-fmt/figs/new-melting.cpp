@@ -844,8 +844,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("run time is %g hours\n", run_time/60/60);
   //printf("mc_constant=%ld, mc_prefactor=%ld\n", mc_constant, mc_prefactor); // HERE!
   
-  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tFEdiff\tmean_n3\t\trelerr\t\tmc_con\tmc_pf\tmin\n");
-  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%ld\t%ld\t%g\n",
+  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tFEdiff\tmean_n3\t\trelerr\t\tmc_con\tmc_pf\tgw\tmin\n");
+  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%ld\t%ld\t%g\t%g\n",
          dx_input,
          MC_ERROR,
          total_phi_1/primitive_cell_volume,
@@ -858,6 +858,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          diff_n3/hf.get_n3(),
          mc_constant,
          mc_prefactor,
+         gwidth,
          run_time/60);
    if (my_experiment > 0) {
    printf("My experiment\n"); 
