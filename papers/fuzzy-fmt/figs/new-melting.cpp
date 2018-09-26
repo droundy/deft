@@ -31,6 +31,7 @@ double MC_ERROR = 0.0;
 double seed=1;
 long mc_prefactor=50000;
 long mc_constant=100;
+int my_experiment =0;   //set to 1 to run my experiment
 
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 6.0;
@@ -297,7 +298,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
 
 
 
-double report_my_error(vector3d r, vector3d R,
+double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
       double gwidth, double fv, double alpha, double Xi) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   double n3_sqr = 0;
@@ -338,6 +339,137 @@ double report_my_error(vector3d r, vector3d R,
 }
 
 
+
+
+
+
+long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ONLY
+      double gwidth, double fv, double alpha, double Xi) {
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  double n3_sqr = 0;
+
+  // On the following line, we include the ratio of gaussian peak
+  // volume to the weight function volume so as to increase the odds
+  // that we get a random point that overlaps with the weight
+  // functions on our first try.
+  long num_points = mc_constant + mc_prefactor*uipow(gwidth/(0.5*alpha), 3);   // HERE!
+  // printf("Starting with num_points = %ld\n", num_points*4);
+  long i=0;
+  double n3_error;
+  do {
+    num_points *= 4;
+    for (; i<num_points; i++) {
+      vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
+      vector3d r_prime = R + dr;
+      vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+      weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
+      weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
+
+      w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
+      w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
+      w_den_R.n_2 += 0.5*(1-fv)*(w.n_2 + w2.n_2);
+      w_den_R.n_3 += 0.5*(1-fv)*(w.n_3 + w2.n_3);
+
+      w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
+      w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
+
+      n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
+    }
+    // we only consider error in n3, because it is dimensionless and
+    // pretty easy to reason about, and the others are closely
+    // related.
+    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)   
+    } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
+  return num_points;
+}
+
+
+
+///////////////////////////EXPERIMENT!!!///////////////////////////////
+weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
+                                              double gwidth, double fv, double alpha, double Xi) {
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  printf("SIZE of Gaussian is 3*gwidth=%g\n", 3*gwidth);
+  printf("SIZE of weight function is 2*Xi*sqrt(1/2) + alpha/2=%g\n", 2*Xi*sqrt(1/2) + alpha/2);
+  double n3_sqr = 0;
+  //int R0num_points;
+  //vector3d rdiff = r - R;
+  // printf("Starting with num_points = %ld\n", num_points*4);
+  long i=0;
+  double n3_error;
+  int vec_count=0;
+  long num_points = 5;
+  //long num_points = mc_constant + mc_prefactor*uipow(gwidth/(0.5*alpha), 3);   // HERE!
+  int num_zeroterms=0;
+  //printf("again, num_points=%li  ", num_points);
+  do {
+    num_points *= 4;
+    for (; i<num_points; i++) {
+      //vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
+     vector3d dr;
+     vector3d r_prime;
+     vector3d r_prime2;
+     //New experimenatal sampling technique 
+     //This uses a "sampling sphere" of radius |Amax| about weight functions within which points 
+     //generated randomly must fall in order to be included in the Monte-Carlo 
+     //average weight calculation. |Amax| was 3*(sqrt(Xi/2)) + alpha/2 but
+     //now |Amax|=2*(sqrt(Xi/2)) + alpha/2 as the data fits this better
+     vector3d A;
+     if (3*gwidth > (2*Xi*sqrt(1/2) + alpha/2)) {
+       do { 
+             dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth        
+             vec_count += 1;
+             A=r-R-dr;   //Sample Shpere around weight function is of radius |Amax|
+             printf("A.norm()=%g\n", A.norm());
+          } while (A.norm() > 2*Xi*sqrt(1/2) + alpha/2);   //FIX THIS!! getting stuck in here!!! the Gaussian is mostly smaller than the weight function - turn this around!
+
+          r_prime = R + dr;
+          r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+        } else {
+      dr = vector3d::ran(gwidth);
+      r_prime = R + dr;
+      r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+      }
+      //if (R.norm() == 0) {
+      //  R0num_points += 1; }
+     //printf("COUNT=%i\n", vec_count); 
+      weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
+      weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
+      //printf("A.norm=%g, w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g, 3*sqrt(Xi/2)=%g, Amax3=%g, Amax2=%g, Amax1=%g, alpha/2=%g, Amin1=%g, Amin2=%g \n",   //Check weighting function data:
+      //        A.norm(), w.n_0, w.n_1, w.n_2, w.n_3, 3*sqrt(Xi/2), (alpha/2)+(3*sqrt(Xi/2)), (alpha/2)+(2*sqrt(Xi/2)), (alpha/2)+(1*sqrt(Xi/2)),
+      //        alpha/2, (alpha/2)-(1*sqrt(Xi/2)), (alpha/2)-(2*sqrt(Xi/2)));
+      w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
+      w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
+      w_den_R.n_2 += 0.5*(1-fv)*(w.n_2 + w2.n_2);
+      w_den_R.n_3 += 0.5*(1-fv)*(w.n_3 + w2.n_3);
+
+      w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
+      w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
+
+      n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
+    }
+    // we only consider error in n3, because it is dimensionless and
+    // pretty easy to reason about, and the others are closely
+    // related.
+    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
+  } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));
+  num_zeroterms=vec_count*(3*gwidth/(2*Xi*sqrt(1/2) + alpha/2))*(3*gwidth/(2*Xi*sqrt(1/2) + alpha/2))*(3*gwidth/(2*Xi*sqrt(1/2) + alpha/2));
+  w_den_R.n_0 /= num_points + num_zeroterms;    //Added terms where weight function is zero but the Gaussian is not!
+  w_den_R.n_1 /= num_points + num_zeroterms;    //Added terms where weight function is zero but the Gaussian is not!
+  w_den_R.n_2 /= num_points + num_zeroterms;    //Added terms where weight function is zero but the Gaussian is not!
+  w_den_R.n_3 /= num_points + num_zeroterms;    //Added terms where weight function is zero but the Gaussian is not!
+  w_den_R.nv_1 /= num_points + num_zeroterms;   //Added terms where weight function is zero but the Gaussian is not!
+  w_den_R.nv_2 /= num_points + num_zeroterms;   //Added terms where weight function is zero but the Gaussian is not!
+  //vector3d rdiff=r-R;
+  //printf("Total num_points is %li for |r-R|=%g\n", num_points, rdiff.norm()); 
+  printf("vec_count=%i\n", vec_count); 
+  printf("3*gwidth=%g\n", 3*gwidth);
+  printf("2*Xi*sqrt(1/2) + alpha/2=%g\n", 2*Xi*sqrt(1/2) + alpha/2);
+  printf("3*gwidth/(2*Xi*sqrt(1/2) + alpha/2)=%g\n", 3*gwidth/(2*Xi*sqrt(1/2) + alpha/2));
+  printf("num_zeroterms=%i\n", num_zeroterms);
+  return w_den_R;   //the experiment takes much longer because the weight function is much larger than the gaussian up to gw=0.165 (at KT=2)
+}
+//////////////////////// END EXPERIMENT ///////////////////////////////
 
 
 
@@ -533,9 +665,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                   n_weight=find_weighted_den_aboutR_mc(r, R, dx, temp,
                                                        lattice_constant, gwidth, fv);
                 } else {
+                  if (my_experiment > 0) {
+                    n_weight=find_weighted_den_aboutR_mc_accurately_experiment(r, R, gwidth, fv, alpha, Xi);
+                  } else {
                   n_weight=find_weighted_den_aboutR_mc_accurately(r, R, gwidth, fv, alpha, Xi);
+                  }
                   //double n3_error=report_my_error(r, R, gwidth, fv, alpha, Xi);  //FOR DEBUG - delete!
                   //printf(">>>>n3_error=%g\n",n3_error);   //FOR DEBUG - delete!
+                  //long total_num_points=report_total_num_points(r, R, gwidth, fv, alpha, Xi);  //FOR DEBUG - delete!
+                  //printf(">>>>total_num_points=%ld\n", total_num_points);   //FOR DEBUG - delete!
                 }
 
                 n_0 +=n_weight.n_0;
@@ -704,9 +842,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     delete[] alldat_filename;
   }
   printf("run time is %g hours\n", run_time/60/60);
-
-  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tmean_n3\t\trelerr\t\tmin\n");
-  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
+  //printf("mc_constant=%ld, mc_prefactor=%ld\n", mc_constant, mc_prefactor); // HERE!
+  
+  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tFEdiff\tmean_n3\t\trelerr\t\tmc_con\tmc_pf\tmin\n");
+  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%ld\t%ld\t%g\n",
          dx_input,
          MC_ERROR,
          total_phi_1/primitive_cell_volume,
@@ -714,10 +853,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          total_phi_3/primitive_cell_volume,
          cfree_energy_per_vol,
          cFideal_of_primitive_cell/primitive_cell_volume,
+         data_out.diff_free_energy_per_atom,
          mean_n3,
          diff_n3/hf.get_n3(),
+         mc_constant,
+         mc_prefactor,
          run_time/60);
-  printf("mc_constant=%ld, mc_prefactor=%ld\n", mc_constant, mc_prefactor); // HERE!    
+   if (my_experiment > 0) {
+   printf("My experiment\n"); 
+   }
   //printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
   //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
