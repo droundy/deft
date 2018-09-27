@@ -757,7 +757,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double diff_n1=mean_n1- hf.get_n1();
   double diff_n2=mean_n2- hf.get_n2();
   double diff_n3=mean_n3- hf.get_n3();
-  printf("mean_n0-homo_n0 ratio=%g\n", diff_n0/hf.get_n0());    // HERE! 
+  printf("mean_n0-homo_n0 ratio=%g\n", diff_n0/hf.get_n0());    // HERE! Relative error
   printf("mean_n1-homo_n1 ratio=%g\n", diff_n1/hf.get_n1());
   printf("mean_n2-homo_n2 ratio=%g\n", diff_n2/hf.get_n2());
   printf("mean_n3-homo_n3 ratio=%g\n", diff_n3/hf.get_n3());
