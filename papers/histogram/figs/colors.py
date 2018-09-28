@@ -184,6 +184,8 @@ def style_args(method):
     if method in _linestyles:
         args['linestyle'] = _linestyles[method]
     args['zorder'] = -legend_order(method)
+    if method == '1/sqrt(t)':
+        args['zorder'] = 0
     return args
 
 def plot(x, y, method=None):
