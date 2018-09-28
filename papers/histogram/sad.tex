@@ -285,7 +285,7 @@ it adds yet another parameter that must be empirically determined.
 %This work proposes a means for dynamically setting the update factor
 %$\gamma_t$ that should robustly converge on a variety of systems.
 
-\subsubsection{Convergence}
+\subsection{SAMC Convergence}\label{sec:samc-convergence}
 The difficulty in using the SAMC method lies in identifying an appropriate
 value for $t_0$.  A value that is either too high or too low will result
 in slow convergence to the true entropy.  It is instructive to consider
@@ -463,9 +463,9 @@ expression for $\gamma_t$ which incorporates these ideas is:
 \begin{align}
   \gamma_{t}^{\text{SAD}} =
      \frac{
-       \frac{E_{H}-E_{L}}{3T_{\text{min}}} + \frac{t}{t_L}
+       \frac{E_{H}-E_{L}}{T_{\text{min}}} + \frac{t}{t_L}
      }{
-       \frac{E_{H}-E_{L}}{3T_{\text{min}}} + \frac{t}{N_S}\frac{t}{t_L}
+       \frac{E_{H}-E_{L}}{T_{\text{min}}} + \frac{t}{N_S}\frac{t}{t_L}
      }
 \end{align}
 This factor asymptotically has the same $1/t$ behavior as the original
@@ -574,18 +574,29 @@ extremely well compared with other flat histogram methods when applied
 to complex continuous systems such as polymers/proteins and spin models.
 
 \subsection{Convergence}
-Although SAD determines the update factor ``dynamically'', the method must still
-satisfy the criteria for convergence. Similar to the discussion that was presented
-on the convergence for SAMC, we approximate the total entropy change using an integral.
-The update factor is integrated from the last time an energy has been discovered $t_L$ to
-some minimum time $t_{\min}$ necessary for convergence.
+Although SAD determines the update factor ``dynamically'', the method
+must still satisfy the SAMC convergence criteria. As in
+Section~\ref{sec:samc-convergence} on the convergence for SAMC, we
+will approximate the total entropy change using an integral.  We
+integrate update factor from the last time an energy has been
+discovered $t_L$ to some minimum time $t_{\min}$ necessary for
+convergence.  This gives us a lower bound on the total entropy change
+that can be acheived in $t_{\min}$ moves.
 \begin{align}
-\Delta S_{\text{tot}} &= \int_{t_L}^{t_{\min}} \gamma dt \\
+\Delta S_{\text{tot}} &= \int_{t_L}^{t_{\min}}
+     \frac{
+       3\langle S\rangle + \frac{t}{t_L}
+     }{
+       3\langle S\rangle + \frac{t}{N_S}\frac{t}{t_L}
+     } dt \\
 &\approx N_S \ln\left(\frac{t_{\min}}{t_L}\right)
    + \Delta S_{\text{tot}} \left(1-\frac{t_L}{t_{\min}}\right)
 \end{align}
-Simplifying, we see that as $t_{\min} \rightarrow \infty$ then $\gamma \rightarrow \infty$ satisfying
-the requirement for SAMC convergence. We can solve for the minimum time
+where we assumed that $t_L\gg N_S\langle S\rangle$, which is to say
+that it takes a long time to find all the interesting energy states.
+Simplifying, we see that as $t_{\min} \rightarrow \infty$ then $\gamma
+\rightarrow \infty$ satisfying the requirement for SAMC
+convergence. We can solve for the minimum time
 \begin{align}
 \Delta S_{\text{tot}} \approx N_S \ln\left(\frac{t_{\min}}{t_L}\right)
 + \Delta S_{\text{tot}} \left(1-\frac{t_L}{t_{\min}}\right)
