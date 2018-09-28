@@ -13,7 +13,7 @@
 \newcommand{\tssays}[1]{{\color{red} [\cyan{Tanner:} \emph{#1}]}}
 
 \begin{document}
-\title{Stochastic Approximation Monte Carlo with Dynamic Update
+\title{Stochastic Approximation Monte Carlo with a Dynamic Update
 Factor (SAD)
 }
 
@@ -23,8 +23,16 @@ Factor (SAD)
   Corvallis, OR 97331}
 
 \begin{abstract}
-  We present several histogram methods and compare the performance and
-  efficiency at treating the square-well fluid.
+  We present a novel Monte-Carlo algorithm based on Stochastic
+  Approximation Monte Carlo (SAMC) algorithm for directly calculating
+  the density of states. The proposed method is Stochastic
+  Approximation with a dynamic update factor (SAD-$\gamma$ or SAD)
+  dynamically adjusts the update factor $\gamma$ during the course of
+  the simulation. We test this MC method on the square-well fluid and
+  compare the convergence time and entropy error for a variety of weight-based
+  and transition matrix Monte-Carlo methods. SAD rapidly converges to the
+  correct density of states without the need for the user to specify an
+  arbitrary tunable parameter $t_0$ as in the case of SAMC.
 \end{abstract}
 
 \maketitle

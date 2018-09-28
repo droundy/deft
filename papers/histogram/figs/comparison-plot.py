@@ -21,7 +21,7 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-tmmc', '-vanilla_wang_landau']
+    methods = ['-sad3','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE', '-sad3-test']
     if transcale == 'slow':
         methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow']
     if transcale == 'fast':
