@@ -21,7 +21,7 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-tmmc', '-vanilla_wang_landau']
+    methods = ['-sad3','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE', '-sad3-test']
     if transcale == 'slow':
         methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow']
     if transcale == 'fast':
@@ -60,10 +60,9 @@ for meth in split4:
             methods.append('-%s' % meth)
 
 
-best_ever_error = 1e100
 best_ever_max = 1e100
-scaling_error = 1e200
 max_time = 0
+min_error = 1e200
 print 'methods are', methods
 for method in methods:
     print 'trying method', method
@@ -75,7 +74,6 @@ for method in methods:
         if energy > 0:
                 Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
         iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
-        best_ever_error = min(best_ever_error, errorinentropy.min())
         best_ever_max = min(best_ever_max, maxerror.min())
 
         if not os.path.exists('figs/lv'):
@@ -136,9 +134,8 @@ for method in methods:
         if type(iterations) is not np.float64:
                 plt.figure('errorinentropy')
                 my_S_error = errorinentropy[0:len(iterations)]
+                min_error = min(min_error, my_S_error[my_S_error > 0].min())
                 colors.loglog(moves, my_S_error, method = method[1:])
-                my_scaling_error = (my_S_error[len(iterations)//2:]*np.sqrt(moves[len(iterations)//2:])).min()
-                scaling_error = min(my_scaling_error, scaling_error)
                 plt.xlabel('Moves')
                 plt.ylabel('Average Entropy Error')
                 #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
@@ -158,8 +155,8 @@ colors.legend()
 plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
 plt.figure('errorinentropy')
-colors.loglog(moves, scaling_error/np.sqrt(moves), method = '1/sqrt(t)')
-#colors.loglog(moves, best_ever_error/np.sqrt(moves/max_time), method = '1/sqrt(t)')
+moves = np.array([1e6, max_time])
+colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = '1/sqrt(t)')
 colors.legend()
 plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
 

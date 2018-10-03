@@ -249,7 +249,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
 
 weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
                                               double gwidth, double fv, double alpha, double Xi) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight n = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
   double n3_sqr = 0;
 
   // On the following line, we include the ratio of gaussian peak
@@ -269,29 +269,29 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
       weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
       weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
 
-      w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
-      w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
-      w_den_R.n_2 += 0.5*(1-fv)*(w.n_2 + w2.n_2);
-      w_den_R.n_3 += 0.5*(1-fv)*(w.n_3 + w2.n_3);
+      n.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
+      n.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
+      n.n_2 += 0.5*(1-fv)*(w.n_2 + w2.n_2);
+      const double n3_contribution = 0.5*(1-fv)*(w.n_3 + w2.n_3);
+      n.n_3 += n3_contribution;
+      n3_sqr += sqr(n3_contribution);
 
-      w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
-      w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
-
-      n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
+      n.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
+      n.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
     }
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
     // related.
-    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)   
-    } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  
+    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(n.n_3/num_points))/(num_points-1));  //Standard Error of the Mean (SEM)
+    } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-n.n_3/num_points) && n3_error < 1e-15));  
     //avoids downward spiral n3_error > ... so n3_error becomes smaller which makes ... smaller and so n3_error is still bigger etc...
-  w_den_R.n_0 /= num_points;
-  w_den_R.n_1 /= num_points;
-  w_den_R.n_2 /= num_points;
-  w_den_R.n_3 /= num_points;
-  w_den_R.nv_1 /= num_points;
-  w_den_R.nv_2 /= num_points;
-  return w_den_R;
+  n.n_0 /= num_points;
+  n.n_1 /= num_points;
+  n.n_2 /= num_points;
+  n.n_3 /= num_points;
+  n.nv_1 /= num_points;
+  n.nv_2 /= num_points;
+  return n;
 }
 
 
