@@ -5,15 +5,17 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-data_file="histogram_relerror.dat"
-thisdata = np.loadtxt(data_file)
+thisdata = np.loadtxt("histogram_relerror.dat")
 
 x=thisdata[:,6]
 
-num_bins=6
-#num_bins=100
-
-n,bins,patches=plt.hist(x,num_bins,facecolor='blue', alpha=0.5)
+error_range = max(x.max(), -x.min())
+_,bins,_ = plt.hist(x,range=(-error_range, error_range), facecolor='blue')
+plt.hist(x[x<0],bins,facecolor='green')
+plt.title(r'%.1f%% $\pm$ %.1f%% negative' %
+          (100.0*len(x[x<0]) / float(len(x)),
+           100.0*len(x[x<0]) / float(len(x))/np.sqrt(len(x))))
 x_label="relerror"
+print(bins)
 plt.xlabel(x_label)
 plt.show()
