@@ -721,6 +721,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           printf("position is: %g %g %g\n", r.x, r.y, r.z);
           printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%.17g = 1+%g\n", n_0, n_1, n_2, n_3, n_3-1);
           printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
+          printf("             #NAN!\n"); //
           data data_out;
           data_out.diff_free_energy_per_atom=0;
           data_out.cfree_energy_per_atom=0;
@@ -844,8 +845,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("run time is %g hours\n", run_time/60/60);
   //printf("mc_constant=%ld, mc_prefactor=%ld\n", mc_constant, mc_prefactor); // HERE!
   
-  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tFEdiff\tmean_n3\t\trelerr\t\tmc_con\tmc_pf\tgw\tmin\n");
-  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%ld\t%ld\t%g\t%g\n",
+  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tFEdiff\tmean_n3\t\trelerr\t\tmc_con\tmc_pf\tgw\tseed\tmin\n");
+  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%ld\t%ld\t%g\t%g\t%g\n",
          dx_input,
          MC_ERROR,
          total_phi_1/primitive_cell_volume,
@@ -859,6 +860,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          mc_constant,
          mc_prefactor,
          gwidth,
+         seed,
          run_time/60);
    if (my_experiment > 0) {
    printf("My experiment\n"); 
