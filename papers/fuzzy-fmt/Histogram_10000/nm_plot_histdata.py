@@ -69,7 +69,7 @@ plt.axhspan(-1e-4, 1e-4, color='green', alpha=0.15, lw=0)
 plt.axhline(0, color='green')
 
 for gw in mc_constant.keys():
-   plt.errorbar(mc_constant[gw], mean_error[gw], error_width[gw], fmt=markers[gw], label='gw=%g' % gw)
+   plt.errorbar(mc_constant[gw], mean_error[gw], mean_error_uncertainty[gw], fmt=markers[gw], label='gw=%g' % gw)
 plt.legend()
 
 plt.title('Histogram results with mc_prefactor %g' % mc_prefactor)
