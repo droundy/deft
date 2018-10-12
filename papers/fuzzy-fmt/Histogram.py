@@ -39,5 +39,5 @@ x_label="relerror"
 #print(bins)
 plt.xlabel(x_label)
 plt.savefig(args.filedat+".png" )
-plt.show()
+#plt.show()
 
