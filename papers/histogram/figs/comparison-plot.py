@@ -2,6 +2,10 @@ from __future__ import division
 import sys, os, matplotlib
 import numpy as np
 
+matplotlib.rcParams['text.usetex'] = True
+matplotlib.rc('font', family='serif')
+matplotlib.rcParams['figure.figsize'] = (5, 4)
+
 if 'noshow' in sys.argv:
         matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -21,9 +25,10 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE', '-sad3-test']
+    methods = ['-sad3','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
+              '-sad-t2-T13','-sad-t-s1-T13']
     if transcale == 'slow':
-        methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow']
+        methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-sad3-T13-slow']
     if transcale == 'fast':
         methods = ['-sad3-fast','-tmmc-fast', '-vanilla_wang_landau-fast']
 
@@ -126,8 +131,8 @@ for method in methods:
 
         plt.figure('maxerror')
         colors.loglog(moves, maxerror, method = method[1:])
-        plt.xlabel('Moves')
-        plt.ylabel('Maximum Entropy Error')
+        plt.xlabel(r'Moves')
+        plt.ylabel(r'Maximum Entropy Error')
         #plt.title('Maximum Entropy Error vs Iterations, %s' %filebase)
         colors.legend()
 
@@ -136,8 +141,8 @@ for method in methods:
                 my_S_error = errorinentropy[0:len(iterations)]
                 min_error = min(min_error, my_S_error[my_S_error > 0].min())
                 colors.loglog(moves, my_S_error, method = method[1:])
-                plt.xlabel('Moves')
-                plt.ylabel('Average Entropy Error')
+                plt.xlabel(r'$\textrm{Moves}$')
+                plt.ylabel(r'$\textrm{Average Entropy Error}$')
                 #plt.title('Average Entropy Error at Each Iteration, %s' %filebase)
                 if "default" in transcale:
                     plt.title(r'$N=%d$, $\eta = %g$ $\delta_0 = 0.05$' % (int(N), ff))
@@ -150,14 +155,23 @@ for method in methods:
     except:
         raise
 plt.figure('maxerror')
-colors.loglog([1e6,max_time], [best_ever_max*np.sqrt(max_time/1e6), best_ever_max], method = '1/sqrt(t)')
+colors.loglog([1e6,max_time], [best_ever_max*np.sqrt(max_time/1e6), best_ever_max], method = r'$\frac{1}{\sqrt{t}}$')
 colors.legend()
 plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
-
+ 
 plt.figure('errorinentropy')
-moves = np.array([1e6, max_time])
-colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = '1/sqrt(t)')
+moves = np.array([1e5, 1e13])
+#colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
+for i in np.arange(-8, 9, 1.0):
+    colors.loglog(moves, 10**i*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
+plt.xlim(moves[0], moves[1])
+if filebase == 's000/periodic-ww1.30-ff0.30-N50':
+    plt.ylim(1e-3, 1e5)
+elif filebase == 's000/periodic-ww1.30-ff0.30-N500':
+    plt.ylim(1e-2, 1e4)
 colors.legend()
+plt.tight_layout()
 plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
+
 
 plt.show()

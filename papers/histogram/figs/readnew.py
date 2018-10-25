@@ -111,6 +111,17 @@ def minT(f):
                 break
     return min_T
 
+def moves(fbase):
+    moves = 0
+    with open(fbase) as file:
+        for line in file:
+            if("total" in line):
+                this_moves = float(line.split()[-1])
+                if this_moves > moves:
+                    moves = this_moves
+                break
+    return moves
+
 def minT_from_transitions(fbase):
     return minT(fbase+"-transitions.dat")
 

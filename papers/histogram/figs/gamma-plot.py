@@ -1,19 +1,15 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
-import sys, glob
+import sys, glob, matplotlib
 import colors
-
-from matplotlib.colors import LightSource
-
-densitycolormap = plt.cm.jet
-densityinterpolation = 'bilinear'
-densityshadedflag = True
-densitybarflag = True
-gridflag = True
+matplotlib.rcParams['text.usetex'] = True
+matplotlib.rc('font', family='serif')
 
 filename = sys.argv[1]
 Tmin = float(sys.argv[2])
+
+plt.figure(figsize=(5,4))
 
 try:
     for wl in glob.glob("data/gamma/%s/wl*.txt" % filename):
@@ -30,7 +26,7 @@ try:
         colors.loglog(moves, factor,
                       'vanilla_wang_landau'
                          + wl[len("data/gamma/%s/wl" % filename):-4])
-        plt.ylim(ymin=1e-10)
+        plt.ylim(ymin=1e-12, ymax=1e1)
 
 except:
     pass
@@ -42,7 +38,7 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     time = data[:,1]
     ehi = data[:,2]
     elo = data[:,3]
-    ts = np.exp(np.linspace(0, np.log(max(time)*5), 1000))
+    ts = np.exp(np.linspace(0, np.log(max(time)*1e3), 2000))
     gamma = np.zeros_like(ts)
     print sad, time
     for j in range(len(time)):
@@ -51,22 +47,23 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
                 t = ts[i]
                 tL = time[j]
                 NE = num_sad_states[j]
-                gamma[i] = abs(elo[j]-ehi[j])/(3*Tmin*t)*(
-                  NE**2 + NE*t + (t/tL-1)*t)/(NE**2 + t + (t/tL-1)*t)
-    sadname = sad.split('/')[-1].split('.')[0]
+                Sbar = abs(elo[j]-ehi[j])/(Tmin) # removed 3 from denominator!
+                gamma[i] = (Sbar + t/tL)/(Sbar + t**2/(tL*NE))
 
+    sadname = sad.split('/')[-1].split('.')[0]
 
     colors.loglog(ts, gamma,sadname)
 
 def gamma_sa(t,t0):
     return t0/np.maximum(t, t0)
 
-t0s = [1e3,1e4,1e5,1e6]
+t0s = [1e3,1e4,1e5,1e6,1e7]
 for t0 in t0s:
     colors.loglog(ts,gamma_sa(ts, t0),'samc-%g' %t0)
-    plt.xlabel('Moves')
-    plt.ylabel('Gamma')
+    plt.xlabel(r'$\textrm{Moves}$')
+    plt.ylabel(r'$\gamma_{t}$')
     colors.legend()
+plt.tight_layout()
 plt.savefig('figs/gamma-%s.pdf' % filename.replace('.','_'))
 if 'noshow' not in sys.argv:
     plt.show()

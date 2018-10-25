@@ -101,9 +101,10 @@ for frame in range(1, numframes+1):
         basename = dataformat % (suffix, frame*skipby)
 
         try:
+            datname = basename+'-transitions.dat'
+            #print(readnew.moves(datname))
             e, hist = readnew.e_hist(basename)
             colors.plot(e, hist, method=suffix)
-            datname = basename+'-transitions.dat'
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception as e:

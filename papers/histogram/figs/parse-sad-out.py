@@ -10,7 +10,7 @@ for line in sys.stdin.readlines():
     if match is not None:
         g = match.groups()
         print g[1], g[0], g[2], g[3]
-    
+
     
     
 

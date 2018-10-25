@@ -29,7 +29,7 @@ data['bins']['histogram'] = np.array(data['bins']['histogram'])
 data['bins']['lnw'] = np.array(data['bins']['lnw'])
 data['movies']['energy']
 minyaml = data['movies']['energy'].index(-120)
-maxyaml = data['movies']['energy'].index(-265)
+maxyaml = data['movies']['energy'].index(-248)
 #print(data['bins']['lnw'])
 moves = data['moves']
 
@@ -41,7 +41,7 @@ ref = reference
 if ref[:len('data/')] != 'data/':
     ref = 'data/' + ref
 maxref = int(readnew.max_entropy_state(ref))
-minref = int(readnew.min_important_energy(ref))
+minref = 248 # int(readnew.min_important_energy(ref))
 n_energies = int(minref - maxref+1)
 print maxref, minref
 try:
@@ -55,9 +55,11 @@ maxerror = np.zeros(N_save_times)
 for i in range(0,N_save_times):
     # below just set average S equal between lndos and lndosref
     norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[maxref:minref+1])
-    doserror = lndos[i][maxyaml:minyaml+1] - lndosref[maxref:minref+1] - norm_factor
+    doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[maxref:minref+1] - norm_factor
     errorinentropy[i] = np.sum(abs(doserror))/len(doserror)
     maxerror[i] = np.amax(doserror) - np.amin(doserror)
+
+print(doserror)
 
 moves = data['movies']['time']
 errorinentropy = errorinentropy[:len(moves)]

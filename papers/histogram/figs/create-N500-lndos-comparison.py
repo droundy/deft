@@ -2,17 +2,22 @@ from __future__ import division, print_function
 import sys, os, matplotlib
 import numpy as np
 
+matplotlib.rcParams['text.usetex'] = True
+matplotlib.rc('font', family='serif')
 if 'noshow' in sys.argv:
         matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import colors
 import readnew
 
+plt.figure(figsize=(5,4))
+
 inputs = [
-    ('vanilla_wang_landau',
-       'data/s000/periodic-ww1.30-ff0.30-N500-vanilla_wang_landau-movie/000001-lndos.dat'),
-    ('golden', 'data/s000/periodic-ww1.30-ff0.30-N500-tmmc-golden-movie/000001-lndos.dat'),
-    ('sad3', 'data/s000/periodic-ww1.30-ff0.30-N500-sad3-movie/000001-lndos.dat'),
+    #('vanilla_wang_landau',
+    #   'data/s000/periodic-ww1.30-ff0.30-N500-vanilla_wang_landau-minE-movie/002000-lndos.dat'),
+    ('samc-1e+06', 'data/s000/periodic-ww1.30-ff0.30-N500-samc-1e+06-movie/004000-lndos.dat'),
+    #('sad3', 'data/s000/periodic-ww1.30-ff0.30-N500-sad3-movie/002000-lndos.dat'),
+    #('sad3-test', 'data/s000/periodic-ww1.30-ff0.30-N500-sad3-test-movie/002000-lndos.dat')
 ]
 
 for method, fname in inputs:
@@ -20,10 +25,21 @@ for method, fname in inputs:
     e, lndos = readnew.e_lndos(fname)
     colors.plot(e, lndos, method=method)
 
-plt.ylabel('$S(E)/k_B$')
-plt.ylim(-2000, 0)
-plt.xlabel('E')
+emax = -34
+emin = -3139
+eminimportant = -2503
+eSmax = -1206
+Smin = -3700.72
+plt.axvline(eminimportant, linestyle=':', color='tab:gray')
+plt.axvline(eSmax, linestyle=':', color='tab:gray')
+#plt.axvline(emin)
+#plt.axvline(eSmax)
+plt.ylabel('$S/k_B$')
+plt.ylim(Smin, 0)
+plt.xlim(emin, emax)
+plt.xlabel('$E$')
 colors.legend()
 
+plt.tight_layout()
 plt.savefig('figs/N500-lndos-comparison.pdf')
 #plt.show()
