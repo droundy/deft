@@ -41,13 +41,14 @@ print 'saving to', dirname
 
 well_width = data['system']['cell']['well_width']
 translation_scale = ['translation_scale']
-min_T = data['method'][method]['min_T']
+if method == 'Sad':
+    min_T = data['method'][method]['min_T']
+    too_lo = data['method'][method]['too_lo']
+    too_hi = data['method'][method]['too_hi']
 moves = data['moves']
 x = data['system']['cell']['box_diagonal']['x']
 y = data['system']['cell']['box_diagonal']['y']
 z = data['system']['cell']['box_diagonal']['z']
-too_lo = data['method'][method]['too_lo']
-too_hi = data['method'][method]['too_hi']
 gamma = data['movies']['gamma'][-1]
 
 # shouldn't need to restric range [maxE:minE+1][::-1]
@@ -57,7 +58,8 @@ lndos = data['movies']['entropy'][-1][maxE:minE+1][::-1]
 lndos[:] = [x - max(lndos) for x in lndos]
 #print data['movies']['entropy']
 ps = data['bins']['round_trips'][maxE:minE+1][::-1]
-
+max_entropy_state = energy[0]
+min_important_energy = energy[-1]
 np.savetxt(dirname,
           np.c_[energy, lndos, ps],
           fmt = ('%.16g'),
@@ -86,4 +88,4 @@ np.savetxt(dirname,
           #newline = '# converged temperature: ',
           #newline = '# energy\t lndos\t ps\t lndos_tm: ',
           #newline = '\n version: created with yaml\n',
-          header = 'comparison reference file\t(generated with python %s \nenergy\t lndos\t\t ps\t ' % ' '.join(sys.argv))
+          header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ps\t ' % (' '.join(sys.argv),max_entropy_state,min_important_energy))
