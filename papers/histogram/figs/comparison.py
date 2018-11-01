@@ -93,8 +93,16 @@ for method in methods:
             # norm_factor = numpy.log(numpy.sum(numpy.exp(lndos[maxref:minref+1] - lndosref[maxref:minref+1]))/n_energies)
 
             # below just set average S equal between lndos and lndosref
-            norm_factor = numpy.mean(lndos[maxref:minref+1]) - numpy.mean(lndosref[maxref:minref+1])
-            doserror = lndos[maxref:minref+1] - lndosref[maxref:minref+1] - norm_factor
+            index_maxref = numpy.argwhere(eref == -maxref)[0][0]
+            index_minref = numpy.argwhere(eref == -minref)[0][0]
+            index_max = numpy.argwhere(e == -maxref)[0][0]
+            index_min = numpy.argwhere(e == -minref)[0][0]
+            norm_factor = numpy.mean(lndos[index_max:index_min]) - numpy.mean(lndosref[index_maxref:index_minref])
+            #print index_maxref
+            #print index_minref
+            #print lndosref[index_maxref:index_minref]
+            #print lndos[index_maxref:index_minref]
+            doserror = lndos[index_max:index_min] - lndosref[index_maxref:index_minref] - norm_factor
             errorinentropy[i] = numpy.sum(abs(doserror))/len(doserror)
             erroratenergy[i] = doserror[energy-maxref]
             # the following "max" result is independent of how we choose
@@ -103,8 +111,8 @@ for method in methods:
             maxerror[i] = numpy.amax(doserror) - numpy.amin(doserror)
             
             if lndostm is not None:
-                norm_factor = numpy.mean(lndostm[maxref:minref+1]) - numpy.mean(lndosref[maxref:minref+1])
-                doserror = lndostm[maxref:minref+1] - lndosref[maxref:minref+1] - norm_factor
+                norm_factor = numpy.mean(lndos[index_max:index_min]) - numpy.mean(lndosref[index_maxref:index_minref])
+                doserror = lndos[index_max:index_min] - lndosref[index_maxref:index_minref] - norm_factor
                 errorinentropytm[i] = numpy.sum(abs(doserror))/len(doserror)
                 erroratenergytm[i] = doserror[energy-maxref]
                 # the following "max" result is independent of how we choose
