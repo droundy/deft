@@ -15,6 +15,7 @@ _colors = { 'sad': 'r',
             'sad3-s2-tm': 'c',
             'sad-t2-T13': 'xkcd:violet',
             'sad-t-s1-T13': 'xkcd:maroon',
+            'sad-t2-s3-T13': 'xkcd:darkblue',
             'wltmmc-1e-10': 'k',
             'wltmmc-1e-10-slow': 'k',
             'wltmmc-1e-10-fast': 'k',
@@ -87,6 +88,7 @@ _linestyles = {
 }
 
 _legend_order = [
+    'sad-t2-s3-T13',
     'sad-t-s1-T13',
     'sad-t2-T13',
     'one_over_t_wang_landau-T13-t',
