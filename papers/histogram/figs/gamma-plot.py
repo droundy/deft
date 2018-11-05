@@ -34,23 +34,31 @@ except:
 
 for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
     data = np.loadtxt(sad)
-    num_sad_states = data[:,0]
-    time = data[:,1]
-    ehi = data[:,2]
-    elo = data[:,3]
-    ts = np.exp(np.linspace(0, np.log(max(time)*1e3), 2000))
-    gamma = np.zeros_like(ts)
-    print sad, time
-    for j in range(len(time)):
-        for i in range(len(gamma)):
-            if ts[i] > time[j]:
-                t = ts[i]
-                tL = time[j]
-                NE = num_sad_states[j]
-                Sbar = abs(elo[j]-ehi[j])/(Tmin) # removed 3 from denominator!
-                gamma[i] = (Sbar + t/tL)/(Sbar + t**2/(tL*NE))
+    print data.shape
+    if data.shape[1] > 2: # i.e. we are not using parse-yaml-out.py
+        num_sad_states = data[:,0]
+        time = data[:,1]
+        ehi = data[:,2]
+        elo = data[:,3]
+        ts = np.exp(np.linspace(0, np.log(max(time)*1e3), 2000))
+        gamma = np.zeros_like(ts)
+        print sad, time
+        for j in range(len(time)):
+            for i in range(len(gamma)):
+                if ts[i] > time[j]:
+                    t = ts[i]
+                    tL = time[j]
+                    NE = num_sad_states[j]
+                    Sbar = abs(elo[j]-ehi[j])/(Tmin) # removed 3 from denominator!
+                    gamma[i] = (Sbar + t/tL)/(Sbar + t**2/(tL*NE))
 
-    sadname = sad.split('/')[-1].split('.')[0]
+        sadname = sad.split('/')[-1].split('.')[0]
+    else: #data.shape[0] == 2: # we are using parse-yaml-out.py
+        ts = data[:,0]
+        gamma = data[:,1]
+        sadname = sad.split('/')[-1].split('.')[0]
+
+
 
     colors.loglog(ts, gamma,sadname)
 
