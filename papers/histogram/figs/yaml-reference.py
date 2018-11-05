@@ -13,6 +13,10 @@ filename = sys.argv[1]
 #used for where we save the data.
 filebase = sys.argv[2]
 
+#energy range
+Smin = int(sys.argv[3])
+Smax = int(sys.argv[4])
+
 f = '%s.yaml' % (filename)
 filename = filename.split('/')[-1]
 
@@ -31,9 +35,9 @@ method = method.replace("'", '')
 print 'the Monte-Carlo method is ', method
 
 data['movies']['energy']
-minE = data['movies']['energy'].index(-120)
-maxE = data['movies']['energy'].index(-248)
-
+minE = data['movies']['energy'].index(-Smax)
+maxE = data['movies']['energy'].index(-Smin)
+#print minE, maxE
 moves = data['movies']['time']
 
 dirname = 'data/%s-reference-lndos.dat' % (filename)
@@ -58,6 +62,7 @@ lndos = data['movies']['entropy'][-1][maxE:minE+1][::-1]
 lndos[:] = [x - max(lndos) for x in lndos]
 #print data['movies']['entropy']
 ps = data['bins']['round_trips'][maxE:minE+1][::-1]
+#print energy
 max_entropy_state = energy[0]
 min_important_energy = energy[-1]
 np.savetxt(dirname,
