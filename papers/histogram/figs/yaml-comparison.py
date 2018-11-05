@@ -16,6 +16,11 @@ reference = sys.argv[2]
 #used for where we save the data.
 filebase = sys.argv[3]
 methodname = sys.argv[4]
+N = int(sys.argv[5]) # the number to divide moves by!
+
+#energy range
+Smin = int(sys.argv[6])
+Smax = int(sys.argv[7])
 
 f = '%s.yaml' % (filename)
 
@@ -28,8 +33,8 @@ data = yaml_data
 data['bins']['histogram'] = np.array(data['bins']['histogram'])
 data['bins']['lnw'] = np.array(data['bins']['lnw'])
 data['movies']['energy']
-minyaml = data['movies']['energy'].index(-120)
-maxyaml = data['movies']['energy'].index(-248)
+minyaml = data['movies']['energy'].index(-Smax)
+maxyaml = data['movies']['energy'].index(-Smin)
 #print(data['bins']['lnw'])
 moves = data['moves']
 
@@ -40,8 +45,8 @@ N_save_times = len(data['movies']['entropy'])
 ref = reference
 if ref[:len('data/')] != 'data/':
     ref = 'data/' + ref
-maxref = int(readnew.max_entropy_state(ref))
-minref = 248 # int(readnew.min_important_energy(ref))
+maxref = Smax #int(readnew.max_entropy_state(ref))
+minref = Smin # int(readnew.min_important_energy(ref))
 n_energies = int(minref - maxref+1)
 print maxref, minref
 try:
@@ -59,9 +64,10 @@ for i in range(0,N_save_times):
     errorinentropy[i] = np.sum(abs(doserror))/len(doserror)
     maxerror[i] = np.amax(doserror) - np.amin(doserror)
 
-print(doserror)
+#print(doserror)
 
-moves = data['movies']['time']
+moves = map(int,data['movies']['time'])
+moves = [x / N for x in moves]
 errorinentropy = errorinentropy[:len(moves)]
 maxerror = maxerror[:len(moves)]
 
