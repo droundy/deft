@@ -1,6 +1,7 @@
 from __future__ import division
 import sys, os, matplotlib
 import numpy as np
+from collections import OrderedDict
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rc('font', family='serif')
@@ -81,6 +82,24 @@ for method in methods:
         iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
         best_ever_max = min(best_ever_max, maxerror.min())
 
+        howManyPoints = 300 # We are definately using C++ code!
+        reducedPoints = 50  # How many points to reduce C++ data to?
+        temp_iter = []
+        temp_ee = []
+        temp_me = []
+        if len(iterations) > howManyPoints:
+                duplicateData = np.logspace(np.log10(1),np.log10(len(iterations)), num=reducedPoints)
+                duplicateData = duplicateData.astype(int)
+                dataOrdered = list(OrderedDict.fromkeys(duplicateData))
+                #print dataOrdered
+                #print len(iterations)
+                for i in range(len(dataOrdered)-1):
+                        temp_iter = np.append(temp_iter,iterations[dataOrdered[i]])
+                        temp_ee = np.append(temp_ee,errorinentropy[dataOrdered[i]])
+                        temp_me = np.append(temp_me,maxerror[dataOrdered[i]])
+                iterations = temp_iter
+                errorinentropy = temp_ee
+                maxerror = temp_me
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
 
@@ -166,9 +185,11 @@ for i in np.arange(-8, 9, 1.0):
     colors.loglog(moves, 10**i*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
 plt.xlim(moves[0], moves[1])
 if filebase == 's000/periodic-ww1.30-ff0.30-N50':
-    plt.ylim(1e-3, 1e5)
+    plt.ylim(1e-3, 1e2)
+    if "slow" in transcale:
+        plt.ylim(1e-2, 1e2)
 elif filebase == 's000/periodic-ww1.30-ff0.30-N500':
-    plt.ylim(1e-2, 1e4)
+    plt.ylim(1e-1, 1e3)
 colors.legend()
 plt.tight_layout()
 plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
