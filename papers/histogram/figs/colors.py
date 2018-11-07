@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 _colors = { 'sad': 'r',
             'sad-tm': 'r',
             'sad3': 'c',
-            'sad3-test': 'maroon',
+            'sad3-T13': 'r',
+            'sad3-T13-slow': 'r',
+            'sad3-test': 'c',
             'sad3-slow': 'c',
             'sad3-fast': 'c',
             'sad3-tm': 'c',
@@ -11,6 +13,9 @@ _colors = { 'sad': 'r',
             'sad3-s1-tm': 'c',
             'sad3-s2': 'c',
             'sad3-s2-tm': 'c',
+            'sad-t2-T13': 'xkcd:violet',
+            'sad-t-s1-T13': 'xkcd:maroon',
+            'sad-t2-s3-T13': 'xkcd:darkblue',
             'wltmmc-1e-10': 'k',
             'wltmmc-1e-10-slow': 'k',
             'wltmmc-1e-10-fast': 'k',
@@ -18,10 +23,12 @@ _colors = { 'sad': 'r',
             'wltmmc-0.8-1e-10-s1': 'k',
             'wltmmc': 'k',
             'vanilla_wang_landau': 'k',
-            'vanilla_wang_landau-minE': 'dimgray',
+            'vanilla_wang_landau-minE': 'k',
             'vanilla_wang_landau-slow': 'k',
             'vanilla_wang_landau-fast': 'k',
+            'one_over_t_wang_landau-T13-t': 'xkcd:lime green',
             'tmmc': 'b',
+            'tmmc-slow': 'b',
             'tmi3': 'g',
             'toe3': 'tab:orange',
             'samc': 'm',
@@ -47,7 +54,7 @@ _colors = { 'sad': 'r',
             'samc-1e+07-slow': 'midnightblue',
             'samc-1e+08': 'darkmagenta',
             'samc-1e+09': 'fuchsia',
-            '1/sqrt(t)': 'r'
+            '1/sqrt(t)': 'xkcd:light gray'
 }
 
 _linestyles = {
@@ -57,7 +64,7 @@ _linestyles = {
     'sad3-s1-tm': '--',
     'sad3-s2': '-.',
     'sad3-s2-tm': '--',
-    'sad3-slow': '--',
+    'sad3-slow': '-',
     'sad3-fast': '-.',
     'vanilla_wang_landau': '--',
     'vanilla_wang_landau-minE': '--',
@@ -69,13 +76,24 @@ _linestyles = {
     'samc-1000-slow': ':',
     'samc-10000-slow': ':',
     'samc-100000-slow': ':',
+    'samc-1e+06-slow': ':',
+    'samc-1e+07-slow': ':',
     'samc-1000-fast': ':',
     'samc-10000-fast': ':',
     'samc-100000-fast': ':',
     'samc-1e+06': ':',
+    'samc-1e+07': ':',
+    'samc-1e+08': ':',
+    '1/sqrt(t)': '-'
 }
 
 _legend_order = [
+    'sad-t2-s3-T13',
+    'sad-t-s1-T13',
+    'sad-t2-T13',
+    'one_over_t_wang_landau-T13-t',
+    'sad3-T13',
+    'sad3-T13-slow',
     'sad', 'sad-tm',
     'sad3-test', 'sad3-test',
     'sad3', 'sad3-tm',
@@ -88,6 +106,7 @@ _legend_order = [
     'vanilla_wang_landau-slow',
     'vanilla_wang_landau-fast',
     'tmmc',
+    'tmmc-slow',
     'wltmmc-0.8-0.0001',
     'wltmmc-0.0001',
     'wltmmc-0.0001-slow',
@@ -123,11 +142,12 @@ _legend_label = {
     'vanilla_wang_landau-minE': 'WL',
     'vanilla_wang_landau-slow': 'WL',
     'vanilla_wang_landau-fast': 'WL',
+    'one_over_t_wang_landau-T13-t': '1/t-WL',
     'sad': 'SAD',
     'sad-tm': 'SAD-TM',
     'sad3': 'SAD',
-    'sad3-test': 'SAD-test',
-    'sad3-slow': 'SAD-slow',
+    'sad3-test': 'SAD',
+    'sad3-slow': 'SAD',
     'sad3-fast': 'SAD-fast',
     'wltmmc': 'WLTMMC ($10^{-4}$ cutoff)',
     'wltmmc-0.8-0.0001': 'WLTMMC ($10^{-4}$ cutoff)',
@@ -139,6 +159,7 @@ _legend_label = {
     'wltmmc-1e-10-slow': 'WLTMMC ($10^{-10}$ cutoff)',
     'wltmmc-1e-10-fast': 'WLTMMC ($10^{-10}$ cutoff)',
     'tmmc': 'TMMC',
+    'tmmc-slow': 'TMMC',
     'tmi3': 'TMI',
     'toe3': 'TOE',
     'samc': 'SAMC',
@@ -178,14 +199,18 @@ def color(m):
     return 'k'
 
 def style_args(method):
-    args = {'label': method}
+    args = {}
+    if method != '1/sqrt(t)':
+        args = {'label': method}
     if method in _colors:
         args['color'] = _colors[method]
     if method in _linestyles:
         args['linestyle'] = _linestyles[method]
     args['zorder'] = -legend_order(method)
     if method == '1/sqrt(t)':
-        args['zorder'] = 0
+        args['zorder'] = -50
+    if method == '1/sqrt(t)':
+        args['linewidth'] = 0.05
     return args
 
 def plot(x, y, method=None):
