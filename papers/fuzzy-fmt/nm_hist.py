@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import os
 
 seeds=50
+mcprefactor=10000
 
 for gw in [.1]: 
 #for gw in [0.01, 0.05, 0.1, 0.5, 0.7]: 
@@ -18,6 +19,6 @@ for gw in [.1]:
     print "mcconstant=%g" % (mcconstant)
     for seed in range(1, seeds+1):   
       print "seed=%g" % (seed)
-      os.system('figs/new-melting.mkdat --kT 2 --n 1.3 --gw %g  --fv 0 --dx .5  --mc-error .0001   --mc-constant %g --mc-prefactor 10000 --seed %g | tail -n 1   >> Hist_%g_10000_gw%g_mcerror0.0001.dat' % (gw, mcconstant, seed, mcconstant, gw)) 
-    os.system('./Histogram.py Hist_%g_10000_gw%g_mcerror0.0001.dat --gw %g --mcconstant %g --seeds %g >> Hist_10000_mcerror0.0001.dat' % (mcconstant, gw, gw, mcconstant, seeds)) 
+      os.system('figs/new-melting.mkdat --kT 2 --n 1.3 --gw %g  --fv 0 --dx .5  --mc-error .0001   --mc-constant %g --mc-prefactor %g --seed %g | tail -n 2   >> Hist_%g_%g_gw%g_mcerror0.0001.dat' % (gw, mcconstant, mcprefactor, seed, mcconstant, mcprefactor, gw)) 
+    os.system('./Histogram.py Hist_%g_%g_gw%g_mcerror0.0001.dat --gw %g --mcconstant %g --seeds %g >> Hist_%g_mcerror0.0001.dat' % (mcconstant, mcprefactor, gw, gw, mcconstant, seeds, mcprefactor)) 
 

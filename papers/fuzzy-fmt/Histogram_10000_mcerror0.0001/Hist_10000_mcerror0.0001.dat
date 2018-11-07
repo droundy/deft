@@ -1,5 +1,5 @@
 100.0 0.01 5 50    #100.0% +- 14.1% negative  Hist_5_10000_gw0.01_mcerror0.0001.dat
-91.1764705882 0.01 20 50    #91.2% +- 15.6% negative  Hist_20_10000_gw0.01_mcerror0.0001.dat
+91.2 0.01 20 50    #91.2% +- 15.6% negative  Hist_20_10000_gw0.01_mcerror0.0001.dat
 98.0 0.01 50 50    #98.0% +- 13.9% negative  Hist_50_10000_gw0.01_mcerror0.0001.dat
 74.0 0.01 100 50    #74.0% +- 10.5% negative  Hist_100_10000_gw0.01_mcerror0.0001.dat
 74.0 0.01 500 50    #74.0% +- 10.5% negative  Hist_500_10000_gw0.01_mcerror0.0001.dat
@@ -9,3 +9,4 @@
 100.0 0.05 50 50    #100.0% +- 15.1% negative  Hist_50_10000_gw0.05_mcerror0.0001.dat
 100.0 0.05 100 50    #100.0% +- 14.7% negative  Hist_100_10000_gw0.05_mcerror0.0001.dat
 100.0 0.1 5 50    #100.0% +- 14.3% negative  Hist_5_10000_gw0.1_mcerror0.0001.dat
+100.0 0.1 20 50    #100.0% +- 14.1% negative  Hist_20_10000_gw0.1_mcerror0.0001.dat

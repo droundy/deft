@@ -720,7 +720,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           printf("free energy is a NaN!\n");
           printf("position is: %g %g %g\n", r.x, r.y, r.z);
           printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%.17g = 1+%g\n", n_0, n_1, n_2, n_3, n_3-1);
-          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n", phi_1, phi_2, phi_3);
+          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n\n", phi_1, phi_2, phi_3);
           printf("             #NAN!\n"); //
           data data_out;
           data_out.diff_free_energy_per_atom=0;
