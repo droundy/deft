@@ -1,0 +1,12 @@
+READ_ME file for nm_plot_histdata.py
+
+Edit and run nm_hist.py to generate data
+Run  nm_plot_histdata.py to create plot from a set of data files with a command like:  
+     ./nm_plot_histdata.py Hist*20000_gw0.1*.dat  
+     
+     This example selects data from the files:
+     Hist_5_20000_gw0.01_mcerror0.001.dat
+     Hist_20_20000_gw0.01_mcerror0.001.dat
+     Hist_50_20000_gw0.01_mcerror0.001.dat
+     Hist_100_20000_gw0.01_mcerror0.001.dat
+

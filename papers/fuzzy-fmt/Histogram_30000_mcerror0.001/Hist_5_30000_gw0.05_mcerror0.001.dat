@@ -1,0 +1,100 @@
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85176	12.7251	15.2138	4.39646	-26.3942	5.93134	0.673381	-6.09446e-05	5	30000	0.05	1	0.105708
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85119	12.7264	15.4349	4.61822	-26.3942	6.10192	0.673354	-0.000101245	5	30000	0.05	2	0.104987
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85	12.7066	15.186	4.3484	-26.3942	5.89437	0.673358	-9.44289e-05	5	30000	0.05	3	0.105791
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85004	12.718	15.1996	4.37346	-26.3942	5.91365	0.673352	-0.000102954	5	30000	0.05	4	0.105647
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85251	12.7241	15.2098	4.39221	-26.3942	5.92807	0.673353	-0.00010225	5	30000	0.05	5	0.104568
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85192	12.7177	15.2025	4.37792	-26.3942	5.91708	0.67334	-0.000122155	5	30000	0.05	6	0.105459
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85293	12.7276	15.2124	4.39866	-26.3942	5.93304	0.673326	-0.000142841	5	30000	0.05	7	0.106368
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85343	12.7252	15.1951	4.37953	-26.3942	5.91832	0.673405	-2.55774e-05	5	30000	0.05	8	0.104464
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85191	12.7286	15.2015	4.38781	-26.3942	5.92468	0.673346	-0.000112876	5	30000	0.05	10	0.105236
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.8496	12.7008	15.1786	4.33484	-26.3942	5.88394	0.673267	-0.000229566	5	30000	0.05	11	0.104815
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85198	12.7363	15.2349	4.42893	-26.3942	5.95632	0.673362	-8.84832e-05	5	30000	0.05	12	0.104811
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85078	12.7226	15.1985	4.37769	-26.3942	5.9169	0.673365	-8.41271e-05	5	30000	0.05	13	0.104694
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.84994	12.7068	15.1951	4.35765	-26.3942	5.90149	0.673335	-0.000128276	5	30000	0.05	14	0.104356
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.8516	12.7263	15.209	4.39266	-26.3942	5.92841	0.673338	-0.000123934	5	30000	0.05	16	0.104217
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85049	12.7064	15.1865	4.34919	-26.3942	5.89498	0.673332	-0.000133714	5	30000	0.05	17	0.104367
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85171	12.7135	15.1842	4.35522	-26.3942	5.89962	0.673318	-0.000154505	5	30000	0.05	18	0.104828
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85053	12.7148	15.1966	4.36779	-26.3942	5.90929	0.673354	-0.000100763	5	30000	0.05	19	0.105524
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85069	12.7209	15.2024	4.3797	-26.3942	5.91845	0.673315	-0.000158113	5	30000	0.05	20	0.108073
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85094	12.719	15.1948	4.37046	-26.3942	5.91134	0.673357	-9.69713e-05	5	30000	0.05	21	0.106104
+
+             #NAN!
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85025	12.6951	15.1696	4.32068	-26.3942	5.87305	0.673315	-0.00015794	5	30000	0.05	24	0.106342
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85129	12.7186	15.2134	4.38906	-26.3942	5.92565	0.673336	-0.000128128	5	30000	0.05	25	0.104227
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85053	12.7113	15.2143	4.38191	-26.3942	5.92015	0.673302	-0.000177655	5	30000	0.05	26	0.105223
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.84978	12.7011	15.1663	4.32299	-26.3942	5.87483	0.673324	-0.000145373	5	30000	0.05	27	0.10429
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85183	12.7197	15.2028	4.38006	-26.3942	5.91872	0.673316	-0.000157104	5	30000	0.05	28	0.104235
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85202	12.7194	15.1879	4.36514	-26.3942	5.90725	0.673369	-7.87832e-05	5	30000	0.05	30	0.105219
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85082	12.722	15.2167	4.39529	-26.3942	5.93044	0.673346	-0.0001127	5	30000	0.05	32	0.105782
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85306	12.7376	15.2284	4.42488	-26.3942	5.9532	0.673355	-9.97629e-05	5	30000	0.05	33	0.104656
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85021	12.7018	15.189	4.34679	-26.3942	5.89313	0.673334	-0.000130506	5	30000	0.05	34	0.104413
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85023	12.7195	15.2023	4.3778	-26.3942	5.91699	0.673337	-0.000125585	5	30000	0.05	35	0.105337
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85082	12.7019	15.1815	4.34001	-26.3942	5.88792	0.673287	-0.000199811	5	30000	0.05	37	0.104514
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85064	12.711	15.1834	4.35082	-26.3942	5.89623	0.673335	-0.000129441	5	30000	0.05	39	0.104674
+
+             #NAN!
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85	12.7062	15.1905	4.35243	-26.3942	5.89747	0.67333	-0.000135805	5	30000	0.05	41	0.105477
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85062	12.7035	15.1828	4.34266	-26.3942	5.88996	0.673297	-0.000185932	5	30000	0.05	42	0.105005
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85085	12.7125	15.1873	4.35639	-26.3942	5.90052	0.673368	-7.93425e-05	5	30000	0.05	43	0.104759
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85051	12.7173	15.2211	4.39468	-26.3942	5.92997	0.673367	-8.06582e-05	5	30000	0.05	44	0.105312
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85095	12.7066	15.1788	4.34219	-26.3942	5.8896	0.673322	-0.000148945	5	30000	0.05	45	0.104895
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85071	12.7017	15.2234	4.38162	-26.3942	5.91992	0.673268	-0.000228806	5	30000	0.05	46	0.105097
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85148	12.7243	15.2087	4.39026	-26.3942	5.92657	0.673321	-0.000149341	5	30000	0.05	47	0.104601
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85081	12.7196	15.1965	4.37262	-26.3942	5.913	0.673348	-0.000109588	5	30000	0.05	48	0.104268
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85202	12.7262	15.1896	4.3736	-26.3942	5.91376	0.673355	-9.9572e-05	5	30000	0.05	49	0.105061
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal		FEdiff	mean_n3		relerr		mc_con	mc_pf	gw	seed	min
+0.5	0.001		2.85056	12.7107	15.2001	4.3672	-26.3942	5.90883	0.673318	-0.000154385	5	30000	0.05	50	0.104271
