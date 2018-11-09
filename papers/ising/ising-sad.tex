@@ -28,9 +28,83 @@
   Corvallis, OR 97331}
 
 \begin{abstract}
-We present several histogram methods and compare the performance and
-efficiency at treating the Ising model.
+In this work, we finish writing everything before the abstract~\jpsays{FIX AT END}
 \end{abstract}
+
+\maketitle
+
+\section{Introduction}
+In the early 2000s, Wang and Landau introduced a novel flat-histogram
+Monte-Carlo algorithm that accurately determined the density of states
+(DOS) for a statistical
+system~\cite{wang2001determining,wang2001efficient}. For all of its
+power, the method unfortunately requires a priori knowledge of several
+user-defined parameters. Thus, for any given system under study, the
+user needs to determine the ideal parameters in order to apply the
+method. The Wang-Landau algorithm is also known to violate detailed
+balance (although only for brief time intervals)~\cite{yan2003fast,
+shell2002generalization}. With the violation of detailed balance,
+convergence of the algorithm is not guaranteed. The convergence rate
+for WL is well known~\cite{zhou2005understanding,lee2006convergence,
+belardinelli2007wang}. Modification factors that decrease faster than
+$1/t$ lead to non-convergence~\cite{belardinelli2007fast}.  These
+findings lead to the formation of the $1/t$-WL algorithm.  The ideal
+choice of decreasing the modification factor prevents CPU time from
+being wasted by continuing to perform calculations after the error in
+the density of states is saturated~\cite{belardinelli2008analysis}.
+Liang independently considered whether WL could be treated as a special
+case of Stochastic Approximation whose convergence could be
+mathematically proven~\cite{liang2006theory, liang2007stochastic}. In
+2007, Liang et al.~\cite{liang2007stochastic} argued that WL can be
+considered a form of Stochastic Approximation Monte Carlo (SAMC).
+Unlike WL, SAMC can guarantee convergence (if certain conditions are
+met). Despite the added benefit of guaranteed convergence, the method
+still has a system specific user-defined variable. Such variables often
+create difficulty when applying Monte-Carlo methods across arbitrary
+systems.  The SAD (Dynamic Stochastic Approximation)
+method~\jpsays{outlined by Pommerenck et.al include David and my paper
+on SAD square well in citations!} is special version of the SAMC
+Algorithm that dynamically chooses the modification factor rather than
+relying on system dependent parameters. SAD shares the same convergence
+properties with SAMC while replacing unphysical user-defined parameters
+with the algorithms dynamic choice.  In this work, we apply the family
+of Monte-Carlo algorithms (WL, SAMC, SAD) to the 2D Potts Model. We
+explore the convergence properties of the three algorithms in an effort
+to demonstrate the system scalability of SAD.
+
+\section{Ising Model}
+The 2D ten state Potts Model was used as a test system for the Wang 
+Landau method during its inception~\cite{wang2001determining,wang2001efficient}.
+
+Apparently Wang and Landau cite~\cite{wu1982potts} because of exact solutions 
+and extensive simulation data are available. Since they use a Q = 10 2D Potts
+Model I assume they are comparing 1 of 2 things.
+(1) The latent heat of the system which can be obtained by plotting U vs T
+and looking at how much U drops at Tc.
+(2) Looking at the value for the critical temperature Tc.
+Or it is possible that they clarify in a later work~\cite{landau2004new} how
+to extract the correct density of states. 
+\begin{align}
+\sum_E g_N\left( E\right)=Q^N
+\end{align}
+Also the number of ground states (where $E = -2N$) is $Q$. He then rescales
+the density of states $g_N\left( E\right)$ and writes
+\begin{align}
+\ln \left[ g_N\left(E\right)\right]=\ln \left[ g\left( E\right)\right]
+-\ln \left[ g\left(E=-2N\right)\right]+\ln\left[ Q \right]
+\end{align}
+He calls this the normallized density of states (for his work Q = 10).
+
+\section{Methods}
+\subsection{Wang-Landau: WL}
+
+\subsection{Stochastic Approximation Monte Carlo: SAMC}
+
+\subsection{Dynamic Stochastic Approximation: SAD}
+
+\section{Results}
+\section{Conclusion}
+\section{Acknowledgements}
 
 \maketitle
 
