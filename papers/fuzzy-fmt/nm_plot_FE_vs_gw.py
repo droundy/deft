@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 #Run this program from /deft/papers/fuzzy-fmt by entering ./nm_plot_FE_vs_gw.py [filename.dat]
-#filename.dat with data to plot will be like:  nm_FE_vs_gw_kT2_n1.3_dx0.5_mcerror0.001.dat
+#Look for a filename.dat (file with data to plot) with a name like:  
+#FE_vs_gw_kT2_n1.3_fv0_dx0.5_mcerror0.001_mcconstant5_mcprefactor50000.dat
 
 
 import os
@@ -14,17 +15,9 @@ parser.add_argument('filedat', metavar='datafile', type=str,
                     help='file with data to plot') 
 args=parser.parse_args()
 
-#markers = {
-#   1: '^',  
-#   2: 'o',  
-#   3: '+',  
-   #0.05: 'v',
-#}
-
 thisdata = np.loadtxt(args.filedat)
 
 data_length = len(thisdata)
-#print data_length
 
 #show constants on plot:
 dx=thisdata[0,0]
@@ -61,8 +54,6 @@ gw = thisdata[:,12]
 ##print j
 #mean_FE[gw[i]]=FE_sum/j 
 ##print mean_FE
-##print
-##print
 
 gw_old=gw[0]
 FE_allvalues_at_gw=[1]
@@ -70,6 +61,7 @@ mean_FE_uncertainty={}
 mean_FE={}
 FE_allvalues_at_gw[0]=thisdata[0,7]
 j=1
+
 for i in range(1,data_length):
    if (gw[i] == gw_old):
       FE_allvalues_at_gw.append(thisdata[i,7])
@@ -84,7 +76,6 @@ for i in range(1,data_length):
       FE_allvalues_at_gw=[1] #re-initialize
       FE_allvalues_at_gw[0]=thisdata[i,7]
       j=1
-      #print
 print FE_allvalues_at_gw
 print j
 mean_FE_uncertainty[gw[i]]=np.std(FE_allvalues_at_gw)/np.sqrt(j)
@@ -103,7 +94,7 @@ for gw in mean_FE.keys():
    #plt.scatter(gw, mean_FE[gw], color='blue')
    plt.errorbar(gw, mean_FE[gw], mean_FE_uncertainty[gw], color='blue', fmt='o')
    #The errorbars are too small to show up on the plot, ZOOM in to see!   
-##plt.legend()
+
 plt.title('FE vs gw at kT %g' % kT)
 plt.ylabel('FE')
 plt.xlabel('gw')
