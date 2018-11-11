@@ -78,7 +78,7 @@ for i in range(1,data_length):
       j=1
 print FE_allvalues_at_gw
 print j
-mean_FE_uncertainty[gw[i]]=np.std(FE_allvalues_at_gw)/np.sqrt(j)
+mean_FE_uncertainty[gw[i]]=np.std(FE_allvalues_at_gw)/np.sqrt(j-1)
 print mean_FE_uncertainty
 mean_FE[gw[i]]=np.mean(FE_allvalues_at_gw)
 print mean_FE
