@@ -95,8 +95,11 @@ for gw in mean_FE.keys():
    plt.errorbar(gw, mean_FE[gw], mean_FE_uncertainty[gw], color='blue', fmt='o')
    #The errorbars are too small to show up on the plot, ZOOM in to see!   
 
-plt.title('FE vs gw at kT %g' % kT)
+plt.title('FE vs gw at kT %g n %g fv %g' % (kT, n, fv))
 plt.ylabel('FE')
 plt.xlabel('gw')
 
+plt.savefig(args.filedat+".png" )
 plt.show()
+
+
