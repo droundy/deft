@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 #Run this program from /deft/papers/fuzzy-fmt by entering ./nm_plot_FE_vs_gw.py [filename.dat]
 #Look for a filename.dat (file with data to plot) with a name like:  
-#FE_vs_gw_kT2_n1.3_fv0_dx0.5_mcerror0.001_mcconstant5_mcprefactor50000.dat
+#FE_vs_gw_kT2_n1.3_fv0_dx0.5_mcerror0.001_mcconstant5_mcprefactor50000_seeds10.dat
 
 
 import os
@@ -90,14 +90,19 @@ print
 #print 'Compare to brute force', mean_FE_bruteforce
 
 for gw in mean_FE.keys():
-   print gw, mean_FE[gw], mean_FE_uncertainty[gw]
+   print gw, mean_FE[gw], mean_FE_uncertainty[gw] 
+   #TO DO: create data out file with the values of gw, mean_FE[gw], mean_FE_uncertainty[gw]
    #plt.scatter(gw, mean_FE[gw], color='blue')
    plt.errorbar(gw, mean_FE[gw], mean_FE_uncertainty[gw], color='blue', fmt='o')
-   #The errorbars are too small to show up on the plot, ZOOM in to see!   
+   #The errorbars are too small to show up on the plot, ZOOM in to see! 
+   
+plt.axhspan(0.2, -0.2, color='black', alpha=0.15, lw=0)
+plt.axhspan(0.02, -0.02, color='green', alpha=0.15, lw=0)
+plt.axhline(0, color='black')
 
 plt.title('FE vs gw at kT %g n %g fv %g' % (kT, n, fv))
 plt.ylabel('FE')
-plt.xlabel('gw')
+plt.xlabel('gw (with dx=%g mc_error=%g mc_constant=%g mc_prefactor=%g)' % (dx, mc_error, mc_constant, mc_prefactor))
 
 plt.savefig(args.filedat+".png" )
 plt.show()
