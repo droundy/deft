@@ -67,34 +67,33 @@ for i in range(1,data_length):
       FE_allvalues_at_gw.append(thisdata[i,7])
       j=j+1
    else :
-      print FE_allvalues_at_gw
-      print j
+      #print FE_allvalues_at_gw  #debug
+      #print j  #debug
       mean_FE_uncertainty[gw[i-1]]=np.std(FE_allvalues_at_gw)/np.sqrt(j)
       mean_FE[gw[i-1]]=np.mean(FE_allvalues_at_gw)
-      print mean_FE_uncertainty
+      #print mean_FE_uncertainty  #debug
       gw_old=gw[i] 
       FE_allvalues_at_gw=[1] #re-initialize
       FE_allvalues_at_gw[0]=thisdata[i,7]
       j=1
-print FE_allvalues_at_gw
-print j
+#print FE_allvalues_at_gw  #debug
+#print j  #debug
 mean_FE_uncertainty[gw[i]]=np.std(FE_allvalues_at_gw)/np.sqrt(j-1)
-print mean_FE_uncertainty
+#print mean_FE_uncertainty  #debug
 mean_FE[gw[i]]=np.mean(FE_allvalues_at_gw)
-print mean_FE
-print
-print
+#print mean_FE  #debug
+#print  #debug
+#print  #debug
 
 #print 'TEST', mean_FE
 #mean_FE_bruteforce=(thisdata[0,7]+thisdata[1,7]+thisdata[2,7]+thisdata[3,7]+thisdata[4,7]+thisdata[5,7]+thisdata[6,7]+thisdata[7,7]+thisdata[8,7]+thisdata[9,7])/10
 #print 'Compare to brute force', mean_FE_bruteforce
 
 for gw in mean_FE.keys():
-   print gw, mean_FE[gw], mean_FE_uncertainty[gw] 
+   print gw, mean_FE[gw], mean_FE_uncertainty[gw]  #for data file
    #TO DO: create data out file with the values of gw, mean_FE[gw], mean_FE_uncertainty[gw]
-   #plt.scatter(gw, mean_FE[gw], color='blue')
    plt.errorbar(gw, mean_FE[gw], mean_FE_uncertainty[gw], color='blue', fmt='o')
-   #The errorbars are too small to show up on the plot, ZOOM in to see! 
+   #The errorbars are small - ZOOM in to see! 
    
 plt.axhspan(0.2, -0.2, color='black', alpha=0.15, lw=0)
 plt.axhspan(0.02, -0.02, color='green', alpha=0.15, lw=0)
