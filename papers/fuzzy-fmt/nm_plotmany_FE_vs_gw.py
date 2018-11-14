@@ -28,11 +28,15 @@ for f in args.filedat:
    print 'Reading file', f
    thisdata = np.loadtxt(f)
 
+   kT = thisdata[0,3]
+   n = thisdata[0,4]
+   fv = thisdata[0,5]
+
    gw = thisdata[:,0]
    mean_FE = thisdata[:,1]
    mean_FE_uncertainty = thisdata[:,2]
 
-   plt.errorbar(gw, mean_FE, mean_FE_uncertainty, fmt='o')
+   plt.errorbar(gw, mean_FE, mean_FE_uncertainty, fmt='o', label='n=%g, fv=%g' % (n, fv))
    
 #plt.title('FE vs gw at kT %g n %g fv %g' % (kT, n, fv))
 plt.title('FE vs gw')
