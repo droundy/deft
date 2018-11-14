@@ -28,7 +28,7 @@ parser.add_argument('--mcconstant', metavar='const', type=int,
 parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
 parser.add_argument('--seeds', metavar='seeds', type=int,
-                    help='number of seeds ran - Default 50') 
+                    help='number of seeds ran - Default 1') 
 parser.add_argument('--datafile', metavar='addtoname', type=str,
                     help='added to name of data file - Default "FE_vs_gw"') 
                                         
@@ -65,7 +65,7 @@ else :
 if args.seeds:
     seeds=args.seeds
 else :
-    seeds=50
+    seeds=1
     
 if args.datafile:    
     datafile='FE_vs_gw_'+args.filedat
@@ -73,12 +73,20 @@ else :
     datafile='FE_vs_gw'
 
 #for gw in [0.5]:
-for gw in [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5]: 
+for gw in [0.01, 0.02, 0.03]: #, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5]: 
 #for gw in [.6, .7, .8]:
   print "gw=%g" % (gw)
   for seed in range(1, seeds+1):   
     print "seed=%g" % (seed)
-    os.system('figs/new-melting.mkdat --kT %g --n %g --gw %g  --fv %g --dx %g  --mc-error %g   --mc-constant %g --mc-prefactor %g --seed %g | tail -n 3   >> %s_kT%g_n%g_fv%g_dx%g_mcerror%g_mcconstant%g_mcprefactor%g_seeds%g.dat' % (kT, n, gw, fv, dx, mcerror, mcconstant, mcprefactor, seed, datafile, kT, n, fv, dx, mcerror, mcconstant, mcprefactor, seeds)) 
+    # os.system('rq run -J gw-%g-seed-%d figs/new-melting.mkdat --kT %g --n %g --gw %g  --fv %g --dx %g  --mc-error %g   --mc-constant %g --mc-prefactor %g --seed %g --filename %s_kT%g_n%g_fv%g_dx%g_mcerror%g_mcconstant%g_mcprefactor%g_seeds%g.dat'
+    #           % (gw, seeds,
+    #              kT, n, gw, fv, dx, mcerror, mcconstant, mcprefactor, seed, datafile, kT, n,
+    #              fv, dx, mcerror, mcconstant, mcprefactor, seeds))
+    cmd = ('figs/new-melting.mkdat --kT %g --n %g --gw %g  --fv %g --dx %g  --mc-error %g   --mc-constant %g --mc-prefactor %g --seed %g --filename %s_kT%g_n%g_fv%g_dx%g_mcerror%g_mcconstant%g_mcprefactor%g_seeds%g.dat &'
+              % (kT, n, gw, fv, dx, mcerror, mcconstant, mcprefactor, seed, datafile, kT, n,
+                 fv, dx, mcerror, mcconstant, mcprefactor, seeds))
+    print(cmd)
+    os.system(cmd)
 
 
 
