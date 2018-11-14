@@ -90,8 +90,8 @@ mean_FE[gw[i]]=np.mean(FE_allvalues_at_gw)
 #print 'Compare to brute force', mean_FE_bruteforce
 
 for gw in mean_FE.keys():
-   print '#gw     mean_FE[gw]     mean_FE_uncertainty[gw]   kT=%g   n=%g  fv=%g' % (kT, n, fv)  
-   print gw, mean_FE[gw], mean_FE_uncertainty[gw]  #for data file
+   print '#gw     mean_FE[gw]     mean_FE_uncertainty[gw]   kT   n  fv'  
+   print gw, mean_FE[gw], mean_FE_uncertainty[gw], kT, n, fv #for data file
    #TO DO: create data out file with the values of gw, mean_FE[gw], mean_FE_uncertainty[gw]
    plt.errorbar(gw, mean_FE[gw], mean_FE_uncertainty[gw], color='blue', fmt='o')
    #The errorbars are small - ZOOM in to see! 
