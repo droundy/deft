@@ -285,7 +285,8 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
     // pretty easy to reason about, and the others are closely
     // related.
     n3_error = sqrt(fabs(n3_sqr/num_points - sqr(n.n_3/num_points))/(num_points-1));  //Standard Error of the Mean (SEM)
-    } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-n.n_3/num_points) && n3_error < 1e-15));  
+    } while (n3_error > MC_ERROR);  
+    //} while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-n.n_3/num_points) && n3_error < 1e-15)); 
     //avoids downward spiral n3_error > ... so n3_error becomes smaller which makes ... smaller and so n3_error is still bigger etc...
   n.n_0 /= num_points;
   n.n_1 /= num_points;

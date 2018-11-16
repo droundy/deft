@@ -19,6 +19,8 @@ parser.add_argument('--n', metavar='density', type=float,
                     
 parser.add_argument('--fv', metavar='vacancies', type=float,
                     help='fraction of vacancies - Default 0')  
+parser.add_argument('--gw', metavar='width', type=float,
+                    help='width of Gaussian - Default 0.01')  
 parser.add_argument('--dx', metavar='dx', type=float,
                     help='scaling dx - Default 0.5') 
 parser.add_argument('--mcerror', metavar='mc_error', type=float,
@@ -31,6 +33,7 @@ parser.add_argument('--seeds', metavar='seeds', type=int,
                     help='number of seeds ran - Default 1') 
 parser.add_argument('--datafile', metavar='addtoname', type=str,
                     help='added to name of data file - Default "FE_vs_gw"') 
+                    
                                         
 args=parser.parse_args()
 
@@ -41,6 +44,11 @@ if args.fv:
     fv=args.fv
 else :
     fv=0
+    
+if args.gw:
+    gw=args.gw
+else :
+    gw=0.01
 
 if args.dx:
     dx=args.dx
@@ -71,9 +79,10 @@ if args.datafile:
     datafile='FE_vs_gw_'+args.filedat
 else :
     datafile='FE_vs_gw'
-
-#for gw in [0.5]:
-for gw in [0.01, 0.02, 0.03]: #, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5]: 
+ 
+#for gw in [0.05]: 
+#for gw in [.0000001, .000001, .00001, .0001, .001, .004, .006, .008]:
+for gw in [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]: #, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5]: 
 #for gw in [.6, .7, .8]:
   print "gw=%g" % (gw)
   for seed in range(1, seeds+1):   
@@ -82,9 +91,11 @@ for gw in [0.01, 0.02, 0.03]: #, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0
     #           % (gw, seeds,
     #              kT, n, gw, fv, dx, mcerror, mcconstant, mcprefactor, seed, datafile, kT, n,
     #              fv, dx, mcerror, mcconstant, mcprefactor, seeds))
-    cmd = ('figs/new-melting.mkdat --kT %g --n %g --gw %g  --fv %g --dx %g  --mc-error %g   --mc-constant %g --mc-prefactor %g --seed %g --filename %s_kT%g_n%g_fv%g_dx%g_mcerror%g_mcconstant%g_mcprefactor%g_seeds%g.dat &'
+    #roundy#cmd = ('figs/new-melting.mkdat --kT %g --n %g --gw %g  --fv %g --dx %g  --mc-error %g   --mc-constant %g --mc-prefactor %g --seed %g --filename %s_kT%g_n%g_fv%g_dx%g_mcerror%g_mcconstant%g_mcprefactor%g_seeds%g.dat &'
+    cmd = ('figs/new-melting.mkdat --kT %g --n %g --gw %g  --fv %g --dx %g  --mc-error %g   --mc-constant %g --mc-prefactor %g --seed %g --filename %s_kT%g_n%g_fv%g_dx%g_mcerror%g_mcconstant%g_mcprefactor%g_seeds%g.dat'          
               % (kT, n, gw, fv, dx, mcerror, mcconstant, mcprefactor, seed, datafile, kT, n,
                  fv, dx, mcerror, mcconstant, mcprefactor, seeds))
+
     print(cmd)
     os.system(cmd)
 
