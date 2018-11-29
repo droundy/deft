@@ -26,7 +26,8 @@ try:
         colors.loglog(moves, factor,
                       'vanilla_wang_landau'
                          + wl[len("data/gamma/%s/wl" % filename):-4])
-        plt.ylim(ymin=1e-12, ymax=1e1)
+        plt.ylim(ymin=1e-10, ymax=1e1)
+        plt.xlim(xmin=1e0, xmax=1e13)
 
 except:
     pass
@@ -40,7 +41,7 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
         time = data[:,1]
         ehi = data[:,2]
         elo = data[:,3]
-        ts = np.exp(np.linspace(0, np.log(max(time)*1e3), 2000))
+        ts = np.exp(np.linspace(0, np.log(max(time)*1e2), 2000))
         gamma = np.zeros_like(ts)
         print sad, time
         for j in range(len(time)):

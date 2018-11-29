@@ -22,6 +22,9 @@ N = int(sys.argv[5]) # the number to divide moves by!
 Smin = int(sys.argv[6])
 Smax = int(sys.argv[7])
 
+#are you comparing to a yaml reference?
+yamlRef = bool(sys.argv[8])
+
 f = '%s.yaml' % (filename)
 
 # Read YAML file
@@ -59,8 +62,12 @@ maxerror = np.zeros(N_save_times)
 
 for i in range(0,N_save_times):
     # below just set average S equal between lndos and lndosref
-    norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[maxref:minref+1])
-    doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[maxref:minref+1] - norm_factor
+    if yamlRef:
+        norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[0:len(lndosref)])
+        doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[0:len(lndosref)] - norm_factor
+    else:
+        norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[maxref:minref+1])
+        doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[maxref:minref+1] - norm_factor
     errorinentropy[i] = np.sum(abs(doserror))/len(doserror)
     maxerror[i] = np.amax(doserror) - np.amin(doserror)
 
