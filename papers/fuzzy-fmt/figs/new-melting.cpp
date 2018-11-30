@@ -33,6 +33,8 @@ long mc_prefactor=50000;
 long mc_constant=100;
 int my_experiment =0;   //set to 1 to run my experiment
 
+char *free_energy_output_file = 0;
+
 // radius we need to integrate around a gaussian, in units of gw.
 const double inclusion_radius = 6.0;
 
@@ -720,8 +722,33 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           printf("free energy is a NaN!\n");
           printf("position is: %g %g %g\n", r.x, r.y, r.z);
           printf("n0 = %g\nn1 = %g\nn2=%g\nn3=%.17g = 1+%g\n", n_0, n_1, n_2, n_3, n_3-1);
-          printf("phi1 = %g\nphi2 = %g\nphi3=%g\n\n", phi_1, phi_2, phi_3);
+          printf("phi1 = %g\nphi2 = %g\n\n#phi3=%g\n", phi_1, phi_2, phi_3);
           printf("             #NAN!\n"); //
+          if (free_energy_output_file) {
+            FILE *f = fopen(free_energy_output_file, "a");
+            fprintf(f, "\n# git  version: %s\n", version_identifier());
+            fprintf(f, "#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\t\tFEdiff\t\tmean_n3\t\t\trelerr\t\t\tmc_con\tmc_pf\tgw\t\tfv\tkT\tn\tseed\tmin\n");
+            fprintf(f, "%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t\t%ld\t%ld\t%g\t%g\t%g\t%g\t%g\t%g\n",
+                    dx_input,
+                    MC_ERROR,
+                    total_phi_1/primitive_cell_volume,
+                    total_phi_2/primitive_cell_volume,
+                    total_phi_3/primitive_cell_volume,
+                    cfree_energy_per_vol,
+                    cFideal_of_primitive_cell/primitive_cell_volume,
+                    total_phi_1+total_phi_2+total_phi_3,
+                    mean_n3,
+                    0.0,
+                    mc_constant,
+                    mc_prefactor,
+                    gwidth,
+                    fv,
+                    temp,
+                    reduced_density,
+                    seed,
+                    0.0);
+            fclose(f);
+          }
           data data_out;
           data_out.diff_free_energy_per_atom=0;
           data_out.cfree_energy_per_atom=0;
@@ -844,27 +871,35 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   }
   printf("run time is %g hours\n", run_time/60/60);
   //printf("mc_constant=%ld, mc_prefactor=%ld\n", mc_constant, mc_prefactor); // HERE!
-  
-  printf("\n#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\tFEdiff\tmean_n3\t\trelerr\t\tmc_con\tmc_pf\tgw\tseed\tmin\n");
-  printf("%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%ld\t%ld\t%g\t%g\t%g\n",
-         dx_input,
-         MC_ERROR,
-         total_phi_1/primitive_cell_volume,
-         total_phi_2/primitive_cell_volume,
-         total_phi_3/primitive_cell_volume,
-         cfree_energy_per_vol,
-         cFideal_of_primitive_cell/primitive_cell_volume,
-         data_out.diff_free_energy_per_atom,
-         mean_n3,
-         diff_n3/hf.get_n3(),
-         mc_constant,
-         mc_prefactor,
-         gwidth,
-         seed,
-         run_time/60);
-   if (my_experiment > 0) {
-   printf("My experiment\n"); 
-   }
+
+  if (free_energy_output_file) {
+    FILE *f = fopen(free_energy_output_file, "a");
+    fprintf(f, "\n# git  version: %s\n", version_identifier());
+    fprintf(f, "#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\t\tFEdiff\t\tmean_n3\t\t\trelerr\t\t\tmc_con\tmc_pf\tgw\t\tfv\tkT\tn\tseed\tmin\n");
+    fprintf(f, "%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t\t%ld\t%ld\t%g\t%g\t%g\t%g\t%g\t%g\n",
+            dx_input,
+            MC_ERROR,
+            total_phi_1/primitive_cell_volume,
+            total_phi_2/primitive_cell_volume,
+            total_phi_3/primitive_cell_volume,
+            cfree_energy_per_vol,
+            cFideal_of_primitive_cell/primitive_cell_volume,
+            data_out.diff_free_energy_per_atom,
+            mean_n3,
+            diff_n3/hf.get_n3(),
+            mc_constant,
+            mc_prefactor,
+            gwidth,
+            fv,
+            temp,
+            reduced_density,
+            seed,
+            run_time/60);
+    fclose(f);
+  }
+  if (my_experiment > 0) {
+   printf("My experiment\n");
+  }
   //printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
   //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
@@ -1442,6 +1477,9 @@ int main(int argc, const char **argv) {
     {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
+    // Where to save the free energy info
+    {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &free_energy_output_file, 0,
+     "File to append free energy info to", "FNAME"},
     {
       "d", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
       "Directory in which to save data", "DIRNAME"

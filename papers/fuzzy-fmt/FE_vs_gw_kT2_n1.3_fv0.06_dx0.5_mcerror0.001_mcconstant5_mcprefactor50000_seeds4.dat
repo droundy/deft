@@ -1,0 +1,69 @@
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66311	15.0179	32.0326	35.7122	-14.0015		30.0203		0.673381		-6.00785e-05		5	50000	0.01	0.06	2	1.3	1	0.00289165
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66277	15.0153	32.0368	35.7135	-14.0015		30.0213		0.673375		-6.89997e-05		5	50000	0.01	0.06	2	1.3	2	0.00281928
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66317	15.0154	32.015	35.6921	-14.0015		30.0049		0.673386		-5.33975e-05		5	50000	0.01	0.06	2	1.3	3	0.00279908
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66341	15.0219	32.0414	35.7253	-14.0015		30.0304		0.673401		-3.07714e-05		5	50000	0.01	0.06	2	1.3	4	0.00279968
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.65953	15.1014	30.4319	28.7849	-19.408		24.6917		0.673383		-5.75417e-05		5	50000	0.02	0.06	2	1.3	1	0.0327245
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66	15.1014	30.4214	28.7748	-19.408		24.6839		0.673367		-8.15087e-05		5	50000	0.02	0.06	2	1.3	2	0.035811
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.65995	15.1085	30.4632	28.8237	-19.408		24.7215		0.673365		-8.47883e-05		5	50000	0.02	0.06	2	1.3	3	0.0336716
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.65889	15.0916	30.4009	28.7434	-19.408		24.6597		0.673378		-6.49601e-05		5	50000	0.02	0.06	2	1.3	4	0.0352776
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.65944	15.1847	27.9887	23.2623	-22.5707		20.4435		0.673361		-8.96079e-05		5	50000	0.03	0.06	2	1.3	1	0.0550634
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.65878	15.1826	28.0112	23.2819	-22.5707		20.4586		0.673357		-9.63001e-05		5	50000	0.03	0.06	2	1.3	2	0.0541379
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66047	15.1955	28.0178	23.3032	-22.5707		20.475		0.673374		-7.13145e-05		5	50000	0.03	0.06	2	1.3	3	0.0576315
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.65958	15.1975	28.0342	23.3207	-22.5707		20.4884		0.673394		-4.05651e-05		5	50000	0.03	0.06	2	1.3	4	0.0541043
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66542	15.249	25.3031	18.4029	-24.8146		16.7055		0.673363		-8.78698e-05		5	50000	0.04	0.06	2	1.3	1	0.0968773
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66339	15.2341	25.2417	18.3247	-24.8146		16.6453		0.673361		-9.02396e-05		5	50000	0.04	0.06	2	1.3	2	0.0982397
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66408	15.2416	25.2746	18.3657	-24.8146		16.6769		0.673334		-0.000130089		5	50000	0.04	0.06	2	1.3	3	0.0971579
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.66451	15.2505	25.2608	18.3612	-24.8146		16.6735		0.673392		-4.43249e-05		5	50000	0.04	0.06	2	1.3	4	0.0964595
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.67539	15.2721	22.6535	14.0459	-26.5551		13.354		0.673394		-4.09697e-05		5	50000	0.05	0.06	2	1.3	1	0.144879
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.67426	15.2561	22.6207	13.996	-26.5551		13.3156		0.673341		-0.000119482		5	50000	0.05	0.06	2	1.3	2	0.138718
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.67236	15.244	22.5975	13.9587	-26.5551		13.2869		0.673356		-9.77607e-05		5	50000	0.05	0.06	2	1.3	3	0.140298
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.67405	15.2611	22.6184	13.9985	-26.5551		13.3175		0.673362		-8.88264e-05		5	50000	0.05	0.06	2	1.3	4	0.139384
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.68609	15.2254	20.2548	10.1891	-27.9772		10.3872		0.673366		-8.33984e-05		5	50000	0.06	0.06	2	1.3	1	0.199106
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.68511	15.2159	20.2595	10.1833	-27.9772		10.3827		0.673314		-0.000160475		5	50000	0.06	0.06	2	1.3	2	0.194792
+# git  version: 0.0.0-2278-g03debe1e
+#dx	mc-error	phi1	phi2	phi3	Ftot	Fideal			FEdiff		mean_n3			relerr			mc_con	mc_pf	gw		fv	kT	n	seed	min
+0.5	0.001		2.68685	15.2325	20.2733	10.2155	-27.9772		10.4075		0.673384		-5.66394e-05		5	50000	0.06	0.06	2	1.3	3	0.194124
