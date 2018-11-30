@@ -27,9 +27,9 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
     methods = ['-sad3','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
-              '-sad-t2-T13','-sad-t-s1-T13','-sad-t2-s3-T13']
+               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256']
     if transcale == 'slow':
-        methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-sad3-T13-slow']
+        methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
     if transcale == 'fast':
         methods = ['-sad3-fast','-tmmc-fast', '-vanilla_wang_landau-fast']
 
@@ -37,7 +37,7 @@ if 'allmethods' not in sys.argv:
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
-
+print split2
 for meth in split2:
     if "default" in transcale:
         if meth[-3:] != '-tm' and "slow" not in meth and "fast" not in meth:
@@ -83,23 +83,22 @@ for method in methods:
         best_ever_max = min(best_ever_max, maxerror.min())
 
         howManyPoints = 300 # We are definately using C++ code!
-        reducedPoints = 50  # How many points to reduce C++ data to?
-        temp_iter = []
-        temp_ee = []
-        temp_me = []
         if len(iterations) > howManyPoints:
-                duplicateData = np.logspace(np.log10(1),np.log10(len(iterations)), num=reducedPoints)
-                duplicateData = duplicateData.astype(int)
-                dataOrdered = list(OrderedDict.fromkeys(duplicateData))
-                #print dataOrdered
-                #print len(iterations)
-                for i in range(len(dataOrdered)-1):
-                        temp_iter = np.append(temp_iter,iterations[dataOrdered[i]])
-                        temp_ee = np.append(temp_ee,errorinentropy[dataOrdered[i]])
-                        temp_me = np.append(temp_me,maxerror[dataOrdered[i]])
-                iterations = temp_iter
-                errorinentropy = temp_ee
-                maxerror = temp_me
+                temp_iter = []
+                temp_ee = []
+                temp_me = []
+                last_power = 0
+                movie_time = 10.0**(1.0/8)
+                for i in range(len(iterations)):
+                        if iterations[i] >= movie_time**last_power:
+                                temp_iter.append(iterations[i])
+                                temp_ee.append(errorinentropy[i])
+                                temp_me.append(maxerror[i])
+                                while iterations[i] >= movie_time**last_power:
+                                        last_power += 1
+                iterations = np.array(temp_iter)
+                errorinentropy = np.array(temp_ee)
+                maxerror = np.array(temp_me)
         if not os.path.exists('figs/lv'):
                 os.makedirs('figs/lv')
 
@@ -187,9 +186,11 @@ plt.xlim(moves[0], moves[1])
 if filebase == 's000/periodic-ww1.30-ff0.30-N50':
     plt.ylim(1e-3, 1e2)
     if "slow" in transcale:
-        plt.ylim(1e-2, 1e2)
+        plt.ylim(1e-3, 1e3)
 elif filebase == 's000/periodic-ww1.30-ff0.30-N500':
     plt.ylim(1e-1, 1e3)
+elif filebase == 's000/periodic-ww1.50-ff0.17-N256':
+    plt.ylim(1e-2, 1e3)
 colors.legend()
 plt.tight_layout()
 plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
