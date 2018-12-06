@@ -72,7 +72,7 @@ else :
     datafile='FE_vs_gw'
 
 for n in np.arange(args.nmin, args.nmax, args.dn):
-    cmd = 'rq run -J melting-kT%g-n%g' % (kT, n)
+    cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
     cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
     cmd += ' --gwstart=%g --gwend %g --gwstep %g' % (args.dgw, args.maxgw, args.dgw)
     cmd += ' --fv %g --dx %g' % (fv, dx)
