@@ -39,7 +39,7 @@ for kT in [.01, .05, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3]:
 
   #plt.figure()
   plt.axhspan(0.0, -0.2, color='lightblue', alpha=0.15, lw=0)
-  plt.title("Isotherms at mc_constant=0.01, mc_pref=50000, dx=0.5")
+  plt.title("Isotherms at mc_error=0.01, mc_constant=5, mc_pref=50000, dx=0.5")
   plt.plot(n, fe_difference, '.-', label='kT=%g' % (kT))
   plt.axhline(0, color='k')
   plt.xlabel('n')
