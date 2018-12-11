@@ -1,81 +1,68 @@
 #!/usr/bin/python2
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./new-melting_plot_script.py [directory where data stored] [temp]
+#with comand ./plot-pressure.py --kT [temp] 
 
-import os
+from __future__ import print_function, division
+
 import numpy as np
+import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
-import sys
+import os, glob
+import argparse
 
-if len(sys.argv) < 3:
-    print "Usage: directory  temperature"
-    exit(1)
+parser = argparse.ArgumentParser(description='Creates data for a FE vs gw plot.')
 
-data_directory=sys.argv[1]
-temp=sys.argv[2]
-data_file=data_directory+"/plot_kT"+temp+".dat"
-print "Removing plot file if it exists..."  #ASK is there a way to tell whether it exists so can avoid error message?
-os.system("rm "+data_file)
+parser.add_argument('--kT', metavar='temperature', type=float,
+                    help='reduced temperature - REQUIRED')
 
-#wait = raw_input("If not, press the ENTER key to continue program...")
-print
+args=parser.parse_args()
 
-print "Creating new plot file [fuzzy-fmt]/"+data_file 
+kT=args.kT
 
-os.system("cat "+data_directory+"/kT"+temp+"*best.dat >>"+data_file)   
+n = []
+invn = []
+hfe = []
+cfe = []
 
-thisdata = np.loadtxt(data_file)
-print thisdata
+files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
+for f in files:
+    data = np.loadtxt(f)
+    n.append(data[1])     #density
+    invn.append(1/data[1])
+    hfe.append(data[4])   #homogeneous free energy/atom
+    cfe.append(data[5])   #crystal free energy/atom
 
-densities=thisdata[:,1]
-print densities
-crystal_energies_per_atom = thisdata[:,5]
-homogeneous_energies_per_atom = thisdata[:,4]
-energy_differences_per_atom = thisdata[:,6]
-crystal_energies_per_volume = thisdata[:,9]
-#if want vol = 4*(1-fv)/reduced_density
+#print("length of n=%g" %(len(n)))
+#for i in range(len(n)-1):    
+#  print(n[i])
 
-plot1=data_directory+"/plot1_FEvsDen_kT"+temp+".png"
-plot2=data_directory+"/plot2_Pressure_kT"+temp+".png"
-
-# Plot Free Energy/atom vs Reduced Density
-plt.plot(densities, crystal_energies_per_atom, 'b', label="Crystal Free Energy/atom")
-plt.plot(densities, homogeneous_energies_per_atom, 'g', label="Homogeneous Free Energy/atom")
-plt.title('Free Energy/atom vs Reduced Density at Fixed kT='+temp)
-plt.xlabel('Reduced Density')
+# Plot Free Energy/atom vs 1/Reduced Density
+plt.plot(invn, hfe, 'deepskyblue', label="Homogeneous Free Energy/atom")
+plt.plot(invn, cfe, 'darkblue', label="Crystal Free Energy/atom")
+plt.title("Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
+plt.xlabel('1/Reduced Density')
 plt.ylabel('Free Energy/atom')
 plt.legend()
-plt.savefig(plot1)
+#plt.savefig(plot1)
 
 plt.figure()
 
-f =crystal_energies_per_atom
-#print "f=", f
-df=np.diff(f)  #Caution: depends on order of data files!
-#print "df=", df
-n =densities
-#print "n=", n
-dn=np.diff(n)  #Caution: depends on order of data files!
-#print "dn=", dn
-mid_n=n[0:len(n)-1]+dn/2
-#print "mid_n=", mid_n
-pressure = -(mid_n*mid_n)*(df/dn) #for fixed N and T
-#print "pressure =", pressure
+dhfe=np.diff(hfe)  #Caution: depends on order of data files!
+dcfe=np.diff(cfe)  #Caution: depends on order of data files!
+dinvn=np.diff(invn)  #Caution: depends on order of data files!
+mid_invn=invn[0:len(invn)-1]+dinvn/2
+hpressure = -(dhfe/dinvn) #for fixed N and Te   
+cpressure = -(dcfe/dinvn) #for fixed N and Te  
 
-# Plot Pressure vs Reduced Density
-plt.plot(mid_n, pressure, color='red')
-plt.title('Reduced Pressure vs Reduced Density at Fixed kT='+temp)
-plt.xlabel('Reduced Density')
+# Plot Pressure vs 1/Reduced Density
+plt.plot(mid_invn, hpressure, label="homogeneous pressure", color='deepskyblue')
+plt.plot(mid_invn, cpressure, label="crystal pressure", color='darkblue')
+plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
+plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
-plt.savefig(plot2)
+plt.legend()
+#plt.savefig(plot2)
 
 plt.show()
 
 
-#------------------------------------------------------------------------------
-#NOTE: lattice_constant will be divided by gwstep   
-
-#Do we need these in the plot file? - ASK!
- #crystal_energiesdensities = np.zeros_like(densities)  #initializing...
- #crystal_energies_per_volume = np.zeros_like(densities)
- #energy_differences = np.zeros_like(densities)
