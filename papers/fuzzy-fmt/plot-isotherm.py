@@ -33,6 +33,8 @@ plt.xlabel('n')
 plt.ylabel('gw')
 
 plt.figure()
+plt.axhspan(0.0, -0.2, color='lightblue', alpha=0.15, lw=0)
+plt.title("kT=%g" % (kT))
 plt.plot(n, fe_difference, '.-')
 plt.axhline(0, color='k')
 plt.xlabel('n')
