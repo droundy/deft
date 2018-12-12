@@ -13,6 +13,8 @@ plt.figure(figsize=(5,4))
 
 try:
     for wl in glob.glob("data/gamma/%s/wl*.txt" % filename):
+        print "in wl"
+        print 'vanilla_wang_landau'+ wl[len("data/gamma/%s/wl" % filename):-4]
         wlmoves, wlfactor = np.loadtxt(wl, dtype = float, unpack = True)
         moves = np.zeros(len(wlmoves)*2+2)
         factor = np.zeros_like(moves)
@@ -27,7 +29,7 @@ try:
                       'vanilla_wang_landau'
                          + wl[len("data/gamma/%s/wl" % filename):-4])
         plt.ylim(ymin=1e-10, ymax=1e1)
-        plt.xlim(xmin=1e0, xmax=1e13)
+        plt.xlim(xmin=1e0, xmax=2e12)
 
 except:
     pass

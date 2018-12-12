@@ -26,8 +26,8 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
-               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256']
+    methods = ['-sad3','-sad3-s2','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
+               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-wl-256']
     if transcale == 'slow':
         methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
     if transcale == 'fast':
@@ -178,21 +178,22 @@ colors.legend()
 plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
  
 plt.figure('errorinentropy')
-moves = np.array([1e5, 1e13])
+moves = np.array([1e5, 2e12])
 #colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
 for i in np.arange(-8, 9, 1.0):
     colors.loglog(moves, 10**i*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
 plt.xlim(moves[0], moves[1])
 if filebase == 's000/periodic-ww1.30-ff0.30-N50':
-    plt.ylim(1e-3, 1e2)
+    plt.ylim(1e-3, 1e1)
     if "slow" in transcale:
-        plt.ylim(1e-3, 1e3)
+        plt.ylim(1e-2, 1e3)
 elif filebase == 's000/periodic-ww1.30-ff0.30-N500':
     plt.ylim(1e-1, 1e3)
 elif filebase == 's000/periodic-ww1.50-ff0.17-N256':
-    plt.ylim(1e-2, 1e3)
+    plt.ylim(1e-3, 1e2)
 colors.legend()
 plt.tight_layout()
+print('filename', 'figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
 plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
 

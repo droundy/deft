@@ -26,10 +26,9 @@ method = method.replace(':', ',').split(',')[0]
 method = method.replace("'", '')
 print 'the Monte-Carlo method is ', method
 
-dirname = 'data/gamma/n%s/%s.dat' % (N,filename)
-print 'saving to', dirname
-
 if method == 'Sad':
+    dirname = 'data/gamma/n%s/%s.dat' % (N,filename)
+    print 'saving to', dirname
     #min_T = data['method'][method]['min_T'] #gamma plot requires this as an arg.
     moves = data['movies']['gamma_time']
     #too_hi = data['method'][method]['too_hi']
@@ -41,6 +40,15 @@ if method == 'Sad':
           delimiter = '\t',
           header = 'comparison reference file\t(generated with python %s \n moves\t gamma\t' % (' '.join(sys.argv)))
 else:
+    dirname = 'data/gamma/n%s/%s.txt' % (N,filename)
+    print 'saving to', dirname
+    moves = data['movies']['gamma_time']
+    gamma = data['movies']['gamma']
+    np.savetxt(dirname,
+          np.c_[moves,gamma],
+          fmt = ('%.16g'),
+          delimiter = '\t',
+          header = 'comparison reference file\t(generated with python %s \n moves\t gamma\t' % (' '.join(sys.argv)))
     print "I don't know what method are you using?"
 
 

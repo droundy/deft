@@ -15,7 +15,7 @@ plt.figure(figsize=(5,4))
 inputs = [
     #('vanilla_wang_landau',
     #   'data/s000/periodic-ww1.30-ff0.30-N500-vanilla_wang_landau-minE-movie/002000-lndos.dat'),
-    ('samc-1e+06', 'data/s000/periodic-ww1.50-ff0.17-N256-samc-1e+06-movie/000900-lndos.dat'),
+    ('samc-1e+06', 'data/s000/periodic-ww1.50-ff0.17-N256-samc-100000-movie/000600-lndos.dat'),
     #('sad3', 'data/s000/periodic-ww1.30-ff0.30-N500-sad3-movie/002000-lndos.dat'),
     #('sad3-test', 'data/s000/periodic-ww1.30-ff0.30-N500-sad3-test-movie/002000-lndos.dat')
 ]
@@ -26,10 +26,10 @@ for method, fname in inputs:
     colors.plot(e, lndos, method=method)
 
 emax = -34
-emin = -3139
+emin = -2000
 eminimportant = -915
-eSmax = -440
-Smin = -3700.72
+eSmax = -509
+Smin = -1500
 plt.axvline(eminimportant, linestyle=':', color='tab:gray')
 plt.axvline(eSmax, linestyle=':', color='tab:gray')
 #plt.axvline(emin)

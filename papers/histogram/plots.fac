@@ -31,7 +31,10 @@ c .pyc
 | python2 figs/gamma-plot.py n500 0.5 noshow
 c .pyc
 
-| python2 figs/gamma-plot.py n50 0.2 noshow
+| python2 figs/gamma-plot.py n50 0.333333333333 noshow
+c .pyc
+
+| python2 figs/gamma-plot.py n256 1.0 noshow
 c .pyc
 
 | python figs/comparison-plot.py 0 s000/periodic-ww1.50-ff0.17-N256 default noshow
