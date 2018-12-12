@@ -31,6 +31,9 @@ for f in files:
     invn.append(1/data[1])
     hfe.append(data[4])   #homogeneous free energy/atom
     cfe.append(data[5])   #crystal free energy/atom
+hfe = np.array(hfe)
+cfe = np.array(cfe)
+invn = np.array(invn)
 
 #print("length of n=%g" %(len(n)))
 #for i in range(len(n)-1):    
@@ -62,6 +65,24 @@ plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
 plt.legend()
 #plt.savefig(plot2)
+
+plt.figure()
+
+mid_hfe = 0.5*(hfe[1:] + hfe[:-1])
+mid_cfe = 0.5*(cfe[1:] + cfe[:-1])
+
+mid_h_gibbs = mid_hfe + mid_invn*hpressure
+mid_c_gibbs = mid_cfe + mid_invn*cpressure
+
+# Plot Gibbs Free Energy/atom vs 1/Reduced Density
+plt.plot(hpressure, mid_h_gibbs - hpressure, 'r.-', label="Homogeneous Free Energy/atom")
+plt.plot(cpressure, mid_c_gibbs - hpressure, 'b.-', label="Crystal Free Energy/atom")
+plt.title("Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
+plt.xlabel('$p$')
+plt.ylabel('Gibbs Free Energy/atom - pressure*(1 volume unit)')
+plt.legend()
+#plt.savefig(plot1)
+
 
 plt.show()
 
