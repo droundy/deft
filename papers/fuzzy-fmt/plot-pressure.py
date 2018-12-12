@@ -55,8 +55,8 @@ hpressure = -(dhfe/dinvn) #for fixed N and Te
 cpressure = -(dcfe/dinvn) #for fixed N and Te  
 
 # Plot Pressure vs 1/Reduced Density
-plt.plot(mid_invn, hpressure, label="homogeneous pressure", color='deepskyblue')
-plt.plot(mid_invn, cpressure, label="crystal pressure", color='darkblue')
+plt.plot(mid_invn, hpressure, label="homogeneous pressure", color='darkblue')
+plt.plot(mid_invn, cpressure, label="crystal pressure", color='deepskyblue')
 plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
