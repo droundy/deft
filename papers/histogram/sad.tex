@@ -287,8 +287,8 @@ of energy bins~\cite{liang2007stochastic}.  Schneider et al. found
 that for the
 Ising model this heuristic is helpful for small spin
 systems, but that larger systems require an even higher $t_0$
-value~\cite{schneider2017convergence}.  We find that for the square-well
-fluid also $t_0$ in some cases needs to be two orders of magnitude higher
+value~\cite{schneider2017convergence}.  Also, we find that for the square-well
+fluid $t_0$ in some cases needs to be two orders of magnitude higher
 than the rule of thumb of $100N_S$.
 
 Werlich \emph{et al.} proposed scaling the SAMC $\gamma_t$ by a factor
@@ -451,7 +451,7 @@ parameter $t_0$.
         minimum entropy change needed to converge to the true value.
         The light blue area is the quadratic approximation
         for the change in entropy.  The vertical dotted lines represent
-        the energy corresponding to $T=0.2$ and $T=\infty$.}
+        the energy corresponding to $T=0.\overline{3}$ and $T=\infty$.}
 \end{figure}
 
 While for SAMC the update factor is defined in the original
@@ -561,9 +561,15 @@ Each time we change the value of $E_H$ or $E_L$, the weights within the
 new portion of the interesting energy range are set to the expressions
 in Equations~\ref{eq:highw} and~\ref{eq:loww}.
 
+%\begin{figure}
+  %\includegraphics[width=\columnwidth]{figs/gamma-n500}
+  %\caption{The update factor $\gamma_t$ for $N=500$ versus iteration for three
+    %different methods: WL, SAMC, and SAD.
+    %method.}\label{fig:gamma-vs-t}
+%\end{figure}
 \begin{figure}
-  \includegraphics[width=\columnwidth]{figs/gamma-n500}
-  \caption{The update factor $\gamma_t$ for $N=500$ versus iteration for three
+  \includegraphics[width=\columnwidth]{figs/gamma-n256}
+  \caption{The update factor $\gamma_t$ for $N=256$ versus iteration for three
     different methods: WL, SAMC, and SAD.
     method.}\label{fig:gamma-vs-t}
 \end{figure}
@@ -637,11 +643,11 @@ sufficient updates to \emph{possibly} converge to the true entropy.
 \section{Results}\label{sec:results}
 
 For the square-well fluid, our simulations treat systems with a
-well-width of $\lambda = 1.3$ and a filling fraction of
-$\eta = 0.3$. We also explore various translation scales $\delta_0 = 0.005\sigma$ and
+well-width of $\lambda = 1.3$ and $\lambda = 1.5$ and a filling fraction of
+$\eta = 0.3$ and $\eta = 0.17$. We also explore various translation scales $\delta_0 = 0.005\sigma$ and
 $0.05\sigma$. The simulations explore the
 energy space of the systems at reduced temperatures of
-$T_{\text{min}} = 0.2$ and $0.5$.  All simulations lead to the minimum important
+$T_{\text{min}} = 0.\overline{3}$ and $1.0$.  All simulations lead to the minimum important
 energy $E_{\min}$ and maximum entropy energy $E_{\max}$
 being calculated (with the exception of the WL methods where both
 of these parameters are needed a priori).  In the sections below, we
@@ -671,21 +677,18 @@ Fig.~\ref{fig:N50-ff0.3-avg-error}.
   SAMC $t_0 = 10^5$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
   serving as the reference.}\label{fig:N50-ff0.3-avg-error-slow}
 \end{figure}
-%\begin{figure}
-  %\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-fast.pdf}
-  %\caption{The average entropy error for each method is shown for $\eta = 0.3$ with
-  %SAMC followed by TMMC serving as the reference system.}\label{fig:N50-ff0.3-avg-error-fast}
-%\end{figure}
 
 \subsection{A periodic system with 50 atoms}
 
-Figure~\ref{fig:N50-ff0.3-avg-error} shows the average entropy vs moves
-for a system consisting of 50 atoms that are placed in a periodic
+Figures~\ref{fig:N50-ff0.3-avg-error}
+and~\ref{fig:N50-ff0.3-avg-error-slow} show the average entropy vs
+moves for a system consisting of 50 atoms that are placed in a periodic
 simple cubic unit cell with lattice constant chosen to give a filling
 fraction of $\eta = 0.3$.  These particles are randomly inserted into
 the system and random moves are proposed (with a translation scale
-$\delta_0 = 0.05\sigma$). For the $\eta = 30\%$ and $N = 50$ system, we
-explore the choice of $\delta_0$ as a parameter.
+$\delta_0 = 0.05\sigma$ and $\delta_0 = 0.005\sigma$ respectively). For
+the $\eta = 30\%$ and $N = 50$ system, we explore the choice of
+$\delta_0$ as a parameter.
 
 {\color{red}
 $S_{\max} = 120$ and $S_{\min} = 248$ for this system.  The number of
@@ -703,56 +706,56 @@ Smaller translation
 scales cause the given method to take additional time to explore all
 energies. Ideal methods should scale linearly with the $\delta_0$, that
 is, a decrease in the translation scale should result in a proportional
-increase in convergence time. However, as can be seen from
-Fig.~\ref{fig:N50-ff0.3-avg-error-slow} SAMC methods that rapidly
+increase in convergence time. As can be seen from
+Fig.~\ref{fig:N50-ff0.3-avg-error-slow}, SAMC methods that rapidly
 converged for $\delta = 0.05\sigma$ do not proportionaly converge for a
 translation scale of $\delta = 0.005\sigma$. We see that SAD handles
 arbitrary translation scales and proportionaly converges based on the
 translation scale that is chosen.
 
 \begin{figure}
-\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-defualt.pdf}
+\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf}
   \caption{The average entropy error for each MC method is shown for $\eta = 0.17$ and $T_{\min} = 1$ with
   SAD serving as the reference.}\label{fig:n256}
 \end{figure}
+%\begin{figure}
+%\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error-default.pdf}
+  %\caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/2$ with
+  %SAMC $t_0 = 10^6$ serving as the reference.}\label{fig:n500-ff0.3}
+%\end{figure}
 \begin{figure}
-\includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N500-entropy-error-default.pdf}
-  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/2$ with
-  SAMC $t_0 = 10^6$ serving as the reference.}\label{fig:n500-ff0.3}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/N500-lndos-comparison}
-  \caption{Use this to create description of the system.}\label{fig:n500-lndos-comparison}
+  \includegraphics[width=\columnwidth]{figs/N256-lndos-comparison}
+  \caption{Use this to create description of the system.}\label{fig:n256-lndos-comparison}
 \end{figure}
 
 
+\subsection{A periodic system with 256 atoms}
 
-\subsection{A periodic system with 500 atoms}
-
-A system is configured with dimensions $x = y = z = 19\sigma$.  A
-filling fraction $\eta = 0.3$ is chosen which yields $N = 500$
-particles in a cubical lattice system.  These particles are randomly
-inserted into the system and random moves are proposed (with a
-translation scale $\delta_0 = 0.05\sigma$).
+Figure~\ref{fig:n256} shows the average entropy vs moves for a system
+consisting of 256 atoms that are placed in a periodic simple cubic unit
+cell with lattice constant chosen to give a filling fraction of $\eta =
+0.17$.   These particles are randomly inserted into the system and
+random moves are proposed (with a translation scale $\delta_0 =
+0.05\sigma$).
 
 {\color{red}
-$S_{\max} = 1206$ and $S_{\min} = 2606$ for this system.  The number of
+$S_{\max} = 509$ and $S_{\min} = 915$ for this system.  The number of
 important energy states for this system is then $N_S = S_{\min} -
-S_{\max} = 1400$. The reduced temperature of $1/2$ is chosen for the
-larger system in order to examine the convergence properties of SAD in
-a reasonable simulation time.
+S_{\max} = 406$. The reduced temperature of $1.0$ and well-width of $\lambda = 1.5$
+are chosen in order to ensure that the simulation encounters liquid vapor coexistence
+and that the results are comparable with NIST.
 }
 
 For the larger system, SAMC parameter values of $t_0$ that gave rapid
 convergence for the $N = 50$ system with $\delta = 0.05\sigma$ do not
-converge rapidly.  Several additional larger $t_0$ parameters are
-chosen to compare with SAD.  SAD has significantly smaller fluctuations
+converge rapidly.  Larger $t_0$ parameters are simulated for
+comparison with SAD.  SAD has significantly smaller fluctuations
 in the average entropy error for a given number of moves.
 
 {\color{red}
-Figure~\ref{fig:n500-lndos-comparison} shows the calculated entropy for
-the $N = 500$ system. The grey dash lines indicate the $S_{\max} = 1206$
-point and the $S_{\min} = 2606$. Only the reference method is shown.
+Figure~\ref{fig:n256-lndos-comparison} shows the calculated entropy for
+the $N = 256$ system. The grey dash lines indicate the $S_{\max} = 509$
+point and the $S_{\min} = 915$. Only the reference method is shown.
 }
 
 \subsubsection{Discussion on convergence and update factor}
@@ -762,7 +765,7 @@ for the Wang-Landau algorithm decreases much more rapidly than
 $\nicefrac{1}{\sqrt{t}}$. It can be observed  for the simulations that
 were carried out that all the methods from the weight-based family
 struggle to converge if the update factor decreases too rapidlly.
-Fig.~\ref{fig:n500-ff0.3} shows WL and SAMC with inappropriate choices
+Fig.~\ref{fig:N50-ff0.3-avg-error-slow} shows SAMC with inappropriate choices
 of $t_0$ i.e. less than $\nicefrac{10^5}{\sqrt{t}}$ failing to converge
 in a reasonable amount of time. Thus, the update factor $\gamma$, shown
 as a function of simulation moves in Fig.~\ref{fig:gamma-vs-t}, proves
