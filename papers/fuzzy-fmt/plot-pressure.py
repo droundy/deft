@@ -37,8 +37,8 @@ for f in files:
 #  print(n[i])
 
 # Plot Free Energy/atom vs 1/Reduced Density
-plt.plot(invn, hfe, 'deepskyblue', label="Homogeneous Free Energy/atom")
-plt.plot(invn, cfe, 'darkblue', label="Crystal Free Energy/atom")
+plt.plot(invn, hfe, 'darkblue', label="Homogeneous Free Energy/atom")
+plt.plot(invn, cfe, 'deepskyblue', label="Crystal Free Energy/atom")
 plt.title("Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Free Energy/atom')
