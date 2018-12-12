@@ -36,10 +36,10 @@ plt.plot(n_crystal, kT, color='deepskyblue')
 for i in range(len(kT)-1):
    plt.plot([n_homogeneous[i], n_crystal[i]],[kT[i],kT[i]], color='gray', lw=2)
    plt.plot([0, n_homogeneous[i]], [kT[i],kT[i]], color='darkblue')
-   plt.plot([0, n_homogeneous[4]], [kT[4],kT[4]], color='darkblue')
+   plt.plot([0, n_homogeneous[5]], [kT[5],kT[5]], color='darkblue')  #FIX!
    plt.plot([n_crystal[i], n_crystal[len(kT)-1]], [kT[i],kT[i]], color='deepskyblue')
 plt.title("Temperature vs Density")
-plt.xlabel('Density')
+plt.xlabel('Density     (dark blue=liquid, light blue=crystal)')
 plt.ylabel('kT')
 
 plt.figure()
@@ -50,6 +50,6 @@ for i in range(len(kT)):
    plt.plot([0, kT[i]], [P[i],P[i]], color='darkblue')
    plt.plot([kT[i], kT[len(kT)-1]], [P[i],P[i]], color='deepskyblue')
 plt.title("Pressure vs Temperature")
-plt.xlabel('kT')
+plt.xlabel('kT     (dark blue=liquid, light blue=crystal)')
 plt.ylabel('Pressure')
 plt.show()
