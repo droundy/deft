@@ -858,11 +858,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     FILE *newmeltoutfile = fopen(alldat_filename, "w");
     if (newmeltoutfile) {
       fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
-      fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcpt\tmcseed\ttime(h)\n");
-      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t      %g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\n",
+      fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcconstant\tmcprefactor\tmcerror\tmcseed\ttime(h)\n");
+      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t      %g\t\t%g\t\t%g\t%g\t%li\t%li\t%g\t%g\t%g\n",
               temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
               cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
-              lattice_constant, reduced_num_spheres, dx_input, NUM_POINTS, seed,
+              lattice_constant, reduced_num_spheres, dx_input, mc_constant, mc_prefactor, MC_ERROR, seed,
               run_time/60/60);
       fclose(newmeltoutfile);
     } else {
@@ -1700,10 +1700,11 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcpt\tmcseed\thFE/volume\tbest_cFE/volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
+     
+      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, NUM_POINTS, seed, hfree_energy_pervol, cfree_energy_pervol);    //Nsph=1-fv for parallepiped
+              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -1746,10 +1747,10 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());      
-      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcpt\tmcseed\thFE/volume\tbest_cFE/volume\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%li\t%g\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
+      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, NUM_POINTS, seed, hfree_energy_pervol, cfree_energy_pervol);    //Nsph=1-fv for parallepiped
+              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
