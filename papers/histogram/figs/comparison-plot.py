@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 import sys, os, matplotlib
 import numpy as np
 from collections import OrderedDict
@@ -26,8 +26,8 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-sad3-s2','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
-               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-wl-256']
+    methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
+               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-sad-256-s5','-sad-256-s6','-wl-256']
     if transcale == 'slow':
         methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
     if transcale == 'fast':
@@ -37,7 +37,6 @@ if 'allmethods' not in sys.argv:
 lvextra = glob('data/comparison/%s-wltmmc*' % filebase)
 split1 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra]
 split2 = [i.split('-m', 1)[0] for i in split1]
-print split2
 for meth in split2:
     if "default" in transcale:
         if meth[-3:] != '-tm' and "slow" not in meth and "fast" not in meth:
@@ -69,9 +68,9 @@ for meth in split4:
 best_ever_max = 1e100
 max_time = 0
 min_error = 1e200
-print 'methods are', methods
+print('methods are', methods)
 for method in methods:
-    print 'trying method', method
+    print('trying method', method)
     try:
         dirname = 'data/comparison/%s%s/' % (filebase,method)
         if not os.path.exists(dirname) or os.listdir(dirname) == []:
