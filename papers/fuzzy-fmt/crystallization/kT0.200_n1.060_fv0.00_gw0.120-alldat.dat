@@ -1,3 +1,3 @@
-# git  version: 0.0.0-2311-g556e843c
-#kT	n	fv	gwidth	hFE/atom	cFE/atom	FEdiff/atom	lat_const	Nsph	dx	mcpt	mcseed	time(h)
-0.2	1.06	0	0.12	0.481798	0.609748	      0.12795		1.55687		1	0.5	800	1	0.00243987
+# git  version: 0.0.0-2324-gba2e6d353-dirty
+#kT	n	fv	gwidth	hFE/atom	cFE/atom	FEdiff/atom	lat_const	Nsph	dx	mcconstant	mcprefactor	mcerror	mcseed	time(h)
+0.2	1.06	0	0.12	0.481798	0.611565	      0.129767		1.55687		1	0.5	5	50000	0.001	1	0.0159323
