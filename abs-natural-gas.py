@@ -11,7 +11,12 @@ import pandas as pd # import data tables from NIST and store with pandas
 
 def find_nearest(array, value):
     #array = np.asarray(array)
-    assert(value < array.max() and value >= array.min())
+    maxval = array.max()
+    print('type', type(maxval), maxval)
+    print(value, array.max(), value < array.max(), value < maxval)
+    print('difference', array.max() - value)
+    assert(value < array.max())
+    assert(value >= array.min())
     idx = (np.abs(array - value)).argmin()
     return idx, array[idx]
 
@@ -31,10 +36,15 @@ kJ = ureg.kJ     # kiloJoule
 
 # --- Command line arguments --- #
 
+if len(sys.argv) != 6:
+    print('arguments: plo pFilled pmax pinc T\n  pressures are in atm (approximately bar), T in Kelvin')
+    exit(1)
 pLow = sys.argv[1]
-pHigh = sys.argv[2]
-pInc = sys.argv[3]
-Temperature = sys.argv[4]
+# Final Pressure and Fixed Volume
+pFilled = sys.argv[2]*atm
+pMax = sys.argv[3]
+pInc = sys.argv[4]
+Temperature = sys.argv[5]
 
 MM = 16.043 * gram/mol     # molar mass of Methane
 NA = 6.02214e23 * 1/mol   # Avogadro's constant
@@ -42,7 +52,7 @@ NA = 6.02214e23 * 1/mol   # Avogadro's constant
 # --- Read NIST tables using Pandas --- #
 
 html_web = "https://webbook.nist.gov/cgi/fluid.cgi?Action=Load&ID=C74828&"
-html_arg = "Type=IsoTherm&Digits=12&PLow=%s&PHigh=%s&PInc=%s&T=%s" % (pLow, pHigh, pInc,Temperature)
+html_arg = "Type=IsoTherm&Digits=12&PLow=%s&PHigh=%s&PInc=%s&T=%s" % (pLow, pMax, pInc,Temperature)
 html_units = "&RefState=DEF&TUnit=K&PUnit=atm&DUnit=g%2Fml&HUnit=kJ%2Fmol&WUnit=m%2Fs&VisUnit=uPa*s&STUnit=N%2Fm"
 tables = pd.read_html(html_web + html_arg + html_units)
 
@@ -71,14 +81,12 @@ F = U - T*S
 
 # --- Calculations --- #
 
-# Final Pressure and Fixed Volume
-Fp = 1*atm + 500*psi
-print('filled pressure', Fp)
+print('filled pressure', pFilled)
 HOC = -882.0 *kJ/mol # - if enthalpy (endothermic) and + if exothermic
 
 # Initial and final pressures
 p_i = p[0]
-idx,p_f = find_nearest(p,Fp)
+idx,p_f = find_nearest(p,pFilled)
 p_f = p_f
 print('actually filled pressure', p_f)
 

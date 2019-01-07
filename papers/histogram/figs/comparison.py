@@ -14,7 +14,7 @@ methods = [ '-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau', '-sad']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-sad3-s2','-tmmc', '-vanilla_wang_landau', '-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
+    methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau', '-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
                '-vanilla_wang_landau-T13','-vanilla_wang_landau-T13-slow','-n256-tmmc']
 fast_methods = [m+'-fast' for m in methods]
 slow_methods = [m+'-slow' for m in methods]

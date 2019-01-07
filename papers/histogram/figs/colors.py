@@ -6,6 +6,8 @@ _colors = { 'sad': 'r',
             'sad3-T13': 'c',
             'sad3-T13-slow': 'c',
             'sad-256': 'c',
+            'sad-256-s5': 'xkcd:lime green',
+            'sad-256-s6': 'fuchsia',
             'sad3-test': 'c',
             'sad3-slow': 'c',
             'sad3-fast': 'c',
@@ -60,7 +62,7 @@ _colors = { 'sad': 'r',
             'samc-500-1e5': 'xkcd:red',
             'samc-1e5-256': 'gold',
             'samc-1e6-256': 'g',
-            '1/sqrt(t)': 'xkcd:light gray'
+            '1/sqrt(t)': 'xkcd:dark gray'
 }
 
 _linestyles = {
@@ -164,6 +166,8 @@ _legend_label = {
     'one_over_t_wang_landau-T13-t': '1/t-WL',
     'sad': 'SAD',
     'sad-256': 'SAD',
+    'sad-256-s5': 'SAD-s5',
+    'sad-256-s6': 'SAD-s6',
     'sad3-s2': 'SAD-s2',
     'sad-tm': 'SAD-TM',
     'sad3': 'SAD',
@@ -237,8 +241,7 @@ def style_args(method):
     args['zorder'] = -legend_order(method)
     if method == '1/sqrt(t)':
         args['zorder'] = -50
-    if method == '1/sqrt(t)':
-        args['linewidth'] = 0.05
+        args['linewidth'] = 0.1
     return args
 
 def plot(x, y, method=None):
