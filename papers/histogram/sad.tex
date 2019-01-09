@@ -665,16 +665,18 @@ choice of $t_0$.
 Simulations that take more iterations to reach the same entropy error as a
 different method take longer to converge. This behavior is seen in
 Fig.~\ref{fig:N50-ff0.3-avg-error}.
-
+\jpsays{We use a SAMC $t_0 = 10^3$ with a fixed energy range $S_{\max} = 120$ and $S_{\min} = 248$ as the reference.
+This is noted because this is not strictly SAMC method. We use this as a reference to increase convergence time of the
+reference.}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-default.pdf}
   \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
-  SAMC $t_0 = 10^5$ serving as the reference.}\label{fig:N50-ff0.3-avg-error}
+  a fixed energy range SAMC $t_0 = 10^3$ serving as the reference.}\label{fig:N50-ff0.3-avg-error}
 \end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-slow.pdf}
   \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
-  SAMC $t_0 = 10^5$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
+  a fixed energy range SAMC $t_0 = 10^3$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
   serving as the reference.}\label{fig:N50-ff0.3-avg-error-slow}
 \end{figure}
 
