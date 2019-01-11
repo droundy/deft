@@ -332,6 +332,10 @@ int count_interactions(int id, ball *p, double interaction_scale,
 int count_all_interactions(ball *balls, int N, double interaction_scale,
                            double len[3], int walls, int sticky_wall);
 
+// Count the interactions of all the balls
+int count_all_interactions_slowly(ball *balls, int N, double interaction_scale,
+                                  double len[3], int walls, int sticky_wall);
+
 // This function finds the maximum number of balls within a given distance
 //   distance should be normalized to (divided by) ball radius
 int max_balls_within(double radius);
