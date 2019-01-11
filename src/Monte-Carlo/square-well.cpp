@@ -289,7 +289,7 @@ void sw_simulation::move_a_ball() {
   if (moves.total % (N*N*1000) == 0) {
     // Let us check that the energy is actually correct!
     const int correct_interaction_count =
-      count_all_interactions_slowly(id, balls, interaction_distance, len, walls, sticky_wall);
+      count_all_interactions_slowly(balls, N, interaction_distance, len, walls, sticky_wall);
     assert(correct_interaction_count == old_interaction_count);
   }
 
