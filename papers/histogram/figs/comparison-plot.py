@@ -27,7 +27,7 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
     methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
-               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-sad-256-s5','-sad-256-s6','-wl-256']
+               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-sad-256-s5','-sad-256-s6','-wl-256','-samc-1e4-256']
     if transcale == 'slow':
         methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
     if transcale == 'fast':
@@ -177,7 +177,7 @@ colors.legend()
 plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
  
 plt.figure('errorinentropy')
-moves = np.array([1e5, 2e12])
+moves = np.array([1e5, 2e13])
 #colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
 for i in np.arange(-8, 9, 1.0):
     colors.loglog(moves, 10**i*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
