@@ -35,13 +35,13 @@ hfe = np.array(hfe)
 cfe = np.array(cfe)
 invn = np.array(invn)
 
-#print("length of n=%g" %(len(n)))
-#for i in range(len(n)-1):    
-#  print(n[i])
+print("length of n=%g" %(len(n)))
+for i in range(len(n)-1):    
+  print(n[i])
 
 # Plot Free Energy/atom vs 1/Reduced Density
-plt.plot(invn, hfe, 'darkblue', label="Homogeneous Free Energy/atom")
-plt.plot(invn, cfe, 'deepskyblue', label="Crystal Free Energy/atom")
+plt.plot(invn, hfe, 'red', label="Homogeneous Free Energy/atom")
+plt.plot(invn, cfe, 'blue', label="Crystal Free Energy/atom")
 plt.title("Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Free Energy/atom')
@@ -59,7 +59,7 @@ cpressure = -(dcfe/dinvn) #for fixed N and Te
 
 # Plot Pressure vs 1/Reduced Density
 plt.plot(mid_invn, hpressure, label="homogeneous pressure", color='r')
-plt.plot(mid_invn, cpressure, label="crystal pressure", color='b')
+plt.plot(mid_invn, cpressure, label="crystal pressure", color='blue')
 plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
