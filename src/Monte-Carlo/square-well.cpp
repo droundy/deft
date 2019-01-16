@@ -222,6 +222,25 @@ int count_all_interactions(ball *balls, int N, double interaction_distance,
   return interactions;
 }
 
+int count_all_interactions_slowly(ball *balls, int N, double interaction_distance,
+                                  double len[3], int walls, int sticky_wall) {
+  // Count initial number of interactions
+  // Sum over i < k for all |ball[i].pos - ball[k].pos| < interaction_distance
+  int interactions = 0;
+  for(int i = 0; i < N; i++) {
+    for(int j = i+1; j < N; j++) {
+      const double r_ij = periodic_diff(balls[i].pos, balls[j].pos, len, walls).norm();
+      if (r_ij <= interaction_distance) interactions++;
+    }
+    // if sticky_wall is true, then there is an attractive slab right
+    // near the -z wall.
+    if (sticky_wall && balls[i].pos.x < balls[i].R) {
+      interactions += wall_stickiness;
+    }
+  }
+  return interactions;
+}
+
 vector3d fcc_pos(int n, int m, int l, double x, double y, double z, double a){
   return a*vector3d(n+x/2,m+y/2,l+z/2);
 }
@@ -266,6 +285,13 @@ void sw_simulation::move_a_ball() {
   moves.total++;
   const int old_interaction_count =
     count_interactions(id, balls, interaction_distance, len, walls, sticky_wall);
+
+  if (moves.total % (N*N*1000) == 0) {
+    // Let us check that the energy is actually correct!
+    const int correct_interaction_count =
+      count_all_interactions_slowly(balls, N, interaction_distance, len, walls, sticky_wall);
+    assert(correct_interaction_count == old_interaction_count);
+  }
 
   ball temp = balls[id];
   temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(translation_scale), len);

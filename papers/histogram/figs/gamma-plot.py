@@ -43,7 +43,7 @@ for sad in glob.glob("data/gamma/%s/sad*.dat" % filename):
         time = data[:,1]
         ehi = data[:,2]
         elo = data[:,3]
-        ts = np.exp(np.linspace(0, np.log(max(time)*1e2), 2000))
+        ts = np.exp(np.linspace(0, np.log(max(time)*1e4), 2000))
         gamma = np.zeros_like(ts)
         print sad, time
         for j in range(len(time)):
