@@ -1,2 +1,0 @@
-# round trips	 doserror
-1	-6.244
