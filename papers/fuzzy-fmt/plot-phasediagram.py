@@ -31,16 +31,22 @@ P=thisdata[:,3]
 
 
 #Temperature vs Density Phase Diagram
-plt.plot(n_homogeneous, kT, label='fluid', color='darkblue')
-plt.plot(n_crystal, kT, label='solid', color='deepskyblue')
-for i in range(len(kT)-1):
-   plt.plot([n_homogeneous[i], n_crystal[i]],[kT[i],kT[i]], color='gray', lw=2)
-   plt.plot([0, n_homogeneous[i]], [kT[i],kT[i]], color='darkblue')
-   plt.plot([0, n_homogeneous[5]], [kT[5],kT[5]], color='darkblue')  #FIX!
-   plt.plot([n_crystal[i], n_crystal[len(kT)-1]], [kT[i],kT[i]], color='deepskyblue')
+plt.plot(n_homogeneous, kT, label='liquid', color='red')
+plt.plot(n_crystal, kT, label='solid', color='blue')
+
+#for i in range(len(kT)-1):
+#   plt.plot([n_homogeneous[i], n_crystal[i]],[kT[i],kT[i]], color='gray', lw=2)
+#   plt.plot([0, n_homogeneous[i]], [kT[i],kT[i]], color='red')
+#   plt.plot([0, n_homogeneous[5]], [kT[5],kT[5]], color='red')  #FIX!
+#   plt.plot([n_crystal[i], n_crystal[len(kT)-1]], [kT[i],kT[i]], color='blue')
+   
+plt.fill_betweenx(kT, 0, n_homogeneous, color='red')  
+plt.fill_betweenx(kT, n_homogeneous, n_crystal, color='gray') 
+plt.fill_betweenx(kT, n_crystal, 1, color='blue')  
+   
 plt.title("Temperature vs Density")
 plt.legend(loc='best')
-plt.xlabel('Density     (dark blue=liquid, light blue=crystal)')
+plt.xlabel('Density')
 plt.ylabel('kT')
 
 plt.figure()
