@@ -121,6 +121,13 @@ for method in methods:
                 # of fractional errors in the actual (not ln) DOS.
                 maxerrortm[i] = numpy.amax(doserror) - numpy.amin(doserror)
 
+        # The following is intended for testing whether there is a
+        # systematic error in any of our codes.
+        
+        #numpy.savetxt('%s/error-vs-energy.txt' %(dirname),
+                    #numpy.c_[eref, doserror],
+                    #fmt = ('%.4g'),
+                    #delimiter = '\t', header = 'E\t Serror')
         i = 1
         while i < len(iterations) and iterations[i] >= iterations[i-1]:
             num_frames_to_count = i+1

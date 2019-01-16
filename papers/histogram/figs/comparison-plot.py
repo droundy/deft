@@ -26,10 +26,11 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
-               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-sad-256-s5','-sad-256-s6','-wl-256','-samc-1e4-256']
+    methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', 
+               '-sad-T13','-wl-50',
+               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-sad-256-s5','-sad-256-s6','-wl-256']
     if transcale == 'slow':
-        methods = ['-sad3-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
+        methods = ['-sad3-slow','-sad-slow-T13','-wl-50-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
     if transcale == 'fast':
         methods = ['-sad3-fast','-tmmc-fast', '-vanilla_wang_landau-fast']
 
@@ -80,6 +81,13 @@ for method in methods:
                 Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
         iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
         best_ever_max = min(best_ever_max, maxerror.min())
+
+        #try:
+            #my_e, my_S_error_vs_e = np.loadtxt(dirname + 'error-vs-energy.txt', delimiter = '\t', unpack = True)
+            #plt.figure('error-vs-energy')
+            #colors.plot(my_e, my_S_error_vs_e, method=method[1:])
+        #except:
+            #pass
 
         howManyPoints = 300 # We are definately using C++ code!
         if len(iterations) > howManyPoints:
@@ -177,7 +185,7 @@ colors.legend()
 plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
  
 plt.figure('errorinentropy')
-moves = np.array([1e5, 2e13])
+moves = np.array([1e5, 4e12])
 #colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
 for i in np.arange(-8, 9, 1.0):
     colors.loglog(moves, 10**i*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
@@ -185,7 +193,7 @@ plt.xlim(moves[0], moves[1])
 if filebase == 's000/periodic-ww1.30-ff0.30-N50':
     plt.ylim(1e-3, 1e1)
     if "slow" in transcale:
-        plt.ylim(1e-2, 1e3)
+        plt.ylim(1e-2, 1e5)
 elif filebase == 's000/periodic-ww1.30-ff0.30-N500':
     plt.ylim(1e-1, 1e3)
 elif filebase == 's000/periodic-ww1.50-ff0.17-N256':
@@ -195,5 +203,10 @@ plt.tight_layout()
 print('filename', 'figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
 plt.savefig('figs/%s-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
+#plt.figure('error-vs-energy')
+#plt.ylim(-1,1)
+#colors.legend()
+#plt.tight_layout()
+#plt.savefig('figs/%s-error-vs-energy-%s.pdf' % (tex_filebase,transcale))
 
 plt.show()
