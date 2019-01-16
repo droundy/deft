@@ -31,15 +31,15 @@ P=thisdata[:,3]
 
 
 #Temperature vs Density Phase Diagram
-plt.plot(n_homogeneous, kT, color='darkblue')
+plt.plot(n_homogeneous, kT, color='red')
 plt.plot(n_crystal, kT, color='deepskyblue')
 for i in range(len(kT)-1):
    plt.plot([n_homogeneous[i], n_crystal[i]],[kT[i],kT[i]], color='gray', lw=2)
-   plt.plot([0, n_homogeneous[i]], [kT[i],kT[i]], color='darkblue')
-   plt.plot([0, n_homogeneous[5]], [kT[5],kT[5]], color='darkblue')  #FIX!
+   plt.plot([0, n_homogeneous[i]], [kT[i],kT[i]], color='red')
+   plt.plot([0, n_homogeneous[5]], [kT[5],kT[5]], color='red')  #FIX!
    plt.plot([n_crystal[i], n_crystal[len(kT)-1]], [kT[i],kT[i]], color='deepskyblue')
 plt.title("Temperature vs Density")
-plt.xlabel('Density     (dark blue=liquid, light blue=crystal)')
+plt.xlabel('Density     (red=liquid, light blue=crystal)')
 plt.ylabel('kT')
 
 plt.figure()
@@ -47,9 +47,9 @@ plt.figure()
 #Pressure vs Temperature Phase Diagram
 plt.plot(kT, P, color='black')
 for i in range(len(kT)):
-   plt.plot([0, kT[i]], [P[i],P[i]], color='darkblue')
-   plt.plot([kT[i], kT[len(kT)-1]], [P[i],P[i]], color='deepskyblue')
+   plt.plot([0, kT[i]], [P[i],P[i]], color='deepskyblue')
+   plt.plot([kT[i], kT[len(kT)-1]], [P[i],P[i]], color='red')
 plt.title("Pressure vs Temperature")
-plt.xlabel('kT     (dark blue=liquid, light blue=crystal)')
+plt.xlabel('kT     (red=liquid, light blue=crystal)')
 plt.ylabel('Pressure')
 plt.show()
