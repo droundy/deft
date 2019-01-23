@@ -66,29 +66,30 @@ density of states. Also, how can the user appropriately decide what
 parameters to choose so that the algorithm solves the problem in the
 most ideal way.
 
-Transition Matrix Monte Carlo~\cite{wang1999transition,
-swendsen1999transition, fitzgerald2000monte} became an attractive
-complimentary simulation algorithm to Wang-Landau, in that, if detailed
-balance is ensured, the system is guaranteed to converge.  Unfortunately,
-the algorithm can be considerably more difficult to implement when
-compared to Wang-Landau: in particular, due to the infinite temperature
-transition matrix~\cite{wang2002transition}.  Also, the time necessary
-for the density of states to converge could be considerable
-due to the algorithm spending too much time exploring low energy states.
-Unlike WL, TMMC does not require a prior knowledge of the energy range of
-the system.
-
-Shell et al.~\cite{shell2003improved, shell2004flat} originially
-implemented Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an
-effort to quickly explore the energies of a given system using WL then
-switch over to TMMC to guarantee convergence. Considerable effort has
-been spent trying to determine the flatness criteria and cutoff for the
-WL portion, but there remains no rigorous systematic way to determine
-these parameters~\cite{rane2013monte}.  The algorithm is first run for
-several trial simulations and/or `experience' is used to determine the
-best parameters for a users particular system of
-study~\cite{siderius2013use}.
-
+%Transition Matrix Monte Carlo~\cite{wang1999transition,
+%swendsen1999transition, fitzgerald2000monte} became an attractive
+%complimentary simulation algorithm to Wang-Landau, in that, if detailed
+%balance is ensured, the system is guaranteed to converge.  Unfortunately,
+%the algorithm can be considerably more difficult to implement when
+%compared to Wang-Landau: in particular, due to the infinite temperature
+%transition matrix~\cite{wang2002transition}.  Also, the time necessary
+%for the density of states to converge could be considerable
+%due to the algorithm spending too much time exploring low energy states.
+%Unlike WL, TMMC does not require a prior knowledge of the energy range of
+%the system.
+%
+%Shell et al.~\cite{shell2003improved, shell2004flat} originially
+%implemented Wang-Landau Transition Matrix Monte Carlo (WL-TMMC) in an
+%effort to quickly explore the energies of a given system using WL then
+%switch over to TMMC to guarantee convergence. Considerable effort has
+%been spent trying to determine the flatness criteria and cutoff for the
+%WL portion, but there remains no rigorous systematic way to determine
+%these parameters~\cite{rane2013monte}.  The algorithm is first run for
+%several trial simulations and/or `experience' is used to determine the
+%best parameters for a users particular system of
+%study~\cite{siderius2013use}.
+\jpsays{I should look at some more 1/t-WL citations. I know a few more
+that probably should be included here...}
 Around the same time, the convergence rate for WL was being
 explored~\cite{zhou2005understanding,lee2006convergence,
 belardinelli2007wang}. It was found that utilizing modification factors
@@ -115,7 +116,8 @@ does not require user-defined inputs and therefore should be easily
 applicable to a given system.  We call this method SAD (Dynamic
 Stochastic Approximation), and will discuss it in detail in the methods
 section. We compare it along with several flat histogram methods
-which include TMMC, WL, WL-TMMC, and SAMC.
+which include WL, 1/t-WL, and SAMC.
+%which include TMMC, WL, WL-TMMC, and SAMC.
 
 We consider the square-well fluid i.e. a system of particles whose
 interactions are governed by a square-well
@@ -135,8 +137,10 @@ reduced range of the potential well, and $\epsilon$ is its depth.
 
 The organization of this paper is as follows: In Section~\ref{sec:histogram}, we
 describe in detail flat-histogram methods.  Section~\ref{sec:weight} outlines
-weight-based histogram methods used in this work. Section~\ref{sec:transition}
-details the workings of the transition-matrix methods studied in this work.
+weight-based histogram methods used in this work.
+%Section~\ref{sec:transition}
+%details the workings of the transition-matrix methods studied in this work.
+
 Section~\ref{sec:sad} introduces the dynamic stochastic approximation method.
 In Section~\ref{sec:results}, we discuss the performance of the various methods
 applied to the model system.
@@ -145,10 +149,13 @@ In this work, We compare a variety of flat histogram
 methods.  We outline the general workings of each algorithm that we
 developed in detail while summarizing algorithms that were developed in other
 works.  The following methods are introduced and applied to the
-square-well fluid: Transition Matrix Monte-Carlo (TMMC), Wang-Landau
-(WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Stochastic
-Approximation Monte-Carlo (SAMC), and Dynamic Stochastic Approximation
-(SAD).
+square-well fluid: Wang-Landau (WL), 1/t-Wang-Landau (1/t-WL), Stochastic
+Approximation Monte-Carlo (SAMC), and Dynamic Stochastic Approximation (SAD).
+
+%Transition Matrix Monte-Carlo (TMMC), Wang-Landau
+%(WL), Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC), Stochastic
+%Approximation Monte-Carlo (SAMC), and Dynamic Stochastic Approximation
+%(SAD).
 
 \section{Flat histogram methods}\label{sec:histogram}
 
@@ -342,89 +349,89 @@ that these extreme limiting cases do not preclude the possibility that there
 is a wide range of $t_0$ values that lead to an acceptable convergence
 rate.
 
-\section{Transition-matrix methods}\label{sec:transition}
-
-\subsection{TMMC Algorithm}
-The previously described weight-based flat-histogram methods utilizes a so-called
-``visited states'' approach to calculate  thermodynamic
-properties~\cite{errington2003direct}. The algorithm is fundamentally
-based on the number of times a given state is visited while the
-system is being sampled. The Transition Matrix Monte Carlo (TMMC) method operates
-differently than the visited states approach~\cite{fitzgerald2000monte}.
-The method uses attempted transitions between states to obtain an estimate of
-the probability that a given transition will be proposed.  The density
-of states is computed from the resulting transition matrix.  An advantage
-of collecting the transition matrix is that this matrix may be collected
-while another method is employed to compute acceptance probabilities, as
-in Wang-Landau TMMC, discussed below.
-
-The TMMC algorithm records the transition data in a \emph{collection matrix},
-i.e. the unnormalized transition histogram matrix, which stores the number
-of times a transition between two energy states has been proposed.
-\begin{align}
-  C(E_{\text{old}} \rightarrow E_{\text{new}},t+1)
-     = C(E_{\text{old}} \rightarrow E_{\text{new}},t) + 1
-\end{align}
-The transition matrix is computed from the collection matrix via
-\begin{align}
-  T(E_{\text{old}} \rightarrow E_{\text{new}})
-   = \frac{C(E_{\text{old}} \rightarrow E_{\text{new}})}{
-     \sum_E C(E_{\text{old}} \rightarrow E)
-  }
-\end{align}
-The acceptance probability is defined in terms of this biasing function:
-\begin{align}
-  \mathcal{P}(E_{\text{old}} \rightarrow E_{\text{new}}) =
-  \max\left(1,\frac{T(E_{\text{old}} \rightarrow E_{\text{new}})}{
-       T(E_{\text{new}} \rightarrow E_{\text{old}})}\right)
-\end{align}
-where we note that the transition matrix is updated to reflect the
-transition under consideration \emph{prior} to computing the acceptance
-probability.  The TMMC method suffers from poor convergence primarily
-because it is sensitive to poor statistics in less probable energy
-transitions.  Like the weight-based methods above, the TMMC method violates
-detailed balance, with the level of violation decreasing as the simulation
-progresses and a difference of 1 in the collection matrix has a smaller
-impact on the acceptance probabilities.
-
-\subsection{WL-TMMC Algorithm}
-Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
-by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
-advantage of the WL methods ease of implementation, while making use of
-a transition matrix to address WL weaknesses, such as its limited
-statistical accuracy convergence.
-
-\paragraph{Initializing Wang-Landau:}
-We set the energy range along which the method may sample as
-$E(T_{\min}) <E< E(T=\infty)$. Conventional Wang-Landau prescribes
-updating the WL factor $\gamma$ by starting at 1.0 and reducing by
-$\frac12$ until the simulation is cutoff typically around $10^{-10}$.
-While variants of this approach appear in the literature, Rane et. al.
-published an implemenation of WL-TMMC~\cite{rane2013monte} that
-suggested using a WL factor between 1.0 and $10^{-2}$ with a cutoff
-$<10^{-5}$, We implement WL-TMMC by setting the WL factor to be 1.0 and
-the cutoff to be either $10^{-4}$ or $10^{-10}$.
-
-A single sweep ``roundtrip'' is defined as each macrostate being
-sampled a number of times in this case 100,000 times. Wang-Landau sets
-a flatness criteria~\cite{wang2001determining, wang2001efficient,
-hatch2015computational, mahynski2017predicting} for the accumulated
-histogram usually to be 0.8.  In the original implementation, it was
-found to be sufficient that each macrostate is visited at least once
-(each histogram bin has one entry)~\cite{shell2003improved}; however,
-for other systems this is rarely sufficient~\cite{bhar2009computer}.
-The goal of this WL initialization is to prefill the transition matrix
-for the next portion of the simulation.
-
-\paragraph{Initializing TMMC:} Prefilling the transition matrix is
-necessary because if numerous zeros existed in the collection matrix,
-the infinite temperature transition matrix would be ill-defined.
-Sampling over large ranges of density of states would therefore take an
-unacceptable length of time to complete~\cite{shell2003improved,
-shen2014elucidating}.  The TMMC portion of the algorithm is run only
-after WL has reached the specified cutoff. An important note is that
-the acceptatnce probability for TMMC is only used to control actual
-transitions not update the collection matrices.
+%\section{Transition-matrix methods}\label{sec:transition}
+%
+%\subsection{TMMC Algorithm}
+%The previously described weight-based flat-histogram methods utilizes a so-called
+%``visited states'' approach to calculate  thermodynamic
+%properties~\cite{errington2003direct}. The algorithm is fundamentally
+%based on the number of times a given state is visited while the
+%system is being sampled. The Transition Matrix Monte Carlo (TMMC) method operates
+%differently than the visited states approach~\cite{fitzgerald2000monte}.
+%The method uses attempted transitions between states to obtain an estimate of
+%the probability that a given transition will be proposed.  The density
+%of states is computed from the resulting transition matrix.  An advantage
+%of collecting the transition matrix is that this matrix may be collected
+%while another method is employed to compute acceptance probabilities, as
+%in Wang-Landau TMMC, discussed below.
+%
+%The TMMC algorithm records the transition data in a \emph{collection matrix},
+%i.e. the unnormalized transition histogram matrix, which stores the number
+%of times a transition between two energy states has been proposed.
+%\begin{align}
+%  C(E_{\text{old}} \rightarrow E_{\text{new}},t+1)
+%     = C(E_{\text{old}} \rightarrow E_{\text{new}},t) + 1
+%\end{align}
+%The transition matrix is computed from the collection matrix via
+%\begin{align}
+%  T(E_{\text{old}} \rightarrow E_{\text{new}})
+%   = \frac{C(E_{\text{old}} \rightarrow E_{\text{new}})}{
+%     \sum_E C(E_{\text{old}} \rightarrow E)
+%  }
+%\end{align}
+%The acceptance probability is defined in terms of this biasing function:
+%\begin{align}
+%  \mathcal{P}(E_{\text{old}} \rightarrow E_{\text{new}}) =
+%  \max\left(1,\frac{T(E_{\text{old}} \rightarrow E_{\text{new}})}{
+%       T(E_{\text{new}} \rightarrow E_{\text{old}})}\right)
+%\end{align}
+%where we note that the transition matrix is updated to reflect the
+%transition under consideration \emph{prior} to computing the acceptance
+%probability.  The TMMC method suffers from poor convergence primarily
+%because it is sensitive to poor statistics in less probable energy
+%transitions.  Like the weight-based methods above, the TMMC method violates
+%detailed balance, with the level of violation decreasing as the simulation
+%progresses and a difference of 1 in the collection matrix has a smaller
+%impact on the acceptance probabilities.
+%
+%\subsection{WL-TMMC Algorithm}
+%Wang-Landau Transition Matrix Monte-Carlo (WL-TMMC) method as proposed
+%by Shell and coworkers~\cite{shell2003improved,shell2004flat} takes
+%advantage of the WL methods ease of implementation, while making use of
+%a transition matrix to address WL weaknesses, such as its limited
+%statistical accuracy convergence.
+%
+%\paragraph{Initializing Wang-Landau:}
+%We set the energy range along which the method may sample as
+%$E(T_{\min}) <E< E(T=\infty)$. Conventional Wang-Landau prescribes
+%updating the WL factor $\gamma$ by starting at 1.0 and reducing by
+%$\frac12$ until the simulation is cutoff typically around $10^{-10}$.
+%While variants of this approach appear in the literature, Rane et. al.
+%published an implemenation of WL-TMMC~\cite{rane2013monte} that
+%suggested using a WL factor between 1.0 and $10^{-2}$ with a cutoff
+%$<10^{-5}$, We implement WL-TMMC by setting the WL factor to be 1.0 and
+%the cutoff to be either $10^{-4}$ or $10^{-10}$.
+%
+%A single sweep ``roundtrip'' is defined as each macrostate being
+%sampled a number of times in this case 100,000 times. Wang-Landau sets
+%a flatness criteria~\cite{wang2001determining, wang2001efficient,
+%hatch2015computational, mahynski2017predicting} for the accumulated
+%histogram usually to be 0.8.  In the original implementation, it was
+%found to be sufficient that each macrostate is visited at least once
+%(each histogram bin has one entry)~\cite{shell2003improved}; however,
+%for other systems this is rarely sufficient~\cite{bhar2009computer}.
+%The goal of this WL initialization is to prefill the transition matrix
+%for the next portion of the simulation.
+%
+%\paragraph{Initializing TMMC:} Prefilling the transition matrix is
+%necessary because if numerous zeros existed in the collection matrix,
+%the infinite temperature transition matrix would be ill-defined.
+%Sampling over large ranges of density of states would therefore take an
+%unacceptable length of time to complete~\cite{shell2003improved,
+%shen2014elucidating}.  The TMMC portion of the algorithm is run only
+%after WL has reached the specified cutoff. An important note is that
+%the acceptatnce probability for TMMC is only used to control actual
+%transitions not update the collection matrices.
 
 \section{SAD Algorithm}\label{sec:sad}
 The Stochastic Approximation with Dynamic update factor (SAD) method
@@ -698,10 +705,10 @@ important energy states for this system is then $N_S = S_{\min} - S_{\max} = 145
 The reduced temperature of $1/3$ is chosen in order to examine the convergence
 properties of SAD in a reasonable simulation time.
 
-As a side note, WL-TMMC does not converge well for $\delta_0 = 0.05\sigma$ while
-it does perform well for $\delta_0 = 0.005\sigma$. The WL portion of the algorithm
-spends nearly 100x longer for the smaller translation scale ensuring that the algorithm
-converges quickly upon transitioning to TMMC.
+%As a side note, WL-TMMC does not converge well for $\delta_0 = 0.05\sigma$ while
+%it does perform well for $\delta_0 = 0.005\sigma$. The WL portion of the algorithm
+%spends nearly 100x longer for the smaller translation scale ensuring that the algorithm
+%converges quickly upon transitioning to TMMC.
 }
 
 Smaller translation
@@ -777,7 +784,7 @@ simulation for an ideal choice of $t_0$.  This gives an unbiased
 comparison with our developed method SAD. The dynamic version of SAMC
 which we call SAD performs as well as SAMC (assuming the user can
 correctly identify an appropriate choice of $t_0$ for SAMC).  SAD
-outperforms WL and WL-TMMC for the same given number of moves. The
+outperforms WL and 1/t-WL? for the same given number of moves. The
 absence of user defined parameters makes SAD an exciting alternative to
 methods where user experience or successive implementation iteration
 are needed to achieve reasonable results.
@@ -793,8 +800,9 @@ parameters makes SAD an ideal algorithm. SAD converges as quickly as
 SAMC (in the case of an ideally chosen $t_0$ for our simulations. SAD
 doesn't suffer from the weakness of SAMC, i.e. the user choosing
 parameters that could lead to the simulation not converging in a
-reasonable amount of time. SAD also converges more quickly than Wl,
-TMMC, and WL-TMMC.
+reasonable amount of time. 
+%SAD also converges more quickly than Wl,
+%TMMC, and WL-TMMC.
 
 SAD decreases $\gamma$ in a controlled way that prevents the algorithm
 from taking too long to converge (as in the case of SAMC with a poor choice
@@ -810,9 +818,9 @@ necessary to ensure the most optimal convergence of the algorithm.
 
 \section{Acknowledgement}
 
-We gratefully acknowledge D.W. Siderius and
-J.R. Errington for helpful communications regarding the implementation
-of WL-TMMC.
+%We gratefully acknowledge D.W. Siderius and
+%J.R. Errington for helpful communications regarding the implementation
+%of WL-TMMC.
 
 % \jpsays{Everything below this is TMI1 and GC-TMMC}
 

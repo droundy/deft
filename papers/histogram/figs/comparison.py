@@ -98,12 +98,12 @@ for method in methods:
             index_minref = numpy.argwhere(eref == -minref)[0][0]
             index_max = numpy.argwhere(e == -maxref)[0][0]
             index_min = numpy.argwhere(e == -minref)[0][0]
-            norm_factor = numpy.mean(lndos[index_max:index_min]) - numpy.mean(lndosref[index_maxref:index_minref])
+            norm_factor = numpy.mean(lndos[index_max:index_min+1]) - numpy.mean(lndosref[index_maxref:index_minref+1])
             #print index_maxref
             #print index_minref
             #print lndosref[index_maxref:index_minref]
             #print lndos[index_maxref:index_minref]
-            doserror = lndos[index_max:index_min] - lndosref[index_maxref:index_minref] - norm_factor
+            doserror = lndos[index_max:index_min+1] - lndosref[index_maxref:index_minref+1] - norm_factor
             errorinentropy[i] = numpy.sum(abs(doserror))/len(doserror)
             erroratenergy[i] = doserror[energy-maxref]
             # the following "max" result is independent of how we choose
@@ -112,8 +112,8 @@ for method in methods:
             maxerror[i] = numpy.amax(doserror) - numpy.amin(doserror)
             
             if lndostm is not None:
-                norm_factor = numpy.mean(lndos[index_max:index_min]) - numpy.mean(lndosref[index_maxref:index_minref])
-                doserror = lndos[index_max:index_min] - lndosref[index_maxref:index_minref] - norm_factor
+                norm_factor = numpy.mean(lndos[index_max:index_min+1]) - numpy.mean(lndosref[index_maxref:index_minref+1])
+                doserror = lndos[index_max:index_min+1] - lndosref[index_maxref:index_minref+1] - norm_factor
                 errorinentropytm[i] = numpy.sum(abs(doserror))/len(doserror)
                 erroratenergytm[i] = doserror[energy-maxref]
                 # the following "max" result is independent of how we choose
@@ -121,6 +121,13 @@ for method in methods:
                 # of fractional errors in the actual (not ln) DOS.
                 maxerrortm[i] = numpy.amax(doserror) - numpy.amin(doserror)
 
+        # The following is intended for testing whether there is a
+        # systematic error in any of our codes.
+        
+        #numpy.savetxt('%s/error-vs-energy.txt' %(dirname),
+                    #numpy.c_[eref, doserror],
+                    #fmt = ('%.4g'),
+                    #delimiter = '\t', header = 'E\t Serror')
         i = 1
         while i < len(iterations) and iterations[i] >= iterations[i-1]:
             num_frames_to_count = i+1
