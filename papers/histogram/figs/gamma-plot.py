@@ -16,15 +16,19 @@ try:
         print "in wl"
         print 'vanilla_wang_landau'+ wl[len("data/gamma/%s/wl" % filename):-4]
         wlmoves, wlfactor = np.loadtxt(wl, dtype = float, unpack = True)
-        moves = np.zeros(len(wlmoves)*2+2)
-        factor = np.zeros_like(moves)
-        factor[0] = 1
-        moves[0] = 1
-        for i in range(len(wlmoves)):
-            moves[2*i+1] = wlmoves[i]
-            moves[2*i+2] = wlmoves[i]
-            factor[2*i+1] = wlfactor[i]*2
-            factor[2*i+2] = wlfactor[i]
+        data = np.loadtxt(wl)
+        moves = data[:,0]
+        factor = data[:,1]
+        if (data[0,0] == 'wl_factor'): # using c++ data!
+            moves = np.zeros(len(wlmoves)*2+2)
+            factor = np.zeros_like(moves)
+            factor[0] = 1
+            moves[0] = 1
+            for i in range(len(wlmoves)):
+                moves[2*i+1] = wlmoves[i]
+                moves[2*i+2] = wlmoves[i]
+                factor[2*i+1] = wlfactor[i]*2
+                factor[2*i+2] = wlfactor[i]
         colors.loglog(moves, factor,
                       'vanilla_wang_landau'
                          + wl[len("data/gamma/%s/wl" % filename):-4])

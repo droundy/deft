@@ -27,10 +27,11 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
     methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', 
-               '-sad-T13','-wl-50',
+               '-sad-T13','-wl-50','-wl-inv-t-50','-wl-inv-t-256',
                '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-sad-256-s5','-sad-256-s6','-wl-256']
     if transcale == 'slow':
-        methods = ['-sad3-slow','-sad-slow-T13','-wl-50-slow','-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
+        methods = ['-sad3-slow','-sad-slow-T13','-wl-50-slow','-wl-inv-t-50-slow',
+                   '-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
     if transcale == 'fast':
         methods = ['-sad3-fast','-tmmc-fast', '-vanilla_wang_landau-fast']
 
