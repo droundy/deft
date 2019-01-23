@@ -42,16 +42,11 @@ if method == 'Sad':
 else:
     dirname = 'data/gamma/n%s/%s.txt' % (N,filename)
     print 'saving to', dirname
-    moves = data['movies']['gamma_time']
-    gamma = data['movies']['gamma']
+    moves = np.asarray(data['movies']['gamma_time']).astype(np.float)
+    gamma = np.asarray(data['movies']['gamma']).astype(np.float)
     np.savetxt(dirname,
           np.c_[moves,gamma],
           fmt = ('%.16g'),
           delimiter = '\t',
           header = 'comparison reference file\t(generated with python %s \n moves\t gamma\t' % (' '.join(sys.argv)))
-    print "I don't know what method are you using?"
-
-
-
-
-
+#print "I don't know what method are you using?"

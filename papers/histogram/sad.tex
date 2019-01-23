@@ -55,16 +55,16 @@ benefit in that they are unlikely to be trapped in a low enetropy state.
 Wang and Landau introduced an algorithm that uses an update factor and
 a statistical histogram to compute the density of states of a given
 system~\cite{wang2001determining, wang2001efficient}.  While the method
-is incredibly powerful, it has several user-defined parameters.  This
-can make its application to a variety of systems something of an
-art-form since the user needs to determine the ideal parameters for the
-particular system being studied.  Also, detailed balance is violated
-(although only for short periods of time), ensuring that convergence is
-not guaranteed.  This raises several questions such as when the method
-does converge, what rate will the method converge to the correct
-density of states. Also, how can the user appropriately decide what
-parameters to choose so that the algorithm solves the problem in the
-most ideal way.
+is incredibly powerful, it has several user-defined
+parameters~\cite{landau2004new}.  This can make its application to a
+variety of systems something of an art-form since the user needs to
+determine the ideal parameters for the particular system being studied.
+Also, detailed balance is violated (although only for short periods of
+time), ensuring that convergence is not guaranteed.  This raises
+several questions such as when the method does converge, what rate will
+the method converge to the correct density of states. Also, how can the
+user appropriately decide what parameters to choose so that the
+algorithm solves the problem in the most ideal way.
 
 %Transition Matrix Monte Carlo~\cite{wang1999transition,
 %swendsen1999transition, fitzgerald2000monte} became an attractive
@@ -88,8 +88,6 @@ most ideal way.
 %several trial simulations and/or `experience' is used to determine the
 %best parameters for a users particular system of
 %study~\cite{siderius2013use}.
-\jpsays{I should look at some more 1/t-WL citations. I know a few more
-that probably should be included here...}
 Around the same time, the convergence rate for WL was being
 explored~\cite{zhou2005understanding,lee2006convergence,
 belardinelli2007wang}. It was found that utilizing modification factors
@@ -262,6 +260,31 @@ it does not in general converge to the true density of states
 $\gamma$ so quickly that it will never (for any cutoff value) decrease the
 error in the density of states beyond a given value.
 
+\subsection{1/t Wang-Landau}
+The Wang-Landau algorithm's error saturation can be corrected by
+modifying the update factor such that it does not decrease too quickly.
+Belardinelli and Pereyra raised the question as to whether the update
+factor should be decrease by $\nicefrac12$ or some other factor for
+each update~\cite{belardinelli2007fast}. They implemented a schedule
+that enforced if the update factor $\gamma$ is less than
+$\nicefrac{1}{t}$ then the update factor is modified by
+$\nicefrac{1}{t}$ and the histogram is no longer tracked. Employing
+this scheduler, they found that the error saturation is avoided since
+the correct density of states is approached asymptotically as
+$\nicefrac{1}{t}$~\cite{belardinelli2008analysis}. Zhou et. al further
+confirmed that the WL algorithm never converges exponentially and
+succesfully bounded the statistical error between
+$\nicefrac{1}{t^{1/2}}$ and $\nicefrac{1}{t}$~\cite{zhou2008optimal}.
+
+Schneider et. al outlines minor refinements to the 1/t WL algorithm
+including $\nicefrac{N_E}{t}$ scaling and switching from standard WL to
+1/t WL when the update factor $\gamma <
+\nicefrac{N_E}{t}$~\cite{schneider2017convergence}. As per the original
+1/t implementation~\cite{belardinelli2007fast}, all energy states $N_E$
+are required to be visited at least once $H(E) \neq 0$ effectively
+avoiding the concept of `flatness'.
+
+
 \subsection{SAMC}
 The Stochastic Approximation Monte Carlo (SAMC) algorithm addresses
 the lack of convergence of Wang-Landau's approach with a simple
@@ -302,9 +325,6 @@ Werlich \emph{et al.} proposed scaling the SAMC $\gamma_t$ by a factor
 $\gamma_0$.  While this may result in an improved rate of convergence,
 it adds yet another parameter that must be empirically determined, and
 we have not explored this degree of freedom.
-
-%This work proposes a means for dynamically setting the update factor
-%$\gamma_t$ that should robustly converge on a variety of systems.
 
 \subsection{SAMC Convergence}\label{sec:samc-convergence}
 The difficulty in using the SAMC method lies in identifying an appropriate
@@ -800,7 +820,7 @@ parameters makes SAD an ideal algorithm. SAD converges as quickly as
 SAMC (in the case of an ideally chosen $t_0$ for our simulations. SAD
 doesn't suffer from the weakness of SAMC, i.e. the user choosing
 parameters that could lead to the simulation not converging in a
-reasonable amount of time. 
+reasonable amount of time.
 %SAD also converges more quickly than Wl,
 %TMMC, and WL-TMMC.
 
