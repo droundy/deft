@@ -20,7 +20,7 @@ parser.add_argument('--dn', type=float,
 parser.add_argument('--dgw', type=float,
                     help='change in gw', default=0.01)
 parser.add_argument('--maxgw', type=float,
-                    help='max gw', default=0.15)
+                    help='max gw', default=0.2)
 
 parser.add_argument('--fv', metavar='vacancies', type=float,
                     help='fraction of vacancies - Default 0')
