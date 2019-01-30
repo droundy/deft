@@ -105,12 +105,53 @@ fit_c_gibbs = fit_cfe + invn*fit_p
 zoom_volume = 0.99
 plt.plot(fit_p, fit_c_gibbs - fit_p*zoom_volume, 'b:', label="fit crystal")
 
+
 # Solve for crossing point here:
-
-# for i in range(len(1,mid_c_gibbs)):
-#     for j in range(1,len(mid_h_gibbs)):
-#         if hpressure[j] > cpressure[i-1]:
-
+fit=0    #Yes=1, No=0
+#for i in range(18,len(mid_h_gibbs)-26):  #test
+for i in range(1,len(mid_h_gibbs)-1):
+#for i in range(4,len(mid_h_gibbs)-24):
+  P1_h=hpressure[i]
+  g1_h=mid_h_gibbs[i]
+  P2_h=hpressure[i+1]
+  g2_h=mid_h_gibbs[i+1]
+  m_h=(mid_h_gibbs[i+1]-mid_h_gibbs[i])/(hpressure[i+1]-hpressure[i])
+  print (m_h)
+  #print("P1_h=", P1_h, "g1_h=", g1_h, "    P2_h=", P2_h, "g2_h=", g2_h)
+  #for j in range(18,len(mid_c_gibbs)-24): #test
+  for j in range(1,len(mid_c_gibbs)-1):
+  #for j in range(i-3,i+3):
+    if fit==0 :
+        P1_c=cpressure[j]
+        g1_c=mid_c_gibbs[j]
+        P2_c=cpressure[j+1]
+        g2_c=mid_c_gibbs[j+1]
+        m_c=(mid_c_gibbs[j+1]-mid_c_gibbs[j])/(cpressure[j+1]-cpressure[j])
+    if fit==1 :
+        P1_c=fit_p[j]
+        g1_c=fit_c_gibbs[j]
+        P2_c=fit_p[j+1]
+        g2_c=fit_c_gibbs[j+1]
+        m_c=(fit_c_gibbs[j+1]-fit_c_gibbs[j])/(fit_p[j+1]-fit_p[j])   
+    #print("  P1_c=", P1_c, "g1_c=", g1_c, "    P2_c=", P2_c, "g2_c=", g2_c)
+    if m_h!=m_c :
+        P_inter=(g1_c - m_c*P1_c -g1_h + m_h*P1_h)/(m_h-m_c) 
+        #print ("  Possible P_intersect:", P_inter) 
+        if P_inter > P1_h :    
+            if P_inter < P2_h :
+                if P_inter > P1_c :
+                    if P_inter < P2_c :
+                        g_inter=m_h*P_inter+g1_h-m_h*P1_h
+                        g_interzoom=m_h*P_inter+g1_h-m_h*P1_h -P_inter*zoom_volume #matches display value
+                        if g_inter > g1_h :
+                            if g_inter < g2_h :
+                                if g_inter > g1_c :
+                                    if g_inter < g2_c :
+                                        print ("")
+                                        print ("Intersets at:", P_inter, g_inter, "(gzoom=", g_interzoom, ")", "fit=", fit)
+                                        print("For P1_h=", P1_h, "g1_h=", g1_h, "P2_h=", P2_h, "g2_h=", g2_h, "i=", i) 
+                                        print("and P1_c=", P1_c, "g1_c=", g1_c, "P2_c=", P2_c, "g2_c=", g2_c, "j=", j)
+ 
 
 plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'r.-', label="Homogeneous Free Energy/atom")
 plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'b.-', label="Crystal Free Energy/atom")
