@@ -81,6 +81,7 @@ struct weight {
   double n_3;
   vector3d nv_1;
   vector3d nv_2;
+  tensor3d nm_2;
 };
 
 static inline double density_gaussian(double r, double gwidth, double norm) {
@@ -110,6 +111,7 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
@@ -129,6 +131,7 @@ weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double 
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
@@ -161,7 +164,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
 
   const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; //round up! Number of infinitesimal lengths along one of the lattice_vectors
 
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
@@ -189,6 +192,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
 
           w_den_R.nv_1 += w.nv_1*n_rp*dVp;
           w_den_R.nv_2 += w.nv_2*n_rp*dVp;
+          w_den_R.nm_2 += w.nm_2*n_rp*dVp;
         }
       }
     }
@@ -200,7 +204,7 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
 weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
     double lattice_constant,
     double gwidth, double fv) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
@@ -217,6 +221,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
 
         w_den_R.nv_1 += .125*(1-fv)*w.nv_1;
         w_den_R.nv_2 += .125*(1-fv)*w.nv_2;
+        w_den_R.nm_2 += .125*(1-fv)*w.nm_2;
       }
     }
   }
@@ -226,7 +231,7 @@ weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, doub
 weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
                                    double lattice_constant,
                                    double gwidth, double fv) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return w_den_R;
   }
@@ -245,13 +250,14 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
 
     w_den_R.nv_1 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_1 + w2.nv_1);
     w_den_R.nv_2 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_2 + w2.nv_2);
+    w_den_R.nm_2 += (0.5/NUM_POINTS)*(1-fv)*(w.nm_2 + w2.nm_2);
   }
   return w_den_R;
 }
 
 weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
                                               double gwidth, double fv, double alpha, double Xi) {
-  weight n = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight n = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   double n3_sqr = 0;
 
   // On the following line, we include the ratio of gaussian peak
@@ -280,6 +286,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
 
       n.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
       n.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
+      n.nm_2 += 0.5*(1-fv)*(w.nm_2 + w2.nm_2);
     }
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
@@ -303,7 +310,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
 
 double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
       double gwidth, double fv, double alpha, double Xi) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   double n3_sqr = 0;
 
   // On the following line, we include the ratio of gaussian peak
@@ -330,6 +337,7 @@ double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
 
       w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
       w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
+      w_den_R.nm_2 += 0.5*(1-fv)*(w.nm_2 + w2.nm_2);
 
       n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
     }
@@ -348,7 +356,7 @@ double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
 
 long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ONLY
       double gwidth, double fv, double alpha, double Xi) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   double n3_sqr = 0;
 
   // On the following line, we include the ratio of gaussian peak
@@ -375,6 +383,7 @@ long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ON
 
       w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
       w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
+      w_den_R.nm_2 += 0.5*(1-fv)*(w.nm_2 + w2.nm_2);
 
       n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
     }
@@ -391,7 +400,7 @@ long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ON
 ///////////////////////////EXPERIMENT!!!///////////////////////////////
 weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
                                               double gwidth, double fv, double alpha, double Xi) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   printf("SIZE of Gaussian is 3*gwidth=%g\n", 3*gwidth);
   printf("SIZE of weight function is 2*Xi*sqrt(1/2) + alpha/2=%g\n", 2*Xi*sqrt(1/2) + alpha/2);
   double n3_sqr = 0;
@@ -448,6 +457,7 @@ weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
 
       w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
       w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
+      w_den_R.nm_2 += 0.5*(1-fv)*(w.nm_2 + w2.nm_2);
 
       n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
     }
@@ -479,10 +489,10 @@ weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
 weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
     double lattice_constant,
     double gwidth, double fv) {
-  weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
-  weight avg_w = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
+  weight avg_w = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
-    return {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+    return {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   }
 
   for (long i=0; i<NUM_POINTS; i++) {
@@ -506,7 +516,7 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
   }
 
   // Compute total w variance = average of squared weight - square of average weight
-  weight n_var = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};
+  weight n_var = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   n_var.n_0 = (1-fv)*(avg_w_sqr.n_0 - sqr(avg_w.n_0))/NUM_POINTS;
   n_var.n_1 = (1-fv)*(avg_w_sqr.n_1 - sqr(avg_w.n_1))/NUM_POINTS;
   n_var.n_2 = (1-fv)*(avg_w_sqr.n_2 - sqr(avg_w.n_2))/NUM_POINTS;
@@ -657,7 +667,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
-        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0)};  //CHECK! Initialize here?
+        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};  //CHECK! Initialize here?
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {

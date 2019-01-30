@@ -39,6 +39,7 @@ private:
   static Rand my_rand;
 };
 
+class tensor3d;
 class vector3d {
  public:
   double x;
@@ -111,6 +112,7 @@ class vector3d {
     return x*v.x + y*v.y + z*v.z; }
   vector3d cross(const vector3d &v) const {
     return vector3d(y*v.z - z*v.y, z*v.x - x*v.z, x*v.y - y*v.x); }
+  tensor3d outer(const vector3d &v) const;
 
   double norm() const {
     return sqrt(x*x + y*y + z*z); }
@@ -336,3 +338,109 @@ class quaternion {
 
 inline quaternion operator*(const double scalar, const quaternion &q) {
   return q*scalar; }
+
+class tensor3d {
+ public:
+  vector3d x;
+  vector3d y;
+  vector3d z;
+
+  tensor3d() {
+    x=vector3d(0,0,0); y=vector3d(0,0,0); z=vector3d(0,0,0);
+  }
+
+ tensor3d(const tensor3d &v) {
+    x = v.x; y = v.y; z = v.z;
+  }
+
+  tensor3d(vector3d newx, vector3d newy, vector3d newz) {
+    x = newx; y = newy; z = newz;
+  }
+  tensor3d operator=(const tensor3d &v) {
+    x = v.x; y = v.y; z = v.z;
+    return *this;
+  }
+
+  tensor3d operator-() const {
+    return tensor3d(-x, -y, -z);
+  }
+
+  tensor3d operator+(const tensor3d &v) const {
+    return tensor3d(x+v.x, y+v.y, z+v.z); }
+  tensor3d operator+=(const tensor3d &v) {
+    x += v.x; y += v.y; z += v.z;
+    return *this;
+  }
+
+  tensor3d operator-(const tensor3d &v) const {
+    return tensor3d(x-v.x, y-v.y, z-v.z);
+  }
+  tensor3d operator-=(const tensor3d &v) {
+    x -= v.x; y -= v.y; z -= v.z;
+    return *this;
+  }
+
+  tensor3d operator*(const double scalar) const {
+    return tensor3d(scalar*x, scalar*y, scalar*z);
+  }
+  tensor3d operator*=(const double scalar) {
+    x *= scalar; y *= scalar; z *= scalar;
+    return *this;
+  }
+
+  tensor3d operator/(const double scalar) const {
+    return tensor3d(x/scalar, y/scalar, z/scalar);
+  }
+  tensor3d operator/=(const double scalar) {
+    x /= scalar; y /= scalar; z /= scalar;
+    return *this;
+  }
+
+  bool operator ==(const tensor3d &v) const {
+    return x == v.x && y == v.y && z == v.z;
+  }
+  bool operator !=(const tensor3d &v) const {
+    return !(*this == v);
+  }
+
+  vector3d &operator[](const unsigned int i) {
+    switch(i) {
+    case 0: return x;
+    case 1: return y;
+    case 2: return z;
+    }
+    assert(0);
+  }
+  vector3d operator[](const unsigned int i) const {
+    switch(i) {
+    case 0: return x;
+    case 1: return y;
+    case 2: return z;
+    }
+    assert(0);
+  }
+
+  vector3d dot(const vector3d &v) const {
+    return x*v.x + y*v.y + z*v.z;
+  }
+
+  double determinant() const {
+    return x.x*y.y*z.z + x.y*y.z*z.x + x.z*y.x*z.y
+      - x.y*y.x*z.z - x.z*y.y*z.x - x.x*y.z*z.y;
+  }
+};
+
+inline tensor3d operator*(const double scalar, const tensor3d &v) {
+  return v*scalar;
+}
+
+inline tensor3d vector3d::outer(const vector3d &v) const {
+  return tensor3d((*this)*v.x, (*this)*v.x, (*this)*v.z);
+}
+
+inline tensor3d identity_tensor() {
+  return tensor3d(vector3d(1,0,0), vector3d(0,1,0), vector3d(0,0,1));
+}
+inline tensor3d zero_tensor() {
+  return tensor3d(vector3d(0,0,0), vector3d(0,0,0), vector3d(0,0,0));
+}
