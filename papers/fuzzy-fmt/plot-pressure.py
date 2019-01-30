@@ -105,48 +105,29 @@ fit_c_gibbs = fit_cfe + invn*fit_p
 zoom_volume = 0.99
 plt.plot(fit_p, fit_c_gibbs - fit_p*zoom_volume, 'b:', label="fit crystal")
 
+def find_first_intersection(p1, g1, p2, g2):
+    for i in range(1,len(g1)-1):
+        m1=(g1[i+1]-g1[i])/(p1[i+1]-p1[i])
+        print (m1)
+        for j in range(1,len(g2)-1):
+            m2=(g2[j+1]-g2[j])/(p2[j+1]-p2[j])
+            if m1!=m2 :
+                P_inter=(g2[j] - m2*p2[j] -g1[i] + m1*p1[i])/(m1-m2)
+                if p1[i] < P_inter < p1[i+1] and p2[j] < P_inter < p2[j+1]:
+                    g_inter=m1*P_inter+g1[i]-m1*p1[i]
+                    if g1[i] < g_inter < g1[i+1] and g2[j] < g_inter < g2[j+1] :
+                        # print ("")
+                        # print ("Intersects at:", P_inter, g_inter)
+                        # print("For p1[i]=", p1[i], "g1[i]=", g1[i], "p1[i+1]=", p1[i+1],
+                        #       "g1[i+1]=", g1[i+1], "i=", i)
+                        # print("and p2[j]=", p2[j], "g2[j]=", g2[j], "p2[j+1]=", p2[j+1],
+                        #       "g2[j+1]=", g2[j+1], "j=", j)
+                        return P_inter, g_inter
 
-# Solve for crossing point here:
-fit=0    #Yes=1, No=0
-#for i in range(18,len(mid_h_gibbs)-26):  #test
-for i in range(1,len(mid_h_gibbs)-1):
-#for i in range(4,len(mid_h_gibbs)-24):
-  P1_h=hpressure[i]
-  g1_h=mid_h_gibbs[i]
-  P2_h=hpressure[i+1]
-  g2_h=mid_h_gibbs[i+1]
-  m_h=(mid_h_gibbs[i+1]-mid_h_gibbs[i])/(hpressure[i+1]-hpressure[i])
-  print (m_h)
-  #print("P1_h=", P1_h, "g1_h=", g1_h, "    P2_h=", P2_h, "g2_h=", g2_h)
-  #for j in range(18,len(mid_c_gibbs)-24): #test
-  for j in range(1,len(mid_c_gibbs)-1):
-  #for j in range(i-3,i+3):
-    if fit==0 :
-        P1_c=cpressure[j]
-        g1_c=mid_c_gibbs[j]
-        P2_c=cpressure[j+1]
-        g2_c=mid_c_gibbs[j+1]
-        m_c=(mid_c_gibbs[j+1]-mid_c_gibbs[j])/(cpressure[j+1]-cpressure[j])
-    if fit==1 :
-        P1_c=fit_p[j]
-        g1_c=fit_c_gibbs[j]
-        P2_c=fit_p[j+1]
-        g2_c=fit_c_gibbs[j+1]
-        m_c=(fit_c_gibbs[j+1]-fit_c_gibbs[j])/(fit_p[j+1]-fit_p[j])   
-    #print("  P1_c=", P1_c, "g1_c=", g1_c, "    P2_c=", P2_c, "g2_c=", g2_c)
-    if m_h!=m_c :
-        P_inter=(g1_c - m_c*P1_c -g1_h + m_h*P1_h)/(m_h-m_c) 
-        #print ("  Possible P_intersect:", P_inter) 
-        if P1_h < P_inter < P2_h and P1_c < P_inter < P2_c:
-            g_inter=m_h*P_inter+g1_h-m_h*P1_h
-            g_interzoom=m_h*P_inter+g1_h-m_h*P1_h -P_inter*zoom_volume #matches display value
-            if g1_h < g_inter < g2_h and g1_c < g_inter < g2_c :
-                print ("")
-                print ("Intersects at:", P_inter, g_inter, "(gzoom=", g_interzoom, ")", "fit=", fit)
-                print("For P1_h=", P1_h, "g1_h=", g1_h, "P2_h=", P2_h, "g2_h=", g2_h, "i=", i) 
-                print("and P1_c=", P1_c, "g1_c=", g1_c, "P2_c=", P2_c, "g2_c=", g2_c, "j=", j)
-                plt.plot(P_inter, g_inter - P_inter*zoom_volume, 'o', markersize=20)
- 
+p_inter, g_inter = find_first_intersection(hpressure, mid_h_gibbs, cpressure, mid_c_gibbs)
+plt.plot(p_inter, g_inter - p_inter*zoom_volume, 'o', markersize=10)
+pf_inter, gf_inter = find_first_intersection(hpressure, mid_h_gibbs, fit_p, fit_c_gibbs)
+plt.plot(pf_inter, gf_inter - pf_inter*zoom_volume, 'o', markersize=10)
 
 plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'r.-', label="Homogeneous Free Energy/atom")
 plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'b.-', label="Crystal Free Energy/atom")
