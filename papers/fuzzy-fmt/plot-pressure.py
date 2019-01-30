@@ -137,20 +137,15 @@ for i in range(1,len(mid_h_gibbs)-1):
     if m_h!=m_c :
         P_inter=(g1_c - m_c*P1_c -g1_h + m_h*P1_h)/(m_h-m_c) 
         #print ("  Possible P_intersect:", P_inter) 
-        if P_inter > P1_h :    
-            if P_inter < P2_h :
-                if P_inter > P1_c :
-                    if P_inter < P2_c :
-                        g_inter=m_h*P_inter+g1_h-m_h*P1_h
-                        g_interzoom=m_h*P_inter+g1_h-m_h*P1_h -P_inter*zoom_volume #matches display value
-                        if g_inter > g1_h :
-                            if g_inter < g2_h :
-                                if g_inter > g1_c :
-                                    if g_inter < g2_c :
-                                        print ("")
-                                        print ("Intersets at:", P_inter, g_inter, "(gzoom=", g_interzoom, ")", "fit=", fit)
-                                        print("For P1_h=", P1_h, "g1_h=", g1_h, "P2_h=", P2_h, "g2_h=", g2_h, "i=", i) 
-                                        print("and P1_c=", P1_c, "g1_c=", g1_c, "P2_c=", P2_c, "g2_c=", g2_c, "j=", j)
+        if P1_h < P_inter < P2_h and P1_c < P_inter < P2_c:
+            g_inter=m_h*P_inter+g1_h-m_h*P1_h
+            g_interzoom=m_h*P_inter+g1_h-m_h*P1_h -P_inter*zoom_volume #matches display value
+            if g1_h < g_inter < g2_h and g1_c < g_inter < g2_c :
+                print ("")
+                print ("Intersects at:", P_inter, g_inter, "(gzoom=", g_interzoom, ")", "fit=", fit)
+                print("For P1_h=", P1_h, "g1_h=", g1_h, "P2_h=", P2_h, "g2_h=", g2_h, "i=", i) 
+                print("and P1_c=", P1_c, "g1_c=", g1_c, "P2_c=", P2_c, "g2_c=", g2_c, "j=", j)
+                plt.plot(P_inter, g_inter - P_inter*zoom_volume, 'o', markersize=20)
  
 
 plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'r.-', label="Homogeneous Free Energy/atom")
