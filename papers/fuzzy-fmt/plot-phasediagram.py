@@ -28,11 +28,11 @@ P=thisdata[:,1]
 
 
 #Temperature vs Density Phase Diagram
-plt.plot(n_homogeneous, kT,  '.-', label='liquid', color='red')
-plt.plot(n_crystal, kT,  '.-', label='solid', color='blue')
-#plt.fill_betweenx(kT, 0, n_homogeneous, color='red')  
-#plt.fill_betweenx(kT, n_homogeneous, n_crystal, color='gray') 
-#plt.fill_betweenx(kT, n_crystal, 1.5, color='blue')  
+plt.plot(n_homogeneous, kT, label='liquid', color='red')
+plt.plot(n_crystal, kT, label='solid', color='blue')
+plt.fill_betweenx(kT, 0, n_homogeneous, color='red')  
+plt.fill_betweenx(kT, n_homogeneous, n_crystal, color='gray') 
+plt.fill_betweenx(kT, n_crystal, 1.1, color='blue')  
 plt.title("Temperature vs Density")
 plt.legend(loc='best')
 plt.xlabel('Density')
