@@ -21,6 +21,8 @@ parser.add_argument('--dgw', type=float,
                     help='change in gw', default=0.01)
 parser.add_argument('--maxgw', type=float,
                     help='max gw', default=0.2)
+parser.add_argument('--mingw', type=float,
+                    help='min gw', default=0.01)
 
 parser.add_argument('--fv', metavar='vacancies', type=float,
                     help='fraction of vacancies - Default 0')
@@ -42,6 +44,31 @@ parser.add_argument('--tar', metavar='tarazona', type=str,
 args=parser.parse_args()
 
 kT=args.kT
+
+if args.dn:
+    dn=args.dn
+else :
+    dn=0.01
+
+if args.dgw:
+    dgw=args.dgw
+else :
+    dgw=0.01
+
+#if args.tar:          #this doesn't work, don't know why
+#    maxgwdef=0.3
+#else :
+#    maxgwdef=0.2
+
+if args.maxgw:
+    maxgw=args.maxgw
+else :
+    maxgw=0.2  #   maxgw=maxgwdef
+    
+if args.mingw:
+    mingw=args.mingw
+else :
+    mingw=0.01
 
 if args.fv:
     fv=args.fv
@@ -74,10 +101,10 @@ else :
     datafile='FE_vs_gw'
     
 if args.tar:    
-    for n in np.arange(args.nmin, args.nmax, args.dn):
+    for n in np.arange(args.nmin, args.nmax, dn):
         cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
         cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
-        cmd += ' --gwstart=%g --gwend %g --gwstep %g' % (args.dgw, args.maxgw, args.dgw)
+        cmd += ' --gwstart %g --gwend %g --gwstep %g' % (mingw, maxgw, dgw)
         cmd += ' --fv %g --dx %g' % (fv, dx)
         cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
         cmd += ' --filename isotherm-kT-%g.dat' % kT
@@ -85,13 +112,12 @@ if args.tar:
         print(cmd)
         os.system(cmd)
 else :
-    for n in np.arange(args.nmin, args.nmax, args.dn):
+    for n in np.arange(args.nmin, args.nmax, dn):
         cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
         cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
-        cmd += ' --gwstart=%g --gwend %g --gwstep %g' % (args.dgw, args.maxgw, args.dgw)
+        cmd += ' --gwstart %g --gwend %g --gwstep %g' % (mingw, maxgw, dgw)
         cmd += ' --fv %g --dx %g' % (fv, dx)
         cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
         cmd += ' --filename isotherm-kT-%g.dat' % kT
         print(cmd)
         os.system(cmd)
-
