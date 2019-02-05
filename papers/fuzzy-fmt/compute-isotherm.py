@@ -36,6 +36,8 @@ parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
 parser.add_argument('--datafile', metavar='addtoname', type=str,
                     help='added to name of data file - Default "FE_vs_gw"')
+parser.add_argument('--tar', metavar='tarazona', type=str,
+                    help='run with tarazona tensor - Default no')
 
 args=parser.parse_args()
 
@@ -70,16 +72,26 @@ if args.datafile:
     datafile='FE_vs_gw_'+args.filedat
 else :
     datafile='FE_vs_gw'
-
-for n in np.arange(args.nmin, args.nmax, args.dn):
-    cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
-    cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
-    cmd += ' --gwstart=%g --gwend %g --gwstep %g' % (args.dgw, args.maxgw, args.dgw)
-    cmd += ' --fv %g --dx %g' % (fv, dx)
-    cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
-    cmd += ' --filename isotherm-kT-%g.dat' % kT
-    print(cmd)
-    os.system(cmd)
-
-
+    
+if args.tar:    
+    for n in np.arange(args.nmin, args.nmax, args.dn):
+        cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
+        cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
+        cmd += ' --gwstart=%g --gwend %g --gwstep %g' % (args.dgw, args.maxgw, args.dgw)
+        cmd += ' --fv %g --dx %g' % (fv, dx)
+        cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
+        cmd += ' --filename isotherm-kT-%g.dat' % kT
+        cmd += ' --tar'
+        print(cmd)
+        os.system(cmd)
+else :
+    for n in np.arange(args.nmin, args.nmax, args.dn):
+        cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
+        cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
+        cmd += ' --gwstart=%g --gwend %g --gwstep %g' % (args.dgw, args.maxgw, args.dgw)
+        cmd += ' --fv %g --dx %g' % (fv, dx)
+        cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
+        cmd += ' --filename isotherm-kT-%g.dat' % kT
+        print(cmd)
+        os.system(cmd)
 

@@ -1,3 +1,3 @@
-# git  version: 0.0.0-2324-gba2e6d353-dirty
-#kT	n	fv	gwidth	hFE/atom	cFE/atom	FEdiff/atom	lat_const	Nsph	dx	mcconstant	mcprefactor	mcerror	mcseed	time(h)
-1	0.99	0	0.13	-7.12133	-7.08348	      0.0378585		1.59273		1	0.5	5	50000	0.001	1	0.00894268
+# git  version: 0.0.0-2372-g688506e3c-dirty
+#kT	n	fv	gwidth	hFE/atom	cFE/atom	FEdiff/atom	lat_const	Nsph	dx	mcconstant	mcprefactor	mcerror	mcseed	time(h)	tarazona
+1	0.99	0	0.13	-7.12133	-7.08348	      0.0378585		1.59273		1	0.5	5	50000	0.001	1	0.00983154	0

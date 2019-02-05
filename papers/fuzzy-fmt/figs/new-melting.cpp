@@ -32,6 +32,7 @@ double seed=1;
 long mc_prefactor=50000;
 long mc_constant=100;
 int my_experiment =0;   //set to 1 to run my experiment
+bool tarazona=false;
 
 char *free_energy_output_file = 0;
 
@@ -118,6 +119,7 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
     w.n_1=0;
     w.nv_1 = vector3d(0,0,0);
     w.nv_2 = vector3d(0,0,0);
+    w.nm_2=zero_tensor();
   }
   return w;
 }
@@ -138,6 +140,7 @@ weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double 
     w.n_1=0;
     w.nv_1 = vector3d(0,0,0);
     w.nv_2 = vector3d(0,0,0);
+    w.nm_2=zero_tensor();
   }
   return w;
 }
@@ -301,6 +304,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   n.n_3 /= num_points;
   n.nv_1 /= num_points;
   n.nv_2 /= num_points;
+  n.nm_2 /= num_points;
   return n;
 }
 
@@ -473,6 +477,7 @@ weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
   w_den_R.n_3 /= num_points + num_zeroterms;    //Added terms where weight function is zero but the Gaussian is not!
   w_den_R.nv_1 /= num_points + num_zeroterms;   //Added terms where weight function is zero but the Gaussian is not!
   w_den_R.nv_2 /= num_points + num_zeroterms;   //Added terms where weight function is zero but the Gaussian is not!
+  w_den_R.nm_2 /= num_points + num_zeroterms;   //Added terms where weight function is zero but the Gaussian is not!
   //vector3d rdiff=r-R;
   //printf("Total num_points is %li for |r-R|=%g\n", num_points, rdiff.norm()); 
   printf("vec_count=%i\n", vec_count); 
@@ -667,7 +672,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
-        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};  //CHECK! Initialize here?
+        tensor3d nm_2;
+        nm_2.x.x=0, nm_2.x.y=0, nm_2.x.z=0, nm_2.y.x=0, nm_2.y.y=0, nm_2.y.z=0, nm_2.z.x=0, nm_2.z.y=0, nm_2.z.z=0;
+        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()}; 
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -696,6 +703,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
                 nv_1 +=n_weight.nv_1;
                 nv_2 +=n_weight.nv_2;
+                nm_2 += n_weight.nm_2;
               }
             }
           }
@@ -703,12 +711,36 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
         double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
+        double phi_3;
+        if (tarazona) {
+          //double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
+          //                              nm_2.y.y*nm_2.y.y +
+          //                              nm_2.z.z*nm_2.z.z +
+          //                            2*nm_2.x.y*nm_2.y.x +
+          //                            2*nm_2.x.z*nm_2.z.x +                               
+          //                            2*nm_2.y.z+nm_2.z.y;  
 
-        // The following was Rosenfelds early vector version of the functional
-        //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
-
-        // This is the fixed version, which comes from dimensional crossover
-        double phi_3 = uipow(n_2,3)*uipow(1.0 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1.0-1.0*n_3,2));  //CHECK THIS!
+         // double traceof_nm_2cubed  =   nm_2.x.x*nm_2.x.x*nm_2.x.x +
+         //                               nm_2.y.y*nm_2.y.y*nm_2.y.y +
+         //                               nm_2.z.z*nm_2.z.z*nm_2.z.z +
+                                    //3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
+                                    //3*nm_2.x.x*nm_2.x.z*nm_2.z.x +                               
+                                    //3*nm_2.x.y*nm_2.y.y+nm_2.y.x +                              
+                                    //3*nm_2.x.y*nm_2.y.z+nm_2.z.x +                              
+                                    //3*nm_2.x.z*nm_2.z.y+nm_2.y.x +
+                                    //3*nm_2.x.z*nm_2.z.z+nm_2.z.x +
+                                    //3*nm_2.y.y*nm_2.y.z+nm_2.z.y +
+                                    //3*nm_2.y.z*nm_2.z.z+nm_2.z.y;
+                                      
+          phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3*nm_2.determinant()))/(24*M_PI*uipow(1.0-1.0*n_3,2)); //Schmidt
+          //phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + 9*(nv_2.dot(nm_2.dot(nv_2))-(traceof_nm_2cubed/2.0)))/(24*M_PI*uipow(1.0-1.0*n_3,2));      //Tensor version FMF2? (Evans)            
+          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2)-traceof_nm_2cubed+n_2*n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));  //Tensor version FMF3 (Sweatman)
+        } else {
+          // The following was Rosenfelds early vector version of the functional
+          //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
+          // This is the fixed version, which comes from dimensional crossover
+          phi_3 = uipow(n_2,3)*uipow(1.0 - nv_2.normsquared()/sqr(n_2),3)/(24*M_PI*uipow(1.0-1.0*n_3,2)); 
+        }
         if (n_2 == 0 || sqr(n_2) <= nv_2.normsquared()) phi_3 = 0;
         if (n_0 < 1e-5*reduced_density && n_3 >= 1 && n_3 < 1 + 1e-14) {
           // This is a case where the prefactor on each of our free
@@ -861,19 +893,23 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     char *alldat_filedescriptor = new char[1024];
     sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
             temp, reduced_density, fv, gwidth);
-    sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
+    if (tarazona)  {
+      sprintf(alldat_filename, "%s/%s-alldat_tara.dat", data_dir, alldat_filedescriptor);
+    } else {
+      sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
+    }
     printf("Create data file: %s\n", alldat_filename);
 
     //Create dataout file
     FILE *newmeltoutfile = fopen(alldat_filename, "w");
     if (newmeltoutfile) {
       fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
-      fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcconstant\tmcprefactor\tmcerror\tmcseed\ttime(h)\n");
-      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t      %g\t\t%g\t\t%g\t%g\t%li\t%li\t%g\t%g\t%g\n",
+      fprintf(newmeltoutfile, "#kT\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\tmcconstant\tmcprefactor\tmcerror\tmcseed\ttime(h)\ttarazona\n");
+      fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t      %g\t\t%g\t\t%g\t%g\t%li\t%li\t%g\t%g\t%g\t%d\n",
               temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
               cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
               lattice_constant, reduced_num_spheres, dx_input, mc_constant, mc_prefactor, MC_ERROR, seed,
-              run_time/60/60);
+              run_time/60/60, tarazona);
       fclose(newmeltoutfile);
     } else {
       printf("Unable to open file %s!\n", alldat_filename);
@@ -886,8 +922,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   if (free_energy_output_file) {
     FILE *f = fopen(free_energy_output_file, "a");
     fprintf(f, "\n# git  version: %s\n", version_identifier());
-    fprintf(f, "#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\t\tFEdiff\t\tmean_n3\t\t\trelerr\t\t\tmc_con\tmc_pf\tgw\t\tfv\tkT\tn\tseed\tmin\n");
-    fprintf(f, "%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t\t%ld\t%ld\t%g\t%g\t%g\t%g\t%g\t%g\n",
+    fprintf(f, "#dx\tmc-error\tphi1\tphi2\tphi3\tFtot\tFideal\t\t\tFEdiff\t\tmean_n3\t\t\trelerr\t\t\tmc_con\tmc_pf\tgw\t\tfv\tkT\tn\tseed\tmin\ttarazona\n");
+    fprintf(f, "%g\t%g\t\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t\t%ld\t%ld\t%g\t%g\t%g\t%g\t%g\t%g\t%d\n",
             dx_input,
             MC_ERROR,
             total_phi_1/primitive_cell_volume,
@@ -905,7 +941,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             temp,
             reduced_density,
             seed,
-            run_time/60);
+            run_time/60,
+            tarazona);
     fclose(f);
   }
   if (my_experiment > 0) {
@@ -1486,6 +1523,9 @@ int main(int argc, const char **argv) {
     
     {"mc-prefactor", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_prefactor, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
     {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
+    
+    /*** Tarazona Tensor OPTION ***/
+    {"tar", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &tarazona, 0, "Include Tarazona Tensor weight in SFMT", "BOOLEAN"},
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     // Where to save the free energy info
@@ -1703,18 +1743,22 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
-
+    if (tarazona)  {
+      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tara.dat", data_dir, temp, reduced_density);
+    } else {
+      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
+    }
+    
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
      
-      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\n", temp, reduced_density, best_fv, best_gwidth,
+      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttarazona\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor);    //Nsph=1-fv for parallepiped
+              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, tarazona);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -1750,17 +1794,21 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
-
+    if (tarazona) {
+      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tara.dat", data_dir, temp, reduced_density);
+    } else {
+      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
+    }
+      
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());      
-      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\n", temp, reduced_density, best_fv, best_gwidth,
+      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttarazona\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor);    //Nsph=1-fv for parallepiped
+              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, tarazona);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
