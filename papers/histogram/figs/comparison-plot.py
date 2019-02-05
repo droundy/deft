@@ -26,11 +26,11 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau','-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', 
-               '-sad-T13','-wl-50','-wl-inv-t-50','-wl-inv-t-256',
-               '-vanilla_wang_landau-T13','samc-500-1e5','-sad-256','-sad-256-s5','-sad-256-s6','-wl-256']
+    methods = ['-sad3','-wl-50','-wl-inv-t-50','-wl-inv-t-256','-sad-50',
+               '-sad-256','-wl-256']
+    # methods = [m+s for m in methods for s in '', '-s1', '-s2', '-s3', '-s4']
     if transcale == 'slow':
-        methods = ['-sad3-slow','-sad-slow-T13','-wl-50-slow','-wl-inv-t-50-slow',
+        methods = ['-sad3-slow','-sad-slow-T13','-wl-50-slow','-wl-inv-t-50-slow','-sad-50-slow',
                    '-tmmc-slow', '-vanilla_wang_landau-slow','-vanilla_wang_landau-T13-slow','-sad3-T13-slow']
     if transcale == 'fast':
         methods = ['-sad3-fast','-tmmc-fast', '-vanilla_wang_landau-fast']
@@ -53,7 +53,7 @@ for meth in split2:
 # For SAMC compatibility with LVMC
 lvextra1 = glob('data/comparison/%s-samc*' % filebase)
 split3 = [i.split('%s-'%filebase, 1)[-1] for i in lvextra1]
-split4 = [i.split('-m', 1)[0] for i in split3]
+split4 = [i for i in split3 if i[-3:-1] != '-s']
 
 for meth in split4:
     if "default" in transcale:
@@ -80,7 +80,10 @@ for method in methods:
 
         if energy > 0:
                 Nrt_at_energy, erroratenergy = np.loadtxt(dirname + 'energy-%s.txt' % energy, delimiter = '\t', unpack = True)
-        iterations, errorinentropy, maxerror = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
+        data = np.loadtxt(dirname + 'errors.txt', delimiter = '\t', unpack = True)
+        iterations = data[0]
+        errorinentropy = data[1]
+        maxerror = data[2]
         best_ever_max = min(best_ever_max, maxerror.min())
 
         #try:
@@ -164,6 +167,13 @@ for method in methods:
 
         if type(iterations) is not np.float64:
                 plt.figure('errorinentropy')
+                if data.shape[0] > 4:
+                    minmean = data[3]
+                    maxmean = data[4]
+                    plt.fill_between(moves, minmean, maxmean,
+                                     edgecolor='none', linewidth=0,
+                                        color=colors.color(method[1:]),
+                                        alpha=0.1, zorder=-51)
                 my_S_error = errorinentropy[0:len(iterations)]
                 min_error = min(min_error, my_S_error[my_S_error > 0].min())
                 colors.loglog(moves, my_S_error, method = method[1:])
@@ -188,8 +198,8 @@ plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
 plt.figure('errorinentropy')
 moves = np.array([1e5, 4e12])
 #colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
-for i in np.arange(-8, 9, 1.0):
-    colors.loglog(moves, 10**i*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
+for i in np.arange(-8, 19, 1.0):
+    colors.loglog(moves, 10**i/np.sqrt(0.1*moves), method = r'1/sqrt(t)')
 plt.xlim(moves[0], moves[1])
 if filebase == 's000/periodic-ww1.30-ff0.30-N50':
     plt.ylim(1e-3, 1e1)
