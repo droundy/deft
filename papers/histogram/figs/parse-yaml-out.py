@@ -10,6 +10,13 @@ import yaml
 
 filename = sys.argv[1]
 N = sys.argv[2] # the number of atoms.
+savename = 'None';
+
+if len(sys.argv) == 4:
+  savename = sys.argv[3] # optional name of file when saving
+elif len(sys.argv) > 4:
+  print "Exiting program! Provide 4 or fewer arguments."
+  exit(0)
 
 f = '%s.yaml' % (filename)
 filename = filename.split('/')[-1]
@@ -25,6 +32,9 @@ method = str(lst).replace("{","").replace("}", "")
 method = method.replace(':', ',').split(',')[0]
 method = method.replace("'", '')
 print 'the Monte-Carlo method is ', method
+
+if savename != 'None':
+  filename = savename
 
 if method == 'Sad':
     dirname = 'data/gamma/n%s/%s.dat' % (N,filename)
