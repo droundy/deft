@@ -55,12 +55,12 @@ dependent~\cite{rowlinson1964statistical, barker1967perturbation,
   andersen1971relationship}.  These works cemented the hard-sphere
 model as the reference system of choice for the theory of
 liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate}.  The hard-sphere fluid hard sphere fluid is
+  lafitte2013accurate}.  The hard-sphere fluid is
 widely studied and well understood, not only for the homogeneous
 fluid~\cite{carnahan1969equation}, but also in the more challenging
 case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
   roth2002whitebear}.  However, the hard-sphere fluid remains a
-non-physical model, which can also be numerically inconvenient due its
+non-physical model, which can also be numerically inconvenient due to its
 discontinuous potential, and the requirement for delta functions in
 computing weighted densities.
 
@@ -102,7 +102,7 @@ pair potential is given by
 \end{align}
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
-2^{5/6} R$. In this paper we will used the dimensionless reduced
+2^{5/6} R$. In this paper we will use the dimensionless reduced
 density $n^* \equiv n \sigma^3$ and reduced temperature $T^* \equiv
 k_BT/\epsilon$.
 
@@ -120,7 +120,7 @@ A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 with integrands
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
-\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1} \cdot\mathbf{n}_{V2}}{1-n_3} \\
+\Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\mbox{~\scriptsize\textbullet~}\mathbf{n}_{V2}}{1-n_3} \\
 \Phi_3 &= \frac{n_2^3 - 3
   n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{24\pi(1-n_3)^2} \text{FIXME FIXME FIXME}
 \label{eq:sfmt-phi3}

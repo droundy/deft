@@ -1,4 +1,7 @@
 #!/usr/bin/python2
+#NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
+#with comand ./plot-isotherm.py --kT [temp] --tar [optional]
+
 from __future__ import print_function, division
 
 import numpy as np
@@ -12,6 +15,9 @@ parser = argparse.ArgumentParser(description='Creates data for a FE vs gw plot.'
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 
+parser.add_argument('--tar', metavar='tarazona', type=float,
+                    help='--tar 1 for use tarazona tensor')
+
 args=parser.parse_args()
 
 kT=args.kT
@@ -20,7 +26,10 @@ n = []
 gw = []
 fe_difference = []
 
-files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
+if args.tar :
+    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tara.dat' % kT)))    
+else :
+    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
 for f in files:
     data = np.loadtxt(f)
     n.append(data[1])
