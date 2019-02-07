@@ -260,27 +260,27 @@ it does not in general converge to the true density of states
 $\gamma$ so quickly that it will never (for any cutoff value) decrease the
 error in the density of states beyond a given value.
 
-\subsection{1/t Wang-Landau}
+\subsection{$1/t$ Wang-Landau}
 The Wang-Landau algorithm's error saturation can be corrected by
 modifying the update factor such that it does not decrease too quickly.
 Belardinelli and Pereyra raised the question as to whether the update
 factor should be decrease by $\nicefrac12$ or some other factor for
 each update~\cite{belardinelli2007fast}. They implemented a schedule
 that enforced if the update factor $\gamma$ is less than
-$\nicefrac{1}{t}$ then the update factor is modified by
-$\nicefrac{1}{t}$ and the histogram is no longer tracked. Employing
+$\nicefrac{N_S}{t}$ then the update factor is set to
+$\nicefrac{N_S}{t}$ and the histogram is no longer tracked. Employing
 this scheduler, they found that the error saturation is avoided since
 the correct density of states is approached asymptotically as
-$\nicefrac{1}{t}$~\cite{belardinelli2008analysis}. Zhou et. al further
+$t^{-\frac12}$~\cite{belardinelli2008analysis}. Zhou et. al further
 confirmed that the WL algorithm never converges exponentially and
 succesfully bounded the statistical error between
-$\nicefrac{1}{t^{1/2}}$ and $\nicefrac{1}{t}$~\cite{zhou2008optimal}.
+$t^{-\frac12}$ and $\nicefrac{1}{t}$~\cite{zhou2008optimal}.
 
-Schneider et. al outlines minor refinements to the 1/t WL algorithm
+Schneider et. al outlines minor refinements to the $1/t$ WL algorithm
 including $\nicefrac{N_E}{t}$ scaling and switching from standard WL to
-1/t WL when the update factor $\gamma <
+$1/t$ WL when the update factor $\gamma <
 \nicefrac{N_E}{t}$~\cite{schneider2017convergence}. As per the original
-1/t implementation~\cite{belardinelli2007fast}, all energy states $N_E$
+$1/t$ implementation~\cite{belardinelli2007fast}, all energy states $N_E$
 are required to be visited at least once $H(E) \neq 0$ effectively
 avoiding the concept of `flatness'.
 

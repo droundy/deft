@@ -8,6 +8,8 @@ from glob import glob
 #import re
 
 import yaml
+import os.path
+import time # Need to wait some time if file is being written
 
 # Example: /home/jordan/sad-monte-carlo/
 filename_location = sys.argv[1]
@@ -34,10 +36,15 @@ print('filenames are ', filename)
 for f in filename:
     name = '%s.yaml' % (f)
     print('trying filename ', name)
+    while not os.path.exists(filename_location + name):
+        print('I am waiting for file to be written.')
+        time.sleep(30)
     # Read YAML file
-    with open(filename_location + name, 'r') as stream:
-        yaml_data = yaml.load(stream)
-    
+    if os.path.isfile(filename_location + name):
+        with open(filename_location + name, 'r') as stream:
+            yaml_data = yaml.load(stream)
+    else:
+        raise ValueError("%s isn't a file!" % (filename_location + name))
     #print(data_loaded)
     data = yaml_data
     data['bins']['histogram'] = np.array(data['bins']['histogram'])
