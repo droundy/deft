@@ -1,0 +1,47 @@
+
+kT1.000_n0.98_best.dat (original without tarazona)
+# git version: 0.0.0-2324-gba2e6d353-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor
+1	0.98	0	0.11	-7.32588	-7.28158		0.0442963		1.59813		1	0.5	0.001	1	-7.17936	-7.13595	5	50000
+
+
+kT1.000_n0.98_best_tara.dat with maxgw=0.2 (with tarazona)
+# git version: 0.0.0-2372-g688506e3c-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor	tarazona
+1	0.98	0	0.2	-7.32588	-6.93997		0.385909		1.59813		1	0.5	0.001	1	-7.17936	-6.80117	5	50000	1
+
+kT1.000_n0.98_best_tara.dat with maxgw=0.3 (with tarazona)
+# git version: 0.0.0-2374-g930883622-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor	tarazona
+1	0.98	0	0.3	-7.32588	-7.27758		0.0482991		1.59813		1	0.5	0.001	1	-7.17936	-7.13203	5	50000	1
+
+kT1.000_n0.98_best_tara.dat with maxgw=0.4 (with tarazona)
+# git version: 0.0.0-2375-g18d44b80c-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor	tarazona
+1	0.98	0	0.4	-7.32588	-7.31719		0.00868486		1.59813		1	0.5	0.001	1	-7.17936	-7.17085	5	50000	1
+This is just going to zero FEdiff (or osc about zero) - it is not freezing!
+
+
+
+ 
+
+kT1.000_n0.99_best.dat (original without tarazona)
+# git version: 0.0.0-2324-gba2e6d353-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor
+1	0.99	0	0.11	-7.12133	-7.09645		0.0248812		1.59273		1	0.5	0.001	1	-7.05012	-7.02549	5	50000
+
+kT1.000_n0.99_best_tara.dat with maxgw=0.2 (with tarazona)
+# git version: 0.0.0-2372-g688506e3c-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor	tarazona
+1	0.99	0	0.2	-7.12133	-6.74311		0.378226		1.59273		1	0.5	0.001	1	-7.05012	-6.67568	5	50000	1
+
+kT1.000_n0.99_best_tara.dat with maxgw=0.3 (with tarazona)
+# git version: 0.0.0-2374-g930883622-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor	tarazona
+1	0.99	0	0.3	-7.12133	-7.07145		0.0498834		1.59273		1	0.5	0.001	1	-7.05012	-7.00074	5	50000	1
+
+kT1.000_n0.99_best_tara.dat with maxgw=0.4 (with tarazona)
+# git version: 0.0.0-2375-g18d44b80c-dirty
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor	tarazona
+1	0.99	0	0.39	-7.12133	-7.11671		0.00462615		1.59273		1	0.5	0.001	1	-7.05012	-7.04554	5	50000	1
+This is just going to zero FEdiff (or osc about zero) - it is not freezing! 
