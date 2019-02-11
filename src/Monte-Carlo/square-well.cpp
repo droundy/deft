@@ -286,13 +286,6 @@ void sw_simulation::move_a_ball() {
   const int old_interaction_count =
     count_interactions(id, balls, interaction_distance, len, walls, sticky_wall);
 
-  if (moves.total % (N*N*1000) == 0) {
-    // Let us check that the energy is actually correct!
-    const int correct_interaction_count =
-      count_all_interactions_slowly(balls, N, interaction_distance, len, walls, sticky_wall);
-    assert(correct_interaction_count == old_interaction_count);
-  }
-
   ball temp = balls[id];
   temp.pos = sw_fix_periodic(temp.pos + vector3d::ran(translation_scale), len);
   // If we overlap, this is a bad move! Because random_move always
@@ -334,10 +327,22 @@ void sw_simulation::move_a_ball() {
   balls[id] = temp; // temporarily update the position
   const int new_interaction_count =
     count_interactions(id, balls, interaction_distance, len, walls, sticky_wall);
+  const int energy_change = new_interaction_count - old_interaction_count;
+  if ((moves.total+1) % (N*N*1000) == 0 || moves.total >= 1047000000) {
+    // Let us check that the energy is actually correct!
+    const int correct_interaction_count =
+      count_all_interactions_slowly(balls, N, interaction_distance, len, walls, sticky_wall);
+    if (correct_interaction_count != energy + energy_change) {
+      printf(" foo energy: %i \t correct interaction count: %i\n",
+             energy + energy_change,correct_interaction_count);
+      printf("moves.total == %lu\n", moves.total);
+    }
+    assert(correct_interaction_count == energy + energy_change);
+  }
   balls[id] = pid;
+
   // Now we can check whether we actually want to do this move based on the
   // new energy.
-  const int energy_change = new_interaction_count - old_interaction_count;
   transitions(energy, energy_change) += 1; // update the transition histogram
   double Pmove = 1;
   if ((use_wl||use_wltmmc)
