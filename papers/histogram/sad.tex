@@ -527,17 +527,23 @@ the simulation, the update factor will experience a jump. This behavior
 allows SAD to dynamically prevent the update factor from decreasing too
 rapidly.
 
-Figure~\ref{fig:gamma-vs-t} compares $\gamma_t$ for SAD, WL,
-and SAMC.  The update factor
-for WL remains high for many iterations, and then decreases very rapidly,
-while the SAMC $\gamma_t$ remains constant before dropping as $1/t$.
-The update factor for SAD in contrast fluctuates
-dynamically around a value less than 1 for early MC moves.
-{\color{red} For intermediate MC moves, $\gamma_t$ decreases as
-$1/t$ while continuing to fluctuate whenever a new important energy
-is discovered.  Once all the important energy states are discovered, the
-update factor decreases faster than $1/t$ until asymptoting to $N_S/t$.
-}
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/gamma-n256}
+  \caption{The update factor $\gamma_t$ for $N=256$ versus iteration for
+    four different methods: WL, $1/t$-WL, SAMC, and SAD}
+    \label{fig:gamma-vs-t}
+\end{figure}
+Figure~\ref{fig:gamma-vs-t} compares $\gamma_t$ for the related methods
+SAD, WL, $1/t$-WL, and SAMC.  For SAMC, $\gamma_t$ remains constant
+before dropping as $1/t$.  WL $\gamma_t$ remains at 1 for many iterations,
+and then decreases very rapidly, with $1/t$-WL behaving similarly before
+transitioning to a $1/t$ behavior.
+The update factor for SAD fluctuates
+dynamically around a value less than 1 for early MC moves, and then
+decreases as approximately $1/t$ while continuing to fluctuate as 
+new energies are found to be important.  At late times, the SAD $\gamma_t$
+decreases as approximately $1/t^2$ until asymptoting to $N_S/t$, which
+is the same as $1/t$-WL.
 
 Since SAD does not explore \emph{all} energy states it needs determine
 what energy range corresponds to the temperature range of interest,
@@ -594,12 +600,6 @@ in Equations~\ref{eq:highw} and~\ref{eq:loww}.
     %different methods: WL, SAMC, and SAD.
     %method.}\label{fig:gamma-vs-t}
 %\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/gamma-n256}
-  \caption{The update factor $\gamma_t$ for $N=256$ versus iteration for three
-    different methods: WL, SAMC, and SAD.
-    method.}\label{fig:gamma-vs-t}
-\end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n50}
   \caption{The update factor $\gamma_t$ for $N=50$ versus iteration for three

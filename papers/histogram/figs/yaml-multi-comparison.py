@@ -24,8 +24,8 @@ filebase = sys.argv[3]
 N = int(sys.argv[4])
 
 # Energy range
-Smin = int(sys.argv[5])
-Smax = int(sys.argv[6])
+Emin = int(sys.argv[5])
+Emax = int(sys.argv[6])
 
 # Are you comparing to a yaml reference?
 yamlRef = bool(sys.argv[7])
@@ -41,39 +41,56 @@ for f in filename:
     min_moves = []
     name = '%s.yaml' % (f)
     for n in range(1,seed_avg+1):
-        try:
+        #try:
             name = '%s-s%s.yaml' % (f,n)
             print('trying filename ', name)
 
-            while not os.path.exists(filename_location + name):
-                print('I am waiting for file to be written.')
-                time.sleep(30)
             # Read YAML file
             if os.path.isfile(filename_location + name):
                 with open(filename_location + name, 'r') as stream:
                     yaml_data = yaml.load(stream)
             else:
+                print('unable to read file', filename_location + name)
                 raise ValueError("%s isn't a file!" % (filename_location + name))
 
             #print(data_loaded)
             data = yaml_data
             data['bins']['histogram'] = np.array(data['bins']['histogram'])
             data['bins']['lnw'] = np.array(data['bins']['lnw'])
-            data['movies']['energy']
-            minyaml = data['movies']['energy'].index(-Smax)
-            maxyaml = data['movies']['energy'].index(-Smin)
-            #print(data['bins']['lnw'])
-            moves = data['moves']
             
             data['movies']['entropy'] = np.array(data['movies']['entropy'])
             lndos = data['movies']['entropy']
             N_save_times = len(data['movies']['entropy'])
+            try:
+                maxyaml = data['movies']['energy'].index(-Emin)
+            except:
+                my_minE = data['movies']['energy'][0]
+                num_new_energies = int(my_minE - (-Emin))
+                print('num_new_maxyaml', num_new_energies)
+                lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
+                lndos_new[:, num_new_energies:] = lndos[:,:]
+                lndos = lndos_new
+                maxyaml = 0
+
+            try:
+                minyaml = data['movies']['energy'].index(-Emax)
+            except:
+                my_maxE = data['movies']['energy'][-1]
+                num_new_energies = -int(my_maxE - (-Emax))
+                print('num_new_minyaml', num_new_energies)
+                lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
+                lndos_new[:, :lndos.shape[1]] = lndos[:,:]
+                lndos = lndos_new
+                minyaml = lndos.shape[1]-1
+
+            #moves = data['moves']
+            
             
             ref = reference
             if ref[:len('data/')] != 'data/':
                 ref = 'data/' + ref
-            maxref = Smax #int(readnew.max_entropy_state(ref))
-            minref = Smin # int(readnew.min_important_energy(ref))
+            maxref = Emax #int(readnew.max_entropy_state(ref))
+            minref = Emin # int(readnew.min_important_energy(ref))
             n_energies = int(minref - maxref+1)
             #print maxref, minref
             try:
@@ -83,7 +100,6 @@ for f in filename:
             
             errorinentropy = np.zeros(N_save_times)
             maxerror = np.zeros(N_save_times)
-            
             for i in range(0,N_save_times):
                 # below just set average S equal between lndos and lndosref
                 if yamlRef:
@@ -120,8 +136,9 @@ for f in filename:
               fmt = ('%.4g'),
               delimiter = '\t',
               header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
-        except:
-            pass
+        #except:
+        #    print('I ran into some odd trouble.')
+        #    pass
 
     for i in range(len(err_in_S)):
         err_in_S[i] = err_in_S[i][:len(min_moves)]

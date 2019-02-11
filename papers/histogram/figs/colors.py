@@ -10,7 +10,7 @@ _colors = { 'SAD': 'tab:orange',
             'SAMC ($t_0 =10^{7}$)': 'midnightblue',
             'SAMC ($t_0 =10^{8}$)': 'darkmagenta',
             '1/sqrt(t)': 'xkcd:dark gray',
-            r'$\frac{1}{\sqrt{t}}$': 'xkcd:dark gray',
+            r'$\frac{1}{\sqrt{t}}$': '#eeeeee',
 }
 
 _linestyles = {
@@ -24,16 +24,32 @@ _linestyles = {
 }
 
 _legend_order = [
-            'SAD',
-            'WL',
-            '$1/t$-WL',
-            'SAMC ($t_0 =10^{3}$)',
-            'SAMC ($t_0 =10^{4}$)',
-            'SAMC ($t_0 =10^{5}$)',
-            'SAMC ($t_0 =10^{6}$)',
-            'SAMC ($t_0 =10^{7}$)',
-            'SAMC ($t_0 =10^{8}$)',
-            r'$\frac{1}{\sqrt{t}}$',
+    'sad-256',
+    'sad-50',
+    'sad-50-slow',
+    'wl-256',
+    'wl-50',
+    'wl-50-slow',
+    'wl-inv-t-256',
+    'wl-inv-t-50',
+    'wl-inv-t-50-slow',
+    'samc-1e3-256',
+    'samc-1e4-256',
+    'samc-1e5-256',
+    'samc-1e6-256',
+    'samc-1e7-256',
+    'samc-1e8-256',
+    'samc-1e3-50',
+    'samc-1e4-50',
+    'samc-1e5-50',
+    'samc-1e6-50',
+    'samc-1e7-50',
+    'samc-1e3-50-slow',
+    'samc-1e4-50-slow',
+    'samc-1e5-50-slow',
+    'samc-1e6-50-slow',
+    'samc-1e7-50-slow',
+    '1/sqrt(t)',
 ]
 
 _legend_label = {
@@ -62,7 +78,7 @@ _legend_label = {
     'samc-1e5-50-slow': 'SAMC ($t_0 =10^{5}$)',
     'samc-1e6-50-slow': 'SAMC ($t_0 =10^{6}$)',
     'samc-1e7-50-slow': 'SAMC ($t_0 =10^{7}$)',
-    '1/sqrt(t)': r'$\frac{1}{\sqrt{t}}$'
+    '1/sqrt(t)': r'$\frac{1}{\sqrt{t}}$',
 }
 
 def fix_legend(method):
@@ -88,9 +104,9 @@ def style_args(method):
         args['color'] = _colors[fix_legend(method)]
     if fix_legend(method) in _linestyles:
         args['linestyle'] = _linestyles[fix_legend(method)]
-    args['zorder'] = -legend_order(fix_legend(method))
+    args['zorder'] = -legend_order(method)
     if method == '1/sqrt(t)':
-        args['zorder'] = -50
+        args['zorder'] = -59
         args['linewidth'] = 0.1
     return args
 

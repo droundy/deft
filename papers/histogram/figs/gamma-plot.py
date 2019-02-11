@@ -30,10 +30,10 @@ try:
                 factor[2*i+1] = wlfactor[i]*2
                 factor[2*i+2] = wlfactor[i]
         colors.loglog(moves, factor,
-                      'vanilla_wang_landau'
+                      'wl'
                          + wl[len("data/gamma/%s/wl" % filename):-4])
         plt.ylim(ymin=1e-10, ymax=1e1)
-        plt.xlim(xmin=1e0, xmax=2e12)
+        plt.xlim(xmin=1e2, xmax=1e12)
 
 except:
     pass
@@ -68,7 +68,7 @@ try:
     
     
         plt.ylim(ymin=1e-10, ymax=1e1)
-        plt.xlim(xmin=1e0, xmax=2e12)
+        plt.xlim(xmin=1e2, xmax=1e12)
         colors.loglog(ts, gamma,sadname)
 except:
     pass
