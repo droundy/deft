@@ -478,7 +478,8 @@ parameter $t_0$.
         minimum entropy change needed to converge to the true value.
         The light blue area is the quadratic approximation
         for the change in entropy.  The vertical dotted lines represent
-        the energy corresponding to $T=0.\overline{3}$ and $T=\infty$.}
+        the energy corresponding to $T=1/3$ and $T=\infty$.}
+  \label{fig:entropy-cartoon}
 \end{figure}
 
 While for SAMC the update factor is defined in the original
@@ -488,7 +489,7 @@ the SAMC parameter
 $t_0$ should have dimensions of entropy.
 We begin with an estimate of the average value of the entropy (relative
 to the lowest entropy at $T_{\min}$).  If we assume a quadratic
-dependence on energy, this is given by
+dependence on energy (see Fig.~\ref{fig:entropy-cartoon}), this is given by
 \begin{align}
 \langle S\rangle \approx \frac13 \frac{E({T=\infty}) - E(T_{\min})}{T_{\min}}
 \end{align}
@@ -709,8 +710,16 @@ reference.}
 
 \subsection{A periodic system with 50 atoms}
 
+Our smaller system consists of 50 square-well atoms with a well width
+of $\lambda=1.3$, in a volume corresponding to a filling fraction of
+$\eta=0.3$.  For this simulation, we chose a minimum reduced
+temperature of $1/3$, which corresponds to an interesting energy range
+from -248 to -120.  The entropy of this system is shown in
+Fig.~\ref{fig:entropy-cartoon} above, which shows that over this
+energy range the entropy differs by 198.
+
 Figures~\ref{fig:N50-ff0.3-avg-error}
-and~\ref{fig:N50-ff0.3-avg-error-slow} show the average entropy vs
+and~\ref{fig:N50-ff0.3-avg-error-slow} show the average error in the entropy vs
 moves for a system consisting of 50 atoms that are placed in a periodic
 simple cubic unit cell with lattice constant chosen to give a filling
 fraction of $\eta = 0.3$.  These particles are randomly inserted into
@@ -719,7 +728,8 @@ $\delta_0 = 0.05\sigma$ and $\delta_0 = 0.005\sigma$ respectively). For
 the $\eta = 30\%$ and $N = 50$ system, we explore the choice of
 $\delta_0$ as a parameter.
 
-{\color{red}
+The interesting range of energies for this system is from
+{\color{blue}
 $S_{\max} = 120$ and $S_{\min} = 248$ for this system.  The number of
 important energy states for this system is then $N_S = S_{\min} - S_{\max} = 145$.
 The reduced temperature of $1/3$ is chosen in order to examine the convergence
