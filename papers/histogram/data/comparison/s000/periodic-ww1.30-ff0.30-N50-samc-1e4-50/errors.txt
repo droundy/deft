@@ -1,4 +1,4 @@
-# iterations	 errorinentropy	 maxerror	(generated with python figs/yaml-multi-comparison.py /home/jordan/weniger-cp-data/ data/samc-1e3-T13-reference-lndos.dat s000/periodic-ww1.30-ff0.30-N50 50 248 120 true 4 sad-50 wl-50 wl-inv-t-50 samc-1e4-50 samc-1e5-50 samc-1e6-50 samc-1e7-50
+# iterations	 errorinentropy	 maxerror	(generated with python figs/yaml-multi-comparison.py /home/jordan/weniger-cp-data/ data/samc-1e3-T13-reference-lndos.dat s000/periodic-ww1.30-ff0.30-N50 50 248 120 true 4 sad-50 wl-50 wl-inv-t-50 samc-1e3-50 samc-1e4-50 samc-1e5-50 samc-1e6-50 samc-1e7-50
 0.02	51.48	198.1	51.48	51.48
 0.04	51.47	198.1	51.47	51.47
 0.06	51.47	198.1	51.47	51.47
@@ -93,3 +93,6 @@
 8.434e+09	0.01798	0.1444	0.01451	0.0213
 1.125e+10	0.02455	0.1559	0.011	0.03331
 1.5e+10	0.01494	0.09973	0.007219	0.02732
+2e+10	0.0196	0.1259	0.006433	0.02621
+2.667e+10	0.014	0.08234	0.007755	0.02026
+3.557e+10	0.009878	0.05918	0.005665	0.01999

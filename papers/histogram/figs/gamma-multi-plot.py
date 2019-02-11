@@ -43,18 +43,23 @@ try:
         data = np.loadtxt(sad)
         ts = data[:,0]
         avg_gamma = data[:,1]
-        max_avg_gamma = data[:,2]
-        min_avg_gamma = data[:,3]
         sadname = sad.split('/')[-1].split('.')[0]
     
     
         plt.ylim(ymin=1e-10, ymax=1e1)
         plt.xlim(xmin=1e0, xmax=2e12)
-        print(avg_gamma)
-        print(ts)
+        #print(avg_gamma)
+        #print(ts)
         colors.loglog(ts, avg_gamma,sadname)
+        if data.shape[1] > 2:
+            max_avg_gamma = data[:,2]
+            min_avg_gamma = data[:,3]
+            plt.fill_between(ts, min_avg_gamma, max_avg_gamma,
+                            edgecolor='none', linewidth=0,
+                            color=colors.color('sad'),
+                            alpha=0.1, zorder=-51)
 except:
-    pass
+    raise
 
 def gamma_sa(t,t0):
     return t0/np.maximum(t, t0)
