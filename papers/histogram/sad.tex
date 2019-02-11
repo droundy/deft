@@ -530,8 +530,8 @@ rapidly.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/gamma-n256}
-  \caption{The update factor $\gamma_t$ for $N=256$ versus iteration for
-    four different methods: WL, $1/t$-WL, SAMC, and SAD}
+  \caption{The update factor $\gamma_t$ for $N=256$ versus
+    iteration for four different methods: WL, $1/t$-WL, SAMC, and SAD}
     \label{fig:gamma-vs-t}
 \end{figure}
 Figure~\ref{fig:gamma-vs-t} compares $\gamma_t$ for the related methods
@@ -601,12 +601,6 @@ in Equations~\ref{eq:highw} and~\ref{eq:loww}.
     %different methods: WL, SAMC, and SAD.
     %method.}\label{fig:gamma-vs-t}
 %\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/gamma-n50}
-  \caption{The update factor $\gamma_t$ for $N=50$ versus iteration for three
-    different methods: WL, SAMC, and SAD.}
-\end{figure}
-
 \paragraph{Energy binning with SAD}
 
 A significant advantage of SAD over other flat histogram methods is
@@ -753,6 +747,16 @@ been made all but the SAMC simulation with the shortest $t_0$ have
 begun to converge as $1/\sqrt{t}$.  We then see the WL error begin to
 saturate around $10^{10}$ moves.
 
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figs/gamma-n50}
+  \caption{\davidsays{We need to make a distinction between SAD and
+      SAD both in figure and in caption.  I don't know what to call
+      the slow SAD.  Also, should this move down to results, and do we
+      want slow WL and slow-1/t WL?} The update factor $\gamma_t$ for
+    $N=50$ versus iteration for three different methods: WL, SAMC, and
+    SAD.}\label{fig:fast-slow-gamma}
+\end{figure}
+
 Figure~\ref{fig:N50-ff0.3-avg-error-slow} shows the average error in
 the entropy as a function of time for this system with the
 unreasonably small displacement distance of $\delta_0 = 0.005\sigma$.
@@ -768,6 +772,10 @@ translation scale of $\delta = 0.005\sigma$. SAD, WL, and $1/t$-WL
 handle the shift in displacement distance and converge roughly as
 expected.
 
+To see how SAD, WL, and $1/t$-WL compensate for the smaller
+displacement distance, \davidsays{see Fig.~\ref{fig:fast-slow-gamma}
+  and discuss this}
+
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf}
   \caption{The average entropy error for each MC method is shown for $\eta = 0.17$ and $T_{\min} = 1$ with
@@ -780,11 +788,15 @@ expected.
 %\end{figure}
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/N256-lndos-comparison}
-  \caption{Use this to create description of the system.}\label{fig:n256-lndos-comparison}
+  \caption{\davidsays{This could be prettier, and do we need it? We
+      definitely need a caption if we keep it.} Use this to create
+    description of the system.}\label{fig:n256-lndos-comparison}
 \end{figure}
 
 
 \subsection{A periodic system with 256 atoms}
+
+\davidsays{Make this section match the previous one.}
 
 Figure~\ref{fig:n256} shows the average entropy vs moves for a system
 consisting of 256 atoms that are placed in a periodic simple cubic unit
