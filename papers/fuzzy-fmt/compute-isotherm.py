@@ -38,8 +38,8 @@ parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
 parser.add_argument('--datafile', metavar='addtoname', type=str,
                     help='added to name of data file - Default "FE_vs_gw"')
-parser.add_argument('--tar', metavar='tarazona', type=str,
-                    help='run with tarazona tensor - Default no')
+parser.add_argument('--tar', action='store_true',
+                    help='--tar for use tarazona tensor')
 
 args=parser.parse_args()
 

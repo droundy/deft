@@ -15,8 +15,8 @@ parser = argparse.ArgumentParser(description='Creates data for a FE vs gw plot.'
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 
-parser.add_argument('--tar', metavar='tarazona', type=float,
-                    help='--tar 1 for use tarazona tensor')
+parser.add_argument('--tar', action='store_true',
+                    help='--tar for use tarazona tensor')
 
 args=parser.parse_args()
 
