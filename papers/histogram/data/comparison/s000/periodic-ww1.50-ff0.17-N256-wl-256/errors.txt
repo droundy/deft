@@ -1,4 +1,4 @@
-# iterations	 errorinentropy	 maxerror	(generated with python figs/yaml-multi-comparison.py /home/jordan/weniger-cp-data/ /home/jordan/deft/papers/histogram/data/samc-1e5-256-reference-lndos.dat s000/periodic-ww1.50-ff0.17-N256 256 915 509 true 4 sad-256 wl-256 wl-inv-t-256 samc-1e3-256 samc-1e4-256 samc-1e5-256 samc-1e6-256 samc-1e7-256 samc-1e8-256
+# iterations	 errorinentropy	 maxerror	(generated with python figs/yaml-multi-comparison.py /home/jordan/weniger-cp-data/ /home/jordan/deft/papers/histogram/data/samc-1e5-256-reference-lndos.dat s000/periodic-ww1.50-ff0.17-N256 256 915 509 true 4 sad-256 wl-256 wl-inv-t-256 samc-1e3-256 samc-1e4-256 samc-1e5-256 samc-1e6-256
 0.003906	74.19	274.6	74.19	74.19
 0.007812	74.19	274.6	74.19	74.19
 0.01172	74.19	274.6	74.19	74.19
