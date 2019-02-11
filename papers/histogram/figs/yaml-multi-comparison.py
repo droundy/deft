@@ -60,22 +60,24 @@ for f in filename:
             
             data['movies']['entropy'] = np.array(data['movies']['entropy'])
             lndos = data['movies']['entropy']
+            energies = data['movies']['energy']
             N_save_times = len(data['movies']['entropy'])
             try:
-                maxyaml = data['movies']['energy'].index(-Emin)
+                maxyaml = energies.index(-Emin)
             except:
-                my_minE = data['movies']['energy'][0]
+                my_minE = energies[0]
                 num_new_energies = int(my_minE - (-Emin))
                 print('num_new_maxyaml', num_new_energies)
                 lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
                 lndos_new[:, num_new_energies:] = lndos[:,:]
                 lndos = lndos_new
+                energies = [0]*num_new_energies + energies
                 maxyaml = 0
 
             try:
-                minyaml = data['movies']['energy'].index(-Emax)
+                minyaml = energies.index(-Emax)
             except:
-                my_maxE = data['movies']['energy'][-1]
+                my_maxE = energies[-1]
                 num_new_energies = -int(my_maxE - (-Emax))
                 print('num_new_minyaml', num_new_energies)
                 lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
@@ -87,8 +89,6 @@ for f in filename:
             
             
             ref = reference
-            if ref[:len('data/')] != 'data/':
-                ref = 'data/' + ref
             maxref = Emax #int(readnew.max_entropy_state(ref))
             minref = Emin # int(readnew.min_important_energy(ref))
             n_energies = int(minref - maxref+1)
@@ -97,7 +97,7 @@ for f in filename:
                 eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
             except:
                 eref, lndosref = readnew.e_lndos(ref)
-            
+
             errorinentropy = np.zeros(N_save_times)
             maxerror = np.zeros(N_save_times)
             for i in range(0,N_save_times):
@@ -105,8 +105,8 @@ for f in filename:
                 if yamlRef:
                     # if using yaml as a reference the range is from 0 to len while for C++ the range is 
                     # from maxref to minref + 1
-                    norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[0:(minyaml+1-maxyaml)])
-                    doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[0:(minyaml+1-maxyaml)] - norm_factor
+                    norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[0:minref-maxref+1])
+                    doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[0:minref-maxref+1] - norm_factor
                 else:
                     norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[maxref:minref+1])
                     doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[maxref:minref+1] - norm_factor
