@@ -38,8 +38,8 @@ parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
 parser.add_argument('--datafile', metavar='addtoname', type=str,
                     help='added to name of data file - Default "FE_vs_gw"')
-parser.add_argument('--tar', action='store_true',
-                    help='--tar for use tarazona tensor')
+parser.add_argument('--ten', action='store_true',
+                    help='--ten for use tensor weight')
 
 args=parser.parse_args()
 
@@ -55,7 +55,7 @@ if args.dgw:
 else :
     dgw=0.01
 
-#if args.tar:          #this doesn't work, don't know why
+#if args.ten:          #this doesn't work, don't know why
 #    maxgwdef=0.3
 #else :
 #    maxgwdef=0.2
@@ -100,7 +100,7 @@ if args.datafile:
 else :
     datafile='FE_vs_gw'
     
-if args.tar:    
+if args.ten:    
     for n in np.arange(args.nmin, args.nmax, dn):
         cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
         cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
@@ -108,7 +108,7 @@ if args.tar:
         cmd += ' --fv %g --dx %g' % (fv, dx)
         cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
         cmd += ' --filename isotherm-kT-%g.dat' % kT
-        cmd += ' --tar'
+        cmd += ' --ten'
         print(cmd)
         os.system(cmd)
 else :

@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-pressure.py --kT [temp] --tar [optional]
+#with comand ./plot-pressure.py --kT [temp] --ten [optional]
 
 from __future__ import print_function, division
 
@@ -15,8 +15,8 @@ parser = argparse.ArgumentParser(description='Creates data for a FE vs gw plot.'
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 
-parser.add_argument('--tar', action='store_true',
-                    help='--tar for use tarazona tensor')
+parser.add_argument('--ten', action='store_true',
+                    help='--ten for use tensor weight')
 
 args=parser.parse_args()
 
@@ -27,7 +27,7 @@ invn = []
 hfe = []
 cfe = []
 
-if args.tar :
+if args.ten :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tara.dat' % kT)))
 else :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
