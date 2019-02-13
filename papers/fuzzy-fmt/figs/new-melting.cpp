@@ -32,7 +32,7 @@ double seed=1;
 long mc_prefactor=50000;
 long mc_constant=100;
 int my_experiment =0;   //set to 1 to run my experiment
-bool tarazona=false;
+bool tensorw=false;
 
 char *free_energy_output_file = 0;
 
@@ -712,7 +712,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
         double phi_3;
-        if (tarazona) {
+        if (tensorw) {
           //double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
           //                              nm_2.y.y*nm_2.y.y +
           //                              nm_2.z.z*nm_2.z.z +
@@ -894,7 +894,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     char *alldat_filedescriptor = new char[1024];
     sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
             temp, reduced_density, fv, gwidth);
-    if (tarazona)  {
+    if (tensorw)  {
       sprintf(alldat_filename, "%s/%s-alldat_tara.dat", data_dir, alldat_filedescriptor);
     } else {
       sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
@@ -910,7 +910,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
               temp, reduced_density, fv, gwidth, hfree_energy_per_atom,
               cfree_energy_per_atom, data_out.diff_free_energy_per_atom,
               lattice_constant, reduced_num_spheres, dx_input, mc_constant, mc_prefactor, MC_ERROR, seed,
-              run_time/60/60, tarazona);
+              run_time/60/60, tensorw);
       fclose(newmeltoutfile);
     } else {
       printf("Unable to open file %s!\n", alldat_filename);
@@ -943,7 +943,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             reduced_density,
             seed,
             run_time/60,
-            tarazona);
+            tensorw);
     fclose(f);
   }
   if (my_experiment > 0) {
@@ -1525,8 +1525,8 @@ int main(int argc, const char **argv) {
     {"mc-prefactor", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_prefactor, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
     {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
     
-    /*** Tarazona Tensor OPTION ***/
-    {"tar", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &tarazona, 0, "Include Tarazona Tensor weight in SFMT", "BOOLEAN"},
+    /*** Tensor Weight OPTION ***/
+    {"ten", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &tensorw, 0, "Include Tensor weight in SFMT", "BOOLEAN"},
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     // Where to save the free energy info
@@ -1744,7 +1744,7 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    if (tarazona)  {
+    if (tensorw)  {
       sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tara.dat", data_dir, temp, reduced_density);
     } else {
       sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
@@ -1759,7 +1759,7 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
       fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttarazona\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, tarazona);    //Nsph=1-fv for parallepiped
+              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, tensorw);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
@@ -1795,7 +1795,7 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
 
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
-    if (tarazona) {
+    if (tensorw) {
       sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tara.dat", data_dir, temp, reduced_density);
     } else {
       sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
@@ -1809,7 +1809,7 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
       fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttarazona\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, tarazona);    //Nsph=1-fv for parallepiped
+              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, tensorw);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
