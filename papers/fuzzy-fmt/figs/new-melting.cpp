@@ -259,7 +259,7 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
 }
 
 weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
-                                              double gwidth, double fv, double alpha, double Xi) {
+    double gwidth, double fv, double alpha, double Xi) {
   weight n = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   double n3_sqr = 0;
 
@@ -295,9 +295,9 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
     // pretty easy to reason about, and the others are closely
     // related.
     n3_error = sqrt(fabs(n3_sqr/num_points - sqr(n.n_3/num_points))/(num_points-1));  //Standard Error of the Mean (SEM)
-    } while (n3_error > MC_ERROR);  
-    //} while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-n.n_3/num_points) && n3_error < 1e-15)); 
-    //avoids downward spiral n3_error > ... so n3_error becomes smaller which makes ... smaller and so n3_error is still bigger etc...
+  } while (n3_error > MC_ERROR);
+  //} while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-n.n_3/num_points) && n3_error < 1e-15));
+  //avoids downward spiral n3_error > ... so n3_error becomes smaller which makes ... smaller and so n3_error is still bigger etc...
   n.n_0 /= num_points;
   n.n_1 /= num_points;
   n.n_2 /= num_points;
@@ -313,7 +313,7 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
 
 
 double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
-      double gwidth, double fv, double alpha, double Xi) {
+                       double gwidth, double fv, double alpha, double Xi) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   double n3_sqr = 0;
 
@@ -348,8 +348,8 @@ double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
     // related.
-    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)   
-    } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
+    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
+  } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
   return n3_error;
 }
 
@@ -359,7 +359,7 @@ double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
 
 
 long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ONLY
-      double gwidth, double fv, double alpha, double Xi) {
+                             double gwidth, double fv, double alpha, double Xi) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   double n3_sqr = 0;
 
@@ -394,8 +394,8 @@ long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ON
     // we only consider error in n3, because it is dimensionless and
     // pretty easy to reason about, and the others are closely
     // related.
-    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)   
-    } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
+    n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
+  } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
   return num_points;
 }
 
@@ -403,7 +403,7 @@ long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ON
 
 ///////////////////////////EXPERIMENT!!!///////////////////////////////
 weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
-                                              double gwidth, double fv, double alpha, double Xi) {
+    double gwidth, double fv, double alpha, double Xi) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   printf("SIZE of Gaussian is 3*gwidth=%g\n", 3*gwidth);
   printf("SIZE of weight function is 2*Xi*sqrt(1/2) + alpha/2=%g\n", 2*Xi*sqrt(1/2) + alpha/2);
@@ -422,33 +422,33 @@ weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
     num_points *= 4;
     for (; i<num_points; i++) {
       //vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
-     vector3d dr;
-     vector3d r_prime;
-     vector3d r_prime2;
-     //New experimenatal sampling technique 
-     //This uses a "sampling sphere" of radius |Amax| about weight functions within which points 
-     //generated randomly must fall in order to be included in the Monte-Carlo 
-     //average weight calculation. |Amax| was 3*(sqrt(Xi/2)) + alpha/2 but
-     //now |Amax|=2*(sqrt(Xi/2)) + alpha/2 as the data fits this better
-     vector3d A;
-     if (3*gwidth > (2*Xi*sqrt(1/2) + alpha/2)) {
-       do { 
-             dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth        
-             vec_count += 1;
-             A=r-R-dr;   //Sample Shpere around weight function is of radius |Amax|
-             printf("A.norm()=%g\n", A.norm());
-          } while (A.norm() > 2*Xi*sqrt(1/2) + alpha/2);   //FIX THIS!! getting stuck in here!!! the Gaussian is mostly smaller than the weight function - turn this around!
+      vector3d dr;
+      vector3d r_prime;
+      vector3d r_prime2;
+      //New experimenatal sampling technique
+      //This uses a "sampling sphere" of radius |Amax| about weight functions within which points
+      //generated randomly must fall in order to be included in the Monte-Carlo
+      //average weight calculation. |Amax| was 3*(sqrt(Xi/2)) + alpha/2 but
+      //now |Amax|=2*(sqrt(Xi/2)) + alpha/2 as the data fits this better
+      vector3d A;
+      if (3*gwidth > (2*Xi*sqrt(1/2) + alpha/2)) {
+        do {
+          dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
+          vec_count += 1;
+          A=r-R-dr;   //Sample Shpere around weight function is of radius |Amax|
+          printf("A.norm()=%g\n", A.norm());
+        } while (A.norm() > 2*Xi*sqrt(1/2) + alpha/2);   //FIX THIS!! getting stuck in here!!! the Gaussian is mostly smaller than the weight function - turn this around!
 
-          r_prime = R + dr;
-          r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
-        } else {
-      dr = vector3d::ran(gwidth);
-      r_prime = R + dr;
-      r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+        r_prime = R + dr;
+        r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
+      } else {
+        dr = vector3d::ran(gwidth);
+        r_prime = R + dr;
+        r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
       }
       //if (R.norm() == 0) {
       //  R0num_points += 1; }
-     //printf("COUNT=%i\n", vec_count); 
+      //printf("COUNT=%i\n", vec_count);
       weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
       weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
       //printf("A.norm=%g, w.n_0=%g, w.n_1=%g, w.n_2=%g, w.n_3=%g, 3*sqrt(Xi/2)=%g, Amax3=%g, Amax2=%g, Amax1=%g, alpha/2=%g, Amin1=%g, Amin2=%g \n",   //Check weighting function data:
@@ -479,8 +479,8 @@ weight find_weighted_den_aboutR_mc_accurately_experiment(vector3d r, vector3d R,
   w_den_R.nv_2 /= num_points + num_zeroterms;   //Added terms where weight function is zero but the Gaussian is not!
   w_den_R.nm_2 /= num_points + num_zeroterms;   //Added terms where weight function is zero but the Gaussian is not!
   //vector3d rdiff=r-R;
-  //printf("Total num_points is %li for |r-R|=%g\n", num_points, rdiff.norm()); 
-  printf("vec_count=%i\n", vec_count); 
+  //printf("Total num_points is %li for |r-R|=%g\n", num_points, rdiff.norm());
+  printf("vec_count=%i\n", vec_count);
   printf("3*gwidth=%g\n", 3*gwidth);
   printf("2*Xi*sqrt(1/2) + alpha/2=%g\n", 2*Xi*sqrt(1/2) + alpha/2);
   printf("3*gwidth/(2*Xi*sqrt(1/2) + alpha/2)=%g\n", 3*gwidth/(2*Xi*sqrt(1/2) + alpha/2));
@@ -539,10 +539,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   printf("lattice_constant=%g\n", lattice_constant);
   // const double cubic_cell_volume = uipow(lattice_constant, 3);
-      
 
-  
-  
+
+
+
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
     vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -553,7 +553,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
 
   double cFideal_of_primitive_cell=0;
-  { //Find inhomogeneous Fideal of one crystal primitive cell
+  {
+    //Find inhomogeneous Fideal of one crystal primitive cell
     // scale our dx by w.
     const double dx = dx_input*gwidth;
     printf("using dx = %g for ideal gas free energy integral\n", dx);
@@ -585,14 +586,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
     } else {
-      
+
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
         for (int j=0; j<Nl; j++) {
           for (int k=0; k<Nl; k++) {
             vector3d r=i*da1 + j*da2 + k*da3;
 
             const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over
-                                                                        //Gaussians father away won't contriubute much            
+            //Gaussians father away won't contriubute much
             double n = 0;
             const double kT = temp;
             for (int t=-many_cells; t <=many_cells; t++) {
@@ -626,18 +627,18 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
   printf("\nCalculating Homogeneous Free Energy analytically ...\n");
   HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
-  hf.sigma() = 1; 
+  hf.sigma() = 1;
   hf.epsilon() = 1;   //energy constant in the WCA fluid
   hf.kT() = temp;
   hf.n() = reduced_density;
   hf.mu() = 0;   //chemical potential is zero so the Grand Canonical Ensemble becomes a Canonical Ensemble
   //Note: hf.energy() returns energy/volume
 
-  hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;  
+  hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
   hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
   hf.printme("     homogeneous:");
   printf("homogeneous free_energy per vol is %g\n", hf.energy());
-  printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);  
+  printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);
 
   // scale our dx by Xi or w, whichever is larger.
   const double dx = dx_input*(find_Xi(temp) + gwidth);
@@ -674,7 +675,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
         tensor3d nm_2;
         nm_2.x.x=0, nm_2.x.y=0, nm_2.x.z=0, nm_2.y.x=0, nm_2.y.y=0, nm_2.y.z=0, nm_2.z.x=0, nm_2.z.y=0, nm_2.z.z=0;
-        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()}; 
+        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -688,7 +689,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                   if (my_experiment > 0) {
                     n_weight=find_weighted_den_aboutR_mc_accurately_experiment(r, R, gwidth, fv, alpha, Xi);
                   } else {
-                  n_weight=find_weighted_den_aboutR_mc_accurately(r, R, gwidth, fv, alpha, Xi);
+                    n_weight=find_weighted_den_aboutR_mc_accurately(r, R, gwidth, fv, alpha, Xi);
                   }
                   //double n3_error=report_my_error(r, R, gwidth, fv, alpha, Xi);  //FOR DEBUG - delete!
                   //printf(">>>>n3_error=%g\n",n3_error);   //FOR DEBUG - delete!
@@ -709,7 +710,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           }
         }
 
-        double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);   
+        double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
         double phi_3;
         if (tensorw) {
@@ -717,24 +718,24 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           //                              nm_2.y.y*nm_2.y.y +
           //                              nm_2.z.z*nm_2.z.z +
           //                            2*nm_2.x.y*nm_2.y.x +
-          //                            2*nm_2.x.z*nm_2.z.x +                               
-          //                            2*nm_2.y.z+nm_2.z.y;  
+          //                            2*nm_2.x.z*nm_2.z.x +
+          //                            2*nm_2.y.z+nm_2.z.y;
 
-         // double traceof_nm_2cubed  =   nm_2.x.x*nm_2.x.x*nm_2.x.x +
-         //                               nm_2.y.y*nm_2.y.y*nm_2.y.y +
-         //                               nm_2.z.z*nm_2.z.z*nm_2.z.z +
-                                    //3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
-                                    //3*nm_2.x.x*nm_2.x.z*nm_2.z.x +                               
-                                    //3*nm_2.x.y*nm_2.y.y+nm_2.y.x +                              
-                                    //3*nm_2.x.y*nm_2.y.z+nm_2.z.x +                              
-                                    //3*nm_2.x.z*nm_2.z.y+nm_2.y.x +
-                                    //3*nm_2.x.z*nm_2.z.z+nm_2.z.x +
-                                    //3*nm_2.y.y*nm_2.y.z+nm_2.z.y +
-                                    //3*nm_2.y.z*nm_2.z.z+nm_2.z.y;
-                                      
+          // double traceof_nm_2cubed  =   nm_2.x.x*nm_2.x.x*nm_2.x.x +
+          //                               nm_2.y.y*nm_2.y.y*nm_2.y.y +
+          //                               nm_2.z.z*nm_2.z.z*nm_2.z.z +
+          //3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
+          //3*nm_2.x.x*nm_2.x.z*nm_2.z.x +
+          //3*nm_2.x.y*nm_2.y.y+nm_2.y.x +
+          //3*nm_2.x.y*nm_2.y.z+nm_2.z.x +
+          //3*nm_2.x.z*nm_2.z.y+nm_2.y.x +
+          //3*nm_2.x.z*nm_2.z.z+nm_2.z.x +
+          //3*nm_2.y.y*nm_2.y.z+nm_2.z.y +
+          //3*nm_2.y.z*nm_2.z.z+nm_2.z.y;
+
           phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3*nm_2.determinant()))
-            /(24*M_PI*sqr(1-n_3)); //Schmidt equation 5
-          //phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + 9*(nv_2.dot(nm_2.dot(nv_2))-(traceof_nm_2cubed/2.0)))/(24*M_PI*uipow(1.0-1.0*n_3,2));      //Tensor version FMF2? (Evans)            
+                  /(24*M_PI*sqr(1-n_3)); //Schmidt equation 5
+          //phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + 9*(nv_2.dot(nm_2.dot(nv_2))-(traceof_nm_2cubed/2.0)))/(24*M_PI*uipow(1.0-1.0*n_3,2));      //Tensor version FMF2? (Evans)
           //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2)-traceof_nm_2cubed+n_2*n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));  //Tensor version FMF3 (Sweatman)
         } else {
           // The following was Rosenfelds early vector version of the functional
@@ -800,7 +801,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           data_out.cfree_energy_per_vol=0;
           return data_out;
         }
-        //printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell);   //debug  
+        //printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell);   //debug
         //printf("      finished %.5f%% of the integral\n",
         //       100*((i)/double(Nl)
         //           +(j)/uipow(Nl, 2)
@@ -824,7 +825,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          mean_n0, mean_n1, mean_n2, mean_n3);
   printf("homo n0 = %g, homo n1 = %g, homo n2 = %g, homo n3 = %g\n",
          hf.get_n0(), hf.get_n1(), hf.get_n2(), hf.get_n3());
-         
+
   double diff_n0=mean_n0- hf.get_n0();
   double diff_n1=mean_n1- hf.get_n1();
   double diff_n2=mean_n2- hf.get_n2();
@@ -833,28 +834,28 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("mean_n1-homo_n1 ratio=%g\n", diff_n1/hf.get_n1());
   printf("mean_n2-homo_n2 ratio=%g\n", diff_n2/hf.get_n2());
   printf("mean_n3-homo_n3 ratio=%g\n", diff_n3/hf.get_n3());
-  
+
   // double array[4] = {diff_n0, diff_n1, diff_n2, diff_n3};
   // int i, j;
   // double tem;
   //  for (i=0; i < 4; ++i)
-  //    if (array[i] < 0) 
+  //    if (array[i] < 0)
   //        array[i]=-array[i];  //take absolute value of difference
-  //  //for (i=0; i < 4; ++i)     
+  //  //for (i=0; i < 4; ++i)
   //  //  printf("array[%i]: %g\n", i, array[i]);
-   
+
   //  for (i=0; i < 4-1; ++i)   //sort to find greatest difference
-  //    for (j=i+1; j<4; ++j) 
+  //    for (j=i+1; j<4; ++j)
   //       if (array[i] < array[j]) {
   //         tem = array[i];
   //         array[i] = array[j];
   //         array[j] = tem;
   //       }
-  //  //for (i=0; i < 4; ++i)     
+  //  //for (i=0; i < 4; ++i)
   //  //  printf("array[%i]: %g\n", i, array[i]);
-      
+
   // printf(">>>LARGEST diff in mean_n-homo_n=%g\n\n",array[0]);
-  
+
   //printf("average of all mean_n-homo_n=%g\n", (mean_n0-hf.get_n0() + mean_n1-hf.get_n1()+mean_n2-hf.get_n2()+mean_n3-hf.get_n3())/4);// HERE! DELETE
 
   //There are 4 parallelepipeds in 1 cube; 1 atom/parallelepiped, 4 atoms/cube;
@@ -947,7 +948,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     fclose(f);
   }
   if (my_experiment > 0) {
-   printf("My experiment\n");
+    printf("My experiment\n");
   }
   //printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
   //printf("scaled num_points=50000\n"); // HERE!
@@ -964,7 +965,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   double dV = dx*dx*dx;  //volume element dV
 
   HomogeneousSFMTFluid hf;
-  hf.sigma() = 1;   
+  hf.sigma() = 1;
   hf.epsilon() = 1;   //energy constant in the WCA fluid
   hf.kT() = temp;
   hf.n() = reduced_density;
@@ -1451,7 +1452,7 @@ int main(int argc, const char **argv) {
   //reduced_density is the homogeneous (flat) number density accounting for sphere vacancies MULTIPLIED BY the WCA sigma^3 to make it dimensionless
   //temp is the Boltzman constant MULTIPLIED BY the temperature in Kelvin
 
-                                                      
+
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
   double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.01; //default settings
 
@@ -1514,24 +1515,28 @@ int main(int argc, const char **argv) {
     {"dh", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &downhill, 0, "Do a Downhill Simplex", "BOOLEAN"},
 
     /*** GRID OPTIONS ***/
-    {"dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0,
-     "dimensionless grid spacing dx (scaled by w or Xi)", "DOUBLE"},
+    {
+      "dx", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &dx, 0,
+      "dimensionless grid spacing dx (scaled by w or Xi)", "DOUBLE"
+    },
 
     /*** MONTE-CARLO SEED OPTIONS ***/
     {"mc", '\0', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &NUM_POINTS, 0, "Number of Points for Monte-Carlo", "INT"},
     {"mc-error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &MC_ERROR, 0, "Desired error in Monte-Carlo", "DOUBLE"},
     {"seed", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0, "Monte-Carlo seed", "DOUBLE"},
-    
+
     {"mc-prefactor", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_prefactor, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
     {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
-    
+
     /*** Tensor Weight OPTION ***/
     {"ten", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &tensorw, 0, "Include Tensor weight in SFMT", "BOOLEAN"},
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
     // Where to save the free energy info
-    {"filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &free_energy_output_file, 0,
-     "File to append free energy info to", "FNAME"},
+    {
+      "filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &free_energy_output_file, 0,
+      "File to append free energy info to", "FNAME"
+    },
     {
       "d", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &data_dir, 0,
       "Directory in which to save data", "DIRNAME"
@@ -1682,9 +1687,9 @@ int main(int argc, const char **argv) {
   }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-printf("mc-prefactor=%ld\n", mc_prefactor);   //temporary -delete!
-printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
-  
+  printf("mc-prefactor=%ld\n", mc_prefactor);   //temporary -delete!
+  printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
+
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
   }
@@ -1749,13 +1754,13 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
     } else {
       sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
     }
-    
+
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-     
+
       fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttarazona\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
@@ -1800,12 +1805,12 @@ printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
     } else {
       sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
     }
-      
+
     //Create bestdataout file
     printf("Create best data file: %s\n", bestdat_filename);
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
-      fprintf(newmeltbest, "# git version: %s\n", version_identifier());      
+      fprintf(newmeltbest, "# git version: %s\n", version_identifier());
       fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttarazona\n");
       fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
