@@ -795,10 +795,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             fclose(f);
           }
           data data_out;
-          data_out.diff_free_energy_per_atom=0;
-          data_out.cfree_energy_per_atom=0;
-          data_out.hfree_energy_per_vol=0;
-          data_out.cfree_energy_per_vol=0;
+          // Note that I use cFexcess_of_primitive_cell here which is
+          // a NaN to represent the values that are actually
+          // undefined.
+          data_out.diff_free_energy_per_atom=cFexcess_of_primitive_cell;
+          data_out.cfree_energy_per_atom=cFexcess_of_primitive_cell;
+          data_out.hfree_energy_per_vol=hfree_energy_per_vol;
+          data_out.cfree_energy_per_vol=cFexcess_of_primitive_cell;
           return data_out;
         }
         //printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell);   //debug
