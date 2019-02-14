@@ -39,8 +39,7 @@ parser.add_argument('--mcconstant', metavar='const', type=int,
                     help='monte carlo integration mc_constant - Default 5')
 parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
-parser.add_argument('--datafile', metavar='addtoname', type=str,
-                    help='added to name of data file - Default "FE_vs_gw"')
+                    
 parser.add_argument('--tensor', action='store_true',
                     help='use tensor weight')
 
@@ -92,11 +91,6 @@ if args.mcprefactor:
     mcprefactor=args.mcprefactor
 else :
     mcprefactor=50000
-
-if args.datafile:    
-    datafile='FE_vs_gw_'+args.filedat
-else :
-    datafile='FE_vs_gw'
     
 if args.tensor:    
     for n in np.arange(args.nmin, args.nmax, dn):
