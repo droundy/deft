@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 
 #This program creates a plot of Free Energy difference vs gw at a specified 
-#temperature and density from data in kT*alldat.dat (or kT*alldat_tensor.dat) files
+#temperature and density from data in kT*n*alldat.dat (or kT*n*alldat_tensor.dat) files
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
