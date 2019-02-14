@@ -24,8 +24,6 @@ parser.add_argument('--tensor', action='store_true',
                     
 args=parser.parse_args()
 
-
-
 kT=args.kT
 n=args.n
 
