@@ -1,6 +1,13 @@
 #!/usr/bin/python2
+
+#This program creates plots of: Free Energy/atom vs 1/Reduced Density
+#                               Gibbs Free Energy/atom vs Pressure
+#                               Pressure vs 1/Reduced Density
+#for a given temperature from data in kT*best.dat (or kT*best_tensor.dat) files
+#which are generated as output data files by figs/new-melting.cpp
+
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-pressure.py --kT [temp] --ten [optional]
+#with comand ./plot-pressure.py --kT [temp] --tensor [optional]
 
 from __future__ import print_function, division
 
@@ -10,13 +17,13 @@ import matplotlib.pyplot as plt
 import os, glob
 import argparse
 
-parser = argparse.ArgumentParser(description='Creates data for a FE vs gw plot.')
+parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, P vs 1/n, GibbsFE/atom vs P.')
 
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 
-parser.add_argument('--ten', action='store_true',
-                    help='--ten for use tensor weight')
+parser.add_argument('--tensor', action='store_true',
+                    help='--tensor for use tensor weight')
 
 args=parser.parse_args()
 
@@ -27,8 +34,8 @@ invn = []
 hfe = []
 cfe = []
 
-if args.ten :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tara.dat' % kT)))
+if args.tensor :
+    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
 else :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
 
@@ -43,12 +50,9 @@ cfe = np.array(cfe)
 invn = np.array(invn)
 n = np.array(n)
 
-#print("length of n=%g" %(len(n)))
-#for i in range(len(n)-1):
-#  print(n[i])
+
 
 # Plot Free Energy/atom vs 1/Reduced Density
-
 functions = np.vstack((np.ones_like(invn),
                        invn**-1,
                        invn**-2,
@@ -69,16 +73,16 @@ coeff = A[0]
 #print('coeff', coeff)
 fit_cfe = np.dot(functions, coeff)
 plt.plot(invn, fit_cfe, label="fit crystal free energy")
-
 plt.plot(invn, hfe, 'red', label="Homogeneous Free Energy/atom")
 plt.plot(invn, cfe, 'blue', label="Crystal Free Energy/atom")
 plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Helmholtz Free Energy/atom')
 plt.legend()
-#plt.savefig(plot1)
 
 plt.figure()
+
+
 
 
 dhfe=np.diff(hfe)  #Caution: depends on order of data files!
@@ -88,21 +92,20 @@ mid_invn=invn[0:len(invn)-1]+dinvn/2
 hpressure = -(dhfe/dinvn) #for fixed N and Te   
 cpressure = -(dcfe/dinvn) #for fixed N and Te  
 
-# Plot Pressure vs 1/Reduced Density
+## Plot Pressure vs 1/Reduced Density
 fit_p = np.dot(pressure_functions, coeff)
-#plt.plot(invn, fit_p, label="fit crystal pressure")
-plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
-#plt.plot(mid_invn, hpressure, label="homogeneous pressure", color='red')
-plt.plot(mid_invn, hpressure,  'r.-', label="homogeneous pressure")
-#plt.plot(mid_invn, cpressure, label="crystal pressure", color='blue')
-plt.plot(mid_invn, cpressure, 'b.-', label="crystal pressure")
-plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
-plt.xlabel('1/Reduced Density')
-plt.ylabel('Reduced Pressure')
-plt.legend()
-#plt.savefig(plot2)
+#plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
+#plt.plot(mid_invn, hpressure,  'r.-', label="homogeneous pressure")
+#plt.plot(mid_invn, cpressure, 'b.-', label="crystal pressure")
+#plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
+#plt.xlabel('1/Reduced Density')
+#plt.ylabel('Reduced Pressure')
+#plt.legend()
 
-plt.figure()
+#plt.figure()
+
+
+
 
 mid_hfe = 0.5*(hfe[1:] + hfe[:-1])
 mid_cfe = 0.5*(cfe[1:] + cfe[:-1])
@@ -111,7 +114,7 @@ mid_h_gibbs = mid_hfe + mid_invn*hpressure
 mid_c_gibbs = mid_cfe + mid_invn*cpressure
 fit_c_gibbs = fit_cfe + invn*fit_p
 
-# Plot Gibbs Free Energy/atom vs Pressure
+# Plot Gibbs Free Energy/atom vs Pressure with point of intersection
 zoom_volume = 0.99
 plt.plot(fit_p, fit_c_gibbs - fit_p*zoom_volume, 'b:', label="fit crystal")
 
@@ -149,12 +152,11 @@ def find_densities(p_inter, pressure, invn):
             invnbelow=invn[i-1]
             m=(pressureabove-pressurebelow)/(invnabove-invnbelow)
             invn_inter=invnabove-((pressureabove-p_inter)/m)
-            #print ("Pabove=", pressureabove, "Pbelow=", pressurebelow)
             return invn_inter
 invnh=find_densities(p_inter, hpressure, mid_invn)
 invnc=find_densities(p_inter, cpressure, mid_invn)
 
-print (kT, p_inter, 1/invnh, 1/invnc)
+print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat
 
 plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'r.-', label="Homogeneous Free Energy/atom")
 plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'b.-', label="Crystal Free Energy/atom")
@@ -162,25 +164,23 @@ plt.title("Gibbs Free Energy/atom vs Pressure at Fixed kT=%g" % (kT))
 plt.xlabel('$p$')
 plt.ylabel('Gibbs Free Energy/atom - pressure*(%g volume unit)' % zoom_volume)
 plt.legend()
-#plt.savefig(plot1)
 
 plt.figure()
 
-# Plot Pressure vs 1/Reduced Density  (AGAIN!)
+
+
+
+# Plot Pressure vs 1/Reduced Density with point of intersection 
 plt.plot(invnh, p_inter, 'o', markersize=10) 
 plt.plot(invnc, p_inter, 'o', markersize=10) 
 fit_p = np.dot(pressure_functions, coeff)
-#plt.plot(invn, fit_p, label="fit crystal pressure")
 #plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
-#plt.plot(mid_invn, hpressure, label="homogeneous pressure", color='red')
 plt.plot(mid_invn, hpressure,  'r.-', label="homogeneous pressure")
-#plt.plot(mid_invn, cpressure, label="crystal pressure", color='blue')
 plt.plot(mid_invn, cpressure, 'b.-', label="crystal pressure")
 plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
 plt.legend()
-
 
 #plt.show()
 
