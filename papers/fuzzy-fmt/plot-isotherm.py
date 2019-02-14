@@ -1,4 +1,7 @@
 #!/usr/bin/python2
+
+#This program creates plots from *best.dat or *best_tensor.dat data files
+#which are generated as output data files by figs/new-melting.cpp
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
 #with comand ./plot-isotherm.py --kT [temp] --tensor(optional)
 
