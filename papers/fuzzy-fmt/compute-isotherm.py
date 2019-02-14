@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import os
 import argparse
 
-parser = argparse.ArgumentParser(description='Creates data for a FE vs gw plot.')
+parser = argparse.ArgumentParser(description='Creates data for plots of gw vs n and FE vs n.')
 
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
@@ -38,8 +38,8 @@ parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
 parser.add_argument('--datafile', metavar='addtoname', type=str,
                     help='added to name of data file - Default "FE_vs_gw"')
-parser.add_argument('--ten', action='store_true',
-                    help='--ten for use tensor weight')
+parser.add_argument('--tensor', action='store_true',
+                    help='--tensor for use tensor weight')
 
 args=parser.parse_args()
 
@@ -55,15 +55,10 @@ if args.dgw:
 else :
     dgw=0.01
 
-#if args.ten:          #this doesn't work, don't know why
-#    maxgwdef=0.3
-#else :
-#    maxgwdef=0.2
-
 if args.maxgw:
     maxgw=args.maxgw
 else :
-    maxgw=0.2  #   maxgw=maxgwdef
+    maxgw=0.2  
     
 if args.mingw:
     mingw=args.mingw
@@ -100,15 +95,15 @@ if args.datafile:
 else :
     datafile='FE_vs_gw'
     
-if args.ten:    
+if args.tensor:    
     for n in np.arange(args.nmin, args.nmax, dn):
         cmd = 'rq run -J isotherm-kT%g-n%g' % (kT, n)
         cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
         cmd += ' --gwstart %g --gwend %g --gwstep %g' % (mingw, maxgw, dgw)
         cmd += ' --fv %g --dx %g' % (fv, dx)
         cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
-        cmd += ' --filename isotherm-kT-%g.dat' % kT
-        cmd += ' --ten'
+        cmd += ' --filename isotherm-kT-%g_tensor.dat' % kT
+        cmd += ' --tensor'
         print(cmd)
         os.system(cmd)
 else :
