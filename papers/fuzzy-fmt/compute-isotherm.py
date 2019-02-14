@@ -39,7 +39,7 @@ parser.add_argument('--mcprefactor', metavar='prefac', type=int,
 parser.add_argument('--datafile', metavar='addtoname', type=str,
                     help='added to name of data file - Default "FE_vs_gw"')
 parser.add_argument('--tensor', action='store_true',
-                    help='--tensor for use tensor weight')
+                    help='use tensor weight')
 
 args=parser.parse_args()
 
