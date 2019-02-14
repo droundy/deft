@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-isotherm.py --kT [temp] --ten [optional]
+#with comand ./plot-isotherm.py --kT [temp] --tensor(optional)
 
 from __future__ import print_function, division
 
@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import os, glob
 import argparse
 
-parser = argparse.ArgumentParser(description='Creates data for a FE vs gw plot.')
+parser = argparse.ArgumentParser(description='Plots gw vs n and FEdiff vs n.')
 
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
-parser.add_argument('--ten', action='store_true',
-                    help='--ten for use tensor weight')
+parser.add_argument('--tensor', action='store_true',
+                    help='--tensor for use tensor weight')
 
 args=parser.parse_args()
 
@@ -25,8 +25,8 @@ n = []
 gw = []
 fe_difference = []
 
-if args.ten :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tara.dat' % kT)))    
+if args.tensor :
+    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))    
 else :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
 for f in files:
@@ -46,6 +46,6 @@ plt.title("kT=%g" % (kT))
 plt.plot(n, fe_difference, '.-')
 plt.axhline(0, color='k')
 plt.xlabel('n')
-plt.ylabel('FED')
+plt.ylabel('FEdiff')
 
 plt.show()
