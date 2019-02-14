@@ -1,7 +1,9 @@
 #!/usr/bin/python2
 
-#This program creates plots from *best.dat or *best_tensor.dat data files
+#This program creates plots of gwidth vs density and a FEdiff vs density 
+#for a given temperature from data in kT*best.dat (or kT*best_tensor.dat) files
 #which are generated as output data files by figs/new-melting.cpp
+
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
 #with comand ./plot-isotherm.py --kT [temp] --tensor(optional)
 
