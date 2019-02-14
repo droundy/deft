@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 
 #This program creates a plot of Free Energy difference vs gw at a specified 
-#temperature and density from data in kT*best.dat (or kT*best_tensor.dat) files
+#temperature and density from data in kT*alldat.dat (or kT*alldat_tensor.dat) files
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
@@ -31,7 +31,7 @@ gw = []
 fe_difference = []
 
 if args.ten :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat_tara.dat' % (kT, n))))    
+    files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat_tensor.dat' % (kT, n))))    
 else :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat.dat' % (kT, n))))
 for f in files:
