@@ -5,7 +5,7 @@
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot_FE_vs_gw.py --kT [temp] --n [density]   [OPTIONAL: --tensor]
+#with comand ./plot-FE_vs_gw.py --kT [temp] --n [density]   [OPTIONAL: --tensor]
 
 import os, glob
 import argparse
