@@ -1,6 +1,10 @@
 #!/usr/bin/python2
+
+#This program produces temperature vs density, and pressure vs temperature phase diagrams
+#from data stored in phasenew.dat (or phasenewtensor.dat)
+
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-phasediagram.py [filename]
+#with comand ./plot-phasediagram.py phasenew.dat (or phasenewtensor.dat)
 
 import os
 import argparse
