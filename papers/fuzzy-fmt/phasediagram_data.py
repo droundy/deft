@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 
 #This program generates the phasenew.dat (or phasenewtensor.dat) file 
-#used by plot-phasediagram to plot phase diagrams. It runs
+#used by plot-phasediagram.py to plot phase diagrams. It runs
 #plot-pressure.py for various temperatures and directs the 
 #printed output into the phasenew.dat (or phasenewtensor.dat) file.
 
