@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import os, glob
 import argparse
 
-parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, P vs 1/n, GibbsFE/atom vs P.')
+parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, GibbsFE/atom vs P, and P vs 1/n')
 
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
@@ -156,7 +156,7 @@ def find_densities(p_inter, pressure, invn):
 invnh=find_densities(p_inter, hpressure, mid_invn)
 invnc=find_densities(p_inter, cpressure, mid_invn)
 
-print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat
+print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) by phasediagram_data.py
 
 plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'r.-', label="Homogeneous Free Energy/atom")
 plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'b.-', label="Crystal Free Energy/atom")
