@@ -21,8 +21,8 @@ args=parser.parse_args()
 
 for kT in np.arange(0.05, 1.25, 0.05):
     if args.tensor :
-        cmd = 'rq run -J plot-pressure.py --kT %g --tensor >> phasenewtensor.dat' % (kT)
+        cmd = 'rq run -J plot-pressure.py --kT %g --tensor --noplotshow >> phasenewtensor.dat' % (kT)
     else :
-        cmd = 'rq run -J plot-pressure.py --kT %g >> phasenew.dat' % (kT)
+        cmd = 'rq run -J plot-pressure.py --kT %g --noplotshow >> phasenew.dat' % (kT)
     print(cmd)
     os.system(cmd)

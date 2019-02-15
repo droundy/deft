@@ -7,7 +7,7 @@
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-pressure.py --kT [temp] --tensor [optional]
+#with comand ./plot-pressure.py --kT [temp] [OPTIONAL: --tensor  --noplotshow]
 
 from __future__ import print_function, division
 
@@ -23,7 +23,10 @@ parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 
 parser.add_argument('--tensor', action='store_true',
-                    help='--tensor for use tensor weight')
+                    help='use data with tensor weight')
+
+parser.add_argument('--noplotshow', action='store_true',
+                    help='do not show plots')
 
 args=parser.parse_args()
 
@@ -156,8 +159,6 @@ def find_densities(p_inter, pressure, invn):
 invnh=find_densities(p_inter, hpressure, mid_invn)
 invnc=find_densities(p_inter, cpressure, mid_invn)
 
-print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) by phasediagram_data.py
-
 plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'r.-', label="Homogeneous Free Energy/atom")
 plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'b.-', label="Crystal Free Energy/atom")
 plt.title("Gibbs Free Energy/atom vs Pressure at Fixed kT=%g" % (kT))
@@ -182,6 +183,10 @@ plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
 plt.legend()
 
-#plt.show()
+if args.noplotshow:
+    print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) by phasediagram_data.py
+else :
+    print (kT, p_inter, 1/invnh, 1/invnc)     
+    plt.show()
 
 
