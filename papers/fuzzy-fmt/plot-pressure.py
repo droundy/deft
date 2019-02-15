@@ -95,20 +95,7 @@ mid_invn=invn[0:len(invn)-1]+dinvn/2
 hpressure = -(dhfe/dinvn) #for fixed N and Te   
 cpressure = -(dcfe/dinvn) #for fixed N and Te  
 
-## Plot Pressure vs 1/Reduced Density
 fit_p = np.dot(pressure_functions, coeff)
-#plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
-#plt.plot(mid_invn, hpressure,  'r.-', label="homogeneous pressure")
-#plt.plot(mid_invn, cpressure, 'b.-', label="crystal pressure")
-#plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
-#plt.xlabel('1/Reduced Density')
-#plt.ylabel('Reduced Pressure')
-#plt.legend()
-
-#plt.figure()
-
-
-
 
 mid_hfe = 0.5*(hfe[1:] + hfe[:-1])
 mid_cfe = 0.5*(cfe[1:] + cfe[:-1])
@@ -182,6 +169,8 @@ plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
 plt.legend()
+
+
 
 if args.noplotshow:
     print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) by phasediagram_data.py
