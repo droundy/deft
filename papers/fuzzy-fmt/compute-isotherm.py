@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 
 #This program runs figs/new-melting.cpp for many different densities
+
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
 #with comand ./compute-isotherm.py --kT [temp] --nmin [starting density] --nmax [ending density] --tensor(optional)
 #For list of the many other options enter ./compute-isotherm.py --help
