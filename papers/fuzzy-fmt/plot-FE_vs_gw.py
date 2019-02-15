@@ -30,7 +30,7 @@ n=args.n
 gw = []
 fe_difference = []
 
-if args.ten :
+if args.tensor :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat_tensor.dat' % (kT, n))))    
 else :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat.dat' % (kT, n))))
