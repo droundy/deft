@@ -16,12 +16,12 @@ args=parser.parse_args()
 
 thisdata = np.loadtxt(args.filedat)
 kT=thisdata[:,0]
-#phasenew.dat:   
+#new phasenew.dat format:   
 n_homogeneous=thisdata[:,2]
 n_crystal=thisdata[:,3]  
 P=thisdata[:,1]
 
-#phase.dat:
+#old phase.dat format:
 #n_homogeneous=thisdata[:,1]
 #n_crystal=thisdata[:,2]  
 #P=thisdata[:,3]
