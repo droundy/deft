@@ -1,6 +1,12 @@
 #!/usr/bin/python2
+
+#This program generates the phasenew.dat (or phasenewtensor.dat) file 
+#used by plot-phasediagram to plot phase diagrams. It runs
+#plot-pressure.py for various temperatures and directs the 
+#printed output into the phasenew.dat (or phasenewtensor.dat) file.
+
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./phasediagram_data.py --tar [optional]
+#with comand ./phasediagram_data.py [OPTIONAL: --tensor]
 
 import numpy as np
 import matplotlib.mlab as mlab
@@ -9,16 +15,14 @@ import os, glob
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--tar', action='store_true',
-                    help='--tar for use tarazona tensor')
+parser.add_argument('--tensor', action='store_true',
+                    help='use tensor weight')
 args=parser.parse_args()
 
 for kT in np.arange(0.05, 1.25, 0.05):
-    #print (kT)
-    #cmd = 'rq run -J plot-pressure.py --kT %g >> phasenew.dat' % (kT)
-    if args.tar :
-        cmd = './plot-pressure.py --kT %g --tar >> phasenewtar.dat' % (kT)
+    if args.tensor :
+        cmd = 'rq run -J plot-pressure.py --kT %g --tensor >> phasenewtensor.dat' % (kT)
     else :
-        cmd = './plot-pressure.py --kT %g >> phasenew.dat' % (kT)
+        cmd = 'rq run -J plot-pressure.py --kT %g >> phasenew.dat' % (kT)
     print(cmd)
     os.system(cmd)
