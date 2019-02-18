@@ -20,7 +20,7 @@ parser.add_argument('--kT', metavar='temperature', type=float,
 parser.add_argument('--n', metavar='density', type=float,
                     help='reduced temperature - REQUIRED')
 parser.add_argument('--tensor', action='store_true',
-                    help='--tensor for use tensor weight')
+                    help='use tensor weight')
                     
 args=parser.parse_args()
 
