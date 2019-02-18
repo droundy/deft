@@ -20,12 +20,14 @@ parser.add_argument('--tensor', action='store_true',
                     help='use tensor weight')
 args=parser.parse_args()
 
+kT_freeze = []
 p_at_freezing = []  #pressure at freezing (intersection point between homogeneous and crystal plots)
 n_homogeneous_at_freezing =[]
 n_crystal_at_freezing = []
 
 for kT in np.arange(0.05, 1.25, 0.05):
-
+   
+   kT_freeze.append(kT)  
    n = []
    invn = []
    hfe = []
@@ -117,30 +119,19 @@ for kT in np.arange(0.05, 1.25, 0.05):
    invnh=find_densities(p_inter, hpressure, mid_invn)
    invnc=find_densities(p_inter, cpressure, mid_invn)
    
-   p_at_freezing.append=p_inter
-   n_homogeneous_at_freezing.append=1/invnh
-   n_crystal_at_freezing.append=1/invnc
+   p_at_freezing.append(p_inter)   
+   n_homogeneous_at_freezing.append(1/invnh)
+   n_crystal_at_freezing.append(1/invnc)
 
-   print (kT, p_inter, n_homogeneous_at_freezing, n_crystal_at_freezing)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) by phasediagram_data.py
+   print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) to store for reference
 
-#---------------------------------------
-#------
-p_at_freezing = np.array(p_at_freezing)
-n_homogeneous_at_freezing = np.array(n_homogeneous_at_freezing)
-n_crystal_at_freezing = np.array(n_crystal_at_freezing)
-
-kT_freeze= []
-for kT in np.arange(0.05, 1.25, 0.05):    
-   kT_freeze.append
-kT_freeze = np.array(kT_freeze)
-#------
-
+   
 #Temperature vs Density Phase Diagram
 plt.plot(n_homogeneous_at_freezing, kT_freeze, label='liquid', color='red')
 plt.plot(n_crystal_at_freezing, kT_freeze, label='solid', color='blue')
-plt.fill_betweenx(kT_freeze, 0, n_homogeneous_at_freezing, color='red')  
-plt.fill_betweenx(kT_freeze, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
-plt.fill_betweenx(kT_freeze, n_crystal_at_freezing, 1.1, color='blue')  
+#plt.fill_betweenx(kT_freeze, 0, n_homogeneous_at_freezing, color='red')       #FIX!
+#plt.fill_betweenx(kT_freeze, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
+#plt.fill_betweenx(kT_freeze, n_crystal_at_freezing, 1.1, color='blue')  
 plt.title("Temperature vs Density")
 plt.legend(loc='best')
 plt.xlabel('Density')
@@ -148,12 +139,12 @@ plt.ylabel('kT')
 
 plt.figure()
 
-#Pressure vs Temperature Phase Diagram
-plt.fill_between(kT_freeze, 0*p_at_freezing, p_at_freezing, color='red')
-plt.fill_between(kT_freeze, p_at_freezing, p_at_freezing+100, color='blue')
+##Pressure vs Temperature Phase Diagram
+#plt.fill_between(kT_freeze, 0*p_at_freezing, p_at_freezing, color='red')      #FIX!
+#plt.fill_between(kT_freeze, p_at_freezing, p_at_freezing+100, color='blue')
 plt.plot(kT_freeze, p_at_freezing, color='black')
-plt.ylim(0, 40)
-plt.xlim(kT_freeze.min(), kT_freeze.max())
+#plt.ylim(0, 40)
+#plt.xlim(kT_freeze.min(), kT_freeze.max())
 plt.title("Pressure vs Temperature")
 plt.xlabel('kT')
 plt.ylabel('Pressure')
