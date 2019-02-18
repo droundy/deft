@@ -1,10 +1,12 @@
 #!/usr/bin/python2
 
 #This program runs figs/new-melting.cpp for many different densities
+#ie. figs/new-melting.mkdat --kT .5 --n 1 --gwstart .01 --gwend .2 --gwstep .01 --fv 0 --dx 0.5 --mcerror 0.001 --mcconstant 5 --mcprefactor 50000
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
 #with comand ./compute-isotherm.py --kT [temp] --nmin [starting density] --nmax [ending density] --tensor(optional)
 #For list of the many other options enter ./compute-isotherm.py --help
+
 
 import numpy as np
 import matplotlib.mlab as mlab
