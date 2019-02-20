@@ -25,6 +25,7 @@ p_at_freezing = []  #pressure at freezing (intersection point between homogeneou
 n_homogeneous_at_freezing =[]
 n_crystal_at_freezing = []
 
+kT_to_plot = [0.1, 0.2, 0.5, 1.0]
 for kT in np.arange(0.05, 1.25, 0.05):
    
    kT_freeze.append(kT)  
@@ -35,6 +36,7 @@ for kT in np.arange(0.05, 1.25, 0.05):
 
    if args.tensor :
      files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
+     
    else :
       files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
 
@@ -77,6 +79,14 @@ for kT in np.arange(0.05, 1.25, 0.05):
    mid_invn=invn[0:len(invn)-1]+dinvn/2
    hpressure = -(dhfe/dinvn) #for fixed N and Te   
    cpressure = -(dcfe/dinvn) #for fixed N and Te  
+
+   if kT in kT_to_plot:
+      plt.figure('pressure')
+      plt.plot(1/mid_invn, cpressure, label='fluid kT=%g' % kT)
+      plt.plot(1/mid_invn, hpressure, label='solid kT=%g' % kT)
+      plt.xlabel('n')
+      plt.ylabel('p')
+      plt.legend(loc='best')
 
    fit_p = np.dot(pressure_functions, coeff)
 
@@ -125,13 +135,13 @@ for kT in np.arange(0.05, 1.25, 0.05):
 
    print (kT, p_inter, 1/invnh, 1/invnc)   #Use >> phase_diagram_data.dat (or phase_diagram_data-tensor.dat) to store data for reference
 
-   
+plt.figure()
 #Temperature vs Density Phase Diagram
 plt.plot(n_homogeneous_at_freezing, kT_freeze, label='liquid', color='red')
 plt.plot(n_crystal_at_freezing, kT_freeze, label='solid', color='blue')
-#plt.fill_betweenx(kT_freeze, 0, n_homogeneous_at_freezing, color='red')       #FIX!   0 is not a list
+plt.fill_betweenx(kT_freeze, 0, n_homogeneous_at_freezing, color='red')       #FIX!   0 is not a list
 plt.fill_betweenx(kT_freeze, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
-#plt.fill_betweenx(kT_freeze, n_crystal_at_freezing, 1.1, color='blue')        #FIX!  1.1 is not a list
+plt.fill_betweenx(kT_freeze, n_crystal_at_freezing, 1.1, color='blue')        #FIX!  1.1 is not a list
 plt.title("Temperature vs Density")
 plt.legend(loc='best')
 plt.xlabel('Density')
