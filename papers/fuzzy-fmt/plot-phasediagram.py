@@ -139,9 +139,9 @@ plt.figure()
 #Temperature vs Density Phase Diagram
 plt.plot(n_homogeneous_at_freezing, kT_freeze, label='liquid', color='red')
 plt.plot(n_crystal_at_freezing, kT_freeze, label='solid', color='blue')
-plt.fill_betweenx(kT_freeze, 0, n_homogeneous_at_freezing, color='red')       #FIX!   0 is not a list
+plt.fill_betweenx(kT_freeze, 0, n_homogeneous_at_freezing, color='red')       
 plt.fill_betweenx(kT_freeze, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
-plt.fill_betweenx(kT_freeze, n_crystal_at_freezing, 1.1, color='blue')        #FIX!  1.1 is not a list
+plt.fill_betweenx(kT_freeze, n_crystal_at_freezing, 1.1, color='blue')        
 plt.title("Temperature vs Density")
 plt.legend(loc='best')
 plt.xlabel('Density')
@@ -150,8 +150,8 @@ plt.ylabel('kT')
 plt.figure()
 
 ##Pressure vs Temperature Phase Diagram
-#plt.fill_between(kT_freeze, 0*p_at_freezing, p_at_freezing, color='red')      #FIX!
-#plt.fill_between(kT_freeze, p_at_freezing, p_at_freezing+100, color='blue')
+plt.fill_between(kT_freeze, 0, p_at_freezing, color='red')      
+plt.fill_between(kT_freeze, p_at_freezing, 30, color='blue')    #FIX - change 30
 plt.plot(kT_freeze, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_freeze.min(), kT_freeze.max())     #FIX!  
