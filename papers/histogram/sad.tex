@@ -365,7 +365,7 @@ parameter $t_0$.
         The light blue area is the quadratic approximation
         for the change in entropy.  The vertical dotted lines represent
         the energy corresponding to $T=1/3$ and $T=\infty$.}
-        ~\jpsays{I fixed this to use samc-1e4 reference. Remove comment}
+        ~\jpsays{I fixed this to use samc-1e4-s1. Remove comment}
   \label{fig:entropy-cartoon}
 \end{figure}
 
@@ -545,6 +545,17 @@ sufficient updates to \emph{possibly} converge to the true entropy.
 
 \section{Results}\label{sec:results}
 
+\begin{figure*}
+  \includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf}%
+\includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf}
+  \caption{(a) The average entropy error for each MC method is shown for $\delta_0 = 0.05\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$ with
+               a fixed energy range reference as discussed in the text. The update factor $\gamma_t$ for
+               $N=50$ versus iteration for the four different methods: WL, $1/t$-WL, SAMC, and SAD is shown beneath.
+           (b) The average entropy error for each MC method is shown for $\delta_0 = 0.005\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$ with
+               the same fixed energy range reference used in (a). The update factor $\gamma_t$ for
+               $N=50$ versus iteration for the four different methods: WL, $1/t$-WL, SAMC, and SAD is shown beneath.}\label{fig:fast-slow-gamma}
+\end{figure*}
+
 ~\jpsays{I edited this section}
 For the square-well fluid, our simulations treat systems with a particle number
 of $50$ and $256$, a well-width of $\lambda = 1.3$ and $\lambda = 1.5$, and a volume
@@ -582,7 +593,7 @@ simulation time.
 \end{align}
 Simulations that take more iterations to reach the same entropy error as a
 different method take longer to converge. This behavior is seen in
-Fig.~\ref{fig:N50-ff0.3-avg-error}.
+Fig.~\ref{fig:fast-slow-gamma}.
 
 \subsection{A periodic system with 50 atoms}
 
@@ -602,19 +613,19 @@ smaller displacement distance of $\delta_0 = 0.005\sigma$, which
 resulted in an acceptance rate of 86\%, which we expected converge
 more slowly.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-default.pdf}
-  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
-  a fixed energy range SAMC $t_0 = 10^3$ serving as the reference.}\label{fig:N50-ff0.3-avg-error}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-slow.pdf}
-  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
-  a fixed energy range SAMC $t_0 = 10^3$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
-  serving as the reference.}\label{fig:N50-ff0.3-avg-error-slow}
-\end{figure}
+%\begin{figure}
+%  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-default.pdf}
+%  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
+%  a fixed energy range SAMC $t_0 = 10^3$ serving as the reference.}\label{fig:N50-ff0.3-avg-error}
+%\end{figure}
+%\begin{figure}
+%  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-slow.pdf}
+%  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
+%  a fixed energy range SAMC $t_0 = 10^3$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
+%  serving as the reference.}\label{fig:N50-ff0.3-avg-error-slow}
+%\end{figure}
 
-Figure~\ref{fig:N50-ff0.3-avg-error} shows the average error in the
+Figure~\ref{fig:fast-slow-gamma}a shows the average error in the
 entropy as a function of time for this system with the reasonable
 displacement distance of $\delta_0 = 0.05\sigma$.  The solid lines
 represent the average of the absolute value of the error in the
@@ -625,17 +636,7 @@ been made all but the SAMC simulation with the shortest $t_0$ have
 begun to converge as $1/\sqrt{t}$.  We then see the WL error begin to
 saturate around $10^{10}$ moves.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/gamma-n50}
-  \caption{\davidsays{We need to make a distinction between SAD and
-      SAD both in figure and in caption.  I don't know what to call
-      the slow SAD.  Also, should this move down to results, and do we
-      want slow WL and slow-1/t WL?} The update factor $\gamma_t$ for
-    $N=50$ versus iteration for three different methods: WL, SAMC, and
-    SAD.}\label{fig:fast-slow-gamma}
-\end{figure}
-
-Figure~\ref{fig:N50-ff0.3-avg-error-slow} shows the average error in
+Figure~\ref{fig:fast-slow-gamma}b shows the average error in
 the entropy as a function of time for this system with the
 unreasonably small displacement distance of $\delta_0 = 0.005\sigma$.
 %
@@ -650,9 +651,18 @@ translation scale of $\delta = 0.005\sigma$. SAD, WL, and $1/t$-WL
 handle the shift in displacement distance and converge roughly as
 expected.
 
-To see how SAD, WL, and $1/t$-WL compensate for the smaller
-displacement distance, \davidsays{see Fig.~\ref{fig:fast-slow-gamma}
-  and discuss this}
+The methods SAD, WL, and $1/t$-WL compensate for the smaller
+displacement distance as can be seen from Figure~\ref{fig:fast-slow-gamma}.
+The update factors take approximately 10x longer to reach steady-state for
+the slower translation scale. Because of this update behavior, these methods
+do not suffer in converging to the correct density of states from having a
+static parameter such as SAMC $t_0$ in the update factor. SAMC methods that converge
+in a reasonable amount of moves in Figure~\ref{fig:fast-slow-gamma}a do not 
+necessarily do so for Figure~\ref{fig:fast-slow-gamma}b.
+
+
+Sad performs similarly regardless of the displacement distance chosen although
+it transitions to $1/\sqrt{t}$ convergence after 
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf}
@@ -671,13 +681,13 @@ displacement distance, \davidsays{see Fig.~\ref{fig:fast-slow-gamma}
 For this simulation, we chose a minimum reduced
 temperature of $1.0$, which corresponds to an interesting energy range
 from $-915$ to $-509$.  The number of important energy states for this
-system is then $N_S = S_{\min} - S_{\max} = 406$.
+system is then $N_S = E_{\min} - E_{\max} = 406$.
 The entropy of this system is has an entropy that
 differs by 275, corresponding to a ratio of
 $10^{119}$ between the highest and lowest density of states.
 
-Figure~\ref{fig:N256} shows the average error in the
-entropy as a function of time for this system with the reasonable
+Figure~\ref{fig:n256} shows the average error in the
+entropy as a function of moves for this system with the reasonable
 displacement distance of $\delta_0 = 0.05\sigma$.  The solid lines
 represent the average of the absolute value of the error in the
 entropy averaged over eight simulations using different random number
@@ -694,11 +704,11 @@ converge rapidly.  Larger $t_0$ parameters are simulated for
 comparison with SAD.  SAD has significantly smaller fluctuations
 in the average entropy error for a given number of moves.
 
-{\color{red}
-Figure~\ref{fig:n256-lndos-comparison} shows the calculated entropy for
-the $N = 256$ system. The grey dash lines indicate the $S_{\max} = 509$
-point and the $S_{\min} = 915$. Only the reference method is shown.
-}
+%{\color{red}
+%Figure~\ref{fig:n256-lndos-comparison} shows the calculated entropy for
+%the $N = 256$ system. The grey dash lines indicate the $S_{\max} = 509$
+%point and the $S_{\min} = 915$. Only the reference method is shown.
+%}
 
 \subsubsection{Discussion on convergence and update factor}
 

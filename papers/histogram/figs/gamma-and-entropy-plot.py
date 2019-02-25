@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rc('font', family='serif')
-matplotlib.rcParams['figure.figsize'] = (5, 8)
+matplotlib.rcParams['figure.figsize'] = (5, 7)
 
 if 'noshow' in sys.argv:
         matplotlib.use('Agg')
