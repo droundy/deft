@@ -365,7 +365,6 @@ parameter $t_0$.
         The light blue area is the quadratic approximation
         for the change in entropy.  The vertical dotted lines represent
         the energy corresponding to $T=1/3$ and $T=\infty$.}
-        ~\jpsays{I fixed this to use samc-1e4-s1. Remove comment}
   \label{fig:entropy-cartoon}
 \end{figure}
 
@@ -548,23 +547,33 @@ sufficient updates to \emph{possibly} converge to the true entropy.
 \begin{figure*}
   \includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf}%
 \includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf}
-  \caption{(a) The average entropy error for each MC method is shown for $\delta_0 = 0.05\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$ with
-               a fixed energy range reference as discussed in the text. The update factor $\gamma_t$ for
-               $N=50$ versus iteration for the four different methods: WL, $1/t$-WL, SAMC, and SAD is shown beneath.
-           (b) The average entropy error for each MC method is shown for $\delta_0 = 0.005\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$ with
+  \caption{(a) The entropy error for each MC method for $N=50$, 
+               $\delta_0 = 0.05\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$
+               as a function of number of iterations run.  The error is
+               averaged over 8 independent simulations, and the best
+               and worst simulations for each method are shown as a
+               semi-transparent shaded area.
+              (b) The update factor $\gamma_t$ versus iteration number
+               for the same simulations.
+           (c) \davidsays{Make this similar} The average entropy error for each MC method is shown for $\delta_0 = 0.005\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$ with
                the same fixed energy range reference used in (a). The update factor $\gamma_t$ for
                $N=50$ versus iteration for the four different methods: WL, $1/t$-WL, SAMC, and SAD is shown beneath.}\label{fig:fast-slow-gamma}
 \end{figure*}
 
-~\jpsays{I edited this section}
-For the square-well fluid, our simulations treat systems with a particle number
-of $50$ and $256$, a well-width of $\lambda = 1.3$ and $\lambda = 1.5$, and a volume
-corresponding to a
-filling fraction of $\eta = 0.3$ and $\eta = 0.17$ respectively. The simulations
-also explore a reasonable displacement distance $\delta_0 = 0.05\sigma$ and
-an unreasonably small displacement distance of $0.005\sigma$. The simulations explore the
-energy space of the systems at reduced temperatures of
-$T_{\text{min}} = 1/3$ and $1.0$.  All simulations lead to the minimum important
+For the square-well fluid, our simulations treat two systems.  The first is
+a smaller simulation with a particle number
+of 50, a well-width of $\lambda = 1.3$, and a volume
+corresponding to a filling fraction of $\eta = 0.3$. The second system
+is larger, with a particle number
+of 256, a well-width of $\lambda = 1.5$, and a volume
+corresponding to a filling fraction of $\eta = 0.17$.
+For each system we use a reasonable displacement distance $\delta_0 = 0.05\sigma$,
+and for the smaller system we also use an unreasonably small displacement
+distance of $0.005\sigma$. The simulations explore the
+energy space of the systems with minimum reduced temperatures of
+$T_{\text{min}} = 1/3$ for simulations of the smaller system, and $T_{\min}=1$
+for the larger system.
+All simulations lead to the minimum important
 energy $E_{\min}$ and maximum entropy energy $E_{\max}$
 being calculated (with the exception of the WL methods where both
 of these parameters are needed a priori).  In the sections below, we
@@ -578,7 +587,9 @@ the WL and $1/t$-WL simulations, we constrained the simulation to
 remain in the energy range corresponding to $T_{\min} < T < \infty$,
 as determined by a previous SAMC simulation.  Thus the WL and $1/t$-WL
 simulations were given extra information that in practice would not be
-available without additional computational effort.
+available without additional computational effort, and the SAMC simulations
+computed the entropy over the entire range of possible energies, which
+required more effort.
 
 We use the average entropy error vs moves as a metric to compare
 simulation runtimes and overall convergence. The overall accuracy

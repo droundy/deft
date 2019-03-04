@@ -136,10 +136,12 @@ if "default" in transcale:
     wl_globstring = 'wl*[!slow].txt'
     sad_globstring = 'sad*[!slow].dat'
     plt.text(10**3.2, 10**12.3, '(a)',fontsize=14)
+    plt.text(10**3.2, 1e-1, '(b)',fontsize=14)
 elif "slow" in transcale:
     wl_globstring = 'wl*slow.txt'
     sad_globstring = 'sad*slow.dat'
-    plt.text(10**3.2, 10**12.3, '(b)',fontsize=14)
+    plt.text(10**3.2, 10**12.3, '(c)',fontsize=14)
+    plt.text(10**3.2, 1e-1, '(d)',fontsize=14)
 
 try:
     for wl in glob("data/gamma/n%s/%s" % (N,wl_globstring)):
