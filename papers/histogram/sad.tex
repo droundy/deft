@@ -43,28 +43,29 @@ simulation algorithms have been developed which calculate the
 thermodynamic properties of various systems for all temperatures.  The
 development began with the original histogram method, which used a
 single canonical Monte Carlo simulation to predict properties for
-nearby temperatures~\cite{ferrenberg1988new}.  For large simulations
-this approach is limited to a narrow temperature range because a single
-canonical simulation explores only a small range of energies.  This led
-to a variety of ``broad'' (or ``flat'') histogram
+nearby temperatures~\cite{ferrenberg1988new}.  For large systems this
+approach is limited to a narrow temperature range because a single
+canonical simulation explores only a small range of energies.  This
+led to a variety of ``broad'' (or ``flat'') histogram
 methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
-wang2001determining, wang2001efficient, trebst2004optimizing}, which
-attempt to explore a wide range of energies.  These methods also
-benefit in that they are unlikely to be trapped in a low enetropy state.
+  wang2001determining, wang2001efficient, trebst2004optimizing}, which
+attempt to explore a wide range of energies.  Another benefit, in
+contrast with low-temperature canonical Monte Carlo, is that these
+approaches cannot be trapped in a local energy minimum.
 
-Wang and Landau introduced an algorithm that uses an update factor and
-a statistical histogram to compute the density of states of a given
-system~\cite{wang2001determining, wang2001efficient}.  While the method
-is incredibly powerful, it has several user-defined
-parameters~\cite{landau2004new}.  This can make its application to a
-variety of systems something of an art-form since the user needs to
-determine the ideal parameters for the particular system being studied.
-Also, detailed balance is violated (although only for short periods of
-time), ensuring that convergence is not guaranteed.  This raises
-several questions such as when the method does converge, at what rate will
-the method converge to the correct density of states. Also, can the
-user appropriately decide what parameters to choose so that the
-algorithm solves the problem in the most ideal way.
+Wang and Landau introduced an algorithm (WL) that uses an update
+factor and a statistical histogram to compute the density of states of
+a given system~\cite{wang2001determining, wang2001efficient}.  While
+the method is incredibly powerful, it has a few disadvantage.
+Firstly, it requires the user to select a number of parameters,
+including the range of energies to be studied~\cite{landau2004new}.
+This adds an additional hurdle to its application to a variety of
+systems.  The simulation violates detailed balance, with the size of
+the violation decreasing with time, which complicates convergence
+analysis.  In fact, the error in a WL computation the error has been
+demonstrated to saturate at a non-zero value, i.e. the method does not
+converge to the true density of states~\davidsays{Find as many
+  citations as we can! Presumably some from the following paragraph?}.
 
 Around the same time, the convergence rate for WL was being
 explored~\cite{zhou2005understanding,lee2006convergence,
