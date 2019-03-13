@@ -47,9 +47,9 @@ for kT in np.arange(0.05, 1.15, 0.05):   #data files with these temperatures wil
    invn = []
    hfe = []
    cfe = []
-   hpressure_at_datapoints = []   #try this
-   cpressure_at_datapoints = []   #try this
-   n_at_datapoints = []  #try this
+   hpressure_at_datapoints = []
+   cpressure_at_datapoints = []
+   n_at_datapoints = []
 
    if args.tensor :
      files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
