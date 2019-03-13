@@ -141,7 +141,7 @@ for kT in np.arange(0.05, 1.15, 0.05):   #data files with these temperatures wil
    actual_density = []
    for i in range(len(mid_invn)):
       if hpressure[i] >= p_inter:
-         break
+         break # if the pressure is too high, then we should just stop, since we have left the fluid
       actual_pressure.append(hpressure[i])
       actual_density.append(1/mid_invn[i])
    actual_pressure.append(p_inter)
@@ -150,7 +150,7 @@ for kT in np.arange(0.05, 1.15, 0.05):   #data files with these temperatures wil
    actual_density.append(1/invnc)
    for i in range(len(mid_invn)):
       if cpressure[i] < 0:
-         break
+         break # when the pressure is negative, we know we are in the crazy part where our dft fails.
       if cpressure[i] > p_inter:
          actual_pressure.append(cpressure[i])
          actual_density.append(1/mid_invn[i])
