@@ -50,10 +50,6 @@ for kT in np.arange(0.05, 1.15, 0.05):   #data files with these temperatures wil
    hpressure_at_datapoints = []   #try this
    cpressure_at_datapoints = []   #try this
    n_at_datapoints = []  #try this
-   
-   hpressure_at_datapoints_list = []   #try this
-   cpressure_at_datapoints_list = []   #try this
-   n_at_datapoints_list = []  #try this
 
    if args.tensor :
      files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
@@ -104,42 +100,7 @@ for kT in np.arange(0.05, 1.15, 0.05):   #data files with these temperatures wil
       n_at_datapoints.append(n[i+1])
       hpressure_at_datapoints.append(hpressure[i]+((hpressure[i+1]-hpressure[i])/2))
       cpressure_at_datapoints.append(cpressure[i]+((cpressure[i+1]-cpressure[i])/2))
-      #print (n_at_datapoints[i], hpressure_at_datapoints[i])
-      
-      #if n[i+1] in n_to_plot:
-         #Plot P vs T  at constant n
-         #plt.figure('pressure corresponding to data vs temperature')
-         #plt.scatter(hpressure_at_datapoints[i], kT, color='red', label='solid n=%g' % n[i+1])
-         #plt.scatter(cpressure_at_datapoints[i], kT, color='blue', label='solid n=%g' % n[i+1])
-         #plt.xlabel('kT')
-         #plt.ylabel('p')
-         #plt.legend(loc='best')
-         
-         #Plot T vs P  at constant n
-         #plt.figure('temperature vs pressure corresponding to data')
-         #plt.scatter(kT, hpressure_at_datapoints[i], color='red', label='solid n=%g' % n[i+1])
-         #plt.scatter(kT, cpressure_at_datapoints[i], color='blue', label='solid n=%g' % n[i+1])
-         #plt.xlabel('p')
-         #plt.ylabel('kT')
-         #plt.legend(loc='best')
-      
-   hpressure_at_datapoints_list=hpressure_at_datapoints   #not necessary to make separate variable if not use array
-   cpressure_at_datapoints_list=cpressure_at_datapoints   #not necessary to make separate variable if not use array
-   n_at_datapoints_list = n_at_datapoints                 #not necessary to make separate variable if not use array
-   #hpressure_at_datapoints = np.array(hpressure_at_datapoints)  #this was for the plot below
-   #cpressure_at_datapoints = np.array(cpressure_at_datapoints)  #this was for the plot below
-   #n_at_datapoints = np.array(n_at_datapoints)                  #this was for the plot below
-   
-   #if kT in kT_to_plot:   #delete - redone later!
-      ##Plot P vs n  at constant kT
-      ###plt.figure('pressure corresponding to data vs density')   
-      #plt.plot(n_at_datapoints, hpressure_at_datapoints, label='solid kT=%g' % kT)
-      #plt.plot(n_at_datapoints, cpressure_at_datapoints, label='solid kT=%g' % kT)
-      #plt.title("OLD Pressure vs Number Density at kT")
-      #plt.xlabel('n')
-      #plt.ylabel('p')
-      #plt.legend(loc='best')
-      
+
    fit_p = np.dot(pressure_functions, coeff)
 
    mid_hfe = 0.5*(hfe[1:] + hfe[:-1])
@@ -187,9 +148,9 @@ for kT in np.arange(0.05, 1.15, 0.05):   #data files with these temperatures wil
 
    #print (kT, p_inter, 1/invnh, 1/invnc)   #Use >> phase_diagram_data.dat (or phase_diagram_data-tensor.dat) to store data for reference
    
-   density_data.append(n_at_datapoints_list)   #row index corresponds to temperature at the same index in kT_freeze
-   hpressure_data.append(hpressure_at_datapoints_list)  #row index corresponds to temperature at the same index in kT_freeze
-   cpressure_data.append(cpressure_at_datapoints_list)  #row index corresponds to temperature at the same index in kT_freeze
+   density_data.append(n_at_datapoints)   #row index corresponds to temperature at the same index in kT_freeze
+   hpressure_data.append(hpressure_at_datapoints)  #row index corresponds to temperature at the same index in kT_freeze
+   cpressure_data.append(cpressure_at_datapoints)  #row index corresponds to temperature at the same index in kT_freeze
    
 
 
@@ -276,22 +237,22 @@ plt.legend(loc='best')
 plt.ylabel('Number Density')
 plt.xlabel('Pressure')
 
-#plt.figure()
+plt.figure()
 
-##--------------FIX
-##Plot P vs T at constant n
-#for i in range(0, len(kT_freeze)) : 
-   #for j in range(0, len(density_data[i])) :
-      #if density_data[i][j] in n_to_plot:
-         ##print(density_data[i][j]) 
-         #pressures_in_plot.append(hpressure_data[i][j])
-         #kT_in_plot.append(kT_freeze[i])
-##plt.plot(pressures_in_plot, kT_in_plot, label= 'hpressure n=%g' % (density_data[i][j]), color='red')
-#plt.plot(pressures_in_plot, kT_in_plot, label= 'hpressure n=', color='red')  
-#plt.title("Pressure vs Temperature at n")
-#plt.legend(loc='best')
-#plt.ylabel('Pressure')
-#plt.xlabel('Temperature')
+#--------------FIX
+# Plot P vs T at constant n
+for i in range(0, len(kT_freeze)) : 
+   for j in range(0, len(density_data[i])) :
+      if density_data[i][j] in n_to_plot:
+         print(density_data[i][j]) 
+         pressures_in_plot.append(hpressure_data[i][j])
+         kT_in_plot.append(kT_freeze[i])
+plt.plot(pressures_in_plot, kT_in_plot, label= 'hpressure n=%g' % (density_data[i][j]), color='red')
+plt.plot(pressures_in_plot, kT_in_plot, label= 'hpressure n=', color='red')  
+plt.title("Pressure vs Temperature at n")
+plt.legend(loc='best')
+plt.ylabel('Pressure')
+plt.xlabel('Temperature')
 #------------FIX
 
 plt.figure()
