@@ -25,9 +25,6 @@ n_homogeneous_at_freezing =[]
 n_crystal_at_freezing = []
 kT_in_plot = []
 
-kT_to_plot = [0.1, 0.2, 0.5, 1.0]
-n_to_plot = [.61]
-
 kT_data = []
 density_data = []
 pressure_data = []
@@ -162,7 +159,7 @@ p_at_freezing = np.array(p_at_freezing)
 
 plt.figure('T-vs-n')
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='#eeeeee') 
-#For plotting T vs n, or n vs T at constant P --------
+#For plotting T vs n, or n vs T at constant P 
 for p in [2,5,10,20]:
    n_mid_at_p_list = []
    kT_at_p_list = []
@@ -183,39 +180,35 @@ plt.legend(loc='best')
 plt.xlabel('Number Density')
 plt.ylabel('Temperature')
 
-#    # - OR - uncomment the plot you want
+# - OR - uncomment the plot you want
    
-#    ##Plot n vs T  at constant P
-#    #plt.plot(kT_at_hp_list, hn_mid_at_p_list, label= 'P=%g' % (pressure))
-#    #plt.plot(kT_at_cp_list, cn_mid_at_p_list, label= 'P=%g' % (pressure))
-#    #plt.title("Number Density vs Temperature at fixed Pressure")
-#    #plt.legend(loc='best')
-#    #plt.ylabel('Number Density')
-#    #plt.xlabel('Temperature') 
-# #-----------------------------------------------------    
-
+   #Plot n vs T  at constant P
+   #plt.plot(kT_at_p_list, n_mid_at_p_list, '.-', label= 'P=%g' % p)
+#plt.title("Number Density vs Temperature at fixed Pressure")
+#plt.legend(loc='best')
+#plt.ylabel('Number Density')
+#plt.xlabel('Temperature') 
+   
 plt.figure('p-vs-n')
 
 plt.fill_betweenx(p_at_freezing, n_homogeneous_at_freezing, n_crystal_at_freezing, color='#eeeeee') 
 for i in range(len(kT_data)):
-   if kT_data[i] in kT_to_plot or True:
+   if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       #Plot P vs n  at constant kT
-      #plt.figure('pressure corresponding to data vs density')
       plt.plot(density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
-plt.title("NEW Pressure vs Number Density at kT")
+plt.title("Pressure vs Number Density at kT")
 plt.legend(loc='best')
 plt.ylim(0, 26)
 plt.xlim(0, 1.1)
 plt.xlabel('Number Density')
 plt.ylabel('Pressure')
 
-plt.figure()
+plt.figure('p-vs-V at fixed T')
 
 plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing, 1/n_crystal_at_freezing, color='#eeeeee') 
 for i in range(len(kT_data)):
-   if kT_data[i] in kT_to_plot or True:
-      #Plot P vs n  at constant kT
-      #plt.figure('pressure corresponding to data vs density')
+   if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
+      #Plot P vs 1/n (or V) at constant kT
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
 plt.title("Pressure vs volume at kT")
 plt.legend(loc='best')
@@ -224,41 +217,27 @@ plt.xlim(0.95, 1.6)
 plt.xlabel('Volume per atom')
 plt.ylabel('Pressure')
 
-# plt.figure()
+plt.figure('p-vs-T at fixed n')
 
-# #Plot n vs P  at constant kT
-# plt.plot(hpressure_data[1], density_data[1], label= 'hpressure kT=0.1')  
-# plt.plot(cpressure_data[1], density_data[1], label= 'cpressure kT=0.1')  
-# plt.plot(hpressure_data[3], density_data[3], label= 'hpressure kT=0.2')  
-# plt.plot(cpressure_data[3], density_data[3], label= 'cpressure kT=0.2')
-# plt.plot(hpressure_data[9], density_data[9], label= 'hpressure kT=0.5') 
-# plt.plot(cpressure_data[9], density_data[9], label= 'cpressure kT=0.5') 
-# plt.plot(hpressure_data[19], density_data[19], label= 'hpressure kT=1.0')  
-# plt.plot(cpressure_data[19], density_data[19], label= 'cpressure kT=1.0')   
-# plt.title("Number Density vs Pressure at kT")
-# plt.legend(loc='best')
-# plt.ylabel('Number Density')
-# plt.xlabel('Pressure')
+#--------------FIX
+# Plot P vs T at constant n
+pressures_in_plot = []
+for i in range(0, len(kT_data)) : 
+   for j in range(0, len(density_data[i])) :
+      print(density_data[i][j])
+      if density_data[i][j] in [.61, 0.62496]: #This is a problem now that we are using n_mid
+          print(density_data[i][j]) 
+          pressures_in_plot.append(pressure_data[i][j])
+          kT_in_plot.append(kT_data[i])
+plt.plot(pressures_in_plot, kT_in_plot, label= 'pressure n=%g' % (density_data[i][j]), color='red')
+plt.plot(pressures_in_plot, kT_in_plot, label= 'pressure n= ', color='red')  
+plt.title("Pressure vs Temperature at n")
+plt.legend(loc='best')
+plt.ylabel('Pressure')
+plt.xlabel('Temperature')
+ #------------FIX
 
-# plt.figure()
-
-# #--------------FIX
-# # Plot P vs T at constant n
-# for i in range(0, len(kT_data)) : 
-#    for j in range(0, len(density_data[i])) :
-#       if density_data[i][j] in n_to_plot:
-#          print(density_data[i][j]) 
-#          pressures_in_plot.append(hpressure_data[i][j])
-#          kT_in_plot.append(kT_data[i])
-# plt.plot(pressures_in_plot, kT_in_plot, label= 'hpressure n=%g' % (density_data[i][j]), color='red')
-# plt.plot(pressures_in_plot, kT_in_plot, label= 'hpressure n=', color='red')  
-# plt.title("Pressure vs Temperature at n")
-# plt.legend(loc='best')
-# plt.ylabel('Pressure')
-# plt.xlabel('Temperature')
-# #------------FIX
-
-plt.figure()
+plt.figure('Phase Diagram of T vs n')
 
 #Temperature vs Density Phase Diagram
 plt.plot(n_homogeneous_at_freezing, kT_data, label='liquid', color='red')
@@ -271,7 +250,7 @@ plt.title("Temperature vs Number Density")
 plt.xlabel('Number Density')
 plt.ylabel('Temperature')
 
-plt.figure()
+plt.figure('Phase Diagram of P vs T')
 
 ##Pressure vs Temperature Phase Diagram
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
