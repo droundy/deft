@@ -23,14 +23,14 @@ Factor (SAD)
   Corvallis, OR 97331}
 
 \begin{abstract}
-  We present a novel Monte-Carlo algorithm based on Stochastic
+  We present a novel Monte-Carlo algorithm based on the Stochastic
   Approximation Monte Carlo (SAMC) algorithm for directly calculating
   the density of states. The proposed method is Stochastic
   Approximation with a dynamic update factor (SAD-$\gamma$ or SAD)
-  dynamically adjusts the update factor $\gamma$ during the course of
+  which dynamically adjusts the update factor $\gamma$ during the course of
   the simulation. We test this MC method on the square-well fluid and
-  compare the convergence time and entropy error for a variety of weight-based
-  and transition matrix Monte-Carlo methods. SAD rapidly converges to the
+  compare the convergence time and average entropy error for a variety of weight-based
+  Monte-Carlo methods. SAD rapidly converges to the
   correct density of states without the need for the user to specify an
   arbitrary tunable parameter $t_0$ as in the case of SAMC.
 \end{abstract}
@@ -43,28 +43,29 @@ simulation algorithms have been developed which calculate the
 thermodynamic properties of various systems for all temperatures.  The
 development began with the original histogram method, which used a
 single canonical Monte Carlo simulation to predict properties for
-nearby temperatures~\cite{ferrenberg1988new}.  For large simulations
-this approach is limited to a narrow temperature range because a single
-canonical simulation explores only a small range of energies.  This led
-to a variety of ``broad'' (or ``flat'') histogram
+nearby temperatures~\cite{ferrenberg1988new}.  For large systems this
+approach is limited to a narrow temperature range because a single
+canonical simulation explores only a small range of energies.  This
+led to a variety of ``broad'' (or ``flat'') histogram
 methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
-wang2001determining, wang2001efficient, trebst2004optimizing}, which
-attempt to explore a wide range of energies.  These methods also
-benefit in that they are unlikely to be trapped in a low enetropy state.
+  wang2001determining, wang2001efficient, trebst2004optimizing}, which
+attempt to explore a wide range of energies.  Another benefit, in
+contrast with low-temperature canonical Monte Carlo, is that these
+approaches cannot be trapped in a local energy minimum.
 
-Wang and Landau introduced an algorithm that uses an update factor and
-a statistical histogram to compute the density of states of a given
-system~\cite{wang2001determining, wang2001efficient}.  While the method
-is incredibly powerful, it has several user-defined
-parameters~\cite{landau2004new}.  This can make its application to a
-variety of systems something of an art-form since the user needs to
-determine the ideal parameters for the particular system being studied.
-Also, detailed balance is violated (although only for short periods of
-time), ensuring that convergence is not guaranteed.  This raises
-several questions such as when the method does converge, what rate will
-the method converge to the correct density of states. Also, how can the
-user appropriately decide what parameters to choose so that the
-algorithm solves the problem in the most ideal way.
+Wang and Landau introduced an algorithm (WL) that uses an update
+factor and a statistical histogram to compute the density of states of
+a given system~\cite{wang2001determining, wang2001efficient}.  While
+the method is incredibly powerful, it has a few disadvantage.
+Firstly, it requires the user to select a number of parameters,
+including the range of energies to be studied~\cite{landau2004new}.
+This adds an additional hurdle to its application to a variety of
+systems.  The simulation violates detailed balance, with the size of
+the violation decreasing with time, which complicates convergence
+analysis.  In fact, the error in a WL computation the error has been
+demonstrated to saturate at a non-zero value, i.e. the method does not
+converge to the true density of states~\davidsays{Find as many
+  citations as we can! Presumably some from the following paragraph?}.
 
 Around the same time, the convergence rate for WL was being
 explored~\cite{zhou2005understanding,lee2006convergence,
@@ -89,8 +90,8 @@ systems difficult.
 
 In this work, we have developed a novel algorithm based on SAMC that
 does not require user-defined inputs and therefore should be easily
-applicable to a given system.  We call this method SAD (Dynamic
-Stochastic Approximation), and will discuss it in detail in the methods
+applicable to a given system.  We call this method SAD (Stochastic Approximation
+with a dynamic update factor), and will discuss it in detail in the methods
 section. We compare it along with several flat histogram methods
 which include WL, $1/t$-WL, and SAMC.
 
@@ -123,7 +124,8 @@ methods.  We outline the general workings of each algorithm that we
 developed in detail while summarizing algorithms that were developed in other
 works.  The following methods are introduced and applied to the
 square-well fluid: Wang-Landau (WL), $1/t$-Wang-Landau ($1/t$-WL), Stochastic
-Approximation Monte-Carlo (SAMC), and Dynamic Stochastic Approximation (SAD).
+Approximation Monte-Carlo (SAMC), and Stochastic Approximation with a
+dynamic $\gamma$ (SAD).
 
 \section{Flat histogram methods}\label{sec:histogram}
 
@@ -142,13 +144,11 @@ Each flat histogram Monte Carlo method uses a given set of ``moves''
 which change a system and should satisfy detailed balance.  Each
 algorithm differs in how it determines the probability of accepting a
 move, and in what additional statistics (if any) must be collected in
-order decide on that probability.  The methods we will compare fall in
-two categories:  weight-based methods, which only require a set of
-weights $w(E)$ be collected, and transition-matrix methods that
-require that statistics be collected for any transitions between pairs
-of energies.
+order decide on that probability.  The methods we compare belong to the
+family of weight-based methods, which only require a set of
+weights $w(E)$ be collected.
 
-Both weight-based and transition matrix methods calculate
+Weight-based methods calculate
 the density of states $D(E)$ for discrete energy
 levels~\cite{haber2018performance}. For this reason, energy binning
 becomes an important consideration for complex continous systems.
@@ -163,7 +163,7 @@ discrete energy levels.
 
 \section{Weight-based methods}\label{sec:weight}
 
-We will begin by introducing two related weight-based methods which
+We will begin by introducing three related weight-based methods which
 rely on a weight function $w(E)$, noting that the method proposed in
 this paper (discussed in Section~\ref{sec:sad}) also falls in this
 category.  In these algorithms, the probability of accepting a move is
@@ -365,7 +365,6 @@ parameter $t_0$.
         The light blue area is the quadratic approximation
         for the change in entropy.  The vertical dotted lines represent
         the energy corresponding to $T=1/3$ and $T=\infty$.}
-        ~\jpsays{I fixed this to use samc-1e4 reference. Remove comment}
   \label{fig:entropy-cartoon}
 \end{figure}
 
@@ -545,15 +544,40 @@ sufficient updates to \emph{possibly} converge to the true entropy.
 
 \section{Results}\label{sec:results}
 
-~\jpsays{I edited this section}
-For the square-well fluid, our simulations treat systems with a particle number
-of $50$ and $256$, a well-width of $\lambda = 1.3$ and $\lambda = 1.5$, and a volume
-corresponding to a
-filling fraction of $\eta = 0.3$ and $\eta = 0.17$ respectively. The simulations
-also explore a reasonable displacement distance $\delta_0 = 0.05\sigma$ and
-an unreasonably small displacement distance of $0.005\sigma$. The simulations explore the
-energy space of the systems at reduced temperatures of
-$T_{\text{min}} = 1/3$ and $1.0$.  All simulations lead to the minimum important
+\begin{figure*}
+  \includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf}%
+\includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf}
+  \caption{(a) The entropy error for each MC method for $N=50$,
+               $\delta_0 = 0.05\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$
+               as a function of number of iterations run.  The error is
+               averaged over 8 independent simulations, and the best
+               and worst simulations for each method are shown as a
+               semi-transparent shaded area.
+           (b) The update factor $\gamma_t$ versus iteration number
+               for the same simulations.
+           (c) The entropy error for each MC method for $N=50$,
+               $\delta_0 = 0.005\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$
+               as a function of number of iterations run. The error is
+               determined exactly as in (a).  
+           (d) The update factor $\gamma_t$ versus iteration number
+               for the same simulations.
+  }
+\end{figure*}
+
+For the square-well fluid, our simulations treat two systems.  The first is
+a smaller simulation with a particle number
+of 50, a well-width of $\lambda = 1.3$, and a volume
+corresponding to a filling fraction of $\eta = 0.3$. The second system
+is larger, with a particle number
+of 256, a well-width of $\lambda = 1.5$, and a volume
+corresponding to a filling fraction of $\eta = 0.17$.
+For each system we use a reasonable displacement distance $\delta_0 = 0.05\sigma$,
+and for the smaller system we also use an unreasonably small displacement
+distance of $0.005\sigma$. The simulations explore the
+energy space of the systems with minimum reduced temperatures of
+$T_{\text{min}} = 1/3$ for simulations of the smaller system, and $T_{\min}=1$
+for the larger system.
+All simulations lead to the minimum important
 energy $E_{\min}$ and maximum entropy energy $E_{\max}$
 being calculated (with the exception of the WL methods where both
 of these parameters are needed a priori).  In the sections below, we
@@ -567,7 +591,9 @@ the WL and $1/t$-WL simulations, we constrained the simulation to
 remain in the energy range corresponding to $T_{\min} < T < \infty$,
 as determined by a previous SAMC simulation.  Thus the WL and $1/t$-WL
 simulations were given extra information that in practice would not be
-available without additional computational effort.
+available without additional computational effort, and the SAMC simulations
+computed the entropy over the entire range of possible energies, which
+required more effort.
 
 We use the average entropy error vs moves as a metric to compare
 simulation runtimes and overall convergence. The overall accuracy
@@ -582,7 +608,7 @@ simulation time.
 \end{align}
 Simulations that take more iterations to reach the same entropy error as a
 different method take longer to converge. This behavior is seen in
-Fig.~\ref{fig:N50-ff0.3-avg-error}.
+Fig.~\ref{fig:fast-slow-gamma}.
 
 \subsection{A periodic system with 50 atoms}
 
@@ -602,19 +628,19 @@ smaller displacement distance of $\delta_0 = 0.005\sigma$, which
 resulted in an acceptance rate of 86\%, which we expected converge
 more slowly.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-default.pdf}
-  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
-  a fixed energy range SAMC $t_0 = 10^3$ serving as the reference.}\label{fig:N50-ff0.3-avg-error}
-\end{figure}
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-slow.pdf}
-  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
-  a fixed energy range SAMC $t_0 = 10^3$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
-  serving as the reference.}\label{fig:N50-ff0.3-avg-error-slow}
-\end{figure}
+%\begin{figure}
+%  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-default.pdf}
+%  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
+%  a fixed energy range SAMC $t_0 = 10^3$ serving as the reference.}\label{fig:N50-ff0.3-avg-error}
+%\end{figure}
+%\begin{figure}
+%  \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-entropy-error-slow.pdf}
+%  \caption{The average entropy error for each MC method is shown for $\eta = 0.3$ and $T_{\min} = 1/3$ with
+%  a fixed energy range SAMC $t_0 = 10^3$ from Fig.~\ref{fig:N50-ff0.3-avg-error}
+%  serving as the reference.}\label{fig:N50-ff0.3-avg-error-slow}
+%\end{figure}
 
-Figure~\ref{fig:N50-ff0.3-avg-error} shows the average error in the
+Figure~\ref{fig:fast-slow-gamma}a shows the average error in the
 entropy as a function of time for this system with the reasonable
 displacement distance of $\delta_0 = 0.05\sigma$.  The solid lines
 represent the average of the absolute value of the error in the
@@ -625,17 +651,7 @@ been made all but the SAMC simulation with the shortest $t_0$ have
 begun to converge as $1/\sqrt{t}$.  We then see the WL error begin to
 saturate around $10^{10}$ moves.
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/gamma-n50}
-  \caption{\davidsays{We need to make a distinction between SAD and
-      SAD both in figure and in caption.  I don't know what to call
-      the slow SAD.  Also, should this move down to results, and do we
-      want slow WL and slow-1/t WL?} The update factor $\gamma_t$ for
-    $N=50$ versus iteration for three different methods: WL, SAMC, and
-    SAD.}\label{fig:fast-slow-gamma}
-\end{figure}
-
-Figure~\ref{fig:N50-ff0.3-avg-error-slow} shows the average error in
+Figure~\ref{fig:fast-slow-gamma}b shows the average error in
 the entropy as a function of time for this system with the
 unreasonably small displacement distance of $\delta_0 = 0.005\sigma$.
 %
@@ -650,9 +666,18 @@ translation scale of $\delta = 0.005\sigma$. SAD, WL, and $1/t$-WL
 handle the shift in displacement distance and converge roughly as
 expected.
 
-To see how SAD, WL, and $1/t$-WL compensate for the smaller
-displacement distance, \davidsays{see Fig.~\ref{fig:fast-slow-gamma}
-  and discuss this}
+The methods SAD, WL, and $1/t$-WL compensate for the smaller
+displacement distance as can be seen from Figure~\ref{fig:fast-slow-gamma}.
+The update factors take approximately 10x longer to reach steady-state for
+the slower translation scale. Because of this update behavior, these methods
+do not suffer in converging to the correct density of states from having a
+static parameter such as SAMC $t_0$ in the update factor. SAMC methods that converge
+in a reasonable amount of moves in Figure~\ref{fig:fast-slow-gamma}a do not 
+necessarily do so for Figure~\ref{fig:fast-slow-gamma}b.
+
+
+Sad performs similarly regardless of the displacement distance chosen although
+it transitions to $1/\sqrt{t}$ convergence after 
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf}
@@ -671,13 +696,13 @@ displacement distance, \davidsays{see Fig.~\ref{fig:fast-slow-gamma}
 For this simulation, we chose a minimum reduced
 temperature of $1.0$, which corresponds to an interesting energy range
 from $-915$ to $-509$.  The number of important energy states for this
-system is then $N_S = S_{\min} - S_{\max} = 406$.
+system is then $N_S = E_{\min} - E_{\max} = 406$.
 The entropy of this system is has an entropy that
 differs by 275, corresponding to a ratio of
 $10^{119}$ between the highest and lowest density of states.
 
-Figure~\ref{fig:N256} shows the average error in the
-entropy as a function of time for this system with the reasonable
+Figure~\ref{fig:n256} shows the average error in the
+entropy as a function of moves for this system with the reasonable
 displacement distance of $\delta_0 = 0.05\sigma$.  The solid lines
 represent the average of the absolute value of the error in the
 entropy averaged over eight simulations using different random number
@@ -694,11 +719,11 @@ converge rapidly.  Larger $t_0$ parameters are simulated for
 comparison with SAD.  SAD has significantly smaller fluctuations
 in the average entropy error for a given number of moves.
 
-{\color{red}
-Figure~\ref{fig:n256-lndos-comparison} shows the calculated entropy for
-the $N = 256$ system. The grey dash lines indicate the $S_{\max} = 509$
-point and the $S_{\min} = 915$. Only the reference method is shown.
-}
+%{\color{red}
+%Figure~\ref{fig:n256-lndos-comparison} shows the calculated entropy for
+%the $N = 256$ system. The grey dash lines indicate the $S_{\max} = 509$
+%point and the $S_{\min} = 915$. Only the reference method is shown.
+%}
 
 \subsubsection{Discussion on convergence and update factor}
 
