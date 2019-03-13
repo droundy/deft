@@ -23,17 +23,10 @@ args=parser.parse_args()
 p_at_freezing = []  #pressure at freezing (intersection point between homogeneous and crystal plots)
 n_homogeneous_at_freezing =[]
 n_crystal_at_freezing = []
-hn_mid_at_p_list = []
-cn_mid_at_p_list = []
-kT_at_hp_list = []
-kT_at_cp_list = []
-pressures_to_plot = []   #may delete this
-pressures_in_plot = []
 kT_in_plot = []
 
 kT_to_plot = [0.1, 0.2, 0.5, 1.0]
 n_to_plot = [.61]
-p_to_plot = [2, 20]
 
 kT_data = []
 density_data = []
@@ -167,42 +160,29 @@ n_homogeneous_at_freezing = np.array(n_homogeneous_at_freezing)
 n_crystal_at_freezing = np.array(n_crystal_at_freezing)
 p_at_freezing = np.array(p_at_freezing)
 
+plt.figure('T-vs-n')
+plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='#eeeeee') 
 #For plotting T vs n, or n vs T at constant P --------
-# for pressure in p_to_plot :
-#    for i in range(0, len(kT_data)) :  #number of temperatures kT
-#       for j in range(0, len(density_data[i])-1) :  #number of elements of n at some kT
-#          if hpressure_data[i][j] < pressure < hpressure_data[i][j+1] :
-#             hpressure_below=hpressure_data[i][j]
-#             hpressure_above=hpressure_data[i][j+1] 
-#             hn_below=density_data[i][j]
-#             hn_above=density_data[i][j+1]
-#             hn_mid=(hn_above-hn_below)/2 + hn_below
-#             hn_mid_at_p_list.append(hn_mid)
-#             #print("new", hpressure_below, pressure, hpressure_above)
-#             #print("new", hn_below, hn_mid, hn_above)
+for p in [2,5,10,20]:
+   n_mid_at_p_list = []
+   kT_at_p_list = []
+   for i in range(0, len(kT_data)) :  #number of temperatures kT
+      for j in range(0, len(density_data[i])-1) :  #number of elements of n at some kT
+         if pressure_data[i][j] < p < pressure_data[i][j+1] :
+            phi = pressure_data[i][j+1]
+            plo = pressure_data[i][j]
+            nhi = density_data[i][j+1]
+            nlo = density_data[i][j]
+            n_mid_at_p_list.append((nlo*(phi - p) + nhi*(p - plo))/(phi - plo))
+            kT_at_p_list.append(kT_data[i])
 
-#             kT_at_hp_list.append(kT_data[i])
-            
-#          if cpressure_data[i][j] < pressure < cpressure_data[i][j+1] :
-#             cpressure_below=cpressure_data[i][j]
-#             cpressure_above=cpressure_data[i][j+1] 
-#             cn_below=density_data[i][j]
-#             cn_above=density_data[i][j+1]
-#             cn_mid=(cn_above-cn_below)/2 + cn_below
-#             cn_mid_at_p_list.append(cn_mid)
-#             #print("new", cpressure_below, pressure, cpressure_above)
-#             #print("new", cn_below, cn_mid, cn_above)
-            
-#             kT_at_cp_list.append(kT_data[i])
+   #Plot T vs n  at constant P
+   plt.plot(n_mid_at_p_list, kT_at_p_list, '.-', label= 'P=%g' % p)
+plt.title("Temperature vs Number Density at fixed Pressure")
+plt.legend(loc='best')
+plt.xlabel('Number Density')
+plt.ylabel('Temperature')
 
-#    #Plot T vs n  at constant P
-#    plt.plot(hn_mid_at_p_list, kT_at_hp_list, label= 'P=%g' % (pressure))
-#    plt.plot(cn_mid_at_p_list, kT_at_cp_list, label= 'P=%g' % (pressure))
-#    plt.title("Temperature vs Number Density at fixed Pressure")
-#    plt.legend(loc='best')
-#    plt.xlabel('Number Density')
-#    plt.ylabel('Temperature')  
-   
 #    # - OR - uncomment the plot you want
    
 #    ##Plot n vs T  at constant P
@@ -214,7 +194,7 @@ p_at_freezing = np.array(p_at_freezing)
 #    #plt.xlabel('Temperature') 
 # #-----------------------------------------------------    
 
-plt.figure()
+plt.figure('p-vs-n')
 
 plt.fill_betweenx(p_at_freezing, n_homogeneous_at_freezing, n_crystal_at_freezing, color='#eeeeee') 
 for i in range(len(kT_data)):
@@ -237,7 +217,7 @@ for i in range(len(kT_data)):
       #Plot P vs n  at constant kT
       #plt.figure('pressure corresponding to data vs density')
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
-plt.title("NEW Pressure vs Number Density at kT")
+plt.title("Pressure vs volume at kT")
 plt.legend(loc='best')
 plt.ylim(0, 26)
 plt.xlim(0.95, 1.6)
