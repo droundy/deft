@@ -29,7 +29,7 @@ kT_data = []
 density_data = []
 pressure_data = []
 
-for kT in np.arange(0.05, 1.15, 0.05):   #data files with these temperatures will be plotted
+for kT in np.arange(0.1, 1.15, 0.05):   #data files with these temperatures will be plotted
    
    n = []
    invn = []
