@@ -63,9 +63,10 @@ This adds an additional hurdle to its application to a variety of
 systems.  The simulation violates detailed balance, with the size of
 the violation decreasing with time, which complicates convergence
 analysis.  In fact, the error in a WL computation the error has been
-demonstrated to saturate at a non-zero value, i.e. the method does not
-converge to the true density of states~\davidsays{Find as many
-  citations as we can! Presumably some from the following paragraph?}.
+demonstrated to saturate at a non-zero value~\cite{yan2003fast}, i.e. the method does not
+converge to the true density of states~\cite{belardinelli2007wang,
+belardinelli2008analysis, belardinelli2014intrinsic,
+singh2012density}.
 
 Around the same time, the convergence rate for WL was being
 explored~\cite{zhou2005understanding,lee2006convergence,
@@ -350,11 +351,11 @@ Flat-Histogram method has unique advantages and disadvantages.
 Wang-Landau requires an energy range for initialization.  SAMC removes
 this energy range requirement but requires simulating every possible
 energy. Our proposed method SAD requires the user to input
-$T_\text{min}$ which is an immediate disadvantage of the method;
-however, this allows the user to define an energy simulation
-range between $T_\text{min}$ and $\infty$. Setting a physical parameter
-such as a minimum temperature $T_\text{min}$ is intuitive vs. a user
-needing to know a prior either an energy range or some unphysical
+$T_\text{min}$, the lowest temperature of interest,
+which is an immediate disadvantage of the method. However,
+setting a physical parameter such as a minimum temperature
+$T_\text{min}$ is possibly easier for a user
+than determining in advance either an energy range or some unphysical
 parameter $t_0$.
 
 \begin{figure}
@@ -389,10 +390,12 @@ total change of entropy required (starting from constant weights) to find
 the true entropy, and puts a lower bound on the convergence time.
 After \emph{long} times, when
 all the energies have been long ago found,
-we wish for a lower $t_0$ in order to more rapidly refine the remaining
-error in entropy.  We enable this
-by tracking the last time we encountered a new energy $t_L$, and
-gradually transition to lower $t_0$ (but still asymptotically scaling
+we wish for a lower update factor in order to more rapidly refine the remaining
+error in entropy.  We track the time at which we first visted each possible
+energy.  We define $t_L$ to be the last time that we encountered an energy
+that we currently believe is in the energy range of interest, so a $t\gg t_L$
+we feel confident that we have established the true energy range of interest. We
+gradually transition to a lower update factor (but still asymptotically scaling
 as $\gamma_t \propto 1/t$ to ensure eventual convergence).  Finally,
 we wish for an update factor that is \emph{never} greater than 1, because
 a very large update factor could introduce errors in entropy that may take
@@ -547,21 +550,20 @@ sufficient updates to \emph{possibly} converge to the true entropy.
 \begin{figure*}
   \includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf}%
 \includegraphics[width=0.5\textwidth]{figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf}
-  \caption{(a) The entropy error for each MC method for $N=50$,
+  \caption{(a) The average entropy error for each MC method for $N=50$,
                $\delta_0 = 0.05\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$
                as a function of number of iterations run.  The error is
                averaged over 8 independent simulations, and the best
                and worst simulations for each method are shown as a
-               semi-transparent shaded area.
-           (b) The update factor $\gamma_t$ versus iteration number
+               semi-transparent shaded area, and
+           (b) the update factor $\gamma_t$ versus iteration number
                for the same simulations.
-           (c) The entropy error for each MC method for $N=50$,
+           (c) The average entropy error for each MC method for $N=50$,
                $\delta_0 = 0.005\sigma$, $\eta = 0.3$, and $T_{\min} = 1/3$
-               as a function of number of iterations run. The error is
-               determined exactly as in (a).  
-           (d) The update factor $\gamma_t$ versus iteration number
+               as a function of number of iterations run, and
+           (d) the update factor $\gamma_t$ versus iteration number
                for the same simulations.
-  }
+  }\label{fig:fast-slow-gamma}
 \end{figure*}
 
 For the square-well fluid, our simulations treat two systems.  The first is
@@ -681,8 +683,14 @@ it transitions to $1/\sqrt{t}$ convergence after
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf}
-  \caption{The average entropy error for each MC method is shown for $\eta = 0.17$ and $T_{\min} = 1$ with
-  SAD serving as the reference.}\label{fig:n256}
+  \caption{
+  The average entropy error for each MC method for $N=256$,
+               $\delta_0 = 0.05\sigma$, $\eta = 0.17$, and $T_{\min} = 1$
+               as a function of number of iterations run.  The error is
+               averaged over 8 independent simulations, and the best
+               and worst simulations for each method are shown as a
+               semi-transparent shaded area.  The update factor for this
+               system is in Fig.~\ref{fig:gamma-vs-t} above.}\label{fig:n256}
 \end{figure}
 %\begin{figure}
 %  \includegraphics[width=\columnwidth]{figs/N256-lndos-comparison}
