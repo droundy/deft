@@ -128,9 +128,9 @@ def find_first_intersection(p1, g1, p2, g2):
                         return P_inter, g_inter
 
 p_inter, g_inter = find_first_intersection(hpressure, mid_h_gibbs, cpressure, mid_c_gibbs)
-plt.plot(p_inter, g_inter - p_inter*zoom_volume, 'o', markersize=10)
+plt.plot(p_inter, g_inter - p_inter*zoom_volume, 'o', markersize=10, color='orange')
 pf_inter, gf_inter = find_first_intersection(hpressure, mid_h_gibbs, fit_p, fit_c_gibbs)
-plt.plot(pf_inter, gf_inter - pf_inter*zoom_volume, 'o', markersize=10)
+plt.plot(pf_inter, gf_inter - pf_inter*zoom_volume, 'o', markersize=10, color='purple')
 
 #Find homogeneous and crystal densities at p_inter
 def find_densities(p_inter, pressure, invn):
@@ -159,8 +159,8 @@ plt.figure()
 
 
 # Plot Pressure vs 1/Reduced Density with point of intersection 
-plt.plot(invnh, p_inter, 'o', markersize=10) 
-plt.plot(invnc, p_inter, 'o', markersize=10) 
+plt.plot(invnh, p_inter, 'o', markersize=10, color='red') 
+plt.plot(invnc, p_inter, 'o', markersize=10, color='blue')
 fit_p = np.dot(pressure_functions, coeff)
 #plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
 plt.plot(mid_invn, hpressure,  'r.-', label="homogeneous pressure")
