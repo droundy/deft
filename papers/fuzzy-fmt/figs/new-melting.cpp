@@ -1478,8 +1478,7 @@ int main(int argc, const char **argv) {
   //};
 
   char *data_dir = new char[1024];
-  sprintf(data_dir,"none");
-  const char *default_data_dir = "crystallization";
+  sprintf(data_dir,"crystallization");
 
 
   //********************Setup POPT to get inputs from command line*******************
@@ -1577,12 +1576,7 @@ int main(int argc, const char **argv) {
   printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
 
   // Create directory for data files
-  if (strcmp(data_dir,"none") == 0) {
-    sprintf(data_dir,"%s",default_data_dir);
-    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
-  } else {
-    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
-  }
+  printf("\nUsing data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   mkdir(data_dir, 0777);
 
   // Downhill Simplex
