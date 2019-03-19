@@ -1479,9 +1479,7 @@ int main(int argc, const char **argv) {
 
   char *data_dir = new char[1024];
   sprintf(data_dir,"none");
-  char *default_data_dir = new char[1024];
-  //sprintf(default_data_dir, "crystallization/data");
-  sprintf(default_data_dir, "crystallization");
+  const char *default_data_dir = "crystallization";
 
 
   //********************Setup POPT to get inputs from command line*******************
