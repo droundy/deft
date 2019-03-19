@@ -63,22 +63,26 @@ This adds an additional hurdle to its application to a variety of
 systems.  The simulation violates detailed balance, with the size of
 the violation decreasing with time, which complicates convergence
 analysis.  In fact, the error in a WL computation the error has been
-demonstrated to saturate at a non-zero value~\cite{yan2003fast}, i.e. the method does not
-converge to the true density of states~\cite{belardinelli2007wang,
-belardinelli2008analysis, belardinelli2014intrinsic,
-singh2012density}.
-
-Around the same time, the convergence rate for WL was being
-explored~\cite{zhou2005understanding,lee2006convergence,
-belardinelli2007wang}. It was found that utilizing modification factors
-that decrease faster than $1/t^2$ leads to
-nonconvergence~\cite{belardinelli2007fast}.  This leads to the so-called
-$1/t$-WL algorithm which ensures that excess CPU time is not wasted by
-continuing to perform calculations once the error in the density of
-states becomes saturated~\cite{belardinelli2008analysis}. An effort to
-reduce the number of user defined parameters of WL and formulate a
-theory for why the method converges despite detailed balance being
-violated although infrequently was also being undertaken.
+demonstrated to saturate at a non-zero value~\cite{yan2003fast},
+i.e. the method does not converge to the true density of
+states~\cite{belardinelli2007wang, belardinelli2007fast,
+  belardinelli2008analysis, belardinelli2014intrinsic,
+  singh2012density}.  
+%
+Belardinelli and Pereyra demonstrated that allowing the update factor
+to decrease faster than $1/t$ leads to
+nonconvergence~\cite{belardinelli2007wang}.
+%% Around the same time, the convergence rate for WL was being
+%% explored~\cite{zhou2005understanding,lee2006convergence,
+%%   belardinelli2007wang}.
+%
+This leads to their $1/t$-WL algorithm which ensures that the error
+continues to decrease asymptotically as
+$1/\sqrt{t}$~\cite{belardinelli2008analysis}. \davidsays{I don't
+  understand the following: An effort to reduce the number of user
+  defined parameters of WL and formulate a theory for why the method
+  converges despite detailed balance being violated although
+  infrequently was also being undertaken.  CUT THIS MAYBE?}
 
 Liang, Liu, and Carrol began to consider whether WL could be considered
 a special case of Stochastic Approximation whose convergence could be
