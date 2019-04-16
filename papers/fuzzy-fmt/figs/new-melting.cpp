@@ -1525,8 +1525,8 @@ int main(int argc, const char **argv) {
     {"mc-error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &MC_ERROR, 0, "Desired error in Monte-Carlo", "DOUBLE"},
     {"seed", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0, "Monte-Carlo seed", "DOUBLE"},
 
-    {"mc-prefactor", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_prefactor, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
-    {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
+    {"mc-prefactor", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_prefactor, 0, "Monte-Carlo mc-prefactor", "LONG"},   //temporary - delete later!
+    {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo mc-constant", "LONG"},   //temporary - delete later!
 
     /*** Tensor Weight OPTION ***/
     {"tensor", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &use_tensor_weight, 0, "Include Tensor weight in SFMT", "BOOLEAN"},

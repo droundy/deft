@@ -1,3 +1,3 @@
-# git  version: 0.0.0-2324-gba2e6d353-dirty
-#kT	n	fv	gwidth	hFE/atom	cFE/atom	FEdiff/atom	lat_const	Nsph	dx	mcconstant	mcprefactor	mcerror	mcseed	time(h)
-1	0.84	0	0.04	-9.6133	-7.30428	      2.30902		1.68239		1	0.5	5	50000	0.001	1	0.00230533
+# git  version: 0.0.0-2435-g03d8d87ac
+#kT	n	fv	gwidth	hFE/atom	cFE/atom	FEdiff/atom	lat_const	Nsph	dx	mcconstant	mcprefactor	mcerror	mcseed	time(h)	tensor
+1	0.84	0	0.04	-9.6133	-7.30428	      2.30902		1.68239		1	0.5	5	50000	0.001	1	0.00206823	0

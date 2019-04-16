@@ -5,7 +5,7 @@
 #files which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-all-isotherm.py --tensor(optional)
+#with comand ./plot-all-isotherm.py directory(with data files) --tensor(optional)
 
 from __future__ import print_function, division
 
@@ -19,8 +19,12 @@ parser = argparse.ArgumentParser(description='Plots FEdiff vs density for many t
 
 parser.add_argument('--tensor', action='store_true',
                     help='--tensor for use tensor weight')
+                    
+parser.add_argument('directory', metavar='directory', type=str,
+                    help='directory with data to plot') 
 
 args=parser.parse_args()
+
 
 #plt.figure()
 
@@ -31,9 +35,12 @@ for kT in [.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .
   fe_difference = []
   
   if args.tensor :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))    
+    #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT))) 
+    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))   
   else :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
+    #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
+    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
+    files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   for f in files:
       data = np.loadtxt(f)
       n.append(data[1])

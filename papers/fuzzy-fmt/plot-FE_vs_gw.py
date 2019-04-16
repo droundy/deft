@@ -31,9 +31,11 @@ gw = []
 fe_difference = []
 
 if args.tensor :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat_tensor.dat' % (kT, n))))    
+    #files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat_tensor.dat' % (kT, n))))  
+    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_*alldat_tensor.dat' % (kT, n))))  
 else :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat.dat' % (kT, n))))
+    #files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat.dat' % (kT, n))))
+    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_*alldat.dat' % (kT, n))))
 for f in files:
     data = np.loadtxt(f)
     gw.append(data[3])
