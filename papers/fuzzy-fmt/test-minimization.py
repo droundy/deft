@@ -55,7 +55,13 @@ def minimize_starting_between(xlo, xhi, error_desired):
     while True:
         # pick the next x:
         true_min = np.argmin(np.abs(es))
+        print("true_min", true_min)
         true_min_x = xs[true_min]
+        print("true_min_x", true_min_x)
+        height_y=es[true_min]
+        print("height_y", height_y)
+        best_height=10*np.abs(rough_error_estimate(xs,es))+height_y   
+        print("best_height", best_height)
         if deriv2 > 0:
             best_width = min(np.sqrt(error/deriv2), best_width)
         newx = np.random.random()*(2*best_width) + true_min_x - best_width
@@ -71,11 +77,16 @@ def minimize_starting_between(xlo, xhi, error_desired):
         es_to_fit = list(1*es)
         while len(xs_to_fit) > N_desired:
             furthest = np.argmax(np.abs(xs_to_fit-true_min_x))
+            furthest_y = np.argmax(np.abs(es_to_fit-height_y))
             if np.abs(xs_to_fit[furthest] - true_min_x) > best_width:
                 del xs_to_fit[furthest]
                 del es_to_fit[furthest]
-            else:
+            elif np.abs(es_to_fit[furthest_y]) > best_height:
+                del xs_to_fit[furthest_y]
+                del es_to_fit[furthest_y]
+            else :
                 break
+
         xs_to_fit = np.array(xs_to_fit)
         es_to_fit = np.array(es_to_fit)
         x0, e0, deriv2, error = parabola_fit(xs_to_fit, es_to_fit)
@@ -84,7 +95,7 @@ def minimize_starting_between(xlo, xhi, error_desired):
 
         plt.clf()
         plt.plot(xs,es,'.',label='data')
-        plt.plot(xs_to_fit,es_to_fit,'.',label='data fitted')
+        plt.plot(xs_to_fit,es_to_fit,'.',label='data fitted', color='orange')
         all_xs = np.linspace(xlo, xhi + (xhi-xlo)*.5, 1000)
         print('x0', x0, 'vs', true_min_x)
         print('e0', e0)
@@ -92,10 +103,14 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.plot(all_xs, 0.5*deriv2*(all_xs - x0)**2 + e0, label='my parabola')
         plt.axvline(true_min_x - best_width)
         plt.axvline(true_min_x + best_width)
+        plt.axhline(y=height_y, color="blue")
+        plt.axhline(y=best_height)
         plt.legend()
         plt.xlim(xs_to_fit.min() - 0.1, xs_to_fit.max() + 0.1)
         plt.ylim(es_to_fit.min() - 0.1, es_to_fit.max() + 0.1)
-        plt.pause(1)
+        #plt.pause(1)
+        plt.pause(.02)
+        #plt.show()
 
         # xs = list(xs)
         # es = list(es)
@@ -108,3 +123,5 @@ def minimize_starting_between(xlo, xhi, error_desired):
 
 
 minimize_starting_between(2.5, 3.8, 0.1)
+
+
