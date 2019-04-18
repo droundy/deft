@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+
+#Use this program to find the minimum of a set of data points 
+#Run this program from deft/papers/fuzzy-fmt with command python3 test-minimization.py
+
 from __future__ import division, print_function
 
 import numpy as np
