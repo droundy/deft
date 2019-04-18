@@ -15,18 +15,18 @@ def func_to_minimize(x):
 
 def parabola_fit(xs,ys):
     A = np.vstack([xs**2, xs, np.ones(len(xs))]).T
-    a, b, c = np.linalg.lstsq(A, ys, rcond=None)[0]
+    a, b, c = np.linalg.lstsq(A, ys, rcond=-1)[0]
     x0 = -b/(2*a)
     y0 = a*x0**2 + b*x0 + c
     error = np.mean(np.abs(ys - a*(xs - x0)**2 + y0))
-    return x0, y0, 2*a, error # return min x, min y, second derivative
+    return x0, y0, 2*a, error  # return min x, min y, second derivative
 
 
 def minimize_starting_between(xlo, xhi, error_desired):
     xs = np.linspace(xlo, xhi, 5)
     es = np.array([func_to_minimize(x) for x in xs])
-    plt.plot(xs,es,'.',label='data')
     x0, e0, deriv2, error = parabola_fit(xs, es)
+    plt.plot(xs,es,'.',label='data')
     all_xs = np.linspace(xlo, xhi, 1000)
     print('x0', x0)
     print('e0', e0)
@@ -42,6 +42,7 @@ def minimize_starting_between(xlo, xhi, error_desired):
 
         N_desired = max(5, (error/error_desired)**2)
         print('N_desired', N_desired)
+        
         while len(xs) > N_desired:
             furthest = np.argmax(np.abs(xs-x0))
             xs[furthest] = xs[-1]
@@ -49,16 +50,27 @@ def minimize_starting_between(xlo, xhi, error_desired):
             xs = xs[:-1]
             es = es[:-1]
 
+        x0, e0, deriv2, error = parabola_fit(xs, es)
+        parabola_e = 0.5*deriv2*(xs - x0)**2 + e0
+        residuals = np.abs(parabola_e - es)
+
         plt.clf()
         plt.plot(xs,es,'.',label='data')
-        x0, e0, deriv2, error = parabola_fit(xs, es)
-        all_xs = np.linspace(xlo, xhi, 1000)
+        all_xs = np.linspace(xlo, xhi + (xhi-xlo)*.5, 1000)
         print('x0', x0)
         print('e0', e0)
         plt.plot(all_xs, 0.5*deriv2*(all_xs - x0)**2 + e0, label='my parabola')
         plt.legend()
         plt.pause(1e-9)
 
+        # xs = list(xs)
+        # es = list(es)
+        # for i in reversed(range(len(xs))):
+        #     if residuals[i] > 3*error:
+        #         del xs[i]
+        #         del es[i]
 
 
-minimize_starting_between(2.8, 3.6, 0.1)
+
+
+minimize_starting_between(2.9, 3.6, 0.1)
