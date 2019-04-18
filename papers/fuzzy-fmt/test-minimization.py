@@ -14,6 +14,14 @@ eps = 2.0
 emin = 1.0
 sigma = 0.01
 
+def func_number_datapoints(xs, xmin, xmax, es, ymin, ymax):
+    count=0
+    for i in range(1,len(xs)-1): 
+        if xmin < xs[i] < xmax :
+            if ymin < es[i] < ymax :
+                count=count+1
+    return count
+
 def func_exact(x):
     return emin + 2*eps*((xmin/x)**12/2 - (xmin/x)**6) + eps
 
@@ -60,7 +68,9 @@ def minimize_starting_between(xlo, xhi, error_desired):
         print("true_min_x", true_min_x)
         height_y=es[true_min]
         print("height_y", height_y)
-        best_height=10*np.abs(rough_error_estimate(xs,es))+height_y   
+        #best_height=5*np.abs(rough_error_estimate(xs,es))+height_y 
+        best_height=10*np.abs(rough_error_estimate(xs,es))+height_y 
+        #best_height=15*np.abs(rough_error_estimate(xs,es))+height_y  
         print("best_height", best_height)
         if deriv2 > 0:
             best_width = min(np.sqrt(error/deriv2), best_width)
@@ -76,6 +86,10 @@ def minimize_starting_between(xlo, xhi, error_desired):
         xs_to_fit = list(1*xs)
         es_to_fit = list(1*es)
         while len(xs_to_fit) > N_desired:
+            datapoints_on_left=func_number_datapoints(xs_to_fit,true_min_x-best_width, true_min_x, es_to_fit, height_y, best_height)
+            print("Number of datapoints on left side", datapoints_on_left)
+            datapoints_on_right=func_number_datapoints(xs_to_fit,true_min_x, true_min_x+best_width, es_to_fit, height_y, best_height)
+            print("Number of datapoints on right side", datapoints_on_right)
             furthest = np.argmax(np.abs(xs_to_fit-true_min_x))
             furthest_y = np.argmax(np.abs(es_to_fit-height_y))
             if np.abs(xs_to_fit[furthest] - true_min_x) > best_width:
@@ -109,8 +123,8 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.xlim(xs_to_fit.min() - 0.1, xs_to_fit.max() + 0.1)
         plt.ylim(es_to_fit.min() - 0.1, es_to_fit.max() + 0.1)
         #plt.pause(1)
-        plt.pause(.02)
-        #plt.show()
+        #plt.pause(.02)
+        plt.show()
 
         # xs = list(xs)
         # es = list(es)
