@@ -123,8 +123,8 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.xlim(xs_to_fit.min() - 0.1, xs_to_fit.max() + 0.1)
         plt.ylim(es_to_fit.min() - 0.1, es_to_fit.max() + 0.1)
         #plt.pause(1)
-        #plt.pause(.02)
-        plt.show()
+        plt.pause(.02)
+        #plt.show()
 
         # xs = list(xs)
         # es = list(es)
