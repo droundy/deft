@@ -22,6 +22,12 @@ def func_number_datapoints(xs, xmin, xmax, es, ymin, ymax):
                 count=count+1
     return count
 
+def func_xcenter(xs, total_number_datapoints):
+    sum_xs=0
+    for i in range(1,len(xs)-1): 
+        sum_xs=xs[i]+sum_xs
+    return sum_xs/total_number_datapoints
+
 def func_exact(x):
     return emin + 2*eps*((xmin/x)**12/2 - (xmin/x)**6) + eps
 
@@ -68,9 +74,9 @@ def minimize_starting_between(xlo, xhi, error_desired):
         print("true_min_x", true_min_x)
         height_y=es[true_min]
         print("height_y", height_y)
-        #best_height=5*np.abs(rough_error_estimate(xs,es))+height_y 
-        best_height=10*np.abs(rough_error_estimate(xs,es))+height_y 
-        #best_height=15*np.abs(rough_error_estimate(xs,es))+height_y  
+        best_height=5*np.abs(rough_error_estimate(xs,es))+height_y #matches minimum, but not curviture
+        #best_height=10*np.abs(rough_error_estimate(xs,es))+height_y #good but shifted a little, closer curviture
+        #best_height=20*np.abs(rough_error_estimate(xs,es))+height_y  
         print("best_height", best_height)
         if deriv2 > 0:
             best_width = min(np.sqrt(error/deriv2), best_width)
@@ -86,10 +92,22 @@ def minimize_starting_between(xlo, xhi, error_desired):
         xs_to_fit = list(1*xs)
         es_to_fit = list(1*es)
         while len(xs_to_fit) > N_desired:
-            datapoints_on_left=func_number_datapoints(xs_to_fit,true_min_x-best_width, true_min_x, es_to_fit, height_y, best_height)
+            #datapoints_on_left=func_number_datapoints(xs_to_fit,true_min_x-best_width, true_min_x, es_to_fit, height_y, best_height)
+            datapoints_on_left=func_number_datapoints(xs,true_min_x-best_width, true_min_x, es, height_y, best_height)
             print("Number of datapoints on left side", datapoints_on_left)
-            datapoints_on_right=func_number_datapoints(xs_to_fit,true_min_x, true_min_x+best_width, es_to_fit, height_y, best_height)
+            #datapoints_on_right=func_number_datapoints(xs_to_fit,true_min_x, true_min_x+best_width, es_to_fit, height_y, best_height)
+            datapoints_on_right=func_number_datapoints(xs,true_min_x, true_min_x+best_width, es, height_y, best_height)
             print("Number of datapoints on right side", datapoints_on_right)
+            #if datapoints_on_right > datapoints_on_left+10:  #NOT WORKING YET
+                #true_min_x=true_min_x+func_xcenter(xs,datapoints_on_left+datapoints_on_right)
+                #true_min_x=0.001*best_width+true_min_x
+                #best_width_left=.8*best_width
+                #print("best_width_left", best_width_left)
+                #best_width_right=2*best_width-best_width_left
+                #print("best_width_right", best_width_right)
+            #if datapoints_on_left > datapoints_on_right+10:
+                #true_min_x=true_min_x+func_xcenter(xs,datapoints_on_left+datapoints_on_right)
+                #true_min_x=0.001*best_width-true_min_x
             furthest = np.argmax(np.abs(xs_to_fit-true_min_x))
             furthest_y = np.argmax(np.abs(es_to_fit-height_y))
             if np.abs(xs_to_fit[furthest] - true_min_x) > best_width:
@@ -117,12 +135,13 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.plot(all_xs, 0.5*deriv2*(all_xs - x0)**2 + e0, label='my parabola')
         plt.axvline(true_min_x - best_width)
         plt.axvline(true_min_x + best_width)
+        plt.axvline(true_min_x, color="blue")
         plt.axhline(y=height_y, color="blue")
         plt.axhline(y=best_height)
         plt.legend()
         plt.xlim(xs_to_fit.min() - 0.1, xs_to_fit.max() + 0.1)
         plt.ylim(es_to_fit.min() - 0.1, es_to_fit.max() + 0.1)
-        #plt.pause(1)
+        #plt.pause(.2)
         plt.pause(.02)
         #plt.show()
 
