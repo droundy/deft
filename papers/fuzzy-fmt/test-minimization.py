@@ -14,18 +14,20 @@ eps = 2.0
 emin = 1.0
 sigma = 0.01
 
-def func_number_datapoints(xs, xmin, xmax, es, ymin, ymax):
+#def func_number_datapoints(xs, xmin, xmax, es, ymin, ymax):
+def func_number_datapoints(xs, xmin, xmax):
     count=0
-    for i in range(1,len(xs)-1): 
+    for i in range(0,len(xs)):
         if xmin < xs[i] < xmax :
-            if ymin < es[i] < ymax :
-                count=count+1
+            #if ymin < es[i] < ymax :
+            count=count+1
     return count
 
-def func_xcenter(xs, total_number_datapoints):
+def func_xcenter(xs, xmin, xmax, total_number_datapoints):
     sum_xs=0
-    for i in range(1,len(xs)-1): 
-        sum_xs=xs[i]+sum_xs
+    for i in range(0,len(xs)):
+        if  xmin < xs[i] < xmax :
+            sum_xs=xs[i]+sum_xs
     return sum_xs/total_number_datapoints
 
 def func_exact(x):
@@ -91,23 +93,19 @@ def minimize_starting_between(xlo, xhi, error_desired):
 
         xs_to_fit = list(1*xs)
         es_to_fit = list(1*es)
+
+        #datapoints_on_left=func_number_datapoints(xs_to_fit,true_min_x-best_width, true_min_x, es_to_fit, height_y, best_height)
+        datapoints_on_left=func_number_datapoints(xs, true_min_x-best_width, true_min_x)
+        print("Number of datapoints on left side", datapoints_on_left)
+        #datapoints_on_right=func_number_datapoints(xs_to_fit,true_min_x, true_min_x+best_width, es_to_fit, height_y, best_height)
+        datapoints_on_right=func_number_datapoints(xs, true_min_x, true_min_x+best_width)
+        print("Number of datapoints on right side", datapoints_on_right)
+        if datapoints_on_right > datapoints_on_left+20:
+            true_min_x=func_xcenter(xs, true_min_x-best_width, true_min_x+best_width, datapoints_on_left+datapoints_on_right+1)
+        if datapoints_on_left > datapoints_on_right+20:
+            true_min_x=func_xcenter(xs, true_min_x-best_width, true_min_x+best_width, datapoints_on_left+datapoints_on_right+1)
+
         while len(xs_to_fit) > N_desired:
-            #datapoints_on_left=func_number_datapoints(xs_to_fit,true_min_x-best_width, true_min_x, es_to_fit, height_y, best_height)
-            datapoints_on_left=func_number_datapoints(xs,true_min_x-best_width, true_min_x, es, height_y, best_height)
-            print("Number of datapoints on left side", datapoints_on_left)
-            #datapoints_on_right=func_number_datapoints(xs_to_fit,true_min_x, true_min_x+best_width, es_to_fit, height_y, best_height)
-            datapoints_on_right=func_number_datapoints(xs,true_min_x, true_min_x+best_width, es, height_y, best_height)
-            print("Number of datapoints on right side", datapoints_on_right)
-            #if datapoints_on_right > datapoints_on_left+10:  #NOT WORKING YET
-                #true_min_x=true_min_x+func_xcenter(xs,datapoints_on_left+datapoints_on_right)
-                #true_min_x=0.001*best_width+true_min_x
-                #best_width_left=.8*best_width
-                #print("best_width_left", best_width_left)
-                #best_width_right=2*best_width-best_width_left
-                #print("best_width_right", best_width_right)
-            #if datapoints_on_left > datapoints_on_right+10:
-                #true_min_x=true_min_x+func_xcenter(xs,datapoints_on_left+datapoints_on_right)
-                #true_min_x=0.001*best_width-true_min_x
             furthest = np.argmax(np.abs(xs_to_fit-true_min_x))
             furthest_y = np.argmax(np.abs(es_to_fit-height_y))
             if np.abs(xs_to_fit[furthest] - true_min_x) > best_width:
