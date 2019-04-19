@@ -113,9 +113,8 @@ where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
 reduced range of the potential well, and $\epsilon$ is its depth.
 
 The organization of this paper is as follows: In Section~\ref{sec:histogram}, we
-describe in detail flat-histogram methods.  Section~\ref{sec:weight} outlines
-weight-based histogram methods used in this work.
-
+describe in detail flat-histogram methods.
+%
 Section~\ref{sec:sad} introduces the dynamic stochastic approximation method.
 In Section~\ref{sec:results}, we discuss the performance of the various methods
 applied to the model system.
@@ -133,9 +132,9 @@ dynamic $\gamma$ (SAD).
 The goal of flat histogram methods (also called \emph{broad histogram}
 or \emph{multicanonical} methods) is to simulate each energy with
 similar accuracy, so as to accurately determine the density of states
-over a broad range of energies.  Once the density of states is known,
-a number of thermodynamic quantities---such as heat capacity or
-internal energy---can be easily computed for any temperature.
+over a broad range of energies---and thus to determine the thermodynamic
+quantities such as heat capacity or internal energy
+over a broad range of temperatures.
 Properties that require more information---such as a spatial
 correlation function or a response function---can still be computed
 for any temperature, provided statistics are collected for each
@@ -144,15 +143,14 @@ individual energy, which can then be reweighted for any temperature.
 Each flat histogram Monte Carlo method uses a given set of ``moves''
 which change a system and should satisfy detailed balance.  Each
 algorithm differs in how it determines the probability of accepting a
-move, and in what additional statistics (if any) must be collected in
-order decide on that probability.  The methods we compare belong to the
-family of weight-based methods, which only require a set of
-weights $w(E)$ be collected.
+move, and in what additional statistics must be collected in
+order decide on that probability.
 
-Weight-based methods calculate
-the density of states $D(E)$ for discrete energy
-levels~\cite{haber2018performance}. For this reason, energy binning
-becomes an important consideration for complex continous systems.
+Flat histogram methods calculate
+the density of states $D(E)$ for a discrete set of
+energies~\cite{haber2018performance}. For this reason, energy binning
+becomes an important consideration for systems with a continuum of
+energies possible.
 Energy bins are typically of uniform size for the entire energy
 continuum~\cite{fasnacht2004adaptive}. Some methods such as
 AdaWL~\cite{koh2013dynamically}
@@ -162,10 +160,8 @@ introduced in this paper is designed to scale appropriately as bin size
 is changed, but we do not test this scaling, as we use a system with
 discrete energy levels.
 
-\section{Weight-based methods}\label{sec:weight}
-
-We will begin by introducing three related weight-based methods which
-rely on a weight function $w(E)$, noting that the method proposed in
+In this section we will introduce four related flat histogram methods
+which each rely on a weight function $w(E)$, noting that the method proposed in
 this paper (discussed in Section~\ref{sec:sad}) also falls in this
 category.  In these algorithms, the probability of accepting a move is
 given by
@@ -182,7 +178,7 @@ few hundred orders of magnitude, the natural logarithm of the weights are used
 in this work.  Since $D(E) = S(E)$, the logarithm of the weights
 can be thought of as an approximation of the entropy.
 
-Each weighted density approach uses a random walk in energy space to
+Each approach uses a random walk in energy space to
 estimate the density of states.  The core of these approaches
 is to continuously update the weights at each step of the simulation
 \begin{equation}
@@ -278,7 +274,7 @@ where $\zeta \in \{1,2\}$, Liang has shown that the weights are proven
 to converge to the true density of states~\cite{liang2006theory,
   liang2007stochastic}.  In addition, the energy range need not be
 known a priori.  The time to converge depends only on the choice of
-parameters $t_0$.  Unfortunately, there is no
+parameter $t_0$.  Unfortunately, there is no
 prescription for finding an acceptable value for $t_0$, and
 while the algorithm formally converges, for a poor choice of $t_0$
 that convergence can be far too slow to be practical.
@@ -484,66 +480,68 @@ Each time we change the value of $E_H$ or $E_L$, the weights within the
 new portion of the interesting energy range are set to the expressions
 in Equations~\ref{eq:highw} and~\ref{eq:loww}.
 
-\paragraph{Energy binning with SAD}
+%~ \paragraph{Energy binning with SAD}
 
 A significant advantage of SAD over other flat histogram methods is
-that energy binning is solved dynamically. SAD should perform
+that energy binning is handled dynamically. SAD should perform
 independently for a reasonable range of binning because $\gamma \propto
 \nicefrac{N_S}{t}$.  As the number of energy states found $N_S$
-increases (fine binning), the time spent $t$ in each bin will decrease.
-This argument explains why SAD should perform well for complex systems
+increases (fine binning), the time spent $t$ in each bin will decrease
+with the effect that the convergence should be roughly independent of
+the bin size chosen.
+This argument explains why SAD should perform well for continuum systems
 in terms of binning. SAMC has a prefactor $\gamma_0$ to aid in a
 similar way but this adds yet another parameter for the user to choose.
 
-\paragraph{Scaling, step size, and SAD}
-Methods such as WL can fail to converge for complex systems in part
-because the same random MC moves are performed for the entire energy
-range.  The main problem lies in trying to determine how to optimize
-the step size such that the time to explore all energies is reasonable.
-Small step sizes lead to improved sampling at the expense of slow
-convergence. Koh et al. proposed multiplying $\gamma$ by an energy
-dependent factor in order to improve the converge of WL in regards to
-convergence and scaling~\cite{koh2013dynamically}.  Because the update
-factor for SAD has an energy dependent factor already present (and
-dynamically adjusted), we expect that SAD will perform consitently
-scaling free for a reasonable choice of step size.  SAD should perform
-extremely well compared with other flat histogram methods when applied
-to complex continuous systems such as polymers/proteins and spin models.
+%~ \paragraph{Scaling, step size, and SAD}
+%~ Methods such as WL can fail to converge for complex systems in part
+%~ because the same random MC moves are performed for the entire energy
+%~ range.  The main problem lies in trying to determine how to optimize
+%~ the step size such that the time to explore all energies is reasonable.
+%~ Small step sizes lead to improved sampling at the expense of slow
+%~ convergence. Koh et al. proposed multiplying $\gamma$ by an energy
+%~ dependent factor in order to improve the converge of WL in regards to
+%~ convergence and scaling~\cite{koh2013dynamically}.  Because the update
+%~ factor for SAD has an energy dependent factor already present (and
+%~ dynamically adjusted), we expect that SAD will perform consitently
+%~ scaling free for a reasonable choice of step size.  SAD should perform
+%~ extremely well compared with other flat histogram methods when applied
+%~ to complex continuous systems such as polymers/proteins and spin models.
 
-\subsection{Convergence}
-Because SAD scales as $1/t$ for large $t$, it satisfies the SAMC
-convergence criteria.  However, we also want to ensure that SAD avoids
-the exponentially poor convergence time that SAMC suffers when $t_0$ is
-small as discussed in Section~\ref{sec:samc-convergence}.
-To place a lower bound on the convergence of SAD, we will again
-approximate the total entropy change using an integral.  To sidestep
-the dynamical nature of SAD, we ensure that \emph{after discovering the
-last important energy} at time $t_L$ the entropy change
-$\Delta S_{\text{tot}}$ can be made in a reasonable number of iterations.
-Thus we integrate the update factor from $t_L$ to some minimum time
-$t_{\min}$ necessary for convergence.  Technically this is not a lower
-bound as in the case of SAMC because the algorithm will already have a
-reasonable approximation for the entropy.
-\begin{align}
-\Delta S_{\text{tot}} &= \int_{t_L}^{t_{\min}}
-     \frac{
-       3\langle S\rangle + \frac{t}{t_L}
-     }{
-       3\langle S\rangle + \frac{t}{N_S}\frac{t}{t_L}
-     } dt \\
-&\approx 3\Delta S_{\text{tot}} \left(1-\frac{t_L}{t_{\min}}\right)
-\end{align}
-where we assumed that $t_L\gg N_S\langle S\rangle$, which is to say
-that it takes a long time to find all the interesting energy states.
-Furthermore, we omitted the $\frac{t}{t_L}$ in the numerator, which is
-of order unity.  This omission only makes our bound more conservative,
-and enables us to solve to find that
-\begin{align}
-  t_{\min} &= \frac32 t_L
-\end{align}
-which means that we only need to run fifty percent longer after we
-discover the final interesting energy state in order to have made
-sufficient updates to \emph{possibly} converge to the true entropy.
+%~ \subsection{Convergence}
+%~ Because SAD scales as $1/t$ for large $t$, it satisfies the SAMC
+%~ convergence criteria.  However, we also want to ensure that SAD avoids
+%~ the exponentially poor convergence time that SAMC suffers when $t_0$ is
+%~ small as discussed in Section~\ref{sec:samc-convergence}.
+%~ To place a lower bound on the convergence of SAD, we will again
+%~ approximate the total entropy change using an integral.  To sidestep
+%~ the dynamical nature of SAD, we ensure that \emph{after discovering the
+%~ last important energy} at time $t_L$ the entropy change
+%~ $\Delta S_{\text{tot}}$ can be made in a reasonable number of iterations.
+%~ Thus we integrate the update factor from $t_L$ to some minimum time
+%~ $t_{\min}$ necessary for convergence.  Technically this is not a lower
+%~ bound as in the case of SAMC because the algorithm will already have a
+%~ reasonable approximation for the entropy.
+%~ \begin{align}
+%~ \Delta S_{\text{tot}} &= \int_{t_L}^{t_{\min}}
+     %~ \frac{
+       %~ 3\langle S\rangle + \frac{t}{t_L}
+     %~ }{
+       %~ 3\langle S\rangle + \frac{t}{N_S}\frac{t}{t_L}
+     %~ } dt \\
+%~ &\approx 3\Delta S_{\text{tot}} \left(1-\frac{t_L}{t_{\min}}\right)
+%~ \end{align}
+%~ where we assumed that $t_L\gg N_S\langle S\rangle$, which is to say
+%~ that it takes a long time to find all the interesting energy states.
+%~ Furthermore, we omitted the $\frac{t}{t_L}$ in the numerator, which is
+%~ of order unity.  This omission only makes our bound more conservative,
+%~ and enables us to solve to find that
+%~ \begin{align}
+  %~ t_{\min} &= \frac32 t_L
+%~ \end{align}
+%~ which means that we only need to run fifty percent longer after we
+%~ discover the final interesting energy state in order to have made
+%~ sufficient updates to \emph{possibly} converge to the true entropy.
 
 \section{Results}\label{sec:results}
 
@@ -601,16 +599,18 @@ We use the average entropy error vs moves as a metric to compare
 simulation runtimes and overall convergence. The overall accuracy
 is determined by examining the fractional error of a particular method to
 a precise reference system. For each simulation, the reference system
-is chosen to be the final output of a SAMC simulation with a fixed interesting energy range.
-We note this because SAMC does not require an energy range as an input parameter; however,
-by fixing the energy range to for SAMC, a smaller $t_0$ can be chosen considerably reducing the
-simulation time.
-\begin{align}
-\epsilon_\text{avg} = 1 - \bigg\lvert\frac{S_\text{method}}{S_\text{ref}}\bigg\rvert
-\end{align}
-Simulations that take more iterations to reach the same entropy error as a
-different method take longer to converge. This behavior is seen in
-Fig.~\ref{fig:fast-slow-gamma}.
+is chosen to be the final output of a SAMC simulation with a fixed energy range
+corresponding to the temperature range of interest.
+Although SAMC does not require an energy range as an input parameter,
+we find that by limiting the simulation to this energy range, we can
+acheive much faster convergence with a smaller $t_0$.  We compute an average
+of the error by averaging the error in the entropy over the 
+interesting energy range, and then averaging \emph{this} error over several
+simulations run with different random number seeds.
+%~ \begin{align}
+%~ \epsilon_\text{avg} =
+  %~ \frac{1}{N_S \text{num seeds}}\sum_s^{\text{num seeds}}\sum_{i}^{N_S} \left|S_\text{ref}(E_i) - S_\text{method}(E_i)\right|
+%~ \end{align}
 
 \subsection{A periodic system with 50 atoms}
 
@@ -672,14 +672,15 @@ The methods SAD, WL, and $1/t$-WL compensate for the smaller
 displacement distance as can be seen from Figure~\ref{fig:fast-slow-gamma}.
 The update factors take approximately 10x longer to reach steady-state for
 the slower translation scale. Because of this update behavior, these methods
-do not suffer in converging to the correct density of states from having a
-static parameter such as SAMC $t_0$ in the update factor. SAMC methods that converge
-in a reasonable amount of moves in Figure~\ref{fig:fast-slow-gamma}a do not 
-necessarily do so for Figure~\ref{fig:fast-slow-gamma}b.
+are able to converge regardless of the displacement distance used in Monte
+Carlo moves.
 
-
-Sad performs similarly regardless of the displacement distance chosen although
-it transitions to $1/\sqrt{t}$ convergence after 
+%~ SAMC methods that converge
+%~ in a reasonable amount of moves in Figure~\ref{fig:fast-slow-gamma}a do not 
+%~ necessarily do so for Figure~\ref{fig:fast-slow-gamma}b.
+%
+%~ Sad performs similarly regardless of the displacement distance chosen although
+%~ it transitions to $1/\sqrt{t}$ convergence after 
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf}
@@ -692,22 +693,30 @@ it transitions to $1/\sqrt{t}$ convergence after
                semi-transparent shaded area.  The update factor for this
                system is in Fig.~\ref{fig:gamma-vs-t} above.}\label{fig:n256}
 \end{figure}
-%\begin{figure}
-%  \includegraphics[width=\columnwidth]{figs/N256-lndos-comparison}
-%  \caption{\davidsays{This could be prettier, and do we need it? We
-%      definitely need a caption if we keep it.} Use this to create
-%    description of the system.}\label{fig:n256-lndos-comparison}
-%\end{figure}
+%~ \begin{figure}
+  %~ \includegraphics[width=\columnwidth]{figs/N256-lndos-comparison}
+  %~ \caption{\davidsays{This could be prettier, and do we need it? We
+      %~ definitely need a caption if we keep it.} Use this to create
+    %~ description of the system.}\label{fig:n256-lndos-comparison}
+%~ \end{figure}
 
 
 \subsection{A periodic system with 256 atoms}
-For this simulation, we chose a minimum reduced
+Next we will introduce a considerably larger simulation containing
+256 atoms which has a total entropy range of around 1500.  This makes
+exploring the entire range of energies extremely expensive, and strongly
+favors methods that restrict the energy (or temperature) range of
+interest.
+For this simulation, we chose a much higher minimum reduced
 temperature of $1.0$, which corresponds to an interesting energy range
 from $-915$ to $-509$.  The number of important energy states for this
-system is then $N_S = E_{\min} - E_{\max} = 406$.
+system is then $N_S = E_{\min} - E_{\max} + 1 = 407$.
 The entropy of this system is has an entropy that
 differs by 275, corresponding to a ratio of
 $10^{119}$ between the highest and lowest density of states.
+\davidsays{Also give the entropy difference, looking at the data.}
+\jpsays{$395.2833013702813 - 4.754731035740479e^{-8}$ = $395.2833$ so $2^{396.2833}$
+gives us about $10^{118}$ from 'samc-1e4-256-s8.yaml'}
 
 Figure~\ref{fig:n256} shows the average error in the
 entropy as a function of moves for this system with the reasonable
@@ -717,15 +726,13 @@ entropy averaged over eight simulations using different random number
 seeds.  The range of average errors for each simulation is shown as a
 shaded region around its mean error.  By the time $10^8$ moves have
 been made all but the SAMC simulation with the shortest $t_0$ have
-begun to converge as $1/\sqrt{t}$.  We then see the WL error begin to
+begun to converge as $1/\sqrt{t}$.  We then see the WL error
 saturate around $10^{10}$ moves.
 
 
-For the larger system, SAMC parameter values of $t_0$ that gave rapid
-convergence for the $N = 50$ system with $\delta = 0.05\sigma$ do not
-converge rapidly.  Larger $t_0$ parameters are simulated for
-comparison with SAD.  SAD has significantly smaller fluctuations
-in the average entropy error for a given number of moves.
+%~ For this larger system, SAMC parameter values of $t_0$ that gave rapid
+%~ convergence for the $N = 50$ system with $\delta = 0.05\sigma$ do not
+%~ converge rapidly.
 
 %{\color{red}
 %Figure~\ref{fig:n256-lndos-comparison} shows the calculated entropy for
@@ -733,29 +740,45 @@ in the average entropy error for a given number of moves.
 %point and the $S_{\min} = 915$. Only the reference method is shown.
 %}
 
-\subsubsection{Discussion on convergence and update factor}
+%~ \subsection{Discussion on convergence and update factor}
 
-A close examination of Fig.~\ref{fig:gamma-vs-t} shows that $\gamma$
-for the Wang-Landau algorithm decreases much more rapidly than
-$\nicefrac{1}{\sqrt{t}}$. It can be observed  for the simulations that
-were carried out that all the methods from the weight-based family
-struggle to converge if the update factor decreases too rapidlly.
-Fig.~\ref{fig:N50-ff0.3-avg-error-slow} shows SAMC with inappropriate choices
-of $t_0$ i.e. less than $\nicefrac{10^5}{\sqrt{t}}$ failing to converge
-in a reasonable amount of time. Thus, the update factor $\gamma$, shown
-as a function of simulation moves in Fig.~\ref{fig:gamma-vs-t}, proves
-useful in determining which methods will converge in a reasonable
-amount of time. We compare each method to a reference SAMC
-simulation for an ideal choice of $t_0$.  This gives an unbiased
-comparison with our developed method SAD. The dynamic version of SAMC
-which we call SAD performs as well as SAMC (assuming the user can
-correctly identify an appropriate choice of $t_0$ for SAMC).  SAD
-outperforms WL and 1/t-WL? for the same given number of moves. The
-absence of user defined parameters makes SAD an exciting alternative to
-methods where user experience or successive implementation iteration
-are needed to achieve reasonable results.
+%~ A close examination of Fig.~\ref{fig:gamma-vs-t} shows that $\gamma$
+%~ for the Wang-Landau algorithm decreases much more rapidly than
+%~ $\nicefrac{1}{t}$. It can be observed  for the simulations that
+%~ were carried out that all the methods
+%~ struggle to converge if the update factor decreases too rapidlly.
+%~ Fig.~\ref{fig:n256} shows SAMC with inappropriate choices
+%~ of $t_0$ i.e. less than $\nicefrac{10^4}{\sqrt{t}}$ failing to converge
+%~ in a reasonable amount of time. Thus, the update factor $\gamma$, shown
+%~ as a function of simulation moves in Fig.~\ref{fig:gamma-vs-t}, proves
+%~ useful in determining which methods will converge in a reasonable
+%~ amount of time. We compare each method to a reference SAMC
+%~ simulation for an ideal choice of $t_0$.  This gives an unbiased
+%~ comparison with our developed method SAD. The dynamic version of SAMC
+%~ which we call SAD performs as well as SAMC (assuming the user can
+%~ correctly identify an appropriate choice of $t_0$ for SAMC).  SAD
+%~ outperforms WL and 1/t-WL? for the same given number of moves. The
+%~ absence of user defined parameters makes SAD an exciting alternative to
+%~ methods where user experience or successive implementation iteration
+%~ are needed to achieve reasonable results.
 
 \section{Conclusions}
+
+\davidsays{We find both 1/tWL and sad do really well and very similarly.
+SAD wins if you want to specify a temperature range rather than an energy.
+1/tWL cheated because you had to run a prior simulation in order to find
+the energy range of interest.  Yay good stuff.}
+
+\jpsays{Both SAD and 1/t-WL converge more rapidly than Wl or SAMC. SAD requires
+the user to specify a temperature range rather than an energy range as 1/t-WL
+does. In addition to requiring the energy range,
+1/t-WL requires a prior simulation in order to determine the energy range
+of interest. WL saturates in convergence as discussion in the introduction and
+requires the user to optimize the choice of parameters to avoid this such as
+increasing the flatness criterion.  SAMC converges for a reasonable choice of
+$t_0$ but this parameter can be difficult to tune especially across different
+energy bins, displacement distances, or systems. Additionaly, SAMC does not
+converge as rapidly as either SAD or 1/t-WL even for the best choice of $t_0$.}
 
 We have introduced a new algorithm SAD (Stochastic Approximation with a
 Dynamic $\gamma$) that effectively samples the entire energy space for
