@@ -12,7 +12,7 @@ from scipy.interpolate import UnivariateSpline
 xmin = 3.0
 eps = 2.0
 emin = 1.0
-sigma = 0.001
+sigma = 0.01
 
 #def func_number_datapoints(xs, xmin, xmax, es, ymin, ymax):
 def func_number_datapoints(xs, xmin, xmax):
@@ -68,6 +68,8 @@ def minimize_starting_between(xlo, xhi, error_desired):
     lowest_indices = np.argsort(es)[:4]
     xs = xs[lowest_indices]
     es = es[lowest_indices]
+    xs_to_fit = xs
+    es_to_fit = es
     plt.plot(xs,es,'x',label='data to keep')
     plt.legend()
     plt.pause(0.4)
@@ -80,9 +82,9 @@ def minimize_starting_between(xlo, xhi, error_desired):
         print("true_min_x", true_min_x)
         height_y=es[true_min]
         print("height_y", height_y)
-        best_height=5*np.abs(rough_error_estimate(xs,es))+height_y #matches minimum, but not curviture
-        #best_height=10*np.abs(rough_error_estimate(xs,es))+height_y #good but shifted a little, closer curviture
-        #best_height=20*np.abs(rough_error_estimate(xs,es))+height_y  
+        best_height=5*np.abs(rough_error_estimate(xs_to_fit,es_to_fit))+height_y #matches minimum, but not curviture
+        if len(xs_to_fit) < 5:
+            best_height=5*np.abs(rough_error_estimate(xs,es))+height_y
         print("best_height", best_height)
         newx = true_min_x + np.random.normal()*(xhi - xlo)/2
         xs = np.array(list(xs) + [newx])
@@ -113,16 +115,17 @@ def minimize_starting_between(xlo, xhi, error_desired):
                 es_to_fit.append(es[i])
         xs_to_fit = np.array(xs_to_fit)
         es_to_fit = np.array(es_to_fit)
+
         x0, e0, deriv2, error = parabola_fit(xs_to_fit, es_to_fit)
         parabola_e = 0.5*deriv2*(xs - x0)**2 + e0
         residuals = np.abs(parabola_e - es)
         
-        error_estimate_of_min = 3*rough_error_estimate(xs,es)/np.sqrt(len(xs))
+        error_estimate_of_min = 3*rough_error_estimate(xs_to_fit,es_to_fit)/np.sqrt(len(xs))
 
         plt.clf()
         plt.plot(xs,es,'.',label='data')
         plt.plot(xs_to_fit,es_to_fit,'.',label='data fitted', color='orange')
-        all_xs = np.linspace(xlo, xhi + (xhi-xlo)*.5, 1000)
+        all_xs = np.linspace(xs.min(), xs.max(), 1000)
         print('x0', x0, 'vs', true_min_x)
         print('e0', e0)
         plt.plot(all_xs, func_exact(all_xs), ':', label='exact')
@@ -134,9 +137,9 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.legend()
         plt.xlim(xs_to_fit.min() - 0.2, xs_to_fit.max() + 0.2)
         plt.ylim(es_to_fit.min() - 0.2, es_to_fit.max() + 0.2)
-        plt.pause(0.02)
-        
-        if error_estimate_of_min < error_desired:
+        plt.pause(1.02)
+
+        if error_estimate_of_min < error_desired and deriv2 > 0:
             print('excellent error:', error_estimate_of_min, 'with', len(xs), 'data and', total_computations, 'effort')
             plt.show()
             return e0
