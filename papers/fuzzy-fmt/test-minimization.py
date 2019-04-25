@@ -91,22 +91,6 @@ eps = 2.0
 emin = 1.0
 sigma = 0.01
 
-#def func_number_datapoints(xs, xmin, xmax, es, ymin, ymax):
-#def func_number_datapoints(xs, xmin, xmax):
-    #count=0
-    #for i in range(0,len(xs)):
-        #if xmin < xs[i] < xmax :
-            ##if ymin < es[i] < ymax :
-            #count=count+1
-    #return count
-
-#def func_xcenter(xs, xmin, xmax, total_number_datapoints):
-    #sum_xs=0
-    #for i in range(0,len(xs)):
-        #if  xmin < xs[i] < xmax :
-            #sum_xs=xs[i]+sum_xs
-    #return sum_xs/total_number_datapoints
-
 def func_exact(x):
     return emin + 2*eps*((xmin/x)**12/2 - (xmin/x)**6) + eps
     
@@ -125,9 +109,6 @@ def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
     f='crystallization/kT%.3f_n%.3f_fv%.2f_gw%.3f-alldat.dat' % (kT, n, fv, x)
     data = np.loadtxt(f)
     diffFE=data[6]
-    print('diffFE=', diffFE, 'gw=', x)
-    print()
-    print()
     return diffFE
     
 
