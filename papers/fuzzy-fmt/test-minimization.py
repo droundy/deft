@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 #Use this program to find the minimum of a set of data points subject to error with a Gaussian distribution
-#Run this program from deft/papers/fuzzy-fmt with command python3 test-minimization.py
+#Run this program from deft/papers/fuzzy-fmt with command python3 test-minimization.py --kT [REQUIRED: temp]  --n [REQUIRED: density]  --tensor [optional]
+#type --help for other options and default values
 
 from __future__ import division, print_function
 
@@ -16,10 +17,10 @@ parser = argparse.ArgumentParser(description='Finds the minimum difference in FE
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 parser.add_argument('--n', type=float,
-                    help='density - REQUIRED')
+                    help='reduced density - REQUIRED')
 
 parser.add_argument('--numgw', type=float,
-                    help='number of inital gw', default=10)
+                    help='number of inital gw datapoints', default=10)
 parser.add_argument('--maxgw', type=float,
                     help='max gw', default=0.2)
 parser.add_argument('--mingw', type=float,
@@ -99,14 +100,23 @@ def func_exact(x):
 
 def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
     print(kT,n,x,fv,dx,mcerror,mcconstant,mcprefactor)
+    name= 'kT%.3f_n%.3f_fv%.2f_gw%.3f' % (kT, n, fv, x)
     cmd = ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
     cmd += ' --gw %g' % (x)
     cmd += ' --fv %g --dx %g' % (fv, dx)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
-    cmd += ' --filename isotherm-kT-%g.dat' % kT
+    if args.tensor:
+        cmd += ' --filename isotherm-kT-%g-tensor.dat' % kT
+    else:
+        cmd += ' --filename isotherm-kT-%g.dat' % kT
+    if args.tensor:
+        cmd += ' --tensor'
     print(cmd)
     os.system(cmd)
-    f='crystallization/kT%.3f_n%.3f_fv%.2f_gw%.3f-alldat.dat' % (kT, n, fv, x)
+    if args.tensor:
+        f='crystallization/%s-alldat_tensor.dat' % (name)
+    else :
+        f='crystallization/%s-alldat.dat' % (name)
     data = np.loadtxt(f)
     diffFE=data[6]
     return diffFE
@@ -140,8 +150,8 @@ def minimize_starting_between(xlo, xhi, error_desired):
     x0, e0, deriv2, error = parabola_fit(xs, es)
     plt.plot(xs,es,'.',label='data')
     all_xs = np.linspace(xlo, xhi, 1000)
-    print('x0', x0)
-    print('e0', e0)
+    print('gw', x0)
+    print('diffFE', e0)
     plt.plot(all_xs, 0.5*deriv2*(all_xs - x0)**2 + e0, label='my parabola')
     lowest_indices = np.argsort(es)[:4]
     xs = xs[lowest_indices]
@@ -149,6 +159,8 @@ def minimize_starting_between(xlo, xhi, error_desired):
     xs_to_fit = xs
     es_to_fit = es
     plt.plot(xs,es,'x',label='data to keep')
+    plt.xlabel('gw')
+    plt.ylabel('diffFE')
     plt.legend()
     plt.pause(0.4)
 
@@ -202,11 +214,13 @@ def minimize_starting_between(xlo, xhi, error_desired):
         error_estimate_of_min = 3*rough_error_estimate(xs_to_fit,es_to_fit)/np.sqrt(len(xs))
 
         plt.clf()
+        plt.xlabel('gw')
+        plt.ylabel('diffFE')
         plt.plot(xs,es,'.',label='data')
         plt.plot(xs_to_fit,es_to_fit,'.',label='data fitted', color='orange')
         all_xs = np.linspace(xs.min(), xs.max(), 1000)
-        print('x0', x0, 'vs', true_min_x)
-        print('e0', e0)
+        print('gw', x0, 'vs', true_min_x)
+        print('diffFE', e0)
         plt.plot(all_xs, func_exact(all_xs), ':', label='exact')
         plt.plot(all_xs, 0.5*deriv2*(all_xs - x0)**2 + e0, label='my parabola')
         plt.axvline(true_min_x, color="blue")
