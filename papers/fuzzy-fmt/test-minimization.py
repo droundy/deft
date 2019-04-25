@@ -37,6 +37,9 @@ parser.add_argument('--mcconstant', metavar='const', type=int,
 parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
                     
+parser.add_argument('--error_desired', metavar='error_desired', type=float,
+                    help='error desired to be within- Default 0.01')
+
 parser.add_argument('--tensor', action='store_true',
                     help='use tensor weight')
 
@@ -49,12 +52,12 @@ n=args.n
 if args.numgw:
     numgw=args.numgw
 else :
-    dgw=10
+    numgw=10
 
 if args.maxgw:
     maxgw=args.maxgw
 else :
-    maxgw=0.2  
+    maxgw=0.19
     
 if args.mingw:
     mingw=args.mingw
@@ -86,6 +89,10 @@ if args.mcprefactor:
 else :
     mcprefactor=50000
 
+if args.error_desired:
+    error_desired=ars.error_desired
+else :
+    error_desired=0.01
 
 xmin = 3.0
 eps = 2.0
@@ -142,8 +149,8 @@ def parabola_fit(xs,ys):
 
 
 def minimize_starting_between(xlo, xhi, error_desired):
-    total_computations = 10  
-    xs = np.linspace(xlo, xhi, 10)  #steps by (xhi-xlo)/(total_computations-1)
+    total_computations = numgw
+    xs = np.linspace(xlo, xhi, numgw)  #steps by (xhi-xlo)/(total_computations-1)
     print('xs=',xs)
     #es = np.array([func_to_minimize(x) for x in xs])
     es = np.array([func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor) for x in xs])
@@ -248,6 +255,6 @@ def minimize_starting_between(xlo, xhi, error_desired):
 
 
 
-minimize_starting_between(0.01, 0.19, 0.01)
+minimize_starting_between(mingw, maxgw, error_desired)
 
 
