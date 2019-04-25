@@ -168,6 +168,7 @@ def minimize_starting_between(xlo, xhi, error_desired):
     plt.plot(xs,es,'x',label='data to keep')
     plt.xlabel('gw')
     plt.ylabel('diffFE')
+    plt.title("kT=%g, n=%g" % (kT, n))
     plt.legend()
     plt.pause(0.4)
 
@@ -223,6 +224,7 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.clf()
         plt.xlabel('gw')
         plt.ylabel('diffFE')
+        plt.title("kT=%g, n=%g" % (kT, n))
         plt.plot(xs,es,'.',label='data')
         plt.plot(xs_to_fit,es_to_fit,'.',label='data fitted', color='orange')
         all_xs = np.linspace(xs.min(), xs.max(), 1000)
