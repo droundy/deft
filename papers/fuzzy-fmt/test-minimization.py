@@ -1,13 +1,90 @@
 #!/usr/bin/python3
 
-#Use this program to find the minimum of a set of data points 
+#Use this program to find the minimum of a set of data points subject to error with a Gaussian distribution
 #Run this program from deft/papers/fuzzy-fmt with command python3 test-minimization.py
 
 from __future__ import division, print_function
 
 import numpy as np
+import os
+import argparse
 import matplotlib.pyplot as plt
 from scipy.interpolate import UnivariateSpline
+
+parser = argparse.ArgumentParser(description='Finds the minimum difference in FE.')
+
+parser.add_argument('--kT', metavar='temperature', type=float,
+                    help='reduced temperature - REQUIRED')
+parser.add_argument('--n', type=float,
+                    help='density - REQUIRED')
+
+parser.add_argument('--numgw', type=float,
+                    help='number of inital gw', default=10)
+parser.add_argument('--maxgw', type=float,
+                    help='max gw', default=0.2)
+parser.add_argument('--mingw', type=float,
+                    help='min gw', default=0.01)
+
+parser.add_argument('--fv', metavar='vacancies', type=float,
+                    help='fraction of vacancies - Default 0')
+parser.add_argument('--dx', metavar='dx', type=float,
+                    help='scaling dx - Default 0.5')
+parser.add_argument('--mcerror', metavar='mc_error', type=float,
+                    help='monte carlo mc_error - Default 0.001')
+parser.add_argument('--mcconstant', metavar='const', type=int,
+                    help='monte carlo integration mc_constant - Default 5')
+parser.add_argument('--mcprefactor', metavar='prefac', type=int,
+                    help='monte carlo integration mc_prefactor - Default 50000')
+                    
+parser.add_argument('--tensor', action='store_true',
+                    help='use tensor weight')
+
+args=parser.parse_args()
+
+kT=args.kT
+n=args.n
+
+
+if args.numgw:
+    numgw=args.numgw
+else :
+    dgw=10
+
+if args.maxgw:
+    maxgw=args.maxgw
+else :
+    maxgw=0.2  
+    
+if args.mingw:
+    mingw=args.mingw
+else :
+    mingw=0.01
+
+if args.fv:
+    fv=args.fv
+else :
+    fv=0
+
+if args.dx:
+    dx=args.dx
+else :
+    dx=.5
+
+if args.mcerror:
+    mcerror=args.mcerror
+else :
+    mcerror=0.001
+
+if args.mcconstant:
+    mcconstant=args.mcconstant
+else :
+    mcconstant=5
+    
+if args.mcprefactor:
+    mcprefactor=args.mcprefactor
+else :
+    mcprefactor=50000
+
 
 xmin = 3.0
 eps = 2.0
@@ -32,9 +109,27 @@ sigma = 0.01
 
 def func_exact(x):
     return emin + 2*eps*((xmin/x)**12/2 - (xmin/x)**6) + eps
+    
+#def func_to_minimize(x):
+    #return func_exact(x) + np.random.normal()*sigma
 
-def func_to_minimize(x):
-    return func_exact(x) + np.random.normal()*sigma
+def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
+    print(kT,n,x,fv,dx,mcerror,mcconstant,mcprefactor)
+    cmd = ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
+    cmd += ' --gw %g' % (x)
+    cmd += ' --fv %g --dx %g' % (fv, dx)
+    cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
+    cmd += ' --filename isotherm-kT-%g.dat' % kT
+    print(cmd)
+    os.system(cmd)
+    f='crystallization/kT%.3f_n%.3f_fv%.2f_gw%.3f-alldat.dat' % (kT, n, fv, x)
+    data = np.loadtxt(f)
+    diffFE=data[6]
+    print('diffFE=', diffFE, 'gw=', x)
+    print()
+    print()
+    return diffFE
+    
 
 def rough_error_estimate(xs,ys):
     iii = np.argsort(xs)
@@ -56,9 +151,11 @@ def parabola_fit(xs,ys):
 
 
 def minimize_starting_between(xlo, xhi, error_desired):
-    total_computations = 10
-    xs = np.linspace(xlo, xhi, 10)
-    es = np.array([func_to_minimize(x) for x in xs])
+    total_computations = 10  
+    xs = np.linspace(xlo, xhi, 10)  #steps by (xhi-xlo)/(total_computations-1)
+    print('xs=',xs)
+    #es = np.array([func_to_minimize(x) for x in xs])
+    es = np.array([func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor) for x in xs])
     x0, e0, deriv2, error = parabola_fit(xs, es)
     plt.plot(xs,es,'.',label='data')
     all_xs = np.linspace(xlo, xhi, 1000)
@@ -88,7 +185,8 @@ def minimize_starting_between(xlo, xhi, error_desired):
         print("best_height", best_height)
         newx = true_min_x + np.random.normal()*(xhi - xlo)/2
         xs = np.array(list(xs) + [newx])
-        es = np.array(list(es) + [func_to_minimize(newx)])
+        #es = np.array(list(es) + [func_to_minimize(newx)])
+        es = np.array(list(es) + [func_to_minimize(kT, n, newx, fv, dx, mcerror, mcconstant, mcprefactor)])
         total_computations += 1
 
         N_desired = 10 # max(5, (error/error_desired)**2)
@@ -155,6 +253,6 @@ def minimize_starting_between(xlo, xhi, error_desired):
 
 
 
-minimize_starting_between(2.8, 3.8, 0.01)
+minimize_starting_between(0.01, 0.19, 0.01)
 
 
