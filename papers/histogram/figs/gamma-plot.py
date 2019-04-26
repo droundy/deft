@@ -33,7 +33,7 @@ try:
                       'wl'
                          + wl[len("data/gamma/%s/wl" % filename):-4])
         plt.ylim(ymin=1e-10, ymax=1e1)
-        plt.xlim(xmin=1e2, xmax=1e12)
+        plt.xlim(xmin=1e3, xmax=1e12)
 
 except:
     pass
@@ -68,7 +68,7 @@ try:
     
     
         plt.ylim(ymin=1e-10, ymax=1e1)
-        plt.xlim(xmin=1e2, xmax=1e12)
+        plt.xlim(xmin=1e3, xmax=1e12)
         print(sadname)
         colors.loglog(ts, gamma,sadname)
 except:
