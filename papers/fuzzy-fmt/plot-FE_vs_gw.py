@@ -48,7 +48,10 @@ plt.axhspan(0.2, -0.2, color='black', alpha=0.15, lw=0)
 plt.axhspan(0.02, -0.02, color='green', alpha=0.15, lw=0)
 plt.axhline(0, color='black')
 
-plt.title('Free Energy difference vs gw  (for fv=%g)' % (fv))
+if args.tensor :
+    plt.title('Free Energy difference vs gw  for kT=%g, n=%g, fv=%g Tensor' % (kT, n, fv))
+else:
+    plt.title('Free Energy difference vs gw  for kT=%g, n=%g, fv=%g Nontensor' % (kT, n, fv))
 plt.ylabel('FEdiff')
 plt.xlabel('gw')
 plt.plot(gw, fe_difference, '.-')
