@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #Use this program to find the minimum of a set of data points subject to error with a Gaussian distribution
-#Run this program from deft/papers/fuzzy-fmt with command python3 test-minimization.py --kT [REQUIRED: temp]  --n [REQUIRED: density]  --tensor [optional]
+#Run this program from deft/papers/fuzzy-fmt with command python3 minimize_FE.py --kT [REQUIRED: temp]  --n [REQUIRED: density]  [REQUIRED: directory] --tensor [optional]
 #type --help for other options and default values
 
 from __future__ import division, print_function
@@ -18,6 +18,9 @@ parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 parser.add_argument('--n', type=float,
                     help='reduced density - REQUIRED')
+
+parser.add_argument('directory', metavar='directory', type=str,
+                    help='directory with data to plot - REQUIRED') 
 
 parser.add_argument('--numgw', type=float,
                     help='number of inital gw datapoints', default=10)
@@ -113,17 +116,19 @@ def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
     cmd += ' --fv %g --dx %g' % (fv, dx)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
     if args.tensor:
+        cmd += ' --d newdata_tensor/phase-diagram'
         cmd += ' --filename isotherm-kT-%g-tensor.dat' % kT
     else:
+        cmd += ' --d newdata/phase-diagram'
         cmd += ' --filename isotherm-kT-%g.dat' % kT
     if args.tensor:
         cmd += ' --tensor'
     print(cmd)
     os.system(cmd)
     if args.tensor:
-        f='crystallization/%s-alldat_tensor.dat' % (name)
+        f='%s/%s-alldat_tensor.dat' % (args.directory, name)
     else :
-        f='crystallization/%s-alldat.dat' % (name)
+        f='%s/%s-alldat.dat' % (args.directory, name)
     data = np.loadtxt(f)
     diffFE=data[6]
     return diffFE

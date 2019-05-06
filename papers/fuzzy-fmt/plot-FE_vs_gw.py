@@ -24,6 +24,9 @@ parser.add_argument('--fv', metavar='fraction of vacancies', type=float,
 parser.add_argument('--tensor', action='store_true',
                     help='use tensor weight')
 
+parser.add_argument('directory', metavar='directory', type=str,
+                    help='directory with data to plot') 
+
 args=parser.parse_args()
 
 kT=args.kT
@@ -35,10 +38,12 @@ fe_difference = []
 
 if args.tensor :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat_tensor.dat' % (kT, n))))  
-    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat_tensor.dat' % (kT, n, fv))))  
+    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat_tensor.dat' % (kT, n, fv)))) 
+    files = sorted(list(glob.glob('%s/kT%.3f_n%.3f_fv%.2f*alldat_tensor.dat' % (args.directory, kT, n, fv)))) 
 else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat.dat' % (kT, n))))
-    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat.dat' % (kT, n, fv))))
+    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat.dat' % (kT, n, fv))))
+    files = sorted(list(glob.glob('%s/kT%.3f_n%.3f_fv%.2f*alldat.dat' % (args.directory,  kT, n, fv))))
 for f in files:
     data = np.loadtxt(f)
     gw.append(data[3])

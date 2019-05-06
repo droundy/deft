@@ -33,21 +33,20 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep=0.01, fv=0, dx=0.5, seed=1,
     if avoid_rq:
         cmd = ''
     cmd += ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
-    cmd += ' --d data/phase-diagram'
     cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwstart, gwend, gwstep)
     cmd += ' --fv %g --dx %g --seed %g' % (fv, dx, seed)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
     if args.tensor:
+        cmd += ' --d newdata_tensor/phase-diagram'
         cmd += ' --tensor'
+    else:
+        #cmd += ' --d data/phase-diagram'
+        cmd += ' --d newdata/phase-diagram'
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
 
-if args.tensor:
-    print("need to do this later")
-    exit(0)
-
-kTs = np.arange(1.15, 0.01, -0.05)
+kTs = np.arange(1.3, 0.01, -0.05)
 #kTs = np.arange(1.15, 0.7, -0.05)
 kTs=np.append(kTs, 0.01)
 for kT in kTs:
