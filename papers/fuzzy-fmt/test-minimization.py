@@ -180,10 +180,10 @@ def minimize_starting_between(xlo, xhi, error_desired):
         print("true_min_x", true_min_x)
         height_y=es[true_min]
         print("height_y", height_y)
-        best_height=5*np.abs(rough_error_estimate(xs_to_fit,es_to_fit))+height_y #matches minimum, but not curviture
+        error_est = np.abs(rough_error_estimate(xs_to_fit,es_to_fit))
         if len(xs_to_fit) < 5:
-            best_height=5*np.abs(rough_error_estimate(xs,es))+height_y
-        print("best_height", best_height)
+            error_est=np.abs(rough_error_estimate(xs,es))
+
         newx = true_min_x + np.random.normal()*(xhi - xlo)/2
         xs = np.array(list(xs) + [newx])
         #es = np.array(list(es) + [func_to_minimize(newx)])
@@ -194,26 +194,29 @@ def minimize_starting_between(xlo, xhi, error_desired):
         print('N_desired', N_desired)
         N_desired = 1
 
-        xlo = 1e300
-        xhi = -1e300
-        for i in range(len(xs)):
-            if es[i] < best_height:
-                if xs[i] < xlo:
-                    xlo = xs[i]
-                if xs[i] > xhi:
-                    xhi = xs[i]
-        if xhi == xlo:
-            xhi = xs.max()
-            xlo = xs.min()
-
         xs_to_fit = []
         es_to_fit = []
-        for i in range(len(xs)):
-            if xs[i] >= xlo and xs[i] <= xhi:
-                xs_to_fit.append(xs[i])
-                es_to_fit.append(es[i])
-        xs_to_fit = np.array(xs_to_fit)
-        es_to_fit = np.array(es_to_fit)
+        while len(xs_to_fit) < 3:
+            best_height=5*error_est+height_y #matches minimum, but not curviture
+            print("best_height", best_height)
+            xlo = 1e300
+            xhi = -1e300
+            for i in range(len(xs)):
+                if es[i] < best_height:
+                    if xs[i] < xlo:
+                        xlo = xs[i]
+                    if xs[i] > xhi:
+                        xhi = xs[i]
+
+            for i in range(len(xs)):
+                if xs[i] >= xlo and xs[i] <= xhi:
+                    xs_to_fit.append(xs[i])
+                    es_to_fit.append(es[i])
+            xs_to_fit = np.array(xs_to_fit)
+            es_to_fit = np.array(es_to_fit)
+
+            if len(xs_to_fit) < 3:
+                error_est *= 2
 
         x0, e0, deriv2, error = parabola_fit(xs_to_fit, es_to_fit)
         parabola_e = 0.5*deriv2*(xs - x0)**2 + e0
