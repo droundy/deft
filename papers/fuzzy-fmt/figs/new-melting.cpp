@@ -128,13 +128,15 @@ weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double 
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   weight w;
-  w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
+  //w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
+  w.n_2=(sqrt(2)/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/(Xi/sqrt(2)),2));
   w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
   w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
-  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
+  //w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
+  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/(Xi/sqrt(2))));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
     w.n_1=0;
