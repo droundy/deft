@@ -55,4 +55,6 @@ for kT in [.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .
   plt.ylabel('FEdiff')
   plt.legend()
 
+plt.ylim(-1,1)
+
 plt.show()

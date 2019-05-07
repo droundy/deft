@@ -22,8 +22,7 @@ parser.add_argument('--n', type=float,
 #parser.add_argument('directory', metavar='directory', type=str,
                     #help='directory to store data - REQUIRED')
 
-parser.add_argument('--numgw', type=float,
-                    help='number of inital gw datapoints', default=10)
+parser.add_argument('--numgw', default=10, type=float, help='number of inital gw datapoints')
 parser.add_argument('--maxgw', type=float,
                     help='max gw', default=0.2)
 parser.add_argument('--mingw', type=float,
@@ -51,11 +50,6 @@ args=parser.parse_args()
 kT=args.kT
 n=args.n
 
-
-if args.numgw:
-    numgw=args.numgw
-else :
-    numgw=10
 
 if args.maxgw:
     maxgw=args.maxgw
@@ -110,6 +104,7 @@ def func_exact(x):
     #return func_exact(x) + np.random.normal()*sigma
 
 def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
+    # return func_exact(x) + np.random.normal()*0.01
     print(kT,n,x,fv,dx,mcerror,mcconstant,mcprefactor)
     name= 'kT%.3f_n%.3f_fv%.2f_gw%.3f' % (kT, n, fv, x)
     cmd = ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
@@ -117,9 +112,11 @@ def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
     cmd += ' --fv %g --dx %g' % (fv, dx)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
     if args.tensor:
+        os.system('mkdir -p newdata_tensor')
         cmd += ' --d newdata_tensor/phase-diagram'
         cmd += ' --filename isotherm-kT-%g-tensor.dat' % kT
     else:
+        os.system('mkdir -p newdata')
         cmd += ' --d newdata/phase-diagram'
         cmd += ' --filename isotherm-kT-%g.dat' % kT
     if args.tensor:
@@ -159,8 +156,8 @@ def parabola_fit(xs,ys):
 
 
 def minimize_starting_between(xlo, xhi, error_desired):
-    total_computations = numgw
-    xs = np.linspace(xlo, xhi, numgw)  #steps by (xhi-xlo)/(total_computations-1)
+    total_computations = args.numgw
+    xs = np.linspace(xlo, xhi, args.numgw)  #steps by (xhi-xlo)/(total_computations-1)
     print('xs=',xs)
     #es = np.array([func_to_minimize(x) for x in xs])
     es = np.array([func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor) for x in xs])
@@ -200,15 +197,14 @@ def minimize_starting_between(xlo, xhi, error_desired):
         es = np.array(list(es) + [func_to_minimize(kT, n, newx, fv, dx, mcerror, mcconstant, mcprefactor)])
         total_computations += 1
 
-        N_desired = 10 # max(5, (error/error_desired)**2)
-        print('N_desired', N_desired)
-        N_desired = 1
-
         xs_to_fit = []
         es_to_fit = []
-        while len(xs_to_fit) < 3:
+        all_done = False
+        while not all_done:
             best_height=5*error_est+height_y #matches minimum, but not curviture
-            print("best_height", best_height)
+            if np.isnan(best_height):
+                print("crazy nan", error_est, height_y)
+                exit(1)
             xlo = 1e300
             xhi = -1e300
             for i in range(len(xs)):
@@ -222,17 +218,32 @@ def minimize_starting_between(xlo, xhi, error_desired):
                 if xs[i] >= xlo and xs[i] <= xhi:
                     xs_to_fit.append(xs[i])
                     es_to_fit.append(es[i])
-            xs_to_fit = np.array(xs_to_fit)
-            es_to_fit = np.array(es_to_fit)
 
-            if len(xs_to_fit) < 3:
+            if len(xs_to_fit) < 5:
                 error_est *= 2
+                xs_to_fit = []
+                es_to_fit = []
+            else:
+                all_done = True
+        xs_to_fit = np.array(xs_to_fit)
+        es_to_fit = np.array(es_to_fit)
 
         x0, e0, deriv2, error = parabola_fit(xs_to_fit, es_to_fit)
         parabola_e = 0.5*deriv2*(xs - x0)**2 + e0
         residuals = np.abs(parabola_e - es)
-        
-        error_estimate_of_min = 3*rough_error_estimate(xs_to_fit,es_to_fit)/np.sqrt(len(xs))
+
+        if xhi == true_min_x:
+            xhi = xhi + 4*(xhi - xlo)
+        if xlo == true_min_x:
+            xlo = xlo - 4*(xhi - xlo)
+        if xhi < x0 and deriv2 > 0:
+            xhi = x0 + (x0 - xhi)
+        if x0 < xlo and deriv2 > 0:
+            xlo = x0 - (xlo - x0)
+
+        num_samples = min(len([x for x in xs_to_fit if x < x0]),
+                          len([x for x in xs_to_fit if x > x0]))
+        error_estimate_of_min = 3*rough_error_estimate(xs_to_fit,es_to_fit)/np.sqrt(num_samples + 1e-10)
 
         plt.clf()
         plt.xlabel('gw')
@@ -249,28 +260,22 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.plot(all_xs, func_exact(all_xs), ':', label='exact')
         plt.plot(all_xs, 0.5*deriv2*(all_xs - x0)**2 + e0, label='my parabola')
         plt.axvline(true_min_x, color="blue")
+        plt.axvline(xlo, color="red")
+        plt.axvline(xhi, color="red")
         plt.axhline(e0 + error_estimate_of_min)
         plt.axhline(e0 - error_estimate_of_min)
         plt.axhline(best_height, linestyle=':')
         plt.legend()
-        plt.xlim(xs_to_fit.min() - 0.2, xs_to_fit.max() + 0.2)
+        plt.xlim(min(xs_to_fit.min(), xlo) - 0.2, max(xs_to_fit.max(), xhi) + 0.2)
         plt.ylim(es_to_fit.min() - 0.2, es_to_fit.max() + 0.2)
         plt.pause(1.02)
 
-        if error_estimate_of_min < error_desired and deriv2 > 0:
+        if error_estimate_of_min < error_desired and deriv2 > 0 and len(xs_to_fit) >= 5:
             print('excellent error:', error_estimate_of_min, 'with', len(xs), 'data and', total_computations, 'effort')
+            print('rough_error_estimate', rough_error_estimate(xs_to_fit, es_to_fit), 'from', len(xs_to_fit))
             plt.show()
             return e0
         #plt.show()
-
-        # xs = list(xs)
-        # es = list(es)
-        # for i in reversed(range(len(xs))):
-        #     if residuals[i] > 3*error:
-        #         del xs[i]
-        #         del es[i]
-
-
 
 
 minimize_starting_between(mingw, maxgw, error_desired)

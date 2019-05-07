@@ -64,24 +64,24 @@ n1v_dot_n2v = var "n1v_dot_n2v" "{\\vec{n}_{1v}\\cdot\\vec{n}_{2v}}" (n2v `dot` 
 w3 :: Expression RealSpace -> Expression RealSpace
 w3 x = ifft ( w3k * fft x)
   where w3k = var "w3k" "\\tilde{w_3}(k)" $
-              4*pi/(k**2)*exp(-(xi*k/2)**2)*((1+xi**2*k**2/2)*sin kalphao2/k - alpha/2*cos kalphao2)
+              4*pi/(k**2)*exp(-((xi/sqrt 2)*k/2)**2)*((1+(xi/sqrt 2)**2*k**2/2)*sin kalphao2/k - alpha/2*cos kalphao2)
         kalphao2 = k*alpha/2
 
 w1 :: Expression RealSpace -> Expression RealSpace
 w1 x = ifft ( w1k * fft x)
   where w1k = var "w1k" "\\tilde{w_1}(k)" $
-              1/k*exp(-(xi*k/2)**2)*sin(k*alpha/2)
+              1/k*exp(-((xi/sqrt 2)*k/2)**2)*sin(k*alpha/2)
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
   where w2k = var "w2k" "\\tilde{w_2}(k)" $
-              2*pi*exp(-(xi*k/2)**2)*(xi**2*cos(k*alpha/2) + alpha*sin(k*alpha/2)/k)
+              2*pi*exp(-((xi/sqrt 2)*k/2)**2)*((xi/sqrt 2)**2*cos(k*alpha/2) + alpha*sin(k*alpha/2)/k)
 
 w2v :: Expression RealSpace -> Vector RealSpace
 w2v x = vector_convolve w2vk x
-  where w2vk = kvec *. (imaginary * pi*exp(-(xi*k/2)**2)*((alpha**2-xi**4*k**2)*cos(k*alpha/2)-
-                                               2*alpha*(xi**2*k+1/k)*sin(k*alpha/2))/k**2)
+  where w2vk = kvec *. (imaginary * pi*exp(-((xi/sqrt 2)*k/2)**2)*((alpha**2-(xi/sqrt 2)**4*k**2)*cos(k*alpha/2)-
+                                               2*alpha*((xi/sqrt 2)**2*k+1/k)*sin(k*alpha/2))/k**2)
 
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vector_convolve w1vk x
-  where w1vk = kvec *. (imaginary * exp(-(xi*k/2)**2)*(alpha/2*cos(k*alpha/2)-(xi**2*k/2+1/k)*sin(k*alpha/2))/k**2)
+  where w1vk = kvec *. (imaginary * exp(-((xi/sqrt 2)*k/2)**2)*(alpha/2*cos(k*alpha/2)-((xi/sqrt 2)**2*k/2+1/k)*sin(k*alpha/2))/k**2)

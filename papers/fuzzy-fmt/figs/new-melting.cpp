@@ -101,30 +101,7 @@ static inline double find_Xi(double temp) {
   return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
 }
 
-weight find_weights(vector3d r, vector3d rp, double temp) {
-  vector3d rdiff=r-rp;
-  double rdiff_magnitude=rdiff.norm();
-  const double alpha = find_alpha(temp);
-  const double Xi = find_Xi(temp);
-  weight w;
-  w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
-  w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
-  w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
-  w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
-  w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
-  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
-  if (rdiff_magnitude == 0) {
-    w.n_0=0;
-    w.n_1=0;
-    w.nv_1 = vector3d(0,0,0);
-    w.nv_2 = vector3d(0,0,0);
-    w.nm_2=zero_tensor();
-  }
-  return w;
-}
-
-weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
+static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   weight w;
@@ -146,6 +123,11 @@ weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double 
   }
   return w;
 }
+
+static inline weight find_weights(vector3d r, vector3d rp, double temp) {
+  return find_weights_from_alpha_Xi(r, rp, find_alpha(temp), find_Xi(temp));
+}
+
 
 // radius_of_peak tells us how far we need to integrate away from a
 // peak with width gwidth, if the temperature is T, when finding the
