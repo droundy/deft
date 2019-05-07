@@ -51,9 +51,12 @@ kTs = np.arange(1.3, 0.01, -0.05)
 kTs=np.append(kTs, 0.01)
 for kT in kTs:
     for n in np.arange(0.01, 0.69, 0.01):
-       run_new_melting(kT, n, 0.001, 0.001, avoid_rq=True)    #temp, density, gw_step, gw_end
+        run_new_melting(kT, n, 0.001, 0.001, avoid_rq=True)    #temp, density, gw_step, gw_end
     for n in np.arange(0.69, 1.03, 0.01):
-       run_new_melting(kT, n, 0.01, 0.2)
+        if args.tensor:
+            run_new_melting(kT, n, 0.01, 0.5)
+        else:
+            run_new_melting(kT, n, 0.01, 0.2)
     #for n in np.arange(0.01, 1.11, 0.01):
         #run_new_melting(0.5, 0.96, 0.01, 0.2)
        
