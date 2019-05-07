@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #Use this program to find the minimum of a set of data points subject to error with a Gaussian distribution
-#Run this program from deft/papers/fuzzy-fmt with command python3 minimize_FE.py --kT [REQUIRED: temp]  --n [REQUIRED: density]  [REQUIRED: directory] --tensor [optional]
+#Run this program from deft/papers/fuzzy-fmt with command python3 minimize_FE.py --kT [REQUIRED: temp]  --n [REQUIRED: density]   --tensor [optional]
 #type --help for other options and default values
 
 from __future__ import division, print_function
@@ -19,8 +19,8 @@ parser.add_argument('--kT', metavar='temperature', type=float,
 parser.add_argument('--n', type=float,
                     help='reduced density - REQUIRED')
 
-parser.add_argument('directory', metavar='directory', type=str,
-                    help='directory with data to plot - REQUIRED') 
+#parser.add_argument('directory', metavar='directory', type=str,
+                    #help='directory to store data - REQUIRED')
 
 parser.add_argument('--numgw', type=float,
                     help='number of inital gw datapoints', default=10)
@@ -60,7 +60,8 @@ else :
 if args.maxgw:
     maxgw=args.maxgw
 else :
-    maxgw=0.19
+    maxgw=0.6
+    #maxgw=0.19   #needs to be much higher now!
     
 if args.mingw:
     mingw=args.mingw
@@ -126,10 +127,14 @@ def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
     print(cmd)
     os.system(cmd)
     if args.tensor:
-        f='%s/%s-alldat_tensor.dat' % (args.directory, name)
+        f='newdata_tensor/phase-diagram/%s-alldat_tensor.dat' % (name)
     else :
-        f='%s/%s-alldat.dat' % (args.directory, name)
-    data = np.loadtxt(f)
+        f='newdata/phase-diagram/%s-alldat.dat' % (name)
+    #if args.tensor:
+        #f='%s/%s-alldat_tensor.dat' % (args.directory, name)
+    #else :
+        #f='%s/%s-alldat.dat' % (args.directory, name)
+    data = np.loadtxt(f)   #FIX if gets a NAN, no data file created?
     diffFE=data[6]
     return diffFE
     
@@ -232,7 +237,10 @@ def minimize_starting_between(xlo, xhi, error_desired):
         plt.clf()
         plt.xlabel('gw')
         plt.ylabel('diffFE')
-        plt.title("kT=%g, n=%g" % (kT, n))
+        if args.tensor:
+            plt.title("kT=%g, n=%g, Tensor" % (kT, n))
+        else:
+            plt.title("kT=%g, n=%g, Nontensor" % (kT, n))
         plt.plot(xs,es,'.',label='data')
         plt.plot(xs_to_fit,es_to_fit,'.',label='data fitted', color='orange')
         all_xs = np.linspace(xs.min(), xs.max(), 1000)
