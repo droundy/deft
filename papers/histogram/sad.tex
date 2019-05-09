@@ -49,27 +49,28 @@ Factor (SAD)
 \section{Introduction}
 Over the past several decades a number of flat histogram Monte-Carlo
 simulation algorithms have been developed which calculate the
-thermodynamic properties of various systems for all temperatures.  The
+thermodynamic properties of various systems for over a range of temperatures.  This
 development began with the original histogram method, which used a
 single canonical Monte Carlo simulation to predict properties for
 nearby temperatures~\cite{ferrenberg1988new}.  For large systems this
 approach is limited to a narrow temperature range because a single
 canonical simulation explores only a small range of energies.  This
-led to a variety of ``broad'' (or ``flat'') histogram
+led to a variety of ``flat'' (or ``broad'') histogram
 methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
   wang2001determining, wang2001efficient, trebst2004optimizing}, which
-attempt to explore a wide range of energies.  Another benefit, in
+explore a wider range of energies.  Another benefit, in
 contrast with low-temperature canonical Monte Carlo, is that these
 approaches cannot be trapped in a local energy minimum.
 
-Wang and Landau introduced an algorithm (WL) that uses an update factor
+Wang and Landau introduced the most widely used flat histogram
+algorithm (WL) that uses an update factor
 and a statistical histogram to compute the density of states of a given
 system~\cite{wang2001determining, wang2001efficient}.  While the method
 is incredibly powerful, it has a few disadvantages. Firstly, it
-requires the user to select a number of parameters, including the range
+requires the user to select the range
 of energies to be studied~\cite{landau2004new}. This adds an additional
-hurdle to its application to a variety of systems because the user must
-simulate until the energy range of interest is known.  The simulation
+hurdle to its application to systems for which the interesting range
+of energies is not known \emph{a priori}.  The simulation
 violates detailed balance albiet briefly as the size of the violation decreases
 with time, which complicates convergence analysis.  In fact, the error
 in a WL computation the error has been demonstrated to saturate at a
@@ -89,11 +90,13 @@ This leads to their $1/t$-WL algorithm which ensures that the error
 continues to decrease asymptotically as
 $1/\sqrt{t}$~\cite{belardinelli2008analysis}.
 
-Liang, Liu, and Carrol began to consider that WL could be considered
-a special case of Stochastic Approximation whose convergence could be
-mathematically proven~\cite{liang2006theory, liang2007stochastic}. In
-2007, Liang et al.~\cite{liang2007stochastic} argued that WL can be
-considered a form of Stochastic Approximation Monte Carlo (SAMC). While
+Liang began to consider that WL could be considered
+a special case of the Stochastic Approximation approach, whose
+convergence could be
+mathematically proven~\cite{liang2006theory}. In
+2007, Liang, Liu, and Carrol et al. argued that WL can be
+considered a form of Stochastic Approximation Monte Carlo
+(SAMC)~\cite{liang2007stochastic}. \davidsays{I'm here} While
 SAMC can guarantee convergence, the method still has a system specific
 user-defined variable which makes applying this algorithm to arbitrary
 systems difficult.
