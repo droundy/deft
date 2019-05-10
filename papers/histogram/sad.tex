@@ -32,17 +32,22 @@ Factor (SAD)
   Corvallis, OR 97331}
 
 \begin{abstract}
-  \davidsays{Let's look at the abstract together.}
-  We present a novel Monte-Carlo algorithm based on the Stochastic
+  We present a new Monte-Carlo algorithm based on the Stochastic
   Approximation Monte Carlo (SAMC) algorithm for directly calculating
   the density of states. The proposed method is Stochastic
-  Approximation with a dynamic update factor (SAD-$\gamma$ or SAD)
+  Approximation with a Dynamic update factor (SAD)
   which dynamically adjusts the update factor $\gamma$ during the course of
-  the simulation. We test this MC method on the square-well fluid and
-  compare the convergence time and average entropy error for a variety of weight-based
-  Monte-Carlo methods. SAD rapidly converges to the
+  the simulation. We test this method on the square-well fluid and
+  compare the convergence time and average entropy error for several
+  related
+  Monte-Carlo methods. We find that both the SAD and $1/t$-Wang-Landau ($1/t$-WL)
+  methods rapidly converge to the
   correct density of states without the need for the user to specify an
-  arbitrary tunable parameter $t_0$ as in the case of SAMC.
+  arbitrary tunable parameter $t_0$ as in the case of SAMC.  SAD requires
+  as input the temperature range of interst, in contrast to
+  $1/t$-WL, which requires that the user identify the interesting range
+  of energies.  Thus SAD is more convenient when the range of energies is
+  not known in advance.
 \end{abstract}
 
 \maketitle
@@ -245,9 +250,8 @@ decrease too quickly.  Belardinelli and Pereyra raised the question as
 to whether the update factor should be decrease by $\nicefrac12$ or
 some other factor for each update~\cite{belardinelli2007fast}. They
 implemented a schedule that enforced that if the update factor
-$\gamma$ is ever less than $\nicefrac{N_S}{t}$ then the update factor
-is set to $\nicefrac{N_S}{t}$ where $N_S$ is the number of energy
-states and the histogram is no longer tracked. Employing this
+$\gamma$ is ever less than $\nicefrac{1}{t}$ then the update factor
+is set to $\nicefrac{1}{t}$ and the histogram is no longer tracked. Employing this
 scheduler, they found that the error saturation is avoided since the
 correct density of states is approached asymptotically as
 $t^{-\frac12}$~\cite{belardinelli2008analysis}. Zhou et. al further
@@ -258,12 +262,12 @@ $1/t$~\cite{zhou2008optimal}.
 Schneider et. al outlines minor refinements to the $1/t$-WL algorithm
 including $\nicefrac{N_S}{t}$ scaling and switching from standard WL
 to $1/t$-WL when the update factor $\gamma <
-\nicefrac{N_S}{t}$~\cite{schneider2017convergence}. \davidsays{Above
-  we say that 1/t-WL does this.  One must be wrong?} As per the
+\nicefrac{N_S}{t}$~\cite{schneider2017convergence}. As per the
 original $1/t$ implementation~\cite{belardinelli2007fast}, the update
 factor is decreased once all $N_S$ energy states are visited at least
 once (i.e. $H(E) \neq 0$) effectively avoiding the concept of
-`flatness'.
+`flatness'.  In this work, we refer to this refined algorithm as $1/t$-WL,
+with the update factor asymptoting to $\nicefrac{N_S}{t}$.
 
 
 \subsection{SAMC}
@@ -685,11 +689,10 @@ and converge roughly as expected.
 The methods SAD, WL, and $1/t$-WL compensate for the smaller
 displacement distance by reducing $\gamma$ more slowly, as can be seen from
 Figure~\ref{fig:fast-slow-gamma}b and ~\ref{fig:fast-slow-gamma}d.
-The update factors take approximately 10x longer to reach steady-state
-for the slower translation scale. Because of this update behavior,
+The update factors take approximately 10$\times$ longer to reach steady-state
+for the smaller displacement distance. Because of this update behavior,
 these methods are less sensitive to the choice of displacement
-distance than SAMC is.  \davidsays{This paragraph could benefit from
-  going through again.}
+distance than SAMC is.
 
 %~ SAMC methods that converge
 %~ in a reasonable amount of moves in Figure~\ref{fig:fast-slow-gamma}a do not
@@ -745,9 +748,6 @@ converge as $1/\sqrt{t}$.  We then see the WL error saturates around
 $10^{10}$ moves.  Once again, the convergence of SAD is essentially
 the same as that of the $1/t$-WL method.
 
-\davidsays{I got to here.}
-
-
 %~ For this larger system, SAMC parameter values of $t_0$ that gave rapid
 %~ convergence for the $N = 50$ system with $\delta = 0.05\sigma$ do not
 %~ converge rapidly.
@@ -781,40 +781,34 @@ the same as that of the $1/t$-WL method.
 %~ are needed to achieve reasonable results.
 
 \section{Conclusions}
-Both SAD and 1/t-WL converge more rapidly than Wl or SAMC. SAD requires
-the user to specify a temperature range rather than an energy range as 1/t-WL
-does. Both WL and 1/t-WL require a prior simulation in order to determine the energy range
-of interest. WL saturates in convergence as discussed in the introduction and
-requires the user to optimize the choice of parameters to avoid this such as
-increasing the flatness criterion.  SAMC converges for a reasonable choice of
-$t_0$ but this parameter can be difficult to tune especially across different
-energy bins, displacement distances, or systems. Additionaly, SAMC does not
-converge as rapidly as either SAD or 1/t-WL even for the best choice of $t_0$.
+We have introduced a new algorithm that effectively samples the
+energy space corresponding to a desired range of temperatures for a
+variety of system sizes. 
+%
+We find that both SAD and $1/t$-WL demonstrate excellent and robust
+convergence.
+They both converge more rapidly than SAMC, and unlike WL consistently
+converge to the correct density of states. SAD requires
+the user to specify a temperature range of interest rather than an
+energy range of interest as $1/t$-WL does.  For use cases in which
+a range of desired temperatures is known, this will make the SAD method
+considerably more convenient.
 
-We have introduced a new algorithm SAD (Stochastic Approximation with a
-Dynamic $\gamma$) that effectively samples the entire energy space for
-a variety of system sizes.  Also, SAD proves effective in comparison
-with other Monte-Carlo methods at converging to the correct density of
-states.  The ease of implementation and the absence of user-defined
-parameters makes SAD an ideal algorithm. SAD converges as quickly as
-SAMC (in the case of an ideally chosen $t_0$ for our simulations. SAD
-doesn't suffer from the weakness of SAMC, i.e. the user choosing
-parameters that could lead to the simulation not converging in a
-reasonable amount of moves.
+We find that SAMC converges for a reasonable choice of
+$t_0$ but this parameter can be difficult to tune especially across
+significantly differing systems.  We find that even simple
+changes to the Monte Carlo moves can have a dramatic effect on the
+range of practical $t_0$ values.  Additionaly, SAMC does not
+converge as rapidly as either SAD or $1/t$-WL even for the best choice of $t_0$,
+when a relatively small range of energies is required, because it always
+simulates all possible energies.
 
-SAD decreases $\gamma$ in a controlled way that prevents the algorithm
-from taking too long to converge (as in the case of SAMC with a poor choice
-of $t_0$) or failing to converge such as is the case with WL for complex
-systems. A major advantage is that the user does not need to determine a
-priori how quickly the update factor $\gamma$ should decrease as the
-method SAD dynamically determines this.
+%We note that SAD should be tested on additional systems, and the
+%convergence of the method should be examined.  Also, a rigorous
+%mathematical justification for our choice of the update factor is
+%necessary to ensure the most optimal convergence of the algorithm.
 
-We note that SAD should be tested on additional systems, and the
-convergence of the method should be examined.  Also, a rigorous
-mathematical justification for our choice of the update factor is
-necessary to ensure the most optimal convergence of the algorithm.
-
-\section{Acknowledgement}
+%\section{Acknowledgement}
 
 %We gratefully acknowledge D.W. Siderius and
 %J.R. Errington for helpful communications regarding the implementation
