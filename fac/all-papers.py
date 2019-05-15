@@ -36,6 +36,7 @@ other_texs = """
    thesis-vischer/Thesis.tex
    histogram/sad.tex
    histogram/sad2d.tex
+   histogram/ising.tex
    ising/ising-sad.tex
 """.split()
 
