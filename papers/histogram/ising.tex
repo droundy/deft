@@ -182,13 +182,6 @@ reaches a specified threshold (typically 0.8), the $\gamma$ value is
 decreased and the histogram is reset to zero. The entire process is repeated
 until $\gamma$ reaches a desired cutoff.
 
-%The Wang-Landau approach thus has three parameters that need be
-%specified: the factor by which to decrease $\gamma$ when flatness is
-%acheived, the flatness criterion, and the cutoff that determines when
-%the computation is complete.  In addition, an energy range (or in
-%general, a \emph{set} of energies) must be supplied, so that the
-%flatness criterion can be defined.
-
 Although the algorithm is both efficient and widely used , it
 suffers from a few shortcomings.  Frist, an energy range of interest must be
 specified ~\cite{wang2001efficient, schulz2003avoiding, yan2003fast},
@@ -200,12 +193,58 @@ cutoff value) decrease the error in the density of states beyond a
 given nonzero value.
 
 \subsection{$1/t$-Wang-Landau}
-1/t WL here.
+The $1/t$-WL method is a refinement of the original implementation that
+addresses the error saturation of WL. Belardinelli and Pereyra
+implemented a schedule~\cite{belardinelli2007fast} that enforced that
+if $\gamma < \nicefrac{1}{t}$ then the update factor is set to
+$\nicefrac{1}{t}$ and the histogram is no longer tracked. Using this
+metric, the error saturation is avoided since the correct density of
+states is approached asymptotically as
+$t^{-\frac12}$~\cite{belardinelli2008analysis}. Zhou et. al also showed
+that the WL algorithm never converges exponentially and succesfully
+bounded the statistical error between $t^{-\frac12}$ and
+$1/t$~\cite{zhou2008optimal}.  
+
+Schneider $\text{et. al}$ outlines minor refinements to the $1/t$-WL algorithm 
+including $\nicefrac{N_S}{t}$ scaling and switching from standard WL to 
+$1/t$-WL when the update factor $\gamma < 
+\nicefrac{N_S}{t}$~\cite{schneider2017convergence}. As per the original 
+$1/t$ implementation~\cite{belardinelli2007fast}, the update factor is 
+decreased once all $N_S$ energy states are visited at least once (i.e. 
+$H(E) \neq 0$) effectively avoiding the concept of `flatness'.  In this 
+work, we refer to this refined algorithm as $1/t$-WL, with the update 
+factor asymptoting to $\nicefrac{N_S}{t}$.
 
 \subsection{SAMC}
-Stochastic Approximation Monte Carlo here.
+The Stochastic Approximation Monte Carlo (SAMC) algorithm has a simple
+schedule by which the update factor $\gamma$ is continuously
+decreased~\cite{liang2007stochastic, werlich2015stochastic,
+schneider2017convergence}.  The update factor is defined in the
+original implementation~\cite{liang2007stochastic} in terms of an
+arbitrary tunable parameter $t_0$,
+\begin{align}
+\gamma_{t}^{\text{SA}} =\frac{t_0}{\max(t_0,t)}
+\end{align}
+where as above $t$ is the number of moves that have been attempted.
+SAMC offers extreme simplicity and proven convergence.
+Provided the update factor satisfies
+\begin{align}
+\sum_{t=1}^\infty \gamma_{t} = \infty \quad\textrm{and}\quad
+\sum_{t=1}^\infty \gamma_{t}^\zeta < \infty
+\end{align}
+where $\zeta \in \{1,2\}$, Liang has shown that the weights are proven
+to converge to the true density of states~\cite{liang2006theory,
+liang2007stochastic}.  Unlike WL methods, the energy range need not be
+known \emph{a priori.}  The convergenc time depends only on the choice of
+parameter $t_0$.  Liang \emph{et al.} give a rule of thumb in
+which $t_0$ is chosen in the range from $2N_S$ to $100N_S$ where $N_S$
+is the number of energy bins~\cite{liang2007stochastic}.  Schneider
+\emph{et al.} found that for the Ising model this heuristic is helpful
+for small spin systems, but that larger systems require an even higher
+$t_0$ value~\cite{schneider2017convergence}.
 
 \subsection{SAD Algorithm}\label{sec:sad}
+In our previous work we discuss this in detail so here we only highlight...
 Stochastic Approximation w/ Dynamic $\gamma$ here.
 
 \section{Results}
