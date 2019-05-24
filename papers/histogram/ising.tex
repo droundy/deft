@@ -7,6 +7,7 @@
 \usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
 \usepackage[colorinlistoftodos,prependcaption,textsize=normalsize]{todonotes}
 \usepackage{mdframed}
+\usepackage{braket}
 
 % define colors for comments
 \definecolor{dark-gray}{gray}{0.10}
@@ -123,37 +124,127 @@ of Monte-Carlo algorithms (WL, 1/t-WL, SAMC, SAD) to the 2D Potts andbinning of 
 %}
 
 \subsection{Ising Model}
-% Flat Histogram Method of Wang-Landau and N-Fold Way (Schulz Binder Muller)
-% https://doi.org/10.1142/S0129183102003243
-\jpsays{talk about papers that covered Ising model in context of flat histogram
-as an introduction to this.}
+The 2D Ising spin-lattice system is widely used as a testbed when
+benchmarking or comparing Monte-Carlo
+methods~\cite{ferdinand1969bounded, wang1999transition}. The 2nd order
+phase transition behavior and the ability to directly calculate the
+exact solution for finite lattices~\cite{beale1996exact} make the
+system sufficiently interesting for such theoretical comparisons. It is
+also of important note that direct comparison of the other methods can
+be made with WL as its original implementation was done on this
+system~\cite{wang2001determining,wang2001efficient}.
 We test the convergence of several flat histogram methods
 on the periodic 2D square lattice ferromagnetic Ising model with nearest
-neighbor interactions~\cite{landau2004new}. The $N\times N$ spin system can
-take on values of $\sigma_i = \pm 1$ for up or down spins respectively. We
-can write the Hamiltonian as follows:
+neighbor interactions~\cite{landau2004new}.
 \begin{align}
-\mathcal{H} = -\sum_{<i,j>} \sigma_i \sigma_j
+\mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j - h \sum_i s_i
 \end{align}
-where the sum is over all enumerated spin sites. The 2D Ising spin-lattice
-system is widely used as a testbed when benchmarking or comparing Monte-Carlo
-methods~\cite{ferdinand1969bounded, wang1999transition}. The
-2nd order phase transition behavior and the ability to directly calculate the
-exact solution for finite lattices~\cite{beale1996exact} make the system sufficiently
-interesting for such theoretical comparisons. It is also of important note that
-direct comparison of the other methods can be made with WL as its original implementation
-was done on this system~\cite{wang2001determining,wang2001efficient}.
+The $N\times N$ spin system can take on values of $\sigma_i = \pm 1$
+for up or down spins respectively. In the infinite volume limit ($h =
+0$), We can write the Hamiltonian as follows~\cite{onsager1944crystal,
+kaufman1949crystal}:
+\begin{align}
+\mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j
+\end{align}
+where the sum is over all enumerated spin sites. Beale showed that for finite
+lattices the Density of States could directly be calculated from the partition
+function~\cite{beale1996exact}
+\begin{align}
+Z = \sum_E g(E) e^{-{\beta E}}
+\end{align}
+where $g(E)$ is the multiplicity of the system which is identical to
+$D(E)$. We can estimate the average deviation from the exact solution
+using the relation~\cite{schneider2017convergence, shakirov2018convergence,
+barash2017control}:
+\begin{align}
+\braket{\epsilon(t)}_E = \frac{1}{N_E - 1} \sum_E \left( \frac{S(E,t) - S_{\text{Beale}(E)}}{S_{\text{Beale}(E)}} \right)
+\end{align}
+As per the implementation by Wang and
+Landau~\cite{wang2001determining}, the total number of available energy
+states are $N-1$.
+\jpsays{Also the necessary condition that the ground state is
+$2$ for the 2D Ising model is enforced to guarantee the accuracy of the
+density of states at low temperatures. If $2^N$ states is the condition
+used for the ferromagnetic ising model, the rescaled factor is
+determined primarily by the maximum density of states impacing the
+accuracy of the energy levels at or near the ground state.}
+
 
 \subsection{Wang-Landau}
-Wang-Landau here.
+The Wang-Landau algorithm~\cite{wang2001efficient,wang2001determining,
+landau2014guide} explores energy space by initially setting $\gamma=1$,
+and then decreases $\gamma$ in discrete stages.  We track the number of
+moves ending at each energy and store the counts in a histogram.  For a
+sufficiently flat energy histogram, $\gamma$ is decreased by a specified factor of
+$\frac12$.  Flatness is defined by the ratio between the minimum
+value of the histogram and its average value.  If this flatness
+reaches a specified threshold (typically 0.8), the $\gamma$ value is
+decreased and the histogram is reset to zero. The entire process is repeated
+until $\gamma$ reaches a desired cutoff.
+
+Although the algorithm is both efficient and widely used , it
+suffers from a few shortcomings.  Frist, an energy range of interest must be
+specified ~\cite{wang2001efficient, schulz2003avoiding, yan2003fast},
+which may require multiple simulations. Second, while Wang-Landau
+converges quickly, it does not in general converge to the true density
+of states ~\cite{belardinelli2008analysis, zhou2008optimal}.  It can
+and does decrease $\gamma$ so quickly that it will never (for any
+cutoff value) decrease the error in the density of states beyond a
+given nonzero value.
 
 \subsection{$1/t$-Wang-Landau}
-1/t WL here.
+The $1/t$-WL method is a refinement of the original implementation that
+addresses the error saturation of WL. Belardinelli and Pereyra
+implemented a schedule~\cite{belardinelli2007fast} that enforced that
+if $\gamma < \nicefrac{1}{t}$ then the update factor is set to
+$\nicefrac{1}{t}$ and the histogram is no longer tracked. Using this
+metric, the error saturation is avoided since the correct density of
+states is approached asymptotically as
+$t^{-\frac12}$~\cite{belardinelli2008analysis}. Zhou et. al also showed
+that the WL algorithm never converges exponentially and succesfully
+bounded the statistical error between $t^{-\frac12}$ and
+$1/t$~\cite{zhou2008optimal}.  
+
+Schneider $\text{et. al}$ outlines minor refinements to the $1/t$-WL algorithm 
+including $\nicefrac{N_S}{t}$ scaling and switching from standard WL to 
+$1/t$-WL when the update factor $\gamma < 
+\nicefrac{N_S}{t}$~\cite{schneider2017convergence}. As per the original 
+$1/t$ implementation~\cite{belardinelli2007fast}, the update factor is 
+decreased once all $N_S$ energy states are visited at least once (i.e. 
+$H(E) \neq 0$) effectively avoiding the concept of `flatness'.  In this 
+work, we refer to this refined algorithm as $1/t$-WL, with the update 
+factor asymptoting to $\nicefrac{N_S}{t}$.
 
 \subsection{SAMC}
-Stochastic Approximation Monte Carlo here.
+The Stochastic Approximation Monte Carlo (SAMC) algorithm has a simple
+schedule by which the update factor $\gamma$ is continuously
+decreased~\cite{liang2007stochastic, werlich2015stochastic,
+schneider2017convergence}.  The update factor is defined in the
+original implementation~\cite{liang2007stochastic} in terms of an
+arbitrary tunable parameter $t_0$,
+\begin{align}
+\gamma_{t}^{\text{SA}} =\frac{t_0}{\max(t_0,t)}
+\end{align}
+where as above $t$ is the number of moves that have been attempted.
+SAMC offers extreme simplicity and proven convergence.
+Provided the update factor satisfies
+\begin{align}
+\sum_{t=1}^\infty \gamma_{t} = \infty \quad\textrm{and}\quad
+\sum_{t=1}^\infty \gamma_{t}^\zeta < \infty
+\end{align}
+where $\zeta \in \{1,2\}$, Liang has shown that the weights are proven
+to converge to the true density of states~\cite{liang2006theory,
+liang2007stochastic}.  Unlike WL methods, the energy range need not be
+known \emph{a priori.}  The convergenc time depends only on the choice of
+parameter $t_0$.  Liang \emph{et al.} give a rule of thumb in
+which $t_0$ is chosen in the range from $2N_S$ to $100N_S$ where $N_S$
+is the number of energy bins~\cite{liang2007stochastic}.  Schneider
+\emph{et al.} found that for the Ising model this heuristic is helpful
+for small spin systems, but that larger systems require an even higher
+$t_0$ value~\cite{schneider2017convergence}.
 
 \subsection{SAD Algorithm}\label{sec:sad}
+In our previous work we discuss this in detail so here we only highlight...
 Stochastic Approximation w/ Dynamic $\gamma$ here.
 
 \section{Results}
