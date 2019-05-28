@@ -880,7 +880,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     // Create all output data filename
     char *alldat_filename = new char[1024];
     char *alldat_filedescriptor = new char[1024];
-    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
+    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.8f",
             temp, reduced_density, fv, gwidth);
     if (use_tensor_weight)  {
       sprintf(alldat_filename, "%s/%s-alldat_tensor.dat", data_dir, alldat_filedescriptor);
@@ -1140,7 +1140,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   // Create all output data filename
   char *alldat_filename = new char[1024];
   char *alldat_filedescriptor = new char[1024];
-  sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
+  sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.8f",
           temp, reduced_density, fv, gwidth);
   sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
   printf("Create data file: %s\n", alldat_filename);
