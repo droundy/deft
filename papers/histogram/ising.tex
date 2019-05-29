@@ -23,7 +23,7 @@
 \newcommandx{\jpcom}[2][1=inline]{\todo[linecolor=gray,backgroundcolor=light-gray,bordercolor=dark-gray,#1]{\textbf{Jordan says:} #2} }
 \begin{document}
 
-\title{Ising Sad paper
+\title{Flat histogram method comparison on 2D Ising Model
 }
 
 \author{Jordan K. Pommerenck} \author{David Roundy}
@@ -37,7 +37,24 @@ In this work, we finish writing everything before the abstract~\jpsays{FIX AT EN
 \maketitle
 
 \section{Introduction}
-\jpsays{this needs a total rewrite}
+\jpsays{What is a flat histogram}
+Flat histogram Monte-Carlo simulation algorithms calculate the
+thermodynamic properties of various systems for over a range of
+temperatures.  The first histogram method used a single canonical Monte
+Carlo simulation to predict properties for nearby
+temperatures~\cite{ferrenberg1988new}. This method is unable to
+effectively sample large energy ranges where the simulation is limited
+to a narrow temperature range.
+
+This led to a
+variety of ``flat'' (or ``broad'') histogram
+methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
+wang2001determining, wang2001efficient, trebst2004optimizing}, which
+explore a wider range of energies.  Another benefit, in contrast with
+low-temperature canonical Monte Carlo, is that these approaches cannot
+be trapped in a local energy minimum.
+
+\jpsays{What is WL}
 In the early 2000s, Wang and Landau introduced a novel flat-histogram
 Monte-Carlo algorithm that accurately determined the density of states
 (DOS) for a statistical
@@ -56,6 +73,8 @@ findings lead to the formation of the $1/t$-WL algorithm.  The ideal
 choice of decreasing the modification factor prevents CPU time from
 being wasted by continuing to perform calculations after the error in
 the density of states is saturated~\cite{belardinelli2008analysis}.
+
+\jpsays{What is SAMC}
 Liang independently considered whether WL could be treated as a special
 case of Stochastic Approximation whose convergence could be
 mathematically proven~\cite{liang2006theory, liang2007stochastic}. In
@@ -72,7 +91,7 @@ algorithm that dynamically chooses the modification factor rather than
 relying on system dependent parameters. SAD shares the same convergence
 properties with SAMC while replacing un-physical user-defined parameters
 with the algorithms dynamic choice.  In this work, we apply the family
-of Monte-Carlo algorithms (WL, 1/t-WL, SAMC, SAD) to the 2D Potts andbinning of discrete energies.
+of Monte-Carlo algorithms (WL, 1/t-WL, SAMC, SAD) to the 2D Ising model.
 
 %\section{Discrete Spin Systems} In this work, we compare the
 %convergence properties of the family of Weight-Based Broad Histogram
@@ -122,6 +141,40 @@ of Monte-Carlo algorithms (WL, 1/t-WL, SAMC, SAD) to the 2D Potts andbinning of 
 %\end{align}
 %Mention: 1st order phase transition nearest neighbor and Hamiltonian
 %}
+\section{Flat histogram methods}\label{sec:histogram}
+Flat histogram methods determine the density of states $D(E)$ over a broad range
+of energies by simulating each energy with equivalent accuracy.
+
+Flat histogram Monte Carlo methods propose randomly chosen ``moves''
+which change the state of the system and must satisfy detailed balance.  Each
+algorithm differs in how it determines the probability of accepting a move and
+in what additional statistics must be collected in order decide on that
+probability.
+
+We describe four closely related flat histogram methods which each rely on a
+weight function $w(E)$ to determine $D(E)$.  For these algorithms, the
+probability of accepting a move is given by
+\begin{equation}
+	\mathcal{P}(E_\text{old} \rightarrow E_\text{new})
+	= \min\left[1,\frac{w(E_\text{old})}{w(E_\text{new})}\right]
+\end{equation}
+which biases the simulation in favor of energies with low weights. The result of
+weights $w(E)$ that are proportional to $D(E)$ is an entirely flat histogram. We
+can relate the entropy to the weights in the microcanonical ensemble, since the
+entropy is defined as $S(E) \equiv k_B\ln(D(E)) \approx \ln w(E)$.
+
+Each approach uses a random walk in energy space to estimate $D(E)$.  At the
+core of each of these approaches is to continuously update the weights at each
+step of the simulation
+\begin{equation}
+	\ln{w_{t+1}(E)}=\ln{w_{t}(E)}
+	+\gamma_t
+\end{equation}
+where $t$ is number of the current move, $\gamma(t)$ is a move-dependent update
+factor, and $E$ is the current energy.  This update causes the random walk to
+avoid energies that have been frequently sampled, leading to a rapid exploration
+of energy space. The four methods differ primarily in how they schedule the
+decreasing of $\gamma_t$.
 
 \subsection{Ising Model}
 The 2D Ising spin-lattice system is widely used as a testbed when
@@ -203,16 +256,16 @@ states is approached asymptotically as
 $t^{-\frac12}$~\cite{belardinelli2008analysis}. Zhou et. al also showed
 that the WL algorithm never converges exponentially and succesfully
 bounded the statistical error between $t^{-\frac12}$ and
-$1/t$~\cite{zhou2008optimal}.  
+$1/t$~\cite{zhou2008optimal}.
 
-Schneider $\text{et. al}$ outlines minor refinements to the $1/t$-WL algorithm 
-including $\nicefrac{N_S}{t}$ scaling and switching from standard WL to 
-$1/t$-WL when the update factor $\gamma < 
-\nicefrac{N_S}{t}$~\cite{schneider2017convergence}. As per the original 
-$1/t$ implementation~\cite{belardinelli2007fast}, the update factor is 
-decreased once all $N_S$ energy states are visited at least once (i.e. 
-$H(E) \neq 0$) effectively avoiding the concept of `flatness'.  In this 
-work, we refer to this refined algorithm as $1/t$-WL, with the update 
+Schneider $\text{et. al}$ outlines minor refinements to the $1/t$-WL algorithm
+including $\nicefrac{N_S}{t}$ scaling and switching from standard WL to
+$1/t$-WL when the update factor $\gamma <
+\nicefrac{N_S}{t}$~\cite{schneider2017convergence}. As per the original
+$1/t$ implementation~\cite{belardinelli2007fast}, the update factor is
+decreased once all $N_S$ energy states are visited at least once (i.e.
+$H(E) \neq 0$) effectively avoiding the concept of `flatness'.  In this
+work, we refer to this refined algorithm as $1/t$-WL, with the update
 factor asymptoting to $\nicefrac{N_S}{t}$.
 
 \subsection{SAMC}
