@@ -5,7 +5,7 @@
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-FE_vs_gw.py --kT [temp] --n [density]   --fv [fraction of vacancies]  [OPTIONAL: --tensor]
+#with comand ./plot-FE_vs_gw.py --kT [temp] --n [density]   --fv [fraction of vacancies]  directory  [OPTIONAL: --tensor]
 
 import os, glob
 import argparse
@@ -38,11 +38,11 @@ fe_difference = []
 
 if args.tensor :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat_tensor.dat' % (kT, n))))  
-    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat_tensor.dat' % (kT, n, fv)))) 
+    #files = sorted(list(glob.glob('newdata_tensor/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat_tensor.dat' % (kT, n, fv)))) 
     files = sorted(list(glob.glob('%s/kT%.3f_n%.3f_fv%.2f*alldat_tensor.dat' % (args.directory, kT, n, fv)))) 
 else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n%.3f_*alldat.dat' % (kT, n))))
-    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat.dat' % (kT, n, fv))))
+    #files = sorted(list(glob.glob('newdata/phase-diagram/kT%.3f_n%.3f_fv%.2f*alldat.dat' % (kT, n, fv))))
     files = sorted(list(glob.glob('%s/kT%.3f_n%.3f_fv%.2f*alldat.dat' % (args.directory,  kT, n, fv))))
 for f in files:
     data = np.loadtxt(f)

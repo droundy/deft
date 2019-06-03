@@ -23,7 +23,7 @@ parser.add_argument('--tensor', action='store_true',
                     help='use tensor weight')
 args=parser.parse_args()
 
-def run_new_melting(kT, n, gwstart, gwend, gwstep=0.01, fv=0, dx=0.5, seed=1,
+def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
                     mcerror=1e-3, mcconstant=5, mcprefactor=50000,
                     avoid_rq=False):
     name = 'nm-kT_%g-n_%g' % (kT, n)
@@ -50,13 +50,20 @@ kTs = np.arange(2, 0.01, -0.1)   # kT must be < 2.21 to fit theory
 #kTs = np.arange(1.15, 0.7, -0.05)
 kTs=np.append(kTs, 0.01)
 for kT in kTs:
-    for n in np.arange(0.01, 0.69, 0.02):
-        run_new_melting(kT, n, 0.001, 0.001, avoid_rq=True)    #temp, density, gw_step, gw_end
-    for n in np.arange(0.69, 1.2, 0.02):
+    for n in np.arange(0.01, 0.69, 0.02):   #homogeneous fluid
+        run_new_melting(kT, n, 0.001, 0.001, 0.001, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
+    for n in np.arange(0.69, 1.2, 0.02):    #crystal
         if args.tensor:
-            run_new_melting(kT, n, 0.01, 0.5)
+            run_new_melting(kT, n, 0.00001, 0.0001, 0.00001)    #temp, density, gw_start, gw_end, gw_step
+            run_new_melting(kT, n, 0.0001, 0.100, 0.0001)    #temp, density, gw_start, gw_end, gw_step
+            run_new_melting(kT, n, 0.001, 0.01, 0.001)    #temp, density, gw_start, gw_end, gw_step
+            run_new_melting(kT, n, 0.01, 0.1, 0.01)    #temp, density, gw_start, gw_end, gw_step
         else:
-            run_new_melting(kT, n, 0.01, 0.2)
+            run_new_melting(kT, n, 0.01, 0.2, 0.01)
     #for n in np.arange(0.01, 1.11, 0.01):
         #run_new_melting(0.5, 0.96, 0.01, 0.2)
 
+    #run_new_melting(2, .2, 0.00001, 0.0001, 0.00001, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
+    #run_new_melting(2, .2, 0.0001, 0.100, 0.0001, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
+    #run_new_melting(2, .2, 0.001, 0.01, 0.001, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
+    #run_new_melting(2, .2, 0.01, 0.1, 0.01, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
