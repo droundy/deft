@@ -41,7 +41,7 @@ def CalculateCoefSum(n,m,k):
 
 def CalculateRef(n, m):
     if (n % 2 == 0):
-    
+
         # define coefficients (x = exp(-2K) = exp(-2J/kbT).
         # the coefficients c0,s0,cn,sn are just numbers contrary
         # to what the notation would have you believe.
@@ -50,7 +50,7 @@ def CalculateRef(n, m):
         s0 = ((1 - x)**m - (x*(1 + x))**m) / 2**(m//2)
         cn = ((1 + x)**m + (x*(1 - x))**m) / 2**(m//2)
         sn = ((1 + x)**m - (x*(1 - x))**m) / 2**(m//2)
-        
+
         c2_coef = 1
         s2_coef = 1
         for k in range(1, n , 2): # should include endpoint so n - 1 --> n
@@ -58,10 +58,10 @@ def CalculateRef(n, m):
             # define c2[k_] and s2[k_] as per Paul D. Beale
             c2_coef *= sy.expand(2**(1 - 2*m)*((c2_coef_sum) + b**m))
             s2_coef *= sy.expand(2**(1 - 2*m)*((c2_coef_sum) - b**m))
-        
+
         z1 = 2**(m*n//2 - 1)*c2_coef
         z2 = 2**(m*n//2 - 1)*s2_coef
-        
+
         c2_coef = 1
         s2_coef = 1
         for k in range(2, n , 2): # should include endpoint so n - 2 --> n
@@ -69,7 +69,7 @@ def CalculateRef(n, m):
             # define c2[k_] and s2[k_] as per Paul D. Beale
             c2_coef *= sy.expand(2**(1 - 2*m)*((c2_coef_sum) + b**m))
             s2_coef *= sy.expand(2**(1 - 2*m)*((c2_coef_sum) - b**m))
-    
+
         z3 = 2**(m*n//2 - 1)*c0*cn*c2_coef
         z4 = 2**(m*n//2 - 1)*s0*sn*s2_coef
     else:
@@ -79,12 +79,12 @@ def CalculateRef(n, m):
             #z1 = 2^(m n/2 - 1) Product[c2[k], k, 1, n - 1, 2];
             #z2 = 2^(m n/2 - 1) Product[s2[k], {k, 1, n - 1, 2}];
             #z3 = 2^(m n/2 - 1) c[0] c[n] Product[c2[k], {k, 2, n - 2, 2}];
-            #z4 = 2^(m n/2 - 1) s[0] s[n] Product[s2[k], {k, 2, n - 2, 2}], 
+            #z4 = 2^(m n/2 - 1) s[0] s[n] Product[s2[k], {k, 2, n - 2, 2}],
         #else: # we could include the cases of m != n
             ##z1 = 2^(m n/2 - 1) c[n] Product[c2[k], {k, 1, n - 1, 2}];
             ##z2 = 2^(m n/2 - 1) s[n] Product[s2[k], {k, 1, n - 1, 2}];
             ##z3 = 2^(m n/2 - 1) c[0] Product[c2[k], {k, 2, n - 1, 2}];
-            ##z4 = 2^(m n/2 - 1) s[0] Product[s2[k], {k, 2, n - 1, 2}]]; 
+            ##z4 = 2^(m n/2 - 1) s[0] Product[s2[k], {k, 2, n - 1, 2}]];
     return z1 + z2 + z3 + z4
 
 
@@ -101,30 +101,79 @@ for i in range(len(Z_coeffs)):
 Z_new = np.delete(Z, index)
 print(Z_new) # Test works for 8x8!
 
-Temperature = np.arange(1,3,0.1)
+
+Temperature = np.arange(0.1,30,0.1)
+
+# The general expression for the entropy is given (via Helmholtz Energy):
+# F := E - TS = - kB T ln(Z) --> S(E) = kBln(Z(Beta)) + E/T
+# E = - d/d(Beta) ln(Z) or equivalently E = kB T^2 d/dT ln(Z)
 
 def EvaluatePartitionFunction(n,m,Z,Temp):
-    Z_ln_eval = []
-    C_eval = []
+    S_ln_eval = []
+    #C_eval = []
+    E_eval = []
     # convert Z and take a derivative
-    Z = -sy.exp(-n*m*x)*Z
+    # K = J/kBT
+    Z = sy.exp(2*n*m/T)*Z
     Z = Z.subs(x,sy.exp(-2/T))
-    Z =  sy.diff(1/T *Z,T)
-    C = T*sy.diff(Z,T)
+    E = T*T*sy.diff(sy.log(Z),T)
+    S =  sy.log(Z) + E/T
+    #C = T*sy.diff(Z,T)
     for i in range(len(Temp)):
-        Z_ln_eval.append(float(str(sy.re(sy.log(Z.subs(T,Temp[i]))))))
-        C_eval.append(float(str(sy.re(C.subs(T,Temp[i])))))
-    return Z_ln_eval,C_eval
+        E_eval.append(float(str(sy.re(E.subs(T,Temp[i])))))
+        S_ln_eval.append(float(str(sy.re(S.subs(T,Temp[i])))))
+        #C_eval.append(float(str(sy.re(C.subs(T,Temp[i])))))
+    return S_ln_eval,E_eval
 
-S,C = EvaluatePartitionFunction(8,8,Z_long,Temperature)
-#print('The entropy S is given:',S)
-#print('The Heat Capacity C is given:',C)
-plt.plot(1/Temperature,C)
-plt.plot(1/Temperature,S)
+S,E = EvaluatePartitionFunction(8,8,Z_long,Temperature)
+plt.plot(E,S)
+plt.xlabel('Energy')
+plt.ylabel('ln(S(E))')
+
 plt.show()
-## the Partition Function Z is then given by:
-#Z = np.exp(2*n*m*K)*(z1 + z2 + z3 + z4)
-##----------------------------------------------------------#
 
-  
+# ------------------ TASKS -------------------- #
+# (1) Need to convert from symbolic to numerical something like below...
+#     I will just have an option that specifies wether to do sybolic math for coefficients
+#    (FOR COMPARING WITH BEALE) or numerical math along the way.
 
+# def myfunction(first, second, third = None):
+#     if third is None:
+#         #just use first and second
+#     else:
+#         #use all three
+
+# (2) Output in same file format as yaml-reference .py that way I can compare to
+#     exact solution without having to run this code often and I won't have to change
+#     the comparison file.
+
+def OutputFile():
+    np.savetxt(dirname,
+          np.c_[energy, lndos, ps],
+          fmt = ('%.16g'),
+          delimiter = '\t',
+          #newline = '# seed:',
+          #newline = '# well_width: %g' % (well_width),
+          #newline = '# ff: ',
+          #newline = '# N: ',
+          #newline = '# walls: ',
+          #newline = '# cell dimensions: (%g, %g, %g)' % (x,y,z),
+          #newline = '# translation_scale: %g' % (translation_scale),
+          #newline = '# energy_levels: ',
+          #newline = '# min_T: %g' % (min_T),
+          #newline = '# max_entropy_state: ',
+          #newline = '# min_important_energy: ',
+          #newline = '# too_high_energy: %i' % (too_hi),
+          #newline = '# too_low_energy: %i' % (too_lo),
+          #newline = '',
+          ##newline = '# WL Factor: %g' % (gamma),
+          ##newline = '# iterations: %i' % (),
+          ##newline = '# working moves: %i' % (),
+          ##newline = '# total moves: %i' % (),
+          ##newline = '# acceptance rate: %i' % (),
+          #newline = '',
+          ##newline = '# converged state: %i' % (),
+          #newline = '# converged temperature: ',
+          #newline = '# energy\t lndos\t ps\t lndos_tm: ',
+          #newline = '\n version: created with yaml\n',
+          header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ps\t ' % (' '.join(sys.argv),max_entropy_state,min_important_energy))
