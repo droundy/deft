@@ -16,20 +16,9 @@ import matplotlib
 
 #LINK --> https://spot.colorado.edu/~beale/IsingExactMathematica.html
 
+
 x,T = sy.symbols('x T')
-
-# global coefficient only depends on x
 b = 2*x - 2*x*x*x
-
-# define Floor function as implemented by Mathematica
-#def Floor(num, multiple):
-    #return num - (num % multiple)
-
-#def RoundAccuracy(n,m):
-    ## set the numerical precision according to paper
-    ## (took forever to figure out what 'acc' was)!
-    #acc = Floor(n*m*np.log(2)/np.log(10),1.5)
-    #return acc
 
 def CalculateCoefSum(n,m,k):
     # define a[k_] as per Paul D. Beale
@@ -87,7 +76,6 @@ def CalculateRef(n, m):
             ##z4 = 2^(m n/2 - 1) s[0] Product[s2[k], {k, 2, n - 1, 2}]];
     return z1 + z2 + z3 + z4
 
-
 Z_long = sy.expand(CalculateRef(8,8))
 Z_coeffs = poly(Z_long, x).all_coeffs()
 
@@ -131,49 +119,3 @@ plt.xlabel('Energy')
 plt.ylabel('ln(S(E))')
 
 plt.show()
-
-# ------------------ TASKS -------------------- #
-# (1) Need to convert from symbolic to numerical something like below...
-#     I will just have an option that specifies wether to do sybolic math for coefficients
-#    (FOR COMPARING WITH BEALE) or numerical math along the way.
-
-# def myfunction(first, second, third = None):
-#     if third is None:
-#         #just use first and second
-#     else:
-#         #use all three
-
-# (2) Output in same file format as yaml-reference .py that way I can compare to
-#     exact solution without having to run this code often and I won't have to change
-#     the comparison file.
-
-def OutputFile():
-    np.savetxt(dirname,
-          np.c_[energy, lndos, ps],
-          fmt = ('%.16g'),
-          delimiter = '\t',
-          #newline = '# seed:',
-          #newline = '# well_width: %g' % (well_width),
-          #newline = '# ff: ',
-          #newline = '# N: ',
-          #newline = '# walls: ',
-          #newline = '# cell dimensions: (%g, %g, %g)' % (x,y,z),
-          #newline = '# translation_scale: %g' % (translation_scale),
-          #newline = '# energy_levels: ',
-          #newline = '# min_T: %g' % (min_T),
-          #newline = '# max_entropy_state: ',
-          #newline = '# min_important_energy: ',
-          #newline = '# too_high_energy: %i' % (too_hi),
-          #newline = '# too_low_energy: %i' % (too_lo),
-          #newline = '',
-          ##newline = '# WL Factor: %g' % (gamma),
-          ##newline = '# iterations: %i' % (),
-          ##newline = '# working moves: %i' % (),
-          ##newline = '# total moves: %i' % (),
-          ##newline = '# acceptance rate: %i' % (),
-          #newline = '',
-          ##newline = '# converged state: %i' % (),
-          #newline = '# converged temperature: ',
-          #newline = '# energy\t lndos\t ps\t lndos_tm: ',
-          #newline = '\n version: created with yaml\n',
-          header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ps\t ' % (' '.join(sys.argv),max_entropy_state,min_important_energy))
