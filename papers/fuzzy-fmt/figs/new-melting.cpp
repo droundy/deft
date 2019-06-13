@@ -714,13 +714,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                                       3*nm_2.x.y*nm_2.y.y*nm_2.y.x +
                                       3*nm_2.y.y*nm_2.y.z*nm_2.z.y +
                                       3*nm_2.x.z*nm_2.z.z*nm_2.z.x +
-                                      3*nm_2.y.z*nm_2.z.z*nm_2.z.y +                                                                                                                                                       
-                                      3*nm_2.x.y*nm_2.y.z*nm_2.z.x +                                     
+                                      3*nm_2.y.z*nm_2.z.z*nm_2.z.y +
+                                      3*nm_2.x.y*nm_2.y.z*nm_2.z.x +
                                       3*nm_2.x.z*nm_2.z.y*nm_2.y.x;
-                                      
-
-
-
 
           //phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3.0*nm_2.determinant()))/(24*M_PI*uipow(1.0-1.0*n_3,2));        // Schmidt equation 5  (2000) - ok
           phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))/(24*M_PI*uipow(1.0-1.0*n_3,2));         // Santos (2012) - yes
