@@ -5,7 +5,7 @@ import subprocess, os, sys
 fname = sys.argv[1]
 
 try:
-    name = subprocess.check_output(['git','describe','--dirty', '--all']).decode(encoding='UTF-8')[:-1]
+    name = subprocess.check_output(['git','describe','--dirty']).decode(encoding='UTF-8')[:-1]
 except subprocess.CalledProcessError:
     name = 'unknown'
 
