@@ -1675,8 +1675,9 @@ int main(int argc, const char **argv) {
   }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  printf("mc-prefactor=%ld\n", mc_prefactor);   //temporary -delete!
-  printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
+  printf("mc-error=%lg\n", MC_ERROR)
+  printf("mc-prefactor=%ld\n", mc_prefactor);
+  printf("mc-constant=%ld\n", mc_constant);
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
