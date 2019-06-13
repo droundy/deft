@@ -718,7 +718,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             3*nm_2.x.z*nm_2.z.y*nm_2.y.x;  // xz zy yx == the above, but these are the non-cyclic permutations
 
           //phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3.0*nm_2.determinant()))/(24*M_PI*uipow(1.0-1.0*n_3,2));        // Schmidt equation 5  (2000) - ok
-          phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))/(24*M_PI*uipow(1.0-1.0*n_3,2));         // Santos (2012) - yes
+          phi_3 =( n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2)) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))
+            /(24*M_PI*uipow(1-n_3,2));         // Santos (2012) - yes
           //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));      // Sweatman, Groh & Schmidt  (2001) - same as Santos with different w_nm
         } else {
           // The following was Rosenfelds early vector version of the functional
