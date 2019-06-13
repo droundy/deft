@@ -46,7 +46,7 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep=0.01, fv=0, dx=0.5, seed=1,
     print(cmd)
     assert(os.system(cmd) == 0)
 
-kTs = np.arange(2, 0.01, -0.1)
+kTs = np.arange(2, 0.01, -0.1)   # kT must be < 2.21 to fit theory
 #kTs = np.arange(1.15, 0.7, -0.05)
 kTs=np.append(kTs, 0.01)
 for kT in kTs:
@@ -59,5 +59,4 @@ for kT in kTs:
             run_new_melting(kT, n, 0.01, 0.2)
     #for n in np.arange(0.01, 1.11, 0.01):
         #run_new_melting(0.5, 0.96, 0.01, 0.2)
-       
 

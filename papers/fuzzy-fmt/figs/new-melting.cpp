@@ -111,7 +111,8 @@ static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double 
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
+  //w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));   // Schmidt
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude));   // Groh & Schmidt
   //w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/(Xi/sqrt(2))));
   if (rdiff_magnitude == 0) {
@@ -698,29 +699,28 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
         double phi_3;
         if (use_tensor_weight) {
-          //double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
-          //                              nm_2.y.y*nm_2.y.y +
-          //                              nm_2.z.z*nm_2.z.z +
-          //                            2*nm_2.x.y*nm_2.y.x +
-          //                            2*nm_2.x.z*nm_2.z.x +
-          //                            2*nm_2.y.z+nm_2.z.y;
+          double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
+                                        nm_2.y.y*nm_2.y.y +
+                                        nm_2.z.z*nm_2.z.z +
+                                      2*nm_2.x.y*nm_2.y.x +
+                                      2*nm_2.x.z*nm_2.z.x +
+                                      2*nm_2.y.z*nm_2.z.y;
 
-          // double traceof_nm_2cubed  =   nm_2.x.x*nm_2.x.x*nm_2.x.x +
-          //                               nm_2.y.y*nm_2.y.y*nm_2.y.y +
-          //                               nm_2.z.z*nm_2.z.z*nm_2.z.z +
-          //3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
-          //3*nm_2.x.x*nm_2.x.z*nm_2.z.x +
-          //3*nm_2.x.y*nm_2.y.y+nm_2.y.x +
-          //3*nm_2.x.y*nm_2.y.z+nm_2.z.x +
-          //3*nm_2.x.z*nm_2.z.y+nm_2.y.x +
-          //3*nm_2.x.z*nm_2.z.z+nm_2.z.x +
-          //3*nm_2.y.y*nm_2.y.z+nm_2.z.y +
-          //3*nm_2.y.z*nm_2.z.z+nm_2.z.y;
+          double traceof_nm_2cubed   =  nm_2.x.x*nm_2.x.x*nm_2.x.x +
+                                        nm_2.y.y*nm_2.y.y*nm_2.y.y +
+                                        nm_2.z.z*nm_2.z.z*nm_2.z.z +
+                                      3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
+                                      3*nm_2.x.x*nm_2.x.z*nm_2.z.x +
+                                      3*nm_2.x.y*nm_2.y.y*nm_2.y.x +
+                                      3*nm_2.x.y*nm_2.y.z*nm_2.z.x +
+                                      3*nm_2.x.z*nm_2.z.y*nm_2.y.x +
+                                      3*nm_2.x.z*nm_2.z.z*nm_2.z.x +
+                                      3*nm_2.y.y*nm_2.y.z*nm_2.z.y +
+                                      3*nm_2.y.z*nm_2.z.z*nm_2.z.y;
 
-          phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3*nm_2.determinant()))
-                  /(24*M_PI*sqr(1-n_3)); //Schmidt equation 5
+          //phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3*nm_2.determinant()))/(24*M_PI*sqr(1-n_3)); //Schmidt equation 5
           //phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + 9*(nv_2.dot(nm_2.dot(nv_2))-(traceof_nm_2cubed/2.0)))/(24*M_PI*uipow(1.0-1.0*n_3,2));      //Tensor version FMF2? (Evans)
-          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2)-traceof_nm_2cubed+n_2*n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));  //Tensor version FMF3 (Sweatman)
+          phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));  //Tensor version FMF3 (Sweatman, Groh & Schmidt)
         } else {
           // The following was Rosenfelds early vector version of the functional
           //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
