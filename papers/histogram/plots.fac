@@ -39,3 +39,6 @@ c .pyc
 
 | python3 figs/gamma-and-entropy-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 slow noshow
 c .pyc
+
+| python figs/comparison-plot.py 0 ising/N32 default noshow
+c .pyc

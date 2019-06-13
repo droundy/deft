@@ -302,8 +302,20 @@ Stochastic Approximation w/ Dynamic $\gamma$ here.
 
 \section{Results}
 
-\subsection{The 16 $\times$ 16 Ising model}
+\subsection{The 32 $\times$ 32 Ising model}
 Something small...
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/ising/N32-entropy-error-default.pdf}
+  \caption{
+  The average entropy error for each MC method for $N=256$,
+               $\delta_0 = 0.05\sigma$, $\eta = 0.17$, and $T_{\min} = 1$
+               as a function of number of iterations run.  The error is
+               averaged over 8 independent simulations, and the best
+               and worst simulations for each method are shown as a
+               semi-transparent shaded area.  The update factor for this
+               system is in Fig.~\ref{fig:gamma-vs-t} above.}\label{fig:n256}
+\end{figure}
+
 \subsection{128 $\times$ 128 Ising system}
 Something big (WL uses 256 by 256 in their paper but only one simulation and
 no comparison while more recent comparison type papers use 128 by 128 as max)...
