@@ -1552,7 +1552,7 @@ int main(int argc, const char **argv) {
   }
   poptFreeContext(optCon);
   if (show_version) {
-    printf("new-melting version %s (should match `git describe --dirty`)\n", version_identifier());
+    printf("new-melting version %s (should match `git describe --dirty --all`)\n", version_identifier());
     exit(0);
   }
 
