@@ -657,10 +657,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
-        nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
         tensor3d nm_2;
-        nm_2.x.x=0, nm_2.x.y=0, nm_2.x.z=0, nm_2.y.x=0, nm_2.y.y=0, nm_2.y.z=0, nm_2.z.x=0, nm_2.z.y=0, nm_2.z.z=0;
-        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
+        weight n_weight;
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
