@@ -20,8 +20,8 @@ parser = argparse.ArgumentParser(description='Plots FEdiff vs density for many t
 parser.add_argument('--tensor', action='store_true',
                     help='--tensor for use tensor weight')
                     
-parser.add_argument('directory', metavar='directory', type=str,
-                    help='directory with data to plot') 
+#parser.add_argument('directory', metavar='directory', type=str,
+#                    help='directory with data to plot') 
 
 args=parser.parse_args()
 
@@ -37,10 +37,11 @@ for kT in [.01, .1, .2, .3, .4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5,
   
   if args.tensor :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT))) 
-    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))   
+    files = sorted(list(glob.glob('newdata_tensor/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
+    #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
-    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
+    #files = sorted(list(glob.glob('newdata/phase-diagram/kT%.3f_n*_best.dat' % kT)))
     files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   for f in files:
       data = np.loadtxt(f)

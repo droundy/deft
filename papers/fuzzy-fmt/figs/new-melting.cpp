@@ -111,7 +111,8 @@ static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double 
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));   // Schmidt, Santos (2012) - use!
+  //w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude));   // Groh & Schmidt don't use
   //w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/(Xi/sqrt(2))));
   if (rdiff_magnitude == 0) {
@@ -656,10 +657,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
-        nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
         tensor3d nm_2;
-        nm_2.x.x=0, nm_2.x.y=0, nm_2.x.z=0, nm_2.y.x=0, nm_2.y.y=0, nm_2.y.z=0, nm_2.z.x=0, nm_2.z.y=0, nm_2.z.z=0;
-        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
+        weight n_weight;
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -699,28 +698,29 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double phi_3;
         if (use_tensor_weight) {
           //double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
-          //                              nm_2.y.y*nm_2.y.y +
-          //                              nm_2.z.z*nm_2.z.z +
-          //                            2*nm_2.x.y*nm_2.y.x +
-          //                            2*nm_2.x.z*nm_2.z.x +
-          //                            2*nm_2.y.z+nm_2.z.y;
+                                        //nm_2.y.y*nm_2.y.y +
+                                        //nm_2.z.z*nm_2.z.z +
+                                      //2*nm_2.x.y*nm_2.y.x +
+                                      //2*nm_2.x.z*nm_2.z.x +
+                                      //2*nm_2.y.z*nm_2.z.y;
 
-          // double traceof_nm_2cubed  =   nm_2.x.x*nm_2.x.x*nm_2.x.x +
-          //                               nm_2.y.y*nm_2.y.y*nm_2.y.y +
-          //                               nm_2.z.z*nm_2.z.z*nm_2.z.z +
-          //3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
-          //3*nm_2.x.x*nm_2.x.z*nm_2.z.x +
-          //3*nm_2.x.y*nm_2.y.y+nm_2.y.x +
-          //3*nm_2.x.y*nm_2.y.z+nm_2.z.x +
-          //3*nm_2.x.z*nm_2.z.y+nm_2.y.x +
-          //3*nm_2.x.z*nm_2.z.z+nm_2.z.x +
-          //3*nm_2.y.y*nm_2.y.z+nm_2.z.y +
-          //3*nm_2.y.z*nm_2.z.z+nm_2.z.y;
+          double traceof_nm_2cubed =
+            nm_2.x.x*nm_2.x.x*nm_2.x.x +   // xx xx xx
+            nm_2.y.y*nm_2.y.y*nm_2.y.y +   // yy yy yy
+            nm_2.z.z*nm_2.z.z*nm_2.z.z +   // zz zz zz
+            3*nm_2.x.x*nm_2.x.y*nm_2.y.x + // xx xy yx three places to put xx
+            3*nm_2.x.x*nm_2.x.z*nm_2.z.x + // xx xz zx three places to put xx
+            3*nm_2.x.y*nm_2.y.y*nm_2.y.x + // xy yy yx three places to put yy
+            3*nm_2.y.y*nm_2.y.z*nm_2.z.y + // yy yz zy three places to put yy
+            3*nm_2.x.z*nm_2.z.z*nm_2.z.x + // xz zz zx three places to put zz
+            3*nm_2.y.z*nm_2.z.z*nm_2.z.y + // yz zz zy three places to put zz
+            3*nm_2.x.y*nm_2.y.z*nm_2.z.x + // xy yz zx three cyclic permutations
+            3*nm_2.x.z*nm_2.z.y*nm_2.y.x;  // xz zy yx == the above, but these are the non-cyclic permutations
 
-          phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3*nm_2.determinant()))
-                  /(24*M_PI*sqr(1-n_3)); //Schmidt equation 5
-          //phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + 9*(nv_2.dot(nm_2.dot(nv_2))-(traceof_nm_2cubed/2.0)))/(24*M_PI*uipow(1.0-1.0*n_3,2));      //Tensor version FMF2? (Evans)
-          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2)-traceof_nm_2cubed+n_2*n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));  //Tensor version FMF3 (Sweatman)
+          //phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3.0*nm_2.determinant()))/(24*M_PI*uipow(1.0-1.0*n_3,2));        // Schmidt equation 5  (2000) - ok
+          phi_3 =( n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2)) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))
+            /(24*M_PI*uipow(1-n_3,2));         // Santos (2012) - yes
+          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));      // Sweatman, Groh & Schmidt  (2001) - same as Santos with different w_nm
         } else {
           // The following was Rosenfelds early vector version of the functional
           //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
@@ -880,7 +880,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     // Create all output data filename
     char *alldat_filename = new char[1024];
     char *alldat_filedescriptor = new char[1024];
-    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
+    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.8f",
             temp, reduced_density, fv, gwidth);
     if (use_tensor_weight)  {
       sprintf(alldat_filename, "%s/%s-alldat_tensor.dat", data_dir, alldat_filedescriptor);
@@ -1140,7 +1140,7 @@ data find_energy(double temp, double reduced_density, double fv, double gwidth, 
   // Create all output data filename
   char *alldat_filename = new char[1024];
   char *alldat_filedescriptor = new char[1024];
-  sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
+  sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.8f",
           temp, reduced_density, fv, gwidth);
   sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
   printf("Create data file: %s\n", alldat_filename);
@@ -1471,11 +1471,16 @@ int main(int argc, const char **argv) {
   // Parse input options
   // ----------------------------------------------------------------------------
 
+  bool show_version = false;
   poptOption optionsTable[] = {
 
     {
       "verbose", '\0', POPT_ARG_NONE, &verbose, 0,
       "Print lots of good stuff!", "BOOLEAN"
+    },
+    {
+      "version", '\0', POPT_ARG_NONE, &show_version, 0,
+      "Show the git-describe version", "BOOLEAN"
     },
 
     /*** FLUID PARAMETERS ***/
@@ -1542,6 +1547,10 @@ int main(int argc, const char **argv) {
     return 1;
   }
   poptFreeContext(optCon);
+  if (show_version) {
+    printf("new-melting version %s (should match `git describe --dirty`)\n", version_identifier());
+    exit(0);
+  }
 
   random::seed(seed);
 
@@ -1666,8 +1675,9 @@ int main(int argc, const char **argv) {
   }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  printf("mc-prefactor=%ld\n", mc_prefactor);   //temporary -delete!
-  printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
+  printf("mc-error=%lg\n", MC_ERROR)
+  printf("mc-prefactor=%ld\n", mc_prefactor);
+  printf("mc-constant=%ld\n", mc_constant);
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);

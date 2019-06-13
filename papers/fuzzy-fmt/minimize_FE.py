@@ -24,9 +24,9 @@ parser.add_argument('--n', type=float,
 
 parser.add_argument('--numgw', default=10, type=float, help='number of inital gw datapoints')
 parser.add_argument('--maxgw', type=float,
-                    help='max gw', default=0.2)
+                    help='max gw', default=0.01)
 parser.add_argument('--mingw', type=float,
-                    help='min gw', default=0.01)
+                    help='min gw', default=0.001)
 
 parser.add_argument('--fv', metavar='vacancies', type=float,
                     help='fraction of vacancies - Default 0')
@@ -40,7 +40,7 @@ parser.add_argument('--mcprefactor', metavar='prefac', type=int,
                     help='monte carlo integration mc_prefactor - Default 50000')
                     
 parser.add_argument('--error_desired', metavar='error_desired', type=float,
-                    help='error desired to be within- Default 0.01')
+                    help='error desired to be within', default=0.01)
 
 parser.add_argument('--tensor', action='store_true',
                     help='use tensor weight')
@@ -87,11 +87,6 @@ if args.mcprefactor:
 else :
     mcprefactor=50000
 
-if args.error_desired:
-    error_desired=ars.error_desired
-else :
-    error_desired=0.01
-
 xmin = 3.0
 eps = 2.0
 emin = 1.0
@@ -106,9 +101,10 @@ def func_exact(x):
 def func_to_minimize(kT, n, x, fv, dx, mcerror, mcconstant, mcprefactor):
     # return func_exact(x) + np.random.normal()*0.01
     print(kT,n,x,fv,dx,mcerror,mcconstant,mcprefactor)
-    name= 'kT%.3f_n%.3f_fv%.2f_gw%.3f' % (kT, n, fv, x)
+    #sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.8f",
+    name= 'kT%5.3f_n%05.3f_fv%04.2f_gw%04.8f' % (kT, n, fv, x)
     cmd = ' figs/new-melting.mkdat --kT %g --n %g' % (kT, n)
-    cmd += ' --gw %g' % (x)
+    cmd += ' --gw %.8g' % (x)
     cmd += ' --fv %g --dx %g' % (fv, dx)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
     if args.tensor:
@@ -278,6 +274,6 @@ def minimize_starting_between(xlo, xhi, error_desired):
         #plt.show()
 
 
-minimize_starting_between(mingw, maxgw, error_desired)
+minimize_starting_between(mingw, maxgw, args.error_desired)
 
 
