@@ -79,6 +79,7 @@ def CalculateRef(n, m):
 Z_long = sy.expand(CalculateRef(8,8))
 Z_coeffs = poly(Z_long, x).all_coeffs()
 
+print(Z_coeffs)
 Z = np.array(Z_coeffs,dtype=np.int64)
 
 index = []
