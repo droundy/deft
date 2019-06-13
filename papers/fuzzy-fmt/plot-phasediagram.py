@@ -34,8 +34,7 @@ density_data = []   #index corresponds to kT
 pressure_data = []  #index corresponds to kT
 
 #for kT in np.arange(0.1, 1.15, 0.05):   #data files with these temperatures will be plotted
-
-for kT in np.arange(0.1, 3.05, 0.05):
+for kT in np.arange(0.1, 2.05, 0.05):
 #for kT in np.arange(0.1, 1.05, 0.05):   #data files with these temperatures will be plotted  DEBUG
 										#values above and below this range do not currrently work   DEBUG
    
