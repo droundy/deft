@@ -706,17 +706,18 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                                       //2*nm_2.x.z*nm_2.z.x +
                                       //2*nm_2.y.z*nm_2.z.y;
 
-          double traceof_nm_2cubed   =  nm_2.x.x*nm_2.x.x*nm_2.x.x +
-                                        nm_2.y.y*nm_2.y.y*nm_2.y.y +
-                                        nm_2.z.z*nm_2.z.z*nm_2.z.z +
-                                      3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
-                                      3*nm_2.x.x*nm_2.x.z*nm_2.z.x +
-                                      3*nm_2.x.y*nm_2.y.y*nm_2.y.x +
-                                      3*nm_2.y.y*nm_2.y.z*nm_2.z.y +
-                                      3*nm_2.x.z*nm_2.z.z*nm_2.z.x +
-                                      3*nm_2.y.z*nm_2.z.z*nm_2.z.y +
-                                      3*nm_2.x.y*nm_2.y.z*nm_2.z.x +
-                                      3*nm_2.x.z*nm_2.z.y*nm_2.y.x;
+          double traceof_nm_2cubed =
+            nm_2.x.x*nm_2.x.x*nm_2.x.x +   // xx xx xx
+            nm_2.y.y*nm_2.y.y*nm_2.y.y +   // yy yy yy
+            nm_2.z.z*nm_2.z.z*nm_2.z.z +   // zz zz zz
+            3*nm_2.x.x*nm_2.x.y*nm_2.y.x + // xx xy yx three places to put xx
+            3*nm_2.x.x*nm_2.x.z*nm_2.z.x + // xx xz zx three places to put xx
+            3*nm_2.x.y*nm_2.y.y*nm_2.y.x + // xy yy yx three places to put yy
+            3*nm_2.y.y*nm_2.y.z*nm_2.z.y + // yy yz zy three places to put yy
+            3*nm_2.x.z*nm_2.z.z*nm_2.z.x + // xz zz zx three places to put zz
+            3*nm_2.y.z*nm_2.z.z*nm_2.z.y + // yz zz zy three places to put zz
+            3*nm_2.x.y*nm_2.y.z*nm_2.z.x + // xy yz zx three cyclic permutations
+            3*nm_2.x.z*nm_2.z.y*nm_2.y.x;  // xz zy yx == the above, but these are the non-cyclic permutations
 
           //phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3.0*nm_2.determinant()))/(24*M_PI*uipow(1.0-1.0*n_3,2));        // Schmidt equation 5  (2000) - ok
           phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))/(24*M_PI*uipow(1.0-1.0*n_3,2));         // Santos (2012) - yes
