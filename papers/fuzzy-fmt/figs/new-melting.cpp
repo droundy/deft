@@ -1675,7 +1675,7 @@ int main(int argc, const char **argv) {
   }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  printf("mc-error=%lg\n", MC_ERROR)
+  printf("mc-error=%lg\n", MC_ERROR);
   printf("mc-prefactor=%ld\n", mc_prefactor);
   printf("mc-constant=%ld\n", mc_constant);
 
