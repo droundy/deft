@@ -1475,11 +1475,16 @@ int main(int argc, const char **argv) {
   // Parse input options
   // ----------------------------------------------------------------------------
 
+  bool show_version = false;
   poptOption optionsTable[] = {
 
     {
       "verbose", '\0', POPT_ARG_NONE, &verbose, 0,
       "Print lots of good stuff!", "BOOLEAN"
+    },
+    {
+      "version", '\0', POPT_ARG_NONE, &show_version, 0,
+      "Show the git-describe version", "BOOLEAN"
     },
 
     /*** FLUID PARAMETERS ***/
@@ -1546,6 +1551,10 @@ int main(int argc, const char **argv) {
     return 1;
   }
   poptFreeContext(optCon);
+  if (show_version) {
+    printf("new-melting version %s (should match `git describe --dirty`)\n", version_identifier());
+    exit(0);
+  }
 
   random::seed(seed);
 
