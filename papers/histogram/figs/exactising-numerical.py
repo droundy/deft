@@ -37,9 +37,9 @@ print('b', b)
 
 def CalculateCoefSum(n,m,k):
     # define a[k_] as per Paul D. Beale
-    print('ccs of',n,m,k)
+    #print('ccs of',n,m,k)
     a_coef = (1 + x*x)**2 - b*np.cos(np.pi*k/n)
-    print('a_coef', a_coef)
+    #print('a_coef', a_coef)
     c2_coef_sum = 0*x
     for j in range(0, m+2, 2): # should include endpoint so m --> m+2
         # print('a_coef**({})'.format(m-j), a_coef**(m-j))
@@ -53,7 +53,6 @@ def CalculateCoefSum(n,m,k):
         # print('adding', binom(m,j)*(a_coef**2 - b*b)**(j//2) * a_coef**(m - j))
         # print('to', c2_coef_sum)
         c2_coef_sum += (a_coef**2 - b*b)**(j//2) * a_coef**(m - j)*binom(m,j)
-        print('it worked')
     return c2_coef_sum
 
 def CalculateRef(n, m):
@@ -113,7 +112,7 @@ def CalculateRef(n, m):
 def EvaluatePartitionFunction(n,m,Z,Temp,dT):
     # convert Z to lnZ and take a derivative
     # K = J/kBT
-    lnZ = 2*n*m/Temp + np.log(Z.astype(float))
+    lnZ = 2*n*m/Temp + np.ln(Z.astype(float))
     #Z = np.exp(2*n*m/Temp)*Z
 
     E = Temp*Temp*np.gradient(lnZ,dT)
@@ -135,6 +134,8 @@ def OutputFile(SaveName,max,min):
 Z_long = CalculateRef(n,m)
 print(Z_long.c[0:None:2])
 S = np.array(np.log(Z_long.c[0:None:2].astype(float)))
+S_abs = np.array(np.log(abs(Z_long.c[0:None:2]).astype(float)))
+#print((np.array(Z_long.c[0:None:2])).tolist())
 print(len(S))
 E = np.arange(-2*n*m,-2*n*m + len(S)*4,4)
 print(len(E))
@@ -156,9 +157,12 @@ min_important_energy = 1
 OutputFile(filename,max_entropy_state,min_important_energy)
 
 plt.plot(E,S)
+plt.plot(E,S_abs,color='red',linestyle='--',linewidth=0.5)
 #plt.plot(Evals,Sinterp,'o')
 plt.plot([-2*n*m, -2*n*m+8, -2*n*m+12, -2*n*m+16, -2*n*m+20],
           np.log([2, 2*n*m, 4*n*m, n**2*m**2+9*n*m, 4*n**2*m**2+24*n*m]),'x')
+
+plt.plot([2048,2040,2036,48,52,56,1472,908],[-705.18+705.18,-698.248+705.18,-697.56+705.18,0+705.18,-0.097+705.18,-0.20+705.18,-406.07+705.18,-177.42+705.18],'o')
 
 plt.xlabel('Energy')
 plt.ylabel('ln(S(E))')
