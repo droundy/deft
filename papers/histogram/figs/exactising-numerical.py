@@ -8,7 +8,7 @@ from scipy.special import binom
 
 import matplotlib.pyplot as plt
 import matplotlib
-
+import readnew
 
 filename = sys.argv[1]
 n = int(sys.argv[2])
@@ -25,15 +25,17 @@ T = np.arange(0.1,100,dT)
 
 # define parameter 'x' in terms of the Temperature
 x = np.exp(-2/T)
+print(x)
 
 x = np.poly1d(np.array([1,0]))
-print('x', x)
-print('x', np.poly1d(x))
-print('x**2', x**2)
+#print('x', x)
+#print('x', np.poly1d(x))
+#print('x**2', x**2)
 
 # define Beta (not to be confused with 1/kBT) as per Paul D. Beale
 b = 2*x - 2*x*x*x
-print('b', b)
+#print('b', b)
+
 
 def CalculateCoefSum(n,m,k):
     # define a[k_] as per Paul D. Beale
@@ -91,7 +93,7 @@ def CalculateRef(n, m):
 
 
     else:
-        print('Cannot determine the Parition Function for (ODD) spin systems')
+        print('Cannot determine the Parition Function for (ODD) spin systems!')
         ## check whether system is even or odd
         #if (n % 2 == 0):
             #z1 = 2^(m n/2 - 1) Product[c2[k], k, 1, n - 1, 2];
@@ -109,16 +111,16 @@ def CalculateRef(n, m):
 # F := E - TS = - kB T ln(Z) --> S(E) = kBln(Z(Beta)) + E/T
 # E = - d/d(Beta) ln(Z) or equivalently E = kB T^2 d/dT ln(Z)
 
-def EvaluatePartitionFunction(n,m,Z,Temp,dT):
-    # convert Z to lnZ and take a derivative
-    # K = J/kBT
-    lnZ = 2*n*m/Temp + np.ln(Z.astype(float))
-    #Z = np.exp(2*n*m/Temp)*Z
-
-    E = Temp*Temp*np.gradient(lnZ,dT)
-    S =  lnZ + E/Temp
-
-    return S,E
+# def EvaluatePartitionFunction(n,m,Z,Temp,dT):
+#     # convert Z to lnZ and take a derivative
+#     # K = J/kBT
+#     lnZ = 2*n*m/Temp + np.ln(Z.astype(float))
+#     #Z = np.exp(2*n*m/Temp)*Z
+#
+#     E = Temp*Temp*np.gradient(lnZ,dT)
+#     S =  lnZ + E/Temp
+#
+#     return S,E
 
 def OutputFile(SaveName,max,min):
     dirname = 'data/%s-reference-lndos.dat' % (SaveName)
@@ -132,9 +134,11 @@ def OutputFile(SaveName,max,min):
           header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ' % (' '.join(sys.argv),max,min))
 
 Z_long = CalculateRef(n,m)
+print(Z_long)
 print(Z_long.c[0:None:2])
+print('x**5',mh.factorial(1164)*x**5)
 S = np.array(np.log(Z_long.c[0:None:2].astype(float)))
-S_abs = np.array(np.log(abs(Z_long.c[0:None:2]).astype(float)))
+
 #print((np.array(Z_long.c[0:None:2])).tolist())
 print(len(S))
 E = np.arange(-2*n*m,-2*n*m + len(S)*4,4)
@@ -157,18 +161,21 @@ min_important_energy = 1
 OutputFile(filename,max_entropy_state,min_important_energy)
 
 plt.plot(E,S)
-plt.plot(E,S_abs,color='red',linestyle='--',linewidth=0.5)
+
 #plt.plot(Evals,Sinterp,'o')
 plt.plot([-2*n*m, -2*n*m+8, -2*n*m+12, -2*n*m+16, -2*n*m+20],
           np.log([2, 2*n*m, 4*n*m, n**2*m**2+9*n*m, 4*n**2*m**2+24*n*m]),'x')
 
-plt.plot([2048,2040,2036,48,52,56,1472,908],[-705.18+705.18,-698.248+705.18,-697.56+705.18,0+705.18,-0.097+705.18,-0.20+705.18,-406.07+705.18,-177.42+705.18],'o')
+# compare with some data
+ref = '/home/jordan/deft/papers/histogram/data/ising-sad-32-reference-lndos.dat'
+try:
+    eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
+except:
+    eref, lndosref = readnew.e_lndos(ref)
+plt.plot(eref,lndosref + np.nanmax(S),'o',markersize=3,alpha=.2)
 
 plt.xlabel('Energy')
 plt.ylabel('ln(S(E))')
-
+plt.ylim(0,750)
+plt.xlim(-2200,50)
 plt.show()
-
-# (2) Output in same file format as yaml-reference .py that way I can compare to
-#     exact solution without having to run this code often and I won't have to change
-#     the comparison file.
