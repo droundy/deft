@@ -27,7 +27,8 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
             '-vanilla_wang_landau']
 if 'allmethods' not in sys.argv:
     methods = ['-sad3','-wl-50','-wl-inv-t-50','-wl-inv-t-256','-sad-50',
-               '-sad-256','-wl-256','-ising-sad-32','-ising-wl-32','-ising-wl-inv-t-32']
+               '-sad-256','-wl-256','-ising-sad-32','-ising-wl-32','-ising-wl-inv-t-32',
+               '-ising-sad-128','-ising-wl-128','-ising-wl-inv-t-128']
     # methods = [m+s for m in methods for s in '', '-s1', '-s2', '-s3', '-s4']
     if transcale == 'slow':
         methods = ['-sad3-slow','-sad-slow-T13','-wl-50-slow','-wl-inv-t-50-slow','-sad-50-slow',
@@ -224,7 +225,9 @@ elif filebase == 's000/periodic-ww1.30-ff0.30-N500':
 elif filebase == 's000/periodic-ww1.50-ff0.17-N256':
     plt.ylim(1e-3, 1e3)
 elif filebase == 'ising/N32':
-    plt.ylim(1e-2,1e3)
+    plt.ylim(1e-3,1e3)
+elif filebase == 'ising/N128':
+    plt.ylim(1e-1,1e4)
 
 colors.legend()
 plt.tight_layout()
