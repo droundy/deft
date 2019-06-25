@@ -4,8 +4,9 @@ from __future__ import division
 import sys, os
 import numpy as np
 import math as mh
-from scipy.special import binom
+from scipy.special import comb
 
+from fractions import Fraction
 import matplotlib.pyplot as plt
 import matplotlib
 import readnew
@@ -19,42 +20,30 @@ m = int(sys.argv[3])
 
 #LINK --> https://spot.colorado.edu/~beale/IsingExactMathematica.html
 
-# define a Temperature Range
-dT = 0.0001
-T = np.arange(0.1,100,dT)
+# # define a Temperature Range
+# dT = 0.0001
+# T = np.arange(0.1,100,dT)
+#
+# # define parameter 'x' in terms of the Temperature
+# x = np.exp(-2/T)
+# print(x)
 
-# define parameter 'x' in terms of the Temperature
-x = np.exp(-2/T)
-print(x)
-
-x = np.poly1d(np.array([1,0]))
-#print('x', x)
-#print('x', np.poly1d(x))
-#print('x**2', x**2)
+x = np.poly1d(np.array([1,0], dtype=Fraction))
 
 # define Beta (not to be confused with 1/kBT) as per Paul D. Beale
 b = 2*x - 2*x*x*x
-#print('b', b)
-
 
 def CalculateCoefSum(n,m,k):
     # define a[k_] as per Paul D. Beale
     #print('ccs of',n,m,k)
-    a_coef = (1 + x*x)**2 - b*np.cos(np.pi*k/n)
+    a_coef = (1 + x*x)**2 - b*Fraction(np.cos(np.pi*k/n))
     #print('a_coef', a_coef)
-    c2_coef_sum = 0*x
+    frac = Fraction(np.cos(np.pi*k/n))
+    c2_coef_sum = np.poly1d(np.array([Fraction(0.5)]))
     for j in range(0, m+2, 2): # should include endpoint so m --> m+2
-        # print('a_coef**({})'.format(m-j), a_coef**(m-j))
-        # print('(a_coef**2 - b*b)**({}//2)'.format(j), (a_coef**2 - b*b)**(j//2))
-        # print('binom({},{})'.format(m,j), binom(m,j))
-        # print('goofy', (a_coef**2 - b*b)**(j//2))
-        # print('type f64', type(15.0))
-        # print('type binom', type(binom(m,j)))
-        # print('silluy', binom(m,j)*(a_coef**2 - b*b)**(j//2))
-        # print('silluy', (a_coef**2 - b*b)**(j//2)*binom(m,j))
-        # print('adding', binom(m,j)*(a_coef**2 - b*b)**(j//2) * a_coef**(m - j))
-        # print('to', c2_coef_sum)
-        c2_coef_sum += (a_coef**2 - b*b)**(j//2) * a_coef**(m - j)*binom(m,j)
+        c2_coef_sum += (a_coef**2 - b*b)**(j//2) * a_coef**(m - j)*comb(m,j, exact=True)
+    print 'c2_coef_sum', type(c2_coef_sum.c[0]), type(c2_coef_sum.c[-1])
+    c2_coef_sum -= np.poly1d(np.array([Fraction(0.5)]))
     return c2_coef_sum
 
 def CalculateRef(n, m):
@@ -64,47 +53,44 @@ def CalculateRef(n, m):
         # the coefficients c0,s0,cn,sn are just numbers contrary
         # to what the notation would have you believe.
         # dividing by 2**(m/2) is different than paper?
-        c0 = ((1 - x)**m + (x*(1 + x))**m) / 2**(m//2)
-        s0 = ((1 - x)**m - (x*(1 + x))**m) / 2**(m//2)
-        cn = ((1 + x)**m + (x*(1 - x))**m) / 2**(m//2)
-        sn = ((1 + x)**m - (x*(1 - x))**m) / 2**(m//2)
+        two = Fraction(2)
+        c0 = ((1-x)**m + (x*(1+x))**m) / two**(m//2)
+        s0 = ((1-x)**m - (x*(1+x))**m) / two**(m//2)
+        cn = ((1+x)**m + (x*(1-x))**m) / two**(m//2)
+        sn = ((1+x)**m - (x*(1-x))**m) / two**(m//2)
 
         c2_coef = 1
         s2_coef = 1
         for k in range(1, n , 2): # should include endpoint so n - 1 --> n
             c2_coef_sum = CalculateCoefSum(n,m,k)
             # define c2[k_] and s2[k_] as per Paul D. Beale
-            c2_coef *= 2**(1 - 2*m)*((c2_coef_sum) + b**m)
-            s2_coef *= 2**(1 - 2*m)*((c2_coef_sum) - b**m)
+            c2_coef *= two**(1 - 2*m)*((c2_coef_sum) + b**m)
+            s2_coef *= two**(1 - 2*m)*((c2_coef_sum) - b**m)
+            print 'odd', k,'/',n, type(c2_coef.c[-1]), type(s2_coef.c[-1])
 
-        z1 = 2**(m*n//2 - 1)*c2_coef
-        z2 = 2**(m*n//2 - 1)*s2_coef
+        z1 = two**(m*n//2 - 1)*c2_coef
+        z2 = two**(m*n//2 - 1)*s2_coef
+        print 'z1', type(z1.c[-1])
+        print 'z2', type(z2.c[-1])
 
         c2_coef = 1
         s2_coef = 1
         for k in range(2, n , 2): # should include endpoint so n - 2 --> n
             c2_coef_sum = CalculateCoefSum(n,m,k)
             # define c2[k_] and s2[k_] as per Paul D. Beale
-            c2_coef *= 2**(1 - 2*m)*((c2_coef_sum) + b**m)
-            s2_coef *= 2**(1 - 2*m)*((c2_coef_sum) - b**m)
+            c2_coef *= two**(1 - 2*m)*((c2_coef_sum) + b**m)
+            s2_coef *= two**(1 - 2*m)*((c2_coef_sum) - b**m)
+            print 'even', k,'/',n, type(c2_coef.c[-1]), type(s2_coef.c[-1])
 
-        z3 = 2**(m*n//2 - 1)*c0*cn*c2_coef
-        z4 = 2**(m*n//2 - 1)*s0*sn*s2_coef
+        z3 = two**(m*n//2 - 1)*c0*cn*c2_coef
+        z4 = two**(m*n//2 - 1)*s0*sn*s2_coef
+        print 'z3', type(z3.c[-1])
+        print 'z4', type(z4.c[-1])
 
 
     else:
         print('Cannot determine the Parition Function for (ODD) spin systems!')
-        ## check whether system is even or odd
-        #if (n % 2 == 0):
-            #z1 = 2^(m n/2 - 1) Product[c2[k], k, 1, n - 1, 2];
-            #z2 = 2^(m n/2 - 1) Product[s2[k], {k, 1, n - 1, 2}];
-            #z3 = 2^(m n/2 - 1) c[0] c[n] Product[c2[k], {k, 2, n - 2, 2}];
-            #z4 = 2^(m n/2 - 1) s[0] s[n] Product[s2[k], {k, 2, n - 2, 2}],
-        #else: # we could include the cases of m != n
-            ##z1 = 2^(m n/2 - 1) c[n] Product[c2[k], {k, 1, n - 1, 2}];
-            ##z2 = 2^(m n/2 - 1) s[n] Product[s2[k], {k, 1, n - 1, 2}];
-            ##z3 = 2^(m n/2 - 1) c[0] Product[c2[k], {k, 2, n - 1, 2}];
-            ##z4 = 2^(m n/2 - 1) s[0] Product[s2[k], {k, 2, n - 1, 2}]];=
+        assert(False)
     return z1 + z2 +z3 +z4
 
 # The general expression for the entropy is given (via Helmholtz Energy):
@@ -134,9 +120,15 @@ def OutputFile(SaveName,max,min):
           header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ' % (' '.join(sys.argv),max,min))
 
 Z_long = CalculateRef(n,m)
-print(Z_long)
+print 'sum          ', Z_long.c.sum(), 2**(n*m)
+print 'sum even only', Z_long.c[0::2].sum(), 2**(n*m)
+exit(1)
 print(Z_long.c[0:None:2])
-print('x**5',mh.factorial(1164)*x**5)
+
+# print('zeros below')
+# print(Z_long.c[1:None:2])
+# print 'the above should be zeros'
+print 'type of Z_long[-1]', type(Z_long.c[-1])
 S = np.array(np.log(Z_long.c[0:None:2].astype(float)))
 
 #print((np.array(Z_long.c[0:None:2])).tolist())
@@ -160,7 +152,7 @@ min_important_energy = 1
 
 OutputFile(filename,max_entropy_state,min_important_energy)
 
-plt.plot(E,S)
+plt.plot(E,S,'.-')
 
 #plt.plot(Evals,Sinterp,'o')
 plt.plot([-2*n*m, -2*n*m+8, -2*n*m+12, -2*n*m+16, -2*n*m+20],
@@ -172,10 +164,10 @@ try:
     eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
 except:
     eref, lndosref = readnew.e_lndos(ref)
-plt.plot(eref,lndosref + np.nanmax(S),'o',markersize=3,alpha=.2)
+plt.plot(eref,lndosref - lndosref[-1] + np.log(2),'o',markersize=3,alpha=.2)
 
 plt.xlabel('Energy')
 plt.ylabel('ln(S(E))')
-plt.ylim(0,750)
-plt.xlim(-2200,50)
+#plt.ylim(0,750)
+#plt.xlim(-2200,50)
 plt.show()
