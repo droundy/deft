@@ -32,8 +32,8 @@ try:
         colors.loglog(moves, factor,
                       'is'
                          + wl[len("data/gamma/ising/%s/wl" % filename):-4])
-        plt.ylim(ymin=1e-10, ymax=1e1)
-        plt.xlim(xmin=1e3, xmax=1e12)
+        #plt.ylim(1e-10, 1e1)
+        #plt.xlim(1e3, 1e13)
 
 except:
     pass
@@ -66,26 +66,33 @@ try:
             sadname = sad.split('/')[-1].split('.')[0]
 
 
-        plt.ylim(ymin=1e-10, ymax=1e1)
-        plt.xlim(xmin=1e3, xmax=1e12)
+
         print(sadname)
         colors.loglog(ts, gamma,sadname)
+        #plt.ylim(1e-10, 1e1)
+        #plt.xlim(1e3, 1e13)
 except:
     pass
 
 def gamma_sa(t,t0):
     return t0/np.maximum(t, t0)
 
-t0s = ['1e3','1e4','1e5','1e6','1e7']
+if '128' in filename:
+    t0s = ['1e5','1e6','1e7','1e8','1e9']
+elif '32' in filename:
+    t0s = ['1e3','1e4','1e5','1e6','1e7']
 
 
 
 for t0 in t0s:
-    colors.loglog(ts,gamma_sa(ts, float(t0)),'samc-%s-%s' %(t0,filename.replace('n','')))
+    colors.loglog(ts,gamma_sa(ts, float(t0)),'ising-samc-%s-%s' %(t0,filename.replace('n','')))
     plt.xlabel(r'$\textrm{Moves}$')
     plt.ylabel(r'$\gamma_{t}$')
     colors.legend()
 plt.tight_layout()
+plt.ylim(1e-10, 1e1)
+plt.xlim(1e3, 1e13)
+
 plt.savefig('figs/ising/gamma-%s.pdf' % filename.replace('.','_'))
 if 'noshow' not in sys.argv:
     plt.show()

@@ -211,7 +211,10 @@ colors.legend()
 plt.savefig('figs/%s-max-entropy-error-%s.pdf' % (tex_filebase,transcale))
 
 plt.figure('errorinentropy')
-moves = np.array([1e5, 1e12])
+if filebase == 'ising/N128':
+    moves = np.array([1e5, 1e13])
+else:
+    moves = np.array([1e5, 1e12])
 #colors.loglog(moves, min_error*np.sqrt(moves.max())/np.sqrt(moves), method = r'1/sqrt(t)')
 for i in np.arange(-8, 19, 1.0):
     colors.loglog(moves, 10**i/np.sqrt(0.1*moves), method = r'1/sqrt(t)')
@@ -227,7 +230,7 @@ elif filebase == 's000/periodic-ww1.50-ff0.17-N256':
 elif filebase == 'ising/N32':
     plt.ylim(1e-3,1e3)
 elif filebase == 'ising/N128':
-    plt.ylim(1e-1,1e4)
+    plt.ylim(1e-2,1e4)
 
 colors.legend()
 plt.tight_layout()
