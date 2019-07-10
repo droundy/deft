@@ -1,4 +1,4 @@
-# iterations	 errorinentropy	 maxerror	(generated with python figs/yaml-multi-comparison.py /home/jordan/ising-cp-data/ /home/jordan/deft/papers/histogram/data/ising-128-reference-lndos.dat ising/N128 128 32760 100 true 8 ising-samc-1e9-128
+# iterations	 errorinentropy	 maxerror	(generated with python figs/yaml-multi-comparison.py /home/jordan/ising-cp-data/ /home/jordan/deft/papers/histogram/data/ising-128-reference-lndos.dat ising/N128 128 32760 100 true 8 ising-sad-128 ising-samc-1e7-128 ising-wl-128 ising-wl-inv-t-128 ising-samc-1e8-128 ising-samc-1e9-128
 0.007812	2947	1.134e+04
 0.01562	2947	1.134e+04
 0.02344	2947	1.134e+04
@@ -99,3 +99,6 @@
 1.853e+10	13.6	59.47
 2.471e+10	10.89	58.23
 3.295e+10	2.103	16.91
+4.393e+10	4.234	26.76
+5.859e+10	1.84	11.13
+7.812e+10	1.916	10.78
