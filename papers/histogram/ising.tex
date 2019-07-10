@@ -282,14 +282,15 @@ is the number of energy bins~\cite{liang2007stochastic}.  Schneider
 for small spin systems, but that larger systems require an even higher
 $t_0$ value~\cite{schneider2017convergence}. Our work also confirms this.
 
-Pommerenck et al. propose a refinement~\cite{pommerenck2019stochastic} to SAMC where
-the update factor is determined dynamically rather than by the user.
-Stochastic Approximation with a dynamic $\gamma$ (SAD) requires the user to provide the
-lowest temperature of interest $T_{\min}$. This is analogous to WL requiring a priori
-an energy range of interest; however, this may easier to identify and is more physical
-than the SAMC parameter $t_0$.
-The update factor can be written in terms of the current estimates for the highest $E_H$ and
-lowest $E_L$ energies of interest.
+Pommerenck et al. propose a refinement~\cite{pommerenck2019stochastic} to SAMC
+where the update factor is determined dynamically rather than by the user.
+Stochastic Approximation with a dynamic $\gamma$ (SAD) requires the user to
+provide the lowest temperature of interest $T_{\min}$. This is analogous to WL
+requiring a priori an energy range of interest; however, this may easier to
+identify and is more physical than the SAMC parameter $t_0$. The update factor
+can be written in terms of the current estimates for the highest $E_H$ and
+lowest $E_L$ energies of interest and the last time that an energy in the range
+of interest is encountered $t_L$.
 \begin{align}
   \gamma_{t}^{\text{SAD}} =
      \frac{
@@ -298,22 +299,37 @@ lowest $E_L$ energies of interest.
        \frac{E_{H}-E_{L}}{T_{\text{min}}} + \frac{t}{N_S}\frac{t}{t_L}
      }
 \end{align}
+SAD only explores the energy range of interest as specified by the minimum
+temperature of interest $T_{\min} < T < \infty$. During the simulation the two
+energies $E_H$ and $E_L$, are refined such that the range of energies are conservatively
+estimated. The weights are calculated for each energy region according to the original
+prescription.
+\begin{enumerate}
+\item {$E < E_L$:} $w(E>E_H) = w(E_H)$
+\item {$E_L < E < E_H$:} moves are handled the same as other weight-based
+methods that are mentioned
+\item {$E > E_H$:} $w(E<E_L) = w(E_L)e^{-\frac{E_L-E}{T_{\min}}}$
+\end{enumerate}
+Each time the simulation changes the value of $E_H$ or $E_L$, the weights
+within the new portion of the interesting energy range are updated.
 
 \section{Results}
+We tested the algorithms on two 2D Ising model systems.  The first is a smaller
+simulation with a lattic size of 32 and the second has a lattice size of 128.
+For each system we use a reasonable root-mean-square displacement distance
+$\delta_0 = 0.05\sigma$ for proposed moves. The simulations explore the energy
+space of the systems with minimum reduced temperatures of $T_{\text{min}} = 1$
+for simulations All simulations lead to the minimum important energy $E_{\min}$
+and maximum entropy energy $E_{\max}$ being calculated (with the exception of
+the WL methods where both of these parameters are needed a priori).
+
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/ising/gamma-n32.pdf}
   \caption{
-  gamma plot}
+  The update factor $\gamma_t$ versus the iteration number for the $N=32 \times 32$
+  system.}
 \end{figure}
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{figs/ising/gamma-n128.pdf}
-  \caption{
-  gamma plot}
-\end{figure}
-
-\subsection{The 32 $\times$ 32 Ising model}
-Something small...
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/ising/N32-entropy-error-default.pdf}
   \caption{
@@ -324,6 +340,30 @@ Something small...
                and worst simulations for each method are shown as a
                semi-transparent shaded area.}\label{fig:n32}
 \end{figure}
+
+\subsection{The 32 $\times$ 32 Ising model}
+For this simulation, we chose a minimum reduced temperature of $1$, which
+corresponds to an interesting energy range from $-2048$ to $50$.  The number of
+important energy states for this system is $N_S = 524$. \jpsays{The entropy of
+this system is shown in Fig.~\ref{fig:entropy-cartoon} above, which shows that
+over this energy range the entropy differs by 198, corresponding to a ratio of
+$10^{86}$ between the highest and lowest density of states.}
+
+Fig.~\ref{fig:n32} shows the average error in the entropy as a function of time for
+this system with the displacement distance of $0 = 0.05$. The solid/dashed lines
+represent the average of the absolute value of the error in the entropy averaged
+over eight simulations using different random number seeds. The range of average
+errors for each simulation is shown as a shaded region around its mean error. By
+the time $10^8$ moves have been made all but the WL simulation have begun to
+converge as $1/\sqrt{t}$. We then see the WL error saturate around $10^9$ moves.
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/ising/gamma-n128.pdf}
+  \caption{
+  The update factor $\gamma_t$ versus the iteration number for the $N=128 \times 128$
+  system.}
+\end{figure}
+
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/ising/N128-entropy-error-default.pdf}
   \caption{
@@ -336,11 +376,35 @@ Something small...
 \end{figure}
 
 \subsection{128 $\times$ 128 Ising system}
-Something big (WL uses 256 by 256 in their paper but only one simulation and
-no comparison while more recent comparison type papers use 128 by 128 as max)...
+For this simulation, we chose a minimum reduced temperature of $1$, which
+corresponds to an interesting energy range from $-30268$ to $100$.  The number of
+important energy states for this system is $N_S = 524$.
+
+Fig.~\ref{fig:n128} shows the average error in the entropy as a function of time
+for this system with the displacement distance of $0 = 0.05$. The solid/dashed
+lines represent the average of the absolute value of the error in the entropy
+averaged over eight simulations using different random number seeds. The range
+of average errors for each simulation is shown as a shaded region around its
+mean error. By the time $10^12$ moves have been made all but the WL and SAD
+simulations have begun to converge as $1/\sqrt{t}$. We then see the WL error
+saturate around $10^12$ moves. The error in the SAD method will continue to
+converge faster than $1/\sqrt{t}$ until the update factor approaches that of
+1/t-WL at which point both methods will converge equivalently.
 
 \section{Conclusion}
-
+We have examined the convergence of SAD versus other widely used weight-based
+histogram methods  We have shown that Sad samples the energy space corresponding
+to a desired range of temperatures for a variety of system sizes. We find that
+both SAD and 1/t-WL demonstrate excellent and robust convergence. They both
+converge more rapidly than SAMC, and unlike WL consistently converge to the
+correct density of states. We find that for larger systems SAD reduces the updated
+factor more slowly (and conservatively) than 1/t-WL. This means that SAD will take
+proportionately more moves to converge to the same value as 1/t-WL as system size is
+increased.
+SAD requires the user to specify a temperature range of interest rather than an
+energy range of interest as 1/t-WL does. For use cases in which a range of
+desired temperatures is known, this will make the SAD method considerably more
+convenient.
 
 \bibliography{ising} % Produces the bibliography via BibTeX.
 
