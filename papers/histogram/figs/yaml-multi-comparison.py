@@ -53,7 +53,6 @@ for f in filename:
                 print('unable to read file', filename_location + name)
                 raise ValueError("%s isn't a file!" % (filename_location + name))
 
-            #print(data_loaded)
             data = yaml_data
             data['bins']['histogram'] = np.array(data['bins']['histogram'])
             data['bins']['lnw'] = np.array(data['bins']['lnw'])
@@ -105,13 +104,26 @@ for f in filename:
                 if yamlRef:
                     # if using yaml as a reference the range is from 0 to len while for C++ the range is
                     # from maxref to minref + 1
-                    norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[0:minref-maxref+1])
-                    doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[0:minref-maxref+1] - norm_factor
+                    if 'ising' in filebase:
+                        ising_norm = lndos[i][maxyaml:minyaml+1] # remove impossible state
+                        # the states are counted backward hence the second to last state would be at index = 1
+                        new_ising_norm = np.delete(ising_norm,[1])
+
+                        ising_lndos = lndos[i][maxyaml:minyaml+1][::-1] # remove impossible state
+                        new_ising_lndos = np.delete(ising_lndos,[len(ising_lndos)-2])
+
+                        norm_factor = np.mean(new_ising_norm) - np.mean(lndosref[0:minref-maxref+1])
+                        doserror = new_ising_lndos - lndosref[0:minref-maxref+1] - norm_factor
+                    else:
+                        norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[0:minref-maxref+1])
+                        doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[0:minref-maxref+1] - norm_factor
                 else:
                     norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[maxref:minref+1])
                     doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[maxref:minref+1] - norm_factor
-                errorinentropy[i] = np.sum(abs(doserror))/len(doserror)
+
+                errorinentropy[i] = np.sum(abs(doserror))/len(doserror) #- np.mean(doserror)
                 maxerror[i] = np.amax(doserror) - np.amin(doserror)
+
 
             # remove N from moves in yaml file because N is added back in the
             # comparison-plot script
