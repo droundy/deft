@@ -60,12 +60,18 @@ the original histogram method, which used a single canonical Monte Carlo
 simulation to predict properties for nearby
 temperatures~\cite{ferrenberg1988new}.  For large systems this approach is
 limited to a narrow temperature range because a single canonical simulation
-explores only a small range of energies.  This led to a variety of ``flat'' (or
+explores only a small range of energies.~\jpsays{
+Berg and Neuhaus developed multicanonical
+methods that improved the sampling of configuration space and attempted to
+overcome free energy barriers~\cite{berg1991multicanonical, berg1992multicanonical}.
+These works led to an explosion in the interest of}
+``flat'' (or
 ``broad'') histogram methods~\cite{penna1996broad, penna1998broad,
 swendsen1999transition, wang2001determining, wang2001efficient,
 trebst2004optimizing}, which explore a wider range of energies.  Another
 benefit, in contrast with low-temperature canonical Monte Carlo, is that these
 approaches cannot be trapped in a local energy minimum.
+
 
 Wang and Landau introduced the most widely used flat histogram algorithm (WL)
 that uses an update factor and a statistical histogram to compute the density of
@@ -104,6 +110,20 @@ method SAD (Stochastic Approximation with a Dynamic update factor), and will
 discuss it in detail in the methods section. We compare its convergence
 properties with three existing flat histogram methods: WL, $1/t$-WL, and SAMC.
 
+~\jpsays{STMC uses a dynamic microcanonical temperature $\tilde{T}$ to
+accelerates convergence by refining the temperature estimate rather than the
+density of states estimate~\cite{kim2006statistical, kim2007statistical}. STMC
+applied to WL requires a temperature range rather than an energy range.
+From what I can tell the user needs to input a temperature range $T_l$ and $T_h$
+in general and an energy range for continuum systems $E_l$ and $E_h$.
+}
+
+~\jpsays{The benefits of Monte Carlo methods such as WL cannot easily be
+exploited on systems where MC moves are not easily
+defined~\cite{kim2006statistical}, such as in the case of molecular simulations,
+or where for continuum systems where energy bins increase extensively with
+system size~\cite{kim2009replica, junghans2014molecular}.}
+
 As a test case, we consider the square-well fluid i.e. a system of particles
 whose interactions are governed by a square-well
 potential~\cite{singh2003surface, barker2004perturbationSW}.  The square-well
@@ -141,7 +161,8 @@ Properties that require more information---such as a spatial
 correlation function or a response function---can still be computed
 for any temperature, provided statistics are collected for each
 individual energy, which can then be reweighted for any
-temperature~\cite{errington2003direct}.
+temperature~\cite{panagiotopoulos1998phase, panagiotopoulos2000monte,
+errington2003direct}.
 
 All the flat histogram Monte Carlo methods begin with randomly chosen
 ``moves'' which change the state of the system and must satisfy
@@ -149,17 +170,17 @@ detailed balance.  Each algorithm differs in how it determines the
 probability of accepting a move and in what additional statistics must
 be collected in order decide on that probability.
 
-Flat histogram methods calculate the density of states $D(E)$ for a
-discrete set of energies~\cite{haber2018performance}. For this reason,
-energy binning becomes an important consideration for systems with a
-continuum of possible energies.  Energy bins are typically of uniform
-size for the entire energy continuum~\cite{fasnacht2004adaptive}. Some
-methods such as AdaWL~\cite{koh2013dynamically} employ a tunable
-mechanism for controlling the binning for low entropic states in order
-to ensure the exploration of all energies.  The method introduced in
-this paper is designed to scale appropriately as bin size is changed,
-but we do not test this scaling, as we use a system with discrete
-energy levels.
+Flat histogram methods calculate the density of states $D(E)$ for a discrete set
+of energies~\cite{wang2001determining, dayal2004performance, troyer2003flat,
+trebst2004optimizing}. For this reason, energy binning becomes an important
+consideration for systems with a continuum of possible energies.  Energy bins
+are typically of uniform size for the entire energy
+continuum~\cite{fasnacht2004adaptive}. Some methods such as
+AdaWL~\cite{koh2013dynamically} employ a tunable mechanism for controlling the
+binning for low entropic states in order to ensure the exploration of all
+energies.  The method introduced in this paper is designed to scale
+appropriately as bin size is changed, but we do not test this scaling, as we use
+a system with discrete energy levels.
 
 In this section we will introduce four closely related flat histogram
 methods which each rely on a weight function $w(E)$.  In these
