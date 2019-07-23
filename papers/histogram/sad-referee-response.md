@@ -9,6 +9,21 @@ is an important one, but does not believe that our work is a substantial
 contribution to the field.  The referee has three major criticisms of the value
 of our work (aside from issues with the introduction section).
 
+***Jordan Says:*** Computational Physics Papers in Physical Review E
+Appropriate papers for this section are those that report new advances in
+computational physics. This includes papers that describe new developments of
+computational methods or substantial improvements of existing computational
+methods, provided they are applicable to significant physics problems.
+In many cases such a paper will improve its impact by explicitly demonstrating
+the usefulness of the described method, i.e., by applying it to some physics
+problem (old or new). However, it should be noted that such an application is
+not a necessary condition for eligibility. Rather, the requirement that "papers
+must contain new results in physics" should be interpreted as a requirement of
+novelty with respect to the method(s), the physics, or both.
+*PRE only even loosely requires that new methods be tested on a single (old) or new system.
+Simply arguing that our method is distinct from WL (the referees argument) 'it
+is a new version of SAMC!' should be sufficient based on PRE guidelines.*
+
 Firstly, the referee criticizes our paper for testing the method on a single
 physical system (the square well fluid).  The referee gives as an argument an
 example of a paper which tests a method on three different physical systems.  We
@@ -18,6 +33,39 @@ physical system as the test case.  We agree that our method should be tested on
 additional different physical systems but dispute that this is necessary for the
 first paper introducing this method.  **Decide whether to just throw in the
 Ising...**
+
+**look them up**
+It is quite common for papers detailing comparison of convergence for various
+methods to only examine a single physical or sometimes even an unphysical (as in
+the case of integrals) system. When examining the convergence and/or comparing
+various computational methods it cannot therefore be expected that multiple
+systems should be considered in the same work. The authors provide a list of
+such works that they directly cite (many accepted by PRE) that prove their point:
+
+Analysis of the convergence of the 1/t and Wang-Landau algorithms in the calculation
+of multidimensional integrals (accepted by PRE)
+This paper compares WL and 1/t-WL on several different integrals (not even a real physical system because the exact answer is known)
+
+Avoiding boundary effects in Wang-Landau sampling (accepted by PRE)
+This paper with DP Landau as an author only considers the 2D ising model with
+the novelty of the paper to avoid boundary effects in WL which is succinctly
+stated in the abstract: 'A simple modification of the ‘‘Wang-Landau sampling’’
+algorithm...'
+
+Optimal modification factor and convergence of the Wang-Landau algorithm (accepted by PRE)
+This paper examines the optimal modification factor and tests only on the 2D
+ising model.
+
+Convergence of Stochastic Approximation Monte Carlo and modified
+Wang–Landau algorithms: Tests for the Ising model (accepted by Computer Physics Communications)
+This paper compares SAMC, WL, and 1/t-WL on a single system: the 2D ising model
+
+Stochastic approximation Monte Carlo and Wang–Landau Monte Carlo applied to a continuum polymer model (accepted by Computer Physics Communications)
+SAMC and WL are compared for a single continuum model with a square well type potential.
+
+The referee even suggested to cite some of the original multicannonical literature
+Multicanonical Ensemble: A New Approach to Simulate First-Order Phase Transitions (accepted by PRL)
+This important work considers a single system in the 2D 10 state Potts model.
 
 Secondly, the referee does not see much value in providing a temperature range
 (rather than an energy range) as input to the method.  We believe that a
@@ -44,17 +92,21 @@ in Secion III.
 methods on influencing methods like WL etc... referencing the original authors
 to the introduction.
 
-3.
+3. As per the referees request, we have briefly reviewed methods the Statistical
+temperature Monte Carlo method.
 
-4.
+4.  As per the referees request, we have briefly reviewed methods used in the
+metadynamics communities in the introduction.
 
-5.
+5. more test cases
 
 Minor details:
 
-6.
+6. Out of curiosity: The authors say a temperature range T_min < T <
+infinity should be chosen. Why not T_min < T < T_max?
 
-7.
+7. On page 5 the authors say "SAD should perform similarly ...". Is
+there any evidence?
 
 8. *Proofreading* **Note all changes made under proof reading, as well as what was
 suggested.**
