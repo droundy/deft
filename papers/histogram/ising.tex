@@ -347,7 +347,7 @@ corresponds to an interesting energy range from $-2048$ to $48$.  The number of
 important energy states for this system is $N_S = 529$.
 
 Fig.~\ref{fig:n32} shows the average error in the entropy as a function of time for
-this system with the displacement distance of $0 = 0.05$. The solid/dashed lines
+this system with the displacement distance of $\delta_0 = 0.05$. The solid/dashed lines
 represent the average of the absolute value of the error in the entropy averaged
 over eight simulations using different random number seeds. The range of average
 errors for each simulation is shown as a shaded region around its mean error. By
@@ -377,7 +377,7 @@ For this simulation, we chose a minimum reduced temperature of $1$, which
 corresponds to an interesting energy range from $-32768$ to $100$.  The number of
 important energy states for this system is $N_S = 8214$.
 Fig.~\ref{fig:n128} shows the average error in the entropy as a function of time
-for this system with the displacement distance of $0 = 0.05$. The solid/dashed
+for this system with the displacement distance of $\delta_0 = 0.05$. The solid/dashed
 lines represent the average of the absolute value of the error in the entropy
 averaged over eight simulations using different random number seeds. The range
 of average errors for each simulation is shown as a shaded region around its
@@ -389,18 +389,17 @@ converge faster than $1/\sqrt{t}$ until the update factor approaches that of
 
 \section{Conclusion}
 We have examined the convergence of SAD versus other widely used weight-based
-histogram methods  We have shown that Sad samples the energy space corresponding
-to a desired range of temperatures for a variety of system sizes. We find that
-both SAD and 1/t-WL demonstrate excellent and robust convergence. They both
-converge more rapidly than SAMC, and unlike WL consistently converge to the
-correct density of states. We find that for larger systems SAD reduces the updated
-factor more slowly (and conservatively) than 1/t-WL. This means that SAD will take
-proportionately more moves to converge to the same value as 1/t-WL as system size is
-increased.
-SAD requires the user to specify a temperature range of interest rather than an
-energy range of interest as 1/t-WL does. For use cases in which a range of
-desired temperatures is known, this will make the SAD method considerably more
-convenient.
+histogram methods.  We have shown that Sad samples the energy space
+corresponding to a desired range of temperatures for a variety of system sizes.
+We find that both SAD and 1/t-WL demonstrate excellent and robust convergence.
+They both converge more rapidly than SAMC, and unlike WL do not suffer from
+error saturation. We find that for larger systems SAD reduces the updated factor
+more slowly (and conservatively) than 1/t-WL. This means that SAD will take
+proportionately more moves to converge to the same value as 1/t-WL as system
+size is increased. SAD requires the user to specify a temperature range of
+interest rather than an energy range of interest as 1/t-WL does. For use cases
+in which a range of desired temperatures is known, this will make the SAD method
+considerably more convenient.
 
 \bibliography{ising} % Produces the bibliography via BibTeX.
 
