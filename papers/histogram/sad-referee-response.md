@@ -11,16 +11,15 @@ value of our work (aside from issues with the introduction section).
 
 **We argue that our method is based on SAMC (as we state) and is a substantial
 improvement on the method (convergence is of 1 - 2 orders of magnitude superior
-as can be seen from Fig. 3 and Fig. 4)**
+as can be seen from Fig. 3 and Fig. 4).
 
-**In addition, we also provide a detailed comparison of 4 different methods on a
-system that would potentially be of value to those most likely to implement our
-method (such as the polymer community has implemented SAMC)**
+In addition, we also provide a detailed comparison of 4 different methods on the
+square well fluid.
 
-**Furthermore, the guidlines that the referee is using come from Computational
-Physics Papers in the Physical Review E (2013). This specifically states
-'Rather, the requirement that "papers must contain new results in physics"
-should be interpreted as a requirement of novelty with respect to the
+Furthermore, the guidelines that the referee is using presumably come from
+Computational Physics Papers in the Physical Review E (2013). This specifically
+states '...Rather, the requirement that "papers must contain new results in
+physics" should be interpreted as a requirement of novelty with respect to the
 method(s), the physics, or both.' As stated above it is only necessary that the
 method is novel OR the physical problem is novel. The paper below accepted by
 PRE confirms this thought.**
@@ -66,10 +65,10 @@ SAMC and WL are compared for a single continuum model with a square well type
 potential.
 
 These papers help to highlight that the convergence properties of the various
-Monte Carlo methods are of importance (while the system(s) are not necessarily).
-In our case, we compare the convergence *four* different methods, one of which
-(SAD) is an improvement on the existing algorithm (SAMC), on a single system
-(square well fluid).
+Monte Carlo methods are of importance (while the system(s) are often not
+necessarily). In our case, we compare the convergence of *four* different
+methods, one of which (SAD) is an improvement on the existing algorithm (SAMC),
+on a single system (square well fluid).
 
 Secondly, the referee does not see much value in providing a temperature range
 (rather than an energy range) as input to the method.  We believe that a
@@ -88,7 +87,8 @@ require multiple simulations over a wider range of energies, or would require
 guessing in advance a wider range of energies than are needed.  In either case,
 the convergence of 1/t-WL would be worse than our tests indicate.
 *Jordan Says we could add* **We have modified the conclusion to better emphasize
-this important distication**
+this important distinction (also our method is based on SAMC and is a signifcant
+improvement on that method)**
 
 **----------------------------------------------------------------------------**
 
@@ -161,13 +161,26 @@ forging a connection between WL and metadynamics.**
 5. The referee argues that our method should be tested on multiple other systems.
 The referee gives for example a single paper accepted by *PRL* that compares STMC
 to WL and introduces STMD.
+**We provide as argument multiple counter examples of papers accepted by PRE
+(the journal to which we are submitting) that test on a single system (not
+necessarily even a system of physical interest). The novelty of our method as
+well as the in depth comparison with WL, 1/t-WL, and SAMC make our paper a
+considerable and 'substantial' addition to the field.
+
+Additionally it is quite obvious that our method (SAD) is far superior from Fig.
+3 and 4 to the method that it is based on (SAMC). Our method is related to
+1/t-WL but hardly an extension of the method as the referee claims; however, it
+performs as well as 1/t-WL and SAD is solving a significantly harder problem.
+Also, SAD has fewer  parameters to chose (only one) and many researchers will
+find temperature easier to determine than the energy range of the system.
+**
 
 **----------------------------------------------------------------------------**
 
 Minor details:
 
-6. The referee asks why we chose a maximum temperature of infinity.  We have
-added a paragraph to Section III explaining the reasoning, which is that
+6. The referee asks why we chose a maximum temperature of infinity.  *We have
+added a paragraph to Section III explaining the reasoning*, which is that
 infinite temperature allows the system to randomize more reliably, and costs us
 essentially nothing.  We do note that for some systems or situations in which
 the energy of maximum entropy is very high (or worse, infinite) we would need
@@ -175,11 +188,12 @@ to introduce a maximum temperature.
 
 7. On page 5 the authors say "SAD should perform similarly ...". Is
 there any evidence?
+*Jordan Says "How do we want to address this" Probably easiest just to remove?*
 
 8. *Proofreading* **Note all changes made under proof reading, as well as what was
 suggested.**
-In the introduction, we improve the clarity of the paper by defining t as the number
-of moves when first introducing 1/t-WL.
+In the introduction, we improve the clarity of the paper by defining t as the
+number of moves when first introducing 1/t-WL.
 As the first referee suggests we edited phrases such as Monte Carlo and the
 update factor for consistency.
 We corrected several typographical errors throughout the paper.
@@ -189,17 +203,35 @@ References were checked for completeness.
 
 The second referee was far more positive on the value of our work, but did
 suggest several places where the paper could be made more clear.
+**The referee clearly acknowledges SAMC and that our method is SAD converges
+faster than SAMC. The referee also notes that the paper makes an important
+contribution.**
+
+**----------------------------------------------------------------------------**
 
 1. The referee wrote that the description of the flat histogram methods in
 section II was confusing, and should be rewritten to highlight the differences
 between methods.  We have added ...
+**We have better described the implementation of each method in more detail in
+section II to highlight the major differences in implementation between the
+methods. The update factor is now shown for each method so that it can be seen
+how each method differs.**
+
+**----------------------------------------------------------------------------**
 
 2. The referee shared that the entropy argument in Section II.D is unclear, and
 wished for the relationship between entropy and the update factor to be more
 fully described, as well as the basis for Equation 7.
+**We have added a better description of the relationship between entropy and the
+update factor and added a paragraph describing the basis of equation 7.**
+
+**----------------------------------------------------------------------------**
 
 3. The referee asked for a better choice of line styles to highlight the SAD
 method in our plots.
+**We have edited the line styles to better highlight the SAD method in our plots.**
+
+**----------------------------------------------------------------------------**
 
 4. The referee finally suggested that it might be interesting to try out our
 method with a Go protein model.  We agree that this would be interesting, and
