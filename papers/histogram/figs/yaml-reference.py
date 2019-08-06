@@ -38,22 +38,22 @@ data['movies']['energy']
 minE = data['movies']['energy'].index(-Smax)
 maxE = data['movies']['energy'].index(-Smin)
 #print minE, maxE
-moves = data['movies']['time']
+#moves = data['movies']['time']
 
 dirname = 'data/%s-reference-lndos.dat' % (filename)
 print 'saving to', dirname
 
-well_width = data['system']['cell']['well_width']
-translation_scale = ['translation_scale']
+#well_width = data['system']['cell']['well_width']
+#translation_scale = ['translation_scale']
 if method == 'Sad':
     min_T = data['method'][method]['min_T']
     too_lo = data['method'][method]['too_lo']
     too_hi = data['method'][method]['too_hi']
-moves = data['moves']
-x = data['system']['cell']['box_diagonal']['x']
-y = data['system']['cell']['box_diagonal']['y']
-z = data['system']['cell']['box_diagonal']['z']
-gamma = data['movies']['gamma'][-1]
+#moves = data['moves']
+#x = data['system']['cell']['box_diagonal']['x']
+#y = data['system']['cell']['box_diagonal']['y']
+#z = data['system']['cell']['box_diagonal']['z']
+#gamma = data['movies']['gamma'][-1]
 
 # shouldn't need to restric range [maxE:minE+1][::-1]
 energy = data['movies']['energy'][maxE:minE+1][::-1]

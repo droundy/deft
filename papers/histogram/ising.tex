@@ -37,62 +37,105 @@ In this work, we finish writing everything before the abstract~\jpsays{FIX AT EN
 \maketitle
 
 \section{Introduction}
-\jpsays{What is a flat histogram}
-Flat histogram Monte-Carlo simulation algorithms calculate the
-thermodynamic properties of various systems for over a range of
-temperatures.  The first histogram method used a single canonical Monte
-Carlo simulation to predict properties for nearby
-temperatures~\cite{ferrenberg1988new}. This method is unable to
-effectively sample large energy ranges where the simulation is limited
-to a narrow temperature range.
+Flat histogram Monte-Carlo simulation algorithms calculate the thermodynamic
+properties of various systems over a range of temperatures.  The first histogram
+method used a single canonical Monte Carlo simulation to predict properties for
+nearby temperatures~\cite{ferrenberg1988new}. While the method effectively
+samples a narrow energy range given limited by a narrow temperature range, it
+proves computationally inefficient at sampling large energy ranges.
 
-This led to a
-variety of ``flat'' (or ``broad'') histogram
+Due to a canonical Monte Carlo simulation's inefficient sampling of large
+energies, a variety of ``flat'' (or ``broad'') histogram
 methods~\cite{penna1996broad, penna1998broad, swendsen1999transition,
-wang2001determining, wang2001efficient, trebst2004optimizing}, which
-explore a wider range of energies.  Another benefit, in contrast with
-low-temperature canonical Monte Carlo, is that these approaches cannot
-be trapped in a local energy minimum.
+wang2001determining, wang2001efficient} were developed to explore a wider range
+of energies.  In addition to obtaining thermodynamic information for the entire
+energy range for a single simulation, these approaches cannot be easily trapped
+in a local energy minimum like a canonical simulation.
 
-\jpsays{What is WL}
-In the early 2000s, Wang and Landau introduced a novel flat-histogram
-Monte-Carlo algorithm that accurately determined the density of states
-(DOS) for a statistical
-system~\cite{wang2001determining,wang2001efficient}. For all of its
-power, the method unfortunately requires a priori knowledge of several
-user-defined parameters. Thus, for any given system under study, the
-user needs to determine the ideal parameters in order to apply the
-method. The Wang-Landau algorithm is also known to violate detailed
-balance (although only for brief time intervals)~\cite{yan2003fast,
-shell2002generalization}. With the violation of detailed balance,
-convergence of the algorithm is not guaranteed. The convergence rate
-for WL is well known~\cite{zhou2005understanding,lee2006convergence,
-belardinelli2007wang}. Modification factors that decrease faster than
-$1/t$ lead to non-convergence~\cite{belardinelli2007fast}.  These
-findings lead to the formation of the $1/t$-WL algorithm.  The ideal
-choice of decreasing the modification factor prevents CPU time from
-being wasted by continuing to perform calculations after the error in
-the density of states is saturated~\cite{belardinelli2008analysis}.
 
-\jpsays{What is SAMC}
-Liang independently considered whether WL could be treated as a special
-case of Stochastic Approximation whose convergence could be
-mathematically proven~\cite{liang2006theory, liang2007stochastic}. In
-2007, Liang et al.~\cite{liang2007stochastic} argued that WL can be
-considered a form of Stochastic Approximation Monte Carlo (SAMC).
-Unlike WL, SAMC can guarantee convergence (if certain conditions are
-met). Despite the added benefit of guaranteed convergence, the method
-still has a system specific user-defined variable. Such variables often
-create difficulty when applying Monte-Carlo methods across arbitrary
-systems.  The SAD (Stochastic Approximation with Dynamic $\gamma$)
-method~\jpsays{outlined by Pommerenck et.al include David and my paper
-on SAD square well in citations!} is special version of the SAMC
-algorithm that dynamically chooses the modification factor rather than
-relying on system dependent parameters. SAD shares the same convergence
-properties with SAMC while replacing un-physical user-defined parameters
-with the algorithms dynamic choice.  In this work, we apply the family
-of Monte-Carlo algorithms (WL, 1/t-WL, SAMC, SAD) to the 2D Ising model.
+Wang and Landau introduced one of the most widely used flat-histogram
+Monte-Carlo algorithms that accurately determined the density of states (DOS) for
+a statistical system~\cite{wang2001determining,wang2001efficient}. For all of
+its power, the method unfortunately requires a priori knowledge of several
+user-defined parameters. Thus, for any given system under study, the user needs
+to determine the ideal parameters in order to apply the method. The Wang-Landau
+algorithm is also known to violate detailed balance (although only for brief
+time intervals)~\cite{yan2003fast, shell2002generalization}. With the violation
+of detailed balance, convergence of the algorithm is not guaranteed.
 
+Because of the uncertainty of convergence for WL, many studies were undertaken
+to understand how the modification (or update) factor $\gamma$ impacts the
+convergence~\cite{zhou2005understanding,lee2006convergence,
+belardinelli2007wang}. The ideal choice of decreasing the modification factor
+helps to prevent CPU time from being wasted by continuing to perform
+calculations after the error in the density of states is
+saturated~\cite{belardinelli2008analysis}. Modification factors that decrease
+faster than $1/t$ were found to lead to
+non-convergence~\cite{belardinelli2007fast}.  These findings led to the
+formation of the $1/t$-WL algorithm.
+
+Liang independently considered whether WL could be treated as a special case of
+Stochastic Approximation whose convergence could be mathematically
+proven~\cite{liang2006theory, liang2007stochastic}. In 2007, Liang et
+al.~\cite{liang2007stochastic} argued that WL can be considered a form of
+Stochastic Approximation Monte Carlo (SAMC). Unlike WL, SAMC can guarantee
+convergence (if certain conditions are met). Despite the added benefit of
+guaranteed convergence, the method still has a system specific user-defined
+variable. Such variables often create difficulty when applying Monte-Carlo
+methods across arbitrary systems.  The SAD (Stochastic Approximation with
+Dynamic $\gamma$) method outlined by Pommerenck
+et.al~\cite{pommerenck2019stochastic} is a special version of the SAMC algorithm
+that dynamically chooses the modification factor rather than relying on system
+dependent parameters. SAD shares the same convergence properties with SAMC while
+replacing un-physical user-defined parameters with the algorithms dynamic
+choice.  In this work, we apply the family of weight-based flat histogram Monte
+Carlo methods (WL, 1/t-WL, SAMC, SAD) to the 2D Ising model.
+
+\section{Ising Model}
+The 2D Ising spin-lattice system is widely used as a testbed when
+benchmarking or comparing Monte-Carlo
+methods~\cite{ferdinand1969bounded, wang1999transition, trebst2004optimizing}. The 2nd order
+phase transition behavior and the ability to directly calculate the
+exact solution for finite lattices~\cite{beale1996exact} make the
+system sufficiently interesting for such theoretical comparisons. It is
+also of important note that direct comparison of the other methods can
+be made with WL as its original implementation was done on this
+system~\cite{wang2001determining,wang2001efficient}.
+We test the convergence of several flat histogram methods
+on the periodic 2D square lattice ferromagnetic Ising model with nearest
+neighbor interactions~\cite{landau2004new}.
+\begin{align}
+\mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j - h \sum_i s_i
+\end{align}
+The $N\times N$ spin system can take on values of $\sigma_i = \pm 1$
+for up or down spins respectively. In the infinite volume limit ($h =
+0$), We can write the Hamiltonian as follows~\cite{onsager1944crystal,
+kaufman1949crystal}:
+\begin{align}
+\mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j
+\end{align}
+where the sum is over all enumerated spin sites. Beale showed that for finite
+lattices the Density of States could directly be calculated from the partition
+function~\cite{beale1996exact}
+\begin{align}
+Z = \sum_E g(E) e^{-{\beta E}}
+\end{align}
+where $g(E)$ is the multiplicity of the system which is identical to
+$D(E)$. We can estimate the average deviation from the exact solution
+using the relation~\cite{schneider2017convergence, shakirov2018convergence,
+barash2017control}:
+\begin{align}
+\braket{\epsilon(t)}_E = \frac{1}{N_E - 1} \sum_E \left( \frac{S(E,t) - S_{\text{Beale}(E)}}{S_{\text{Beale}(E)}} \right)
+\end{align}
+As per the implementation by Wang and
+Landau~\cite{wang2001determining}, the total number of available energy
+states are $N-1$.
+% \jpsays{Also the necessary condition that the ground state is
+% $2$ for the 2D Ising model is enforced to guarantee the accuracy of the
+% density of states at low temperatures. If $2^N$ states is the condition
+% used for the ferromagnetic ising model, the rescaled factor is
+% determined primarily by the maximum density of states impacing the
+% accuracy of the energy levels at or near the ground state.}
 %\section{Discrete Spin Systems} In this work, we compare the
 %convergence properties of the family of Weight-Based Broad Histogram
 %Methods applied to the Q-State Potts model and Ising model. The two
@@ -143,13 +186,11 @@ of Monte-Carlo algorithms (WL, 1/t-WL, SAMC, SAD) to the 2D Ising model.
 %}
 \section{Flat histogram methods}\label{sec:histogram}
 Flat histogram methods determine the density of states $D(E)$ over a broad range
-of energies by simulating each energy with equivalent accuracy.
-
-Flat histogram Monte Carlo methods propose randomly chosen ``moves''
-which change the state of the system and must satisfy detailed balance.  Each
-algorithm differs in how it determines the probability of accepting a move and
-in what additional statistics must be collected in order decide on that
-probability.
+of energies by simulating each energy with equivalent accuracy. Flat histogram
+Monte Carlo methods propose randomly chosen ``moves'' which change the state of
+the system and must satisfy detailed balance.  Each algorithm differs in how it
+determines the probability of accepting a move and in what additional statistics
+must be collected in order decide on that probability.
 
 We describe four closely related flat histogram methods which each rely on a
 weight function $w(E)$ to determine $D(E)$.  For these algorithms, the
@@ -176,76 +217,23 @@ avoid energies that have been frequently sampled, leading to a rapid exploration
 of energy space. The four methods differ primarily in how they schedule the
 decreasing of $\gamma_t$.
 
-\subsection{Ising Model}
-The 2D Ising spin-lattice system is widely used as a testbed when
-benchmarking or comparing Monte-Carlo
-methods~\cite{ferdinand1969bounded, wang1999transition}. The 2nd order
-phase transition behavior and the ability to directly calculate the
-exact solution for finite lattices~\cite{beale1996exact} make the
-system sufficiently interesting for such theoretical comparisons. It is
-also of important note that direct comparison of the other methods can
-be made with WL as its original implementation was done on this
-system~\cite{wang2001determining,wang2001efficient}.
-We test the convergence of several flat histogram methods
-on the periodic 2D square lattice ferromagnetic Ising model with nearest
-neighbor interactions~\cite{landau2004new}.
-\begin{align}
-\mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j - h \sum_i s_i
-\end{align}
-The $N\times N$ spin system can take on values of $\sigma_i = \pm 1$
-for up or down spins respectively. In the infinite volume limit ($h =
-0$), We can write the Hamiltonian as follows~\cite{onsager1944crystal,
-kaufman1949crystal}:
-\begin{align}
-\mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j
-\end{align}
-where the sum is over all enumerated spin sites. Beale showed that for finite
-lattices the Density of States could directly be calculated from the partition
-function~\cite{beale1996exact}
-\begin{align}
-Z = \sum_E g(E) e^{-{\beta E}}
-\end{align}
-where $g(E)$ is the multiplicity of the system which is identical to
-$D(E)$. We can estimate the average deviation from the exact solution
-using the relation~\cite{schneider2017convergence, shakirov2018convergence,
-barash2017control}:
-\begin{align}
-\braket{\epsilon(t)}_E = \frac{1}{N_E - 1} \sum_E \left( \frac{S(E,t) - S_{\text{Beale}(E)}}{S_{\text{Beale}(E)}} \right)
-\end{align}
-As per the implementation by Wang and
-Landau~\cite{wang2001determining}, the total number of available energy
-states are $N-1$.
-\jpsays{Also the necessary condition that the ground state is
-$2$ for the 2D Ising model is enforced to guarantee the accuracy of the
-density of states at low temperatures. If $2^N$ states is the condition
-used for the ferromagnetic ising model, the rescaled factor is
-determined primarily by the maximum density of states impacing the
-accuracy of the energy levels at or near the ground state.}
-
-
-\subsection{Wang-Landau}
 The Wang-Landau algorithm~\cite{wang2001efficient,wang2001determining,
-landau2014guide} explores energy space by initially setting $\gamma=1$,
-and then decreases $\gamma$ in discrete stages.  We track the number of
-moves ending at each energy and store the counts in a histogram.  For a
-sufficiently flat energy histogram, $\gamma$ is decreased by a specified factor of
-$\frac12$.  Flatness is defined by the ratio between the minimum
-value of the histogram and its average value.  If this flatness
-reaches a specified threshold (typically 0.8), the $\gamma$ value is
-decreased and the histogram is reset to zero. The entire process is repeated
-until $\gamma$ reaches a desired cutoff.
+landau2014guide} explores energy space by initially setting $\gamma=1$, and then
+decreases $\gamma$ in discrete stages. An energy range of interest must be
+specified~\cite{wang2001efficient, schulz2003avoiding, yan2003fast},
+which can require multiple simulations if unknown.
 
-Although the algorithm is both efficient and widely used , it
-suffers from a few shortcomings.  Frist, an energy range of interest must be
-specified ~\cite{wang2001efficient, schulz2003avoiding, yan2003fast},
-which may require multiple simulations. Second, while Wang-Landau
-converges quickly, it does not in general converge to the true density
-of states ~\cite{belardinelli2008analysis, zhou2008optimal}.  It can
-and does decrease $\gamma$ so quickly that it will never (for any
-cutoff value) decrease the error in the density of states beyond a
-given nonzero value.
+The number (``counts'') of moves ending at each energy are stored in a
+histogram.  For a sufficiently flat energy histogram (specified by the user to
+typically be 0.8), $\gamma$ is decreased by a specified factor of $\frac12$ and
+the histogram is reset to zero. The entire process is repeated until $\gamma$
+reaches a desired cutoff.
 
-\subsection{$1/t$-Wang-Landau}
+Zhou et. al also showed that the WL algorithm never converges
+exponentially~\cite{zhou2008optimal} and succesfully bounded the statistical
+error between $t^{-\frac12}$ and $1/t$~\cite{zhou2008optimal}. He also suggests
+that a modification factor of $1/t$ is optimal for WL.
+
 The $1/t$-WL method is a refinement of the original implementation that
 addresses the error saturation of WL. Belardinelli and Pereyra
 implemented a schedule~\cite{belardinelli2007fast} that enforced that
@@ -253,23 +241,17 @@ if $\gamma < \nicefrac{1}{t}$ then the update factor is set to
 $\nicefrac{1}{t}$ and the histogram is no longer tracked. Using this
 metric, the error saturation is avoided since the correct density of
 states is approached asymptotically as
-$t^{-\frac12}$~\cite{belardinelli2008analysis}. Zhou et. al also showed
-that the WL algorithm never converges exponentially and succesfully
-bounded the statistical error between $t^{-\frac12}$ and
-$1/t$~\cite{zhou2008optimal}.
-
-Schneider $\text{et. al}$ outlines minor refinements to the $1/t$-WL algorithm
+$t^{-\frac12}$~\cite{belardinelli2008analysis}.
+Schneider $\text{et. al}$ outline minor refinements to the $1/t$-WL algorithm
 including $\nicefrac{N_S}{t}$ scaling and switching from standard WL to
 $1/t$-WL when the update factor $\gamma <
 \nicefrac{N_S}{t}$~\cite{schneider2017convergence}. As per the original
 $1/t$ implementation~\cite{belardinelli2007fast}, the update factor is
 decreased once all $N_S$ energy states are visited at least once (i.e.
-$H(E) \neq 0$) effectively avoiding the concept of `flatness'.  In this
-work, we refer to this refined algorithm as $1/t$-WL, with the update
-factor asymptoting to $\nicefrac{N_S}{t}$.
+$H(E) \neq 0$) effectively avoiding the concept of `flatness'.
 
-\subsection{SAMC}
-The Stochastic Approximation Monte Carlo (SAMC) algorithm has a simple
+Another weight-based flat histogram method is
+the Stochastic Approximation Monte Carlo (SAMC) algorithm. SAMC has a simple
 schedule by which the update factor $\gamma$ is continuously
 decreased~\cite{liang2007stochastic, werlich2015stochastic,
 schneider2017convergence}.  The update factor is defined in the
@@ -279,6 +261,7 @@ arbitrary tunable parameter $t_0$,
 \gamma_{t}^{\text{SA}} =\frac{t_0}{\max(t_0,t)}
 \end{align}
 where as above $t$ is the number of moves that have been attempted.
+
 SAMC offers extreme simplicity and proven convergence.
 Provided the update factor satisfies
 \begin{align}
@@ -289,28 +272,134 @@ where $\zeta \in \{1,2\}$, Liang has shown that the weights are proven
 to converge to the true density of states~\cite{liang2006theory,
 liang2007stochastic}.  Unlike WL methods, the energy range need not be
 known \emph{a priori.}  The convergenc time depends only on the choice of
-parameter $t_0$.  Liang \emph{et al.} give a rule of thumb in
+parameter $t_0$.
+The parameter $t_0$ can unfortunately be difficult to chose in advance
+for arbitrary systems.
+Liang \emph{et al.} give a rule of thumb in
 which $t_0$ is chosen in the range from $2N_S$ to $100N_S$ where $N_S$
 is the number of energy bins~\cite{liang2007stochastic}.  Schneider
 \emph{et al.} found that for the Ising model this heuristic is helpful
 for small spin systems, but that larger systems require an even higher
-$t_0$ value~\cite{schneider2017convergence}.
+$t_0$ value~\cite{schneider2017convergence}. Our work also confirms this.
 
-\subsection{SAD Algorithm}\label{sec:sad}
-In our previous work we discuss this in detail so here we only highlight...
-Stochastic Approximation w/ Dynamic $\gamma$ here.
+Pommerenck et al. propose a refinement~\cite{pommerenck2019stochastic} to SAMC
+where the update factor is determined dynamically rather than by the user.
+Stochastic Approximation with a dynamic $\gamma$ (SAD) requires the user to
+provide the lowest temperature of interest $T_{\min}$. This is analogous to WL
+requiring a priori an energy range of interest; however, this may easier to
+identify and is more physical than the SAMC parameter $t_0$. The update factor
+can be written in terms of the current estimates for the highest $E_H$ and
+lowest $E_L$ energies of interest and the last time that an energy in the range
+of interest is encountered $t_L$.
+\begin{align}
+  \gamma_{t}^{\text{SAD}} =
+     \frac{
+       \frac{E_{H}-E_{L}}{T_{\text{min}}} + \frac{t}{t_L}
+     }{
+       \frac{E_{H}-E_{L}}{T_{\text{min}}} + \frac{t}{N_S}\frac{t}{t_L}
+     }
+\end{align}
+SAD only explores the energy range of interest as specified by the minimum
+temperature of interest $T_{\min} < T < \infty$. During the simulation the two
+energies $E_H$ and $E_L$, are refined such that the range of energies are conservatively
+estimated. The weights are calculated for each energy region according to the original
+prescription.
+\begin{enumerate}
+\item {$E < E_L$:} $w(E>E_H) = w(E_H)$
+\item {$E_L < E < E_H$:} moves are handled the same as other weight-based
+methods that are mentioned
+\item {$E > E_H$:} $w(E<E_L) = w(E_L)e^{-\frac{E_L-E}{T_{\min}}}$
+\end{enumerate}
+Each time the simulation changes the value of $E_H$ or $E_L$, the weights
+within the new portion of the interesting energy range are updated.
 
 \section{Results}
+We tested the algorithms on two 2D Ising model systems.  The first is a smaller
+simulation with a lattic size of 32 and the second has a lattice size of 128.
+For each system we use a reasonable root-mean-square displacement distance
+$\delta_0 = 0.05\sigma$ for proposed moves. The simulations explore the energy
+space of the systems with minimum reduced temperatures of $T_{\text{min}} = 1$
+for simulations All simulations lead to the minimum important energy $E_{\min}$
+and maximum entropy energy $E_{\max}$ being calculated (with the exception of
+the WL methods where both of these parameters are needed a priori).
 
-\subsection{The 16 $\times$ 16 Ising model}
-Something small...
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/ising/gamma-n32.pdf}
+  \caption{
+  The update factor $\gamma_t$ versus the iteration number for the $N=32 \times 32$
+  system.}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/ising/N32-entropy-error-default.pdf}
+  \caption{
+  The average entropy error for each MC method for $N=32 \times 32$,
+               $\delta_0 = 0.05\sigma$, and $T_{\min} = 1$
+               as a function of number of iterations run.  The error is
+               averaged over 8 independent simulations, and the best
+               and worst simulations for each method are shown as a
+               semi-transparent shaded area.}\label{fig:n32}
+\end{figure}
+
+\subsection{The 32 $\times$ 32 Ising model}
+For this simulation, we chose a minimum reduced temperature of $1$, which
+corresponds to an interesting energy range from $-2048$ to $48$.  The number of
+important energy states for this system is $N_S = 529$.
+
+Fig.~\ref{fig:n32} shows the average error in the entropy as a function of time for
+this system with the displacement distance of $\delta_0 = 0.05$. The solid/dashed lines
+represent the average of the absolute value of the error in the entropy averaged
+over eight simulations using different random number seeds. The range of average
+errors for each simulation is shown as a shaded region around its mean error. By
+the time $10^8$ moves have been made all but the WL simulation have begun to
+converge as $1/\sqrt{t}$. We then see the WL error saturate around $10^9$ moves.
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/ising/gamma-n128.pdf}
+  \caption{
+  The update factor $\gamma_t$ versus the iteration number for the $N=128 \times 128$
+  system.}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{figs/ising/N128-entropy-error-default.pdf}
+  \caption{
+  The average entropy error for each MC method for $N=128 \times 128$,
+               $\delta_0 = 0.05\sigma$, and $T_{\min} = 1$
+               as a function of number of iterations run.  The error is
+               averaged over 8 independent simulations, and the best
+               and worst simulations for each method are shown as a
+               semi-transparent shaded ar.}\label{fig:n128}
+\end{figure}
+
 \subsection{128 $\times$ 128 Ising system}
-Something big (WL uses 256 by 256 in their paper but only one simulation and
-no comparison while more recent comparison type papers use 128 by 128 as max)...
+For this simulation, we chose a minimum reduced temperature of $1$, which
+corresponds to an interesting energy range from $-32768$ to $100$.  The number of
+important energy states for this system is $N_S = 8214$.
+Fig.~\ref{fig:n128} shows the average error in the entropy as a function of time
+for this system with the displacement distance of $\delta_0 = 0.05$. The solid/dashed
+lines represent the average of the absolute value of the error in the entropy
+averaged over eight simulations using different random number seeds. The range
+of average errors for each simulation is shown as a shaded region around its
+mean error. By the time $10^{12}$ moves have been made all but the WL and SAD
+simulations have begun to converge as $1/\sqrt{t}$. We then see the WL error
+saturate around $10^{12}$ moves. The error in the SAD method will continue to
+converge faster than $1/\sqrt{t}$ until the update factor approaches that of
+1/t-WL at which point both methods will converge equivalently.
 
 \section{Conclusion}
-
-\section{Acknowledgements}
+We have examined the convergence of SAD versus other widely used weight-based
+histogram methods.  We have shown that Sad samples the energy space
+corresponding to a desired range of temperatures for a variety of system sizes.
+We find that both SAD and 1/t-WL demonstrate excellent and robust convergence.
+They both converge more rapidly than SAMC, and unlike WL do not suffer from
+error saturation. We find that for larger systems SAD reduces the updated factor
+more slowly (and conservatively) than 1/t-WL. This means that SAD will take
+proportionately more moves to converge to the same value as 1/t-WL as system
+size is increased. SAD requires the user to specify a temperature range of
+interest rather than an energy range of interest as 1/t-WL does. For use cases
+in which a range of desired temperatures is known, this will make the SAD method
+considerably more convenient.
 
 \bibliography{ising} % Produces the bibliography via BibTeX.
 

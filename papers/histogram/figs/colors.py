@@ -9,6 +9,7 @@ _colors = { 'SAD': 'tab:orange',
             'SAMC ($t_0 =10^{6}$)': 'g',
             'SAMC ($t_0 =10^{7}$)': 'midnightblue',
             'SAMC ($t_0 =10^{8}$)': 'darkmagenta',
+            'SAMC ($t_0 =10^{9}$)': 'xkcd:maroon',
             '1/sqrt(t)': 'xkcd:dark gray',
             r'$\frac{1}{\sqrt{t}}$': '#eeeeee',
 }
@@ -20,6 +21,7 @@ _linestyles = {
     'SAMC ($t_0 =10^{6}$)': ':',
     'SAMC ($t_0 =10^{7}$)': ':',
     'SAMC ($t_0 =10^{8}$)': ':',
+    'SAMC ($t_0 =10^{9}$)': ':',
     'WL': '--',
     '$1/t$-WL': '-.',
     r'$\frac{1}{\sqrt{t}}$': '-'
@@ -52,6 +54,24 @@ _legend_order = [
     'samc-1e6-50-slow',
     'samc-1e7-50-slow',
     '1/sqrt(t)',
+
+    # This is for the Ising paper
+    'ising-sad-128',
+    'ising-sad-32',
+    'ising-wl-128',
+    'ising-wl-32',
+    'ising-wl-inv-t-128',
+    'ising-wl-inv-t-32',
+    'ising-samc-1e3-32',
+    'ising-samc-1e4-32',
+    'ising-samc-1e5-32',
+    'ising-samc-1e6-32',
+    'ising-samc-1e7-32',
+    'ising-samc-1e5-128',
+    'ising-samc-1e6-128',
+    'ising-samc-1e7-128',
+    'ising-samc-1e8-128',
+    'ising-samc-1e9-128',
 ]
 
 _legend_label = {
@@ -81,6 +101,24 @@ _legend_label = {
     'samc-1e6-50-slow': 'SAMC ($t_0 =10^{6}$)',
     'samc-1e7-50-slow': 'SAMC ($t_0 =10^{7}$)',
     '1/sqrt(t)': r'$\frac{1}{\sqrt{t}}$',
+
+    # This is for the Ising paper
+    'ising-sad-128': 'SAD',
+    'ising-sad-32': 'SAD',
+    'ising-wl-128': 'WL',
+    'ising-wl-32': 'WL',
+    'ising-wl-inv-t-128': '$1/t$-WL',
+    'ising-wl-inv-t-32': '$1/t$-WL',
+    'ising-samc-1e3-32': 'SAMC ($t_0 =10^{3}$)',
+    'ising-samc-1e4-32': 'SAMC ($t_0 =10^{4}$)',
+    'ising-samc-1e5-32': 'SAMC ($t_0 =10^{5}$)',
+    'ising-samc-1e6-32': 'SAMC ($t_0 =10^{6}$)',
+    'ising-samc-1e7-32': 'SAMC ($t_0 =10^{7}$)',
+    'ising-samc-1e5-128': 'SAMC ($t_0 =10^{5}$)',
+    'ising-samc-1e6-128': 'SAMC ($t_0 =10^{6}$)',
+    'ising-samc-1e7-128': 'SAMC ($t_0 =10^{7}$)',
+    'ising-samc-1e8-128': 'SAMC ($t_0 =10^{8}$)',
+    'ising-samc-1e9-128': 'SAMC ($t_0 =10^{9}$)',
 }
 
 def fix_legend(method):
