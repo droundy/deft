@@ -21,13 +21,13 @@ Computational Physics Papers in the Physical Review E (2013). This specifically
 states '...Rather, the requirement that "papers must contain new results in
 physics" should be interpreted as a requirement of novelty with respect to the
 method(s), the physics, or both.' As stated above it is only necessary that the
-method is novel OR the physical problem is novel. The paper below accepted by
-PRE confirms this thought.**
+method is novel OR the physical problem is novel. As example, the paper below
+accepted by PRE confirms this thought.**
 
 **Analysis of the convergence of the 1/t and Wang-Landau algorithms in the
 calculation of multidimensional integrals** *(accepted by PRE)*
 This paper compares the performance of two methods (WL and 1/t-WL) to calculate
-different integrals (not a real physical system because the exact answer is
+different integrals (not a real physical system chosen because the exact answer is
 known).
 
 Firstly, the referee criticizes our paper for testing the method on a single
@@ -162,7 +162,7 @@ forging a connection between WL and metadynamics.**
 The referee gives for example a single paper accepted by *PRL* that compares STMC
 to WL and introduces STMD.
 **We provide as argument multiple counter examples of papers accepted by PRE
-(the journal to which we are submitting) that test on a single system (not
+(the journal to which we are submitting not PRL) that test on a single system (not
 necessarily even a system of physical interest). The novelty of our method as
 well as the in depth comparison with WL, 1/t-WL, and SAMC make our paper a
 considerable and 'substantial' addition to the field.
@@ -172,7 +172,7 @@ Additionally it is quite obvious that our method (SAD) is far superior from Fig.
 1/t-WL but hardly an extension of the method as the referee claims; however, it
 performs as well as 1/t-WL and SAD is solving a significantly harder problem.
 Also, SAD has fewer  parameters to chose (only one) and many researchers will
-find temperature easier to determine than the energy range of the system.
+find temperature more convenient than the energy range of the system.
 **
 
 **----------------------------------------------------------------------------**
@@ -203,9 +203,9 @@ References were checked for completeness.
 
 The second referee was far more positive on the value of our work, but did
 suggest several places where the paper could be made more clear.
-**The referee clearly acknowledges SAMC and that our method is SAD converges
-faster than SAMC. The referee also notes that the paper makes an important
-contribution.**
+**The referee clearly acknowledges SAMC and that our method SAD converges
+significantly faster than SAMC. The referee also notes that the paper makes an
+important contribution.**
 
 **----------------------------------------------------------------------------**
 

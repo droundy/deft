@@ -47,7 +47,10 @@ Factor
   as input the temperature range of interst, in contrast to
   $1/t$-WL, which requires that the user identify the interesting range
   of energies.  Thus SAD is more convenient when the range of energies is
-  not known in advance.
+  not known in advance. \jpsays{We believe that a
+  temperature range is \emph{far} more physical and convenient, and this is the primary
+  value of our paper.  We have modified the abstract to better highlight this
+  contribution.}
 \end{abstract}
 
 \maketitle
@@ -327,6 +330,8 @@ be empirically determined, and we have not explored this degree of
 freedom.
 
 \subsection{SAMC convergence time}\label{sec:samc-convergence}
+\jpsays{a better description of the relationship between entropy and the
+update factor and added a paragraph describing the basis of equation 7!}
 A primary difficulty in using the SAMC method lies in identifying an
 appropriate value for $t_0$.  Although SAMC is proven to formally
 converge regardless of the $t_0$ value, a choice that is either too
@@ -462,7 +467,7 @@ factor from decreasing too rapidly.
   \includegraphics[width=\columnwidth]{gamma-n256}
   \caption{The update factor $\gamma_t$ versus iteration for $N=256$
     square-well atoms, for four different methods: WL, $1/t$-WL, SAMC,
-    and SAD}
+    and SAD \jpsays{edit linestyles to highlight SAD}}
     \label{fig:gamma-vs-t}
 \end{figure}
 Figure~\ref{fig:gamma-vs-t} compares $\gamma_t$ for the related
@@ -527,7 +532,7 @@ in Equations~\ref{eq:highw} and~\ref{eq:loww}.
 A significant advantage of SAD over SAMC---which the $1/t$-WL and WL
 methods share \emph{after} they have found all the energies---is that
 the schedule for $\gamma_t$ automatically responds to the choice of bin
-size. SAD should perform similarly over a wide range of bin sizes
+size. \jpsays{Do we just remove this?} SAD should perform similarly over a wide range of bin sizes
 because $\gamma_t \propto \nicefrac{N_S}{t}$.  As the number of energy
 states $N_S$ found increases (fine binning), the time spent $t$ in
 each bin will decrease with the effect that the convergence should be
@@ -605,6 +610,7 @@ for the user to choose.
                as a function of number of iterations run, and
            (d) the update factor $\gamma_t$ versus iteration number
                for the same simulations.
+           \jpsays{edit linestyle to highlight SAD!}
   }\label{fig:fast-slow-gamma}
 \end{figure*}
 
@@ -724,7 +730,7 @@ distance than SAMC is.
                averaged over 8 independent simulations, and the best
                and worst simulations for each method are shown as a
                semi-transparent shaded area.  The update factor for this
-               system is in Fig.~\ref{fig:gamma-vs-t} above.}\label{fig:n256}
+               system is in Fig.~\ref{fig:gamma-vs-t} above. \jpsays{edit linestyle to highlight SAD!}}\label{fig:n256}
 \end{figure}
 
 
