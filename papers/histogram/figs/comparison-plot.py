@@ -28,7 +28,7 @@ methods = ['-sad3', '-sad3-s1', '-sad3-s2',
 if 'allmethods' not in sys.argv:
     methods = ['-sad3','-wl-50','-wl-inv-t-50','-wl-inv-t-256','-sad-50',
                '-sad-256','-wl-256','-ising-sad-32','-ising-wl-32','-ising-wl-inv-t-32',
-               '-ising-sad-128','-ising-wl-128','-ising-wl-inv-t-128']
+               '-ising-sad-128','-ising-wl-128','-ising-wl-inv-t-128','-ising-sad-128-T15']
     # methods = [m+s for m in methods for s in '', '-s1', '-s2', '-s3', '-s4']
     if transcale == 'slow':
         methods = ['-sad3-slow','-sad-slow-T13','-wl-50-slow','-wl-inv-t-50-slow','-sad-50-slow',

@@ -9,12 +9,10 @@ is an important one, but does not believe that our work is a *'substantial
 contribution*'' to the field.  The referee has three major criticisms of the
 value of our work (aside from issues with the introduction section).
 
-**We argue that our method is based on SAMC (as we state) and is a substantial
-improvement on the method (convergence is of 1 - 2 orders of magnitude superior
-as can be seen from Fig. 3 and Fig. 4).
-
-In addition, we also provide a detailed comparison of 4 different methods on the
-square well fluid.
+Our method is based on SAMC (as we clearly state in the paper) and is a substantial
+improvement on this method (convergence is of 1 - 2 orders of magnitude superior
+as can be seen from Fig. 3 and Fig. 4).  In addition, we also provide a detailed
+comparison with 4 different methods on the square well system.
 
 Furthermore, the guidelines that the referee is using presumably come from
 Computational Physics Papers in the Physical Review E (2013). This specifically
@@ -22,7 +20,7 @@ states '...Rather, the requirement that "papers must contain new results in
 physics" should be interpreted as a requirement of novelty with respect to the
 method(s), the physics, or both.' As stated above it is only necessary that the
 method is novel OR the physical problem is novel. As example, the paper below
-accepted by PRE confirms this thought.**
+accepted by PRE confirms this thought.
 
 **Analysis of the convergence of the 1/t and Wang-Landau algorithms in the
 calculation of multidimensional integrals** *(accepted by PRE)*
@@ -119,19 +117,10 @@ the mathematical background of stochastic approximation methods they proved the
 convergence of SAMC."
 
 The referee further disputes the use of language *'we have introduced a new
-algorithm'*. In response, we argue that this language is commonly used to
-describe MC methods that have their foundation in other methods (SAD is a
-derivative of SAMC). Our choice of language is further validated by other
-researchers in the field that are published in PRE.
-
-**Dynamically optimized Wang-Landau sampling with adaptive trial moves and
-modification factors**
-*(accepted by PRE)*
-This work introduces an improved update scheme as the referee would call it.
-The authors still use language such as *'To test our new algorithm...'*
-
-Still we have changed the language to say *'we have introduced a new variant of
-SAMC called SAD'"'* to better highlight the subtle distinction.
+algorithm'*. This language is commonly used to describe MC methods that have
+their foundation in other methods (as SAD is a derivative of SAMC). However,
+we did revise the paper to clarify in the conclusion that our algorithm is a
+variant of the SAMC method.
 
 **----------------------------------------------------------------------------**
 
@@ -188,7 +177,8 @@ to introduce a maximum temperature.
 
 7. On page 5 the authors say "SAD should perform similarly ...". Is
 there any evidence?
-*Jordan Says "How do we want to address this" Probably easiest just to remove?*
+**We have edited the paper to make clear that we have not tested and confirmed
+the behavior of SAD in systems with a continuum of energies.**
 
 8. *Proofreading* **Note all changes made under proof reading, as well as what was
 suggested.**
@@ -222,14 +212,17 @@ how each method differs.**
 2. The referee shared that the entropy argument in Section II.D is unclear, and
 wished for the relationship between entropy and the update factor to be more
 fully described, as well as the basis for Equation 7.
-**We have added a better description of the relationship between entropy and the
-update factor and added a paragraph describing the basis of equation 7.**
+**We have added an additional description of the relationship between entropy,
+ln w, and the update factor immediately after equation 7 to make more clear how
+the total change in entropy connects with the update factor schedule.**
 
 **----------------------------------------------------------------------------**
 
 3. The referee asked for a better choice of line styles to highlight the SAD
 method in our plots.
-**We have edited the line styles to better highlight the SAD method in our plots.**
+**We found that by thickening the SAD line style and thinning SAMC lines we
+could make it considerably easier to distinguish between the different methods
+and to better highlight the SAD method in our plots.**
 
 **----------------------------------------------------------------------------**
 

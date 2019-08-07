@@ -144,7 +144,11 @@ def style_args(method):
         args['color'] = _colors[fix_legend(method)]
     if fix_legend(method) in _linestyles:
         args['linestyle'] = _linestyles[fix_legend(method)]
-    args['zorder'] = -legend_order(method)
+    args['zorder'] = legend_order(method)
+    if fix_legend(method) == 'SAD':
+        args['linewidth'] = 3
+    if 'SAMC' in fix_legend(method):
+        args['linewidth'] = 0.5
     if method == '1/sqrt(t)':
         args['zorder'] = -59
         args['linewidth'] = 0.1

@@ -106,14 +106,14 @@ for f in filename:
                     # from maxref to minref + 1
                     if 'ising' in filebase:
                         ising_norm = lndos[i][maxyaml:minyaml+1] # remove impossible state
-                        # the states are counted backward hence the second to last state would be at index = 1
-                        new_ising_norm = np.delete(ising_norm,[1])
-
                         ising_lndos = lndos[i][maxyaml:minyaml+1][::-1] # remove impossible state
-                        new_ising_lndos = np.delete(ising_lndos,[len(ising_lndos)-2])
 
-                        norm_factor = np.mean(new_ising_norm) - np.mean(lndosref[0:minref-maxref+1])
-                        doserror = new_ising_lndos - lndosref[0:minref-maxref+1] - norm_factor
+                        # the states are counted backward hence the second to last state would be at index = 1
+                        #ising_norm = np.delete(ising_norm,[1])
+                        #ising_lndos = np.delete(ising_lndos,[len(ising_lndos)-2])
+
+                        norm_factor = np.mean(ising_norm) - np.mean(lndosref[0:minref-maxref+1])
+                        doserror = ising_lndos - lndosref[0:minref-maxref+1] - norm_factor
                     else:
                         norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[0:minref-maxref+1])
                         doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[0:minref-maxref+1] - norm_factor
