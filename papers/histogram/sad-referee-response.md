@@ -14,53 +14,75 @@ improvement on this method (convergence is of 1 - 2 orders of magnitude superior
 as can be seen from Fig. 3 and Fig. 4).  In addition, we also provide a detailed
 comparison with 4 different methods on the square well system.
 
-Furthermore, the guidelines that the referee is using presumably come from
-Computational Physics Papers in the Physical Review E (2013). This specifically
-states '...Rather, the requirement that "papers must contain new results in
-physics" should be interpreted as a requirement of novelty with respect to the
-method(s), the physics, or both.' As stated above it is only necessary that the
-method is novel OR the physical problem is novel. As example, the paper below
-accepted by PRE confirms this thought.
-
-**Analysis of the convergence of the 1/t and Wang-Landau algorithms in the
-calculation of multidimensional integrals** *(accepted by PRE)*
-This paper compares the performance of two methods (WL and 1/t-WL) to calculate
-different integrals (not a real physical system chosen because the exact answer is
-known).
-
 Firstly, the referee criticizes our paper for testing the method on a single
 physical system (the square well fluid).  The referee gives as an argument an
 example of a paper which tests a method on three different physical systems.  We
 give as counter examples *references that we cite* which each use a single
 physical system as the test case.  We agree that our method should be tested on
 additional different physical systems but dispute that this is necessary for the
-first paper introducing this method.  
+first paper introducing an improved method.
+
+For instance, our citations
+[10,15,18,19,22] are all papers (the first three published in PRE **?**) which
+examine the convergence properties of flat histogram methods using a single
+physical system.
+
+**Avoiding boundary effects in Wang-Landau sampling** *(accepted by PRE)*
+This paper with DP Landau as an author considers a single system (the 2D Ising
+model). The novelty of the paper is providing a scheme to avoid boundary effects
+in WL. [10]
+
+**Fast Calculation of the Density of States of a Fluid by Monte Carlo Simulations**
+*(accepted by PRL)*
+This paper compares two new methods with WL on the truncated Lennard-Jones system. [11]
+
+**Optimizing the ensemble for equilibration in broad-histogram Monte Carlo simulations**
+*(accepted by PRE)*
+This paper presents an adaptive algorithm and compares with WL on 2D Ising systems. [12]
 
 **Analysis of the convergence of the 1/t and Wang-Landau algorithms in the
 calculation of multidimensional integrals** *(accepted by PRE)*
 This paper compares the performance of two methods (WL and 1/t-WL) to calculate
 different integrals (not a real physical system because the exact answer is
-known).
-
-**Avoiding boundary effects in Wang-Landau sampling** *(accepted by PRE)*
-This paper with DP Landau as an author considers a single system (the 2D Ising
-model). The novelty of the paper is providing a scheme to avoid boundary effects
-in WL.
+known). [15]
 
 **Optimal modification factor and convergence of the Wang-Landau algorithm**
 *(accepted by PRE)*
 This paper examines the optimal modification factor for the WL algorithm and
-tests on a single system (the 2D Ising model).
+tests on a single system (the 2D Ising model). [18]
 
 **Convergence of Stochastic Approximation Monte Carlo and modified Wang–Landau
 algorithms: Tests for the Ising model**
 *(accepted by Computer Physics Communications)*
-This paper compares SAMC, WL, and 1/t-WL on a single system (the 2D Ising model).
+This paper compares SAMC, WL, and 1/t-WL on a single system (the 2D Ising model). [19]
 
 **Stochastic approximation Monte Carlo and Wang–Landau Monte Carlo applied to a
 continuum polymer model** *(accepted by Computer Physics Communications)*
 SAMC and WL are compared for a single continuum model with a square well type
-potential.
+potential. [22]
+
+**Direct calculation of liquid–vapor phase equilibria from transition
+matrix Monte Carlo simulation** *J. Chem. Phys.*
+This paper introduces a new method (adaptation of Fitzgerald et al.) TMMC and tests
+on Lennard-Jones fluid. [34]
+
+**Performance Limitations of Flat-Histogram Methods**
+*(accepted by PRL)*
+This paper examines optimal scaling of flat histogram methods on 2D Ising systems. [35]
+
+**Flat Histogram Methods for Quantum Systems: Algorithms to Overcome Tunneling Problems
+and Calculate the Free Energy**
+*(accepted by PRL)*
+This paper examines the generalization of WL algorithm on a spin-1/2 Heisenberg model. [36]
+
+**Adaptive integration method for Monte Carlo simulations**
+*(accepted by PRE)*
+This paper introduces an adaptive sampling method and tests on Lennard-Jones. [37]
+
+**Dynamically optimized Wang-Landau sampling with adaptive trial moves and
+modification factors**
+*(accepted by PRE)*
+This paper introduces dynamically optimized WL sampling and tests on XY-Model. [38]
 
 These papers help to highlight that the convergence properties of the various
 Monte Carlo methods are of importance (while the system(s) are often not
