@@ -6,12 +6,10 @@ import numpy as np
 import readnew
 from glob import glob
 #import re
-
+import matplotlib.pyplot as plt
 import yaml
 import os.path
 import time # Need to wait some time if file is being written
-import mpmath
-mpmath.mp.dps = 160      # The precision used by mpmath
 
 # Example: /home/jordan/sad-monte-carlo/
 filename_location = sys.argv[1]
@@ -102,8 +100,9 @@ for f in filename:
             errorinentropy = np.zeros(N_save_times)
             maxerror = np.zeros(N_save_times)
             # Internal energy and heat capacity error:
-            error_U = np.zeros(N_save_times)
-            error_CV = np.zeros(N_save_times)
+            U = np.zeros(N_save_times)
+            CV = np.zeros(N_save_times)
+            beta = np.linspace(0.2,1.0, N_save_times)
 
             for i in range(0,N_save_times):
                 # below just set average S equal between lndos and lndosref
@@ -120,28 +119,42 @@ for f in filename:
                         ising_norm = np.delete(ising_norm,[1])
                         ising_lndos = np.delete(ising_lndos,[len(ising_lndos)-2])
 
-                        # # Calculate the internal energy and heat capacity:
-                        # PartitionF = []
-                        # U_numer = []
-                        # C_numer = []
-                        # ising_E = energies[maxyaml:minyaml+1]
-                        # beta = np.linspace(0.2,1.0, len(ising_E)-1)
-                        #
-                        # for EE in range(len(ising_E)-1):
-                        #     # print(len(new_ising_lndos))
-                        #     # print(len(ising_E))
-                        #     PartitionF.append(np.array(np.exp((new_ising_lndos[EE] - beta[EE]*ising_E[EE])),dtype=object))
-                        # for EE in range(len(ising_E)-1):
-                        #     U_numer.append(np.array(ising_E[EE]*np.exp(new_ising_lndos[EE] - beta[EE]*ising_E[EE]),dtype=object))
-                        # for EE in range(len(ising_E)-1):
-                        #     C_numer.append(np.array((ising_E[EE]**2)*np.exp(new_ising_lndos[EE] - beta[EE]*ising_E[EE]),dtype=object))
-                        #
-                        # PartitionF = np.asarray(PartitionF)
-                        # U_numer = np.asarray(U_numer)
-                        # C_numer = np.asarray(C_numer)
+                        # Calculate the internal energy and heat capacity:
+                        PartitionF = []
+                        U_numer = []
+                        C_numer = []
 
+                        # Compute the Boltzmann factor and reference
+                        Boltz_fac = []
+                        Boltz_fac_ref = []
+
+                        ising_E = np.array(energies[maxyaml:minyaml+1])
+                        ising_E = np.delete(ising_E,[len(ising_E)-2])
+                        for EE in range(len(ising_E)):
+                            #print(ising_lndos,ising_lndos.size,ising_E.size,beta[i])
+                            Boltz_fac.append(ising_lndos[EE] - beta[i]*ising_E[EE])
+                            Boltz_fac_ref.append(lndosref[EE] - beta[i]*ising_E[EE])
+
+                        # Compute the Maximum in the Boltz_fac
+                        Max_Boltz_fac = max(Boltz_fac)
+                        Max_Boltz_fac_ref = max(Boltz_fac_ref)
+                        #print(Max_Boltz_fac, Max_Boltz_fac_ref)
+
+                        for EE in range(len(ising_E)):
+                            # print(len(new_ising_lndos))
+                            # print(len(ising_E))
+                            PartitionF.append(np.array(np.exp(Boltz_fac[EE]-Max_Boltz_fac)))
+                        for EE in range(len(ising_E)):
+                            U_numer.append(np.array(ising_E[EE]*np.exp(Boltz_fac[EE]-Max_Boltz_fac)))
+                        for EE in range(len(ising_E)):
+                            C_numer.append(np.array((ising_E[EE]**2)*np.exp(Boltz_fac[EE]-Max_Boltz_fac)))
+
+                        PartitionF = np.asarray(PartitionF)
+                        U_numer = np.asarray(U_numer)
+                        C_numer = np.asarray(C_numer)
+                        #
                         norm_factor = np.mean(ising_norm) - np.mean(lndosref[0:minref-maxref+1])
-                        doserror = new_ising_lndos - lndosref[0:minref-maxref+1] - norm_factor
+                        doserror = ising_lndos - lndosref[0:minref-maxref+1] - norm_factor
                     else:
                         norm_factor = np.mean(lndos[i][maxyaml:minyaml+1]) - np.mean(lndosref[0:minref-maxref+1])
                         doserror = lndos[i][maxyaml:minyaml+1][::-1] - lndosref[0:minref-maxref+1] - norm_factor
@@ -152,11 +165,15 @@ for f in filename:
                 errorinentropy[i] = np.sum(abs(doserror))/len(doserror) #- np.mean(doserror)
                 maxerror[i] = np.amax(doserror) - np.amin(doserror)
 
-                # error_U[i] = np.sum(U_numer) / np.sum(PartitionF)
-                # error_CV[i] = np.sum(C_numer) / np.sum(PartitionF)
-                print('The error in the internal energy is: ', error_U[i])
-                print('The error in the heat capacity is: ', error_CV[i])
+                U[i] = np.sum(U_numer) / np.sum(PartitionF)
+                CV[i] = beta[i]**2 * (np.sum(C_numer) / np.sum(PartitionF) - U[i]**2)
 
+                print('The error in the internal energy is: ', U[i])
+                print('The error in the heat capacity is: ', CV[i])
+            plt.figure()
+            plt.plot(beta, CV)
+            #plt.plot(beta, U)
+            plt.show()
             # remove N from moves in yaml file because N is added back in the
             # comparison-plot script
             moves = data['movies']['time']
