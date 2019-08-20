@@ -59,30 +59,30 @@ This paper compares SAMC, WL, and 1/t-WL on a single system (the 2D Ising model)
 **Stochastic approximation Monte Carlo and Wang–Landau Monte Carlo applied to a
 continuum polymer model** *(accepted by Computer Physics Communications)*
 SAMC and WL are compared for a single continuum model with a square well type
-potential. [22]
+potential. [23]
 
 **Direct calculation of liquid–vapor phase equilibria from transition
 matrix Monte Carlo simulation** *J. Chem. Phys.*
 This paper introduces a new method (adaptation of Fitzgerald et al.) TMMC and tests
-on Lennard-Jones fluid. [34]
+on Lennard-Jones fluid. [35]
 
 **Performance Limitations of Flat-Histogram Methods**
 *(accepted by PRL)*
-This paper examines optimal scaling of flat histogram methods on 2D Ising systems. [35]
+This paper examines optimal scaling of flat histogram methods on 2D Ising systems. [36]
 
 **Flat Histogram Methods for Quantum Systems: Algorithms to Overcome Tunneling Problems
 and Calculate the Free Energy**
 *(accepted by PRL)*
-This paper examines the generalization of WL algorithm on a spin-1/2 Heisenberg model. [36]
+This paper examines the generalization of WL algorithm on a spin-1/2 Heisenberg model. [37]
 
 **Adaptive integration method for Monte Carlo simulations**
 *(accepted by PRE)*
-This paper introduces an adaptive sampling method and tests on Lennard-Jones. [37]
+This paper introduces an adaptive sampling method and tests on Lennard-Jones. [38]
 
 **Dynamically optimized Wang-Landau sampling with adaptive trial moves and
 modification factors**
 *(accepted by PRE)*
-This paper introduces dynamically optimized WL sampling and tests on XY-Model. [38]
+This paper introduces dynamically optimized WL sampling and tests on XY-Model. [39]
 
 These papers help to highlight that the convergence properties of the various
 Monte Carlo methods are of importance (while the system(s) are often not
