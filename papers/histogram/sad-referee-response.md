@@ -14,7 +14,7 @@ Response to first referee
 
 The first referee acknowledges that our paper is well written and that the field
 is an important one, but does not believe that our work is a *'substantial
-contribution*'' to the field.  The referee has three major criticisms of the
+contribution'* to the field.  The referee has three major criticisms of the
 value of our work (aside from issues with the introduction section).
 
 Our method is based on SAMC (as we clearly state in the paper) and is a substantial
@@ -71,7 +71,7 @@ Our method clearly does *not* implement a new update scheme for the WL method.
 We also do not simply implement a new update scheme for SAMC, since SAMC
 specifies an update schedule which is predetermined.  As stated in Section I
 *'In this work, we have developed an improved algorithm based on SAMC.'*  This
-idea is again reinforced in Secion III.
+idea is again reinforced in Section III.
 
 The referee further disputes the use of language *'we have introduced a new
 algorithm'*. This language is commonly used to describe MC methods that have

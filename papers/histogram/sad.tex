@@ -44,7 +44,7 @@ Factor
   methods rapidly converge to the
   correct density of states without the need for the user to specify an
   arbitrary tunable parameter $t_0$ as in the case of SAMC.  SAD requires
-  as input the temperature range of interst, in contrast to
+  as input the temperature range of interest, in contrast to
   $1/t$-WL, which requires that the user identify the interesting range
   of energies.  Thus SAD is more powerful in the common case in which the range
   of energies is not known in advance.
@@ -72,18 +72,18 @@ belardinelli2008analysis, belardinelli2014intrinsic, singh2012density,
 zhou2008optimal, schneider2017convergence, liang2006theory, liang2007stochastic,
 liang2009improving, werlich2015stochastic, kim2006statistical,
 kim2007statistical, kim2009replica, junghans2014molecular}, which explore a
-wider range of energies.  \jpsays{In addition to simulating a range of
-temperatures}, in contrast with low-temperature canonical Monte Carlo, is that
-these approaches \jpsays{avoid being} trapped in a local energy minimum.
+wider range of energies. In addition to simulating a range of temperatures, in
+contrast with low-temperature canonical Monte Carlo, is that these approaches
+avoid being trapped in a local energy minimum.
 
 
 Wang and Landau introduced the most widely used flat histogram algorithm (WL)
 that uses an update factor and a statistical histogram to compute the density of
 states of a given system~\cite{wang2001determining, wang2001efficient}.  While
-the method is incredibly powerful, it has a few disadvantages. \jpsays{The most
-significant disadvantage is that the method} requires the user to select the
+the method is incredibly powerful, it has a few disadvantages. The most
+significant disadvantage is that the method requires the user to select the
 range of energies to be studied~\cite{landau2004new, wang2001efficient,
-schulz2003avoiding, yan2003fast}. This \jpsays{requirement} adds an additional
+schulz2003avoiding, yan2003fast}. This requirement adds an additional
 hurdle to its application to systems for which the interesting range of energies
 is not known \emph{a priori}.  The simulation violates detailed balance, albeit
 briefly as the size of the violation decreases with time, which complicates
@@ -103,15 +103,15 @@ This leads to their $1/t$-WL algorithm which ensures that the error continues to
 decrease asymptotically as $1/\sqrt{t}$, which they demonstrated avoids the
 error saturation and asymptotically approaches the true density of
 states~\cite{belardinelli2008analysis}. Zhou et. al further confirmed that the
-original WL algorithm never converges exponentially and succesfully bounded the
+original WL algorithm never converges exponentially and successfully bounded the
 statistical error between $t^{-\frac12}$ and $1/t$~\cite{zhou2008optimal}.
 Schneider \emph{et al.} outline minor refinements to the $1/t$-WL algorithm
 including scaling the update factor with the number of energy
 bins~\cite{schneider2017convergence}.
 
 
-Liang began to consider \jpsays{Stochastic Approximation as a mathematical
-generalization of the WL approach}, whose convergence could be mathematically
+Liang began to consider Stochastic Approximation as a mathematical
+generalization of the WL approach, whose convergence could be mathematically
 proven~\cite{liang2006theory}. In 2007, Liang, Liu, and Carrol \emph{et al.}
 developed Stochastic Approximation Monte Carlo (SAMC)~\cite{liang2007stochastic,
 liang2009improving}, and proved its convergence, although the method still has a
@@ -123,7 +123,7 @@ parameter into SAMC~\cite{werlich2015stochastic}.
 
 Kim \emph{et al.} introduced Statistical Temperature Monte Carlo (STMC) and the
 related Statistical Temperature Molecular Dynamics (STMD) which is an
-adaption of the WL method \jpsays{that} approximates the entropy (or log density of
+adaption of the WL method that approximates the entropy (or log density of
 states) as a piecewise linear function, which improves convergence for systems
 with a continuously varying energy~\cite{kim2006statistical,
 kim2007statistical}. STMC applied to WL requires a temperature range be
@@ -224,7 +224,7 @@ the simulation
 	\ln{w_{t+1}(E)}=\ln{w_{t}(E)}
 	+\gamma_t
 \end{equation}
-where $t$ is number of the current move, \jpsays{$\gamma_t$} is an update factor
+where $t$ is number of the current move, $\gamma_t$ is an update factor
 that varies over the simulation, and $E$ is the current energy.  This update
 causes the random walk to avoid energies that have been frequently sampled,
 enabling a rapid exploration of energy space. This approach violates detailed
@@ -249,7 +249,7 @@ $\gamma^{\text{WL}}$ reaches a desired cutoff.
 
 The Wang-Landau approach thus has three parameters that need be
 specified: the factor by which to decrease $\gamma^{\text{WL}}$ when flatness is
-acheived, the flatness criterion, and the cutoff that determines when
+achieved, the flatness criterion, and the cutoff that determines when
 the computation is complete.  In addition, an energy range (or in
 general, a \emph{set} of energies) must be supplied, so that the
 flatness criterion can be defined.
@@ -264,13 +264,6 @@ decreased by a factor of two, when every energy state has been visited once,
 i.e. when the WL ``flatness'' becomes nonzero. Secondly, when
 $\gamma^{\text{WL}} < N_S/t$ at time $t_0$, the algorithm switches to use
 $\gamma_t = N_S/t$ for the remainder of the simulation:
-\jpsays{Michael prefers removing $t_0$ since he found it confusing with SAMC later.
-replace the formula with this:
-\begin{align}
-\gamma_t^{1/t\text{-WL}} = \min \left( \gamma_t^{WL}, N_S/t \right)
-\end{align}
-This has problems with not defining when all the states have been visited once!}
-
 \begin{align}
   \gamma_t^{1/t\text{-WL}} = \begin{cases}
      \gamma^{\text{WL}}_t & \gamma^{\text{WL}}_t > \frac{N_S}{t} \\
@@ -312,7 +305,7 @@ value~\cite{schneider2017convergence}.  We will describe below one case we
 examined, in which $t_0$ needs to be as much as two orders of magnitude higher
 than the rule of thumb of $100N_S$ in order to converge in $10^{12}$ moves.
 
-Werlich \emph{et al.} proposed scaling the SAMC \jpsays{$\gamma_t^{\text{SA}}$}
+Werlich \emph{et al.} proposed scaling the SAMC $\gamma_t^{\text{SA}}$
 by a factor $\gamma_0$~\cite{werlich2015stochastic}.  While this may result in
 an improved rate of convergence, it adds yet another parameter that must be
 empirically determined, and we have not explored this additional degree of
@@ -339,7 +332,7 @@ weights is determined by the total entropy change required.  We can estimate
 this number of moves required by summing the $\gamma_t$,
 which we can approximate using an integral:
 \begin{align}
-   \Delta S_{\text{tot}} &= \sum_{t=0}^{t_{\min}} \gamma_t^{SA} \\
+   \Delta S_{\text{tot}} &= \sum_{t=0}^{t_{\min}} \gamma_t^{\text{SA}} \\
   % &= \int_0^{t_{\min}} \gamma(t)dt \\
   &\approx t_0 + \int_{t_0}^{t_{\min}} \frac{t_0}{t}dt
   \\
@@ -354,16 +347,16 @@ as $t_0$ is made smaller.  You \emph{seriously} don't want to underestimate
 $t_0$!
 
 One might reasonably choose to err by selecting a large $t_0$. The rate of
-convergence is harder to estimate when $t_0$ is large, but in general $\gamma_t$
-itself forms a lower bound on the accuracy with which the entropy may be known,
-with an unknown prefactor which is related to the coherence time \jpsays{define
-coherence time!} of the Monte Carlo simulation.  Since $\gamma_t$ is given by
-$t_0/t$, the time to converge to a given accuracy is increased in proportion to
-the ratio by which we overestimate $t_0$.  Thus, while it is exponentially
-painful to underestimate $t_0$, overestimating by several orders of magnitude is
-also not acceptable.  We should note that these extreme limiting cases do not
-preclude the possibility that there is a wide range of $t_0$ values that lead to
-an acceptable convergence rate.
+convergence is harder to estimate when $t_0$ is large, but in general
+$\gamma_t^{\text{SA}}$ itself forms a lower bound on the accuracy with which the
+entropy may be known, with an unknown prefactor which is related to the
+coherence time ($t = t_0$) of the Monte Carlo simulation.  Since
+$\gamma_t^{\text{SA}}$ is given by $t_0/t$, the time to converge to a given
+accuracy is increased in proportion to the ratio by which we overestimate $t_0$.
+Thus, while it is exponentially painful to underestimate $t_0$, overestimating
+by several orders of magnitude is also not acceptable.  We should note that
+these extreme limiting cases do not preclude the possibility that there is a
+wide range of $t_0$ values that lead to an acceptable convergence rate.
 
 \section{SAD Algorithm}\label{sec:sad}
 The Stochastic Approximation with Dynamic update factor (SAD) method
@@ -383,17 +376,16 @@ an energy range of interest or the unphysical parameter $t_0$.
 
 We set the maximum temperature of interest as $T=\infty$ for several reasons.
 Firstly, when this temperature is reached, the system is maximally randomized.
-Allowing infinite temperature further ensures that the system can surmount
-\jpsays{an energy barrier of any size}.  Finally, the high temperatures are
-``easy'' to simulate, and tend to converge very quickly.  We note, however, that
-this is under the assumption that infinite temperature corresponds to a finite
-energy, as is the case for configurational sampling.  Were we to include kinetic
-energy in a simulation (as in molecular dynamics), or to examine a system such
-as a high density Lennard-Jones fluid \jpsays{with an entropy maximum at an
-energy that is far from the energy range of physical interest} which might have
-an energy of maximum entropy far from the energy range of physical interest,
-then we would need to apply a maximum temperature, which could slow down the
-rate at which state space is explored.
+Allowing infinite temperature further ensures that the system can surmount an
+energy barrier of any size.  Finally, the high temperatures are ``easy'' to
+simulate, and tend to converge very quickly.  We note, however, that this is
+under the assumption that infinite temperature corresponds to a finite energy,
+as is the case for configurational sampling.  Were we to include kinetic energy
+in a simulation (as in molecular dynamics), or to examine a system such as a
+high density Lennard-Jones fluid with an entropy maximum at an energy that is
+far from the energy range of physical interest, then we would need to apply a
+maximum temperature, which could slow down the rate at which state space is
+explored.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{N50-lndos-comparison}
@@ -426,9 +418,8 @@ of entropy required (starting from constant weights) to find the true
 entropy, and puts a lower bound on the convergence time. After
 \emph{long} times, when all the energies have been explored a long time ago, we
 wish for a lower update factor in order to more rapidly refine the
-remaining error in entropy.  We track the time at which we first visted
+remaining error in entropy.  We track the time at which we first visited
 each possible energy.  We define $t_L$ to be the last time that we
-\jpsays{Perlin asks: Did you mean to define $t_L$ as the last time you encountered a new energy of interest.}
 encountered an energy that we currently believe is in the energy range
 of interest, so a $t\gg t_L$ we feel confident that we have established
 the true energy range of interest. We gradually transition to a lower
@@ -613,7 +604,7 @@ $\lambda = 1.3$, and a volume corresponding to a filling fraction
 0.3$. The second system is larger, with a particle number of 256, a
 well-width of $\lambda = 1.5$, and a volume corresponding to a filling
 fraction of $\eta = 0.17$.  For each system we use a reasonable
-root-mean-square displacement distance \jpsays{what type gaussian?} $\delta_0 = 0.05\sigma$ for
+root-mean-square displacement distance $\delta_0 = 0.05\sigma$ for
 proposed moves, and for the smaller system we also use an unreasonably
 small displacement distance of $0.005\sigma$. The simulations explore
 the energy space of the systems with minimum reduced temperatures of
@@ -643,7 +634,7 @@ is chosen to be the final output of a SAMC simulation with a fixed energy range
 corresponding to the temperature range of interest.
 Although SAMC does not require an energy range as an input parameter,
 we find that by limiting the simulation to this energy range, we can
-acheive much faster convergence with a smaller $t_0$.  We compute an average
+achieve much faster convergence with a smaller $t_0$.  We compute an average
 of the error by averaging the error in the entropy over the
 interesting energy range, and then averaging \emph{this} error over several
 simulations run with different random number seeds.
@@ -770,7 +761,7 @@ the same as that of the $1/t$-WL method.
 %~ for the Wang-Landau algorithm decreases much more rapidly than
 %~ $\nicefrac{1}{t}$. It can be observed  for the simulations that
 %~ were carried out that all the methods
-%~ struggle to converge if the update factor decreases too rapidlly.
+%~ struggle to converge if the update factor decreases too rapidly.
 %~ Fig.~\ref{fig:n256} shows SAMC with inappropriate choices
 %~ of $t_0$ i.e. less than $\nicefrac{10^4}{\sqrt{t}}$ failing to converge
 %~ in a reasonable amount of time. Thus, the update factor $\gamma$, shown
@@ -805,7 +796,7 @@ We find that SAMC converges for a reasonable choice of
 $t_0$ but this parameter can be difficult to tune especially across
 significantly differing systems.  We find that even simple
 changes to the Monte Carlo moves can have a dramatic effect on the
-range of practical $t_0$ values.  Additionaly, SAMC does not
+range of practical $t_0$ values.  Additionally, SAMC does not
 converge as rapidly as either SAD or $1/t$-WL even for the best choice of $t_0$,
 when a relatively small range of energies is required, because it always
 simulates all possible energies.
