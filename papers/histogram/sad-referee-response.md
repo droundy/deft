@@ -31,10 +31,10 @@ histogram methods using a single physical system. Many of these papers only
 present the convergence properties of a single Monte Carlo method. In our case,
 we compare the convergence of *four* different methods, one of which (SAD) is an
 improvement on the existing algorithm (SAMC), on a single system (square well
-fluid).  We also note that this work is the only instance of a test of any flat
-histogram method to the square well fluid.  We agree that our method should be
-tested on additional different physical systems but dispute that this is
-necessary for the first paper introducing an improved method.
+fluid).  We also note that to our knowledge this work is the only instance of a
+test of any flat histogram method to the square well fluid.  We agree that our
+method should be tested on additional different physical systems but dispute
+that this is necessary for the first paper introducing an improved method.
 
 Secondly, the referee does not see much value in providing a temperature range
 (rather than an energy range) as input to the method.  We believe that a
@@ -61,7 +61,7 @@ mathematical generalization of WL). In fact, the referee does not seem to
 acknowledge *the existence of the SAMC method* which we find curious. The
 referee states that "the original WL paper does not specify a scheme for
 updating the update factor."  This is false.  Both of the 2001 WL papers specify
-the same scheme that is generally used in when the WL method is used (gamma
+the same scheme that is generally used for the WL method (the update factor
 drops by a factor of 2).  It is true that the papers do not *mandate* this
 schedule.  However, neither our method nor SAMC can be considered an
 implementation of the WL method, because the WL method *does* mandate that the
