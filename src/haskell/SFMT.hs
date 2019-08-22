@@ -51,7 +51,7 @@ n = "n" === r_var "x"
 n3 = "n3" === w3 n
 n2 = "n2" === w2 n
 n1 = "n1" === w1 n
-n0 = "n0" === 2/alpha*(2*n1 - n2/(2*pi*alpha))
+n0 = "n0" === w0 n
 
 n2v, n1v :: Vector RealSpace
 n2v = "n2v" `nameVector` w2v n
@@ -71,6 +71,11 @@ w1 :: Expression RealSpace -> Expression RealSpace
 w1 x = ifft ( w1k * fft x)
   where w1k = var "w1k" "\\tilde{w_1}(k)" $
               1/k*exp(-((xi/sqrt 2)*k/2)**2)*sin(k*alpha/2)
+
+w0 :: Expression RealSpace -> Expression RealSpace
+w0 x = ifft ( w0k * fft x)
+  where w0k = var "w0k" "\\tilde{w_0}(k)" $
+              (sqrt (pi/2)/(k*xi)) *exp(-0.5*alpha**2/xi**2)*scalar (real_part_complex_erf(k*xi/2/sqrt 2 + imaginary*alpha/sqrt 2/xi))
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)

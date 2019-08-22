@@ -120,6 +120,9 @@ for method in methods:
         if not os.path.exists('figs/s000'):
                 os.makedirs('figs/s000')
 
+        if not os.path.exists('figs/ising'):
+                os.makedirs('figs/ising')
+
         if filebase.startswith('lv'):
                 NxNsplit = filebase.split('-')
                 NxN = NxNsplit[-1].split('x')

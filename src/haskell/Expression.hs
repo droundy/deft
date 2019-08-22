@@ -1,7 +1,7 @@
 {-# LANGUAGE PatternGuards, Rank2Types #-}
 
 module Expression (Exprn(..),
-                   break_real_from_imag,
+                   real_part_complex_erf,
                    RealSpace(..), r_var, dV, dVscalar, dr,
                    rx, ry, rz, rmag, rvec,
                    lat1, lat2, lat3, rlat1, rlat2, rlat3, volume,
@@ -58,7 +58,8 @@ data KSpace = Delta | -- handy for FFT of homogeneous systems
               SphericalFourierTransform Symmetry (Expression Scalar) |
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
-data Scalar = Summate (Expression RealSpace)
+data Scalar = Summate (Expression RealSpace) |
+              RealPartComplexErf (Expression KSpace)
             deriving ( Eq, Ord, Show )
 
 data Vector a = Vector (Expression a) (Expression a) (Expression a)
@@ -87,7 +88,7 @@ xhat = Vector 1 0 0
 yhat = Vector 0 1 0
 zhat = Vector 0 0 1
 
-vector :: Type a => Expression a -> Expression a -> Expression a -> Vector a
+vector :: Expression a -> Expression a -> Expression a -> Vector a
 vector a b c = Vector a b c
 
 cross :: Type a => Vector a -> Vector a -> Vector a
@@ -587,7 +588,7 @@ cleanvars = mapExpression' helper
 
 cleanallvars :: Type a => Expression a -> Expression a
 cleanallvars = mapExpression' helper
-    where helper :: Type a => Expression a -> Expression a
+    where helper :: Expression a -> Expression a
           helper (Var IsTemp _ _ _ (Just e)) = e
           helper e = e
 
@@ -699,7 +700,9 @@ setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
   codePrec _ (Summate r) = showString "integrate(" . codePrec 0 r . showString ")"
+  codePrec _ (RealPartComplexErf a) = showString "Faddeeva::erf(" . codePrec 0 a . showString ").real()"
   latexPrec _ (Summate r) = showString "\\int " . latexPrec 0 r
+  latexPrec _ (RealPartComplexErf a) = showString "\\Re\\operatorname{erf}(" . latexPrec 0 a . showString ")"
 instance Type Scalar where
   s_var ("complex(0,1)") = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
@@ -708,8 +711,12 @@ instance Type Scalar where
   amScalar _ = True
   mkExprn = ES
   derivativeHelper v dds (Summate e) = derive v (scalar dds) e
+  derivativeHelper v dds (RealPartComplexErf e) = derive v (scalar dds*2/sqrt pi*exp(-e**2)) e
   scalarderivativeHelper v (Summate e) = summate (scalarderive v e)
+  scalarderivativeHelper v (RealPartComplexErf e) = 0 -- FIXME scalarderivativeHelper v (2/sqrt pi*exp(-e**2)) e
+
   zeroHelper v (Summate e) = summate (setZero v e)
+  zeroHelper v (RealPartComplexErf e) = real_part_complex_erf (setZero v e)
   codeStatementHelper a " = " (Var _ _ _ _ (Just e)) = codeStatementHelper a " = " e
   codeStatementHelper a " = " (Expression (Summate e)) =
     code a ++ " = 0;\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++
@@ -742,10 +749,14 @@ instance Type Scalar where
   initialize v = error ("bug in initialize Scalar: "++show v)
   newdeclare _ = "double"
   toScalar (Summate r) = makeHomogeneous (r/dV)
+  toScalar (RealPartComplexErf e) = real_part_complex_erf (scalar $ makeHomogeneous e)
   fromScalar = id
   mapExpressionHelper' f (Summate e) = summate (f e)
+  mapExpressionHelper' f (RealPartComplexErf e) = real_part_complex_erf (f e)
   subAndCountHelper x y (Summate e) = case subAndCount x y e of (e', n) -> (summate e', n)
+  subAndCountHelper x y (RealPartComplexErf e) = case subAndCount x y e of (e', n) -> (real_part_complex_erf e', n)
   searchHelper f (Summate e) = f e
+  searchHelper f (RealPartComplexErf e) = f e
   safeCoerce a _ = case mkExprn a of
                     ES a' -> Just a'
                     _ -> Nothing
@@ -888,6 +899,10 @@ complex :: Expression Scalar -> Expression Scalar -> Expression KSpace
 complex a b | b == 0 = scalar a
             | otherwise = Expression (Complex a b)
 
+real_part_complex_erf :: Expression KSpace -> Expression Scalar
+real_part_complex_erf a | a == 0 = 0
+                        | otherwise = Expression (RealPartComplexErf a)
+
 break_real_from_imag :: Expression KSpace -> Expression KSpace
 break_real_from_imag = brfi
   where brfi (Product p _) = handle 1 0 $ product2pairs p
@@ -908,7 +923,7 @@ break_real_from_imag = brfi
                            _ -> error "ceraziness"
         brfi (F f e) = case brfi e of
                          Expression (Complex r 0) -> Expression (Complex (function f r) 0)
-                         _ -> error ("cerazinesss in " ++ show f)
+                         xxx -> error ("cerazinesss in " ++ show f ++ "   " ++ show xxx)
         brfi (Var t _ b tex Nothing) = Expression $ Complex (Var t (b++"[i].real()") b tex Nothing)
                                                             (Var t (b++"[i].imag()") b tex Nothing)
         brfi (Var a b c d (Just e))
@@ -960,7 +975,7 @@ data Function = Heaviside | Cos | Sin | Erfi | Exp | Log | Erf | Abs | Signum
 data Exprn = EK (Expression KSpace) | ER (Expression RealSpace) | ES (Expression Scalar)
        deriving (Eq, Ord, Show)
 
-sum2pairs :: Type a => Map.Map (Expression a) Double -> [(Double, Expression a)]
+sum2pairs :: Map.Map (Expression a) Double -> [(Double, Expression a)]
 sum2pairs s = map rev $ Map.assocs s
   where rev (a,b) = (b,a)
 
@@ -984,7 +999,7 @@ map2sum s | Map.size s == 1 =
                       _ -> Sum s (Set.unions $ map varSet $ Map.keys s)
 map2sum s = Sum s (Set.unions $ map varSet $ Map.keys s)
 
-product2pairs :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2pairs :: Map.Map (Expression a) Double -> [(Expression a, Double)]
 product2pairs s = Map.assocs s
 
 -- map2sum converts a Map to a product.  It handles the case of a
@@ -1038,7 +1053,7 @@ product2numerator :: Type a => Map.Map (Expression a) Double -> [Expression a]
 product2numerator s = map f $ product2numerator_pairs s
   where f (a,b) = a ** (toExpression b)
 
-product2numerator_pairs :: Type a => Map.Map (Expression a) Double -> [(Expression a, Double)]
+product2numerator_pairs :: Map.Map (Expression a) Double -> [(Expression a, Double)]
 product2numerator_pairs s = filter ((>=0) . snd) $ product2pairs s
 
 product2denominator :: Type a => Map.Map (Expression a) Double -> Expression a
@@ -1477,6 +1492,7 @@ hasK e0 | EK e' <- mkExprn e0 = hask e'
         hask (Expression Ky) = True
         hask (Expression Kz) = True
         hask (Expression Delta) = False
+        hask (Expression (Complex (Expression (RealPartComplexErf a)) _)) = hasK a
         hask (Expression (Complex _ _)) = False
         hask (Expression (FFT _)) = False
         hask (Expression (SphericalFourierTransform _ _)) = False
