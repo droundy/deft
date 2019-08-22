@@ -306,9 +306,9 @@ instance Code KSpace where
   codePrec _ (FFT r) = showString "fft(gd, " . codePrec 0 (makeHomogeneous r) . showString ")"
   codePrec _ (SphericalFourierTransform s r) =
     showString ("transform(" ++ show s ++ ",") . codePrec 0 (makeHomogeneous r) . showString ")"
-  codePrec _ (Complex 0 1) = showString "std::complex(0,1)"
-  codePrec _ (Complex a b) = showString "std::complex(" . codePrec 0 a . showString ", " .
-                                                     codePrec 0 b . showString ")"
+  codePrec _ (Complex 0 1) = showString "std::complex<double>(0,1)"
+  codePrec _ (Complex a b) = showString "std::complex<double>(" . codePrec 0 a . showString ", " .
+                                                              codePrec 0 b . showString ")"
   latexPrec _ Kx = showString "k_{x}"
   latexPrec _ Ky = showString "k_{y}"
   latexPrec _ Kz = showString "k_{z}"
@@ -704,7 +704,7 @@ instance Code Scalar where
   latexPrec _ (Summate r) = showString "\\int " . latexPrec 0 r
   latexPrec _ (RealPartComplexErf a) = showString "\\Re\\operatorname{erf}(" . latexPrec 0 a . showString ")"
 instance Type Scalar where
-  s_var ("complex(0,1)") = Var CannotBeFreed "std::complex(0,1)" "std::complex(0,1)" "i" Nothing
+  s_var ("complex(0,1)") = Var CannotBeFreed "std::complex<double>(0,1)" "std::complex<double>(0,1)" "i" Nothing
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
   s_var v = Var CannotBeFreed v v (cleanTex v) Nothing
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
