@@ -700,7 +700,7 @@ setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
   codePrec _ (Summate r) = showString "integrate(" . codePrec 0 r . showString ")"
-  codePrec _ (RealPartComplexErf a) = showString "erf(" . codePrec 0 a . showString ").real()"
+  codePrec _ (RealPartComplexErf a) = showString "Faddeeva::erf(" . codePrec 0 a . showString ").real()"
   latexPrec _ (Summate r) = showString "\\int " . latexPrec 0 r
   latexPrec _ (RealPartComplexErf a) = showString "\\Re\\operatorname{erf}(" . latexPrec 0 a . showString ")"
 instance Type Scalar where

@@ -101,7 +101,7 @@ classCode ewithtransforms arg n = "class " ++ n ++ " : public FunctionalInterfac
       mktransforms _ (z:_) _ = error ("Not a transform: " ++ show z)
 
 generateHeader :: Expression RealSpace -> [String] -> String -> String
-generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n\n" ++
+generateHeader e arg n = "// -*- mode: C++; -*-\n\n#include \"MinimalFunctionals.h\"\n#include \"utilities.h\"\n#include \"handymath.h\"\n#include \"Faddeeva.hh\"\n\n" ++
                      classCode e arg (n ++ "_type") ++
                      "\n\nFunctional " ++ n ++"(" ++ codeA arg ++ ") {\n\treturn Functional(new " ++ n ++ "_type(" ++ codeA' arg ++ "), \"" ++ n ++ "\");\n}\n"
     where codeA [] = ""
