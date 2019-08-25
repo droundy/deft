@@ -75,7 +75,7 @@ w1 x = ifft ( w1k * fft x)
 w0 :: Expression RealSpace -> Expression RealSpace
 w0 x = ifft ( w0k * fft x)
   where w0k = var "w0k" "\\tilde{w_0}(k)" $
-              (sqrt (pi/2)/(k*xi)) *exp(-0.5*alpha**2/xi**2)*scalar (real_part_complex_erf(k*xi/2/sqrt 2 + imaginary*alpha/sqrt 2/xi))
+              (sqrt (pi/2)/(k*xi)) *exp(-0.5*alpha**2/xi**2)*(real_part_complex_erf(k*xi/2/sqrt 2 + imaginary*alpha/sqrt 2/xi))
 
 w2 :: Expression RealSpace -> Expression RealSpace
 w2 x = ifft ( w2k * fft x)
