@@ -37,12 +37,12 @@ for kT in [.01, .1, .2, .3, .4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5,
   
   if args.tensor :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT))) 
-    files = sorted(list(glob.glob('newdata_tensor/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
+    files = sorted(list(glob.glob('newdata_tensor/phase-diagram2/kT%.3f_n*_best_tensor.dat' % kT)))   #remove the "2" at the end of phase-diagram when done comparing new data
     #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
-    #files = sorted(list(glob.glob('newdata/phase-diagram/kT%.3f_n*_best.dat' % kT)))
-    files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
+    files = sorted(list(glob.glob('newdata/phase-diagram2/kT%.3f_n*_best.dat' % kT)))    #remove the "2" at the end of phase-diagram when done comparing new data
+    #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   for f in files:
       data = np.loadtxt(f)
       n.append(data[1])
