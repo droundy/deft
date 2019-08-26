@@ -41,7 +41,7 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
         cmd += ' --tensor'
     else:
         #cmd += ' --d data/phase-diagram'
-        cmd += ' --d newdata/phase-diagram'
+        cmd += ' --d newdata/phase-diagram2' #once new results are compared to the old, remove the "2" at the end of phase-diagram
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
