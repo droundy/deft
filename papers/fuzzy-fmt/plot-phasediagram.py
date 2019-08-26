@@ -45,10 +45,10 @@ for kT in np.arange(0.1, 2.05, 0.05):
 
    if args.tensor :
      #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
-     files = sorted(list(glob.glob('newdata_tensor/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
+     files = sorted(list(glob.glob('newdata_tensor/phase-diagram2/kT%.3f_n*_best_tensor.dat' % kT)))    #remove 2 at the end of phase-diagram when done comparing new data
      
    else :
-      files = sorted(list(glob.glob('newdata/phase-diagram/kT%.3f_n*_best.dat' % kT)))
+      files = sorted(list(glob.glob('newdata/phase-diagram2/kT%.3f_n*_best.dat' % kT)))    #remove 2 at the end of phase-diagram when done comparing new data
       #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
       #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
 
