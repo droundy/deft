@@ -56,10 +56,11 @@ data KSpace = Delta | -- handy for FFT of homogeneous systems
               Kx | Ky | Kz |
               SetKZeroValue (Expression KSpace) (Expression KSpace) |
               SphericalFourierTransform Symmetry (Expression Scalar) |
+              RealPartComplexErf (Expression KSpace) |
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 data Scalar = Summate (Expression RealSpace) |
-              RealPartComplexErf (Expression KSpace)
+              ScalarComplexErf (Expression KSpace)
             deriving ( Eq, Ord, Show )
 
 data Vector a = Vector (Expression a) (Expression a) (Expression a)
@@ -306,9 +307,10 @@ instance Code KSpace where
   codePrec _ (FFT r) = showString "fft(gd, " . codePrec 0 (makeHomogeneous r) . showString ")"
   codePrec _ (SphericalFourierTransform s r) =
     showString ("transform(" ++ show s ++ ",") . codePrec 0 (makeHomogeneous r) . showString ")"
-  codePrec _ (Complex 0 1) = showString "complex(0,1)"
-  codePrec _ (Complex a b) = showString "complex(" . codePrec 0 a . showString ", " .
-                                                     codePrec 0 b . showString ")"
+  codePrec _ (RealPartComplexErf a) = showString "Faddeeva::erf(" . codePrec 0 a . showString ").real()"
+  codePrec _ (Complex 0 1) = showString "std::complex<double>(0,1)"
+  codePrec _ (Complex a b) = showString "std::complex<double>(" . codePrec 0 a . showString ", " .
+                                                              codePrec 0 b . showString ")"
   latexPrec _ Kx = showString "k_{x}"
   latexPrec _ Ky = showString "k_{y}"
   latexPrec _ Kz = showString "k_{z}"
@@ -317,6 +319,7 @@ instance Code KSpace where
   latexPrec _ (FFT r) = showString "\\text{fft}\\left(" . latexPrec 0 r . showString "\\right)"
   latexPrec _ (SphericalFourierTransform s r) =
     showString ("\\mathcal{F}(" ++ show s ++ ",") . latexPrec 0 r . showString ")"
+  latexPrec _ (RealPartComplexErf a) = showString "\\Re\\operatorname{erf}(" . latexPrec 0 a . showString ")"
   latexPrec p (Complex a b) = latexPrec p (a + s_var "i" * b)
 instance Type KSpace where
   amKSpace _ = True
@@ -326,6 +329,7 @@ instance Type KSpace where
     if derive v 1 e == 0 || ddk == 0
     then 0
     else error "do not have an implementation for derivativeHelper of SphericalFourierTransform"
+  derivativeHelper v ddk (RealPartComplexErf e) = derive v (ddk*2/sqrt pi*exp(-e**2)) e
   derivativeHelper v ddk (SetKZeroValue _ e) = derive v (setkzero 0 ddk) e -- FIXME: how best to handle k=0 derivative?
   derivativeHelper _ _ Kx = 0
   derivativeHelper _ _ Ky = 0
@@ -335,6 +339,7 @@ instance Type KSpace where
                                          derive v (imag_part ddk) b
   scalarderivativeHelper v (FFT r) = fft (scalarderive v r)
   scalarderivativeHelper v (SphericalFourierTransform s e) = transform s (scalarderive v e)
+  scalarderivativeHelper v (RealPartComplexErf e) = (2/sqrt pi*exp(-e**2))*(scalarderive v e)
   scalarderivativeHelper v (SetKZeroValue z e) = setkzero (scalarderive v z) (scalarderive v e)
   scalarderivativeHelper v (Complex a b) = complex (scalarderive v a) (scalarderive v b)
   scalarderivativeHelper _ Kx = 0
@@ -343,6 +348,7 @@ instance Type KSpace where
   scalarderivativeHelper _ Delta = 0
   zeroHelper v (FFT r) = fft (setZero v r)
   zeroHelper v (SphericalFourierTransform s e) = transform s (setZero v e)
+  zeroHelper v (RealPartComplexErf e) = real_part_complex_erf (setZero v e)
   zeroHelper _ Kx = Expression Kx
   zeroHelper _ Ky = Expression Ky
   zeroHelper _ Kz = Expression Kz
@@ -446,15 +452,24 @@ instance Type KSpace where
   toScalar (SetKZeroValue val _) = makeHomogeneous val
   toScalar (FFT e) = makeHomogeneous e
   toScalar (SphericalFourierTransform _ _) = error "need to do spherical transform for toScalar, really need to just evaluate the FT once, and then make this resultingarray[0]"
+  toScalar (RealPartComplexErf e) =
+    mapExpression toScalar $ der*k
+    where ee = setZero (EK ky) $ setZero (EK kx) e
+          resid = setZero (EK kz) ee
+          residi = imag_part resid
+          residr = real_part resid
+          der = derive kz (2/sqrt pi*exp(scalar (residi**2 - residr**2))) ee
   toScalar (Complex a _) = a
   mapExpressionHelper' f (FFT e) = fft (f e)
   mapExpressionHelper' f (SphericalFourierTransform s e) = transform s (f e)
+  mapExpressionHelper' f (RealPartComplexErf e) = real_part_complex_erf (f e)
   mapExpressionHelper' f (Complex a b) = complex (f a) (f b)
   mapExpressionHelper' f (SetKZeroValue z v) = setkzero (f z) (f v)
   mapExpressionHelper' _ kk = Expression kk
   subAndCountHelper x y (FFT e) = case subAndCount x y e of (e', n) -> (fft e', n)
   subAndCountHelper x y (SphericalFourierTransform s e) =
              case subAndCount x y e of (e', n) -> (transform s e', n)
+  subAndCountHelper x y (RealPartComplexErf e) = case subAndCount x y e of (e', n) -> (real_part_complex_erf e', n)
   subAndCountHelper x y (SetKZeroValue z e) = (setkzero z' e', n1+n2)
         where (z',n1) = subAndCount x y z
               (e',n2) = subAndCount x y e
@@ -469,6 +484,7 @@ instance Type KSpace where
   searchHelper f (SphericalFourierTransform _ e) = f e
   searchHelper f (SetKZeroValue _ e) = f e
   searchHelper f (Complex a b) = myappend (f a) (f b)
+  searchHelper f (RealPartComplexErf e) = f e
   searchHelper _ Kx = myempty
   searchHelper _ Ky = myempty
   searchHelper _ Kz = myempty
@@ -700,23 +716,23 @@ setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
   codePrec _ (Summate r) = showString "integrate(" . codePrec 0 r . showString ")"
-  codePrec _ (RealPartComplexErf a) = showString "Faddeeva::erf(" . codePrec 0 a . showString ").real()"
+  codePrec _ (ScalarComplexErf e) = showString "Faddeeva::erf(" . codePrec 0 e . showString ").real()"
   latexPrec _ (Summate r) = showString "\\int " . latexPrec 0 r
-  latexPrec _ (RealPartComplexErf a) = showString "\\Re\\operatorname{erf}(" . latexPrec 0 a . showString ")"
+  latexPrec _ (ScalarComplexErf a) = showString "\\Re\\operatorname{erf}(" . latexPrec 0 a . showString ")"
 instance Type Scalar where
-  s_var ("complex(0,1)") = Var CannotBeFreed "complex(0,1)" "complex(0,1)" "i" Nothing
+  s_var ("complex(0,1)") = Var CannotBeFreed "std::complex<double>(0,1)" "std::complex<double>(0,1)" "i" Nothing
   s_var v@['d',_] = Var CannotBeFreed v v v Nothing -- for differentials
   s_var v = Var CannotBeFreed v v (cleanTex v) Nothing
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   amScalar _ = True
   mkExprn = ES
   derivativeHelper v dds (Summate e) = derive v (scalar dds) e
-  derivativeHelper v dds (RealPartComplexErf e) = derive v (scalar dds*2/sqrt pi*exp(-e**2)) e
+  derivativeHelper v dds (ScalarComplexErf e) = derive v (scalar dds*2/sqrt pi*exp(-e**2)) e
   scalarderivativeHelper v (Summate e) = summate (scalarderive v e)
-  scalarderivativeHelper v (RealPartComplexErf e) = 0 -- FIXME scalarderivativeHelper v (2/sqrt pi*exp(-e**2)) e
+  scalarderivativeHelper _ (ScalarComplexErf _) = 0 -- FIXME scalarderivativeHelper v (2/sqrt pi*exp(-e**2)) e
 
   zeroHelper v (Summate e) = summate (setZero v e)
-  zeroHelper v (RealPartComplexErf e) = real_part_complex_erf (setZero v e)
+  zeroHelper v (ScalarComplexErf e) = scalar_complex_erf (setZero v e)
   codeStatementHelper a " = " (Var _ _ _ _ (Just e)) = codeStatementHelper a " = " e
   codeStatementHelper a " = " (Expression (Summate e)) =
     code a ++ " = 0;\n\tfor (int i=0; i<gd.NxNyNz; i++) {\n\t\t" ++
@@ -749,14 +765,14 @@ instance Type Scalar where
   initialize v = error ("bug in initialize Scalar: "++show v)
   newdeclare _ = "double"
   toScalar (Summate r) = makeHomogeneous (r/dV)
-  toScalar (RealPartComplexErf e) = real_part_complex_erf (scalar $ makeHomogeneous e)
+  toScalar (ScalarComplexErf e) = toScalar (RealPartComplexErf e)
   fromScalar = id
   mapExpressionHelper' f (Summate e) = summate (f e)
-  mapExpressionHelper' f (RealPartComplexErf e) = real_part_complex_erf (f e)
+  mapExpressionHelper' f (ScalarComplexErf e) = scalar_complex_erf (f e)
   subAndCountHelper x y (Summate e) = case subAndCount x y e of (e', n) -> (summate e', n)
-  subAndCountHelper x y (RealPartComplexErf e) = case subAndCount x y e of (e', n) -> (real_part_complex_erf e', n)
+  subAndCountHelper x y (ScalarComplexErf e) = case subAndCount x y e of (e', n) -> (scalar_complex_erf e', n)
   searchHelper f (Summate e) = f e
-  searchHelper f (RealPartComplexErf e) = f e
+  searchHelper f (ScalarComplexErf e) = f e
   safeCoerce a _ = case mkExprn a of
                     ES a' -> Just a'
                     _ -> Nothing
@@ -899,9 +915,13 @@ complex :: Expression Scalar -> Expression Scalar -> Expression KSpace
 complex a b | b == 0 = scalar a
             | otherwise = Expression (Complex a b)
 
-real_part_complex_erf :: Expression KSpace -> Expression Scalar
+real_part_complex_erf :: Expression KSpace -> Expression KSpace
 real_part_complex_erf a | a == 0 = 0
                         | otherwise = Expression (RealPartComplexErf a)
+
+scalar_complex_erf :: Expression KSpace -> Expression Scalar
+scalar_complex_erf a | a == 0 = 0
+                     | otherwise = Expression (ScalarComplexErf a)
 
 break_real_from_imag :: Expression KSpace -> Expression KSpace
 break_real_from_imag = brfi
@@ -935,6 +955,7 @@ break_real_from_imag = brfi
         brfi (Expression Kz) = Expression $ Complex (s_var "k_i[2]") 0
         brfi (Scalar e) = Expression $ Complex e 0
         brfi (Expression (Complex a b)) = Expression (Complex a b)
+        brfi (Expression (RealPartComplexErf e)) = Expression (Complex (scalar_complex_erf e) 0)
         brfi e = error ("brfi doesn't handle " ++ show e)
 
 real_part :: Expression KSpace -> Expression Scalar
@@ -1492,7 +1513,7 @@ hasK e0 | EK e' <- mkExprn e0 = hask e'
         hask (Expression Ky) = True
         hask (Expression Kz) = True
         hask (Expression Delta) = False
-        hask (Expression (Complex (Expression (RealPartComplexErf a)) _)) = hasK a
+        hask (Expression (RealPartComplexErf a)) = hasK a
         hask (Expression (Complex _ _)) = False
         hask (Expression (FFT _)) = False
         hask (Expression (SphericalFourierTransform _ _)) = False
