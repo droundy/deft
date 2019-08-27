@@ -456,9 +456,10 @@ instance Type KSpace where
     mapExpression toScalar $ der*k
     where ee = setZero (EK ky) $ setZero (EK kx) e
           resid = setZero (EK kz) ee
-          residi = imag_part resid
-          residr = real_part resid
-          der = derive kz (2/sqrt pi*exp(scalar (residi**2 - residr**2))) ee
+          der = -- this is the derivative with respect to k of the argument evaluated at k=0
+            if real_part resid == 0
+            then derive kz (2/sqrt pi*exp(scalar (imag_part resid)**2)) ee
+            else error "the real part of a complex erf is hard to interpret if there is a real component when k=0"
   toScalar (Complex a _) = a
   mapExpressionHelper' f (FFT e) = fft (f e)
   mapExpressionHelper' f (SphericalFourierTransform s e) = transform s (f e)
