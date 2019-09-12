@@ -88,7 +88,9 @@ et.al~\cite{pommerenck2019stochastic} is a special version of the SAMC algorithm
 that dynamically chooses the modification factor rather than relying on system
 dependent parameters. SAD shares the same convergence properties with SAMC while
 replacing un-physical user-defined parameters with the algorithms dynamic
-choice.  In this work, we apply the family of weight-based flat histogram Monte
+choice.
+
+In this work, we apply the family of weight-based flat histogram Monte
 Carlo methods (WL, 1/t-WL, SAMC, SAD) to the 2D Ising model.
 
 \section{Ising Model}
@@ -98,7 +100,7 @@ methods~\cite{ferdinand1969bounded, wang1999transition, trebst2004optimizing}. T
 phase transition behavior and the ability to directly calculate the
 exact solution for finite lattices~\cite{beale1996exact} make the
 system sufficiently interesting for such theoretical comparisons. It is
-also of important note that direct comparison of the other methods can
+also important to note that direct comparison of the other methods can
 be made with WL as its original implementation was done on this
 system~\cite{wang2001determining,wang2001efficient}.
 We test the convergence of several flat histogram methods
@@ -108,19 +110,19 @@ neighbor interactions~\cite{landau2004new}.
 \mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j - h \sum_i s_i
 \end{align}
 The $N\times N$ spin system can take on values of $\sigma_i = \pm 1$
-for up or down spins respectively. In the infinite volume limit ($h =
+for up or down spins respectively. In the absence of a magnetic field ($h =
 0$), We can write the Hamiltonian as follows~\cite{onsager1944crystal,
 kaufman1949crystal}:
 \begin{align}
 \mathcal{H} = -\sum_{\braket{i,j}} \sigma_i \sigma_j
 \end{align}
-where the sum is over all enumerated spin sites. Beale showed that for finite
+where the sum is over nearest neighbor spin sites. Beale showed that for finite
 lattices the Density of States could directly be calculated from the partition
 function~\cite{beale1996exact}
 \begin{align}
 Z = \sum_E g(E) e^{-{\beta E}}
 \end{align}
-where $g(E)$ is the multiplicity of the system which is identical to
+where $g(E)$ is the multiplicity of the system which is proportional to
 $D(E)$. We can estimate the average deviation from the exact solution
 using the relation~\cite{schneider2017convergence, shakirov2018convergence,
 barash2017control}:
@@ -322,6 +324,11 @@ space of the systems with minimum reduced temperatures of $T_{\text{min}} = 1$
 for simulations All simulations lead to the minimum important energy $E_{\min}$
 and maximum entropy energy $E_{\max}$ being calculated (with the exception of
 the WL methods where both of these parameters are needed a priori).
+
+\davidsays{The results feel a bit slim.  I wonder whether we can look
+  at the heat capacity also? Or perhaps there is a way that we can see
+  something ``interesting'' arise out of the computation? I also
+  wonder if we can run longer and get a bit more accuracy.}
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{figs/ising/gamma-n32.pdf}

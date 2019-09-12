@@ -13,8 +13,8 @@ plt.figure(figsize=(5,4))
 
 try:
     for wl in glob.glob("data/gamma/ising/%s/*wl*.txt" % filename):
-        print "in wl"
-        print 'vanilla_wang_landau'+ '-is' + wl[len("data/gamma/ising/%s/wl" % filename):-4]
+        print("in wl")
+        print('vanilla_wang_landau'+ '-is' + wl[len("data/gamma/ising/%s/wl" % filename):-4])
         wlmoves, wlfactor = np.loadtxt(wl, dtype = float, unpack = True)
         data = np.loadtxt(wl)
         moves = data[:,0]
@@ -41,7 +41,7 @@ except:
 try:
     for sad in glob.glob("data/gamma/ising/%s/*sad*.dat" % filename):
         data = np.loadtxt(sad)
-        print data.shape
+        print(data.shape)
         if data.shape[1] > 2: # i.e. we are not using parse-yaml-out.py
             num_sad_states = data[:,0]
             time = data[:,1]
@@ -49,7 +49,7 @@ try:
             elo = data[:,3]
             ts = np.exp(np.linspace(0, np.log(max(time)*1e4), 2000))
             gamma = np.zeros_like(ts)
-            print sad, time
+            print(sad, time)
             for j in range(len(time)):
                 for i in range(len(gamma)):
                     if ts[i] > time[j]:
