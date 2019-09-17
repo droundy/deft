@@ -17,6 +17,9 @@
 \newcommand{\kk}{\textbf{k}}
 \newcommand{\refnote}{\red{[ref]}}
 
+\newcommand\davidsays[1]{{\bf \color{blue}D: #1}}
+\newcommand\kirstiesays[1]{{\bf \color{red}K: #1}}
+
 \newcommand{\fixme}[1]{\red{[#1]}}
 
 \begin{document}
@@ -43,6 +46,24 @@
 \end{abstract}
 
 \maketitle
+
+\subsection{\kirstiesays{Kirstie to-do list}}
+\begin{enumerate}
+\item Use tensor functional in src/haskell/SFMT.hs (for walls and
+  radial distribution function).
+\item Document all the Fourier transforms we are using.
+\item Find new expressions for alpha and Xi based on virial expansion.
+\item Edit paper to describe/use tensor functional.
+\item Add Kirstie to author list of paper.
+\item Write up section on freezing with figures.
+\item Decide which equation of state figure to use. (And make pretty.)
+\item Touch up the freezing figures.
+\end{enumerate}
+
+\subsection{Meeting to-do list}
+\begin{enumerate}
+\item Look together at Haskell tensor stuff.
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
 \section{Introduction}
@@ -122,7 +143,7 @@ with integrands
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\mbox{~\scriptsize\textbullet~}\mathbf{n}_{V2}}{1-n_3} \\
 \Phi_3 &= \frac{n_2^3 - 3
-  n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{24\pi(1-n_3)^2} \text{FIXME FIXME FIXME}
+  n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{24\pi(1-n_3)^2} \text{\davidsays{FIXME}}
 \label{eq:sfmt-phi3}
 \end{align}
 which is derived using dimensional crossover from the exact free energy
