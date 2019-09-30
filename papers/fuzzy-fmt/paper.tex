@@ -58,6 +58,19 @@
 \item Write up section on freezing with figures.
 \item Decide which equation of state figure to use. (And make pretty.)
 \item Touch up the freezing figures.
+\item Work out how tensor weight in Fourier space relates to the tensor density.
+  \begin{align}
+    n_{m2ij}(\vec r) &= \int n(\vec r') w_{m2ij}(\vec r- \vec r')d\vec r' \\
+    w_{m2ij}(\vec r) &= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\\
+    n_{m2ij}(\vec r) &= \int n(\vec r') d\vec r' \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')} \\
+    &= \int d\vec r' \left(\frac1{2\pi}\int d\vec k' n(\vec k')e^{i\vec k'\cdot \vec r'}\right) \left(\frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')}\right) \\
+    &=  \frac1{2\pi}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)
+    e^{i\vec k\cdot \vec r}\left(\frac1{2\pi}\int d\vec r'e^{i(\vec k'-\vec k)\cdot \vec r'}\right)
+    \\
+    &= \frac1{2\pi}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\delta(\vec k'-\vec k)
+    \\
+    &= \frac1{2\pi}\int d\vec k\, n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
+  \end{align}
 \end{enumerate}
 
 \subsection{Meeting to-do list}

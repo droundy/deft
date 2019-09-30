@@ -90,3 +90,12 @@ w2v x = vector_convolve w2vk x
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vector_convolve w1vk x
   where w1vk = kvec *. (imaginary * exp(-((xi/sqrt 2)*k/2)**2)*(alpha/2*cos(k*alpha/2)-((xi/sqrt 2)**2*k/2+1/k)*sin(k*alpha/2))/k**2)
+
+w2xx :: Expression RealSpace -> Expression RealSpace
+w2xx x = ifft ( w2xxk * fft x)
+  where w2xxk = var "w2xxk" "\\tilde{w_{2xx}}(k)" $
+              (4*pi*exp(-(xi*k)**2/8)*((xi/sqrt 2/k/3 - 1/k**2)*cos(k*alpha/2) + xi*alpha/(12*sqrt 2)*sin(k*alpha/2))
+                +
+                (2*pi)**(3/2)/k**3/xi*exp(-alpha**2/2/xi**2)*
+                2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/sqrt 2/xi)
+              )
