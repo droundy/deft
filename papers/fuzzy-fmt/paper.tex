@@ -142,8 +142,7 @@ with integrands
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\mbox{~\scriptsize\textbullet~}\mathbf{n}_{V2}}{1-n_3} \\
-\Phi_3 &= \frac{n_2^3 - 3
-  n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}}{24\pi(1-n_3)^2} \text{\davidsays{FIXME}}
+\Phi_3 &= \frac{{n_2}^3-3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}+\frac{9}{2}[\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}\\
 \label{eq:sfmt-phi3}
 \end{align}
 which is derived using dimensional crossover from the exact free energy
@@ -170,6 +169,10 @@ step function.  The weighting functions are related by
   \mathbf{w}_{V1} &= w_1\frac{\textbf{r}}{r}
   \label{eq:n-vectors}
 \end{align}
+\begin{equation}
+  \overleftrightarrow{w}_{m2} = w_2(r)\left(\frac{\mathbf{rr}}{r^2}-\frac{I}{3}\right)
+  \label{eq:n-tensor}
+\end{equation}
 \begin{equation}
    w_3(r) = \int_{r}^{\infty} w_2(r') dr',
   \label{eq:n-3}
@@ -208,12 +211,12 @@ applicable to energetic interactions such as dominate the repulsion
 between molecules.
 
 In this paper, we will make use of the \emph{error function model} (or
-\emph{erf model}) introduced by Schmidt in
+\emph{erf model}) introduced by Schmidt in 
 Ref.~\citenum{schmidt2000fluid}, which is a analytically simple
 functional form.  The erf model corresponds to a Gaussian form for the
 weighting function $w_2$:
 \begin{align}
-  w_2(r) &= \frac{1}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\Xi^2}}
+  w_2(r) &= \frac{\sqrt{2}}{\Xi \sqrt{\pi}} e^{-\left( \frac{r-\alpha/2}{\frac{\Xi}{\sqrt{2}}} \right)^2}
   \label{eq:gaussianw2}
 \end{align}
 where $\Xi$ and $\alpha$ are parameters with dimensions of length.
@@ -221,11 +224,11 @@ This choice for $w_2$ results in forms containing an error function
 for the $w_3$ weighting function, the Mayer $f$ function, and the pair
 potential:
 \begin{align}
-  w_3(r) &= \tfrac12 \left( 1 - \mathrm{erf}\left(\frac{r-\alpha/2}{\Xi}\right) \right) \\
-  f(r) &= \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right)
+  w_3(r) &= \tfrac12 \left( 1 - \mathrm{erf}\left(\frac{r-\alpha/2}{\frac{\Xi}{\sqrt{2}}}\right) \right) \\
+  f(r) &= \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\frac{\Xi}{\sqrt{2}}} \right) - 1 \right)
   \label{eq:mayer-approx} \\
   \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
-    \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
+    \alpha}{\frac{\Xi}{\sqrt{2}}} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
 The erf potential is shown in Fig.~\ref{fig:potential-plot}, and the
 first derivative of the Mayer $f$ function corresponding to this
