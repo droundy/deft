@@ -18,13 +18,13 @@ e, lndos = readnew.e_lndos(fname)
 
 emax = 108
 emin = -32770
-Tmin = 1
-eminimportant = -32774
-eSmax = -5000
-Smin = -11000
+Tmin = 1.5
+eminimportant = -32770
+eSmax = 0
+Smin = -11326
 Sminimportant = -11000
 #Sminimportant = 0
-#plt.plot(e, (e - eminimportant)/.2 + Sminimportant - Smin, 'r:')
+plt.plot(e, (e - eminimportant)/.2 + Sminimportant - Smin, 'r:')
 
 
 ei = np.arange(eminimportant, eSmax, 0.1)
