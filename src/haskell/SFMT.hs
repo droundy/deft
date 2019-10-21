@@ -17,7 +17,11 @@ phi2 = var "phi2" "\\Phi_2" $ integrate $ kT*(n2*n1 - n1v_dot_n2v)/(1-n3)
 -- phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*(n2**3/3 - sqr_n2v*n2)/(8*pi*(1-n3)**2)
 
 -- This is the fixed version, which comes from dimensional crossover
-phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*n2**3*(1 - sqr_n2v/n2**2)**3/(24*pi*(1-n3)**2)
+-- phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*n2**3*(1 - sqr_n2v/n2**2)**3/(24*pi*(1-n3)**2) + n2xx
+
+-- This is the tensor version
+phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*(n2**3 - 3*sqr_n2v*n2 +
+                                              9/2*(tensor_vector - trace_tensor_cubed))
 
 sfmt :: Expression Scalar
 sfmt = var "sfmt" "F_{\\text{soft}}" $ (phi1 + phi2 + phi3)
@@ -52,6 +56,33 @@ n3 = "n3" === w3 n
 n2 = "n2" === w2 n
 n1 = "n1" === w1 n
 n0 = "n0" === w0 n
+
+n2xx = "n2xx" === ifft ( w2transverse * (1 - 3*kx**2) * fft n)
+n2yy = "n2yy" === ifft ( w2transverse * (1 - 3*ky**2) * fft n)
+n2zz = "n2zz" === ifft ( w2transverse * (1 - 3*kz**2) * fft n)
+n2xy = "n2xy" === ifft ( w2transverse * (3*kx*ky) * fft n)
+n2yz = "n2yz" === ifft ( w2transverse * (3*ky*kz) * fft n)
+n2zx = "n2zx" === ifft ( w2transverse * (3*kz*kx) * fft n)
+
+tensor_vector = var "tensor_vector" "n_{2v}\\cdot n_{2m}\\cdot n_{2v}"
+    (n2xx*n2x*n2x + n2yy*n2y*n2y + n2zz*n2z*n2z +
+      2*n2xy*n2x*n2y + 2*n2yz*n2y*n2z + 2*n2zx*n2z*n2x)
+  where n2x = xhat `dot` n2v
+        n2y = yhat `dot` n2v
+        n2z = zhat `dot` n2v
+
+trace_tensor_cubed = var "trace_tensor_cubed" "\\mathrm{Tr}(n_{2m}^3)"
+     (n2xx*n2xx*n2xx +   -- xx xx xx
+       n2yy*n2yy*n2yy +   -- yy yy yy
+       n2zz*n2zz*n2zz +   -- zz zz zz
+       3*n2xx*n2xy*n2xy + -- xx xy yx three places to put xx
+       3*n2xx*n2zx*n2zx + -- xx xz zx three places to put xx
+       3*n2xy*n2yy*n2xy + -- xy yy yx three places to put yy
+       3*n2yy*n2yz*n2yz + -- yy yz zy three places to put yy
+       3*n2zx*n2zz*n2zx + -- xz zz zx three places to put zz
+       3*n2yz*n2zz*n2yz + -- yz zz zy three places to put zz
+       3*n2xy*n2yz*n2zx + -- xy yz zx three cyclic permutations
+       3*n2zx*n2yz*n2xy)  -- xz zy yx == the above, but these are the non-cyclic permutations
 
 n2v, n1v :: Vector RealSpace
 n2v = "n2v" `nameVector` w2v n
@@ -91,11 +122,10 @@ w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vector_convolve w1vk x
   where w1vk = kvec *. (imaginary * exp(-((xi/sqrt 2)*k/2)**2)*(alpha/2*cos(k*alpha/2)-((xi/sqrt 2)**2*k/2+1/k)*sin(k*alpha/2))/k**2)
 
-w2xx :: Expression RealSpace -> Expression RealSpace
-w2xx x = ifft ( w2xxk * fft x)
-  where w2xxk = var "w2xxk" "\\tilde{w_{2xx}}(k)" $
-              (4*pi*exp(-(xi*k)**2/8)*((xi/sqrt 2/k/3 - 1/k**2)*cos(k*alpha/2) + xi*alpha/(12*sqrt 2)*sin(k*alpha/2))
+w2transverse :: Expression KSpace
+w2transverse = var "w2transversek" "\\tilde{w_{2\\perp}}(k)" $
+               (4*pi*exp(-(xi*k)**2/8)*((xi/sqrt 2/k/3 - 1/k**2)*cos(k*alpha/2) + xi*alpha/(12*sqrt 2)*sin(k*alpha/2))
                 +
-                (2*pi)**(3/2)/k**3/xi*exp(-alpha**2/2/xi**2)*
-                2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/sqrt 2/xi)
-              )
+                 (2*pi)**(3/2)/k**3/xi*exp(-alpha**2/2/xi**2)*
+                 2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/sqrt 2/xi)
+               )
