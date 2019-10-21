@@ -90,15 +90,15 @@ def label_line(line, label_text, near_i=None, near_x=None, near_y=None, rotation
 
     x = line.get_xdata()
     y = line.get_ydata()
-    ax = line.get_axes()
-    if ax.get_xscale() == 'log':
-        sx = np.log10(x)    # screen space
-    else:
-        sx = x
-    if ax.get_yscale() == 'log':
-        sy = np.log10(y)
-    else:
-        sy = y/50.0
+    # ax = line.get_axes()
+    # if ax.get_xscale() == 'log':
+    #     sx = np.log10(x)    # screen space
+    # else:
+    sx = x
+    # if ax.get_yscale() == 'log':
+    #     sy = np.log10(y)
+    # else:
+    sy = y/50.0
 
     # find index
     if near_i is not None:
