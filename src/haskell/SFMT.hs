@@ -123,8 +123,8 @@ w1v x = vector_convolve w1vk x
   where w1vk = kvec *. (imaginary * exp(-((xi/sqrt 2)*k/2)**2)*(alpha/2*cos(k*alpha/2)-((xi/sqrt 2)**2*k/2+1/k)*sin(k*alpha/2))/k**2)
 
 w2transverse :: Expression KSpace
-w2transverse = var "w2transversek" "\\tilde{w_{2\\perp}}(k)" $
-               (4*pi*exp(-(xi*k)**2/8)*((xi/sqrt 2/k/3 - 1/k**2)*cos(k*alpha/2) + xi*alpha/(12*sqrt 2)*sin(k*alpha/2))
+w2transverse = -- var "w2transversek" "k^2\\tilde{w_{2\\perp}}(k)" $
+               k**2*(4*pi*exp(-(xi*k)**2/8)*((xi/sqrt 2/k/3 - 1/k**2)*cos(k*alpha/2) + xi*alpha/(12*sqrt 2)*sin(k*alpha/2))
                 +
                  (2*pi)**(3/2)/k**3/xi*exp(-alpha**2/2/xi**2)*
                  2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/sqrt 2/xi)
