@@ -88,8 +88,8 @@ T_ch=[]
 B2_WCA_ch=[]
 B2_erf_ch=[]
 
-pXi=0.01
-for KbT in np.arange(0.05, 200, 0.05):
+pXi=0.171
+for KbT in np.arange(0.05, 300, 0.15):
     B2_erf_at_T=quad(B2_erf_integrand, 0, np.inf, args=(KbT, pXi))
     B2_WCA_at_T=quad(B2_WCA_integrand, 0, 2/1.781797435, args=(KbT))
     B2_erf_ch.append(B2_erf_at_T[0])
@@ -97,8 +97,10 @@ for KbT in np.arange(0.05, 200, 0.05):
     T_ch.append(KbT)
     
 #plot B2 vs T
-plt.plot(T_ch, B2_WCA_ch, label = 'B2_WCA_ch')
-plt.plot(T_ch, B2_erf_ch, label = 'B2_erf_ch')
+# plt.plot(T_ch, B2_WCA_ch, label = 'B2_WCA_ch')
+# plt.plot(T_ch, B2_erf_ch, label = 'B2_erf_ch')
+plt.plot(T_ch, np.array(B2_erf_ch)-np.array(B2_WCA_ch), label = 'B2_WCA_ch')
+plt.axhline(0)
 plt.xlabel('KbT')
 plt.ylabel('B2')
 plt.title('B2 vs T at Xi=%g' % (pXi))
