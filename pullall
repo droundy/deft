@@ -6,10 +6,7 @@ repos = ['/home/droundy/git/deft.git',
          '/home/jordan/deft',
          '/home/kirstie/git/deft.git',
          '/home/kirstie/deft',
-         '/home/lincoln/deft',
-         '/home/tysonf/git/deft.git',
-         '/home/cadetrotter/git/deft',
-         '/home/cadetrotter/deft']
+]
 
 for repo in repos:
     os.system('git pull {} :'.format(repo))

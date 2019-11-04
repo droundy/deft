@@ -30,19 +30,14 @@ mkdats = """
 
   papers/fuzzy-fmt/figs/homogeneous
   papers/fuzzy-fmt/figs/homogeneous-bh
-  papers/fuzzy-fmt/figs/radial-wca
-  papers/fuzzy-fmt/figs/radial-lj
   papers/fuzzy-fmt/figs/new-radial-lj
   papers/fuzzy-fmt/figs/new-radial-wca
   papers/fuzzy-fmt/figs/new-bh-radial-wca
-  papers/fuzzy-fmt/figs/soft-wall
   papers/fuzzy-fmt/figs/new-soft-wall
   papers/fuzzy-fmt/figs/new-melting
-  papers/fuzzy-fmt/figs/walls
   papers/fuzzy-fmt/figs/new-walls
   papers/fuzzy-fmt/figs/new-bh-walls
   papers/fuzzy-fmt/figs/new-bh-soft-walls
-  papers/fuzzy-fmt/figs/soft-sphere
 
   papers/square-well-fluid/figs/new-radial-sw
   papers/square-well-fluid/figs/homogeneous
