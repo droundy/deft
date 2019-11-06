@@ -42,7 +42,7 @@ double f_erf(double r, double T, double xi){   //erf mayer function
     return (0.5)*(erf((r-alpha(T))/(xi/sqrt(2)))-1);
 }
 
-double B2_erf(double T, double xi) {    //This also *appears* to be working! matched David's program at T=0.1
+double B2_erf(double T, double xi) {    //This also appears to be working! matched David's program at T=0.1
     long i=0;
     long num_points =10000;
     double r;
@@ -56,7 +56,7 @@ double B2_erf(double T, double xi) {    //This also *appears* to be working! mat
 }
 
 
-double find_Xi(double T) {      //not working yet...xi values are not matching David's program, but does match my python program
+double find_Xi(double T) {      //OK, matches my program ... fix sqrt(2) in David's for integral solution
     double B2wca = B2_wca(T);
     double xi_lo = 0;
     double xi_hi = 1;
