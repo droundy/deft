@@ -41,12 +41,12 @@ def B2_erf(T, Xi):
     return quad(B2_erf_integrand, 0, np.inf, args=(T, Xi))
 
 def find_Xi(T):
-    B2wca = B2_wca(KbT)
+    B2wca = B2_wca(KbT)[0]
     xi_lo = 0
     xi_hi = 1
     while xi_hi - xi_lo > 0.000001:
         xi_mid = 0.5*(xi_hi + xi_lo)
-        if B2_erf(T, xi_mid) > B2wca:
+        if B2_erf(T, xi_mid)[0] > B2wca:
             xi_hi = xi_mid
         else:
             xi_lo = xi_mid
@@ -55,17 +55,16 @@ def find_Xi(T):
 T = np.linspace(0.2575, 10, 100)
 for KbT in T:
 
-    B2_WCA_at_T = B2_wca(KbT)
+    B2_WCA_at_T = B2_wca(KbT)[0]
     
     Xi_at_T = find_Xi(KbT)
                     
     #print "B2_diff=", B2_diff, "Xi_at_T=", Xi_at_T, "KbT=", KbT
     Xi.append(Xi_at_T)
-    B2_erf_list.append(B2_erf(KbT, Xi_at_T))
+    B2_erf_list.append(B2_erf(KbT, Xi_at_T)[0])
     B2_WCA_list.append(B2_WCA_at_T)
     print(KbT, Xi_at_T)
-    
-    
+   
 #Plot B2_WCA vs T
 plt.plot(T, B2_WCA_list, label = 'B2_WCA')
 plt.plot(T, B2_erf_list, label = 'B2_erf')
@@ -90,7 +89,6 @@ plt.legend()
 
 plt.show()
 
-print('B2wca at T=0.5 is', B2_wca(0.5)[0])  #FIX: not reporting the correct value! should be 2.35668
 
 # #-----CHECK--------------------
 # T_ch=[]
