@@ -90,7 +90,7 @@ plt.legend()
 
 plt.show()
 
-print('B2wca at T=0.5 is', B2_wca(0.5)[0])
+print('B2wca at T=0.5 is', B2_wca(0.5)[0])  #FIX: not reporting the correct value! should be 2.35668
 
 # #-----CHECK--------------------
 # T_ch=[]
