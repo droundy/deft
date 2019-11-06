@@ -16,13 +16,13 @@ epsilon=1
 sigma=1
 
 PI=np.pi
-T=[]
+#T=[]
 Xi=[]
-B2_WCA=[]
+B2_WCA_list=[]
 B2_erf_list=[]
 
 def alpha(KbT) :
-    return np.cbrt(np.sqrt((2.0/(1+np.sqrt(KbT*np.log(2))))))
+    return pow(np.sqrt((2.0/(1+np.sqrt(KbT*np.log(2))))), 1.0/3)
 
 def B2_WCA_integrand(r, KbT) :
     V_WCA=4*(pow(r,-12) - pow(r,-6)) +1
@@ -34,14 +34,11 @@ def B2_erf_integrand(r, KbT, pXi) :
     return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
 
 def B2_wca(T):
-    upper_limit=2.0*sigma*pow(2,-5.0/6)
+    upper_limit=sigma*pow(2,1.0/6)
     return quad(B2_WCA_integrand, 0, upper_limit, args=(KbT))  #integrate from 0 to less than 2R
 
 def B2_erf(T, Xi):
     return quad(B2_erf_integrand, 0, np.inf, args=(T, Xi))
-
-upper_limit=2.0*sigma*pow(2,-5.0/6)   #integrate from 0 to less than 2R  where R=sigma*2^(-5/6)   FIX?
-print(upper_limit)
 
 def find_Xi(T):
     B2wca = B2_wca(KbT)
@@ -65,19 +62,19 @@ for KbT in T:
     #print "B2_diff=", B2_diff, "Xi_at_T=", Xi_at_T, "KbT=", KbT
     Xi.append(Xi_at_T)
     B2_erf_list.append(B2_erf(KbT, Xi_at_T))
-    B2_WCA.append(B2_WCA_at_T)
+    B2_WCA_list.append(B2_WCA_at_T)
     print(KbT, Xi_at_T)
     
     
-# #Plot B2_WCA vs T
-# plt.plot(T, B2_WCA, label = 'B2_WCA')
-# plt.plot(T, B2_erf_list, label = 'B2_erf')
-# plt.xlabel('KbT')
-# plt.ylabel('B2')
-# plt.title('B2 vs Temp')
-# plt.legend()
+#Plot B2_WCA vs T
+plt.plot(T, B2_WCA_list, label = 'B2_WCA')
+plt.plot(T, B2_erf_list, label = 'B2_erf')
+plt.xlabel('KbT')
+plt.ylabel('B2')
+plt.title('B2 vs Temp')
+plt.legend()
 
-# plt.figure()
+plt.figure()
 
 alpha=np.cbrt(np.sqrt((2/(1+np.sqrt(T*np.log(2))))))
 Xi_old = alpha/(6*np.sqrt(np.pi)*(np.sqrt(np.log(2)/T) + np.log(2)))
@@ -85,14 +82,14 @@ Xi_old = alpha/(6*np.sqrt(np.pi)*(np.sqrt(np.log(2)/T) + np.log(2)))
 ##Plot xi
 plt.plot(T, Xi, label = 'Xi')
 plt.plot(T, Xi_old, label='Krebs')
-plt.plot(T, (0.09**2*(T-0.2575))**(1/2), label='crazy fit')
+#plt.plot(T, (0.09**2*(T-0.2575))**(1/2), label='crazy fit')
 plt.xlabel('KbT')
 plt.ylabel('Xi')
 plt.title('Xi vs Temp')
 plt.legend()
 
-plt.show()       
-        
+plt.show()
+
 print('B2wca at T=0.5 is', B2_wca(0.5)[0])
 
 # #-----CHECK--------------------
