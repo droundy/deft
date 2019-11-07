@@ -59,17 +59,19 @@ for fname in fnames:
         CV = heat_capacity(T, Ebest, Sbest)
 
     cv_error = []
+    cv_max_error = []
     for t in range(len(my_entropy[:,0])):
         mycv = heat_capacity(T, my_energy, my_entropy[t,:])
 
         err = 0
         norm = 0
-        for j in range(1, len(T)):
+        for j in range(1, len(mycv)):
             err += abs(CV[j]-mycv[j])
-            norm += 1
+            norm += 1.0
         cv_error.append(err/norm)
+        cv_max_error.append(abs(CV-mycv).max())
 
     np.savetxt(datadir+os.path.basename(fname)+'-cv-error.txt',
-               np.array([time, cv_error]).transpose(),
+               np.array([time, cv_error, cv_max_error]).transpose(),
                fmt='%.3g', # low resolution is good enough for error data.
     );

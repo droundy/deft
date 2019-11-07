@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
         filename_filter = sys.argv[1]
 
 fnames = [
-    'tiny-lj-benchmark-0.001',
+    # 'tiny-lj-benchmark-0.001',
 
     'lj-wl-31-bin001',
     'lj-wl-31-bin002',
@@ -58,15 +58,15 @@ for i in np.arange(-8, 19, 1.0):
 for fname in fnames:
         method = fname # FIXME
         data = np.loadtxt(datadir+fname+'-cv-error.txt')
-        colors.loglog(data[:,0], data[:,1], method=method)
+        colors.loglog(data[:,0], data[:,2], method=method)
 
 plt.title(r'$\Delta E = 0.001\epsilon$')
 
 plt.xlabel(r'$\textrm{Moves}$')
-plt.ylabel(r'$\textrm{Average Error in }C_V$')
+plt.ylabel(r'$\textrm{Maximum Error in }C_V$')
 
-plt.xlim(1e7, 1e12)
-plt.ylim(1e-2,2e2)
+plt.xlim(1e7, 2e12)
+plt.ylim(3e-1,4e3)
 
 colors.legend()
 plt.tight_layout()
