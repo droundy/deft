@@ -32,6 +32,7 @@ Factor
   Corvallis, OR 97331}
 
 \begin{abstract}
+  \jpsays{edit to include LJ clusters}
   We present a new Monte Carlo algorithm based on the Stochastic
   Approximation Monte Carlo (SAMC) algorithm for directly calculating
   the density of states. The proposed method is Stochastic
@@ -144,6 +145,7 @@ update factor), and will discuss it in detail in the methods section. We compare
 its convergence properties with three existing flat histogram methods: WL,
 $1/t$-WL, and SAMC.
 
+\jpcom{edit some here!}
 As a test case, we consider the square-well fluid i.e. a system of particles
 whose interactions are governed by a square-well
 potential~\cite{singh2003surface, barker2004perturbationSW}.  The square-well
@@ -162,12 +164,21 @@ reduced range of the potential well, and $\epsilon$ is its depth. This model has
 the further advantage that binning is not required because the energy is
 discrete.
 
+\jpcom{Describe Lennard-Jones clusters we test SAD ability to handle complex
+energy landscapes. We choose 31 and 38 due to complex funnels In the particular
+case of n=38 there exist two funnels at low energies representing octahedral (Oh)
+and icosahedral (ico) energy minima [5] leading to a pronounced size-specific
+behavior at low temperatures, which is especially difficult to simulate. The
+first numerical success}
+
 In this work, we compare four flat histogram methods.  We outline the
 general workings of each algorithm that we developed in detail while
 summarizing algorithms that were developed in other works.  The
 following methods are discussed and simulated for the square-well
 fluid: Wang-Landau (WL), $1/t$-Wang-Landau ($1/t$-WL), Stochastic
 Approximation Monte Carlo (SAMC), and SAD.
+\jpcom{In addition, we test the ability of SAD to accurately and efficiently
+samples low-temperature solid-solid transitions for Lennard-Jones clusters.}
 
 \section{Flat histogram methods}\label{sec:histogram}
 The goal of flat histogram methods (also called \emph{broad histogram}
@@ -745,37 +756,9 @@ converge as $1/\sqrt{t}$.  We then see the WL error saturates around
 $10^{10}$ moves.  Once again, the convergence of SAD is essentially
 the same as that of the $1/t$-WL method.
 
-%~ For this larger system, SAMC parameter values of $t_0$ that gave rapid
-%~ convergence for the $N = 50$ system with $\delta = 0.05\sigma$ do not
-%~ converge rapidly.
+\subsection{Lennard-Jones clusters with 31 atoms}
 
-%{\color{red}
-%Figure~\ref{fig:n256-lndos-comparison} shows the calculated entropy for
-%the $N = 256$ system. The grey dash lines indicate the $S_{\max} = 509$
-%point and the $S_{\min} = 915$. Only the reference method is shown.
-%}
-
-%~ \subsection{Discussion on convergence and update factor}
-
-%~ A close examination of Fig.~\ref{fig:gamma-vs-t} shows that $\gamma$
-%~ for the Wang-Landau algorithm decreases much more rapidly than
-%~ $\nicefrac{1}{t}$. It can be observed  for the simulations that
-%~ were carried out that all the methods
-%~ struggle to converge if the update factor decreases too rapidly.
-%~ Fig.~\ref{fig:n256} shows SAMC with inappropriate choices
-%~ of $t_0$ i.e. less than $\nicefrac{10^4}{\sqrt{t}}$ failing to converge
-%~ in a reasonable amount of time. Thus, the update factor $\gamma$, shown
-%~ as a function of simulation moves in Fig.~\ref{fig:gamma-vs-t}, proves
-%~ useful in determining which methods will converge in a reasonable
-%~ amount of time. We compare each method to a reference SAMC
-%~ simulation for an ideal choice of $t_0$.  This gives an unbiased
-%~ comparison with our developed method SAD. The dynamic version of SAMC
-%~ which we call SAD performs as well as SAMC (assuming the user can
-%~ correctly identify an appropriate choice of $t_0$ for SAMC).  SAD
-%~ outperforms WL and 1/t-WL? for the same given number of moves. The
-%~ absence of user defined parameters makes SAD an exciting alternative to
-%~ methods where user experience or successive implementation iteration
-%~ are needed to achieve reasonable results.
+\subsection{Lennard-Jones clusters with 38 atoms}
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/lj-cv-error}
@@ -810,10 +793,7 @@ converge as rapidly as either SAD or $1/t$-WL even for the best choice of $t_0$,
 when a relatively small range of energies is required, because it always
 simulates all possible energies.
 
-%We note that SAD should be tested on additional systems, and the
-%convergence of the method should be examined.  Also, a rigorous
-%mathematical justification for our choice of the update factor is
-%necessary to ensure the most optimal convergence of the algorithm.
+\jpcom{mention something about LJ clusters and what we find!}
 
 %\section{Acknowledgement}
 
