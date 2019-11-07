@@ -66,11 +66,7 @@ double find_Xi(double T) {
     double xi_mid;
     printf("B2wca=%g\n", B2wca);
     do {
-      //printf("xi_lo=%g\n", xi_lo);
-      //printf("xi_hi=%g\n", xi_hi);
       xi_mid = 0.5*(xi_hi + xi_lo);
-      //printf("xi_mid=%g\n", xi_mid);
-      //printf("B2_erf=%g\n", B2_erf(xi_mid, T));
       if (B2_erf(xi_mid, T) > B2wca) {
         xi_hi = xi_mid;
       }  else  {
