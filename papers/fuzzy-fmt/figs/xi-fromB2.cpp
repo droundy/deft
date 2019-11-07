@@ -40,23 +40,27 @@ double B2_wca(double T) {
     return f_sum;
 }
 
-
-double f_erf(double r, double xi, double T){   //erf mayer function
-    return (0.5)*(erf((r-alpha(T))/(xi/sqrt(2)))-1);
+double B2_erf(double Xi, double T) {
+    double B2_erf=(M_PI/3)*((pow(alpha(T), 3) + 1.5*alpha(T)*pow((Xi/pow(2, 0.5)),2))*(1+erf(alpha(T)/(Xi/pow(2,0.5)))) + 1/pow(M_PI,0.5)*(pow(alpha(T),2)*(Xi/pow(2,0.5)) + pow((Xi/pow(2,0.5)),3))*exp(-pow((alpha(T)/(Xi/pow(2,0.5))),2)));
+    return B2_erf;
 }
 
-double B2_erf(double xi, double T) {   
-    long i=0;
-    long num_points =10000;
-    double r;
-    double dr=rmax_erf(T)/num_points;
-    double f_sum=0;
-    for (; i<num_points; i++) {
-      r=dr*i+ 0.0000000000001;
-      f_sum = f_sum + (-0.5)*(4*M_PI*r*r*dr*f_erf(r, xi, T)); 
-    }
-    return f_sum;
-}
+//double f_erf(double r, double xi, double T){   //erf mayer function
+    //return (0.5)*(erf((r-alpha(T))/(xi/sqrt(2)))-1);
+//}
+
+//double B2_erf(double xi, double T) {   
+    //long i=0;
+    //long num_points =10000;
+    //double r;
+    //double dr=rmax_erf(T)/num_points;
+    //double f_sum=0;
+    //for (; i<num_points; i++) {
+      //r=dr*i+ 0.0000000000001;
+      //f_sum = f_sum + (-0.5)*(4*M_PI*r*r*dr*f_erf(r, xi, T)); 
+    //}
+    //return f_sum;
+//}
 
 
 double find_Xi(double T) {      
