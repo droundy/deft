@@ -3,6 +3,9 @@
 #include <time.h>
 #include <sys/stat.h>
 
+//Run this program from the directory it is listed in
+//with command ./xi-fromB2
+
 double sigma=1;
 double epsilon=1;
 
@@ -24,7 +27,7 @@ double f_wca(double r, double T){   //WCA mayer function
     return exp(-Vwca(r)/T) - 1;
 }
 
-double B2_wca(double T) {   //This appears to be working! matches results from David's program!!!
+double B2_wca(double T) {   
     long i=0;
     long num_points =10000;
     double r;
@@ -38,11 +41,11 @@ double B2_wca(double T) {   //This appears to be working! matches results from D
 }
 
 
-double f_erf(double r, double T, double xi){   //erf mayer function
+double f_erf(double r, double xi, double T){   //erf mayer function
     return (0.5)*(erf((r-alpha(T))/(xi/sqrt(2)))-1);
 }
 
-double B2_erf(double T, double xi) {    //This also appears to be working! matched David's program at T=0.1
+double B2_erf(double xi, double T) {   
     long i=0;
     long num_points =10000;
     double r;
@@ -50,13 +53,13 @@ double B2_erf(double T, double xi) {    //This also appears to be working! match
     double f_sum=0;
     for (; i<num_points; i++) {
       r=dr*i+ 0.0000000000001;
-      f_sum = f_sum + (-0.5)*(4*M_PI*r*r*dr*f_erf(r, T, xi)); 
+      f_sum = f_sum + (-0.5)*(4*M_PI*r*r*dr*f_erf(r, xi, T)); 
     }
     return f_sum;
 }
 
 
-double find_Xi(double T) {      //OK, matches my program ... fix sqrt(2) in David's for integral solution
+double find_Xi(double T) {      
     double B2wca = B2_wca(T);
     double xi_lo = 0;
     double xi_hi = 1;
@@ -67,17 +70,17 @@ double find_Xi(double T) {      //OK, matches my program ... fix sqrt(2) in Davi
       //printf("xi_hi=%g\n", xi_hi);
       xi_mid = 0.5*(xi_hi + xi_lo);
       //printf("xi_mid=%g\n", xi_mid);
-      //printf("B2_erf=%g\n", B2_erf(T,xi_mid));
-      if (B2_erf(T, xi_mid) > B2wca) {
+      //printf("B2_erf=%g\n", B2_erf(xi_mid, T));
+      if (B2_erf(xi_mid, T) > B2wca) {
         xi_hi = xi_mid;
       }  else  {
         xi_lo = xi_mid;
       } 
     } while (xi_hi - xi_lo > 0.000000001); 
-    printf("B2_erf mid=%g\n",B2_erf(T,xi_mid));  
-    printf("B2_erf hi =%g, xi_hi=%g\n",B2_erf(T,xi_hi), xi_hi);
-    printf("B2_erf lo =%g, xi_lo=%g\n",B2_erf(T,xi_hi), xi_lo);
-    printf("B2_erf=%g, xi=0.0457\n",B2_erf(T,0.0457));
+    printf("B2_erf mid=%g\n",B2_erf(xi_mid, T));  
+    printf("B2_erf hi =%g, xi_hi=%g\n",B2_erf(xi_hi, T), xi_hi);
+    printf("B2_erf lo =%g, xi_lo=%g\n",B2_erf(xi_hi, T), xi_lo);
+    printf("B2_erf=%g, xi=0.0457\n",B2_erf(0.0457, T));
     return xi_mid;  
 }
 
@@ -96,4 +99,3 @@ int main() {
 
     return 0;
 }
-
