@@ -14,7 +14,7 @@ PI=np.pi
 
 KbT=np.linspace(0.05, 2000, 2000)
 
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
+alpha=sigma*(2/(1+np.sqrt((KbT*np.log(2))/epsilon)))**(1.0/6)
 
 #Plot alpha
 plt.plot(KbT, alpha, label = 'alpha')
