@@ -11,6 +11,7 @@ _colors = { 'SAD': 'tab:orange',
             'SAMC ($t_0 =10^{8}$)': 'darkmagenta',
             'SAMC ($t_0 =10^{9}$)': 'xkcd:maroon',
             '1/sqrt(t)': 'xkcd:dark gray',
+            'converged result': 'xkcd:black',
             r'$\frac{1}{\sqrt{t}}$': '#eeeeee',
 }
 
@@ -24,10 +25,13 @@ _linestyles = {
     'SAMC ($t_0 =10^{9}$)': ':',
     'WL': '--',
     '$1/t$-WL': '-.',
-    r'$\frac{1}{\sqrt{t}}$': '-'
+    r'$\frac{1}{\sqrt{t}}$': '-',
+    'converged result': ':',
 }
 
 _legend_order = [
+    'bench',
+
     'sad-256',
     'sad-50',
     'sad-50-slow',
@@ -165,6 +169,8 @@ _legend_label = {
     'lj-samc-31-1e7-bin001': 'SAMC ($t_0 =10^{7}$)',
     'lj-samc-31-1e7-bin002': 'SAMC ($t_0 =10^{7}$) big bin',
     'lj-samc-31-1e7-bin0005': 'SAMC ($t_0 =10^{7}$) hires',
+
+    'bench': 'converged result',
 }
 
 def fix_legend(method):

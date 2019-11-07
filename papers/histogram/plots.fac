@@ -57,3 +57,4 @@ c .pyc
 | python3 figs/lj-comparison-plot.py noshow
 c .pyc
 > figs/lj-cv-error.pdf
+> figs/lj-cv.pdf

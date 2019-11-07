@@ -21,47 +21,79 @@ Xi=[]
 B2_WCA_list=[]
 B2_erf_list=[]
 
-def alpha(KbT) :
-    return pow(np.sqrt((2.0/(1+np.sqrt(KbT*np.log(2))))), 1.0/3)
+# def alpha(KbT) :
+    # return pow(np.sqrt((2.0/(1+np.sqrt(KbT*np.log(2))))), 1.0/3)
 
-def B2_WCA_integrand(r, KbT) :
-    V_WCA=4*(pow(r,-12) - pow(r,-6)) +1
-    WCA_mayer_function=np.exp(-V_WCA/KbT)-1
-    return (-1.0/2)*4*np.pi*WCA_mayer_function*r*r
+# def B2_erf_integrand(r, KbT, pXi) :
+    # erf_mayer_function=(1.0/2)*(erf((r-alpha(KbT))/(pXi/np.sqrt(2)))-1)
+    # return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
     
-def B2_erf_integrand(r, KbT, pXi) :
-    erf_mayer_function=(1.0/2)*(erf((r-alpha(KbT))/(pXi/np.sqrt(2)))-1)
-    return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
+# def B2_erf(T, Xi):
+    # return quad(B2_erf_integrand, 0, np.inf, args=(T, Xi))
+
+
+
+# def B2_WCA_integrand(r, KbT) :
+    # V_WCA=4*(pow(r,-12) - pow(r,-6)) +1
+    # WCA_mayer_function=np.exp(-V_WCA/KbT)-1
+    # return (-1.0/2)*4*np.pi*WCA_mayer_function*r*r
+
+# def B2_wca(T):
+    # upper_limit=sigma*pow(2,1.0/6)
+    # return quad(B2_WCA_integrand, 0, upper_limit, args=(KbT))  #integrate from 0 to less than 2R
+    
+    
+
+def B2_erf_numerical(Xi,T) :
+    alpha=pow(np.sqrt((2/(1+np.sqrt(T*np.log(2))))), 1.0/3)
+    r = np.linspace(0, 10*alpha, 10000)
+    #f=(0.5)*(erf((r-alpha)/(Xi))-1)
+    f=(0.5)*(erf((r-alpha)/(Xi/np.sqrt(2)))-1)   #fixed sqrt(2)
+    return -0.5*(4*np.pi*r**2*r[1]*f).sum()
+#B2_erf_numerical = np.vectorize(B2_erf_numerical)
+
+    
+rmax = 2.0**(1/6)
+
+def Vwca(r):
+    return 4*((1/r)**12-(1/r)**6) +  1
+    
+def f_wca(r, T):
+    return np.exp(-Vwca(r)/T) - 1
 
 def B2_wca(T):
-    upper_limit=sigma*pow(2,1.0/6)
-    return quad(B2_WCA_integrand, 0, upper_limit, args=(KbT))  #integrate from 0 to less than 2R
-
-def B2_erf(T, Xi):
-    return quad(B2_erf_integrand, 0, np.inf, args=(T, Xi))
+    r = np.linspace(0, rmax, 10000)
+    f = f_wca(r, T)
+    f[0] = 1
+    return -0.5*(4*np.pi*r**2*r[1]*f).sum()    
 
 def find_Xi(T):
-    B2wca = B2_wca(KbT)[0]
+    #B2wca = B2_wca(KbT)[0]
+    B2wca = B2_wca(KbT)
     xi_lo = 0
     xi_hi = 1
     while xi_hi - xi_lo > 0.000001:
         xi_mid = 0.5*(xi_hi + xi_lo)
-        if B2_erf(T, xi_mid)[0] > B2wca:
+        #if B2_erf(T, xi_mid)[0] > B2wca:
+        if B2_erf_numerical(xi_mid, T) > B2wca:
             xi_hi = xi_mid
         else:
             xi_lo = xi_mid
     return xi_mid
 
 T = np.linspace(0.2575, 10, 100)
+
 for KbT in T:
 
-    B2_WCA_at_T = B2_wca(KbT)[0]
+    #B2_WCA_at_T = B2_wca(KbT)[0]
+    B2_WCA_at_T = B2_wca(KbT)
     
     Xi_at_T = find_Xi(KbT)
                     
     #print "B2_diff=", B2_diff, "Xi_at_T=", Xi_at_T, "KbT=", KbT
     Xi.append(Xi_at_T)
-    B2_erf_list.append(B2_erf(KbT, Xi_at_T)[0])
+    #B2_erf_list.append(B2_erf(KbT, Xi_at_T)[0])
+    B2_erf_list.append(B2_erf_numerical(KbT, Xi_at_T))
     B2_WCA_list.append(B2_WCA_at_T)
     print(KbT, Xi_at_T)
    
