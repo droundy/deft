@@ -72,6 +72,29 @@ _legend_order = [
     'ising-samc-1e7-128',
     'ising-samc-1e8-128',
     'ising-samc-1e9-128',
+
+    'lj-sad-31-bin001',
+    'lj-sad-31-bin002',
+
+    'lj-wl-31-bin001',
+    'lj-wl-31-bin002',
+    'lj-wl-31-bin0005',
+
+    'lj-inv-t-wl-31-bin001',
+    'lj-inv-t-wl-31-bin002',
+    'lj-inv-t-wl-31-bin0005',
+
+    'lj-samc-31-1e5-bin001',
+    'lj-samc-31-1e5-bin002',
+    'lj-samc-31-1e5-bin0005',
+
+    'lj-samc-31-1e6-bin001',
+    'lj-samc-31-1e6-bin002',
+    'lj-samc-31-1e6-bin0005',
+
+    'lj-samc-31-1e7-bin001',
+    'lj-samc-31-1e7-bin002',
+    'lj-samc-31-1e7-bin0005',
 ]
 
 _legend_label = {
@@ -119,6 +142,29 @@ _legend_label = {
     'ising-samc-1e7-128': 'SAMC ($t_0 =10^{7}$)',
     'ising-samc-1e8-128': 'SAMC ($t_0 =10^{8}$)',
     'ising-samc-1e9-128': 'SAMC ($t_0 =10^{9}$)',
+
+    'lj-sad-31-bin001': 'SAD',
+    'lj-sad-31-bin002': 'SAD big bin',
+
+    'lj-wl-31-bin001': 'WL',
+    'lj-wl-31-bin002': 'WL big bin',
+    'lj-wl-31-bin0005': 'WL hires',
+
+    'lj-inv-t-wl-31-bin001': '$1/t$-WL',
+    'lj-inv-t-wl-31-bin002': '$1/t$-WL big bin',
+    'lj-inv-t-wl-31-bin0005': '$1/t$-WL hires',
+
+    'lj-samc-31-1e5-bin001': 'SAMC ($t_0 =10^{5}$)',
+    'lj-samc-31-1e5-bin002': 'SAMC ($t_0 =10^{5}$) big bin',
+    'lj-samc-31-1e5-bin0005': 'SAMC ($t_0 =10^{5}$) hires',
+
+    'lj-samc-31-1e6-bin001': 'SAMC ($t_0 =10^{6}$)',
+    'lj-samc-31-1e6-bin002': 'SAMC ($t_0 =10^{6}$) big bin',
+    'lj-samc-31-1e6-bin0005': 'SAMC ($t_0 =10^{6}$) hires',
+
+    'lj-samc-31-1e7-bin001': 'SAMC ($t_0 =10^{7}$)',
+    'lj-samc-31-1e7-bin002': 'SAMC ($t_0 =10^{7}$) big bin',
+    'lj-samc-31-1e7-bin0005': 'SAMC ($t_0 =10^{7}$) hires',
 }
 
 def fix_legend(method):
@@ -151,7 +197,7 @@ def style_args(method):
         args['linewidth'] = 0.5
     if method == '1/sqrt(t)':
         args['zorder'] = -59
-        args['linewidth'] = 0.1
+        args['linewidth'] = 1.1
     return args
 
 def plot(x, y, method=None):
