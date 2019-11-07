@@ -23,11 +23,11 @@ B2_erf_list=[]
 def alpha(T) :
     return (2.0/(1+np.sqrt(T*np.log(2))))**(1.0/6)
 
-# #Compute B2_erf analytically:   #not working...
-# def B2_erf_analytical(Xi,T) :   
-    # return 
+#Compute B2_erf analytically (default method): 
+def B2_erf_analytical(Xi,T) :   
+    return np.pi/3*( (alpha(T)**3 + 1.5*alpha(T)*(Xi/2**0.5)**2)*(1+erf(alpha(T)/(Xi/2**0.5))) + 1/np.sqrt(np.pi)*(alpha(T)**2*(Xi/2**0.5) + (Xi/2**0.5)**3)*np.exp(-(alpha(T)/(Xi/2**0.5))**2) )
     
-#Compute B2_erf numerically by evaluating the integral (default method):    
+#Compute B2_erf numerically by evaluating the integral:    
 def f_erf(r, Xi, T):
     return (0.5)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)
 
@@ -79,8 +79,8 @@ def find_Xi(T):
     while xi_hi - xi_lo > 0.000001:
         xi_mid = 0.5*(xi_hi + xi_lo)
         #if B2_erf_quad(xi_mid, T)[0] > B2wca:      #use with B2 erf quad method
-        #if B2_erf_analytical(xi_mid, T) > B2wca:   #use with B2 erf analytical method 
-        if B2_erf_numerical(xi_mid, T) > B2wca:     #use with B2 erf numerical method  (default)
+        if B2_erf_analytical(xi_mid, T) > B2wca:    #use with B2 erf analytical method (default)
+        #if B2_erf_numerical(xi_mid, T) > B2wca:    #use with B2 erf numerical method
             xi_hi = xi_mid
         else:
             xi_lo = xi_mid
@@ -90,15 +90,15 @@ def find_Xi(T):
 T = np.linspace(0.2575, 10, 100)
 
 for KbT in T:
-    #B2_WCA_at_T = B2_wca_quad(KbT)[0]     #use with B2 wca quad method
+    #B2_WCA_at_T = B2_wca_quad(KbT)[0]      #use with B2 wca quad method
     B2_WCA_at_T = B2_wca_numerical(KbT)     #use with B2 wca numerical method  (default)
     
     Xi_at_T = find_Xi(KbT)
                     
     Xi.append(Xi_at_T)
-    #B2_erf_list.append(B2_erf_quad(Xi_at_T, KbT)[0])     #use with B2 erf quad method
-    #B2_erf_list.append(B2_erf_analytical(Xi_at_T, KbT))    #use with B2 erf analytical method 
-    B2_erf_list.append(B2_erf_numerical(Xi_at_T, KbT))    #use with B2 erf numerical method  (default)
+    #B2_erf_list.append(B2_erf_quad(Xi_at_T, KbT)[0])      #use with B2 erf quad method
+    B2_erf_list.append(B2_erf_analytical(Xi_at_T, KbT))    #use with B2 erf analytical method  (default)
+    #B2_erf_list.append(B2_erf_numerical(Xi_at_T, KbT))    #use with B2 erf numerical method
     B2_WCA_list.append(B2_WCA_at_T)
     print(KbT, Xi_at_T)
    
@@ -118,7 +118,7 @@ Xi_old = alpha(T)/(6*np.sqrt(np.pi)*(np.sqrt(np.log(2)/T) + np.log(2)))
 ##Plot xi
 plt.plot(T, Xi, label = 'Xi')
 plt.plot(T, Xi_old, label='Krebs')
-plt.plot(T, (0.095**2*(T-0.2575))**(1/2.1), label='crazy fit')
+plt.plot(T, (0.12**2*(T-0.2575))**(1/2.1), label='crazy fit')
 plt.xlabel('KbT')
 plt.ylabel('Xi')
 plt.title('Xi vs Temp')
