@@ -16,84 +16,89 @@ epsilon=1
 sigma=1
 
 PI=np.pi
-#T=[]
 Xi=[]
 B2_WCA_list=[]
 B2_erf_list=[]
 
-# def alpha(KbT) :
-    # return pow(np.sqrt((2.0/(1+np.sqrt(KbT*np.log(2))))), 1.0/3)
+def alpha(T) :
+    return (2.0/(1+np.sqrt(T*np.log(2))))**(1.0/6)
 
-# def B2_erf_integrand(r, KbT, pXi) :
-    # erf_mayer_function=(1.0/2)*(erf((r-alpha(KbT))/(pXi/np.sqrt(2)))-1)
-    # return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
+#Compute B2_erf analytically (default method): 
+def B2_erf_analytical(Xi,T) :   
+    return np.pi/3*( (alpha(T)**3 + 1.5*alpha(T)*(Xi/2**0.5)**2)*(1+erf(alpha(T)/(Xi/2**0.5))) + 1/np.sqrt(np.pi)*(alpha(T)**2*(Xi/2**0.5) + (Xi/2**0.5)**3)*np.exp(-(alpha(T)/(Xi/2**0.5))**2) )
     
-# def B2_erf(T, Xi):
-    # return quad(B2_erf_integrand, 0, np.inf, args=(T, Xi))
+#Compute B2_erf numerically by evaluating the integral:    
+def f_erf(r, Xi, T):
+    return (0.5)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)
 
-
-
-# def B2_WCA_integrand(r, KbT) :
-    # V_WCA=4*(pow(r,-12) - pow(r,-6)) +1
-    # WCA_mayer_function=np.exp(-V_WCA/KbT)-1
-    # return (-1.0/2)*4*np.pi*WCA_mayer_function*r*r
-
-# def B2_wca(T):
-    # upper_limit=sigma*pow(2,1.0/6)
-    # return quad(B2_WCA_integrand, 0, upper_limit, args=(KbT))  #integrate from 0 to less than 2R
+def B2_erf_numerical(Xi,T):
+    r = np.linspace(0, 10*alpha(T), 10000)
+    f = f_erf(r, Xi, T)
+    f[0] = 1
+    return -0.5*(4*np.pi*r**2*r[1]*f).sum() 
     
+#Compute B2_erf by using python quad function:
+def B2_erf_quad_integrand(r, Xi, T) :
+    erf_mayer_function=(1.0/2)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)
+    return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
     
+def B2_erf_quad(Xi, T):
+    return quad(B2_erf_quad_integrand, 0, np.inf, args=(Xi, T))
 
-def B2_erf_numerical(Xi,T) :
-    alpha=pow(np.sqrt((2/(1+np.sqrt(T*np.log(2))))), 1.0/3)
-    r = np.linspace(0, 10*alpha, 10000)
-    #f=(0.5)*(erf((r-alpha)/(Xi))-1)
-    f=(0.5)*(erf((r-alpha)/(Xi/np.sqrt(2)))-1)   #fixed sqrt(2)
-    return -0.5*(4*np.pi*r**2*r[1]*f).sum()
-#B2_erf_numerical = np.vectorize(B2_erf_numerical)
 
-    
-rmax = 2.0**(1/6)
-
+#Compute B2_wca numerically by evaluating the integral (default method):
 def Vwca(r):
     return 4*((1/r)**12-(1/r)**6) +  1
     
 def f_wca(r, T):
     return np.exp(-Vwca(r)/T) - 1
 
-def B2_wca(T):
+def B2_wca_numerical(T):
+    rmax = 2.0**(1/6)
     r = np.linspace(0, rmax, 10000)
     f = f_wca(r, T)
     f[0] = 1
-    return -0.5*(4*np.pi*r**2*r[1]*f).sum()    
+    return -0.5*(4*np.pi*r**2*r[1]*f).sum()  
+        
+#Compute V2_wca by using python quad function:
+def B2_WCA_quad_integrand(r, T) :
+    V_WCA=4*(pow(r,-12) - pow(r,-6)) +1
+    WCA_mayer_function=np.exp(-V_WCA/T)-1
+    return (-1.0/2)*4*np.pi*WCA_mayer_function*r*r
+
+def B2_wca_quad(T):
+    rmax=sigma*pow(2,1.0/6)
+    return quad(B2_WCA_quad_integrand, 0, rmax, args=(T))  #integrate from 0 to less than 2R
+
 
 def find_Xi(T):
-    #B2wca = B2_wca(KbT)[0]
-    B2wca = B2_wca(KbT)
+    #B2wca = B2_wca_quad(T)[0]   #use with B2 wca quad method
+    B2wca = B2_wca_numerical(T)   #use with B2 wca numerical method  (default)
     xi_lo = 0
     xi_hi = 1
     while xi_hi - xi_lo > 0.000001:
         xi_mid = 0.5*(xi_hi + xi_lo)
-        #if B2_erf(T, xi_mid)[0] > B2wca:
-        if B2_erf_numerical(xi_mid, T) > B2wca:
+        #if B2_erf_quad(xi_mid, T)[0] > B2wca:      #use with B2 erf quad method
+        if B2_erf_analytical(xi_mid, T) > B2wca:    #use with B2 erf analytical method (default)
+        #if B2_erf_numerical(xi_mid, T) > B2wca:    #use with B2 erf numerical method
             xi_hi = xi_mid
         else:
             xi_lo = xi_mid
     return xi_mid
+    
 
 T = np.linspace(0.2575, 10, 100)
 
 for KbT in T:
-
-    #B2_WCA_at_T = B2_wca(KbT)[0]
-    B2_WCA_at_T = B2_wca(KbT)
+    #B2_WCA_at_T = B2_wca_quad(KbT)[0]      #use with B2 wca quad method
+    B2_WCA_at_T = B2_wca_numerical(KbT)     #use with B2 wca numerical method  (default)
     
     Xi_at_T = find_Xi(KbT)
                     
-    #print "B2_diff=", B2_diff, "Xi_at_T=", Xi_at_T, "KbT=", KbT
     Xi.append(Xi_at_T)
-    #B2_erf_list.append(B2_erf(KbT, Xi_at_T)[0])
-    B2_erf_list.append(B2_erf_numerical(KbT, Xi_at_T))
+    #B2_erf_list.append(B2_erf_quad(Xi_at_T, KbT)[0])      #use with B2 erf quad method
+    B2_erf_list.append(B2_erf_analytical(Xi_at_T, KbT))    #use with B2 erf analytical method  (default)
+    #B2_erf_list.append(B2_erf_numerical(Xi_at_T, KbT))    #use with B2 erf numerical method
     B2_WCA_list.append(B2_WCA_at_T)
     print(KbT, Xi_at_T)
    
@@ -107,13 +112,13 @@ plt.legend()
 
 plt.figure()
 
-alpha=np.cbrt(np.sqrt((2/(1+np.sqrt(T*np.log(2))))))
-Xi_old = alpha/(6*np.sqrt(np.pi)*(np.sqrt(np.log(2)/T) + np.log(2)))
+
+Xi_old = alpha(T)/(6*np.sqrt(np.pi)*(np.sqrt(np.log(2)/T) + np.log(2)))
 
 ##Plot xi
 plt.plot(T, Xi, label = 'Xi')
 plt.plot(T, Xi_old, label='Krebs')
-#plt.plot(T, (0.09**2*(T-0.2575))**(1/2), label='crazy fit')
+plt.plot(T, (0.12**2*(T-0.2575))**(1/2.1), label='crazy fit')
 plt.xlabel('KbT')
 plt.ylabel('Xi')
 plt.title('Xi vs Temp')
@@ -127,9 +132,9 @@ plt.show()
 # B2_WCA_ch=[]
 # B2_erf_ch=[]
 
-# pXi=0.171
+# Xi=0.171
 # for KbT in np.arange(0.05, 300, 0.15):
-    # B2_erf_at_T=quad(B2_erf_integrand, 0, np.inf, args=(KbT, pXi))
+    # B2_erf_at_T=quad(B2_erf_integrand, 0, np.inf, args=(Xi, KbT))
     # B2_WCA_at_T=quad(B2_WCA_integrand, 0, 2/1.781797435, args=(KbT))
     # B2_erf_ch.append(B2_erf_at_T[0])
     # B2_WCA_ch.append(B2_WCA_at_T[0])
@@ -142,7 +147,8 @@ plt.show()
 # plt.axhline(0)
 # plt.xlabel('KbT')
 # plt.ylabel('B2')
-# plt.title('B2 vs T at Xi=%g' % (pXi))
+# plt.title('B2 vs T at Xi=%g' % (Xi))
 # plt.legend()
 
 # plt.show()
+

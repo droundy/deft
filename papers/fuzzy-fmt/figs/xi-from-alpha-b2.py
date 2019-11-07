@@ -6,27 +6,25 @@ from scipy.special import erf, iv
 from scipy.integrate import quad
 
 def alpha(T):
-    return (2/(1+np.sqrt(T*np.log(2))))**(1./6)
+    return (2/(1+np.sqrt(T*np.log(2))))**(1.0/6)
 
 def B2_erf_numerical(Xi, T) :
-    alpha=np.cbrt(np.sqrt((2/(1+np.sqrt(T*np.log(2))))))
-    r = np.linspace(0, 10*alpha, 10000)
-    f=(1.0/2)*(erf((r-alpha)/(Xi/np.sqrt(2)))-1)   #fixed sqrt(2)
+    r = np.linspace(0, 10*alpha(T), 10000)
+    f=(1.0/2)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)   #fixed sqrt(2)
     return -0.5*(4*np.pi*r**2*r[1]*f).sum()
 B2_erf_numerical = np.vectorize(B2_erf_numerical)
 
-def B2_erf_integrand(r, KbT, pXi) :
-    alpha=np.cbrt(np.sqrt((2/(1+np.sqrt(KbT*np.log(2))))))
-    erf_mayer_function=(1.0/2)*(erf((r-alpha)/(pXi/np.sqrt(2)))-1)   #fixed sqrt(2)
+def B2_erf_integrand(r, Xi, T) :
+    erf_mayer_function=(1.0/2)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)   #fixed sqrt(2)
     return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
 def B2_erf_with_quad(Xi, T):
-    val = quad(B2_erf_integrand, 0, np.inf, args=(T, Xi))
+    val = quad(B2_erf_integrand, 0, np.inf, args=(Xi, T))
     # print('quad says', val)
     return val[0]
 
-def b2(xi, T):
+def b2(xi, T):   #Analytical method
     a = alpha(T)
-    return np.pi/3*( (a**3 + 1.5*a*xi**2)*(1+erf(a/xi)) + 1/np.sqrt(np.pi)*(a**2*xi + xi**3)*np.exp(-(a/xi)**2) )    #fix sqrt(2) !
+    return np.pi/3*( (a**3 + 1.5*a*(xi/2**0.5)**2)*(1+erf(a/(xi/2**0.5))) + 1/np.sqrt(np.pi)*(a**2*(xi/2**0.5) + (xi/2**0.5)**3)*np.exp(-(a/(xi/2**0.5))**2) )    #fixed sqrt(2)
 
 def b2wca_bessel(T):
     return -2*np.sqrt(2)*np.pi**2/(6*T)*np.exp(-0.5/T)*(
@@ -53,7 +51,7 @@ xi = np.linspace(0.0001, 1, 1000)
 
 for T in [0.1, 0.5,1, 200]:
     plt.figure()
-    plt.plot(xi, b2(xi, T), label=r'$B_2(\Xi)$')
+    plt.plot(xi, b2(xi, T), label=r'$B_2(\Xi)$ analytical')
     plt.plot(xi, B2_erf_numerical(xi, T), 'b--', label=r'$B_2(\Xi)$ numerical')
     with_quad = np.zeros_like(xi)
     for j in range(len(xi)):
