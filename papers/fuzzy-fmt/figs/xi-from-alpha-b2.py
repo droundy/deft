@@ -22,9 +22,9 @@ def B2_erf_with_quad(Xi, T):
     # print('quad says', val)
     return val[0]
 
-def b2(xi, T):   #Analytical method ERROR here...
+def b2(xi, T):   #Analytical method
     a = alpha(T)
-    return np.pi/3*( (a**3 + 1.5*a*xi**2)*(1+erf(a/xi)) + 1/np.sqrt(np.pi)*(a**2*xi + xi**3)*np.exp(-(a/xi)**2) )    #fix sqrt(2) !
+    return np.pi/3*( (a**3 + 1.5*a*(xi/2**0.5)**2)*(1+erf(a/(xi/2**0.5))) + 1/np.sqrt(np.pi)*(a**2*(xi/2**0.5) + (xi/2**0.5)**3)*np.exp(-(a/(xi/2**0.5))**2) )    #fixed sqrt(2)
 
 def b2wca_bessel(T):
     return -2*np.sqrt(2)*np.pi**2/(6*T)*np.exp(-0.5/T)*(
