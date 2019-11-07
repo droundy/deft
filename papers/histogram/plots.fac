@@ -53,3 +53,7 @@ c .pyc
 
 | python3 figs/ising-gamma-plot.py n128 1.0 noshow
 c .pyc
+
+| python3 figs/lj-comparison-plot.py noshow
+c .pyc
+> figs/lj-cv-error.pdf
