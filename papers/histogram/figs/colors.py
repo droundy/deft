@@ -102,15 +102,22 @@ _legend_order = [
 ]
 
 _legend_label = {
+    'sad': 'SAD',
     'sad-256': 'SAD',
     'sad-50': 'SAD',
     'sad-50-slow': 'SAD',
+    'wl': 'WL',
     'wl-256': 'WL',
     'wl-50': 'WL',
     'wl-50-slow': 'WL',
+    'inv-t-wl': '$1/t$-WL',
     'wl-inv-t-256': '$1/t$-WL',
     'wl-inv-t-50': '$1/t$-WL',
     'wl-inv-t-50-slow': '$1/t$-WL',
+    'samc-1e5': 'SAMC ($t_0 =10^{5}$)',
+    'samc-1e6': 'SAMC ($t_0 =10^{6}$)',
+    'samc-1e7': 'SAMC ($t_0 =10^{7}$)',
+
     'samc-1e3-256': 'SAMC ($t_0 =10^{3}$)',
     'samc-1e4-256': 'SAMC ($t_0 =10^{4}$)',
     'samc-1e5-256': 'SAMC ($t_0 =10^{5}$)',
