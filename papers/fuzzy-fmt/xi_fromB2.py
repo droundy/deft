@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #Run this program from the directory it is listed in
 #with command ./xi_fromB2.py
@@ -16,11 +16,13 @@ epsilon=1
 sigma=1
 
 PI=np.pi
-T=[]
+#T=[]
 Xi=[]
-B2_WCA=[]
-B2_erf=[]
+B2_WCA_list=[]
+B2_erf_list=[]
 
+def alpha(KbT) :
+    return pow(np.sqrt((2.0/(1+np.sqrt(KbT*np.log(2))))), 1.0/3)
 
 def B2_WCA_integrand(r, KbT) :
     V_WCA=4*(pow(r,-12) - pow(r,-6)) +1
@@ -28,92 +30,65 @@ def B2_WCA_integrand(r, KbT) :
     return (-1.0/2)*4*np.pi*WCA_mayer_function*r*r
     
 def B2_erf_integrand(r, KbT, pXi) :
-    alpha=np.cbrt(np.sqrt((2/(1+np.sqrt(KbT*np.log(2))))))
-    erf_mayer_function=(1.0/2)*(erf((r-alpha)/pXi)-1)
+    erf_mayer_function=(1.0/2)*(erf((r-alpha(KbT))/(pXi/np.sqrt(2)))-1)
     return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
-    
-upper_limit=2.0*sigma*pow(2,-5.0/6)   #integrate from 0 to less than 2R  where R=sigma*2^(-5/6)   FIX?
-print upper_limit
 
+def B2_wca(T):
+    upper_limit=sigma*pow(2,1.0/6)
+    return quad(B2_WCA_integrand, 0, upper_limit, args=(KbT))  #integrate from 0 to less than 2R
 
-for KbT in np.arange(0.5, 200, 0.5):
+def B2_erf(T, Xi):
+    return quad(B2_erf_integrand, 0, np.inf, args=(T, Xi))
 
-    B2_WCA_int = quad(B2_WCA_integrand, 0, upper_limit, args=(KbT))  #integrate from 0 to less than 2R
+def find_Xi(T):
+    B2wca = B2_wca(KbT)[0]
+    xi_lo = 0
+    xi_hi = 1
+    while xi_hi - xi_lo > 0.000001:
+        xi_mid = 0.5*(xi_hi + xi_lo)
+        if B2_erf(T, xi_mid)[0] > B2wca:
+            xi_hi = xi_mid
+        else:
+            xi_lo = xi_mid
+    return xi_mid
+
+T = np.linspace(0.2575, 10, 100)
+for KbT in T:
+
+    B2_WCA_at_T = B2_wca(KbT)[0]
     
-    alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-    
-    #METHOD 1: -----------------------------
-    # #B2_diff=10 
-    # for pXi in np.arange(0.01, 0.2, 0.01) :   #pXi stands for "proposed Xi"
-    # #The real Xi at a particular KbT is found when B2_WCA=B2_erf at that particular KbT
-        # pB2_erf_int=quad(B2_erf_integrand, 0, np.inf, args=(KbT, pXi))
-        # pB2_diff=pB2_erf_int[0]-B2_WCA_int[0]
-        # print(pB2_diff)
-        # #if math.copysign(1, pB2_diff) =
-        # if abs(pB2_diff) < B2_diff :
-            # B2_diff=pB2_diff
-            # B2_WCA_at_T=B2_WCA_int[0]
-            # B2_erf_at_T=pB2_erf_int[0]
-            # Xi_at_T=pXi 
-            #-------------------------------   
-                       
-    #METHOD 2: -----------------------------
-    pB2_erf_int=quad(B2_erf_integrand, 0, np.inf, args=(KbT, 0.01))
-    pB2_diff=pB2_erf_int[0]-B2_WCA_int[0]
-    if pB2_diff > 0 :
-        sign=1
-    elif pB2_diff < 0 :
-        sign=0
-    for pXi in np.arange(0.011, 0.2, 0.001) :   #pXi stands for "proposed Xi"
-    #The real Xi at a particular KbT is found when B2_WCA=B2_erf at that particular KbT
-        pB2_erf_int=quad(B2_erf_integrand, 0, np.inf, args=(KbT, pXi))
-        pB2_diff=pB2_erf_int[0]-B2_WCA_int[0]
-        #print(pB2_diff)
-        if math.copysign(1, pB2_diff) > 0 :
-            if sign==0 :
-                B2_diff=pB2_diff
-                B2_WCA_at_T=B2_WCA_int[0]
-                B2_erf_at_T=pB2_erf_int[0]
-                Xi_at_T=pXi 
-                break 
-        if math.copysign(1, pB2_diff) < 0 :
-            if sign==1 :
-                B2_diff=pB2_diff
-                B2_WCA_at_T=B2_WCA_int[0]
-                B2_erf_at_T=pB2_erf_int[0]
-                Xi_at_T=pXi 
-                break 
-                #-----------------------------
-                
+    Xi_at_T = find_Xi(KbT)
                     
     #print "B2_diff=", B2_diff, "Xi_at_T=", Xi_at_T, "KbT=", KbT
     Xi.append(Xi_at_T)
-    B2_erf.append(B2_erf_at_T)
-    B2_WCA.append(B2_WCA_at_T)
-    T.append(KbT)
-    
-    
-##Plot B2_WCA vs T
-plt.plot(T, B2_WCA, label = 'B2_WCA')
-plt.plot(T, B2_erf, label = 'B2_erf')
+    B2_erf_list.append(B2_erf(KbT, Xi_at_T)[0])
+    B2_WCA_list.append(B2_WCA_at_T)
+    print(KbT, Xi_at_T)
+   
+#Plot B2_WCA vs T
+plt.plot(T, B2_WCA_list, label = 'B2_WCA')
+plt.plot(T, B2_erf_list, label = 'B2_erf')
 plt.xlabel('KbT')
 plt.ylabel('B2')
 plt.title('B2 vs Temp')
 plt.legend()
 
-plt.show()
+plt.figure()
 
+alpha=np.cbrt(np.sqrt((2/(1+np.sqrt(T*np.log(2))))))
+Xi_old = alpha/(6*np.sqrt(np.pi)*(np.sqrt(np.log(2)/T) + np.log(2)))
 
 ##Plot xi
 plt.plot(T, Xi, label = 'Xi')
+plt.plot(T, Xi_old, label='Krebs')
+#plt.plot(T, (0.09**2*(T-0.2575))**(1/2), label='crazy fit')
 plt.xlabel('KbT')
 plt.ylabel('Xi')
 plt.title('Xi vs Temp')
 plt.legend()
 
-plt.show()       
-        
-    
+plt.show()
+
 
 # #-----CHECK--------------------
 # T_ch=[]
