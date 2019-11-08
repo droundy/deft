@@ -775,7 +775,25 @@ the same as that of the $1/t$-WL method.
 
 The heat capacity changes significantly even at these low temperatures
 when the size of the cavity is increased.  We use a 2.5 cavity because
-``everyone else'' does.
+``everyone else'' does.  For purposes of testing the convergence of
+the algorithm, we don't need to solve for the true heat capacity.
+Furthermore, the heat capacity at fixed volume is not the most
+meaningful quantity to predict for a cluster.
+
+Dependence on bin width.  Figure~\ref{fig:lj-cv-error} shows that the
+heat capacity converges just as well for bin widths varying over two
+orders of magnitude.  WL and $1/t$-WL show similar behavior, so this
+is not new, but is encouraging.
+
+Specifying temperature range rather than energy range is beneficial.
+Both WL and $1/t$-WL are incredibly sensitive to the minimum energy
+chosen, as seen in Fig.~\ref{fig:lj-cv-error}.  Cite previous work
+that showed them not converging because it chose too low a minimum
+energy, proving that it is \emph{not} a trivial procedure to determine
+an appropriate energy range.  Specifying the temperature range
+\emph{does} matter! We had to do a whole bunch of $1/t$-WL
+computations in order to determine what would be a sufficient
+low-energy cutoff.
 
 \section{Conclusions}
 We have introduced a new algorithm, a variant of the SAMC method, which
