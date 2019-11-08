@@ -36,7 +36,7 @@ double B2_wca(double T) {
 }
 
 double B2_erf(double Xi, double T) {
-    double B2_erf=(M_PI/3)*((pow(alpha(T), 3) + 1.5*alpha(T)*pow((Xi/pow(2, 0.5)),2))*(1+erf(alpha(T)/(Xi/pow(2,0.5)))) + 1/pow(M_PI,0.5)*(pow(alpha(T),2)*(Xi/pow(2,0.5)) + pow((Xi/pow(2,0.5)),3))*exp(-pow((alpha(T)/(Xi/pow(2,0.5))),2)));
+    double B2_erf=(M_PI/3)*((pow(alpha(T), 3) + 1.5*alpha(T)*pow(Xi,2))*(1+erf(alpha(T)/Xi)) + 1/pow(M_PI,0.5)*(pow(alpha(T),2)*Xi + pow(Xi,3))*exp(-pow((alpha(T)/Xi),2)));
     return B2_erf;
 }
 
@@ -77,7 +77,7 @@ int main() {
 //B2_erf integrated----------------
 
 //double f_erf(double r, double xi, double T){   //erf mayer function
-    //return (0.5)*(erf((r-alpha(T))/(xi/sqrt(2)))-1);
+    //return (0.5)*(erf((r-alpha(T))/xi)-1);
 //}
 
 //double B2_erf(double xi, double T) {    //This also appears to be working! matched David's program at T=0.1
@@ -93,8 +93,4 @@ int main() {
     //}
     //return f_sum;
 //}
-
-
-
-
 
