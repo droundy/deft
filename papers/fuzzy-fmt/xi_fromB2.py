@@ -25,11 +25,11 @@ def alpha(T) :
 
 #Compute B2_erf analytically (default method): 
 def B2_erf_analytical(Xi,T) :   
-    return np.pi/3*( (alpha(T)**3 + 1.5*alpha(T)*(Xi/2**0.5)**2)*(1+erf(alpha(T)/(Xi/2**0.5))) + 1/np.sqrt(np.pi)*(alpha(T)**2*(Xi/2**0.5) + (Xi/2**0.5)**3)*np.exp(-(alpha(T)/(Xi/2**0.5))**2) )
+    return np.pi/3*((alpha(T)**3 + 1.5*alpha(T)*Xi**2)*(1+erf(alpha(T)/Xi)) + 1/np.sqrt(np.pi)*(alpha(T)**2*Xi + Xi**3)*np.exp(-(alpha(T)/Xi)**2))
     
 #Compute B2_erf numerically by evaluating the integral:    
 def f_erf(r, Xi, T):
-    return (0.5)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)
+    return (0.5)*(erf((r-alpha(T))/Xi)-1)
 
 def B2_erf_numerical(Xi,T):
     r = np.linspace(0, 10*alpha(T), 10000)
@@ -39,7 +39,7 @@ def B2_erf_numerical(Xi,T):
     
 #Compute B2_erf by using python quad function:
 def B2_erf_quad_integrand(r, Xi, T) :
-    erf_mayer_function=(1.0/2)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)
+    erf_mayer_function=(1.0/2)*(erf((r-alpha(T))/Xi)-1)
     return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
     
 def B2_erf_quad(Xi, T):

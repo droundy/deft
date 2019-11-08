@@ -10,12 +10,12 @@ def alpha(T):
 
 def B2_erf_numerical(Xi, T) :
     r = np.linspace(0, 10*alpha(T), 10000)
-    f=(1.0/2)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)   #fixed sqrt(2)
+    f=(1.0/2)*(erf((r-alpha(T))/Xi)-1)
     return -0.5*(4*np.pi*r**2*r[1]*f).sum()
 B2_erf_numerical = np.vectorize(B2_erf_numerical)
 
 def B2_erf_integrand(r, Xi, T) :
-    erf_mayer_function=(1.0/2)*(erf((r-alpha(T))/(Xi/np.sqrt(2)))-1)   #fixed sqrt(2)
+    erf_mayer_function=(1.0/2)*(erf((r-alpha(T))/Xi)-1)
     return (-1.0/2)*(4*np.pi)*(erf_mayer_function)*r*r
 def B2_erf_with_quad(Xi, T):
     val = quad(B2_erf_integrand, 0, np.inf, args=(Xi, T))
@@ -24,7 +24,7 @@ def B2_erf_with_quad(Xi, T):
 
 def b2(xi, T):   #Analytical method
     a = alpha(T)
-    return np.pi/3*( (a**3 + 1.5*a*(xi/2**0.5)**2)*(1+erf(a/(xi/2**0.5))) + 1/np.sqrt(np.pi)*(a**2*(xi/2**0.5) + (xi/2**0.5)**3)*np.exp(-(a/(xi/2**0.5))**2) )    #fixed sqrt(2)
+    return np.pi/3*( (a**3 + 1.5*a*xi**2)*(1+erf(a/xi)) + 1/np.sqrt(np.pi)*(a**2*xi + xi**3)*np.exp(-(a/xi)**2) )
 
 def b2wca_bessel(T):
     return -2*np.sqrt(2)*np.pi**2/(6*T)*np.exp(-0.5/T)*(
