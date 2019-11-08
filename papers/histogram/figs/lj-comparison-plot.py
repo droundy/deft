@@ -29,7 +29,7 @@ files = {
             0.005: 'lj-wl-31-bin0005',
             0.001: 'lj-wl-31-bin0001',
     },
-    'inv-t-wl': {
+    r'$1/t$-WL $E_{\min}=-133.53\epsilon$': {
             0.1: 'lj-inv-t-wl-31-bin01',
             0.01: 'lj-inv-t-wl-31-bin001',
             0.02: 'lj-inv-t-wl-31-bin002',
@@ -59,11 +59,11 @@ files = {
     # },
 }
 
-extra_files = [
-        'lj-inv-t-wl-31-bin001-58',
-        'lj-inv-t-wl-31-bin001-54',
-        'lj-inv-t-wl-31-bin001-52',
-]
+extra_files = {
+        r'$1/t$-WL $E_{\min}=-133.58\epsilon$': 'lj-inv-t-wl-31-bin001-58',
+        r'$1/t$-WL $E_{\min}=-133.54\epsilon$': 'lj-inv-t-wl-31-bin001-54',
+        r'$1/t$-WL $E_{\min}=-133.52\epsilon$': 'lj-inv-t-wl-31-bin001-52',
+}
 
 plt.figure('cv-error')
 
@@ -88,17 +88,23 @@ for method in files:
                         if i < len(errors[dE]):
                                 best[i] = min(best[i], errors[dE][i])
                                 worst[i] = max(worst[i], errors[dE][i])
-        plt.fill_between(longest_iters, worst, best,
-                         edgecolor='none', linewidth=0,
-                         color=colors.color(method),
-                         alpha=0.1, zorder=-51)
-        colors.loglog(iters[0.01], errors[0.01], method=method)
+        if 'sad' in method:
+                # plt.fill_between(longest_iters, worst, best,
+                #                  edgecolor='none', linewidth=0,
+                #                  color=colors.color(method),
+                #                  alpha=0.1, zorder=-51)
+                colors.loglog(iters[0.001], errors[0.001], method=r'SAD $\Delta E=0.001\epsilon$')
+                colors.loglog(iters[0.01], errors[0.01], method=r'SAD $\Delta E=0.01\epsilon$')
+                colors.loglog(iters[0.1], errors[0.1], method=r'SAD $\Delta E=0.1\epsilon$')
+        else:
+                colors.loglog(iters[0.01], errors[0.01], method=method)
 
-for fname in extra_files:
+for method in extra_files:
+        fname = extra_files[method]
         data = np.loadtxt(datadir+fname+'-cv-error.txt')
         if len(data) == 0:
                 continue
-        colors.loglog(data[:,0], data[:,2], method=fname)
+        colors.loglog(data[:,0], data[:,2], method=method)
 
 moves = np.array([1e6, 1e13])
 for i in np.arange(-8, 19, 1.0):

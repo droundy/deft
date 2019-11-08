@@ -1,8 +1,19 @@
 import matplotlib.pyplot as plt
 
 _colors = { 'SAD': 'tab:orange',
+            r'SAD $\Delta E=0.001\epsilon$': 'tab:orange',
+            r'SAD $\Delta E=0.01\epsilon$': 'tab:orange',
+            r'SAD $\Delta E=0.1\epsilon$': 'tab:orange',
+
             'WL': 'tab:green',
+
             '$1/t$-WL': 'xkcd:purple',# 'tab:blue',
+
+            r'$1/t$-WL $E_{\min}=-133.58\epsilon$': 'xkcd:purple',
+            r'$1/t$-WL $E_{\min}=-133.54\epsilon$': 'xkcd:purple',
+            r'$1/t$-WL $E_{\min}=-133.53\epsilon$': 'xkcd:purple',
+            r'$1/t$-WL $E_{\min}=-133.52\epsilon$': 'xkcd:purple',
+
             'SAMC ($t_0 =10^{3}$)': 'r',
             'SAMC ($t_0 =10^{4}$)': 'xkcd:orange',
             'SAMC ($t_0 =10^{5}$)': 'xkcd:gold',
@@ -24,17 +35,27 @@ _linestyles = {
     'SAMC ($t_0 =10^{8}$)': ':',
     'SAMC ($t_0 =10^{9}$)': ':',
     'WL': '--',
+
     '$1/t$-WL': '-.',
+    r'$1/t$-WL $E_{\min}=-133.58\epsilon$': '-.',
+    r'$1/t$-WL $E_{\min}=-133.54\epsilon$': '-.',
+    r'$1/t$-WL $E_{\min}=-133.53\epsilon$': '-.',
+    r'$1/t$-WL $E_{\min}=-133.52\epsilon$': '-.',
+
     r'$\frac{1}{\sqrt{t}}$': '-',
     'converged result': ':',
 }
 
 _legend_order = [
-    'bench',
-
+    'SAD',
+    r'SAD $\Delta E=0.1\epsilon$',
+    r'SAD $\Delta E=0.01\epsilon$',
+    r'SAD $\Delta E=0.001\epsilon$',
     'sad-256',
     'sad-50',
     'sad-50-slow',
+
+    'WL',
     'wl-256',
     'wl-50',
     'wl-50-slow',
@@ -88,6 +109,11 @@ _legend_order = [
     'lj-inv-t-wl-31-bin002',
     'lj-inv-t-wl-31-bin0005',
 
+    r'$1/t$-WL $E_{\min}=-133.52\epsilon$',
+    r'$1/t$-WL $E_{\min}=-133.53\epsilon$',
+    r'$1/t$-WL $E_{\min}=-133.54\epsilon$',
+    r'$1/t$-WL $E_{\min}=-133.58\epsilon$',
+
     'lj-samc-31-1e5-bin001',
     'lj-samc-31-1e5-bin002',
     'lj-samc-31-1e5-bin0005',
@@ -99,6 +125,9 @@ _legend_order = [
     'lj-samc-31-1e7-bin001',
     'lj-samc-31-1e7-bin002',
     'lj-samc-31-1e7-bin0005',
+
+    'converged result',
+    'bench',
 ]
 
 _legend_label = {
@@ -188,6 +217,8 @@ def fix_legend(method):
 def legend_order(method):
     if method in _legend_order:
         return _legend_order.index(method)
+    if fix_legend(method) in _legend_order:
+        return _legend_order.index(fix_legend(method))
     return len(_legend_order)
 
 def color(m):
@@ -204,8 +235,24 @@ def style_args(method):
     if fix_legend(method) in _linestyles:
         args['linestyle'] = _linestyles[fix_legend(method)]
     args['zorder'] = legend_order(method)
+    print(method,'zorder', legend_order(method))
     if fix_legend(method) == 'SAD':
         args['linewidth'] = 3
+    elif method == r'$1/t$-WL $E_{\min}=-133.52\epsilon$':
+        args['linewidth'] = 2
+    elif method == r'$1/t$-WL $E_{\min}=-133.53\epsilon$':
+        args['linewidth'] = 1.6666
+    elif method == r'$1/t$-WL $E_{\min}=-133.54\epsilon$':
+        args['linewidth'] = 1.3333
+    elif method == r'$1/t$-WL $E_{\min}=-133.58\epsilon$':
+        args['linewidth'] = 1
+    elif r'$\Delta E=0.1\epsilon$' in method:
+        args['linewidth'] = 3
+    elif r'$\Delta E=0.01\epsilon$' in method:
+        args['linewidth'] = 2
+    elif r'$\Delta E=0.001\epsilon$' in method:
+        args['linewidth'] = 1
+
     if 'SAMC' in fix_legend(method):
         args['linewidth'] = 0.5
     if method == '1/sqrt(t)':
