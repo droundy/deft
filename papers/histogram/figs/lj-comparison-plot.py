@@ -113,7 +113,7 @@ plt.xlabel(r'$\textrm{Moves}$')
 plt.ylabel(r'$\textrm{Maximum Error in }C_V/k_B$')
 
 plt.xlim(1e7, 2e12)
-plt.ylim(3e-1,4e3)
+plt.ylim(3e-1,1e4)
 
 colors.legend()
 plt.tight_layout()
