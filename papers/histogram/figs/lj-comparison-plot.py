@@ -137,12 +137,19 @@ for method in files:
         if len(data) == 0:
                 continue
         colors.plot(data[:,0], data[:,1], method=method)
+for method in extra_files:
+        fname = extra_files[method]
+        data = np.loadtxt(datadir+fname+'-cv.txt')
+        if len(data) == 0:
+                continue
+        colors.plot(data[:,0], data[:,1], method=method)
 
 plt.xlim(data[0,0], data[-1,0])
 plt.xlabel(r'$k_BT/\epsilon$')
 plt.ylabel(r'$C_V/k_B$')
+plt.ylim(89, 125)
 
-colors.legend()
+colors.legend(framealpha=1)
 plt.tight_layout()
 
 plt.savefig('figs/' + 'lj-cv.pdf')

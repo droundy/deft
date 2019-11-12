@@ -783,14 +783,22 @@ cluster is popular because it features a two-funnel energy landscape
 with a significant barrier between the two low-energy
 states~\davidsays{add citations}.
 
-Poulain \emph{et al.} found \cite{poulain2006performances}
+Poulain \emph{et al.} found very poor convergence for a variety of
+modified WL methods on the LJ31
+cluster~\cite{poulain2006performances}.  Sadly, they don't mention the
+energy range or bin size that was used in their simulation, so their
+results cannot be reproduced.  They do mention that they use 1000
+energy bins, which if they used an energy range of
+$[-133.58\epsilon,0]$ would correspond to a bin size of $\Delta
+E\approx 0.13\epsilon$, which we find to be too large to accurately
+predict the heat capacity peak at $0.03\epsilon/k_B$.
 
 The heat capacity changes significantly even at these low temperatures
 when the size of the cavity is increased.  We use a 2.5 cavity because
-``everyone else'' does.  For purposes of testing the convergence of
-the algorithm, we don't need to solve for the true heat capacity.
-Furthermore, the heat capacity at fixed volume is not the most
-meaningful quantity to predict for a cluster.
+``everyone else'' does~\cite{poulain2006performances}.  For purposes
+of testing the convergence of the algorithm, we don't need to solve
+for the true heat capacity.  Furthermore, the heat capacity at fixed
+volume is not the most meaningful quantity to predict for a cluster.
 
 Dependence on bin width.  Figure~\ref{fig:lj-cv-error} shows that the
 heat capacity converges just as well for bin widths varying over two

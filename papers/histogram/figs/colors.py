@@ -269,10 +269,11 @@ def plot(x, y, method=None):
 def loglog(x, y, method=None):
     return plt.loglog(x,y, **style_args(method))
 
-def legend(loc='best'):
+def legend(loc='best', framealpha=None, facecolor=None):
     handles, labels = plt.gca().get_legend_handles_labels()
     labels_and_handles = list(zip(*sorted(zip(labels, handles), key = lambda t: legend_order(t[0]))))
     if len(labels_and_handles) == 2:
       labels, handles = labels_and_handles
       labels = map(fix_legend, labels)
-      plt.legend(handles, labels, loc=loc)
+      leg = plt.legend(handles, labels, loc=loc, framealpha=framealpha, facecolor=facecolor)
+      leg.set_zorder(len(_legend_order)+1) # set legend on top.
