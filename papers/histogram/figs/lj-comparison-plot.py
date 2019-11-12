@@ -22,7 +22,7 @@ files = {
             0.02: 'lj-sad-31-bin002',
             0.001: 'lj-sad-31-bin0001',
     },
-    'wl': {
+    'WL $E_{\min}=-133.53\epsilon$': {
             0.1: 'lj-wl-31-bin01',
             0.01: 'lj-wl-31-bin001',
             0.02: 'lj-wl-31-bin002',
@@ -118,7 +118,7 @@ for i in np.arange(-8, 19, 1.0):
 plt.xlabel(r'$\textrm{Moves}$')
 plt.ylabel(r'$\textrm{Maximum Error in }C_V/k_B$')
 
-plt.xlim(1e7, 2e12)
+plt.xlim(1e7, 4e12)
 plt.ylim(3e-1,1e4)
 
 colors.legend()

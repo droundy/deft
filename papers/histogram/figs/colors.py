@@ -6,6 +6,7 @@ _colors = { 'SAD': 'tab:orange',
             r'SAD $\Delta E=0.1\epsilon$': 'tab:orange',
 
             'WL': 'tab:green',
+            r'WL $E_{\min}=-133.53\epsilon$': 'tab:green',
 
             '$1/t$-WL': 'xkcd:purple',# 'tab:blue',
 
@@ -35,6 +36,7 @@ _linestyles = {
     'SAMC ($t_0 =10^{8}$)': ':',
     'SAMC ($t_0 =10^{9}$)': ':',
     'WL': '--',
+    r'WL $E_{\min}=-133.53\epsilon$': '--',
 
     '$1/t$-WL': '-.',
     r'$1/t$-WL $E_{\min}=-133.58\epsilon$': '-.',
@@ -56,6 +58,7 @@ _legend_order = [
     'sad-50-slow',
 
     'WL',
+    r'WL $E_{\min}=-133.53\epsilon$',
     'wl-256',
     'wl-50',
     'wl-50-slow',
@@ -240,7 +243,7 @@ def style_args(method):
         args['linewidth'] = 3
     elif method == r'$1/t$-WL $E_{\min}=-133.52\epsilon$':
         args['linewidth'] = 2
-    elif method == r'$1/t$-WL $E_{\min}=-133.53\epsilon$':
+    elif method in [r'$1/t$-WL $E_{\min}=-133.53\epsilon$', r'WL $E_{\min}=-133.53\epsilon$']:
         args['linewidth'] = 1.6666
     elif method == r'$1/t$-WL $E_{\min}=-133.54\epsilon$':
         args['linewidth'] = 1.3333
