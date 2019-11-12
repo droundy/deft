@@ -95,11 +95,59 @@ static inline double find_alpha(double temp) {
   return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
 }
 
-static inline double find_Xi(double temp) {
-  const double epsilon=1;
-  const double alpha = find_alpha(temp);
-  return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
+//Find Xi(T)---------------------------------------------------
+double Vwca(double r) {
+    return 4.0*(pow(r,-12.0) - pow(r,-6.0)) +1;
 }
+
+double f_wca(double r, double T){   //WCA mayer function
+    return exp(-Vwca(r)/T) - 1;
+}
+
+double B2_wca(double T) {
+    long i=0;
+    long num_points =10000;
+    double r;
+    double rmax_wca = pow(2.0,1.0/6);   //rmax_wca=1.122462048
+    double dr=rmax_wca/num_points;
+    double f_sum=0;
+    for (; i<num_points; i++) {
+      r=dr*i+ 0.0000000000001;
+      f_sum = f_sum + (-0.5)*(4*M_PI*r*r*dr*f_wca(r, T)); 
+    }
+    return f_sum;
+}
+
+double B2_erf(double Xi, double T) {
+    double B2_erf=(M_PI/3)*((pow(alpha(T), 3) + 1.5*alpha(T)*pow(Xi,2))*(1+erf(alpha(T)/Xi)) + 1/pow(M_PI,0.5)*(pow(alpha(T),2)*Xi + pow(Xi,3))*exp(-pow((alpha(T)/Xi),2)));
+    return B2_erf;
+}
+
+
+double find_Xi(double T) {
+    double B2wca = B2_wca(T);
+    double xi_lo = 0;
+    double xi_hi = 1;
+    double xi_mid;
+    printf("B2wca=%g\n", B2wca);
+    do {
+      xi_mid = 0.5*(xi_hi + xi_lo);
+      if (B2_erf(xi_mid, T) > B2wca) {
+        xi_hi = xi_mid;
+      }  else  {
+        xi_lo = xi_mid;
+      } 
+    } while (xi_hi - xi_lo > 0.000000001); 
+    printf("B2_erf mid=%g\n",B2_erf(xi_mid, T));  
+    return xi_mid;  
+}
+//END Find Xi(T)---------------------------------------------------
+
+//static inline double find_Xi(double temp) {
+  //const double epsilon=1;
+  //const double alpha = find_alpha(temp);
+  //return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
+//}
 
 static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
   vector3d rdiff=r-rp;
