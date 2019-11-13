@@ -119,7 +119,7 @@ double B2_wca(double T) {
 }
 
 double B2_erf(double Xi, double T) {
-    double B2_erf=(M_PI/3)*((pow(alpha(T), 3) + 1.5*alpha(T)*pow(Xi,2))*(1+erf(alpha(T)/Xi)) + 1/pow(M_PI,0.5)*(pow(alpha(T),2)*Xi + pow(Xi,3))*exp(-pow((alpha(T)/Xi),2)));
+    double B2_erf=(M_PI/3)*((pow(find_alpha(T), 3) + 1.5*find_alpha(T)*pow(Xi,2))*(1+erf(find_alpha(T)/Xi)) + 1/pow(M_PI,0.5)*(pow(find_alpha(T),2)*Xi + pow(Xi,3))*exp(-pow((find_alpha(T)/Xi),2)));
     return B2_erf;
 }
 
