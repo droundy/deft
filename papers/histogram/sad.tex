@@ -17,7 +17,7 @@
 \newcommand{\blue}[1]{{\bf \color{blue} #1}}
 \newcommand{\cyan}[1]{{\bf \color{cyan} #1}}
 
-\newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
+\newcommand{\davidsays}[1]{{\color{blue} [\green{David:} \emph{#1}]}}
 \newcommand{\jpsays}[1]{{\color{red} [\blue{Jordan:} \emph{#1}]}}
 \newcommandx{\jpcom}[2][1=inline]{\todo[linecolor=gray,backgroundcolor=light-gray,bordercolor=dark-gray,#1]{\textbf{Jordan says:} #2} }
 \begin{document}
@@ -39,6 +39,7 @@ Factor
   Approximation with a Dynamic update factor (SAD)
   which dynamically adjusts the update factor $\gamma_t$ during the course of
   the simulation. We test this method on the square-well fluid and
+  the 31-atom Lennard-Jones cluster and
   compare the convergence time and average entropy error for several
   related
   Monte Carlo methods. We find that both the SAD and $1/t$-Wang-Landau ($1/t$-WL)
@@ -145,40 +146,13 @@ update factor), and will discuss it in detail in the methods section. We compare
 its convergence properties with three existing flat histogram methods: WL,
 $1/t$-WL, and SAMC.
 
-\jpcom{edit some here!}
-As a test case, we consider the square-well fluid i.e. a system of particles
-whose interactions are governed by a square-well
-potential~\cite{singh2003surface, barker2004perturbationSW}.  The square-well
-potential is an ideal test-bed as it is a simple model for a liquid, which
-includes both attractive and repulsive
-interactions~\cite{barker1967-SW-perturbation, vega1992phase}.  The potential
-$U(\textbf{r})$ for such a system is given by
-\begin{equation}
- U(\textbf{r})=\begin{cases} \infty &
- \lvert\textbf{r}\rvert< \sigma\\-\epsilon &
- \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 &
- \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
-\end{equation}
-where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
-reduced range of the potential well, and $\epsilon$ is its depth. This model has
-the further advantage that binning is not required because the energy is
-discrete.
-
-\jpcom{Describe Lennard-Jones clusters we test SAD ability to handle complex
-energy landscapes. We choose 31 and 38 due to complex funnels In the particular
-case of n=38 there exist two funnels at low energies representing octahedral (Oh)
-and icosahedral (ico) energy minima [5] leading to a pronounced size-specific
-behavior at low temperatures, which is especially difficult to simulate. The
-first numerical success}
-
 In this work, we compare four flat histogram methods.  We outline the
 general workings of each algorithm that we developed in detail while
 summarizing algorithms that were developed in other works.  The
 following methods are discussed and simulated for the square-well
-fluid: Wang-Landau (WL), $1/t$-Wang-Landau ($1/t$-WL), Stochastic
-Approximation Monte Carlo (SAMC), and SAD.
-\jpcom{In addition, we test the ability of SAD to accurately and efficiently
-samples low-temperature solid-solid transitions for Lennard-Jones clusters.}
+fluid and the 31-atom Lennard-Jones cluster: Wang-Landau (WL),
+$1/t$-Wang-Landau ($1/t$-WL), Stochastic Approximation Monte Carlo
+(SAMC), and SAD.
 
 \section{Flat histogram methods}\label{sec:histogram}
 The goal of flat histogram methods (also called \emph{broad histogram}
@@ -588,6 +562,27 @@ for the user to choose.
 
 \section{Results}\label{sec:results}
 
+\subsection{Square-well fluid}
+\davidsays{Edit this paragraph: introduce novelty of square well fluid
+in particular, and importance.}
+As our first test case, we consider the square-well fluid i.e. a
+system of particles whose interactions are governed by a square-well
+potential~\cite{singh2003surface, barker2004perturbationSW}.  The
+square-well potential is an ideal test-bed as it is a simple model for
+a liquid, which includes both attractive and repulsive
+interactions~\cite{barker1967-SW-perturbation, vega1992phase}.  The
+potential $U(\textbf{r})$ for such a system is given by
+\begin{equation}
+ U(\textbf{r})=\begin{cases} \infty &
+ \lvert\textbf{r}\rvert< \sigma\\-\epsilon &
+ \sigma<\lvert\textbf{r}\rvert<\lambda\sigma\\0 &
+ \lvert\textbf{r}\rvert > \lambda\sigma\end{cases}
+\end{equation}
+where $\sigma$ is the hard-sphere diameter of the particle, $\lambda$ is the
+reduced range of the potential well, and $\epsilon$ is its depth. This model has
+the further advantage that binning is not required because the energy is
+discrete.
+
 \begin{figure*}
   \includegraphics[width=0.5\textwidth]{periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf}%
 \includegraphics[width=0.5\textwidth]{periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf}
@@ -654,8 +649,8 @@ simulations run with different random number seeds.
   %~ \frac{1}{N_S \text{num seeds}}\sum_s^{\text{num seeds}}\sum_{i}^{N_S} \left|S_\text{ref}(E_i) - S_\text{method}(E_i)\right|
 %~ \end{align}
 
-\subsection{A periodic system with 50 atoms}
-
+\subsubsection{50 square-well atoms}
+\davidsays{check this periodic}
 For this simulation, we chose a minimum reduced
 temperature of $1/3$, which corresponds to an interesting energy range
 from $-248$ to $-120$.  The number of important energy states
@@ -728,7 +723,8 @@ distance than SAMC is.
 \end{figure}
 
 
-\subsection{A periodic system with 256 atoms}
+\subsubsection{256 square-well atoms}
+\davidsays{check this periodic}
 Next we will introduce a considerably larger simulation containing 256
 atoms which has a maximum entropy about 1500 greater than its minimum.
 This makes exploring the entire range of energies extremely expensive,
@@ -757,6 +753,54 @@ $10^{10}$ moves.  Once again, the convergence of SAD is essentially
 the same as that of the $1/t$-WL method.
 
 \begin{figure}
+  \includegraphics[width=\columnwidth]{figs/lj-cv}
+  \caption{The heat capacity of the LJ31 cluster after $10^{12}$ moves
+    as calculated with each method.}
+  \label{fig:lj-cv}
+\end{figure}
+
+\subsection{31-atom Lennard-Jones cluster}
+
+In order to explore both the bin-size behavior and low-temperature
+effectiveness of our algorithm, we chose to study the 31-atom cluster
+(LJ31).
+Clusters of Lennard-Jones atoms have been frequently used for testing
+Monte Carlo algorithms~\davidsays{add a few citations}.  The LJ31
+cluster is commonly used for testing convergence of algorithms
+because it features a two-funnel energy landscape with a significant
+barrier between the two low-energy states~\davidsays{add citations}.
+In particular, the LJ31 cluster features a solid-solid phase
+transition at a temperature of around $T=0.03\epsilon/k_B$ that is
+challenging to converge~\davidsays{cite}.  Poulain \emph{et al.}
+tested a variety of variants of WL on LJ31 and found
+\davidsays{summarize}~\cite{poulain2006performances}.
+
+\jpcom{This \P\ should be commented once summarized.
+Poulain \emph{et al.} found very poor convergence for a variety of
+modified WL methods on the LJ31
+cluster~\cite{poulain2006performances}.  Sadly, they don't mention the
+energy range or bin size that was used in their simulation, so their
+results cannot be reproduced.  They do mention that they use 1000
+energy bins, which if they used an energy range of
+$[-133.58\epsilon,0]$ would correspond to a bin size of $\Delta
+E\approx 0.13\epsilon$, which we find to be too large to accurately
+predict the heat capacity peak at $0.03\epsilon/k_B$.  Looks like they
+only ran $\sim 10^{10}$ moves. We can't converge in that few moves either.}
+
+Figure~\ref{fig:lj-cv} shows the heat capacity of the LJ31 cluster as
+a function of temperature.  There are two peaks, a large peak at 0.2?
+corresponding to melting temperature, and a small peak around 0.03 for
+the solid-solid transition from a mackay to antimackay
+wahatever~\davidsays{cite}.  We keep our atoms in a spherical box with
+radius 2.5$\sigma$, as others do~\davidsays{cite}.  We find that using
+a larger box (with radius $5\sigma$) has a large effect on the melting
+peak, and a smaller but still significant effect on the solid-solid
+transition.  Since our focus is on the convergence rate, we focused on
+the smaller box size.  We further restricted our simulations to
+negative energies, as the microcanonical energy at infinite
+temperature is rather high for such a small box.
+
+\begin{figure}
   \includegraphics[width=\columnwidth]{figs/lj-cv-error}
   \caption{The maximum error in the heat capacity of the LJ31 cluster
     in the temperature range from 0.01~$\epsilon/k_B$ to
@@ -768,32 +812,6 @@ the same as that of the $1/t$-WL method.
   \label{fig:lj-cv-error}
 \end{figure}
 
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figs/lj-cv}
-  \caption{The heat capacity of the LJ31 cluster after $10^{12}$ moves
-    as calculated with each method.}
-  \label{fig:lj-cv}
-\end{figure}
-
-\subsection{Lennard-Jones clusters with 31 atoms}
-
-Clusters of Lennard-Jones atoms have been frequently used for testing
-Monte Carlo algorithms~\davidsays{add a few citations}.  The 31-atom
-cluster is popular because it features a two-funnel energy landscape
-with a significant barrier between the two low-energy
-states~\davidsays{add citations}.
-
-Poulain \emph{et al.} found very poor convergence for a variety of
-modified WL methods on the LJ31
-cluster~\cite{poulain2006performances}.  Sadly, they don't mention the
-energy range or bin size that was used in their simulation, so their
-results cannot be reproduced.  They do mention that they use 1000
-energy bins, which if they used an energy range of
-$[-133.58\epsilon,0]$ would correspond to a bin size of $\Delta
-E\approx 0.13\epsilon$, which we find to be too large to accurately
-predict the heat capacity peak at $0.03\epsilon/k_B$.  Looks like they
-only ran $\sim 10^{10}$ move. We can't converge in that few moves either.
-
 The heat capacity changes significantly even at these low temperatures
 when the size of the cavity is increased.  We use a 2.5 cavity because
 ``everyone else'' does~\cite{poulain2006performances}.  For purposes
@@ -803,8 +821,12 @@ volume is not the most meaningful quantity to predict for a cluster.
 
 Dependence on bin width.  Figure~\ref{fig:lj-cv-error} shows that the
 heat capacity converges just as well for bin widths varying over two
-orders of magnitude.  WL and $1/t$-WL show similar behavior, so this
-is not new, but is encouraging.
+orders of magnitude, although for bins as large as $\Delta
+E=0.1\epsilon$ the error in the heat capacity is significant, as is
+apparent in Fig~\ref{fig:lj-cv}.  The entropy itself converges much
+more slowly for a smaller $\Delta E$, but when summing over energies
+the statistical fluctuations in the entropy cancel. WL and $1/t$-WL
+show similar behavior, so this is not new, but is encouraging.
 
 Specifying temperature range rather than energy range is beneficial.
 Both WL and $1/t$-WL are incredibly sensitive to the minimum energy
@@ -815,6 +837,12 @@ an appropriate energy range.  Specifying the temperature range
 \emph{does} matter! We had to do a whole bunch of $1/t$-WL
 computations in order to determine what would be a sufficient
 low-energy cutoff.
+
+SAMC is a major pain.  The $t_0$ value needs to be adjusted when
+$\Delta E$ is changed or when the energy range is changed.  The energy
+range has the same downsides as the WL methods, although it manifests
+differently, with failure to converge as the problem, rather than
+failure for $\gamma_t$ to decrease.
 
 \section{Conclusions}
 We have introduced a new algorithm, a variant of the SAMC method, which

@@ -263,7 +263,9 @@ def style_args(method):
         args['linewidth'] = 1.1
     return args
 
-def plot(x, y, method=None):
+def plot(x, y, method=None, axes=None):
+    if axes is not None:
+        return axes.plot(x,y, **style_args(method))
     return plt.plot(x,y, **style_args(method))
 
 def loglog(x, y, method=None):

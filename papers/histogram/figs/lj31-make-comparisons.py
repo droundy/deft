@@ -4,10 +4,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-T = np.arange(0.01, 0.06000001, 0.0005)
+T = np.arange(0.01, 0.05000001, 0.0005)
+
+wideT = np.arange(0.01, 0.4000001, 0.001)
 
 fnames = [
     '/home/jordan/sad-monte-carlo/lj-31-benchmark',
+
+    '/home/jordan/sad-monte-carlo/lj-sad-31-bin001',
+    '/home/jordan/sad-monte-carlo/lj-sad-31-bin01',
+    '/home/jordan/sad-monte-carlo/lj-sad-31-bin002',
+    # '/home/jordan/sad-monte-carlo/lj-sad-31-bin0005',
+    '/home/jordan/sad-monte-carlo/lj-sad-31-bin0001',
 
     '/home/jordan/sad-monte-carlo/lj-wl-31-bin01',
     '/home/jordan/sad-monte-carlo/lj-wl-31-bin001',
@@ -41,17 +49,12 @@ fnames = [
     '/home/jordan/sad-monte-carlo/lj-samc-31-1e7-bin002',
     '/home/jordan/sad-monte-carlo/lj-samc-31-1e7-bin0005',
     '/home/jordan/sad-monte-carlo/lj-samc-31-1e7-bin0001',
-
-    '/home/jordan/sad-monte-carlo/lj-sad-31-bin01',
-    '/home/jordan/sad-monte-carlo/lj-sad-31-bin001',
-    '/home/jordan/sad-monte-carlo/lj-sad-31-bin002',
-    # '/home/jordan/sad-monte-carlo/lj-sad-31-bin0005',
-    '/home/jordan/sad-monte-carlo/lj-sad-31-bin0001',
 ]
 
 bench = fnames[0]
 
 CV = None
+need_wide_cv = True
 
 def heat_capacity(T, E, S):
     C = np.zeros_like(T)
@@ -82,6 +85,13 @@ for fname in fnames:
                    np.array([T, CV]).transpose(),
                    fmt='%.4g', # good enough for our plot
         );
+    elif need_wide_cv:
+        wideCV = heat_capacity(wideT, my_energy, my_entropy[-1,:])
+        np.savetxt(datadir+'wide-cv.txt',
+                   np.array([wideT, wideCV]).transpose(),
+                   fmt='%.4g', # good enough for our plot
+        );
+        need_wide_cv = False
 
     cv_error = []
     cv_max_error = []
@@ -110,6 +120,10 @@ for fname in fnames:
         if time[t] == 1e12:
             np.savetxt(datadir+os.path.basename(fname)+'-cv.txt',
                        np.array([T, mycv]).transpose(),
+                       fmt='%.4g', # good enough for our plot
+            );
+            np.savetxt(datadir+os.path.basename(fname)+'-wide-cv.txt',
+                       np.array([wideT, heat_capacity(wideT, my_energy, my_entropy[t,:])]).transpose(),
                        fmt='%.4g', # good enough for our plot
             );
 

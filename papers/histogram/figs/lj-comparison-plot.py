@@ -115,10 +115,10 @@ for i in np.arange(-8, 19, 1.0):
 #         data = np.loadtxt(datadir+fname+'-cv-error.txt')
 #         colors.loglog(data[:,0], data[:,2], method=method)
 
-plt.xlabel(r'$\textrm{Moves}$')
-plt.ylabel(r'$\textrm{Maximum Error in }C_V/k_B$')
+plt.xlabel(r'Moves')
+plt.ylabel(r'Maximum Error in $C_V/k_B$')
 
-plt.xlim(1e7, 4e12)
+plt.xlim(1e7, 2e12)
 plt.ylim(3e-1,1e4)
 
 colors.legend()
@@ -129,27 +129,70 @@ plt.savefig('figs/' + 'lj-cv-error.pdf')
 plt.figure('cv')
 
 data = np.loadtxt(datadir+'bench-cv.txt')
-colors.plot(data[:,0], data[:,1], method='bench')
+
+wideax = plt.gca();
+# inset axes....
+inset_rect = [0.08, 0.43, 0.46, 0.57]
+zoomax = wideax.inset_axes(inset_rect)
+
+zoomax.set_xlim(data[0,0], data[-1,0])
+
+zoom_ymin = 89
+zoom_ymax = 125
+zoomax.set_ylim(zoom_ymin, zoom_ymax)
+colors.plot(data[:,0], data[:,1], method='bench', axes=zoomax)
+data = np.loadtxt(datadir+'wide-cv.txt')
+wideax.set_xlim(0, data[-1,0])
+wide_ymin = 89
+wide_ymax = 190
+wideax.set_ylim(wide_ymin, wide_ymax)
+colors.plot(data[:,0], data[:,1], method='bench', axes=wideax)
 
 for method in files:
         fname = files[method][0.01]
         data = np.loadtxt(datadir+fname+'-cv.txt')
+        widedata = np.loadtxt(datadir+fname+'-wide-cv.txt')
         if len(data) == 0:
                 continue
-        colors.plot(data[:,0], data[:,1], method=method)
+        if 'sad' in method:
+                colors.plot(data[:,0], data[:,1], method=r'SAD $\Delta E=0.01\epsilon$', axes=zoomax)
+                colors.plot(widedata[:,0], widedata[:,1], method=r'SAD $\Delta E=0.01\epsilon$', axes=wideax)
+                fname = files[method][0.001]
+                if os.path.exists(datadir+fname+'-cv.txt'):
+                        data = np.loadtxt(datadir+fname+'-cv.txt')
+                        colors.plot(data[:,0], data[:,1], method=r'SAD $\Delta E=0.001\epsilon$', axes=zoomax)
+                        widedata = np.loadtxt(datadir+fname+'-wide-cv.txt')
+                        colors.plot(widedata[:,0], widedata[:,1], method=r'SAD $\Delta E=0.001\epsilon$', axes=wideax)
+        else:
+                colors.plot(data[:,0], data[:,1], method=method, axes=zoomax)
+                colors.plot(widedata[:,0], widedata[:,1], method=method, axes=wideax)
 for method in extra_files:
         fname = extra_files[method]
-        data = np.loadtxt(datadir+fname+'-cv.txt')
-        if len(data) == 0:
-                continue
-        colors.plot(data[:,0], data[:,1], method=method)
+        if os.path.exists(datadir+fname+'-cv.txt'):
+                data = np.loadtxt(datadir+fname+'-cv.txt')
+                if len(data) == 0:
+                        continue
+                colors.plot(data[:,0], data[:,1], method=method, axes=zoomax)
 
-plt.xlim(data[0,0], data[-1,0])
 plt.xlabel(r'$k_BT/\epsilon$')
 plt.ylabel(r'$C_V/k_B$')
-plt.ylim(89, 125)
 
-colors.legend(framealpha=1)
+print('hello', 0 + inset_rect[0]*(widedata[-1,0]-0))
+print(widedata[0,0])
+wideax.plot([inset_rect[0]*widedata[-1,0],
+             data[0,0],
+             data[0,0]],
+            [wide_ymax, zoom_ymax, 0], '-', color='k', linewidth=0.25, alpha=0.2, zorder=160)
+wideax.plot([data[0,0], data[-1,0], data[-1,0], (inset_rect[0] + inset_rect[2])*widedata[-1,0]],
+            [zoom_ymax, zoom_ymax, wide_ymin, wide_ymin+inset_rect[1]*(wide_ymax-wide_ymin)],
+            '-', color='k', linewidth=0.25, alpha=0.2)
+
+# axins.set_xlabel(r'$k_BT/\epsilon$')
+# axins.set_ylabel(r'$C_V/k_B$')
+# axins.set_xlim(0,0.4)
+
+colors.legend(framealpha=1, loc='lower right')
+
 plt.tight_layout()
 
 plt.savefig('figs/' + 'lj-cv.pdf')
