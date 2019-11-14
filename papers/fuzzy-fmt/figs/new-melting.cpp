@@ -120,7 +120,7 @@ double B2_wca(double T) {
 
 double B2_erf(double Xi, double T) {
   double alpha = find_alpha(T);
-  return (M_PI/3)*((pow(alpha, 3) + 1.5*alpha*pow(Xi,2))*(1+erf(alpha/Xi)) + 1/pow(M_PI,0.5)*(pow(alpha,2)*Xi + pow(Xi,3))*exp(-pow((alpha/Xi),2)));
+  return B2_erf=(M_PI/3)*((pow(alpha, 3) + 1.5*alpha*pow(Xi,2))*(1+erf(alpha/Xi)) + 1/pow(M_PI,0.5)*(pow(alpha,2)*Xi + pow(Xi,3))*exp(-pow((alpha/Xi),2)));
 }
 
 
