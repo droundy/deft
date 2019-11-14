@@ -32,7 +32,7 @@ Factor
   Corvallis, OR 97331}
 
 \begin{abstract}
-  \jpsays{edit to include LJ clusters}
+  \jpsays{edit to include LJ clusters when paper finished!}
   We present a new Monte Carlo algorithm based on the Stochastic
   Approximation Monte Carlo (SAMC) algorithm for directly calculating
   the density of states. The proposed method is Stochastic
@@ -374,7 +374,7 @@ explored.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{N50-lndos-comparison}
-  \caption{The entropy of a square well fluid with 50 atoms and filling fraction
+  \caption{The entropy of a square-well fluid with 50 atoms and filling fraction
         0.3 as the green line.  The green hatched area reflects the
         minimum entropy change needed to converge to the true value.
         The light blue area is the quadratic approximation
@@ -433,8 +433,8 @@ factor from decreasing too rapidly.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{gamma-n256}
-  \caption{The update factor $\gamma_t$ versus iteration for $N=256$
-    square-well atoms, for four different methods: WL, $1/t$-WL, SAMC,
+  \caption{The update factor $\gamma_t$ versus iteration for the
+    square-well fluid with 256 atoms, for four different methods: WL, $1/t$-WL, SAMC,
     and SAD.}
     \label{fig:gamma-vs-t}
 \end{figure}
@@ -563,14 +563,15 @@ for the user to choose.
 \section{Results}\label{sec:results}
 
 \subsection{Square-well fluid}
-\davidsays{Edit this paragraph: introduce novelty of square well fluid
-in particular, and importance.}
 As our first test case, we consider the square-well fluid i.e. a
 system of particles whose interactions are governed by a square-well
 potential~\cite{singh2003surface, barker2004perturbationSW}.  The
 square-well potential is an ideal test-bed as it is a simple model for
 a liquid, which includes both attractive and repulsive
-interactions~\cite{barker1967-SW-perturbation, vega1992phase}.  The
+interactions~\cite{barker1967-SW-perturbation, vega1992phase}.
+\jpcom{In addition to providing an ideal test-bed for new algorithm development,
+to the best of the knowledge of the authors, there are \emph{not} any direct convergence comparison tests in the literature for the variety of flat histogram methods presented here applied to the square-well fluid.}
+The
 potential $U(\textbf{r})$ for such a system is given by
 \begin{equation}
  U(\textbf{r})=\begin{cases} \infty &
@@ -650,8 +651,7 @@ simulations run with different random number seeds.
 %~ \end{align}
 
 \subsubsection{50 square-well atoms}
-\davidsays{check this periodic}
-For this simulation, we chose a minimum reduced
+For this 50 atom simulation, we chose a minimum reduced
 temperature of $1/3$, which corresponds to an interesting energy range
 from $-248$ to $-120$.  The number of important energy states
 for this system is therefore $N_S = 129$.  The entropy of this system is shown in
@@ -724,8 +724,7 @@ distance than SAMC is.
 
 
 \subsubsection{256 square-well atoms}
-\davidsays{check this periodic}
-Next we will introduce a considerably larger simulation containing 256
+Next we introduce a considerably larger simulation containing 256
 atoms which has a maximum entropy about 1500 greater than its minimum.
 This makes exploring the entire range of energies extremely expensive,
 and strongly favors the methods that restrict the energy (or
@@ -763,16 +762,17 @@ the same as that of the $1/t$-WL method.
 
 In order to explore both the bin-size behavior and low-temperature
 effectiveness of our algorithm, we chose to study the 31-atom cluster
-(LJ31).
+(LJ31) because it is the smallest Lennard-Jones cluster that exhibits broken ergoidcity
+and a solid-solid phase transition at a low temperature~\cite{doye1998thermodynamics, martiniani2014superposition}.
 Clusters of Lennard-Jones atoms have been frequently used for testing
-Monte Carlo algorithms~\davidsays{add a few citations}.  The LJ31
+Monte Carlo algorithms~\cite{wales1997global, neirotti2000phase, frantsuzov2005size, mandelshtam2006multiple}.  The LJ31
 cluster is commonly used for testing convergence of algorithms
 because it features a two-funnel energy landscape with a significant
-barrier between the two low-energy states~\davidsays{add citations}.
+barrier between the two low-energy states~\cite{calvo2000entropic, calvo2000phase, poulain2006performances, martiniani2014superposition}.
 In particular, the LJ31 cluster features a solid-solid phase
-transition at a temperature of around $T=0.03\epsilon/k_B$ that is
-challenging to converge~\davidsays{cite}.  Poulain \emph{et al.}
-tested a variety of variants of WL on LJ31 and found
+transition at a temperature of around $T \approx 0.027\epsilon/k_B$ that is
+challenging to converge~\cite{mandelshtam2006multiple}.  Poulain \emph{et al.}
+tested a number of variants of WL on LJ31 and found
 \davidsays{summarize}~\cite{poulain2006performances}.
 
 \jpcom{This \P\ should be commented once summarized.
@@ -787,18 +787,20 @@ E\approx 0.13\epsilon$, which we find to be too large to accurately
 predict the heat capacity peak at $0.03\epsilon/k_B$.  Looks like they
 only ran $\sim 10^{10}$ moves. We can't converge in that few moves either.}
 
-Figure~\ref{fig:lj-cv} shows the heat capacity of the LJ31 cluster as
-a function of temperature.  There are two peaks, a large peak at 0.2?
-corresponding to melting temperature, and a small peak around 0.03 for
-the solid-solid transition from a mackay to antimackay
-wahatever~\davidsays{cite}.  We keep our atoms in a spherical box with
-radius 2.5$\sigma$, as others do~\davidsays{cite}.  We find that using
-a larger box (with radius $5\sigma$) has a large effect on the melting
-peak, and a smaller but still significant effect on the solid-solid
-transition.  Since our focus is on the convergence rate, we focused on
-the smaller box size.  We further restricted our simulations to
-negative energies, as the microcanonical energy at infinite
-temperature is rather high for such a small box.
+Figure~\ref{fig:lj-cv} shows the heat capacity of the LJ31 cluster as a function
+of temperature.  There are two peaks, a large peak around $T \approx
+0.3\epsilon/k_B$? corresponding to melting temperature, and a small peak around
+$T \approx 0.027\epsilon/k_B$ for the solid-solid transition from a
+Mackay-to-anti-Mackay (M $\rightarrow$ aM) transition~\cite{doye1997thermally,
+hendy2001molecular, mandelshtam2006multiple}.  We keep our atoms in a spherical
+box with radius 2.5$\sigma$, as is common in the
+literature~\cite{poulain2006performances, mandelshtam2006multiple}.  We find
+that using a larger box (with radius $5\sigma$) has a large effect on the
+melting peak, and a smaller but still significant effect on the solid-solid
+transition.  Since our focus is on the convergence rate, we focused on the
+smaller box size.  We further restricted our simulations to negative energies,
+as the microcanonical energy at infinite temperature is rather high for such a
+small box.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{figs/lj-cv-error}
@@ -812,12 +814,15 @@ temperature is rather high for such a small box.
   \label{fig:lj-cv-error}
 \end{figure}
 
+\jpcom{this is a basically a repeat of above...
+
 The heat capacity changes significantly even at these low temperatures
 when the size of the cavity is increased.  We use a 2.5 cavity because
 ``everyone else'' does~\cite{poulain2006performances}.  For purposes
 of testing the convergence of the algorithm, we don't need to solve
 for the true heat capacity.  Furthermore, the heat capacity at fixed
 volume is not the most meaningful quantity to predict for a cluster.
+}
 
 Dependence on bin width.  Figure~\ref{fig:lj-cv-error} shows that the
 heat capacity converges just as well for bin widths varying over two
