@@ -61,7 +61,7 @@ class facfile:
             maincontents = f.read()
             includes = includes_re.findall(maincontents)
             if "OptimizedFunctionals" in includes:
-                obj |= set(""" src/SoftFluidFast.o src/SaftFluid2Fast.o
+                obj |= set(""" src/SaftFluid2Fast.o
                                src/EntropySaftFluid2Fast.o src/WaterSaftFast.o src/WaterXFast.o
                                src/HughesXFast.o src/HughesHBFast.o src/TensorWhiteBearFast.o
                                src/WhiteBearMarkIIFast.o src/HardSpheresNoTensor2Fast.o

@@ -38,7 +38,7 @@ old_generated = """
   gSigmaA_by_handFast gSigmaA_automagicFast TensorDensityXXFast
   n2DensityFast VectorDensityXFast YuWuCorrelationFast SaftFluid2Fast
   EntropySaftFluid2Fast CorrelationGrossCorrectFast gSigmaSm2Fast
-  gSigmaAm2Fast gSigmaSFast gSigmaAFast HughesHBFast SoftFluidFast
+  gSigmaAm2Fast gSigmaSFast gSigmaAFast HughesHBFast
   HardFluidFast HardRosenfeldFluidFast WaterXFast HughesXFast
 """.split()
 

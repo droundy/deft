@@ -18,10 +18,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/stat.h>
-#include "new/SFMTFluidFast.h"
 #include "new/SFMTFluidVeffFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
+
+#include "findxi.h"
 
 // Here we set up the lattice.
 static double width = 20;
@@ -127,23 +128,14 @@ int main(int argc, char **argv) {
   sscanf(argv[1], "%lg", &reduced_density);
   sscanf(argv[2], "%lg", &temp);
 
-  HomogeneousSFMTFluid hf;
-  const double rad = 1;
-  hf.sigma() = rad*pow(2,5.0/6.0);
-  hf.epsilon() = 1;
-  hf.kT() = temp;
-  hf.n() = reduced_density*pow(2,-5.0/2.0);
+  HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
 
-  SFMTFluidVeff f(dw, dw, width, dx);
-  f.sigma() = hf.sigma();
-  f.epsilon() = hf.epsilon();
-  f.kT() = hf.kT();
-  //f.Veff() = 0;
+  SFMTFluidVeff f = sfmt_inhomogeneous(temp, dw, dw, width, dx);
   f.mu() = hf.mu();
   f.Vext() = 0;
 

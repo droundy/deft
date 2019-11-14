@@ -24,6 +24,8 @@
 #include "new/Minimize.h"
 #include "version-identifier.h"
 
+#include "findxi.h"
+
 // Here we set up the lattice.
 double zmax = 16;
 double ymax = zmax;
@@ -106,22 +108,14 @@ int main(int argc, char **argv) {
   sscanf(argv[1], "%lg", &reduced_density);
   sscanf(argv[2], "%lg", &temp);
 
-  HomogeneousSFMTFluid hf;
-  hf.sigma() = sigma;
-  hf.epsilon() = epsilon;
-  hf.kT() = temp;
-  hf.n() = reduced_density*pow(2,-5.0/2.0);
+  HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*xmax*ymax*zmax);
 
-  SFMTFluidVeff f(xmax, ymax, zmax, dx);
-  f.sigma() = hf.sigma();
-  f.epsilon() = hf.epsilon();
-  f.kT() = hf.kT();
-  //f.Veff() = 0;
+  SFMTFluidVeff f = sfmt_inhomogeneous(temp, xmax, ymax, zmax, dx);
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.Veff() = -temp*log(hf.n()); // start with a uniform density as a guess
