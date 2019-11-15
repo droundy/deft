@@ -172,11 +172,13 @@ for method in files:
                 colors.plot(widedata[:,0], widedata[:,1], method=method, axes=wideax)
 for method in extra_files:
         fname = extra_files[method]
-        if os.path.exists(datadir+fname+'-cv.txt'):
+        if os.path.exists(datadir+fname+'-cv.txt') and '8' not in fname:
                 data = np.loadtxt(datadir+fname+'-cv.txt')
                 if len(data) == 0:
                         continue
                 colors.plot(data[:,0], data[:,1], method=method, axes=zoomax)
+                widedata = np.loadtxt(datadir+fname+'-wide-cv.txt')
+                colors.plot(widedata[:,0], widedata[:,1], method=method, axes=wideax)
 
 plt.xlabel(r'$k_BT/\epsilon$')
 plt.ylabel(r'$C_V/k_B$')
