@@ -9,6 +9,7 @@ T = np.arange(0.01, 0.05000001, 0.0005)
 wideT = np.arange(0.01, 0.4000001, 0.001)
 
 fnames = [
+    '/home/droundy/src/sad-monte-carlo/tiny-lj-benchmark',
     '/home/jordan/sad-monte-carlo/lj-31-benchmark',
 
     '/home/jordan/sad-monte-carlo/lj-sad-31-bin001',

@@ -16,6 +16,10 @@ import colors
 datadir = 'data/lj31/'
 
 files = {
+    # 'bench': {
+    #         # 0.01: 'tiny-lj-benchmark',
+    #         # 0.01: 'lj-31-benchmark',
+    # },
     'sad': {
             0.1: 'lj-sad-31-bin01',
             0.01: 'lj-sad-31-bin001',
@@ -118,8 +122,8 @@ for i in np.arange(-8, 19, 1.0):
 plt.xlabel(r'Moves')
 plt.ylabel(r'Maximum Error in $C_V/k_B$')
 
-plt.xlim(1e7, 2e12)
-plt.ylim(3e-1,1e4)
+plt.xlim(1e7, 3e12)
+plt.ylim(1e-1,1e4)
 
 colors.legend()
 plt.tight_layout()
