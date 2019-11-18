@@ -5,7 +5,7 @@
 #(use compute-isotherm.py to run figs/new-melting.cpp for many different densities based on user input)
 #ie. figs/new-melting.mkdat --kT 0.5 --n 1.06 --gwstart 0.01 --gwend 0.2 --gwstep 0.01 --fv 0.01 --dx 0.5 --mc-error 0.001 --mc-constant 5 --mc-prefactor 50000 --filename isotherm-kT-0.5_tensor.dat --tensor
 
-#NOTE: Run this script from directory deft/papers/fuzzy-fmt with command ./compute-phasediagram.py --tensor(optional)
+#NOTE: Run this script from directory deft/papers/fuzzy-fmt with command python3 ./compute-phasediagram.py --tensor(optional)
 #Data is stored in the direction deft/papers/fuzzy-fmt/newdata_tensor/phase-diagram
 
 
@@ -37,11 +37,11 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     cmd += ' --fv %g --dx %g --seed %g' % (fv, dx, seed)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
     if args.tensor:
-        cmd += ' --d newdata_tensor/phase-diagram2'   #once new results are compared to the old, remove the "2" at the end of phase-diagram
+        cmd += ' --d newdata_tensor/phase-diagram3'   #once new results are compared to the old, remove the "2" at the end of phase-diagram
         cmd += ' --tensor'
     else:
         #cmd += ' --d data/phase-diagram'
-        cmd += ' --d newdata/phase-diagram2' #once new results are compared to the old, remove the "2" at the end of phase-diagram
+        cmd += ' --d newdata/phase-diagram3' #once new results are compared to the old, remove the "2" at the end of phase-diagram
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
