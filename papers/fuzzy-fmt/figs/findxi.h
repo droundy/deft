@@ -23,7 +23,7 @@ static inline double B2_wca(double T) {
     double dr=rmax_wca/num_points;
     double f_sum=0;
     for (; i<num_points; i++) {
-      r=dr*i+ 0.0000000000001;
+      r=dr*(i+0.5);
       f_sum = f_sum + (-0.5)*(4*M_PI*r*r*dr*f_wca(r, T)); 
     }
     return f_sum;
@@ -36,21 +36,28 @@ static inline double B2_erf(double Xi, double T) {
 
 
 static inline double find_Xi(double T) {
-    double B2wca = B2_wca(T);
-    double xi_lo = 0;
-    double xi_hi = 1;
-    double xi_mid;
-    printf("B2wca=%g\n", B2wca);
-    do {
-      xi_mid = 0.5*(xi_hi + xi_lo);
-      if (B2_erf(xi_mid, T) > B2wca) {
-        xi_hi = xi_mid;
-      }  else  {
-        xi_lo = xi_mid;
-      } 
-    } while (xi_hi - xi_lo > 0.000000001); 
-    printf("B2_erf mid=%g\n",B2_erf(xi_mid, T));  
-    return xi_mid;  
+  static double last_T = 0.0;
+  static double last_Xi = 0.0;
+  if (last_T == T) {
+    return last_Xi;
+  }
+  double B2wca = B2_wca(T);
+  double xi_lo = 0;
+  double xi_hi = 1;
+  double xi_mid;
+  // printf("B2wca=%g\n", B2wca);
+  do {
+    xi_mid = 0.5*(xi_hi + xi_lo);
+    if (B2_erf(xi_mid, T) > B2wca) {
+      xi_hi = xi_mid;
+    }  else  {
+      xi_lo = xi_mid;
+    }
+  } while (xi_hi - xi_lo > 0.000000001);
+  // printf("B2_erf mid=%g\n",B2_erf(xi_mid, T));
+  last_T = T;
+  last_Xi = xi_mid;
+  return xi_mid;
 }
 //END Find Xi(T)---------------------------------------------------
 
