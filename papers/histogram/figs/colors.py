@@ -250,11 +250,11 @@ def style_args(method):
     elif method == r'$1/t$-WL $E_{\min}=-133.58\epsilon$':
         args['linewidth'] = 1
     elif r'$\Delta E=0.1\epsilon$' in method:
-        args['linewidth'] = 3
-    elif r'$\Delta E=0.01\epsilon$' in method:
-        args['linewidth'] = 2
-    elif r'$\Delta E=0.001\epsilon$' in method:
         args['linewidth'] = 1
+    elif r'$\Delta E=0.01\epsilon$' in method:
+        args['linewidth'] = 3
+    elif r'$\Delta E=0.001\epsilon$' in method:
+        args['linewidth'] = 2
 
     if 'SAMC' in fix_legend(method):
         args['linewidth'] = 0.5

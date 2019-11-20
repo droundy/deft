@@ -67,7 +67,7 @@ extra_files = {
         r'$1/t$-WL $E_{\min}=-133.58\epsilon$': 'lj-inv-t-wl-31-bin001-58',
         r'$1/t$-WL $E_{\min}=-133.54\epsilon$': 'lj-inv-t-wl-31-bin001-54',
         r'$1/t$-WL $E_{\min}=-133.52\epsilon$': 'lj-inv-t-wl-31-bin001-52',
-        r'SAD $\Delta E=0.001\epsilon$':  'lj-sad-31-bin0001',
+        # r'SAD $\Delta E=0.001\epsilon$':  'lj-sad-31-bin0001',
 }
 
 plt.figure('cv-error')
@@ -98,7 +98,7 @@ for method in files:
                 #                  edgecolor='none', linewidth=0,
                 #                  color=colors.color(method),
                 #                  alpha=0.1, zorder=-51)
-                colors.loglog(iters[0.001], errors[0.001], method=r'SAD $\Delta E=0.001\epsilon$')
+                # colors.loglog(iters[0.001], errors[0.001], method=r'SAD $\Delta E=0.001\epsilon$')
                 colors.loglog(iters[0.01], errors[0.01], method=r'SAD $\Delta E=0.01\epsilon$')
                 colors.loglog(iters[0.1], errors[0.1], method=r'SAD $\Delta E=0.1\epsilon$')
         else:
@@ -145,13 +145,13 @@ zoomax.set_xlim(data[0,0], data[-1,0])
 zoom_ymin = 89
 zoom_ymax = 125
 zoomax.set_ylim(zoom_ymin, zoom_ymax)
-colors.plot(data[:,0], data[:,1], method='bench', axes=zoomax)
+# colors.plot(data[:,0], data[:,1], method='bench', axes=zoomax)
 data = np.loadtxt(datadir+'wide-cv.txt')
 wideax.set_xlim(0, data[-1,0])
 wide_ymin = 89
 wide_ymax = 190
 wideax.set_ylim(wide_ymin, wide_ymax)
-colors.plot(data[:,0], data[:,1], method='bench', axes=wideax)
+# colors.plot(data[:,0], data[:,1], method='bench', axes=wideax)
 
 for method in files:
         fname = files[method][0.01]
@@ -162,12 +162,12 @@ for method in files:
         if 'sad' in method:
                 colors.plot(data[:,0], data[:,1], method=r'SAD $\Delta E=0.01\epsilon$', axes=zoomax)
                 colors.plot(widedata[:,0], widedata[:,1], method=r'SAD $\Delta E=0.01\epsilon$', axes=wideax)
-                fname = files[method][0.001]
-                if os.path.exists(datadir+fname+'-cv.txt'):
-                        data = np.loadtxt(datadir+fname+'-cv.txt')
-                        colors.plot(data[:,0], data[:,1], method=r'SAD $\Delta E=0.001\epsilon$', axes=zoomax)
-                        widedata = np.loadtxt(datadir+fname+'-wide-cv.txt')
-                        colors.plot(widedata[:,0], widedata[:,1], method=r'SAD $\Delta E=0.001\epsilon$', axes=wideax)
+                # fname = files[method][0.1]
+                # if os.path.exists(datadir+fname+'-cv.txt'):
+                #         data = np.loadtxt(datadir+fname+'-cv.txt')
+                #         colors.plot(data[:,0], data[:,1], method=r'SAD $\Delta E=0.1\epsilon$', axes=zoomax)
+                #         widedata = np.loadtxt(datadir+fname+'-wide-cv.txt')
+                #         colors.plot(widedata[:,0], widedata[:,1], method=r'SAD $\Delta E=0.1\epsilon$', axes=wideax)
         else:
                 colors.plot(data[:,0], data[:,1], method=method, axes=zoomax)
                 colors.plot(widedata[:,0], widedata[:,1], method=method, axes=wideax)

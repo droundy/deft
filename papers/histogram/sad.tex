@@ -755,11 +755,7 @@ the same as that of the $1/t$-WL method.
   \includegraphics[width=\columnwidth]{figs/lj-cv}
   \caption{The heat capacity of the LJ31 cluster after $10^{12}$ moves
     as calculated with each method.  Each simulation used a bin size
-    of $\Delta E=0.01\epsilon$.  The dotted black line labeled
-    ``converged result'' was a $1/t$-WL simulation with the energy
-    constrained to a range $-133.53\epsilon\le E\le -110\epsilon$,
-    all other simulations had a maximum allowed energy of zero.  The
-    ``converged result'' therefore is only converged at low temperatures.}
+    of $\Delta E=0.01\epsilon$.}
   \label{fig:lj-cv}
 \end{figure}
 
@@ -821,8 +817,10 @@ our simulations to negative energies.
     Note that the value of $C_V$ ranges from 90$k_B$ to 120$k_B$, so
     the smallest (maximum) errors seen are around 1\%.  All WL methods
     shown were run with a histogram bin width of $\Delta
-    E=0.01\epsilon$.  Their convergence at other bin widths was
-    similar to that of SAD. }
+    E=0.01\epsilon$.  The converged reference heat capacity was
+    computed with a $1/t$-WL simulation with the energy constrained to
+    a range $-133.53\epsilon\le E\le -110\epsilon$.
+  }
   \label{fig:lj-cv-error}
 \end{figure}
 
@@ -867,19 +865,21 @@ used a bin size of $0.01\epsilon$ for our reference in all plots in
 this paper (including the reference), except where otherwise
 specified.
 
-Figure~\ref{fig:lj-cv-error} shows the largest error in heat capacity
-at low temperatures as a function of the number of Monte Carlo moves
-performed.
+Figure~\ref{fig:lj-cv-error} shows the maximum error in heat capacity
+in the temperature range $0.01\epsilon\le k_BT\le 0.05\epsilon$ as a
+function of the number of Monte Carlo moves performed.
 %
-We explored the convergence behavior of each algorithm as a function
-of bin width, but show only the results for SAD.  Both the WL and
-$1/t$-WL algorithms showed similar behavior to SAD.  In each of these
-algorithms, the rate of convergence of the heat capacity is roughly
+We explored the convergence behavior of each algorithm at two energy
+bin widths ($\Delta E=0.01\epsilon$ and $\Delta E=0.1\epsilon$).  We
+were unable to converge the WL or $1/t$-WL algorithms with the larger
+bin size.
+%
+The rate of convergence for the heat capacity seems to be roughly
 independent of the bin width.  In contrast (but not shown) the entropy
-itself shows significantly larger statistical errors with smaller bin
+itself shows much larger statistical fluctuations with smaller bin
 sizes.  The canonical averaging process in Eq.~\ref{eq:cv} averages
-out those statistical fluctuations, largely eliminating the penalty of
-using a smaller bin size.
+out those statistical fluctuations, which reduces the penalty of using
+a smaller bin size.
 
 %% Dependence on bin width.  Figure~\ref{fig:lj-cv-error} shows that the
 %% heat capacity converges just as well for bin widths varying over two
@@ -891,11 +891,12 @@ using a smaller bin size.
 %% show similar behavior, so this is not new, but is encouraging.
 
 We found the convergence of the WL and $1/t$-WL to be incredibly
-sensitve to the minimum energy chosen, complicating the process of
+sensitive to the minimum energy chosen, complicating the process of
 obtaining a workable result.  The known ground state energy of this
-cluster is $-133.586422$~\cite{northby1987structure, wales1997global}.  With a minimum energy of
-$-133.58\epsilon$, our simulation did not converge in 10$^{12}$ moves.
-With minimum energies of $-133.54\epsilon$, $-133.53\epsilon$, and
+cluster is $-133.586422\epsilon$~\cite{northby1987structure,
+  wales1997global}.  With a minimum energy of $-133.58\epsilon$, none
+of our simulations converged in 10$^{12}$ moves.  With minimum
+energies of $-133.54\epsilon$, $-133.53\epsilon$, and
 $-133.52\epsilon$, the simulations do seem to converge, although the
 lowest energy case was significantly slower and never reached as small
 an error.  This result highlights the advantage of being able to
@@ -952,7 +953,14 @@ converge as rapidly as either SAD or $1/t$-WL even for the best choice of $t_0$,
 when a relatively small range of energies is required, because it always
 simulates all possible energies.
 
-\jpcom{mention something about LJ clusters and what we find!}
+We found that for examining low-energy structures of a Lennard-Jones
+cluster the WL and $1/t$-WL algorithms---versions of which had
+previously found to be unsuccessful on this problem~\cite{}---have
+convergence properties that are highly dependent on the choice of
+energy range to be examined.  This is particularly problematic when
+examining the low-temperature heat capacity, where it is difficult to
+determine the lowest energy that will have a significant impact at the
+temperatures of interest.
 
 %\section{Acknowledgement}
 
