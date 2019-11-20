@@ -16,7 +16,7 @@ fnames = [
     '/home/jordan/sad-monte-carlo/lj-sad-31-bin01',
     '/home/jordan/sad-monte-carlo/lj-sad-31-bin002',
     # '/home/jordan/sad-monte-carlo/lj-sad-31-bin0005',
-    '/home/jordan/sad-monte-carlo/lj-sad-31-bin0001',
+    '/home/droundy/src/sad-monte-carlo/lj-sad-31-bin0001',
 
     '/home/jordan/sad-monte-carlo/lj-wl-31-bin01',
     '/home/jordan/sad-monte-carlo/lj-wl-31-bin001',

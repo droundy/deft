@@ -67,6 +67,7 @@ extra_files = {
         r'$1/t$-WL $E_{\min}=-133.58\epsilon$': 'lj-inv-t-wl-31-bin001-58',
         r'$1/t$-WL $E_{\min}=-133.54\epsilon$': 'lj-inv-t-wl-31-bin001-54',
         r'$1/t$-WL $E_{\min}=-133.52\epsilon$': 'lj-inv-t-wl-31-bin001-52',
+        r'SAD $\Delta E=0.001\epsilon$':  'lj-sad-31-bin0001',
 }
 
 plt.figure('cv-error')
@@ -179,6 +180,8 @@ for method in extra_files:
                 colors.plot(data[:,0], data[:,1], method=method, axes=zoomax)
                 widedata = np.loadtxt(datadir+fname+'-wide-cv.txt')
                 colors.plot(widedata[:,0], widedata[:,1], method=method, axes=wideax)
+        else:
+                print('skipping extra', fname)
 
 plt.xlabel(r'$k_BT/\epsilon$')
 plt.ylabel(r'$C_V/k_B$')

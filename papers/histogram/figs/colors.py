@@ -238,7 +238,7 @@ def style_args(method):
     if fix_legend(method) in _linestyles:
         args['linestyle'] = _linestyles[fix_legend(method)]
     args['zorder'] = legend_order(method)
-    print(method,'zorder', legend_order(method))
+    # print(method,'zorder', legend_order(method))
     if fix_legend(method) == 'SAD':
         args['linewidth'] = 3
     elif method == r'$1/t$-WL $E_{\min}=-133.52\epsilon$':
