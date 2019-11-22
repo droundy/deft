@@ -117,7 +117,7 @@ bins~\cite{schneider2017convergence}.
 
 Liang began to consider Stochastic Approximation as a mathematical
 generalization of the WL approach, with convergence that could be mathematically
-proven~\cite{liang2006theory}. In 2007, Liang, Liu, and Carrol \emph{et al.}
+proven~\cite{liang2006theory}. In 2007, Liang \emph{et al.}
 developed Stochastic Approximation Monte Carlo (SAMC)~\cite{liang2007stochastic,
 liang2009improving}, and proved its convergence, although the method still has a
 system specific user-defined parameter which must be tuned when applying this
@@ -175,11 +175,11 @@ All the flat histogram Monte Carlo methods begin with randomly chosen
 ``moves'' which change the state of the system and must satisfy
 detailed balance.  Each algorithm differs in how it determines the
 probability of accepting a move and in what additional statistics must
-be collected in order decide on that probability.
+be collected in order to decide on that probability.
 
 Flat histogram methods calculate the density of states $D(E)$ for a discrete set
 of energies~\cite{wang2001determining, dayal2004performance, troyer2003flat,
-trebst2004optimizing}. For this reason, energy binning becomes an important
+trebst2004optimizing}. Therefore, energy binning becomes an important
 consideration for systems with a continuum of possible energies.  Energy bins
 are typically of uniform size for the entire energy
 continuum~\cite{fasnacht2004adaptive}. Some methods such as
@@ -199,10 +199,10 @@ which biases the simulation in favor of energies with low weights.  A set of
 weights that are proportional to the density of states $D(E)$ of the system will
 result in an entirely flat histogram, which means that the weights should
 converge to being proportional to the density of states.  The natural logarithm
-of the weights are typically stored, since the density of states will often vary
-over a few hundred orders of magnitude. In the microcanonical ensemble the
+of the weight is typically stored, since the density of states will often vary
+over a few hundred orders of magnitude. In the microcanonical ensemble, the
 entropy is defined as $S(E) \equiv \ln(D(E))$ (where $k_B \equiv 1$), the
-logarithm of the weights is an approximation of the entropy.
+logarithm of the weight is an approximation of the entropy.
 
 Each approach uses a random walk in energy space to estimate the density of
 states.  The core of these approaches is to update the weights at each step of
@@ -211,7 +211,7 @@ the simulation
 	\ln{w_{t+1}(E)}=\ln{w_{t}(E)}
 	+\gamma_t
 \end{equation}
-where $t$ is number of the current move, $\gamma_t$ is an update factor
+where $t$ is the number of the current move, $\gamma_t$ is an update factor
 that varies over the simulation, and $E$ is the current energy.  This update
 causes the random walk to avoid energies that have been frequently sampled,
 enabling a rapid exploration of energy space. This approach violates detailed
@@ -361,18 +361,20 @@ the method. However, identifying a minimum temperature of interest
 $T_\text{min}$ may be easier for a user than determining in advance
 an energy range of interest or the unphysical parameter $t_0$.
 
-We set the maximum temperature of interest as $T=\infty$ for several reasons.
-Firstly, when this temperature is reached, the system is maximally randomized.
-Allowing infinite temperature further ensures that the system can surmount an
-energy barrier of any size.  Finally, the high temperatures are ``easy'' to
-simulate, and tend to converge very quickly.  We note, however, that this is
-under the assumption that infinite temperature corresponds to a finite energy,
-as is the case for configurational sampling.  Were we to include kinetic energy
-in a simulation (as in molecular dynamics), or to examine a system such as a
-high density Lennard-Jones fluid with an entropy maximum at an energy that is
-far from the energy range of physical interest, then we would need to apply a
-maximum temperature, which could slow down the rate at which state space is
-explored.
+We set the maximum temperature of interest as $T=\infty$ for a couple
+of reasons.  First, when this temperature is reached, the system is
+maximally randomized, so allowing infinite temperature further ensures
+that the system can surmount an energy barrier of any size.  Second,
+the high temperatures tend to be ``easy'' to simulate, and tend to
+converge very quickly.  We note, however, that this is under the
+assumption that infinite temperature corresponds to a finite energy,
+as is the case for configurational sampling.  Were we to include
+kinetic energy in a simulation (as in molecular dynamics), or to
+examine a system such as a high density Lennard-Jones fluid with an
+entropy maximum at an energy that is far from the energy range of
+physical interest, then we would need to apply either a maximum
+temperature or a maximum energy, either of which could slow down the
+rate at which state space is explored.
 
 \begin{figure}
   \includegraphics[width=\columnwidth]{N50-lndos-comparison}
@@ -474,7 +476,7 @@ may only increase, while $E_L$ may only decrease over the course of the
 simulation, which results in a conservative estimate of the range of
 energies that need be sampled.
 
-During the simulation when considering a move inside of the energy
+During the simulation when considering a move inside the energy
 range of interest $E_L \le E \le E_H$, the weights are used as in the
 three methods already described.  If $E\ge E_H$, the weight is taken
 to be
@@ -762,10 +764,9 @@ the same as that of the $1/t$-WL method.
 
 \subsection{31-atom Lennard-Jones cluster}
 
-In order to further explore both the
-convergence of our algorithm, we chose to study the 31-atom cluster
+We also examined convergence of each algorithm on the 31-atom cluster
 (LJ31), which is the smallest Lennard-Jones cluster that exhibits
-broken ergoidcity and a solid-solid phase transition at a low
+broken ergodicity and a solid-solid phase transition at a low
 temperature~\cite{doye1998thermodynamics,
   martiniani2014superposition}.  Clusters of Lennard-Jones atoms have
 been frequently used for testing Monte Carlo
@@ -949,15 +950,15 @@ converge as rapidly as either SAD or $1/t$-WL even for the best choice of $t_0$,
 when a relatively small range of energies is required, because it always
 simulates all possible energies.
 
-Finally, we find that for examining a Lennard-Jones
-cluster the WL and $1/t$-WL algorithms---versions of which had
-previously found to be unsuccessful on this problem~\cite{poulain2006performances}---have
+Finally, we find that for examining a Lennard-Jones cluster the WL and
+$1/t$-WL algorithms---versions of which had previously been found to
+be unsuccessful on this problem~\cite{poulain2006performances}---have
 convergence properties that are highly dependent on the choice of
 energy range to be examined.  This is particularly problematic when
 examining the low-temperature heat capacity, where it is difficult to
 determine the lowest energy that will have a significant impact at the
-temperatures of interest. This is an example of how SAD is more powerful when the range
-of energies is not known in advance.
+temperatures of interest. This is an example of how SAD is more
+powerful when the range of energies is not known in advance.
 
 %\section{Acknowledgement}
 
