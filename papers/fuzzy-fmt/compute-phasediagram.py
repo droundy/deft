@@ -50,13 +50,13 @@ kTs = np.arange(2, 0.01, -0.1)   # kT must be < 2.21 to fit theory
 #kTs = np.arange(1.15, 0.7, -0.05)
 kTs=np.append(kTs, 0.01)
 for kT in kTs:
-    for n in np.arange(0.01, 0.59, 0.02):   #homogeneous fluid
-        run_new_melting(kT, n, 0.001, 0.001, 0.001, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
-    for n in np.arange(0.59, 1.2, 0.02):    #crystal
-        if args.tensor:
-            run_new_melting(kT, n, 0.01, 0.2, 0.01)    #temp, density, gw_start, gw_end, gw_step
-        else:
-            run_new_melting(kT, n, 0.01, 0.2, 0.01)
-    #for n in np.arange(0.01, 1.11, 0.01):
-        #run_new_melting(0.5, 0.96, 0.01, 0.2)
+    # for n in np.arange(0.01, 0.59, 0.02):   #homogeneous fluid
+        # run_new_melting(kT, n, 0.001, 0.001, 0.001, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
+    # for n in np.arange(0.59, 1.2, 0.02):    #crystal
+        # if args.tensor:
+            # run_new_melting(kT, n, 0.01, 0.2, 0.01)    #temp, density, gw_start, gw_end, gw_step
+        # else:
+            # run_new_melting(kT, n, 0.01, 0.2, 0.01)
+    for n in np.arange(0.01, 0.59, 0.02):
+        run_new_melting(kT, n, 0.01, 0.2, 0.01)
 
