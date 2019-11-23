@@ -4,8 +4,8 @@ We appreciate the referees' careful reading of our paper, and feel that their
 feedback has led to a significant improvement. We have added new data and a
 section for the 31 atom Lennard-Jones cluster. We show specific heat curves for
 this test system and show the convergence SAD vs the other method quantitatively
-(a quantitative comparison of this kind has not been done in the literature to
-our knowledge). We also added a note to the Square-well fluid section
+(a quantitative comparison of convergence on the LJ31 system has not been done in the literature to
+our knowledge).  We also added a note to the Square-well fluid section
 highlighting that this system has not been explored using broad histogram
 methods. We believe that we have addressed all of the referees' concerns and per
 the first referee's own words 'If that or similar data would be in the paper
@@ -29,6 +29,11 @@ state in the paper) then 'there would be no doubt whatsoever that SAD is a
 "substantial improvement of existing computational methods".'
 We believe that we have completely satisfied the first referee and thank the referee
 for pointing our attention toward simulating Lennard-Jones clusters.
+
+We were surprised by how poorly the 1/t-WL algorithm performed on the LJ31 system,
+in particular the convergence was very strongly affected by the lower limit of
+the energy range chosen.  This example thus strongly highlights the benefits
+SAD provides when examining the heat capacity over a chosen temperature range.
 
 Response to second referee
 # -----------------------------------------------------------------------------#
