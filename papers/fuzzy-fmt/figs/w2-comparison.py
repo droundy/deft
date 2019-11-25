@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
-from __future__ import division
+from __future__ import division, print_function
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
-import matplotlib
-matplotlib.use('Agg')
+import matplotlib, sys
+if 'show' not in sys.argv:
+    matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import erf
@@ -22,8 +23,6 @@ rmax=1.2
 alpha, Xi, diameter = wca_erf.parameters(kT)
 
 r = np.arange(rmin, diameter, 0.01*Xi)
-
-plt.figure(figsize=(6,4))
 
 figscale=1.9
 plt.figure(figsize=(4*figscale,3*figscale))
@@ -61,3 +60,4 @@ plt.xlabel('$r/\sigma$')
 plt.legend(loc='best')
 
 plt.savefig('figs/w2-comparison.pdf')
+plt.show()

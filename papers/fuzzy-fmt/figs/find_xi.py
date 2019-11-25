@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 #This program finds xi for a given T by setting the second virial coefficient
 #computed with V_wca equal to the second virial coefficient computed with V_erf.
 #It is referenced by wca_erf.py which is referenced by potential-plot.py

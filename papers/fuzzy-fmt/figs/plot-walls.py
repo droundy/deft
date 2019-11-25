@@ -63,16 +63,16 @@ def plot_walls(reduced_density, temps):
     legend()
     xlim(-0.2, 4)
 
-# input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 2.5, 0.1]]
-# input: ['figs/new-data/wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5, 0.1]]
-# input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5, 0.1]]
+# input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 2.5]]
+# input: ['figs/new-data/wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5]]
+# input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5]]
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 figure(figsize=(9,14.5))
 
 subplot(2, 1, 1)
-plot_walls(60, [10.0, 2.5, 0.1])
+plot_walls(60, [10.0, 2.5])
 
 subplot(2, 1, 2)
 plot_walls(100, [10.0, 5.0, 2.5]) # 1.0 could work?

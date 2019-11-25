@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+from __future__ import division
 
 import re, string, os, sys
 
