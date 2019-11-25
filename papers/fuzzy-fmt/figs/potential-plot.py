@@ -15,6 +15,7 @@ from scipy.special import erf
 import wca_erf
 import styles
 
+#kT = 1.0
 kT = 1.0
 sigma = 1
 
@@ -36,7 +37,8 @@ plt.plot(r, Verf, 'g--', label=r'$V_{erf}$ for $kT/\epsilon = %g$' % kT)
 plt.axhline(kT, color='g', ls=':')
 plt.axvline(alpha, color='g', linestyle=':')
 
-kT = .1
+#kT = .1
+kT = .4
 alpha, Xi, diameter = wca_erf.parameters(kT)
 Verf = -kT*np.log(0.5*(erf ((r-alpha)/Xi)+1))
 plt.plot(r, Verf, 'b--', label=r'$V_{erf}$ for $kT/\epsilon = %g$' % kT)
