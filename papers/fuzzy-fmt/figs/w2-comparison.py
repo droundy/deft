@@ -39,7 +39,8 @@ plt.plot(r, fp_erf, 'g--', label=r"$f'_{erf}$ for $kT/\epsilon = %g$" % kT)
 
 plt.axvline(alpha, color='g', linestyle=':')
 
-kT=.1
+#kT=.1
+kT=.4
 
 r = np.arange(rmin, diameter, 0.01*Xi)
 fp_wca = np.exp(-wca_erf.V(r)/kT)*(-wca_erf.Vprime(r)/kT)
