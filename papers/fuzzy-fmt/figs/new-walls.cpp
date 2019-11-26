@@ -53,7 +53,11 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
   while (min.improve_energy(verbose)) {
-    //f->run_finite_difference_test("SFMT");
+    // f->run_finite_difference_test("SFMT");
+    if (min.energy() < -1e20) {
+      printf("trouble with the energy: %g\n", min.energy());
+      break;
+    }
   }
   took("Doing the minimization");
   min.print_info();
