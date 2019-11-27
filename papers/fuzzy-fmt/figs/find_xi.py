@@ -57,39 +57,3 @@ def Xi(alpha, T, sigma = 1, eps = 1):
 # Xi_at_T=xi_mid
 # print(Xi_at_T, T)
 
-# #another way------------------------------------------------------------------
-
-# def alpha(T) :
-    # return (2.0/(1+np.sqrt(T*np.log(2))))**(1.0/6)
-
-# #Compute B2_erf analytically (default method): 
-# def B2_erf_analytical(Xi,T) :   
-    # return np.pi/3*((alpha(T)**3 + 1.5*alpha(T)*Xi**2)*(1+erf(alpha(T)/Xi)) + 1/np.sqrt(np.pi)*(alpha(T)**2*Xi + Xi**3)*np.exp(-(alpha(T)/Xi)**2))
-
-
-# #Compute B2_wca numerically by evaluating the integral (default method):
-# def Vwca(r):
-    # return 4*((1/r)**12-(1/r)**6) +  1
-    
-# def f_wca(r, T):
-    # return np.exp(-Vwca(r)/T) - 1
-
-# def B2_wca_numerical(T):
-    # rmax = 2.0**(1/6)
-    # r = np.linspace(0, rmax, 10000)
-    # f = f_wca(r, T)
-    # f[0] = 1
-    # return -0.5*(4*np.pi*r**2*r[1]*f).sum()  
-
-# #Find Xi at a given T   
-# def Xi(T, sigma = 1, eps = 1):
-    # B2wca = B2_wca_numerical(T)   #use with B2 wca numerical method  (default)
-    # xi_lo = 0
-    # xi_hi = 1
-    # while xi_hi - xi_lo > 0.000001:
-        # xi_mid = 0.5*(xi_hi + xi_lo)
-        # if B2_erf_analytical(xi_mid, T) > B2wca:    #use with B2 erf analytical method (default)
-            # xi_hi = xi_mid
-        # else:
-            # xi_lo = xi_mid
-    # return xi_mid
