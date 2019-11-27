@@ -288,7 +288,7 @@ plt.figure('Phase Diagram of P vs T')
 
 ##Pressure vs Temperature Phase Diagram
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
-plt.fill_between(kT_data, p_at_freezing, 35, color='blue')    #FIX - change 30
+plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
