@@ -29,7 +29,6 @@ def B2_wca_numerical(T):
     return -0.5*(4*np.pi*r**2*r[1]*f).sum()  
 
 #Find Xi at a given T   
-#alpha=(2.0/(1+np.sqrt(T*np.log(2))))**(1.0/6)
 def Xi(alpha, T, sigma = 1, eps = 1):
     B2wca = B2_wca_numerical(T)   #use with B2 wca numerical method  (default)
     xi_lo = 0
