@@ -52,7 +52,7 @@ for kT in [.4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1
       gw.append(data[3])
       fe_difference.append(data[6])
 
-  plt.axhspan(0.0, -3, color='lightblue', alpha=0.15, lw=0)
+  plt.axhspan(0.0, -5, color='lightblue', alpha=0.15, lw=0)
   plt.title("Free Energy difference vs density")
   plt.plot(n, fe_difference, '.-', label='kT=%g' % (kT))
   plt.axhline(0, color='k')

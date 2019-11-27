@@ -1,16 +1,20 @@
 from __future__ import division, print_function
-#This program finds xi for a given T by setting the second virial coefficient
+#This program finds xi for a given temperture T (really kT) by setting the second virial coefficient
 #computed with V_wca equal to the second virial coefficient computed with V_erf.
-#It is referenced by wca_erf.py which is referenced by potential-plot.py
-#and by w2-comparison.py.
+#It is referenced by wca_erf.py which is referenced by potential-plot.py and by w2-comparison.py.
 
 from scipy import special
 from scipy.special import erf
 import numpy as np
 import math
 
+#Old Xi derived from derivatives (referenced here if want to revert to old Xi for comparison)------
+#def Xi(alpha, kT, sigma = 1, eps = 1):
+#   return alpha/(6*np.sqrt(np.pi))/(np.log(2) + np.sqrt(np.log(2)*eps/kT))
+#--------------------------------------------------------------------------------------------------
+
 #Compute B2_erf analytically (default method): 
-def B2_erf_analytical(alpha, Xi,T) :   
+def B2_erf_analytical(alpha, Xi,T) :
     return np.pi/3*((alpha**3 + 1.5*alpha*Xi**2)*(1+erf(alpha/Xi)) + 1/np.sqrt(np.pi)*(alpha**2*Xi + Xi**3)*np.exp(-(alpha/Xi)**2))
 
 
@@ -28,7 +32,7 @@ def B2_wca_numerical(T):
     f[0] = 1
     return -0.5*(4*np.pi*r**2*r[1]*f).sum()  
 
-#Find Xi at a given T   
+#Find Xi at a given  T (that is, kT)
 def Xi(alpha, T, sigma = 1, eps = 1):
     B2wca = B2_wca_numerical(T)   #use with B2 wca numerical method  (default)
     xi_lo = 0
