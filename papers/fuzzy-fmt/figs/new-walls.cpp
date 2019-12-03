@@ -49,11 +49,43 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   min.precondition(true);
   if (reduced_density == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243257584e-07);
 
+  {
+    Vector phi3 = f->get_phi3_density();
+    Vector rz = f->get_rz();
+    Vector n3 = f->get_n3();
+    Vector n = f->get_n();
+    Vector trace_tensor_cubed = f->get_trace_tensor_cubed();
+    Vector tensor_vector = f->get_tensor_vector();
+    Vector n2x = f->get_n2vx();
+    Vector n2y = f->get_n2vy();
+    Vector n2z = f->get_n2vz();
+    Vector n2xx = f->get_n2xx();
+    Vector n2yy = f->get_n2yy();
+    Vector n2zz = f->get_n2zz();
+    Vector n2xy = f->get_n2xy();
+    Vector n2yz = f->get_n2yz();
+    Vector n2zx = f->get_n2zx();
+    for (int i=0; i<phi3.get_size(); i++) {
+      printf("   %8g %15g %15g %15g %15g %15g\n", rz[i], n[i], trace_tensor_cubed[i], n2xx[i], n2yy[i], n2zz[i]);
+      if (rz[i] == rz[0] && i > 0) break;
+    }
+    exit(1);
+  }
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
   while (min.improve_energy(verbose)) {
     // f->run_finite_difference_test("SFMT");
+    Vector phi3 = f->get_phi3_density();
+    Vector rz = f->get_rz();
+    Vector n3 = f->get_n3();
+    Vector n = f->get_n();
+    Vector trace_tensor_cubed = f->get_trace_tensor_cubed();
+    Vector tensor_vector = f->get_tensor_vector();
+    for (int i=0; i<phi3.get_size(); i++) {
+      printf("   %8g %15g %15g %15g %15g\n", rz[i], n[i], phi3[i], trace_tensor_cubed[i], tensor_vector[i]);
+      if (rz[i] == rz[0] && i > 0) break;
+    }
     if (min.energy() < -1e20) {
       printf("trouble with the energy: %g\n", min.energy());
       break;
@@ -93,7 +125,7 @@ for kT in np.arange(0.1, 10.05, 0.1):
 int main(int argc, char **argv) {
   double reduced_density, temp;
   if (argc != 3) {
-    printf("usage: %s reduced_density kT\n", argv[0]);
+    printf("usage   : %s reduced_density kT\n", argv[0]);
     return 1;
   }
   sscanf(argv[1], "%lg", &reduced_density);
@@ -104,6 +136,7 @@ int main(int argc, char **argv) {
   printf("bulk energy is %g\n", hf.energy());
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
+  hf.printme("homogeneous");
 
   SFMTFluidVeff f = sfmt_inhomogeneous(temp, dw, dw, width + spacing, dx);
   f.mu() = hf.mu();

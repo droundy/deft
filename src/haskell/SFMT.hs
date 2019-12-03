@@ -20,8 +20,8 @@ phi2 = var "phi2" "\\Phi_2" $ integrate $ kT*(n2*n1 - n1v_dot_n2v)/(1-n3)
 -- phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*n2**3*(1 - sqr_n2v/n2**2)**3/(24*pi*(1-n3)**2) + n2xx
 
 -- This is the tensor version
-phi3 = var "phi3" "\\Phi_3" $ integrate $ kT*(n2**3 - 3*sqr_n2v*n2 +
-                                              9/2*(tensor_vector - trace_tensor_cubed))/(24*pi*(1-n3)**2)
+phi3 = var "phi3" "\\Phi_3" $ integrate $ "phi3_density" ===
+  kT*(n2**3 - 3*sqr_n2v*n2 + 9/2*(tensor_vector - trace_tensor_cubed))/(24*pi*(1-n3)**2)
 
 sfmt :: Expression Scalar
 sfmt = var "sfmt" "F_{\\text{soft}}" $ (phi1 + phi2 + phi3)
