@@ -283,9 +283,9 @@ plt.xlabel('Number Density')
 plt.ylabel('Temperature')
 
 #plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
-plt.plot([0.88, 0.90, 0.91, 0.92, 1.04],[0.7, 0.8, 0.9, 1.0, 2.0], label='chris_l', color='green')
+plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
 #plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
-plt.plot([0.96, 0.98, 0.99, 1.00, 1.11],[0.7, 0.8, 0.9, 1.0, 2.0], label='chris_s', color='green')
+plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
 plt.legend()
 
 plt.figure('Phase Diagram of P vs T')
@@ -302,7 +302,7 @@ plt.xlabel('Temperature')
 plt.ylabel('Pressure')
 
 #plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
-plt.plot([0.7, 0.8,0.9,1.0,2.0], [6.24, 7.62, 8.78, 9.99, 25.5], label='chris_l', color='green')
+plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
 plt.legend()
 
 plt.show()
