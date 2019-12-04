@@ -35,7 +35,8 @@ pressure_data = []  #index corresponds to kT
 
 #for kT in np.arange(0.1, 1.15, 0.05):   #data files with these temperatures will be plotted
 #for kT in np.arange(0.1, 2.05, 0.05):  #original
-for kT in np.arange(0.4, 2.05, 0.05):
+#for kT in np.arange(0.4, 2.05, 0.05):   # new normal
+for kT in (1, 2, 4, 6, 8, 10, 12, 14, 16, 18):
 #for kT in np.arange(0.1, 1.05, 0.05):   #data files with these temperatures will be plotted  DEBUG
 										#values above and below this range do not currrently work   DEBUG
    
@@ -213,8 +214,10 @@ for i in range(len(kT_data)):
       plt.plot(density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
 plt.title("Pressure vs Number Density at kT")
 plt.legend(loc='best')
-plt.ylim(0, 26)
-plt.xlim(0, 1.1)
+#plt.ylim(0, 26)
+plt.ylim(0, 500)
+#plt.xlim(0, 1.1)
+plt.xlim(0, 1.8)
 plt.xlabel('Number Density')
 plt.ylabel('Pressure')
 
@@ -272,7 +275,8 @@ plt.plot(n_homogeneous_at_freezing, kT_data, label='liquid', color='red')
 plt.plot(n_crystal_at_freezing, kT_data, label='solid', color='blue')
 plt.fill_betweenx(kT_data, .1, n_homogeneous_at_freezing, color='red')       
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
-plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')        
+#plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')
+plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')           
 plt.title("Temperature vs Number Density")
 #plt.legend(loc='best')
 plt.xlabel('Number Density')
@@ -288,7 +292,8 @@ plt.figure('Phase Diagram of P vs T')
 
 ##Pressure vs Temperature Phase Diagram
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
-plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
+#plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
+plt.fill_between(kT_data, p_at_freezing, 1500, color='blue')    
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
