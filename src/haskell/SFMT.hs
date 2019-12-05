@@ -57,12 +57,12 @@ n2 = "n2" === w2 n
 n1 = "n1" === w1 n
 n0 = "n0" === w0 n
 
-n2xx = "n2xx" === ifft ( w2transverse * (1 - 3*kx**2) * fft n)
-n2yy = "n2yy" === ifft ( w2transverse * (1 - 3*ky**2) * fft n)
-n2zz = "n2zz" === ifft ( w2transverse * (1 - 3*kz**2) * fft n)
-n2xy = "n2xy" === ifft ( w2transverse * (3*kx*ky) * fft n)
-n2yz = "n2yz" === ifft ( w2transverse * (3*ky*kz) * fft n)
-n2zx = "n2zx" === ifft ( w2transverse * (3*kz*kx) * fft n)
+n2xx = "n2xx" === ifft ( w2transverse * (1 - 3*(kx**2)/ksqr) * fft n)
+n2yy = "n2yy" === ifft ( w2transverse * (1 - 3*(ky**2)/ksqr) * fft n)
+n2zz = "n2zz" === ifft ( w2transverse * (1 - 3*(kz**2)/ksqr) * fft n)
+n2xy = "n2xy" === ifft ( w2transverse * (3*kx*ky/ksqr) * fft n)
+n2yz = "n2yz" === ifft ( w2transverse * (3*ky*kz/kqsr) * fft n)
+n2zx = "n2zx" === ifft ( w2transverse * (3*kz*kx/ksqr) * fft n)
 
 tensor_vector = var "tensor_vector" "n_{2v}\\cdot n_{2m}\\cdot n_{2v}"
     (n2xx*n2x*n2x + n2yy*n2y*n2y + n2zz*n2z*n2z +
