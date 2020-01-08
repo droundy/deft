@@ -31,7 +31,7 @@ ff = 0.3
 def plot1d():
   global g2, ax
   zvals = len(g2[0][0,:])
-  rvals = len(g2[0][:,0])
+  rvals = len(g2[0][:, 0])
   if theta < numpy.arctan(1/2):
     z1 = zmax
     r1 = (z1-z0)*numpy.tan(theta)
@@ -50,7 +50,7 @@ def plot1d():
 
   i = 0
   while i < numplots:
-    zi = scipy.ndimage.map_coordinates(g2[i], numpy.vstack((x,y)), order = 1)
+    zi = scipy.ndimage.map_coordinates(g2[i], numpy.vstack((x, y)), order = 1)
     angline[i].set_data([z0, z1], [0, r1])
     gslice[i].set_data(numpy.linspace(0, rlen, num), zi)
     i += 1
@@ -62,9 +62,9 @@ def plot():
     ax[i].collections = []
     g2[i] = read_walls(ff, z0, plots[i])
 
-    rmax = len(g2[i][:,0])*dx
+    rmax = len(g2[i][:, 0])*dx
     zmax = len(g2[i][0,:])*dx
-    print "zmax len is = %d and zmax is = %g" % (len(g2[i][0,:]), zmax)
+    print("zmax len is = %d and zmax is = %g" % (len(g2[i][0,:]), zmax))
 
     r = numpy.arange(0, rmax, dx)
     z = numpy.arange(0, zmax, dx)
@@ -86,9 +86,9 @@ def read_walls(ff, z0, fun):
     filename = "figs/wallsWB-with-sphere-%04.2f.dat" % ff
   else:
     filename = "figs/walls/wallsWB-%s-pair-%1.2f-%1.2f.dat" %(fun, ff, z0)
-  print 'Using', filename
+  print('Using', filename)
   if (os.path.isfile(filename) == False):
-    print "File does not exist:", filename
+    print("File does not exist:", filename)
     sys.exit(1)
   data = numpy.loadtxt(filename)
   return data
@@ -102,21 +102,21 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xlo,  1.0, 1.0),
                    (1.0/gmax,  1.0, 1.0),
                    (xhi,  0.0, 0.0),
-                   (xhier,0.0, 0.0),
+                   (xhier, 0.0, 0.0),
                    (1.0,  1.0, 1.0)],
 
          'green': [(0.0, 0.0, 0.0),
                    (xlo,  0.1, 0.1),
                    (1.0/gmax, 1.0, 1.0),
                    (xhi, 0.0, 0.0),
-                   (xhier,1.0, 1.0),
+                   (xhier, 1.0, 1.0),
                    (1.0, 1.0, 1.0)],
 
          'blue':  [(0.0,  0.0, 0.0),
                    (xlo,  0.1, 0.1),
                    (1.0/gmax,  1.0, 1.0),
                    (xhi,  1.0, 1.0),
-                   (xhier,0.0, 0.0),
+                   (xhier, 0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 levels = numpy.linspace(0, gmax, gmax*100)
@@ -124,7 +124,7 @@ levels = numpy.linspace(0, gmax, gmax*100)
 g2 = [0]*numplots
 g2[0] = read_walls(ff, z0, 'mc')
 
-rmax = len(g2[0][:,0])*dx
+rmax = len(g2[0][:, 0])*dx
 zmax = len(g2[0][0,:])*dx
 
 r = numpy.arange(0, rmax, dx)
@@ -152,7 +152,7 @@ i = 0
 while i < numplots:
   ax[i].set_aspect('equal')
   ax[i].set_xlim(0, 20)
-  ax[i].set_ylim(-10,10)
+  ax[i].set_ylim(-10, 10)
   i += 1
 
 num = 1000

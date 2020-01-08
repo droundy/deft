@@ -6,7 +6,7 @@ parser.add_argument(
   'ff', metavar='ff', type=float, help='filling fraction')
 
 parser.add_argument(
-  '-N', metavar='N', type=int,default=0,
+  '-N', metavar='N', type=int, default=0,
   help="""number of polyhedra, if not supplied then the first
   file with the proper filling fraction will be used""")
 

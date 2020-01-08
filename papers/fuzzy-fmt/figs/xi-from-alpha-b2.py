@@ -36,7 +36,7 @@ def Vwca(r):
 
 rmax = 2.0**(1/6)
 
-print(Vwca(rmax))
+print((Vwca(rmax)))
 
 def f_wca(r, T):
     return np.exp(-Vwca(r)/T) - 1
@@ -49,7 +49,7 @@ def b2wca(T):
 
 xi = np.linspace(0.0001, 1, 1000)
 
-for T in [0.1, 0.5,1, 200]:
+for T in [0.1, 0.5, 1, 200]:
     plt.figure()
     plt.plot(xi, b2(xi, T), label=r'$B_2(\Xi)$ analytical')
     plt.plot(xi, B2_erf_numerical(xi, T), 'b--', label=r'$B_2(\Xi)$ numerical')

@@ -8,7 +8,7 @@ if "show" not in sys.argv:
 from pylab import *
 
 if len(sys.argv) < 3:
-    print("Usage:  " + sys.argv[0] + " eta delta_r")
+    print(("Usage:  " + sys.argv[0] + " eta delta_r"))
     exit(1)
 
 from matplotlib import rc
@@ -26,8 +26,8 @@ dadz = {}
 
 versions = ['mc', 'this-work-short', 'sokolowski', 'fischer']
 
-data = loadtxt("figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta,delta_r))
-z['mc'], dadz['mc'] = data[:,0][::10], data[:,1][::10]
+data = loadtxt("figs/mc/a1/wallsMC-a1-pair-%02.1f-%1.3f.dat" %(eta, delta_r))
+z['mc'], dadz['mc'] = data[:, 0][::10], data[:, 1][::10]
 
 # data = loadtxt("figs/walls/walls_daWB-this-work-FIXME-%04.2f-%05.3f.dat" % (eta, delta_r))
 # z['this-work'], dadz['this-work'] = data[:,0], data[:,1]
@@ -36,22 +36,22 @@ z['mc'], dadz['mc'] = data[:,0][::10], data[:,1][::10]
 # z['this-work-mc'], dadz['this-work-mc'] = data[:,0], data[:,1]
 
 data = loadtxt("figs/walls/walls_daWB-this-work-short-%04.2f-%05.3f.dat" % (eta, delta_r))
-z['this-work-short'], dadz['this-work-short'] = data[:,0], data[:,1]
+z['this-work-short'], dadz['this-work-short'] = data[:, 0], data[:, 1]
 
 data = loadtxt("figs/walls/walls_daWB-sokolowski-%04.2f-%05.3f.dat" % (eta, delta_r))
-z['sokolowski'], dadz['sokolowski'] = data[:,0], data[:,1]
+z['sokolowski'], dadz['sokolowski'] = data[:, 0], data[:, 1]
 
 data = loadtxt("figs/walls/walls_daWB-fischer-%04.2f-%05.3f.dat" % (eta, delta_r))
-z['fischer'], dadz['fischer'] = data[:,0], data[:,1]
+z['fischer'], dadz['fischer'] = data[:, 0], data[:, 1]
 
 scaleme=0.8
-plt.figure(figsize=(6*scaleme,4*scaleme))
+plt.figure(figsize=(6*scaleme, 4*scaleme))
 
 for version in versions:
   plt.plot(z[version], dadz[version], styles.plot[version], label=styles.title[version])
 
 
-plt.xlim([-.5,6])
+plt.xlim([-.5, 6])
 plt.legend(loc='upper right').draw_frame(False)
 
 plt.xlabel('$z/R$')

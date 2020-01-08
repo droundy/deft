@@ -6,7 +6,7 @@ import numpy
 import styles
 
 if len(sys.argv) != 6:
-    print 'useage: %s ww ff N methods seed' % sys.argv[0]
+    print('useage: %s ww ff N methods seed' % sys.argv[0])
     exit(1)
 
 ww = float(sys.argv[1])
@@ -31,8 +31,8 @@ plt.title('Energy histogram for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww, ff, 
 for version in methods:
     data = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-E.dat"
                          % (seed, ww, ff, N, version))
-    energy = -data[:,0]/N
-    DS = data[:,1]
+    energy = -data[:, 0]/N
+    DS = data[:, 1]
     plt.semilogy(energy, DS, styles.dots(version), label=styles.title(version))
 
 plt.xlabel('$U/N\epsilon$')

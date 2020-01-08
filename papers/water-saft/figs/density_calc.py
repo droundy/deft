@@ -31,7 +31,7 @@ def calc_density(fin, fout):
 
 
 water_in = open('figs/single-rod-in-water.dat', 'r')
-water_out = open('figs/single-rods-calculated-density.dat','w')
+water_out = open('figs/single-rods-calculated-density.dat', 'w')
 
 calc_density(water_in, water_out)
 
@@ -39,7 +39,7 @@ water_in.close()
 water_out.close()
 
 hughes_in = open('figs/hughes-single-rod-in-water.dat', 'r')
-hughes_out = open('figs/hughes-rods-calculated-density.dat','w')
+hughes_out = open('figs/hughes-rods-calculated-density.dat', 'w')
 
 calc_density(hughes_in, hughes_out)
 

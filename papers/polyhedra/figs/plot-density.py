@@ -37,17 +37,17 @@ e, densities = read.read_mc_density(ff, polyhedron, N, celltype)
 if e == 0:
   exit(1)
 length = read.read_mc_dimensions(ff, polyhedron, N, celltype)
-print 'cell shape: ', length
+print('cell shape: ', length)
 dims = ['x', 'y', 'z']
 colors = ['r', 'b', 'k']
-for i in xrange(3):
+for i in range(3):
   coord = e[i]
   density = densities[i]
   if args.reflect:
     mid = length[i]/2
   else:
     mid = len(coord)
-  print("Integral %c: %g" %(dims[i], sum(density)/len(density)*length[0]*length[1]*length[2]))
+  print(("Integral %c: %g" %(dims[i], sum(density)/len(density)*length[0]*length[1]*length[2])))
   plot(coord[coord<mid], density[coord<mid], label="$%c$" %dims[i], color=colors[i], linestyle='-')
   if args.reflect:
     plot(length[i]-coord[coord>mid], density[coord>mid], color=colors[i], linestyle='--')

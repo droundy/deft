@@ -13,10 +13,10 @@ hardsphereR = 3.03420/2/10 # from Clark et al, in nm
 
 newdata = pylab.loadtxt('figs/sphere.dat')
 hugdata = pylab.loadtxt('figs/hughes-sphere.dat')
-rnew = newdata[:,0] - hardsphereR
-rhug = hugdata[:,0] - hardsphereR
-newbrokenHB = newdata[:,5]
-hugbrokenHB = hugdata[:,5]
+rnew = newdata[:, 0] - hardsphereR
+rhug = hugdata[:, 0] - hardsphereR
+newbrokenHB = newdata[:, 5]
+hugbrokenHB = hugdata[:, 5]
 p1, = pylab.plot(rnew, newbrokenHB/2, color = '#990022', linestyle = '-')  #'r-')
 p2, = pylab.plot(rhug, hugbrokenHB/2, color = '#220099', linestyle = '--')  #'r--')
 
@@ -28,6 +28,6 @@ pyplot.ylabel('Numer of broken bonds')
 pyplot.xlabel('Radius of sphere(nm)')
 pyplot.xlim(0, 1.5)
 pyplot.ylim(0, 4)
-pyplot.legend([p2,p1],["Hughes, et al", "This work"], loc = 2)
+pyplot.legend([p2, p1], ["Hughes, et al", "This work"], loc = 2)
 pyplot.savefig('figs/sphere-broken-HB.pdf')
 pyplot.show()

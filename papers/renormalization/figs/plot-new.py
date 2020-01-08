@@ -11,12 +11,12 @@ matplotlib.rc('text', usetex=True)
 
 import gatherandcalculate
 
-def find_common_tangent(x,y):
+def find_common_tangent(x, y):
     los = []
     his = []
     slopes = []
     for i in range(len(x)):
-        for j in range(i+1,len(y)):
+        for j in range(i+1, len(y)):
             slope = (y[j]-y[i])/(x[j]-x[i])
             ynew = y - y[i] - slope*(x-x[i])
             if ynew.min() > -abs(y[i])*1e-5:
@@ -32,7 +32,7 @@ def find_common_tangent(x,y):
             slope = slopes[i]
     return slope
 
-all_colors = ['g','b','r','k','c','m','y']
+all_colors = ['g', 'b', 'r', 'k', 'c', 'm', 'y']
 
 temperature_color = {}
 u_temperature_color = {}
@@ -54,13 +54,13 @@ ww = 1.3
 R = 1
 mu = -20
 
-i_values = [1,2,3]
+i_values = [1, 2, 3]
 next_color = 0
 next_u_color = 0
 next_phi_color = 0
 
 for i in i_values:
-    print 'working on iteration', i
+    print('working on iteration', i)
     dbase = 'data/scrunched-ww%04.2f-L%04.2f/i%01d' % (ww, L,  i)
     lndos, energy, Ns = gatherandcalculate.lndos_energy_Ns(dbase)
 
@@ -76,13 +76,13 @@ for i in i_values:
     plt.figure('Fexc-T')
     for j in range(len(Ns)):
         modulo = 2*8**(i-1)
-        if Ns[j] % modulo == 0 and (Fexc[:,j] != 0).any():
+        if Ns[j] % modulo == 0 and (Fexc[:, j] != 0).any():
             val = Ns[j] // modulo
             c = all_colors[(Ns[j] // modulo) % len(all_colors)]
             if i == i_values[0]:
-                plt.plot(Ts, Fexc[:,j]/Ns[j], linetype[i]+c, label=r'$\eta = %.2g$' % etas[j])
+                plt.plot(Ts, Fexc[:, j]/Ns[j], linetype[i]+c, label=r'$\eta = %.2g$' % etas[j])
             else:
-                plt.plot(Ts, Fexc[:,j]/Ns[j], linetype[i]+c)
+                plt.plot(Ts, Fexc[:, j]/Ns[j], linetype[i]+c)
 
     plt.figure('Fexc-eta')
     for k in Tnum_to_plot:
@@ -135,18 +135,18 @@ for i in i_values:
     plt.figure('Phiabs-T')
     for j in range(len(Ns)):
         modulo = 2*8**(i-1)
-        if Ns[j] % modulo == 0 and (Fabs[:,j] != 0).any():
+        if Ns[j] % modulo == 0 and (Fabs[:, j] != 0).any():
             val = Ns[j] // modulo
             c = all_colors[(Ns[j] // modulo) % len(all_colors)]
             if i == i_values[0]:
-                plt.plot(Ts, Phiabs[:,j]/Ns[j], linetype[i]+c, label=r'$\eta = %.2g$' % etas[j])
+                plt.plot(Ts, Phiabs[:, j]/Ns[j], linetype[i]+c, label=r'$\eta = %.2g$' % etas[j])
             else:
-                plt.plot(Ts, Phiabs[:,j]/Ns[j], linetype[i]+c)
+                plt.plot(Ts, Phiabs[:, j]/Ns[j], linetype[i]+c)
 
 
     plt.figure('HS')
     Sexcs, NNs = gatherandcalculate.Sexc_hardsphere_Ns(dbase)
-    print NNs
+    print(NNs)
     plt.plot(NNs*4*np.pi/3*R**3/V, Sexcs/NNs, linetype[i]+'k')
 
 
@@ -162,25 +162,25 @@ plt.legend(loc='best')
 plt.savefig("figs/Shs-vs-eta.pdf")
 
 plt.figure('Fexc-eta')
-plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww,L))
-plt.xlim(0,0.6)
-plt.ylim(-5,50)
+plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww, L))
+plt.xlim(0, 0.6)
+plt.ylim(-5, 50)
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')
 plt.savefig("figs/Fexc-vs-eta.pdf")
 
 plt.figure('Fabs-eta')
-plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww,L))
+plt.title(r'Absolute free energies for $\lambda=%g$, $L=%g$' % (ww, L))
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$F_{abs}/\epsilon V$')
 plt.ylim(-5, 0)
-plt.xlim(0,0.6)
+plt.xlim(0, 0.6)
 plt.legend(loc='best')
 plt.savefig("figs/Fabs-vs-eta.pdf")
 
 plt.figure('Uexc-eta')
-plt.title(r'Excess internal energies for $\lambda=%g$, $L=%g$' % (ww,L))
+plt.title(r'Excess internal energies for $\lambda=%g$, $L=%g$' % (ww, L))
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$U_{exc}/\epsilon N$')
 plt.legend(loc='best')
@@ -188,7 +188,7 @@ plt.savefig("figs/Uexc-vs-eta.pdf")
 
 plt.figure('Fexc-T')
 plt.title(r'Excess free energies for $\lambda=%g$, $L=%g$' % (ww, L))
-plt.xlim(0,10)
+plt.xlim(0, 10)
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$F_{exc}/\epsilon N$')
 plt.legend(loc='best')

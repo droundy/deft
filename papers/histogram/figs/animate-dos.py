@@ -25,10 +25,10 @@ subdirname = args.subdir
 filename = args.periodic_whatever
 suffixes = args.methods
 
-print(sys.argv)
+print((sys.argv))
 if subdirname[:len('data/')] == 'data/':
 	subdirname = subdirname[len('data/'):]
-	print('cutting redundant "data/" from first argument:', subdirname)
+	print(('cutting redundant "data/" from first argument:', subdirname))
 
 moviedir = 'figs/movies/%s/%s-dos' % (subdirname, filename)
 os.system('rm -rf ' + moviedir)
@@ -44,7 +44,7 @@ dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 
 lastframe = -1
 alldone = False
-for frame in range(1,100000):
+for frame in range(1, 100000):
     if alldone:
         break
     for suffix in suffixes:
@@ -62,33 +62,33 @@ for frame in range(1,100000):
         if len(e[lndos != lndos[0]]):
             maxe = max(maxe, e[lndos != lndos[0]].max()+5)
     if numframes % 25 == 0 and frame != lastframe:
-        print('counting %dth frame' % numframes)
+        print(('counting %dth frame' % numframes))
         lastframe = frame
 
 bestframe = sorted(glob.glob('data/%s/%s-%s-movie/*-lndos.dat'
                              % (subdirname, filename, suffixes[0])))[-1]
 best_e, best_lndos = readnew.e_lndos(bestframe)
-print('best data is', bestframe)
+print(('best data is', bestframe))
 
 maxlndos = best_lndos.max()
 minlndos = best_lndos.min()
-print('counted %d frames' % numframes)
-print('mine', mine)
-print('maxe', maxe)
-print('minlndos', minlndos)
-print('maxlndos', maxlndos)
+print(('counted %d frames' % numframes))
+print(('mine', mine))
+print(('maxe', maxe))
+print(('minlndos', minlndos))
+print(('maxlndos', maxlndos))
 
 skipby = 1
 maxframes = 200
 if numframes > maxframes and not args.all_frames:
     skipby = numframes // maxframes
     numframes = numframes // skipby
-    print('only showing 1/%d of the frames' % skipby)
-print('numframes', numframes)
+    print(('only showing 1/%d of the frames' % skipby))
+print(('numframes', numframes))
 
 for frame in range(1, numframes+1):
     if frame % 25 == 0:
-        print('working on frame %d/%d' % (frame, numframes))
+        print(('working on frame %d/%d' % (frame, numframes)))
     plt.cla()
     ax.plot(best_e, best_lndos, ':', color='0.5')
 

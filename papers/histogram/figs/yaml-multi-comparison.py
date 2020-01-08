@@ -33,24 +33,24 @@ yamlRef = bool(sys.argv[7])
 seed_avg = int(sys.argv[8])
 
 filename = sys.argv[9:]
-print('filenames are ', filename)
+print(('filenames are ', filename))
 
 for f in filename:
     err_in_S = []
     err_max = []
     min_moves = []
     name = '%s.yaml' % (f)
-    for n in range(1,seed_avg+1):
+    for n in range(1, seed_avg+1):
         #try:
-            name = '%s-s%s.yaml' % (f,n)
-            print('trying filename ', name)
+            name = '%s-s%s.yaml' % (f, n)
+            print(('trying filename ', name))
 
             # Read YAML file
             if os.path.isfile(filename_location + name):
                 with open(filename_location + name, 'r') as stream:
                     yaml_data = yaml.load(stream)
             else:
-                print('unable to read file', filename_location + name)
+                print(('unable to read file', filename_location + name))
                 raise ValueError("%s isn't a file!" % (filename_location + name))
 
             data = yaml_data
@@ -66,7 +66,7 @@ for f in filename:
             except:
                 my_minE = energies[0]
                 num_new_energies = int(my_minE - (-Emin))
-                print('num_new_maxyaml', num_new_energies)
+                print(('num_new_maxyaml', num_new_energies))
                 lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
                 lndos_new[:, num_new_energies:] = lndos[:,:]
                 lndos = lndos_new
@@ -78,7 +78,7 @@ for f in filename:
             except:
                 my_maxE = energies[-1]
                 num_new_energies = -int(my_maxE - (-Emax))
-                print('num_new_minyaml', num_new_energies)
+                print(('num_new_minyaml', num_new_energies))
                 lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
                 lndos_new[:, :lndos.shape[1]] = lndos[:,:]
                 lndos = lndos_new
@@ -99,7 +99,7 @@ for f in filename:
 
             errorinentropy = np.zeros(N_save_times)
             maxerror = np.zeros(N_save_times)
-            for i in range(0,N_save_times):
+            for i in range(0, N_save_times):
                 # below just set average S equal between lndos and lndosref
                 if yamlRef:
                     # if using yaml as a reference the range is from 0 to len while for C++ the range is
@@ -135,14 +135,14 @@ for f in filename:
             err_in_S.append(errorinentropy)
             err_max.append(maxerror)
 
-            dirname = 'data/comparison/%s-%s' % (filebase, name.replace('.yaml',''))
-            print 'saving to', dirname
+            dirname = 'data/comparison/%s-%s' % (filebase, name.replace('.yaml', ''))
+            print('saving to', dirname)
             try:
                 os.mkdir(dirname)
             except OSError:
                 pass
             else:
-                print ("Successfully created the directory %s " % dirname)
+                print(("Successfully created the directory %s " % dirname))
             np.savetxt('%s/errors.txt' %(dirname),
               np.c_[np.array(moves)/N, errorinentropy, maxerror],
               fmt = ('%.4g'),
@@ -159,14 +159,14 @@ for f in filename:
     maxmean = np.amax(err_in_S, axis=0)
     minmean = np.amin(err_in_S, axis=0)
     maxerror = np.average(err_max, axis=0)
-    dirname = 'data/comparison/%s-%s' % (filebase, name.replace('-s%s.yaml' %seed_avg,''))
-    print 'saving to', dirname
+    dirname = 'data/comparison/%s-%s' % (filebase, name.replace('-s%s.yaml' %seed_avg, ''))
+    print('saving to', dirname)
     try:
         os.mkdir(dirname)
     except OSError:
         pass
     else:
-        print ("Successfully created the directory %s " % dirname)
+        print(("Successfully created the directory %s " % dirname))
     np.savetxt('%s/errors.txt' %(dirname),
               np.c_[min_moves, errorinentropy, maxerror, minmean, maxmean],
               fmt = ('%.4g'),

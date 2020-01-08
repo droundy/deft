@@ -26,15 +26,15 @@ Nlen = max([len(item['N']) for item in info])
 fflen = max([len(item['ff']) for item in info])
 
 print("Setup frame only:")
-print("%*s    %*s    %*s    %*s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N"))
+print(("%*s    %*s    %*s    %*s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N")))
 print("-------------------------------------------------")
 for f in info:
   if f['frames'] == 0:
-    print("%*s    %*s    %*s    %*s" %(namelen, f['name'], cellen, f['celltype'], fflen, f['ff'], Nlen, f['N']))
+    print(("%*s    %*s    %*s    %*s" %(namelen, f['name'], cellen, f['celltype'], fflen, f['ff'], Nlen, f['N'])))
 
 print("\nAnimations:")
-print("%*s    %*s    %*s    %*s    %s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N", "frames"))
+print(("%*s    %*s    %*s    %*s    %s" %(namelen, "Name", cellen, "celltype", fflen, "ff", Nlen, "N", "frames")))
 print("-----------------------------------------------------------")
 for f in info:
   if f['frames'] > 0:
-    print("%*s    %*s    %*s    %*s    %6s" %(namelen, f['name'], cellen, f['celltype'], fflen, f['ff'], Nlen, f['N'], f['frames']))
+    print(("%*s    %*s    %*s    %*s    %6s" %(namelen, f['name'], cellen, f['celltype'], fflen, f['ff'], Nlen, f['N'], f['frames'])))

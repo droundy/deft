@@ -33,24 +33,24 @@ yamlRef = bool(sys.argv[7])
 seed_avg = int(sys.argv[8])
 
 filename = sys.argv[9:]
-print('filenames are ', filename)
+print(('filenames are ', filename))
 
 for f in filename:
     err_in_S = []
     err_max = []
     min_moves = []
     name = '%s.yaml' % (f)
-    for n in range(1,seed_avg+1):
+    for n in range(1, seed_avg+1):
         #try:
-            name = '%s-s%s.yaml' % (f,n)
-            print('trying filename ', name)
+            name = '%s-s%s.yaml' % (f, n)
+            print(('trying filename ', name))
 
             # Read YAML file
             if os.path.isfile(filename_location + name):
                 with open(filename_location + name, 'r') as stream:
                     yaml_data = yaml.load(stream)
             else:
-                print('unable to read file', filename_location + name)
+                print(('unable to read file', filename_location + name))
                 raise ValueError("%s isn't a file!" % (filename_location + name))
 
             data = yaml_data
@@ -66,7 +66,7 @@ for f in filename:
             except:
                 my_minE = energies[0]
                 num_new_energies = int(my_minE - (-Emin))
-                print('num_new_maxyaml', num_new_energies)
+                print(('num_new_maxyaml', num_new_energies))
                 lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
                 lndos_new[:, num_new_energies:] = lndos[:,:]
                 lndos = lndos_new
@@ -78,7 +78,7 @@ for f in filename:
             except:
                 my_maxE = energies[-1]
                 num_new_energies = -int(my_maxE - (-Emax))
-                print('num_new_minyaml', num_new_energies)
+                print(('num_new_minyaml', num_new_energies))
                 lndos_new = np.zeros((lndos.shape[0], lndos.shape[1]+num_new_energies))
                 lndos_new[:, :lndos.shape[1]] = lndos[:,:]
                 lndos = lndos_new
@@ -102,9 +102,9 @@ for f in filename:
             # Internal energy and heat capacity error:
             U = np.zeros(N_save_times)
             CV = np.zeros(N_save_times)
-            beta = np.linspace(0.2,1.0, N_save_times)
+            beta = np.linspace(0.2, 1.0, N_save_times)
 
-            for i in range(0,N_save_times):
+            for i in range(0, N_save_times):
                 # below just set average S equal between lndos and lndosref
                 if yamlRef:
                     # if using yaml as a reference the range is from 0 to len while for C++ the range is
@@ -116,8 +116,8 @@ for f in filename:
                         ising_lndos = lndos[i][maxyaml:minyaml+1][::-1] # remove impossible state
 
                         # the states are counted backward hence the second to last state would be at index = 1
-                        ising_norm = np.delete(ising_norm,[1])
-                        ising_lndos = np.delete(ising_lndos,[len(ising_lndos)-2])
+                        ising_norm = np.delete(ising_norm, [1])
+                        ising_lndos = np.delete(ising_lndos, [len(ising_lndos)-2])
 
                         # Calculate the internal energy and heat capacity:
                         PartitionF = []
@@ -129,7 +129,7 @@ for f in filename:
                         Boltz_fac_ref = []
 
                         ising_E = np.array(energies[maxyaml:minyaml+1])
-                        ising_E = np.delete(ising_E,[len(ising_E)-2])
+                        ising_E = np.delete(ising_E, [len(ising_E)-2])
                         for EE in range(len(ising_E)):
                             #print(ising_lndos,ising_lndos.size,ising_E.size,beta[i])
                             Boltz_fac.append(ising_lndos[EE] - beta[i]*ising_E[EE])
@@ -168,8 +168,8 @@ for f in filename:
                 U[i] = np.sum(U_numer) / np.sum(PartitionF)
                 CV[i] = beta[i]**2 * (np.sum(C_numer) / np.sum(PartitionF) - U[i]**2)
 
-                print('The error in the internal energy is: ', U[i])
-                print('The error in the heat capacity is: ', CV[i])
+                print(('The error in the internal energy is: ', U[i]))
+                print(('The error in the heat capacity is: ', CV[i]))
             plt.figure()
             plt.plot(beta, CV)
             #plt.plot(beta, U)
@@ -208,7 +208,7 @@ for f in filename:
     maxmean = np.amax(err_in_S, axis=0)
     minmean = np.amin(err_in_S, axis=0)
     maxerror = np.average(err_max, axis=0)
-    dirname = 'data/comparison/%s-%s' % (filebase, name.replace('-s%s.yaml' %seed_avg,''))
+    dirname = 'data/comparison/%s-%s' % (filebase, name.replace('-s%s.yaml' %seed_avg, ''))
     # print 'saving to', dirname
     # try:
     #     os.mkdir(dirname)

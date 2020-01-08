@@ -22,18 +22,18 @@ theta = numpy.pi/2
 ff = 0.3
 
 if len(sys.argv) < 4:
-    print("Usage:  " + sys.argv[0] + " ff z0 theta/pi")
+    print(("Usage:  " + sys.argv[0] + " ff z0 theta/pi"))
     exit(1)
 ff = float(sys.argv[1])
 z0 = float(sys.argv[2])
 #theta_div_by_pi = float(sys.argv[2])
 theta = numpy.pi*float(sys.argv[3])
-print theta/numpy.pi
+print(theta/numpy.pi)
 
 def plot1d():
     global g2, ax
     zvals = len(g2[0][0,:])
-    rvals = len(g2[0][:,0])
+    rvals = len(g2[0][:, 0])
     if theta < numpy.arctan(1/2):
         z1 = zmax
         r1 = (z1-z0)*numpy.tan(theta)
@@ -54,7 +54,7 @@ def plot1d():
     i = 0
     ax[4].set_title('%s, $z_0 = %g$, $ff = %g$ $theta = %g\pi$' %(plots[i], z0, ff, theta/numpy.pi))
     while i < numplots:
-        zi = scipy.ndimage.map_coordinates(g2[i], numpy.vstack((x,y)), order = 1)
+        zi = scipy.ndimage.map_coordinates(g2[i], numpy.vstack((x, y)), order = 1)
         angline[i].set_data([z0, z1], [0, r1])
         gslice[i].set_data(numpy.linspace(0, rlen, num), zi)
         i += 1
@@ -68,7 +68,7 @@ def plot():
         if able_to_read_file == False:
             break
 
-        rmax = len(g2[i][:,0])*dx
+        rmax = len(g2[i][:, 0])*dx
         zmax = len(g2[i][0,:])*dx
 
         r = numpy.arange(0, rmax, dx)
@@ -100,26 +100,26 @@ def read_walls(ff, z0, fun):
         except IOError:
             able_to_read_file = False
             return 0
-    print 'Using', filename
+    print('Using', filename)
     return data
 
 # COLORS
 cdict = {'red':  ((0.0, 0.0, 0.0),
-                  (0.25,0.56, 0.2),
+                  (0.25, 0.56, 0.2),
                   (0.5, 1.0, 1.0),
-                  (0.75,1.0, 1.0),
+                  (0.75, 1.0, 1.0),
                   (1.0, 1.0, 0.0)),
 
         'green': ((0.0, 0.0, 0.0),
-                  (0.25,1.0, 1.0),
+                  (0.25, 1.0, 1.0),
                   (0.5, 0.0, 0.0),
-                  (0.75,0.0, 0.0),
+                  (0.75, 0.0, 0.0),
                   (1.0, 1.0, 0.0)),
 
         'blue':  ((0.0, 0.0, 0.0),
-                  (0.25,0.6, 1.0),
+                  (0.25, 0.6, 1.0),
                   (0.5, 1.0, 1.0),
-                  (0.75,0.0, 0.0),
+                  (0.75, 0.0, 0.0),
                   (1.0, 1.0, 0.0))
         }
 map = LinearSegmentedColormap('map', cdict)
@@ -132,20 +132,20 @@ g2 = [0]*numplots
 g2[0] = read_walls(ff, z0, 'mc')
 
 if able_to_read_file == False:
-    matplotlib.pyplot.plot(numpy.arange(0,10,1), [0]*10, 'k')
+    matplotlib.pyplot.plot(numpy.arange(0, 10, 1), [0]*10, 'k')
     matplotlib.pyplot.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
     savedfilename = "figs/pair-correlation-" + str(int(ff*10)) + "-" + str(int(z0*100)) + "-" + str(int(10*theta/numpy.pi)) + ".pdf"
     pylab.savefig(savedfilename)
     exit(0)
 
-rmax = len(g2[0][:,0])*dx
+rmax = len(g2[0][:, 0])*dx
 zmax = len(g2[0][0,:])*dx
 
-print rmax, zmax
+print(rmax, zmax)
 
 
 zbins = len(g2[0][0,:])
-rbins = len(g2[0][:,0])
+rbins = len(g2[0][:, 0])
 dr = rmax/rbins
 dz = zmax/zbins
 
@@ -174,7 +174,7 @@ i = 0
 while i < numplots:
     ax[i].set_aspect('equal')
     ax[i].set_xlim(0, 20)
-    ax[i].set_ylim(-10,10)
+    ax[i].set_ylim(-10, 10)
     i += 1
 
 num = 1000
@@ -193,7 +193,7 @@ ax[4].set_ylim(0, 4)
 pylab.legend(plots)
 ax[4].axhline(y=1, linestyle='--', color='slategray')
 if able_to_read_file == False:
-    matplotlib.pyplot.plot(numpy.arange(0,10,1), [0]*10, 'k')
+    matplotlib.pyplot.plot(numpy.arange(0, 10, 1), [0]*10, 'k')
     matplotlib.pyplot.suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
     savedfilename = "figs/pair-correlation-" + str(int(ff*10)) + "-" + str(int(z0*100)) + "-" + str(int(10*theta/numpy.pi)) + ".pdf"
     pylab.savefig(savedfilename)

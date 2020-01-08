@@ -24,13 +24,13 @@ split2 = [i.split('-m', 1)[0] for i in split1]
 
 for j in range(len(split2)):
     methods.append('-%s' %split2[j])
-print 'methods are', methods
+print('methods are', methods)
 
-directory = ['000000', '000010', '000025', '000100','000500']
+directory = ['000000', '000010', '000025', '000100', '000500']
 
 for method in methods:
     i = 1
-    print 'trying method', method
+    print('trying method', method)
     for subdirectory in directory:
         try:
             basename = 'data/lv/%s%s-movie/%s' % (filebase, method, subdirectory)
@@ -45,7 +45,7 @@ for method in methods:
             plt.ylabel('Histogram')
             plt.xlabel('Energy')
 
-            plt.subplot(len(directory),1,i)
+            plt.subplot(len(directory), 1, i)
             colors.plot(e, hist_norm, method=method[1:])
             colors.legend()
 

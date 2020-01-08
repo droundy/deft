@@ -27,7 +27,7 @@ rmax = 4.1
 ############################
 
 if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + " ff")
+    print(("Usage:  " + sys.argv[0] + " ff"))
     exit(1)
 ff = float(sys.argv[1])
 #arg ff = [0.1, 0.2, 0.3, 0.4, 0.5]
@@ -48,8 +48,8 @@ def read_g2_and_prepare_plot(zmin, zmax, rmax, centered = True):
   znegbins = zbins - zposbins
   g22 = numpy.zeros((rbins, zbins) )
   if centered:
-    g22[rbins/2:rbins, znegbins:zbins] = g2mc[:rbins/2,:zposbins]
-    g22[:rbins/2, znegbins:zbins] = numpy.flipud(g2mc[:rbins/2,:zposbins])
+    g22[rbins/2:rbins, znegbins:zbins] = g2mc[:rbins/2, :zposbins]
+    g22[:rbins/2, znegbins:zbins] = numpy.flipud(g2mc[:rbins/2, :zposbins])
     g2mc = g22
   gmax = g2mc.max()
 
@@ -68,27 +68,27 @@ def read_g2_and_prepare_plot(zmin, zmax, rmax, centered = True):
                      ((1-whiterange)/gmax,  1.0, 1.0),
                      ((1+whiterange)/gmax,  1.0, 1.0),
                      (xhi,  0, 0),
-                     (xhier,0.0, 0.0),
+                     (xhier, 0.0, 0.0),
                      (1.0,  1.0, 1.0)],
            'green': [(0.0, 0.0, 0.0),
                      (xlo,  0.1, 0.1),
                      ((1-whiterange)/gmax,  1.0, 1.0),
                      ((1+whiterange)/gmax,  1.0, 1.0),
                      (xhi, 0, 0),
-                     (xhier,1.0, 1.0),
+                     (xhier, 1.0, 1.0),
                      (1.0, 1.0, 1.0)],
            'blue':  [(0.0,  0.0, 0.0),
                      (xlo,  0.1, 0.1),
                      ((1-whiterange)/gmax,  1.0, 1.0),
                      ((1+whiterange)/gmax,  1.0, 1.0),
                      (xhi,  1.0, 1.0),
-                     (xhier,0.0, 0.0),
+                     (xhier, 0.0, 0.0),
                      (1.0,  0.0, 0.0)]}
   cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
   return Z, R, g2mc, cmap, gmax
 
-pylab.figure(figsize=(21,15 + 10*dx))
-pylab.subplot(1,1,1).set_aspect('equal')
+pylab.figure(figsize=(21, 15 + 10*dx))
+pylab.subplot(1, 1, 1).set_aspect('equal')
 
 Z, R, g2mc, cmap, gmax = read_g2_and_prepare_plot(zmin, 21, 15.0)
 rbins = Z.shape[0]

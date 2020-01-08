@@ -10,29 +10,29 @@ nmax = 0.75/eta_conv
 ns = nmax*np.exp(np.arange(-15, 0, 1e-3))
 
 # Plots
-def plotphi(T,n,mu,i,label):
-  plt.plot(n*eta_conv,RG.phi(T,n,mu,i),label=label)
+def plotphi(T, n, mu, i, label):
+  plt.plot(n*eta_conv, RG.phi(T, n, mu, i), label=label)
 
-def plotphi_old(T,n,npart,i,label):
-  plt.plot(n*eta_conv,RG1.phi(T,n,npart,i),label=label)
+def plotphi_old(T, n, npart, i, label):
+  plt.plot(n*eta_conv, RG1.phi(T, n, npart, i), label=label)
 
-def plotPress(T,n,i):
-  plt.plot(n*eta_conv,RG.P(T,n,i))
+def plotPress(T, n, i):
+  plt.plot(n*eta_conv, RG.P(T, n, i))
 
 ### Plot stuff ###
 T = 0.5
 
 mu = -7
-plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
+plotphi(T, ns, mu, 1, label='mu=%.3f'%mu)
 
 mu = -6
-plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
+plotphi(T, ns, mu, 1, label='mu=%.3f'%mu)
 
 mu = -5
-plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
+plotphi(T, ns, mu, 1, label='mu=%.3f'%mu)
 
 mu = -4
-plotphi(T,ns,mu,1,label='mu=%.3f'%mu)
+plotphi(T, ns, mu, 1, label='mu=%.3f'%mu)
 
 ### Titles, etc. ###
 plt.title('Grand free energy per unit volume; T=%.2f'%T)

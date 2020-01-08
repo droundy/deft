@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import colors
 import readnew
 
-plt.figure(figsize=(5,4))
+plt.figure(figsize=(5, 4))
 
 #fname = 'data/s000/periodic-ww1.30-ff0.30-N50-samc-100000-movie/005000-lndos.dat'
 fname = 'data/samc-1e4-50-s1-reference-lndos.dat'

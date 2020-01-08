@@ -18,13 +18,13 @@ hardsphereR = 3.03420/2/10 # from Clark et al, in nm
 for i in range(len(radii)):
     newdata = pylab.loadtxt('figs/sphere-%04.2f.dat' % (2*radii[i]))
     hugdata = pylab.loadtxt('figs/hughes-sphere-%04.2f.dat' % (2*radii[i]))
-    rnew = newdata[:,1]/nm
-    rhug = hugdata[:,1]/nm
+    rnew = newdata[:, 1]/nm
+    rhug = hugdata[:, 1]/nm
     newcutoff = radii[i]
     hugcutoff = radii[i] - hardsphereR
     newdata[rnew<newcutoff] = 1
-    pylab.plot(rnew[rnew>=hugcutoff], 4*(1-newdata[:,4])[rnew>=hugcutoff], color = colors[i], linestyle='-')
-    pylab.plot(rhug[rhug>=hugcutoff], 4*(1-hugdata[:,4])[rhug>=hugcutoff], color = colors[i], linestyle='--')
+    pylab.plot(rnew[rnew>=hugcutoff], 4*(1-newdata[:, 4])[rnew>=hugcutoff], color = colors[i], linestyle='-')
+    pylab.plot(rhug[rhug>=hugcutoff], 4*(1-hugdata[:, 4])[rhug>=hugcutoff], color = colors[i], linestyle='--')
     #pyplot.vlines(x = radii[i], ymin = 0, ymax = 4, color=colors[i], linestyles=':')
     pyplot.vlines(x = hugcutoff, ymin = 0, ymax = 4, color=colors[i], linestyles=':')
 

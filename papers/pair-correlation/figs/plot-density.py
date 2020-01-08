@@ -16,7 +16,7 @@ if (len(sys.argv) > 1):
 def read_walls(ff):
     filename = "figs/mc/wallsMC-pair-%02.1f-density.dat" % ff
     if (os.path.isfile(filename) == False):
-        print "File %s does not exist" %filename
+        print("File %s does not exist" %filename)
         sys.exit(1)
     data = numpy.loadtxt(filename)
     return data
@@ -24,26 +24,26 @@ def read_walls(ff):
 def read_gs(ff):
   filename = "figs/wallsWB-%03.2f.dat" % ff
   if (os.path.isfile(filename) == False):
-    print "File %s does not exist" %filename
+    print("File %s does not exist" %filename)
     sys.exit(1)
   data = pylab.loadtxt(filename)
-  r = data[:,0]
-  density = data[:,1]
-  gsigma = data[:,2]
-  nA = data[:,3]
+  r = data[:, 0]
+  density = data[:, 1]
+  gsigma = data[:, 2]
+  nA = data[:, 3]
   return r, density
 
 den = read_walls(ff)
 r, den2 = read_gs(ff)
 
 
-N = sum(den[:,1])/len(den[:,1])*30*30*30
+N = sum(den[:, 1])/len(den[:, 1])*30*30*30
 Ndft = sum(den2)/(len(den2)-3/.01)*30*30*30
-print N, Ndft
+print(N, Ndft)
 
 
-pylab.xlim(0,15)
-pylab.plot(den[:,0], den[:,1])
+pylab.xlim(0, 15)
+pylab.plot(den[:, 0], den[:, 1])
 pylab.plot(r-3, den2)
 pylab.title('density(z), $ff = %g$' %(ff))
 pylab.xlabel("z")

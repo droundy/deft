@@ -21,7 +21,7 @@ def t_u_cv_s(ww, ff, N, method, seed=0):
     max_T = 1.4
     T_bins = 1e3
     dT = max_T/T_bins
-    T_range = numpy.arange(dT,max_T,dT)
+    T_range = numpy.arange(dT, max_T, dT)
 
     basedir = 'data/'
     fname = "periodic-ww%04.2f-ff%04.2f-N%i-%s" % (ww, ff, N, method)
@@ -39,9 +39,9 @@ def t_u_cv_s(ww, ff, N, method, seed=0):
 
     e_hist, lnw_hist, min_T = get_hists(basename)
 
-    energy = -e_hist[:,0] # array of energies
-    lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
-    ln_dos = numpy.log(e_hist[:,1]) - lnw
+    energy = -e_hist[:, 0] # array of energies
+    lnw = lnw_hist[e_hist[:, 0].astype(int), 1] # look up the lnw for each actual energy
+    ln_dos = numpy.log(e_hist[:, 1]) - lnw
 
     Z = numpy.zeros(len(T_range)) # partition function
     U = numpy.zeros(len(T_range)) # internal energy

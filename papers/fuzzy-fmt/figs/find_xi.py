@@ -14,7 +14,7 @@ import math
 #--------------------------------------------------------------------------------------------------
 
 #Compute B2_erf analytically (default method): 
-def B2_erf_analytical(alpha, Xi,T) :
+def B2_erf_analytical(alpha, Xi, T) :
     return np.pi/3*((alpha**3 + 1.5*alpha*Xi**2)*(1+erf(alpha/Xi)) + 1/np.sqrt(np.pi)*(alpha**2*Xi + Xi**3)*np.exp(-(alpha/Xi)**2))
 
 

@@ -56,25 +56,25 @@ def npart(iterations):
     ###############################
 
     # Open file for output
-    fout = open('figs/coexistence_RG-i%d-out.dat'%iterations,'w')
+    fout = open('figs/coexistence_RG-i%d-out.dat'%iterations, 'w')
 
     # label the columns of the output
     fout.write('#T     nvapor    nmid     nliquid       phi(nvap)       phi(nmid)         phi(nliq)         mu\n')
     sys.stdout.flush()
 
     # Do first temperature before the loop
-    nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,nmid,mu,iterations)
-    nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,nmid,c_liq,mu,iterations)
-    print '  initial nvap,phi_vap',nvapor,phi_vapor
-    print '  initial nmid,phi_mid',nmid,RG.phi(T,nmid,mu,iterations)
-    print '  initial nliq,phi_liq',nliquid,phi_liquid
-    print '  initial mu',mu
+    nvapor, phi_vapor = minmax_RG.minimize(RG.phi, T, a_vap, nmid, mu, iterations)
+    nliquid, phi_liquid = minmax_RG.minimize(RG.phi, T, nmid, c_liq, mu, iterations)
+    print('  initial nvap,phi_vap', nvapor, phi_vapor)
+    print('  initial nmid,phi_mid', nmid, RG.phi(T, nmid, mu, iterations))
+    print('  initial nliq,phi_liq', nliquid, phi_liquid)
+    print('  initial mu', mu)
 
     #while T < 1.4:
-    for j in xrange(0,N+1):
+    for j in range(0, N+1):
         # Temp points get closer as we near the critical point
         T = (Tc - Tlow)*(1 - ((N-j)/N)**4) + Tlow
-        print '  T =',T
+        print('  T =', T)
 
         fout.flush()
 
@@ -85,8 +85,8 @@ def npart(iterations):
         #a_vap = max(nmid - 2.0*(nmid - nvapor), a_vap)
         #c_liq = nmid + 2.0*(nliquid - nmid)
 
-        nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,nmid,mu,iterations)
-        nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,nmid,c_liq,mu,iterations)
+        nvapor, phi_vapor = minmax_RG.minimize(RG.phi, T, a_vap, nmid, mu, iterations)
+        nliquid, phi_liquid = minmax_RG.minimize(RG.phi, T, nmid, c_liq, mu, iterations)
         phi_mid = RG.phi(T, nmid, mu, iterations)
 
         tol = 1e-9
@@ -103,9 +103,9 @@ def npart(iterations):
             mu += delta_mu
 
             # find new values for nvap, nmid, nliq and phi_vap, phi_mid, phi_liq
-            nmid, phi_mid = minmax_RG.maximize(RG.phi,T,nvapor,nliquid,mu,iterations), RG.phi(T, nmid, mu, iterations)
-            nvapor,phi_vapor = minmax_RG.minimize(RG.phi,T,a_vap,nmid,mu,iterations)
-            nliquid,phi_liquid = minmax_RG.minimize(RG.phi,T,nmid,c_liq,mu,iterations)
+            nmid, phi_mid = minmax_RG.maximize(RG.phi, T, nvapor, nliquid, mu, iterations), RG.phi(T, nmid, mu, iterations)
+            nvapor, phi_vapor = minmax_RG.minimize(RG.phi, T, a_vap, nmid, mu, iterations)
+            nliquid, phi_liquid = minmax_RG.minimize(RG.phi, T, nmid, c_liq, mu, iterations)
             # print '      nvap,phi(nvap)',nvapor,phi_vapor
             # print '        etavap',nvapor*RG.sigma**3*np.pi/6
             # print '      nmid,phi(nmid)',nmid,phi_mid
@@ -128,8 +128,8 @@ def npart(iterations):
         #   plt.title('T = %.14g' % T)
 
         if nmid == nvapor or nmid == nliquid:
-          print 'I have achieved silliness!'
-          print 'This occurred at T =',T
+          print('I have achieved silliness!')
+          print('This occurred at T =', T)
           #break
         # print '    left while loop'
         fout.write(str(T))
@@ -159,11 +159,11 @@ if __name__ == '__main__':
     num_iterations = 1
 
     # define the colors/symbols for plotting
-    colors = np.array(['b-','g-','r-'])
+    colors = np.array(['b-', 'g-', 'r-'])
 
     plt.figure(1)
     for i in range(num_iterations+1): # remember, range(x) only goes up to x-1
-        print 'running npart_RG for iteration =',i
+        print('running npart_RG for iteration =', i)
 
         # run npart
         npart(i)
@@ -172,13 +172,13 @@ if __name__ == '__main__':
         # Read in data
         data = np.loadtxt('figs/coexistence_RG-i%d-out.dat'%i)
 
-        T = data[:,0]
-        etavapor = data[:,1]*np.pi*RG.sigma**3/6
-        etaliquid = data[:,3]*np.pi*RG.sigma**3/6
+        T = data[:, 0]
+        etavapor = data[:, 1]*np.pi*RG.sigma**3/6
+        etaliquid = data[:, 3]*np.pi*RG.sigma**3/6
 
         # Plot data
         plt.figure(1)
-        plt.plot(etavapor, T, colors[i],label='RG '+r'$i=$ '+'%d'%i)
+        plt.plot(etavapor, T, colors[i], label='RG '+r'$i=$ '+'%d'%i)
         plt.plot(etaliquid, T, colors[i])
 
     # Labels, etc.

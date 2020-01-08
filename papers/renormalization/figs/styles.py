@@ -1,4 +1,4 @@
-hist_methods = ['wang_landau','vanilla_wang_landau','simple_flat','tmmc','oetmmc']
+hist_methods = ['wang_landau', 'vanilla_wang_landau', 'simple_flat', 'tmmc', 'oetmmc']
 
 _colors = { 'nw': 'r',
             'kT0.4': 'c',

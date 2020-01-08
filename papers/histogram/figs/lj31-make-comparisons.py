@@ -97,7 +97,7 @@ for fname in fnames:
     cv_error = []
     cv_max_error = []
     myt = []
-    for t in range(len(my_entropy[:,0])):
+    for t in range(len(my_entropy[:, 0])):
         if time[t] < 1e7:
             continue
         myt.append(time[t])

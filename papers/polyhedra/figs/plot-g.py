@@ -32,11 +32,11 @@ from pylab import *
 
 names, data = read.read_mc_g(ff, polyhedron, N, celltype)
 colors = ['k', 'b', 'c', 'r', 'g', 'g']
-xmax = max(data[:,0])
-xlim(0,xmax)
+xmax = max(data[:, 0])
+xlim(0, xmax)
 
-for i in xrange(1, len(names)):
-  plot(data[:,0], data[:,i], label=names[i], color=colors[i-1])
+for i in range(1, len(names)):
+  plot(data[:, 0], data[:, i], label=names[i], color=colors[i-1])
 
 legend(loc='best')
 title("distribution functions, %s, %s, $\\eta = %04.2f$, $N = %i$." %(celltype, polyhedron, ff, N))
