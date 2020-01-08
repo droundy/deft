@@ -100,7 +100,7 @@ for fname in pyfs:
             print('C %s/.cache' % os.getenv('HOME'))
             print()
     else:
-        print('? python2', fname)
+        print('? python3', fname)
         for i in list_inputs:
             inputs += friendly_eval(i, fname, {})
         for i in inputs:

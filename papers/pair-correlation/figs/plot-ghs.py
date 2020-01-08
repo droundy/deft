@@ -8,7 +8,7 @@ if len(sys.argv) < 2 or sys.argv[1] != "show":
 import sympy
 from scipy.optimize import leastsq
 from sympy import pi, exp
-import pylab, string, numpy
+import pylab, numpy
 
 from matplotlib import rc
 
@@ -280,7 +280,7 @@ def fix_pows(ccode):
   It turns out not to make a difference in the speed of walls.mkdat,
   but I'm leaving it in, becuase this way we can easily check if this
   makes a difference (since I thought that it might). """
-  n = string.find(ccode, 'pow(')
+  n = ccode.find('pow(')
   if n > 0:
     return ccode[:n] + fix_pows(ccode[n:])
   if n == -1:
