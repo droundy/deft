@@ -14,7 +14,7 @@ for paper in papers:
   print("> ../papers/"+paper+"/.paper.tex.fac")
   print("c .pyc\n")
 
-  print("| cd ../papers/%s && python2 ../../fac/figs.py figs/*.py > .figs.fac"
+  print("| cd ../papers/%s && python3 ../../fac/figs.py figs/*.py > .figs.fac"
         % paper)
   print("> ../papers/"+paper+"/.figs.fac")
   print("c .pyc\n")
@@ -27,7 +27,7 @@ for project in ['thesis-roth']:
   print("> ../papers/"+project+"/.project.tex.fac")
   print("c .pyc\n")
 
-  print("| cd ../papers/%s && python2 ../../fac/figs.py figs/*.py > .figs.fac"
+  print("| cd ../papers/%s && python3 ../../fac/figs.py figs/*.py > .figs.fac"
         % project)
   print("> ../papers/"+project+"/.figs.fac")
   print("c .pyc\n")
@@ -49,7 +49,7 @@ for tex in other_texs:
   print("c .pyc\n")
 
   if d not in papers:
-    print("| cd ../papers/%s && python2 %s/figs.py figs/*.py > .figs.fac"
+    print("| cd ../papers/%s && python3 %s/figs.py figs/*.py > .figs.fac"
           % (d, facd))
     print("> ../papers/"+d+"/.figs.fac")
     print("c .pyc\n")

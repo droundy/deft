@@ -24,7 +24,7 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 number = sys.argv[5]
-#arg number = [000100]
+#arg number = ['000100']
 
 all_methods = [ '-tmi3', '-tmi2', '-tmi', '-toe', '-tmmc']
 methods = []

@@ -10,7 +10,7 @@ matplotlib.rc('text', usetex=True)
 
 plt.figure()
 
-# input: ['data/homogeneous/ww%g-kT%g.dat' % (ww, kT) for ww in [1.3] for kT in xrange(1,11)]
+# input: ['data/homogeneous/ww%g-kT%g.dat' % (ww, kT) for ww in [1.3] for kT in range(1,11)]
 ww = 1.3
 for kT in np.arange(1.0, 11.0, 1.0):
     fname = 'data/homogeneous/ww%g-kT%g.dat' % (ww, kT)

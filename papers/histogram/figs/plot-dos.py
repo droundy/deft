@@ -16,7 +16,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = int(sys.argv[3])
-#arg N = range(5,21)+[100, 200, 1000]
+#arg N = list(range(5,21))+[100, 200, 1000]
 
 methods = eval(sys.argv[4])
 #arg methods = [["nw","wang_landau","simple_flat","tmmc","oetmmc"]]
