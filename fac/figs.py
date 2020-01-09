@@ -88,7 +88,7 @@ for fname in pyfs:
                     extrainputs.append(i[0] % xxx)
             for o in coutputs:
                 extraoutputs.append(o[0] % friendly_eval(o[1], fname, a))
-            print("? python2 %s %s" % (fname, aa))
+            print("? python3 %s %s" % (fname, aa))
             for i in inputs + extrainputs:
                 print('<', i)
             for o in outputs + extraoutputs:
