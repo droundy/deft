@@ -130,6 +130,6 @@ w2transverse = -- var "w2transversek" "\\tilde{w_{2\\perp}}(k)" $
                --     2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/(xi*sqrt 2))
                (-(pi*xi**2)/3 - 4*pi/k**2)*exp(-(xi*k)**2/8)*cos(k*alpha/2) - 2*pi*alpha/(3*k)*exp(-(xi*k)**2/8)*sin(k*alpha/2)
                      +
-                    (2*pi)**(3/2)/((k**2)*xi)*exp(-alpha**2/(2*(xi**2)))*
+                    (2*pi)**(3/2)/((k**3)*xi)*exp(-alpha**2/(2*(xi**2)))*
                     2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/(xi*sqrt 2))
                )
