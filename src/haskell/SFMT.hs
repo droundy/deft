@@ -57,12 +57,12 @@ n2 = "n2" === w2 n
 n1 = "n1" === w1 n
 n0 = "n0" === w0 n
 
-n2xx = "n2xx" === ifft ( w2transverse * (1 - 3*(kx**2)/ksqr) * fft n)
-n2yy = "n2yy" === ifft ( w2transverse * (1 - 3*(ky**2)/ksqr) * fft n)
-n2zz = "n2zz" === ifft ( w2transverse * (1 - 3*(kz**2)/ksqr) * fft n)
-n2xy = "n2xy" === ifft ( w2transverse * (3*kx*ky/ksqr) * fft n)
-n2yz = "n2yz" === ifft ( w2transverse * (3*ky*kz/kqsr) * fft n)
-n2zx = "n2zx" === ifft ( w2transverse * (3*kz*kx/ksqr) * fft n)
+n2xx = "n2xx" === ifft ( w2transverse * (1 - 3*(kx**2)/k**2) * fft n)
+n2yy = "n2yy" === ifft ( w2transverse * (1 - 3*(ky**2)/k**2) * fft n)
+n2zz = "n2zz" === ifft ( w2transverse * (1 - 3*(kz**2)/k**2) * fft n)
+n2xy = "n2xy" === ifft ( w2transverse * (3*kx*ky/k**2) * fft n)
+n2yz = "n2yz" === ifft ( w2transverse * (3*ky*kz/k**2) * fft n)
+n2zx = "n2zx" === ifft ( w2transverse * (3*kz*kx/k**2) * fft n)
 
 tensor_vector = var "tensor_vector" "n_{2v}\\cdot n_{2m}\\cdot n_{2v}"
     (n2xx*n2x*n2x + n2yy*n2y*n2y + n2zz*n2z*n2z +
@@ -123,9 +123,13 @@ w1v x = vector_convolve w1vk x
   where w1vk = kvec *. (imaginary * exp(-((xi/sqrt 2)*k/2)**2)*(alpha/2*cos(k*alpha/2)-((xi/sqrt 2)**2*k/2+1/k)*sin(k*alpha/2))/k**2)
 
 w2transverse :: Expression KSpace
-w2transverse = -- var "w2transversek" "k^2\\tilde{w_{2\\perp}}(k)" $
-               k**2*(4*pi*exp(-(xi*k)**2/8)*((xi/sqrt 2/k/3 - 1/k**2)*cos(k*alpha/2) + xi*alpha/(12*sqrt 2)*sin(k*alpha/2))
-                +
-                 (2*pi)**(3/2)/k**3/xi*exp(-alpha**2/2/xi**2)*
-                 2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/sqrt 2/xi)
+w2transverse = -- var "w2transversek" "\\tilde{w_{2\\perp}}(k)" $
+               --(4*pi*exp(-(xi*k)**2/8)*(((xi*k)/(3*sqrt 2) - 1)*cos(k*alpha/2) + k**2*xi*alpha/(12*sqrt 2)*sin(k*alpha/2))/k**2
+               --      +
+               --     (2*pi)**(3/2)/((k**3)*xi)*exp(-alpha**2/(2*(xi**2)))*
+               --     2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/(xi*sqrt 2))
+               (-(pi*xi**2)/3 - 4*pi/k**2)*exp(-(xi*k)**2/8)*cos(k*alpha/2) - 2*pi*alpha/(3*k)*exp(-(xi*k)**2/8)*sin(k*alpha/2)
+                     +
+                    (2*pi)**(3/2)/((k**2)*xi)*exp(-alpha**2/(2*(xi**2)))*
+                    2*real_part_complex_erf(k*xi/2**1.5 + imaginary*alpha/(xi*sqrt 2))
                )
