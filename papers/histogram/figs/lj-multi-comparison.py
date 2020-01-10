@@ -127,19 +127,19 @@ for f in filename:
             err_in_S.append(errorinentropy)
             err_max.append(maxerror)
 
-            dirname = 'data/comparison/%s-%s' % (filebase, name.replace('.yaml',''))
-            print 'saving to', dirname
-            try:
-                os.mkdir(dirname)
-            except OSError:
-                pass
-            else:
-                print ("Successfully created the directory %s " % dirname)
-            np.savetxt('%s/errors.txt' %(dirname),
-              np.c_[np.array(moves)/N, errorinentropy, maxerror],
-              fmt = ('%.4g'),
-              delimiter = '\t',
-              header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
+            dirname = 'data/comparison/lj/%s' % (f.split('/')[-1])
+            print('saving to', dirname)
+            # try:
+            #     os.mkdir(dirname)
+            # except OSError:
+            #     pass
+            # else:
+            #     print ("Successfully created the directory %s " % dirname)
+            # np.savetxt('%s/errors.txt' %(dirname),
+            #   np.c_[np.array(moves)/N, errorinentropy, maxerror],
+            #   fmt = ('%.4g'),
+            #   delimiter = '\t',
+            #   header = 'iterations\t errorinentropy\t maxerror\t(generated with python %s' % ' '.join(sys.argv))
         #except:
         #    print('I ran into some odd trouble.')
         #    pass

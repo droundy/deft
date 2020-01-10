@@ -109,8 +109,8 @@ for f in filename:
                         ising_lndos = lndos[i][maxyaml:minyaml+1][::-1] # remove impossible state
 
                         # the states are counted backward hence the second to last state would be at index = 1
-                        #ising_norm = np.delete(ising_norm,[1])
-                        #ising_lndos = np.delete(ising_lndos,[len(ising_lndos)-2])
+                        ising_norm = np.delete(ising_norm,[1])
+                        ising_lndos = np.delete(ising_lndos,[len(ising_lndos)-2])
 
                         norm_factor = np.mean(ising_norm) - np.mean(lndosref[0:minref-maxref+1])
                         doserror = ising_lndos - lndosref[0:minref-maxref+1] - norm_factor

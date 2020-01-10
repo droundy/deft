@@ -152,7 +152,7 @@ for f in filename:
                         PartitionF = np.asarray(PartitionF)
                         U_numer = np.asarray(U_numer)
                         C_numer = np.asarray(C_numer)
-                        #
+
                         norm_factor = np.mean(ising_norm) - np.mean(lndosref[0:minref-maxref+1])
                         doserror = ising_lndos - lndosref[0:minref-maxref+1] - norm_factor
                     else:
@@ -168,11 +168,15 @@ for f in filename:
                 U[i] = np.sum(U_numer) / np.sum(PartitionF)
                 CV[i] = beta[i]**2 * (np.sum(C_numer) / np.sum(PartitionF) - U[i]**2)
 
-                print('The error in the internal energy is: ', U[i])
-                print('The error in the heat capacity is: ', CV[i])
             plt.figure()
             plt.plot(beta, CV)
-            #plt.plot(beta, U)
+            plt.xlabel(r'$\beta$')
+            plt.ylabel(r'$C_V$')
+            plt.xlim(0.2,1.0)
+            plt.figure()
+            plt.plot(beta, U)
+            plt.xlabel(r'$\beta$')
+            plt.ylabel(r'$U$')
             plt.show()
             # remove N from moves in yaml file because N is added back in the
             # comparison-plot script
