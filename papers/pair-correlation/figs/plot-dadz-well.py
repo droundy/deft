@@ -9,7 +9,7 @@ if 'show' not in sys.argv:
 from pylab import *
 import matplotlib.pyplot as plt
 if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + " eta")
+    print(("Usage:  " + sys.argv[0] + " eta"))
     exit(1)
 
 from matplotlib import rc
@@ -24,7 +24,7 @@ able_to_read_file = True
 plt.title('$da/dz,$ $\eta = %g,$  square well' %(eta))
 
 data = loadtxt("figs/mc/a1/square-well-0.3-1.790.dat")
-mc_z0, mc_da_dz = data[:,0], data[:,1]
+mc_z0, mc_da_dz = data[:, 0], data[:, 1]
 
 # data = loadtxt("figs/walls/square-well-dadz-this-work-%04.2f-1.790.dat" % eta)
 # tw_z0, tw_dadz = data[:,0], data[:,1]
@@ -33,13 +33,13 @@ mc_z0, mc_da_dz = data[:,0], data[:,1]
 # twmc_z0, twmc_dadz = datamc[:,0], datamc[:,1]
 
 data = loadtxt("figs/walls/square-well-dadz-this-work-short-%04.2f-1.790.dat" % eta)
-tws_z0, tws_dadz = data[:,0], data[:,1]
+tws_z0, tws_dadz = data[:, 0], data[:, 1]
 
 data = loadtxt("figs/walls/square-well-dadz-sokolowski-%04.2f-1.790.dat" % eta)
-s_z0, s_dadz = data[:,0], data[:,1]
+s_z0, s_dadz = data[:, 0], data[:, 1]
 
 scaleme=0.8
-plt.figure(figsize=(6*scaleme,4*scaleme))
+plt.figure(figsize=(6*scaleme, 4*scaleme))
 
 plt.plot(mc_z0[::10], mc_da_dz[::10], styles.plot['mc'], label=styles.title['mc'])
 # plt.plot(tw_z0, tw_dadz, styles.plot['this-work'], label=styles.title['this-work'])

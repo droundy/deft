@@ -34,15 +34,15 @@ P_cs = density*(1+eta+eta**2)/(1-eta)**3
 P_cs = density
 
 bhdata = loadtxt('figs/homogeneous-bh.dat')
-bhtemp = bhdata[0,1:]
-bhnred = bhdata[1:,0]
+bhtemp = bhdata[0, 1:]
+bhnred = bhdata[1:, 0]
 bhpressures = bhdata[1:, 1:]
 bhnans = bhpressures != bhpressures
 bhpressures[bhnans] = 1e30
 
 erfdata = loadtxt('figs/homogeneous.dat')
-erftemp = erfdata[0,1:]
-erfnred = erfdata[1:,0]
+erftemp = erfdata[0, 1:]
+erfnred = erfdata[1:, 0]
 
 pressures = erfdata[1:, 1:]
 mynans = pressures != pressures
@@ -73,7 +73,7 @@ ylim(ymax=1.0)
 
 savefig('figs/n-vs-T.pdf', bbox_inches=0)
 
-def label_line(line, label_text, near_i=None, near_x=None, near_y=None, rotation_offset=0, offset=(0,0)):
+def label_line(line, label_text, near_i=None, near_x=None, near_y=None, rotation_offset=0, offset=(0, 0)):
     """call 
         l, = plt.loglog(x, y)
         label_line(l, "text", near_x=0.32)
@@ -86,7 +86,7 @@ def label_line(line, label_text, near_i=None, near_x=None, near_y=None, rotation
         rotation = np.rad2deg(math.atan2(dy, dx)) + rotation_offset
         pos = [(x[i] + x[i+1])/2. + offset[0], (y[i] + y[i+1])/2 + offset[1]]
         plt.text(pos[0], pos[1], label_text, size=9, rotation=rotation, color = line.get_color(),
-        ha="center", va="center", bbox = dict(ec='1',fc='1'))
+        ha="center", va="center", bbox = dict(ec='1', fc='1'))
 
     x = line.get_xdata()
     y = line.get_ydata()
@@ -119,15 +119,15 @@ def label_line(line, label_text, near_i=None, near_x=None, near_y=None, rotation
 
 figure()
 skipby = 50 # number of temperatures to skip
-xlim(xmin=0.,xmax=1.2)
+xlim(xmin=0., xmax=1.2)
 ylim(ymin=0.001, ymax = 30)
 near_x = 0.85
-for i in range(skipby-1,len(n_reduced[0,:]),skipby):
-  line, = semilogy(n_reduced[:,i], pressures[:,i], label='T=%g' % temperatures[0,i])
-  temp_name = '$T = %g$' % temperatures[0,i]
-  if temperatures[0,i] < 1 or not ('.' in temp_name):
+for i in range(skipby-1, len(n_reduced[0,:]), skipby):
+  line, = semilogy(n_reduced[:, i], pressures[:, i], label='T=%g' % temperatures[0, i])
+  temp_name = '$T = %g$' % temperatures[0, i]
+  if temperatures[0, i] < 1 or not ('.' in temp_name):
     label_line(line, temp_name, near_x=near_x)
-    if temperatures[0,i] < 1:
+    if temperatures[0, i] < 1:
       near_x += 0.05
     else:
       near_x += 0.01
@@ -140,15 +140,15 @@ savefig('figs/p-vs-V.pdf', bbox_inches=0)
 
 figure()
 skipby = 10 # number of temperatures to skip
-xlim(xmin=0.,xmax=1.2)
+xlim(xmin=0., xmax=1.2)
 ylim(ymin=0, ymax = 15)
 near_x = 0.85
-for i in range(skipby-1,len(n_reduced[0,:]),skipby):
-  line, = plot(n_reduced[:,i], pressures[:,i], label='T=%g' % temperatures[0,i])
-  temp_name = '$T = %g$' % temperatures[0,i]
-  if temperatures[0,i] < 1 or not ('.' in temp_name):
+for i in range(skipby-1, len(n_reduced[0,:]), skipby):
+  line, = plot(n_reduced[:, i], pressures[:, i], label='T=%g' % temperatures[0, i])
+  temp_name = '$T = %g$' % temperatures[0, i]
+  if temperatures[0, i] < 1 or not ('.' in temp_name):
     label_line(line, temp_name, near_x=near_x)
-    if temperatures[0,i] < 1:
+    if temperatures[0, i] < 1:
       near_x += 0.05
     else:
       near_x += 0.01
@@ -166,14 +166,14 @@ Tlabel = []
 Plabel = []
 MCPlabel = []
 
-for i in range(9,len(n_reduced[:,0]),10)[:10]:
+for i in range(9, len(n_reduced[:, 0]), 10)[:10]:
   plot(temperatures[i,:], pressures[i,:],
-       styles.density_color(n_reduced[i,0])+'-')
+       styles.density_color(n_reduced[i, 0])+'-')
   plot(bhtemperatures[i,:], bhpressures[i,:],
-       styles.density_color(n_reduced[i,0])+':')
+       styles.density_color(n_reduced[i, 0])+':')
   if i > 9:
-    Nlabel.append(n_reduced[i,0])
-    Tlabel.append(2.75 - 2.7*(n_reduced[i,0] - 0.2)**0.9)
+    Nlabel.append(n_reduced[i, 0])
+    Tlabel.append(2.75 - 2.7*(n_reduced[i, 0] - 0.2)**0.9)
     Plabel.append(pressures[i,:][temperatures[i,:] >= Tlabel[-1]][0])
     MCPlabel.append(0.0)
 
@@ -220,7 +220,7 @@ for rd in arange(1.00, 0.25, -0.1):
   if len(temps) > 0:
     plot(temps, pressures, styles.density_color(rd)+'--')
     if len(np.argwhere(np.abs(Nlabel - rd) < 0.001)) == 1:
-      print 'We have MC for rd', rd
+      print('We have MC for rd', rd)
       pressures = np.array(pressures)
       temps = np.array(temps)
       i = np.argwhere(np.abs(Nlabel - rd) < 0.001)[0][0]
@@ -228,7 +228,7 @@ for rd in arange(1.00, 0.25, -0.1):
       MCPlabel[i] = pressures[j]
 
 
-for i in range(0,len(Tlabel)):
+for i in range(0, len(Tlabel)):
   if MCPlabel[i] == 0:
     MCPlabel[i] = Plabel[i]
   text(Tlabel[i], 0.5*(Plabel[i] + MCPlabel[i]), '$n^{*} = %g$' % Nlabel[i],
@@ -241,9 +241,9 @@ ylim(ymin=0, ymax = 25)
 xlabel('$T^*$')
 ylabel('$p^*$')
 
-plot([],[], 'k-', label='SFMT theory')
-plot([],[], 'k--', label='Monte Carlo')
-plot([],[], 'k:', label='BH')
+plot([], [], 'k-', label='SFMT theory')
+plot([], [], 'k--', label='Monte Carlo')
+plot([], [], 'k:', label='BH')
 legend(loc='best', frameon=False)
 
 plt.tight_layout();

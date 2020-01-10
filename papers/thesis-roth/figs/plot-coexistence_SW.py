@@ -9,14 +9,14 @@ import SW
 # Read in data
 data = pylab.loadtxt('figs/npart_SW-out.dat')
 
-T = data[:,0]
+T = data[:, 0]
 # nvapor = data[:,1]
 # nliquid = data[:,2]
 
-etapart = data[:,5]*pylab.pi*SW.sigma**3/6
+etapart = data[:, 5]*pylab.pi*SW.sigma**3/6
 
-etavapor = data[:,1]*pylab.pi*SW.sigma**3/6
-etaliquid = data[:,2]*pylab.pi*SW.sigma**3/6
+etavapor = data[:, 1]*pylab.pi*SW.sigma**3/6
+etaliquid = data[:, 2]*pylab.pi*SW.sigma**3/6
 
 # Plot the curve
 pylab.plot(etavapor, T, 'b-')

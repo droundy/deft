@@ -9,8 +9,8 @@ def bracket(ax, x1, x2, y, em, text):
   shrink = 0
   rad = 2
   ax.annotate("",
-              xy=(x1,y), xycoords='axes fraction',
-              xytext=(xleft,y-0.5*bracket_height), textcoords='axes fraction',
+              xy=(x1, y), xycoords='axes fraction',
+              xytext=(xleft, y-0.5*bracket_height), textcoords='axes fraction',
               arrowprops=dict(arrowstyle="-",
                                color="0.0",
                                shrinkA=0, shrinkB=shrink,
@@ -20,8 +20,8 @@ def bracket(ax, x1, x2, y, em, text):
                                ),
                )
   ax.annotate("",
-              xy=(xleft,y-0.5*bracket_height), xycoords='axes fraction',
-              xytext=(xmiddle,y-bracket_height), textcoords='axes fraction',
+              xy=(xleft, y-0.5*bracket_height), xycoords='axes fraction',
+              xytext=(xmiddle, y-bracket_height), textcoords='axes fraction',
               arrowprops=dict(arrowstyle="-",
                                color="0.0",
                                shrinkA=shrink, shrinkB=0,
@@ -31,8 +31,8 @@ def bracket(ax, x1, x2, y, em, text):
                                ),
                )
   ax.annotate("",
-              xy=(x2,y), xycoords='axes fraction',
-              xytext=(xight,y-0.5*bracket_height), textcoords='axes fraction',
+              xy=(x2, y), xycoords='axes fraction',
+              xytext=(xight, y-0.5*bracket_height), textcoords='axes fraction',
               arrowprops=dict(arrowstyle="-",
                                color="0.0",
                                shrinkA=0, shrinkB=shrink,
@@ -42,8 +42,8 @@ def bracket(ax, x1, x2, y, em, text):
                                ),
                )
   ax.annotate("",
-              xy=(xight,y-0.5*bracket_height), xycoords='axes fraction',
-              xytext=(xmiddle,y-bracket_height), textcoords='axes fraction',
+              xy=(xight, y-0.5*bracket_height), xycoords='axes fraction',
+              xytext=(xmiddle, y-bracket_height), textcoords='axes fraction',
               arrowprops=dict(arrowstyle="-",
                                color="0.0",
                                shrinkA=shrink, shrinkB=0,

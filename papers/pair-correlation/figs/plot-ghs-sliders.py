@@ -38,15 +38,15 @@ able_to_read_file = True
 def read_ghs(base, ff):
   mcdatafilename = "%s-%4.2f.dat" % (base, ff)
   if (os.path.isfile(mcdatafilename) == False):
-    print "File does not exist: ", mcdatafilename
+    print("File does not exist: ", mcdatafilename)
     global able_to_read_file
     able_to_read_file = False
     return 0, 0
 
   mcdata = loadtxt(mcdatafilename)
-  print 'Using', mcdatafilename, 'for filling fraction', ff
-  r_mc = mcdata[:,0]
-  n_mc = mcdata[:,1]
+  print('Using', mcdatafilename, 'for filling fraction', ff)
+  r_mc = mcdata[:, 0]
+  n_mc = mcdata[:, 1]
   ghs = n_mc/ff
   return r_mc, ghs
 
@@ -63,7 +63,7 @@ for i in range(len(ff)):
         break
     #r_mclores, ghslores[i] = read_ghs("grlores", ff[i])
     figure(1)
-    ax.plot(r_mc, ghs[i], colors[i]+":",label='ghs at filling fraction %.2f'%ff[i])
+    ax.plot(r_mc, ghs[i], colors[i]+":", label='ghs at filling fraction %.2f'%ff[i])
     # The following is the Monte Carlo approximation of the
     # distribution function at contact.  This gives us an answer with
     # no systematic error (well, very little, and what we have is due
@@ -118,7 +118,7 @@ def evalg_nosquare(xnew, eta, r):
 
 
   if toprint:
-    print eta, a1, a4, a1/a4
+    print(eta, a1, a4, a1/a4)
     toprint = False
 
   f0 = hsigma
@@ -144,7 +144,7 @@ def dist2(x):
 
 
 ghsconcatenated = ghs[0]
-for i in range(1,len(ff)):
+for i in range(1, len(ff)):
   ghsconcatenated = concatenate((ghsconcatenated, ghs[i]))
 
 etaconcatenated = [0]*len(r)*len(eta)
@@ -173,7 +173,7 @@ toprint = True
 # make plots:
 plots = [0]*len(ff)
 for i in range(len(ff)):
-  plots[i], = ax.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'-',label='g at filling fraction %.2f'%ff[i])
+  plots[i], = ax.plot(r_mc, g[i*len(r):(i+1)*len(r)], colors[i]+'-', label='g at filling fraction %.2f'%ff[i])
 
 # sliders
 y0 = .025
@@ -205,7 +205,7 @@ for i in range(len(x)):
 
 
 figure(1)
-ax.set_xlim(2,6.5)
+ax.set_xlim(2, 6.5)
 ax.set_ylim(0., 3.5)
 ax.set_title('$g_{HS}(r)$, $\\chi^2 %.2f$' %chi2)
 ax.set_xlabel(r"$r/R$")

@@ -12,7 +12,7 @@ sys.path.insert(0, dir_path+'/../results/')
 
 # change this to use colors rather than line at some point
 # so that each method gets its own color?
-colors = ["cyan","red","green"]
+colors = ["cyan", "red", "green"]
 
 animate_what = sys.argv[1]           # DOS or HIST
 normalize_dos = bool(sys.argv[2])    # True or False
@@ -54,11 +54,11 @@ if animate_what == 'DOS':
   title_text = ax.text(0.05, 0.9, 'hello', transform=ax.transAxes)
   
   def init():
-      ax.set_xlim(np.min(datas[0].E),np.max(datas[0].E))
+      ax.set_xlim(np.min(datas[0].E), np.max(datas[0].E))
       if normalize_dos:
           ax.set_ylim(-max_Sdiff_ever, 0)
       else:
-          ax.set_ylim(min_S_ever,max_S_ever)
+          ax.set_ylim(min_S_ever, max_S_ever)
       plt.xlabel('E')
       plt.ylabel('$S(E)/k_B$')
       for i in range(len(methods)):
@@ -113,7 +113,7 @@ if animate_what == 'HIST':
   title_text = ax.text(0.05, 0.9, 'hello', transform=ax.transAxes)
   
   def init():
-      ax.set_xlim(np.min(datas[0].E),np.max(datas[0].E))
+      ax.set_xlim(np.min(datas[0].E), np.max(datas[0].E))
       ax.set_ylim(0, d.histogram[-1].max())
       plt.xlabel('E')
       plt.ylabel('Histogram Counts')

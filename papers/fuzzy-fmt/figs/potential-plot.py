@@ -24,7 +24,7 @@ alpha, Xi, diameter = wca_erf.parameters(kT)
 rmin = 0.9
 rmax = 1.2
 
-plt.figure(figsize=(6,4))
+plt.figure(figsize=(6, 4))
 
 r = np.arange(rmin, diameter, 0.01)
 plt.plot(r, wca_erf.V(r), 'k-', label='$V_{wca}$')

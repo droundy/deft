@@ -63,6 +63,8 @@ for kT in kTs:
         # run_new_melting(kT, n, 0.01, 0.2, 0.01)
     # for n in np.arange(1.22, 1.42, 0.02):
         # run_new_melting(kT, n, 0.01, 0.2, 0.01)
-    for n in np.arange(1.42, 1.82, 0.02):
+    #for n in np.arange(1.42, 1.82, 0.02):
+        #run_new_melting(kT, n, 0.01, 0.2, 0.01)
+    for n in np.arange(1.82, 2.8, 0.2):
         run_new_melting(kT, n, 0.01, 0.2, 0.01)
 

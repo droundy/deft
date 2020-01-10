@@ -17,7 +17,7 @@ Ss = []
 labels = []
 
 for f in frames:
-    print f
+    print(f)
     e, lndos = readnew.e_lndos('%s/%06d-lnw.dat' % (moviedir, f))
     its = readnew.iterations('%s/%06d-lnw.dat' % (moviedir, f))
     lndos = -lndos

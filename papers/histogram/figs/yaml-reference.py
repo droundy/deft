@@ -29,10 +29,10 @@ data = yaml_data
 
 #parse the method name used.
 lst = data['method']
-method = str(lst).replace("{","").replace("}", "")
+method = str(lst).replace("{", "").replace("}", "")
 method = method.replace(':', ',').split(',')[0]
 method = method.replace("'", '')
-print 'the Monte-Carlo method is ', method
+print('the Monte-Carlo method is ', method)
 
 data['movies']['energy']
 minE = data['movies']['energy'].index(-Smax)
@@ -41,7 +41,7 @@ maxE = data['movies']['energy'].index(-Smin)
 #moves = data['movies']['time']
 
 dirname = 'data/%s-reference-lndos.dat' % (filename)
-print 'saving to', dirname
+print('saving to', dirname)
 
 #well_width = data['system']['cell']['well_width']
 #translation_scale = ['translation_scale']
@@ -93,4 +93,4 @@ np.savetxt(dirname,
           #newline = '# converged temperature: ',
           #newline = '# energy\t lndos\t ps\t lndos_tm: ',
           #newline = '\n version: created with yaml\n',
-          header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ps\t ' % (' '.join(sys.argv),max_entropy_state,min_important_energy))
+          header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ps\t ' % (' '.join(sys.argv), max_entropy_state, min_important_energy))

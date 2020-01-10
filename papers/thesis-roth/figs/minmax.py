@@ -17,19 +17,19 @@ def minimize(func,T,a,c,prefac, tol=1e-14):
 
     """
 
-    fa = func(T,a,prefac)
-    fc = func(T,c,prefac)
+    fa = func(T, a, prefac)
+    fc = func(T, c, prefac)
 
     b = 0.6*a + 0.4*c
     b_old = a
-    fb = func(T,b,prefac)
+    fb = func(T, b, prefac)
     dx = (c - a)/100000
 
     if a == c:
         return a, fa
     possible_bs = np.arange(a+dx, c-dx, dx)
     f_possible_bs = func(T, possible_bs, prefac)
-    for i in xrange(1, len(possible_bs)):
+    for i in range(1, len(possible_bs)):
         if f_possible_bs[i] < fb:
             b = possible_bs[i]
             fb = f_possible_bs[i]
@@ -48,8 +48,8 @@ def minimize(func,T,a,c,prefac, tol=1e-14):
         n1 = b - 0.4*(b - a)
         n2 = b
 
-    f1 = func(T,n1,prefac)
-    f2 = func(T,n2,prefac)
+    f1 = func(T, n1, prefac)
+    f2 = func(T, n2, prefac)
 
     while abs(n3-n0) > tol*(abs(n1)+abs(n2)):
         if f2 < f1: # Shift everything over one way
@@ -59,7 +59,7 @@ def minimize(func,T,a,c,prefac, tol=1e-14):
 
             # re-define f_i to be accurate to new n_i
             f1 = f2
-            f2 = func(T,n2,prefac)
+            f2 = func(T, n2, prefac)
         else: # Shift everything over the other way
             n3 = n2
             n2 = n1
@@ -67,7 +67,7 @@ def minimize(func,T,a,c,prefac, tol=1e-14):
 
             # re-define f_i to be accurate to the new n_i
             f2 = f1
-            f1 = func(T,n1,prefac)
+            f1 = func(T, n1, prefac)
 
     if f1 < f2:
         nmin = n1
@@ -76,10 +76,10 @@ def minimize(func,T,a,c,prefac, tol=1e-14):
         nmin = n2
         fmin = f2
 
-    return nmin,fmin
+    return nmin, fmin
 
 def maximize(func,T,a,c,prefac, tol=1e-14):
-    def negfunc(T,n,x):
-        return -func(T,n,x)
-    n,phi = minimize(negfunc,T,a,c,prefac,tol)
+    def negfunc(T, n, x):
+        return -func(T, n, x)
+    n, phi = minimize(negfunc, T, a, c, prefac, tol)
     return n

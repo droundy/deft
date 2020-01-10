@@ -9,7 +9,7 @@ import matplotlib
 import pylab, numpy, sys
 
 if len(sys.argv) != 2:
-    print("Usage:  " + sys.argv[0] + " out-filename.pdf")
+    print(("Usage:  " + sys.argv[0] + " out-filename.pdf"))
     exit(1)
 
 pdffilename = sys.argv[1]
@@ -25,22 +25,22 @@ pylab.axhline(y=0, color='k', linestyle='-')
 
 def read_ghs(ff):
     mcdatafilename = "figs/mc-inner-sphere-2-0.%d.dat" % (10*ff)
-    print 'Using', mcdatafilename
+    print('Using', mcdatafilename)
     mcdata = numpy.loadtxt(mcdatafilename)
-    nA_mc = mcdata[:,11]
-    n0_mc = mcdata[:,10]
-    r_mc = mcdata[:,0]
-    n_mc = mcdata[:,1]
+    nA_mc = mcdata[:, 11]
+    n0_mc = mcdata[:, 10]
+    r_mc = mcdata[:, 0]
+    n_mc = mcdata[:, 1]
     ghs = n_mc[r_mc>2]*4*numpy.pi/3/ff
     return r_mc[r_mc>2], ghs
 
-for (c,ff) in [('r',.1008),('b',.2),('g',.3),('c',.4)]:
+for (c, ff) in [('r', .1008), ('b', .2), ('g', .3), ('c', .4)]:
     r_mc, ghs = read_ghs(ff)
 
     ghssigma = ghs.max()
     #pylab.plot(r_mc[r_mc>2]/2, (ghs-1)/(ghssigma-1), c+"-",label='filling fraction %.1f'%ff)
     pylab.figure(1)
-    pylab.plot(r_mc, ghs, c+"-",label='filling fraction %.1f'%ff)
+    pylab.plot(r_mc, ghs, c+"-", label='filling fraction %.1f'%ff)
 
     ghsnorm = (ghs-1)/(ghssigma-1)
     _, ghs1 = read_ghs(0.1008)
@@ -81,9 +81,9 @@ for (c,ff) in [('r',.1008),('b',.2),('g',.3),('c',.4)]:
     
     sigma_correction = (ghs - (1 + g1*ff)).max()
     pylab.figure(2)
-    pylab.plot(r_mc, (ghs - (1 + g1*ff)), c+"-",label='filling fraction %.1f'%ff)
+    pylab.plot(r_mc, (ghs - (1 + g1*ff)), c+"-", label='filling fraction %.1f'%ff)
     pylab.figure(3)
-    pylab.plot(r_mc, (ghs - (1 + g1*ff))/sigma_correction, c+"-",label='filling fraction %.1f'%ff)
+    pylab.plot(r_mc, (ghs - (1 + g1*ff))/sigma_correction, c+"-", label='filling fraction %.1f'%ff)
     fac = ghssigma-1
     period = 6.0/2 # converting from units of R to units of diameter
     slope = 1.5 # dimensions of 1/distance
@@ -169,17 +169,17 @@ for (c,ff) in [('r',.1008),('b',.2),('g',.3),('c',.4)]:
     pylab.figure(3)
     pylab.plot(r_mc, correction, c+"-.")
 
-print r_mc[0]
+print(r_mc[0])
 
 pylab.figure(1)
-pylab.xlim(2,6.5)
+pylab.xlim(2, 6.5)
 pylab.xlabel(r"$r/R$")
 pylab.ylabel("$g(r)$")
 pylab.legend(loc='best').get_frame().set_alpha(0.5)
 pylab.savefig(pdffilename)
 
 pylab.figure(2)
-pylab.xlim(2,6.5)
+pylab.xlim(2, 6.5)
 pylab.xlabel(r"$r/R$")
 pylab.ylabel("$g(r)$")
 pylab.legend(loc='best').get_frame().set_alpha(0.5)

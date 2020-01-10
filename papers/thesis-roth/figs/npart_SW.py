@@ -42,36 +42,36 @@ c_liq = 0.55/(SW.sigma**3*np.pi/6)
 ###############################
 
 # Open file for output
-fout = open('figs/npart_SW-out.dat','w')
+fout = open('figs/npart_SW-out.dat', 'w')
 
 # label the columns of the output
 fout.write('#T     nvapor     nliquid       phi(nvap)        phi(nliq)         nparticular\n')#       phi_avg')
 
 # Do first temperature before the loop
-nvapor,phi_vapor = minmax.minimize(SW.phi,T,a_vap,c_vap,nparticular)
-nliquid,phi_liquid = minmax.minimize(SW.phi,T,a_liq,c_liq,nparticular)
+nvapor, phi_vapor = minmax.minimize(SW.phi, T, a_vap, c_vap, nparticular)
+nliquid, phi_liquid = minmax.minimize(SW.phi, T, a_liq, c_liq, nparticular)
 sys.stdout.flush()
 
 #while T < 1.4:
-for i in xrange(0,N+1):
+for i in range(0, N+1):
     T = (Tc - Tlow)*(1 - ((N-i)/N)**4) + Tlow
 
     fout.flush()
     # Starting point for new nparticular is abscissa of max SW.phi with old nparticular
-    nparticular = minmax.maximize(SW.phi,T,nvapor, nliquid, nparticular)
+    nparticular = minmax.maximize(SW.phi, T, nvapor, nliquid, nparticular)
 
     # I'm looking at the minima of SW.phi
     c_vap = nparticular
     a_liq = nparticular
 
-    nvapor,phi_vapor = minmax.minimize(SW.phi,T,c_vap,a_vap,nparticular)
-    nliquid,phi_liquid = minmax.minimize(SW.phi,T,a_liq,c_liq,nparticular)
+    nvapor, phi_vapor = minmax.minimize(SW.phi, T, c_vap, a_vap, nparticular)
+    nliquid, phi_liquid = minmax.minimize(SW.phi, T, a_liq, c_liq, nparticular)
 
     if abs(T - 0.8) < 0.05:
-        print "\n\nT =", T
-        print 'npart', nparticular
-        print 'nv', nvapor
-        print 'nl', nliquid
+        print("\n\nT =", T)
+        print('npart', nparticular)
+        print('nv', nvapor)
+        print('nl', nliquid)
 
     tol = 1e-5
     fnpart = SW.phi(T, nparticular, nparticular)
@@ -81,18 +81,18 @@ for i in xrange(0,N+1):
         delta_mu = (phi_liquid - phi_vapor)/(nliquid - nvapor)
         def newphi(T, n, npart):
             return SW.phi(T, n, npart) - delta_mu*n
-        nparticular = minmax.maximize(newphi,T,nvapor,nliquid,nparticular)
+        nparticular = minmax.maximize(newphi, T, nvapor, nliquid, nparticular)
         fnpart = SW.phi(T, nparticular, nparticular)
 
-        nvapor,phi_vapor = minmax.minimize(SW.phi,T,a_vap,c_vap,nparticular)
-        nliquid,phi_liquid = minmax.minimize(SW.phi,T,a_liq,c_liq,nparticular)
+        nvapor, phi_vapor = minmax.minimize(SW.phi, T, a_vap, c_vap, nparticular)
+        nliquid, phi_liquid = minmax.minimize(SW.phi, T, a_liq, c_liq, nparticular)
         if abs(T - 0.8) < 0.05:
-            print "\nT =", T
-            print 'npart', nparticular
-            print 'nv', nvapor
-            print 'nl', nliquid
-            print 'dphi', phi_vapor - phi_liquid
-            print 'dimensionless dphi', (phi_vapor - phi_liquid)/np.fabs(fnpart - phi_vapor)
+            print("\nT =", T)
+            print('npart', nparticular)
+            print('nv', nvapor)
+            print('nl', nliquid)
+            print('dphi', phi_vapor - phi_liquid)
+            print('dimensionless dphi', (phi_vapor - phi_liquid)/np.fabs(fnpart - phi_vapor))
 
     fout.write(str(T))
     fout.write('  ')
@@ -107,7 +107,7 @@ for i in xrange(0,N+1):
     fout.write(str(nparticular))
     fout.write('\n')
     sys.stdout.flush();
-    print T,'\t',nvapor/(SW.sigma**3*np.pi/6),'\t',nliquid/(SW.sigma**3*np.pi/6)
+    print(T, '\t', nvapor/(SW.sigma**3*np.pi/6), '\t', nliquid/(SW.sigma**3*np.pi/6))
 
     # Set temp slightly higher
 #    T += 0.01

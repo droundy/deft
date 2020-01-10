@@ -10,7 +10,7 @@ import pylab, numpy, sys, scipy
 from scipy.interpolate import interp1d
 
 if len(sys.argv) != 4:
-    print("Usage:  " + sys.argv[0] + " cell-width radius filling-fraction")
+    print(("Usage:  " + sys.argv[0] + " cell-width radius filling-fraction"))
     exit(1)
 
 width = float(sys.argv[1])
@@ -50,7 +50,7 @@ elif width == 32 and radius == 6:
               0.299,
               0.398]
 else:
-    print "I don't have enough data"
+    print("I don't have enough data")
     sys.exit(1)
 
 # interpolate beyond highest...
@@ -59,6 +59,6 @@ ffvals.append(ffvals[-1]*100)
 num = numpy.array(num)
 ffvals = numpy.array(ffvals)
 
-print numpy.interp(ff, ffvals, num)
+print(numpy.interp(ff, ffvals, num))
 
-print interp1d(ffvals, num, kind='cubic')(ff)
+print(interp1d(ffvals, num, kind='cubic')(ff))

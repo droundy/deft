@@ -20,12 +20,12 @@ title('nA')
 
 def read_gs(ff):
   filename = "figs/wallsWB-0.%d0.dat" % (10*ff)
-  print 'Using', filename
+  print('Using', filename)
   data = loadtxt(filename)
-  r = data[:,0]
-  density = data[:,1]
-  gsigma = data[:,2]
-  nA = data[:,3]
+  r = data[:, 0]
+  density = data[:, 1]
+  gsigma = data[:, 2]
+  nA = data[:, 3]
   return r, density, gsigma, nA
 
 ff = [.1, .2, .3, .4, .5]

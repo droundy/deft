@@ -22,7 +22,7 @@ def run_wca(reduced_density, temperature):
     outfilename = figsdir+'/new-data/radial-wca-%06.4f-%04.2f.out' % (temperature, reduced_density)
     #system("%s %s/soft-sphere.mkdat %g %g > %s 2>&1 &" %
     cmd = ("%s %s/new-radial-wca.mkdat %g %g > %s 2>&1 &" %
-           (srun(reduced_density, temperature).replace('name','new-wca'), figsdir, reduced_density, temperature, outfilename))
+           (srun(reduced_density, temperature).replace('name', 'new-wca'), figsdir, reduced_density, temperature, outfilename))
     print(cmd)
     os.system(cmd)
 
@@ -30,7 +30,7 @@ def run_bh_wca(reduced_density, temperature):
     outfilename = figsdir+'/new-data/radial-bh-wca-%06.4f-%04.2f.out' % (temperature, reduced_density)
     #system("%s %s/soft-sphere.mkdat %g %g > %s 2>&1 &" %
     cmd = ("%s %s/new-bh-radial-wca.mkdat %g %g > %s 2>&1 &" %
-           (srun(reduced_density, temperature).replace('name','new-bh-wca'), figsdir, reduced_density, temperature, outfilename))
+           (srun(reduced_density, temperature).replace('name', 'new-bh-wca'), figsdir, reduced_density, temperature, outfilename))
     print(cmd)
     os.system(cmd)
 
@@ -38,7 +38,7 @@ def run_bh_lj(reduced_density, temperature):
     outfilename = figsdir+'/new-data/radial-bh-lj-%06.4f-%04.2f.out' % (temperature, reduced_density)
     #system("%s %s/soft-sphere.mkdat %g %g > %s 2>&1 &" %
     cmd = ("%s %s/new-bh-radial-lj.mkdat %g %g > %s 2>&1 &" %
-           (srun(reduced_density, temperature).replace('name','new-bh-lj'), figsdir, reduced_density, temperature, outfilename))
+           (srun(reduced_density, temperature).replace('name', 'new-bh-lj'), figsdir, reduced_density, temperature, outfilename))
     print(cmd)
     os.system(cmd)
 

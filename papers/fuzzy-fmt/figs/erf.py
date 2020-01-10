@@ -13,7 +13,7 @@ R = 1
 V0 = 1
 
 dr = R/100
-r = arange(0,1.5*diameter, dr)
+r = arange(0, 1.5*diameter, dr)
 
 
 V = V0*(1-r/diameter)**2
@@ -34,7 +34,7 @@ delta_r = diameter*sqrt(kT/V0/log(2)/pi)
 C = 0.5
 
 figure()
-plot(r,f)
+plot(r, f)
 ferf = C*(erf((r-sigma)/delta_r)-1)
 plot(r, ferf)
 axvline(sigma)
@@ -45,7 +45,7 @@ fprime = -beta*Vprime*exp(-beta*V)
 fprime[r>diameter] = 0
 
 figure()
-plot(r,fprime, 'b-', label="true $f'(r)$ for harmonic potential")
+plot(r, fprime, 'b-', label="true $f'(r)$ for harmonic potential")
 plot(r, C*exp(-(r - sigma)**2/delta_r**2)/delta_r*2/sqrt(pi), 'g-', label='erf approximation')
 
 axvline(sigma, color='k', linestyle=':')

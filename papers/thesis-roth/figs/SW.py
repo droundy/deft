@@ -40,23 +40,23 @@ da1VDW_deta = -4*epsilon*(lambdaSW**3-1)
 
 # Total free energy per volume
 # NB: Gil-Villegas also includes a Chain term; we do not deal with chains, so I leave it off
-def f(T,n):
-    return fid(T,n) + fdisp(T,n) + fhs(T,n)
+def f(T, n):
+    return fid(T, n) + fdisp(T, n) + fhs(T, n)
 
 # Grand free energy per volume
-def phi(T,n,nparticular):
+def phi(T, n, nparticular):
 #    mu = df_dn(T,nparticular)
-    mu = alt_df_dn(T,nparticular)
-    return f(T,n) - mu*n
+    mu = alt_df_dn(T, nparticular)
+    return f(T, n) - mu*n
 
 # Derivative of free energy wrt number at const temp
-def alt_df_dn(T,n):
+def alt_df_dn(T, n):
     # step size
     dn = 1e-6*n
-    return (f(T,n + dn/2) - f(T,n - dn/2))/dn
+    return (f(T, n + dn/2) - f(T, n - dn/2))/dn
 
 # Derivative of free energy wrt number (const. temp)
-def df_dn(T,n):
+def df_dn(T, n):
 
     # Constants for eta_eff
     # Redefine here, rather than using SW.c1 (etc.) in case the value of lambdaSW is different between SW.py and this program
@@ -105,12 +105,12 @@ def df_dn(T,n):
 # NB: In Gil-Villegas, there is a term involving the thermal DeBroglie wavelength (Lambda)
 ## I ignore this here, because Lambda does not have any contribution from density.
 ## It only serves to add a constant to the free energy; we absorb this later into the chemical potential
-def fid(T,n):
+def fid(T, n):
     return n*k_B*T*(np.log(n) - 1)
 
 # Hard-sphere free energy
 # based on Hughes
-def fhs(T,n):
+def fhs(T, n):
     # Phi 1
     Phi1 = -n0(n)*np.log(1-n3(n))
 
@@ -139,7 +139,7 @@ def n3(n):
 # Dispersion
 # Hughes calls this Dispersion, Gil-Villegas calls it Monomer
 # This is taken from the code based on Hughes (Hughes.py)
-def fdisp(T,n):
+def fdisp(T, n):
     return (a1SW(n) + 1/(k_B*T)*a2(n))*n
 
 # 1st term in High-temp perturbation expansion, for square well potential
@@ -210,5 +210,5 @@ def K(n):
     return (1-eta(n))**4/(1+4*eta(n)+4*eta(n)**2)
 
 # Pressure, defined in Hughes' thesis, eqn 38
-def P(T,n):
-    return n*df_dn(T,n) - f(T,n)
+def P(T, n):
+    return n*df_dn(T, n) - f(T, n)

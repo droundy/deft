@@ -25,10 +25,10 @@ for t in temps:
     pylab.figure()
     data = pylab.loadtxt('figs/lj-Kr-%gK-new-precond.dat' %t)
     data_hughes = pylab.loadtxt('figs/hughes-lj-Kr-%gK.dat' %t)
-    r = data[:,1]/nm
-    r_hughes = data_hughes[:,1]/nm
-    density = data[:,3]/gpermL
-    dens_hughes = data_hughes[:,3]/gpermL
+    r = data[:, 1]/nm
+    r_hughes = data_hughes[:, 1]/nm
+    density = data[:, 3]/gpermL
+    dens_hughes = data_hughes[:, 3]/gpermL
     pylab.plot(r_hughes*10, dens_hughes, color = blueish, linestyle='--', label='Hughes, et al')
     pylab.plot(r*10, density, color = redish, linestyle='-', label='This work')
 

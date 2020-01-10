@@ -31,7 +31,7 @@ args=parser.parse_args()
 #for kT in [.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]:
 #for kT in [.01, .1, .2, .3, .4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]:
 #for kT in [.4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]:   #no data appears for lower than .4
-for kT in [.4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 4,6,8,10,12,14,16,18,20]:   #no data appears for lower than .4
+for kT in [.4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 4,6,8,10,12,14,16,18,20,40, 60, 80, 100, 120, 140, 160, 180, 200]:   #no data appears for lower than .4
 #for kT in [1.9, 2]:
 #for kT in [0.5, 1]:
   n = []
@@ -52,7 +52,7 @@ for kT in [.4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1
       gw.append(data[3])
       fe_difference.append(data[6])
 
-  plt.axhspan(0.0, -5, color='lightblue', alpha=0.15, lw=0)
+  plt.axhspan(0.0, -25, color='lightblue', alpha=0.15, lw=0)
   plt.title("Free Energy difference vs density")
   plt.plot(n, fe_difference, '.-', label='kT=%g' % (kT))
   plt.axhline(0, color='k')

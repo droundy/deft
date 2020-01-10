@@ -18,21 +18,21 @@ hsigma = pylab.zeros(len(ff))
 def read_ghs(base, ff):
     mcdatafilename = "%s-0.%02d.dat" % (base, 100*ff)
     mcdata = numpy.loadtxt(mcdatafilename)
-    print 'Using', mcdatafilename, 'for filling fraction', ff
-    r_mc = mcdata[:,0]
-    n_mc = mcdata[:,1]
+    print('Using', mcdatafilename, 'for filling fraction', ff)
+    r_mc = mcdata[:, 0]
+    n_mc = mcdata[:, 1]
     ghs = n_mc/ff
     return r_mc, ghs
 
 for i in range(len(ff)):
-  print 'working with', i
-  r,ghs = read_ghs('figs/gr', ff[i])
+  print('working with', i)
+  r, ghs = read_ghs('figs/gr', ff[i])
   hsigma[i] = (1-ff[i]/2)/(1-ff[i])**3 - 1
   skipnum = 3
   slope[i] = (ghs[skipnum] - ghs[0])/(r[skipnum] - r[0])
   plot(r, ghs[0] + (r-2)*slope[i])
   plot(r, ghs)
-pylab.xlim(2,2.2)
+pylab.xlim(2, 2.2)
 pylab.ylim(0, 6)
 
 pylab.figure()

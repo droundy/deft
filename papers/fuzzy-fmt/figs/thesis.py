@@ -26,8 +26,8 @@ balls = []
 #   rate(100)
 
 ax = subplot(111, autoscale_on=False, aspect='equal') 
-ax.set_xbound(-20,20)
-ax.set_ybound(-20,20)
+ax.set_xbound(-20, 20)
+ax.set_ybound(-20, 20)
 subplots_adjust(left=0.25, bottom=0.25)
 
 a0 = 0
@@ -35,19 +35,19 @@ a0 = 0
 
 
 r = 1
-cir = plt.Circle((0,0), radius=r,  fc='b')
+cir = plt.Circle((0, 0), radius=r,  fc='b')
 ax.add_patch(cir)
-cir = plt.Circle((0,0), radius=5,  color='r',fill=False)
+cir = plt.Circle((0, 0), radius=5,  color='r', fill=False)
 ax.add_patch(cir)
-cir = plt.Circle((0,0), radius=6,  color='r',fill=False)
+cir = plt.Circle((0, 0), radius=6,  color='r', fill=False)
 ax.add_patch(cir)
 colr='y'
-for i in range(0,35):
-	x = randint(-20,20)
-	y = randint(-20,20)
-	if pow(x*x + y*y,.5) < 6 and pow(x*x + y*y,.5) > 5:
+for i in range(0, 35):
+	x = randint(-20, 20)
+	y = randint(-20, 20)
+	if pow(x*x + y*y, .5) < 6 and pow(x*x + y*y, .5) > 5:
 		colr = 'r'
-	cir = plt.Circle((x,y), radius=r,  fc=colr)
+	cir = plt.Circle((x, y), radius=r,  fc=colr)
 	ax.add_patch(cir)
 	colr='y'
    

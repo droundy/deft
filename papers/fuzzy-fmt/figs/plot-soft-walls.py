@@ -28,8 +28,8 @@ def smooth(x, N):
 
 def average_positive_and_negative(data):
     for i in range(len(data)//2):
-        data[i,1] = data[abs(data[:,0]) == abs(data[i,0]),1].mean()
-    return data[:len(data)//2, :]
+        data[i, 1] = data[abs(data[:, 0]) == abs(data[i, 0]), 1].mean()
+    return data[:len(data)//2,:]
 
 def plot_soft_walls(reduced_density, temps):
     have_labelled_bh = False
@@ -39,8 +39,8 @@ def plot_soft_walls(reduced_density, temps):
     for temp in temps:
         fname = 'figs/new-data/soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
-        z = data[:,0]
-        nreduced_density = data[:,1]
+        z = data[:, 0]
+        nreduced_density = data[:, 1]
         if have_labelled_dft:
             plot(z, nreduced_density, styles.new_dft_code(temp))
         else:
@@ -49,8 +49,8 @@ def plot_soft_walls(reduced_density, temps):
 
         fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
-        z = data[:,0]
-        nreduced_density = data[:,1]
+        z = data[:, 0]
+        nreduced_density = data[:, 1]
         if have_labelled_bh:
             plot(z, nreduced_density, styles.color[temp]+':')
         else:
@@ -60,8 +60,8 @@ def plot_soft_walls(reduced_density, temps):
         
         fname = 'figs/mc-soft-wall-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
-        zmin = data[:,0].min()
-        plot(smooth(data[:,0]-zmin,NUM), smooth(data[:,1],NUM)/2**(-5.0/2.0),
+        zmin = data[:, 0].min()
+        plot(smooth(data[:, 0]-zmin, NUM), smooth(data[:, 1], NUM)/2**(-5.0/2.0),
              styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
     #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
@@ -73,7 +73,7 @@ def plot_soft_walls(reduced_density, temps):
     xlim(-0.2, 6)
     outputname = 'figs/soft-walls-%02d.pdf' % (reduced_density)
     savefig(outputname, bbox_inches=0)
-    print('figs/walls-%02d.pdf' % (reduced_density))
+    print(('figs/walls-%02d.pdf' % (reduced_density)))
 
 
 # input: ['figs/mc-soft-wall-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
@@ -82,7 +82,7 @@ def plot_soft_walls(reduced_density, temps):
 # input: ['figs/mc-soft-wall-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
-figure(figsize=(9,14.5))
+figure(figsize=(9, 14.5))
 subplot(2, 1, 1)
 plot_soft_walls(60, [10.0, 5.0, 2.5, 1.0])
 

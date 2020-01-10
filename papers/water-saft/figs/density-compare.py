@@ -18,13 +18,13 @@ blueish = '#99cccc'#'#aadddd' #'#55dae0'
 rod = '#666666'
 
 hugdata = pylab.loadtxt('figs/hughes-single-rod-1nm-density.dat')
-rhug = hugdata[:,0]/nm
-hugdensity = hugdata[:,1]/gpermL
+rhug = hugdata[:, 0]/nm
+hugdensity = hugdata[:, 1]/gpermL
 p1, = pylab.plot(rhug, hugdensity, color = '#3333aa', linestyle='--')
 
 newdata = pylab.loadtxt('figs/single-rod-1nm-density.dat')
-rnew = newdata[:,0]/nm
-newdensity = newdata[:,1]/gpermL
+rnew = newdata[:, 0]/nm
+newdensity = newdata[:, 1]/gpermL
 p2, = pylab.plot(rnew, newdensity, color = '#dd6677', linestyle='-')
 
 pyplot.hlines(1, 0, 1.3, 'black', ':')
@@ -52,5 +52,5 @@ pyplot.ylabel('Density (g/mL)')
 pyplot.xlabel('Radius (nm)')
 pyplot.ylim(0, ymax)
 pyplot.xlim(0, rmax)
-pyplot.legend([p1,p2],["Hughes, et al", "This work"])
+pyplot.legend([p1, p2], ["Hughes, et al", "This work"])
 pyplot.savefig('figs/density-compare.pdf')

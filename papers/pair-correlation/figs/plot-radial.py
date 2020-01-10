@@ -22,9 +22,9 @@ rmax = 10
 
 def read_walls(ff, z0):
     filename = "figs/mc/wallsMC-pair-0.%d-%1.2f.dat" % (10*ff, z0)
-    print 'Using', filename
+    print('Using', filename)
     if (os.path.isfile(filename) == False):
-        print "File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data."
+        print("File does not exist. Try different values for ff and z0, or leave them blank to use defaults, or generate more monte carlo data.")
         sys.exit(1)
     data = numpy.loadtxt(filename)
     return data
@@ -38,7 +38,7 @@ dr = rmax/rbins
 r = numpy.arange(0, rmax, dr)
 fig = pylab.figure(1)
 max = int(g2.max()) + 1
-print max
+print(max)
 dw = 0.05
 
 pylab.plot(r, g2)

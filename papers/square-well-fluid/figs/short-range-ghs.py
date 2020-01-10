@@ -8,7 +8,7 @@ if len(sys.argv) < 2 or sys.argv[1] != "show":
 import sympy
 from scipy.optimize import leastsq
 from sympy import pi, exp
-import pylab, string, numpy
+import pylab, numpy
 
 from matplotlib import rc
 
@@ -94,12 +94,12 @@ f.write(latex_code)
 f.close()
 
 
-for i in xrange(len(expr)):
+for i in range(len(expr)):
   latex_code += '\\begin{dmath}\n' + sympy.latex(sympy.Eq(v[l[i]], expr[i]())) + '\n\\end{dmath}\n'
 
 # this loop unwraps the onion, getting ghs in terms of only the 9 kappas, h_sigma, and r
 # we will wait on substituting h_sigma as a function of eta, though
-for i in reversed(xrange(len(expr))):
+for i in reversed(range(len(expr))):
     temp = v[l[i]]
     v[l[i]] = expr[i]()
     # v[l[i]] = sympy.simplify(expr[i]() this makes it take way too long
@@ -108,7 +108,7 @@ for i in reversed(xrange(len(expr))):
 ghs_s = expr[0]()
 
 # now that we have ghs defined, we want to do a best fit to find the kappas
-print 'I see g(r) = ', ghs_s.subs(sympy.symbols('h_sigma'), sympy.symbols('g_sigma') - 1)
+print('I see g(r) = ', ghs_s.subs(sympy.symbols('h_sigma'), sympy.symbols('g_sigma') - 1))
 lam = sympy.utilities.lambdify(('kappa_11', 'kappa_12', 'kappa_13', 'kappa_14',
                                 'kappa_21', 'kappa_22', 'kappa_23', 'kappa_24',
                                 'kappa_31', 'kappa_32', 'kappa_33', 'kappa_34',
@@ -126,14 +126,14 @@ def read_ghs(base, ff):
   global able_to_read_file
   mcdatafilename = "%s-%4.2f.dat" % (base, ff)
   if (os.path.isfile(mcdatafilename) == False):
-    print "File does not exist: ", mcdatafilename
+    print("File does not exist: ", mcdatafilename)
     able_to_read_file = False
     return 0, 0
 
   mcdata = numpy.loadtxt(mcdatafilename)
-  print 'Using', mcdatafilename, 'for filling fraction', ff
-  r_mc = mcdata[:,0]
-  n_mc = mcdata[:,1]
+  print('Using', mcdatafilename, 'for filling fraction', ff)
+  r_mc = mcdata[:, 0]
+  n_mc = mcdata[:, 1]
   #n_mc = n_mc[r_mc < fit_rcutoff]
   #r_mc = r_mc[r_mc < fit_rcutoff]
   ghs = n_mc/ff
@@ -152,7 +152,7 @@ ghs = [0]*len(ff)
 eta = [0]*len(ff)
 gsigmas = [0]*len(ff)
 
-fig1 = pylab.figure(1, figsize=(5,4))
+fig1 = pylab.figure(1, figsize=(5, 4))
 ax1 = fig1.gca()
 pylab.axvline(x=sigma, color='k', linestyle=':')
 pylab.axhline(y=1, color='k', linestyle=':')
@@ -162,7 +162,7 @@ for i in range(len(ff)):
     if able_to_read_file == False:
         break
     pylab.figure(1)
-    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='$\eta = %.2f$'%ff[i])
+    pylab.plot(r_mc, ghs[i], colors[i]+"-", label='$\eta = %.2f$'%ff[i])
     eta[i] = ff[i]
     gsigmas[i] = (1 - ff[i]/2)/(1 - ff[i])**3
     r = r_mc
@@ -184,7 +184,7 @@ def dist2(x):
                               len(gsigmas)*len(r[r<fit_rcutoff]))
 
 ghsconcatenated = ghs[0]
-for i in range(1,len(ff)):
+for i in range(1, len(ff)):
   ghsconcatenated = pylab.concatenate((ghsconcatenated, ghs[i]))
 
 etaconcatenated = [0]*len(r)*len(eta)
@@ -208,17 +208,17 @@ while (j < len(eta)):
 vals = pylab.zeros_like(x)
 
 chi2 = sum(dist2(x)**2)
-print "beginning least squares fit, chi^2 initial: ", chi2
+print("beginning least squares fit, chi^2 initial: ", chi2)
 vals, mesg = leastsq(dist2, x)
 # round fitted numbers
 digits = 3
 vals = pylab.around(vals, digits)
 chi2 = sum(dist2(vals)**2)
-print "original fit complete, chi^2: %g" % chi2
+print("original fit complete, chi^2: %g" % chi2)
 
 toprint = True
 for i in range(len(x)):
-  print "vals[%i]: %.*f\t x[%i]: %g" %(i, digits, vals[i], i, x[i])
+  print("vals[%i]: %.*f\t x[%i]: %g" %(i, digits, vals[i], i, x[i]))
 
 g = dist(vals)
 gdifference = dist2(vals)
@@ -227,7 +227,7 @@ chisq = (gdifference**2).sum()
 maxerr = abs(gdifference).max()
 etamaxerr = 0
 rmaxerr = 0
-for i in xrange(len(gdifference)):
+for i in range(len(gdifference)):
   if abs(gdifference[i]) == maxerr:
     etamaxerr = etaconcatenated[i]
     rmaxerr = rconcatenated[i]
@@ -256,7 +256,7 @@ alpha = vals[12]
 def next_comma(ccode):
   """ returns next comma not counting commas within parentheses """
   deepness = 0
-  for i in xrange(len(ccode)):
+  for i in range(len(ccode)):
     if ccode[i] == ')':
       if deepness == 0:
         return -1
@@ -270,7 +270,7 @@ def next_comma(ccode):
 def next_right_paren(ccode):
   """ returns next ")" not counting matching parentheses """
   deepness = 0
-  for i in xrange(len(ccode)):
+  for i in range(len(ccode)):
     if ccode[i] == ')':
       if deepness == 0:
         return i
@@ -284,7 +284,7 @@ def fix_pows(ccode):
   It turns out not to make a difference in the speed of walls.mkdat,
   but I'm leaving it in, becuase this way we can easily check if this
   makes a difference (since I thought that it might). """
-  n = string.find(ccode, 'pow(')
+  n = ccode.find('pow(')
   if n > 0:
     return ccode[:n] + fix_pows(ccode[n:])
   if n == -1:
@@ -447,7 +447,7 @@ def avg_points(x, y, dpath):
   new_y = numpy.array([])
   new_x = numpy.array([])
   old_i = 0
-  for i in xrange(1, len(x)):
+  for i in range(1, len(x)):
     dist = numpy.sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
     if dist >= dpath or i == len(x) - 1:
       avg_x = numpy.average(x[old_i:i])
@@ -459,7 +459,7 @@ def avg_points(x, y, dpath):
   return (new_x, new_y)
 
 scaleme = 0.8
-fig2 = pylab.figure(2, figsize=(6*scaleme,8*scaleme))
+fig2 = pylab.figure(2, figsize=(6*scaleme, 8*scaleme))
 ax2 = fig2.gca()
 
 # ax.axvline(x=sigma, color='gray', linestyle='-')
@@ -474,20 +474,20 @@ alt_styles = {
 }
 
 # now let's plot the fit
-ranges = [(0.9,1.2), (0.9,1.4), (0.9,1.7), (0.8, 1.8), (0.8, 2.3),
+ranges = [(0.9, 1.2), (0.9, 1.4), (0.9, 1.7), (0.8, 1.8), (0.8, 2.3),
           (0.75, 2.5), (0.75, 3.2), (0.6, 4.0), (0.6, 5.0)]
 
 skip_every_other = True
-indexes = range(len(ff))
+indexes = list(range(len(ff)))
 if skip_every_other:
-  indexes = range(1,len(ff),2)
-  for i in range(0,len(ranges),2):
-    ranges[i] = (0,0)
+  indexes = list(range(1, len(ff), 2))
+  for i in range(0, len(ranges), 2):
+    ranges[i] = (0, 0)
 
 zeros = [-ranges[0][0]]*len(ranges)
 maxes = [ranges[0][1]]*len(ranges)
 mines = [ranges[0][0]]*len(ranges)
-for i in range(1,len(zeros)):
+for i in range(1, len(zeros)):
   mines[i] = ranges[i][0]
   maxes[i] = ranges[i][1]
   zeros[i] = zeros[i-1] + maxes[i-1] - ranges[i][0]
@@ -552,7 +552,7 @@ for i in indexes:
   integrand_ours = 4*pi*r_mc*r_mc*g[i*len(r):(i+1)*len(r)]
   integral_mc = sum(integrand_mc)/len(integrand_mc)*(r_mc[2]-r_mc[1]) - 4/3*pi*sigma**3
   integral_ours = sum(integrand_ours)/len(integrand_ours)*(r_mc[2]-r_mc[1]) - 4/3*pi*sigma**3
-  print("Int_mc: %6.3f, Int_ours: %6.3f, Diff: %6.3f" %(integral_mc, integral_ours, integral_ours-integral_mc))
+  print(("Int_mc: %6.3f, Int_ours: %6.3f, Diff: %6.3f" %(integral_mc, integral_ours, integral_ours-integral_mc)))
 
 
 pylab.figure(2)

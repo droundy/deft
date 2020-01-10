@@ -23,7 +23,7 @@ fig, axD = plt.subplots()
 axT = plt.twinx()
 
 for ff in ffs:
-    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
+    basename = 'data/lv/ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenx, lenyz)
     e, diff = readandcompute.e_diffusion_estimate(basename)
     N = readandcompute.read_N(basename);
     axD.plot(e, diff, label=r'$\eta = %g$' % ff)
@@ -39,8 +39,8 @@ for ff in ffs:
     axT.plot(e/N, 2.5*hist/hist.max(), 'k:')
 
     e, init_hist = readandcompute.e_and_total_init_histogram(basename)
-    for i in xrange(len(e)):
-        print e[i], (2.5*init_hist/init_hist.max())[i]
+    for i in range(len(e)):
+        print(e[i], (2.5*init_hist/init_hist.max())[i])
     axT.plot(e, 2.5*init_hist/init_hist.max(), 'c--')
 
 axT.spines['right'].set_color('red')
@@ -55,6 +55,6 @@ axT.set_ylabel(r'$T$')
 plt.title(r'RMS $\Delta E$ with $\lambda = %g$  %.1g initialization iterations'
           % (ww, readandcompute.total_init_iterations(basename)))
 
-plt.savefig('figs/liquid-vapor-ww%.2f-%gx%g-diffusion.pdf' % (ww,lenx,lenyz))
+plt.savefig('figs/liquid-vapor-ww%.2f-%gx%g-diffusion.pdf' % (ww, lenx, lenyz))
 
 plt.show()

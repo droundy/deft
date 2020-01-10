@@ -11,7 +11,7 @@ matplotlib.rc('text', usetex=True)
 import readnew
 
 if len(sys.argv) < 5:
-    print("Usage: python {} 1.3 0.22 100 10".format(sys.argv[0]))
+    print(("Usage: python {} 1.3 0.22 100 10".format(sys.argv[0])))
     exit(1)
 
 ww = float(sys.argv[1])
@@ -42,7 +42,7 @@ def color(T):
         return colors[T]
     except:
         return ''
-lines = ['-', '--', ':','-.', '.']
+lines = ['-', '--', ':', '-.', '.']
 
 first_method = True
 the_first_method = ''
@@ -52,7 +52,7 @@ first_temperature = [True]*len(methods)
 
 for i in range(len(methods)):
     method = methods[i]
-    fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww,ff,lenx,lenyz,method)
+    fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww, ff, lenx, lenyz, method)
     fname = fbase + '-density.dat'
     try:
         minT = readnew.minT(fname)
@@ -86,6 +86,6 @@ plt.ylabel(r'$\eta$')
 plt.legend(loc='best')
 plt.title(r'$\eta(z)$ with $\lambda = %g$ and $\eta=%g$' % (ww, ff))
 
-plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g.pdf' % (ww,ff,lenx,lenyz))
+plt.savefig('figs/sticky-wall-ww%.2f-ff%.2f-%gx%g.pdf' % (ww, ff, lenx, lenyz))
 
 plt.show()

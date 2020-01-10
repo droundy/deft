@@ -1,7 +1,7 @@
 from __future__ import division
 import os, sys, re
 import numpy as np
-from numpy import exp,log
+from numpy import exp, log
 import matplotlib
 import pylab as plt
 from itertools import cycle
@@ -19,38 +19,38 @@ import listAll
 listAll.baseDir+="/../data"
 listAll.findFolders()
 
-def SW_Fexc(T,n):
+def SW_Fexc(T, n):
 	#return SW.fhs(T,n)
 	#return SW.fdisp(T,n)
-	return SW.fdisp(T,n)+SW.fhs(T,n)
+	return SW.fdisp(T, n)+SW.fhs(T, n)
 
 def SW_Finfinity(n):
 	T=1.0e8
-	return SW.fhs(T,n)/T
+	return SW.fhs(T, n)/T
 
-def avgFcost(stats,Tmin,Tmax):
+def avgFcost(stats, Tmin, Tmax):
 	T=Tmin
 	deltaT=(Tmax-Tmin)/1000
 	count=0
 	totalCost=0
 	while T<Tmax:
-		totalCost+=Fcost(stats,T)
+		totalCost+=Fcost(stats, T)
 		T+=deltaT
 		count+=1
 	return totalCost/count
 def FcostFixedFF(stats):
-	ffs=[0.05,0.15,0.25,0.35,0.45]
+	ffs=[0.05, 0.15, 0.25, 0.35, 0.45]
 	nPairs=[]
 	for ff in ffs:#first find the nPairs corresponding to each FF############
 		nLeft=int(ff*(stats[0].L**3.0)/(4/3.0*np.pi))#assumes R=1.0
 		nRight=int(ff*(stats[0].L**3.0)/(4/3.0*np.pi)+1.0)
 		nPair=[]
-		for i in range(0,len(stats)):
+		for i in range(0, len(stats)):
 			if stats[i].N==nLeft:
 				nPair.append(i)
 				#
 				break
-		for i in range(0,len(stats)):
+		for i in range(0, len(stats)):
 			if stats[i].N==nRight:
 				nPair.append(i)
 				#
@@ -60,8 +60,8 @@ def FcostFixedFF(stats):
 	if len(nPairs)==0: return -1.0
 	diffSquared=0.0
 	weightTotal=0
-	Ts=plt.linspace(0.6,1.3,1000)
-	for i in range(0,len(nPairs)):#now find the diffSquared by interpolation of the pairs############
+	Ts=plt.linspace(0.6, 1.3, 1000)
+	for i in range(0, len(nPairs)):#now find the diffSquared by interpolation of the pairs############
 		nMid=ffs[i]*(stats[0].L**3.0)/(4/3.0*np.pi) #what we want
 		nLeft=int(ffs[i]*(stats[0].L**3.0)/(4/3.0*np.pi))#assumes R=1.0
 		density=nMid/stats[0].L**3.0
@@ -69,41 +69,41 @@ def FcostFixedFF(stats):
 			Fleft=stats[nPairs[i][0]].findFexc(T)
 			Fright=stats[nPairs[i][1]].findFexc(T)
 			Fmid=Fleft+(Fright-Fleft)/(1.0)*(nMid-nLeft) #F0+(rise/run)*dn
-			diffSquared+=(Fmid-SW_Fexc(T,density))**2.0/density**2.0
+			diffSquared+=(Fmid-SW_Fexc(T, density))**2.0/density**2.0
 			weightTotal+=1
 	return (diffSquared/weightTotal)**0.5
 
 		
-def Fcost(stats,T):
+def Fcost(stats, T):
 	#free energy cost function
 	#now uses RMS
 	diffSquared=0.0
 	weightTotal=0.0
 	for thermoStat in stats:
 		density=thermoStat.N/(thermoStat.L**3.0)
-		diffSquared+=((thermoStat.findFexc(T)-SW_Fexc(T,density))**2.0)/density**2.0
+		diffSquared+=((thermoStat.findFexc(T)-SW_Fexc(T, density))**2.0)/density**2.0
 		weightTotal+=1
 	return (diffSquared/weightTotal)
 
-dataColors=['ro','go','bo','rx','gx','bx']
-saftColors=['r','g','b','r--','b--','g--']
+dataColors=['ro', 'go', 'bo', 'rx', 'gx', 'bx']
+saftColors=['r', 'g', 'b', 'r--', 'b--', 'g--']
 
 #iterates over base folders and ith orders
 #finally loads the N atoms in a box data
 #for each set, generates some plots near optimal temp (found in 1.0->1.3
 LforAvgCost=[]
 avgCost=[]
-for m in range(0,len(listAll.validFoldersss)):#iterates over base folders
-	for ith in range(0,len(listAll.validFoldersss[m])):#iterates over ith orders
+for m in range(0, len(listAll.validFoldersss)):#iterates over base folders
+	for ith in range(0, len(listAll.validFoldersss[m])):#iterates over ith orders
 		stats=[]	#holds thermoStats
-		for nj in range(0,len(listAll.validFoldersss[m][ith])):#loads N_j data
+		for nj in range(0, len(listAll.validFoldersss[m][ith])):#loads N_j data
 			fbase=listAll.validFoldersss[m][ith][nj]
 			if False==os.path.isfile(fbase+"lv-data-dos.dat"): continue
 			if useCarnahanStarling==True:
-				print fbase
+				print(fbase)
 				L=float(fbase.split("-L")[1].split("/")[0])
 				density=int(fbase.split("N")[1].split("/")[0])/L**3.0
-				temp=thermoStats.ThermoStats(fbase=fbase,SatInfinity=-SW_Finfinity(density)*(L**3.0))
+				temp=thermoStats.ThermoStats(fbase=fbase, SatInfinity=-SW_Finfinity(density)*(L**3.0))
 				
 			else:
 				if False==os.path.isfile(fbase+"absolute/Sexc.dat"): continue
@@ -115,7 +115,7 @@ for m in range(0,len(listAll.validFoldersss)):#iterates over base folders
 			
 			if len(temp.dos)<1: continue
 			stats.append(temp)
-			print temp.L
+			print(temp.L)
 		if len(stats)==0: continue
 		#data now loaded, PLOT!
 		
@@ -188,9 +188,9 @@ for m in range(0,len(listAll.validFoldersss)):#iterates over base folders
 				avgCost.append(currentCost)
 
 ###############--------------all ww=1.5  T=infinity  dataF-saftF------##
-colors=['ro','go','bo','rx','gx','bx']
+colors=['ro', 'go', 'bo', 'rx', 'gx', 'bx']
 plt.figure()
-plt.plot(LforAvgCost,avgCost,'ro')
+plt.plot(LforAvgCost, avgCost, 'ro')
 plt.xlabel("length of box")
 plt.ylabel("average RMS(Fexc-SaftF) for T in (0.7,1.5)")
 plt.savefig("costVsBoxSize.png")

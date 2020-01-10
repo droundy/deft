@@ -24,7 +24,7 @@ ff = 0.3
 def plot1d():
   global g2, ax
   zvals = len(g2[0][0,:])
-  rvals = len(g2[0][:,0])
+  rvals = len(g2[0][:, 0])
   if theta < arctan(1/2):
     z1 = zmax
     r1 = (z1-z0)*tan(theta)
@@ -43,7 +43,7 @@ def plot1d():
 
   i = 0
   while i < numplots:
-    zi = scipy.ndimage.map_coordinates(g2[i], vstack((x,y)), order = 1)
+    zi = scipy.ndimage.map_coordinates(g2[i], vstack((x, y)), order = 1)
     angline[i].set_data([z0, z1], [0, r1])
     gslice[i].set_data(linspace(0, rlen, num), zi)
     i += 1
@@ -56,7 +56,7 @@ def make_plots():
     ax[i].collections = []
     g2[i] = read_triplet(ff, z0, plots[i])
 
-    rmax = len(g2[i][:,0])*dx-dx
+    rmax = len(g2[i][:, 0])*dx-dx
     zmax = len(g2[i][0,:])*dx-dx
 
     r = arange(0, rmax+dx/2, dx)
@@ -65,8 +65,8 @@ def make_plots():
     if i == 0:
       # colormap
       gmax = max(g2[0].max(axis=0))
-      white = g2[0][-1,0]
-      print white, gmax
+      white = g2[0][-1, 0]
+      print(white, gmax)
       xlo = 0.85*white/gmax
       xhi = 1.15*white/gmax
       xhier = (1+xhi)/2.0
@@ -75,21 +75,21 @@ def make_plots():
                          (xlo,  1.0, 1.0),
                          (white/gmax,  1.0, 1.0),
                          (xhi,  0.0, 0.0),
-                         (xhier,0.0, 0.0),
+                         (xhier, 0.0, 0.0),
                          (1.0,  1.0, 1.0)],
 
                'green': [(0.0, 0.0, 0.0),
                          (xlo,  0.1, 0.1),
                          (white/gmax, 1.0, 1.0),
                          (xhi, 0.0, 0.0),
-                         (xhier,1.0, 1.0),
+                         (xhier, 1.0, 1.0),
                          (1.0, 1.0, 1.0)],
 
                'blue':  [(0.0,  0.0, 0.0),
                          (xlo,  0.1, 0.1),
                          (white/gmax,  1.0, 1.0),
                          (xhi,  1.0, 1.0),
-                         (xhier,0.0, 0.0),
+                         (xhier, 0.0, 0.0),
                          (1.0,  0.0, 0.0)]}
 
       cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
@@ -116,15 +116,15 @@ def read_triplet(ff, z0, fun):
     filename = "figs/mc/triplet/tripletMC-%03.1f-%05.2f.dat" % (ff, z0)
   else:
     filename = "figs/tripletWB-%s-%1.2f-%1.1f0.dat" %(fun, ff, z0)
-  print 'Using', filename
+  print('Using', filename)
   if (os.path.isfile(filename) == False):
-    print "File does not exist:", filename
-    return zeros((150,150))
+    print("File does not exist:", filename)
+    return zeros((150, 150))
   data = loadtxt(filename)
   return data
 
 
-g2 = range(numplots)
+g2 = list(range(numplots))
 g2[0] = read_triplet(ff, z0, 'mc')
 
 
@@ -158,7 +158,7 @@ gmax = max(g2[0].max(axis=0))
 # levels = linspace(0, gmax, gmax*20)
 # levels = linspace(0,4, 100);
 
-rmax = len(g2[0][:,0])*dx
+rmax = len(g2[0][:, 0])*dx
 zmax = len(g2[0][0,:])*dx
 
 # r = arange(0, rmax, dx)
@@ -186,7 +186,7 @@ i = 0
 while i < numplots:
   ax[i].set_aspect('equal')
   ax[i].set_xlim(0, 15)
-  ax[i].set_ylim(-7.5,7.5)
+  ax[i].set_ylim(-7.5, 7.5)
   i += 1
 
 num = 1000
