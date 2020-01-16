@@ -297,6 +297,11 @@ setKequalToZero e = setZero (EK kz) $ expand kz $ setZero (EK ky) $ setZero (EK 
                     setZero (EK imaginary) $
                     -- trace ("setKequalToZero\n    "++code e)
                     e
+-- In the following we don't set the imaginary part to zero...
+setKequalToZeroLeavingI :: Expression KSpace -> Expression KSpace
+setKequalToZeroLeavingI e = setZero (EK kz) $ expand kz $ setZero (EK ky) $ setZero (EK kx) $
+                            -- trace ("setKequalToZero\n    "++code e)
+                            e
 
 instance Code KSpace where
   codePrec _ Kx = showString "k_i[0]"
@@ -348,8 +353,10 @@ instance Type KSpace where
   scalarderivativeHelper _ Delta = 0
   zeroHelper v (FFT r) = fft (setZero v r)
   zeroHelper v (SphericalFourierTransform s e) = transform s (setZero v e)
-  zeroHelper v (RealPartComplexErf e) = distribute $ 2*exp (a**2)*x/sqrt pi - 2*(2*a**2+1)*exp (a**2)*x**3/3/sqrt pi
-    where e_with_k_zero = setKequalToZero e
+  zeroHelper v (RealPartComplexErf e) = distribute $
+                                        -- trace ("\na = "++latex a++"\newk=0 = "++latex e_with_k_zero++"\ne = "++latex e) $
+                                        2*exp (a**2)*x/sqrt pi - 2*(2*a**2+1)*exp (a**2)*x**3/3/sqrt pi
+    where e_with_k_zero = setKequalToZeroLeavingI e
           x = e - e_with_k_zero -- real_part e
           a = -imaginary * e_with_k_zero -- imag_part e
 
