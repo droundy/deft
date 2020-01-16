@@ -45,7 +45,7 @@ betaeps :: Type a => Expression a
 betaeps = s_var "epsilon"/kT
 
 xi :: Type a => Expression a
-xi = s_var "Xi" -- scalar $ var "Xi" "\\Xi" (alpha/(6*sqrt(pi)*(sqrt(betaeps * log 2 ) + log 2)))
+xi = s_tex "Xi" "\\Xi" -- scalar $ var "Xi" "\\Xi" (alpha/(6*sqrt(pi)*(sqrt(betaeps * log 2 ) + log 2)))
 
 alpha :: Type a => Expression a
 alpha = scalar $ var "alpha" "\\alpha" (sigma*(2/(1+sqrt(log 2 / betaeps)))**(1.0/6.0))

@@ -348,7 +348,15 @@ instance Type KSpace where
   scalarderivativeHelper _ Delta = 0
   zeroHelper v (FFT r) = fft (setZero v r)
   zeroHelper v (SphericalFourierTransform s e) = transform s (setZero v e)
-  zeroHelper v (RealPartComplexErf e) = real_part_complex_erf (setZero v e)
+  zeroHelper v (RealPartComplexErf e) = distribute $ 2*exp (a**2)*x/sqrt pi - 2*(2*a**2+1)*exp (a**2)*x**3/3/sqrt pi
+    where e_with_k_zero = setKequalToZero e
+          x = e - e_with_k_zero -- real_part e
+          a = -imaginary * e_with_k_zero -- imag_part e
+
+    -- if real_part resid == 0
+    -- then v*derive v (2/sqrt pi*exp(scalar (imag_part resid)**2)) e -- power series
+    -- else real_part_complex_erf resid
+    -- where resid = setZero v e
   zeroHelper _ Kx = Expression Kx
   zeroHelper _ Ky = Expression Ky
   zeroHelper _ Kz = Expression Kz
@@ -452,14 +460,10 @@ instance Type KSpace where
   toScalar (SetKZeroValue val _) = makeHomogeneous val
   toScalar (FFT e) = makeHomogeneous e
   toScalar (SphericalFourierTransform _ _) = error "need to do spherical transform for toScalar, really need to just evaluate the FT once, and then make this resultingarray[0]"
-  toScalar (RealPartComplexErf e) =
-    mapExpression toScalar $ der*k
-    where ee = setZero (EK ky) $ setZero (EK kx) e
-          resid = setZero (EK kz) ee
-          der = -- this is the derivative with respect to k of the argument evaluated at k=0
-            if real_part resid == 0
-            then derive kz (2/sqrt pi*exp(scalar (imag_part resid)**2)) ee
-            else error "the real part of a complex erf is hard to interpret if there is a real component when k=0"
+  toScalar (RealPartComplexErf e) = distribute $ makeHomogeneous (2*exp (a**2)*x/sqrt pi - 2*(2*a**2+1)*exp (a**2)*x**3/3/sqrt pi)
+    where e_with_k_zero = setKequalToZero e
+          x = e - e_with_k_zero -- real_part e
+          a = -imaginary * e_with_k_zero -- imag_part e
   toScalar (Complex a _) = a
   mapExpressionHelper' f (FFT e) = fft (f e)
   mapExpressionHelper' f (SphericalFourierTransform s e) = transform s (f e)
@@ -638,8 +642,9 @@ isEven v e = case mkExprn e of
              ES (Expression (Summate x)) -> isEven v x
              _ -> 1 -- Expression _.  Technically, it might be good to recurse into this
 
--- expand does a few terms in a taylor expansion, and is intended only
--- to be a tool for setting a variable (k, in particular) to zero.
+-- expand does a few terms in a taylor expansion (power series
+-- expansion), and is intended only to be a tool for setting a
+-- variable (k, in particular) to zero.
 expand :: Type a => Expression a -> Expression a -> Expression a
 expand v (Var a b c d (Just e)) = Var a b c d (Just $ expand v e)
 expand _ e@(Var _ _ _ _ Nothing) = e
