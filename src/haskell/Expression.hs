@@ -358,7 +358,7 @@ instance Type KSpace where
                                         2*exp (a**2)*x/sqrt pi - 2*(2*a**2+1)*exp (a**2)*x**3/3/sqrt pi
     where e_with_k_zero = setKequalToZeroLeavingI e
           x = e - e_with_k_zero -- real_part e
-          a = -imaginary * e_with_k_zero -- imag_part e
+          a = e_with_k_zero/imaginary -- imag_part e
 
     -- if real_part resid == 0
     -- then v*derive v (2/sqrt pi*exp(scalar (imag_part resid)**2)) e -- power series
