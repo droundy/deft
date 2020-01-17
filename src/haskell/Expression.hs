@@ -468,7 +468,7 @@ instance Type KSpace where
   toScalar (SetKZeroValue val _) = makeHomogeneous val
   toScalar (FFT e) = makeHomogeneous e
   toScalar (SphericalFourierTransform _ _) = error "need to do spherical transform for toScalar, really need to just evaluate the FT once, and then make this resultingarray[0]"
-  toScalar (RealPartComplexErf e) = makeHomogeneous $ zeroHelper (EK ky) (RealPartComplexErf e)
+  toScalar (RealPartComplexErf e) = mapExpression toScalar $ zeroHelper (EK ky) (RealPartComplexErf e)
   toScalar (Complex a _) = a
   mapExpressionHelper' f (FFT e) = fft (f e)
   mapExpressionHelper' f (SphericalFourierTransform s e) = transform s (f e)
