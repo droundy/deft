@@ -60,7 +60,8 @@ data KSpace = Delta | -- handy for FFT of homogeneous systems
               FFT (Expression RealSpace)
             deriving ( Eq, Ord, Show )
 data Scalar = Summate (Expression RealSpace) |
-              ScalarComplexErf (Expression KSpace)
+              ScalarComplexErf (Expression KSpace) |
+              PI
             deriving ( Eq, Ord, Show )
 
 data Vector a = Vector (Expression a) (Expression a) (Expression a)
@@ -353,9 +354,9 @@ instance Type KSpace where
   scalarderivativeHelper _ Delta = 0
   zeroHelper v (FFT r) = fft (setZero v r)
   zeroHelper v (SphericalFourierTransform s e) = transform s (setZero v e)
-  zeroHelper v (RealPartComplexErf e) = distribute $
-                                        -- trace ("\na = "++latex a++"\newk=0 = "++latex e_with_k_zero++"\ne = "++latex e) $
-                                        2*exp (a**2)*x/sqrt pi - 2*(2*a**2+1)*exp (a**2)*x**3/3/sqrt pi
+  zeroHelper v (RealPartComplexErf e) = distribute $ setZero v $
+                                        -- trace ("\na = "++code a++"\newk=0 = "++code e_with_k_zero++"\ne = "++code e) $
+                                        2/exp (-a**2)*x/sqrt pi - 2*(2*a**2+1)/exp (-a**2)*x**3/3/sqrt pi
     where e_with_k_zero = setKequalToZeroLeavingI e
           x = e - e_with_k_zero -- real_part e
           a = e_with_k_zero/imaginary -- imag_part e
@@ -467,10 +468,7 @@ instance Type KSpace where
   toScalar (SetKZeroValue val _) = makeHomogeneous val
   toScalar (FFT e) = makeHomogeneous e
   toScalar (SphericalFourierTransform _ _) = error "need to do spherical transform for toScalar, really need to just evaluate the FT once, and then make this resultingarray[0]"
-  toScalar (RealPartComplexErf e) = distribute $ makeHomogeneous (2*exp (a**2)*x/sqrt pi - 2*(2*a**2+1)*exp (a**2)*x**3/3/sqrt pi)
-    where e_with_k_zero = setKequalToZero e
-          x = e - e_with_k_zero -- real_part e
-          a = -imaginary * e_with_k_zero -- imag_part e
+  toScalar (RealPartComplexErf e) = makeHomogeneous $ zeroHelper (EK ky) (RealPartComplexErf e)
   toScalar (Complex a _) = a
   mapExpressionHelper' f (FFT e) = fft (f e)
   mapExpressionHelper' f (SphericalFourierTransform s e) = transform s (f e)
@@ -647,6 +645,7 @@ isEven v e = case mkExprn e of
              EK _ -> 1
              ER (Expression (IFFT ks)) -> isEven v ks
              ES (Expression (Summate x)) -> isEven v x
+             ES (Expression PI) -> 1
              _ -> 1 -- Expression _.  Technically, it might be good to recurse into this
 
 -- expand does a few terms in a taylor expansion (power series
@@ -711,8 +710,9 @@ setZero v (Product p i) =
     if zd /= 0
     then zn / zd
     else if zn /= 0
-         then error ("L'Hopital's rule failure:\n" ++
-                     latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n"
+         then error ("L'Hopital's rule failure:\n"
+                     ++ latex n ++ "\n /\n  " ++ latex d ++ "\n\n\n"
+                     ++ code n ++ "\n /\n  " ++ code d ++ "\n\n\n"
                      ++ latex (Product p i) ++ "\n\n\n" ++ latex zn)
          else setZero v (scalarderive v n / scalarderive v d)
   where d = product2denominator p
@@ -728,8 +728,10 @@ setZero v (Sum s i) =
 setZero v (Expression x) = zeroHelper v x
 
 instance Code Scalar where
+  codePrec _ PI = showString "M_PI"
   codePrec _ (Summate r) = showString "integrate(" . codePrec 0 r . showString ")"
   codePrec _ (ScalarComplexErf e) = showString "Faddeeva::erf(" . codePrec 0 e . showString ").real()"
+  latexPrec _ PI = showString "\\pi "
   latexPrec _ (Summate r) = showString "\\int " . latexPrec 0 r
   latexPrec _ (ScalarComplexErf a) = showString "\\Re\\operatorname{erf}(" . latexPrec 0 a . showString ")"
 instance Type Scalar where
@@ -739,11 +741,14 @@ instance Type Scalar where
   s_tex vv tex = Var CannotBeFreed vv vv tex Nothing
   amScalar _ = True
   mkExprn = ES
+  derivativeHelper _ _ PI = 0
   derivativeHelper v dds (Summate e) = derive v (scalar dds) e
   derivativeHelper v dds (ScalarComplexErf e) = derive v (scalar dds*2/sqrt pi*exp(-e**2)) e
+  scalarderivativeHelper _ PI = 0
   scalarderivativeHelper v (Summate e) = summate (scalarderive v e)
   scalarderivativeHelper _ (ScalarComplexErf _) = 0 -- FIXME scalarderivativeHelper v (2/sqrt pi*exp(-e**2)) e
 
+  zeroHelper v PI = pi
   zeroHelper v (Summate e) = summate (setZero v e)
   zeroHelper v (ScalarComplexErf e) = scalar_complex_erf (setZero v e)
   codeStatementHelper a " = " (Var _ _ _ _ (Just e)) = codeStatementHelper a " = " e
@@ -779,13 +784,17 @@ instance Type Scalar where
   newdeclare _ = "double"
   toScalar (Summate r) = makeHomogeneous (r/dV)
   toScalar (ScalarComplexErf e) = toScalar (RealPartComplexErf e)
+  toScalar PI = pi
   fromScalar = id
   mapExpressionHelper' f (Summate e) = summate (f e)
   mapExpressionHelper' f (ScalarComplexErf e) = scalar_complex_erf (f e)
+  mapExpressionHelper' _ PI = pi
   subAndCountHelper x y (Summate e) = case subAndCount x y e of (e', n) -> (summate e', n)
   subAndCountHelper x y (ScalarComplexErf e) = case subAndCount x y e of (e', n) -> (scalar_complex_erf e', n)
+  subAndCountHelper _ _ PI = (pi, 0)
   searchHelper f (Summate e) = f e
   searchHelper f (ScalarComplexErf e) = f e
+  searchHelper _ PI = myempty
   safeCoerce a _ = case mkExprn a of
                     ES a' -> Just a'
                     _ -> Nothing
@@ -1050,7 +1059,9 @@ map2product p = helper 1 (Map.empty) $ product2pairs p
   where helper 1 a [] = Product a (vl a)
         helper f a [] = Sum (Map.singleton (Product a i) f) i
           where i = vl a
-        helper f a ((Sum x _,n):xs) | [(f',x')] <- sum2pairs x = helper (f*f'**n) a ((x',n):xs)
+        -- The careful_pow below ensures that squaring a square root
+        -- of an integer gives the same result back.
+        helper f a ((Sum x _,n):xs) | [(f',x')] <- sum2pairs x = helper (careful_prod f (careful_pow f' n)) a ((x',n):xs)
         helper f a ((x,n):xs)
           | n == 0 = helper f a xs
           | x == 1 = helper f a xs
@@ -1071,7 +1082,7 @@ pairs2product = map2product . fl (Map.empty)
         -- Products inside that we will need to break up (via the next
         -- pattern match).
         fl a ((Sum x _,n):xs) | [(f',x')] <- sum2pairs x,
-                                Nothing <- isConstant x' = fl a ((toExpression (f'**n),1):(x',n):xs)
+                                Nothing <- isConstant x' = fl a ((toExpression (careful_pow f' n),1):(x',n):xs)
         -- The following normalizes the case where we are seeing a
         -- Product of Products, since we don't want to have this
         -- nested case, which can impede handling of cancellations.
@@ -1390,7 +1401,7 @@ instance Type a => Num (Expression a) where
                                             else sumup (Map.insert y (f+f') x) ys
   Sum a _ + b = case Map.lookup b a of
                 Just fac -> if fac + 1 == 0
-                            then case sum2pairs deleted of 
+                            then case sum2pairs deleted of
                                    [(1,e)] -> e
                                    [(f,e)] -> pairs2sum [(f,e)]
                                    _ -> map2sum deleted
@@ -1458,13 +1469,32 @@ erfi :: Type a => Expression a -> Expression a
 erfi x = case x of 0 -> 0
                    _ -> F Erfi x
 
+-- The careful family of arithmetic are designed to ensure that at
+-- least sometimes our constant arithmetic is done exactly.
+-- Specifically, powers of integers should mostly be exact, e.g. ((1/2)**(0.5))**2 == 1/2
+careful_pow :: Double -> Double -> Double
+careful_pow 0 _ = 0
+careful_pow x n = if x == (fromIntegral $ round $ x**n)**(1/n)
+                  then fromIntegral $ round $ x**n
+                  else if x == 1/(fromIntegral $ round $ x**(-n))**(1/n)
+                       then 1/(fromIntegral $ round $ x**(-n))
+                       else x**n
+
+careful_prod :: Double -> Double -> Double
+careful_prod 0 _ = 0
+careful_prod _ 0 = 0
+careful_prod x 1 = x
+careful_prod 1 x = x
+careful_prod x y | x == y = careful_pow x 2
+careful_prod x y = x*y
+
 heaviside :: Type a => Expression a -> Expression a
 heaviside x = case isConstant x of
               Just n -> if n >= 0 then 1 else 0
               Nothing -> F Heaviside x
 
 instance Type a => Floating (Expression a) where
-  pi = toExpression (pi :: Double)
+  pi = scalar (Expression PI) -- toExpression (pi :: Double)
   exp = \x -> case x of 0 -> 1
                         _ -> F Exp x
   log = \x -> case x of 1 -> 0
@@ -1478,11 +1508,11 @@ instance Type a => Floating (Expression a) where
   cos = \x -> case x of
     0 -> 1
     _ -> F Cos x
-  a ** b | Just x <- isConstant a, Just y <- isConstant b = toExpression (x ** y)
+  a ** b | Just x <- isConstant a, Just y <- isConstant b = toExpression (careful_pow x y)
   x ** y | y == 0 = 1
          | y == 1 = x
   (Sum x _) ** c | Just n <- isConstant c,
-                   [(f,y)] <- sum2pairs x = pairs2sum [(f**n, y ** c)]
+                   [(f,y)] <- sum2pairs x = pairs2sum [(careful_pow f n, y ** c)]
   (Product x _) ** c | Just n <- isConstant c = pairs2product $ map (p n) $ product2pairs x
                          where p n (e,n2) = (e,n2*n)
   x ** c | Just n <- isConstant c = pairs2product [(x,n)]
