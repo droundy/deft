@@ -72,7 +72,7 @@ double soft_wall_potential(double z, double Vcutoff) {
 void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
-  min.set_maxiter(100);
+  min.set_maxiter(10000);
   min.set_miniter(9);
   min.precondition(true);
   if (reduced_density == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243257584e-07);
@@ -81,10 +81,9 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
   while (min.improve_energy(quiet)) {
-    //f->run_finite_difference_test("SFMT");
+    // f->run_finite_difference_test("SFMT");
     if (min.energy() < -1e20) {
       printf("trouble with the energy: %g\n", min.energy());
-      f->run_finite_difference_test("SFMT");
       break;
     }
   }
@@ -104,12 +103,12 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   Vector Vext = f->Vext();
   Vector rz = f->get_rz();
   Vector n = f->get_n();
-  Vector n3 = f->get_n3();
-  for (int i=Nz/2+1; i<Nz; i++) {
-    fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
-  }
+  // for (int i=Nz/2+1; i<Nz; i++) {
+  //   fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
+  // }
   for (int i=0; i<Nz/2; i++) {
-    fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
+    fprintf(o, "%g\t%g\n", (rz[i] - spacing)/f->sigma(), n[i]*uipow(f->sigma(), 3));
+    // fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
   }
   fclose(o);
 }
@@ -134,11 +133,11 @@ int main(int argc, char **argv) {
   sscanf(argv[2], "%lg", &temp);
 
   HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);
-  hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*dw*dw*width);
+  hf.printme("homogeneous");
 
   SFMTFluidVeff f = sfmt_inhomogeneous(temp, dw, dw, width, dx);
   f.mu() = hf.mu();
