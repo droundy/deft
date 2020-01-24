@@ -23,12 +23,12 @@ for a in atoms:
     for t in temps:
         data = pylab.loadtxt('figs/lj-%s-%gK.dat' % (a, t))
         data_hires = pylab.loadtxt('figs/lj-Xe-300K-hires.dat')
-        r = data[:,1]/nm
-        r_hires = data_hires[:,1]/nm
-        density = data[:,3]/gpermL
-        dens_hires = data_hires[:,3]/gpermL
+        r = data[:, 1]/nm
+        r_hires = data_hires[:, 1]/nm
+        density = data[:, 3]/gpermL
+        dens_hires = data_hires[:, 3]/gpermL
         pylab.plot(r, density, color = '#3333aa', linestyle='-')
-        pylab.plot(r_hires, dens_hires,color = grey, linestyle='--')
+        pylab.plot(r_hires, dens_hires, color = grey, linestyle='--')
 
         #plot properties
         pyplot.ylabel('Density (g/mL)')

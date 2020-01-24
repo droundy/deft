@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import colors
 import readnew
 
-plt.figure(figsize=(5,4))
+plt.figure(figsize=(5, 4))
 
 inputs = [
     #('vanilla_wang_landau',

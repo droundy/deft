@@ -6,7 +6,7 @@ import numpy
 import styles
 
 if len(sys.argv) != 6:
-    print 'useage: %s ww ff N methods seed' % sys.argv[0]
+    print('useage: %s ww ff N methods seed' % sys.argv[0])
     exit(1)
 
 ww = float(sys.argv[1])
@@ -16,7 +16,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = int(sys.argv[3])
-#arg N = range(5,21)+[100, 200, 1000]
+#arg N = list(range(5,21))+[100, 200, 1000]
 
 methods = eval(sys.argv[4])
 #arg methods = [["nw","wang_landau","simple_flat","tmmc","oetmmc"]]
@@ -30,15 +30,15 @@ plt.title('Iterations per sample for $\lambda=%g$, $\eta=%g$, and $N=%i$' % (ww,
 for method in methods:
     data_file = "data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-ps.dat" \
                 % (seed, ww, ff, N, method)
-    with open(data_file,'r') as file_handle:
+    with open(data_file, 'r') as file_handle:
         for line in file_handle:
             entries = line.split()
             if 'iterations:' in entries:
-                iterations = int(entries[entries.index('iterations:')+1].replace(',',''))
+                iterations = int(entries[entries.index('iterations:')+1].replace(',', ''))
                 continue
     data = numpy.loadtxt(data_file)
-    energy = -data[:,0]/N
-    round_trips = data[:,1]
+    energy = -data[:, 0]/N
+    round_trips = data[:, 1]
     energy = energy[round_trips != 0]
     round_trips = round_trips[round_trips != 0]
     if sum(round_trips) > 0:

@@ -10,7 +10,7 @@ import Hughes as H
 # NOTE: the plot is in cgs units and Hughes.py calculates in atomic
 # Divide a reading on the plot by H.conv_n to get into atomic units for the calculation
 
-def minimize(func,T,a,c,prefac):
+def minimize(func, T, a, c, prefac):
 
     """Find the minimum of a function in the range [a,b]; return a tuple (abscissa, ordinate).
 
@@ -21,16 +21,16 @@ def minimize(func,T,a,c,prefac):
 
     """
 
-    fa = func(T,a,prefac)
-    fc = func(T,c,prefac)
+    fa = func(T, a, prefac)
+    fc = func(T, c, prefac)
 
     b = 0.6*a + 0.4*c
-    fb = func(T,b,prefac)
+    fb = func(T, b, prefac)
     while fb > fa:
         c = b
         fc = fb
         b = 0.6*a + 0.4*c
-        fb = func(T,b,prefac)
+        fb = func(T, b, prefac)
 
     # golden section search
     n0 = a
@@ -43,8 +43,8 @@ def minimize(func,T,a,c,prefac):
         n2 = b
 
     tol = 1.e-6
-    f1 = func(T,n1,prefac)
-    f2 = func(T,n2,prefac)
+    f1 = func(T, n1, prefac)
+    f2 = func(T, n2, prefac)
 
     while abs(n3-n0) > tol*(abs(n1)+abs(n2)):
         if f2 < f1: # Shift everything over one way
@@ -54,7 +54,7 @@ def minimize(func,T,a,c,prefac):
 
             # re-define f_i to be accurate to new n_i
             f1 = f2
-            f2 = func(T,n2,prefac)
+            f2 = func(T, n2, prefac)
         else: # Shift everything over the other way
             n3 = n2
             n2 = n1
@@ -62,7 +62,7 @@ def minimize(func,T,a,c,prefac):
 
             # re-define f_i to be accurate to the new n_i
             f2 = f1
-            f1 = func(T,n1,prefac)
+            f1 = func(T, n1, prefac)
 
     if f1 < f2:
         nmin = n1
@@ -71,12 +71,12 @@ def minimize(func,T,a,c,prefac):
         nmin = n2
         fmin = f2
 
-    return nmin,fmin
+    return nmin, fmin
 
-def maximize(func,T,a,c,prefac):
-    def negfunc(T,n,x):
-        return -func(T,n,x)
-    n,phi = minimize(negfunc,T,a,c,prefac)
+def maximize(func, T, a, c, prefac):
+    def negfunc(T, n, x):
+        return -func(T, n, x)
+    n, phi = minimize(negfunc, T, a, c, prefac)
     return n
 
 # def maximize(func,T,g,prefac):

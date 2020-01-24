@@ -435,7 +435,7 @@ inline tensor3d operator*(const double scalar, const tensor3d &v) {
 }
 
 inline tensor3d vector3d::outer(const vector3d &v) const {
-  return tensor3d((*this)*v.x, (*this)*v.x, (*this)*v.z);
+  return tensor3d((*this)*v.x, (*this)*v.y, (*this)*v.z);
 }
 
 inline tensor3d identity_tensor() {

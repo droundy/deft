@@ -10,7 +10,7 @@ matplotlib.rc('text', usetex=True)
 import styles
 
 if len(sys.argv) != 7:
-    print 'useage: %s ww ff N min_T methods seed' % sys.argv[0]
+    print('useage: %s ww ff N min_T methods seed' % sys.argv[0])
     exit(1)
 
 ww = float(sys.argv[1])
@@ -36,7 +36,7 @@ seed = int(sys.argv[6])
 max_T = 2
 T_bins = 1e3
 dT = max_T/T_bins
-T_range = numpy.arange(dT,max_T,dT)
+T_range = numpy.arange(dT, max_T, dT)
 
 # make dictionaries which we can index by method name
 U = {} # internal energy
@@ -51,17 +51,17 @@ for method in methods:
     lnw_hist = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-conv_T%g-lnw.dat"
                              % (seed, ww, ff, N, method, min_T), ndmin=2)
 
-    energy = -e_hist[:,0] # array of energies
-    lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
-    ln_dos = numpy.log(e_hist[:,1]) - lnw
+    energy = -e_hist[:, 0] # array of energies
+    lnw = lnw_hist[e_hist[:, 0].astype(int), 1] # look up the lnw for each actual energy
+    ln_dos = numpy.log(e_hist[:, 1]) - lnw
 
-    log10w = lnw_hist[e_hist[:,0].astype(int),1]*numpy.log10(numpy.exp(1))
-    log10_dos = numpy.log10(e_hist[:,1]) - log10w
+    log10w = lnw_hist[e_hist[:, 0].astype(int), 1]*numpy.log10(numpy.exp(1))
+    log10_dos = numpy.log10(e_hist[:, 1]) - log10w
     log10_dos -= log10_dos.max()
     if log10_dos.min() < minlog:
         minlog = log10_dos.min()
     plt.figure('dos')
-    plt.plot(energy, log10_dos, styles.dots(method),label=styles.title(method))
+    plt.plot(energy, log10_dos, styles.dots(method), label=styles.title(method))
 
     Z = numpy.zeros(len(T_range)) # partition function
     U[method] = numpy.zeros(len(T_range)) # internal energy
@@ -83,13 +83,13 @@ for method in methods:
                          (sum(energy/T_range[i]*dos_boltz)/Z[i])**2
 
     plt.figure('u')
-    plt.plot(T_range,U[method]/N,styles.plot(method),label=styles.title(method))
+    plt.plot(T_range, U[method]/N, styles.plot(method), label=styles.title(method))
 
     plt.figure('hc')
-    plt.plot(T_range,CV[method]/N,styles.plot(method),label=styles.title(method))
+    plt.plot(T_range, CV[method]/N, styles.plot(method), label=styles.title(method))
 
     plt.figure('S')
-    plt.plot(T_range,S[method]/N,styles.plot(method),label=styles.title(method))
+    plt.plot(T_range, S[method]/N, styles.plot(method), label=styles.title(method))
 
 
 plt.figure('dos')
@@ -122,7 +122,7 @@ plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$, and $N=%i$'
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')
 plt.legend(loc='best')
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
+plt.axvline(min_T, linewidth=1, color='k', linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-u-conv-T%02.0f.pdf"
             % (ww*100, ff*100, N, min_T*100))
@@ -134,7 +134,7 @@ plt.ylim(0)
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$C_V/Nk$')
 plt.legend(loc='best')
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
+plt.axvline(min_T, linewidth=1, color='k', linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-hc-conv-T%02.0f.pdf"
             % (ww*100, ff*100, N, min_T*100))
@@ -145,7 +145,7 @@ plt.title('Configurational entropy for $\lambda=%g$, $\eta=%g$, and $N=%i$'
 plt.xlabel(r'$kT/\epsilon$')
 plt.ylabel(r'$S_{\textit{config}}/Nk$')
 plt.legend(loc='best')
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
+plt.axvline(min_T, linewidth=1, color='k', linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-N%i-S-conv-T%02.0f.pdf"
             % (ww*100, ff*100, N, min_T*100))

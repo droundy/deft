@@ -4,7 +4,7 @@ import math
 
 
 fin = open('figs/single-rod-in-water.dat', 'r')
-fout = open('figs/single-rods-calculated-density.dat','w')
+fout = open('figs/single-rods-calculated-density.dat', 'w')
 
 kB = 3.16681539628059e-6 # This is Boltzmann's constant in Hartree/Kelvin
 first = 1

@@ -11,7 +11,7 @@ import styles
 import readandcompute
 
 if len(sys.argv) != 5:
-    print 'useage: %s i ww L N ' % sys.argv[0]
+    print('useage: %s i ww L N ' % sys.argv[0])
     exit(1)
 
 i = float(sys.argv[1])
@@ -55,12 +55,12 @@ plt.title('Absolute free energies for $\lambda=%g$, $L=%g$ and $i=%d$' % (ww, L,
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$F/N\epsilon$')
 plt.legend(loc='best')
-plt.axvline(min_T,linewidth=1,color='k',linestyle=':')
+plt.axvline(min_T, linewidth=1, color='k', linestyle=':')
 plt.tight_layout(pad=0.2)
 plt.savefig("ww%02.0f-L%02.0f-i%i-F_eta.pdf" % (ww*100, L, i))
 
 plt.figure('F-eta')
-plt.title('Absolute free energies for $\lambda=%g$, $L=%g$, and $i=%d$' % (ww,L,i))
+plt.title('Absolute free energies for $\lambda=%g$, $L=%g$, and $i=%d$' % (ww, L, i))
 plt.xlabel('$\eta$')
 plt.ylabel('$F/N\epsilon$')
 plt.legend(loc='best')

@@ -1,0 +1,96 @@
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,pre,aps,10pt]{revtex4-1}
+\usepackage{graphicx} % Include figure files
+\usepackage{color}
+\usepackage{nicefrac} % Include for inline fractions
+
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+\usepackage[colorinlistoftodos,prependcaption,textsize=normalsize]{todonotes}
+\usepackage{mdframed}
+
+% define colors for comments
+\definecolor{dark-gray}{gray}{0.10}
+\definecolor{light-gray}{gray}{0.70}
+
+\newcommand{\red}[1]{{\bf \color{red} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\cyan}[1]{{\bf \color{cyan} #1}}
+
+\newcommand{\davidsays}[1]{{\color{red} [\green{David:} \emph{#1}]}}
+\newcommand{\jpsays}[1]{{\color{red} [\blue{Jordan:} \emph{#1}]}}
+\newcommandx{\jpcom}[2][1=inline]{\todo[linecolor=gray,backgroundcolor=light-gray,bordercolor=dark-gray,#1]{\textbf{Jordan says:} #2} }
+\begin{document}
+
+\title{Notes on 2D sad
+}
+
+\author{Jordan K. Pommerenck} \author{David Roundy}
+\affiliation{Department of Physics, Oregon State University,
+  Corvallis, OR 97331}
+
+\begin{abstract}
+  Notes for a possible 2D sad algorithm
+\end{abstract}
+
+\maketitle
+
+\section{The basics}
+
+\begin{align}
+  dU &= TdS - pdV + \mu dN \\
+  dE_{exc} &= TdS_{exc} - p_{exc}dV + \mu_{exc} dN
+\end{align}
+This tells us that
+\begin{align}
+  \frac{1}{T} &= \frac{S_{exc}(N,E+\Delta E) - S_{exc}(N,E)}{\Delta E}
+\end{align}
+and
+\begin{align}
+  \mu_{exc} &= \left(\frac{\partial E_{exc}}{\partial N}\right)_{S_{exc}}
+  \\
+  &= -\frac{
+    \left(\frac{\partial E_{exc}}{\partial S_{exc}}\right)_{N}
+  }{
+    \left(\frac{\partial N}{\partial S_{exc}}\right)_{E_{exc}}
+  }
+  \\
+  &= -\frac{
+    \left(\frac{\partial S_{exc}}{\partial N}\right)_{E_{exc}}
+  }{
+    \left(\frac{\partial S_{exc}}{\partial E_{exc}}\right)_{N}
+  }
+  \\
+  &= -T\left(\frac{\partial S_{exc}}{\partial N}\right)_{E_{exc}}
+\end{align}
+where I used the cyclic chain rule to make the derivatives feasible.
+
+\section{Moving forward}
+
+\begin{align}
+  U &= ST - pV + \mu N \\
+  E_{exc} &= S_{exc}T - p_{exc}V + \mu_{exc}N
+\end{align}
+We want a maximum total pressure $p_{\max}$, which makes for a maximum excess pressure of
+$p_{\max} - p_{id} = p_{\max} - NkT/V$.  Thus at higher $N$ values, we have
+\begin{align}
+  E_{exc} &= S_{exc}T - \left(p_{\max}-\frac{NkT}{V}\right)V - NT\left(\frac{\partial S_{exc}}{\partial N}\right)_{E}
+  \\
+  &= S_{exc}T - p_{\max}V + NkT - NT\left(\frac{\partial S_{exc}}{\partial N}\right)_{E}
+\end{align}
+solving for the rate of change, we see
+\begin{align}
+  \left(\frac{\partial S_{exc}}{\partial N}\right)_{E} &= \frac{S_{exc}T - E_{exc} - p_{\max}V + NkT}{NT}
+  \\
+  &= \frac{S_{exc}}{N} - \frac{E_{exc}+p_{\max}V}{NT} + k
+\end{align}
+So at a finite value of $N>N_{hi}$ let's start with an ansatz:
+\begin{align}
+  S_{exc}(N,E) &= A e^{BN} + C \\
+  \left(\frac{\partial S_{exc}}{\partial N}\right)_{E} &= AB e^{BN} \\
+  &= BS_{exc}(N,E) - BC
+\end{align}
+thus we can see that our ansatz was nonsense.
+
+
+\end{document}

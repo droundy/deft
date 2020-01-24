@@ -13,7 +13,7 @@ import styles # nice plots
 import readandcompute # needed for many functions, look at this if you haven't!
 
 if len(sys.argv) != 5:
-    print 'useage: %s i ww L [Ns] RECURSION-LEVEL WELL-WIDTH LENGTH [SPHERES]' % sys.argv[0]
+    print('useage: %s i ww L [Ns] RECURSION-LEVEL WELL-WIDTH LENGTH [SPHERES]' % sys.argv[0])
     exit(1)
 
 # Necessary constants and parameters 
@@ -32,12 +32,12 @@ L = float(sys.argv[3])
 #seed = int(sys.argv[5])
 #arg seed = [0]
 
-Ts = [0.2,0.5,0.8,1.5,2.0]
+Ts = [0.2, 0.5, 0.8, 1.5, 2.0]
 max_T = Ts[-1]
 # Fixed T for plots
 
 
-styles = ['r-','b-','g-','c-']
+styles = ['r-', 'b-', 'g-', 'c-']
 
 plot_all = plot_F_T = plot_F_eta = False
 
@@ -62,9 +62,9 @@ if plot_all:
 elif plot_F_eta:
     for N in set(Ns):
         eta = N*(4*np.pi/3*R**3/(L*2**i)**3)
-        for j in range(0,len(Ts)):            
+        for j in range(0, len(Ts)):            
             T, U, F, CV, S, min_T = readandcompute.T_u_F_cv_s_minT('data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, N), max_T)
-            q = readandcompute.nearest_T(T,Ts[j])
+            q = readandcompute.nearest_T(T, Ts[j])
             Ts[j] = T[q]
 
             plt.figure('F-Fix_i')
@@ -79,11 +79,11 @@ elif plot_F_eta:
     plt.xlabel('$\eta$')
     
 elif plot_F_T:
-    etas = np.sort(map(lambda N: N*(4*np.pi/3*R**3/(L*2**i)**3), Ns))
-    for k in range(0,len(etas)):
+    etas = np.sort([N*(4*np.pi/3*R**3/(L*2**i)**3) for N in Ns])
+    for k in range(0, len(etas)):
         T, U, F, CV, S, min_T = readandcompute.T_u_F_cv_s_minT('data/scrunched-ww%04.2f-L%04.2f/i%01d/N%03d/data' % (ww, L,  i, Ns[k]), max_T)
         plt.figure('F-T')
-        plt.plot(T, F, styles[k%len(styles)],label= "$\eta=%01.2f$" % etas[k])
+        plt.plot(T, F, styles[k%len(styles)], label= "$\eta=%01.2f$" % etas[k])
     plt.xlabel('$T/\epsilon$')
     plt.axvline(x=min_T)
     output_filename = "figs/ww%02.0f-L%02.0f-i%01d_F-T.pdf" % (ww*100, L, i)

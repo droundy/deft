@@ -31,7 +31,7 @@ rmax = 4.1
 ############################
 
 if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + " ff")
+    print(("Usage:  " + sys.argv[0] + " ff"))
     exit(1)
 ff = float(sys.argv[1])
 #arg ff = [0.1, 0.2, 0.3]
@@ -51,10 +51,10 @@ def read_walls_path(ff, fun):
     filename = "figs/walls/wallsWB-path-%s-pair-%1.2f-0.005.dat" %(fun, ff)
   data = loadtxt(filename)
   if fun == 'mc':
-    data[:,0]-=4.995
+    data[:, 0]-=4.995
   else:
-    data[:,2]-=3
-  return data[:,0:4]
+    data[:, 2]-=3
+  return data[:, 0:4]
 
 def read_walls_mc(ff):
   # The 0.01 is really 0.005, but is only saved to 2 digits of precision
@@ -122,7 +122,7 @@ zposbins = int(round(zmax/dx))
 znegbins = int(round(-zmin/dx))
 zbins = zposbins + znegbins
 g22 = zeros((rbins, zbins))
-g22[:, znegbins:zbins] = g2mc[:rbins,:zposbins]
+g22[:, znegbins:zbins] = g2mc[:rbins, :zposbins]
 #g22[:rbins/2, znegbins:zbins] = flipud(g2mc[:rbins/2,:zposbins])
 g2mc = g22
 gmax = g2mc.max()
@@ -153,26 +153,26 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xlo,  1.0, 1.0),
                    (1.0/gmax,  1.0, 1.0),
                    (xhi,  0.0, 0.0),
-                   (xhier,0.0, 0.0),
+                   (xhier, 0.0, 0.0),
                    (1.0,  1.0, 1.0)],
 
          'green': [(0.0, 0.0, 0.0),
                    (xlo,  0.1, 0.1),
                    (1.0/gmax, 1.0, 1.0),
                    (xhi, 0.0, 0.0),
-                   (xhier,1.0, 1.0),
+                   (xhier, 1.0, 1.0),
                    (1.0, 1.0, 1.0)],
 
          'blue':  [(0.0,  0.0, 0.0),
                    (xlo,  0.1, 0.1),
                    (1.0/gmax,  1.0, 1.0),
                    (xhi,  1.0, 1.0),
-                   (xhier,0.0, 0.0),
+                   (xhier, 0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
-zextra, xextra = meshgrid(arange(zmin, -zmin, -zmin/2), arange(-rmax,rmax, rmax/2))
-twod_plot.contourf(zextra, xextra, zeros_like(zextra), levels=[-1,1], colors=['k','k'])
+zextra, xextra = meshgrid(arange(zmin, -zmin, -zmin/2), arange(-rmax, rmax, rmax/2))
+twod_plot.contourf(zextra, xextra, zeros_like(zextra), levels=[-1, 1], colors=['k', 'k'])
 CS = twod_plot.pcolormesh(Z, R, g2mc, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.pcolormesh(zdft, -xdft, g2dft, vmax=gmax, vmin=0, cmap=cmap)
 
@@ -188,7 +188,7 @@ def avg_points(x, y, dpath):
   new_y = array([])
   new_x = array([])
   old_i = 0
-  for i in xrange(1, len(x)):
+  for i in range(1, len(x)):
     dist = sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
     if dist >= dpath or i == len(x) - 1:
       avg_x = average(x[old_i:i])
@@ -203,14 +203,14 @@ def avg_points(x, y, dpath):
 for name in styles.plots:
     g2_path = read_walls_path(ff, name)
     if able_to_read_file == False:
-        plot(arange(0,10,1), [0]*10, 'k')
+        plot(arange(0, 10, 1), [0]*10, 'k')
         suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
         savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
         savefig(savedfilename)
         exit(0)
-    x = g2_path[:,3]
-    z = g2_path[:,2]
-    g = g2_path[:,1]
+    x = g2_path[:, 3]
+    z = g2_path[:, 2]
+    g = g2_path[:, 1]
     zcontact = z.min()
     xcontact = 2.0 if name == 'mc' else 2.0051
     incontact = (x<xcontact) & (z<2)
@@ -256,7 +256,7 @@ for name in styles.plots:
       suba.set_ylim(sub_ylim)
       sub_xlim = suba.get_xlim()
 
-      for i in suba.spines.itervalues():
+      for i in suba.spines.values():
         i.set_linewidth(2)
       if name == 'this-work-short': # only want to draw rectangle once
         zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
@@ -310,16 +310,16 @@ hw = 4 # headwidth of arrows
 
 g2nice = read_walls_path(ff, 'this-work-short')
 def g2pathfunction_x(x):
-    return interp(x, flipud(g2nice[:,3]), flipud(g2nice[:,1]))
+    return interp(x, flipud(g2nice[:, 3]), flipud(g2nice[:, 1]))
 def g2pathfunction_z(z):
-    return interp(z, g2nice[:,2], g2nice[:,1])
+    return interp(z, g2nice[:, 2], g2nice[:, 1])
 
 # Annotations on 2d plot
-twod_plot.annotate('$A$', xy=(Az,Ax), xytext=(1,3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-twod_plot.annotate('$B$', xy=(Bz,Bx), xytext=(1,2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-twod_plot.annotate('$C$', xy=(Cz,Cx), xytext=(2.3,2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-twod_plot.annotate('$D$', xy=(Dz,Dx), xytext=(3,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
-twod_plot.annotate('$E$', xy=(Ez,Ex), xytext=(5,1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$A$', xy=(Az, Ax), xytext=(1, 3), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$B$', xy=(Bz, Bx), xytext=(1, 2.5), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$C$', xy=(Cz, Cx), xytext=(2.3, 2.0), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$D$', xy=(Dz, Dx), xytext=(3, 1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
+twod_plot.annotate('$E$', xy=(Ez, Ex), xytext=(5, 1), arrowprops=dict(shrink=0.01, width=1, headwidth=hw))
 
 # Annotations on 1d plot
 # xplot.annotate('$A$', xy=(Ax, g2pathfunction_x(Ax)),

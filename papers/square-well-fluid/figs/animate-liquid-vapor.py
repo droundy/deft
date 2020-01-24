@@ -18,14 +18,14 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
-print sys.argv
+print(sys.argv)
 
 if 'tmi' in sys.argv:
-    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi' % (ww,ff,lenx,lenyz)
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi' % (ww, ff, lenx, lenyz)
 elif 'toe' in sys.argv:
-    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-toe' % (ww,ff,lenx,lenyz)
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-toe' % (ww, ff, lenx, lenyz)
 else:
-    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g' % (ww,ff,lenx,lenyz)
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g' % (ww, ff, lenx, lenyz)
 
 os.system('rm -rf ' + moviedir)
 assert not os.system('mkdir -p ' + moviedir)
@@ -38,13 +38,13 @@ minhist = 1e100
 maxhist = -1e100
 numframes = 0
 
-dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww,ff,lenx,lenyz)
+dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww, ff, lenx, lenyz)
 if 'tmi' in sys.argv:
-    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
+    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww, ff, lenx, lenyz)
 if 'toe' in sys.argv:
-    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-toe-movie/%%06d' % (ww,ff,lenx,lenyz)
+    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-toe-movie/%%06d' % (ww, ff, lenx, lenyz)
 
-for frame in xrange(100000):
+for frame in range(100000):
     basename = dataformat % frame
     try:
         e, hist = readandcompute.e_and_total_init_histogram(basename)
@@ -56,17 +56,17 @@ for frame in xrange(100000):
     minhist = min(minhist, hist.min())
     maxhist = max(maxhist, hist.max())
 
-print 'mine', mine
-print 'maxe', maxe
-print 'minhist', minhist
-print 'maxhist', maxhist
-print 'numframes', numframes
+print('mine', mine)
+print('maxe', maxe)
+print('minhist', minhist)
+print('maxhist', maxhist)
+print('numframes', numframes)
 
 min_T = None
 
-for frame in xrange(numframes):
+for frame in range(numframes):
     if frame % 10 == 0:
-        print 'working on frame %d/%d' % (frame, numframes)
+        print('working on frame %d/%d' % (frame, numframes))
     plt.cla()
 
     basename = dataformat % frame
@@ -84,7 +84,7 @@ for frame in xrange(numframes):
 
     e, init_hist = readandcompute.e_and_total_init_histogram(basename)
     if min_T != old_min_T:
-        print 'min_T goes from', old_min_T, 'to', min_T
+        print('min_T goes from', old_min_T, 'to', min_T)
         baseline_init_hist = init_hist
         baseline_e = e
     ax.plot(e, init_hist, 'b-',
@@ -94,7 +94,7 @@ for frame in xrange(numframes):
     # So we look up the element with the corresponding energy.
     if len(e) != len(baseline_e):
         newstuff = 1.0*init_hist
-        for i in xrange(len(e)):
+        for i in range(len(e)):
             theindex = numpy.nonzero(baseline_e == e[i])[0]
             if len(theindex) > 0:
                 newstuff[i] -= baseline_init_hist[theindex[0]]

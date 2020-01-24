@@ -1,0 +1,23 @@
+| tar czvf upload.tar.gz sad.tex sad.bbl gamma-n256.pdf N50-lndos-comparison.pdf periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf
+< sad.pdf
+< gamma-n256.pdf
+< N50-lndos-comparison.pdf
+< periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf
+< periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf
+< periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf
+> upload.tar.gz
+
+| cp figs/gamma-n256.pdf .
+< figs/gamma-n256.pdf
+
+| cp figs/N50-lndos-comparison.pdf .
+< figs/N50-lndos-comparison.pdf
+
+| cp figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf .
+< figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-slow.pdf
+
+| cp figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf .
+< figs/s000/periodic-ww1_30-ff0_30-N50-gamma-and-entropy-error-default.pdf
+
+| cp figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf .
+< figs/s000/periodic-ww1_50-ff0_17-N256-entropy-error-default.pdf

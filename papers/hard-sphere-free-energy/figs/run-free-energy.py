@@ -43,7 +43,7 @@ def main(argv=None):
     elif argv[1] == 'dir':
         plot_from_directory(argv[2])
     else:
-        print "invalid option"
+        print("invalid option")
 
 
 def run_simulation():
@@ -60,7 +60,7 @@ def run_simulation():
     seed = 0
     sc_period = max(10, (1 * N * N)/10)
 
-    for i in xrange(steps):
+    for i in range(steps):
         # hacky way to reduce step size as we approach a smaller cell
         if i != 0 and i % 4 == 0:
             step_size = step_size * 0.5
@@ -93,7 +93,7 @@ def run_simulation():
                 ])
 
             print("running with command:")
-            print(" ".join(arg_list))
+            print((" ".join(arg_list)))
             assert(not subprocess.call(arg_list))
 
         data = read_data_file_to_dict(filepath)
@@ -102,16 +102,16 @@ def run_simulation():
         valid_checks = data['total valid small checks']
         success_ratio = (valid_checks * 1.0)/total_checks
 
-        print 'this step had valid_checks', valid_checks
-        print 'this step had total_checks', total_checks
+        print('this step had valid_checks', valid_checks)
+        print('this step had total_checks', total_checks)
         if not ff == 0:
-            print 'this step had longest valid run', data['longest valid run']
-            print 'this step had longest failed run', data['longest failed run']
-            print 'this step had average valid run', data['average valid run']
-            print 'this step had average failed run', data['average failed run']
-            print 'this step had valid runs', data['valid runs']
-            print 'this step had failed runs', data['failed runs']
-        print "************ end step ************"
+            print('this step had longest valid run', data['longest valid run'])
+            print('this step had longest failed run', data['longest failed run'])
+            print('this step had average valid run', data['average valid run'])
+            print('this step had average failed run', data['average failed run'])
+            print('this step had valid runs', data['valid runs'])
+            print('this step had failed runs', data['failed runs'])
+        print("************ end step ************")
 
         ffs.append(next_ff)
         success_ratios.append(success_ratio)
@@ -120,8 +120,8 @@ def run_simulation():
 
         ff = next_ff
 
-    print ffs
-    print success_ratios
+    print(ffs)
+    print(success_ratios)
 
     #do plot
     if plot:
@@ -140,10 +140,10 @@ def run_simulation():
         #          = -kT/R sqrt(N_a)/N_t = -kt/sqrt(N_a)
         # F = Delta F_1 + Delta F_2 + ... => ~F = sqrt(~F_1^2 + ~F_2^2 + ...)
         error_bars = np.insert(np.sqrt(np.cumsum(1.0/all_valid_checks)), 0, 0)
-        print error_bars
+        print(error_bars)
         #print map(math.log, error_bars)
 
-        energy = np.insert(-np.cumsum(map(math.log, success_ratios))/N, 0, 0)
+        energy = np.insert(-np.cumsum(list(map(math.log, success_ratios)))/N, 0, 0)
         ffs.insert(0, 0)
         ffs = np.array(ffs)
         plt.scatter(ffs, energy, label='Simulation', c='k')
@@ -170,7 +170,7 @@ def plot_from_directory(directory = None):
     P_dir = ""
 
 
-    for f in filter(lambda f: f.startswith("periodic"), os.listdir(os.path.join(data_dir, N_dir, P_dir))):
+    for f in [f for f in os.listdir(os.path.join(data_dir, N_dir, P_dir)) if f.startswith("periodic")]:
         filepath = os.path.join(data_dir, N_dir, P_dir, f)
 
         data = read_data_file_to_dict(filepath)
@@ -179,24 +179,24 @@ def plot_from_directory(directory = None):
         valid_checks = data['total valid small checks']
         success_ratio = (valid_checks * 1.0)/total_checks
 
-        print 'this step had valid_checks', valid_checks
-        print 'this step had total_checks', total_checks
+        print('this step had valid_checks', valid_checks)
+        print('this step had total_checks', total_checks)
         if ffs:
-            print 'this step had longest valid run', data['longest valid run']
-            print 'this step had longest failed run', data['longest failed run']
-            print 'this step had average valid run', data['average valid run']
-            print 'this step had average failed run', data['average failed run']
-            print 'this step had valid runs', data['valid runs']
-            print 'this step had failed runs', data['failed runs']
-        print "************ end step ************"
+            print('this step had longest valid run', data['longest valid run'])
+            print('this step had longest failed run', data['longest failed run'])
+            print('this step had average valid run', data['average valid run'])
+            print('this step had average failed run', data['average failed run'])
+            print('this step had valid runs', data['valid runs'])
+            print('this step had failed runs', data['failed runs'])
+        print("************ end step ************")
 
         ffs.append(next_ff)
         success_ratios.append(success_ratio)
         all_total_checks.append(total_checks)
         all_valid_checks.append(valid_checks)
 
-    print ffs
-    print success_ratios
+    print(ffs)
+    print(success_ratios)
 
     #do plot
     if plot:
@@ -215,10 +215,10 @@ def plot_from_directory(directory = None):
         #          = -kT/R sqrt(N_a)/N_t = -kt/sqrt(N_a)
         # F = Delta F_1 + Delta F_2 + ... => ~F = sqrt(~F_1^2 + ~F_2^2 + ...)
         error_bars = np.insert(np.sqrt(np.cumsum(1.0/all_valid_checks)), 0, 0)
-        print error_bars
+        print(error_bars)
         #print map(math.log, error_bars)
 
-        energy = np.insert(-np.cumsum(map(math.log, success_ratios))/N, 0, 0)
+        energy = np.insert(-np.cumsum(list(map(math.log, success_ratios)))/N, 0, 0)
         ffs.insert(0, 0)
         ffs = np.array(ffs)
         plt.scatter(ffs, energy, label='Simulation', c='k')
@@ -226,8 +226,8 @@ def plot_from_directory(directory = None):
 
         cffs = np.arange(0, ffs[-1], 0.01)
         plt.plot(cffs, (4*cffs - 3*cffs**2)/(1-cffs)**2, '-', label='Carnahan-Starling')
-        plt.xlim(0,0.55)
-        plt.ylim(0,6)
+        plt.xlim(0, 0.55)
+        plt.ylim(0, 6)
         plt.ylabel(r'$F^C/NkT$')
         plt.xlabel(r'$\eta$')
         plt.legend(loc=2)
@@ -246,7 +246,7 @@ def check_triangles():
     sc_period = (1 * N * N)/10
 
 
-    for i in xrange(3):
+    for i in range(3):
         filename = FILENAME %\
             (ffs[i], ffs[i]+step_sizes[i], N, sim_iterations, seed, sc_period)
         filename_with_extension = filename+"-g.dat"
@@ -269,29 +269,29 @@ def check_triangles():
         total_checks = data['total checks of small cell']
         valid_checks = data['total valid small checks']
         success_ratio = (valid_checks * 1.0)/total_checks
-        print ffs[i], 'gives valid_checks', valid_checks
-        print ffs[i], 'gives total_checks', total_checks
-        print ffs[i], 'gives longest valid run', data['longest valid run']
-        print ffs[i], 'gives longest failed run', data['longest failed run']
-        print ffs[i], 'gives average valid run', data['average valid run']
-        print ffs[i], 'gives average failed run', data['average failed run']
-        print ffs[i], 'gives valid runs', data['valid runs']
-        print ffs[i], 'gives failed runs', data['failed runs']
+        print(ffs[i], 'gives valid_checks', valid_checks)
+        print(ffs[i], 'gives total_checks', total_checks)
+        print(ffs[i], 'gives longest valid run', data['longest valid run'])
+        print(ffs[i], 'gives longest failed run', data['longest failed run'])
+        print(ffs[i], 'gives average valid run', data['average valid run'])
+        print(ffs[i], 'gives average failed run', data['average failed run'])
+        print(ffs[i], 'gives valid runs', data['valid runs'])
+        print(ffs[i], 'gives failed runs', data['failed runs'])
         success_ratios[i] = success_ratio
 
-    print success_ratios
-    print success_ratios[0]*success_ratios[1], 'should be', success_ratios[2]
+    print(success_ratios)
+    print(success_ratios[0]*success_ratios[1], 'should be', success_ratios[2])
 
 
 
 # I was awake when I wrote this part
 def read_data_file_to_dict(filepath):
-    print('reading %s\n' % filepath)
+    print(('reading %s\n' % filepath))
     meta_data = {}
     with open(filepath, 'r') as f:
         for line in f:
             if line.startswith('#') and ':' in line:
-                sanitized = map(lambda s: s.strip(' #'), line.split(':'))
+                sanitized = [s.strip(' #') for s in line.split(':')]
                 meta_data[sanitized[0]] = eval(sanitized[1])
     return meta_data
 

@@ -3,7 +3,7 @@ from visual import *
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + " filename.dat")
+    print(("Usage:  " + sys.argv[0] + " filename.dat"))
     exit(1)
 
 allSpheres = genfromtxt(sys.argv[1])
@@ -23,7 +23,7 @@ spheres = allSpheres # reshape(spheres, (-1, 3))
 
 a=0
 s=30/7
-print 30/7
+print(30/7)
 for i in range(len(spheres)):
     if(a <= spheres[i][0]<s and a <=spheres[i][1]<s and a <=spheres[i][2]<s):
         if i >= len(balls):
@@ -36,7 +36,7 @@ for i in range(len(spheres)):
             if i != j:
                 d = sqrt((spheres[j][0]-spheres[i][0])**2+(spheres[j][1]-spheres[i][1])**2+(spheres[j][2]-spheres[i][2])**2)
                 if d < 1:
-                    print 'distance is', i, j, d
+                    print('distance is', i, j, d)
                     balls[i].color = color.yellow
 for i in range(len(balls)):       
     balls[i].radius=1
@@ -59,6 +59,6 @@ for i in range (len(spheres)):
 
 print ("And the spheres outside are: ")
 #print (spheresOutside)
-print ("count inside: " + str(countInside) + "  And count outside: " + str(countOutside))
-print ("And the number that are outside in Z coordinate are: " + str(countOutsideZ))        
+print(("count inside: " + str(countInside) + "  And count outside: " + str(countOutside)))
+print(("And the number that are outside in Z coordinate are: " + str(countOutsideZ)))        
 

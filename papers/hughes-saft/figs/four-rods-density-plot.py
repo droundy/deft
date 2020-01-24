@@ -6,7 +6,7 @@ import numpy, math
 
 #Get data before transition
 lines = 0
-f = open('rods-slice-01.0-01.1.dat','r')
+f = open('rods-slice-01.0-01.1.dat', 'r')
 for line in f:
     lines +=1
 f.close()
@@ -18,7 +18,7 @@ density_1 = numpy.zeros((rowcol, rowcol))
 row = 0
 col = 0
 
-f = open('rods-slice-01.0-01.1.dat','r')
+f = open('rods-slice-01.0-01.1.dat', 'r')
 for line in f:
     current = str(line)
     pieces = current.split ('\t')
@@ -35,7 +35,7 @@ f.close()
 
 #get data for after transition
 lines = 0
-f = open('rods-slice-01.0-01.4.dat','r')
+f = open('rods-slice-01.0-01.4.dat', 'r')
 for line in f:
     lines +=1
 f.close()
@@ -47,7 +47,7 @@ density_2 = numpy.zeros((rowcol, rowcol))
 row = 0
 col = 0
 
-f = open('rods-slice-01.0-01.4.dat','r')
+f = open('rods-slice-01.0-01.4.dat', 'r')
 for line in f:
     current = str(line)
     pieces = current.split ('\t')

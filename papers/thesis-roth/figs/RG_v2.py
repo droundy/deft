@@ -47,17 +47,17 @@ def VD(i):
     return (lambda_D(i)/2)**3
 
 # Free energy density, defined by an iterative process
-def fiterative(T,n,i):
+def fiterative(T, n, i):
     # eqn (55) Forte 2011:
-    fnaught = SWfid(T,n) + SWfhs(T,n) + a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
+    fnaught = SWfid(T, n) + SWfhs(T, n) + a2(n)/k_B/T*n # SW (and Hughes) a2/kT is the same as Forte's f2
 
     # eqn (5) from Forte 2011:
     for j in range(i+1): # The function range(y) only goes up to y-1; range(y+1) will include y
         if j == 0:
             f = fnaught
         else:
-            IDvalue = ID(integrand_ID,T,n,j)
-            ID_refvalue = ID_ref(integrand_ID_ref,T,n,j)
+            IDvalue = ID(integrand_ID, T, n, j)
+            ID_refvalue = ID_ref(integrand_ID_ref, T, n, j)
             dfi = -k_B*T*np.log(IDvalue/ID_refvalue)/VD(j) # eqn (7), Forte 2011
             f += dfi
 
@@ -66,69 +66,69 @@ def fiterative(T,n,i):
 # Integral over amplitudes (x) of wave-packet of length lambda_D
 # similar to sum over density fluctuations n_D
 # eqn(8), Forte 2011
-def integrand_ID(T,n,x,i):
-    argument = np.exp(-VD(i)/k_B/T*(fbarD(T,n,x,i) + ubarD(T,n,x,i)))
+def integrand_ID(T, n, x, i):
+    argument = np.exp(-VD(i)/k_B/T*(fbarD(T, n, x, i) + ubarD(T, n, x, i)))
     return argument
 
-def ID(integrand,T,n,i):
+def ID(integrand, T, n, i):
     maxn = 1/(sigma**3*np.pi/6)
-    maxx = np.minimum(np.ones_like(n),maxn/n - 1)
-    return integrate.midpoint(lambda x: integrand_ID(T,n,x,i),0,maxx,100)
+    maxx = np.minimum(np.ones_like(n), maxn/n - 1)
+    return integrate.midpoint(lambda x: integrand_ID(T, n, x, i), 0, maxx, 100)
 
 # Reference for ID
 # Evaluated at small enough wavelengths that UbarD should be negligible
 # eqn (9), Forte 2011
-def integrand_ID_ref(T,n,x,i):
-    return np.exp(-VD(i)/k_B/T*fbarD(T,n,x,i))
+def integrand_ID_ref(T, n, x, i):
+    return np.exp(-VD(i)/k_B/T*fbarD(T, n, x, i))
 
-def ID_ref(integrand,T,n,i):
+def ID_ref(integrand, T, n, i):
     maxn = 1/(sigma**3*np.pi/6)
-    maxx = np.minimum(np.ones_like(n),maxn/n - 1)
-    return integrate.midpoint(lambda x: integrand_ID_ref(T,n,x,i),0,maxx,100)
+    maxx = np.minimum(np.ones_like(n), maxn/n - 1)
+    return integrate.midpoint(lambda x: integrand_ID_ref(T, n, x, i), 0, maxx, 100)
 
 # Average within the considered subdomain, based on x
 ## eqn (10), Forte 2011
 ## For fluctuations in [0,1] (rather than [0,n]), do n(1 +/- x) instead of simply (n +/- x), as it is in Forte
 ## This amounts to defining x* = x/n --> n-x = n-(n x*) = n(1-x*); then simply writing x (instead of x*) in the program
-def fbarD(T,n,x,i):
-    iplusx = fiterative(T,n*(1+x),i-1)
-    iminusx = fiterative(T,n*(1-x),i-1)
-    nochangex = fiterative(T,n,i-1)
+def fbarD(T, n, x, i):
+    iplusx = fiterative(T, n*(1+x), i-1)
+    iminusx = fiterative(T, n*(1-x), i-1)
+    nochangex = fiterative(T, n, i-1)
     value = (iplusx + iminusx)/2 - nochangex
     return value
 
 # Averge scaled potential
 # eqn (11), Forte 2011
-def ubarD(T,n,x,i):
-    value = (u(T,n*(1+x),i) + u(T,n*(1-x),i))/2 - u(T,n,i)
+def ubarD(T, n, x, i):
+    value = (u(T, n*(1+x), i) + u(T, n*(1-x), i))/2 - u(T, n, i)
     return value
 
 # Potential energy density for square well
 # Eqn (51), Forte 2011
 ## The paper also includes a factor m, which refers to the number of segments forming a chain
 ## we do not deal with chains, so m = 1
-def u(T,n,i):
+def u(T, n, i):
     return -(n)**2*(gHS_eff(n)*alpha
                     - (4*np.pi**2)/(2**(2*i+1)*L**2)*alpha*omega2
                     + ((4*np.pi**2)/(2**(2*i+1)*L**2))**2*alpha*gamma)
 
 # Total free energy
 # Eqn (32), Forte 2011; f1 = fatt (see paragraph after eqn 55)
-def ftot(T,n,i):
-    return fiterative(T,n,i) + a1SW(n)*n # a1SW*n is the same as Forte's f1
+def ftot(T, n, i):
+    return fiterative(T, n, i) + a1SW(n)*n # a1SW*n is the same as Forte's f1
 
 # Pressure
 # See Jess Hughes' project report, equation (38)
-def P(T,n,i):
-  return n*df_dn(T,n) - ftot(T,n,i)
+def P(T, n, i):
+  return n*df_dn(T, n) - ftot(T, n, i)
 
 # Grand free energy per volume
-def phi(T,n,mu,i):
-    return ftot(T,n,i) - mu*n
+def phi(T, n, mu, i):
+    return ftot(T, n, i) - mu*n
 
-def df_dn(T,n,i):
+def df_dn(T, n, i):
     dn = 1e-8*n
-    return (ftot(T,n+dn/2,i) - ftot(T,n-dn/2,i))/dn
+    return (ftot(T, n+dn/2, i) - ftot(T, n-dn/2, i))/dn
 
 #######################################
 # I define the following functions here, rather than calling from SW.py
@@ -200,12 +200,12 @@ def K(n):
 # NB: In Gil-Villegas, there is a term involving the thermal DeBroglie wavelength (Lambda)
 ## I ignore this here, because Lambda does not have any contribution from density.
 ## It only serves to add a constant to the free energy; we absorb this later into the chemical potential
-def SWfid(T,n):
+def SWfid(T, n):
     return n*k_B*T*(np.log(n) - 1)
 
 # Hard-sphere free energy
 # based on Hughes
-def SWfhs(T,n):
+def SWfhs(T, n):
     # Phi 1
     Phi1 = -n0(n)*np.log(1-n3(n))
 

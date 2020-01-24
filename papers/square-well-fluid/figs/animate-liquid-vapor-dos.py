@@ -19,14 +19,14 @@ lenx = float(sys.argv[3])
 lenyz = float(sys.argv[4])
 #arg lenyz = [10]
 
-print sys.argv
+print(sys.argv)
 
 if 'tmi' in sys.argv:
-    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi-dos' % (ww,ff,lenx,lenyz)
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-tmi-dos' % (ww, ff, lenx, lenyz)
 elif 'toe' in sys.argv:
-    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-toe-dos' % (ww,ff,lenx,lenyz)
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-toe-dos' % (ww, ff, lenx, lenyz)
 else:
-    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-dos' % (ww,ff,lenx,lenyz)
+    moviedir = 'figs/movies/lv/ww%.2f-ff%.2f-%gx%g-dos' % (ww, ff, lenx, lenyz)
 os.system('rm -rf ' + moviedir)
 assert not os.system('mkdir -p ' + moviedir)
 
@@ -38,13 +38,13 @@ minlndos = 1e100
 maxlndos = -1e100
 numframes = 0
 
-dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww,ff,lenx,lenyz)
+dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-movie/%%06d' % (ww, ff, lenx, lenyz)
 if 'tmi' in sys.argv:
-    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww,ff,lenx,lenyz)
+    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-tmi-movie/%%06d' % (ww, ff, lenx, lenyz)
 if 'toe' in sys.argv:
-    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-toe-movie/%%06d' % (ww,ff,lenx,lenyz)
+    dataformat = 'data/lv/ww%.2f-ff%.2f-%gx%g-toe-movie/%%06d' % (ww, ff, lenx, lenyz)
 
-for frame in xrange(100000):
+for frame in range(100000):
     basename = dataformat % frame
     try:
         e, lndos = readandcompute.e_lndos(basename)
@@ -61,15 +61,15 @@ for frame in xrange(100000):
     mine = min(mine, e.min() - 20)
     maxe = max(maxe, e.max())
 
-print 'mine', mine
-print 'maxe', maxe
-print 'minlndos', minlndos
-print 'maxlndos', maxlndos
-print 'numframes', numframes
+print('mine', mine)
+print('maxe', maxe)
+print('minlndos', minlndos)
+print('maxlndos', maxlndos)
+print('numframes', numframes)
 
-for frame in xrange(numframes):
+for frame in range(numframes):
     if frame % 10 == 0:
-        print 'working on frame %d/%d' % (frame, numframes)
+        print('working on frame %d/%d' % (frame, numframes))
     plt.cla()
 
     basename = dataformat % frame

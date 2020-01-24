@@ -21,12 +21,12 @@ radii = [ 0.2, 0.6, 1.0 ]
 for i in range(len(radii)):
     newdata = pylab.loadtxt('figs/single-rod-slice-%04.2f.dat' % (2*radii[i]))
     hugdata = pylab.loadtxt('figs/hughes-single-rod-slice-%04.2f.dat' % (2*radii[i]))
-    rnew = newdata[:,0]/nm
-    rhug = hugdata[:,0]/nm
-    newdensity = newdata[:,1]/gpermL
-    newHB = 4*(1-newdata[:,2])
+    rnew = newdata[:, 0]/nm
+    rhug = hugdata[:, 0]/nm
+    newdensity = newdata[:, 1]/gpermL
+    newHB = 4*(1-newdata[:, 2])
     #hugHB = 4*(1-hugdata[:,2])
-    bulkHB = 4*(1-newdata[len(newdata) - 2,2])
+    bulkHB = 4*(1-newdata[len(newdata) - 2, 2])
     #brokenHB = (bulkHB - newHB)*newdensity
     #brokenHB[newdensity<0.01] = 0
     newdenstotal = 0

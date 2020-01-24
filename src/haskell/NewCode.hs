@@ -37,6 +37,7 @@ create3dHeader e0 n =
    "#include \"new/NewFunctional.h\"",
    "#include \"utilities.h\"",
    "#include \"handymath.h\"",
+   "#include \"Faddeeva.hh\"",
    "",
    "#pragma GCC diagnostic ignored \"-Wunused-variable\"",
    "class " ++ n ++ " : public NewFunctional {",

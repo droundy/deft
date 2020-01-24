@@ -29,11 +29,11 @@ def dist_to_plane(point, plane):
 def get_faces(verts, pad = 0, acc = 0.1):
   # find the distance between neighbors. Assumes all neighbors are equidistant
   faces = []
-  for i in xrange(len(verts)):
+  for i in range(len(verts)):
     u = verts[i]
-    for j in xrange(i+1, len(verts)):
+    for j in range(i+1, len(verts)):
       v = verts[j]
-      for k in xrange(j+1, len(verts)):
+      for k in range(j+1, len(verts)):
         w = verts[k]
         # now make sure we don't have a duplicate
         keep = True
@@ -45,7 +45,7 @@ def get_faces(verts, pad = 0, acc = 0.1):
           plane = vstack((u, v, w))
           has_neg = False
           has_pos = False
-          for l in xrange(len(verts)):
+          for l in range(len(verts)):
             if l != i and l != j and l != k:
               dist = dist_to_plane(verts[l], plane)
               if (dist > acc): has_pos = True
@@ -53,7 +53,7 @@ def get_faces(verts, pad = 0, acc = 0.1):
           if (not has_neg) or (not has_pos):
             # this plane is good!
             face = empty(0)
-            for l in xrange(len(verts)):
+            for l in range(len(verts)):
               if abs(dist_to_plane(verts[l], plane)) < acc:
                 face = append(face, l)
             faces.append(face)
@@ -61,7 +61,7 @@ def get_faces(verts, pad = 0, acc = 0.1):
   sfaces = []
   for face in faces:
     sface = array([face[0]])
-    for i in xrange(len(face)-1):
+    for i in range(len(face)-1):
       last = sface[-1]
       dmin = 10000
       for j in face:
@@ -78,7 +78,7 @@ def get_faces(verts, pad = 0, acc = 0.1):
   # 2d array:
   n = max([len(face) for face in faces])
   n = max(n, pad)
-  for i in xrange(len(faces)):
+  for i in range(len(faces)):
     if len(face) < n:
       faces[i] = hstack((faces[i], ones(n-len(faces[i]))*faces[i][-1]))
   return array(faces)
@@ -92,7 +92,7 @@ def get_faces(verts, pad = 0, acc = 0.1):
 # of the face array for one shape, with each copy incremented by the number of
 # vertices added.
 def create_plot_data(shape_array, ncolors, mixture=False):
-  nvertices = sum([len(shape_array[i]) for i in xrange(len(shape_array))])
+  nvertices = sum([len(shape_array[i]) for i in range(len(shape_array))])
   shapes = vstack(shape_array)
   N = len(shape_array)
   shapedim = shape_array[0].shape
@@ -111,7 +111,7 @@ def create_plot_data(shape_array, ncolors, mixture=False):
   colors = empty((0, 3))
   vertices_so_far = 0
 
-  for i in xrange(N):
+  for i in range(N):
     if mixture:
       newface = get_faces(shape_array[i], most_vertices) + vertices_so_far
     else:
@@ -135,47 +135,47 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(
     description='Plot density of polyhedra.', parents = [arguments.parser])
   parser.add_argument(
-    '-d','--delay', metavar='N', type=int, default=10,
+    '-d', '--delay', metavar='N', type=int, default=10,
     help='time in ms to pause between frames. Minimum 10')
 
   parser.add_argument(
-    '-f','--frames', metavar='N', type=int, default=10000,
+    '-f', '--frames', metavar='N', type=int, default=10000,
     help='number of frames to animate')
 
   parser.add_argument(
-    '-o','--one_frame', metavar='N', type=int, default=-100,
+    '-o', '--one_frame', metavar='N', type=int, default=-100,
     help='Instead of animating, view the specific frame')
 
   parser.add_argument(
-    '-b','--begin', metavar='N', type=int, default=0,
+    '-b', '--begin', metavar='N', type=int, default=0,
     help='start at this frame instead of frame 0')
 
   parser.add_argument(
-    '-n','--show_only', metavar='F', type=double, default=0,
+    '-n', '--show_only', metavar='F', type=double, default=0,
     help='will only render a fraction of the polyhedra')
 
   parser.add_argument(
-    '-k','--skip', metavar='N', type=int, default=1,
+    '-k', '--skip', metavar='N', type=int, default=1,
     help='only play every N frames')
 
   parser.add_argument(
-    '-a','--alpha', metavar='F', type=double,
+    '-a', '--alpha', metavar='F', type=double,
     help='sets the alpha of the polyhedra', default=1)
 
   parser.add_argument(
-    '-v','--save', action='store_true',
+    '-v', '--save', action='store_true',
     help='will save animation frames as pdfs')
 
   parser.add_argument(
-    '-m','--mixture', action='store_true',
+    '-m', '--mixture', action='store_true',
     help="""signals that the system may have multiple different shapes.
     The default assumption is that it does not, which allows faster runtime""")
 
   parser.add_argument(
-    '-t','--talk', action='store_true',
+    '-t', '--talk', action='store_true',
     help='instead of performing normal function, generate figures for talk')
 
-  parser.add_argument('-w','--hide_walls', action='store_true', help='won\'t draw walls')
+  parser.add_argument('-w', '--hide_walls', action='store_true', help='won\'t draw walls')
   parser.add_argument('--xmin', type=double, default=0, help='minimum x-value')
   parser.add_argument('--xmax', type=double, default=1000, help='maximum x-value')
   parser.add_argument('--ymin', type=double, default=0, help='minimum y-value')
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     celltype = 'periodic'
   else:
     celltype = 'walls'
-  print ("Using %s with %s" %(polyhedron, celltype))
+  print(("Using %s with %s" %(polyhedron, celltype)))
 
   if args.N == 0:
     N = read.get_N("figs/mc/vertices/%s-%4.2f-vertices-%s" %(celltype, ff, polyhedron))
@@ -224,7 +224,7 @@ if __name__ == '__main__':
   # ------------------------------------------------------------------------------
   # Inital plot setup
   # ------------------------------------------------------------------------------
-  figure = mlab.figure(bgcolor=(1,1,1), fgcolor=(0,0,0), size=(1024,768))
+  figure = mlab.figure(bgcolor=(1, 1, 1), fgcolor=(0, 0, 0), size=(1024, 768))
 
   if args.one_frame > -100:
     f = args.one_frame
@@ -232,37 +232,37 @@ if __name__ == '__main__':
     f = args.begin
   dim, centers, shape_array, iteration = read.read_vertices(ff, polyhedron, N, celltype, f)
   if partial_cell:
-    for i in xrange(N):
-      if (centers[i,0] < args.xmin or centers[i,0] > args.xmax or
-          centers[i,1] < args.ymin or centers[i,1] > args.ymax or
-          centers[i,2] < args.zmin or centers[i,2] > args.zmax):
+    for i in range(N):
+      if (centers[i, 0] < args.xmin or centers[i, 0] > args.xmax or
+          centers[i, 1] < args.ymin or centers[i, 1] > args.ymax or
+          centers[i, 2] < args.zmin or centers[i, 2] > args.zmax):
         shape_array[i] = zeros_like(shape_array[i])
   if args.shiftx > 0:
-    for i in xrange(len(centers)):
+    for i in range(len(centers)):
       val = args.shiftx
-      centers[i,0] += val
-      if centers[i,0] > dim[0]:
-        centers[i,0] -= dim[0]
+      centers[i, 0] += val
+      if centers[i, 0] > dim[0]:
+        centers[i, 0] -= dim[0]
         val -= dim[0]
-      shape_array[i,:,0] += val
+      shape_array[i,:, 0] += val
 
   if args.shifty > 0:
-    for i in xrange(len(centers)):
+    for i in range(len(centers)):
       val = args.shifty
-      centers[i,1] += val
-      if centers[i,1] > dim[1]:
-        centers[i,1] -= dim[1]
+      centers[i, 1] += val
+      if centers[i, 1] > dim[1]:
+        centers[i, 1] -= dim[1]
         val -= dim[1]
-      shape_array[i,:,1] += val
+      shape_array[i,:, 1] += val
 
   if args.shiftz > 0:
-    for i in xrange(len(centers)):
+    for i in range(len(centers)):
       val = args.shiftz
-      centers[i,2] += val
-      if centers[i,2] > dim[2]:
-        centers[i,2] -= dim[2]
+      centers[i, 2] += val
+      if centers[i, 2] > dim[2]:
+        centers[i, 2] -= dim[2]
         val -= dim[2]
-      shape_array[i,:,2] += val
+      shape_array[i,:, 2] += val
 
   if partial_cell:
     dim[0] = min(dim[0], args.xmax)
@@ -275,7 +275,7 @@ if __name__ == '__main__':
   nvertices = len(shapes)
   s =  mlab.pipeline.surface(src, colormap='jet', vmin=0, vmax=1, opacity=args.alpha)
 
-  mlab.view(azimuth=30, elevation=65, distance=28, focalpoint=(dim[0]/2,dim[1]/2,dim[2]/2))
+  mlab.view(azimuth=30, elevation=65, distance=28, focalpoint=(dim[0]/2, dim[1]/2, dim[2]/2))
 
   words = [polyhedron,
           celltype,
@@ -299,7 +299,7 @@ if __name__ == '__main__':
     mlab.orientation_axes(figure=figure, name='bob')
 
   # Draw the cell
-  cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0,0,0), line_width=3)
+  cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0, 0, 0), line_width=3)
 
   if(celltype == 'walls' and not args.hide_walls):
     sheet_points = array([[0, 0, 0], [dim[0], 0, 0], [dim[0], dim[1], 0], [0, dim[1], 0],
@@ -307,7 +307,7 @@ if __name__ == '__main__':
                    [0, dim[1], dim[2]]])
     sheet_connections = array([[0, 1, 2, 3], [4, 5, 6, 7]])
     sheetmesh = tvtk.PolyData(points=sheet_points, polys=sheet_connections)
-    mlab.pipeline.surface(sheetmesh, opacity=.6, color=(1,1,1))
+    mlab.pipeline.surface(sheetmesh, opacity=.6, color=(1, 1, 1))
 
   # if(celltype == 'walls'and not args.hide_walls):
   #   nbars = 11
@@ -350,10 +350,10 @@ if __name__ == '__main__':
       if args.show_only>0:
         newshapes = newshapes[:N*args.show_only]
       if partial_cell:
-        for i in xrange(N):
-          if (newcenters[i,0] < args.xmin or newcenters[i,0] > args.xmax or
-              newcenters[i,1] < args.ymin or newcenters[i,1] > args.ymax or
-              newcenters[i,2] < args.zmin or newcenters[i,2] > args.zmax):
+        for i in range(N):
+          if (newcenters[i, 0] < args.xmin or newcenters[i, 0] > args.xmax or
+              newcenters[i, 1] < args.ymin or newcenters[i, 1] > args.ymax or
+              newcenters[i, 2] < args.zmin or newcenters[i, 2] > args.zmax):
             newshapes[i] = zeros_like(newshapes[i])
 
       shapes[:] = newshapes.reshape((nvertices, 3))
@@ -364,12 +364,12 @@ if __name__ == '__main__':
         newdim[2] = min(dim[2], args.zmax)
       if newdim[0] != dim[0]:
         dim = newdim
-        cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0,0,0), line_width=3)
+        cell = mlab.outline(extent=[0, dim[0], 0, dim[1], 0, dim[2]], color=(0, 0, 0), line_width=3)
       # fixme : yield screws things up even when args.hide == True
       # if not args.hide:
         # yield
       if args.save:
-        print("saving figs/anim/%s-%4.2f-%s-%i-%i.png" %(celltype, ff, polyhedron, N, f))
+        print(("saving figs/anim/%s-%4.2f-%s-%i-%i.png" %(celltype, ff, polyhedron, N, f)))
         figure.scene.save("figs/anim/%s-%4.2f-%s-%i-%i.png" %(celltype, ff, polyhedron, N, f))
       f += args.skip
 

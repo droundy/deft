@@ -18,10 +18,10 @@ tempmax = 3.5
 dtemp = 0.5
 
 
-tempFF = np.arange(ffmin,ffmax,dff)
-tempTemp = np.arange(tempmin,tempmax,dtemp)
+tempFF = np.arange(ffmin, ffmax, dff)
+tempTemp = np.arange(tempmin, tempmax, dtemp)
 
-pressure = np.zeros((len(tempFF),len(tempTemp)))
+pressure = np.zeros((len(tempFF), len(tempTemp)))
 
 
 #######################################################################
@@ -30,9 +30,9 @@ pressure = np.zeros((len(tempFF),len(tempTemp)))
 #######################################################################
 
 for fillFrac in tempFF:
-	print fillFrac
+	print(fillFrac)
 	for temp in tempTemp:
-		print temp
+		print(temp)
 		position_file = open('CHRIS/ff-'+str(fillFrac)+'_temp-'+str(temp)+'-pos.dat')
 		radial_file = open('CHRIS/ff-'+str(fillFrac)+'_temp-'+str(temp)+'-radial.dat')
 		pressure_file = open('CHRIS/ff-'+str(fillFrac)+'_temp-'+str(temp)+'-press.dat')
@@ -41,7 +41,7 @@ for fillFrac in tempFF:
 		for line in position_file.readlines():
 			sphereNum += 1
 
-		print "You could try...", np.loadtxt('CHRIS/ff-'+str(fillFrac)+'_temp-'+str(temp)+'-press.dat')
+		print("You could try...", np.loadtxt('CHRIS/ff-'+str(fillFrac)+'_temp-'+str(temp)+'-press.dat'))
 		with open('CHRIS/ff-'+str(fillFrac)+'_temp-'+str(temp)+'-press.dat') as f:
 			for l in f:
 				if(l[0] != "#"):
@@ -91,11 +91,11 @@ for fillFrac in tempFF:
 		#~ plt.xlabel('Radial Distance (r)')
 		#~ plt.ylabel('Number of Spheres at this distance')
 	
-print pressure
+print(pressure)
 
 plt.figure()
 for i in range(len(tempFF)):
-	plt.plot(tempTemp,pressure[i][:])
+	plt.plot(tempTemp, pressure[i][:])
 plt.title('Pressure v. Temperature')
 plt.xlabel('Temperature')
 plt.ylabel('Pressure')

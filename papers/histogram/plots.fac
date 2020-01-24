@@ -1,37 +1,37 @@
-| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-30x4 default noshow
+| python3 figs/comparison-plot.py 0 lv/ww1.30-ff0.22-30x4 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-60x8 default noshow
+| python3 figs/comparison-plot.py 0 lv/ww1.30-ff0.22-60x8 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 lv/ww1.30-ff0.22-100x10 default noshow
+| python3 figs/comparison-plot.py 0 lv/ww1.30-ff0.22-100x10 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N500 default noshow
+| python3 figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N500 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.10-N50 default noshow
+| python3 figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.10-N50 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.20-N50 default noshow
+| python3 figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.20-N50 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 default noshow
+| python3 figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 default noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 slow noshow
+| python3 figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 slow noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 fast noshow
+| python3 figs/comparison-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 fast noshow
 c .pyc
 
-| python2 figs/gamma-plot.py n50 0.333333333333 noshow
+| python3 figs/gamma-plot.py n50 0.333333333333 noshow
 c .pyc
 
-| python2 figs/gamma-plot.py n256 1.0 noshow
+| python3 figs/gamma-plot.py n256 1.0 noshow
 c .pyc
 
-| python figs/comparison-plot.py 0 s000/periodic-ww1.50-ff0.17-N256 default noshow
+| python3 figs/comparison-plot.py 0 s000/periodic-ww1.50-ff0.17-N256 default noshow
 c .pyc
 
 | python3 figs/gamma-and-entropy-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 default noshow
@@ -39,3 +39,22 @@ c .pyc
 
 | python3 figs/gamma-and-entropy-plot.py 0 s000/periodic-ww1.30-ff0.30-N50 slow noshow
 c .pyc
+
+# The ising plots
+
+| python3 figs/comparison-plot.py 0 ising/N32 default noshow
+c .pyc
+
+| python3 figs/comparison-plot.py 0 ising/N128 default noshow
+c .pyc
+
+| python3 figs/ising-gamma-plot.py n32 1.0 noshow
+c .pyc
+
+| python3 figs/ising-gamma-plot.py n128 1.0 noshow
+c .pyc
+
+| python3 figs/lj-comparison-plot.py noshow
+c .pyc
+> figs/lj-cv-error.pdf
+> figs/lj-cv.pdf

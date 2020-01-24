@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy
 import readandcompute
 
-if len(sys.argv) not in [4,5]:
-    print 'useage: %s ww ff Ns show' % sys.argv[0]
+if len(sys.argv) not in [4, 5]:
+    print('useage: %s ww ff Ns show' % sys.argv[0])
     exit(1)
 
 ww = float(sys.argv[1])
@@ -23,9 +23,9 @@ Ns = eval(sys.argv[3])
 # make figure with axes labeled using scientific notation
 def sci_fig(handle):
     fig = plt.figure(handle)
-    ax = fig.add_subplot(1,1,1)
+    ax = fig.add_subplot(1, 1, 1)
     fmt = matplotlib.ticker.ScalarFormatter(useMathText=True)
-    fmt.set_powerlimits((-2,3))
+    fmt.set_powerlimits((-2, 3))
     fmt.set_scientific(True)
     ax.yaxis.set_major_formatter(fmt)
     ax.xaxis.set_major_formatter(fmt)
@@ -36,7 +36,7 @@ plt.title('Specific internal energy for $\lambda=%g$, $\eta=%g$' % (ww, ff))
 
 for N in Ns:
     T, U, CV, S, minT = readandcompute.T_u_cv_s_minT("data/mc/ww%.2f-ff%.2f-N%d" % (ww, ff, N))
-    plt.semilogx(T,U/N,'-', label='$N=%d$' % N)
+    plt.semilogx(T, U/N, '-', label='$N=%d$' % N)
 
 plt.xlabel('$kT/\epsilon$')
 plt.ylabel('$U/N\epsilon$')

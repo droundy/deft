@@ -29,31 +29,31 @@ data = yaml_data
 
 #parse the method name used.
 lst = data['method']
-method = str(lst).replace("{","").replace("}", "")
+method = str(lst).replace("{", "").replace("}", "")
 method = method.replace(':', ',').split(',')[0]
 method = method.replace("'", '')
-print 'the Monte-Carlo method is ', method
+print('the Monte-Carlo method is ', method)
 
 data['movies']['energy']
 minE = data['movies']['energy'].index(-Smax)
 maxE = data['movies']['energy'].index(-Smin)
 #print minE, maxE
-moves = data['movies']['time']
+#moves = data['movies']['time']
 
 dirname = 'data/%s-reference-lndos.dat' % (filename)
-print 'saving to', dirname
+print('saving to', dirname)
 
-well_width = data['system']['cell']['well_width']
-translation_scale = ['translation_scale']
+#well_width = data['system']['cell']['well_width']
+#translation_scale = ['translation_scale']
 if method == 'Sad':
     min_T = data['method'][method]['min_T']
     too_lo = data['method'][method]['too_lo']
     too_hi = data['method'][method]['too_hi']
-moves = data['moves']
-x = data['system']['cell']['box_diagonal']['x']
-y = data['system']['cell']['box_diagonal']['y']
-z = data['system']['cell']['box_diagonal']['z']
-gamma = data['movies']['gamma'][-1]
+#moves = data['moves']
+#x = data['system']['cell']['box_diagonal']['x']
+#y = data['system']['cell']['box_diagonal']['y']
+#z = data['system']['cell']['box_diagonal']['z']
+#gamma = data['movies']['gamma'][-1]
 
 # shouldn't need to restric range [maxE:minE+1][::-1]
 energy = data['movies']['energy'][maxE:minE+1][::-1]
@@ -93,4 +93,4 @@ np.savetxt(dirname,
           #newline = '# converged temperature: ',
           #newline = '# energy\t lndos\t ps\t lndos_tm: ',
           #newline = '\n version: created with yaml\n',
-          header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ps\t ' % (' '.join(sys.argv),max_entropy_state,min_important_energy))
+          header = 'comparison reference file\t(generated with python %s \n max_entropy_state: %i \n min_important_energy: %i \n energy\t lndos\t\t ps\t ' % (' '.join(sys.argv), max_entropy_state, min_important_energy))

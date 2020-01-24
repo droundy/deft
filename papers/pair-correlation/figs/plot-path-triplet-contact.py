@@ -35,7 +35,7 @@ rmax = 4
 ############################
 
 if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + " ff")
+    print(("Usage:  " + sys.argv[0] + " ff"))
     exit(1)
 ff = float(sys.argv[1])
 #arg ff = [0.3]
@@ -56,12 +56,12 @@ def read_triplet_path(ff, fun):
 
   data = loadtxt(filename)
   if fun == 'mc':
-    data[:,0]-=4.995
-  return data[:,0:4]
+    data[:, 0]-=4.995
+  return data[:, 0:4]
 
 def read_triplet_back(ff, fun):
   if fun == 'mc':
-    print 'bad read_triplet_back'
+    print('bad read_triplet_back')
     exit(1)
   else:
     # input: "figs/triplet-back-contact-fischer-%4.2f.dat" % (ff)
@@ -70,7 +70,7 @@ def read_triplet_back(ff, fun):
     # input: "figs/triplet-back-contact-this-work-mc-%4.2f.dat" % (ff)
     filename = "figs/triplet-back-contact-%s-%4.2f.dat" % (fun, ff)
     data = loadtxt(filename)
-  return data[:,0:4]
+  return data[:, 0:4]
 
 def read_triplet(ff, fun):
   if fun == 'mc':
@@ -129,7 +129,7 @@ twod_plot.set_ylim(-rmax, rmax)
 
 twod_plot.set_aspect('equal')
 g3mc = read_triplet(ff, 'mc')[:, int(center/dx):-1]
-rpoints = len(g3mc[:,0])
+rpoints = len(g3mc[:, 0])
 zpoints = len(g3mc[0,:])
 r = arange(0, rpoints*dx, dx)
 z = arange(center, center+zpoints*dx, dx)
@@ -142,7 +142,7 @@ xdft = loadtxt("figs/triplet-x.dat")
 
 levels = linspace(0, gmax, gmax*100)
 gr = read_gr(ff)
-ginf = interp(rpath, gr[:,0], gr[:,1]/ff)
+ginf = interp(rpath, gr[:, 0], gr[:, 1]/ff)
 xlo = 0.5*ginf/gmax
 xhi = 1.5*ginf/gmax
 xwhite = 1.0*ginf/gmax
@@ -159,28 +159,28 @@ cdict = {'red':   [(0.0,  0.0, 0.0),
                    (xlo,  1.0, 1.0),
                    (xwhite,  1.0, 1.0),
                    (xhi,  0.0, 0.0),
-                   (xhier,0.0, 0.0),
+                   (xhier, 0.0, 0.0),
                    (1.0,  1.0, 1.0)],
 
          'green': [(0.0, 0.0, 0.0),
                    (xlo,  0.1, 0.1),
                    (xwhite, 1.0, 1.0),
                    (xhi, 0.0, 0.0),
-                   (xhier,1.0, 1.0),
+                   (xhier, 1.0, 1.0),
                    (1.0, 1.0, 1.0)],
 
          'blue':  [(0.0,  0.0, 0.0),
                    (xlo,  0.1, 0.1),
                    (xwhite,  1.0, 1.0),
                    (xhi,  1.0, 1.0),
-                   (xhier,0.0, 0.0),
+                   (xhier, 0.0, 0.0),
                    (1.0,  0.0, 0.0)]}
 cmap = matplotlib.colors.LinearSegmentedColormap('mine', cdict)
 
 CS = twod_plot.pcolormesh(Z, R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.pcolormesh(-(Z-2*center), R, g3mc, vmax=gmax, vmin=0, cmap=cmap)
 twod_plot.pcolormesh(zdft, -xdft, g3dft, vmax=gmax, vmin=0, cmap=cmap)
-twod_plot.plot([zmin,zmax], [0,0], 'k-', linewidth=2)
+twod_plot.plot([zmin, zmax], [0, 0], 'k-', linewidth=2)
 
 twod_plot.text(-2.7, -3.9, styles.title['this-work-short'],
                path_effects=[matplotlib.patheffects.withStroke(linewidth=2, foreground="w")])
@@ -201,19 +201,19 @@ twod_plot.set_xlabel('$z/R$');
 # Here we plot the paths on the 2d plot.  The mc plot should align
 # with the dft one.
 g3_path = read_triplet_path(ff, 'mc')
-xmc = g3_path[:,3]
-zmc = g3_path[:,2]
+xmc = g3_path[:, 3]
+zmc = g3_path[:, 2]
 g3_path = read_triplet_path(ff, 'this-work-short')
-xdft = g3_path[:,3]
-zdft = g3_path[:,2]
+xdft = g3_path[:, 3]
+zdft = g3_path[:, 2]
 g3_back = read_triplet_back(ff, 'this-work-short')
-xback = g3_back[:,3]
-zback = g3_back[:,2]
-plot(zmc,xmc, 'w-', linewidth=3)
+xback = g3_back[:, 3]
+zback = g3_back[:, 2]
+plot(zmc, xmc, 'w-', linewidth=3)
 #plot(zdft,-xdft, 'w-', linewidth=3)
 #plot(zback,-xback, 'w-', linewidth=3)
 #plot(zdft,xdft, 'w-', linewidth=3)
-plot(zmc,xmc, styles.color['mc']+'--', linewidth=3)
+plot(zmc, xmc, styles.color['mc']+'--', linewidth=3)
 #plot(zdft,-xdft, colors[plots.index('this-work')]+'--', linewidth=3)
 #plot(zback[zback<zback.max()],-xback[zback<zback.max()],
 #     colors[plots.index('this-work')]+'--', linewidth=3)
@@ -225,7 +225,7 @@ def avg_points(x, y, dpath):
   new_y = array([])
   new_x = array([])
   old_i = 0
-  for i in xrange(1, len(x)):
+  for i in range(1, len(x)):
     dist = sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
     if dist >= dpath or i == len(x) - 1:
       avg_x = average(x[old_i:i])
@@ -241,14 +241,14 @@ suba = axes([.73, .59, .23, .28])
 for name in styles.plots:
   g3_path = read_triplet_path(ff, name)
   if able_to_read_file == False:
-    plot(arange(0,10,1), [0]*10, 'k')
+    plot(arange(0, 10, 1), [0]*10, 'k')
     suptitle('!!!!WARNING!!!!! There is data missing from this plot!', fontsize=25)
     savedfilename = "figs/pair-correlation-path-" + str(int(ff*10)) + ".pdf"
     savefig(savedfilename)
     exit(0)
-  x = g3_path[:,3]
-  z = g3_path[:,2]
-  g = g3_path[:,1]
+  x = g3_path[:, 3]
+  z = g3_path[:, 2]
+  g = g3_path[:, 1]
   zcontact = z.min()
   incontact = x**2 + (z-rpath)**2 < (rpath + .01)**2
 
@@ -290,7 +290,7 @@ for name in styles.plots:
   suba.set_ylim(sub_ylim)
   sub_xlim = (1.8, z_c.max())
   suba.set_xlim(sub_xlim)
-  for i in suba.spines.itervalues():
+  for i in suba.spines.values():
     i.set_linewidth(1)
   if 'this-work' in name: # only want to draw rectangle once
     zplot.add_patch(Rectangle((sub_xlim[0], sub_ylim[0]),
@@ -304,7 +304,7 @@ zplot.axvline(x=2*rpath, color='k')
 def get_closest(x, y, xref, space):
   xnew = zeros_like(xref)
   ynew = zeros_like(xref)
-  for i in xrange(len(xnew)):
+  for i in range(len(xnew)):
     cond = abs((x - xref[i]) - space) == abs((x - xref[i]) - space).min()
     xnew[i] = x[cond][0]
     ynew[i] = y[cond][0]
@@ -321,9 +321,9 @@ z_ref = arange(rpath/2 + 0.1 + spacing/2, 6+spacing, spacing)
 for name in styles.oriented_plots:
   # backward lines
   g3_path = read_triplet_back(ff, name)
-  x = g3_path[:,3]
-  z = g3_path[:,2]
-  g = g3_path[:,1]
+  x = g3_path[:, 3]
+  z = g3_path[:, 2]
+  g = g3_path[:, 1]
   zcontact = z.max()
   z = zcontact + (zcontact - z)
 
@@ -350,9 +350,9 @@ for name in styles.oriented_plots:
 for name in styles.oriented_plots:
   # forward arrows
   g3_path = read_triplet_path(ff, name)
-  x = g3_path[:,3]
-  z = g3_path[:,2]
-  g = g3_path[:,1]
+  x = g3_path[:, 3]
+  z = g3_path[:, 2]
+  g = g3_path[:, 1]
   zcontact = z.min()
 
   g_x = g[z==zcontact]
@@ -378,9 +378,9 @@ for name in styles.oriented_plots:
 for name in styles.oriented_plots:
   # backward arrows
   g3_path = read_triplet_back(ff, name)
-  x = g3_path[:,3]
-  z = g3_path[:,2]
-  g = g3_path[:,1]
+  x = g3_path[:, 3]
+  z = g3_path[:, 2]
+  g = g3_path[:, 1]
   zcontact = z.max()
   z = zcontact + (zcontact - z)
 
@@ -433,9 +433,9 @@ zplot.set_xticklabels(["$A$", "$B$", "$C$", "$D$", "$E$"])
 hw = 4 # headwidth of arrows
 
 g3nice = read_triplet_path(ff, 'this-work-short')
-znice = g3nice[:,2]
-xnice = g3nice[:,3]
-gnice = g3nice[:,1]
+znice = g3nice[:, 2]
+xnice = g3nice[:, 3]
+gnice = g3nice[:, 1]
 znicecontact = znice.min()
 def g3pathfunction_x(x):
     return interp(x, xnice[znice == znicecontact], gnice[znice == znicecontact])
@@ -445,19 +445,19 @@ def g3pathfunction_z(z):
 # Annotations on 2d plot
 texteff = [matplotlib.patheffects.withStroke(linewidth=2, foreground="w")]
 arroweff = [matplotlib.patheffects.withStroke(linewidth=3, foreground="w")]
-twod_plot.annotate('A', xy=(Az, Ax), xytext=(0.2,3),
+twod_plot.annotate('A', xy=(Az, Ax), xytext=(0.2, 3),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-twod_plot.annotate('B', xy=(Bz, Bx), xytext=(rpath,3),
+twod_plot.annotate('B', xy=(Bz, Bx), xytext=(rpath, 3),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-twod_plot.annotate('C', xy=(Cz, Cx), xytext=(4.3,2.5),
+twod_plot.annotate('C', xy=(Cz, Cx), xytext=(4.3, 2.5),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-twod_plot.annotate('D', xy=(Dz, Dx), xytext=(5,1),
+twod_plot.annotate('D', xy=(Dz, Dx), xytext=(5, 1),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
-twod_plot.annotate('E', xy=(Ez, Ex), xytext=(6,1),
+twod_plot.annotate('E', xy=(Ez, Ex), xytext=(6, 1),
          path_effects=texteff,
          arrowprops=dict(shrink=0.01, width=1, headwidth=hw, path_effects=arroweff))
 

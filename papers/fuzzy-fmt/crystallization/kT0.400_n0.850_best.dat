@@ -1,3 +1,3 @@
-# git version: 0.0.0-2324-gba2e6d353-dirty
-#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor
-0.4	0.85	0	0.14	-2.82044	-2.78964		0.0307994		1.67577		1	0.5	0.001	1	-2.39737	-2.37119	5	50000
+# git version: 0.0.0-2435-g03d8d87ac
+#kT	n	fv	gwidth	hFE/atom	best_cFE/atom	best_FEdiff/atom	best_lat_const	Nsph	dx	mcerror	mcseed	hFE/volume	best_cFE/volume	mcconstant	mcprefactor	tensor
+0.4	0.85	0	0.37	-2.82044	-2.82455		-0.00411501		1.67577		1	0.5	0.001	1	-2.39737	-2.40087	5	50000	0

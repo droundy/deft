@@ -46,7 +46,7 @@ first_temperature = [True, True, True]
 methods = ['-tmi', '-toe', '-tmmc', ]
 for i in range(len(methods)):
     method = methods[i]
-    fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww,ff,lenx,lenyz,method)
+    fbase = 'data/lv/ww%.2f-ff%.2f-%gx%g%s' % (ww, ff, lenx, lenyz, method)
     fname = fbase + '-density.dat'
     try:
         minT = readandcompute.minT(fname)
@@ -80,6 +80,6 @@ plt.ylabel(r'$\eta$')
 plt.legend(loc='best')
 plt.title(r'$\eta(z)$ with $\lambda = %g$ and $\eta=%g$' % (ww, ff))
 
-plt.savefig('figs/liquid-vapor-ww%.2f-ff%.2f-%gx%g.pdf' % (ww,ff,lenx,lenyz))
+plt.savefig('figs/liquid-vapor-ww%.2f-ff%.2f-%gx%g.pdf' % (ww, ff, lenx, lenyz))
 
 plt.show()

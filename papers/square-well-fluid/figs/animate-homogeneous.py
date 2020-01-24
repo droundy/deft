@@ -28,8 +28,8 @@ minhist = 1e100
 maxhist = -1e100
 numframes = 0
 
-for frame in xrange(100000):
-    basename = 'data/mc/ww%.2f-ff%.2f-N%d-movie/%06d' % (ww,ff,N,frame)
+for frame in range(100000):
+    basename = 'data/mc/ww%.2f-ff%.2f-N%d-movie/%06d' % (ww, ff, N, frame)
     try:
         e, hist = readandcompute.e_and_total_init_histogram(basename)
     except:
@@ -40,20 +40,20 @@ for frame in xrange(100000):
     minhist = min(minhist, hist.min())
     maxhist = max(maxhist, hist.max())
 
-print 'mine', mine
-print 'maxe', maxe
-print 'minhist', minhist
-print 'maxhist', maxhist
-print 'numframes', numframes
+print('mine', mine)
+print('maxe', maxe)
+print('minhist', minhist)
+print('maxhist', maxhist)
+print('numframes', numframes)
 
 min_T = None
 
-for frame in xrange(numframes):
+for frame in range(numframes):
     if frame % 10 == 0:
-        print 'working on frame %d/%d' % (frame, numframes)
+        print('working on frame %d/%d' % (frame, numframes))
     plt.cla()
 
-    basename = 'data/mc/ww%.2f-ff%.2f-N%d-movie/%06d' % (ww,ff,N,frame)
+    basename = 'data/mc/ww%.2f-ff%.2f-N%d-movie/%06d' % (ww, ff, N, frame)
     old_min_T = min_T
     min_T = readandcompute.minT_from_transitions(basename)
     # e, diff = readandcompute.e_diffusion_estimate(basename)
@@ -75,7 +75,7 @@ for frame in xrange(numframes):
 
     e, init_hist = readandcompute.e_and_total_init_histogram(basename)
     if min_T != old_min_T:
-        print 'min_T goes from', old_min_T, 'to', min_T
+        print('min_T goes from', old_min_T, 'to', min_T)
         baseline_init_hist = init_hist
         baseline_e = e
     ax.plot(e, init_hist, 'b-',
@@ -85,7 +85,7 @@ for frame in xrange(numframes):
     # So we look up the element with the corresponding energy.
     if len(e) != len(baseline_e):
         newstuff = 1.0*init_hist
-        for i in xrange(len(e)):
+        for i in range(len(e)):
             theindex = numpy.nonzero(baseline_e == e[i])[0]
             if len(theindex) > 0:
                 newstuff[i] -= baseline_init_hist[theindex[0]]
@@ -105,4 +105,4 @@ for frame in xrange(numframes):
     plt.savefig(fname)
 
 os.system("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
-print("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir)) # make the movie
+print(("avconv -y -r 10 -i %s/frame%%06d.png -b 1000k %s/movie.mp4" % (moviedir, moviedir))) # make the movie

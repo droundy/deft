@@ -8,7 +8,7 @@ if len(sys.argv) < 2 or sys.argv[1] != "show":
 import sympy
 from scipy.optimize import leastsq
 from sympy import pi, exp
-import pylab, string, numpy
+import pylab, numpy
 
 from matplotlib import rc
 
@@ -86,7 +86,7 @@ f.write(latex_code)
 f.close()
 
 
-for i in xrange(len(expr)):
+for i in range(len(expr)):
   latex_code += '\\begin{dmath}\n' + sympy.latex(sympy.Eq(v[l[i]], expr[i]())) + '\n\\end{dmath}\n'
 
 # the expression for h_sigma is not included in the above list,
@@ -95,7 +95,7 @@ latex_code += '\\begin{dmath}\n' + sympy.latex(sympy.Eq(v['h_sigma'], h_sigma_ex
 
 # this loop unwraps the onion, getting ghs in terms of only the 3 kappas, h_sigma, and r
 # we will wait on substituting h_sigma as a function of eta, though
-for i in reversed(xrange(len(expr))):
+for i in reversed(range(len(expr))):
   if l[i] == 'eta':
     eta_i = i
   else:
@@ -107,18 +107,18 @@ for i in reversed(xrange(len(expr))):
 ghs_s = expr[0]()
 
 # Let us now verify that our contraints are met:
-print "checking conditions on g(r):"
+print("checking conditions on g(r):")
 
 # --- g(sigma) == g_sigma?
 gsigma = ghs_s.subs('r', sigma)
 cor = 'correct' if gsigma == v['h_sigma'] + 1 else 'INCORRECT'
-print '\tValue at contact is ' + cor + ': g(sigma) =', gsigma
+print('\tValue at contact is ' + cor + ': g(sigma) =', gsigma)
 latex_code += '\\begin{dmath}\n' + 'g(\sigma) = ' + sympy.latex(gsigma) + '\n\\end{dmath}\n'
 
 # --- g'(sigma) == -h_sigma*g_sigma?
 gprimesigma = ghs_s.diff('r').subs(v['r'], sigma).simplify()
 cor = 'correct' if gprimesigma == -v['h_sigma']*(v['h_sigma'] + 1) else 'INCORRECT'
-print '\tSlope at contact is ' + cor + ': g\'(sigma) =', gprimesigma
+print('\tSlope at contact is ' + cor + ': g\'(sigma) =', gprimesigma)
 latex_code += '\\begin{dmath}\n' + 'g\'(\sigma) = ' + sympy.latex(gprimesigma) + '\n\\end{dmath}\n'
 
 # --- 1 + n*int h(r)d^3r = nkT\chi_T
@@ -128,7 +128,7 @@ latex_code += '\\begin{dmath}\n' + 'g\'(\sigma) = ' + sympy.latex(gprimesigma) +
 # now let's substitute in eta:
 v['eta'] = eta_expr
 ghs_s = ghs_s.subs('eta', v['eta']).subs('g_sigma', v['g_sigma'])
-print '**********************\nghs_s is', ghs_s
+print('**********************\nghs_s is', ghs_s)
 
 #################################################################################################
 
@@ -144,14 +144,14 @@ def read_ghs(base, ff):
   global able_to_read_file
   mcdatafilename = "%s-%4.2f.dat" % (base, ff)
   if (os.path.isfile(mcdatafilename) == False):
-    print "File does not exist: ", mcdatafilename
+    print("File does not exist: ", mcdatafilename)
     able_to_read_file = False
     return 0, 0
 
   mcdata = numpy.loadtxt(mcdatafilename)
-  print 'Using', mcdatafilename, 'for filling fraction', ff
-  r_mc = mcdata[:,0]
-  n_mc = mcdata[:,1]
+  print('Using', mcdatafilename, 'for filling fraction', ff)
+  r_mc = mcdata[:, 0]
+  n_mc = mcdata[:, 1]
   ghs = n_mc/ff
   return r_mc, ghs
 
@@ -167,7 +167,7 @@ able_to_read_file = True
 ghs = [0]*len(ff)
 eta = [0]*len(ff)
 
-pylab.figure(1, figsize=(5,4))
+pylab.figure(1, figsize=(5, 4))
 pylab.axvline(x=sigma, color='k', linestyle=':')
 pylab.axhline(y=1, color='k', linestyle=':')
 
@@ -176,7 +176,7 @@ for i in range(len(ff)):
     if able_to_read_file == False:
         break
     pylab.figure(1)
-    pylab.plot(r_mc, ghs[i], colors[i]+"-",label='$\eta = %.1f$'%ff[i])
+    pylab.plot(r_mc, ghs[i], colors[i]+"-", label='$\eta = %.1f$'%ff[i])
     eta[i] = ff[i]
     r = r_mc
 
@@ -198,7 +198,7 @@ def dist2(x):
                               len(eta)*len(r[r<fit_rcutoff]))
 
 ghsconcatenated = ghs[0]
-for i in range(1,len(ff)):
+for i in range(1, len(ff)):
   ghsconcatenated = pylab.concatenate((ghsconcatenated, ghs[i]))
 
 etaconcatenated = [0]*len(r)*len(eta)
@@ -222,17 +222,17 @@ while (j < len(eta)):
 vals = pylab.zeros_like(x)
 
 chi2 = sum(dist2(x)**2)
-print "beginning least squares fit, chi^2 initial: %g" %chi2
+print("beginning least squares fit, chi^2 initial: %g" %chi2)
 vals, mesg = leastsq(dist2, x)
 # round fitted numbers
 digits = 2
 vals = pylab.around(vals, digits)
 chi2 = sum(dist2(vals)**2)
-print "original fit complete, chi^2: %g" % chi2
+print("original fit complete, chi^2: %g" % chi2)
 
 toprint = True
 for i in range(len(x)):
-  print "vals[%i]: %.*f\t x[%i]: %g" %(i, digits, vals[i], i, x[i])
+  print("vals[%i]: %.*f\t x[%i]: %g" %(i, digits, vals[i], i, x[i]))
 
 g = dist(vals)
 gdifference = dist2(vals)
@@ -241,7 +241,7 @@ chisq = (gdifference**2).sum()
 maxerr = abs(gdifference).max()
 etamaxerr = 0
 rmaxerr = 0
-for i in xrange(len(gdifference)):
+for i in range(len(gdifference)):
   if abs(gdifference[i]) == maxerr:
     etamaxerr = etaconcatenated[i]
     rmaxerr = rconcatenated[i]
@@ -252,7 +252,7 @@ K2 = vals[2]
 def next_comma(ccode):
   """ returns next comma not counting commas within parentheses """
   deepness = 0
-  for i in xrange(len(ccode)):
+  for i in range(len(ccode)):
     if ccode[i] == ')':
       if deepness == 0:
         return -1
@@ -266,7 +266,7 @@ def next_comma(ccode):
 def next_right_paren(ccode):
   """ returns next ")" not counting matching parentheses """
   deepness = 0
-  for i in xrange(len(ccode)):
+  for i in range(len(ccode)):
     if ccode[i] == ')':
       if deepness == 0:
         return i
@@ -280,7 +280,7 @@ def fix_pows(ccode):
   It turns out not to make a difference in the speed of walls.mkdat,
   but I'm leaving it in, becuase this way we can easily check if this
   makes a difference (since I thought that it might). """
-  n = string.find(ccode, 'pow(')
+  n = ccode.find('pow(')
   if n > 0:
     return ccode[:n] + fix_pows(ccode[n:])
   if n == -1:
@@ -393,7 +393,7 @@ def avg_points(x, y, dpath):
   new_y = numpy.array([])
   new_x = numpy.array([])
   old_i = 0
-  for i in xrange(1, len(x)):
+  for i in range(1, len(x)):
     dist = numpy.sqrt((x[i] - x[old_i])**2 + (y[i] - y[old_i])**2)
     if dist >= dpath or i == len(x) - 1:
       avg_x = numpy.average(x[old_i:i])
@@ -405,7 +405,7 @@ def avg_points(x, y, dpath):
   return (new_x, new_y)
 
 
-fig2 = pylab.figure(2, figsize=(6,6))
+fig2 = pylab.figure(2, figsize=(6, 6))
 ax1 = fig2.add_subplot(411)
 ax2 = fig2.add_subplot(412)
 ax3 = fig2.add_subplot(413)
@@ -465,7 +465,7 @@ for i in range(len(ff)):
   integrand_ours = 4*pi*r_mc*r_mc*g[i*len(r):(i+1)*len(r)]
   integral_mc = sum(integrand_mc)/len(integrand_mc)*(r_mc[2]-r_mc[1]) - 4/3*pi*sigma**3
   integral_ours = sum(integrand_ours)/len(integrand_ours)*(r_mc[2]-r_mc[1]) - 4/3*pi*sigma**3
-  print("Int_mc: %6.3f, Int_ours: %6.3f, Diff: %6.3f" %(integral_mc, integral_ours, integral_ours-integral_mc))
+  print(("Int_mc: %6.3f, Int_ours: %6.3f, Diff: %6.3f" %(integral_mc, integral_ours, integral_ours-integral_mc)))
 
 
 
@@ -474,7 +474,7 @@ for i in range(len(ff)):
 
 
 pylab.figure(1)
-pylab.xlim(0,6.5)
+pylab.xlim(0, 6.5)
 pylab.ylim(0., 3.5)
 pylab.xlabel(r"$r/R$")
 pylab.ylabel("$g(r)$")

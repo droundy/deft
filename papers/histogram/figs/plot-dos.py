@@ -6,7 +6,7 @@ import numpy
 import styles
 
 if len(sys.argv) != 6:
-    print 'useage: %s ww ff N methods seed' % sys.argv[0]
+    print('useage: %s ww ff N methods seed' % sys.argv[0])
     exit(1)
 
 ww = float(sys.argv[1])
@@ -16,7 +16,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = int(sys.argv[3])
-#arg N = range(5,21)+[100, 200, 1000]
+#arg N = list(range(5,21))+[100, 200, 1000]
 
 methods = eval(sys.argv[4])
 #arg methods = [["nw","wang_landau","simple_flat","tmmc","oetmmc"]]
@@ -32,20 +32,20 @@ for method in methods:
                            % (seed, ww, ff, N, method))
     lnw = numpy.loadtxt("data/s%03d/periodic-ww%04.2f-ff%04.2f-N%i-%s-lnw.dat"
                         % (seed, ww, ff, N, method))
-    energy = -e_hist[:,0]/N
-    log10w = lnw[e_hist[:,0].astype(int),1]*numpy.log10(numpy.exp(1))
-    log10_dos = numpy.log10(e_hist[:,1]) - log10w
+    energy = -e_hist[:, 0]/N
+    log10w = lnw[e_hist[:, 0].astype(int), 1]*numpy.log10(numpy.exp(1))
+    log10_dos = numpy.log10(e_hist[:, 1]) - log10w
     log10_dos -= log10_dos.max()
     if log10_dos.min() < minlog:
         minlog = log10_dos.min()
     plt.figure('dos')
-    plt.plot(energy, log10_dos, styles.dots(method),label=styles.title(method))
+    plt.plot(energy, log10_dos, styles.dots(method), label=styles.title(method))
 
     log10w += log10w.min()
     if log10w.min() < minlog:
         minlog = log10w.min()
     plt.figure('w')
-    plt.plot(energy, -log10w, styles.dots(method),label=styles.title(method))
+    plt.plot(energy, -log10w, styles.dots(method), label=styles.title(method))
 
 
 def tentothe(n):

@@ -14,8 +14,8 @@ methods = [ '-sad3', '-sad3-s1', '-sad3-s2',
             '-tmmc', '-tmi', '-tmi2', '-tmi3', '-toe', '-toe2', '-toe3',
             '-vanilla_wang_landau', '-sad']
 if 'allmethods' not in sys.argv:
-    methods = ['-sad3','-sad3-s2','-sad3-s5','-sad3-s6','-tmmc', '-vanilla_wang_landau', '-vanilla_wang_landau-minE','-vanilla_wang_landau-s2', '-sad3-test','-sad3-T13','-one_over_t_wang_landau-T13-t',
-               '-vanilla_wang_landau-T13','-vanilla_wang_landau-T13-slow','-n256-tmmc']
+    methods = ['-sad3', '-sad3-s2', '-sad3-s5', '-sad3-s6', '-tmmc', '-vanilla_wang_landau', '-vanilla_wang_landau-minE', '-vanilla_wang_landau-s2', '-sad3-test', '-sad3-T13', '-one_over_t_wang_landau-T13-t',
+               '-vanilla_wang_landau-T13', '-vanilla_wang_landau-T13-slow', '-n256-tmmc']
 fast_methods = [m+'-fast' for m in methods]
 slow_methods = [m+'-slow' for m in methods]
 methods = methods + fast_methods + slow_methods
@@ -39,7 +39,7 @@ split4 = [i.split('-m', 1)[0] for i in split3]
 for j in range(len(split4)):
     methods.append('-%s' %split4[j])
 
-print methods
+print(methods)
 
 ref = reference
 if ref[:len('data/')] != 'data/':
@@ -47,17 +47,17 @@ if ref[:len('data/')] != 'data/':
 maxref = int(readnew.max_entropy_state(ref))
 minref = int(readnew.min_important_energy(ref))
 n_energies = int(minref - maxref+1)
-print maxref, minref
+print(maxref, minref)
 try:
     eref, lndosref, Nrt_ref = readnew.e_lndos_ps(ref)
 except:
     eref, lndosref = readnew.e_lndos(ref)
 
 for method in methods:
-    dirname = 'data/comparison/%s%s' % (filebase,method)
-    dirnametm = 'data/comparison/%s%s-tm' % (filebase,method)
+    dirname = 'data/comparison/%s%s' % (filebase, method)
+    dirnametm = 'data/comparison/%s%s-tm' % (filebase, method)
     try:
-        r = glob('data/%s%s-movie/*lndos.dat' % (filebase,method))
+        r = glob('data/%s%s-movie/*lndos.dat' % (filebase, method))
         if len(r)==0:
             # print(" ... but it has no data in data/%s%s-movie/*lndos.dat" % (filebase,method))
             continue
@@ -78,8 +78,8 @@ for method in methods:
         errorinentropytm = numpy.zeros(len(r))
         maxerrortm = numpy.zeros(len(r))
 
-        for i,f in enumerate(sorted(r)):
-            e,lndos,Nrt,lndostm = readnew.e_lndos_ps_lndostm(f)
+        for i, f in enumerate(sorted(r)):
+            e, lndos, Nrt, lndostm = readnew.e_lndos_ps_lndostm(f)
             maxentropystate[i] = readnew.max_entropy_state(f)
             minimportantenergy[i] = readnew.min_important_energy(f)
 
@@ -149,7 +149,7 @@ for method in methods:
         errorinentropytm = errorinentropytm[:num_frames_to_count]
         maxerrortm = maxerrortm[:num_frames_to_count]
 
-        print 'saving to', dirname
+        print('saving to', dirname)
         numpy.savetxt('%s/energy-%d.txt' %(dirname, energy),
                       numpy.c_[Nrt_at_energy, erroratenergy],
                       fmt = ('%.4g'),
@@ -167,7 +167,7 @@ for method in methods:
                         #header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
 
         if lndostm is not None:
-            print 'saving to', dirnametm
+            print('saving to', dirnametm)
             numpy.savetxt('%s/energy-%d.txt' %(dirnametm, energy),
                         numpy.c_[Nrt_at_energy, erroratenergytm],
                         fmt = ('%.4g'),
@@ -184,5 +184,5 @@ for method in methods:
                         #delimiter = '\t',
                         #header = 'iterations\t wl_factor\t(generated with python %s' % ' '.join(sys.argv))
     except:
-        print 'I had trouble with', method
+        print('I had trouble with', method)
         raise

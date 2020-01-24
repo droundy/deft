@@ -8,7 +8,7 @@ import numpy as np
 # Date: January 2014
 
 # very simple
-def simple(func,a,b):
+def simple(func, a, b):
     # func should be a function of x
 
     # initialization
@@ -18,13 +18,13 @@ def simple(func,a,b):
     dx = 1e-3
 
     # integrate
-    for x in np.arange(a,b,dx):
+    for x in np.arange(a, b, dx):
         integral += func(x)*dx
 
     return integral
 
 # Trapezoidal rule
-def trapezoid(func,a,b,n):
+def trapezoid(func, a, b, n):
     '''func is a function of x
     [a,b] are the limits of integration
     n is the number of segments desired'''
@@ -32,26 +32,26 @@ def trapezoid(func,a,b,n):
     h = (b-a)/n
     s = func(a) + func(b)
 
-    for k in range (1,n,1):
+    for k in range (1, n, 1):
         s += 2*func(a + k*h)
 
     return h/2*s
 
 
 # Midpoint rule
-def midpoint(func,a,b,n):
+def midpoint(func, a, b, n):
     ''' func is a function of x
     [a,b] are the limits of integration
     n is the number of segments desired '''
     dx = (b-a)/n
     s = 0
-    for i in xrange(n):
+    for i in range(n):
         s += func(dx*(i + .5))
     return s*dx
 
 
 # Simpson's rule
-def simpson(func,a,b,n):
+def simpson(func, a, b, n):
     '''func is a function of x
     [a,b] are the limits of integration
     n is the number of segments desired
@@ -60,7 +60,7 @@ def simpson(func,a,b,n):
     h = (b - a)/n
     s = func(a) + func(b)
 
-    for i in range (1,int(n/2),1):
+    for i in range (1, int(n/2), 1):
         s += func(a + (2*i-2)*h) + 4*func(a + (2*i-1)*h) + func(a + 2*i*h)
 
     return h/3*s
@@ -71,7 +71,7 @@ def testfunc(x):
 def testfunc_antideriv(x):
     return np.exp(x)
 
-def anal(func,a,b):
+def anal(func, a, b):
     return testfunc(b) - testfunc(a)
 
 # n = 1000

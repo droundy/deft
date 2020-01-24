@@ -5,10 +5,8 @@ import os
 repos = ['/home/droundy/git/deft.git',
          '/home/jordan/deft',
          '/home/kirstie/git/deft.git',
-         '/home/lincoln/deft',
-         '/home/tysonf/git/deft.git',
-         '/home/cadetrotter/git/deft',
-         '/home/cadetrotter/deft']
+         '/home/kirstie/deft',
+]
 
 for repo in repos:
     os.system('git pull {} :'.format(repo))

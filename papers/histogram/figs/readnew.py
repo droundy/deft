@@ -5,31 +5,31 @@ import numpy
 def e_hist(fbase):
     try:
         trans = numpy.loadtxt(fbase +"-transitions.dat", dtype=numpy.float)
-        energy = -trans[:,0]
-        trans = trans[:,1:]
+        energy = -trans[:, 0]
+        trans = trans[:, 1:]
         hist = numpy.sum(trans, axis=1)
     except:
         # energy histogram file; indexed by [-energy,counts]
         e_hist = numpy.loadtxt(fbase+"-E.dat", ndmin=2, dtype=numpy.float)
-        energy = -e_hist[:,0] # array of energies
-        hist = e_hist[:,1]
+        energy = -e_hist[:, 0] # array of energies
+        hist = e_hist[:, 1]
     return energy, hist
 
 def e_lndos(f):
     if '.dat' not in f:
         f = f+"-lndos.dat"
     e_lndos = numpy.loadtxt(f, ndmin=2, dtype=numpy.float)
-    energy = -e_lndos[:,0] # array of energies
-    lndos = e_lndos[:,1]
+    energy = -e_lndos[:, 0] # array of energies
+    lndos = e_lndos[:, 1]
     return energy, lndos
 
 def e_lndos_ps(fbase):
     if '.dat' not in fbase:
         fbase = fbase + "-lndos.dat"
     e_lndos_ps = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
-    energy = -e_lndos_ps[:,0]
-    lndos = e_lndos_ps[:,1]
-    ps = e_lndos_ps[:,2] # pessimistic samples
+    energy = -e_lndos_ps[:, 0]
+    lndos = e_lndos_ps[:, 1]
+    ps = e_lndos_ps[:, 2] # pessimistic samples
 
     return energy, lndos, ps
 
@@ -37,31 +37,31 @@ def e_lndos_ps_lndostm(fbase):
     if '.dat' not in fbase:
         fbase = fbase + "-lndos.dat"
     e_lndos_ps = numpy.loadtxt(fbase, ndmin=2, dtype=numpy.float)
-    energy = -e_lndos_ps[:,0]
-    lndos = e_lndos_ps[:,1]
-    ps = e_lndos_ps[:,2] # pessimistic samples
+    energy = -e_lndos_ps[:, 0]
+    lndos = e_lndos_ps[:, 1]
+    ps = e_lndos_ps[:, 2] # pessimistic samples
     lndostm = None
     if len(e_lndos_ps[0,:]) >= 4:
-        lndostm = e_lndos_ps[:,3]
+        lndostm = e_lndos_ps[:, 3]
 
     return energy, lndos, ps, lndostm
 
 def e_lnw(fbase):
     e_lnw = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2, dtype=numpy.float)
 
-    energy = -e_lnw[:,0] # array of energies
-    lnw = e_lnw[:,1]
+    energy = -e_lnw[:, 0] # array of energies
+    lnw = e_lnw[:, 1]
     return energy, lnw
 
 def T_u_cv_s_minT(fbase):
     max_T = 20.0
     T_bins = 1e3
     dT = max_T/T_bins
-    T_range = numpy.arange(dT,max_T,dT)
+    T_range = numpy.arange(dT, max_T, dT)
     
     # Now compute (or just read in) the lndos and the energies
     try:
-        energy,ln_dos = e_lndos(fbase)
+        energy, ln_dos = e_lndos(fbase)
         min_T = minT(fbase+'-lndos.dat')
     except:
         min_T = minT(fbase)
@@ -70,9 +70,9 @@ def T_u_cv_s_minT(fbase):
         # weight file; indexed by [-energy,ln(weight)]
         lnw_hist = numpy.loadtxt(fbase+"-lnw.dat", ndmin=2)
 
-        energy = -e_hist[:,0] # array of energies
-        lnw = lnw_hist[e_hist[:,0].astype(int),1] # look up the lnw for each actual energy
-        ln_dos = numpy.log(e_hist[:,1]) - lnw
+        energy = -e_hist[:, 0] # array of energies
+        lnw = lnw_hist[e_hist[:, 0].astype(int), 1] # look up the lnw for each actual energy
+        ln_dos = numpy.log(e_hist[:, 1]) - lnw
 
     Z = numpy.zeros(len(T_range)) # partition function
     U = numpy.zeros(len(T_range)) # internal energy
@@ -141,7 +141,7 @@ def converged_state(f):
         for line in file:
             if "converged state:" in line:
                 return int(line.split()[-1])
-    print('ERROR FINDING converged_state in', f)
+    print(('ERROR FINDING converged_state in', f))
 
 def iterations(f):
     if '.dat' not in f:
@@ -222,12 +222,12 @@ def max_entropy_state(f):
 
 def g_r(fbase, T):
     data = numpy.loadtxt(fbase+"-g.dat", ndmin=2)
-    ghist = data[1:,3:]
+    ghist = data[1:, 3:]
     dr = dr_g(fbase)
-    r_1d = data[0,3:]
-    E_1d = data[1:,0]
-    hist_1d = data[1:,1]
-    lnw_1d = data[1:,2]
+    r_1d = data[0, 3:]
+    E_1d = data[1:, 0]
+    hist_1d = data[1:, 1]
+    lnw_1d = data[1:, 2]
     n_E = len(E_1d)
     n_r = len(r_1d)
     r, E = numpy.meshgrid(r_1d, E_1d)
@@ -243,9 +243,9 @@ def g_r(fbase, T):
 
     # now let's normalize the density of states
     for i in range(n_r):
-        dos_boltz[:,i] /= sum(dos_boltz[:,i])
+        dos_boltz[:, i] /= sum(dos_boltz[:, i])
 
-    dr = r[0,1] - r[0,0]
+    dr = r[0, 1] - r[0, 0]
     dV = (4/3)*numpy.pi*((r+dr/2)**3 - (r-dr/2)**3)
     ff = read_ff(fbase)
     n = ff/(4/3*numpy.pi)
@@ -256,9 +256,9 @@ def g_r(fbase, T):
 
     counts = 0
     for i in range(n_E):
-        if hist[i,0]:
+        if hist[i, 0]:
             g += dos_boltz[i,:]*g_of_E[i,:]
-            counts += dos_boltz[i,0]*hist[i,0]
+            counts += dos_boltz[i, 0]*hist[i, 0]
             # if dos_boltz[i,0] > 0.0001:
             #     print 'hist %d at energy %d with weight %g' % (hist[i,0], E[i,0], dos_boltz[i,0])
 
@@ -271,11 +271,11 @@ def density_x(fdensity, T):
         fdensity = fdensity+"-density.dat"
     #fdensity = fbase+"-density.dat"
     data = numpy.loadtxt(fdensity)
-    denshist = data[1:,2:]
-    x_1d = data[0,2:]
+    denshist = data[1:, 2:]
+    x_1d = data[0, 2:]
     dx = x_1d[1] - x_1d[0]
-    E_1d = data[1:,0]
-    ln_dos_1d = data[1:,1]
+    E_1d = data[1:, 0]
+    ln_dos_1d = data[1:, 1]
     hist_1d = numpy.zeros_like(ln_dos_1d)
     n_E = len(E_1d)
     n_x = len(x_1d)
@@ -319,30 +319,30 @@ def e_de_transitions(basename):
                 de = numpy.array([ -float(val) for val in line.split()[2:] ])
                 break
     N = read_N(basename)
-    e = -trans[:,0]/N
+    e = -trans[:, 0]/N
     de /= -N
-    trans = trans[:,1:]
+    trans = trans[:, 1:]
     for i in range(len(e)):
         trans[i,:] /= sum(trans[i,:])
-    e,de = numpy.meshgrid(e, de)
+    e, de = numpy.meshgrid(e, de)
     return e, de, trans
 
 def total_init_iterations(basename):
     trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
-    trans = trans[:,1:]
+    trans = trans[:, 1:]
     return numpy.sum(trans)/read_N(basename)
 
 def e_and_total_init_histogram(basename):
     trans = numpy.loadtxt(basename+"-transitions.dat", dtype=numpy.float)
     N = read_N(basename)
-    e = -trans[:,0]
-    trans = trans[:,1:]
+    e = -trans[:, 0]
+    trans = trans[:, 1:]
     return e, numpy.sum(trans, axis=1)
 
 def e_diffusion_estimate(basename):
     e, de, trans = e_de_transitions(basename)
     e = e[0,:]
-    de = de[:,0]
+    de = de[:, 0]
     diffusion = numpy.zeros_like(e)
     for i in range(len(e)):
         meane = sum(de*trans[i,:])/len(de)

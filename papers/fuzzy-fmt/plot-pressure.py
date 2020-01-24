@@ -7,7 +7,7 @@
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-pressure.py --kT [temp] [OPTIONAL: --tensor  --noplotshow]
+#with comand ./plot-pressure.py directory(with data files) --kT [temp] [OPTIONAL: --tensor  --noplotshow]
 
 from __future__ import print_function, division
 
@@ -21,6 +21,9 @@ parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, 
 
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
+
+parser.add_argument('directory', metavar='directory', type=str,
+                    help='directory with data to plot') 
 
 parser.add_argument('--tensor', action='store_true',
                     help='use data with tensor weight')
@@ -39,8 +42,11 @@ cfe = []
 
 if args.tensor :
     files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
+    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))  
 else :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
+    #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
+    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
+    files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
 
 for f in files:
     data = np.loadtxt(f)
@@ -128,9 +134,9 @@ def find_first_intersection(p1, g1, p2, g2):
                         return P_inter, g_inter
 
 p_inter, g_inter = find_first_intersection(hpressure, mid_h_gibbs, cpressure, mid_c_gibbs)
-plt.plot(p_inter, g_inter - p_inter*zoom_volume, 'o', markersize=10, color='orange')
+plt.plot(p_inter, g_inter - p_inter*zoom_volume, 'o', color='turquoise', markersize=10)
 pf_inter, gf_inter = find_first_intersection(hpressure, mid_h_gibbs, fit_p, fit_c_gibbs)
-plt.plot(pf_inter, gf_inter - pf_inter*zoom_volume, 'o', markersize=10, color='purple')
+plt.plot(pf_inter, gf_inter - pf_inter*zoom_volume, 'o', color='orange', markersize=10)
 
 #Find homogeneous and crystal densities at p_inter
 def find_densities(p_inter, pressure, invn):
@@ -159,8 +165,8 @@ plt.figure()
 
 
 # Plot Pressure vs 1/Reduced Density with point of intersection 
-plt.plot(invnh, p_inter, 'o', markersize=10, color='red') 
-plt.plot(invnc, p_inter, 'o', markersize=10, color='blue')
+plt.plot(invnh, p_inter, 'o', color='red', markersize=10) 
+plt.plot(invnc, p_inter, 'o', color='blue', markersize=10) 
 fit_p = np.dot(pressure_functions, coeff)
 #plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
 plt.plot(mid_invn, hpressure,  'r.-', label="homogeneous pressure")

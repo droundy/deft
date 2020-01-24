@@ -10,12 +10,12 @@ matplotlib.rc('text', usetex=True)
 
 plt.figure()
 
-# input: ['data/homogeneous/ww%g-kT%g.dat' % (ww, kT) for ww in [1.3] for kT in xrange(1,11)]
+# input: ['data/homogeneous/ww%g-kT%g.dat' % (ww, kT) for ww in [1.3] for kT in range(1,11)]
 ww = 1.3
 for kT in np.arange(1.0, 11.0, 1.0):
     fname = 'data/homogeneous/ww%g-kT%g.dat' % (ww, kT)
     data = np.loadtxt(fname)
-    plt.plot(data[:,0], data[:,1], label=r'$T=%g$' % kT)
+    plt.plot(data[:, 0], data[:, 1], label=r'$T=%g$' % kT)
 
 plt.legend(loc='best')
 plt.xlim(0, 0.53)

@@ -10,7 +10,7 @@ matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 
 if len(sys.argv) != 6:
-    print 'useage: %s ww ff methods golden seed' % sys.argv[0]
+    print('useage: %s ww ff methods golden seed' % sys.argv[0])
     exit(1)
 
 ww = float(sys.argv[1])
@@ -29,7 +29,7 @@ seed = int(sys.argv[5])
 #arg seed = [0]
 
 all_Ns = os.popen("ls data/periodic-ww%.2f-ff%.2f.*-golden-E.dat"
-                  %(ww,ff)).readlines()
+                  %(ww, ff)).readlines()
 all_Ns = numpy.sort([ int(N.split('-')[-4][1:]) for N in all_Ns ])
 
 if len(all_Ns) == 0:
@@ -64,13 +64,13 @@ for method in methods:
     Emins[method].append(E_data[:, 0].max())
 
     sample_data = numpy.loadtxt(wildfilename % 'ps', ndmin=2)
-    samples[method].append(sample_data[len(sample_data[:,1])-1, 1])
+    samples[method].append(sample_data[len(sample_data[:, 1])-1, 1])
 
   plt.figure('iters')
   plt.semilogy(all_Ns, init_iters[method], styles.color(method)+'.-',
                label=styles.title(method))
   plt.figure('emin')
-  plt.plot(all_Ns, Emins[method],styles.color(method)+'.-', label=styles.title(method))
+  plt.plot(all_Ns, Emins[method], styles.color(method)+'.-', label=styles.title(method))
 
 plt.figure('iters')
 plt.xlabel('$N$')
@@ -154,9 +154,9 @@ for N in all_Ns:
 min_T = 0.2 # FIXME maybe shouldn't hardcode this?
 
 plt.figure()
-for method in u_errors.keys():
-    plt.semilogy(u_errors[method][:,0], u_errors[method][:,1],
-                 '.'+styles.plot(method),label=styles.title(method))
+for method in list(u_errors.keys()):
+    plt.semilogy(u_errors[method][:, 0], u_errors[method][:, 1],
+                 '.'+styles.plot(method), label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
@@ -166,9 +166,9 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
-for method in cv_errors.keys():
-    plt.semilogy(cv_errors[method][:,0], cv_errors[method][:,1],
-                 '.'+styles.plot(method),label=styles.title(method))
+for method in list(cv_errors.keys()):
+    plt.semilogy(cv_errors[method][:, 0], cv_errors[method][:, 1],
+                 '.'+styles.plot(method), label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
@@ -178,9 +178,9 @@ plt.tight_layout(pad=0.2)
 plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_errors.pdf" % (ww*100, ff*100))
 
 plt.figure()
-for method in s_errors.keys():
-    plt.semilogy(s_errors[method][:,0], s_errors[method][:,1],
-                 '.'+styles.plot(method),label=styles.title(method))
+for method in list(s_errors.keys()):
+    plt.semilogy(s_errors[method][:, 0], s_errors[method][:, 1],
+                 '.'+styles.plot(method), label=styles.title(method))
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('$N$')
@@ -198,16 +198,16 @@ if 'cfw' in methods:
 else:
     reference = 'tmmc'
 
-comp_methods = s_errors.keys()
+comp_methods = list(s_errors.keys())
 comp_methods.remove(reference)
 
 plt.figure()
 for method in comp_methods:
-    plt.loglog(u_errors[reference][:,1], u_errors[method][:,1],
-               '.'+styles.color(method),label=styles.title(method))
-xmin,xmax = plt.xlim()
-ymin,ymax = plt.ylim()
-plt.plot([xmin,xmax],[ymin,ymax],'k:')
+    plt.loglog(u_errors[reference][:, 1], u_errors[method][:, 1],
+               '.'+styles.color(method), label=styles.title(method))
+xmin, xmax = plt.xlim()
+ymin, ymax = plt.ylim()
+plt.plot([xmin, xmax], [ymin, ymax], 'k:')
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('%s $\\Delta U/N\epsilon$'%styles.title(reference))
@@ -218,11 +218,11 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-u_error_comp.pdf" % (ww*100, ff*100
 
 plt.figure()
 for method in comp_methods:
-    plt.loglog(cv_errors[reference][:,1], cv_errors[method][:,1],
-               '.'+styles.color(method),label=styles.title(method))
-xmin,xmax = plt.xlim()
-ymin,ymax = plt.ylim()
-plt.plot([xmin,xmax],[ymin,ymax],'k:')
+    plt.loglog(cv_errors[reference][:, 1], cv_errors[method][:, 1],
+               '.'+styles.color(method), label=styles.title(method))
+xmin, xmax = plt.xlim()
+ymin, ymax = plt.ylim()
+plt.plot([xmin, xmax], [ymin, ymax], 'k:')
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel('%s $\\Delta C_V/N\epsilon$'%styles.title(reference))
@@ -233,11 +233,11 @@ plt.savefig("figs/periodic-ww%02.0f-ff%02.0f-cv_error_comp.pdf" % (ww*100, ff*10
 
 plt.figure()
 for method in comp_methods:
-    plt.loglog(s_errors[reference][:,1], s_errors[method][:,1],
-               '.'+styles.color(method),label=styles.title(method))
-xmin,xmax = plt.xlim()
-ymin,ymax = plt.ylim()
-plt.plot([xmin,xmax],[ymin,ymax],'k:')
+    plt.loglog(s_errors[reference][:, 1], s_errors[method][:, 1],
+               '.'+styles.color(method), label=styles.title(method))
+xmin, xmax = plt.xlim()
+ymin, ymax = plt.ylim()
+plt.plot([xmin, xmax], [ymin, ymax], 'k:')
 
 plt.title('Maximum error with $\lambda=%g$, $\eta=%g$, and $T_{min}=%g$' % (ww, ff, min_T))
 plt.xlabel(r'%s $\Delta S_{\textit{config}}/Nk$'%styles.title(reference))

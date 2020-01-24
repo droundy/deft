@@ -10,7 +10,7 @@ import numpy as np
 # This is the second-ish version       #
 ########################################
 
-def minimize(func,T,a,c,mu,i):
+def minimize(func, T, a, c, mu, i):
 
     """Find the minimum of a function in the range [a,c]; return a tuple (abscissa, ordinate).
 
@@ -21,19 +21,19 @@ def minimize(func,T,a,c,mu,i):
 
     """
 
-    fa = func(T,a,mu,i)
-    fc = func(T,c,mu,i)
+    fa = func(T, a, mu, i)
+    fc = func(T, c, mu, i)
 
     b = 0.6*a + 0.4*c
     b_old = a
-    fb = func(T,b,mu,i)
+    fb = func(T, b, mu, i)
     dx = (c - a)/100000
 
     if a == c:
         return a, fa
     possible_bs = np.arange(a+dx, c-dx, dx)
-    f_possible_bs = func(T, possible_bs, mu,i)
-    for bindex in xrange(1, len(possible_bs)):
+    f_possible_bs = func(T, possible_bs, mu, i)
+    for bindex in range(1, len(possible_bs)):
         if f_possible_bs[bindex] < fb:
             b = possible_bs[bindex]
             fb = f_possible_bs[bindex]
@@ -53,8 +53,8 @@ def minimize(func,T,a,c,mu,i):
         n2 = b
 
     tol = 1.e-10
-    f1 = func(T,n1,mu,i)
-    f2 = func(T,n2,mu,i)
+    f1 = func(T, n1, mu, i)
+    f2 = func(T, n2, mu, i)
 
     while abs(n3-n0) > tol*(abs(n1)+abs(n2)):
         if f2 < f1: # Shift everything over one way
@@ -64,7 +64,7 @@ def minimize(func,T,a,c,mu,i):
 
             # re-define f_i to be accurate to new n_i
             f1 = f2
-            f2 = func(T,n2,mu,i)
+            f2 = func(T, n2, mu, i)
         else: # Shift everything over the other way
             n3 = n2
             n2 = n1
@@ -72,7 +72,7 @@ def minimize(func,T,a,c,mu,i):
 
             # re-define f_i to be accurate to the new n_i
             f2 = f1
-            f1 = func(T,n1,mu,i)
+            f1 = func(T, n1, mu, i)
 
     if f1 < f2:
         nmin = n1
@@ -81,10 +81,10 @@ def minimize(func,T,a,c,mu,i):
         nmin = n2
         fmin = f2
 
-    return nmin,fmin
+    return nmin, fmin
 
-def maximize(func,T,a,c,mu,i):
-    def negfunc(T,n,x,ineg):
-        return -func(T,n,x,ineg)
-    n,phi = minimize(negfunc,T,a,c,mu,i)
+def maximize(func, T, a, c, mu, i):
+    def negfunc(T, n, x, ineg):
+        return -func(T, n, x, ineg)
+    n, phi = minimize(negfunc, T, a, c, mu, i)
     return n

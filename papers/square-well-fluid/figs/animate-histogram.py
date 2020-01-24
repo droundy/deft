@@ -11,14 +11,14 @@ matplotlib.rc('text', usetex=True)
 import readandcompute
 
 if len(sys.argv) < 4:
-    print("Usage: python {} lv ww1.30-ff0.22-100x10 tmi toe ...".format(sys.argv[0]))
+    print(("Usage: python {} lv ww1.30-ff0.22-100x10 tmi toe ...".format(sys.argv[0])))
     exit(1)
 
 subdirname = sys.argv[1]
 filename = sys.argv[2]
 suffixes = sys.argv[3:]
 
-print sys.argv
+print(sys.argv)
 
 moviedir = 'figs/movies/%s/%s-hist' % (subdirname, filename)
 os.system('rm -rf ' + moviedir)
@@ -35,7 +35,7 @@ dataformat = 'data/%s/%s-%%s-movie/%%06d' % (subdirname, filename)
 
 lastframe = -1
 alldone = False
-for frame in xrange(100000):
+for frame in range(100000):
     if alldone:
         break
     for suffix in suffixes:
@@ -52,25 +52,25 @@ for frame in xrange(100000):
         mine = min(mine, e.min() - 20)
         maxe = max(maxe, e.max())
     if numframes % 25 == 0 and frame != lastframe:
-        print 'counting %dth frame' % numframes
+        print('counting %dth frame' % numframes)
         lastframe = frame
 
-print 'counted %d frames' % numframes
-print 'mine', mine
-print 'maxe', maxe
-print 'maxhist', maxhist
+print('counted %d frames' % numframes)
+print('mine', mine)
+print('maxe', maxe)
+print('maxhist', maxhist)
 
 skipby = 1
 if numframes > 200:
     skipby = numframes // 200
     numframes = numframes // skipby
-    print 'only showing 1/%d of the frames' % skipby
+    print('only showing 1/%d of the frames' % skipby)
 
-print 'numframes', numframes
+print('numframes', numframes)
 
-for frame in xrange(numframes):
+for frame in range(numframes):
     if frame % 25 == 0:
-        print 'working on frame %d/%d' % (frame, numframes)
+        print('working on frame %d/%d' % (frame, numframes))
     plt.cla()
 
     for suffix_index in range(len(suffixes)):

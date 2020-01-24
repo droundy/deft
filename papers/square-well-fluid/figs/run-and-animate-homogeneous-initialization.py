@@ -12,7 +12,7 @@ matplotlib.rc('text', usetex=True)
 import readandcompute
 
 if len(sys.argv) != 6:
-    print "usage:  python2 %s ww ff N minT iterations_per_frame" % sys.argv[0]
+    print("usage:  python2 %s ww ff N minT iterations_per_frame" % sys.argv[0])
     exit(1)
 
 if os.path.exists('paper.tex'):
@@ -57,13 +57,13 @@ cmd += ' --data_dir %s --filename %s' % (datadir, fname)
 fig, ax = plt.subplots()
 
 total_iterations = 0
-for frame in xrange(1000000):
+for frame in range(1000000):
     assert not os.system(cmd)
     total_iterations += iterations_per_frame
 
     plt.cla()
 
-    basename = datadir+'/ww%.2f-ff%.2f-N%d' % (ww,ff,N)
+    basename = datadir+'/ww%.2f-ff%.2f-N%d' % (ww, ff, N)
     e, diff = readandcompute.e_diffusion_estimate(basename)
 
     T, u, cv, s, minT = readandcompute.T_u_cv_s_minT(basename)
@@ -85,7 +85,7 @@ for frame in xrange(1000000):
               % (ww, ff, N, total_iterations/1.0e6))
 
     fname = moviedir+'/frame%06d.png' % (frame)
-    print 'saving', fname
+    print('saving', fname)
     plt.savefig(fname)
     os.system("convert -delay 100 %s/frame*.png %s/movie.gif"
               % (moviedir, moviedir)) # make the movie

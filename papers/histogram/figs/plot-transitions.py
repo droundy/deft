@@ -6,7 +6,7 @@ import numpy
 import styles
 
 if len(sys.argv) != 7:
-    print 'useage: %s ww ff N seed' % sys.argv[0]
+    print('useage: %s ww ff N seed' % sys.argv[0])
     exit(1)
 
 ww = float(sys.argv[1])
@@ -16,7 +16,7 @@ ff = float(sys.argv[2])
 #arg ff = [0.1, 0.2, 0.3, 0.4]
 
 N = int(sys.argv[3])
-#arg N = range(5,21)+[100, 200, 1000]
+#arg N = list(range(5,21))+[100, 200, 1000]
 
 golden_method = sys.argv[4]
 #arg golden_method = ['tmmc-golden']
@@ -27,7 +27,7 @@ method = sys.argv[5]
 seed = int(sys.argv[6])
 #arg seed = [0]
 
-bothdata = [0,0]
+bothdata = [0, 0]
 
 golden_data_file = "data/periodic-ww%04.2f-ff%04.2f-N%i-%s-transitions.dat" \
                    % (ww, ff, N, golden_method)
@@ -52,10 +52,10 @@ for method, data, de in [(golden_method, golden_data, de_golden), (method, metho
     plt.figure()
     plt.title('Energy transitions from %s for $\lambda=%g$, $n^*=%g$, and $N=%i$' % (method, ww, ff, N))
 
-    energy = -data[:,0]
+    energy = -data[:, 0]
     maxde = 0
     minde = 0
-    transitions = data[:,1:]
+    transitions = data[:, 1:]
     de, e = numpy.meshgrid(de, energy)
 
     for i in range(len(energy)):
@@ -63,14 +63,14 @@ for method, data, de in [(golden_method, golden_data, de_golden), (method, metho
         if norm > 0:
             transitions[i,:] /= norm
         for j in range(len(transitions[i,:])):
-            if transitions[i,j] > 0:
-                if de[i,j] < minde:
-                    minde = de[i,j]
-                if de[i,j] > maxde:
-                    maxde = de[i,j]
+            if transitions[i, j] > 0:
+                if de[i, j] < minde:
+                    minde = de[i, j]
+                if de[i, j] > maxde:
+                    maxde = de[i, j]
     c = plt.pcolor(de+0.5, e, transitions, vmin=0, vmax=1)
     plt.colorbar(c)
-    plt.xlim(minde,maxde)
+    plt.xlim(minde, maxde)
     plt.ylim(e.min(), e.max())
 
     plt.xlabel('$\Delta E/\epsilon$')
@@ -83,26 +83,26 @@ for method, data, de in [(golden_method, golden_data, de_golden), (method, metho
 
 plt.figure()
 
-if golden_data[0,0] < method_data[0,0]:
-    golden_data = golden_data[int(method_data[0,0] - golden_data[0,0]):,:]
+if golden_data[0, 0] < method_data[0, 0]:
+    golden_data = golden_data[int(method_data[0, 0] - golden_data[0, 0]):,:]
 else:
-    method_data = method_data[int(golden_data[0,0] - method_data[0,0]):,:]
+    method_data = method_data[int(golden_data[0, 0] - method_data[0, 0]):,:]
 
-energy = -golden_data[:,0]
+energy = -golden_data[:, 0]
 
 # fixme: do reasonable things when de_golden != de_method ?
 de, e = numpy.meshgrid(de_golden, energy)
 
-cut2 = golden_data[:,0].min() - method_data[:,0].min()
+cut2 = golden_data[:, 0].min() - method_data[:, 0].min()
 
-for i in range(len(golden_data[:,0])):
-    if i < len(method_data[:,0]):
+for i in range(len(golden_data[:, 0])):
+    if i < len(method_data[:, 0]):
         for j in range(len(golden_data[1,:])):
-            golden_data[i,j] -= method_data[i,j]
+            golden_data[i, j] -= method_data[i, j]
 
-c = plt.pcolor(de-0.5, e, golden_data[:,1:], cmap='RdBu', vmin=-0.05, vmax = 0.05)
+c = plt.pcolor(de-0.5, e, golden_data[:, 1:], cmap='RdBu', vmin=-0.05, vmax = 0.05)
 plt.colorbar(c)
-plt.xlim(-8,8)
+plt.xlim(-8, 8)
 plt.ylim(e.min(), e.max())
 plt.xlabel('$\Delta E/\epsilon$')
 plt.ylabel('$E/\epsilon$')

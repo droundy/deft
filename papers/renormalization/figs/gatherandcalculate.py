@@ -9,14 +9,14 @@ def lndos_energy_Ns(dbase):
     ln_dos = {}
     energy = {}
     Ns = []
-    for N in range(2,6000): #maybe require N as an argument?
+    for N in range(2, 6000): #maybe require N as an argument?
         fname = '%s/N%03d/lv-data-dos.dat' % (dbase, N)
         if os.path.isfile(fname):
             try:
                 ln_dos_hist = np.loadtxt(fname, ndmin=2)
-                ln_dos[N] = ln_dos_hist[:,1]
+                ln_dos[N] = ln_dos_hist[:, 1]
                 # the energy is actually negative, but stored positive in the file:
-                energy[N] = -ln_dos_hist[:,0]
+                energy[N] = -ln_dos_hist[:, 0]
                 Ns.append(N)
             except:
                 # this happens if there is no data in the file
@@ -28,7 +28,7 @@ def lndos_energy_Ns(dbase):
 def Sexc_hardsphere_Ns(dbase):
     Ns = []
     S = []
-    for N in range(2,6000): # maybe go higher?
+    for N in range(2, 6000): # maybe go higher?
         fbase = '%s/N%03d/absolute/' % (dbase, N)
         # we only try to add this N value if we have one .dat file,
         # and our number of .dat files is the same as our number of
@@ -40,7 +40,7 @@ def Sexc_hardsphere_Ns(dbase):
                 S.append(thisS)
                 Ns.append(N)
             except:
-                print 'no data for N =', N
+                print('no data for N =', N)
     return np.array(S), np.array(Ns)
 
 def Sexc_hardsphere(dbase, N):
@@ -83,8 +83,7 @@ def Sexc_hardsphere(dbase, N):
     return S - Stirling_correction(N)
 
 def Uexc(ln_dos, energy, Ts):
-    Ns = ln_dos.keys()
-    Ns.sort()
+    Ns = sorted(list(ln_dos.keys()))
     U = np.zeros((len(Ts), len(Ns)))
     for j in range(len(Ns)):
         N = Ns[j]
@@ -93,12 +92,11 @@ def Uexc(ln_dos, energy, Ts):
             ln_dos_boltz = ln_dos[N] - energy[N]/T
             # Subtract of ln_dos_boltz.max() to keep dos_boltz reasonable
             dos_boltz = np.exp(ln_dos_boltz - ln_dos_boltz.max())
-            U[k,j] = sum(energy[N]*dos_boltz)/sum(dos_boltz)
+            U[k, j] = sum(energy[N]*dos_boltz)/sum(dos_boltz)
     return U
 
 def Fexc(dbase, ln_dos, energy, volume, Ts):
-    Ns = ln_dos.keys()
-    Ns.sort()
+    Ns = sorted(list(ln_dos.keys()))
     F = np.zeros((len(Ts), len(Ns)))
     for j in range(len(Ns)):
         N = Ns[j]
@@ -133,7 +131,7 @@ def Fexc(dbase, ln_dos, energy, volume, Ts):
                 Z = sum(dos_boltz + offset)
                 Zinf = sum(np.exp(ln_dos[N]))
                 # print 'fixed: Z is', Z, 'and Zinf is', Zinf
-            F[k,j] = Uinf -T*Sexc_HS - T*np.log(Z/Zinf)
+            F[k, j] = Uinf -T*Sexc_HS - T*np.log(Z/Zinf)
     return F
 
 
@@ -153,7 +151,7 @@ def Fabs(Fex, Ts, Ns, V):
     for l in range(len(Ts)):
         for j in range(len(Ns)):
             Lambda = hbar*np.sqrt(2*np.pi/(m*kb*Ts[l]))
-            Fid[l,j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*(np.log(Ns[j]) - 1)
+            Fid[l, j]  = -Ns[j]*kb*Ts[l]*np.log(V/Lambda**3) + Ns[j]*kb*Ts[l]*(np.log(Ns[j]) - 1)
     F = Fex + Fid
     return F
 
@@ -161,12 +159,12 @@ def Fabs(Fex, Ts, Ns, V):
 def Phiabs(Fabs, mu, Ns):
     Phiabs = np.zeros_like(Fabs)
     for q in range(len(Ns)):
-        Phiabs[:,q] = Fabs[:,q] - mu*Ns[q]
+        Phiabs[:, q] = Fabs[:, q] - mu*Ns[q]
     return Phiabs
 
 def Stirling_correction(N):
     guess = N*np.log(N) - N
-    actual = sum(np.log(np.arange(1,N+.5)))
+    actual = sum(np.log(np.arange(1, N+.5)))
     return (actual - guess)
 
 # def U_F_S(dbase, i):

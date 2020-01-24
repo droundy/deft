@@ -44,7 +44,7 @@ kap_a = 1.06673*angstrom**3 # value has dimensions of length^3
 eps_a = 1400*k_B # (kelvin x Boltzmann)
 
 # Ideal Gas
-def fid(T,n):
+def fid(T, n):
     # constants
     hbar = 1.05*10**(-27) # cm^2 g s^-1
 
@@ -74,7 +74,7 @@ def n3(n):
     return n*R**3*(4/3)*np.pi
 
 # Hard-sphere repulsion
-def fhs(T,n):
+def fhs(T, n):
     # Phi 1
     Phi1 = -n0(n)*np.log(1-n3(n))
 
@@ -168,41 +168,41 @@ def a2(n):
     return 0.5*eps*K(n)*eta(n)*da1SW_deta(n)
 
 # Dispesion Free Energy
-def fdisp(T,n):
+def fdisp(T, n):
     return (a1SW(n) + 1/(k_B*T)*a2(n))*n
 
 # correlation functions
 def gHS(n):
     return 1/(1-n3(n))+ (R/2)*n2(n)/(1-n3(n))**2 + (R**2/18)*n2(n)**2/(1-n3(n))**3
 
-def gSW(T,n):
+def gSW(T, n):
     return gHS(n) + 1/(4*k_B*T)*(da1SW_deta(n) - lambd/(3*eta(n))*da1SW_dlambd(n))
 
 # Delta is a measure of hydrogen-bonding proability
-def Delta(T,n):
-    return kap_a*gSW(T,n)*(np.exp(eps_a/(k_B*T)) - 1)
+def Delta(T, n):
+    return kap_a*gSW(T, n)*(np.exp(eps_a/(k_B*T)) - 1)
 
 # Fraction of association sites NOT hydrogen-bonded
-def X(T,n):
-    return ((1 + 8*n0(n)*Delta(T,n))**0.5 - 1)/(4*n0(n)*Delta(T,n))
+def X(T, n):
+    return ((1 + 8*n0(n)*Delta(T, n))**0.5 - 1)/(4*n0(n)*Delta(T, n))
 
 #  Association Free Energy
-def fassoc(T,n):
-    return 4*k_B*T*n0(n)*(np.log(X(T,n)) - X(T,n)/2 + 0.5)
+def fassoc(T, n):
+    return 4*k_B*T*n0(n)*(np.log(X(T, n)) - X(T, n)/2 + 0.5)
 
 # Total free energy
-def f(T,n):
-    return fid(T,n)+fhs(T,n)+fdisp(T,n)+fassoc(T,n)
+def f(T, n):
+    return fid(T, n)+fhs(T, n)+fdisp(T, n)+fassoc(T, n)
 
 # Derivative wrt number at const temp
-def df_dn(T,n):
+def df_dn(T, n):
     # step size
     dn = 1e-8*n
-    return (f(T,n + dn/2) - f(T,n - dn/2))/dn
+    return (f(T, n + dn/2) - f(T, n - dn/2))/dn
 
 # Pressure
-def p(T,n):
-    return n*df_dn(T,n) - f(T,n)
+def p(T, n):
+    return n*df_dn(T, n) - f(T, n)
 
 # Conversion factor taking n from atoms/bohr^3 to g/mL
 conv_n = m/bohr**3/N_A # g cm^-3 atoms^-1
@@ -211,11 +211,11 @@ conv_n = m/bohr**3/N_A # g cm^-3 atoms^-1
 conv_p = Ha*1e6/bohr**3/atm
 
 # Grand free energy
-def Phi(T,n,prefac):
+def Phi(T, n, prefac):
     '''Grand free energy'''
     nl = prefac*nw # we will adjust the prefactor to find accurate chemical potential
-    mu = df_dn(T,nl) # chemical potential; derivative of free energy around a particular density
-    return f(T,n) - mu*n
+    mu = df_dn(T, nl) # chemical potential; derivative of free energy around a particular density
+    return f(T, n) - mu*n
 
 ############################################
 
@@ -225,5 +225,5 @@ def Phi(T,n,prefac):
 nparticular = 0.0022182
 
 # GFE alternate
-def Phi_alt(T,n,nparticular):
-    return f(T,n) - n*df_dn(T,nparticular)
+def Phi_alt(T, n, nparticular):
+    return f(T, n) - n*df_dn(T, nparticular)

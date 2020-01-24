@@ -31,11 +31,11 @@ Smax = int(sys.argv[6])
 yamlRef = bool(sys.argv[7])
 
 filename = sys.argv[8:]
-print('filenames are ', filename)
+print(('filenames are ', filename))
 
 for f in filename:
     name = '%s.yaml' % (f)
-    print('trying filename ', name)
+    print(('trying filename ', name))
     while not os.path.exists(filename_location + name):
         print('I am waiting for file to be written.')
         time.sleep(30)
@@ -74,7 +74,7 @@ for f in filename:
     errorinentropy = np.zeros(N_save_times)
     maxerror = np.zeros(N_save_times)
     
-    for i in range(0,N_save_times):
+    for i in range(0, N_save_times):
         # below just set average S equal between lndos and lndosref
         if yamlRef:
             # if using yaml as a reference the range is from 0 to len while for C++ the range is 
@@ -89,19 +89,19 @@ for f in filename:
     
     # remove N from moves in yaml file because N is added back in the
     # comparison-plot script
-    moves = map(int,data['movies']['time'])
+    moves = list(map(int, data['movies']['time']))
     moves = [x / N for x in moves]
     errorinentropy = errorinentropy[:len(moves)]
     maxerror = maxerror[:len(moves)]
     
-    dirname = 'data/comparison/%s-%s' % (filebase, name.replace('.yaml',''))
-    print 'saving to', dirname
+    dirname = 'data/comparison/%s-%s' % (filebase, name.replace('.yaml', ''))
+    print('saving to', dirname)
     try:  
         os.mkdir(dirname)
     except OSError:  
         pass
     else:  
-        print ("Successfully created the directory %s " % dirname)
+        print(("Successfully created the directory %s " % dirname))
     np.savetxt('%s/errors.txt' %(dirname),
               np.c_[moves, errorinentropy, maxerror],
               fmt = ('%.4g'),

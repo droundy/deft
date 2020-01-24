@@ -6,17 +6,17 @@ import numpy as np
 from matplotlib.widgets import Slider, Button, RadioButtons
 sys.setrecursionlimit(2500)
 if len(sys.argv) < 2:
-    print("Usage:  " + sys.argv[0] + " filename.dat")
+    print(("Usage:  " + sys.argv[0] + " filename.dat"))
     exit(1)
 
 
 ax = subplot(111, autoscale_on=False, aspect='equal') 
-ax.set_xbound(-25,25)
-ax.set_ybound(-25,25)
+ax.set_xbound(-25, 25)
+ax.set_ybound(-25, 25)
 subplots_adjust(left=0.25, bottom=0.25)
 
 a0 = 0
-axcoord = axes([0.25,.1,.65,.03])
+axcoord = axes([0.25, .1, .65, .03])
 scoord = Slider(axcoord, 'x cord', -20, 20, valinit=a0)
 
 
@@ -64,19 +64,19 @@ def plotDat(j):
             lx[inter][2] = sqrt(1-(si*si)) 
             inter = inter +1
 
-#        print 'in z ', k, ' ', len(spheres)
-    print 'inter is ' ,inter
+    #        print 'in z ', k, ' ', len(spheres)
+    print('inter is ', inter)
     for i in range(inter):
         x = lx[i][0]
         y = lx[i][1]
         r = lx[i][2]
-       # c = lx[i][3]
+        # c = lx[i][3]
         if (lx[i][3] == 1):
-            cir = plt.Circle((x,y), radius=r,  fc='y')
-  #      elif (c == 0):
-  #          cir = plt.Circle((x,y), radius=r,  fc='r')
+            cir = plt.Circle((x, y), radius=r,  fc='y')
+            #      elif (c == 0):
+            #          cir = plt.Circle((x,y), radius=r,  fc='r')
         else:
-            cir = plt.Circle((x,y), radius=r, fc = 'b')
+            cir = plt.Circle((x, y), radius=r, fc = 'b')
         ax.add_patch(cir)    
 
 def update(val):    

@@ -55,9 +55,9 @@ pixels = pylab.array([[184.0, 1024.0],
 
 points = pylab.zeros_like(pixels)
 
-for i in xrange(len(pixels)):
-    points[i,0] = (pixels[i,0] - bottom_left[0])*(top_right_values[0] - bottom_left_values[0])/(top_right[0]-bottom_left[0]) + bottom_left_values[0]
-    points[i,1] = (pixels[i,1] - bottom_left[1])*(top_right_values[1] - bottom_left_values[1])/(top_right[1]-bottom_left[1]) + bottom_left_values[1]
+for i in range(len(pixels)):
+    points[i, 0] = (pixels[i, 0] - bottom_left[0])*(top_right_values[0] - bottom_left_values[0])/(top_right[0]-bottom_left[0]) + bottom_left_values[0]
+    points[i, 1] = (pixels[i, 1] - bottom_left[1])*(top_right_values[1] - bottom_left_values[1])/(top_right[1]-bottom_left[1]) + bottom_left_values[1]
     #print points[i, 0], points[i, 1]
 
 r = points[:, 0]

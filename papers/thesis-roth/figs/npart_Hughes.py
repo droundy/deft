@@ -44,34 +44,34 @@ c_liq = 1.05/H.conv_n
 
 
 # Open file for output
-fout = open('figs/npart_Hughes-out.dat','w')
+fout = open('figs/npart_Hughes-out.dat', 'w')
 
 # label the columns of the output
 fout.write('#T    nvapor(g/ml)    nliquid(g/mL)    phi(nvap)(atm)    phi(nliq)(atm)    nparticular')
 
 # Do first temperature before the loop
-leftmin_n,leftmin_phi = minmax.minimize(H.Phi_alt,T,a_vap,c_vap,nparticular)
-rightmin_n,rightmin_phi = minmax.minimize(H.Phi_alt,T,a_liq,c_liq,nparticular)
+leftmin_n, leftmin_phi = minmax.minimize(H.Phi_alt, T, a_vap, c_vap, nparticular)
+rightmin_n, rightmin_phi = minmax.minimize(H.Phi_alt, T, a_liq, c_liq, nparticular)
 
 
 leftmin_n = a_vap
 rightmin_n = c_liq
 
 # while T < 800:
-for i in xrange(0,N+1):
+for i in range(0, N+1):
     T = (Tc - Tlow)*(1 - ((N-i)/N)**4) + Tlow
 
     fout.flush()
     # Starting point for new nparticular is abscissa of max H.Phi_alt with old nparticular
-    nparticular = minmax.maximize(H.Phi_alt,T,leftmin_n, rightmin_n, nparticular)
+    nparticular = minmax.maximize(H.Phi_alt, T, leftmin_n, rightmin_n, nparticular)
     tol_nparticular = 1e-2/H.conv_n
 
 
     # I'm looking at the minima of H.Phi_alt
     c_vap = nparticular
     a_liq = nparticular
-    leftmin_n,leftmin_phi = minmax.minimize(H.Phi_alt,T,c_vap,a_vap,nparticular)
-    rightmin_n,rightmin_phi = minmax.minimize(H.Phi_alt,T,a_liq,c_liq,nparticular)
+    leftmin_n, leftmin_phi = minmax.minimize(H.Phi_alt, T, c_vap, a_vap, nparticular)
+    rightmin_n, rightmin_phi = minmax.minimize(H.Phi_alt, T, a_liq, c_liq, nparticular)
     tol_min = 0.5/H.conv_p
 
     # Compare the two minima in H.Phi_alt
@@ -80,10 +80,10 @@ for i in xrange(0,N+1):
         def newphi(T, n, npart):
             return H.Phi_alt(T, n, npart) - delta_mu*n
         oldnparticular = nparticular
-        nparticular = minmax.maximize(newphi,T,leftmin_n,rightmin_n,nparticular)
+        nparticular = minmax.maximize(newphi, T, leftmin_n, rightmin_n, nparticular)
 
-        leftmin_n,leftmin_phi = minmax.minimize(H.Phi_alt,T,a_vap,c_vap,nparticular)
-        rightmin_n,rightmin_phi = minmax.minimize(H.Phi_alt,T,a_liq,c_liq,nparticular)
+        leftmin_n, leftmin_phi = minmax.minimize(H.Phi_alt, T, a_vap, c_vap, nparticular)
+        rightmin_n, rightmin_phi = minmax.minimize(H.Phi_alt, T, a_liq, c_liq, nparticular)
 
     fout.write('\n')
     fout.write(str(T))
@@ -97,7 +97,7 @@ for i in xrange(0,N+1):
     fout.write(str(rightmin_phi*H.conv_p))
     fout.write('  ')
     fout.write(str(nparticular))
-    print T
+    print(T)
 
     # Set temp slightly higher
 #    dT = 5000/T

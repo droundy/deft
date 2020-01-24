@@ -10,7 +10,7 @@ moves = []
 for line in sys.stdin.readlines():
     match = move.search(line)
     if match is not None:
-        print "line matches:", line[:-1]
+        print("line matches:", line[:-1])
         g = match.groups()
         G = ''.join(map(str, g))
         movestemp = G.split(' ')[0]
@@ -18,7 +18,7 @@ for line in sys.stdin.readlines():
         wltemp = G.split('r')[-1]
         wl.append(np.double(wltemp.split(')')[0]))
 
-np.savetxt('data/gamma/%s.txt'%(filename), np.c_[moves,wl], 
+np.savetxt('data/gamma/%s.txt'%(filename), np.c_[moves, wl], 
 delimiter = '\t', header = 'moves\t wl_factor')
 
 

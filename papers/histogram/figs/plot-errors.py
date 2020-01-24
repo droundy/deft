@@ -15,7 +15,7 @@ golden = 'tmmc-golden'
 
 methods = ['tmmc', 'oetmmc', 'simple_flat', 'wang_landau', 'vanilla_wang_landau']
 reference = 'cfw'
-seeds = range(0, 30)
+seeds = list(range(0, 30))
 
 ######################################################################
 # Make beautiful error plot
@@ -52,7 +52,7 @@ for golden_comp in all_goldens:
     ww = float(bits[1][2:])
     ff = float(bits[2][2:])
     N = int(bits[3][1:])
-    print 'ww = %g, ff = %g, N = %d' % (ww, ff, N)
+    print('ww = %g, ff = %g, N = %d' % (ww, ff, N))
     t_u_cv_s = readandcompute.T_u_cv_s_minT(ww, ff, N, golden)
     if t_u_cv_s != None:
         plt.figure(2)
@@ -65,18 +65,18 @@ for golden_comp in all_goldens:
         reference_error = mean_u_err(ww, ff, N, reference, golden_u)
         if reference_error == None:
             continue
-        print '    ', reference, reference_error
+        print('    ', reference, reference_error)
         for method in methods:
             plt.figure(2)
             method_err = mean_u_err(ww, ff, N, method, golden_u)
             if method_err != None:
-                print '    ', method, method_err
+                print('    ', method, method_err)
                 plt.figure(1)
                 if method not in labels_added:
                     plt.loglog(reference_error, method_err, styles.dots(method),
                                markerfacecolor='none', markeredgecolor=styles.color(method),
                                label=styles.title(method))
-                    labels_added |= set([method])
+                    labels_added |= {method}
                 else:
                     plt.loglog(reference_error, method_err, styles.dots(method),
                                markerfacecolor='none', markeredgecolor=styles.color(method))
@@ -89,10 +89,10 @@ for golden_comp in all_goldens:
 min_T = 0.2 # FIXME maybe shouldn't hardcode this?
 
 plt.figure(1)
-xmin,xmax = plt.xlim()
-ymin,ymax = plt.ylim()
+xmin, xmax = plt.xlim()
+ymin, ymax = plt.ylim()
 plt.axis('equal')
-plt.loglog([min(xmin,ymin),max(xmax,ymax)],[min(xmin,ymin),max(xmax,ymax)],'k:')
+plt.loglog([min(xmin, ymin), max(xmax, ymax)], [min(xmin, ymin), max(xmax, ymax)], 'k:')
 plt.legend(loc='best')
 
 plt.title('average maximum error in $U$ for various configurations')

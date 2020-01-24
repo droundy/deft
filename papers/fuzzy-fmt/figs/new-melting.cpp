@@ -19,11 +19,13 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <popt.h>
-#include "new/SFMTFluidFast.h"
+#include "new/SFMTFluidVeffFast.h"
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 #include "version-identifier.h"
 #include "vector3d.h"
+
+#include "findxi.h"
 
 //Number of points for Monte-Carlo
 long NUM_POINTS = 800;
@@ -89,31 +91,26 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
   return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
 }
 
-static inline double find_alpha(double temp) {
-  const double sigma=1;  //sigma must be 1 - changing it would invalidate other equations in the program!
-  const double epsilon=1;
-  return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
-}
+//static inline double find_Xi(double temp) {
+  //const double epsilon=1;
+  //const double alpha = find_alpha(temp);
+  //return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
+//}
 
-static inline double find_Xi(double temp) {
-  const double epsilon=1;
-  const double alpha = find_alpha(temp);
-  return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
-}
-
-weight find_weights(vector3d r, vector3d rp, double temp) {
+static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
-  const double alpha = find_alpha(temp);
-  const double Xi = find_Xi(temp);
   weight w;
-  w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
+  //w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
+  w.n_2=(sqrt(2)/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/(Xi/sqrt(2)),2));
   w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
-  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));   // Schmidt, Santos (2012) - use!
+  //w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude));   // Groh & Schmidt don't use
+  //w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
+  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/(Xi/sqrt(2))));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
     w.n_1=0;
@@ -124,26 +121,10 @@ weight find_weights(vector3d r, vector3d rp, double temp) {
   return w;
 }
 
-weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
-  vector3d rdiff=r-rp;
-  double rdiff_magnitude=rdiff.norm();
-  weight w;
-  w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
-  w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
-  w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
-  w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
-  w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - tensor3d()*(1.0/3));
-  w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
-  if (rdiff_magnitude == 0) {
-    w.n_0=0;
-    w.n_1=0;
-    w.nv_1 = vector3d(0,0,0);
-    w.nv_2 = vector3d(0,0,0);
-    w.nm_2=zero_tensor();
-  }
-  return w;
+static inline weight find_weights(vector3d r, vector3d rp, double temp) {
+  return find_weights_from_alpha_Xi(r, rp, find_alpha(temp), find_Xi(temp));
 }
+
 
 // radius_of_peak tells us how far we need to integrate away from a
 // peak with width gwidth, if the temperature is T, when finding the
@@ -626,12 +607,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_vol;
 
   printf("\nCalculating Homogeneous Free Energy analytically ...\n");
-  HomogeneousSFMTFluid hf;   //note: homogeneousFE/atom does not depend on fv or gw
-  hf.sigma() = 1;
-  hf.epsilon() = 1;   //energy constant in the WCA fluid
-  hf.kT() = temp;
-  hf.n() = reduced_density;
-  hf.mu() = 0;   //chemical potential is zero so the Grand Canonical Ensemble becomes a Canonical Ensemble
+  HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);   //note: homogeneousFE/atom does not depend on fv or gw
   //Note: hf.energy() returns energy/volume
 
   hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
@@ -672,10 +648,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
         double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
         vector3d nv_1, nv_2;
-        nv_1.x=0, nv_1.y=0, nv_1.z=0, nv_2.x=0, nv_2.y=0, nv_2.z=0;
         tensor3d nm_2;
-        nm_2.x.x=0, nm_2.x.y=0, nm_2.x.z=0, nm_2.y.x=0, nm_2.y.y=0, nm_2.y.z=0, nm_2.z.x=0, nm_2.z.y=0, nm_2.z.z=0;
-        weight n_weight= {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
+        weight n_weight;
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
@@ -715,28 +689,29 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double phi_3;
         if (use_tensor_weight) {
           //double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
-          //                              nm_2.y.y*nm_2.y.y +
-          //                              nm_2.z.z*nm_2.z.z +
-          //                            2*nm_2.x.y*nm_2.y.x +
-          //                            2*nm_2.x.z*nm_2.z.x +
-          //                            2*nm_2.y.z+nm_2.z.y;
+                                        //nm_2.y.y*nm_2.y.y +
+                                        //nm_2.z.z*nm_2.z.z +
+                                      //2*nm_2.x.y*nm_2.y.x +
+                                      //2*nm_2.x.z*nm_2.z.x +
+                                      //2*nm_2.y.z*nm_2.z.y;
 
-          // double traceof_nm_2cubed  =   nm_2.x.x*nm_2.x.x*nm_2.x.x +
-          //                               nm_2.y.y*nm_2.y.y*nm_2.y.y +
-          //                               nm_2.z.z*nm_2.z.z*nm_2.z.z +
-          //3*nm_2.x.x*nm_2.x.y*nm_2.y.x +
-          //3*nm_2.x.x*nm_2.x.z*nm_2.z.x +
-          //3*nm_2.x.y*nm_2.y.y+nm_2.y.x +
-          //3*nm_2.x.y*nm_2.y.z+nm_2.z.x +
-          //3*nm_2.x.z*nm_2.z.y+nm_2.y.x +
-          //3*nm_2.x.z*nm_2.z.z+nm_2.z.x +
-          //3*nm_2.y.y*nm_2.y.z+nm_2.z.y +
-          //3*nm_2.y.z*nm_2.z.z+nm_2.z.y;
+          double traceof_nm_2cubed =
+            nm_2.x.x*nm_2.x.x*nm_2.x.x +   // xx xx xx
+            nm_2.y.y*nm_2.y.y*nm_2.y.y +   // yy yy yy
+            nm_2.z.z*nm_2.z.z*nm_2.z.z +   // zz zz zz
+            3*nm_2.x.x*nm_2.x.y*nm_2.y.x + // xx xy yx three places to put xx
+            3*nm_2.x.x*nm_2.x.z*nm_2.z.x + // xx xz zx three places to put xx
+            3*nm_2.x.y*nm_2.y.y*nm_2.y.x + // xy yy yx three places to put yy
+            3*nm_2.y.y*nm_2.y.z*nm_2.z.y + // yy yz zy three places to put yy
+            3*nm_2.x.z*nm_2.z.z*nm_2.z.x + // xz zz zx three places to put zz
+            3*nm_2.y.z*nm_2.z.z*nm_2.z.y + // yz zz zy three places to put zz
+            3*nm_2.x.y*nm_2.y.z*nm_2.z.x + // xy yz zx three cyclic permutations
+            3*nm_2.x.z*nm_2.z.y*nm_2.y.x;  // xz zy yx == the above, but these are the non-cyclic permutations
 
-          phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3*nm_2.determinant()))
-                  /(24*M_PI*sqr(1-n_3)); //Schmidt equation 5
-          //phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.dot(nv_2) + 9*(nv_2.dot(nm_2.dot(nv_2))-(traceof_nm_2cubed/2.0)))/(24*M_PI*uipow(1.0-1.0*n_3,2));      //Tensor version FMF2? (Evans)
-          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2)-traceof_nm_2cubed+n_2*n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));  //Tensor version FMF3 (Sweatman)
+          //phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3.0*nm_2.determinant()))/(24*M_PI*uipow(1.0-1.0*n_3,2));        // Schmidt equation 5  (2000) - ok
+          phi_3 =( n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2)) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))
+            /(24*M_PI*uipow(1-n_3,2));         // Santos (2012) - yes
+          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));      // Sweatman, Groh & Schmidt  (2001) - same as Santos with different w_nm
         } else {
           // The following was Rosenfelds early vector version of the functional
           //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
@@ -959,224 +934,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 }
 //%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-data find_energy(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx, bool verbose=false) {
-  double reduced_num_spheres = 4*(1-fv); // number of spheres in one cell based on input vacancy fraction fv
-  double vacancy = 4*fv;                 //there are 4 spheres in one cell when there are no vacancies (fv=1)
-  double lattice_constant = find_lattice_constant(reduced_density, fv);
-  printf("lattice_constant= %g", lattice_constant);
-  double dV = dx*dx*dx;  //volume element dV
-
-  HomogeneousSFMTFluid hf;
-  hf.sigma() = 1;
-  hf.epsilon() = 1;   //energy constant in the WCA fluid
-  hf.kT() = temp;
-  hf.n() = reduced_density;
-  hf.mu() = 0;
-  //Note: hf.energy() returns energy/volume
-
-  if (verbose) {
-    //printf("Reduced homogeneous density= %g, fraction of vacancies= %g, Gaussian width= %g, temp= %g\n",
-    //       reduced_density, fv, gwidth, temp);
-
-    printf("Reduced number of spheres in one fluid cell is %g, vacancy is %g spheres.\n",
-           reduced_num_spheres, vacancy);
-    printf("lattice constant = %g\n", lattice_constant);
-  }
-
-  const double homogeneous_free_energy = hf.energy()/reduced_density; // energy per sphere
-  if (verbose) {
-    printf("Bulk energy per volume is %g\n", hf.energy());
-    printf("Homogeneous free energy per sphere is %g\n", homogeneous_free_energy);
-  }
-
-  if (fv >= 1) {
-    printf("Craziness: fv==1 is a meaningless scenario!");
-    data data_out;
-    data_out.diff_free_energy_per_atom=sqrt(-1);
-    data_out.cfree_energy_per_atom=sqrt(-1);
-    data_out.hfree_energy_per_vol=hf.energy();
-    data_out.cfree_energy_per_vol=sqrt(-1);
-    return data_out;
-  }
-
-  SFMTFluid f(lattice_constant, lattice_constant, lattice_constant, dx);
-  printf("Predicted memory use: %.1f G\n", f.Nx()*f.Ny()*f.Nz()*12*8.0/1024/1024/1024);
-  f.sigma() = hf.sigma();
-  f.epsilon() = hf.epsilon();
-  f.kT() = hf.kT();
-  f.mu() = hf.mu();
-  f.Vext() = 0;
-  f.n() = hf.n();
-  //Note: f.energy() returns energy (not energy/volume like hf.energy()!)
-
-  double N_crystal = 0;
-
-  {
-    // This is where we set up the inhomogeneous n(r) for a Face Centered Cubic (FCC)
-    const int Ntot = f.Nx()*f.Ny()*f.Nz();  //Ntot is the total number of position vectors at which the density will be calculated
-    const Vector rrx = f.get_rx();          //Nx is the total number of values for rx etc...
-    const Vector rry = f.get_ry();
-    const Vector rrz = f.get_rz();
-    const double norm = (1-fv)/(sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth*sqrt(2*M_PI)*gwidth); // Normalized Gaussians correspond to 4 spheres/atoms for no vacancies
-    // multiply 4 by (1-fv) to get the reduced number of spheres.
-    Vector setn = f.n();
-
-    for (int i=0; i<Ntot; i++) {
-      const double rx = rrx[i];
-      const double ry = rry[i];
-      const double rz = rrz[i];
-      setn[i] = 0.0*hf.n(); //sets initial density everywhere to a small value (zero)
-      // The FCC cube is set up with one whole sphere in the center of the cube.
-      // dist is the magnitude of vector r-vector R=square root of ((rx-Rx)^2 + (ry-Ry)^2 + (rz-Rz)^2)
-      // where r is a position vector and R is a vector to the center of a sphere or Gaussian.
-      // The following code calculates the contribution to the density
-      // at a position vector (rrx[i],rry[i],rrz[i]) from each Gaussian
-      // and adds them to get the density at that position vector which
-      // is then stored in setn[i].
-      {
-        //R1: Gaussian centered at Rx=0,     Ry=0,    Rz=0
-        double dist = sqrt(rx*rx + ry*ry+rz*rz);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-      }
-      {
-        //R2: Gaussian centered at Rx=a/2,   Ry=a/2,  Rz=0
-        double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
-                           (ry-lattice_constant/2)*(ry-lattice_constant/2) +
-                           rz*rz);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R3: Gaussian centered at Rx=-a/2,  Ry=a/2,  Rz=0
-        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
-                    (ry-lattice_constant/2)*(ry-lattice_constant/2) +
-                    rz*rz);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R4: Gaussian centered at Rx=a/2,   Ry=-a/2, Rz=0
-        dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
-                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
-                    rz*rz);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R5: Gaussian centered at Rx=-a/2,  Ry=-a/2, Rz=0
-        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
-                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
-                    rz*rz);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-      }
-      {
-        //R6:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=a/2
-        double dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
-                           (ry-lattice_constant/2)*(ry-lattice_constant/2) +
-                           rx*rx);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R7:  Gaussian centered at Rx=0,    Ry=a/2,  Rz=-a/2
-        dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
-                    (ry-lattice_constant/2)*(ry-lattice_constant/2) +
-                    rx*rx);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R8:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=a/2
-        dist = sqrt((rz-lattice_constant/2)*(rz-lattice_constant/2) +
-                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
-                    rx*rx);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R9:  Gaussian centered at Rx=0,    Ry=-a/2, Rz=-a/2
-        dist = sqrt((rz+lattice_constant/2)*(rz+lattice_constant/2) +
-                    (ry+lattice_constant/2)*(ry+lattice_constant/2) +
-                    rx*rx);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-      }
-      {
-        //R10: Gaussian centered at Rx=a/2,  Ry=0,    Rz=a/2
-        double dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
-                           (rz-lattice_constant/2)*(rz-lattice_constant/2) +
-                           ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R11: Gaussian centered at Rx=-a/2, Ry=0,    Rz=a/2
-        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
-                    (rz-lattice_constant/2)*(rz-lattice_constant/2) +
-                    ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R12: Gaussian centered at Rx=a/2,  Ry=0,    Rz=-a/2
-        dist = sqrt((rx-lattice_constant/2)*(rx-lattice_constant/2) +
-                    (rz+lattice_constant/2)*(rz+lattice_constant/2) +
-                    ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-
-        //R13: Gaussian centered at Rx=-a/2,  Ry=0,   Rz=-a/2
-        dist = sqrt((rx+lattice_constant/2)*(rx+lattice_constant/2) +
-                    (rz+lattice_constant/2)*(rz+lattice_constant/2) +
-                    ry*ry);
-        setn[i] += norm*exp(-0.5*dist*dist/gwidth/gwidth);
-      }
-      //Integrate n(r) computationally to check number of spheres in one cell
-      N_crystal = (setn[i]*dV) + N_crystal;
-    }
-    if (verbose) {
-      printf("Integrated number of spheres in one crystal cell is %g but we want %g\n",
-             N_crystal, reduced_num_spheres);
-    }
-    setn = setn*(reduced_num_spheres/N_crystal);  //Normalizes setn
-    if (verbose) {
-      double checking_normalized_num_spheres = 0;
-      for (int i=0; i<Ntot; i++) {
-        checking_normalized_num_spheres += setn[i]*dV;
-      }
-      printf("Integrated number of spheres in one crystal cell is NOW %.16g and we want %.16g\n",
-             checking_normalized_num_spheres, reduced_num_spheres);
-    }
-  }
-
-  //printf("crystal free energy is %g\n", f.energy());
-  double crystal_free_energy = f.energy()/reduced_num_spheres; // free energy per atom
-  data data_out;
-  data_out.diff_free_energy_per_atom=crystal_free_energy - homogeneous_free_energy;
-  data_out.cfree_energy_per_atom=crystal_free_energy;
-  data_out.hfree_energy_per_vol=hf.energy();
-  data_out.cfree_energy_per_vol=f.energy()/(lattice_constant*lattice_constant*lattice_constant);
-
-  if (verbose) {
-    printf("Crystal free energy is %g\n", crystal_free_energy);
-
-    f.printme("Crystal stuff!");
-    if (f.energy() != f.energy()) {
-      printf("FAIL!  nan for initial energy is bad!\n");
-    }
-
-    if (crystal_free_energy < homogeneous_free_energy) {
-      printf("Crystal Free Energy is LOWER than the Liquid Cell Free Energy!!!\n\n");
-    } else printf("TRY AGAIN!\n\n");
-  }
-
-  // Create all output data filename
-  char *alldat_filename = new char[1024];
-  char *alldat_filedescriptor = new char[1024];
-  sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
-          temp, reduced_density, fv, gwidth);
-  sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
-  printf("Create data file: %s\n", alldat_filename);
-
-  //Create dataout file
-  FILE *newmeltoutfile = fopen(alldat_filename, "w");
-  if (newmeltoutfile) {
-    fprintf(newmeltoutfile, "# git  version: %s\n", version_identifier());
-    fprintf(newmeltoutfile, "#T\tn\tfv\tgwidth\thFE/atom\tcFE/atom\tFEdiff/atom\tlat_const\tNsph\tdx\n");
-    fprintf(newmeltoutfile, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",
-            temp, reduced_density, fv, gwidth, homogeneous_free_energy,
-            crystal_free_energy, crystal_free_energy-homogeneous_free_energy,
-            lattice_constant, reduced_num_spheres, dx);
-    fclose(newmeltoutfile);
-  } else {
-    printf("Unable to open file %s!\n", alldat_filename);
-  }
-  delete[] alldat_filename;
-  return data_out;
-}
 
 //+++++++++++++Downhill Simplex Functions+++++++++++++++
 
@@ -1478,10 +1235,7 @@ int main(int argc, const char **argv) {
   //};
 
   char *data_dir = new char[1024];
-  sprintf(data_dir,"none");
-  char *default_data_dir = new char[1024];
-  //sprintf(default_data_dir, "crystallization/data");
-  sprintf(default_data_dir, "crystallization");
+  sprintf(data_dir,"crystallization");
 
 
   //********************Setup POPT to get inputs from command line*******************
@@ -1490,18 +1244,23 @@ int main(int argc, const char **argv) {
   // Parse input options
   // ----------------------------------------------------------------------------
 
+  bool show_version = false;
   poptOption optionsTable[] = {
 
     {
       "verbose", '\0', POPT_ARG_NONE, &verbose, 0,
       "Print lots of good stuff!", "BOOLEAN"
     },
+    {
+      "version", '\0', POPT_ARG_NONE, &show_version, 0,
+      "Show the git-describe version", "BOOLEAN"
+    },
 
     /*** FLUID PARAMETERS ***/
     {"kT", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &temp, 0, "temperature", "DOUBLE"},
     {"n", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &reduced_density, 0, "number density times WCA sigma^3", "DOUBLE"},
-    {"fv", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv, 0, "fraction of vacancies", "DOUBLE or -1 for loop"},
-    {"gw", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw, 0, "width of Gaussian", "DOUBLE or -1 for loop (without lattice ref) or -2 loop (with lattice ref)"},
+    {"fv", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv, 0, "fraction of vacancies", "DOUBLE"},
+    {"gw", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &gw, 0, "width of Gaussian", "DOUBLE"},
 
     /*** LOOPING OPTIONS ***/
     {"fvstart", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &fv_start, 0, "start fv loop at", "DOUBLE"},
@@ -1528,8 +1287,8 @@ int main(int argc, const char **argv) {
     {"mc-error", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &MC_ERROR, 0, "Desired error in Monte-Carlo", "DOUBLE"},
     {"seed", '\0', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT, &seed, 0, "Monte-Carlo seed", "DOUBLE"},
 
-    {"mc-prefactor", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_prefactor, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
-    {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo seed", "LONG"},   //temporary - delete later!
+    {"mc-prefactor", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_prefactor, 0, "Monte-Carlo mc-prefactor", "LONG"},   //temporary - delete later!
+    {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo mc-constant", "LONG"},   //temporary - delete later!
 
     /*** Tensor Weight OPTION ***/
     {"tensor", '\0', POPT_ARG_NONE | POPT_ARGFLAG_SHOW_DEFAULT, &use_tensor_weight, 0, "Include Tensor weight in SFMT", "BOOLEAN"},
@@ -1561,6 +1320,10 @@ int main(int argc, const char **argv) {
     return 1;
   }
   poptFreeContext(optCon);
+  if (show_version) {
+    printf("new-melting version %s (should match `git describe --dirty`)\n", version_identifier());
+    exit(0);
+  }
 
   random::seed(seed);
 
@@ -1579,12 +1342,7 @@ int main(int argc, const char **argv) {
   printf("\nTemperature=%g, Reduced homogeneous density=%g, Fraction of vacancies=%g, Gaussian width=%g\n", temp, reduced_density, fv, gw);
 
   // Create directory for data files
-  if (strcmp(data_dir,"none") == 0) {
-    sprintf(data_dir,"%s",default_data_dir);
-    printf("\nUsing default data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
-  } else {
-    printf("\nUsing given data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
-  }
+  printf("\nUsing data directory: [deft/papers/fuzzy-fmt]/%s\n", data_dir);
   mkdir(data_dir, 0777);
 
   // Downhill Simplex
@@ -1690,8 +1448,9 @@ int main(int argc, const char **argv) {
   }
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  printf("mc-prefactor=%ld\n", mc_prefactor);   //temporary -delete!
-  printf("mc-constant=%ld\n", mc_constant);     //temporary -delete!
+  //printf("mc-error=%lg\n", MC_ERROR)
+  //printf("mc-prefactor=%ld\n", mc_prefactor);
+  //printf("mc-constant=%ld\n", mc_constant);
 
   if (fv == -1) {
     printf("fv loop variables: fv start=%g, fv_end=%g, fv step=%g\n", fv_start, fv_end, fv_step);
@@ -1728,7 +1487,6 @@ int main(int argc, const char **argv) {
       }
 
       for (double gwidth=gw_start; gwidth < gw_end +0.1*gw_step; gwidth+=gw_step) {
-        //data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
         data e_data =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
         num_computed += 1;
         if (num_computed % (num_to_compute/100) == 0) {
@@ -1787,7 +1545,6 @@ int main(int argc, const char **argv) {
     printf("gw is %g\n", gw);
     printf ("gwend=%g, gwstep=%g   \n\n", gw_end, gw_step);
     for (double gwidth=gw_start; gwidth < gw_end + 0.1*gw_step; gwidth+=gw_step) {
-      //data e_data =find_energy(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
       data e_data =find_energy_new(temp, reduced_density, fv, gwidth, data_dir, dx, bool(verbose));
       if (e_data.diff_free_energy_per_atom < best_energy_diff) {
         best_energy_diff = e_data.diff_free_energy_per_atom;
@@ -1825,7 +1582,6 @@ int main(int argc, const char **argv) {
     delete[] bestdat_filename;
 
   } else {
-    //find_energy(temp, reduced_density, fv, gw, data_dir, dx, true);    //no bestdataout needed for single run
     find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
   }
 

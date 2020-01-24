@@ -17,6 +17,9 @@
 \newcommand{\kk}{\textbf{k}}
 \newcommand{\refnote}{\red{[ref]}}
 
+\newcommand\davidsays[1]{{\bf \color{blue}D: #1}}
+\newcommand\kirstiesays[1]{{\bf \color{red}K: #1}}
+
 \newcommand{\fixme}[1]{\red{[#1]}}
 
 \begin{document}
@@ -46,6 +49,37 @@
 \end{abstract}
 
 \maketitle
+
+\subsection{\kirstiesays{Kirstie to-do list}}
+\begin{enumerate}
+\item Use tensor functional in src/haskell/SFMT.hs (for walls and
+  radial distribution function).
+\item Document all the Fourier transforms we are using.
+\item Find new expressions for alpha and Xi based on virial expansion.
+\item Edit paper to describe/use tensor functional.
+\item Add Kirstie to author list of paper.
+\item Write up section on freezing with figures.
+\item Decide which equation of state figure to use. (And make pretty.)
+\item Touch up the freezing figures.
+\item Work out how tensor weight in Fourier space relates to the tensor density.
+  \begin{align}
+    n_{m2ij}(\vec r) &= \int n(\vec r') w_{m2ij}(\vec r- \vec r')d\vec r' \\
+    w_{m2ij}(\vec r) &= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\\
+    n_{m2ij}(\vec r) &= \int n(\vec r') d\vec r' \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')} \\
+    &= \int d\vec r' \left(\frac1{2\pi}\int d\vec k' n(\vec k')e^{i\vec k'\cdot \vec r'}\right) \left(\frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')}\right) \\
+    &=  \frac1{2\pi}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)
+    e^{i\vec k\cdot \vec r}\left(\frac1{2\pi}\int d\vec r'e^{i(\vec k'-\vec k)\cdot \vec r'}\right)
+    \\
+    &= \frac1{2\pi}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\delta(\vec k'-\vec k)
+    \\
+    &= \frac1{2\pi}\int d\vec k\, n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
+  \end{align}
+\end{enumerate}
+
+\subsection{Meeting to-do list}
+\begin{enumerate}
+\item Look together at Haskell tensor stuff.
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
 \section{Introduction}
@@ -209,12 +243,12 @@ Alternatively, one can
 construct a $w_2$ and use Equation~\ref{eq:mayerandw2} to solve for the pair potential that weighting
 function represents.
 In this paper, we will make use of the \emph{error function model} (or
-\emph{erf model}) introduced by Schmidt in
+\emph{erf model}) introduced by Schmidt in 
 Ref.~\citenum{schmidt2000fluid}, which is a analytically simple
 functional form.  In the erf model, the weighting function $w_2$ has the form of a Gaussian %The erf model corresponds to a Gaussian form for the
 %weighting function $w_2$:
 \begin{align}
-  w_2(r) &= \frac{\sqrt{2}}{\Xi \sqrt{\pi}} e^{-\frac{(r-\alpha/2)^2}{\left(\frac{\Xi}{\sqrt{2}}\right)^2}}
+  w_2(r) &= \frac{\sqrt{2}}{\Xi \sqrt{\pi}} e^{-\left( \frac{r-\alpha/2}{\frac{\Xi}{\sqrt{2}}} \right)^2}
   \label{eq:gaussianw2}
 \end{align}
 where $\Xi$ and $\alpha$ are parameters with dimensions of length.

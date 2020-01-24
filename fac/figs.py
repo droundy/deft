@@ -1,4 +1,5 @@
 #!/usr/bin/python2
+from __future__ import division, print_function
 
 import re, string, os, sys
 
@@ -25,7 +26,7 @@ def friendly_eval(code, context, local = None):
     try:
         return eval(code, local)
     except:
-        print ("\n# Error evaluating '%s' from file %s" % (code, context))
+        print("\n# Error evaluating '%s' from file %s" % (code, context))
         sys.stderr.write("\nError evaluating '%s' from file %s\n" % (code, context))
         return None
 
@@ -73,7 +74,7 @@ for fname in pyfs:
                     newallvalues.append(newav)
             allvalues = newallvalues
         for a in allvalues:
-            aa = commandlineformat % friendly_eval('(' + string.join(commandlineargs, ",") + ')', 'file '+ fname, a)
+            aa = commandlineformat % friendly_eval('(' + ','.join(commandlineargs) + ')', 'file '+ fname, a)
             extrainputs = []
             extraoutputs = []
             for i in list_inputs:
@@ -82,31 +83,33 @@ for fname in pyfs:
                 #print 'found', fnames
                 extrainputs += fnames
             for i in cinputs:
-                extrainputs.append(i[0] % friendly_eval(i[1], fname, a))
+                xxx = friendly_eval(i[1], fname, a)
+                if xxx is not None:
+                    extrainputs.append(i[0] % xxx)
             for o in coutputs:
                 extraoutputs.append(o[0] % friendly_eval(o[1], fname, a))
-            print "? python2 %s %s" % (fname, aa)
+            print("? python3 %s %s" % (fname, aa))
             for i in inputs + extrainputs:
-                print '<', i
+                print('<', i)
             for o in outputs + extraoutputs:
-                print '>', o
-            print 'c .pyc'
+                print('>', o)
+            print('c .pyc')
             for suf in cache_suffixes:
-                print 'c', suf
-            print 'C %s/.matplotlib' % os.getenv('HOME')
-            print 'C %s/.cache' % os.getenv('HOME')
-            print
+                print('c', suf)
+            print('C %s/.matplotlib' % os.getenv('HOME'))
+            print('C %s/.cache' % os.getenv('HOME'))
+            print()
     else:
-        print '? python2', fname
+        print('? python3', fname)
         for i in list_inputs:
             inputs += friendly_eval(i, fname, {})
         for i in inputs:
-            print '<', i
+            print('<', i)
         for o in outputs:
-            print '>', o
-        print 'c .pyc'
+            print('>', o)
+        print('c .pyc')
         for suf in cache_suffixes:
-            print 'c', suf
-        print 'C %s/.matplotlib' % os.getenv('HOME')
-        print 'C %s/.cache' % os.getenv('HOME')
-        print
+            print('c', suf)
+        print('C %s/.matplotlib' % os.getenv('HOME'))
+        print('C %s/.cache' % os.getenv('HOME'))
+        print()

@@ -16,10 +16,14 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "new/HomogeneousSFMTFluidFast.h"
 #include "equation-of-state.h"
 #include "utilities.h"
 #include "handymath.h"
+
+#include "new/SFMTFluidVeffFast.h"
+#include "new/HomogeneousSFMTFluidFast.h"
+
+#include "findxi.h"
 
 // The following tells fac how to run the executable to generate a
 // homogeneous.dat file.
@@ -45,15 +49,11 @@ int main(int, char **) {
   const double dn = 0.01, nmax = 2.5;
   for (double n_reduced = dn; n_reduced <= nmax; n_reduced += dn) {
     fprintf(out, "%g", n_reduced);
+    printf("n = %g\n", n_reduced);
     for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
       const double temp = T;
 
-      HomogeneousSFMTFluid hf;
-      hf.sigma() = 1; // for this computation we will use sigma as our
-      // unit of distance to keep things simple.
-      hf.epsilon() = 1;
-      hf.kT() = temp;
-      hf.n() = n_reduced;
+      HomogeneousSFMTFluid hf = sfmt_homogeneous(n_reduced, temp);
       hf.mu() = 0;
       hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
 
