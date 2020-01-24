@@ -102,6 +102,7 @@ pair potential is given by
     \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
     0, & \textrm{otherwise}.
   \end{cases}
+\label{eq:Vwca}
 \end{align}
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
@@ -272,7 +273,7 @@ analytically tractable.
 \label{fig:w2-comparison}
 \end{figure}
 
-Our approach is to approximate the effect a soft repulsive potential
+Our approach is to approximate the effect of a soft repulsive potential
 (specifically the potential of the WCA fluid) by using the erf
 potential with temperature-dependent parameters. 
 We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ at distance
@@ -283,9 +284,9 @@ the maximum slope of the Mayer $f$ function. This tells us that the $\alpha$ par
         \ln 2}} \right)^{\frac{1}{6}}.
 \end{align}
 The alpha parameter roughly measures the length-scale of the
-interaction, and like the Barker-Henderson diameter, decreases with
+interaction, and like the Barker-Henderson diameter discussed later, decreases with
 increasing temperature.  Next, we set the second virial coeffecient formed using 
-the mayer function for the $\Vwca(r)$ potential equal to the second virial coefficent formed using the mayer function for the $\Vwca(r)$ potential, and solve for the parameter $\Xi$.
+the mayer function for the $\Vwca(r)$ potential in Eq.~\ref{eq:Vwca} equal to the second virial coefficent formed using the mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, and solve for the parameter $\Xi$ at a given temperature.
 %Finally, equating the slope of both
 %potentials at $r = \alpha$ yields the other parameter
 %\begin{align}
@@ -329,20 +330,24 @@ valid in the low-temperature limit, when $\Xi\ll\alpha$.
 
 \subsection{Freezing of the WCA fluid}
 
-Freezing is governed by entropy which the universe, or any closed system, seeks to maximize according to the second law of Thermodynamics. When the entropy of a pure substance in its liquid state is lower than the entropy that it would have in its solid state at the same temperature, pressure, and chemical potential an abrupt phase transistion occurs, that is, the liquid freezes forming a crystalline structure. The particular crystalline structure and density that result are affected by the interatomic potential. 
+Freezing is governed by entropy which the universe, or any closed system, seeks to maximize according to the second law of Thermodynamics. When the entropy of a pure substance in its liquid state is lower than the entropy that it would have in its solid state at the same temperature, pressure, and chemical potential an abrupt phase transistion occurs, that is, the liquid freezes forming a crystalline structure. The particular crystalline structure and density that result are affected by the interatomic potential. When the soft sphere WCA fluid freezes, a Face Centered Cubic lattice is formed[reference!!] with a total of one atom in each parallelpiped-shaped primative cell. 
 
-When the soft sphere WCA fluid freezes, a Face Centered Cubic lattice is formed[reference!!]. The equilibrium Helmholtz free energy of the system, and its corresponding equilbirium number density profile can be found at a given temperature simply by varying $n(\vec{r})$ by changing %the spatial profile of the number density by varying 
-the width of the gaussians centered at each lattice point and the crystal cell size until the free energy is minimized. The densities at the solid-liquid transition can then be found using Maxwell's double tangent construction which equates the pressure given by the slopes of the Helmholtz free energy per atom with respect to the inverse density of the liquid and the solid respectively. Monte-Carlo Integration is employed to more efficiently compute the weighted densities.
+The equilibrium Helmholtz free energy of the crystal, and its corresponding equilibrium number density profile can be found at a given temperature simply by varying $n(\vec{r})$
+%, the spatially varying number density, 
+by changing %the spatial profile of the number density by varying 
+the width of the gaussians centered at each lattice point, and the crystal cell size until the free energy - which is a functional of $n(\vec{r})$ - is minimized. Monte-Carlo Integration is employed to more efficiently compute the weighted densities which are used to calculate the excess free energy. The excess free energy is added to the ideal free energy which is computed analytically to get the total free energy. The densities at the solid-liquid transition can then be found using Maxwell's double tangent construction which equates the pressure of the fluid and of the solid at the phase transition. The pressure is given by the negative of the slope of the Helmholtz free energy per atom with respect to the inverse number density. \begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
 
 
 
 
-\subsection{Barker-Henderson hard sphere}
+\subsection{Comparison to Barker-Henderson hard sphere}
 
-Another approach to account for the temperature dependence of
-realistic fluids is Barker-Henderson's
-approach~\cite{barker1967perturbation}. This theory takes any general
-repulsive pair potential, $V(r)$, and constructs a corresponding hard
+%Another approach to account for the temperature dependence of
+%realistic fluids is Barker-Henderson's
+%approach~\cite{barker1967perturbation}. This theory takes any general
+The Barker-Henderson fluid is known to give good results, so we use it as a reference to compare with our DFT results. 
+In the BH approach, any general
+repulsive pair potential, $V(r)$ is used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter. The hard
 sphere diameter is given by
 \begin{align}
@@ -383,11 +388,12 @@ Eqs.~\ref{eq:n-0-1}-\ref{eq:n-3}, as in SFMT.
 
 
 \section{Results}
-
-For all of our simulations, we construct a Barker-Henderson hard
+In this section the results of our SFMT method will be compared to the results of simulations for a reference fluid.
+For all of our reference simulations, we construct a Barker-Henderson hard
 sphere fluid with a diameter determined by Eq.~\ref{eq:bh-diameter}
-using the WCA potential as the pair potential. The BH fluid is known
-to give good results, so we use it as a reference for our DFT.
+using a WCA potential as the pair potential. The excess free energy functional of the 
+BH fluid is constructed using White Bear FMT. %The BH fluid is known
+%to give good results, so we use it as a reference for our DFT.
 
 \subsection{Homogeneous limit}
 
