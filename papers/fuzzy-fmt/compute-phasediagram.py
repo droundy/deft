@@ -46,9 +46,9 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     print(cmd)
     assert(os.system(cmd) == 0)
 
-kTs = np.arange(2, 0.3, -0.1)   # kT less than 0.4 don't have solutions
+#kTs = np.arange(2, 0.3, -0.1)   # kT less than 0.4 don't have solutions
 #kTs = np.arange(20, 2, -2) 
-#kTs = np.arange(200, 20, -20)
+kTs = np.arange(200, 20, -20)
 #kTs = np.arange(1.15, 0.7, -0.05)
 #kTs=np.append(kTs, 0.01)
 for kT in kTs:
