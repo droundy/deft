@@ -15,9 +15,11 @@ USING_PART_OF_NAMESPACE_EIGEN
 #include <string.h>
 
 #include "version-identifier.h"
+#include "handymath.h"
 
 double ran();
 Vector3d ran3();
+double soft_wall_potential(double z);
 
 inline double distance(Vector3d v1, Vector3d v2){
   return (v1 - v2).norm();
@@ -61,7 +63,6 @@ const double sigma = R*pow(2,5.0/6.0);
 double sig_wall = R_T*pow(2,-1.0/6.0);
 
 bool periodic[3] = {false, false, false};
-inline double max(double a, double b) { return (a>b)? a : b; }
 
 int main(int argc, char *argv[]){
   if (argc < 6) {
@@ -577,7 +578,12 @@ int main(int argc, char *argv[]){
         }
         fprintf(out, "# %s\n", version_identifier());
         if (flat_div){
-          fprintf(out, "%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0]);
+          if (soft_wall) {
+            fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
+                    soft_wall_potential(0.5*(sections[0]+sections[1])));
+          } else {
+            fprintf(out, "%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0]);
+          }
         } else if (spherical_inner_wall || testp) {
           fprintf(out, "%g\t%g\n", radius[0], 0.0);
           fprintf(out, "%g\t%g\n", 0.5*(radius[0]+radius[1]), density[0]);
@@ -830,10 +836,6 @@ int main(int argc, char *argv[]){
   fflush(stdout);
 }
 
-inline double sqr(double x) {
-  return x*x;
-}
-
 inline double potential(double r) {
   if (r >= 2*R) return 0;
   //eps is defined to give the same curvature at r=2R for both potentials
@@ -847,7 +849,7 @@ inline double soft_wall_potential(double z) {
     z = lenz/2 - z;
   }
   if (z >  R_T) return 0;
-  return 2*M_PI*rho*eps*((pow(z,3) - pow(R_T,3))/6 + 2*pow(sig_wall,12)*(1/pow(z,9)-1/pow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*pow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*pow(sig_wall/R_T,10)/5) + pow(sig_wall,6)*(1/pow(R_T,3)-1/pow(z,3))/3);
+  return 2*M_PI*rho*eps*((uipow(z,3) - uipow(R_T,3))/6 + 2*uipow(sig_wall,12)*(1/uipow(z,9)-1/uipow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*uipow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*uipow(sig_wall/R_T,10)/5) + uipow(sig_wall,6)*(1/uipow(R_T,3)-1/uipow(z,3))/3);
 }
 
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
