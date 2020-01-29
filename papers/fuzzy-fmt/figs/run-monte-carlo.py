@@ -8,7 +8,7 @@ figsdir = 'papers/fuzzy-fmt/figs/'
 bindir = '.'
 
 # always remember to build the executable before running it
-system('scons soft-monte-carlo')
+system('fac soft-monte-carlo')
 
 def run_homogeneous(n_reduced, temperature, pot = ""):
     nspheres = round(n_reduced*2**(-5.0/2.0)*30**3)
@@ -28,8 +28,8 @@ def run_soft_walls(n_reduced, nspheres, temperature):
     if nspheres == 0:
         nspheres = round(n_reduced*2**(-5.0/2.0)*30**2*32) # reasonable guess
     filename = '%s/mc-soft-wall-%.4f-%.4f-%d' % (figsdir, n_reduced, temperature, nspheres)
-    system("srun --mem=60 -J wcawalls-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxy 30 softwallz 1 kT %g > %s.out 2>&1 &" %
-           (n_reduced, temperature, bindir, nspheres, filename, temperature, filename))
+    system("rq run -J wcawalls-%.4f-%.4f %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxy 30 softwallz 1 kT %g" %
+           (n_reduced, temperature, bindir, nspheres, filename, temperature))
 
 def run_test_particle(n_reduced, temperature, testp_sigma,testp_eps,pot = ""):
     nspheres = round(n_reduced*2**(-5.0/2.0)*30**3)
