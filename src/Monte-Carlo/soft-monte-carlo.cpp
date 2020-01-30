@@ -598,7 +598,12 @@ int main(int argc, char *argv[]){
           }
         } else {
           for(long i=1; i<div; i++){
-            fprintf(out, "%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i]);
+            if (soft_wall) {
+              fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i],
+                      soft_wall_potential(0.5*(sections[i]+sections[i+1])));
+            } else {
+              fprintf(out, "%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i]);
+            }
           }
         }
         fclose(out);

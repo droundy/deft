@@ -97,6 +97,12 @@ run_soft_walls(1.0, 0, 2.5)
 run_soft_walls(1.0, 0, 1.0)
 run_soft_walls(1.0, 0, 0.1)
 
+run_soft_walls(0.6, 0, 10.0)
+run_soft_walls(0.6, 0, 5.0)
+run_soft_walls(0.6, 0, 2.5)
+run_soft_walls(0.6, 0, 1.0)
+run_soft_walls(0.6, 0, 0.1)
+
 # run_FCC_walls(0.6, 10.0, 0.95044, "wca")
 # run_FCC_walls(0.6, 2.5, 0.9577, "wca")
 # run_FCC_walls(0.6, 0.1, 0.9740, "wca")
