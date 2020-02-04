@@ -576,6 +576,11 @@ int main(int argc, char *argv[]){
           printf("Error creating file %s\n", outfilename);
           return 1;
         }
+        fprintf(out, "#");
+        for (const char **a = argv; a; a += 1) {
+          fprintf(out, " %s", *a);
+        }
+        fprintf(out, "\n");
         fprintf(out, "# %s\n", version_identifier());
         if (flat_div){
           if (soft_wall) {
@@ -847,14 +852,34 @@ inline double potential(double r) {
   return (4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps);
 }
 
+// This potential is copied from the DFT code.
 inline double soft_wall_potential(double z) {
+  const double epsilon = eps;
+  // now we set z=0 to be overlap with the wall (and infinite potential)
   if (z < 0) {
     z = lenz/2 + z;
   } else {
     z = lenz/2 - z;
   }
-  if (z >  R_T) return 0;
-  return 2*M_PI*rho*eps*((uipow(z,3) - uipow(R_T,3))/6 + 2*uipow(sig_wall,12)*(1/uipow(z,9)-1/uipow(R_T,9))/45 + (R_T-z)*(R_T*R_T/2 + sig_wall*sig_wall*uipow(sig_wall/R_T,4) - 2*sig_wall*sig_wall*uipow(sig_wall/R_T,10)/5) + uipow(sig_wall,6)*(1/uipow(R_T,3)-1/uipow(z,3))/3);
+  const double R_0 = 2*sigma/pow(2,5.0/6.0);
+  const double rho = 1.0; // wall density
+
+  if (z >= R_0) return 0;
+
+  const double sig = sigma;
+  const double sig6 = pow(sig,6);
+  const double sig12 = pow(sig,12);
+  const double z3 = pow(z,3);
+  const double z9 = pow(z,9);
+  const double R3 = pow(R_0,3);
+  const double R9 = pow(R_0,9);
+
+  double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
+                                         + 2*sig12*(1/z9 - 1/R9)/45
+                                         + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4)
+                                             - 2*sig12/5/pow(R_0,10))
+                                         + sig6*(1/R3-1/z3)/3);
+  return potential;
 }
 
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
