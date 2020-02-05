@@ -780,17 +780,21 @@ This is the same as -2 times equation \ref{compare_equation}, and so \begin{equa
 \[{}\]
 %GOOD TO HERE
 \subsection{Transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero}
-\[{}\]
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
-\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
+\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+Term 1: 
 \color{green}
 \begin{equation}{\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})}\end{equation}
 \begin{displaymath}{\approx\left(-\frac{\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(1-\left(\frac{1}{2}\right)\frac{k^2\alpha^2}{4}\right)}\end{displaymath} 
 \begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}}\end{displaymath} 
+\color{black}
+Term 2:
 \color{blue}
 \begin{equation}{-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{equation} 
 \begin{displaymath}{\approx\left(-\frac{2\pi\alpha}{3k}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(\frac{k\alpha}{2}\right)}\end{displaymath} 
-\begin{displaymath}{\approx}-\frac{\pi\alpha^2}{3}\end{displaymath} 
+\begin{displaymath}{\approx}-\frac{\pi\alpha^2}{3}\end{displaymath}
+\color{black} 
+Term 3:
 \color{red}
 \begin{equation}{\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
 \begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)\right)\right]}\end{displaymath} 
@@ -801,11 +805,11 @@ Adding the three terms gives:
 \begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}-\frac{\pi\alpha^2}{3}+\frac{4\pi}{k^2}-\frac{\pi\alpha^2}{6}-\frac{\pi\Xi^2}{6}}\end{displaymath} 
 \begin{displaymath}{\approx0}\end{displaymath} 
 \[{}\]
+
+
 \subsection{The tensor weight components in the coordinate system (x,y,z)}
 The tensor weight components in the coordinate system $(x',y',z')$ are:
-
 \begin{equation}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
-
 \begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\hat{x'}\hat{x'}+\widetilde{w}_{{m2}_{y'y'}}\hat{y'}\hat{y'}+\widetilde{w}_{{m2}_{z'z'}}\hat{z'}\hat{z'}}\end{displaymath}
 where vector had been aligned with the $\hat{z}$ direction so that 
 \begin{equation}{\hat{k}=\hat{z'}}\end{equation}
@@ -821,11 +825,11 @@ and the results from earlier
 \begin{equation}{\widetilde{w}_{{m2}_{y'y'}}=\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
 \begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
 results in
-
 \begin{displaymath}{\widetilde{w}_{m2}(\vec{k})= (1-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
 and so 
 \begin{displaymath}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3k_ik_j)\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
 \[{}\]
+
 
 \[{}\]
 \subsection{Integrals used to compute tensor weights}
@@ -838,7 +842,6 @@ and so
 \begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}}}\end{equation}
 \begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}\left[\cos(kau)\cos(\frac{k\alpha}{2})-\sin(kau)\sin(\frac{k\alpha}{2})\right]d{u}}}\end{displaymath}  
 \begin{equation}{=a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})}\end{equation} 
-\[{}\]
 \[{}\]
 \begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}}}\end{equation} 
 \begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}(au+\frac{\alpha}{2})\sin(k(au+\frac{\alpha}{2}))d{u}}}\end{displaymath} 
@@ -862,12 +865,18 @@ and so
 \[{}\]
 
 \subsection{Deriviation of Tensor Density} 
-Deriviation of tensor density $n_{m2ij}(\vec{r})$ from Fourier space tensor weights:
 %Work out how tensor weight in Fourier space relates to the tensor density:
-\begin{equation}{\overleftrightarrow{n}_{m2}(\vec{r})=\int_{allspace}n(\vec{r'})\overleftrightarrow{w}_{m2}(|\vec{r}-\vec{r'}|)d{\vec{r'}}}\end{equation} 
+\noindent The tensor density is given by:
+\begin{equation}{\overleftrightarrow{n}_{m2}(\vec{r})=\int_{allspace}n(\vec{r'})\overleftrightarrow{w}_{m2}(|\vec{r}-\vec{r'}|)d{\vec{r'}}}\end{equation}
+%ERROR below?? Shoud it be:
+with tensor elements  
+\begin{displaymath}{n_{m2_{ij}}(\vec{r})=\int_{allspace}n(\vec{r'})w_{m2_{ij}}(|\vec{r}-\vec{r'}|)d{r'}}\end{displaymath} 
+where
+\begin{displaymath}{w_{m2ij}(\vec r)= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}}\end{displaymath} 
+Deriviation of tensor density $n_{m2ij}(\vec{r})$ 
 \begin{align}
     n_{m2ij}(\vec r) &= \int_{allspace} n(\vec r') w_{m2ij}(\vec r- \vec r')d\vec r' \\
-    w_{m2ij}(\vec r) &= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\\
+%    w_{m2ij}(\vec r) &= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\\
     n_{m2ij}(\vec r) &= \int n(\vec r') d\vec r' \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')} \\
     &= \int d\vec r' \left(\frac1{2\pi}\int d\vec k' n(\vec k')e^{i\vec k'\cdot \vec r'}\right) \left(\frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')}\right) \\
     &=  \frac1{2\pi}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)
@@ -877,16 +886,8 @@ Deriviation of tensor density $n_{m2ij}(\vec{r})$ from Fourier space tensor weig
     \\
     &= \frac1{2\pi}\int d\vec k\, n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
   \end{align} 
-
 \[{}\]
 
-ERROR ABOVE?? Shoud it be:
-\begin{displaymath}{n_{m2_{ij}}(\vec{r})=\int_{allspace}n(\vec{r'})w_{m2_{ij}}(|\vec{r}-\vec{r'}|)d{r'}}\end{displaymath} 
-\[{}\]
-
-
-
-\[{}\]
 
 \subsection{Deriviation of Phi3}
 %\textbf{Deriviation of $\Phi_3$}
