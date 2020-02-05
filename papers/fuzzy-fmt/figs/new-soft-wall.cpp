@@ -22,15 +22,16 @@
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 
+const double sigma = 1;
+const double epsilon = 1;
+
 #include "findxi.h"
 
 // Here we set up the lattice.
-static double width = 20;
-const double dx = 0.001;
-const double dw = 0.002;
-const double spacing = 1.5; // space on each side
-const double epsilon = 1.0;
-const double radius = 1.0;
+static double width = 30;
+const double dx = 0.01;
+const double dw = 0.01;
+const double spacing = 3.0; // space on each side
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -43,7 +44,7 @@ static void took(const char *name) {
 }
 
 double soft_wall_potential(double z, double Vcutoff) {
-  const double R_0 = 2*radius;
+  const double R_0 = 2*sigma/pow(2,5.0/6.0);
   const double rho = 1.0; // wall density
   z = fabs(z);
 
@@ -52,13 +53,12 @@ double soft_wall_potential(double z, double Vcutoff) {
 
   z = z - spacing; // now we set z=0 to be overlap with the wall (and infinite potential)
 
-  const double sig = radius*pow(2,5.0/6.0);
-  const double sig6 = pow(sig,6);
-  const double sig12 = pow(sig,12);
-  const double z3 = pow(z,3);
-  const double z9 = pow(z,9);
-  const double R3 = pow(R_0,3);
-  const double R9 = pow(R_0,9);
+  const double sig6 = uipow(sigma,6);
+  const double sig12 = uipow(sigma,12);
+  const double z3 = uipow(z,3);
+  const double z9 = uipow(z,9);
+  const double R3 = uipow(R_0,3);
+  const double R9 = uipow(R_0,9);
 
   double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
                                          + 2*sig12*(1/z9 - 1/R9)/45
@@ -75,7 +75,6 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   min.set_maxiter(10000);
   min.set_miniter(9);
   min.precondition(true);
-  if (reduced_density == 0.4 && kT == 0.01) min.set_known_true_energy(-2.41098243257584e-07);
 
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
@@ -107,7 +106,7 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   //   fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
   // }
   for (int i=0; i<Nz/2; i++) {
-    fprintf(o, "%g\t%g\n", (rz[i] - spacing)/f->sigma(), n[i]*uipow(f->sigma(), 3));
+    fprintf(o, "%g\t%g\t%g\n", (rz[i] - spacing)/sigma, n[i]*uipow(sigma, 3), Vext[i]);
     // fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
   }
   fclose(o);

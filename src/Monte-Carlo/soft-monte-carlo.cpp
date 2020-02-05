@@ -33,7 +33,7 @@ double potentialEnergy(Vector3d *spheres, long n, double R);
 inline Vector3d fixPeriodic(Vector3d newv);
 
 double kT;
-double eps = 1;
+double epsilon = 1;
 double rho = 1;
 bool testp = false;
 bool has_x_wall = false;
@@ -584,7 +584,7 @@ int main(int argc, char *argv[]){
         fprintf(out, "# %s\n", version_identifier());
         if (flat_div){
           if (soft_wall) {
-            fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0],
+            fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[0]+sections[1])/sigma, density[0]*uipow(sigma,3),
                     soft_wall_potential(0.5*(sections[0]+sections[1])));
           } else {
             fprintf(out, "%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0]);
@@ -848,13 +848,12 @@ int main(int argc, char *argv[]){
 
 inline double potential(double r) {
   if (r >= 2*R) return 0;
-  //eps is defined to give the same curvature at r=2R for both potentials
-  return (4*eps*(pow(sigma/r,12) - pow(sigma/r,6)) + eps);
+  //epsilon is defined to give the same curvature at r=2R for both potentials
+  return (4*epsilon*(pow(sigma/r,12) - pow(sigma/r,6)) + epsilon);
 }
 
 // This potential is copied from the DFT code.
 inline double soft_wall_potential(double z) {
-  const double epsilon = eps;
   // now we set z=0 to be overlap with the wall (and infinite potential)
   if (z < 0) {
     z = lenz/2 + z;
@@ -866,13 +865,12 @@ inline double soft_wall_potential(double z) {
 
   if (z >= R_0) return 0;
 
-  const double sig = sigma;
-  const double sig6 = pow(sig,6);
-  const double sig12 = pow(sig,12);
-  const double z3 = pow(z,3);
-  const double z9 = pow(z,9);
-  const double R3 = pow(R_0,3);
-  const double R9 = pow(R_0,9);
+  const double sig6 = uipow(sigma,6);
+  const double sig12 = uipow(sigma,12);
+  const double z3 = uipow(z,3);
+  const double z9 = uipow(z,9);
+  const double R3 = uipow(R_0,3);
+  const double R9 = uipow(R_0,9);
 
   double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
                                          + 2*sig12*(1/z9 - 1/R9)/45
