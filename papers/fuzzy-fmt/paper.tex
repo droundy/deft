@@ -875,7 +875,8 @@ where
 \begin{displaymath}{w_{m2ij}(\vec r)= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}}\end{displaymath} 
 Deriviation of tensor density $n_{m2ij}(\vec{r})$ 
 \begin{align}
-    n_{m2ij}(\vec r) &= \int_{allspace} n(\vec r') w_{m2ij}(\vec r- \vec r')d\vec r' \\
+ %   n_{m2ij}(\vec r) &= \int_{allspace} n(\vec r') w_{m2ij}(\vec r- \vec r')d\vec r' \\
+     n_{m2_{ij}(\vec{r})=\int_{allspace}n(\vec{r'})w_{m2_{ij}}(|\vec{r}-\vec{r'}|)d{r'} 
 %    w_{m2ij}(\vec r) &= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\\
     n_{m2ij}(\vec r) &= \int n(\vec r') d\vec r' \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')} \\
     &= \int d\vec r' \left(\frac1{2\pi}\int d\vec k' n(\vec k')e^{i\vec k'\cdot \vec r'}\right) \left(\frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')}\right) \\
