@@ -619,10 +619,11 @@ Appendix
 \begin{enumerate}
 \item A. Fourier Transfrom of Weight Function $w_0(r)$  
 \item B. Foureir Transform of Tensor Weight $\overleftrightarrow{w}_{m2}(r)$
-\item ( C. The tensor weight components in the coordinate system (x,y,z) )
-\item D. Integrals used to compute tensor weights
-\item E. Deriviation of Tensor Density $n_{m2ij}(\vec{r})$ - Work out how tensor weight in Fourier space relates to the tensor density.
-\item F. Deriviation of $\Phi_3$ 
+\item C. show trasform of tensor weight $\overleftrightarrow{w}_{m2}(r)$ goes to zero as k goes to 0
+\item ( D. The tensor weight components in the coordinate system (x,y,z) )
+\item E. Integrals used to compute tensor weights
+\item F. Deriviation of Tensor Density $n_{m2ij}(\vec{r})$ - Work out how tensor weight in Fourier space relates to the tensor density.
+\item G. Deriviation of $\Phi_3$ 
 \end{enumerate}
 
 
@@ -656,7 +657,7 @@ Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ 
 \color{black}
 \[{}\]
 
-\[{}\]
+
 \subsection{Fourier Transform of Tensor weight ${w}_{m2}(r)$} %$\overleftrightarrow{w}_{m2}(r)$
 %\textbf{Tensor Weight $\overleftrightarrow{w}_{m2}(r)$:}
 \begin{equation}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation}
@@ -725,21 +726,22 @@ Calculate $\widetilde{w}_{{m2}_{x'x'}}(k)$
 Set the lower limit to -infinity since the integrand is nearly zero by the time r is zero. 
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{4\sqrt{\pi}}{3ka}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}\right)}\end{displaymath} 
 \begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}\right)}\end{displaymath} 
-\begin{equation}{+\frac{\sqrt{\pi}}{k^3a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right)}\end{equation} 
+\begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right)}\end{equation} 
 \[{}\]
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{4\sqrt{\pi}}{3ka}\left(a^2\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{ka^2\alpha}{4}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})\right)}\end{displaymath} 
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{-4\sqrt{\pi}}{3ka}\left(\frac{ka^3}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{a\alpha}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})\right)}\end{displaymath} 
 \begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})\right)}\end{displaymath} 
 \begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\frac{\pi}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]\right)}\end{equation} 
 \[{}\]
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=4{\pi}e^{-\left(\frac{ka}{2}\right)^2}\left[\left(\frac{a}{3k}-\frac{1}{k^2}\right)\cos(\frac{k\alpha}{2})+\frac{a\alpha}{12}\sin(\frac{k\alpha}{2})\right]}\end{displaymath} 
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-2\pi{a}^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{ka}{2}\right)^2}   \cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{displaymath} 
 \begin{equation}{+\frac{2\pi\sqrt{\pi}}{k^3a}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
-\[{}\] \color{red}
+\[{}\] 
 Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_{{m2}_{xx}}(k)$ becomes
-%\color{red}
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=4{\pi}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\left[\left(\frac{\Xi}{3k\sqrt{2}}-\frac{1}{k^2}\right)\cos(\frac{k\alpha}{2})+\frac{\Xi\alpha}{12*\sqrt{2}}\sin(\frac{k\alpha}{2})\right]}\end{displaymath} 
+\color{green}
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
 \begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
 \color{black}
 \[{}\]
+ 
 Calculate $\widetilde{w}_{{m2}_{y'y'}}(k)$ 
 \begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{y'})}{r^2}-\frac{\delta_{y'y'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
 \begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\sin^2\theta'\sin^2\phi'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
@@ -765,6 +767,26 @@ Calculate $\widetilde{w}_{{m2}_{z'z'}}(k)$
 \begin{equation}{-2\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}d{\cos\theta'}\right]d{r}}\end{equation}
 \color{black} 
 This is the same as -2 times equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=-2\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
+\[{}\]
+%GOOD TO HERE
+\subsection{Transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero}
+\[{}\]
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
+\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
+\color{green}
+\begin{equation}{\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})}\end{equation}
+\begin{displaymath}{\approx\left(\right)\left(\right)\left(\right)}\end{displaymath} 
+\begin{displaymath}{\approx}\end{displaymath} 
+\color{blue}
+\begin{equation}{-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{equation} 
+\begin{displaymath}{\approx\left(\right)\left(\right)\left(\right)}\end{displaymath} 
+\begin{displaymath}{\approx}\end{displaymath} 
+\color{red}
+\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+\begin{displaymath}{}\end{displaymath} 
+\begin{displaymath}{}\end{displaymath} 
+\color{black}
+
 \[{}\]
 \subsection{Transform coordinate system}
 The tensor weight components in the coordinate system (x,y,z) are
