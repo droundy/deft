@@ -577,7 +577,7 @@ int main(int argc, char *argv[]){
           return 1;
         }
         fprintf(out, "#");
-        for (const char **a = argv; a; a += 1) {
+        for (char **a = argv; a; a += 1) {
           fprintf(out, " %s", *a);
         }
         fprintf(out, "\n");
@@ -604,7 +604,7 @@ int main(int argc, char *argv[]){
         } else {
           for(long i=1; i<div; i++){
             if (soft_wall) {
-              fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i],
+              fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[i]+sections[i+1])/sigma, density[i]*uipow(sigma,3),
                       soft_wall_potential(0.5*(sections[i]+sections[i+1])));
             } else {
               fprintf(out, "%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i]);
