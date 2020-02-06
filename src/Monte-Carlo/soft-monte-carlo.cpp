@@ -606,7 +606,7 @@ int main(int argc, char *argv[]){
         } else {
           for(long i=1; i<div; i++){
             if (soft_wall) {
-              fprintf(out, "%.15g\t%g\t%.15g\n", 0.5*(sections[i]+sections[i+1])/sigma, density[i]*uipow(sigma,3),
+              fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[i]+sections[i+1])/sigma, density[i]*uipow(sigma,3),
                       soft_wall_potential(0.5*(sections[i]+sections[i+1]))/epsilon);
             } else {
               fprintf(out, "%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i]);
