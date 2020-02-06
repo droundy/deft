@@ -4,7 +4,6 @@
 static inline double soft_wall_potential(double z, double Vcutoff=1e300) {
   const double R_0 = 2*sigma/pow(2,5.0/6.0);
   const double rho = 1.0; // wall density
-  z = fabs(z);
 
   if (z >= R_0) return 0;
   if ( z < 0 ) return Vcutoff;

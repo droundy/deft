@@ -19,7 +19,12 @@ USING_PART_OF_NAMESPACE_EIGEN
 
 double ran();
 Vector3d ran3();
-double soft_wall_potential(double z);
+
+const double R = 1;
+const double sigma = R*pow(2,5.0/6.0);
+const double epsilon = 1;
+
+#include "soft-wall-potential.h"
 
 inline double distance(Vector3d v1, Vector3d v2){
   return (v1 - v2).norm();
@@ -33,7 +38,6 @@ double potentialEnergy(Vector3d *spheres, long n, double R);
 inline Vector3d fixPeriodic(Vector3d newv);
 
 double kT;
-double epsilon = 1;
 double rho = 1;
 bool testp = false;
 bool has_x_wall = false;
@@ -46,7 +50,6 @@ double leny = 20;
 double lenz = 20;
 double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
-const double R = 1;
 double R_wall = R;
 double length_of_cavity=0;
 double R_T = R + R_wall;
@@ -59,7 +62,6 @@ bool FCC=false;  //if true then face centered cubic latice
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 bool WCA = true; //Defaults to a test particle with Lennard-Jones repulsion
 bool soft_wall = false;
-const double sigma = R*pow(2,5.0/6.0);
 double sig_wall = R_T*pow(2,-1.0/6.0);
 
 bool periodic[3] = {false, false, false};
@@ -852,34 +854,6 @@ inline double potential(double r) {
   return (4*epsilon*(pow(sigma/r,12) - pow(sigma/r,6)) + epsilon);
 }
 
-// This potential is copied from the DFT code.
-inline double soft_wall_potential(double z) {
-  // now we set z=0 to be overlap with the wall (and infinite potential)
-  if (z < 0) {
-    z = lenz/2 + z;
-  } else {
-    z = lenz/2 - z;
-  }
-  const double R_0 = 2*sigma/pow(2,5.0/6.0);
-  const double rho = 1.0; // wall density
-
-  if (z >= R_0) return 0;
-
-  const double sig6 = uipow(sigma,6);
-  const double sig12 = uipow(sigma,12);
-  const double z3 = uipow(z,3);
-  const double z9 = uipow(z,9);
-  const double R3 = uipow(R_0,3);
-  const double R9 = uipow(R_0,9);
-
-  double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
-                                         + 2*sig12*(1/z9 - 1/R9)/45
-                                         + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4)
-                                             - 2*sig12/5/pow(R_0,10))
-                                         + sig6*(1/R3-1/z3)/3);
-  return potential;
-}
-
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
   double energyNew = 0.0;
   double energyOld = 0.0;
@@ -1101,7 +1075,7 @@ Vector3d move(Vector3d v,double scale){
 inline double force_times_distance(double rij) {
   if (rij > 2*R) return 0;
   //these forces are negative for repulsive forces. no particular reason
-  return -4*eps*(12*pow(sigma/rij,12) - 6*pow(sigma/rij,6));
+  return -4*epsilon*(12*pow(sigma/rij,12) - 6*pow(sigma/rij,6));
 }
 
 double calcPressure(Vector3d *spheres, long N, double volume){
