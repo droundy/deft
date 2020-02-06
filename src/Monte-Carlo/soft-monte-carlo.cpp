@@ -606,8 +606,8 @@ int main(int argc, char *argv[]){
         } else {
           for(long i=1; i<div; i++){
             if (soft_wall) {
-              fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[i]+sections[i+1])/sigma, density[i]*uipow(sigma,3),
-                      soft_wall_potential(0.5*(sections[i]+sections[i+1])));
+              fprintf(out, "%.15g\t%g\t%.15g\n", 0.5*(sections[i]+sections[i+1])/sigma, density[i]*uipow(sigma,3),
+                      soft_wall_potential(0.5*(sections[i]+sections[i+1]))/epsilon);
             } else {
               fprintf(out, "%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i]);
             }
@@ -851,7 +851,7 @@ int main(int argc, char *argv[]){
 inline double potential(double r) {
   if (r >= 2*R) return 0;
   //epsilon is defined to give the same curvature at r=2R for both potentials
-  return (4*epsilon*(pow(sigma/r,12) - pow(sigma/r,6)) + epsilon);
+  return 4*epsilon*(pow(sigma/r,12) - pow(sigma/r,6)) + epsilon;
 }
 
 bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
