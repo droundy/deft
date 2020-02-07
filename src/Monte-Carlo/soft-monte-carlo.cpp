@@ -587,7 +587,7 @@ int main(int argc, char *argv[]){
         if (flat_div){
           if (soft_wall) {
             fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[0]+sections[1])/sigma, density[0]*uipow(sigma,3),
-                    soft_wall_potential(0.5*(sections[0]+sections[1])));
+                    soft_wall_potential(lenz/2+0.5*(sections[0]+sections[1])));
           } else {
             fprintf(out, "%g\t%g\n", 0.5*(sections[0]+sections[1]), density[0]);
           }
@@ -607,7 +607,7 @@ int main(int argc, char *argv[]){
           for(long i=1; i<div; i++){
             if (soft_wall) {
               fprintf(out, "%g\t%g\t%g\n", 0.5*(sections[i]+sections[i+1])/sigma, density[i]*uipow(sigma,3),
-                      soft_wall_potential(0.5*(sections[i]+sections[i+1]))/epsilon);
+                      soft_wall_potential(lenz/2+0.5*(sections[i]+sections[i+1]))/epsilon);
             } else {
               fprintf(out, "%g\t%g\n", 0.5*(sections[i]+sections[i+1]), density[i]);
             }
@@ -888,7 +888,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     double r0 = v.norm();
     energyOld += -(4*testp_eps*(pow(testp_sigma/r0,12) - pow(testp_sigma/r0,6)));
   }
-  if (soft_wall) { energyOld += soft_wall_potential(spheres[s][2]); }
+  if (soft_wall) { energyOld += soft_wall_potential(lenz/2+spheres[s][2]); }
   for(long i = 0; i < n; i++){
     if (i != s) energyOld += potential(distance(spheres[i],spheres[s]));
   }
@@ -999,7 +999,7 @@ double potentialEnergy(Vector3d *spheres, long n, double R){
       fabs(spheres[s][1]) + 2*R >= leny/2,
       fabs(spheres[s][2]) + 2*R >= lenz/2
     };
-    if (soft_wall) { potEnergy += soft_wall_potential(spheres[s][2]); }
+    if (soft_wall) { potEnergy += soft_wall_potential(lenz/2+spheres[s][2]); }
     for(long i = s+1; i < n; i++){
       potEnergy += potential(distance(spheres[i],spheres[s]));
     }
