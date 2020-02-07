@@ -25,13 +25,15 @@
 const double sigma = 1;
 const double epsilon = 1;
 
+#include "soft-wall-potential.h"
+
 #include "findxi.h"
 
 // Here we set up the lattice.
 static double width = 30;
 const double dx = 0.01;
 const double dw = 0.01;
-const double spacing = 3.0; // space on each side
+const double spacing = 6.0; // space on one side
 
 static void took(const char *name) {
   static clock_t last_time = clock();
@@ -41,32 +43,6 @@ static void took(const char *name) {
   printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
   fflush(stdout);
   last_time = t;
-}
-
-double soft_wall_potential(double z, double Vcutoff) {
-  const double R_0 = 2*sigma/pow(2,5.0/6.0);
-  const double rho = 1.0; // wall density
-  z = fabs(z);
-
-  if (z >= (spacing + R_0)) return 0;
-  if ( z < spacing ) return Vcutoff;
-
-  z = z - spacing; // now we set z=0 to be overlap with the wall (and infinite potential)
-
-  const double sig6 = uipow(sigma,6);
-  const double sig12 = uipow(sigma,12);
-  const double z3 = uipow(z,3);
-  const double z9 = uipow(z,9);
-  const double R3 = uipow(R_0,3);
-  const double R9 = uipow(R_0,9);
-
-  double potential = 2*M_PI*rho*epsilon*((z3-R3)/6
-                                         + 2*sig12*(1/z9 - 1/R9)/45
-                                         + (R_0 - z)*(R_0*R_0/2 + sig6/pow(R_0,4)
-                                             - 2*sig12/5/pow(R_0,10))
-                                         + sig6*(1/R3-1/z3)/3);
-  if (potential < Vcutoff) return potential;
-  return Vcutoff;
 }
 
 void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
@@ -79,8 +55,8 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
-  while (min.improve_energy(quiet)) {
-    // f->run_finite_difference_test("SFMT");
+  while (min.improve_energy(verbose)) {
+    //  f->run_finite_difference_test("SFMT");
     if (min.energy() < -1e20) {
       printf("trouble with the energy: %g\n", min.energy());
       break;
@@ -102,12 +78,11 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   Vector Vext = f->Vext();
   Vector rz = f->get_rz();
   Vector n = f->get_n();
-  // for (int i=Nz/2+1; i<Nz; i++) {
-  //   fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
-  // }
-  for (int i=0; i<Nz/2; i++) {
-    fprintf(o, "%g\t%g\t%g\n", (rz[i] - spacing)/sigma, n[i]*uipow(sigma, 3), Vext[i]);
-    // fprintf(o, "%g\t%g\t%g\n", rz[i] - spacing, n[i]/pow(2,-5.0/2.0), Vext[i]/kT);
+  for (int i=0; i<Nz; i++) {
+    if (rz[i] < 0) fprintf(o, "%.15g\t%g\t%.15g\n", rz[i]/sigma, n[i]*uipow(sigma, 3), Vext[i]/epsilon);
+  }
+  for (int i=0; i<Nz; i++) {
+    if (rz[i] >= 0) fprintf(o, "%.15g\t%g\t%.15g\n", rz[i]/sigma, n[i]*uipow(sigma, 3), Vext[i]/epsilon);
   }
   fclose(o);
 }
@@ -146,14 +121,8 @@ int main(int argc, char **argv) {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector rz = f.get_rz();
     for (int i=0; i<Ntot; i++) {
-      f.Vext()[i] = soft_wall_potential(rz[i], 20*temp);
-      if (fabs(rz[i]) < spacing) {
-        f.Veff()[i] = -temp*log(0.01*hf.n());
-        //f.n()[i] = 0.01*hf.n();
-      } else {
-        f.Veff()[i] = -temp*log(hf.n());
-        //f.n()[i] = hf.n();
-      }
+      f.Vext()[i] = soft_wall_potential(rz[i]+width/2-spacing,  30*temp);
+      f.Veff()[i] = -temp*log(hf.n()) + f.Vext()[i];
     }
   }
   printf("my energy is %g\n", f.energy());
