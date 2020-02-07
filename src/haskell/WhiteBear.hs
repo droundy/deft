@@ -24,14 +24,19 @@ whitebear_n, homogeneous_whitebear, whitebear_fluid_n, whitebear_fluid_Veff :: E
 whitebear_n = substitute n (r_var "n") whitebear
 homogeneous_whitebear = makeHomogeneous whitebear_n
 whitebear_fluid_n = substitute n (r_var "n") $
-                    whitebear + idealgas + integrate (n * (r_var "Vext" - s_var "mu"))
+                    whitebear + idealgas + external_potential + minus_mu_N
 whitebear_fluid_Veff = substitute n ("n" === exp(- r_var "Veff"/kT)) $
-                       whitebear + idealgas + integrate (n * (r_var "Vext" - s_var "mu"))
+                       whitebear + idealgas + external_potential + minus_mu_N
 
 homogeneous_whitebear_fluid :: Expression Scalar
 homogeneous_whitebear_fluid = makeHomogeneous $ substitute n (r_var "n") $
                               whitebear + idealgas - integrate (n * s_var "mu")
 
+external_potential :: Expression Scalar
+external_potential = var "int_V_n" "\\int V_{ext}n" $ integrate (n * (r_var "Vext"))
+
+minus_mu_N :: Expression Scalar
+minus_mu_N = var "minus_mu_N" "-\\mu N" $ integrate (n * (-s_var "mu"))
 
 vectorThirdTerm :: Expression RealSpace
 vectorThirdTerm = n2*(n2**2 - 3*sqr_n2v)
@@ -80,7 +85,7 @@ gSigmaS_helper phit = dAdR/(kT * n0**2 * 4*pi* (2*rad)**2)
           dv a = realspaceGradient a phit
           n2p' = -2*n2/rad
           n2vp' = (-2/rad).*n2v
-          
+
 nA :: Expression RealSpace
 nA = "nA" === double_shell n / (4*pi*(2*rad)**2)
 
