@@ -50,9 +50,7 @@ double leny = 20;
 double lenz = 20;
 double rad = 10;  //of outer spherical walls
 double innerRad = 3;  //of inner spherical "solute"
-double R_wall = R;
 double length_of_cavity=0;
-double R_T = R + R_wall;
 double testp_sigma, testp_eps, testp_r;
 Vector3d latx = Vector3d(lenx,0,0);
 Vector3d laty = Vector3d(0,leny,0);
@@ -62,7 +60,6 @@ bool FCC=false;  //if true then face centered cubic latice
 bool flat_div = false; //the divisions will be equal and will divide from z wall to z wall
 bool WCA = true; //Defaults to a test particle with Lennard-Jones repulsion
 bool soft_wall = false;
-double sig_wall = R_T*pow(2,-1.0/6.0);
 
 bool periodic[3] = {false, false, false};
 
@@ -145,13 +142,11 @@ int main(int argc, char *argv[]){
       flat_div = true; // we want flat divisions in the z directoin,
                        // if we have a z wall.  In every other case we
                        // use spherical divisions.
-      R_wall = atof(argv[a+1]);
+      double R_wall = atof(argv[a+1]); // FIXME THIS IS IGNORED
       lenz = 30;
       periodic[2] = false;
       maxrad = max(maxrad, lenz);
       soft_wall = true;
-      R_T = R + R_wall;
-      sig_wall = R_T*pow(2,-1.0/6.0);
     } else if (strcmp(argv[a],"kT") == 0) {
       kT = atof(argv[a+1]);
       printf("kT is %g\n",kT);
