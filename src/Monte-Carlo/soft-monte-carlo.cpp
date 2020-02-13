@@ -935,7 +935,7 @@ bool overlap(Vector3d *spheres, Vector3d v, long n, double R, long s){
     double r1 = spheres[s].norm();
     energyNew += -(4*testp_eps*(pow(testp_sigma/r1,12) - pow(testp_sigma/r1,6)));
   }
-  if (soft_wall) { energyNew += soft_wall_potential(v[2]); }
+  if (soft_wall) { energyNew += soft_wall_potential(lenz/2+v[2]); }
   for(long i = 0; i < n; i++) {
     if (i != s) energyNew += potential(distance(spheres[i],v));
   }
