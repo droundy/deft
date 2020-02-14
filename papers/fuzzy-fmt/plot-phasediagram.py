@@ -36,7 +36,8 @@ pressure_data = []  #index corresponds to kT
 #for kT in np.arange(0.1, 1.15, 0.05):   #data files with these temperatures will be plotted
 #for kT in np.arange(0.1, 2.05, 0.05):  #original
 #for kT in np.arange(0.4, 2.05, 0.05):   # new normal
-for kT in (1, 2, 4, 6, 8, 10, 12, 14, 16, 18):
+#for kT in (1, 2, 4, 6, 8, 10, 12, 14, 16, 18):
+for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2): #for paper
 #for kT in np.arange(0.1, 1.05, 0.05):   #data files with these temperatures will be plotted  DEBUG
 										#values above and below this range do not currrently work   DEBUG
    
@@ -215,9 +216,11 @@ for i in range(len(kT_data)):
 plt.title("Pressure vs Number Density at kT")
 plt.legend(loc='best')
 #plt.ylim(0, 26)
-plt.ylim(0, 500)
+#plt.ylim(0, 500)
+plt.ylim(0, 45)
 #plt.xlim(0, 1.1)
-plt.xlim(0, 1.8)
+#plt.xlim(0, 1.8)
+plt.xlim(0, 1.1)
 plt.xlabel('Number Density')
 plt.ylabel('Pressure')
 
@@ -240,7 +243,8 @@ plt.figure('p-vs-T at fixed n')
 #--------------NEW
 #Plot P vs T  at constant n 
 #for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]:    #densities to show on the plot
-for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1]:  #densities to show on the plot
+#for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1]:  #densities to show on the plot
+for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the plot
    p_mid_at_n_list = []
    kT_at_n_list = []
    for i in range(0, len(kT_data)) :  #number of temperatures kT
@@ -282,10 +286,12 @@ plt.title("Temperature vs Number Density")
 plt.xlabel('Number Density')
 plt.ylabel('Temperature')
 
-#plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
-plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
-#plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
-plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
+##plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
+##plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
+#plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
+#plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
+plt.plot([0.88, 0.90, 0.91, 0.92, 1.04],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_l', color='green')
+plt.plot([0.96, 0.98, 0.99, 1.00, 1.11],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_s', color='green')
 plt.legend()
 
 plt.figure('Phase Diagram of P vs T')
@@ -293,7 +299,8 @@ plt.figure('Phase Diagram of P vs T')
 ##Pressure vs Temperature Phase Diagram
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
 #plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
-plt.fill_between(kT_data, p_at_freezing, 1500, color='blue')    
+#plt.fill_between(kT_data, p_at_freezing, 1500, color='blue') 
+plt.fill_between(kT_data, p_at_freezing, 50, color='blue') 
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
@@ -302,7 +309,8 @@ plt.xlabel('Temperature')
 plt.ylabel('Pressure')
 
 #plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
-plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
+##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
+plt.plot([0.7, 0.8,0.9,1.0,2.0], [6.24, 7.62, 8.78, 9.99, 25.5], label='MC', color='green')
 plt.legend()
 
 plt.show()
