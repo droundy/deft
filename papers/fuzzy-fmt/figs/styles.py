@@ -57,6 +57,11 @@ def mcwca(kT):
         return color[kT] + '--'
     return '--'
 
+def other_mcwca(kT):
+    if kT in color:
+        return color[kT] + '.'
+    return '.'
+
 def bh_dft(kT):
     if kT in color:
         return color[kT] + ':'
