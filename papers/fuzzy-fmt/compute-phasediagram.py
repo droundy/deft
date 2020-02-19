@@ -48,7 +48,9 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
 
 #kTs = np.arange(2, 0.3, -0.1)   # kT less than 0.4 don't have solutions
 #kTs = np.arange(20, 2, -2) 
-kTs = np.arange(200, 20, -20)
+#kTs = np.arange(200, 20, -20)
+#kTs = np.arange(.05, .005, -0.02)
+kTs = np.arange(3, 0.05, -0.1)
 #kTs = np.arange(1.15, 0.7, -0.05)
 #kTs=np.append(kTs, 0.01)
 for kT in kTs:
@@ -59,7 +61,7 @@ for kT in kTs:
             # run_new_melting(kT, n, 0.01, 0.2, 0.01)    #temp, density, gw_start, gw_end, gw_step
         # else:
             # run_new_melting(kT, n, 0.01, 0.2, 0.01)
-    for n in np.arange(0.01, 1.2, 0.02):
+    for n in np.arange(1.2, 1.52, 0.02):
         run_new_melting(kT, n, 0.01, 0.2, 0.01)
     # for n in np.arange(1.22, 1.42, 0.02):
         # run_new_melting(kT, n, 0.01, 0.2, 0.01)
