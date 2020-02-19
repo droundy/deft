@@ -24,9 +24,10 @@ def run_walls(n_reduced, nspheres, temperature):
     system("srun --mem=60 -J softwalls-%.4f-%.4f time nice -19 %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxy 30 wallz 30 kT %g > %s.out 2>&1 &" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature, filename))
 
-def run_soft_walls(n_reduced, nspheres, temperature):
+def run_soft_walls(n_reduced, nspheres, temperature, correction_factor=1):
     if nspheres == 0:
         nspheres = round(n_reduced*2**(-5.0/2.0)*30**2*32) # reasonable guess
+        nspheres = round(nspheres*correction_factor)
     filename = '%s/mc-soft-wall-%.4f-%.4f-%d' % (figsdir, n_reduced, temperature, nspheres)
     system("rq run -J wcawalls-%.4f-%.4f %s/soft-monte-carlo %d 0.01 0.001 %s.dat periodxy 30 softwallz 1 kT %g" %
            (n_reduced, temperature, bindir, nspheres, filename, temperature))
@@ -91,17 +92,17 @@ def run_FCC_walls(n_reduced, temperature, tweak_density = 1, pot = "wca"):
 # run_FCC(0.8, 0.35, 'wca')
 # run_FCC(0.8, 0.37, 'wca')
 
-run_soft_walls(1.0, 0, 10.0)
-run_soft_walls(1.0, 0, 5.0)
-run_soft_walls(1.0, 0, 2.5)
-run_soft_walls(1.0, 0, 1.0)
-run_soft_walls(1.0, 0, 0.1)
+run_soft_walls(1.0, 0, 10.0, correction_factor = 1/1.1241239670565355/0.9556961399999997)
+run_soft_walls(1.0, 0,  5.0, correction_factor = 1/1.1252180592369307/0.9475263199999999)
+run_soft_walls(1.0, 0,  2.5, correction_factor = 1/1.1160919128447668/0.95585656)
+# run_soft_walls(1.0, 0, 1.0)
+# run_soft_walls(1.0, 0, 0.1)
 
-run_soft_walls(0.6, 0, 10.0)
-run_soft_walls(0.6, 0, 5.0)
-run_soft_walls(0.6, 0, 2.5)
-run_soft_walls(0.6, 0, 1.0)
-run_soft_walls(0.6, 0, 0.1)
+run_soft_walls(0.6, 0, 10.0, correction_factor = 0.6/0.6830454082048744*0.6/0.5689411)
+run_soft_walls(0.6, 0,  5.0, correction_factor = 0.6/0.6832733794311285*0.6/0.57097722)
+run_soft_walls(0.6, 0,  2.5, correction_factor = 0.6/0.682760359319242*0.6/0.5671544599999999)
+run_soft_walls(0.6, 0,  1.0, correction_factor = 0.6/0.6875152281586531*0.6/0.56183994)
+# run_soft_walls(0.6, 0, 0.1)
 
 # run_FCC_walls(0.6, 10.0, 0.95044, "wca")
 # run_FCC_walls(0.6, 2.5, 0.9577, "wca")
