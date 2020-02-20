@@ -19,6 +19,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import os
 import sys
+import styles
 
 matplotlib.rc('text', usetex=True)
 figscale = 1.1
@@ -244,10 +245,49 @@ for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the
             p_mid_at_n_list.append((plo*(nhi - n) + phi*(n - nlo))/(nhi - nlo))
             kT_at_n_list.append(kT_data[i])
 
-   plt.plot(kT_at_n_list, p_mid_at_n_list, '.-', label= 'n=%g' % n)
+   plt.plot(kT_at_n_list, p_mid_at_n_list, styles.density_color(n)+'-', label= 'n=%g' % n)
+
+
+for rd in np.arange(1.00, 0.25, -0.1):
+  temps = []
+  pressures = []
+  # print 'could use:', glob.glob('figs/mcfcc-%.4f-*.dat.prs' % (rd))
+  for temp in np.arange(0.05, 3.05, 0.05):
+    fname = 'figs/mcfcc-%.4f-%.4f.dat.prs' % (rd, temp)
+    if os.path.exists(fname):
+      temps.append(temp)
+      p = np.loadtxt(fname)
+      # we account below for the fact that the MC code does not spit
+      # out a reduced pressure, so we need to do a conversion.
+      pressures.append(p*2.0**(5/2.0))
+  if len(temps) > 0:
+    plt.plot(temps, pressures, styles.density_color(rd)+'--')
+    # if len(np.argwhere(np.abs(Nlabel - rd) < 0.001)) == 1:
+    #   print('We have MC for rd', rd)
+    #   pressures = np.array(pressures)
+    #   temps = np.array(temps)
+      # i = np.argwhere(np.abs(Nlabel - rd) < 0.001)[0][0]
+      # j = np.argwhere(temps > Tlabel[i])[0][0]
+      # MCPlabel[i] = pressures[j]
+
+bhdata = np.loadtxt('figs/homogeneous-bh.dat')
+bhtemp = bhdata[0, 1:]
+bhnred = bhdata[1:, 0]
+bhpressures = bhdata[1:, 1:]
+bhnans = bhpressures != bhpressures
+bhpressures[bhnans] = 1e30
+bhtemperatures, bhn_reduced = np.meshgrid(bhtemp, bhnred)
+
+for i in range(9, len(bhn_reduced[:, 0]), 10)[:10]:
+   plt.plot(bhtemperatures[i,:], bhpressures[i,:],
+            styles.density_color(bhn_reduced[i, 0])+':')
+
 plt.legend(loc='best')
 plt.ylabel('$p^*$')
 plt.xlabel('$T^*$')
+plt.xlim(0)
+plt.ylim(0)
+plt.tight_layout()
 plt.savefig('./figs/p-vs-T_at_fixed_n.pdf')
 
 # - OR - uncomment the plot you want
@@ -271,15 +311,16 @@ plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')
 #plt.legend(loc='best')
 plt.xlabel('$n^*$')
 plt.ylabel('$T^*$')
-plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
 
 ##plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
 ##plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
 #plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
 #plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
-plt.plot([0.88, 0.90, 0.91, 0.92, 1.04],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_l', color='green')
-plt.plot([0.96, 0.98, 0.99, 1.00, 1.11],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_s', color='green')
+plt.plot([0.88, 0.90, 0.91, 0.92, 1.04],[0.7, 0.8, 0.9, 1.0, 2.0], '-', label='$MC_l$', color='white')
+plt.plot([0.96, 0.98, 0.99, 1.00, 1.11],[0.7, 0.8, 0.9, 1.0, 2.0], '-', label='$MC_s$', color='white')
 plt.legend()
+
+plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
 
 plt.figure(figsize=myfigsize)
 
@@ -293,12 +334,12 @@ plt.plot(kT_data, p_at_freezing, color='black')
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
 plt.xlabel('$T^*$')
 plt.ylabel('$p^*$')
-plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
-
 #plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
 ##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
 plt.plot([0.7, 0.8,0.9,1.0,2.0], [6.24, 7.62, 8.78, 9.99, 25.5], label='MC', color='green')
 plt.legend()
+
+plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
 
 if 'show' in sys.argv:
    plt.show()
