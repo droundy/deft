@@ -179,7 +179,7 @@ plt.title("Temperature vs Number Density at fixed Pressure")
 plt.legend(loc='best')
 plt.xlabel('n*')
 plt.ylabel('T*')
-plt.savefig('./figs/T-vs-n_at_fixed_P.png')
+plt.savefig('./figs/T-vs-n_at_fixed_P.pdf')
 
 # - OR - uncomment the plot you want
    
@@ -207,7 +207,7 @@ plt.ylim(0, 45)
 plt.xlim(0, 1.1)
 plt.xlabel('n*')
 plt.ylabel('P*')
-plt.savefig('./figs/p-vs-n_at_fixed_T.png')
+plt.savefig('./figs/p-vs-n_at_fixed_T.pdf')
 
 plt.figure('p-vs-V at fixed T')
 
@@ -222,7 +222,7 @@ plt.ylim(0, 26)
 plt.xlim(0.95, 1.6)
 plt.xlabel('Volume per atom')
 plt.ylabel('P*')
-plt.savefig('./figs/p-vs-V_at_fixed_T.png')
+plt.savefig('./figs/p-vs-V_at_fixed_T.pdf')
 
 plt.figure('p-vs-T at fixed n')
 
@@ -248,7 +248,7 @@ plt.title("Pressure vs Temperature at fixed n")
 plt.legend(loc='best')
 plt.ylabel('P*')
 plt.xlabel('T*')
-plt.savefig('./figs/p-vs-T_at_fixed_n.png')
+plt.savefig('./figs/p-vs-T_at_fixed_n.pdf')
 
 # - OR - uncomment the plot you want
    ##Plot T vs P  at constant n 
@@ -272,7 +272,7 @@ plt.title("Temperature vs Number Density")
 #plt.legend(loc='best')
 plt.xlabel('n*')
 plt.ylabel('T*')
-plt.savefig('./figs/Phase_Diagram_of_T_vs_n.png')
+plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
 
 ##plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
 ##plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
@@ -295,12 +295,13 @@ plt.plot(kT_data, p_at_freezing, color='black')
 plt.title("Pressure vs Temperature")
 plt.xlabel('T*')
 plt.ylabel('P*')
-plt.savefig('./figs/Phase_Diagram_of_P_vs_T.png')
+plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
 
 #plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
 ##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
 plt.plot([0.7, 0.8,0.9,1.0,2.0], [6.24, 7.62, 8.78, 9.99, 25.5], label='MC', color='green')
 plt.legend()
 
-plt.show()
+if 'show' in sys.argv:
+   plt.show()
 
