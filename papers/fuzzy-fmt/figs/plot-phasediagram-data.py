@@ -15,10 +15,14 @@
 from __future__ import print_function, division
 
 import numpy as np
-import matplotlib.mlab as mlab
+import matplotlib
 import matplotlib.pyplot as plt
-import os, glob
+import os
 import sys
+
+matplotlib.rc('text', usetex=True)
+figscale = 1.1
+myfigsize=(4*figscale,3*figscale)
 
 p_at_freezing = []  #pressure at freezing (intersection point between homogeneous and crystal plots)
 n_homogeneous_at_freezing =[]
@@ -157,7 +161,7 @@ n_homogeneous_at_freezing = np.array(n_homogeneous_at_freezing)
 n_crystal_at_freezing = np.array(n_crystal_at_freezing)
 p_at_freezing = np.array(p_at_freezing)
 
-plt.figure('T-vs-n at fixed P')
+plt.figure(figsize=myfigsize)
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='#eeeeee') 
 
 #Plot T vs n  at constant P 
@@ -175,10 +179,9 @@ for p in [2,5,10,20]:
             kT_at_p_list.append(kT_data[i])
 
    plt.plot(n_mid_at_p_list, kT_at_p_list, '.-', label= 'P=%g' % p)
-plt.title("Temperature vs Number Density at fixed Pressure")
 plt.legend(loc='best')
-plt.xlabel('n*')
-plt.ylabel('T*')
+plt.xlabel('$n^*$')
+plt.ylabel('$T^*$')
 plt.savefig('./figs/T-vs-n_at_fixed_P.pdf')
 
 # - OR - uncomment the plot you want
@@ -190,14 +193,13 @@ plt.savefig('./figs/T-vs-n_at_fixed_P.pdf')
 #plt.ylabel('Number Density')
 #plt.xlabel('Temperature') 
 
-plt.figure('p-vs-n at fixed T')
+plt.figure(figsize=myfigsize)
 
 plt.fill_betweenx(p_at_freezing, n_homogeneous_at_freezing, n_crystal_at_freezing, color='#eeeeee') 
 for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       #Plot P vs n  at constant kT
-      plt.plot(density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
-plt.title("Pressure vs Number Density at kT")
+      plt.plot(density_data[i], pressure_data[i], label= r'$T^*=%g$' % kT_data[i])
 plt.legend(loc='best')
 #plt.ylim(0, 26)
 #plt.ylim(0, 500)
@@ -205,26 +207,25 @@ plt.ylim(0, 45)
 #plt.xlim(0, 1.1)
 #plt.xlim(0, 1.8)
 plt.xlim(0, 1.1)
-plt.xlabel('n*')
-plt.ylabel('P*')
+plt.xlabel('$n^*$')
+plt.ylabel('$p^*$')
 plt.savefig('./figs/p-vs-n_at_fixed_T.pdf')
 
-plt.figure('p-vs-V at fixed T')
+plt.figure(figsize=myfigsize)
 
 #Plot P vs 1/n (or V) at constant kT
 plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing, 1/n_crystal_at_freezing, color='#eeeeee') 
 for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
-plt.title("Pressure vs volume at kT")
 plt.legend(loc='best')
 plt.ylim(0, 26)
 plt.xlim(0.95, 1.6)
 plt.xlabel('Volume per atom')
-plt.ylabel('P*')
+plt.ylabel('$p^*$')
 plt.savefig('./figs/p-vs-V_at_fixed_T.pdf')
 
-plt.figure('p-vs-T at fixed n')
+plt.figure(figsize=myfigsize)
 
 #--------------NEW
 #Plot P vs T  at constant n 
@@ -244,10 +245,9 @@ for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the
             kT_at_n_list.append(kT_data[i])
 
    plt.plot(kT_at_n_list, p_mid_at_n_list, '.-', label= 'n=%g' % n)
-plt.title("Pressure vs Temperature at fixed n")
 plt.legend(loc='best')
-plt.ylabel('P*')
-plt.xlabel('T*')
+plt.ylabel('$p^*$')
+plt.xlabel('$T^*$')
 plt.savefig('./figs/p-vs-T_at_fixed_n.pdf')
 
 # - OR - uncomment the plot you want
@@ -259,7 +259,7 @@ plt.savefig('./figs/p-vs-T_at_fixed_n.pdf')
 #plt.ylabel('Temperature')
 #--------------end NEW
 
-plt.figure('Phase Diagram of T vs n')
+plt.figure(figsize=myfigsize)
 
 #Temperature vs Density Phase Diagram
 plt.plot(n_homogeneous_at_freezing, kT_data, label='liquid', color='red')
@@ -268,10 +268,9 @@ plt.fill_betweenx(kT_data, .1, n_homogeneous_at_freezing, color='red')
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
 #plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')
 plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')           
-plt.title("Temperature vs Number Density")
 #plt.legend(loc='best')
-plt.xlabel('n*')
-plt.ylabel('T*')
+plt.xlabel('$n^*$')
+plt.ylabel('$T^*$')
 plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
 
 ##plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
@@ -282,7 +281,7 @@ plt.plot([0.88, 0.90, 0.91, 0.92, 1.04],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_l',
 plt.plot([0.96, 0.98, 0.99, 1.00, 1.11],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_s', color='green')
 plt.legend()
 
-plt.figure('Phase Diagram of P vs T')
+plt.figure(figsize=myfigsize)
 
 ##Pressure vs Temperature Phase Diagram
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
@@ -292,9 +291,8 @@ plt.fill_between(kT_data, p_at_freezing, 50, color='blue')
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
-plt.title("Pressure vs Temperature")
-plt.xlabel('T*')
-plt.ylabel('P*')
+plt.xlabel('$T^*$')
+plt.ylabel('$p^*$')
 plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
 
 #plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
