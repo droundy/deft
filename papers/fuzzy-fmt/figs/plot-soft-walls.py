@@ -41,19 +41,21 @@ def plot_soft_walls(reduced_density, temps):
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
     NUM = 1
+    zmax = 5
     for temp in temps:
         fname = 'figs/new-data/soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
         z = data[:, 0]
         Vext = data[:, 2]
         z_center = find_z_with_V(z, Vext, 10)
+        z = z - z_center
         nreduced_density = data[:, 1]
         Vext = data[:, 2]
         if have_labelled_dft:
-            plot(z-z_center, nreduced_density, styles.new_dft_code(temp))
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_code(temp))
             # plot(z, Vext, 'r-')
         else:
-            plot(z-z_center, nreduced_density, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
             have_labelled_dft = True
 
         fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
@@ -61,11 +63,12 @@ def plot_soft_walls(reduced_density, temps):
         z = data[:, 0]
         Vext = data[:, 2]
         z_center = find_z_with_V(z, Vext, 10)
+        z = z - z_center
         nreduced_density = data[:, 1]
         if have_labelled_bh:
-            plot(z-z_center, nreduced_density, styles.color[temp]+':')
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.color[temp]+':')
         else:
-            plot(z-z_center, nreduced_density, styles.color[temp]+':', label = 'BH $T^* = %g$' % temp)
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.color[temp]+':', label = 'BH $T^* = %g$' % temp)
             have_labelled_bh = True
         # plot(z-z_center, Vext, '--', label=f'Vext bh {temp}')
 
@@ -78,10 +81,12 @@ def plot_soft_walls(reduced_density, temps):
         Vext = data[:, 2]
         z_center = find_z_with_V(z, Vext, 10)
         print(reduced_density/100, temp, smoothed[len(smoothed)//2])
-        plot(smooth(z-z_center, NUM), smooth(data[:, 1], NUM),
+        smoothed_z = smooth(z-z_center, NUM)
+        smoothed_n = smooth(data[:, 1], NUM)
+        plot(smoothed_z[smoothed_z<=zmax], smoothed_n[smoothed_z<=zmax],
              styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
         # plot(z-z_center, Vext, '.', label=f'Vext mc {temp}')
-        plt.ylim(0,5)
+        # plt.ylim(0,5)
 
     #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
 
@@ -89,7 +94,7 @@ def plot_soft_walls(reduced_density, temps):
     xlabel(r'$z/\sigma$')
     ylabel('$n^*(r)$')
     legend()
-    xlim(-0.3, 5)
+    xlim(-0.3, zmax)
     outputname = 'figs/soft-walls-%02d.pdf' % (reduced_density)
     savefig(outputname, bbox_inches=0)
     print(('figs/walls-%02d.pdf' % (reduced_density)))

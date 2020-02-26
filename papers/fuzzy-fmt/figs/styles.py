@@ -1,17 +1,18 @@
 def density_color(rd):
-    dc = { 0.1: 'k',
-           0.2: 'y',
-           0.3: 'g',
-           0.4: 'r',
-           0.5: 'm',
-           0.6: 'c',
-           0.7: 'b',
-           0.8: 'k',
-           0.9: 'y',
-           1.0: 'r',
+    dc = { '0.1': 'k',
+           '0.2': 'y',
+           '0.3': 'g',
+           '0.4': 'r',
+           '0.5': 'm',
+           '0.6': 'c',
+           '0.7': 'b',
+           '0.8': 'k',
+           '0.9': 'y',
+           '1.0': 'r',
         }
-    if float(str(rd)) in dc:
-        return dc[float(str(rd))]
+    key = '%.5g' % rd
+    if key in dc:
+        return dc[key]
     return 'k'
 
 color = { 100.0: 'k',
@@ -56,6 +57,11 @@ def mcwca(kT):
     if kT in color:
         return color[kT] + '--'
     return '--'
+
+def other_mcwca(kT):
+    if kT in color:
+        return color[kT] + '.'
+    return '.'
 
 def bh_dft(kT):
     if kT in color:

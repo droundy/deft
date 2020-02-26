@@ -30,10 +30,12 @@ def plot_walls(reduced_density, temps):
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
     have_labelled_bh = False
+    NUM=1
     for temp in temps:
-        fname = 'figs/new-data/wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
+        fname = 'figs/new-data/soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
-        z = data[:, 0]
+        z = -data[:, 0]
+        z -= z.min()
         nreduced_density = data[:, 1]
         if have_labelled_dft:
             plot(z, nreduced_density, styles.new_dft_code(temp))
@@ -41,38 +43,52 @@ def plot_walls(reduced_density, temps):
             plot(z, nreduced_density, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
             have_labelled_dft = True
 
-        fname = 'figs/new-data/bh-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
+        fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
-        z = data[:, 0]
+        z = -data[:, 0]
+        z -= z.min()
         nreduced_density = data[:, 1]
         if have_labelled_bh:
             plot(z, nreduced_density, styles.color[temp]+':')
         else:
             plot(z, nreduced_density, styles.color[temp]+':', label = 'BH $T^* = %g$' % temp)
             have_labelled_bh = True
-        
-        fname = 'figs/mcfcc-walls-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
+
+        # fname = 'figs/mcfcc-walls-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
+        # data = loadtxt(fname)
+        # zmin = data[:, 0].min()
+        # plot(smooth((data[:, 0]-zmin)/sigma_over_R, num), smooth(data[:, 1]*sigma_over_R**3, num),
+        #      styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
+
+        fname = 'figs/mc-soft-wall-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
-        zmin = data[:, 0].min()
-        plot(smooth((data[:, 0]-zmin)/sigma_over_R, num), smooth(data[:, 1]*sigma_over_R**3, num),
-             styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
+        z = -data[:,0]
+        z -= z.min()
+        smoothed = smooth(data[:, 1], NUM)
+        print(reduced_density/100, temp, smoothed[len(smoothed)//2])
+        plot(smooth(z, NUM), smooth(data[:, 1], NUM),
+             styles.mcwca(temp), label = 'soft-walls-backwards WCA MC $T^*$ = %g' % temp)
 
     title('Hard walls with bulk $n^* = %g$' % (reduced_density/100))
     xlabel(r'$z/\sigma$')
     ylabel('$n^*(r)$')
     legend()
-    xlim(-0.2, 4)
+    plt.ylim(0)
+    plt.xlim(0, 2.5)
+
+# input: ['figs/mc-soft-wall-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
+# input: ['figs/new-data/soft-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
+# input: ['figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0]]
+# input: ['figs/mc-soft-wall-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
+# input: ['figs/new-data/soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
+# input: ['figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 2.5]]
-# input: ['figs/new-data/wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5]]
-# input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (0.6, temp) for temp in [10.0, 2.5]]
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
-# input: ['figs/new-data/wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
-# input: ['figs/new-data/bh-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 figure(figsize=(9, 14.5))
 
 subplot(2, 1, 1)
-plot_walls(60, [10.0, 2.5])
+plot_walls(60, [10.0, 2.5, 1.0])
 
 subplot(2, 1, 2)
 plot_walls(100, [10.0, 5.0, 2.5]) # 1.0 could work?

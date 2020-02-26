@@ -53,19 +53,18 @@
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
-\item Document all the Fourier transforms we are using.
-\item Find new expressions for alpha and Xi based on virial expansion.
+\item Document all the Fourier transforms we are using. (vectors)
+\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 \item Edit paper to describe/use tensor functional.
 \item Write up section on freezing with figures.
 \item Decide which equation of state figure to use. (And make pretty.)
 \item Touch up the freezing figures.
-\item Work out how tensor weight in Fourier space relates to the tensor density.
-  
+ 
 \end{enumerate}
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
-\item Look together at Haskell tensor stuff.
+\item go over plots.
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
@@ -508,11 +507,10 @@ to the Monte Carlo simulations.
 \subsection{Soft spheres near a soft wall}
 
 \begin{figure}
-  \begin{center}
-    \includegraphics[width=\columnwidth]{figs/soft-walls}
+  \centering
+  \includegraphics[width=\columnwidth]{figs/soft-walls}
   \caption{Density distribution of a WCA fluid near a soft wall.}
   \label{fig:soft-walls}
-  \end{center}
 \end{figure}
 
 As a second and more physical case, we construct a wall of made of a
@@ -616,6 +614,67 @@ peak.  Here the discrepancy between theory and simulation is somewhat
 larger, but again our new functional performs comparably to the
 Barker-Henderson approach.  Both theories significantly overestimate
 the height of the first peak.
+
+
+
+
+\subsection{Freezing of the WCA fluid}
+
+Phase diagrams for the WCA fluid are shown below. In all cases $\sigma=1$ and $\epsilon=1$.
+
+\begin{figure}
+ \centering
+  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
+\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
+\label{fig:Phase_Diagram_of_T_vs_n}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
+\label{fig:Phase_Diagram_P_vs_T}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/T-vs-n_at_fixed_P}
+ \end{center}
+\caption{Phase Diagram of the reduced temperature verses the reduced density. The grey region indicates coexistence.}
+\label{fig:T-vs-n_at_fixed_P}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The lines bending downward indicate freezing.}
+\label{fig:p-vs-T_at_fixed_density}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
+\label{fig:p-vs-V_at_fixed_T}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/p-vs-n_at_fixed_T}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced density. The grey region indicates coexistence.}
+\label{fig:p-vs-n_at_fixed_T}
+\end{figure}
+
+\[{}\]
+\[{}\]
+\[{}\]
+
+
+
 \section{Conclusion}
 
 The theory presented in this paper is as good as a Barker-Henderson
@@ -624,17 +683,60 @@ advantage of our theory is that we can use it \emph{as is} rather than
 needing to accommodate for discontinuities and delta functions of hard
 sphere fluids.
 
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
 \bibliography{paper}% Produces the bibliography via BibTeX.
  
 \begin{widetext}
 \[{}\]
-\[{}\]
-\[{}\]
-\[{}\]
-\[{}\]
-\[{}\]
-\[{}\]
-\[{}\]
+%\[{}\]
 
 
 Appendix
