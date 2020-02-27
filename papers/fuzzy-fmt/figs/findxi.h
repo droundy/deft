@@ -6,6 +6,15 @@ static inline double find_alpha(double temp) {
   return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
 }
 
+//Old Xi derived from derivatives (referenced here if want to revert to old Xi for comparison)--------DEBUG
+//static inline double find_Xi(double alpha, T) {
+  //const double sigma=1;  //sigma must be 1 - changing it would invalidate other equations in the program!
+  //const double epsilon=1;
+  //return alpha/(6*pow(pi,0.5))/(log(2) + pow(log(2)*epsilon/kT,0.5));  //check syntex!
+  //}
+//END old Xi(T)---------------------------------------------------------------------------------------DEBUG
+
+
 //Find Xi(T)---------------------------------------------------
 static inline double Vwca(double r) {
     return 4.0*(pow(r,-12.0) - pow(r,-6.0)) +1;
@@ -60,6 +69,8 @@ static inline double find_Xi(double T) {
   return xi_mid;
 }
 //END Find Xi(T)---------------------------------------------------
+
+
 
 static inline HomogeneousSFMTFluid sfmt_homogeneous(double n, double T) {
   HomogeneousSFMTFluid hf;

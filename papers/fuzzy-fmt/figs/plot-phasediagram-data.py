@@ -36,7 +36,7 @@ kT_data = []
 density_data = []   #index corresponds to kT
 pressure_data = []  #index corresponds to kT
 
-for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2): #for paper
+for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3): #for paper
    
    n = []
    invn = []
@@ -316,8 +316,8 @@ plt.ylabel('$T^*$')
 ##plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
 #plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
 #plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
-plt.plot([0.88, 0.90, 0.91, 0.92, 1.04],[0.7, 0.8, 0.9, 1.0, 2.0], '-', label='$MC_l$', color='white')
-plt.plot([0.96, 0.98, 0.99, 1.00, 1.11],[0.7, 0.8, 0.9, 1.0, 2.0], '-', label='$MC_s$', color='white')
+plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_l$', color='white')
+plt.plot([0.96, 0.98, 0.99, 1.00, 1.11,1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_s$', color='white')
 plt.legend()
 
 plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
@@ -328,7 +328,7 @@ plt.figure(figsize=myfigsize)
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
 #plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
 #plt.fill_between(kT_data, p_at_freezing, 1500, color='blue') 
-plt.fill_between(kT_data, p_at_freezing, 50, color='blue') 
+plt.fill_between(kT_data, p_at_freezing, 80, color='blue') 
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
@@ -336,7 +336,7 @@ plt.xlabel('$T^*$')
 plt.ylabel('$p^*$')
 #plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
 ##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
-plt.plot([0.7, 0.8,0.9,1.0,2.0], [6.24, 7.62, 8.78, 9.99, 25.5], label='MC', color='green')
+plt.plot([0.7, 0.8,0.9,1.0,2.0, 3], [6.24, 7.62, 8.78, 9.99, 25.5, 43.8], label='MC', color='white')
 plt.legend()
 
 plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
