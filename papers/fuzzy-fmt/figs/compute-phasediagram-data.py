@@ -31,7 +31,7 @@ pressure_data = []  #index corresponds to kT
 #for kT in np.arange(0.1, 2.05, 0.05):  #original
 #for kT in np.arange(0.4, 2.05, 0.05):   # new normal
 #for kT in (1, 2, 4, 6, 8, 10, 12, 14, 16, 18):
-for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2): #for paper
+for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3): #for paper
 #for kT in np.arange(0.1, 1.05, 0.05):   #data files with these temperatures will be plotted  DEBUG
 										#values above and below this range do not currrently work   DEBUG
    
