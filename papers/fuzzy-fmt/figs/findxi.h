@@ -11,6 +11,7 @@ static inline double find_alpha(double temp) {
   //const double sigma=1;  //sigma must be 1 - changing it would invalidate other equations in the program!
   //const double epsilon=1;
   //return alpha/(6*pow(pi,0.5))/(log(2) + pow(log(2)*epsilon/kT,0.5));  //check syntex!
+  //}
 //END old Xi(T)---------------------------------------------------------------------------------------DEBUG
 
 
