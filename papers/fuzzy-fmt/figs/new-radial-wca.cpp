@@ -124,10 +124,7 @@ int main(int argc, char **argv) {
     const Vector r = f.get_r();
     for (int i=0; i<Ntot; i++) {
       const double Vmax = 100*temp;
-      f.Vext()[i] = 4*epsilon*(uipow(sigma/r[i], 12) - uipow(sigma/r[i], 6)) + epsilon;
-      if (r[i] > 2*radius) {
-        f.Vext()[i] = 0;
-      }
+      f.Vext()[i] = Vwca(r[i]);
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
 
       if (f.Vext()[i] > 0) {
