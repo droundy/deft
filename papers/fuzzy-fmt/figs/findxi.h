@@ -6,11 +6,12 @@ static inline double find_alpha(double temp) {
 }
 
 //Old Xi derived from derivatives (referenced here if want to revert to old Xi for comparison)--------DEBUG
-//static inline double find_Xi(double alpha, T) {
-  //const double sigma=1;  //sigma must be 1 - changing it would invalidate other equations in the program!
-  //const double epsilon=1;
-  //return alpha/(6*pow(pi,0.5))/(log(2) + pow(log(2)*epsilon/kT,0.5));  //check syntex!
-  //}
+// static inline double find_Xi(double kT) {
+//   double xi = find_alpha(kT)/(6*pow(M_PI,0.5))/(log(2) + pow(log(2)*epsilon/kT,0.5));  //check syntex!
+//   printf("our alpha at T=%g is %g\n", kT, find_alpha(kT));
+//   printf("our Xi at T=%g is %g\n", kT, xi);
+//   return xi;
+// }
 //END old Xi(T)---------------------------------------------------------------------------------------DEBUG
 
 
