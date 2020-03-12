@@ -6,13 +6,14 @@ static inline double find_alpha(double temp) {
   return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
 }
 
-//Old Xi derived from derivatives (referenced here if want to revert to old Xi for comparison)--------DEBUG
-//static inline double find_Xi(double alpha, T) {
-  //const double sigma=1;  //sigma must be 1 - changing it would invalidate other equations in the program!
-  //const double epsilon=1;
-  //return alpha/(6*pow(pi,0.5))/(log(2) + pow(log(2)*epsilon/kT,0.5));  //check syntex!
-  //}
-//END old Xi(T)---------------------------------------------------------------------------------------DEBUG
+////Old Xi derived from derivatives (referenced here if want to revert to old Xi for comparison)--------DEBUG
+//static inline double find_Xi(double T) {
+  ////const double sigma=1;  //sigma must be 1 - changing it would invalidate other equations in the program!
+  ////const double epsilon=1;
+  //double alpha = find_alpha(T);
+  //return alpha/6*pow(M_PI,0.5)/(pow(log(2)/T,0.5) + log(2));  //check syntex!
+//}
+////END old Xi(T)---------------------------------------------------------------------------------------DEBUG
 
 
 //Find Xi(T)---------------------------------------------------
@@ -54,7 +55,7 @@ static inline double find_Xi(double T) {
   double xi_lo = 0;
   double xi_hi = 1;
   double xi_mid;
-  // printf("B2wca=%g\n", B2wca);
+  //putStrLn("B2wca=%g\n", B2wca);   //DEBUG
   do {
     xi_mid = 0.5*(xi_hi + xi_lo);
     if (B2_erf(xi_mid, T) > B2wca) {
@@ -63,7 +64,7 @@ static inline double find_Xi(double T) {
       xi_lo = xi_mid;
     }
   } while (xi_hi - xi_lo > 0.000000001);
-  // printf("B2_erf mid=%g\n",B2_erf(xi_mid, T));
+  //putStrLn("B2_erf mid=%g\n",B2_erf(xi_mid, T));   //DEBUG
   last_T = T;
   last_Xi = xi_mid;
   return xi_mid;
