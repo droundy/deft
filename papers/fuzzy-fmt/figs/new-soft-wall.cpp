@@ -22,12 +22,9 @@
 #include "new/HomogeneousSFMTFluidFast.h"
 #include "new/Minimize.h"
 
-const double sigma = 1;
-const double epsilon = 1;
+#include "findxi.h"
 
 #include "soft-wall-potential.h"
-
-#include "findxi.h"
 
 // Here we set up the lattice.
 static double width = 30;

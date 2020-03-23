@@ -24,16 +24,13 @@
 #include "new/Minimize.h"
 #include "version-identifier.h"
 
-#include "findxi.h"
-
 // Here we set up the lattice.
 double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
 double dx = 0.05;
-const double epsilon = 1.0;
-const double radius = 1.0;
-const double sigma = radius*pow(2,5.0/6.0);
+
+#include "findxi.h"
 
 static void took(const char *name) {
   static clock_t last_time = 0;

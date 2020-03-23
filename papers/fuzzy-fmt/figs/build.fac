@@ -1,0 +1,11 @@
+? ./weight-functions.mkdat 1.0
+< weight-functions.mkdat
+> weight-functions-1.dat
+
+? ./weight-functions.mkdat 2
+< weight-functions.mkdat
+> weight-functions-2.dat
+
+? ./weight-functions.mkdat 0.5
+< weight-functions.mkdat
+> weight-functions-0.5.dat
