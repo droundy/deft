@@ -24,10 +24,10 @@
 #include "version-identifier.h"
 
 // Here we set up the lattice.
-double zmax = 8;
+double zmax = 3;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.025;
+double dx = 0.01;
 
 #include "findxi.h"
 
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   SFMTFluidVeff f = sfmt_inhomogeneous(temp, xmax, ymax, zmax, dx);
   f.Vext() = 0;
   f.Veff() = -temp*log(0.00001); // essentially zero everywhere else
-  f.Veff()[0] = temp*log(1.0/dx/dx/dx); // here is the delta function.
+  f.Veff()[0] = -temp*log(1.0/uipow(dx, 3)); // here is the delta function.
 
   took("initializing functional");
   const int Nz = f.Nz();
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     Vector n2zx = f.get_n2zx();
     took("finding n2zx");
     char *fname = malloc(4096);
-    sprintf(fname, "weight-functions-%g.dat", temp);
+    sprintf(fname, "figs/weight-functions-%g.dat", temp);
     printf("creating file %s\n", fname);
     FILE *o = fopen(fname, "w");
     if (!o) {
