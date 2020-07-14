@@ -142,7 +142,7 @@ r = styles.short_range
 phi = linspace(-pi/2, 0, 100)
 twod_plot.plot(r*cos(phi), r*sin(phi), '-k')
 
-levels = linspace(0, gmax, gmax*100)
+levels = linspace(0, gmax, int(gmax*100))
 xlo = 0.25/gmax
 xhi = 1.25/gmax
 if xhi > (1+2.0/gmax)/3:

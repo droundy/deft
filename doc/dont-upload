@@ -13,3 +13,5 @@ frame*.png
 *.o
 *.exe
 *.hi
+data
+movies

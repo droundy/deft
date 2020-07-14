@@ -1,4 +1,4 @@
-| python2 mkdown.py
+| python3 mkdown.py
 > index.html
 
 | sass style.scss style.css

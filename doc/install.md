@@ -21,12 +21,6 @@ where `username` is your username on the cluster.
 
 ## Building deft
 
-To build, just run:
-
-    scons
-
-## Building deft with fac (preferred)
-
 You need to start by getting fac by following the instructions at the
 [fac website](https://physics.oregonstate.edu/~roundyd/fac/building.html).
 You should probably put fac in your path using something like
@@ -40,58 +34,13 @@ anywhere in the deft directory.
 
 You need ...
 
-    haskell-mode # optional, but handy
-    emacs-goodies-el # optional, but handy for markdown-mode
-    scons
     fftw3-dev
     libpopt-dev # for command-line argument processing
     g++
     haskell-platform
     texlive-full
-    gnuplot
     python-matplotlib
     python-scipy python3-scipy
-    python-sympy
-    python-markdown # for the documentation
+    python-sympy python3-sympy
+    python-markdown python3-markdown # for the documentation
     inkscape # for the documentation
-
-Running the test suite
-----------------------
-
-Our test suite is run automatically when necessary when you run
-
-    scons
-
-or you can explicitly request that the tests be run by typing
-
-    scons check
-
-### To write a new test
-
-Create a new file such as
-
-    tests/my-new-feature.cpp
-
-Then add that test to `SConstruct`
-
-    for test in Split(""" memory saft eos  ... my-new-feature  """):
-        env.BuildTest(test, all_sources)
-    
-At this point, `scons check` should do what you want.  There are
-several such `for` loops, so that you can choose one that lists the
-sources required, in order to minimize the build time for your test.
-
-
-Using the git pre-commit hook
------------------------------
-
-`scons` will add a pre-commit hook that causes git to build the code
-and papers and run the test suite prior to actually committing your
-changes when you run `git commit`.  Thanks to `scons` caching, this
-should not take long (a few minutes), but when it took much longer, I
-instituted a short-cut to bypass the process.  If you have a few quick
-(and safe) commits, you could skip the tests on all but the final one.
-
-To skip the tests, you simply run:
-
-    TEST-none git commit # possibly with -m
