@@ -51,8 +51,8 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   min.precondition(true);
 
   char *fname = new char[5000];
-  mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
-  snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/radial-lj-%06.4f-%04.2f.dat", kT, reduced_density);
+  mkdir("new-data", 0777); // make sure the directory exists
+  snprintf(fname, 5000, "new-data/radial-lj-%06.4f-%04.2f.dat", kT, reduced_density);
 
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
