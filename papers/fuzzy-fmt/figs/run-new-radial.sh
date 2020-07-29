@@ -15,7 +15,7 @@ rq run -J radial-6-0.1 -o new-data/radial-wca-0.6000-0.10.out ./new-radial-wca.m
 
 rq run -J radial-1-10 -o new-data/radial-wca-1.0000-10.00.out ./new-radial-wca.mkdat 1 10.0
 rq run -J radial-1-5 -o new-data/radial-wca-1.0000-5.00.out ./new-radial-wca.mkdat 1 5.0
-rq run -J radial-1-2.5-o new-data/radial-wca-1.0000-2.50.out ./new-radial-wca.mkdat 1 2.5
+rq run -J radial-1-2.5 -o new-data/radial-wca-1.0000-2.50.out ./new-radial-wca.mkdat 1 2.5
 
 
 # def runme(reduced_density, temperature):
