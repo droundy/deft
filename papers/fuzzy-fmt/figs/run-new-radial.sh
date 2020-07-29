@@ -8,14 +8,14 @@ fac new-radial-lj.mkdat new-radial-wca.mkdat # new-bh-radial-wca.mkdat new-bh-ra
 
 # ./new-radial-wca.mkdat DENSITY TEMPERATURE 
 rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 10.0 
-rq run -J radial-6-5 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 5.0
-rq run -J radial-6-2_5 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 2.5
-rq run -J radial-6-1 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 1
-rq run -J radial-6-0_1 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 0.1
+rq run -J radial-6-5 -o new-data/radial-wca-0.6000-5.00.out ./new-radial-wca.mkdat 0.6 5.0
+rq run -J radial-6-2.5 -o new-data/radial-wca-0.6000-2.50.out ./new-radial-wca.mkdat 0.6 2.5
+rq run -J radial-6-1 -o new-data/radial-wca-0.6000-1.00.out ./new-radial-wca.mkdat 0.6 1
+rq run -J radial-6-0.1 -o new-data/radial-wca-0.6000-0.10.out ./new-radial-wca.mkdat 0.6 0.1
 
-rq run -J radial-1-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 1 10.0
-rq run -J radial-1-5 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 1 5.0
-rq run -J radial-1-2_5-o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 1 2.5
+rq run -J radial-1-10 -o new-data/radial-wca-1.0000-10.00.out ./new-radial-wca.mkdat 1 10.0
+rq run -J radial-1-5 -o new-data/radial-wca-1.0000-5.00.out ./new-radial-wca.mkdat 1 5.0
+rq run -J radial-1-2.5-o new-data/radial-wca-1.0000-2.50.out ./new-radial-wca.mkdat 1 2.5
 
 
 # def runme(reduced_density, temperature):
