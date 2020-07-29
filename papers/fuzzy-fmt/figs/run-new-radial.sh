@@ -8,6 +8,15 @@ fac new-radial-lj.mkdat new-radial-wca.mkdat # new-bh-radial-wca.mkdat new-bh-ra
 
 # ./new-radial-wca.mkdat DENSITY TEMPERATURE 
 rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 10.0 
+rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 5.0
+rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 2.5
+rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 1
+rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 0.6 0.1
+
+rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 1 10.0
+rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 1 5.0
+rq run -J radial-6-10 -o new-data/radial-wca-0.6000-10.00.out ./new-radial-wca.mkdat 1 2.5
+
 
 # def runme(reduced_density, temperature):
 #     outfilename = figsdir+'/new-data/radial-lj-%06.4f-%04.2f.out' % (temperature, reduced_density)

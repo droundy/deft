@@ -15,6 +15,8 @@ import math
 epsilon=1
 sigma=1
 
+twoR=2**(1.0/6)*sigma
+
 PI=np.pi
 Xi=[]
 B2_WCA_list=[]
@@ -110,18 +112,6 @@ for KbT in T:
     print(KbT, Xi_at_T)
 
 
-  
-
-#Plot B2_WCA vs T
-#plt.plot(T, B2_WCA_list, label = 'B2_WCA')
-#plt.plot(T, B2_erf_list, label = 'B2_erf')
-#plt.xlabel('KbT')
-#plt.ylabel('B2')
-#plt.title('B2 vs Temp')
-#plt.legend()
-
-#plt.figure()
-
 #Range of "magic #" for good results is 1.4 to 1.6, my choice 1.5 or 1.43
 Xi_old = alpha(T)/(6*np.sqrt(np.pi)*(np.sqrt(np.log(2)/T) + np.log(2)))
 Xi_new_2 = (pow(2,1.0/6)-alpha(T))/2.0 #not good
@@ -134,7 +124,7 @@ Xi_new_1_43 = (pow(2,1.0/6)-alpha(T))/1.43 #close fit for 1.1<T<5
 #Xi_new_1_41 = (pow(2,1.0/6)-alpha(T))/1.41 #close fit for 1.4<T<3.5 staring to go over Xi_B2
 Xi_new_1_4 = (pow(2,1.0/6)-alpha(T))/1.40 #SAVE close fit for 1.6<T<2.9 staring to go over Xi_B2
 Xi_new_ln=(pow(2,1.0/6)-alpha(T))/(1.5+0.3*np.log(T)) #Xi_new_ln
-#Xi_new_ln=(pow(2,1.0/6)-alpha(T))/(1.5+0.3*np.log(10)) #Xi_new_ln   #took pictures of this!
+Xi_new_ln10=(pow(2,1.0/6)-alpha(T))/(1.5+0.3*np.log(10)) #Xi_new_ln10   #took pictures of this!
 #Xi_new_ln=(pow(2,1.0/6)-alpha(T))/(1.5+0.3) #Xi_new
 print(T)
 #Xi_df_dr=(T/(4*np.sqrt(PI)))*(1.0/(12*pow(alpha(T),-13)-6*pow(alpha(T),-7)))*np.exp((1/T)*(4*pow(alpha(T),-12)-4*pow(alpha(T),-6)+1))  #Xi_df_dr
@@ -150,7 +140,9 @@ plt.plot(T, Xi_old, label='Krebs', color='orange')
 #plt.plot(T, Xi_new_1_5, label='Xi_2pt 1.5')
 #plt.plot(T, Xi_new_1_43, label='Xi_2pt 1.43', color='yellow'  )
 #plt.plot(T, Xi_new_1_4, label='Xi_2pt 1.4')
-plt.plot(T, Xi_new_ln, label='Xi_2pt ln', color='red' )
+plt.plot(T, Xi_new_ln, label='Xi ln', color='red' )
+plt.plot(T, Xi_new_ln10, label='Xi ln10', color='purple' )
+plt.plot(T, Xi_new_1_43, label='Xi_2pt', color='yellow' )
 #plt.plot(T, Xi_df_dr, label='Xi_df_dr', color='purple' )
 #plt.plot(T, (0.12**2*(T-0.2575))**(1/2.1), label='crazy fit')
 plt.xlabel('KbT')
@@ -160,116 +152,106 @@ plt.legend()
 
 plt.figure()
 
-
 #Plots---------------
-KbT=200 #this is actually kBT/epsilon with epsilon=1
+KbT=1 #this is actually kBT/epsilon with epsilon=1
 
-# #Plot df/dr and w2*w2 for comparison
-# r=np.linspace(.3, 1.1225, 2000) #Use this for full range of temperatures
-# #r=np.linspace(0.9, 1.20, 2000) #Use to match Eric's diagram
-# alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-# #zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))   #Eric's
-# zeta=(pow(2,1.0/6)-alpha)/(1.5+0.3*np.log(KbT))  #Xi_new_ln
-# w2_w2=(1.0/(zeta*np.sqrt(PI)))*np.exp(-pow((r-alpha)/zeta,2))  #convolution of w2 with itself
 
-# #zeta = find_Xi(KbT)  #Xi from B2
-# #w2_w2=(1.0/(zeta*np.sqrt(PI)))*np.exp(-pow((r-alpha(T))/zeta,2))  #convolution of w2 with itself  (use this with Xi from B2)
+zeta_B2 = find_Xi(KbT)  #Xi from B2
+zeta_Eric = alpha(KbT)/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
+zeta_ln=(pow(2,1.0/6)-alpha(KbT))/(1.5+0.3*np.log(KbT)) #Xi_new_ln
+zeta_ln10=(pow(2,1.0/6)-alpha(KbT))/(1.5+0.3*np.log(10))
+zeta_2pt=(pow(2,1.0/6)-alpha(KbT))/1.43 #Xi_new_2pt
+zeta_df_dr=(KbT/(4*np.sqrt(PI)))*pow(12*pow(alpha(KbT),-13)-6*pow(alpha(KbT),-7),-1.0)*np.exp((1/KbT)*(4*pow(alpha(KbT),-12)-4*pow(alpha(KbT),-6)+1))  #Xi_df_dr
 
-# df_dr= np.exp(-(1/KbT)*(4*epsilon*(pow(sigma,12)*pow(r,-12)-pow(sigma,6)*pow(r,-6))+epsilon))*((1/KbT)*4*epsilon*(12*pow(sigma,12)*pow(r,-13)-6*pow(sigma,6)*pow(r,-7))) #derivative of the mayer function from the WCA potential
-# plt.plot(r/sigma, df_dr, label='df_dr')
-# plt.plot(r/sigma, w2_w2, label='w2_w2', linestyle='dashed')
-# plt.xlabel('r/$\sigma$')
-# plt.ylabel('df(r)/dr, w2*w2')
-# plt.title('Compare match with Eq12 for low density kT=%g' % (KbT))
-# plt.legend()
-# #plt.savefig(plot1)
-
-# plt.figure()
+alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
 
 #Potential Plots
-r=np.linspace(1, 1.12, 2000) #for erf plots
-
-#Plot erf with Xi from B2  
-zeta = find_Xi(KbT)
-Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/zeta)+1))
-plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
+#r=np.linspace(1, 1.12, 2000) #for erf plots #original SAVE
+r=np.linspace(.5, 1.1225, 2000)   #2R=1.1225
+#r=np.linspace(.5, 3, 2000)
 
 #Plot WCA
-sigma_over_r_to_pow6=(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)
-V=4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6) + epsilon
-plt.plot(r/sigma,V/epsilon, label='Vwca', color='black')
+sigma_over_r_to_pow6 = (sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)
+V = 4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6) + epsilon
+#plt.plot(r/sigma,V/epsilon, label='Vwca', color='black')
+plt.plot(r/sigma,V/KbT, label='Vwca V/T', color='black')
 
-#Plot erf with Eric's Xi
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  
-zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
-Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta)+1))
-plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
+#Plot erf with Xi from B2  
+Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta_B2)+1))
+#plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
+plt.plot(r/sigma,Verf/KbT, label='B2 V/T', color='blue')
+
+#Plot erf with Xi_ln 
+Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta_ln)+1))
+#plt.plot(r/sigma,Verf/epsilon, label='Xi ln', color='red')
+plt.plot(r/sigma,Verf/KbT, label='Xi ln V/T', color='red')
+
+#Plot erf with Xi_ln10 
+Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta_ln10)+1))
+#plt.plot(r/sigma,Verf/epsilon, label='Xi ln', color='red')
+plt.plot(r/sigma,Verf/KbT, label='Xi ln10 V/T', color='purple')
+
+#Plot erf with Eric's Xi 
+Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta_Eric)+1))
+#plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
+plt.plot(r/sigma,Verf/KbT, label='Eric V/T', color='orange')
 
 #Plot erf with Xi_2pt 1.43
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  
-#zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
-zeta=(pow(2,1.0/6)-alpha)/2  #Xi_new_1_43
-Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta)+1))
+#zeta=(pow(2,1.0/6)-alpha)/1.43 #Xi_new_1_43
+Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta_2pt)+1))
 #plt.plot(r/sigma,Verf/epsilon, label='Xi 1.43', color='yellow')
+plt.plot(r/sigma,Verf/KbT, label='Xi 1.43 V/T', color='yellow')
 
 #Plot erf with Xi_2pt 2
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  
-#zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
 zeta=(pow(2,1.0/6)-alpha)/2 #Xi_new_2
 Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta)+1))
 #plt.plot(r/sigma,Verf/epsilon, label='Xi 2', color='green')
 
-#Plot erf with Xi_2pt 3
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  
-#zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
+#Plot erf with Xi_2pt 3 
 zeta=(pow(2,1.0/6)-alpha)/3 #Xi_new_3
 Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta)+1))
 #plt.plot(r/sigma,Verf/epsilon, label='Xi 3', color='yellow')
 
-#Plot erf with Xi_2pt ln
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  
-#zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
-zeta=(pow(2,1.0/6)-alpha)/(1.5+0.3*np.log(KbT)) #Xi_new_ln
-Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta)+1))
-plt.plot(r/sigma,Verf/epsilon, label='Xi ln', color='red')
-
 #Plot erf with Xi_df_dr 
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))  
-zeta=(KbT/(4*np.sqrt(PI)))*pow(12*pow(alpha,-13)-6*pow(alpha,-7),-1.0)*np.exp((1/KbT)*(4*pow(alpha,-12)-4*pow(alpha,-6)+1))  #Xi_df_dr
-Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta)+1))
+Verf=-KbT*np.log(.5*(special.erf((r-alpha)/zeta_df_dr)+1))
 #plt.plot(r/sigma,Verf/epsilon, label='Xi ln', color='purple')
 
 plt.xlabel('r/$\sigma$')
-plt.ylabel('V(r)/$\epsilon$')
+#plt.ylabel('V(r)/$\epsilon$')
+plt.ylabel('V(r)/KT')
 plt.title('Error Function Potential Verf kT=%g' % (KbT))
 plt.legend()
-#plt.savefig(plot1)
 
 plt.figure()
 
-#Plot df/dr and w2*w2 for comparison
+#Plot df/dr and w2*w2 for comparison---------------------
 r=np.linspace(.3, 1.1225, 2000) #Use this for full range of temperatures
 #r=np.linspace(0.9, 1.20, 2000) #Use to match Eric's diagram
-alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-print(alpha)
-zeta=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))   #Eric's
-#zeta=(pow(2,1.0/6)-alpha)/(1.5+0.3*np.log(KbT))  #Xi_new_ln
-zeta=(KbT/(4*np.sqrt(PI)))*pow(12*pow(alpha,-13)-6*pow(alpha,-7),-1.0)*np.exp((1/KbT)*(4*pow(alpha,-12)-4*pow(alpha,-6)+1))  #Xi_df_dr
-w2_w2=(1.0/(zeta*np.sqrt(PI)))*np.exp(-pow((r-alpha)/zeta,2))  #convolution of w2 with itself
 
-#zeta = find_Xi(KbT)  #Xi from B2
-#w2_w2=(1.0/(zeta*np.sqrt(PI)))*np.exp(-pow((r-alpha(KbT))/zeta,2))  #convolution of w2 with itself  (use this with Xi from B2)
+w2_w2_Eric=(1.0/(zeta_Eric*np.sqrt(PI)))*np.exp(-pow((r-alpha)/zeta_Eric,2))  #convolution of w2 with itself
+w2_w2_B2=(1.0/(zeta_B2*np.sqrt(PI)))*np.exp(-pow((r-alpha)/zeta_B2,2))  #convolution of w2 with itself  (use this with Xi from B2)
+w2_w2_ln=(1.0/(zeta_ln*np.sqrt(PI)))*np.exp(-pow((r-alpha)/zeta_ln,2))
+w2_w2_ln10=(1.0/(zeta_ln10*np.sqrt(PI)))*np.exp(-pow((r-alpha)/zeta_ln10,2))
+w2_w2_2pt=(1.0/(zeta_2pt*np.sqrt(PI)))*np.exp(-pow((r-alpha)/zeta_2pt,2))
 
 df_dr= np.exp(-(1/KbT)*(4*epsilon*(pow(sigma,12)*pow(r,-12)-pow(sigma,6)*pow(r,-6))+epsilon))*((1/KbT)*4*epsilon*(12*pow(sigma,12)*pow(r,-13)-6*pow(sigma,6)*pow(r,-7))) #derivative of the mayer function from the WCA potential
-plt.plot(r/sigma, df_dr, label='df_dr')
-plt.plot(r/sigma, w2_w2, label='w2_w2', linestyle='dashed')
+
+plt.plot(r/sigma, df_dr, label='WCA df_dr')
+plt.plot(r/sigma, w2_w2_Eric, label='Eric w2_w2', linestyle='dashed', color='orange')
+plt.plot(r/sigma, w2_w2_B2, label='B2 w2_w2', linestyle='dashed', color='blue')
+plt.plot(r/sigma, w2_w2_ln, label='ln w2_w2', linestyle='dashed', color='red')
+plt.plot(r/sigma, w2_w2_ln10, label='ln10 w2_w2', linestyle='dashed', color='purple')
+plt.plot(r/sigma, w2_w2_2pt, label='2pt w2_w2', linestyle='dashed', color='yellow')
 plt.xlabel('r/$\sigma$')
 plt.ylabel('df(r)/dr, w2*w2')
 plt.title('Compare match with Eq12 for low density kT=%g' % (KbT))
 plt.legend()
-#plt.savefig(plot1)
+
 
 plt.show()
+
+print('alpha=',alpha)
+
 
 
 
