@@ -1,7 +1,10 @@
 #pragma once
 
+//sigma must be 1 - changing it would invalidate other equations in the program?
+const double epsilon = 1.0;
+const double sigma = 1.0;
+
 static inline double find_alpha(double temp) {
-  assert(sigma == 1.0); //sigma must be 1 - changing it would invalidate other equations in the program?
   return sigma*pow(2/(1+sqrt((temp*log(2))/epsilon)),1.0/6);
 }
 

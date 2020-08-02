@@ -32,11 +32,11 @@ def mkdown(mdfile):
     template = string.Template(templatestr)
 
     f = open(htfile, 'w')
-    myhtml = string.replace(template.safe_substitute(
+    myhtml = template.safe_substitute(
             title = title,
             pagetitle = pagetitle,
             content = mmdd.markdown(mkstr, extensions=['def_list', 'markdown.extensions.toc']),
-            sidebar = mmdd.markdown(sidebar, extensions=['def_list'])),
+            sidebar = mmdd.markdown(sidebar, extensions=['def_list'])).replace(
                             '<li><a href="'+mdfile[:-3],
                             '<li><a class="current" href="'+mdfile[:-3])
 

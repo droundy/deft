@@ -32,6 +32,7 @@ mkdats = """
   papers/fuzzy-fmt/figs/homogeneous-bh
   papers/fuzzy-fmt/figs/new-radial-lj
   papers/fuzzy-fmt/figs/new-radial-wca
+  papers/fuzzy-fmt/figs/weight-functions
   papers/fuzzy-fmt/figs/new-bh-radial-wca
   papers/fuzzy-fmt/figs/new-soft-wall
   papers/fuzzy-fmt/figs/new-melting

@@ -140,7 +140,7 @@ zdft = loadtxt("figs/triplet-z.dat")
 xdft = loadtxt("figs/triplet-x.dat")
 
 
-levels = linspace(0, gmax, gmax*100)
+levels = linspace(0, gmax, int(gmax*100))
 gr = read_gr(ff)
 ginf = interp(2*rpath, gr[:, 0], gr[:, 1]/ff)
 xlo = 0.5*ginf/gmax

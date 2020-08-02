@@ -115,12 +115,11 @@ w2 x = ifft ( w2k * fft x)
 
 w2v :: Expression RealSpace -> Vector RealSpace
 w2v x = vector_convolve w2vk x
-  where w2vk = kvec *. (imaginary * pi*exp(-((xi/sqrt 2)*k/2)**2)*((alpha**2-(xi/sqrt 2)**4*k**2)*cos(k*alpha/2)-
-                                               2*alpha*((xi/sqrt 2)**2*k+1/k)*sin(k*alpha/2))/k**2)
+   where w2vk = kvec *. (imaginary * (4*pi/k**2)*exp(-xi**2*k**2/8)*((xi**2*k/4+1/k)*sin(k*alpha/2)-alpha/2*cos(k*alpha/2)))
 
 w1v :: Expression RealSpace -> Vector RealSpace
 w1v x = vector_convolve w1vk x
-  where w1vk = kvec *. (imaginary * exp(-((xi/sqrt 2)*k/2)**2)*(alpha/2*cos(k*alpha/2)-((xi/sqrt 2)**2*k/2+1/k)*sin(k*alpha/2))/k**2)
+   where w1vk = kvec *. (imaginary *(1/k**2)*(sqrt (pi/2)/(k*xi)*exp(-alpha**2/xi**2/2)*(2*real_part_complex_erf(k*xi/2/sqrt 2 + imaginary*alpha/(xi*sqrt 2))) - exp(-k**2*xi**2/8)*cos(k*alpha/2)))
 
 w2transverse :: Expression KSpace
 w2transverse = -- var "w2transversek" "\\tilde{w_{2\\perp}}(k)" $
