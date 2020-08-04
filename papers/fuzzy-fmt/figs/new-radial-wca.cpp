@@ -67,6 +67,7 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
     f->get_Fideal(); // FIXME this is a hokey trick to make dV be defined
     Vector n3 = f->get_n3();
 
+    printf("The length of the vectors is %d", n.get_size());
     FILE *o = fopen(fname, "w");
     if (!o) {
       fprintf(stderr, "error creating file %s\n", fname);
