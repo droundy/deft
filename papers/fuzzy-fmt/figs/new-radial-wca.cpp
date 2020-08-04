@@ -83,17 +83,6 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
   delete[] fname;
 }
 
-/* - -
-# To run this automagically in fac, remove spaces from the above line
-
-for kT in np.arange(0.1, 2.05, 0.1):
-  for rho in np.arange(0.1, 2.05, 0.1):
-    self.rule('%s %g %g' % (exe, rho, kT),
-              [exe],
-              ["papers/fuzzy-fmt/figs/new-data/radial-lj-%04.2f-%04.2f.dat" % (rho, kT)])
-
-- - */
-
 int main(int argc, char **argv) {
   double reduced_density, temp;
   if (argc != 3) {
