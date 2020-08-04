@@ -784,85 +784,46 @@ Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ 
 \subsection{Fourier Transform of Weight Function $w_1(r)$}
 %\begin{equation}{w_1(r)= }\end{equation}
 \begin{equation}
-    w_1(k)=\frac{1}{k}e^{-\frac{k^2\Xi^2}{8}}\sin\left(\frac{k\alpha}{2}\right)
+     w_1(r)=\frac{w_2(r)}{4{\pi}r}=\frac{1}{4{\pi}r}\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}
+\end{equation}
+\begin{equation}
+    \widetilde{w}_1(k)=\frac{1}{k}e^{-\frac{k^2\Xi^2}{8}}\sin\left(\frac{k\alpha}{2}\right)
 \end{equation}
 
 \subsection{Fourier Transform of Weight Function $w_2(r)$}
 %\begin{equation}{w_2(r)= }\end{equation}
-\begin{equation}{w_2(k)=\frac{2\pi}{k}e^{-\frac{k^2\Xi^2}{8}}\left[\frac{k\Xi^2}{2}\cos\left(\frac{k\alpha}{2}\right)+{\alpha}\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
+\begin{equation}
+     w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}
+\end{equation}
+\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{k}e^{-\frac{k^2\Xi^2}{8}}\left[\frac{k\Xi^2}{2}\cos\left(\frac{k\alpha}{2}\right)+{\alpha}\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
+\[{}\]
 
 \subsection{Fourier Transform of Weight Function $w_3(r)$}
 \begin{equation}
-  w_3(r)=
+    w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]
 \end{equation}
 \begin{equation}
-    w_3(k)=\frac{4\pi}{k^3}
+    \widetilde{w}_3(k)=\frac{4\pi}{k^3}
     e^{-\frac{k^2\Xi^2}{8}}
     \left[\left(1+\frac{k^2\Xi^2}{4}\right)\sin\left(\frac{k\alpha}{2}\right)
       -\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]
 \end{equation}
+\[{}\]
 
 \subsection{Fourier Transform of Vector Weight Function $\vec{w}_{1}(r)$}
 \begin{equation}{\vec{w}_1(\vec{r})=w_1(r)\frac{\vec{r}}{r}}\end{equation}
 where
 \begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
 \begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}\vec{w}_1(\vec{r})e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
-\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-where 
-\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
-\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
-\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
-The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
-\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\frac{1}{4\pi\sqrt{\pi}a}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos{\theta}'e^{-ikr\cos\theta'}d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}+\frac{1}{k}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right]{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)+\frac{\pi}{2k}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]\right]{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]-e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}{\sqrt{2}\Xi}\right)\right]-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
+\[{}\]
 
 \subsection{Fourier Transform of Vector Weight Function $\vec{w}_{2}(r)$}
 \begin{equation}{\vec{w}_2(\vec{r})=w_2(r)\frac{\vec{r}}{r}}\end{equation}
 where
 \begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
-
-\begin{equation}{\widetilde{w}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
-\begin{equation}{\widetilde{w}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-where 
-\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
-\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
-\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
-The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
-\begin{equation}{\widetilde{w}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(-\frac{2i}{kr}\cos(kr) + \frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{-4i\sqrt{\pi}}{ak}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos(kr)d{r} + \frac{4i\sqrt{\pi}}{ak^2}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}{~~}\hat{z}'}\end{equation}
-
-\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{-4\sqrt{\pi}i}{ak}\left[\frac{a\alpha\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation} 
-\begin{displaymath}{+{~~}\frac{4\sqrt{\pi}i}{ak^2}\left[a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]{~~}\hat{z}'}\end{displaymath}
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2\Xi^2}{8}}\left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
 \[{}\]
-\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2a^2}{4}}\left[\left(\frac{a^2k}{2}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
 
 \subsection{Fourier Transform of Tensor weight ${w}_{m2}(r)$} %$\overleftrightarrow{w}_{m2}(r)$
 %\textbf{Tensor Weight $\overleftrightarrow{w}_{m2}(r)$:}
@@ -881,7 +842,7 @@ The fourier transform of the tensor weight matrix elements are given by
 \begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})=\int_{allspace}{w_{{m2}_{ij}}}(\vec{r})e^{-i\vec{k}\cdot\vec{r}}d{\vec{r}}}\end{equation}
 %\mbox{~%\scriptsize\textbullet~}
 Since the integration is over all space, the integral can be simplified by setting 
-\begin{equation}{\vec{k}=k\hat{z}=k\cos\theta\hat{z}}\end{equation}
+\begin{equation}{\vec{k}=k\hat{z}}\end{equation}
 Instead of constraining vector $\vec{k}$ to be in the z direction, however, a rotated coordinate system $(x',y',z')$ is used which is rotated from the (x,y,z) coordinate system in such a way that $z'$ points in the direction of vector $\vec{k}$. After solving for the elements of the transformed weight function in coordinate system $(x',y',z')$, they will be expressed again in terms of vector $\vec{k}$ as it appears in coordinate system (x,y,z) to get the elements of the transformed weight function in coordinate system (x,y,z).
 
 %The weight components of interest are those corresponding to the component of vector $\vec{r}$ parallel to vector $\vec{k}$ which will be called $r_{z'}$, and to the two components of $\vec{r}$ perpendicular to vector $\vec{k}$ (and to each other) which will be called $r_{x'}$ and $r_{y'}$. 
@@ -1033,11 +994,9 @@ and the results from earlier
 results in
 \begin{displaymath}{\widetilde{w}_{m2}(\vec{k})= (1-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
 and so 
-\begin{displaymath}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3k_ik_j)\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+\begin{displaymath}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
 \[{}\]
 
-
-\[{}\]
 \subsection{Integrals used to compute tensor weights}
 %\textbf{Integrals used to compute tensor weights:}
 \begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}}\end{equation} 
