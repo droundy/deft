@@ -61,11 +61,9 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
     took("Doing the minimization step");
 
     const int Nz = f->Nz();
-    Vector Vext = f->Vext();
     Vector r = f->get_r();
     Vector n = f->get_n();
     f->get_Fideal(); // FIXME this is a hokey trick to make dV be defined
-    Vector n3 = f->get_n3();
 
     printf("The length of the vectors is %d", n.get_size());
     FILE *o = fopen(fname, "w");
@@ -74,7 +72,7 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
       exit(1);
     }
     for (int i=0; i<Nz/2; i++) {
-      fprintf(o, "%g\t%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i], n3[i]);
+      fprintf(o, "%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3));
     }
     fclose(o);
 
