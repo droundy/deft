@@ -28,7 +28,7 @@
 double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.04;
+double dx = 0.02;
 
 #include "findxi.h"
 
