@@ -73,6 +73,12 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
     }
     for (int i=0; i<Nz/2; i++) {
       fprintf(o, "%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3));
+      if (i == int(Nz/2) - 1) {
+        printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+        printf("   n -> %.9g (i.e. g -> %g)\n",
+           n[i]*uipow(sigma, 3), n[i]*uipow(sigma, 3)/reduced_density);
+        printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+      }
     }
     fclose(o);
 
