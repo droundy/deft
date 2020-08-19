@@ -9,18 +9,17 @@ static inline double find_alpha(double temp) {
 }
 
 
-//Old Xi derived from derivatives (referenced here if want to revert to old Xi for comparison)--------DEBUG
-// static inline double find_Xi(double kT) {
-//   double xi = find_alpha(kT)/(6*pow(M_PI,0.5))/(log(2) + pow(log(2)*epsilon/kT,0.5));  //check syntex!
-//   printf("our alpha at T=%g is %g\n", kT, find_alpha(kT));
-//   printf("our Xi at T=%g is %g\n", kT, xi);
-//   return xi;
-// }
-//END old Xi(T)---------------------------------------------------------------------------------------DEBUG
+//Old Xi derived from derivatives (referenced here if want to revert to old Xi for comparison)--------
+ //static inline double find_Xi(double kT) {
+   //double xi = find_alpha(kT)/(6*uipow(M_PI,0.5))/(log(2) + uipow(log(2)*epsilon/kT,0.5));  //check syntex!
+   //printf("our alpha at T=%g is %g\n", kT, find_alpha(kT));
+   //printf("our Xi at T=%g is %g\n", kT, xi);
+   //return xi;
+ //}
+//END old Xi(T)---------------------------------------------------------------------------------------
 
 
 
-//Find Xi(T)---------------------------------------------------
 static inline double Vwca(double r) {
     return 4.0*epsilon*(pow(r/sigma,-12.0) - pow(r/sigma,-6.0)) + epsilon;
 }
@@ -28,6 +27,8 @@ static inline double Vwca(double r) {
 static inline double f_wca(double r, double T){   //WCA mayer function
     return exp(-Vwca(r)/T) - 1;
 }
+
+//Find Xi(T)---------------------------------------------------
 
 static inline double B2_wca(double T) {
     long num_points =10000;
