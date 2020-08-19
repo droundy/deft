@@ -65,8 +65,8 @@ void run_minimization(double reduced_density,WhiteBearFluidVeff *f, double kT) {
   min.precondition(true);
 
   char *fname = new char[5000];
-  mkdir("papers/fuzzy-fmt/figs/new-data", 0777); // make sure the directory exists
-  snprintf(fname, 5000, "papers/fuzzy-fmt/figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat", kT, reduced_density);
+  mkdir("new-data", 0777); // make sure the directory exists
+  snprintf(fname, 5000, "new-data/radial-bh-wca-%06.4f-%04.2f.dat", kT, reduced_density);
 
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
@@ -90,6 +90,12 @@ void run_minimization(double reduced_density,WhiteBearFluidVeff *f, double kT) {
     }
     for (int i=0; i<Nz/2; i++) {
       fprintf(o, "%g\t%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i], n3[i]);
+      if (i == int(Nz/2) - 1) {
+        printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+        printf("   n -> %.9g (i.e. g -> %g)\n",
+           n[i]*uipow(sigma, 3), n[i]*uipow(sigma, 3)/reduced_density);
+        printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+      }
     }
     fclose(o);
 
@@ -106,7 +112,7 @@ for kT in np.arange(0.1, 2.05, 0.1):
   for rho in np.arange(0.1, 2.05, 0.1):
     self.rule('%s %g %g' % (exe, rho, kT),
               [exe],
-              ["papers/fuzzy-fmt/figs/new-data/radial-bh-%04.2f-%04.2f.dat" % (rho, kT)])
+              ["new-data/radial-bh-%04.2f-%04.2f.dat" % (rho, kT)])
 
 - - */
 
