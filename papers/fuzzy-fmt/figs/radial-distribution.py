@@ -59,7 +59,7 @@ def plot_radial(reduced_density, temps):
 figure(figsize=(9, 14.5))
 subplot(2, 1, 1)
 # plot_radial(60, [10, 5.0, 2.5, 1.0, 0.1])
-plot_radial(60, [10])
+plot_radial(60, [10, 1.0])
 
 subplot(2, 1, 2)
 plot_radial(100, [10.0, 5.0, 2.5])
