@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #This program creates plots of Free Energy difference vs density 
 #for many temperatures from data in kT*best.dat (or kT*best_tensor.dat)
