@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #This program runs figs/new-melting.cpp for many different densities for input parameters specified within this program
 #It is used to reproduce data, which is why the input paratmeters are specified within the program, and are not intended to be changed.
