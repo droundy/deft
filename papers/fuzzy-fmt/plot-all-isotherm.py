@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #This program creates plots of Free Energy difference vs density 
 #for many temperatures from data in kT*best.dat (or kT*best_tensor.dat)
@@ -33,7 +33,8 @@ args=parser.parse_args()
 #for kT in [.4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2]:   #no data appears for lower than .4
 #for kT in [.4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 4,6,8,10,12,14,16,18,20,40, 60, 80, 100, 120, 140, 160, 180, 200]:   #no data appears for lower than .4
 #for kT in [.1, .2, .3, .4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 4,6,8,10,12,14,16,18,20,40]:  
-for kT in [.1, .2, .3, .4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 4,6,8,10,12,14,16,18,20,40, 60, 80, 100, 120, 140, 160, 180, 200]:  
+#for kT in [.1, .2, .3, .4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 4,6,8,10,12,14,16,18,20,40, 60, 80, 100, 120, 140, 160, 180, 200]:  
+for kT in [0.5, 1, 2, 5, 10, 50, 100, 200]:
 #for kT in [1.9, 2]:
 #for kT in [0.5, 1]:
   n = []
@@ -42,11 +43,11 @@ for kT in [.1, .2, .3, .4, .5, .6, .7, .8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6,
   
   if args.tensor :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT))) 
-    files = sorted(list(glob.glob('newdata_tensor/phase-diagram4/kT%.3f_n*_best_tensor.dat' % kT)))   #remove the "2" at the end of phase-diagram when done comparing new data
+    files = sorted(list(glob.glob('newdata_tensor/phase-diagram5/kT%.3f_n*_best_tensor.dat' % kT)))   #remove the "2" at the end of phase-diagram when done comparing new data
     #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
-    files = sorted(list(glob.glob('newdata/phase-diagram4/kT%.3f_n*_best.dat' % kT)))    #remove the "2" at the end of phase-diagram when done comparing new data
+    files = sorted(list(glob.glob('newdata/phase-diagram5/kT%.3f_n*_best.dat' % kT)))    #remove the "2" at the end of phase-diagram when done comparing new data
     #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   for f in files:
       data = np.loadtxt(f)
