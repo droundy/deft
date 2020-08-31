@@ -9,10 +9,13 @@ static inline double find_alpha(double T) {                    //note: T means k
 
 static const double Rmax = 2*sigma/pow(2.0,5.0/6.0); // this is the distance for which the potential is zero beyond it.
 
-static inline double Vwca(double r) { 
+static inline double Vlj(double r) {
   const double power_6 = uipow(sigma/r, 6);
+  return 4*epsilon*(sqr(power_6) - power_6);
+}
+static inline double Vwca(double r) {
   if (r > Rmax) return 0;
-  return 4*epsilon*(sqr(power_6) - power_6) + epsilon;
+  return Vlj(r) + epsilon;
 }
 
 //Find Xi(T) by matching second virial coefficeints B2 for WCA and Erf potentials: 

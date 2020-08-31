@@ -48,7 +48,7 @@ def plot_radial(reduced_density, temps):
     xlabel(r'$r/\sigma$')
     ylabel('$g(r)$')
     legend()
-    xlim(0.5, 5)
+    xlim(0.5, 3)
 
 # input: ['figs/mcfcc-%04.4f-%.4f.dat.gradial' % (0.6, temp) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
 # input: ['figs/new-data/radial-wca-%06.4f-%04.2f.dat' % (temp, 0.6) for temp in [10.0, 5.0, 2.5, 1.0, 0.1]]
