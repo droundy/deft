@@ -21,13 +21,8 @@
 #include "new/WhiteBearFluidVeffFast.h"
 #include "new/HomogeneousWhiteBearFluidFast.h"
 #include "new/Minimize.h"
-
-const double sigma = 1;
-const double epsilon = 1;
-
-#include "soft-wall-potential.h"
-
 #include "findbh.h"
+#include "soft-wall-potential.h"
 
 // Here we set up the lattice.
 static double width = 30;
