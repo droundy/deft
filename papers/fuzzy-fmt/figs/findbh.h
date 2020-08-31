@@ -3,6 +3,9 @@
 const double epsilon = 1.0;
 const double sigma = 1.0;  //sigma must be 1, changing it would invalidate other equations
 
+//When edited new-bh-radial-wca.cpp and this file to be simliar to new-radial-wca.cpp and findxi.h, R and sigma were CHANGED!
+//WAS: R = 2*radius, sigma=R*pow(2,-1.0/6.0)  NOW: R = 2*sigma/pow(2.0,5.0/6.0), sigma=1
+
 static const double Rmax = 2*sigma/pow(2.0,5.0/6.0); // this is the distance for which the potential is zero beyond it.
 const double radius = Rmax/2.0;
 
