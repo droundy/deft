@@ -31,8 +31,8 @@ double ymax = zmax;
 double xmax = zmax;
 double dx = 0.05;
 
-const double external_epsilon = 1.0;
-const double external_sigma = sigma;
+const double external_epsilon = epsilon;   //ASK if need
+const double external_sigma = sigma;	   //ASK if need
 
 static void took(const char *name) {
   static clock_t last_time = 0;
@@ -43,7 +43,7 @@ static void took(const char *name) {
   last_time = t;
 }
 
-void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
+void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
   min.set_maxiter(100);
@@ -58,26 +58,35 @@ void run_walls(double reduced_density, SFMTFluidVeff *f, double kT) {
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
   while (min.improve_energy(verbose)) {
-    //f->run_finite_difference_test("SFMT");
+    //f->run_finite_difference_test("SFMT");   
 
     took("Doing the minimization step");
 
+    const int Nz = f->Nz();
+    Vector Vext = f->Vext();
+    Vector r = f->get_r();
+    Vector n = f->get_n();
+    f->get_Fideal(); // FIXME this is a hokey trick to make dV be defined    //ADD this to match wca ?
+        
+    printf("The length of the vectors is %d", n.get_size());
     FILE *o = fopen(fname, "w");
     if (!o) {
       fprintf(stderr, "error creating file %s\n", fname);
       exit(1);
     }
-    const int Nz = f->Nz();
-    Vector Vext = f->Vext();
-    Vector r = f->get_r();
-    Vector n = f->get_n();
     for (int i=0; i<Nz/2; i++) {
       fprintf(o, "%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i]);
+      if (i == int(Nz/2) - 1) {
+        printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+        printf("   n -> %.9g (i.e. g -> %g)\n",
+           n[i]*uipow(sigma, 3), n[i]*uipow(sigma, 3)/reduced_density);
+        printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+      }
     }
     fclose(o);
 
     took("Outputting to file");
-  }
+  } while (min.improve_energy(gossipy));
   min.print_info();
   delete[] fname;
 }
@@ -89,7 +98,7 @@ for kT in np.arange(0.1, 2.05, 0.1):
   for rho in np.arange(0.1, 2.05, 0.1):
     self.rule('%s %g %g' % (exe, rho, kT),
               [exe],
-              ["papers/fuzzy-fmt/figs/new-data/radial-lj-%04.2f-%04.2f.dat" % (rho, kT)])
+              ["new-data/radial-lj-%04.2f-%04.2f.dat" % (rho, kT)])
 
 - - */
 
@@ -121,7 +130,7 @@ int main(int argc, char **argv) {
     const Vector r = f.get_r();
     for (int i=0; i<Ntot; i++) {
       const double Vmax = 100*temp;
-      f.Vext()[i] = 4*external_epsilon*(uipow(external_sigma/r[i], 12) - uipow(external_sigma/r[i], 6));
+      f.Vext()[i] = Vwca(r[i]);
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
 
       if (f.Vext()[i] > 0) {
@@ -132,6 +141,6 @@ int main(int argc, char **argv) {
   printf("my energy is %g\n", f.energy());
   took("Finding the energy a single time");
 
-  run_walls(reduced_density, &f, temp);
+  run_minimization(reduced_density, &f, temp);
   return 0;
 }
