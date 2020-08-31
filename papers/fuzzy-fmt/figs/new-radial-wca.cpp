@@ -24,13 +24,13 @@
 #include "new/Minimize.h"
 #include "version-identifier.h"
 
+#include "findxi.h"
+
 // Here we set up the lattice.
 double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
 double dx = 0.02;
-
-#include "findxi.h"
 
 static void took(const char *name) {
   static clock_t last_time = 0;
@@ -87,6 +87,17 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
   min.print_info();
   delete[] fname;
 }
+
+/* - -
+# To run this automagically in fac, remove spaces from the above line
+
+for kT in np.arange(0.1, 2.05, 0.1):
+  for rho in np.arange(0.1, 2.05, 0.1):
+    self.rule('%s %g %g' % (exe, rho, kT),
+              [exe],
+              ["new-data/radial-wca-%04.2f-%04.2f.dat" % (rho, kT)])
+
+- - */
 
 int main(int argc, char **argv) {
   double reduced_density, temp;
