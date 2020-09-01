@@ -8,24 +8,44 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-plot1="plot_Gauss.png"
-
 #Plot Gaussian vs rprime_magnitude at fixed gw  R=0
-rprime=np.linspace(0, .01, 20000)
-gw=.001
+gw=1
+x=np.linspace(-4*gw, 4*gw, 20000)
  
 #Gaussian=(1/np.sqrt(2*np.pi)*gw)*(1/np.sqrt(2*np.pi)*gw)*(1/np.sqrt(2*np.pi)*gw)*np.exp(-(rprime/np.sqrt(2)*gw)*(rprime/np.sqrt(2)*gw))
 
-Gaussian=np.exp(-(rprime/(np.sqrt(2)*gw))*(rprime/(np.sqrt(2)*gw)))
+def Gaussian(x):
+    return np.exp(-(x/(np.sqrt(2)*gw))*(x/(np.sqrt(2)*gw)))
 
-plt.plot(rprime,Gaussian)
-plt.xlabel('rprime')
-plt.ylabel('Gaussian')
-plt.title('Gaussian at gw=0.001')
+scale = 0.9
+plt.figure(figsize=(4*scale,3*scale))
+
+plt.xlabel('$x$')
+plt.xticks([-gw,0,gw], ['$-\sigma$', '$0$', '$\sigma$'])
+
+plt.plot([-gw, -gw], [0, Gaussian(gw)], 'k-')
+plt.plot([gw, gw], [0, Gaussian(gw)], 'k-')
+
+plt.ylim(0, 1.1)
+plt.xlim(-3*gw, 3*gw)
+
+plt.axvline(0, color='k')
+
+plt.plot(x,Gaussian(x))
+
+plt.yticks([0, 1], ['$0$', r'$\frac{1}{\sqrt{2\pi}\sigma}$'])
+plt.axhline(1, linestyle=':', color='k')
+
+# plt.annotate('hello', xy=(0,1), xytext=(0.5*gw,1),
+#              arrowprops=dict(arrowstyle="->",
+#                             connectionstyle="arc3"),)
+plt.text(-2.5*gw, 0.75, r"$\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{x^2}{2\sigma^2}}$")
+
+plt.tight_layout()
 #plt.legend()
-plt.savefig(plot1)
+plt.savefig("Gaussian.pdf")
 
-plt.show()
+# plt.show()
 
 
 
