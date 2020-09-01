@@ -38,6 +38,7 @@ other_texs = """
    histogram/sad2d.tex
    histogram/ising.tex
    ising/ising-sad.tex
+   thesis-kirstie/thesis.tex
 """.split()
 
 for tex in other_texs:
