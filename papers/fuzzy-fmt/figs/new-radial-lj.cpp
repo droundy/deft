@@ -31,9 +31,6 @@ double ymax = zmax;
 double xmax = zmax;
 double dx = 0.05;
 
-const double external_epsilon = epsilon;   //ASK if need
-const double external_sigma = sigma;	   //ASK if need
-
 static void took(const char *name) {
   static clock_t last_time = 0;
   clock_t t = clock();
@@ -130,7 +127,7 @@ int main(int argc, char **argv) {
     const Vector r = f.get_r();
     for (int i=0; i<Ntot; i++) {
       const double Vmax = 100*temp;
-      f.Vext()[i] = Vwca(r[i]);
+      f.Vext()[i] = Vlj(r[i]);
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
 
       if (f.Vext()[i] > 0) {
