@@ -8,8 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-plot1="plot_WCA_Potential_fixed.png"
-
 #Plot WCA Potential vs r 
 R=1/1.781797436  #for a sigma=1   DOESN"T WORK!!  graph wrong shape!
 epsilon=1
@@ -37,9 +35,9 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('$V(r)/\epsilon$')
 plt.title('WCA Potential')
 #plt.legend()
-plt.savefig(plot1)
+plt.savefig('WCA_Potential.png')
 
-plt.show()
+# plt.show()
 
 
 

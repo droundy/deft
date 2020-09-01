@@ -8,8 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-plot1="plot_LJ_Potential.png"
-
 #Plot WCA Potential vs r 
 #R=1/1.781797436  #for a sigma=1   DOESN'T WORK!!  graph wrong shape!
 R=1/1.781797436 
@@ -38,9 +36,9 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('V(r)/$\epsilon$')
 plt.title('Leonard-Jones Potential')
 #plt.legend()
-plt.savefig(plot1)
+plt.savefig("LJ_Potential.png")
 
-plt.show()
+# plt.show()
 
 
 

@@ -8,8 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-plot1="plot_HardSphere_Potential.png"
-
 #Plot Hard Sphere Potential vs r 
 R=1/1.781797436  #for a sigma=1   DOESN"T WORK!!  graph wrong shape!
 epsilon=1
@@ -38,9 +36,9 @@ plt.xlabel('r')
 plt.ylabel('V(r)')
 plt.title('Hard Sphere Potential')
 #plt.legend()
-plt.savefig(plot1)
+plt.savefig("plot_HardSphere_Potential.png")
 
-plt.show()
+# plt.show()
 
 
 
