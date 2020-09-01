@@ -54,7 +54,7 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
-  while (min.improve_energy(verbose)) {
+  do {
     //f->run_finite_difference_test("SFMT");   
 
     took("Doing the minimization step");
