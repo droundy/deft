@@ -1,4 +1,4 @@
-\documentclass[12pt,draft]{article}
+\documentclass[12pt]{article}
 \usepackage{setspace}
 \doublespacing
 %\usepackage[top=1.2in, bottom=1.2in]{geometry}
@@ -33,9 +33,7 @@ There are many interatomic potentials which can be used to model a fluid each of
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{plot_HardSphere_Potential.png}
-    %\includegraphics[height=3.5cm]{plot_HardSphere_Potential.png}
-    %\caption{Hard Sphere Potential}
+    % FIXME \includegraphics[height=7cm]{plot_HardSphere_Potential.png}
     \caption{A Hard Sphere Potential is zero for $r>2R$, and infinity for $r\leq{2R}$ which is approximately 1.225 in this example.}
     \label{fig:HardSphere_potential}
   \end{figure}
@@ -49,7 +47,7 @@ Another fairly simple, but relatively accurate interatomic potential widely used
  
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{LJ_Potential.png}
+    % FIXME \includegraphics[height=7cm]{LJ_Potential.png}
     \caption{Leonard-Jones Potential for $\sigma=1$, $\epsilon=1$}
     \label{fig:LJ_potential}
   \end{figure}
@@ -58,7 +56,7 @@ The combined attractive and repulsive effects produce the overall shape of the L
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{LJ_Potential_2part.png}
+    % FIXME \includegraphics[height=7cm]{LJ_Potential_2part.png}
     \caption{Leanard-Jones Potential broken into two parts for $\sigma=1$, $\epsilon=1$}
     \label{fig:LJ_potential_2parts}
   \end{figure}
@@ -68,7 +66,7 @@ The combined attractive and repulsive effects produce the overall shape of the L
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{WCA_Potential.png}
+    % FIXME \includegraphics[height=7cm]{WCA_Potential.png}
     \caption{WCA Potential for $\sigma=1$, $\epsilon=1$}
     \label{fig:WCA_potential}
   \end{figure}
@@ -83,7 +81,7 @@ The repulsive portion of the Leonard-Jones potential forms the potential for a W
 \begin{figure}[h!]
     \centering
    % \begin{subfigure}[b]{0.4\linewidth}
-      \includegraphics[height=3.5cm]{TwoSpheres.png}
+      % FIXME \includegraphics[height=3.5cm]{TwoSpheres.png}
     %\end{subfigure} 
     %\begin{subfigure}[b]{0.4\linewidth}
     %  \includegraphics[height=3.5cm]{2spheres.png}
@@ -104,12 +102,12 @@ Unlike the WCA potential, the erf potential depends on temperature through the p
  \begin{figure}[h!]
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
-      \includegraphics[height=4.5cm]{plot_alpha_vs_KbT.png}
+      % FIXME \includegraphics[height=4.5cm]{plot_alpha_vs_KbT.png}
       %\includegraphics[height=5cm]{plot_alpha_vs_KbT.png}
       \caption{$\alpha$ versus $k_BT/\epsilon$}
     \end{subfigure} 
     \begin{subfigure}[b]{0.4\linewidth}
-      \includegraphics[height=4.5cm]{plot_xi_vs_KbT.png}
+      % FIXME \includegraphics[height=4.5cm]{plot_xi_vs_KbT.png}
       %\includegraphics[height=5cm]{plot_xi_vs_KbT.png}
       \caption{$\Xi$ versus $k_BT/\epsilon$}
     \end{subfigure} 
@@ -119,7 +117,7 @@ Unlike the WCA potential, the erf potential depends on temperature through the p
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{Verf.png}
+    % FIXME \includegraphics[height=7cm]{Verf.png}
     %\includegraphics[height=5cm]{Verf.png}
     \caption{Error Function Potential $V_{erf}(r)$ at several temperatures with $\sigma=1$, $\epsilon=1$, compared to the WCA potential $V_{WCA}(r)$ shown in black.}
     \label{fig:erf_potential}
@@ -236,7 +234,7 @@ Although the entire crystal lattice can be constructed with FCC cells, FCC cells
 
   \begin{figure}[h!]
     \centering
-    \includegraphics[height=3.5cm]{PrimitiveCellLightBlue.png}
+    % FIXME \includegraphics[height=3.5cm]{PrimitiveCellLightBlue.png}
     \caption{The Primivitive Crystal Cell is shown by the shaded parallelpiped}
     \label{fig:primitivecell_firsttime}
   \end{figure}
@@ -247,7 +245,7 @@ For pure substances, a phase transition occurs along a line on a Pressure-Temper
 %For each particular temperature, the pressure of the liquid and the solid are the same at the point of transistion. 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=5cm]{P-T_Diagram.png}
+    % FIXME \includegraphics[height=5cm]{P-T_Diagram.png}
     \caption{Conceptual Pressure-Temperature Phase Diagram}
     \label{fig:P-T_Diagram}
   \end{figure}
@@ -260,7 +258,7 @@ Two such curves are shown in Figure \ref{fig:MaxwellDT}, one for the liquid and 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{MDTC.png}
+    % FIXME \includegraphics[height=7cm]{MDTC.png}
     \caption{Identifying densities at the solid-liquid transition using Maxwell's Double Tangent Construction}
     \label{fig:MaxwellDT}
   \end{figure}
@@ -283,7 +281,7 @@ it is helpful to consider the Gibbs free energy given by G=F+PV. Rearranging the
 The pressure at the transistion point can be obtained from the point of intersection that occurs when the Gibbs free energy per atom is plotted against the pressure for both the liquid and the solid at fixed temperature, as shown in Figure \ref{fig:GibbsvsP}. These curves are constructed from the slope and cooresponding y-intercept data collected from lines tangent along the curves on the the Helmholtz free energy per atom verses inverse density plots for both the liquid and the solid. 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{MDTC-2.png}
+    % FIXME \includegraphics[height=7cm]{MDTC-2.png}
     \caption{Pressure is found at point of intersection which occurs when $g_L=g_S$}
     \label{fig:GibbsvsP}
   \end{figure}
@@ -295,7 +293,7 @@ Once the pressure is known for the transition point, the density of the liquid a
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{MDTC-3.png}
+    % FIXME \includegraphics[height=7cm]{MDTC-3.png}
     \caption{The liquid and solid densities at the point of transistion are found from a plot of pressure vs inverse denisty for both the liquid and the solid.}
     \label{fig:Pvsinvn}
   \end{figure}
@@ -304,7 +302,7 @@ A Temperature-Density (T-n) phase diagram, such as that in Figure \ref{fig:T-n_D
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=4cm]{T-n_Diagram.png}
+    % FIXME \includegraphics[height=4cm]{T-n_Diagram.png}
     \caption{Conceptual Temperature-Density Phase Diagram used to identify the number densities of the liquid and the solid during a phase transistion. The gray region is where the liquid and the solid coexist, and are therefore not pure states.}
     \label{fig:T-n_Diagram}
   \end{figure} 
@@ -607,7 +605,7 @@ To implement cDFT computationally, we begin by picturing one single crystal cell
  
   \begin{figure}[h!]
     \centering
-    \includegraphics[height=4.5cm]{PrimitiveCellLightBlue.png}
+    % FIXME \includegraphics[height=4.5cm]{PrimitiveCellLightBlue.png}
     \caption{The Primivitive Crystal Cell is shown by the shaded parallelpiped}
     \label{fig:primitivecell}
   \end{figure}
@@ -615,7 +613,7 @@ To implement cDFT computationally, we begin by picturing one single crystal cell
 
   \begin{figure}[h!]
     \centering
-    \includegraphics[height=4.5cm]{Simple_Cell.png}
+    % FIXME \includegraphics[height=4.5cm]{Simple_Cell.png}
     \caption{A Simplified Crystal Cell}
     \label{fig:simplecell}
   \end{figure}
@@ -631,7 +629,7 @@ In a large collection of simple cells, the atom at the center of each cell will 
 
   \begin{figure}[h!]
     \centering
-    \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
+    % FIXME \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
     \caption{A Gaussian Distribution Number Density Profile}
     \label{fig:Ensemble_Gaus}
   \end{figure} 
@@ -639,7 +637,7 @@ In a large collection of simple cells, the atom at the center of each cell will 
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=6cm]{Gaussian_Plot.png}
+    % FIXME \includegraphics[height=6cm]{Gaussian_Plot.png}
     \caption{A 2D Gaussian Distribution of width 2$\sigma$}
     \label{fig:Gaus_plot}
   \end{figure}  
@@ -652,7 +650,7 @@ In a large collection of cells, not all lattice sites will be occupied. Vacancie
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
+    % FIXME \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
     \caption{A Gaussian Distribution Number Density Profile}
     \label{fig:Ensemble_Smallcells}
   \end{figure} 
@@ -663,7 +661,7 @@ Instead of thinking of an atom in one of the eight small cells, the same Gaussia
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=2.5cm]{SameStatPic.png}
+    % FIXME \includegraphics[height=2.5cm]{SameStatPic.png}
     \caption{Front views of a cube with eight smaller cells. The two views show two ways of picturing a fraction of vacancies, $f_v$ of 7/8 which give rise to the same Gaussian distribution statistically}
     \label{fig:SameStatPic}
   \end{figure} 
@@ -672,7 +670,7 @@ By varying the width of the Gaussians and the fraction of vacancies, new number 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=8cm]{VaryWidthandVacancies.png}
+    % FIXME \includegraphics[height=8cm]{VaryWidthandVacancies.png}
     \caption{Several Gaussian Distribution Number Density Profiles all with a number density of 1 atom per $V_{bold box}$}
     \label{fig:Ensemble_vary}
   \end{figure}  
@@ -682,7 +680,7 @@ Once again, it is important to note that the number density is the same for all 
  \begin{figure}[h!]
     \centering
     %\includegraphics[height=4cm]{HomogeneousDen.png}
-    \includegraphics[height=4cm]{Homogeneous_bold-box.png}
+    % FIXME \includegraphics[height=4cm]{Homogeneous_bold-box.png}
     \caption{A homogeneouse number density profile $n(\vec{r})$}
     \label{fig:homogen_denisty}
   \end{figure}    
@@ -791,7 +789,7 @@ The center of with weighting function is placed at some vector $\vec{r}=\vec{r}_
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=5cm]{InclusionRadius.png}
+    % FIXME \includegraphics[height=5cm]{InclusionRadius.png}
     \caption{The Gaussians at each lattice point are of width gw. After a radius of few gw's the Gaussians go to zero and can be neglected.}
     \label{fig:InclusionRadius}
   \end{figure} 
@@ -811,7 +809,7 @@ The result can be made more accurate by increasing NumPoints which is the number
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=4cm]{AntitheticVariate.png}
+    % FIXME \includegraphics[height=4cm]{AntitheticVariate.png}
     \caption{Antithetic variates reduce first order error in an average. Each point in the average is paired with another point from along the same line as the first, and at an equal, but opposite distance.}
     \label{fig:AntitheticVariate}
   \end{figure} 
@@ -829,7 +827,7 @@ Figure \ref{fig:weight_functions} shows a 1 dimensional view of the weight funct
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=6cm]{weight_functions.png}
+    % FIXME \includegraphics[height=6cm]{weight_functions.png}
     \caption{Shows how the weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the z-axis for a reduced temperature of 2}
     \label{fig:weight_functions}
   \end{figure}  
@@ -838,11 +836,11 @@ Figure \ref{fig:weight_functions} shows a 1 dimensional view of the weight funct
  \begin{figure}[h!]
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
-      \includegraphics[height=5cm]{W2.png}
+      % FIXME % FIXME \includegraphics[height=5cm]{W2.png}
       \caption{A crossectional view of $w_2$}
     \end{subfigure} 
     \begin{subfigure}[b]{0.4\linewidth}
-      \includegraphics[height=5cm]{W3.png}
+      % FIXME \includegraphics[height=5cm]{W3.png}
       \caption{A crossectional view of $w_3$}
     \end{subfigure} 
     \caption{Cross-sectional views of the 3D weight functions. (a) $w_2$ is a spherical shell in 3D with soft edges. Weight functions $w_0$ and $w_1$ have a similar shape. (b) $w_3$ is a sphere with soft edges in 3D.}
@@ -854,14 +852,14 @@ Figure \ref{fig:GaussandW2_actual} ......
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=6cm]{GaussandW2_actual.png}
+    % FIXME \includegraphics[height=6cm]{GaussandW2_actual.png}
     \caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional view of $w_2$ centered at $\vec{r}'$ is shown in purple. Here, the weight function is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ is generated randomly according to a Gaussian distribution.} 
   \label{fig:GaussandW2_actual}
   \end{figure} 
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=6cm]{GaussandW2_thinkas.png}
+    % FIXME \includegraphics[height=6cm]{GaussandW2_thinkas.png}
     \caption{An alternative way of viewing Figure \ref{fig:GaussandW2_actual} where the weight function, shown by the purple dashed lines, is centered at $\vec{r}$  and fixed in place as $\vec{dr}$ varies randomly.} 
   \label{fig:GaussandW2_thinkas}
   \end{figure} 
@@ -1461,7 +1459,7 @@ where $P_{NoOverlap}$ is the probablity of positions existing in the hard fluid 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=3cm]{P_overlap.png}
+    % FIXME \includegraphics[height=3cm]{P_overlap.png}
     \caption{No energy is needed to place a sphere at a position where there is no overlap such as shown by the black dot at the center of the dotted region near the top. But it is not possible to place a sphere at a position where an overlap occurs.}
     \label{fig:p_overlap}
   \end{figure}
@@ -1507,7 +1505,7 @@ which gives
 --------------------------------------------------------------------------------
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=6cm]{SimpleCell_Gaus.png}
+    % FIXME \includegraphics[height=6cm]{SimpleCell_Gaus.png}
     \caption{A 3D Gaussian Distribution}
     \label{fig:SimpleCell_Gaus}
   \end{figure}  
@@ -1539,21 +1537,21 @@ For a vector $\vec{r}=\vec{r}_k$ within the primitive cell, a vector $\vec{R}_j$
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=4cm]{SimpleCell_Gaus.png}
+    % FIXME \includegraphics[height=4cm]{SimpleCell_Gaus.png}
     \caption{A homogeneouse number density profile $n(\vec{r})$}
     \label{fig:homogen_denisty}
   \end{figure} 
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=4cm]{W0.png}
+    % FIXME \includegraphics[height=4cm]{W0.png}
     \caption{A crossectional view of weight function $w_2$ which is a spherical shell with soft edges in 3D. Weight functions $w_0$ and $w_1$ have a similar shape.}
     \label{fig:W0}
     \end{figure} 
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=4cm]{W3.png}
+    % FIXME \includegraphics[height=4cm]{W3.png}
     \caption{A crossectional view of weight function $w_3$ which is a sphere with soft edges in 3D.}
     \label{fig:W3}
     \end{figure} 
@@ -1561,14 +1559,14 @@ For a vector $\vec{r}=\vec{r}_k$ within the primitive cell, a vector $\vec{R}_j$
 ////////alpha and Xi vary with temp:
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=4.7cm]{plot_alpha_vs_KbT.png}
+    % FIXME \includegraphics[height=4.7cm]{plot_alpha_vs_KbT.png}
     \caption{Shows how $\alpha$ varies with temperature}
     \label{fig:alpha_vs_T}
   \end{figure} 
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=4.7cm]{plot_xi_vs_KbT.png}
+    % FIXME \includegraphics[height=4.7cm]{plot_xi_vs_KbT.png}
     \caption{Shows how $\Xi$ varies with temperature}
     \label{fig:xi_vs_T}
   \end{figure} 
