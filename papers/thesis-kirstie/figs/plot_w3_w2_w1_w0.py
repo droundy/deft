@@ -8,10 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-
-#plot1="plot_w0_w1_w2_w3_vs_KbT.png"
-plot2="plot_w0_w1_w2_w3_vs_rz_at_kT2newcolors.png"
-
 sigma=1
 epsilon=1
 PI=np.pi
@@ -67,6 +63,6 @@ plt.xlabel('rz/(alpha/2)')
 plt.ylabel('weight function')
 plt.title('Weight Functions at KbT=2')
 plt.legend()
-plt.savefig(plot2)
+plt.savefig('weight_functions.pdf')
 
-plt.show()
+# plt.show()
