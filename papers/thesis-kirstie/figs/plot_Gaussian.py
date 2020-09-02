@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #RUN this program from the directory it is listed in
 #with command ./plot_Gaussian.py
