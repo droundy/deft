@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #RUN this program from the directory it is listed in
 #with command ./plot_w3_w2_w1_w0.py
