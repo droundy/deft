@@ -112,8 +112,6 @@ for KbT in T:
     B2_erf_list.append(B2_erf_analytical(Xi_at_T, KbT))    #use with B2 erf analytical method  (default)
     #B2_erf_list.append(B2_erf_numerical(Xi_at_T, KbT))    #use with B2 erf numerical method
     B2_WCA_list.append(B2_WCA_at_T)
-    print(KbT, Xi_at_T)
-
 
 
 
@@ -124,12 +122,13 @@ plt.xlabel('KbT')
 plt.ylabel('B2')
 plt.title('B2 vs Temp')
 plt.legend()
+plt.savefig("B2_vs_T.pdf")
 
 plt.figure()
 
 
 
-#Plot xi vs T - Figure 2
+#Plot Xi vs T - Figure 2
 plt.plot(T, Xi, label = 'Xi_B2', color='blue')
 #plt.plot(T, xi_Eric(T), label='Krebs', color='orange')
 #plt.plot(T, (0.12**2*(T-0.2575))**(1/2.1), label='crazy fit')
@@ -137,16 +136,18 @@ plt.xlabel('KbT')
 plt.ylabel('Xi')
 plt.title('Xi vs Temp')
 plt.legend()
+plt.savefig("Xi_vs_T.pdf")
+
 
 plt.figure()
 
 
 
 #Plot df/dr and w2*w2 for comparison - Figure 3
-r=np.linspace(.3, 1.1225, 2000) #Use this for full range of temperatures
+r=np.linspace(.7, 1.1225, 2000) #Use this for full range of temperatures
 #r=np.linspace(0.9, 1.20, 2000) #Use to match Eric's diagram
 
-KbT=10 #this is actually kBT/epsilon with epsilon=1
+KbT=2 #this is actually kBT/epsilon with epsilon=1
 
 w2_w2_Eric=(1.0/(xi_Eric(KbT)*np.sqrt(PI)))*np.exp(-pow((r-alpha(KbT))/xi_Eric(KbT),2))  #convolution of w2 with itself
 w2_w2_B2=(1.0/(find_Xi(KbT)*np.sqrt(PI)))*np.exp(-pow((r-alpha(KbT))/find_Xi(KbT),2))  #convolution of w2 with itself  (use this with Xi from B2)
@@ -161,8 +162,9 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('df(r)/dr, w2*w2')
 plt.title('Compare match with Eq12 for low density kT=%g' % (KbT))
 plt.legend()
+plt.savefig("df_dr_and_w2w2.pdf")
 
 
-plt.show()
+#plt.show()
 
 
