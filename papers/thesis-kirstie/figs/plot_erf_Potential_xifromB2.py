@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #Run this program from the directory it is listed in
-#with command ./plot_erf_Potential_new_xi.py
+#with command ./plot_erf_Potential_xifromB2.py
 
 from scipy import special
 from scipy.special import iv
