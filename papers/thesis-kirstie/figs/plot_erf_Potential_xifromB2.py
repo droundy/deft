@@ -70,7 +70,6 @@ for KbT in T:
     Xi.append(Xi_at_T)
     B2_erf_list.append(B2_erf_analytical(Xi_at_T, KbT))    #use with B2 erf analytical method  (default)
     B2_WCA_list.append(B2_WCA_at_T)
-    print(KbT, Xi_at_T)
 
 
 
@@ -102,7 +101,7 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('V(r)/KT')
 plt.title('Compare Vwca/kT and Verf/kT at kT=%g' % (KbT))
 plt.legend()
-
+plt.savefig('erf_Potential_overkT.pdf')
 
 plt.figure()
 
@@ -137,8 +136,8 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('V(r)/$\epsilon$')
 plt.title('Compare Vwca and Verf')
 plt.legend()
+plt.savefig('erf_Potential.pdf')
 
-
-plt.show()
+#plt.show()
 
 
