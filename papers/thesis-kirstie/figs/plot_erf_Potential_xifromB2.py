@@ -72,134 +72,73 @@ for KbT in T:
     B2_WCA_list.append(B2_WCA_at_T)
     print(KbT, Xi_at_T)
 
-#Plots---------------
-KbT=10 #this is actually kBT/epsilon with epsilon=1
 
-xi_B2 = find_Xi(KbT)  #Xi from B2
-#xi_Eric = alpha(KbT)/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
 
-#Potential Plots - Figure 1
+#Plot Vwca and Verf - Figure 1
 r=np.linspace(1, 1.12, 2000) #for erf plots #original SAVE
 #r=np.linspace(.6, 1.1225, 2000)   #2R=1.1225  shows intersection 
 #r=np.linspace(.95, 1.1225, 2000)   #2R=1.1225  good
 
-#Plot WCA
-sigma_over_r_to_pow6 = (sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)
-V = 4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6) + epsilon
-#plt.plot(r/sigma,V/epsilon, label='Vwca', color='black')
-plt.plot(r/sigma,V/KbT, label='Vwca V/T', color='black')
+i=0
+line_colors = ['orange', 'g', 'b', 'r', 'm']
+for KbT in [10] :
+	
+	#Plot WCA
+    sigma_over_r_to_pow6 = (sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)
+    V_wca = 4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6) + epsilon
+    plt.plot(r/sigma, V_wca/KbT, label='Vwca', color='black')
+	
+    #Plot erf with Xi from B2
+    Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/find_Xi(KbT))+1))
+    plt.plot(r/sigma, Verf/KbT, label='kT=%g' % (KbT), color=line_colors[3])
 
-#Plot erf with Xi from B2  
-Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/find_Xi(KbT))+1))
-#plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
-plt.plot(r/sigma,Verf/KbT, label='B2 V/T', color='blue')
-
-#Plot erf with Eric's Xi 
-Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/xi_Eric(KbT))+1))
-#plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
-plt.plot(r/sigma,Verf/KbT, label='Eric V/T', color='orange')
+    #Plot erf with Eric's Xi 
+    Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/xi_Eric(KbT))+1))
+    plt.plot(r/sigma, Verf/KbT, linestyle='dashed', label='Eric kT=%g' % (KbT), color=line_colors[3])
+       
+    i = i + 1
 
 plt.xlabel('r/$\sigma$')
-#plt.ylabel('V(r)/$\epsilon$')
 plt.ylabel('V(r)/KT')
 plt.title('Compare Vwca/kT and Verf/kT at kT=%g' % (KbT))
 plt.legend()
 
+
 plt.figure()
+
+
 
 #Potential Plot at various temperatures - Figure 2
 #r=np.linspace(.6, 1.1225, 2000)   #2R=1.1225  shows intersection
 #r=np.linspace(.8, 1.1225, 2000)   #2R=1.1225  
-#r=np.linspace(.95, 1.1225, 2000)   #2R=1.1225   good
-r=np.linspace(1, 1.12, 2000)   #2R=1.1225   matches old figure
+r=np.linspace(.95, 1.1225, 2000)   #2R=1.1225   good
+#r=np.linspace(1, 1.12, 2000)   #2R=1.1225   matches old figure
 
 #Plot WCA
 sigma_over_r_to_pow6 = (sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)*(sigma/r)
-V = 4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6) + epsilon
-#plt.plot(r/sigma,V/epsilon, label='Vwca', color='black')
-plt.plot(r/sigma,V, label='Vwca', color='black')
+V_wca = 4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6) + epsilon
+plt.plot(r/sigma, V_wca/epsilon, label='Vwca', color='black')
 
-KbT=0.5 #this is actually kBT/epsilon with epsilon=1 
+i=0
+line_colors = ['orange', 'g', 'b', 'r', 'm']
+for KbT in [0.5, 1, 2, 10, 40] :
+	
+    #Plot erf with Xi from B2
+    Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/find_Xi(KbT))+1))
+    plt.plot(r/sigma, Verf/epsilon, label='kT=%g' % (KbT), color=line_colors[i])
 
-#Plot erf with Xi from B2
-Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/find_Xi(KbT))+1))
-#plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
-plt.plot(r/sigma,Verf, label='kT=0.5', color='blue')
-
-#Plot erf with Eric's Xi 
-Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/xi_Eric(KbT))+1))
-#plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
-plt.plot(r/sigma,Verf, linestyle='dashed', label='Eric kT=0.5', color='blue')
-
-# KbT=1 #this is actually kBT/epsilon with epsilon=1  
-# xi_B2 = find_Xi(KbT)  #Xi from B2
-# xi_Eric = alpha(KbT)/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2))) 
-# alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-
-# #Plot erf with Xi from B2
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_B2)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
-# plt.plot(r/sigma,Verf, label='kT=1', color='orange')
-
-# #Plot erf with Eric's Xi 
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_Eric)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
-# plt.plot(r/sigma,Verf, linestyle='dashed', label='Eric kT=1', color='orange')
-
-# KbT=2 #this is actually kBT/epsilon with epsilon=1 
-# xi_B2 = find_Xi(KbT)  #Xi from B2
-# xi_Eric = alpha(KbT)/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2))) 
-# alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-
-# #Plot erf with Xi from B2 
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_B2)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
-# plt.plot(r/sigma,Verf, label='kT=2', color='red')
-
-# #Plot erf with Eric's Xi 
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_Eric)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
-# plt.plot(r/sigma,Verf, linestyle='dashed', label='Eric kT=2', color='red')
-
-# KbT=10 #this is actually kBT/epsilon with epsilon=1  
-# zeta_B2 = find_Xi(KbT)  #Xi from B2
-# zeta_Eric = alpha(KbT)/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2))) 
-# alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-
-# #Plot erf with Xi from B2
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_B2)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
-# plt.plot(r/sigma,Verf, label='kT=10', color='purple')
-
-# #Plot erf with Eric's Xi 
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_Eric)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
-# plt.plot(r/sigma,Verf, linestyle='dashed', label='Eric kT=10', color='purple')
-
-# KbT=40 #this is actually kBT/epsilon with epsilon=1 
-# xi_B2 = find_Xi(KbT)  #Xi from B2
-# xi_Eric = alpha(KbT)/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2))) 
-# alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-
-# #Plot erf with Xi from B2 
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_B2)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='B2', color='blue')
-# plt.plot(r/sigma,Verf, label='kT=40', color='yellow')
-
-# #Plot erf with Eric's Xi 
-# Verf=-KbT*np.log(.5*(special.erf((r-alpha)/xi_Eric)+1))
-# #plt.plot(r/sigma,Verf/epsilon, label='Eric', color='orange')
-# plt.plot(r/sigma,Verf, linestyle='dashed', label='Eric kT=40', color='yellow')
-
-
-# plt.xlabel('r/$\sigma$')
-# #plt.ylabel('V(r)/$\epsilon$')
-# plt.ylabel('V(r)')
-# plt.title('Compare Vwca and Verf')
-# plt.legend()
+    #Plot erf with Eric's Xi 
+    Verf=-KbT*np.log(.5*(special.erf((r-alpha(KbT))/xi_Eric(KbT))+1))
+    #plt.plot(r/sigma, Verf/epsilon, linestyle='dashed', label='Eric kT=%g' % (KbT), color=line_colors[i])
+       
+    i = i + 1
+    
+plt.xlabel('r/$\sigma$')
+plt.ylabel('V(r)/$\epsilon$')
+plt.title('Compare Vwca and Verf')
+plt.legend()
 
 
 plt.show()
 
-#print('alpha=',alpha)
 
