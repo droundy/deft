@@ -121,7 +121,7 @@ plt.plot(T, B2_erf_list, label = 'B2_erf')
 plt.xlabel('KbT')
 plt.ylabel('B2')
 plt.title('B2 vs Temp')
-plt.legend()
+#plt.legend()
 plt.savefig("B2_vs_T_with_xi_fromB2.pdf")
 
 plt.figure()
@@ -135,7 +135,7 @@ plt.plot(T, Xi, label = 'Xi_B2', color='blue')
 plt.xlabel('KbT')
 plt.ylabel('Xi')
 plt.title('Xi vs Temp')
-plt.legend()
+#plt.legend()
 plt.savefig("xi_fromB2.pdf")
 
 
