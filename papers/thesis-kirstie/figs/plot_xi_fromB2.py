@@ -122,7 +122,7 @@ plt.xlabel('KbT')
 plt.ylabel('B2')
 plt.title('B2 vs Temp')
 plt.legend()
-plt.savefig("B2_vs_T.pdf")
+plt.savefig("B2_vs_T_with_xi_fromB2.pdf")
 
 plt.figure()
 
@@ -136,7 +136,7 @@ plt.xlabel('KbT')
 plt.ylabel('Xi')
 plt.title('Xi vs Temp')
 plt.legend()
-plt.savefig("Xi_vs_T.pdf")
+plt.savefig("xi_fromB2.pdf")
 
 
 plt.figure()
@@ -162,7 +162,7 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('df(r)/dr, w2*w2')
 plt.title('Compare match with Eq12 for low density kT=%g' % (KbT))
 plt.legend()
-plt.savefig("df_dr_and_w2w2.pdf")
+plt.savefig("df_dr_with_xi_fromB2.pdf")
 
 
 #plt.show()
