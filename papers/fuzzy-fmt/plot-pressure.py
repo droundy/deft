@@ -44,8 +44,9 @@ hfe = []
 cfe = []
 
 if args.tensor :
-    files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
-    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))  
+    #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
+    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT))) 
+    files = sorted(list(glob.glob('%s/kT%.3f_n*_best_tensor.dat' % (args.directory,  kT)))) 
 else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
     #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
