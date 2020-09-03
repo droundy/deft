@@ -96,57 +96,57 @@ The WCA potential is not well suited for implementing computationally.  Therefor
 
 \noindent These conditions, along with V$_{erf}=$V$_{WCA}$ at $r=\alpha$, help fit the curve of the erf potential to the curve of the WCA potential.
 
-Unlike the WCA potential, the erf potential depends on temperature through the parameters $\alpha$ and $\Xi$. Figure \ref{fig:alphaXivsT} shows how $\alpha$ and $\Xi$ vary with temperature when $\sigma=1$ and $\epsilon=1$, and Figure \ref{fig:erf_potential} shows the erf potential at reduced temperatures $\frac{k_BT}{\epsilon}=1$, $\frac{k_BT}{\epsilon}=2$, and $\frac{k_BT}{\epsilon}=3$ alongside the WCA potential. %As seen in Figure \ref{fig:erf_potential}, the erf potentials closely match the WCA potential for reduced temperatures below $\frac{k_BT}{\epsilon}=2$, and for r/$\sigma$ less than ???. % so only values of $V_{erf}$ that are much less than $k_BT$/$\epsilon$ ??? will be considered. 
+Unlike the WCA potential, the erf potential depends on temperature through the parameters $\alpha$ and $\Xi$. Figure \ref{fig:alphaXivsT} shows how $\alpha$ and $\Xi$ vary with temperature when $\sigma=1$ and $\epsilon=1$. % and Figure \ref{fig:erf_Potential} shows the erf potential at reduced temperatures $\frac{k_BT}{\epsilon}=1$, $\frac{k_BT}{\epsilon}=2$, and $\frac{k_BT}{\epsilon}=3$ alongside the WCA potential. %As seen in Figure \ref{fig:erf_potential}, the erf potentials closely match the WCA potential for reduced temperatures below $\frac{k_BT}{\epsilon}=2$, and for r/$\sigma$ less than ???. % so only values of $V_{erf}$ that are much less than $k_BT$/$\epsilon$ ??? will be considered. 
 % In these regions $\alpha$ decreases with increasing temperature, and $\Xi$ increases with increasing temperature.
 
  \begin{figure}[h!]
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
-      % FIXME \includegraphics[height=4.5cm]{plot_alpha_vs_KbT.png}
-      %\includegraphics[height=5cm]{plot_alpha_vs_KbT.png}
+      % FIXME \includegraphics[height=4.5cm]{plot_alpha.png}
+      \includegraphics[height=5cm]{plot_alpha.pdf}
       \caption{$\alpha$ versus $k_BT/\epsilon$}
     \end{subfigure} 
     \begin{subfigure}[b]{0.4\linewidth}
-      % FIXME \includegraphics[height=4.5cm]{plot_xi_vs_KbT.png}
-      %\includegraphics[height=5cm]{plot_xi_vs_KbT.png}
+      % FIXME \includegraphics[height=4.5cm]{plot_xi.png}
+      \includegraphics[height=5cm]{plot_xi.pdf}
       \caption{$\Xi$ versus $k_BT/\epsilon$}
     \end{subfigure} 
     \caption{These plots, generated with $\sigma=1$ and $\epsilon=1$, show how the parameters $\alpha$ and $\Xi$ vary with temperature. (a) $\alpha$ decreases with increasing temperature. (b) $\Xi$ rapidly increases for temperatures below $\frac{k_BT}{\epsilon}=52$ and then gradually decreases.}
     \label{fig:alphaXivsT}
     \end{figure} 
 
-\begin{figure}[h!]
-    \centering
-    % FIXME \includegraphics[height=7cm]{Verf.png}
-    %\includegraphics[height=5cm]{Verf.png}
-    \caption{Error Function Potential $V_{erf}(r)$ at several temperatures with $\sigma=1$, $\epsilon=1$, compared to the WCA potential $V_{WCA}(r)$ shown in black.}
-    \label{fig:erf_potential}
-  \end{figure}
+%\begin{figure}[h!]
+%    \centering
+    %\includegraphics[height=7cm]{erf_Potential.pdf}
+%    \caption{Error Function Potential $V_{erf}(r)$ at several temperatures with $\sigma=1$, $\epsilon=1$, compared to the WCA potential $V_{WCA}(r)$ shown in black.}
+%    \label{fig:erf_Potential}
+%  \end{figure}
 
-\color{red}\noindent!ADD PLOT of df/dr=w2*w2 !!! BUT not here!\color{black}
-\[\]
-\[\]
+%\color{red}\noindent!ADD PLOT of df/dr=w2*w2 !!! BUT not here!\color{black}
 
-
-Another way to find values for $\Xi(T)$ is to find computationally the value $\Xi$ for which the second virial coefficient evaluated for the error function potential $V_{erf}(r)$ is equal to the value for the second virial coefficent evalued for the WCA potential $V_{WCA}$, with $\alpha(T)$ plugged into the equation for $B_{2erf}$ at each temperature T. A plot of $\Xi(T)$ obtained through this method is shown in Figure \ref{fig:XifromB2vsT}.
+Another way to find values for $\Xi(T)$ is to find computationally the value $\Xi$ for which the second virial coefficient evaluated for the error function potential $V_{erf}(r)$ is equal to the value for the second virial coefficent evalued for the WCA potential $V_{WCA}$, with $\alpha(T)$ plugged into the equation for $B_{2erf}$ at each temperature T. 
 \begin{equation}B_{2erf}(T) =B_{2WCA}(T)\end{equation}
 \begin{equation}B_{2erf}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{erf}(r)}-1\right)d\vec{r} \end{equation}
 \begin{equation}B_{2erf}(T) = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{erf}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]\end{equation}
 and 
 \begin{equation}B_{2WCA}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{WCA}(r)}-1\right)d\vec{r} \end{equation}
-
-\[\]
-\[\]
-\[\]
+A plot of $\Xi(T)$ obtained through this method is shown in Figure \ref{fig:xi_fromB2vsT}, and Figure \ref{fig:erf_Potential_xifromB2} shows the erf potential at reduced temperatures $\frac{k_BT}{\epsilon}=1$, $\frac{k_BT}{\epsilon}=2$, and $\frac{k_BT}{\epsilon}=3$ alongside the WCA potential. 
 
 \begin{figure}[h!]
     \centering
-    %\includegraphics[height=7cm]{Xi_from_B2.png}
+    \includegraphics[height=7cm]{xi_fromB2.pdf}
     \caption{Shows the temperature dependence of $\Xi$ generated from matching the second virial coeficients for $V_{erf}(r)$ and $V_{WCA}(r)$ at each temperature.}
-    \label{fig:XifromB2vsT}
+    \label{fig:xi_fromB2vsT}
   \end{figure}
 \color{red}
-\noindent !ADD PLOT of Verf !!!
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[height=7cm]{erf_Potential_xifromB2.pdf}
+    \caption{Error Function Potential $V_{erf}(r)$ at several temperatures with $\sigma=1$, $\epsilon=1$, compared to the WCA potential $V_{WCA}(r)$ shown in black.}
+    \label{fig:erf_Potential_xifromB2}
+  \end{figure}
+
 \noindent!ADD PLOT of df/dr=w2*w2 !!! BUT not here!
 \color{black}
 %\[\]
