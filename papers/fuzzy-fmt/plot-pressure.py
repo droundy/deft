@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #This program creates plots of: Free Energy/atom vs 1/Reduced Density
 #                               Gibbs Free Energy/atom vs Pressure
@@ -7,7 +7,7 @@
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-pressure.py directory(with data files) --kT [temp] [OPTIONAL: --tensor  --noplotshow]
+#with comand ./plot-pressure.py directory(with data files) --kT [temp] [OPTIONAL: --tensor  --showplot]
 
 from __future__ import print_function, division
 
@@ -28,8 +28,8 @@ parser.add_argument('directory', metavar='directory', type=str,
 parser.add_argument('--tensor', action='store_true',
                     help='use data with tensor weight')
 
-parser.add_argument('--noplotshow', action='store_true',
-                    help='do not show plots')
+parser.add_argument('--showplot', action='store_true',
+                    help='show plots')
 
 args=parser.parse_args()
 
@@ -88,6 +88,7 @@ plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Helmholtz Free Energy/atom')
 plt.legend()
+plt.savefig('plot-pressure_Fig1.pdf')
 
 plt.figure()
 
@@ -158,6 +159,7 @@ plt.title("Gibbs Free Energy/atom vs Pressure at Fixed kT=%g" % (kT))
 plt.xlabel('$p$')
 plt.ylabel('Gibbs Free Energy/atom - pressure*(%g volume unit)' % zoom_volume)
 plt.legend()
+plt.savefig('plot-pressure_Fig2.pdf')
 
 plt.figure()
 
@@ -175,13 +177,14 @@ plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
 plt.legend()
+plt.savefig('plot-pressure_Fig3.pdf')
 
 
-
-if args.noplotshow:
+if args.showplot:
     print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) by phasediagram_data.py
+    plt.show()
 else :
     print (kT, p_inter, 1/invnh, 1/invnc)     
-    plt.show()
+
 
 
