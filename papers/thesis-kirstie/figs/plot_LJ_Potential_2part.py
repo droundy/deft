@@ -33,18 +33,22 @@ r_dless=sigma/r  #plot dimensionless quantity!
 sigma_over_r_to_pow6=(r_dless)*(r_dless)*(r_dless)*(r_dless)*(r_dless)*(r_dless)
 V=4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6)  #LJ potential 
 plt.plot(1/r_dless,V, color='red')
+plt.annotate('Attractive portion', xy=(1.4,-0.5), xytext=(1.6,-0.7),
+             arrowprops=dict(arrowstyle="->", connectionstyle="arc3"),)
 
 #Plot repulsive portion from r=1.1225 to rmax:
 r=np.linspace(1.11, 2.5, 2000) 
 V=(r/r) - 1
 plt.plot(1/r_dless,V, color='blue')
+plt.annotate('Repulsive portion', xy=(1,2), xytext=(1.2,2),
+             arrowprops=dict(arrowstyle="->", connectionstyle="arc3"),)
 
 
 plt.xlabel('r/$\sigma$')
 plt.ylabel('$V(r)/\epsilon$')
 plt.title('Leonard-Jones Potential in 2 parts')
-plt.legend()
-plt.savefig("LJ_Potential_2part.png")
+#plt.legend()
+plt.savefig("LJ_Potential_2part.pdf")
 
 # plt.show()
 
