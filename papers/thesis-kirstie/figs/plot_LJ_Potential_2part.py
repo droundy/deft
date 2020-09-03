@@ -40,7 +40,7 @@ plt.annotate('Attractive portion', xy=(1.4,-0.5), xytext=(1.6,-0.7),
 r=np.linspace(1.11, 2.5, 2000) 
 V=(r/r) - 1
 plt.plot(1/r_dless,V, color='blue')
-plt.annotate('Repulsive portion', xy=(1,2), xytext=(1.2,2),
+plt.annotate('Repulsive portion', xy=(1,2), xytext=(1.2,2.5),
              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"),)
 
 
