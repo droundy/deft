@@ -66,7 +66,7 @@ n = np.array(n)
 
 
 
-# Plot Free Energy/atom vs 1/Reduced Density
+# Plot Free Energy/atom vs 1/Reduced Density - Figure 1
 functions = np.vstack((np.ones_like(invn),
                        invn**-1,
                        invn**-2,
@@ -86,7 +86,7 @@ coeff = A[0]
 #print('residuals', A[1])
 #print('coeff', coeff)
 fit_cfe = np.dot(functions, coeff)
-plt.plot(invn, fit_cfe, label="fit crystal free energy")
+#plt.plot(invn, fit_cfe, label="fit crystal free energy")
 plt.plot(invn, hfe, 'red', label="Liquid")
 plt.plot(invn, cfe, 'blue', label="Solid")
 plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
@@ -117,7 +117,7 @@ mid_h_gibbs = mid_hfe + mid_invn*hpressure
 mid_c_gibbs = mid_cfe + mid_invn*cpressure
 fit_c_gibbs = fit_cfe + invn*fit_p
 
-# Plot Gibbs Free Energy/atom vs Pressure with point of intersection
+# Plot Gibbs Free Energy/atom vs Pressure with point of intersection   - Figure 2
 zoom_volume = 0.99
 plt.plot(fit_p, fit_c_gibbs - fit_p*zoom_volume, 'b:', label="fit crystal")
 
@@ -159,8 +159,8 @@ def find_densities(p_inter, pressure, invn):
 invnh=find_densities(p_inter, hpressure, mid_invn)
 invnc=find_densities(p_inter, cpressure, mid_invn)
 
-plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'r.-', label="Liquid")
-plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'b.-', label="Solid")
+plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'red', label="Liquid")
+plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'blue', label="Solid")
 plt.title("Gibbs Free Energy/atom vs Pressure at Fixed kT=%g" % (kT))
 plt.xlabel('$p$')
 plt.ylabel('Gibbs Free Energy/atom - pressure*(%g volume unit)' % zoom_volume)
@@ -173,13 +173,13 @@ plt.figure()
 
 
 
-# Plot Pressure vs 1/Reduced Density with point of intersection 
+# Plot Pressure vs 1/Reduced Density with point of intersection - Figure 3
 plt.plot(invnh, p_inter, 'o', color='red', markersize=10) 
 plt.plot(invnc, p_inter, 'o', color='blue', markersize=10) 
 fit_p = np.dot(pressure_functions, coeff)
 #plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
-plt.plot(mid_invn, hpressure,  'r.-', label="Liquid")
-plt.plot(mid_invn, cpressure, 'b.-', label="Solid")
+plt.plot(mid_invn, hpressure,  'red', label="Liquid")
+plt.plot(mid_invn, cpressure, 'blue', label="Solid")
 plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('1/Reduced Density')
 plt.ylabel('Reduced Pressure')
