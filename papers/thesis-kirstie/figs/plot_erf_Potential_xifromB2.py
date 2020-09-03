@@ -74,9 +74,11 @@ for KbT in T:
 
 
 #Plot Vwca and Verf - Figure 1
-r=np.linspace(1, 1.12, 2000) #for erf plots #original SAVE
+#r=np.linspace(1, 1.12, 2000) #for erf plots #original SAVE
 #r=np.linspace(.6, 1.1225, 2000)   #2R=1.1225  shows intersection 
-#r=np.linspace(.95, 1.1225, 2000)   #2R=1.1225  good
+r=np.linspace(.85, 1.12, 2000)   #2R=1.1225  ASK!
+#r=np.linspace(.85, 1.123, 2000)   #2R=1.1225  
+#r=np.linspace(.95, 1.1225, 2000)   #2R=1.1225  ok
 
 i=0
 line_colors = ['orange', 'g', 'b', 'r', 'm']
@@ -101,7 +103,7 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('V(r)/KT')
 plt.title('Compare Vwca/kT and Verf/kT at kT=%g' % (KbT))
 plt.legend()
-plt.savefig('erf_Potential_overkT.pdf')
+plt.savefig('erf_Potential_overkT_xifromB2.pdf')
 
 plt.figure()
 
@@ -136,7 +138,7 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('V(r)/$\epsilon$')
 plt.title('Compare Vwca and Verf')
 plt.legend()
-plt.savefig('erf_Potential.pdf')
+plt.savefig('erf_Potential_xifromB2.pdf')
 
 #plt.show()
 
