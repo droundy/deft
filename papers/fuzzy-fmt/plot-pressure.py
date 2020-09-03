@@ -117,9 +117,12 @@ mid_h_gibbs = mid_hfe + mid_invn*hpressure
 mid_c_gibbs = mid_cfe + mid_invn*cpressure
 fit_c_gibbs = fit_cfe + invn*fit_p
 
+
+
+
 # Plot Gibbs Free Energy/atom vs Pressure with point of intersection   - Figure 2
 zoom_volume = 0.99
-plt.plot(fit_p, fit_c_gibbs - fit_p*zoom_volume, 'b:', label="fit crystal")
+#plt.plot(fit_p, fit_c_gibbs - fit_p*zoom_volume, 'b:', label="fit crystal")
 
 #Find pressure at point of intersection
 def find_first_intersection(p1, g1, p2, g2): 
