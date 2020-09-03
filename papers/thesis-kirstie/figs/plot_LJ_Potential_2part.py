@@ -33,7 +33,7 @@ r_dless=sigma/r  #plot dimensionless quantity!
 sigma_over_r_to_pow6=(r_dless)*(r_dless)*(r_dless)*(r_dless)*(r_dless)*(r_dless)
 V=4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6)  #LJ potential 
 plt.plot(1/r_dless,V, color='red')
-plt.annotate('Attractive portion', xy=(1.4,-0.5), xytext=(1.6,-0.7),
+plt.annotate('Attractive portion', xy=(1.45,-0.5), xytext=(1.6,-0.7),
              arrowprops=dict(arrowstyle="->", connectionstyle="arc3"),)
 
 #Plot repulsive portion from r=1.1225 to rmax:
