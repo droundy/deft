@@ -36,7 +36,7 @@ plt.xlabel('r')
 plt.ylabel('V(r)')
 plt.title('Hard Sphere Potential')
 #plt.legend()
-plt.savefig("plot_HardSphere_Potential.png")
+plt.savefig("plot_HardSphere_Potential.pdf")
 
 # plt.show()
 
