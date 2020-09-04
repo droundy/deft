@@ -168,7 +168,7 @@ plt.xlabel('Inverse Density')
 plt.ylabel('Helmholtz Free Energy/atom')
 plt.legend()
 if args.saveplots:
-    plt.savefig('plot-pressure_Fig1b.pdf')
+    plt.savefig('plot-pressure_Fig1.pdf')
 
 plt.figure()
 
