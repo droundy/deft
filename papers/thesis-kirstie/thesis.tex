@@ -80,19 +80,28 @@ The repulsive portion of the Leonard-Jones potential forms the potential for a W
 
 \begin{figure}[h!]
     \centering
-   % \begin{subfigure}[b]{0.4\linewidth}
-      % FIXME \includegraphics[height=3.5cm]{TwoSpheres.pdf}
-    %\end{subfigure} 
-    %\begin{subfigure}[b]{0.4\linewidth}
-    %  \includegraphics[height=3.5cm]{2spheres.png}
-    %\end{subfigure} 
+      % FIXME \includegraphics[height=3.5cm]{TwoSpheres.pdf} 
     \caption{(Left) The WCA potential is a minimum at r=2R. 
              (Right) The WCA potential increases rapidly for $r<2R$.}
     \label{fig:TwoSpheres}
     \end{figure} 
-%\[\]
 
-The WCA potential is not well suited for implementing computationally.  Therefore, an erf potential which closely approximates the WCA potential at temperatures of interest will be used instead of the WCA potential. The erf potential is given by: \begin{equation}{V_{erf}=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]}\end{equation} where the parameter $\alpha$ is derived by setting the erf potential equal to the WCA potentail when r equals $\alpha$ \begin{displaymath}{V_{erf}(r=\alpha)=V_{WCA}(r=\alpha)}\end{displaymath} and is given by \begin{equation}{\alpha=\sigma\left(\frac{2}{1+\sqrt{\frac{k_BT}{\epsilon}\ln(2)}}\right)^\frac{1}{6}}\end{equation}  The parameter $\Xi$ is derived by matching the slope of the erf potential to the slope of the WCA potential at r=$\alpha$:\begin{displaymath}{\frac{dV_{erf}(r=\alpha)}{dr}=\frac{dV_{WCA}(r=\alpha)}{dr}}\end{displaymath} and is given by: \begin{equation}{\Xi=\frac{\alpha}{6\sqrt{\pi}\left(\sqrt{\frac{\epsilon}{k_BT}\ln(2)}+\ln(2)\right)}}\end{equation} 
+The WCA potential is not well suited for implementing Density Functional Theory.  Therefore, an erf potential which closely approximates the WCA potential at temperatures of interest will be used instead of the WCA potential. The erf potential is given by 
+\begin{equation}
+	{V_{erf}=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]}
+\end{equation} 
+where the parameter $\alpha$ is derived by setting the erf potential equal to the WCA potentail when r equals $\alpha$ 
+\begin{displaymath}{V_{erf}(r=\alpha)=V_{WCA}(r=\alpha)}\end{displaymath} 
+and is given by 
+\begin{equation}\label{alphaT}
+	{\alpha=\sigma\left(\frac{2}{1+\sqrt{\frac{k_BT}{\epsilon}\ln(2)}}\right)^\frac{1}{6}}
+\end{equation} 
+The parameter $\Xi$ is derived by matching the slope of the erf potential to the slope of the WCA potential at r=$\alpha$:
+\begin{displaymath}{\frac{dV_{erf}(r=\alpha)}{dr}=\frac{dV_{WCA}(r=\alpha)}{dr}}\end{displaymath} 
+and is given by: 
+\begin{equation}
+	{\Xi=\frac{\alpha}{6\sqrt{\pi}\left(\sqrt{\frac{\epsilon}{k_BT}\ln(2)}+\ln(2)\right)}}
+\end{equation} 
 
 \noindent These conditions, along with V$_{erf}=$V$_{WCA}$ at $r=\alpha$, help fit the curve of the erf potential to the curve of the WCA potential.
 
@@ -122,105 +131,59 @@ Unlike the WCA potential, the erf potential depends on temperature through the p
 
 %\color{red}\noindent!ADD PLOT of df/dr=w2*w2 !!! BUT not here!\color{black}
 
-Another way to find values for $\Xi(T)$ is to find computationally the value $\Xi$ for which the second virial coefficient evaluated for the error function potential $V_{erf}(r)$ is equal to the value for the second virial coefficent evalued for the WCA potential $V_{WCA}$, with $\alpha(T)$ plugged into the equation for $B_{2erf}$ at each temperature T. 
+Another way to find values for $\Xi(T)$ is to use the second virial coefficent $B_{2}$ from the equation of state expressed in terms of the virial expansion. 
+\begin{equation}\label{virialequation}
+    \frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) 
+\end{equation}
+where 
+\begin{equation}
+	B_{2}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}(r)}-1\right)d\vec{r} 
+\end{equation}
+The second virial coefficient can be derived from Euler's equation for the internal energy of a system, 
+\begin{equation}U=TS-PV+\mu{N}\end{equation}
+using the relations from statistical thermophysics which views the thermodynamic quantities as ensemble averages
+\begin{equation}S=-k_B\sum_{i=0}^\infty{P_i\ln{P_i}}\end{equation}
+\begin{equation}U=<E>=\sum_{i=0}^\infty{P_iE_i}\end{equation}
+\begin{equation}N=<n>=\sum_{i=0}^\infty{P_in_i}\end{equation}
+which gives
+\begin{equation}\frac{PV}{k_BT}=N + \beta\frac{\partial{F}_{excess}}{\partial{N}}{N} - \frac{F_{excess}}{k_BT}\end{equation}
+Expressing the Helmholtz free energy in terms of the pair potential $V(r)$ results in the equation of state expressed in terms of the virial expansion as given by Equation~\ref{virialequation}.
+
+The value of $\Xi$ at a given temperature, T, can be found computationally by equating the second virial coefficient evaluated for the error function potential $V_{erf}(r)$, and the second virial coefficent evalued for the WCA potential $V_{WCA}$.
 \begin{equation}B_{2erf}(T) =B_{2WCA}(T)\end{equation}
-\begin{equation}B_{2erf}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{erf}(r)}-1\right)d\vec{r} \end{equation}
-\begin{equation}B_{2erf}(T) = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{erf}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]\end{equation}
-and 
-\begin{equation}B_{2WCA}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{WCA}(r)}-1\right)d\vec{r} \end{equation}
-A plot of $\Xi(T)$ obtained through this method is shown in Figure \ref{fig:xi_fromB2vsT}, and Figure \ref{fig:erf_Potential_xifromB2} shows the erf potential at reduced temperatures $\frac{k_BT}{\epsilon}=1$, $\frac{k_BT}{\epsilon}=2$, and $\frac{k_BT}{\epsilon}=3$ alongside the WCA potential. 
+Evaluating $B_{2}$ for the erf potential gives
+%\begin{equation}B_{2erf}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{erf}(r)}-1\right)d\vec{r} \end{equation}
+\begin{equation}
+	B_{2erf}(T) = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{erf}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]
+\end{equation}
+where $\alpha(T)$ is given by Equation~\ref{alphaT} as before. Similarly, $B_{2WCA}$ can be found computationally from 
+\begin{equation}
+	B_{2WCA}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{WCA}(r)}-1\right)d\vec{r} 
+\end{equation}
+ 
+A plot of $\Xi(T)$ obtained through this method is shown in Figure \ref{fig:xi_fromB2vsT}, and Figure \ref{fig:erf_Potential_xifromB2} shows the erf potential at a few different temperatures alongside the WCA potential. 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{xi_fromB2.pdf}
+    \includegraphics[height=6cm]{xi_fromB2.pdf}
     \caption{Shows the temperature dependence of $\Xi$ generated from matching the second virial coeficients for $V_{erf}(r)$ and $V_{WCA}(r)$ at each temperature.}
     \label{fig:xi_fromB2vsT}
   \end{figure}
-\color{red}
+
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=7cm]{erf_Potential_xifromB2.pdf}
+    \includegraphics[height=6cm]{erf_Potential_xifromB2.pdf}
     \caption{Error Function Potential $V_{erf}(r)$ at several temperatures with $\sigma=1$, $\epsilon=1$, compared to the WCA potential $V_{WCA}(r)$ shown in black.}
     \label{fig:erf_Potential_xifromB2}
   \end{figure}
 
-\noindent!ADD PLOT of df/dr=w2*w2 !!! BUT not here!
-\color{black}
-%\[\]
-%\[\]
-
-%----------------BEGIN Virial Expansion--------------
-The second virial coefficient can be derived from Euler's equation for the internal energy of a system.
-\begin{equation}PV=TS-(U-\mu{N})\end{equation}
-\begin{equation}\label{Euler_rearranged}\frac{PV}{k_BT}=\frac{S}{k_B}-\frac{1}{k_BT}(U-\mu{N})\end{equation}
-Setting $\beta=\frac{1}{k_BT}$, and putting in the relations from statistical thermophysics which views the thermodynamic quantities as ensemble averages
-\begin{equation}S=-k_B\sum_{i=0}^\infty{P_i\ln{P_i}}\end{equation}
-\begin{equation}U=<E>=\sum_{i=0}^\infty{P_iE_i}\end{equation}
-\begin{equation}N=<n>=\sum_{i=0}^\infty{P_in_i}\end{equation}
-%\begin{equation}\beta=\frac{1}{k_BT}\end{equation}
-%\begin{equation}\frac{PV}{k_BT}=-\sum{P_i\ln{P_i}}-\frac{1}{k_BT}(\sum{P_iE_i}-\mu\sum{P_iN})\end{equation}
-Equation~\ref{Euler_rearranged} then becomes
-\begin{equation}\frac{PV}{k_BT}=-\sum{P_i\ln{P_i}}-\sum{P_i\beta(E_i-\mu
-{n_i}})\end{equation}
-\begin{equation}\frac{PV}{k_BT}=-\sum{P_i}\left[\ln{P_i}+\beta(E_i-\mu
-{n_i})\right]\end{equation}
-For a Grand Canonical Ensemble the probablity of a state given by
-\begin{equation}P_{n,s(n)}=\frac{e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\end{equation}
-results in 
-\begin{equation}\frac{PV}{k_BT}=-\sum_{n=0}^\infty\sum_{s(n)}P_{n,s(n)}\left[\ln{\left(\frac{ e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\right)}+\beta(E_{s(n)}-\mu{n})\right]\end{equation}
-
-\begin{equation}\frac{PV}{k_BT}=-\sum_{n=0}^\infty\sum_{s(n)}P_{n,s(n)}\left[-\beta(E_{s(n)}-\mu{n})-\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)}+\beta(E_{s(n)}-\mu{n})\right]\end{equation}
-
-\begin{equation}\frac{PV}{k_BT}=-\sum_{n=0}^\infty\sum_{s(n)}\left(\frac{e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}} \left[-\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)}\right]\right)\end{equation}
-
-\begin{equation}\frac{PV}{k_BT}=\left[\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)}\right]\left(\frac{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\right) \end{equation}
-
-\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)} \end{equation}
-
-\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \left(e^{\beta\mu}\right)^n\sum_{s(n)}e^{-\beta{E}_{s(n)}}\right)} \end{equation}
-
-\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \lambda^nZ_n\right)} \end{equation}
-
-\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \lambda^nZ_{on}Q_n\right)} \end{equation}
-where $Q_n$ is the configuration integral.
-\color{red}For a system of N particles only, the sum collapses to one term, that for n=N, which gives \color{black}
-\begin{equation}\label{PV/kBT_reduces_for_N}\frac{PV}{k_BT}=\ln{\left(\lambda^NZ_{oN}Q_N\right)}
-%=\ln\lambda^n + \ln{Z}_{on}+\ln{Q}_n
-=\beta\mu{N} + \ln{Z}_{oN} +\ln{Q}_N\end{equation}
-\begin{equation}\label{PV/kBT_reduces_for_N}\frac{PV}{k_BT}=\beta\mu_{ideal}{N} + \ln{Z}_{oN} + \beta\mu_{excess}{N} + \ln{Q}_N\end{equation}
-Noting that $Q_N=1$ for an ideal gas since $V(r)=0$ for an ideal gas
-\begin{equation}\frac{P_{ideal}V}{k_BT}=\beta\mu_{ideal}{N} + \ln{Z}_{oN}=N\end{equation}
-%\begin{equation}P_{ideal}=\mu{N} + k_BT\ln{Z}_{oN}\end{equation}
-\begin{equation}\frac{P_{excess}}{k_BT}= \beta\mu_{excess}{N} + \ln{Q}_N\end{equation}
-and Equation~\ref{PV/kBT_reduces_for_N} becomes
-\begin{equation}\frac{PV}{k_BT}=N + \beta\mu_{excess}{N} + \ln{Q}_N\end{equation}
-\begin{equation}\frac{PV}{k_BT}=N + \beta\frac{\partial{F}_{excess}}{\partial{N}}{N} - \frac{F_{excess}}{k_BT}\end{equation}
-Plugging in the expression for $F_{excess}$ in terms of the mayer function for low density fluids
-\begin{equation}F_{excess}=k_BT\frac{N^2}{V}\left(-\frac{1}{2}\int{f(r)d\vec{r}}\right)\end{equation}
-gives
-\begin{equation}\frac{PV}{k_BT}=N + \left(-\frac{N}{V}\int{f(r)d\vec{r}}\right){N} + \frac{N^2}{V}\frac{1}{2}\int{f(r)d\vec{r}}\end{equation}
-%\begin{equation}\frac{PV}{k_BT}=N - \frac{N^2}{V}\frac{1}{2}\int{f(r)d\vec{r}}\end{equation}
-\begin{equation}\frac{PV}{k_BT}=N\left(1-\frac{N}{V}\frac{1}{2}\int{f(r)d\vec{r}}\right)\end{equation}
-\begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)\right) \end{equation}
-where $B_2(T)$ is given by
-\begin{equation}B_2=-\frac{1}{2}\int_{Volume}f(r)d\vec{r} \end{equation}
-
-\color{red}This result was for low densities where higher terms in the expression for the excess free energy were neglected. The full virial equation is given by\color{black}
-\begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
-
-%-----------------END Virial Expansion---------------
-%\[\]
-
-
-
-
+%\color{red}
+% FIXME \noindent!ADD PLOT of df/dr=w2*w2 !!! BUT not here!
+%\color{black}
 
 %The spheres in the WCA model fluid do not exhibit quantum interference effects as the mass of the spheres, and the temperatures are taken to be large enough that the de Broglie wavelength is smaller than the mean distance between the spheres. Thus, the WCA fluid can be treated as a classical fluid.
-%\\
 
-%\[\]
-%\[\]
 \[\]
 \noindent IB. The Theory of Freezing and Maxwell's Double Tangent Construction
 
@@ -678,7 +641,7 @@ Once again, it is important to note that the number density is the same for all 
  \begin{figure}[h!]
     \centering
     %\includegraphics[height=4cm]{Homogeneous_bold-box.pdf}
-    % FIXME \includegraphics[height=4cm]{Homogeneous_bold-box.png}
+    % FIXME \includegraphics[height=4cm]{Homogeneous_bold-box.pdf}
     \caption{A homogeneouse number density profile $n(\vec{r})$}
     \label{fig:homogen_denisty}
   \end{figure}    
@@ -1495,12 +1458,86 @@ which gives
 %\begin{displaymath}F_{ex}=\end{displaymath}
 \begin{equation}F_{excess}=k_BTN\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)\end{equation} 
 
+
+
+
+\noindent \textbf{Derivation of the Virial Equation}
+%----------------BEGIN Virial Expansion--------------
+The second virial coefficient can be derived from Euler's equation for the internal energy of a system.
+\begin{equation}PV=TS-(U-\mu{N})\end{equation}
+\begin{equation}\label{Euler_rearranged}\frac{PV}{k_BT}=\frac{S}{k_B}-\frac{1}{k_BT}(U-\mu{N})\end{equation}
+Setting $\beta=\frac{1}{k_BT}$, and putting in the relations from statistical thermophysics which views the thermodynamic quantities as ensemble averages
+\begin{equation}S=-k_B\sum_{i=0}^\infty{P_i\ln{P_i}}\end{equation}
+\begin{equation}U=<E>=\sum_{i=0}^\infty{P_iE_i}\end{equation}
+\begin{equation}N=<n>=\sum_{i=0}^\infty{P_in_i}\end{equation}
+%\begin{equation}\beta=\frac{1}{k_BT}\end{equation}
+%\begin{equation}\frac{PV}{k_BT}=-\sum{P_i\ln{P_i}}-\frac{1}{k_BT}(\sum{P_iE_i}-\mu\sum{P_iN})\end{equation}
+Equation~\ref{Euler_rearranged} then becomes
+\begin{equation}\frac{PV}{k_BT}=-\sum{P_i\ln{P_i}}-\sum{P_i\beta(E_i-\mu
+{n_i}})\end{equation}
+\begin{equation}\frac{PV}{k_BT}=-\sum{P_i}\left[\ln{P_i}+\beta(E_i-\mu
+{n_i})\right]\end{equation}
+For a Grand Canonical Ensemble the probablity of a state given by
+\begin{equation}P_{n,s(n)}=\frac{e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\end{equation}
+results in 
+\begin{equation}\frac{PV}{k_BT}=-\sum_{n=0}^\infty\sum_{s(n)}P_{n,s(n)}\left[\ln{\left(\frac{ e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\right)}+\beta(E_{s(n)}-\mu{n})\right]\end{equation}
+
+\begin{equation}\frac{PV}{k_BT}=-\sum_{n=0}^\infty\sum_{s(n)}P_{n,s(n)}\left[-\beta(E_{s(n)}-\mu{n})-\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)}+\beta(E_{s(n)}-\mu{n})\right]\end{equation}
+
+\begin{equation}\frac{PV}{k_BT}=-\sum_{n=0}^\infty\sum_{s(n)}\left(\frac{e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}} \left[-\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)}\right]\right)\end{equation}
+
+\begin{equation}\frac{PV}{k_BT}=\left[\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)}\right]\left(\frac{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\right) \end{equation}
+
+\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}\right)} \end{equation}
+
+\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \left(e^{\beta\mu}\right)^n\sum_{s(n)}e^{-\beta{E}_{s(n)}}\right)} \end{equation}
+
+\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \lambda^nZ_n\right)} \end{equation}
+
+\begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \lambda^nZ_{on}Q_n\right)} \end{equation}
+where $Q_n$ is the configuration integral.
+\color{red}For a system of N particles only, the sum collapses to one term, that for n=N, which gives \color{black}
+\begin{equation}\label{PV/kBT_reduces_for_N}\frac{PV}{k_BT}=\ln{\left(\lambda^NZ_{oN}Q_N\right)}
+%=\ln\lambda^n + \ln{Z}_{on}+\ln{Q}_n
+=\beta\mu{N} + \ln{Z}_{oN} +\ln{Q}_N\end{equation}
+\begin{equation}\label{PV/kBT_reduces_for_N}\frac{PV}{k_BT}=\beta\mu_{ideal}{N} + \ln{Z}_{oN} + \beta\mu_{excess}{N} + \ln{Q}_N\end{equation}
+Noting that $Q_N=1$ for an ideal gas since $V(r)=0$ for an ideal gas
+\begin{equation}\frac{P_{ideal}V}{k_BT}=\beta\mu_{ideal}{N} + \ln{Z}_{oN}=N\end{equation}
+%\begin{equation}P_{ideal}=\mu{N} + k_BT\ln{Z}_{oN}\end{equation}
+\begin{equation}\frac{P_{excess}}{k_BT}= \beta\mu_{excess}{N} + \ln{Q}_N\end{equation}
+and Equation~\ref{PV/kBT_reduces_for_N} becomes
+\begin{equation}\frac{PV}{k_BT}=N + \beta\mu_{excess}{N} + \ln{Q}_N\end{equation}
+\begin{equation}\frac{PV}{k_BT}=N + \beta\frac{\partial{F}_{excess}}{\partial{N}}{N} - \frac{F_{excess}}{k_BT}\end{equation}
+Plugging in the expression for $F_{excess}$ in terms of the mayer function for low density fluids
+\begin{equation}F_{excess}=k_BT\frac{N^2}{V}\left(-\frac{1}{2}\int{f(r)d\vec{r}}\right)\end{equation}
+gives
+\begin{equation}\frac{PV}{k_BT}=N + \left(-\frac{N}{V}\int{f(r)d\vec{r}}\right){N} + \frac{N^2}{V}\frac{1}{2}\int{f(r)d\vec{r}}\end{equation}
+%\begin{equation}\frac{PV}{k_BT}=N - \frac{N^2}{V}\frac{1}{2}\int{f(r)d\vec{r}}\end{equation}
+\begin{equation}\frac{PV}{k_BT}=N\left(1-\frac{N}{V}\frac{1}{2}\int{f(r)d\vec{r}}\right)\end{equation}
+\begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)\right) \end{equation}
+where $B_2(T)$ is given by
+\begin{equation}B_2=-\frac{1}{2}\int_{Volume}f(r)d\vec{r} \end{equation}
+
+\color{red}This result was for low densities where higher terms in the expression for the excess free energy were neglected. The full virial equation is given by\color{black}
+\begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
+
+%-----------------END Virial Expansion---------------
+%\[\]
+
+
 \cite{fake}
 
 \bibliography{thesis}
 \bibliographystyle{plain}
 
+
 \end{document}
+
+
+
+
+
+
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
