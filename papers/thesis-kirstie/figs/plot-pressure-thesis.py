@@ -53,7 +53,8 @@ if args.tensor :
 else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
     #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
-    files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
+    files = sorted(list(glob.glob('plot-pressure-data/kT%.3f_n*_best.dat' % kT)))
+    #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
 
 for f in files:
     data = np.loadtxt(f)
