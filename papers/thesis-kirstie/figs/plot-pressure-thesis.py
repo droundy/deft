@@ -8,7 +8,7 @@
 #This program is the same plot-pressure.py prgram modified for plots labeled nicely for thesis 
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-pressure.py directory(with data files) --kT [temp] [OPTIONAL: --tensor  --showplots --saveplots]
+#with comand ./plot-pressure-thesis.py --kT [temp] [OPTIONAL: --tensor  --showplots --saveplots]
 
 from __future__ import print_function, division
 
@@ -23,8 +23,8 @@ parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, 
 parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 
-parser.add_argument('directory', metavar='directory', type=str,
-                    help='directory with data to plot') 
+#parser.add_argument('directory', metavar='directory', type=str,
+#                    help='directory with data to plot') 
 
 parser.add_argument('--tensor', action='store_true',
                     help='use data with tensor weight')
@@ -48,7 +48,8 @@ if args.tensor :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
     #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT))) 
     #files = sorted(list(glob.glob('newdata_tensor/phase-diagram4/kT%.3f_n*_best_tensor.dat' % kT))) 
-    files = sorted(list(glob.glob('%s/kT%.3f_n*_best_tensor.dat' % (args.directory,  kT)))) 
+    files = sorted(list(glob.glob('plot-pressure-data/kT%.3f_n*_best_tensor.dat' % kT)))
+    #files = sorted(list(glob.glob('%s/kT%.3f_n*_best_tensor.dat' % (args.directory,  kT)))) 
 else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
     #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
@@ -67,7 +68,7 @@ n = np.array(n)
 
 
 
-# Plot Free Energy/atom vs 1/Reduced Density - Figure 1
+# Generate data for Figure 1
 functions = np.vstack((np.ones_like(invn),
                        invn**-1,
                        invn**-2,
@@ -87,19 +88,6 @@ coeff = A[0]
 #print('residuals', A[1])
 #print('coeff', coeff)
 fit_cfe = np.dot(functions, coeff)
-#plt.plot(invn, fit_cfe, label="fit crystal free energy")
-plt.plot(invn, hfe, 'red', label="Liquid")
-plt.plot(invn, cfe, 'blue', label="Solid")
-plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
-plt.xlabel('1/Reduced Density')
-plt.ylabel('Helmholtz Free Energy/atom')
-plt.legend()
-if args.saveplots:
-    plt.savefig('plot-pressure_Fig1.pdf')
-
-plt.figure()
-
-
 
 
 dhfe=np.diff(hfe)  #Caution: depends on order of data files!
@@ -119,9 +107,7 @@ mid_c_gibbs = mid_cfe + mid_invn*cpressure
 fit_c_gibbs = fit_cfe + invn*fit_p
 
 
-
-
-# Plot Gibbs Free Energy/atom vs Pressure with point of intersection   - Figure 2
+# Find point of intersection for Figure 2
 zoom_volume = 0.99
 #plt.plot(fit_p, fit_c_gibbs - fit_p*zoom_volume, 'b:', label="fit crystal")
 
@@ -144,10 +130,11 @@ def find_first_intersection(p1, g1, p2, g2):
                         #       "g2[j+1]=", g2[j+1], "j=", j)
                         return P_inter, g_inter
 
+
 p_inter, g_inter = find_first_intersection(hpressure, mid_h_gibbs, cpressure, mid_c_gibbs)
-plt.plot(p_inter, g_inter - p_inter*zoom_volume, 'o', color='turquoise', markersize=10)
+
 pf_inter, gf_inter = find_first_intersection(hpressure, mid_h_gibbs, fit_p, fit_c_gibbs)
-plt.plot(pf_inter, gf_inter - pf_inter*zoom_volume, 'o', color='orange', markersize=10)
+
 
 #Find homogeneous and crystal densities at p_inter
 def find_densities(p_inter, pressure, invn):
@@ -163,26 +150,65 @@ def find_densities(p_inter, pressure, invn):
 invnh=find_densities(p_inter, hpressure, mid_invn)
 invnc=find_densities(p_inter, cpressure, mid_invn)
 
-plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'red', label="Liquid")
-plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'blue', label="Solid")
-plt.title("Gibbs Free Energy/atom vs Pressure at Fixed kT=%g" % (kT))
-plt.xlabel('$p$')
-plt.ylabel('Gibbs Free Energy/atom - pressure*(%g volume unit)' % zoom_volume)
+
+#-------------PLOTS---------------------------------------
+
+# Plot Free Energy/atom vs 1/Reduced Density - Figure 1
+#plt.plot(invn, fit_cfe, label="fit crystal free energy")
+plt.plot(invn, hfe, 'red', label="Liquid")
+plt.plot(invn, cfe, 'blue', label="Solid")
+plt.plot([invnc, invnc], [-163, -68.07], 'k-')
+plt.plot([invnh, invnh], [-163, -77.82], 'k-')
+#plt.plot([invnc, invnh], [-68.09, -77.82], 'k-')
+plt.plot([0.55, invnh], [-77.82 - ((invnh-0.55)*(-77.8-(-68.07))/(invnh-invnc)), -77.82], 'k-')
+plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
+plt.xlabel('Inverse Density')
+#plt.xlabel(r'Inverse Reduced Density = $\frac{1}{n\sigma^3}$')
+plt.ylabel('Helmholtz Free Energy/atom')
+plt.legend()
+if args.saveplots:
+    plt.savefig('plot-pressure_Fig1b.pdf')
+
+plt.figure()
+
+# Plot Gibbs Free Energy/atom vs Pressure with point of intersection   - Figure 2
+#plt.plot(hpressure, mid_h_gibbs - hpressure*zoom_volume, 'red', label="Liquid")
+#plt.plot(cpressure, mid_c_gibbs - cpressure*zoom_volume, 'blue', label="Solid")
+#plt.xticks([p_inter], [r'$p_{Trans}$'])
+#plt.yticks([g_inter- p_inter*zoom_volume], [r'$\mu_{Trans}$'])
+#plt.plot([0, p_inter], [g_inter-p_inter*zoom_volume, g_inter-p_inter*zoom_volume], 'k-')
+#plt.plot([p_inter, p_inter], [-1080, g_inter-p_inter*zoom_volume], 'k-')
+#plt.plot(p_inter, g_inter - p_inter*zoom_volume, 'o', color='turquoise', markersize=10)
+#plt.plot(pf_inter, gf_inter - pf_inter*zoom_volume, 'o', color='orange', markersize=10)
+#plt.ylabel('Chemical Potential - pressure*(%g volume unit)' % zoom_volume)
+
+plt.plot(hpressure, mid_h_gibbs, 'red', label="Liquid")
+plt.plot(cpressure, mid_c_gibbs, 'blue', label="Solid")
+plt.xticks([p_inter], [r'$p_{Trans}$'])
+plt.yticks([g_inter], [r'$\mu_{Trans}$'])
+plt.plot([0, p_inter], [g_inter, g_inter], 'k-')
+plt.plot([p_inter, p_inter], [-137, g_inter], 'k-')
+plt.plot(p_inter, g_inter, 'o', color='turquoise', markersize=10)
+plt.plot(pf_inter, gf_inter, 'o', color='orange', markersize=10)
+plt.ylabel('Chemical Potential')
+
+#plt.xlabel('Reduced Pressure')
+plt.xlabel('Pressure')
+plt.title("Chemical Potential vs Pressure at Fixed kT=%g" % (kT))
 plt.legend()
 if args.saveplots:
     plt.savefig('plot-pressure_Fig2.pdf')
+#note: chemical potential = Gibbs Free Energy/atom
 
 plt.figure()
 
 
-
-
 # Plot Pressure vs 1/Reduced Density with point of intersection - Figure 3
-#plt.xticks([xS,xL], ['$\frac{1}{n_S}$', '$\frac{1}{n_L}$'])
-#plt.yticks([yT], ['$p_{Transition}$'])
-#plt.plot([xS, xS], [0, yT], 'k-')
-#plt.plot([xL, xL], [0, yT], 'k-')
-#plt.plot([xS, xL], [yT, yT], 'k-')
+plt.xticks([invnc,invnh], [r'$\frac{1}{n_S}$', r'$\frac{1}{n_L}$'])
+plt.yticks([p_inter], [r'$p_{Trans}$'])
+plt.plot([invnc, invnc], [0, p_inter], 'k-')
+plt.plot([invnh, invnh], [0, p_inter], 'k-')
+plt.plot([invnc, invnh], [p_inter, p_inter], 'k-')
 plt.plot(invnh, p_inter, 'o', color='red', markersize=10) 
 plt.plot(invnc, p_inter, 'o', color='blue', markersize=10) 
 fit_p = np.dot(pressure_functions, coeff)
@@ -190,8 +216,10 @@ fit_p = np.dot(pressure_functions, coeff)
 plt.plot(mid_invn, hpressure,  'red', label="Liquid")
 plt.plot(mid_invn, cpressure, 'blue', label="Solid")
 plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
-plt.xlabel('Inverse Reduced Density')
-plt.ylabel('Reduced Pressure = $\frac{P\sigma^3}{\epsilon}$')
+#plt.xlabel(r'Inverse Reduced Density = $\frac{1}{n\sigma^3}$')
+#plt.ylabel(r'Reduced Pressure = $\frac{P\sigma^3}{\epsilon}$')
+plt.xlabel('Inverse Density')
+plt.ylabel('Pressure')
 plt.legend()
 if args.saveplots:
     plt.savefig('plot-pressure_Fig3.pdf')
