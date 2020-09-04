@@ -35,7 +35,7 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('$V(r)/\epsilon$')
 plt.title('WCA Potential')
 #plt.legend()
-plt.savefig('WCA_Potential.png')
+plt.savefig('WCA_Potential.pdf')
 
 # plt.show()
 
