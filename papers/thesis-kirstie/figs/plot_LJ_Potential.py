@@ -36,7 +36,7 @@ plt.xlabel('r/$\sigma$')
 plt.ylabel('V(r)/$\epsilon$')
 plt.title('Leonard-Jones Potential')
 #plt.legend()
-plt.savefig("LJ_Potential.png")
+plt.savefig("LJ_Potential.pdf")
 
 # plt.show()
 
