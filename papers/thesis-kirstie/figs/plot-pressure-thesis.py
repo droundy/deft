@@ -7,8 +7,8 @@
 #which are generated as output data files by figs/new-melting.cpp
 #This program is the same plot-pressure.py prgram modified for plots labeled nicely for thesis 
 
-#NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-pressure-thesis.py --kT [temp] [OPTIONAL: --tensor  --showplots --saveplots]
+#NOTE: Run this plot script from directory deft/papers/thesis-kirstie 
+#with comand figs/plot-pressure-thesis.py --kT [temp] [OPTIONAL: --tensor  --showplots --saveplots]
 
 from __future__ import print_function, division
 
@@ -16,45 +16,37 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import os, glob
-import argparse
+#import argparse
 
-parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, GibbsFE/atom vs P, and P vs 1/n')
+#parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, GibbsFE/atom vs P, and P vs 1/n')
 
-parser.add_argument('--kT', metavar='temperature', type=float,
-                    help='reduced temperature - REQUIRED')
+#parser.add_argument('--kT', metavar='temperature', type=float,
+#                    help='reduced temperature - REQUIRED')
 
 #parser.add_argument('directory', metavar='directory', type=str,
 #                    help='directory with data to plot') 
 
-parser.add_argument('--tensor', action='store_true',
-                    help='use data with tensor weight')
+#parser.add_argument('--tensor', action='store_true',
+#                    help='use data with tensor weight')
 
-parser.add_argument('--showplots', action='store_true',
-                    help='show plots')
+#parser.add_argument('--showplots', action='store_true',
+#                    help='show plots')
                     
-parser.add_argument('--saveplots', action='store_true',
-                    help='will generate 3 plot .pdf files')
+#parser.add_argument('--saveplots', action='store_true',
+#                    help='will generate 3 plot .pdf files')
 
-args=parser.parse_args()
+#args=parser.parse_args()
 
-kT=args.kT
+#kT=args.kT
+kT=10
 
 n = []
 invn = []
 hfe = []
 cfe = []
 
-if args.tensor :
-    #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT)))
-    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT))) 
-    #files = sorted(list(glob.glob('newdata_tensor/phase-diagram4/kT%.3f_n*_best_tensor.dat' % kT))) 
-    files = sorted(list(glob.glob('plot-pressure-data/kT%.3f_n*_best_tensor.dat' % kT)))
-    #files = sorted(list(glob.glob('%s/kT%.3f_n*_best_tensor.dat' % (args.directory,  kT)))) 
-else :
-    #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
-    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
-    files = sorted(list(glob.glob('plot-pressure-data/kT%.3f_n*_best.dat' % kT)))
-    #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
+#files = sorted(list(glob.glob('../fuzzy-fmt/newdata_tensor/phase-diagram4/kT%.3f_n*_best_tensor.dat' % kT)))  #works with fac, but data files must be in git
+files = sorted(list(glob.glob('figs/plot-pressure-data/kT%.3f_n*_best_tensor.dat' % kT))) #works with fac, but data files must be in git
 
 for f in files:
     data = np.loadtxt(f)
@@ -67,7 +59,7 @@ cfe = np.array(cfe)
 invn = np.array(invn)
 n = np.array(n)
 
-
+print(n)
 
 # Generate data for Figure 1
 functions = np.vstack((np.ones_like(invn),
@@ -123,12 +115,6 @@ def find_first_intersection(p1, g1, p2, g2):
                 if p1[i] < P_inter < p1[i+1] and p2[j] < P_inter < p2[j+1]:
                     g_inter=m1*P_inter+g1[i]-m1*p1[i]
                     if g1[i] < g_inter < g1[i+1] and g2[j] < g_inter < g2[j+1] :
-                        # print ("")
-                        # print ("Intersects at:", P_inter, g_inter)
-                        # print("For p1[i]=", p1[i], "g1[i]=", g1[i], "p1[i+1]=", p1[i+1],
-                        #       "g1[i+1]=", g1[i+1], "i=", i)
-                        # print("and p2[j]=", p2[j], "g2[j]=", g2[j], "p2[j+1]=", p2[j+1],
-                        #       "g2[j+1]=", g2[j+1], "j=", j)
                         return P_inter, g_inter
 
 
@@ -168,8 +154,7 @@ plt.xlabel('Inverse Density')
 #plt.xlabel(r'Inverse Reduced Density = $\frac{1}{n\sigma^3}$')
 plt.ylabel('Helmholtz Free Energy/atom')
 plt.legend()
-if args.saveplots:
-    plt.savefig('plot-pressure_Fig1.pdf')
+plt.savefig('plot-pressure_Fig1.pdf')
 
 plt.figure()
 
@@ -198,8 +183,7 @@ plt.ylabel('Chemical Potential')
 plt.xlabel('Pressure')
 plt.title("Chemical Potential vs Pressure at Fixed kT=%g" % (kT))
 plt.legend()
-if args.saveplots:
-    plt.savefig('plot-pressure_Fig2.pdf')
+plt.savefig('plot-pressure_Fig2.pdf')
 #note: chemical potential = Gibbs Free Energy/atom
 
 plt.figure()
@@ -223,15 +207,9 @@ plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('Inverse Density')
 plt.ylabel('Pressure')
 plt.legend()
-if args.saveplots:
-    plt.savefig('plot-pressure_Fig3.pdf')
+plt.savefig('plot-pressure_Fig3.pdf')
 
 
-if args.showplots:
-    print (kT, p_inter, 1/invnh, 1/invnc)   #This print out is sent to >> phasenew.dat (or phasenewtensor.dat) by phasediagram_data.py
-    plt.show()
-else :
-    print (kT, p_inter, 1/invnh, 1/invnc)     
 
 
 
