@@ -360,7 +360,7 @@ where the paritian function Z is integrated over all of phase space for N identi
 \begin{displaymath}{dP=d\vec{p}_1d\vec{p}_2...d\vec{p}_N \mbox{~~~~where~~~~} d\vec{p}=dp_xdp_ydp_z}\end{displaymath}
 \begin{displaymath}{dQ=d\vec{r}_1d\vec{r}_2...d\vec{r}_N \mbox{~~~~where~~~~} d\vec{r}=dxdydz\mbox{~~~~}}\end{displaymath}
 
-Breaking the Hamiltonians H into its component energies
+Breaking the Hamiltonian, H into its component energies
 \begin{equation}{H = KE + V + V_{ext} = \sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)+V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)+V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{equation}
 where the translational kinetic energy of the N atoms is given by \begin{displaymath}{\sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)}\end{displaymath}
 the potential energy of the total interaction of each atom with the other N-1 atoms is given by
@@ -370,7 +370,7 @@ Noting that the kinetic energy depends only on momentum while the total interato
 \begin{equation}{Z=\frac{1}{N!}\frac{1}{h^{3N}}\int...\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+\frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\int...\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}}\end{equation}  Multiplying by $\frac{V^N}{V^N}$ where V is the real space volume satisfying \begin{equation}{V^N=}\int{...}\int{dQ}\end{equation} 
 %the equation can be written
 %\begin{equation}{Z=\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}e^\frac{-(\frac{|\vec{p}_2|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\right)\left(\frac{1}{V^N}\int{...}\int{dQ}e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}\right)}\end{equation}  
-and the partitian function can be expressed as
+the partitian function can be expressed as
 \begin{equation}\label{Zmultiply}{Z=Z_{ideal}Z_{excess}}\end{equation}
 where
 \begin{equation}{Z_{ideal}=V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}}\end{equation}
@@ -383,26 +383,27 @@ where
 The ideal Helmholtz free energy is
 \begin{displaymath}{F_{ideal}=-k_BT\ln{\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\right)}}\end{displaymath}  
 
-\begin{equation}{\label{Fidealmultipleint}}{=-k_BT\ln\left(\frac{1}{h^{3}}\int{d\vec{p}_1}~e^\frac{-\frac{|\vec{p}_1|^2}{2m}}{k_BT}\frac{1}{h^{3}}\int{d\vec{p}_2}~e^\frac{-\frac{|\vec{p}_2|^2}{2m}}{k_BT}{...}\frac{1}{h^{3}}\int{d\vec{p}_N}~e^\frac{-\frac{|\vec{p}_N|^2}{2m}}{k_BT}\right)}\end{equation}
+\begin{equation}{\label{Fidealmultipleint}}{=-k_BT\ln\left(V^N\frac{1}{N!}\frac{1}{h^{3}}\int{d\vec{p}_1}~e^\frac{-\frac{|\vec{p}_1|^2}{2m}}{k_BT}\frac{1}{h^{3}}\int{d\vec{p}_2}~e^\frac{-\frac{|\vec{p}_2|^2}{2m}}{k_BT}{...}\frac{1}{h^{3}}\int{d\vec{p}_N}~e^\frac{-\frac{|\vec{p}_N|^2}{2m}}{k_BT}\right)}\end{equation}
 These integrals can conveniently be written in terms of the DeBroglie wavelength $\Lambda$
 \begin{equation}{\frac{1}{h^{3}}\int{d\vec{p}}~e^\frac{-\frac{|\vec{p}|^2}{2m}}{k_BT}=\left(\sqrt{\frac{k_BTm}{2\pi\hbar^2}}\right)^3=\frac{1}{\Lambda^{3}}}\end{equation} 
 where \begin{equation}{\Lambda =\sqrt{\frac{2\pi\hbar^2}{k_BTm}}}\end{equation} 
 Rewriting Equation~\ref{Fidealmultipleint} in terms of $\Lambda$ gives
 \begin{equation}{F_{ideal}= -k_BT[\ln(V^N)-\ln(N!) - \ln(\Lambda^{3N})]}\end{equation}Using Stirling's approximation \begin{displaymath}{\ln(N!)=N\ln{N}-N}\end{displaymath} this becomes
 \begin{equation}{F_{ideal}= k_BT[N\ln(\frac{N\Lambda^{3}}{V}{)-N}]}\end{equation} 
-Multiplying by $\frac{V}{V}$ gives an expression in terms of the number density $n=\frac{N}{V}$ gives \begin{equation}{F_{ideal}= k_BT\left[\frac{N}{V}\ln{\left(\frac{N\Lambda^3}{V}\right)}-\frac{N}{V}\right]}V\end{equation}
-\begin{equation}{F_{ideal}= k_BT[n\ln(n\Lambda^3)-n]V}\label{eq:Fideal}\end{equation}   
+Rewriting the equation in terms of the number density $n=\frac{N}{V}$, and the quantum volume, $n_Q=\frac{1}{\lambda^3}$ gives
+\begin{equation}{F_{ideal}= k_BT\left[\frac{N}{V}\ln{\left(\frac{N}{V}\frac{1}{n_Q}\right)}-\frac{N}{V}\right]}V\end{equation}
+\begin{equation}{F_{ideal}= k_BT[n\ln(n/n_Q)-n]V}\label{eq:Fideal}\end{equation}   
 For a spatially varying number density, the ideal free energy in Equation~\ref{eq:Fideal} becomes
-\begin{equation}{F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]d\vec{r}}\end{equation} 
+\begin{equation}{F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/n_Q)-n(\vec{r})]d\vec{r}}\end{equation} 
 
-Now consider the excess free energy which is written as
+Now consider the excess free energy which is written most generally as
 \begin{equation}\label{Fexcess}{F_{excess}= -k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)}}\end{equation} 
 This integral can be greatly simplified if it can be assumed that the potential energy $V(\vec{r_1},\vec{r_2},...\vec{r_N})$ is a sum of the potential energies between pairs of atoms, where each atom is paired in turn with each of the other atoms in the system. In this case $V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ becomes 
 \begin{equation}{V(\vec{r_1},\vec{r_2},...\vec{r_N})=\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}\end{equation} 
 %\begin{displaymath}{=V_{12}(\vec{r_1},\vec{r_2})+V_{13}(\vec{r_1},\vec{r_3}) + V_{14}(\vec{r_1},\vec{r_4}) + ...}\end{displaymath}
 %\begin{displaymath}{+ V_{23}(\vec{r_2},\vec{r_3})+V_{24}(\vec{r_2},\vec{r_4})+V_{25}(\vec{r_2},\vec{r_5})+ ...}\end{displaymath} 
 %\begin{displaymath}{+ V_{34}(\vec{r_3},\vec{r_4})+V_{35}(\vec{r_3},\vec{r_5})+V_{36}(\vec{r_3},\vec{r_6})+...}\end{displaymath}
-Using this potential, and setting the external potential $V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ to zero, the exponent in equation \ref{Fexcess} becomes
+Using this potential, and setting the external potential $V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ to zero, the exponent in Equation~\ref{Fexcess} becomes
 
 \begin{displaymath}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{displaymath}    \begin{equation}{\approx-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
 where each exponential term is simplified by a Taylor expansion $e^x\approx{1+x}$. %\begin{equation}{\exp^{-V_{ij}(\vec{r_i},\vec{r_j})}\approx 1+f_{ij}(\vec{r_i},\vec{r_j})}\end{equation}%    %$\exp^x=1+x+\frac{x^2}{2!}+\frac{x^3}{3!}...$.%  
