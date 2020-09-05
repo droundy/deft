@@ -384,17 +384,17 @@ The ideal Helmholtz free energy is
 \begin{displaymath}{F_{ideal}=-k_BT\ln{\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\right)}}\end{displaymath}  
 
 \begin{equation}{\label{Fidealmultipleint}}{=-k_BT\ln\left(V^N\frac{1}{N!}\frac{1}{h^{3}}\int{d\vec{p}_1}~e^\frac{-\frac{|\vec{p}_1|^2}{2m}}{k_BT}\frac{1}{h^{3}}\int{d\vec{p}_2}~e^\frac{-\frac{|\vec{p}_2|^2}{2m}}{k_BT}{...}\frac{1}{h^{3}}\int{d\vec{p}_N}~e^\frac{-\frac{|\vec{p}_N|^2}{2m}}{k_BT}\right)}\end{equation}
-These integrals can conveniently be written in terms of the DeBroglie wavelength $\Lambda$
-\begin{equation}{\frac{1}{h^{3}}\int{d\vec{p}}~e^\frac{-\frac{|\vec{p}|^2}{2m}}{k_BT}=\left(\sqrt{\frac{k_BTm}{2\pi\hbar^2}}\right)^3=\frac{1}{\Lambda^{3}}}\end{equation} 
+These integrals can conveniently be written in terms of the DeBroglie wavelength $\Lambda$, or the quantum volume $\text{n}_\text{Q}$
+\begin{equation}{\frac{1}{h^{3}}\int{d\vec{p}}~e^\frac{-\frac{|\vec{p}|^2}{2m}}{k_BT}=\left(\sqrt{\frac{k_BTm}{2\pi\hbar^2}}\right)^3=\frac{1}{\Lambda^{3}}}=\text{n}_\text{Q}\end{equation} 
 where \begin{equation}{\Lambda =\sqrt{\frac{2\pi\hbar^2}{k_BTm}}}\end{equation} 
 Rewriting Equation~\ref{Fidealmultipleint} in terms of $\Lambda$ gives
 \begin{equation}{F_{ideal}= -k_BT[\ln(V^N)-\ln(N!) - \ln(\Lambda^{3N})]}\end{equation}Using Stirling's approximation \begin{displaymath}{\ln(N!)=N\ln{N}-N}\end{displaymath} this becomes
 \begin{equation}{F_{ideal}= k_BT[N\ln(\frac{N\Lambda^{3}}{V}{)-N}]}\end{equation} 
-Rewriting the equation in terms of the number density $n=\frac{N}{V}$, and the quantum volume, $n_Q=\frac{1}{\lambda^3}$ gives
-\begin{equation}{F_{ideal}= k_BT\left[\frac{N}{V}\ln{\left(\frac{N}{V}\frac{1}{n_Q}\right)}-\frac{N}{V}\right]}V\end{equation}
-\begin{equation}{F_{ideal}= k_BT[n\ln(n/n_Q)-n]V}\label{eq:Fideal}\end{equation}   
+Rewriting the equation in terms of the number density $n=\frac{N}{V}$, and the quantum volume, $\text{n}_\text{Q}$ gives
+\begin{equation}{F_{ideal}= k_BT\left[\frac{N}{V}\ln{\left(\frac{N}{V}\frac{1}{\text{n}_\text{Q}}\right)}-\frac{N}{V}\right]}V\end{equation}
+\begin{equation}{F_{ideal}= k_BT[n\ln(n/\text{n}_\text{Q})-n]V}\label{eq:Fideal}\end{equation}   
 For a spatially varying number density, the ideal free energy in Equation~\ref{eq:Fideal} becomes
-\begin{equation}{F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/n_Q)-n(\vec{r})]d\vec{r}}\end{equation} 
+\begin{equation}{F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]d\vec{r}}\end{equation} 
 
 Now consider the excess free energy which is written most generally as
 \begin{equation}\label{Fexcess}{F_{excess}= -k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)}}\end{equation} 
