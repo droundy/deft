@@ -111,8 +111,9 @@ plt.figure()
 
 #Potential Plot at various temperatures - Figure 2
 #r=np.linspace(.6, 1.1225, 2000)   #2R=1.1225  shows intersection
+r=np.linspace(.75, 1.1225, 2000)   #2R=1.1225  shows intersection
 #r=np.linspace(.8, 1.1225, 2000)   #2R=1.1225  
-r=np.linspace(.95, 1.1225, 2000)   #2R=1.1225   good
+#r=np.linspace(.95, 1.1225, 2000)   #2R=1.1225   good but mismatch really shows
 #r=np.linspace(1, 1.12, 2000)   #2R=1.1225   matches old figure
 
 #Plot WCA
