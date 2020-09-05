@@ -26,7 +26,7 @@ parser.add_argument('--tensor', action='store_true',
 args=parser.parse_args()
 
 
-for kT in [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]:
+for kT in [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40]:
 
   n = []
   gw = []
@@ -34,11 +34,11 @@ for kT in [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 1
   
   if args.tensor :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best_tensor.dat' % kT))) 
-    files = sorted(list(glob.glob('newdata_tensor/phase-diagram7/kT%.3f_n*_best_tensor.dat' % kT)))   #remove the "2" at the end of phase-diagram when done comparing new data
+    files = sorted(list(glob.glob('newdata_tensor/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))   #remove the "2" at the end of phase-diagram when done comparing new data
     #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   else :
     #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
-    files = sorted(list(glob.glob('newdata/phase-diagram7/kT%.3f_n*_best.dat' % kT)))    #remove the "2" at the end of phase-diagram when done comparing new data
+    files = sorted(list(glob.glob('newdata/phase-diagram/kT%.3f_n*_best.dat' % kT)))    #remove the "2" at the end of phase-diagram when done comparing new data
     #files = sorted(list(glob.glob('%s/kT%.3f_n*_best.dat' % (args.directory,  kT))))
   for f in files:
       data = np.loadtxt(f)
