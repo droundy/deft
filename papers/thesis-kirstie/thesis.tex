@@ -277,27 +277,14 @@ IC. Classical Density Functional Theory (cDFT)
 
 The key idea behind classical Density Functional Theory (cDFT) is that free energy can be written as a functional (a function of a function) of a number density profile $n(\vec{r})$ which describes the way the number density, or atoms per volume, varies spatially. 
 \begin{displaymath}{f[n(}\vec{r}{)]}\end{displaymath}
-
 This, coupled with the fact that the free energy of a system tends toward a minimum at equilibrium means that the equilibrium free energy of the system ${f_{equil}}{[}\rho{(}\vec{r}{)]}$, and its corresponding equilibrium number density profile $\rho{(}\vec{r}{)}$, can be found simply by varying $n(\vec{r})$ through all possible spatial profiles until the free energy is minimized. 
 
 \begin{displaymath}{f[n(}\vec{r}{)]}\rightarrow{f_{equil}}{[}\rho{(}\vec{r}{)]}  \mbox{ as $f$ is minimized} \end{displaymath}
 \begin{displaymath}{\mbox{where }  n(\vec{r})=\rho{(}\vec{r})  \mbox{ at equilibrium}}\end{displaymath}
 
-The reason this works is because cDFT satisfies the conditions of the variational principle, the same mathematical principle used to determine that the shortest distance between two points is a straight line by varying the path between the two points until the distance is minimized.
+%The reason this works is because cDFT satisfies the conditions of the variational principle, the same mathematical principle used to determine that the shortest distance between two points is a straight line by varying the path between the two points until the distance is minimized.
 
-A description of cDFT ordinarily begins with considering the Grand Free Energy defined as
-\begin{equation}\Phi=F-\mu{N}\end{equation}
-%\begin{equation}\int\frac{N}{V}\frac{V_{ext}}{N}dV\end{equation}
-which can then be expressed in terms of a varrying number density profile $n(\vec r)$
-%\begin{equation}\Phi=F-\int n(\vec{r})\phi{(\vec r)}d\vec{r} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu{N}\end{equation}
-\begin{equation}\label{GrandFE}\Phi= F_{int} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu\int n(\vec r)d\vec{r}\end{equation}
-where $\phi=\frac{V_{ext}}{N}$, $V_{ext}(\vec r)$ is an externally applied potential energy, and
-\begin{equation}F_{int}= F -\int n(\vec{r})\phi{(\vec r)}d\vec{r}\end{equation}  
-%If $\mu=0$ and $V_{ext}=0$, then the Grand free energy $\Phi$ reduces to the Helmholz free energy $F$. %The second and third terms in Eq~\ref{GrandFE} are both functionals of $n(\vec{r})$, so it remains to show that $F$, and thus $\Phi$, is a functional of $n(\vec{r})$.
-
-The Grand free energy is applicable to systems with a varying number of particles and fixed chemical potential, temperature and volume. But this paper will be examining a system with a fixed temperature, volume, and number of particles in which case it is the Helmholtz energy as a functional of the number density profile $F[n(\vec r)]$ that is of interest. 
-
-The Helmholtz free energy F is defined as 
+In this paper a system with a fixed temperature, volume, and number of particles will be examined in which case it is the Helmholtz energy as a functional of the number density profile $F[n(\vec r)]$ that is of interest. The Helmholtz free energy F is defined as 
 \begin{equation}F=U-TS\end{equation}
 \begin{equation}\frac{F}{N}=\frac{U}{N}-\frac{TS}{N}\end{equation}
 \begin{equation}\label{usetoshowmin}d\left(\frac{F}{N}\right)=d\left(\frac{U}{N}\right)-d\left(\frac{TS}{N}\right)\end{equation}
@@ -306,8 +293,8 @@ Setting $f_N=\frac{F}{N}$ this becomes
 \begin{equation}df_N=-\frac{S}{N}dT-\frac{P}{N}dV-PVd\left(\frac{1}{N}\right)\end{equation}
 This result shows that the natural variables of the Helmholtz free energy per particle $f_N$ are temperature, volume and one over the number of particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. It is the Helmholtz free energy will be minimized in a system that has a temperature, volume, and number of particles that are fixed.
 %\begin{equation}f_N(T,V, \frac{1}{N})\mbox{~~~~or~~~~}f_N(T,n)\end{equation}
-\begin{equation}f_N(T,V, \frac{1}{N})\end{equation} 
-
+\begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
+ 
 The Helmholtz free energy can be written as
 \begin{equation}{F=-k_{B}T\ln(Z)}\end{equation}
 where the paritian function Z is integrated over all of phase space for N identical particles each with a momentum $\vec{p}$ and a position $\vec{r}$
@@ -381,6 +368,7 @@ Each pair can then be described by a function of the distance between the two at
 \begin{equation}f_{ij}(\vec{r_i}-\vec{r_j})=f(\vec{r})=e^{-\frac{V(\vec{r})}{k_BT}}-1\end{equation} 
 \color{black}
 With a careful counting of the resulting number of such pairs, the excess free energy can then be written as 
+\begin{equation}{F_{excess}=-k_BT\ln\left(1+\frac{1}{2}\frac{N^2}{V}\int{f(r)}{d\vec{r}}+\frac{1}{2}\left(\frac{1}{2}\frac{N^2}{V}\int{f(r)}{d\vec{r}}\right)^2+ ...\right)}\end{equation}
 where in the thermodynamic limit (large N), $N-1, N-2, ...\approx{N}$. 
 Written in terms of an exponential $e^x=1+x+\frac{x^2}{2!}+\frac{x^3}{3!}+ ...$ for a homogeneous density n=$\frac{N}{V}$ this becomes
 \begin{equation}{F_{excess}=-k_BT\ln{\left(e^{\frac{1}{2}\frac{N^2}{V}\int{f(r)}{d\vec{r}}}\right)}}\end{equation} 
