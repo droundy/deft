@@ -15,7 +15,7 @@ from __future__ import print_function, division
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
-import os, glob
+import os, glob, sys
 #import argparse
 
 #parser = argparse.ArgumentParser(description='Creates plots of: FE/atom vs 1/n, GibbsFE/atom vs P, and P vs 1/n')
@@ -138,23 +138,37 @@ invnh=find_densities(p_inter, hpressure, mid_invn)
 invnc=find_densities(p_inter, cpressure, mid_invn)
 
 
+invnh = np.interp(p_inter, hpressure, mid_invn)
+invnc = np.interp(p_inter, cpressure, mid_invn)
+
+h_coexistence_free_energy = np.interp(invnh, invn[::-1], hfe[::-1])
+c_coexistence_free_energy = np.interp(invnc, invn[::-1], cfe[::-1])
+
 #-------------PLOTS---------------------------------------
 
 # Plot Free Energy/atom vs 1/Reduced Density - Figure 1
 #plt.plot(invn, fit_cfe, label="fit crystal free energy")
 plt.plot(invn, hfe, 'red', label="Liquid")
 plt.plot(invn, cfe, 'blue', label="Solid")
-plt.xticks([invnc,invnh], [r'$\frac{1}{n_S}$', r'$\frac{1}{n_L}$'])
+plt.plot([invnh, invnc], [h_coexistence_free_energy, c_coexistence_free_energy], 'o')
+plt.plot(invn, ((invn - invnh)*c_coexistence_free_energy + (invnc - invn)*h_coexistence_free_energy)/(invnc - invnh),
+         'k-')
+# plt.xticks([invnc,invnh], [r'$\frac{1}{n_S}$', r'$\frac{1}{n_L}$'])
+
+
 #plt.plot([invnc, invnc], [-163, -68.07], 'k-')
 #plt.plot([invnh, invnh], [-163, -77.82], 'k-')
 #plt.plot([invnc, invnh], [-68.09, -77.82], 'k-') 
 #plt.plot([0.55, invnh], [-77.82 - ((invnh-0.55)*(-77.8-(-68.07))/(invnh-invnc)), -77.82], 'k-')
 plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
 plt.xlabel('Inverse Density')
+plt.xlim(2*invnc - invnh, 2*invnh - invnc)
+plt.ylim(2*h_coexistence_free_energy-c_coexistence_free_energy,
+         2*c_coexistence_free_energy-h_coexistence_free_energy)
 #plt.xlabel(r'Inverse Reduced Density = $\frac{1}{n\sigma^3}$')
 plt.ylabel('Helmholtz Free Energy/atom')
 plt.legend()
-plt.savefig('plot-pressure_Fig1.pdf')
+plt.savefig('plot-pressure-helmholtz-vs-inverse-density.pdf')
 
 plt.figure()
 
@@ -209,7 +223,8 @@ plt.ylabel('Pressure')
 plt.legend()
 plt.savefig('plot-pressure_Fig3.pdf')
 
-
+if 'show' in sys.argv:
+    plt.show()
 
 
 
