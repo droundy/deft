@@ -378,83 +378,33 @@ as the second virial expanision coefficient typically called $B_2$. %where $x=\f
 It is important that the expression for the excess Helmholtz free energy correctly reduces to this result in the low-density limit. 
 %Although we will not be restricting ourselves to the low-density limit, it is important that the theory we use correctly reduces to this same result in the low-density limit. 
 Outside of the low density limit, it is quite difficult to evaluate the excess Helmholtz free energy given in Equation~\ref{Fexcess-simplified}. 
+
 Another way to form an expression for the excess Helmholtz free energy in terms of a homogeneous number density is to use Scaled Particle Theory (SPT).
-
-%(FINISH! Take P=-dF/dV and set equal to virial expansion for P to get virial coefficients in terms of the mayer functions....CLARIFY why cDFT is better than this route!)
-
-
-%NEW-------Scaled Partical Theory-----------------
---------------------------------------------------
-
-Scaled particle theory seeks a general expression for the excess chemical potential of a homogeneous Hard Sphere fluid 
-which can then be integrated to find the excess Helmholtz free energy.
+Scaled particle theory seeks a general expression for the excess chemical potential of a homogeneous Hard Sphere fluid which can then be integrated to find the excess Helmholtz free energy.
 \begin{equation}F_{ex}=\int{\mu_{ex}dN}\end{equation}
 It is an extension of the work done by Widom who showed that the excess chemical potential of a homogenesous fluid corredsponds to the reversible work 
 of inserting a sphere of radius R into a fluid consisting of hard spheres of radius R. 
-
 Widom's result was obtained by considering the difference in the excess Helmholtz free energy when one atom is added to an otherwise closed system. 
 He showed that the excess chemcial potential is related to the ensemble average of the Boltzman factor for the potential energy difference $V_{diff}$ 
 between a system with N atoms and one with N+1 atoms. The resulting equation is known as Widom's Insertion Formula.
 %\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
 \begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-%Equation~\ref{widom} is called Widom's Insertion Formula. 
-
-%%COME BACK TO THIS POINT! >>>>>\color{red}For a system... $<e^{-\beta{V_{diff}}}> \rightarrow e^{-\beta{V_{diff}}}$, and Equation~\ref{widoms-insertion-formula} becomes \begin{equation}\mu_{ex}=-k_BT\ln\left(e^{-\beta{V_{diff}}}\right)=-k_BT(-\beta{V}_{diff})=V_{diff}=W_{rev}\end{equation}\color{black}
-
-%In a randomly positioned (I think it has to be homogeneous!)
-\noindent To evaluate Equation~\ref{widoms-insertion-formula} for a Hard Sphere fluid consider that
-no energy would be required to place a hard sphere at points surrounded by an empty space the size of a hard sphere. 
-But a hard sphere cannot be placed at points where a hard sphere would overlap another hard sphere; 
-the energy required to do that would be infinite. Thus, for a Hard Sphere fluid, Equation~\ref{widoms-insertion-formula} becomes
-\begin{equation}\mu_{ex}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{V}_{NoOverlap}}+P_{Overlap}e^{-\beta{V}_{Overlap}}\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{0}}+P_{Overlap}e^{-\beta\infty}\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}(1)+P_{Overlap}(0)\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}\right)\end{equation}
-where $P_{NoOverlap}$ is the probablity of positions existing in the hard fluid that are surrounded by an empty space the size of a hard sphere.
-
-\begin{figure}[h!]
-    \centering
-    %\includegraphics[height=5cm]{Probability-of-overlap.pdf}
-    \caption{No energy is needed to place a sphere at a position where there is no overlap such 
-             as shown by the black dot at the center of the dotted region near the top. 
-             But it is not possible to place a sphere at a position where an overlap occurs.}
-    \label{fig:p_overlap}
-  \end{figure}
-
-For a homogeneous system, the probablity of positions existing in the hard fluid that are surrounded 
-by an empty space the size of a hard sphere, $P_{NoOverlap}$, can be found by considering 
-that $P_{NoOverlap}~=1-~P_{Overlap}$ where $P_{Overlap}$ is simply the number density times the volume of one sphere. 
-%\color{red}Thus the chemical potential for a fluid with cavities having a radius equal to the radius R of a hard sphere is \color{black}
-\color{red}Thus, for cavities having a radius Ro equal to the radius R of a hard sphere, the chemical potential is found to be \color{black}
-%\begin{equation}P_{Overlap}=nV_{sphere}\right)\end{equation}
-\begin{equation}\mu_{ex}(Ro=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
-\color{red} ???More generally, for Ro $<$ R this becomes???
-\begin{equation}???\mu_{ex}(Ro < R)=-k_BT(\ln(1-n\frac{4\pi}{3}(R_o+R)^3))???\end{equation}
-\color{black}
-
-NOW DO UPPER LIMIT  Ro $>>$ R
-
-For Ro $>>$ R ...
-
---------------------------------------------------
-%-----SFMT -------
-
-An expression for the excess Helmholtz free energy as a functional of the number density profile $n(\vec r)$ can be found using Fundamental Measure Theory (FMT).
-FMT was developed for hard sphere fluids, and has been very sucessful at predicting the thermodynamic properties of 
-inhomogeneous hard sphere fluids starting from an expression for the excess Helmholtz free energy obtained from Scaled Partical Theory (SPT). 
-Soft Fundamental Measure Theory (SFMT), which will be addressed later, extends FMT to fluids with soft potentials like that of the WCA fluid.
-
-Scaled Partical Theory (SPT) gives an expression for the excess Helmholtz free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
-\begin{equation}\label{SPT_FE}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
+\begin{equation}=-k_BT(\ln(1-n\frac{4\pi}{3}(R_o+R)^3))\end{equation}
+Forming a more general result for different sizes of cavities in the fluid, Scaled Partical Theory arrives at an expression for the excess Helmholtz free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
+\begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
 where
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
 \begin{equation}{\eta = \frac{N\frac{4}{3}\pi{R^3}}{V}}\end{equation}
 
+An expression for the excess Helmholtz free energy as a functional of the number density profile $n(\vec r)$ can be found using Fundamental Measure Theory (FMT).
+FMT was developed for hard sphere fluids, and has been very sucessful at predicting the thermodynamic properties of inhomogeneous hard sphere fluids starting from an expression for the excess Helmholtz free energy obtained from Scaled Partical Theory. 
+Soft Fundamental Measure Theory (SFMT), which will be addressed later, extends FMT to fluids with soft potentials like that of the WCA fluid.
+
 %\begin{equation}{\eta = \frac{NR_{3}}{V}}\end{equation}
 %\begin{equation}{\eta = \left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}}\end{equation}
 %\begin{equation}{\eta = n\frac{4}{3}\pi{R^3}=nR_{3}=n_{3}}\end{equation}
-From this expression, a quantity $\zeta_{3}$ can be defined as follows
+From Equation~\ref{Fexcess-SPT}, a quantity $\zeta_{3}$ can be defined as follows
 \begin{equation}{\eta =\left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}=n\zeta_{3}}\end{equation}
 where $\zeta_{3}$ is the volume of a sphere. Likewise,
 \begin{equation}{\zeta_{2}=4\pi{R^2}}\end{equation}
