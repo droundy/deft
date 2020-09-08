@@ -390,8 +390,8 @@ between a system with N atoms and one with N+1 atoms. The resulting equation is 
 %\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
 \begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-\begin{equation}=-k_BT(\ln(1-n\frac{4\pi}{3}(R_o+R)^3))\end{equation}
-Forming a more general result for different sizes of cavities in the fluid, Scaled Partical Theory arrives at an expression for the excess Helmholtz free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
+\begin{equation}=-k_BT(\ln(1-n\frac{4\pi}{3}(R_{cavity}+R)^3))\end{equation}
+where the radius of the cavity $R_{cavity}$ is equal to the radius of a hard sphere, R. Forming a more general result for different sizes of cavities in the fluid, Scaled Partical Theory arrives at an expression for the excess Helmholtz free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
 \begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
 where
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
@@ -416,7 +416,7 @@ where $\zeta_{2}$ is the surface area of a sphere, and $\zeta_{1}$ is the radius
 \begin{equation}\label{n1}{n_{1}=n\zeta_{1}=\left(\frac{N}{V}\right)R}\end{equation}
 \begin{equation}\label{n0}{n_{0}=n\zeta_{0}=\left(\frac{N}{V}\right)}\end{equation}
 
-\noindent The excess free energy in Eq~\ref{SPT_FE} can be written in terms of the number density $\frac{N}{V}$
+\noindent The excess free energy in Eq~\ref{Fexcess-SPT} can be written in terms of the number density $\frac{N}{V}$
 \begin{equation}{F_{excess}=k_{B}T\left(-\frac{N}{V}ln(1-\eta)+\frac{N}{V}\frac{3\eta}{1-\eta}+\frac{N}{V}\frac{3{\eta}^2}{2(1-\eta)^2}\right)V}\end{equation}
 and using the expressions in Equations~\ref{n3} through~\ref{n0}, this becomes
 \begin{equation}\label{FexfromSPT}{F_{excess}=k_{B}T\left(-n_{0}ln(1-n_{3})+\frac{n_{1}n_{2}}{1-n_{3}}+\frac{n_{2}^3}{24\pi(1-n_{3})^2}\right)V}\end{equation}
@@ -497,7 +497,7 @@ The equations developed so far have been for a hard sphere fluid. All of the wei
 In this paper,  $w_{2}(r)$ will be constructed using the following expresssion for $w_3(r)$ proposed by Schmidt$^{(?)}$ 
 \begin{equation}{w_3(r)=\frac{1}{2}}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]\end{equation} 
  where $w_3(r)$ is subject to the boundary conditions $w_3(0)\approx{1}$ and $w_3(\infty)=0$. 
-\color{red}These boundary conditions are satisfied for $\Xi{\sqrt{2}<<\alpha}$, or $k_BT << 2.21$. \color{black} 
+%\color{red}These boundary conditions are satisfied for $\Xi{\sqrt{2}<<\alpha}$, or $k_BT << 2.21$. \color{black} 
 Using Equation~\ref{w2_w3_relation}, shown again below, 
 \begin{displaymath}{w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)}\end{displaymath}
 and solving for $w_2(r)$
@@ -513,17 +513,11 @@ The Mayer function for the error function potential $V_{erf}(r)$ is thus given b
 \begin{equation}{f(r)=-\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)\right]}\end{equation} Combining this result with the definition of the Mayer function \begin{displaymath}f(r)=e^{-\frac{V(r)}{K_BT}}-1\end{displaymath} %This gives an interatomic potential of \begin{equation}{V_{erf}=-k_BT\ln(f(r)-1)}\end{equation} 
 gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$ 
 \begin{equation}{V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]}\end{equation} The two parameters $\alpha$ and $\Xi$ are given in equations (3) and (4), and are determined to make $V_{erf}(r)$ match $V_{WCA}(r)$ as closely as possible by compensating for the unwanted temperature dependence that shows up in the error function potential $V_{erf}(r)$.
-	
---------------------------------------------------
-%END NEW------------------------------------------
 
-In summary, classical Density Functional Theory (cDFT) used in conjunction with Soft Fundamental Measure Theory (SFMT) provides a powerful tool in modeling the thermodynamic properties of fluids. With SFMT an expression for the excess free energy in terms of the number density can be found simply and directly without taking into account the interaction each sphere, or atom, has with every other sphere. For a spatially varying number density, as would be expected for a crystal, the free energy can then be written as a functional of the number density profile $n(\vec{r})$ 
-\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
-To implement cDFT, the number density profile $n(\vec{r})$ is varied until the free energy is minimized. The minimum free energy and its corresponding number density profile are then the equilibrium values for that temperature. \color{red} $\leftarrow$CAREFUL! \color{black} Thus to use cDFT all that is needed are number density profiles, such as Gaussian profiles that depend on position and which can be varied, for example, by changing the width of the Gaussian. 
-\begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int\exp^{-\frac{|\vec{r}-\vec{R}|^2}{2\sigma^2}}d\vec{r}}\end{equation} 
-
-For a number density n that is constant everywhere, as would be expected for a homogeneous fluid in equilbrium, the free energy can be written as a function of n where the ideal Helmholtz free energy can be determined analytically, and SFMT is used once again to form an expresssion for the excess Helmholtz free energy
-\begin{equation}{F(n)=F_{ideal}(n) + F_{excess}(n)}\end{equation} 
+In summary, classical Density Functional Theory (cDFT) is used in conjunction with Soft Fundamental Measure Theory (SFMT) to find the equilibrium free energy of a system, and the corresponding equilibrium number density profile. In particular, SFMT is used to form the expression for the excess free energy without having to take into account the interaction each sphere, or atom, has with every other sphere. The excess free energy is then added to the ideal free energy calculated analytically to find the resulting Free energy for the system. 
+\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
+For a spatially varying number density, as would be expected for a crystal, the free energy is a functional of the number density profile $n(\vec{r})$  
+\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} To implement cDFT, the number density profile $n(\vec{r})$ is varied with the temperature fixed until the free energy is minimized. The minimum free energy and its corresponding number density profile are then the equilibrium values for that temperature.  
 
 Once the Helmholtz free energy for both the crystal and liquid states of the fluid are found, they can be compared to find the resulting state of the fluid. Outside the region of coexistence, the fluid will be completely in a crystalline state if the crystal free energy is lower than the liquid free energy, and it will be completely in a liquid state if the liquid free energy is lower than the crystal free energy as was discussed in Section IB. 
 
