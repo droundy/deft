@@ -296,21 +296,7 @@ where $\phi=\frac{V_{ext}}{N}$, $V_{ext}(\vec r)$ is an externally applied poten
 %If $\mu=0$ and $V_{ext}=0$, then the Grand free energy $\Phi$ reduces to the Helmholz free energy $F$. %The second and third terms in Eq~\ref{GrandFE} are both functionals of $n(\vec{r})$, so it remains to show that $F$, and thus $\Phi$, is a functional of $n(\vec{r})$.
 
 The Grand free energy is applicable to systems with a varying number of particles and fixed chemical potential, temperature and volume. But this paper will be examining a system with a fixed temperature, volume, and number of particles in which case it is the Helmholtz energy as a functional of the number density profile $F[n(\vec r)]$ that is of interest. 
-%*********************** DFT minimize F/N *********************
-%--------------------------------------------------------
-%\color{red}
-%Starting with Euler's equation
-%%\begin{equation}U=TS-PV+\mu{N}\end{equation}
-%\begin{equation}\frac{U}{N}=\frac{TS}{N}-\frac{PV}{N}+\mu\end{equation}
-%\begin{equation}\label{d(U/N)long}d\left(\frac{U}{N}\right)=\frac{T}{N}dS+\frac{S}{N}%dT+TSd\left(\frac{1}{N}\right)-\frac{V}{N}dP-\frac{P}{N}dV-PVd\left(\frac{1}{N}\right)%+d\mu\end{equation}
-%and using the Gibbs-Duhem relation which follows from Euler's equation
-%\begin{equation}SdT-VdP+Nd\mu=0\end{equation}
-%which gives
-%\begin{equation}\frac{S}{N}dT-\frac{V}{N}dP+d\mu=0\end{equation}
-%Equation~\ref{d(U/N)long} becomes
-%\begin{equation}\label{d(U/N)}d\left(\frac{U}{N}\right)=\frac{T}{N}dS+TSd\left(\frac{1}{N}\right)-\frac{P}{N}dV-PVd\left(\frac{1}{N}\right)\end{equation}
-%\begin{equation}dU=TdS+SdT-PdV-VdP+\mu{dN}+Nd\mu\end{equation}
-%\color{black}
+
 The Helmholtz free energy F is defined as 
 \begin{equation}F=U-TS\end{equation}
 \begin{equation}\frac{F}{N}=\frac{U}{N}-\frac{TS}{N}\end{equation}
@@ -321,36 +307,6 @@ Setting $f_N=\frac{F}{N}$ this becomes
 This result shows that the natural variables of the Helmholtz free energy per particle $f_N$ are temperature, volume and one over the number of particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. It is the Helmholtz free energy will be minimized in a system that has a temperature, volume, and number of particles that are fixed.
 %\begin{equation}f_N(T,V, \frac{1}{N})\mbox{~~~~or~~~~}f_N(T,n)\end{equation}
 \begin{equation}f_N(T,V, \frac{1}{N})\end{equation} 
-
-The minimization can be shown by considering that according to the second law of thermodynamics, a system that is not in equilibrium will expreience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here "surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that whatever energy is lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that any change in the free energy will be negative with each spontaneous process until a minimum is reached if the natural variables of the free energy are held fixed.  How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
-\begin{equation}d\left(\frac{F}{N}\right)_{System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\frac{S}{N}dT_{System}\end{equation}
-and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that $dT=0$ gives
-\begin{equation}d\left(\frac{F}{N}\right)_{System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}\end{equation}
-where conservation of energy was also applied. Fixing the volume and the number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, results in
-\begin{equation}d\left(\frac{F}{N}\right)_{System}=-\frac{T}{N}dS_{System+Surroundings} \end{equation}which, for fixed N, is the same as
-\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number of particles are fixed, the change in the free energy of the system will always be negative. (reference schroder)
-
-More generally, the Helmholtz free energy is the value assumed by U-TS for a system that has a fixed volume, number of particles, and temperature that equals the temperature of the reservoir, or surroundings as it settles spontaneously to equilibrium. Under these conditions, the quantity U-TS settles to a minimum at equilibrium with respect to unconstrained variables, such as the number density profile $n(\vec r)$.
-\begin{equation}F=\text{min}_{U}(U_{Not.equilibrium} - TS_{Not.equilibrium}) = U_{equilibrium}-TS_{equilibrium}\end{equation}
-An extremum is reached when
-\begin{equation}\frac{\partial{F}}{\partial{U}}=0\end{equation}
-\color{red} 
-\begin{equation}F=\text{min}_{n(\vec{r})}(U_{Not.equilibrium} - TS_{Not.equilibrium}) = U_{equilibrium}-TS_{equilibrium}\end{equation} 
-\color{red} 
-\begin{equation}\frac{\delta{F}}{\delta{n(\vec r)}}\bigg|_{n(\vec{r})_{equil}}=0\end{equation}
-Taking this derivative gives  ??????? CHECK PARTIAL DERVIVATIVE OF FUNCTIONAL 
-%\begin{equation}\frac{\partial{(U-TS)}}{\partial{n(\vec r)}}=\frac{\partial{U}}{\partial{n(\vec r)}}-T\frac{\partial{S}}{\partial{U}}\bigg|_{V,N}\frac{\partial{U}}{\partial{n(\vec r)}}\end{equation}
-\begin{equation}\frac{\partial{(U-TS)}}{\partial{n(\vec r)}}=\frac{\partial{U}}{\partial{n(\vec r)}}-T\frac{\partial{S}}{\partial{U}}\bigg|_{V,N}\frac{\partial{U}}{\partial{n(\vec r)}}\end{equation}
-\begin{equation}=\frac{\partial{U}}{\partial{n(\vec r)}}-T\left(\frac{1}{T}\right)\frac{\partial{U}}{\partial{n(\vec r)}}\end{equation}
-\begin{equation}=\frac{\partial{U}}{\partial{n(\vec r)}}-\frac{\partial{U}}{\partial{n(\vec r)}}\end{equation}
-\begin{equation}=0\end{equation}
-\color{black}
-As shown earlier, the extremum that is reached at equilibrium is a minimum. (reference shethna) %\color{red} To show that there is only one minimum, that the extremum is unique, I refer the reader to ...(reference fluids). \color{black} 
-\color{red} To show that F is unique ... \color{black} 
-It remains to be shown that the Helmholtz free energy can be expressed as a functional of the number density profile.
-
-
-%*************************END DFT minimize F/N ****************
 
 The Helmholtz free energy can be written as
 \begin{equation}{F=-k_{B}T\ln(Z)}\end{equation}
