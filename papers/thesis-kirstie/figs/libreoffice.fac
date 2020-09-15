@@ -1,0 +1,1 @@
+| libreoffice --convert-to pdf *.odg
