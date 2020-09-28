@@ -29,7 +29,9 @@ mu = -5.75178857763
 #plt.plot(ns*np.pi*RG.sigma**3/6, correction(T,ns,mu,1,0), label=r'$(T,\mu)=$ (%g,%g) difference'%(T,mu))
 plt.plot(ns*np.pi*RG.sigma**3/6, RG.phi(T, ns, mu, 0), label=r'$\phi(%g,\eta,%g,0)$'%(T, mu))
 plt.plot(ns*np.pi*RG.sigma**3/6, RG.phi(T, ns, mu, 1), label=r'$\phi(%g,\eta,%g,1)$'%(T, mu))
-plt.plot(ns*np.pi*RG.sigma**3/6, RG.phi(T, ns, mu, 2), label=r'$\phi(%g,\eta,%g,2)$'%(T, mu))
+
+# The following is very slow, uncomment if you want to see the result.
+# plt.plot(ns*np.pi*RG.sigma**3/6, RG.phi(T, ns, mu, 2), label=r'$\phi(%g,\eta,%g,2)$'%(T, mu))
 
 plt.xlabel(r'$\eta$')
 plt.ylabel(r'$\phi(T,\eta,\mu,i)$')
