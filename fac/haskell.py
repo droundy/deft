@@ -87,7 +87,7 @@ for main in mainfiles:
     haskell.rule('ghc -O2 -package process -package containers -package filepath -package directory -o %s.exe %s'
                  % (main, ' '.join(objects)), objects, [main+'.exe'])
 
-haskell.rule('python2 create_generators.py',
+haskell.rule('python3 create_generators.py',
              [], sorted(['generate_%s.hs' % x for x in generated_names]))
 
 os.chdir('../..')

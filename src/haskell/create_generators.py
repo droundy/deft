@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 for name, module, hsfunctional, inputs in [
     # The following are just for testing purposes
