@@ -15,11 +15,11 @@
 \usepackage{color}
 \usepackage{enumitem}
 \title{Freezing of a Weeks-Chandler-Anderson Fluid using classical Density Functional Theory}
-\author{by Kirstie Finster}
+\author{Kirstie L. Finster}
 \date{August 2020}
 \begin{document}
-  \maketitle
-  \thispagestyle{fancy}
+   \maketitle
+   \thispagestyle{fancy}
 
 \noindent IA. Model Fluids and the Weeks-Chandler-Anderson Fluid (WCA)
 
@@ -275,7 +275,7 @@ A Temperature-Density (T-n) phase diagram, such as that in Figure \ref{fig:T-n_D
 \[\]
 IC. Classical Density Functional Theory (cDFT)
 
-The key idea behind classical Density Functional Theory (cDFT) is that free energy can be written as a functional (a function of a function) of a number density profile $n(\vec{r})$ which describes the way the number density, or atoms per volume, varies spatially. 
+The key idea behind classical Density Functional Theory (cDFT) is that free energy can be written as a functional (a function of a function) of a number density profile $n(\vec{r})$ which describes the way the number density, or atoms per volume, varies spatially on average. 
 \begin{displaymath}{f[n(}\vec{r}{)]}\end{displaymath}
 This, coupled with the fact that the free energy of a system tends toward a minimum at equilibrium means that the equilibrium free energy of the system ${f_{equil}}{[}\rho{(}\vec{r}{)]}$, and its corresponding equilibrium number density profile $\rho{(}\vec{r}{)}$, can be found simply by varying $n(\vec{r})$ through all possible spatial profiles until the free energy is minimized. 
 
@@ -284,20 +284,47 @@ This, coupled with the fact that the free energy of a system tends toward a mini
 
 %The reason this works is because cDFT satisfies the conditions of the variational principle, the same mathematical principle used to determine that the shortest distance between two points is a straight line by varying the path between the two points until the distance is minimized.
 
-In this paper a system with a fixed temperature, volume, and number of particles will be examined in which case it is the Helmholtz energy as a functional of the number density profile $F[n(\vec r)]$ that is of interest. The Helmholtz free energy F is defined as 
-\begin{equation}F=U-TS\end{equation}
-\begin{equation}\frac{F}{N}=\frac{U}{N}-\frac{TS}{N}\end{equation}
-\begin{equation}\label{usetoshowmin}d\left(\frac{F}{N}\right)=d\left(\frac{U}{N}\right)-d\left(\frac{TS}{N}\right)\end{equation}
-\begin{equation}d\left(\frac{F}{N}\right)=d\left(\frac{U}{N}\right)-\frac{T}{N}dS-\frac{S}{N}dT-TS d\left(\frac{1}{N}\right)\end{equation}
-Setting $f_N=\frac{F}{N}$ this becomes
+A description of cDFT ordinarily begins with considering the Grand Free Energy defined as
+\begin{equation}\Phi=F-\mu{N}\end{equation}
+%\begin{equation}\int\frac{N}{V}\frac{V_{ext}}{N}dV\end{equation}
+which can then be expressed in terms of a varrying number density profile $n(\vec r)$
+%\begin{equation}\Phi=F-\int n(\vec{r})\phi{(\vec r)}d\vec{r} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu{N}\end{equation}
+\begin{equation}\label{GrandFE}\Phi= F_{int} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu\int n(\vec r)d\vec{r}\end{equation}
+where $\phi=\frac{V_{ext}}{N}$, $V_{ext}(\vec r)$ is an externally applied potential energy, and the Helmholtz free energy is expressed as
+\begin{equation}F = F_{int} + \int n(\vec{r})\phi{(\vec r)}d\vec{r}\end{equation}  
+%If $\mu=0$ and $V_{ext}=0$, then the Grand free energy $\Phi$ reduces to the Helmholz free energy $F$. %The second and third terms in Eq~\ref{GrandFE} are both functionals of $n(\vec{r})$, so it remains to show that $F$, and thus $\Phi$, is a functional of $n(\vec{r})$.
+
+The Grand free energy is applicable to systems with a varying number of particles and fixed chemical potential, temperature and volume. But in this paper a system with a fixed temperature, volume, and number of particles will be of interest in which case
+\begin{equation}\int n(\vec r)d\vec{r}=N\end{equation}
+and so 
+\begin{equation}\label{GrandFE}\Phi_{constrained}= F[n(\vec r)]-\mu N\end{equation}
+The dependence on $n(\vec r)$ is now only present in the expression for the Helmholtz free energy, and so it is the Helmholtz energy as a functional of the number density profile $F[n(\vec r)]$ that is minimized at equilibrium. 
+%In this paper a system with a fixed temperature, volume, and number of particles will be examined in which case it is the Helmholtz energy as a functional of the number density profile $F[n(\vec r)]$ that is of interest. 
+More specifically, in this paper, the Helmholtz free energy per particle, or atom,  $f_N=\frac{F}{N}$ will be minimized which is given by
+\begin{equation}f_N=\frac{U}{N}-\frac{TS}{N}\end{equation}
+with differential
+\begin{equation}\label{usetoshowmin}df_N=d\left(\frac{U}{N}\right)-d\left(\frac{TS}{N}\right)\end{equation}
+%\begin{equation}df_N=d\left(\frac{U}{N}\right)-\frac{T}{N}dS-\frac{S}{N}dT-TS d\left(\frac{1}{N}\right)\end{equation}
 \begin{equation}df_N=-\frac{S}{N}dT-\frac{P}{N}dV-PVd\left(\frac{1}{N}\right)\end{equation}
-This result shows that the natural variables of the Helmholtz free energy per particle $f_N$ are temperature, volume and one over the number of particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. It is the Helmholtz free energy will be minimized in a system that has a temperature, volume, and number of particles that are fixed.
-%\begin{equation}f_N(T,V, \frac{1}{N})\mbox{~~~~or~~~~}f_N(T,n)\end{equation}
+This result shows that the natural variables of the Helmholtz free energy per particle $f_N$ are temperature, volume and one over the number of particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. 
+%Thus, the Helmholtz free energy will be minimized in a system that has a temperature, volume, and number of particles that are fixed.
+%\begin{equation}f_N(T,V, \frac{1}{N})\mbox{~~~~or~~~~}f_V(T,n)\end{equation}
 \begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
  
+The minimization can be illustrated by considering that according to the second law of thermodynamics, a system that is not in equilibrium will exprience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here "surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that energy lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that changes in the free energy will be negative for spontaneous processes when the natural variables of the free energy are held fixed. %And so the free energy tends toward a minimum. 
+%How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? 
+
+Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
+\begin{equation}df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}\end{equation}
+and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that $dT=0$ gives
+\begin{equation}df_{N-System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}\end{equation}
+where conservation of energy was also applied. Fixing the volume and the number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, results in
+\begin{equation}df_{N-System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings} \end{equation}which, for fixed N, is the same as
+\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number of particles are fixed, the change in the free energy of the system will always be negative, and thus the free energy tends toward a minimum. (reference schroder) This illustrates the tendancy toward minimization for a system near equilibrium. A general proof of minimization can be found in (reference simple fluids).
+
 The Helmholtz free energy can be written as
 \begin{equation}{F=-k_{B}T\ln(Z)}\end{equation}
-where the paritian function Z is integrated over all of phase space for N identical particles each with a momentum $\vec{p}$ and a position $\vec{r}$
+which results from equating the expressions for the Helmholtz free energy from thermodynamics to those of statistical mechanics. The paritian function Z is integrated over all of phase space for N identical particles each with a momentum $\vec{p}$ and a position $\vec{r}$ is given by
 \begin{equation}{Z=}\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dPdQ}~e^\frac{-H(\vec{p}_1,\vec{p}_2,...\vec{p}_N,\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\end{equation}
 \begin{displaymath}{dP=d\vec{p}_1d\vec{p}_2...d\vec{p}_N \mbox{~~~~where~~~~} d\vec{p}=dp_xdp_ydp_z}\end{displaymath}
 \begin{displaymath}{dQ=d\vec{r}_1d\vec{r}_2...d\vec{r}_N \mbox{~~~~where~~~~} d\vec{r}=dxdydz\mbox{~~~~}}\end{displaymath}
@@ -381,17 +408,20 @@ Outside of the low density limit, it is quite difficult to evaluate the excess H
 
 Another way to form an expression for the excess Helmholtz free energy in terms of a homogeneous number density is to use Scaled Particle Theory (SPT).
 Scaled particle theory seeks a general expression for the excess chemical potential of a homogeneous Hard Sphere fluid which can then be integrated to find the excess Helmholtz free energy.
-\begin{equation}F_{ex}=\int{\mu_{ex}dN}\end{equation}
+%\begin{equation}F_{ex}=\int{\mu_{ex}dN}\end{equation}
+%\begin{equation}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}\end{equation}
+\begin{equation}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~}\rightarrow{~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{equation}
 It is an extension of the work done by Widom who showed that the excess chemical potential of a homogenesous fluid corredsponds to the reversible work 
 of inserting a sphere of radius R into a fluid consisting of hard spheres of radius R. 
 Widom's result was obtained by considering the difference in the excess Helmholtz free energy when one atom is added to an otherwise closed system. 
 He showed that the excess chemcial potential is related to the ensemble average of the Boltzman factor for the potential energy difference $V_{diff}$ 
-between a system with N atoms and one with N+1 atoms. The resulting equation is known as Widom's Insertion Formula.
+between a system with N atoms and one with N+1 atoms. The resulting equation is known as Widom's Insertion Formula given by
 %\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
 \begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-\begin{equation}=-k_BT(\ln(1-n\frac{4\pi}{3}(R_{cavity}+R)^3))\end{equation}
-where the radius of the cavity $R_{cavity}$ is equal to the radius of a hard sphere, R. Forming a more general result for different sizes of cavities in the fluid, Scaled Partical Theory arrives at an expression for the excess Helmholtz free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
+\color{red} \begin{equation}=-k_BT\ln(1-n\frac{4\pi}{3}R_{cavity}^3)\end{equation}
+where the radius of the cavity $R_{cavity}$ is equal to the radius of a hard sphere, R, and the cavity is either filled or not. \color{black}%For cavities that are much larger than one of the hard spheres, 
+Forming a more general result for different sizes of cavities in the fluid, Scaled Partical Theory arrives at an expression for the excess Helmholtz free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
 \begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
 where
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
@@ -1460,28 +1490,26 @@ that $P_{NoOverlap}~=1-~P_{Overlap}$ where $P_{Overlap}$ is simply the number de
 %\color{red}Thus the chemical potential for a fluid with cavities having a radius equal to the radius R of a hard sphere is \color{black}
 \color{red}Thus, considering cavities having a radius Ro equal to the radius R of a hard sphere, the chemical potential is found to be \color{black}
 %\begin{equation}P_{Overlap}=nV_{sphere}\right)\end{equation}
-\begin{equation}\mu_{ex}(Ro=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
+\begin{equation}\label{mu_excess}\mu_{ex}(R_{cavity}=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
 
 %\begin{equation}\mu_{ex}(R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
 
 Using this result, scaled particle theory seeks a more general expression of the excess chemical potential of 
-a hard sphere fluid by considering the work of inserting a hard sphere into a cavity of radius $R_o$ 
-where the size of $R_o$ falls into three different cases: $R_o >> R$, $R_o > R$, and $R_o < R$. 
+a hard sphere fluid by considering the work of inserting a hard sphere into a cavity of radius $R_{cavity}$ 
+where the size of $R_{cavity}$ falls into three different cases: $R_{cavity} >> R$, $R_{cavity} > R$, and $R_{cavity} \leq R$. 
 
-\begin{equation}\label{3_parts_to_mu_ex}{\mu_{ex}(R_o)=\left\{ \begin{array}{rc} P\frac{4\pi}{3}R_o^3 & R_o >> R 
-\\ P\frac{4\pi}{3}R_o^3 + c_2R_o^2 + c_1R_o^1 + c_0R_o^0  & R_o > R \\ -k_BT(\ln(1-n\frac{4\pi}{3}(R_o+R)^3)) & R_o < R\end{array}\right.}\end{equation}
+\begin{equation}\label{3_parts_to_mu_ex}{W_{rev}(R_{cavity})=\left\{ \begin{array}{rc} P\frac{4\pi}{3}R_{cavity}^3 & R_{cavity} >> R 
+\\ P\frac{4\pi}{3}R_{cavity}^3 + c_2R_{cavity}^2 + c_1R_{cavity}^1 + c_0R_{cavity}^0  & R_{cavity} > R \\ -k_BT(\ln(1-n\frac{4\pi}{3}(R_{cavity})^3)) & R_{cavity} \leq R\end{array}\right.}\end{equation}
 
 %The first function, valid for $R_o >> R$, yields the dominant term to which the second function, valid for $R_o > R$,  
 %must tend toward in the limit that $R_o$ goes to infinity. By expanding the logrythmic term (ln(1-x)= ...) 
 %in the last function, valid for $R_o < R$, the function can be expressed in terms of powers of $R_o$. 
 
 %The first and last functions in Equation~\ref{3_parts_to_mu_ex} are derived from theory, and since they 
-The first and last functions in Equation~\ref{3_parts_to_mu_ex} can be expressed in terms of powers of $R_o$, 
-and so it is assumed that the middle function, which is valid for values of $R_o$ in between the two extremes, 
-can also be expressed in terms of powers of $R_o$.  
-The coeficients $c_2$, $c_1$ and $c_0$ in the middle function can be determnined be considering that this function (valid for $R_o > R$) 
-must be continuous with the last function (valid for $R_o < R$) along with their first and second derivatives. 
-The middle function must also tend toward the first function in the limit that $R_o$ goes to infinity. The chemical potential then becomes
+The first and last functions in Equation~\ref{3_parts_to_mu_ex} can be expressed in terms of powers of $R_{cavity}$, 
+and so it is assumed that the middle function, which is valid for values of $R_{cavity}$ in between the two extremes, 
+can also be expressed in terms of powers of $R_{cavity}$.  
+The coeficients $c_2$, $c_1$ and $c_0$ are determnined by considering that the three functions must be conintuous at the boundaries along with their first and second derivatives, and using Equation~\ref{mu_excess}.The chemical potential then becomes
 \begin{equation}\mu_{ex}=-k_BT\left(\ln(1-\eta) + \frac{6\eta}{1-\eta}+\frac{9\eta^2}{2(1-\eta)^2}+\frac{PV\eta}{k_BTN}\right)\end{equation}
 where $\eta$ is the packing fraction given by
 \begin{displaymath}\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}=\frac{N\frac{4}{3}\pi{R}^3}{V}\end{displaymath} 
@@ -1500,8 +1528,83 @@ which gives
 %\begin{displaymath}F_{ex}=\end{displaymath}
 \begin{equation}F_{excess}=k_BTN\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)\end{equation} 
 
+%------------------n(r)--move to "back" later---------------------
+------------------------------------------------------------------
 
-\cite{fake}
+The actual positions of atoms in a microstate  \color{red}?at time t, or averaged over time?:\color{black}
+\begin{equation}\rho_{s}(\vec r)=\sum_{i=1}^N\delta(\vec r - \vec r_i)\end{equation}
+The equilibrium single number density distribution equals the ensemble average over all microstates, and is independent of time:
+\begin{equation}n(\vec r)=\rho^{(1)}(\vec r)=~<\rho_s(\vec r)>~\end{equation}
+The reduced equilibrium phase-space probablity density of n particles in volume $dr^ndp^n$:
+\begin{equation}f_o^{(n)}(\vec r^n, \vec p^n)=\rho^{(n)}(\vec r^n)f_M^{(n)}(\vec p^n)\end{equation}
+The relation between the  reduced equilibrium phase-space probablity density and the equilibrium phase-space probablity density:
+\begin{equation}f_o^{(n)}(\vec r^n, \vec p^n)=\frac{N!}{(N-n)!}\int\dot~\dot~\dot~\int f_o^{[N]}(\vec r^N, \vec p^N) d\vec r^{N-n} d\vec p^{N-n}\end{equation}
+The canonical equilibrium phase-space probablity density:
+\begin{equation}f_o^{[N]}(\vec r^N, \vec p^N)=\frac{1}{N!}\frac{1}{h^{3N}}\frac{e^{-\beta H}}{partian function}\end{equation}
+where
+\begin{equation}{partian function}=\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\end{equation}
+The equilibrium phase-space probablity density integrated over all continuous microstates $(\vec r^N,\vec p^N)$ is 1:
+\begin{equation}\int\dot~\dot~\dot~\int f_o^{[N]}(\vec r^N, \vec p^N) d\vec r^{N} d\vec p^{N}=1\end{equation}
+The equilibrium phase-space probablity density is independent of time:
+\begin{equation}f_o^{[N]}(\vec r^N, \vec p^N) = f_o^{[N]}(\vec r^N, \vec p^N; t)\end{equation}
+The Helmholtz free energy is a functional of the equilibrium phase-space probability density:
+\begin{equation}U = <E> = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N}\end{equation}
+\begin{equation}TS = -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln\left(N!~h^{3N}f_o^{[N]}\right) d\vec r^{N} d\vec p^{N} \end{equation}
+\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln\left(\frac{e^{-\beta H}}{\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}}\right) d\vec r^{N} d\vec p^{N} \end{equation}
+\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[f_o^{[N]}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right] \end{equation}
+\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[f_o^{[N]}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right] \end{equation}
+\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln(Z)d\vec r^{N} d\vec p^{N}\end{equation}
+\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}d\vec r^{N} d\vec p^{N}\right]\end{equation}
+\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[1\right]\end{equation}
+and so 
+\begin{equation}F = U - TS\end{equation}
+\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N}-\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} -k_BTln(Z)\end{equation}
+\begin{equation}F = -k_BTln(Z)\end{equation}
+
+----------------------------------------------
+
+\cite{rosenfeld1989}
+\cite{tarazona2000}
+\cite{schmidt1999density}
+\cite{schmidt2000fluid}
+
+\cite{santos2012phi3}
+
+\cite{TschoppBHextended}
+
+%1-21
+\cite{lucretius}
+\cite{rowlinson1964statistical}
+\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
+  lafitte2013accurate}
+\cite{carnahan1969equation}
+\cite{rosenfeld1989, rosenfeld1997,
+  roth2002whitebear}
+\cite{rosenfeld1989}
+%\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density, hughes2013classical, krebs2014improved}
+\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density}
+%\cite{schmidt1999density}
+\cite{schmidt2000density, groh2001density, kim2001adsorption,
+  sweatman2002fundamental}
+%\cite{schmidt2000fluid, sweatman2002fundamental}
+\cite{weeks1971}
+%\cite{rosenfeld1989}
+%\cite{schmidt1999density}
+%%\cite{tarazonaFIXME,santos2012phi3}
+%\cite{schmidt1999density} 
+%\cite{schmidt2000fluid}
+%\cite{schmidt1999density, schmidt2000fluid}
+%\cite{schmidt1999density}
+%\citenum{schmidt2000fluid}
+%\citenum{schmidt2000fluid}
+%a Face Centered Cubic (FCC) lattice is formed~\cite{reference!}
+\cite{barker1967perturbation}
+\cite{roth2002whitebear} 
+%\cite{roth2002whitebear}
+\cite{mikolaj2004structure, eggert2002quantitative,
+yarnell1973structure}
+\cite{verlet1967computer}
+
 
 \bibliography{thesis}
 \bibliographystyle{plain}
@@ -1509,4 +1612,82 @@ which gives
 \end{document}
 
 
+
+
+
+%-------------Minimization-----------------
+%The minimization can be shown by considering that according to the second law of thermodynamics, a system that is not in equilibrium will exprience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here "surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that whatever energy is lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that any change in the free energy will be negative with each spontaneous process until a minimum is reached if the natural variables of the free energy are held fixed.  How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
+%\begin{equation}d\left(\frac{F}{N}\right)_{System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\frac{S}{N}dT_{System}\end{equation}
+%and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that $dT=0$ gives
+%\begin{equation}d\left(\frac{F}{N}\right)_{System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}\end{equation}
+%where conservation of energy was also applied. Fixing the volume and the number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, results in
+%\begin{equation}d\left(\frac{F}{N}\right)_{System}=-\frac{T}{N}dS_{System+Surroundings} \end{equation}which, for fixed N, is the same as
+%\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number of particles are fixed, the change in the free energy of the system will always be negative. (reference schroder)
+
+%More generally, the Helmholtz free energy is the value assumed by U-TS for a system that has a fixed volume, number of particles, and temperature that equals the temperature of the reservoir, or surroundings as it settles spontaneously to equilibrium. Under these conditions, the quantity U-TS settles to a minimum at equilibrium with respect to unconstrained variables, such as the number density profile $n(\vec r)$.
+%\begin{equation}F=\text{min}_{U}(U_{Not.equilibrium} - TS_{Not.equilibrium}) = U_{equilibrium}-TS_{equilibrium}\end{equation}
+%An extremum is reached when
+%\begin{equation}\frac{\partial{F}}{\partial{U}}=0\end{equation}
+
+%\begin{equation}F=U-TS\end{equation}
+%\begin{equation}\frac{F}{N}=\frac{U}{N}-\frac{TS}{N}\end{equation}
+%\begin{equation}\label{usetoshowmin}d\left(\frac{F}{N}\right)=d\left(\frac{U}{N}\right)-d\left(\frac{TS}{N}\right)\end{equation}
+%\begin{equation}d\left(\frac{F}{N}\right)=d\left(\frac{U}{N}\right)-\frac{T}{N}dS-\frac{S}{N}dT-TS d\left(\frac{1}{N}\right)\end{equation}
+%Setting $f_N=\frac{F}{N}$ this becomes
+%\begin{equation}df_N=-\frac{S}{N}dT-\frac{P}{N}dV-PVd\left(\frac{1}{N}\right)\end{equation}
+
+
+
+%-------Scaled Partical Theory-----------------
+Scaled particle theory seeks a general expression for the excess chemical potential of a homogeneous Hard Sphere fluid 
+which can then be integrated to find the excess Helmholtz free energy.
+\begin{equation}F_{ex}=\int{\mu_{ex}dN}\end{equation}
+It is an extension of the work done by Widom who showed that the excess chemical potential of a homogenesous fluid corredsponds to the reversible work 
+of inserting a sphere of radius R into a fluid consisting of hard spheres of radius R. 
+
+Widom's result was obtained by considering the difference in the excess Helmholtz free energy when one atom is added to an otherwise closed system. 
+He showed that the excess chemcial potential is related to the ensemble average of the Boltzman factor for the potential energy difference $V_{diff}$ 
+between a system with N atoms and one with N+1 atoms. The resulting equation is known as Widom's Insertion Formula.
+%\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
+\begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
+\begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
+%Equation~\ref{widom} is called Widom's Insertion Formula. 
+
+%%COME BACK TO THIS POINT! >>>>>\color{red}For a system... $<e^{-\beta{V_{diff}}}> \rightarrow e^{-\beta{V_{diff}}}$, and Equation~\ref{widoms-insertion-formula} becomes \begin{equation}\mu_{ex}=-k_BT\ln\left(e^{-\beta{V_{diff}}}\right)=-k_BT(-\beta{V}_{diff})=V_{diff}=W_{rev}\end{equation}\color{black}
+
+%In a randomly positioned (I think it has to be homogeneous!)
+\noindent To evaluate Equation~\ref{widoms-insertion-formula} for a Hard Sphere fluid consider that
+no energy would be required to place a hard sphere at points surrounded by an empty space the size of a hard sphere. 
+But a hard sphere cannot be placed at points where a hard sphere would overlap another hard sphere; 
+the energy required to do that would be infinite. Thus, for a Hard Sphere fluid, Equation~\ref{widoms-insertion-formula} becomes
+\begin{equation}\mu_{ex}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{V}_{NoOverlap}}+P_{Overlap}e^{-\beta{V}_{Overlap}}\right)\end{equation}
+\begin{equation}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{0}}+P_{Overlap}e^{-\beta\infty}\right)\end{equation}
+\begin{equation}=-k_BT\ln\left(P_{NoOverlap}(1)+P_{Overlap}(0)\right)\end{equation}
+\begin{equation}=-k_BT\ln\left(P_{NoOverlap}\right)\end{equation}
+where $P_{NoOverlap}$ is the probablity of positions existing in the hard fluid that are surrounded by an empty space the size of a hard sphere.
+
+\begin{figure}[h!]
+    \centering
+    %\includegraphics[height=5cm]{Probability-of-overlap.pdf}
+    \caption{No energy is needed to place a sphere at a position where there is no overlap such 
+             as shown by the black dot at the center of the dotted region near the top. 
+             But it is not possible to place a sphere at a position where an overlap occurs.}
+    \label{fig:p_overlap}
+  \end{figure}
+
+For a homogeneous system, the probablity of positions existing in the hard fluid that are surrounded 
+by an empty space the size of a hard sphere, $P_{NoOverlap}$, can be found by considering 
+that $P_{NoOverlap}~=1-~P_{Overlap}$ where $P_{Overlap}$ is simply the number density times the volume of one sphere. 
+%\color{red}Thus the chemical potential for a fluid with cavities having a radius equal to the radius R of a hard sphere is \color{black}
+\color{red}Thus, for cavities having a radius Ro equal to the radius R of a hard sphere, the chemical potential is found to be \color{black}
+%\begin{equation}P_{Overlap}=nV_{sphere}\right)\end{equation}
+\begin{equation}\mu_{ex}(Ro=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
+\color{red} ???More generally, for Ro $<$ R this becomes???
+\begin{equation}???\mu_{ex}(Ro < R)=-k_BT(\ln(1-n\frac{4\pi}{3}(R_o+R)^3))???\end{equation}
+\color{black}
+
+NOW DO UPPER LIMIT  Ro $>>$ R
+
+For Ro $>>$ R ...
+--------------------------------------------------
 
