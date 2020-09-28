@@ -37,7 +37,10 @@ pressure_data = []  #index corresponds to kT
 #for kT in np.arange(0.1, 2.05, 0.05):  #original
 #for kT in np.arange(0.4, 2.05, 0.05):   # new normal
 #for kT in (1, 2, 4, 6, 8, 10, 12, 14, 16, 18):
-for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2): #for paper
+#for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2): #for paper
+for kT in (1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25): #use for kT from 1 to 38 and 0.5 
+#for kT in (2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38): #use for kT from 1 to 38 and 0.5 
+#for kT in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 38): #use for kT from 1 to 38 and 0.5 
 #for kT in np.arange(0.1, 1.05, 0.05):   #data files with these temperatures will be plotted  DEBUG
 										#values above and below this range do not currrently work   DEBUG
    
@@ -48,10 +51,10 @@ for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1
 
    if args.tensor :
      #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
-     files = sorted(list(glob.glob('newdata_tensor/phase-diagram4/kT%.3f_n*_best_tensor.dat' % kT)))    #remove 2 at the end of phase-diagram when done comparing new data
+     files = sorted(list(glob.glob('newdata_tensor/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))    #remove 2 at the end of phase-diagram when done comparing new data
      
    else :
-      files = sorted(list(glob.glob('newdata/phase-diagram4/kT%.3f_n*_best.dat' % kT)))    #remove 2 at the end of phase-diagram when done comparing new data
+      files = sorted(list(glob.glob('newdata/phase-diagram/kT%.3f_n*_best.dat' % kT)))    #remove 2 at the end of phase-diagram when done comparing new data
       #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best.dat' % kT)))
       #files = sorted(list(glob.glob('crystallization/kT%.3f_n*_best.dat' % kT)))
 
@@ -178,7 +181,8 @@ plt.figure('T-vs-n at fixed P')
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='#eeeeee') 
 
 #Plot T vs n  at constant P 
-for p in [2,5,10,20]:
+#for p in [2,5,10,20]:  #paper
+for p in [20, 60, 100, 200, 600, 1000, 2000, 4000, 6000]:  #use for kT from 1 to 38 and 0.5
    n_mid_at_p_list = []
    kT_at_p_list = []
    for i in range(0, len(kT_data)) :  #number of temperatures kT
@@ -217,10 +221,12 @@ plt.title("Pressure vs Number Density at kT")
 plt.legend(loc='best')
 #plt.ylim(0, 26)
 #plt.ylim(0, 500)
-plt.ylim(0, 45)
+#plt.ylim(0, 45) #paper
+plt.ylim(0, 6000) #use for  kT from 1 to 38 and 0.5
 #plt.xlim(0, 1.1)
 #plt.xlim(0, 1.8)
-plt.xlim(0, 1.1)
+#plt.xlim(0, 1.1)  #paper
+plt.xlim(0, 2.2)  #use for  kT from 1 to 38 and 0.5
 plt.xlabel('Number Density')
 plt.ylabel('Pressure')
 
@@ -244,7 +250,8 @@ plt.figure('p-vs-T at fixed n')
 #Plot P vs T  at constant n 
 #for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]:    #densities to show on the plot
 #for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1]:  #densities to show on the plot
-for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the plot
+#for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the plot - paper
+for n in [0.7, 0.8, 0.9, 1, 2, 2.2]:  #densities to show on the plot - use for kT from 1 to 38 and 0.5
    p_mid_at_n_list = []
    kT_at_n_list = []
    for i in range(0, len(kT_data)) :  #number of temperatures kT
@@ -277,10 +284,12 @@ plt.figure('Phase Diagram of T vs n')
 #Temperature vs Density Phase Diagram
 plt.plot(n_homogeneous_at_freezing, kT_data, label='liquid', color='red')
 plt.plot(n_crystal_at_freezing, kT_data, label='solid', color='blue')
-plt.fill_betweenx(kT_data, .1, n_homogeneous_at_freezing, color='red')       
+#plt.fill_betweenx(kT_data, .1, n_homogeneous_at_freezing, color='red')     #paper 
+plt.fill_betweenx(kT_data, .4, n_homogeneous_at_freezing, color='red')     #use for kT from 1 to 38 and 0.5 
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
 #plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')
-plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')           
+#plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')    #paper  
+plt.fill_betweenx(kT_data, n_crystal_at_freezing, 2.14, color='blue')    #use for kT from 1 to 38 and 0.5       
 plt.title("Temperature vs Number Density")
 #plt.legend(loc='best')
 plt.xlabel('Number Density')
@@ -299,8 +308,8 @@ plt.figure('Phase Diagram of P vs T')
 ##Pressure vs Temperature Phase Diagram
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
 #plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
-#plt.fill_between(kT_data, p_at_freezing, 1500, color='blue') 
-plt.fill_between(kT_data, p_at_freezing, 50, color='blue') 
+plt.fill_between(kT_data, p_at_freezing, 6500, color='blue')  #use for kT 1 to 38 and 0.5
+#plt.fill_between(kT_data, p_at_freezing, 50, color='blue')   #paper
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
