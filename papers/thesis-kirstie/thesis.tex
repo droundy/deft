@@ -21,7 +21,41 @@
    \maketitle
    \thispagestyle{fancy}
 
-\noindent IA. Model Fluids and the Weeks-Chandler-Anderson Fluid (WCA)
+\noindent I. Introduction
+
+Classically, fluids have been modeled by a collection of small, impenetrable spheres colliding 
+with one another like billiard balls~\cite{lucretius}. This model, called the Hard-Sphere fluid, has served as 
+the primary reference system for fluids. This is due to the fact that the repulsion between atoms is 
+much stronger than their attraction, and so the repulsive potential, which is descriptive of hard spheres, 
+dominates the interactions between atoms. 
+
+%Van der Waal took into account both the attraction, and the respulsion 
+%of the impenetrable spheres in devopling his equation of state for an ideal gas in 1xxx.
+
+In the late 1950s, Scaled Particle Theory (SPT) was developed which provided an expression for the 
+excess Helmholtz free energy of a homogeneous Hard-Sphere fluid. 
+%This .... allowed for ... 
+In the 1960s Percus-Yevick applied Density Functional Theory (DFT) to find an expression 
+for the excess Helmholtz free energy of an inhomogeneous Hard-Sphere fluid. In the late 1960s, and early 1970s, 
+Barker and Henderson adapted the DFT method to use with fluids composed of 
+spheres with softly fading potential functions rather than the hard edges of the spheres 
+in the Hard-Sphere fluid. This was done by making the radius of the soft spheres temperature dependent, 
+so that at low temperatures the fluid could be modeled by hard spheres with large radii, and at high 
+temperatures the fluid could be modeled by hard spheres with smaller radii. This is because at higher 
+temperatures, the soft-spheres would penetrate into each other farther when they collide. 
+Weeks, Chandler, and Anderson studied the soft repulsive portion of the Leonard-Jones potential, 
+which became known as the Weeks-Chandler-Anderson model fluid. 
+
+In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT) to form an expression for the excess 
+Helmholtz free energy of an inhomogeneous hard sphere fluid based on the results from SPT. In 
+19xx Schmidt adopted FMT for soft-sphere atoms to form Soft Fundamental Measure Theory (SFMT). In this paper, 
+Density Functional Theory will be used to predict the freezing of a Weeks-Chandler-Anderson model fluid 
+by applying SFMT to form the expression for the excess Helmholtz free energy, and the results will be 
+compared to those generated from Monte-Carlo simulations.
+%\[{}\]
+\newline
+\newline
+\noindent IIA. Model Fluids and the Weeks-Chandler-Anderson Fluid (WCA)
 
 Real fluids and their behavior are very complex from a physicist's point of view. Although a water molecule, for example, is composed of only three atoms, the ever-changing redistribution of charges within the molecules, and their interaction with charges from other molecules make it difficult to study a fluid composed of water molecules directly. The task becomes even more daunting considering the complicated molecular motion of each water molecule, and the sheer number of molecules that must be taken into account. 
 %Although a water molecule, for example, is composed of only three atoms, the ever-changing redistribution of charges within the molecules and their interaction with charges from other molecules, the complicated molecular motion of a collection of water molecules, and the sheer number of molecules that must be taken into account make it difficult to study a fluid composed of water molecules directly.
@@ -185,7 +219,7 @@ A plot of $\Xi(T)$ obtained through this method is shown in Figure \ref{fig:xi_f
 %The spheres in the WCA model fluid do not exhibit quantum interference effects as the mass of the spheres, and the temperatures are taken to be large enough that the de Broglie wavelength is smaller than the mean distance between the spheres. Thus, the WCA fluid can be treated as a classical fluid.
 
 \[\]
-\noindent IB. The Theory of Freezing and Maxwell's Double Tangent Construction
+\noindent IIB. The Theory of Freezing and Maxwell's Double Tangent Construction
 
 Freezing is governed by entropy, which the universe, or any closed system, seeks to maximize according to the second law of Thermodynamics. When the entropy of a pure substance in its liquid state is lower than the entropy that it would have in its solid state at the same temperature (necessary for thermal equilibrium), the same pressure (necessary for mechanical equilibrium), and the same chemical potential (necessary for diffusive equilibrium), an abrupt phase transition occurs, that is, the liquid freezes forming a crystalline structure. The particular crystalline structure and density that result are affected by the interatomic potential. When repulsive, soft sphere fluids (that are not too soft) freeze, they form lattice structures composed of Face Centered Cubic (FCC) crystal cells, as do hard spheres. %This structure is the three-dimensional equivilant to the two-dimensional structure that one would see by filling the bottom of a box with a single layer of marbles. 
 This structure is what one would see by filling a cube with marbles. It results in the highest density achievable for hard, and nearly-hard, spheres that are purely repulsive. 
@@ -219,7 +253,7 @@ Two such curves are shown in Figure \ref{fig:MaxwellDT}, one for the liquid and 
 
 \begin{figure}[h!]
     \centering
-     \includegraphics[height=7cm]{figs/MaxwellDTC-Fig1.pdf}
+     %\includegraphics[height=7cm]{figs/MaxwellDTC-Fig1.pdf}
      % FIXME\includegraphics[height=7cm]{plot-pressure_Fig1.pdf}
     \caption{Identifying densities at the solid-liquid transition using Maxwell's Double Tangent Construction}
     \label{fig:MaxwellDT}
@@ -273,7 +307,7 @@ A Temperature-Density (T-n) phase diagram, such as that in Figure \ref{fig:T-n_D
 %One way of implementing this practically is to determine what the Helmholtz free energy would be for both the liquid and solid phases at a particular temperature and density. Whichever phase has the lower Helmholtz free energy will be the phase that the substance will be in. 
 %\[\]
 \[\]
-IC. Classical Density Functional Theory (cDFT)
+\noindent IIC. Classical Density Functional Theory (cDFT)
 
 The key idea behind classical Density Functional Theory (cDFT) is that free energy can be written as a functional (a function of a function) of a number density profile $n(\vec{r})$ which describes the way the number density, or atoms per volume, varies spatially on average. 
 \begin{displaymath}{f[n(}\vec{r}{)]}\end{displaymath}
@@ -553,7 +587,7 @@ For a spatially varying number density, as would be expected for a crystal, the 
 Once the Helmholtz free energy for both the crystal and liquid states of the fluid are found, they can be compared to find the resulting state of the fluid. Outside the region of coexistence, the fluid will be completely in a crystalline state if the crystal free energy is lower than the liquid free energy, and it will be completely in a liquid state if the liquid free energy is lower than the crystal free energy. 
 
 \[{}\]
-II. METHODS
+III. METHODS
 
 To implement cDFT computationally, we begin by picturing one single crystal cell. Although the crystal structure is composed of Face Centered Cubic (FCC) cells, the entire lattice can be generated with a cell one-fourth the size called a primitive cell shown by the shaded region in Figure \ref{fig:primitivecell}. The primitive cell has the shape of a parallelpiped, and contains the equivalent of one atom.
  
@@ -820,6 +854,19 @@ Figure \ref{fig:GaussandW2_actual} ......
 
 
 The parameters $\alpha$ and $\Xi$ are temperature dependent, as shown earlier in Figure \ref{fig:alphaXivsT}. $\Xi$ is related to the width of the functions which become wider in general as the temperature increases. The radial distance to the peak decreases as the temperature increases, that is, the shells shrink, as does the sphere. The functions can be treated as neglible outside of a distance of about $3(\frac{\Xi}{\sqrt{2}}) + \frac{\alpha}{2}$ CHECK!! from the center of the weight function.
+%\[{}\]
+
+Monte-Carlo integration is employed to more efficiently 
+compute the weighted densities used to calculate the excess free energy which is then 
+added to the ideal free energy (computed analytically) to get the total free energy 
+which is minimized. 
+
+\newpage
+
+\noindent IV. Results and Discussion
+
+Phase diagrams for the WCA fluid are shown below. In all cases $\sigma=1$ and $\epsilon=1$.
+
 
 \[{}\]
 \[{}\]
@@ -827,11 +874,98 @@ The parameters $\alpha$ and $\Xi$ are temperature dependent, as shown earlier in
 \[{}\]
 \[{}\]
 \[{}\]
-III. RESULTS
 \[{}\]
 \[{}\]
 \[{}\]
 \[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\begin{figure}
+ \centering
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
+\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
+\label{fig:Phase_Diagram_of_T_vs_n}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
+\label{fig:Phase_Diagram_P_vs_T}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  %\includegraphics[width=\columnwidth]{figs/T-vs-n_at_fixed_P}
+ \end{center}
+\caption{Phase Diagram of the reduced temperature verses the reduced density. The grey region indicates coexistence.}
+\label{fig:T-vs-n_at_fixed_P}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  %\includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The lines bending downward indicate freezing.}
+\label{fig:p-vs-T_at_fixed_density}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  %\includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
+\label{fig:p-vs-V_at_fixed_T}
+\end{figure}
+
+\begin{figure}
+ \begin{center}
+  %\includegraphics[width=\columnwidth]{figs/p-vs-n_at_fixed_T}
+ \end{center}
+\caption{Phase Diagram of the reduced pressure verses the reduced density. The grey region indicates coexistence.}
+\label{fig:p-vs-n_at_fixed_T}
+\end{figure}
+
+
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
+
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
+\noindent V. Conclusion
+
+
 \[{}\]
 \[{}\]
 \[{}\]
