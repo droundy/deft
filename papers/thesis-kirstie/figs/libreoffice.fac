@@ -1,1 +1,7 @@
 | libreoffice --convert-to pdf *.odg
+
+| cp ../fuzzy-fmt/figs/Phase_Diagram_of_P_vs_T.pdf .
+< ../fuzzy-fmt/figs/Phase_Diagram_of_P_vs_T.pdf
+
+| cp ../fuzzy-fmt/figs/Phase_Diagram_of_T_vs_n.pdf .
+< ../fuzzy-fmt/figs/Phase_Diagram_of_T_vs_n.pdf
