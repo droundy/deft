@@ -369,18 +369,40 @@ are Dirac $\delta$ functions.\color{black}
 
 \subsection{Freezing of the WCA fluid}
 
-Freezing is governed by entropy which the universe, or any closed system, seeks to maximize according to the second law of Thermodynamics. When the entropy of a pure substance in its liquid state is lower than the entropy that it would have in its solid state at the same temperature, pressure, and chemical potential an abrupt phase transistion occurs, that is, the liquid freezes forming a crystalline structure. The particular crystalline structure and density that result are affected by the interatomic potential. When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) lattice is formed~\cite{reference!} with a total of one atom in each parallelpiped-shaped primative cell. 
+Freezing is governed by entropy which the universe, or any closed system, 
+seeks to maximize according to the second law of Thermodynamics. When the 
+entropy of a pure substance in its liquid state is lower than the entropy 
+that it would have in its solid state at the same temperature, pressure, 
+and chemical potential an abrupt phase transistion occurs, that is, the 
+liquid freezes forming a crystalline structure. The particular crystalline 
+structure and density that result are affected by the interatomic potential. 
+When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) lattice 
+is formed~\cite{reference!} with a total of one atom in each parallelpiped-shaped 
+primative cell. 
 
-The equilibrium Helmholtz free energy of the crystal, and its corresponding equilibrium number density profile $n(\vec{r})$ can be found at a given temperature simply by varying the number density spatially 
+The equilibrium Helmholtz free energy of the crystal, and its corresponding 
+equilibrium number density profile $n(\vec{r})$ can be found at a given 
+temperature simply by varying the number density spatially 
 %, the spatially varying number density, 
 %by changing %the spatial profile of the number density by varying 
 %the width of the gaussians centered at each lattice point, and the crystal cell size 
 until the free energy
 % - which is a functional of $n(\vec{r})$ - 
-is minimized. For the crystal the $n(\vec{r})$ used in the integral in Eq.\ref{eq:n-convolution} is given by Gaussians centered at each lattice point specified by $\vec{R_i}$. 
+is minimized. For the crystal the $n(\vec{r})$ used in the integral in Eq.\ref{eq:n-convolution} 
+is given by Gaussians centered at each lattice point specified by $\vec{R_i}$. 
 \begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}\int{e^{-\frac{|\vec{r}-\vec{R}|^2}{2\left(\sigma_g\right)^2}}d{\vec{r}}}  \end{equation}  
-$n(\vec{r})$ is changed by varying the width of the gaussians, \color{red} and by changing the size of the crystal cell. \color{black}As the gaussian width gets large, the number density becomes homogeneous. \color{red}A larger crystal cell models a larger fraction of vacancies. \color{black} Monte-Carlo integration is employed to more efficiently compute the weighted densities used to calculate the excess free energy which is then added to the ideal free energy (computed analytically) to get the total free energy which is minimized. The pressure is found from the negative of the slope of the Helmholtz free energy per atom with respect to the inverse number density. \begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
-The densities of both the solid and the liquid at the solid-liquid transition can then be found using Maxwell's double tangent construction which equates the pressure of the fluid and of the solid at the phase transition.
+$n(\vec{r})$ is changed by varying the width of the gaussians, \color{red} and by changing 
+the size of the crystal cell. \color{black}As the gaussian width gets large, the number 
+density becomes homogeneous. \color{red}A larger crystal cell models a larger fraction 
+of vacancies. \color{black} Monte-Carlo integration is employed to more efficiently 
+compute the weighted densities used to calculate the excess free energy which is then 
+added to the ideal free energy (computed analytically) to get the total free energy 
+which is minimized. The pressure is found from the negative of the slope of the Helmholtz 
+free energy per atom with respect to the inverse number density. 
+\begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
+The densities of both the solid and the liquid at the solid-liquid transition can then 
+be found using Maxwell's double tangent construction which equates the pressure of the 
+fluid and of the solid at the phase transition.
 
 
 
