@@ -64,7 +64,7 @@ plot_radial(60, [10, 1.0])
 
 subplot(2, 1, 2)
 #plot_radial(100, [10.0, 5.0, 2.5])
-plot_radial(100, [2.5])
+plot_radial(100, [10, 2.5])
 
 plt.tight_layout();
 savefig('figs/radial-distribution.pdf', bbox_inches=0)
