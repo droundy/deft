@@ -24,7 +24,8 @@
 \noindent I. Introduction
 
 Classically, fluids have been modeled by a collection of small, impenetrable spheres colliding 
-with one another like billiard balls~\cite{lucretius}. This model, called the Hard-Sphere fluid, has served as 
+with one another like billiard balls%~\cite{kinetictheory}
+. This model, called the Hard-Sphere fluid, has served as 
 the primary reference system for fluids. This is due to the fact that the repulsion between atoms is 
 much stronger than their attraction, and so the repulsive potential, which is descriptive of hard spheres, 
 dominates the interactions between atoms. 
@@ -32,26 +33,33 @@ dominates the interactions between atoms.
 %Van der Waal took into account both the attraction, and the respulsion 
 %of the impenetrable spheres in devopling his equation of state for an ideal gas in 1xxx.
 
-In the late 1950s, Scaled Particle Theory (SPT) was developed which provided an expression for the 
-excess Helmholtz free energy of a homogeneous Hard-Sphere fluid. 
-%This .... allowed for ... 
-In the 1960s Percus-Yevick applied Density Functional Theory (DFT) to find an expression 
-for the excess Helmholtz free energy of an inhomogeneous Hard-Sphere fluid. In the late 1960s, and early 1970s, 
-Barker and Henderson adapted the DFT method to use with fluids composed of 
+In the late 1950s, Scaled Particle Theory (SPT) was developed~\cite{Reiss Frich Lebowitz} from which an equation of state, and
+an expression for the excess Helmholtz free energy of a homogeneous Hard-Sphere fluid can be obtained~\cite{Hansen}. 
+%Percus and Yevick took another approach to the Hard-Sphere fluid.
+In 1961 Morita and Hiroike introduced a density functional approach to finding an expression for the excess Helmholtz free energy of inhomogeneous fluids~\cite{MoritaDFT}.
+% ?  Percus-Yevick applied Density Functional Theory (DFT) to find an expression for the excess Helmholtz free energy of an inhomogeneous Hard-Sphere fluid. 
+In 1967 %the late 1960s, and early 1970s, 
+Barker and Henderson~\cite{barker1967perturbation} adapted perturbation methods to use with fluids composed of 
 spheres with softly fading potential functions rather than the hard edges of the spheres 
-in the Hard-Sphere fluid. This was done by making the radius of the soft spheres temperature dependent, 
-so that at low temperatures the fluid could be modeled by hard spheres with large radii, and at high 
-temperatures the fluid could be modeled by hard spheres with smaller radii. This is because at higher 
-temperatures, the soft-spheres would penetrate into each other farther when they collide. 
-Weeks, Chandler, and Anderson studied the soft repulsive portion of the Leonard-Jones potential, 
+in the Hard-Sphere fluid. This was done by making the radius of the spheres temperature dependent, 
+so that at low temperatures the Soft-Sphere fluid could be modeled by hard spheres with large radii, 
+and at high temperatures the Soft-Sphere fluid could be modeled by hard spheres with smaller radii. 
+%A larger radii cooresponds to a deeper level of penetration of two soft spheres into each other when they collide at higher temperatures.
+%The different size radii coorespond to the different depths to which two soft spheres would penetrate into each other when they collide. 
+This reflects the idea that soft-spheres penetrate more deeply into each other when they collide at higher temperatures. 
+Weeks, Chandler, and Anderson studied the soft repulsive portion of the Leonard-Jones potential~\cite{andersen1971relationship}, 
 which became known as the Weeks-Chandler-Anderson model fluid. 
 
-In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT) to form an expression for the excess 
-Helmholtz free energy of an inhomogeneous hard sphere fluid based on the results from SPT. In 
-19xx Schmidt adopted FMT for soft-sphere atoms to form Soft Fundamental Measure Theory (SFMT). In this paper, 
+DFT Evans 1979
+
+In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989} which provides an expression for the excess 
+Helmholtz free energy of an inhomogeneous Hard-Sphere fluid. 
+Tarazona later improved on the method by introducing a tensor version of the functional~\cite{tarazonaphi3}. 
+In 1999 Schmidt adopted FMT for soft spheres forming Soft Fundamental Measure Theory (SFMT)\cite{schmidt1999density}. In this paper, 
 Density Functional Theory will be used to predict the freezing of a Weeks-Chandler-Anderson model fluid 
-by applying SFMT to form the expression for the excess Helmholtz free energy, and the results will be 
-compared to those generated from Monte-Carlo simulations.
+by applying SFMT with Schmidt's proposed erf model\cite{schmidt2000fluid}. %for generating the weight funcions, 
+%and Tarazona's tensor functional. 
+Results will be compared to those generated from Monte-Carlo simulations.
 %\[{}\]
 \newline
 \newline
