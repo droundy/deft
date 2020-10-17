@@ -62,7 +62,7 @@ larger radii at low temperatures, and smaller radii at high temperatures.
 %they collide at higher temperatures. 
 In 1971 Weeks, Chandler, and Anderson used temperature and density dependent hard-sphere 
 radii to model spheres with the more realistic softly fading repulsive portion of the 
-Leonard-Jones potential~\cite{andersen1971relationship}, which became known as the 
+Leonard-Jones potential~\cite{andersen1971relationship}, which is known as the 
 Weeks-Chandler-Anderson model fluid. 
 
 While models for particular fluids were being created, powerful methods to describe the properties 
@@ -82,12 +82,12 @@ In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld198
 %which provides an expression for the excess Helmholtz free energy of an inhomogeneous 
 the Hard-Sphere fluid. 
 Tarazona later improved on the method by introducing a tensor version of the 
-functional~\cite{tarazonaphi3}, and in 1999 Schmidt adopted FMT for soft spheres 
+functional~\cite{tarazonaphi3, santos2012phi3}, and in 1999 Schmidt adopted FMT for soft spheres 
 forming Soft Fundamental Measure Theory (SFMT)\cite{schmidt1999density}. 
 
 Schmidt applied his Soft Fundamental Measure Theory to various fluids with soft repulsive 
 and soft attractive potentials, and developed an erf model for 
-spheres with a steep, short-range soft repulsive potential~\cite{schmidt2000fluid}. In this paper, 
+spheres with steep, short-range soft repulsive potentials~\cite{schmidt2000fluid}. In this paper, 
 Density Functional Theory (DFT) will be used to predict the freezing of a 
 Weeks-Chandler-Anderson model fluid by applying SFMT with Schmidt's proposed 
 erf model to form the functional for the excess Helmholtz free energy. 
@@ -852,12 +852,20 @@ The standard error of the mean (SEM) is given by:
 \begin{equation}{Error=\sqrt{\frac{\overline{w_3^2}-(\overline{w}_3)^2}{NumPoints}}}\end{equation} NumPoints, the number of vectors randomly generated, is increased until:
 \begin{equation}{Error<\frac{|1-n_3|}{4}}\end{equation} where the maximum value that $n_3$ can be without error is 1.
 
-Figure \ref{fig:weight_functions} shows a 1 dimensional view of the weight functions $w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance along the z-axis. In three dimensions, the weighting functions $w_0$, $w_1$, $w_2$ are spherical shells centered at $\vec{r}$. As shown in the cross-sectional view in Figure \ref{fig:W0andW3}a, $w_2$ peaks at a radius of $|\vec{r}-\vec{r'}|=\frac{\alpha}{2}$, a width determined by $\frac{\Xi}{\sqrt{2}}$, and edges that tapers off on either side of the peak giving the shell. The weighting function $w_3$, shown in Figure \ref{fig:W0andW3}b is a solid sphere up to a radius of ?FIX? after which it tapers off over a distance of ?FIX?.
+Figure \ref{fig:weight_functions} shows a 1 dimensional view of the weight functions 
+$w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance along the z-axis. In three 
+dimensions, the weighting functions $w_0$, $w_1$, $w_2$ are spherical shells 
+centered at $\vec{r}$. As shown in the cross-sectional view in Figure \ref{fig:W0andW3}a, 
+$w_2$ peaks at a radius of $|\vec{r}-\vec{r'}|=\frac{\alpha}{2}$, a width determined 
+by $\frac{\Xi}{\sqrt{2}}$, and edges that tapers off on either side of the peak giving 
+the shell. The weighting function $w_3$, shown in Figure \ref{fig:W0andW3}b is a solid 
+sphere up to a radius of ?FIX? after which it tapers off over a distance of ?FIX?.
 
  \begin{figure}[h!]
     \centering
     \includegraphics[height=6cm]{weight_functions.pdf}
-    \caption{Shows how the weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the z-axis for a reduced temperature of 2}
+    \caption{Shows how the weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the 
+    z-axis for a reduced temperature of 2}
     \label{fig:weight_functions}
   \end{figure}  
 
@@ -872,7 +880,9 @@ Figure \ref{fig:weight_functions} shows a 1 dimensional view of the weight funct
       % FIXME \includegraphics[height=5cm]{W3.png}
       \caption{A crossectional view of $w_3$}
     \end{subfigure} 
-    \caption{Cross-sectional views of the 3D weight functions. (a) $w_2$ is a spherical shell in 3D with soft edges. Weight functions $w_0$ and $w_1$ have a similar shape. (b) $w_3$ is a sphere with soft edges in 3D.}
+    \caption{Cross-sectional views of the 3D weight functions. (a) $w_2$ is a 
+    spherical shell in 3D with soft edges. Weight functions $w_0$ and $w_1$ 
+    have a similar shape. (b) $w_3$ is a sphere with soft edges in 3D.}
     \label{fig:W0andW3}
     \end{figure} 
 
@@ -882,19 +892,30 @@ Figure \ref{fig:GaussandW2_actual} ......
  \begin{figure}[h!]
     \centering
     % FIXME \includegraphics[height=6cm]{GaussandW2_actual.png}
-    \caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional view of $w_2$ centered at $\vec{r}'$ is shown in purple. Here, the weight function is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ is generated randomly according to a Gaussian distribution.} 
+    \caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional 
+    view of $w_2$ centered at $\vec{r}'$ is shown in purple. Here, the weight function 
+    is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ 
+    is generated randomly according to a Gaussian distribution.} 
   \label{fig:GaussandW2_actual}
   \end{figure} 
 
  \begin{figure}[h!]
     \centering
     % FIXME \includegraphics[height=6cm]{GaussandW2_thinkas.png}
-    \caption{An alternative way of viewing Figure \ref{fig:GaussandW2_actual} where the weight function, shown by the purple dashed lines, is centered at $\vec{r}$  and fixed in place as $\vec{dr}$ varies randomly.} 
+    \caption{An alternative way of viewing Figure \ref{fig:GaussandW2_actual} where 
+    the weight function, shown by the purple dashed lines, is centered at $\vec{r}$  
+    and fixed in place as $\vec{dr}$ varies randomly.} 
   \label{fig:GaussandW2_thinkas}
   \end{figure} 
 
 
-The parameters $\alpha$ and $\Xi$ are temperature dependent, as shown earlier in Figure \ref{fig:alphaXivsT}. $\Xi$ is related to the width of the functions which become wider in general as the temperature increases. The radial distance to the peak decreases as the temperature increases, that is, the shells shrink, as does the sphere. The functions can be treated as neglible outside of a distance of about $3(\frac{\Xi}{\sqrt{2}}) + \frac{\alpha}{2}$ CHECK!! from the center of the weight function.
+The parameters $\alpha$ and $\Xi$ are temperature dependent, as shown earlier in 
+Figure \ref{fig:alphaXivsT}. $\Xi$ is related to the width of the functions which 
+become wider in general as the temperature increases. The radial distance to the 
+peak decreases as the temperature increases, that is, the shells shrink, as does 
+the sphere. The functions can be treated as neglible outside of a distance of 
+about $3(\frac{\Xi}{\sqrt{2}}) + \frac{\alpha}{2}$ CHECK!! from the center of 
+the weight function.
 %\[{}\]
 
 Monte-Carlo integration is employed to more efficiently 
@@ -906,52 +927,83 @@ which is minimized.
 
 \noindent IV. Results and Discussion
 
-Phase diagrams for the WCA fluid are shown below. In all cases $\sigma=1$ and $\epsilon=1$.
+Phase diagrams for the WCA fluid are shown in Figures \ref{fig:Phase_Diagram_of_T_vs_n} 
+and \ref{fig:Phase_Diagram_P_vs_T}. In all cases $\sigma=1$ and $\epsilon=1$. 
+In Figure \ref{fig:Phase_Diagram_of_T_vs_n} the reduced temperature $T^*=\frac{kT}{\epsilon}$ 
+is plotted against the reduced number density $n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. 
+The red area is fluid, and the blue area is crystal. The gray area that separates the fluid, 
+and the crystal regions is where some fluid and crystal exist together at varying porportions. 
+The region of coexistence slants slightly to the right toward higher density as the temperature 
+increases. This is expected since at higher temperatures, the fluid would have to be under 
+greater compression before forming a solid. The white lines show results from Monte-Carlo 
+simulations of the WCA fluid. Overall, the general shape, and position of the lines correspond
+fairly closely to the edges of the region of coexistance predicted from the DFT method, 
+but the width of the coexistance region is about one-third larger for the Monte-Carlo results 
+for most temperatures. The white line on the right, representing the density of the solid at 
+each temperature, is in fairly good aggreement with our DFT results for all temperatures. 
+However, the white line on the left, representing the density of the liquid at each temperature, 
+is consistenty farther left than the liquid transition densities our method predicted.
+
+Figure \ref{fig:Phase_Diagram_P_vs_T} shows the reduced pressure $p^*=\frac{P\sigma^3}{\epsilon}$ 
+plotted against the reduced temperature for temperatures of kT = 0.5 to 3.0. Again, the red area 
+is fluid, and the blue area is crystal. The general trend of the values for the transition 
+temperatures and pressures is what would be expected, with the WCA fluid becoming a solid at
+a higher pressure for a higher temperatuer, or becoming a liquid at a higher temperature 
+for a higher pressure. But the transition pressures and temperatures are consistently higher 
+than the Monte-Carlo simulations shown by the white line, and the descripancy grows as 
+the temperature increases.
 
 \begin{figure}
- \centering
- %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
-\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
-\label{fig:Phase_Diagram_of_T_vs_n}
+  \centering
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
+  \includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n}
+  \caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
+  White lines show the liquid and solid transition densities at each temperature from 
+  Monte-Carlo simulations of the WCA fluid. The gray region is the region of coexistence.}
+  \label{fig:Phase_Diagram_of_T_vs_n}
 \end{figure}
 
 \begin{figure}
- \centering
- %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
-\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
-\label{fig:Phase_Diagram_P_vs_T}
+  \centering
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
+  \includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T}
+  \caption{Phase Diagram of the reduced pressure verses the reduced temperature. 
+  The green line marks the boundary from Monte-Carlo simulations.}
+  \label{fig:Phase_Diagram_P_vs_T}
 \end{figure}
 
+%Plots of 
+
 \begin{figure}
- \begin{center}
+  \centering
   %\includegraphics[width=\columnwidth]{figs/T-vs-n_at_fixed_P}
- \end{center}
-\caption{Phase Diagram of the reduced temperature verses the reduced density. The grey region indicates coexistence.}
-\label{fig:T-vs-n_at_fixed_P}
+  \caption{Plot of the reduced temperature verses the reduced density. 
+  The grey region indicates coexistence.}
+  \label{fig:T-vs-n_at_fixed_P}
 \end{figure}
 
 \begin{figure}
- \begin{center}
+  \centering
   %\includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n}
- \end{center}
-\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The lines bending downward indicate freezing.}
-\label{fig:p-vs-T_at_fixed_density}
+  \caption{Plot of the reduced pressure verses the reduced temperature. 
+  The lines bending downward indicate freezing.}
+  \label{fig:p-vs-T_at_fixed_density}
 \end{figure}
 
 \begin{figure}
- \begin{center}
+  \centering
   %\includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
- \end{center}
-\caption{Phase Diagram of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
-\label{fig:p-vs-V_at_fixed_T}
+  \caption{Plot of the reduced pressure verses the reduced volume. 
+  The grey region indicates coexistence.}
+  \label{fig:p-vs-V_at_fixed_T}
 \end{figure}
 
 \begin{figure}
- \begin{center}
+  \centering
   %\includegraphics[width=\columnwidth]{figs/p-vs-n_at_fixed_T}
- \end{center}
-\caption{Phase Diagram of the reduced pressure verses the reduced density. The grey region indicates coexistence.}
-\label{fig:p-vs-n_at_fixed_T}
+  \caption{Plot of the reduced pressure verses the reduced density. 
+  The grey region indicates coexistence.}
+  \label{fig:p-vs-n_at_fixed_T}
 \end{figure}
 
 
@@ -1720,47 +1772,41 @@ and so
 
 ----------------------------------------------
 
-\cite{rosenfeld1989}
-\cite{tarazona2000}
-\cite{schmidt1999density}
-\cite{schmidt2000fluid}
 
-\cite{santos2012phi3}
+  %\cite{TschoppBHextended}
 
-\cite{TschoppBHextended}
-
-%1-21
-\cite{lucretius}
-\cite{rowlinson1964statistical}
-\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate}
-\cite{carnahan1969equation}
-\cite{rosenfeld1989, rosenfeld1997,
-  roth2002whitebear}
-\cite{rosenfeld1989}
-%\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density, hughes2013classical, krebs2014improved}
-\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density}
-%\cite{schmidt1999density}
-\cite{schmidt2000density, groh2001density, kim2001adsorption,
-  sweatman2002fundamental}
-%\cite{schmidt2000fluid, sweatman2002fundamental}
-\cite{weeks1971}
+	%1-21	
+	%\cite{lucretius}
+%\cite{rowlinson1964statistical}
+%\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
+%  lafitte2013accurate}
+%\cite{carnahan1969equation}
+%\cite{rosenfeld1989, rosenfeld1997,
+%  roth2002whitebear}
 %\cite{rosenfeld1989}
-%\cite{schmidt1999density}
-%%\cite{tarazonaFIXME,santos2012phi3}
-%\cite{schmidt1999density} 
-%\cite{schmidt2000fluid}
-%\cite{schmidt1999density, schmidt2000fluid}
-%\cite{schmidt1999density}
-%\citenum{schmidt2000fluid}
-%\citenum{schmidt2000fluid}
-%a Face Centered Cubic (FCC) lattice is formed~\cite{reference!}
-\cite{barker1967perturbation}
-\cite{roth2002whitebear} 
-%\cite{roth2002whitebear}
-\cite{mikolaj2004structure, eggert2002quantitative,
-yarnell1973structure}
-\cite{verlet1967computer}
+	%\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density, hughes2013classical, krebs2014improved}
+%\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density}
+	%\cite{schmidt1999density}
+%\cite{schmidt2000density, groh2001density, kim2001adsorption,
+%  sweatman2002fundamental}
+	%\cite{schmidt2000fluid, sweatman2002fundamental}
+%\cite{weeks1971}
+	%\cite{rosenfeld1989}
+	%\cite{schmidt1999density}
+	%%\cite{tarazonaFIXME,santos2012phi3}
+	%\cite{schmidt1999density} 
+	%\cite{schmidt2000fluid}
+	%\cite{schmidt1999density, schmidt2000fluid}
+	%\cite{schmidt1999density}
+	%\citenum{schmidt2000fluid}
+	%\citenum{schmidt2000fluid}
+	%a Face Centered Cubic (FCC) lattice is formed~\cite{reference!}
+%\cite{barker1967perturbation}
+%\cite{roth2002whitebear} 
+	%\cite{roth2002whitebear}
+%\cite{mikolaj2004structure, eggert2002quantitative,
+%yarnell1973structure}
+	%\cite{verlet1967computer}
 
 
 \bibliography{thesis}
