@@ -650,8 +650,8 @@ To implement cDFT computationally, we begin by picturing one single crystal cell
 
 This cell is rather complicated for the purposes of this discussion, so consider instead a simplified crystal cell with one atom in its center as shown in Figure \ref{fig:simplecell}. 
 The Helmholtz free energy is minimized for a fixed volume (and temperature and number of particles).  A fixed cubical volume called the ``bold-box" volume, $V_{bold-box}$ will be used for illustration. The number density n for a collection of simplified cells is simply 1 atom per fixed bold-box volume.
-\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} It is easier to think of 1 atom per ``box" (a reduced number density) than 1 atom per some length$^3$ (the actual number density). Reduced number density is given by n* and is equal to the number of atoms in a ``box" of size $\sigma^3$.
-\begin{displaymath}{n*=n\sigma^3}\end{displaymath} If $V_{bold-box}$  has a volume of $\sigma^3$, the reduced number density is just the number of atoms in the fixed bold-box volume. 
+\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} It is easier to think of 1 atom per ``box" (a reduced number density) than 1 atom per some length$^3$ (the actual number density). Reduced number density is given by $n^*$ and is equal to the number of atoms in a ``box" of size $\sigma^3$.
+\begin{displaymath}{n^*=n\sigma^3}\end{displaymath} If $V_{bold-box}$  has a volume of $\sigma^3$, the reduced number density is just the number of atoms in the fixed bold-box volume. 
 \begin{displaymath}\text{Reduced Number Density of the simple cell = 1 atom}\end{displaymath} 
 
 In a large collection of simple cells, the atom at the center of each cell will not realistically reside exactly at the lattice point in the center of the cell. Statistically there will typically be a normal distribution of positions about the lattice point as pictured in the far right box in Figure \ref{fig:Ensemble_Gaus}. A plot of a 2-dimensional Gaussian distribution is shown in Figure \ref{fig:Gaus_plot}. A 3-dimenstional Gaussian distribution centered at a lattice point can be used to represent a number density profile $n(\vec{r})$  which describes how the atoms are statistically distrubuted over a collection of cells.
@@ -714,9 +714,9 @@ Once again, it is important to note that the number density is the same for all 
     \label{fig:homogen_denisty}
   \end{figure}    
  
-A simplified flowchart of the program created to investigate the freezing of a WCA fluid is shown on pages x-x. The program takes four inputs: reduced number density n*, reduced temperature t*, a range of Gaussian widths gw, and a range of fraction of vacancies fv.The number density profile is varied by varying gw and fv, and the free energy $F[n(\vec{r})]$ is calculated for each profile until the minimum free energy is found for that combination of n* and t*, which is known from cDFT to be unique. The process is then repeated to find the free energies at other number densities and temperatures. 
+A simplified flowchart of the program created to investigate the freezing of a WCA fluid is shown on pages x-x. The program takes four inputs: reduced number density n*, reduced temperature t*, a range of Gaussian widths gw, and a range of fraction of vacancies fv.The number density profile is varied by varying gw and fv, and the free energy $F[n(\vec{r})]$ is calculated for each profile until the minimum free energy is found for that combination of $n^*$ and $t^*$, which is known from cDFT to be unique. The process is then repeated to find the free energies at other number densities and temperatures. 
 
-In general, if the crystal free energy at some n* and t* is lower than the homogeneous free energy of a liquid at that same n* and t*, then the crystaline state dominates. But if the crystal free energy is higher than the homogeneous free energy, the liquid state dominates. However, there is a region of densities between the liquid and crystal states that are forbidden, and so the actual state can not be determined just by which energy is lower at that particular n* and t*. Maxwell's Double Tangent Construction must be implemented using the date collected to determine the actual crystal and liquid states, and construct phase diagrams. 
+In general, if the crystal free energy at some $n^*$ and $t^*$ is lower than the homogeneous free energy of a liquid at that same $n^*$ and $t^*$, then the crystaline state dominates. But if the crystal free energy is higher than the homogeneous free energy, the liquid state dominates. However, there is a region of densities between the liquid and crystal states that are forbidden, and so the actual state can not be determined just by which energy is lower at that particular $n^*$ and $t^*$. Maxwell's Double Tangent Construction must be implemented using the date collected to determine the actual crystal and liquid states, and construct phase diagrams. 
 \[{}\]
 \textbf{Program Implementation}
 
@@ -757,7 +757,7 @@ Loop:
 %lattice_constant= pow(4*(1-fv)/reduced_density, 1.0/3)
 \[\]
 
-The Liquid (homogeneous) ideal free energy $hF_{ideal}$ is computed analytically for a given n* and t*, where $\sigma=1$ so that n*=n$\sigma^3$=n, and $\epsilon=1$ so that t*=$\frac{k_BT}{\epsilon}=k_BT$. 
+The Liquid (homogeneous) ideal free energy $hF_{ideal}$ is computed analytically for a given $n^*$ and $t^*$, where $\sigma=1$ so that $n^*=n\sigma^3$=n, and $\epsilon=1$ so that $t^*=\frac{k_BT}{\epsilon}=k_BT$. 
 %\begin{displaymath}{\frac{hF_{ideal}}{V}=k_BTn(\ln(\frac{n*2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)-DELETE-EQN!}\end{displaymath} 
 \begin{displaymath}{\frac{hF_{ideal}}{V}=k_BTn(\ln(n\Lambda^3)-1.0)}\end{displaymath} where 
 
@@ -767,7 +767,7 @@ The Liquid (homogeneous) ideal free energy $hF_{ideal}$ is computed analytically
 %\begin{displaymath}{\hbar=}\end{displaymath} 
 %\begin{displaymath}{k_B=}\end{displaymath} 
 
-The Liquid (homogeneous) excess free energy $hF_{excess}$ is computed analytically for a given n* and t* using SFMT with a uniform number density profile that does not depend on $\vec r$. 
+The Liquid (homogeneous) excess free energy $hF_{excess}$ is computed analytically for a given $n^*$ and $t^*$ using SFMT with a uniform number density profile that does not depend on $\vec r$. 
 %done in hf.energy() note- does not depend on fv or gw but does use SFMT):
 \begin{displaymath}{\frac{hF_{excess}}{V} = k_BT(\Phi_1+\Phi_2+\Phi_3)}\end{displaymath} 
 For the case of a homogeneous number density n, $\Phi_1$, $\Phi_2$, and $\Phi_3$ simplify to:
@@ -1087,7 +1087,7 @@ Set the lower limit to $-\infty$  since the integrand is nearly zero by the time
 \begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation}
 \[{}\] 
 Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ becomes
-\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
 
 
 \[{}\]
@@ -1323,7 +1323,7 @@ Set the lower limit to -infinity since the integrand is nearly zero by the time 
 Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_{{m2}_{xx}}(k)$ becomes
 \[{}\] \color{green}
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi{\Xi}^2}{3}-\frac{4\pi}{k^2}\right)e^{-\frac{k^2\Xi^2}{8}}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\frac{k^2\Xi^2}{8}}\sin(\frac{k\alpha}{2})}\end{displaymath} 
-\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
+\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
 \color{black}
 \[{}\]
 Calculate $\widetilde{w}_{{m2}_{y'y'}}(k)$ 
@@ -1392,7 +1392,7 @@ Now  $\vec{k}$ can be expressed in the $(x,y,z)$ coordinate system, $\vec{k}=k_x
 %\subsection{Transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero}
 \noindent Check that the transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero:
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
-\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
 \[{}\]
 Term 1: 
 %\color{green}
@@ -1408,7 +1408,7 @@ Term 2:
 \color{black} 
 Term 3:
 %\color{red}
-\begin{equation}{\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+\begin{equation}{\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
 \begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)\right)\right]}\end{displaymath} 
 \begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}\frac{2}{\sqrt{\pi}}   \left(\frac{k\Xi}{2\sqrt{2}}   -\frac{2\left(\frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}\right)^3\right)\right]}\end{displaymath}
 \begin{displaymath}{\approx\frac{4\pi}{k^2}-\frac{\pi}{6}\left(\alpha^2-\Xi^2\right)}\end{displaymath}  
