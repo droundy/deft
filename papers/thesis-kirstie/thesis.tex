@@ -390,11 +390,18 @@ The minimization can be illustrated by considering that according to the second 
 %How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? 
 
 Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
-\begin{equation}df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}\end{equation}
+\begin{equation}
+  df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
+\end{equation}
 and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that $dT=0$ gives
-\begin{equation}df_{N-System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}\end{equation}
+\begin{equation}
+  f_{N-System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}
+\end{equation}
 where conservation of energy was also applied. Fixing the volume and the number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, results in
-\begin{equation}df_{N-System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings} \end{equation}which, for fixed N, is the same as
+\begin{equation}
+  df_{N-System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings}
+\end{equation}
+which, for fixed N, is the same as
 \begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number of particles are fixed, the change in the free energy of the system will always be negative, and thus the free energy tends toward a minimum. (reference schroder) This illustrates the tendancy toward minimization for a system near equilibrium. A general proof of minimization can be found in (reference simple fluids).
 
 The Helmholtz free energy can be written as
