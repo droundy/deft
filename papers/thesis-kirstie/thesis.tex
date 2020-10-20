@@ -102,7 +102,7 @@ Real fluids and their behavior are very complex from a physicist's point of view
 %Although a water molecule, for example, is composed of only three atoms, the ever-changing redistribution of charges within the molecules and their interaction with charges from other molecules, the complicated molecular motion of a collection of water molecules, and the sheer number of molecules that must be taken into account make it difficult to study a fluid composed of water molecules directly.
 The problem of understanding the behavoir of real liquids is better addressed by using models which reduce a complex picture to a simple one. Modifications, or perturbations, can then be incorporated into the model making it progressively more complex until it mimics the behavior of a real liquid as closely as possible.
 
-In developing a model for a fluid, simplifications can be made regarding the composition, type, shape, and interatomic interaction of the molecules. Rather than dealing with any particular molecule or atom, the model only deals with generic "particles", which may also be referred to as "atoms". The shape of the particles, or atoms will be the simplest shape possible - a sphere. The spheres in the simplest models do not exhibit quantum interference effects as the mass of the spheres, and the temperature are taken to be large enough that the de Broglie wavelength is smaller than the mean distance between the spheres. The fluid can then be treated as a classical fluid where the spheres interact with each other according to their electrostatic interatomic potential. 
+In developing a model for a fluid, simplifications can be made regarding the composition, type, shape, and interatomic interaction of the molecules. Rather than dealing with any particular molecule or atom, the model only deals with generic ``particles", which may also be referred to as ``atoms''. The shape of the particles, or atoms will be the simplest shape possible - a sphere. The spheres in the simplest models do not exhibit quantum interference effects as the mass of the spheres, and the temperature are taken to be large enough that the de Broglie wavelength is smaller than the mean distance between the spheres. The fluid can then be treated as a classical fluid where the spheres interact with each other according to their electrostatic interatomic potential. 
 
 There are many interatomic potentials which can be used to model a fluid each of which describes the interaction between two real atoms to some degree of accuracy. The simplest, and oldest, model used to describe a fluid is the hard-sphere model. The hard-sphere model envisions a fluid to be composed of hard spheres like, for example, a collection of marbles. This model came about by considering the near incompressibilty of liquids indicating that the particles making up the liquid strongly resist being pushed closer together. This behavior can be described by an interatomic potential energy that is zero when two spheres are not in contact, but goes instantly to infinity when contact is made. The inablilty to push real atoms closer together is due to the repulsion of the electrons in each atom, and is the dominating interparticle electrostatic interaction. Thus, the hard-sphere model - which is the simplest, but still effective representation of this replusive behavior that dominates the interaction between real atoms, is currently the most widely used model for fluids.
 
@@ -151,7 +151,7 @@ The combined attractive and repulsive effects produce the overall shape of the L
 
 The repulsive portion of the Leonard-Jones potential forms the potential for a Weeks-Chandler-Anderson (WCA) model fluid, shown in Figure \ref{fig:WCA_potential}. The WCA potential is described by the equation: \begin{equation}{V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.}\end{equation} 
 
-\noindent As seen in Figure \ref{fig:WCA_potential}, the WCA potential decreases from infinity as the distance between the centers of the atoms r increases, and becomes, and remains, essentially zero when r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ where R is the radius of the sphere as shown in Figure \ref{fig:TwoSpheres}. As with the Lenard-Jones potential, the repulsive WCA potential increases rapidly and approches infinity as the two spheres begin to overlap. This is a more realistic repulsive potential than that of the Hard Sphere model which goes instantly to infinity when the two spheres make contact (at r=2R), and is zero otherwise. Because the WCA spheres have no hard boundary in their interatomic potential, they are called "soft spheres" and their gradually fading potential makes them slightly "squishy".
+\noindent As seen in Figure \ref{fig:WCA_potential}, the WCA potential decreases from infinity as the distance between the centers of the atoms r increases, and becomes, and remains, essentially zero when r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ where R is the radius of the sphere as shown in Figure \ref{fig:TwoSpheres}. As with the Lenard-Jones potential, the repulsive WCA potential increases rapidly and approches infinity as the two spheres begin to overlap. This is a more realistic repulsive potential than that of the Hard Sphere model which goes instantly to infinity when the two spheres make contact (at r=2R), and is zero otherwise. Because the WCA spheres have no hard boundary in their interatomic potential, they are called ``soft spheres'' and their gradually fading potential makes them slightly ``squishy''.
 
 \begin{figure}[h!]
     \centering
@@ -276,7 +276,7 @@ Although the entire crystal lattice can be constructed with FCC cells, FCC cells
   \end{figure}
 %-------------------------------
 
-For pure substances, a phase transition occurs along a line on a Pressure-Temperature (P-T) phase diagram, such as can be seen in the phase diagram shown in Figure \ref{fig:P-T_Diagram}. This phase diagram is representative of some arbitrary, unknown substance composed of atoms, or molecules which exibit both attraction and repulsion. However, since the atoms in a WCA fliud do not exhibit attraction there will not be a dividing line between the gas and liquid phases, and so the term "liquid" or "gas" is not used, but simply "fluid". Points along the line that separates the solid and the fluid phases indicate a phase transition, and show that the solid and the fluid both have the same temperature and the same pressure at a phase transistion.
+For pure substances, a phase transition occurs along a line on a Pressure-Temperature (P-T) phase diagram, such as can be seen in the phase diagram shown in Figure \ref{fig:P-T_Diagram}. This phase diagram is representative of some arbitrary, unknown substance composed of atoms, or molecules which exibit both attraction and repulsion. However, since the atoms in a WCA fliud do not exhibit attraction there will not be a dividing line between the gas and liquid phases, and so the term ``liquid" or ``gas" is not used, but simply ``fluid". Points along the line that separates the solid and the fluid phases indicate a phase transition, and show that the solid and the fluid both have the same temperature and the same pressure at a phase transistion.
 
 %For each particular temperature, the pressure of the liquid and the solid are the same at the point of transistion. 
 \begin{figure}[h!]
@@ -386,7 +386,7 @@ This result shows that the natural variables of the Helmholtz free energy per pa
 %\begin{equation}f_N(T,V, \frac{1}{N})\mbox{~~~~or~~~~}f_V(T,n)\end{equation}
 \begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
  
-The minimization can be illustrated by considering that according to the second law of thermodynamics, a system that is not in equilibrium will exprience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here "surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that energy lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that changes in the free energy will be negative for spontaneous processes when the natural variables of the free energy are held fixed. %And so the free energy tends toward a minimum. 
+The minimization can be illustrated by considering that according to the second law of thermodynamics, a system that is not in equilibrium will exprience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here ``surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that energy lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that changes in the free energy will be negative for spontaneous processes when the natural variables of the free energy are held fixed. %And so the free energy tends toward a minimum. 
 %How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? 
 
 Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
@@ -649,8 +649,8 @@ To implement cDFT computationally, we begin by picturing one single crystal cell
 
 
 This cell is rather complicated for the purposes of this discussion, so consider instead a simplified crystal cell with one atom in its center as shown in Figure \ref{fig:simplecell}. 
-The Helmholtz free energy is minimized for a fixed volume (and temperature and number of particles).  A fixed cubical volume called the "bold-box" volume, $V_{bold-box}$ will be used for illustration. The number density n for a collection of simplified cells is simply 1 atom per fixed bold-box volume.
-\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} It is easier to think of 1 atom per "box" (a reduced number density) than 1 atom per some length$^3$ (the actual number density). Reduced number density is given by n* and is equal to the number of atoms in a "box" of size $\sigma^3$.
+The Helmholtz free energy is minimized for a fixed volume (and temperature and number of particles).  A fixed cubical volume called the ``bold-box" volume, $V_{bold-box}$ will be used for illustration. The number density n for a collection of simplified cells is simply 1 atom per fixed bold-box volume.
+\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} It is easier to think of 1 atom per ``box" (a reduced number density) than 1 atom per some length$^3$ (the actual number density). Reduced number density is given by n* and is equal to the number of atoms in a ``box" of size $\sigma^3$.
 \begin{displaymath}{n*=n\sigma^3}\end{displaymath} If $V_{bold-box}$  has a volume of $\sigma^3$, the reduced number density is just the number of atoms in the fixed bold-box volume. 
 \begin{displaymath}\text{Reduced Number Density of the simple cell = 1 atom}\end{displaymath} 
 
@@ -671,7 +671,7 @@ In a large collection of simple cells, the atom at the center of each cell will 
     \label{fig:Gaus_plot}
   \end{figure}  
 
-It is important to note that the number density does not change when introducing a number density profile. There is still a total of one atom per "bold box" volume.
+It is important to note that the number density does not change when introducing a number density profile. There is still a total of one atom per ``bold box" volume.
 
 \begin{equation}{n=<n(\vec{r})>=\frac{1}{V_{bold-box}}\overbrace{\int_{bold-box}{n(\vec{r})}{d\vec{r}}}=\frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{equation}
 
@@ -704,7 +704,7 @@ By varying the width of the Gaussians and the fraction of vacancies, new number 
     \label{fig:Ensemble_vary}
   \end{figure}  
 
-Once again, it is important to note that the number density is the same for all these number density profiles $n(\vec{r})$. There is still a total of one atom per "bold box" volume. This prodcedure is used only to find the crystal free energy as number density profile for a liquid is homogeneous, as shown in Figure \ref{fig:homogen_denisty}.  
+Once again, it is important to note that the number density is the same for all these number density profiles $n(\vec{r})$. There is still a total of one atom per ``bold box" volume. This prodcedure is used only to find the crystal free energy as number density profile for a liquid is homogeneous, as shown in Figure \ref{fig:homogen_denisty}.  
 
  \begin{figure}[h!]
     \centering
@@ -1737,7 +1737,7 @@ which gives
 %\begin{displaymath}F_{ex}=\end{displaymath}
 \begin{equation}F_{excess}=k_BTN\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)\end{equation} 
 
-%------------------n(r)--move to "back" later---------------------
+%------------------n(r)--move to ``back" later---------------------
 ------------------------------------------------------------------
 
 The actual positions of atoms in a microstate  \color{red}?at time t, or averaged over time?:\color{black}
@@ -1819,7 +1819,7 @@ and so
 
 
 %-------------Minimization-----------------
-%The minimization can be shown by considering that according to the second law of thermodynamics, a system that is not in equilibrium will exprience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here "surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that whatever energy is lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that any change in the free energy will be negative with each spontaneous process until a minimum is reached if the natural variables of the free energy are held fixed.  How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
+%The minimization can be shown by considering that according to the second law of thermodynamics, a system that is not in equilibrium will exprience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here ``surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that whatever energy is lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that any change in the free energy will be negative with each spontaneous process until a minimum is reached if the natural variables of the free energy are held fixed.  How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
 %\begin{equation}d\left(\frac{F}{N}\right)_{System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\frac{S}{N}dT_{System}\end{equation}
 %and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that $dT=0$ gives
 %\begin{equation}d\left(\frac{F}{N}\right)_{System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}\end{equation}
