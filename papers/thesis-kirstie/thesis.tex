@@ -99,11 +99,10 @@ Weeks-Chandler-Anderson model fluid by applying SFMT with Schmidt's proposed
 erf model to form the functional for the excess Helmholtz free energy. 
 %for generating the weight funcions, and Tarazona's tensor functional. 
 Results will be compared to those generated from Monte-Carlo simulations.
-%\[{}\]
+
+\chapter{Theory}
 
 \section{Model Fluids and the Weeks-Chandler-Anderson Fluid (WCA)}
-
-\subsection{Model Fluids and the Weeks-Chandler-Anderson Fluid (WCA)}
 
 Real fluids and their behavior are very complex from a physicist's point of view. Although a water molecule, for example, is composed of only three atoms, the ever-changing redistribution of charges within the molecules, and their interaction with charges from other molecules make it difficult to study a fluid composed of water molecules directly. The task becomes even more daunting considering the complicated molecular motion of each water molecule, and the sheer number of molecules that must be taken into account. 
 %Although a water molecule, for example, is composed of only three atoms, the ever-changing redistribution of charges within the molecules and their interaction with charges from other molecules, the complicated molecular motion of a collection of water molecules, and the sheer number of molecules that must be taken into account make it difficult to study a fluid composed of water molecules directly.
@@ -119,13 +118,9 @@ There are many interatomic potentials which can be used to model a fluid each of
     \caption{A Hard Sphere Potential is zero for $r>2R$, and infinity for $r\leq{2R}$ which is approximately 1.225 in this example.}
     \label{fig:HardSphere_potential}
   \end{figure}
-\[{}\]
-\[{}\]
-\[{}\]
-\[{}\]
 
 Another fairly simple, but relatively accurate interatomic potential widely used to represent generic, neutral atoms is the Leonard-Jones potential. The Leonard-Jones potential describes both the long-range attraction, and the short-range replusion that occurs between two nuetral atoms. The attraction between two nuetral atoms is due to fleeting dipoles that form spontaneously when electrons are redistributed as atoms come into close proximty. These are often characterized as Van der Walls, or London dispersion forces. The attraction grows stronger as two atoms move closer together until their atomic orbitals begin to overlap. %At this point the electrons in each atom begin to repel the electrons in the other atom and oppose the overlap of the two atoms.
- At this point the electrons in each atom begin to oppose the overlap of the two atoms through their replusion. The repulsion increases rapidly and approaches infinity as the distance between the atoms conintues to decrease.  
+At this point the electrons in each atom begin to oppose the overlap of the two atoms through their replusion. The repulsion increases rapidly and approaches infinity as the distance between the atoms conintues to decrease.  
  
 \begin{figure}[h!]
     \centering
@@ -142,9 +137,6 @@ The combined attractive and repulsive effects produce the overall shape of the L
     \caption{Leanard-Jones Potential broken into two parts for $\sigma=1$, $\epsilon=1$}
     \label{fig:LJ_potential_2parts}
   \end{figure}
- 
-%\[{}\]
-%\[{}\]
 
 \begin{figure}[h!]
     \centering
@@ -153,39 +145,34 @@ The combined attractive and repulsive effects produce the overall shape of the L
     \label{fig:WCA_potential}
   \end{figure}
 
-%\[{}\]
-%\[{}\]
-
 The repulsive portion of the Leonard-Jones potential forms the potential for a Weeks-Chandler-Anderson (WCA) model fluid, shown in Figure \ref{fig:WCA_potential}. The WCA potential is described by the equation: \begin{equation}{V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.}\end{equation} 
 
 \noindent As seen in Figure \ref{fig:WCA_potential}, the WCA potential decreases from infinity as the distance between the centers of the atoms r increases, and becomes, and remains, essentially zero when r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ where R is the radius of the sphere as shown in Figure \ref{fig:TwoSpheres}. As with the Lenard-Jones potential, the repulsive WCA potential increases rapidly and approches infinity as the two spheres begin to overlap. This is a more realistic repulsive potential than that of the Hard Sphere model which goes instantly to infinity when the two spheres make contact (at r=2R), and is zero otherwise. Because the WCA spheres have no hard boundary in their interatomic potential, they are called ``soft spheres'' and their gradually fading potential makes them slightly ``squishy''.
 
 \begin{figure}[h!]
     \centering
-    %\includegraphics[height=3.5cm]{TwoSpheres.pdf} 
+    \includegraphics[height=3.5cm]{TwoSpheres.pdf} 
     \caption{(Left) The WCA potential is a minimum at r=2R. 
              (Right) The WCA potential increases rapidly for $r<2R$.}
     \label{fig:TwoSpheres}
     \end{figure} 
 
-The WCA potential is not well suited for implementing Density Functional Theory.  Therefore, an erf potential which closely approximates the WCA potential at temperatures of interest will be used instead of the WCA potential. The erf potential is given by 
+The WCA potential is not well suited for implementing Density Functional Theory.  
+Therefore, an erf potential which closely approximates the WCA potential at temperatures 
+of interest will be used instead of the WCA potential. The erf potential is given by 
 \begin{equation}
 	{V_{erf}=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]}
 \end{equation} 
-where the parameter $\alpha$ is derived by setting the erf potential equal to the WCA potential when r equals $\alpha$ 
+where the parameter $\alpha$ is derived by setting the erf potential equal to the WCA 
+potentail when r equals $\alpha$ 
 \begin{displaymath}{V_{erf}(r=\alpha)=V_{WCA}(r=\alpha)}\end{displaymath} 
 and is given by 
 \begin{equation}\label{alphaT}
 	{\alpha=\sigma\left(\frac{2}{1+\sqrt{\frac{k_BT}{\epsilon}\ln(2)}}\right)^\frac{1}{6}}
 \end{equation} 
-The parameter $\Xi$ is derived by matching the slope of the erf potential to the slope of the WCA potential at r=$\alpha$:
-\begin{displaymath}{\frac{dV_{erf}(r=\alpha)}{dr}=\frac{dV_{WCA}(r=\alpha)}{dr}}\end{displaymath} 
-and is given by: 
-\begin{equation}
-	{\Xi=\frac{\alpha}{6\sqrt{\pi}\left(\sqrt{\frac{\epsilon}{k_BT}\ln(2)}+\ln(2)\right)}}
-\end{equation} 
 
-\noindent These conditions, along with V$_{erf}=$V$_{WCA}$ at $r=\alpha$, help fit the curve of the erf potential to the curve of the WCA potential.
+%Deleted old Xi method
+%move 3-9 to methods
 
 Unlike the WCA potential, the erf potential depends on temperature through the parameters $\alpha$ and $\Xi$. Figure \ref{fig:alphaXivsT} shows how $\alpha$ and $\Xi$ vary with temperature when $\sigma=1$ and $\epsilon=1$. % and Figure \ref{fig:erf_Potential} shows the erf potential at reduced temperatures $\frac{k_BT}{\epsilon}=1$, $\frac{k_BT}{\epsilon}=2$, and $\frac{k_BT}{\epsilon}=3$ alongside the WCA potential. %As seen in Figure \ref{fig:erf_potential}, the erf potentials closely match the WCA potential for reduced temperatures below $\frac{k_BT}{\epsilon}=2$, and for r/$\sigma$ less than ???. % so only values of $V_{erf}$ that are much less than $k_BT$/$\epsilon$ ??? will be considered. 
 % In these regions $\alpha$ decreases with increasing temperature, and $\Xi$ increases with increasing temperature.
@@ -267,7 +254,7 @@ A plot of $\Xi(T)$ obtained through this method is shown in Figure \ref{fig:xi_f
 %The spheres in the WCA model fluid do not exhibit quantum interference effects as the mass of the spheres, and the temperatures are taken to be large enough that the de Broglie wavelength is smaller than the mean distance between the spheres. Thus, the WCA fluid can be treated as a classical fluid.
 
 \[\]
-\noindent IIB. The Theory of Freezing and Maxwell's Double Tangent Construction
+\subsection{The Theory of Freezing and Maxwell's Double Tangent Construction}
 
 Freezing is governed by entropy, which the universe, or any closed system, seeks to maximize according to the second law of Thermodynamics. When the entropy of a pure substance in its liquid state is lower than the entropy that it would have in its solid state at the same temperature (necessary for thermal equilibrium), the same pressure (necessary for mechanical equilibrium), and the same chemical potential (necessary for diffusive equilibrium), an abrupt phase transition occurs, that is, the liquid freezes forming a crystalline structure. The particular crystalline structure and density that result are affected by the interatomic potential. When repulsive, soft sphere fluids (that are not too soft) freeze, they form lattice structures composed of Face Centered Cubic (FCC) crystal cells, as do hard spheres. %This structure is the three-dimensional equivilant to the two-dimensional structure that one would see by filling the bottom of a box with a single layer of marbles. 
 This structure is what one would see by filling a cube with marbles. It results in the highest density achievable for hard, and nearly-hard, spheres that are purely repulsive. 
@@ -355,7 +342,7 @@ A Temperature-Density (T-n) phase diagram, such as that in Figure \ref{fig:T-n_D
 %One way of implementing this practically is to determine what the Helmholtz free energy would be for both the liquid and solid phases at a particular temperature and density. Whichever phase has the lower Helmholtz free energy will be the phase that the substance will be in. 
 %\[\]
 \[\]
-\noindent IIC. Classical Density Functional Theory (cDFT)
+\subsection{Classical Density Functional Theory (cDFT)}
 
 The key idea behind classical Density Functional Theory (cDFT) is that free energy can be written as a functional (a function of a function) of a number density profile $n(\vec{r})$ which describes the way the number density, or atoms per volume, varies spatially on average. 
 \begin{displaymath}{f[n(}\vec{r}{)]}\end{displaymath}
@@ -642,7 +629,7 @@ For a spatially varying number density, as would be expected for a crystal, the 
 Once the Helmholtz free energy for both the crystal and liquid states of the fluid are found, they can be compared to find the resulting state of the fluid. Outside the region of coexistence, the fluid will be completely in a crystalline state if the crystal free energy is lower than the liquid free energy, and it will be completely in a liquid state if the liquid free energy is lower than the crystal free energy. 
 
 \[{}\]
-III. METHODS
+\section{Chapter 3 - Methods}
 
 To implement cDFT computationally, we begin by picturing one single crystal cell. Although the crystal structure is composed of Face Centered Cubic (FCC) cells, the entire lattice can be generated with a cell one-fourth the size called a primitive cell shown by the shaded region in Figure \ref{fig:primitivecell}. The primitive cell has the shape of a parallelpiped, and contains the equivalent of one atom.
  
@@ -952,7 +939,7 @@ which is minimized.
 
 \newpage
 
-\noindent IV. Results and Discussion
+\section{Chapter 4 - Results and Discussion}
 
 Phase diagrams for the WCA fluid are shown in Figures \ref{fig:Phase_Diagram_of_T_vs_n} 
 and \ref{fig:Phase_Diagram_P_vs_T}. In all cases $\sigma=1$ and $\epsilon=1$. 
@@ -1065,7 +1052,7 @@ the temperature increases.
 \[{}\]
 \[{}\]
 
-\noindent V. Conclusion
+\section{Chapter 5 -  Conclusion}
 
 
 \[{}\]
