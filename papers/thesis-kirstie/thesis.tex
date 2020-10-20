@@ -1,27 +1,34 @@
-\documentclass[12pt]{article}
-\usepackage{setspace}
-\doublespacing
-%\usepackage[top=1.2in, bottom=1.2in]{geometry}
-%\usepackage[top=1.5in]{geometry}
-\usepackage[bottom=1.2in]{geometry}
-\usepackage{fancyhdr}
-\usepackage{yhmath}
-\pagestyle{fancy}
-\fancyhf{}
-\renewcommand{\headrulewidth}{0pt}
-\fancyhead[R]{\thepage}
+\documentclass[double,12pt]{beavtex}
 \usepackage{graphicx}
-\usepackage{subcaption}
-\usepackage{color}
-\usepackage{enumitem}
+\usepackage{rotating} %Package added to allow the rotation of figures and chart on a page, {sidewaysfigure} command
+\usepackage{tablefootnote} %Packaged added to allow footnotes in the tabular environment, use \tablefootnote command
 \title{Freezing of a Weeks-Chandler-Anderson Fluid using classical Density Functional Theory}
 \author{Kirstie L. Finster}
+\degree{Master of Science}
+\doctype{Thesis}
+\department{Physics}
+\depttype{Department}
+\depthead{Head}
+\major{Physics}
+\advisor{David Roundy}
+\submitdate{October ??, 2020}
+\commencementyear{2020}
+
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{subcaption}
+
 \date{August 2020}
+
+\abstract{
+  This is a test
+}
+
 \begin{document}
    \maketitle
-   \thispagestyle{fancy}
+   \mainmatter
 
-\section I. Chapter 1 - Introduction
+\chapter{Introduction}
 
 Classically, fluids have been modeled by a collection of small, impenetrable spheres colliding 
 with one another like billiard balls. In the simplest case, the spheres are treated as having 
@@ -92,11 +99,10 @@ Weeks-Chandler-Anderson model fluid by applying SFMT with Schmidt's proposed
 erf model to form the functional for the excess Helmholtz free energy. 
 %for generating the weight funcions, and Tarazona's tensor functional. 
 Results will be compared to those generated from Monte-Carlo simulations.
-%\[{}\]
-\newline
-\newline
-\section{Chapter 2 - Theory}
-\subsection{Model Fluids and the Weeks-Chandler-Anderson Fluid (WCA)}
+
+\chapter{Theory}
+
+\section{Model Fluids and the Weeks-Chandler-Anderson Fluid (WCA)}
 
 Real fluids and their behavior are very complex from a physicist's point of view. Although a water molecule, for example, is composed of only three atoms, the ever-changing redistribution of charges within the molecules, and their interaction with charges from other molecules make it difficult to study a fluid composed of water molecules directly. The task becomes even more daunting considering the complicated molecular motion of each water molecule, and the sheer number of molecules that must be taken into account. 
 %Although a water molecule, for example, is composed of only three atoms, the ever-changing redistribution of charges within the molecules and their interaction with charges from other molecules, the complicated molecular motion of a collection of water molecules, and the sheer number of molecules that must be taken into account make it difficult to study a fluid composed of water molecules directly.
@@ -112,10 +118,6 @@ There are many interatomic potentials which can be used to model a fluid each of
     \caption{A Hard Sphere Potential is zero for $r>2R$, and infinity for $r\leq{2R}$ which is approximately 1.225 in this example.}
     \label{fig:HardSphere_potential}
   \end{figure}
-\[{}\]
-\[{}\]
-\[{}\]
-\[{}\]
 
 Another fairly simple, but relatively accurate interatomic potential widely used to represent generic, neutral atoms is the Leonard-Jones potential. The Leonard-Jones potential describes both the long-range attraction, and the short-range replusion that occurs between two nuetral atoms. The attraction between two nuetral atoms is due to fleeting dipoles that form spontaneously when electrons are redistributed as atoms come into close proximty. These are often characterized as Van der Walls, or London dispersion forces. The attraction grows stronger as two atoms move closer together until their atomic orbitals begin to overlap. %At this point the electrons in each atom begin to repel the electrons in the other atom and oppose the overlap of the two atoms.
 At this point the electrons in each atom begin to oppose the overlap of the two atoms through their replusion. The repulsion increases rapidly and approaches infinity as the distance between the atoms conintues to decrease.  
@@ -135,9 +137,6 @@ The combined attractive and repulsive effects produce the overall shape of the L
     \caption{Leanard-Jones Potential broken into two parts for $\sigma=1$, $\epsilon=1$}
     \label{fig:LJ_potential_2parts}
   \end{figure}
- 
-%\[{}\]
-%\[{}\]
 
 \begin{figure}[h!]
     \centering
@@ -145,9 +144,6 @@ The combined attractive and repulsive effects produce the overall shape of the L
     \caption{WCA Potential for $\sigma=1$, $\epsilon=1$}
     \label{fig:WCA_potential}
   \end{figure}
-
-%\[{}\]
-%\[{}\]
 
 The repulsive portion of the Leonard-Jones potential forms the potential for a Weeks-Chandler-Anderson (WCA) model fluid, shown in Figure \ref{fig:WCA_potential}. The WCA potential is described by the equation: \begin{equation}{V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.}\end{equation} 
 
@@ -785,34 +781,47 @@ where \begin{displaymath}{n_i=nw_i}\end{displaymath}
 %\begin{displaymath}{n_2=nw_2}\end{displaymath}
 %\begin{displaymath}{n_3=nw_3}\end{displaymath}
 and the weights are as usual 
-\begin{equation}{w_{0}=\frac{w_{2}}{4\pi{r}^2}}\end{equation}
-\begin{equation}{w_{1}=\frac{w_{2}}{4\pi{r}}}\end{equation}
-\begin{equation}{ w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2} }\end{equation}
-\begin{equation}{w_3(r)=\frac{1}{2}}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]\end{equation} 
+\begin{align}
+  w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
+  w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
+  w_2(r)&=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}
+  \\
+  w_3(r)&=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]
+\end{align}
 %\begin{displaymath}{w_0=?}\end{displaymath} 
 %\begin{displaymath}{w_1=\frac{\alpha}{2}}\end{displaymath}
 %\begin{displaymath}{w_2=6.2...\Xi^2 + \pi\alpha^2}\end{displaymath}
 %\begin{displaymath}{w_3=\alpha(\pi\Xi^2 + 0.52...\alpha^2)}\end{displaymath} \[\]
-\[\]
 
 The Crystal ideal free energy $cF_{ideal}$ is computed in two different ways from the equation 
 \begin{displaymath}{F_{ideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV}\end{displaymath}
 with the varying number density profile given by 
-\begin{displaymath}{n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}}\end{displaymath}
-\newline $\bullet$ For small gw values it is assumed that the Guassians do not overlap, in which case the equation for the free energy can be simplified and solved analytically with the result
-\begin{displaymath}{cF_{ideal}=(1-f_v)k_BT\left(\ln((1-f_v)\Lambda^3)-3\ln(\sqrt{2\pi{gw}})-\frac{5.0}{2}\right)}\end{displaymath}
-
-%\begin{displaymath}{cF_{ideal}=(1-f_v)k_BT\left(\ln(\frac{(1-fv)2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-3\ln(\sqrt{2\pi{gw}})-\frac{5.0}{2}\right)-DELETE-EQN!}\end{displaymath} 
-
-$\bullet$ For larger gw values it is assumed that the Gaussians do overlap, and so the free energy is caluculated computationally. First dx is scaled by gw
-\begin{displaymath}{dx_{scaled}=(dx_{input})(gw)}\end{displaymath}
+\begin{displaymath}
+  {n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}}
+\end{displaymath}
+\begin{itemize}
+  \item For small gw values it is assumed that the Guassians do not overlap, in
+  which case the equation for the free energy can be simplified and solved
+  analytically with the result
+  \begin{align}
+    cF_{ideal}=(1-f_v)k_BT\left(\ln((1-f_v)\Lambda^3)-3\ln(\sqrt{2\pi{gw}})-\frac{5.0}{2}\right)
+  \end{align}
+\item For larger gw values it is assumed that the Gaussians do overlap, and so the free energy is caluculated computationally. First dx is scaled by gw
+\begin{align}
+  dx_{scaled} &= (dx_{input})(gw)
+\end{align}
 then $n(\vec{r})$ is computed at one position of $\vec{r}$ within the primitive cell taking into account the contribution of Gaussians from many (5x5x5) nearby cells whose centers are given by $R_i$.
 %\begin{displaymath}{n(|\vec{r}-\vec{R_i}|)+=\frac{(1-f_v)\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}\end{displaymath}
-The contribution to the free energy of $n(\vec{r})$ at the one position is then added to the accumulating sum.
+The contribution to the free energy of $n(\vec{r})$ at the one position is then
+added to the accumulating sum.
 %\begin{displaymath}{cF_{ideal}+=k_BTn(ln(\frac{(n)2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)dV-DELETE-EQN!}\end{displaymath}
 %\begin{displaymath}{cF_{ideal}+=k_BTn(\ln(n\Lambda^3)-1.0)dV}\end{displaymath}
-This process is repeated for all positions within one primitive cell to get the crystal ideal free energy for the primitive cell. This energy is then divided by the volume of the primitive cell to get the crystal ideal free energy per volume.
+This process is repeated for all positions within one primitive cell to get the
+crystal ideal free energy for the primitive cell. This energy is then divided by
+the volume of the primitive cell to get the crystal ideal free energy per
+volume.
 %\[\]
+\end{itemize}
 
 The crystal excess free energy $cF_{excess}$ is computed computationally using SFMT which gives
 %First dx is scaled by $\Xi$ or gw, whichever is larger \begin{displaymath}{dx_{scaled}=(dx_{input})(\Xi + gw)}\end{displaymath}
@@ -1051,9 +1060,9 @@ the temperature increases.
 \[{}\]
 \[{}\]
 
+\backmatter
 
-
-APPENDIX
+\chapter{Appendix}
 \begin{enumerate}
 
 \item Fourier Transforms of Weight Functions $w_0(r), w_1(r), w_2(r), w_3(r)$
@@ -1069,7 +1078,7 @@ APPENDIX
 \item Derivation of the Virial Equation
 \end{enumerate}
 
-\textbf{1a. Fourier Transform of Weight Function $w_0(r)$:}
+\section{Fourier Transform of Weight Function $w_0(r)$:}
 \begin{equation}{w_0(r)=\frac{w_2(r)}{4{\pi}r^2}}\end{equation}
 where
 \begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
@@ -1097,7 +1106,7 @@ Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ 
 
 \[{}\]
 %\[{}\]
-\textbf{1b. Fourier Transform of Weight Function $w_{1}(r)$:}
+\section{Fourier Transform of Weight Function $w_{1}(r)$:}
 \begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
 where
 \begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
@@ -1126,7 +1135,7 @@ Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_
 
 \[{}\]
 %\[{}\]
-\textbf{1c. Fourier Transform of Weight Function $w_{2}(r)$:}
+\section{Fourier Transform of Weight Function $w_{2}(r)$:}
 \begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
 set 
 \begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
@@ -1150,7 +1159,7 @@ Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_
 
 \[{}\]
 %\[{}\]
-\textbf{1d. Fourier Transform of Weight Function $w_{3}(r)$:}
+\section{Fourier Transform of Weight Function $w_{3}(r)$:}
 \begin{equation}{w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]}\end{equation}
 temporarily set 
 \begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
@@ -1173,8 +1182,11 @@ Integrating by parts with
 \begin{displaymath}{f=1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)}\end{displaymath}
 \begin{displaymath}{g=\frac{\sin(kr)-kr\cos(kr)}{k^2}}\end{displaymath}
 
-\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{k}\left[\left(1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right)\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\bigg|^{\infty}_0\color{white}\right]}\end{equation} \color{black}
-\begin{displaymath}{-\int_{0}^{\infty}\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\left(\frac{2}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\right)d{r}}\end{displaymath}
+\begin{multline}
+  \widetilde{w}_3(k)=\frac{2\pi}{k}\Bigg[\left(1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right)\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\bigg|^{\infty}_0
+   \\
+  -\int_{0}^{\infty}\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\left(\frac{2}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\right)dr\Bigg]
+\end{multline}
 Evaluating the integral by doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$, and setting the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero this becomes
 \begin{equation}{\widetilde{w}_3(k)=\frac{4\pi}{k^3}e^{-\frac{k^2a^2}{4}}\left[\left(1+\frac{k^2a^2}{2}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
 Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_3(k)$ becomes
@@ -1182,7 +1194,7 @@ Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_
 
 \[{}\]
 %\[{}\]
-\textbf{2a. Fourier Transform of Vector Weight Function $\vec{w}_{1}(r)$:}
+\section{Fourier Transform of Vector Weight Function $\vec{w}_{1}(r)$:}
 \begin{equation}{\vec{w}_1(\vec{r})=w_1(r)\frac{\vec{r}}{r}}\end{equation}
 where
 \begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
@@ -1196,7 +1208,7 @@ temporarily set
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-where 
+where
 \begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
 \begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
 \begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
@@ -1219,7 +1231,7 @@ Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\ve
 
 \[{}\]
 %\[{}\]
-\textbf{2b. Fourier Transform of Vector Weight Function $\vec{w}_{2}(r)$:}
+\section{Fourier Transform of Vector Weight Function $\vec{w}_{2}(r)$:}
 \begin{equation}{\vec{w}_2(\vec{r})=w_2(r)\frac{\vec{r}}{r}}\end{equation}
 where
 \begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
@@ -1245,12 +1257,12 @@ The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$
 
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{-4\sqrt{\pi}i}{ak}\left[\frac{a\alpha\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation} 
 \begin{displaymath}{+{~~}\frac{4\sqrt{\pi}i}{ak^2}\left[a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]{~~}\hat{z}'}\end{displaymath}
-\[{}\]
+
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2a^2}{4}}\left[\left(\frac{a^2k}{2}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
 Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_2(k)$ becomes
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2\Xi^2}{8}}\left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
-\[{}\]
-\textbf{3. Fourier Transform of Tensor Weight $\overleftrightarrow{w}_{m2}(r)$:}
+
+\section{Fourier Transform of Tensor Weight $w_{m2}$}
 \begin{equation}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation}
 where
 \begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
@@ -1815,7 +1827,7 @@ and so
 
 
 \bibliography{thesis}
-\bibliographystyle{plain}
+\bibliographystyle{unsrt}
 
 \end{document}
 

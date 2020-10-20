@@ -78,3 +78,7 @@ log/
 new-soft
 *.exe
 *.swp
+*.loaf
+*.loap
+*.loat
+*.lot
