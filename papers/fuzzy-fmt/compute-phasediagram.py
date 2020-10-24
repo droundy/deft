@@ -37,18 +37,18 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     cmd += ' --fv %g --dx %g --seed %g' % (fv, dx, seed)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
     if args.tensor:
-        cmd += ' --d newdata_tensor/phase-diagram7'   #once new results are compared to the old, remove the "2" at the end of phase-diagram
+        cmd += ' --d newdata_tensor/phase-diagram4'   #once new results are compared to the old, remove the "2" at the end of phase-diagram
         cmd += ' --tensor'
     else:
         #cmd += ' --d data/phase-diagram'
-        cmd += ' --d newdata/phase-diagram7' #once new results are compared to the old, remove the "2" at the end of phase-diagram
+        cmd += ' --d newdata/phase-diagram4' #once new results are compared to the old, remove the "2" at the end of phase-diagram
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
 
 #kTs = np.arange(2, 0.3, -0.1)   # kT less than 0.4 don't have solutions
 #kTs = np.arange(20, 2, -2) 
-kTs = np.arange(40, .1, -2) 
+kTs = np.arange(39, 4, -2) 
 #kTs = np.arange(200, 20, -20)
 #kTs = np.arange(.05, .005, -0.02)
 #kTs = np.arange(3, 0.05, -0.1)
@@ -63,7 +63,7 @@ for kT in kTs:
             # run_new_melting(kT, n, 0.01, 0.2, 0.01)    #temp, density, gw_start, gw_end, gw_step
         # else:
             # run_new_melting(kT, n, 0.01, 0.2, 0.01)
-    for n in np.arange(0.6, 2.32, 0.02):
+    for n in np.arange(0.60, 2.32, 0.02):
          #run_new_melting(kT, n, 0.001, 0.001, 0.001) #super fast for homogeneous at the high temps I'm running
          run_new_melting(kT, n, 0.01, 0.2, 0.01)
     # for n in np.arange(1.22, 1.42, 0.02):
