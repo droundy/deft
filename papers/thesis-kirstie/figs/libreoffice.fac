@@ -7,3 +7,23 @@
 | cp ../../fuzzy-fmt/figs/Phase_Diagram_of_T_vs_n.pdf .
 < ../../fuzzy-fmt/figs/Phase_Diagram_of_T_vs_n.pdf
 > Phase_Diagram_of_T_vs_n.pdf
+
+| cp ../../fuzzy-fmt/figs/T-vs-n_at_fixed_P.pdf .
+< ../../fuzzy-fmt/figs/T-vs-n_at_fixed_P.pdf
+> T-vs-n_at_fixed_P.pdf
+
+| cp ../../fuzzy-fmt/figs/p-vs-T_at_fixed_n.pdf .
+< ../../fuzzy-fmt/figs/p-vs-T_at_fixed_n.pdf
+> p-vs-T_at_fixed_n.pdf
+
+| cp ../../fuzzy-fmt/figs/p-vs-V_at_fixed_T.pdf .
+< ../../fuzzy-fmt/figs/p-vs-V_at_fixed_T.pdf
+> p-vs-V_at_fixed_T.pdf
+
+| cp ../../fuzzy-fmt/figs/p-vs-n_at_fixed_T.pdf .
+< ../../fuzzy-fmt/figs/p-vs-n_at_fixed_T.pdf
+> p-vs-n_at_fixed_T.pdf
+
+| cp ../../fuzzy-fmt/figs/p-vs-T.pdf .
+< ../../fuzzy-fmt/figs/p-vs-T.pdf
+> p-vs-T.pdf
