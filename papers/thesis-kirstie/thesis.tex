@@ -484,8 +484,8 @@ Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number
 of particles are fixed, the change in the free energy of the system will 
 always be negative, and thus the free energy tends toward a 
 minimum~\cite{schroeder}. This illustrates the tendancy toward minimization 
-for a system near equilibrium. A general proof of minimization can be 
-found in Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
+for a system near equilibrium. A general proof of minimization 
+can be found in Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
 
 The Helmholtz free energy can be written as
 \begin{equation}{F=-k_{B}T\ln(Z)}\end{equation}
@@ -609,18 +609,20 @@ correctly reduces to this result in the low-density limit.
 Outside of the low density limit, it is quite difficult to evaluate the 
 excess Helmholtz free energy given in Equation~\ref{eq:Fexcess-simplified}. 
 
-Equations~\ref{eq:Fideal} and \ref{eq:Fexcess} show that the Helmholtz free energy 
-\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
-is a function of the number density n. For a spatially varying number density, 
-as would be expected for a crystal, the free energy becomes a functional of 
-the number density profile $n(\vec{r})$.  
-\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
+%Equations~\ref{eq:Fideal} and \ref{eq:Fexcess} show that the Helmholtz free energy 
+%\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
+%is a function of the number density n. For a spatially varying number density, 
+%as would be expected for a crystal, the free energy becomes a functional of 
+%the number density profile $n(\vec{r})$.  
+ 
 The functional for the ideal Helmholtz free energy is given by 
 Equation~\ref{eq:Fideal-n(r)}, and the functional for the excess Helmholtz 
 free energy depends on the particular fluid as defined by the spheres' 
 interatomic potential V(r). To implement cDFT, the number density profile 
 $n(\vec{r})$ is varied with the temperature fixed until the free energy 
-is minimized. The minimum free energy and its corresponding number density 
+is minimized. 
+\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation}
+The minimum free energy and its corresponding number density 
 profile are then the equilibrium values for that temperature.  
 
 \section{Soft Fundamental Measure Theory (SFMT)}
@@ -966,18 +968,16 @@ homogeneous, as shown in Figure \ref{fig:homogen_denisty}.
   \end{figure}    
  
 A simplified flowchart of the program created to investigate the freezing 
-of a WCA fluid is shown on %pages x-x. 
-The program takes four inputs: reduced number density n*, reduced temperature t*, 
-a range of Gaussian 
-widths gw, and a range of fraction of vacancies fv.The number density 
+of a WCA fluid is shown below. The program takes four inputs: reduced number 
+density n*, reduced temperature t*, a range of Gaussian 
+widths gw, and a range of fraction of vacancies fv. The number density 
 profile is varied by varying gw and fv, and the free energy $F[n(\vec{r})]$ 
 is calculated for each profile until the minimum free energy is found for 
 that combination of $n^*$ and $t^*$, which is known from cDFT to be unique. 
 The process is then repeated to find the free energies at other number 
 densities and temperatures. 
 
-\textbf{Program Implementation}
-
+%Program Implementation
 The program computes both the crystal and the homogeneous Helmholtz free 
 energies. The Helmholtz free energy is minimized for a system with a fixed 
 temperature, volume, and number density. The temperature, T is an input to 
@@ -1022,7 +1022,7 @@ Loop:
 %lattice_constant= pow(4*(1-fv)/reduced_density, 1.0/3)
 \newline
 \newline
-*****   start stuff?  ******
+*****   start stuff  ******
 
 In general, if the crystal free energy at some $n^*$ and $t^*$ is lower 
 than the homogeneous free energy of a liquid at that same $n^*$ and $t^*$, 
@@ -1035,7 +1035,7 @@ Double Tangent Construction must be implemented using the date collected
 to determine the actual crystal and liquid states, and construct phase 
 diagrams. 
 
-*****  end  stuff?  ******
+*****  end  stuff  ******
 
 \section{Computing the Liquid and Crystal Ideal Helmholtz free energies}
 
@@ -1086,55 +1086,76 @@ volume.
 
 \section{Our Functional for the Excess Helmholtz free energy}
 
-The excess Helmholtz free energy is particular to the fluid being modeled, 
-as it depends on the interatomic potential V(r). 
-%MOVE to METHODS start1 >>>
-The WCA potential is not well suited for implementing Density Functional 
-Theory.  Therefore, an erf potential which closely approximates the WCA 
-potential at temperatures of interest will be used instead of the WCA 
-potential. The erf potential is given by 
-\begin{equation}
-	{V_{erf}=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]}
-\end{equation} 
+%The excess Helmholtz free energy is particular to the fluid being modeled, 
+%as it depends on the interatomic potential V(r). 
+We use Soft Fundamental Measure Theory to find the excess Helmholtz free energy.
+The functional is written in general form as 
+\begin{displaymath}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{displaymath} 
+where
+\begin{align}
+\Phi_1 &= -n_{0}ln(1-n_{3}) \\
+\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
+\Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
+\end{align} 
+and Tarazona's tensor expression~\cite{tarazonaphi3, santos2012phi3} is used 
+for $\Phi_3$. The weigthed densities $n_0, n_1, n_2,$ and $n_3$ are found from
+\begin{equation}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
+where the weight functions $w_0, w_1, w_2,$ and $w_3$ are given by
+\begin{align}\label{eq:weights}
+  w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
+  w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
+  w_2(r)&=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}
+  \\
+  w_3(r)&=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]
+\end{align}
+The weight fucntions $w_{2}(r)$ and $w_{3}(r)$ are constructed using 
+Schmidt's proposed erf model~\cite{schmidt2000fluid} in which he set
+\begin{equation}{w_3(r)=\frac{1}{2}}\left[1-\operatorname{erf}\left(\frac{r-\frac{\sigma}{2}}{\frac{\text{a}}{\sqrt{2}}}\right)\right]\end{equation} 
+where $w_3(r)$ is subject to the boundary conditions $w_3(0)\approx{1}$ 
+and $w_3(\infty)=0$. 
+%\color{red}These boundary conditions are satisfied for $\Xi{\sqrt{2}<<\alpha}$, or $k_BT << 2.21$. \color{black} 
+Our functional is  created by replacing Schmidt's parameters $\sigma$ 
+and $a$ with our temperature dependent parameters $\alpha(T)$ and $\Xi(T)$.
+\begin{equation}\sigma = \alpha(T)\text{~~~~~~~and~~~~~~~} a = \Xi(T)\end{equation}
 
-Unlike the WCA potential, the erf potential depends on temperature, but 
-we temperature dependent parameters $\alpha(T)$ and $\Xi(T)$ to compensate for the
-variance with temperature. The parameter $\alpha(T)$ is derived by setting 
+The two parameters $\alpha$ and $\Xi$ are used to compensate for the 
+temperature dependence that enters in through the expression for the 
+error function potential $V_{erf}(r)$ which is used to approximate the
+non-temperature dependent WCA potential that is more difficult to 
+implement computationally. The erf potential emerges from the relationships
+that the weight functions must satisfy.
+%potential at temperatures of interest will be used instead of the WCA potential. 
+Using Equation~\ref{w2_w3_relation}, shown again below, 
+\begin{displaymath}{w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)}\end{displaymath}
+and solving for $w_2(r)$
+\begin{displaymath}{\frac{dw_3(r)}{dr}\bigg|_{\infty}-\frac{dw_3(r)}{dr}\bigg|_{r}=w_2(r)}\end{displaymath} 
+we get \begin{equation}{ w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2} }\end{equation} %From the deconvolution equation \begin{equation}{-\frac{1}{2}f(r)=w_0*w_3 + w_1*w_2 -\vec{w}_{V1}*\vec{w}_{V2}}\end{equation} it follows that $w_2$ must satisfy the relation
+Putting $w_2(r)$ into Equation~\ref{mayerder=w2convolution}, shown again below, 
+\begin{displaymath}{\frac{df(r)}{dr}=\int_{-\infty}^{\infty}{w_2(r')w_2(r-r')dr'}}\end{displaymath}
+gives
+\begin{equation}{\frac{df(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\alpha}{\Xi}\right)^2}}\end{equation} 
+which can be integrated to obtain the Mayer function
+\begin{equation}{f(r)=\int_{\infty}^r{ \frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r'-\alpha}{\Xi}\right)^2}{dr'}}}\end{equation} 
+The Mayer function for the error function potential $V_{erf}(r)$ is thus 
+given by
+\begin{equation}{f(r)=-\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)\right]}\end{equation} 
+Combining this result with the definition of the Mayer function \begin{displaymath}f(r)=e^{-\frac{V(r)}{K_BT}}-1\end{displaymath} 
+%This gives an interatomic potential of \begin{equation}{V_{erf}=-k_BT\ln(f(r)-1)}\end{equation} 
+gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$ 
+\begin{equation}
+	V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]
+\end{equation}  
+
+Expressions for $\alpha(T)$ and $\Xi(T)$  can be found as follows. 
+The parameter $\alpha(T)$ is derived by setting 
 the erf potential equal to the WCA potential when r equals $\alpha$ 
-\begin{displaymath}{V_{erf}(r=\alpha)=V_{WCA}(r=\alpha)}\end{displaymath} 
+\begin{equation}{V_{erf}(r=\alpha)=V_{WCA}(r=\alpha)}\end{equation} 
 and is given by 
 \begin{equation}\label{alphaT}
 	{\alpha(T)=\sigma\left(\frac{2}{1+\sqrt{\frac{k_BT}{\epsilon}\ln(2)}}\right)^\frac{1}{6}}
 \end{equation} 
-%%%%Unlike the WCA potential, the erf potential depends on temperature through the parameters $\alpha$ and $\Xi$. 
-Figure \ref{fig:alphaXivsT} shows how 
-$\alpha$ varies with temperature when $\sigma=1$ and $\epsilon=1$. 
-% and Figure \ref{fig:erf_Potential} shows the erf potential at reduced 
-%temperatures $\frac{k_BT}{\epsilon}=1$, $\frac{k_BT}{\epsilon}=2$, and 
-%$\frac{k_BT}{\epsilon}=3$ alongside the WCA potential. 
-%As seen in Figure \ref{fig:erf_potential}, the erf potentials closely 
-%match the WCA potential for reduced temperatures below $\frac{k_BT}{\epsilon}=2$, 
-%and for r/$\sigma$ less than ???. % so only values of $V_{erf}$ that are 
-%much less than $k_BT$/$\epsilon$ ??? will be considered. 
-% In these regions $\alpha$ decreases with increasing temperature, 
-%and $\Xi$ increases with increasing temperature.
- %\begin{figure}[h!]
-    %\centering
-    %\begin{subfigure}[b]{0.4\linewidth}
-      %\includegraphics[height=5cm]{plot_alpha.pdf}
-      %\caption{$\alpha$ versus $k_BT/\epsilon$}
-    %\end{subfigure} 
-    %\begin{subfigure}[b]{0.4\linewidth}
-      %\includegraphics[height=5cm]{plot_xi.pdf}
-      %\caption{$\Xi$ versus $k_BT/\epsilon$}
-    %\end{subfigure} 
-    %\caption{These plots, generated with $\sigma=1$ and $\epsilon=1$, 
-    %show how the parameters $\alpha$ and $\Xi$ vary with temperature. 
-    %(a) $\alpha$ decreases with increasing temperature. (b) $\Xi$ rapidly 
-    %increases for temperatures below $\frac{k_BT}{\epsilon}=52$ and then 
-    %gradually decreases.}
-    %\label{fig:alphaXivsT}
-    %\end{figure}     
+Figure \ref{fig:alphaXivsT} shows how $\alpha$ varies with temperature 
+when $\sigma=1$ and $\epsilon=1$.    
 \begin{figure}[h!]
     \centering
     \includegraphics[height=9cm]{plot_alpha.pdf}
@@ -1142,17 +1163,11 @@ $\alpha$ varies with temperature when $\sigma=1$ and $\epsilon=1$.
     for $\sigma=1$ and $\epsilon=1$}
     \label{fig:alphaXivsT}
   \end{figure}
-
-To find values for $\Xi(T)$ we use the second virial 
-coefficent $B_{2}$ from the equation of state expressed in terms of 
-the virial expansion. 
-\begin{equation}\label{virialequation}
-    \frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) 
-\end{equation}
-where 
-\begin{equation}
-	B_{2}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}(r)}-1\right)d\vec{r} 
-\end{equation}
+The value of $\Xi$ at a given temperature, T, can be found computationally 
+by equating the second virial coefficient evaluated for the error function 
+potential $V_{erf}(r)$, and the second virial coefficent evalued for the 
+WCA potential $V_{WCA}$.
+\begin{equation}B_{2erf}(T) =B_{2WCA}(T)\end{equation}
 The second virial coefficient can be derived from Euler's equation for 
 the internal energy of a system, 
 \begin{equation}U=TS-PV+\mu{N}\end{equation}
@@ -1164,23 +1179,24 @@ thermodynamic quantities as ensemble averages
 which, for a canonical ensemble, gives
 \begin{equation}\frac{PV}{k_BT}=N + \beta\frac{\partial{F}_{excess}}{\partial{N}}{N} - \frac{F_{excess}}{k_BT}\end{equation}
 Expressing the Helmholtz free energy in terms of the pair potential 
-$V(r)$ results in the equation of state expressed in terms of the virial 
-expansion as given by Equation~\ref{virialequation}.
-
-The value of $\Xi$ at a given temperature, T, can be found computationally 
-by equating the second virial coefficient evaluated for the error function 
-potential $V_{erf}(r)$, and the second virial coefficent evalued for the 
-WCA potential $V_{WCA}$.
-\begin{equation}B_{2erf}(T) =B_{2WCA}(T)\end{equation}
+$V(r)$ results in an equation of state expressed in terms of the virial expansion 
+\begin{equation}\label{virialequation}
+    \frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) 
+\end{equation}
+where 
+\begin{equation}
+	B_{2}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}(r)}-1\right)d\vec{r} 
+\end{equation}
 Evaluating $B_{2}$ for the erf potential gives
 \begin{equation}
 	B_{2erf}(T) = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{erf}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]
 \end{equation}
-where $\alpha(T)$ is given by Equation~\ref{alphaT} as before. Similarly, 
+where $\alpha(T)$ is given by Equation~\ref{alphaT}. Similarly, 
 $B_{2WCA}$ can be found computationally from 
 \begin{equation}
 	B_{2WCA}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{WCA}(r)}-1\right)d\vec{r} 
 \end{equation}
+
 A plot of the resulting second virial coefficient $B_2(T)$  with respect 
 to temperature is given in Figure~\ref{fig:B2vsT}, and a plot of $\Xi(T)$ obtained 
 through this method is shown in Figure~\ref{fig:xi_fromB2vsT}. 
@@ -1224,64 +1240,7 @@ potential which is not temperature dependent.
 %is smaller than the mean distance between the spheres. Thus, the WCA fluid can be treated as a 
 %classical fluid.
 
-%MOVE to METHODS end1 >>>
-
-******  SFMT Functional ******
-
-
-%MOVE to METHODS start2 >>>
-In this paper,  $w_{2}(r)$ will be constructed using the following expresssion 
-for $w_3(r)$ proposed by Schmidt\cite{schmidt2000fluid}.
-\begin{equation}{w_3(r)=\frac{1}{2}}\left[1-\operatorname{erf}\left(\frac{r-\frac{\sigma}{2}}{\frac{\text{a}}{\sqrt{2}}}\right)\right]\end{equation} 
-where $w_3(r)$ is subject to the boundary conditions $w_3(0)\approx{1}$ 
-and $w_3(\infty)=0$. 
-%\color{red}These boundary conditions are satisfied for $\Xi{\sqrt{2}<<\alpha}$, or $k_BT << 2.21$. \color{black} 
-We replace Shcmidt's parameters $\sigma$ and $a$ with our temperature 
-dependent parameters $\alpha(T)$ and $\Xi(T)$ which were defined above.
-\begin{equation}\sigma = \alpha(T)\text{~~~~~~~and~~~~~~~} a = \Xi(T)\end{equation}
-This gives the expression
-\begin{equation}{w_3(r)=\frac{1}{2}}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]\end{equation} 
-Using Equation~\ref{w2_w3_relation}, shown again below, 
-\begin{displaymath}{w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)}\end{displaymath}
-and solving for $w_2(r)$
-\begin{displaymath}{\frac{dw_3(r)}{dr}\bigg|_{\infty}-\frac{dw_3(r)}{dr}\bigg|_{r}=w_2(r)}\end{displaymath} 
-we get \begin{equation}{ w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2} }\end{equation} %From the deconvolution equation \begin{equation}{-\frac{1}{2}f(r)=w_0*w_3 + w_1*w_2 -\vec{w}_{V1}*\vec{w}_{V2}}\end{equation} it follows that $w_2$ must satisfy the relation
-Putting $w_2(r)$ into Equation~\ref{mayerder=w2convolution}, shown again below, 
-\begin{displaymath}{\frac{df(r)}{dr}=\int_{-\infty}^{\infty}{w_2(r')w_2(r-r')dr'}}\end{displaymath}
-gives
-\begin{equation}{\frac{df(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\alpha}{\Xi}\right)^2}}\end{equation} 
-which can be integrated to obtain the Mayer function
-\begin{equation}{f(r)=\int_{\infty}^r{ \frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r'-\alpha}{\Xi}\right)^2}{dr'}}}\end{equation} 
-The Mayer function for the error function potential $V_{erf}(r)$ is thus 
-given by
-\begin{equation}{f(r)=-\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)\right]}\end{equation} 
-Combining this result with the definition of the Mayer function \begin{displaymath}f(r)=e^{-\frac{V(r)}{K_BT}}-1\end{displaymath} 
-%This gives an interatomic potential of \begin{equation}{V_{erf}=-k_BT\ln(f(r)-1)}\end{equation} 
-gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$ 
-\begin{equation}{V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]}\end{equation} 
-The two parameters $\alpha$ and $\Xi$ are given in equations (3) and (4), 
-and are used to compensate for the temperature dependence that enters 
-in through the expression for the error function potential $V_{erf}(r)$.
-%determined to make $V_{erf}(r)$ match $V_{WCA}(r)$ as closely as 
-%possible by compensating for the unwanted temperature dependence that shows 
-%up in the error function potential $V_{erf}(r)$.
-%MOVE to METHODS end2 >>>
-
-**** FUNCTIONAL HERE! *****
-\begin{align}
-\Phi_1 &= -n_{0}ln(1-n_{3}) \\
-\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
-\Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
-\end{align} 
-
-\begin{align}\label{eq:weights}
-  w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
-  w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
-  w_2(r)&=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}
-  \\
-  w_3(r)&=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]
-\end{align}
-
+\color{red}
 Figure \ref{fig:weight_functions} shows a 1 dimensional view of the weight functions 
 $w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance along the z-axis. In three 
 dimensions, the weighting functions $w_0$, $w_1$, $w_2$ are spherical shells 
@@ -1302,7 +1261,7 @@ the weight function.
  \begin{figure}[h!]
     \centering
     \includegraphics[height=6cm]{weight_functions.pdf}
-    \caption{Shows how the weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the 
+    \caption{\color{red}RERUN for NEW XI!\color{black}Shows how the weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the 
     z-axis for a reduced temperature of 2}
     \label{fig:weight_functions}
   \end{figure}  
@@ -1317,11 +1276,12 @@ the weight function.
       \includegraphics[height=5cm]{W3.png}
       \caption{A crossectional view of $w_3$}
     \end{subfigure} 
-    \caption{Cross-sectional views of the 3D weight functions. (a) $w_2$ is a 
+    \caption{\color{red}RERUN for NEW XI!\color{black}Cross-sectional views of the 3D weight functions. (a) $w_2$ is a 
     spherical shell in 3D with soft edges. Weight functions $w_0$ and $w_1$ 
     have a similar shape. (b) $w_3$ is a sphere with soft edges in 3D.}
     \label{fig:W0andW3}
     \end{figure} 
+\color{black}
 
 \section{Computing the Liquid and Crystal Excess Helmholtz free energies}
 
@@ -2145,97 +2105,6 @@ expression for the excess free energy were neglected. The full virial
 equation is given by\color{black}
 \begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
 
-\section{Derivation of the Excess Free Energy from Scaled Particle Theory}
-The excess chemical potential of a homogeneous fluid corresdponds to the 
-reversible work of inserting a sphere of radius R 
-into a fluid consisting of hard spheres of radius R. 
-\begin{displaymath}\mu_{ex}=W_{rev}(R){~~~~}\text{work to insert a hard sphere of radius R}\end{displaymath}
-This result is obtained by considering the difference in the excess Helmholtz 
-free energy when one atom is added to the system. It was shown by Widom 
-to be related to the ensemble average of the Boltzman factor for the 
-potential energy difference $V_{diff}$ of a system with N atoms and one 
-with N+1 atoms. The resulting equation is known as Widom's Insertion Formula.
-%\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
-\begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
-\begin{equation}\label{widom}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-%Equation~\ref{widom} is called Widom's Insertion Formula. 
-\color{red}For a system... $<e^{-\beta{V_{diff}}}> \rightarrow e^{-\beta{V_{diff}}}$, and Equation~\ref{widom} becomes 
-\begin{equation}\mu_{ex}=-k_BT\ln\left(e^{-\beta{V_{diff}}}\right)=-k_BT(-\beta{V}_{diff})=V_{diff}=W_{rev}\end{equation}\color{black}
-%In a randomly positioned (I think it has to be homogeneous!)
-\indent In a collection of hard spheres making up a hard sphere fluid, 
-no energy would be required to place a hard sphere at points 
-surrounded by an empty space the size of a hard sphere. But a hard sphere 
-cannot be placed at points where a hard sphere would 
-overlap another hard sphere; the energy required to do that would be infinite. 
-Thus, for a Hard Sphere fluid, Equation~\ref{widom} becomes
-\begin{equation}\mu_{ex}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{V}_{NoOverlap}}+P_{Overlap}e^{-\beta{V}_{Overlap}}\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{0}}+P_{Overlap}e^{-\beta\infty}\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}(1)+P_{Overlap}(0)\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}\right)\end{equation}
-where $P_{NoOverlap}$ is the probablity of positions existing in the hard 
-fluid that are surrounded by an empty space the size of a hard sphere.
-
-\begin{figure}[h!]
-    \centering
-    % FIXME \includegraphics[height=3cm]{Probability-of-overlap.pdf}
-    \caption{No energy is needed to place a sphere at a position where 
-    there is no overlap such as shown by the black dot at the center of 
-    the dotted region near the top. But it is not possible to place a 
-    sphere at a position where an overlap occurs.}
-    \label{fig:p_overlap}
-  \end{figure}
-
-For a homogeneous system, the probablity of positions existing in the hard 
-fluid that are surrounded by an empty space the size of a hard sphere, 
-$P_{NoOverlap}$, can be found by considering 
-that $P_{NoOverlap}~=1-~P_{Overlap}$ where $P_{Overlap}$ is simply the 
-number density times the volume of one sphere. 
-%\color{red}Thus the chemical potential for a fluid with cavities having 
-%a radius equal to the radius R of a hard sphere is \color{black}
-\color{red}Thus, considering cavities having a radius Ro equal to the 
-radius R of a hard sphere, the chemical potential is found to be \color{black}
-%\begin{equation}P_{Overlap}=nV_{sphere}\right)\end{equation}
-\begin{equation}\label{mu_excess}\mu_{ex}(R_{cavity}=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
-
-%\begin{equation}\mu_{ex}(R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
-
-Using this result, scaled particle theory seeks a more general expression 
-of the excess chemical potential of a hard sphere fluid by considering the 
-work of inserting a hard sphere into a cavity of radius $R_{cavity}$ 
-where the size of $R_{cavity}$ falls into three different cases: 
-$R_{cavity} >> R$, $R_{cavity} > R$, and $R_{cavity} \leq R$. 
-
-\begin{equation}\label{3_parts_to_mu_ex}{W_{rev}(R_{cavity})=\left\{ \begin{array}{rc} P\frac{4\pi}{3}R_{cavity}^3 & R_{cavity} >> R 
-\\ P\frac{4\pi}{3}R_{cavity}^3 + c_2R_{cavity}^2 + c_1R_{cavity}^1 + c_0R_{cavity}^0  & R_{cavity} > R \\ -k_BT(\ln(1-n\frac{4\pi}{3}(R_{cavity})^3)) & R_{cavity} \leq R\end{array}\right.}\end{equation}
-
-%The first function, valid for $R_o >> R$, yields the dominant term to which the second function, valid for $R_o > R$,  
-%must tend toward in the limit that $R_o$ goes to infinity. By expanding the logrythmic term (ln(1-x)= ...) 
-%in the last function, valid for $R_o < R$, the function can be expressed in terms of powers of $R_o$. 
-
-%The first and last functions in Equation~\ref{3_parts_to_mu_ex} are derived from theory, and since they 
-The first and last functions in Equation~\ref{3_parts_to_mu_ex} can be expressed in terms of powers of $R_{cavity}$, 
-and so it is assumed that the middle function, which is valid for values of $R_{cavity}$ in between the two extremes, 
-can also be expressed in terms of powers of $R_{cavity}$.  
-The coeficients $c_2$, $c_1$ and $c_0$ are determnined by considering that the three functions must be conintuous at 
-the boundaries along with their first and second derivatives, and using Equation~\ref{mu_excess}.The chemical potential then becomes
-\begin{equation}\mu_{ex}=-k_BT\left(\ln(1-\eta) + \frac{6\eta}{1-\eta}+\frac{9\eta^2}{2(1-\eta)^2}+\frac{PV\eta}{k_BTN}\right)\end{equation}
-where $\eta$ is the packing fraction given by
-\begin{displaymath}\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}=\frac{N\frac{4}{3}\pi{R}^3}{V}\end{displaymath} 
-
-%The last two functions, valid for $R_o > R$, and $R_o < R$, and their first and second derivatives must be continuous at $R_o=R$. 
-%From these considerations, factors $c_2$, $c_1$ and $c_0$ can be determnined, and using the relation 
-%...ADD!...P, an expression is found for the reversible work done when $R_o=R$ which is equal to the excess chemical potential. 
-%From the expression for pressure given by
-
-The pressure can be obtained from \color{red}
-\begin{equation}{\frac{\partial{P}}{\partial{N}}\bigg|_{T,V}V=N\frac{\partial\mu}{\partial{N}}\bigg|_{T,V}}\end{equation} \color{black}
-%The excess Hemlholtz free energy is then found from the relation
-and the Helmholz free energy from
-\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\text{or}{~~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{displaymath}
-which gives
-%\begin{displaymath}F_{ex}=\end{displaymath}
-\begin{equation}F_{excess}=k_BTN\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)\end{equation} 
-
 %------------------n(r)--move to ``back" later---------------------
 ------------------------------------------------------------------
 
@@ -2270,6 +2139,12 @@ and so
 \begin{equation}F = -k_BTln(Z)\end{equation}
 
 ----------------------------------------------
+
+\bibliography{thesis}
+\bibliographystyle{unsrt}
+
+\end{document}
+
   %\cite{TschoppBHextended}	
 
 %\cite{rowlinson1964statistical}
@@ -2297,11 +2172,6 @@ and so
 %\cite{mikolaj2004structure, eggert2002quantitative,
 %yarnell1973structure}
 	%\cite{verlet1967computer}
-
-\bibliography{thesis}
-\bibliographystyle{unsrt}
-
-\end{document}
 
 
 %-------------Minimization-----------------
@@ -2380,3 +2250,93 @@ NOW DO UPPER LIMIT  Ro $>>$ R
 For Ro $>>$ R ...
 --------------------------------------------------
 
+%\section{Derivation of the Excess Free Energy from Scaled Particle Theory}
+%The excess chemical potential of a homogeneous fluid corresdponds to the 
+%reversible work of inserting a sphere of radius R 
+%into a fluid consisting of hard spheres of radius R. 
+%\begin{displaymath}\mu_{ex}=W_{rev}(R){~~~~}\text{work to insert a hard sphere of radius R}\end{displaymath}
+%This result is obtained by considering the difference in the excess Helmholtz 
+%free energy when one atom is added to the system. It was shown by Widom 
+%to be related to the ensemble average of the Boltzman factor for the 
+%potential energy difference $V_{diff}$ of a system with N atoms and one 
+%with N+1 atoms. The resulting equation is known as Widom's Insertion Formula.
+%%\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
+%\begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
+%\begin{equation}\label{widom}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
+%%Equation~\ref{widom} is called Widom's Insertion Formula. 
+%\color{red}For a system... $<e^{-\beta{V_{diff}}}> \rightarrow e^{-\beta{V_{diff}}}$, and Equation~\ref{widom} becomes 
+%\begin{equation}\mu_{ex}=-k_BT\ln\left(e^{-\beta{V_{diff}}}\right)=-k_BT(-\beta{V}_{diff})=V_{diff}=W_{rev}\end{equation}\color{black}
+%%In a randomly positioned (I think it has to be homogeneous!)
+%\indent In a collection of hard spheres making up a hard sphere fluid, 
+%no energy would be required to place a hard sphere at points 
+%surrounded by an empty space the size of a hard sphere. But a hard sphere 
+%cannot be placed at points where a hard sphere would 
+%overlap another hard sphere; the energy required to do that would be infinite. 
+%Thus, for a Hard Sphere fluid, Equation~\ref{widom} becomes
+%\begin{equation}\mu_{ex}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{V}_{NoOverlap}}+P_{Overlap}e^{-\beta{V}_{Overlap}}\right)\end{equation}
+%\begin{equation}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{0}}+P_{Overlap}e^{-\beta\infty}\right)\end{equation}
+%\begin{equation}=-k_BT\ln\left(P_{NoOverlap}(1)+P_{Overlap}(0)\right)\end{equation}
+%\begin{equation}=-k_BT\ln\left(P_{NoOverlap}\right)\end{equation}
+%where $P_{NoOverlap}$ is the probablity of positions existing in the hard 
+%fluid that are surrounded by an empty space the size of a hard sphere.
+
+%\begin{figure}[h!]
+    %\centering
+    %% FIXME \includegraphics[height=3cm]{Probability-of-overlap.pdf}
+    %\caption{No energy is needed to place a sphere at a position where 
+    %there is no overlap such as shown by the black dot at the center of 
+    %the dotted region near the top. But it is not possible to place a 
+    %sphere at a position where an overlap occurs.}
+    %\label{fig:p_overlap}
+  %\end{figure}
+
+%For a homogeneous system, the probablity of positions existing in the hard 
+%fluid that are surrounded by an empty space the size of a hard sphere, 
+%$P_{NoOverlap}$, can be found by considering 
+%that $P_{NoOverlap}~=1-~P_{Overlap}$ where $P_{Overlap}$ is simply the 
+%number density times the volume of one sphere. 
+%%\color{red}Thus the chemical potential for a fluid with cavities having 
+%%a radius equal to the radius R of a hard sphere is \color{black}
+%\color{red}Thus, considering cavities having a radius Ro equal to the 
+%radius R of a hard sphere, the chemical potential is found to be \color{black}
+%%\begin{equation}P_{Overlap}=nV_{sphere}\right)\end{equation}
+%\begin{equation}\label{mu_excess}\mu_{ex}(R_{cavity}=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
+
+%%\begin{equation}\mu_{ex}(R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
+
+%Using this result, scaled particle theory seeks a more general expression 
+%of the excess chemical potential of a hard sphere fluid by considering the 
+%work of inserting a hard sphere into a cavity of radius $R_{cavity}$ 
+%where the size of $R_{cavity}$ falls into three different cases: 
+%$R_{cavity} >> R$, $R_{cavity} > R$, and $R_{cavity} \leq R$. 
+
+%\begin{equation}\label{3_parts_to_mu_ex}{W_{rev}(R_{cavity})=\left\{ \begin{array}{rc} P\frac{4\pi}{3}R_{cavity}^3 & R_{cavity} >> R 
+%\\ P\frac{4\pi}{3}R_{cavity}^3 + c_2R_{cavity}^2 + c_1R_{cavity}^1 + c_0R_{cavity}^0  & R_{cavity} > R \\ -k_BT(\ln(1-n\frac{4\pi}{3}(R_{cavity})^3)) & R_{cavity} \leq R\end{array}\right.}\end{equation}
+
+%%The first function, valid for $R_o >> R$, yields the dominant term to which the second function, valid for $R_o > R$,  
+%%must tend toward in the limit that $R_o$ goes to infinity. By expanding the logrythmic term (ln(1-x)= ...) 
+%%in the last function, valid for $R_o < R$, the function can be expressed in terms of powers of $R_o$. 
+
+%%The first and last functions in Equation~\ref{3_parts_to_mu_ex} are derived from theory, and since they 
+%The first and last functions in Equation~\ref{3_parts_to_mu_ex} can be expressed in terms of powers of $R_{cavity}$, 
+%and so it is assumed that the middle function, which is valid for values of $R_{cavity}$ in between the two extremes, 
+%can also be expressed in terms of powers of $R_{cavity}$.  
+%The coeficients $c_2$, $c_1$ and $c_0$ are determnined by considering that the three functions must be conintuous at 
+%the boundaries along with their first and second derivatives, and using Equation~\ref{mu_excess}.The chemical potential then becomes
+%\begin{equation}\mu_{ex}=-k_BT\left(\ln(1-\eta) + \frac{6\eta}{1-\eta}+\frac{9\eta^2}{2(1-\eta)^2}+\frac{PV\eta}{k_BTN}\right)\end{equation}
+%where $\eta$ is the packing fraction given by
+%\begin{displaymath}\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}=\frac{N\frac{4}{3}\pi{R}^3}{V}\end{displaymath} 
+
+%%The last two functions, valid for $R_o > R$, and $R_o < R$, and their first and second derivatives must be continuous at $R_o=R$. 
+%%From these considerations, factors $c_2$, $c_1$ and $c_0$ can be determnined, and using the relation 
+%%...ADD!...P, an expression is found for the reversible work done when $R_o=R$ which is equal to the excess chemical potential. 
+%%From the expression for pressure given by
+
+%The pressure can be obtained from \color{red}
+%\begin{equation}{\frac{\partial{P}}{\partial{N}}\bigg|_{T,V}V=N\frac{\partial\mu}{\partial{N}}\bigg|_{T,V}}\end{equation} \color{black}
+%%The excess Hemlholtz free energy is then found from the relation
+%and the Helmholz free energy from
+%\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\text{or}{~~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{displaymath}
+%which gives
+%%\begin{displaymath}F_{ex}=\end{displaymath}
+%\begin{equation}F_{excess}=k_BTN\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)\end{equation} 
