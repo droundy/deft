@@ -63,7 +63,7 @@ for kT in kTs:
             # run_new_melting(kT, n, 0.01, 0.2, 0.01)    #temp, density, gw_start, gw_end, gw_step
         # else:
             # run_new_melting(kT, n, 0.01, 0.2, 0.01)
-    for n in np.arange(0.72, 0.73, 0.02):
+    for n in np.arange(1.78, 1.79, 0.02):
          #run_new_melting(kT, n, 0.001, 0.001, 0.001) #super fast for homogeneous at the high temps I'm running
          run_new_melting(kT, n, 0.01, 0.2, 0.01)
     # for n in np.arange(1.22, 1.42, 0.02):
