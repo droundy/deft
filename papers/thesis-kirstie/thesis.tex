@@ -1094,10 +1094,12 @@ volume.
 %as it depends on the interatomic potential V(r). 
 We use Soft Fundamental Measure Theory to find the excess Helmholtz free energy.
 The functional is written in general form as 
-\begin{displaymath}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{displaymath} 
+\begin{align}
+  F_{excess}[n(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
+\end{align}
 where
 \begin{align}
-\Phi_1 &= -n_{0}ln(1-n_{3}) \\
+\Phi_1 &= -n_{0}\ln(1-n_{3}) \\
 \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
 \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
 \end{align} 
