@@ -1043,7 +1043,9 @@ The liquid ideal Helmholtz free energy $F_{Hideal}$ is computed
 analytically for a given homogeneous reduced density $n^*$, and reduced 
 temperature $t^*$ from the equation 
 %\begin{displaymath}{\frac{F_{Hideal}}{V}=k_BTn(\ln(\frac{n*2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)-DELETE-EQN!}\end{displaymath} 
-\begin{displaymath}{\frac{F_{Hideal}}{V}=k_BTn(\ln(n\Lambda^3)-1.0)}\end{displaymath} 
+\begin{align}
+  \frac{F_{Hideal}}{V}=k_BTn(\ln(n\Lambda^3)-1.0)
+\end{align}
 where $\sigma=1$ (which gives $n^*=n\sigma^3$=n), and $\epsilon=1$ (which 
 gives $t^*=\frac{k_BT}{\epsilon}=k_BT$). The quantity $\Lambda$ is the DeBroglie 
 wavelength given by
@@ -1055,7 +1057,9 @@ where in our program we have set
 %\begin{displaymath}{k_B=}\end{displaymath} 
 
 The crystal ideal Helmholtz free energy $F_{Cideal}$ is computed from the equation 
-\begin{displaymath}{F_{Cideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV}\end{displaymath}
+\begin{align}
+  F_{Cideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV
+\end{align}
 with the varying number density profile given by 
 \begin{displaymath}
   {n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}}
