@@ -804,11 +804,11 @@ A new set of weight functions can then be derived for a system of soft spheres.
 We use classical Density Functional Theory (cDFT) in conjunction 
 with Soft Fundamental Measure Theory (SFMT) to find the equilibrium free 
 energy of a system, and the corresponding equilibrium number density profile. 
-In particular, SFMT is used to form the expression for the excess free energy 
-without having to take into account the interaction each sphere, or atom, 
-has with every other sphere. The excess free energy is then added to the 
-ideal free energy calculated analytically to find the resulting free energy 
-for the system. 
+In particular, SFMT is used to form the expression for the excess Helmholtz 
+free energy without having to take into account the interaction each sphere, 
+or atom, has with every other sphere. The excess free energy is then added 
+to the ideal free energy calculated analytically to find the resulting 
+free energy for the system. 
 \begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
 For a spatially varying number density, as would be expected for a crystal, 
 the free energy is a functional of the number density profile $n(\vec{r})$  
@@ -824,32 +824,17 @@ in a crystalline state if the crystal free energy is lower than the liquid
 free energy, and it will be completely in a liquid state if the liquid 
 free energy is lower than the crystal free energy.
 
-***** DFT uses n(r) for BOTH Fideal and Fexcess ******
-
-To implement cDFT computationally, we begin by picturing one single crystal 
-cell. Although the crystal structure is composed of Face Centered Cubic (FCC) 
-cells, the entire lattice can be generated with a cell one-fourth the size 
-called a primitive cell shown by the shaded region in Figure \ref{fig:primitivecell}. 
-The primitive cell has the shape of a parallelpiped, and contains the 
-equivalent of one atom.
-
-%move this paragraph to methods?
------------*****-------------
-
 Although the entire crystal lattice can be constructed with FCC cells, 
 FCC cells are not the smallest cells with which the lattice can be built. 
-The shaded parallepiped shown within a FCC cell in Figure \ref{fig:primitivecell} 
+The shaded parallepiped shown within the FCC cell in Figure \ref{fig:primitivecell} 
 is the smallest structure that, when repeated, re-creates the entire crystal 
-lattice. The parallepiped primitive cell takes up one-fourth the volume 
-of an FCC cell, includes portions of eight atoms for a total of one full 
-atom, and has eight lattice sites convenietly reachable by moving along 
-one of three different lattice vectors to step from one atom to the next. 
-The three lattice vectors will be useful in creating the lattice structure 
-computationally, and will also make the program run faster.
-
-----------****--------------
-%-------------------------------
-
+lattice. This parallepiped primitive cell takes up one-fourth the volume 
+of an FCC cell, and contains the equivalent of one atom.
+It includes portions of eight atoms each located on a lattice site convenietly 
+reachable by moving along one of three different lattice vectors to step 
+from one atom to the next. The three lattice vectors will be useful in 
+creating the lattice structure computationally, and will also make the 
+program run faster.
 
   \begin{figure}[h!]
     \centering
@@ -858,40 +843,46 @@ computationally, and will also make the program run faster.
     \label{fig:primitivecell}
   \end{figure}
 
-  \begin{figure}[h!]
-    \centering
-    % FIXME \includegraphics[height=4.5cm]{Simple_Cell.png}
-    \caption{A Simplified Crystal Cell}
-    \label{fig:simplecell}
-  \end{figure}
+  %\begin{figure}[h!]
+    %\centering
+    %% FIXME \includegraphics[height=4.5cm]{Simple_Cell.png}
+    %%\caption{A Simplified Crystal Cell}
+    %\label{fig:simplecell}
+  %\end{figure}
 
-This cell is rather complicated for the purposes of this discussion, so 
-consider instead a simplified crystal cell with one atom in its center 
-as shown in Figure \ref{fig:simplecell}. The Helmholtz free energy is 
-minimized for a fixed volume (and temperature and number of particles).  
-A fixed cubical volume called the ``bold-box" volume, $V_{bold-box}$ will 
-be used for illustration. The number density n for a collection of 
-simplified cells is simply 1 atom per fixed bold-box volume.
-\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} 
-It is easier to think of 1 atom per ``box" (a reduced number density) 
-than 1 atom per some length$^3$ (the actual number density). Reduced number 
-density is given by $n^*$ and is equal to the number of atoms in a ``box" 
-of size $\sigma^3$.
-\begin{displaymath}{n^*=n\sigma^3}\end{displaymath} If $V_{bold-box}$  
-has a volume of $\sigma^3$, the reduced number density is just the number 
-of atoms in the fixed bold-box volume. 
-\begin{displaymath}\text{Reduced Number Density of the simple cell = 1 atom}\end{displaymath} 
-
-In a large collection of simple cells, the atom at the center of each cell 
+%\textcolor{red}{This cell is rather complicated for the purposes of this discussion, so 
+%consider instead a simplified crystal cell with one atom in its center 
+%as shown in Figure \ref{fig:simplecell}. The Helmholtz free energy is 
+%minimized for a fixed volume (and temperature and number of particles).  
+%A fixed cubical volume called the ``bold-box" volume, $V_{bold-box}$ will 
+%be used for illustration. The number density n for a collection of 
+%simplified cells is simply 1 atom per fixed bold-box volume.
+%\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} 
+%It is easier to think of 1 atom per ``box" (a reduced number density) 
+%than 1 atom per some length$^3$ (the actual number density). Reduced number 
+%density is given by $n^*$ and is equal to the number of atoms in a ``box" 
+%of size $\sigma^3$.
+%\begin{displaymath}{n^*=n\sigma^3}\end{displaymath} If $V_{bold-box}$  
+%has a volume of $\sigma^3$, the reduced number density is just the number 
+%of atoms in the fixed bold-box volume. 
+%\begin{displaymath}\text{Reduced Number Density of the simple cell = 1 atom}\end{displaymath} 
+%}
+In a large collection of cells, the atom at each lattice site of 
 will not realistically reside exactly at the lattice point in the center 
 of the cell. Statistically there will typically be a normal distribution 
 of positions about the lattice point as pictured in the far right box in 
 Figure \ref{fig:Ensemble_Gaus}. A plot of a 2-dimensional Gaussian 
-distribution is shown in Figure \ref{fig:Gaus_plot}. A 3-dimenstional 
-Gaussian distribution centered at a lattice point can be used to represent 
+distribution is shown in Figure \ref{fig:Gaus_plot}. 
+A 3-dimensional Gaussian distribution centered at a lattice point can be used to represent 
 a number density profile $n(\vec{r})$  which describes how the atoms are 
-statistically distrubuted over a collection of cells.
-
+statistically distrubuted over a collection of cells. 
+%In 3-dimensions, the Gaussian function takes on the form
+%\begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int{e}^{-\frac{r^2}{2\sigma^2}}d\vec{r}}\end{equation} 
+It is important to note that the number density does not change when introducing a number 
+density profile. There are still the same number of atoms over some fixed volume. 
+%There is still a total of one atom per ``bold box" volume.
+%\begin{equation}{n=<n(\vec{r})>=\frac{1}{V_{bold-box}}\overbrace{\int_{bold-box}{n(\vec{r})}{d\vec{r}}}=\frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{equation}
+\begin{equation}{n=<n(\vec{r})>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}=\frac{1~\text{atom}}{V}}\end{equation}
   \begin{figure}[h!]
     \centering
     \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
@@ -906,36 +897,32 @@ statistically distrubuted over a collection of cells.
     \label{fig:Gaus_plot}
   \end{figure}  
 
-It is important to note that the number density does not change when 
-introducing a number density profile. There is still a total of one atom 
-per ``bold box" volume.
-
-\begin{equation}{n=<n(\vec{r})>=\frac{1}{V_{bold-box}}\overbrace{\int_{bold-box}{n(\vec{r})}{d\vec{r}}}=\frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{equation}
-
-In a large collection of cells, not all lattice sites will be occupied. 
-Vacancies can be taken into account while keeping the volume of the 
-bold box, and thus the overall number density, the same. This is done by 
+It may be that not all lattice sites are occupied. Vacancies can be taken 
+into account while keeping %the volume of the bold box, and thus 
+the overall number density the same. This is done by 
 making the cells smaller. A large collection of smaller cells creates a 
 new number density profile shown in Figure \ref{fig:Ensemble_Smallcells} 
-with eight smaller Gaussians of one-eigth the height.
+with eight smaller Gaussians of one-eigth the height. 
+Instead of thinking of an atom in one of the eight small cells, the same 
+Gaussian distribution can be obtained from thinking of one-eigth of an 
+atom in each small cell. This makes it convenient to describe the new 
+number density in terms of the fraction of vacancies, $f_v$: 
+
+\begin{displaymath}{ n = (1-f_v){n_{no.vacancies}}}\end{displaymath} 
+%\begin{align}
+  %n(\vec{r})=(1-f_v)\frac{\exp^{-\frac{{\vec{r}}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}
+%\end{align}
 
  \begin{figure}[h!]
     \centering
-    % FIXME \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
+    \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
     \caption{A Gaussian Distribution Number Density Profile}
     \label{fig:Ensemble_Smallcells}
   \end{figure} 
 
-Instead of thinking of an atom in one of the eight small cells, the same 
-Gaussian distribution can be obtained from thinking of one-eigth of an 
-atom in each small cell. This makes it convenient to describe the new 
-reduced number density in terms of the fraction of vacancies, $f_v$: 
-
-\begin{displaymath}{ n^* = (1-f_v){n_{no.vacancies}^*}}\end{displaymath} 
-
 \begin{figure}[h!]
     \centering
-    % FIXME \includegraphics[height=2.5cm]{SameStatPic.png}
+    \includegraphics[height=2.5cm]{SameStatPic.png}
     \caption{Front views of a cube with eight smaller cells. The two views 
     show two ways of picturing a fraction of vacancies, $f_v$ of 7/8 which 
     give rise to the same Gaussian distribution statistically}
@@ -943,49 +930,56 @@ reduced number density in terms of the fraction of vacancies, $f_v$:
   \end{figure} 
 
 By varying the width of the Gaussians and the fraction of vacancies, new 
-number density profiles can be generated as shown in Figure \ref{fig:Ensemble_vary}.
+number density profiles can be generated as shown in Figure~\ref{fig:Ensemble_vary}.
+Once again, it is important to note that the number density is the same 
+for all these number density profiles $n(\vec{r})$. 
+%There is still a total of one atom per ``bold box" volume. 
+%This prodcedure is used only to find the crystal free energy as the number density 
+%profile for a liquid is homogeneous, as shown in Figure \ref{fig:homogen_denisty}.  
+A homogeneous number density profile is shown in Figure \ref{fig:homogen_denisty}.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{VaryWidthandVacancies.png}
     \caption{Several Gaussian Distribution Number Density Profiles all 
-    with a number density of 1 atom per $V_{bold box}$}
+    with the same number density, that is, there is one atom over the fixed volume.}
     \label{fig:Ensemble_vary}
   \end{figure}  
-
-Once again, it is important to note that the number density is the same 
-for all these number density profiles $n(\vec{r})$. There is still a total 
-of one atom per ``bold box" volume. This prodcedure is used only to find 
-the crystal free energy as number density profile for a liquid is 
-homogeneous, as shown in Figure \ref{fig:homogen_denisty}.  
 
  \begin{figure}[h!]
     \centering
     \includegraphics[height=4cm]{figs/homogeneous_bold-box.pdf}
-    % FIXME \includegraphics[height=4cm]{Homogeneous_bold-box.pdf}
     \caption{A homogeneouse number density profile $n(\vec{r})$}
     \label{fig:homogen_denisty}
-  \end{figure}    
- 
-A simplified flowchart of the program created to investigate the freezing 
-of a WCA fluid is shown below. The program takes four inputs: reduced number 
-density n*, reduced temperature t*, a range of Gaussian 
-widths gw, and a range of fraction of vacancies fv. The number density 
-profile is varied by varying gw and fv, and the free energy $F[n(\vec{r})]$ 
-is calculated for each profile until the minimum free energy is found for 
-that combination of $n^*$ and $t^*$, which is known from cDFT to be unique. 
-The process is then repeated to find the free energies at other number 
-densities and temperatures. 
+  \end{figure}   
+  
+%The number density profile is varied by varying gw and fv, and the 
+For a given combination of number density and temperature, a suite of number 
+density profiles are generated.
+% like those represented by Figure~\ref{fig:Ensemble_vary}.
+The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number density profile,
+and also for the homogeneous number denisty profile. 
+Both the ideal and excess free energies are found, and added together to get the total Helmholtz 
+free energy.
+The Helmholtz free energy is minimized for a system with a fixed temperature, 
+volume, and number of particles. Setting the number of particles to one, 
+the volume can be found from the number density.
+The process is then repeated to find the free energies at other combinations 
+of number densities and temperatures. 
 
-%Program Implementation
-The program computes both the crystal and the homogeneous Helmholtz free 
-energies. The Helmholtz free energy is minimized for a system with a fixed 
-temperature, volume, and number density. The temperature, T is an input to 
-the program. The number density, which is also an input to the program, 
-is used to calculate the volume of one primitive cell over which the free 
-energy is computed. The number of atoms in one primitive cell is one. To 
-compute the free energy, it is necessary to compute both the ideal and 
-excess free energies and add them, $F = F_{ideal} + F_{excess}$.
+%The number of atoms in one primitive cell is one. 
+
+In general, if at some number density and temperature the crystal free energy 
+is lower than the homogeneous free energy of the liquid then the fluid will 
+be in the crystalline state. If the crystal free energy is higher than 
+the homogeneous free energy, then the fluid will be in the liquid state. 
+However, there is a region of densities between the liquid and crystal 
+states that are forbidden, and so the actual state can not be determined 
+just by which energy is lower at that particular number density and
+temperature. Maxwell's Double Tangent Construction must be implemented 
+using the date collected to determine the actual crystal and liquid states, 
+and construct phase diagrams.
+
 %\begin{displaymath}F_{homogeneous} = F_{ideal.homogeneous} + F_{excess.homogeneous}\end{displaymath}
 %\begin{displaymath}F_{crystal} = F_{ideal.crystal} + F_{excess.crystal}\end{displaymath}
 %\newline
@@ -994,99 +988,27 @@ excess free energies and add them, $F = F_{ideal} + F_{excess}$.
 %\newline Outputs: Homogeneous (liquid)  Helmholtz free energy (at the given T,V,N) 
 %\newline\indent\indent\indent Crystal Helmholtz free energy (at the given T,V,N)
 
-%\noindent Input:
-\begin{displaymath}\text{Input:~~~~~~~~~~~~~~~~~~~~~~~~~~~T,~~ n,~~Range of fv,~~Range of gw~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
-%\noindent Set:
-%\begin{displaymath}\text{N = 1}\end{displaymath}
-\begin{displaymath}\text{Set:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~N~=~1~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
-\begin{displaymath}\text{Best}\left(\frac{F}{N}\right)_{diff}= 1e100\end{displaymath}
-%Outer Loop:  %set fv to one of the input values
-Loop: 
-\begin{displaymath}\text{fv = one of the fv values from input}\end{displaymath}
-\begin{equation}N_{primitive.cell}=(1-\text{fv})\text{N}\end{equation}
-\begin{equation}V_{primitive.cell}=\frac{\text{1}}{\text{n}}(1-\text{fv})\text{N}\end{equation}
-%\indent\indent\indent Inner Loop : %set gw to one of the input values
-\begin{displaymath}\sigma = \text{one of the gw values from input}\end{displaymath}
-\begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int\exp^{-\frac{|\vec{r}-\vec{R}|^2}{2\sigma^2}}d\vec{r}}\end{equation} 
-\begin{equation}\left(\frac{F}{N}\right)_{crystal}=\frac{cFideal_{primitive.cell} + cFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
-\begin{equation}\left(\frac{F}{N}\right)_{homogeneous}=\frac{hFideal_{primitive.cell} + hFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
-\begin{equation}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{crystal}-{~~}\left(\frac{F}{N}\right)_{homogeneous}\end{equation}
+%PROGRAM FLOWCHART ---------------------------
+%\begin{displaymath}\text{Input:~~~~~~~~~~~~~~~~~~~~~~~~~~~T,~~ n,~~Range of fv,~~Range of gw~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
+%\begin{displaymath}\text{Set:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~N~=~1~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
+%\begin{displaymath}\text{Best}\left(\frac{F}{N}\right)_{diff}= 1e100\end{displaymath}
+%Loop: 
+%\begin{displaymath}\text{fv = one of the fv values from input}\end{displaymath}
+%\begin{equation}N_{primitive.cell}=(1-\text{fv})\text{N}\end{equation}
+%\begin{equation}V_{primitive.cell}=\frac{\text{1}}{\text{n}}(1-\text{fv})\text{N}\end{equation}
+%\begin{displaymath}\sigma = \text{one of the gw values from input}\end{displaymath}
+%\begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int\exp^{-\frac{|\vec{r}-\vec{R}|^2}{2\sigma^2}}d\vec{r}}\end{equation} 
+%\begin{equation}\left(\frac{F}{N}\right)_{crystal}=\frac{cFideal_{primitive.cell} + cFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
+%\begin{equation}\left(\frac{F}{N}\right)_{homogeneous}=\frac{hFideal_{primitive.cell} + hFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
+%\begin{equation}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{crystal}-{~~}\left(\frac{F}{N}\right)_{homogeneous}\end{equation}
+%\begin{displaymath}\text{If~~~~~~}\left(\frac{F}{N}\right)_{diff}<\text{~~~~Best}\left(\frac{F}{N}\right)_{diff}\end{displaymath}
+%\begin{displaymath}\text{Then~~~~~~}\text{Best}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{diff}\end{displaymath}
+%\begin{displaymath}\text{Output:~~~~~~~~~~~~ Best}\left(\frac{F}{N}\right)_{crystal}\text{~~and~~~~~~}\left(\frac{F}{N}\right)_{homogeneous}\text{~~~~for the given T, n ~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
 
-%Compare:
-\begin{displaymath}\text{If~~~~~~}\left(\frac{F}{N}\right)_{diff}<\text{~~~~Best}\left(\frac{F}{N}\right)_{diff}\end{displaymath}
-\begin{displaymath}\text{Then~~~~~~}\text{Best}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{diff}\end{displaymath}
-%\noindent Output:
-\begin{displaymath}\text{Output:~~~~~~~~~~~~ Best}\left(\frac{F}{N}\right)_{crystal}\text{~~and~~~~~~}\left(\frac{F}{N}\right)_{homogeneous}\text{~~~~for the given T, n ~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
 %\begin{displaymath}\text{Best}\left(\frac{F}{N}\right)_{crystal}\end{displaymath}
 %\begin{displaymath}\left(\frac{F}{N}\right)_{homogeneous}\end{displaymath}
 %lattice_constant= pow(4*(1-fv)/reduced_density, 1.0/3)
-\newline
-\newline
-*****   start stuff  ******
 
-In general, if the crystal free energy at some $n^*$ and $t^*$ is lower 
-than the homogeneous free energy of a liquid at that same $n^*$ and $t^*$, 
-then the crystaline state dominates. But if the crystal free energy is 
-higher than the homogeneous free energy, the liquid state dominates. 
-However, there is a region of densities between the liquid and crystal 
-states that are forbidden, and so the actual state can not be determined 
-just by which energy is lower at that particular $n^*$ and $t^*$. Maxwell's 
-Double Tangent Construction must be implemented using the date collected 
-to determine the actual crystal and liquid states, and construct phase 
-diagrams. 
-
-*****  end  stuff  ******
-
-\section{Computing the Liquid and Crystal Ideal Helmholtz free energies}
-
-The liquid ideal Helmholtz free energy $F_{Hideal}$ is computed 
-analytically for a given homogeneous reduced density $n^*$, and reduced 
-temperature $t^*$ from the equation 
-%\begin{displaymath}{\frac{F_{Hideal}}{V}=k_BTn(\ln(\frac{n*2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)-DELETE-EQN!}\end{displaymath} 
-\begin{align}
-  \frac{F_{Hideal}}{V}=k_BTn(\ln(n\Lambda^3)-1.0)
-\end{align}
-where $\sigma=1$ (which gives $n^*=n\sigma^3$=n), and $\epsilon=1$ (which 
-gives $t^*=\frac{k_BT}{\epsilon}=k_BT$). The quantity $\Lambda$ is the DeBroglie 
-wavelength given by
-\begin{displaymath}{\Lambda =\sqrt{\frac{2\pi\hbar^2}{k_BTm}}}\end{displaymath}  
-where in our program we have set
-\begin{displaymath}\left(\sqrt{\frac{2\hbar^2}{m}}\right)^3=4.752731840013864\text{x}10^{-7}\color{red}units?\color{black}\end{displaymath} 
-%\begin{displaymath}{m=}\end{displaymath}  
-%\begin{displaymath}{\hbar=}\end{displaymath} 
-%\begin{displaymath}{k_B=}\end{displaymath} 
-
-The crystal ideal Helmholtz free energy $F_{Cideal}$ is computed from the equation 
-\begin{align}
-  F_{Cideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV
-\end{align}
-with the varying number density profile given by 
-\begin{displaymath}
-  {n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}}
-\end{displaymath}
-For small gw values it is assumed that the Guassians do not overlap, 
-in which case the equation for the free energy can be simplified, and solved
-analytically with the result
-\begin{equation}
- F_{Cideal}=(1-f_v)k_BT\left(\ln((1-f_v)\Lambda^3)-3\ln(\sqrt{2\pi{gw}})-\frac{5.0}{2}\right)
-\end{equation}
-For larger gw values it is assumed that the Gaussians do overlap, 
-and so the free energy is caluculated computationally. First dx is scaled by gw,
-\begin{equation}
-  dx_{scaled} = (dx_{input})(gw)
-\end{equation}
-and then $n(\vec{r})$ is computed at one position of $\vec{r}$ within the 
-primitive cell taking into account the contribution of Gaussians from 
-many (5x5x5) nearby cells whose centers are given by $R_i$.
-%\begin{displaymath}{n(|\vec{r}-\vec{R_i}|)+=\frac{(1-f_v)\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}\end{displaymath}
-The contribution to the free energy of $n(\vec{r})$ at the one position is then
-added to the accumulating sum.
-%\begin{displaymath}{cF_{ideal}+=k_BTn(ln(\frac{(n)2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)dV-DELETE-EQN!}\end{displaymath}
-%\begin{displaymath}{cF_{ideal}+=k_BTn(\ln(n\Lambda^3)-1.0)dV}\end{displaymath}
-This process is repeated for all positions within one primitive cell to get the
-crystal ideal free energy for the primitive cell. This energy is then divided by
-the volume of the primitive cell to get the crystal ideal free energy per
-volume.
 
 \section{Our Functional for the Excess Helmholtz free energy}
 
@@ -1106,7 +1028,11 @@ where
 and Tarazona's tensor expression~\cite{tarazonaphi3, santos2012phi3} is used 
 for $\Phi_3$. The weigthed densities $n_0, n_1, n_2,$ and $n_3$ are found from
 \begin{equation}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
-where the weight functions $w_0, w_1, w_2,$ and $w_3$ are given by
+where the number density profile $n(\vec r)$ within the integral is given by a Gaussian function,
+%\begin{align}
+  %n(\vec r)=(1-f_v)\frac{\exp^{-\frac{r^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}
+%\end{align}
+and the weight functions $w_0, w_1, w_2,$ and $w_3$ are given by
 \begin{align}\label{eq:weights}
   w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
   w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
@@ -1290,27 +1216,74 @@ the weight function.
     \end{figure} 
 \color{black}
 
-\section{Computing the Liquid and Crystal Excess Helmholtz free energies}
+\section{Computing the Liquid and Crystal Helmholtz free energies}
 
-The liquid excess free energy $F_{Hexcess}$ is computed analytically for 
-a given homogeneous reduced density $n^*$, and reduced temperature $t^*$ 
+The liquid ideal Helmholtz free energy is computed analytically 
+from Equation~\ref{} 
+for a given homogeneous reduced density $n^*$, and reduced temperature $t^*$. 
+%from the equation 
+%\begin{displaymath}{\frac{F_{Hideal}}{V}=k_BTn(\ln(\frac{n*2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)-DELETE-EQN!}\end{displaymath} 
+%\begin{align}
+  %\frac{F_{Hideal}}{V}=k_BTn(\ln(n\Lambda^3)-1.0)
+%\end{align}
+%The quantity $\Lambda$ is the DeBroglie wavelength given by
+%\begin{displaymath}{\Lambda =\sqrt{\frac{2\pi\hbar^2}{k_BTm}}}\end{displaymath}  
+%where in our program we have set
+%\begin{displaymath}\left(\sqrt{\frac{2\hbar^2}{m}}\right)^3=4.752731840013864\text{x}10^{-7}\color{red}units?\color{black}\end{displaymath} 
+%\begin{displaymath}{m=}\end{displaymath}  
+%\begin{displaymath}{\hbar=}\end{displaymath} 
+%\begin{displaymath}{k_B=}\end{displaymath} 
+The crystal ideal Helmholtz free energy is computed computationally 
+from Equation~\ref{} with the varying number density profile given by
+%\begin{align}
+  %F_{Cideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV
+%\end{align} 
+\begin{align}
+  {n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{e^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}}}
+\end{align}
+%For small gw values it is assumed that the Guassians do not overlap, 
+%in which case the equation for the free energy can be simplified, and solved
+%analytically with the result
+%\begin{equation}
+ %F_{Cideal}=(1-f_v)k_BT\left(\ln((1-f_v)\Lambda^3)-3\ln(\sqrt{2\pi{gw}})-\frac{5.0}{2}\right)
+%\end{equation}
+%For larger gw values it is assumed that the Gaussians do overlap, 
+%and so the free energy is caluculated computationally. First dx is scaled by gw,
+%\begin{equation}
+  %dx_{scaled} = (dx_{input})(gw)
+%\end{equation}
+%and then $n(\vec{r})$ is computed at one position of $\vec{r}$ within the 
+%primitive cell taking into account the contribution of Gaussians from 
+%many (5x5x5) nearby cells whose centers are given by $R_i$.
+%%\begin{displaymath}{n(|\vec{r}-\vec{R_i}|)+=\frac{(1-f_v)\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}\end{displaymath}
+%The contribution to the free energy of $n(\vec{r})$ at the one position is then
+%added to the accumulating sum.
+%%\begin{displaymath}{cF_{ideal}+=k_BTn(ln(\frac{(n)2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)dV-DELETE-EQN!}\end{displaymath}
+%%\begin{displaymath}{cF_{ideal}+=k_BTn(\ln(n\Lambda^3)-1.0)dV}\end{displaymath}
+%This process is repeated for all positions within one primitive cell to get the
+%crystal ideal free energy for the primitive cell. This energy is then divided by
+%the volume of the primitive cell to get the crystal ideal free energy per
+%volume.
+
+The liquid excess Helmholtz free energy is computed analytically  
+%for a given homogeneous reduced density $n^*$, and reduced temperature $t^*$ 
 using SFMT with a uniform number density profile, n that does not depend 
 on $\vec r$. 
 %done in hf.energy() note- does not depend on fv or gw but does use SFMT):
-\begin{displaymath}{\frac{F_{Hexcess}}{V} = k_BT(\Phi_1+\Phi_2+\Phi_3)}\end{displaymath} 
-For the case of a homogeneous number density n, $\Phi_2$, and $\Phi_3$ simplify to:
+%\begin{displaymath}{\frac{F_{Hexcess}}{V} = k_BT(\Phi_1+\Phi_2+\Phi_3)}\end{displaymath} 
+%For the case of a homogeneous number density n, $\Phi_2$, and $\Phi_3$ simplify to:
 %\begin{displaymath}{\Phi_1= -n_0\ln(1-n_3)}\end{displaymath} 
-\begin{displaymath}{\Phi_2= \frac{n_1n_2}{1-n_3}}\end{displaymath} 
-\color{red}\begin{displaymath}{\Phi_3=\frac{n_2^3}{24\pi(1-n_3)^2}}\end{displaymath}\color{black}
-The weighted densities are found from
-\begin{displaymath}{n_i=nw_i}\end{displaymath} 
-where the weights $w_i$ are given by Equations~\ref{eq:weights}.
+%\begin{displaymath}{\Phi_2= \frac{n_1n_2}{1-n_3}}\end{displaymath} 
+%\color{red}\begin{displaymath}{\Phi_3=\frac{n_2^3}{24\pi(1-n_3)^2}}\end{displaymath}\color{black}
+%The weighted densities are found from
+%\begin{displaymath}{n_i=nw_i}\end{displaymath} 
+%where the weights $w_i$ are given by Equations~\ref{eq:weights}.
 
-The crystal excess free energy $F_{Cexcess}$ is computed computationally 
+The crystal excess Helmholtz free energy is computed computationally 
 using SFMT with a number density profile $n(\vec r)$ that varies spacially.
 %First dx is scaled by $\Xi$ or gw, whichever is larger \begin{displaymath}{dx_{scaled}=(dx_{input})(\Xi + gw)}\end{displaymath}
 %Then the crystal, or inhomogeneous, excess free energy is found from
-\begin{displaymath}{F_{Cexcess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{displaymath} 
+%\begin{displaymath}{F_{Cexcess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{displaymath} 
 Monte-Carlo integration is used to compute the weighted densities 
 $n_0(\vec{r})$, $n_1(\vec{r})$, $n_2(\vec{r})$, $n_3(\vec{r})$.
 %form $\Phi_1(\vec{r})$, $\Phi_2(\vec{r})$, and $\Phi_3(\vec{r})$.
