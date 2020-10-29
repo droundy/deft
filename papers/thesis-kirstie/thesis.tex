@@ -50,53 +50,82 @@ at a given temperature and density.
 %Once the Helmholtz free energy for both the crystal and liquid states of 
 %the fluid are found for a given temperature and density, they can be 
 %compared to find the resulting state of the fluid. 
-Outside the region of 
-coexistence which exists between the liquid and crystal states, 
-the fluid will be completely in a crystalline state if the 
-crystal free energy is lower than the liquid free energy, and it will be 
-completely in a liquid state if the liquid free energy is lower than 
-the crystal free energy. Maxwell's Double Tangent Construction is used 
-to determine the actual number densities of the crystal and liquid states
-at the boundaries of the coexistance region for a given temperature from 
-which the phase diagrams can be constructed.
-
+%
+%save:
+%Outside the region of 
+%coexistence which exists between the liquid and crystal states, and which 
+%consists of various amounts of liquid and crystal existing together,
+%the fluid will be completely in a crystalline state if the 
+%crystal free energy is lower than the liquid free energy, and it will be 
+%completely in a liquid state if the liquid free energy is lower than 
+%the crystal free energy. Maxwell's Double Tangent Construction is used 
+%to determine the actual number densities of the crystal and liquid states
+%at the boundaries of the coexistance region for a given temperature from 
+%which the phase diagrams can be constructed.
+%end save
+%
 %In general, if at some number density and temperature the crystal free energy 
 %is lower than the homogeneous free energy of the liquid, then the fluid will 
 %be in the crystalline state. If the homogeneous liquid free energy is lower 
 %than the crystal free energy, then the fluid will be in the liquid state. 
-
+%
 %To find the equilibrium Helmholtz free energies we use classical Density 
 %Functional Theory (cDFT) in conjunction with Soft Fundamental Measure Theory (SFMT).
 %%the corresponding equilibrium number density profile. 
 %In particular, 
-
-In general, the Helmholtz free energy can be written as a functional of 
+In general, the Helmholtz free energy, 
+which consists of an ideal part and an excess part ,
+can be written as a functional of 
 the number density profile $n(\vec{r})$ which describes the way the average number 
 density varies spatially. 
 \begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
-Classical Density Functional Theory (cDFT) is used to find the equilbrium 
-Helmholtz free energy of the system 
-by varying the number density profile $n(\vec{r})$ until the free energy 
-is minimized. The minimum free energy, and its corresponding number 
-density profile are then the equilibrium values of the Helmholtz free energy
-of the system at the given temperature and number density. 
+%
 
-To find the Helmholtz free energy both the ideal Helmholtz free energy
-and the excess Helmholtz free energy must be found and added together.
-The ideal Helmholtz free energy is the free energy the fluid would have in
-the absence of any interactomic potential energy $V(r)$ between the spheres, 
-or atoms that make up the fluid. The excess Helmholtz free energy is that 
-additional energy which results from the presence of an interatomic potential 
-energy $V(r)$ between the spheres.
+In this paper, classical Density Functional Theory (cDFT)
+will be used to find the equilibrium Helmholtz free energy, and 
+Soft Fundamental Measure Theory (SFMT) will be used to form the functional for the excess Helmholtz 
+free energy. 
+%to predict the freezing of a Weeks-Chandler-Anderson 
+%model fluid by applying SFMT with Schmidt's proposed erf model, and our temperature
+%dependent parameters to form the functional for the excess Helmholtz free energy. 
+%for generating the weight funcions, and Tarazona's tensor functional. 
+%
+%Classical Density Functional Theory (cDFT) is used to find the equilbrium 
+According to classical Density Functional Theory (cDFT) the equilbrium 
+Helmholtz free energy of the system 
+can be found
+by varying the number density profile $n(\vec{r})$ until the free energy 
+is minimized. 
+%The minimum free energy, and its corresponding number 
+%density profile are then the equilibrium values of the Helmholtz free energy
+%of the system at the given temperature and number density. 
+%
+%To find the Helmholtz free energy both the ideal Helmholtz free energy
+%and the excess Helmholtz free energy must be found and added together.
+%The ideal Helmholtz free energy is the free energy the fluid would have in
+%the absence of any interactomic potential energy $V(r)$ between the spheres, 
+%or atoms that make up the fluid. 
+%
+%The excess Helmholtz free energy is that 
+%additional energy beyond the ideal Helmholtz free energy which results from the presence of an interatomic potential 
+%energy $V(r)$ between the spheres.
+%
 %\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
 %For a spatially varying number density, as would be expected for a crystal, 
 %the free energy is a functional of the number density profile $n(\vec{r})$  
 %The Helmholtz free energy excess free energy is then added to the ideal free energy calculated 
 %analytically to find the resulting free energy for the system. 
-Soft Fundamental Measure Theory (SFMT) is a method used to form an expression 
-for the excess Helmholtz free energy of a particular model fluid without 
-having to take explicitly into account the interaction each sphere, or atom, 
-has with every other sphere. 
+%
+Soft Fundamental Measure Theory (SFMT) makes the task of forming an expression
+%is a method used to form an expression 
+for the excess Helmholtz free energy of a particular model fluid 
+much easier since the interaction that each sphere, or atom, 
+has with every other sphere does not have to be taken explicitly into account.
+%without 
+%having to take explicitly into account the interaction each sphere, or atom, 
+%has with every other sphere which would make the task very difficult, 
+%or even prohibtive.
+%
 %Classically, fluids have been modeled by a collection of small, 
 %impenetrable spheres colliding with one another like billiard balls. 
 %In the simplest case, the spheres are treated as having only a replulsive 
@@ -122,7 +151,7 @@ has with every other sphere.
 %Chandler, and Anderson used temperature and density dependent hard-sphere 
 %radii to model spheres with the more realistic softly fading repulsive 
 %portion of the Leonard-Jones potential~\cite{andersen1971relationship}, 
-%which is known as the Weeks-Chandler-Anderson model fluid. 
+%which is known as the Weeks-Chandler-Anderson model fluid. f
 %
 %While models for particular fluids were being created, powerful methods 
 %to describe the properties of fluids in general were also being developed. 
@@ -146,18 +175,14 @@ has with every other sphere.
 %method by introducing a tensor version of the functional~\cite{tarazonaphi3, 
 %santos2012phi3}, and in 1999 Schmidt adopted FMT for soft spheres 
 %forming Soft Fundamental Measure Theory (SFMT)\cite{schmidt1999density}. 
-Schmidt applied his Soft Fundamental Measure Theory to various fluids 
-with soft repulsive and soft attractive potentials, and developed an erf 
-model for spheres with steep, short-range soft repulsive 
-potentials~\cite{schmidt2000fluid}.
+%
+%Schmidt applied his Soft Fundamental Measure Theory to various fluids 
+%with soft repulsive and soft attractive potentials, and developed an erf 
+%model for spheres with steep, short-range soft repulsive 
+%potentials~\cite{schmidt2000fluid}.
 % like that exhibited by a WCA fluid. 
-
-In this paper, classical Density Functional 
-Theory will be used to predict the freezing of a Weeks-Chandler-Anderson 
-model fluid by applying SFMT with Schmidt's proposed erf model, and our temperature
-dependent parameters to form the functional for the excess Helmholtz free energy. 
-%for generating the weight funcions, and Tarazona's tensor functional. 
-Results will be compared to those generated from Monte-Carlo simulations.
+%
+Results will be compared to those from Monte-Carlo simulations.
 
 \chapter{Theory}
 
