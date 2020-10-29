@@ -41,61 +41,119 @@
 
 \chapter{Introduction}
 
-Classically, fluids have been modeled by a collection of small, 
-impenetrable spheres colliding with one another like billiard balls. 
-In the simplest case, the spheres are treated as having only a replulsive 
-potential. This model, called the Hard-Sphere fluid, has served as the 
-primary reference system for fluids. This is due to the fact that the 
-repulsion between atoms is much stronger than their attraction, and so 
-the repulsive potential, which is descriptive of hard spheres, dominates 
-the interactions between atoms. In 1954 Zwanzig introduced the Square-well 
-fluid which is a perturbation of the Hard-Sphere fluid created by adding 
-a hard-edge attractive potential to the repulsive potential of the 
-Hard-Sphere fluid~\cite{ZwanzigSqrWell}. In 1964 Rowlinson studied 
-spheres with softly fading replusive potentials which he modeled by making
-the radius of the spheres temperature dependent~\cite{rowlinson1964statistical}. 
-This reflects the idea that soft-spheres penetrate more deeply into 
-each other when they collide at higher temperatures. 
+The goal of this project is to generate temperature-density and 
+pressure-temperature phase diagrams for a Weeks-Chandler-Anderson (WCA) 
+model fluid using a computer program. 
+To do this we need to find the Helmholtz free energies that the fluid
+would have in a liquid state, and in a crystalline solid state 
+at a given temperature and density. 
+%Once the Helmholtz free energy for both the crystal and liquid states of 
+%the fluid are found for a given temperature and density, they can be 
+%compared to find the resulting state of the fluid. 
+Outside the region of 
+coexistence which exists between the liquid and crystal states, 
+the fluid will be completely in a crystalline state if the 
+crystal free energy is lower than the liquid free energy, and it will be 
+completely in a liquid state if the liquid free energy is lower than 
+the crystal free energy. Maxwell's Double Tangent Construction is used 
+to determine the actual number densities of the crystal and liquid states
+at the boundaries of the coexistance region for a given temperature from 
+which the phase diagrams can be constructed.
 
-In 1967 Barker and Henderson combined the perturabtion approach of Zwanzig 
-with Rowlinson's idea of using temperature-dependent radii to model spheres 
-with soft repulsive potentials to create the Barker-Henderson model 
-fluid~\cite{barker1967perturbation}, where a soft-sphere fluid by is 
-modeled by using a Hard-Sphere fluid with hard spheres of larger radii 
-at low temperatures, and smaller radii at high temperatures. In 1971 Weeks, 
-Chandler, and Anderson used temperature and density dependent hard-sphere 
-radii to model spheres with the more realistic softly fading repulsive 
-portion of the Leonard-Jones potential~\cite{andersen1971relationship}, 
-which is known as the Weeks-Chandler-Anderson model fluid. 
+%In general, if at some number density and temperature the crystal free energy 
+%is lower than the homogeneous free energy of the liquid, then the fluid will 
+%be in the crystalline state. If the homogeneous liquid free energy is lower 
+%than the crystal free energy, then the fluid will be in the liquid state. 
 
-While models for particular fluids were being created, powerful methods 
-to describe the properties of fluids in general were also being developed. 
-In the late 1950s, Scaled Particle Theory (SPT)~\cite{ReissSPT} was 
-introduced from which an equation of state, and an expression for the 
-excess Helmholtz free energy of a homogeneous Hard-Sphere fluid can be 
-obtained~\cite{Hansen}. \color{red}ADD Percus-Yevick introduced an 
-alternative method...OZ... \color{black}
-%Percus and Yevick took another approach to the Hard-Sphere fluid.
-In 1961 Morita and Hiroike introduced a density functional 
-approach~\cite{MoritaDFT} to finding the equilibrium grand free energy 
-(the equilibrium Helmholtz free energy in the case of a canonical 
-ensemble), and the cooresponding equilibrium number density profile for 
-inhomogeneous fluids. To use this approach, a functional must be 
-constructed for a particular fluid.
-%DFT Evans 1979
-%Led by the consistency bewteen results from SPT and Percus-Yevick, 
-In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989} 
-(which can be constructed from SPT~\cite{santos2012phi3}) to form a 
-functional for the Hard-Sphere fluid. Tarazona later improved on the 
-method by introducing a tensor version of the functional~\cite{tarazonaphi3, 
-santos2012phi3}, and in 1999 Schmidt adopted FMT for soft spheres 
-forming Soft Fundamental Measure Theory (SFMT)\cite{schmidt1999density}. 
+%To find the equilibrium Helmholtz free energies we use classical Density 
+%Functional Theory (cDFT) in conjunction with Soft Fundamental Measure Theory (SFMT).
+%%the corresponding equilibrium number density profile. 
+%In particular, 
 
+In general, the Helmholtz free energy can be written as a functional of 
+the number density profile $n(\vec{r})$ which describes the way the average number 
+density varies spatially. 
+\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
+Classical Density Functional Theory (cDFT) is used to find the equilbrium 
+Helmholtz free energy of the system 
+by varying the number density profile $n(\vec{r})$ until the free energy 
+is minimized. The minimum free energy, and its corresponding number 
+density profile are then the equilibrium values of the Helmholtz free energy
+of the system at the given temperature and number density. 
+
+To find the Helmholtz free energy both the ideal Helmholtz free energy
+and the excess Helmholtz free energy must be found and added together.
+The ideal Helmholtz free energy is the free energy the fluid would have in
+the absence of any interactomic potential energy $V(r)$ between the spheres, 
+or atoms that make up the fluid. The excess Helmholtz free energy is that 
+additional energy which results from the presence of an interatomic potential 
+energy $V(r)$ between the spheres.
+%\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
+%For a spatially varying number density, as would be expected for a crystal, 
+%the free energy is a functional of the number density profile $n(\vec{r})$  
+%The Helmholtz free energy excess free energy is then added to the ideal free energy calculated 
+%analytically to find the resulting free energy for the system. 
+Soft Fundamental Measure Theory (SFMT) is a method used to form an expression 
+for the excess Helmholtz free energy of a particular model fluid without 
+having to take explicitly into account the interaction each sphere, or atom, 
+has with every other sphere. 
+%Classically, fluids have been modeled by a collection of small, 
+%impenetrable spheres colliding with one another like billiard balls. 
+%In the simplest case, the spheres are treated as having only a replulsive 
+%potential. This model, called the Hard-Sphere fluid, has served as the 
+%primary reference system for fluids. This is due to the fact that the 
+%repulsion between atoms is much stronger than their attraction, and so 
+%the repulsive potential, which is descriptive of hard spheres, dominates 
+%the interactions between atoms. In 1954 Zwanzig introduced the Square-well 
+%fluid which is a perturbation of the Hard-Sphere fluid created by adding 
+%a hard-edge attractive potential to the repulsive potential of the 
+%Hard-Sphere fluid~\cite{ZwanzigSqrWell}. In 1964 Rowlinson studied 
+%spheres with softly fading replusive potentials which he modeled by making
+%the radius of the spheres temperature dependent~\cite{rowlinson1964statistical}. 
+%This reflects the idea that soft-spheres penetrate more deeply into 
+%each other when they collide at higher temperatures. 
+%
+%In 1967 Barker and Henderson combined the perturabtion approach of Zwanzig 
+%with Rowlinson's idea of using temperature-dependent radii to model spheres 
+%with soft repulsive potentials to create the Barker-Henderson model 
+%fluid~\cite{barker1967perturbation}, where a soft-sphere fluid by is 
+%modeled by using a Hard-Sphere fluid with hard spheres of larger radii 
+%at low temperatures, and smaller radii at high temperatures. In 1971 Weeks, 
+%Chandler, and Anderson used temperature and density dependent hard-sphere 
+%radii to model spheres with the more realistic softly fading repulsive 
+%portion of the Leonard-Jones potential~\cite{andersen1971relationship}, 
+%which is known as the Weeks-Chandler-Anderson model fluid. 
+%
+%While models for particular fluids were being created, powerful methods 
+%to describe the properties of fluids in general were also being developed. 
+%In the late 1950s, Scaled Particle Theory (SPT)~\cite{ReissSPT} was 
+%introduced from which an equation of state, and an expression for the 
+%excess Helmholtz free energy of a homogeneous Hard-Sphere fluid can be 
+%obtained~\cite{Hansen}. \color{red}ADD Percus-Yevick introduced an 
+%alternative method...OZ... \color{black}
+%%Percus and Yevick took another approach to the Hard-Sphere fluid.
+%In 1961 Morita and Hiroike introduced a density functional 
+%approach~\cite{MoritaDFT} to finding the equilibrium grand free energy 
+%(the equilibrium Helmholtz free energy in the case of a canonical 
+%ensemble), and the cooresponding equilibrium number density profile for 
+%inhomogeneous fluids. To use this approach, a functional must be 
+%constructed for a particular fluid.
+%%DFT Evans 1979
+%%Led by the consistency bewteen results from SPT and Percus-Yevick, 
+%In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989} 
+%(which can be constructed from SPT~\cite{santos2012phi3}) to form a 
+%functional for the Hard-Sphere fluid. Tarazona later improved on the 
+%method by introducing a tensor version of the functional~\cite{tarazonaphi3, 
+%santos2012phi3}, and in 1999 Schmidt adopted FMT for soft spheres 
+%forming Soft Fundamental Measure Theory (SFMT)\cite{schmidt1999density}. 
 Schmidt applied his Soft Fundamental Measure Theory to various fluids 
 with soft repulsive and soft attractive potentials, and developed an erf 
 model for spheres with steep, short-range soft repulsive 
-potentials~\cite{schmidt2000fluid}. In this paper, Density Functional 
-Theory (DFT) will be used to predict the freezing of a Weeks-Chandler-Anderson 
+potentials~\cite{schmidt2000fluid}.
+% like that exhibited by a WCA fluid. 
+
+In this paper, classical Density Functional 
+Theory will be used to predict the freezing of a Weeks-Chandler-Anderson 
 model fluid by applying SFMT with Schmidt's proposed erf model, and our temperature
 dependent parameters to form the functional for the excess Helmholtz free energy. 
 %for generating the weight funcions, and Tarazona's tensor functional. 
@@ -801,29 +859,64 @@ A new set of weight functions can then be derived for a system of soft spheres.
 \chapter{Methods}
 
 \section{Overview}
-We use classical Density Functional Theory (cDFT) in conjunction 
-with Soft Fundamental Measure Theory (SFMT) to find the equilibrium free 
-energy of a system, and the corresponding equilibrium number density profile. 
-In particular, SFMT is used to form the expression for the excess Helmholtz 
-free energy without having to take into account the interaction each sphere, 
-or atom, has with every other sphere. The excess free energy is then added 
-to the ideal free energy calculated analytically to find the resulting 
-free energy for the system. 
-\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
-For a spatially varying number density, as would be expected for a crystal, 
-the free energy is a functional of the number density profile $n(\vec{r})$  
+The goal of this project is to generate phase diagrams for a 
+Weeks-Chandler-Anderson model fluid using a computer program. 
+To do this we find the Helmholtz free energies that the fluid
+would have at a given temperature and density in a  
+liquid state, and in a crystalline solid state. 
+%Once the Helmholtz free energy for both the crystal and liquid states of 
+%the fluid are found for a given temperature and density, they can be 
+%compared to find the resulting state of the fluid. 
+Outside the region of 
+coexistence which exists between the liquid and crystal states, 
+the fluid will be completely in a crystalline state if the 
+crystal free energy is lower than the liquid free energy, and it will be 
+completely in a liquid state if the liquid free energy is lower than 
+the crystal free energy. Maxwell's Double Tangent Construction is used 
+to determine the actual number densities of the crystal and liquid states
+at the boundaries of the coexistance region for a given temperature, 
+and construct phase diagrams.
+
+%In general, if at some number density and temperature the crystal free energy 
+%is lower than the homogeneous free energy of the liquid, then the fluid will 
+%be in the crystalline state. If the homogeneous liquid free energy is lower 
+%than the crystal free energy, then the fluid will be in the liquid state. 
+
+%To find the equilibrium Helmholtz free energies we use classical Density 
+%Functional Theory (cDFT) in conjunction with Soft Fundamental Measure Theory (SFMT).
+%%the corresponding equilibrium number density profile. 
+%In particular, 
+
+In general, the Helmholtz free energy can be written as a functional of 
+the number density profile $n(\vec{r})$ which describes the way the average number 
+density varies spatially. 
 \begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
+Classical Density Functional Theory (cDFT) is used to find the equilbrium 
+Helmholtz free energy of the system at a given temperature and density
+by varying the number density profile $n(\vec{r})$ until the free energy 
+is minimized. The minimum free energy, and its corresponding number 
+density profile are then the equilibrium values for that temperature 
+and number density. 
 
-To implement cDFT, the number density profile $n(\vec{r})$ is varied with 
-the temperature fixed until the free energy is minimized. The minimum free 
-energy and its corresponding number density profile are then the equilibrium 
-values for that temperature. Once the Helmholtz free energy for both the crystal and liquid states of 
-the fluid are found, they can be compared to find the resulting state of 
-the fluid. Outside the region of coexistence, the fluid will be completely 
-in a crystalline state if the crystal free energy is lower than the liquid 
-free energy, and it will be completely in a liquid state if the liquid 
-free energy is lower than the crystal free energy.
+The Helmholtz free energy consists of two parts: the ideal Helmholtz free energy
+and the excess Helmholtz free energy.
+The ideal Helmholtz free energy is the free energy the fluid would have in
+the absence of any interactomic potential energy $V(r)$ between the spheres, 
+or atoms that make up the fluid. The excess Helmholtz free energy is that 
+additional energy which results from the presence of an interatmoic potential 
+energy $V(r)$ between the spheres.
+%\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
+%For a spatially varying number density, as would be expected for a crystal, 
+%the free energy is a functional of the number density profile $n(\vec{r})$  
+%The Helmholtz free energy excess free energy is then added to the ideal free energy calculated 
+%analytically to find the resulting free energy for the system. 
+Soft Fundamental Measure Theory (SFMT) is used to form the expression 
+for the excess Helmholtz free energy without having to take explicitly 
+into account the interaction each sphere, or atom, has with every other 
+sphere. 
 
+ ******
+ 
 Although the entire crystal lattice can be constructed with FCC cells, 
 FCC cells are not the smallest cells with which the lattice can be built. 
 The shaded parallepiped shown within the FCC cell in Figure \ref{fig:primitivecell} 
@@ -969,16 +1062,6 @@ of number densities and temperatures.
 
 %The number of atoms in one primitive cell is one. 
 
-In general, if at some number density and temperature the crystal free energy 
-is lower than the homogeneous free energy of the liquid then the fluid will 
-be in the crystalline state. If the crystal free energy is higher than 
-the homogeneous free energy, then the fluid will be in the liquid state. 
-However, there is a region of densities between the liquid and crystal 
-states that are forbidden, and so the actual state can not be determined 
-just by which energy is lower at that particular number density and
-temperature. Maxwell's Double Tangent Construction must be implemented 
-using the date collected to determine the actual crystal and liquid states, 
-and construct phase diagrams.
 
 %\begin{displaymath}F_{homogeneous} = F_{ideal.homogeneous} + F_{excess.homogeneous}\end{displaymath}
 %\begin{displaymath}F_{crystal} = F_{ideal.crystal} + F_{excess.crystal}\end{displaymath}
@@ -1011,11 +1094,21 @@ and construct phase diagrams.
 
 
 \section{Our Functional for the Excess Helmholtz free energy}
-
+In order to apply classical Density Functional Theory, the Helmholtz energy
+must be found. Computing the ideal portion of the Helmholtz free energy is
+straightforward, but computing the excess portion of the Helmholtz free energy 
+is difficult since it depends on the interatomic potential energy $V(r)$ between 
+each sphere with all the other spheres. Soft Fundamental Measure Theory is a method
+developed to form an expression for the excess Helmholtz free energy without
+explicitly taking into account the interaction of each sphere with all the others, 
+but it must be taylored to fit a particular fluid. 
 %The excess Helmholtz free energy is particular to the fluid being modeled, 
 %as it depends on the interatomic potential V(r). 
-We use Soft Fundamental Measure Theory to find the excess Helmholtz free energy.
-The functional is written in general form as 
+
+We use Soft Fundamental Measure Theory to form a functional for the excess 
+Helmholtz free energy appropriate for the WCA fluid by introducing our 
+temperature dependent parameters $\alpha(T)$ and $\Xi(T)$. The functional 
+is written in general form as 
 \begin{align}
   F_{excess}[n(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
 \end{align}
@@ -1327,43 +1420,45 @@ $n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\ve
 \begin{equation}{n_i(\vec{r})=\sum_{NumPoints}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}'|)}{NumPoints}}\end{equation}
 
 The result can be made more accurate by increasing NumPoints which is the 
-number of vectors randomly generated. In order to further reduce the error 
-in the average, antithetic variates are used. Rather than computing an average 
-of a set of random points, each random point in the set is paired with a 
-point along the same line as the first point, but opposite in direction, 
-as shown in Figure \ref{fig:AntitheticVariate}. This reduces first order 
-error in the average by filtering out an erroneous offset of values along 
-the line connecting the two points by averaging the two results, one of 
-which may be erroneously higher than it should be while the other is 
-erronesously lower than it should be.
+number of vectors randomly generated. 
+%-------Antithetic-------------------
+%In order to further reduce the error 
+%in the average, antithetic variates are used. Rather than computing an average 
+%of a set of random points, each random point in the set is paired with a 
+%point along the same line as the first point, but opposite in direction, 
+%as shown in Figure \ref{fig:AntitheticVariate}. This reduces first order 
+%error in the average by filtering out an erroneous offset of values along 
+%the line connecting the two points by averaging the two results, one of 
+%which may be erroneously higher than it should be while the other is 
+%erronesously lower than it should be.
+
+ %\begin{figure}[h!]
+    %\centering
+    %\includegraphics[height=4cm]{AntitheticVariate.png}
+    %\caption{Antithetic variates reduce first order error in an average. 
+    %Each point in the average is paired with another point from along 
+    %the same line as the first, and at an equal, but opposite distance.}
+    %\label{fig:AntitheticVariate}
+  %\end{figure} 
+%Incorporating antithetic variates $-\vec{dr}$ for every $\vec{dr}$ equation ?? becomes:
+%\begin{displaymath}{n_i(\vec{r}_k, \vec{R}_j)=\sum_{NumPoints}\frac{1}{2}\frac{(1-f_v)\left[w_i(|\vec{r}-\vec{R_j}-\vec{dr}|) +w_i(|\vec{r}-\vec{R_j}+\vec{dr}|)\right]}{NumPoints}}\end{displaymath}   The process is repeated for all the other $\vec{R}_j$'s to get the total weighted densities at vector $\vec{r}_k$ due to all the Gaussians. 
+%\begin{displaymath}{n_i(\vec{r}_k)=\sum_j{n_i(\vec{r}_k, \vec{R}_j)}}\end{displaymath}
+%Then the entire process repeated for each vector $\vec{r}_k$ to get the 
+%total weighted densities $n_i(\vec{r})$ as a function of the position $\vec{r}$. 
+
+%The standard error of the mean (SEM) is given by:
+%\begin{equation}{SD_{mean}=\frac{SD}{\sqrt{N}}}\end{equation} which gives 
+%a measure of the error in $n_3=\overline{w}_3$:
+%\begin{equation}{Error=\sqrt{\frac{\overline{w_3^2}-(\overline{w}_3)^2}{NumPoints}}}\end{equation} 
+%NumPoints, the number of vectors randomly generated, is increased until:
+%\begin{equation}{Error<\frac{|1-n_3|}{4}}\end{equation} where the maximum 
+%value that $n_3$ can be without error is 1.
+
+%Figure \ref{fig:GaussandW2_actual} ......
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=4cm]{AntitheticVariate.png}
-    \caption{Antithetic variates reduce first order error in an average. 
-    Each point in the average is paired with another point from along 
-    the same line as the first, and at an equal, but opposite distance.}
-    \label{fig:AntitheticVariate}
-  \end{figure} 
-Incorporating antithetic variates $-\vec{dr}$ for every $\vec{dr}$ equation ?? becomes:
-\begin{displaymath}{n_i(\vec{r}_k, \vec{R}_j)=\sum_{NumPoints}\frac{1}{2}\frac{(1-f_v)\left[w_i(|\vec{r}-\vec{R_j}-\vec{dr}|) +w_i(|\vec{r}-\vec{R_j}+\vec{dr}|)\right]}{NumPoints}}\end{displaymath}   The process is repeated for all the other $\vec{R}_j$'s to get the total weighted densities at vector $\vec{r}_k$ due to all the Gaussians. 
-\begin{displaymath}{n_i(\vec{r}_k)=\sum_j{n_i(\vec{r}_k, \vec{R}_j)}}\end{displaymath}
-Then the entire process repeated for each vector $\vec{r}_k$ to get the 
-total weighted densities $n_i(\vec{r})$ as a function of the position $\vec{r}$. 
-
-The standard error of the mean (SEM) is given by:
-\begin{equation}{SD_{mean}=\frac{SD}{\sqrt{N}}}\end{equation} which gives 
-a measure of the error in $n_3=\overline{w}_3$:
-\begin{equation}{Error=\sqrt{\frac{\overline{w_3^2}-(\overline{w}_3)^2}{NumPoints}}}\end{equation} 
-NumPoints, the number of vectors randomly generated, is increased until:
-\begin{equation}{Error<\frac{|1-n_3|}{4}}\end{equation} where the maximum 
-value that $n_3$ can be without error is 1.
-
-Figure \ref{fig:GaussandW2_actual} ......
-
- \begin{figure}[h!]
-    \centering
-    % FIXME \includegraphics[height=6cm]{GaussandW2_actual.png}
+    \includegraphics[height=6cm]{GaussandW2_actual.png}
     \caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional 
     view of $w_2$ centered at $\vec{r}'$ is shown in purple. Here, the weight function 
     is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ 
@@ -1373,10 +1468,10 @@ Figure \ref{fig:GaussandW2_actual} ......
 
  \begin{figure}[h!]
     \centering
-    % FIXME \includegraphics[height=6cm]{GaussandW2_thinkas.png}
-    \caption{An alternative way of viewing Figure \ref{fig:GaussandW2_actual} where 
-    the weight function, shown by the purple dashed lines, is centered at $\vec{r}$  
-    and fixed in place as $\vec{dr}$ varies randomly.} 
+    %\includegraphics[height=6cm]{GaussandW2_thinkas.png}
+    %\caption{An alternative way of viewing Figure \ref{fig:GaussandW2_actual} where 
+    %the weight function, shown by the purple dashed lines, is centered at $\vec{r}$  
+    %and fixed in place as $\vec{dr}$ varies randomly.} 
   \label{fig:GaussandW2_thinkas}
   \end{figure} 
 
@@ -1429,11 +1524,11 @@ region predicted by Ahmed and Sadus.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
   %\includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n_AS}
-  \caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
-  White lines show the liquid and solid transition densities at each temperature from 
-  simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
+  %\caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
+  %White lines show the liquid and solid transition densities at each temperature from 
+  %simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
   \label{fig:Phase_Diagram_of_T_vs_n_AS}
 \end{figure}
 
@@ -1460,26 +1555,26 @@ pressures and temperatures are consistently higher.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T_AS}
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T_AS}
   %\includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T_AS}
-  \caption{Phase Diagram of the reduced pressure verses the reduced temperature. 
-  The white line marks the boundary from simulations by Ahmed and Sadus~\cite{ahmedsadus}.}
+  %\caption{Phase Diagram of the reduced pressure verses the reduced temperature. 
+  %The white line marks the boundary from simulations by Ahmed and Sadus~\cite{ahmedsadus}.}
   \label{fig:Phase_Diagram_P_vs_T_AS}
 \end{figure}
 
-Figure~\ref{fig:p-vs-T_at_fixed_density} shows individual plots of the 
-reduced pressure versus the reduced temperature at fixed reduced densities 
-from $n^*$ = 0.7 to 1.2. As can be seen by comparison with Figure 
-\ref{fig:Phase_Diagram_P_vs_T_AS}, the plotted lines display kinks when 
-the WCA fluid transistions into a solid. These downward bends align to 
-form the curved interface separating the blue and red areas in 
-Figures~\ref{fig:Phase_Diagram_P_vs_T} and \ref{fig:Phase_Diagram_P_vs_T_AS}.
+%Figure~\ref{fig:p-vs-T_at_fixed_density} shows individual plots of the 
+%reduced pressure versus the reduced temperature at fixed reduced densities 
+%from $n^*$ = 0.7 to 1.2. As can be seen by comparison with Figure 
+%\ref{fig:Phase_Diagram_P_vs_T_AS}, the plotted lines display kinks when 
+%the WCA fluid transistions into a solid. These downward bends align to 
+%form the curved interface separating the blue and red areas in 
+%Figures~\ref{fig:Phase_Diagram_P_vs_T} and \ref{fig:Phase_Diagram_P_vs_T_AS}.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n_noMC}
-  \caption{Plot of the reduced pressure verses the reduced temperature. 
-  The lines bending downward indicate freezing.}
+  %\includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n_noMC}
+  %\caption{Plot of the reduced pressure verses the reduced temperature. 
+  %The lines bending downward indicate freezing.}
   \label{fig:p-vs-T_at_fixed_density}
 \end{figure}
 
