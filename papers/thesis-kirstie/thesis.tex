@@ -12,13 +12,13 @@
 \major{Physics}
 \advisor{David Roundy}
 \submitdate{October ??, 2020}
-\commencementyear{2020}
+\commencementyear{2021}
 
 \usepackage{color}
 \usepackage{amsmath}
 \usepackage{subcaption}
 
-\date{August 2020}
+\date{October 2020}
 
 \abstract{
   We use Classical Density Functional Theory (cDFT) to predict the 
@@ -292,12 +292,14 @@ which when added together regenerate the full Leonard-Jones potential.
   \end{figure}
 
 The repulsive portion of the Leonard-Jones potential forms the potential for a 
-Weeks-Chandler-Anderson (WCA) model fluid, shown in Figure \ref{fig:WCA_potential}. 
+Weeks-Chandler-Anderson (WCA) model fluid~\cite{andersen1971relationship}, 
+shown in Figure \ref{fig:WCA_potential}. 
 The WCA potential is described by the equation: 
 \begin{equation}{V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.}\end{equation} 
 As seen in Figure \ref{fig:WCA_potential}, the WCA potential decreases 
 from infinity as the distance between the centers of the atoms r increases, 
-and becomes, and remains, essentially zero when r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ 
+and becomes, and remains, essentially zero when 
+r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ 
 where R is the radius of the sphere as shown in Figure \ref{fig:TwoSpheres}. 
 As with the Lenard-Jones potential, the repulsive WCA potential increases 
 rapidly and approches infinity as the two spheres begin to overlap. This 
@@ -476,7 +478,7 @@ a minimum at equilibrium means that the equilibrium free energy of the
 system ${f_{equil}}{[}\rho{(}\vec{r}{)]}$, and its corresponding equilibrium 
 number density profile $\rho{(}\vec{r}{)}$, can be found simply by varying 
 $n(\vec{r})$ through all possible spatial profiles until the free energy 
-is minimized. 
+is minimized~\cite{MoritaDFT}. 
 
 \begin{displaymath}{f[n(}\vec{r}{)]}\rightarrow{f_{equil}}{[}\rho{(}\vec{r}{)]}  \mbox{ as $f$ is minimized} \end{displaymath}
 \begin{displaymath}{\mbox{where }  n(\vec{r})=\rho{(}\vec{r})  \mbox{ at equilibrium}}\end{displaymath}
@@ -716,7 +718,7 @@ energy for the particular fluid being modeled must be formed. But forming
 an expression based on Equation~\ref{eq:Fexcess-simplified} can be challenging. 
 For the Hard Sphere fluid, there is another way to form an expression for 
 the excess Helmholtz free energy in terms of a homogeneous number density 
-and, that is to use Scaled Particle Theory (SPT).
+and, that is to use Scaled Particle Theory (SPT)~\cite{ReissSPT}.
 
 Scaled Particle Theory seeks a general expression for the excess chemical 
 potential of a homogeneous Hard Sphere fluid which can then be integrated 
@@ -742,7 +744,7 @@ hard sphere, R, and the cavity is either filled or not. \color{black}
 %For cavities that are much larger than one of the hard spheres, 
 Forming a more general result for different sizes of cavities in the fluid, 
 Scaled Partical Theory arrives at an expression for the excess Helmholtz 
-free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
+free energy of a homogeneous fluid~\cite{Hansen} in terms of the packing fraction $\eta$ 
 \begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
 where
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
@@ -750,12 +752,12 @@ where
 
 An expression for the excess Helmholtz free energy as a functional of the 
 number density profile $n(\vec r)$ can be found using Fundamental Measure 
-Theory (FMT). FMT was developed for hard sphere fluids, and has been very 
+Theory (FMT)~\cite{rosenfeld1989}. FMT was developed for hard sphere fluids, and has been very 
 sucessful at predicting the thermodynamic properties of inhomogeneous hard 
 sphere fluids starting from an expression for the excess Helmholtz free 
-energy obtained from Scaled Partical Theory. Soft Fundamental Measure 
-Theory (SFMT), which will be addressed later, extends FMT to fluids with 
-soft potentials like that of the WCA fluid.
+energy obtained from Scaled Partical Theory~\cite{santos2012phi3}. 
+Soft Fundamental Measure Theory (SFMT), which will be addressed later, 
+extends FMT to fluids with soft potentials like that of the WCA fluid.
 
 %\begin{equation}{\eta = \frac{NR_{3}}{V}}\end{equation}
 %\begin{equation}{\eta = \left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}}\end{equation}
@@ -849,7 +851,8 @@ which matches Equation~\ref{mayerder}.
 
 Incorporating into Equation~\ref{FexfromSPT} the two vector weights which 
 were added to satisfy Equation~\ref{mayer_deconvolution}, and an updated 
-expression for $\Phi_3$ developed by Tarazona, the excess free energy becomes
+expression for $\Phi_3$ developed by Tarazona~\cite{tarazonaphi3, santos2012phi3}, 
+the excess free energy becomes
 \begin{displaymath}{F_{excess}=k_{B}T\left(-n_{0}ln(1-n_{3})+\frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}}\color{white}\right)}\end{displaymath}
 \begin{equation}{\color{white}\left(\color{black}+\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}\right)\color{black}V}\end{equation} 
 where the tensor weight is given by
@@ -879,13 +882,15 @@ of the mayer function, can be expressed in terms of $w_{2}(r)$ which consists
 of a delta function characteristic of hard spheres. Soft Fundamental Measure 
 Theory extends the Fundamental Measure Theory discussed so far to 
 fluids with soft potenials by keeping the relationships between the weight 
-functions, and that the weight functions satisfy the same, but replacing 
+functions, and which the weight functions satisfy the same, but replacing 
 $w_{2}(r)$ with a weight function appropriate for a soft sphere potential. 
-A new set of weight functions can then be derived for a system of soft spheres. 
+A new set of weight functions can then be derived for a system of soft 
+spheres which is what we do in forming our functional for the 
+Weeks-Chandler-Anderson fluid as detailed in the chapter on Methods.
 
 \chapter{Methods}
 
-\section{Overview}
+\section{The Overall Approach}
 %
 %The goal of this project is to generate phase diagrams for a 
 %Weeks-Chandler-Anderson model fluid using a computer program. 
@@ -1023,6 +1028,9 @@ density profile. There are still the same number of atoms over some fixed volume
 %There is still a total of one atom per ``bold box" volume.
 %\begin{equation}{n=<n(\vec{r})>=\frac{1}{V_{bold-box}}\overbrace{\int_{bold-box}{n(\vec{r})}{d\vec{r}}}=\frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{equation}
 \begin{equation}{n=<n(\vec{r})>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}=\frac{1~\text{atom}}{V}}\end{equation}
+where $n(\vec r)$ is itself an ensemble average over all microstates, and is independent of time:
+\begin{equation}n(\vec r)=~<\sum_{i=1}^N\delta(\vec r - \vec r_i)>~\end{equation}
+
   \begin{figure}[h!]
     \centering
     \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
@@ -1091,20 +1099,43 @@ A homogeneous number density profile is used for a liquid is shown in Figure \re
     \caption{A homogeneouse number density profile $n(\vec{r})$}
     \label{fig:homogen_denisty}
   \end{figure}   
-  
+
+%Classical Density Functional Theory is used to find the equilbrium 
+%Helmholtz free energy of the system at a given temperature and density
+%by varying the number density profile $n(\vec{r})$ until the free energy 
+%is minimized. The minimum free energy, and its corresponding number 
+%density profile are then the equilibrium values for that temperature 
+%and number density. 
+
 %The number density profile is varied by varying gw and fv, and the 
-For a given combination of number density and temperature, a suite of number 
-density profiles are generated.
-% like those represented by Figure~\ref{fig:Ensemble_vary}.
-The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number density profile,
-and also for the homogeneous number denisty profile. 
-Both the ideal and excess free energies are found, and added together to get the total Helmholtz 
-free energy.
-The Helmholtz free energy is minimized for a system with a fixed temperature, 
-volume, and number of particles. Setting the number of particles to one, 
-the volume can be found from the number density.
-The process is then repeated to find the free energies at other combinations 
-of number densities and temperatures. 
+For a given combination of temperature and number density, a suite of number 
+density profiles are generated similiar to those represented in the example 
+set of profiles shown in Figure~\ref{fig:Ensemble_vary}. 
+The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number 
+density profile, and also for the homogeneous number denisty profile 
+characteristic of a liquid. Both the ideal and excess free energies are 
+found, and added together to get the total Helmholtz free energy.
+According to classical Density Functional Theory, the minimum free energy, 
+and its corresponding number density profile are then the equilibrium values 
+for that temperature and number density.
+%The Helmholtz free energy is minimized for a system with a fixed temperature, 
+%volume, and number of particles. Setting the number of particles to one, 
+%the volume can be found from the number density.
+The process is repeated to find the free energies at other combinations 
+of temperatures and number densities. 
+
+%Once the Helmholtz free energy for both the crystal and liquid states of 
+%the fluid are found for a given temperature and density, they can be 
+%compared to find the resulting state of the fluid. 
+Outside the region of coexistence which exists between the liquid and 
+crystal states, the fluid will be completely in a crystalline state if the 
+crystal free energy is lower than the liquid free energy, and it will be 
+completely in a liquid state if the liquid free energy is lower than 
+the crystal free energy. Maxwell's Double Tangent Construction is used 
+to determine the actual number densities of the crystal and liquid states
+at the boundaries of the coexistance region for a given temperature, 
+and construct phase diagrams as described in the section on The Theory of
+Freezing and Maxwell's Double Tangent Construction.
 
 %The number of atoms in one primitive cell is one. 
 
@@ -1162,7 +1193,7 @@ from Equation~\ref{eq:Fideal-n(r)} with the varying number density profile given
   %F_{ideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV
 %\end{align} 
 \begin{align}
-  {n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{e^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}}}
+  n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{e^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}}
 \end{align}
 %For small gw values it is assumed that the Guassians do not overlap, 
 %in which case the equation for the free energy can be simplified, and solved
@@ -1319,7 +1350,7 @@ is difficult since it depends on the interatomic potential energy $V(r)$ between
 each sphere with all the other spheres. Soft Fundamental Measure Theory is a method
 developed to form an expression for the excess Helmholtz free energy without
 explicitly taking into account the interaction of each sphere with all the others, 
-but it must be taylored to fit a particular fluid. 
+but it must be taylored to fit a particular fluid\cite{schmidt1999density}. 
 %The excess Helmholtz free energy is particular to the fluid being modeled, 
 %as it depends on the interatomic potential V(r). 
 
@@ -1954,10 +1985,10 @@ Calculate $\widetilde{w}_{{m2}_{x'x'}}(k)$
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta'\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\cos^2\phi'~d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
 \begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
 
-\color{blue}
+%\color{blue}
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
 \begin{equation}\label{compare_equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
-\color{black}
+%\color{black}
 
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}\right)d{r}}\end{displaymath} 
 \begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}\right)d{r}}\end{equation}
@@ -2259,8 +2290,8 @@ results in
 
 \begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \lambda^nZ_{on}Q_n\right)} \end{equation}
 where $Q_n$ is the configuration integral.
-\color{red}For a system of N particles only, the sum collapses to one term, 
-that for n=N, which gives \color{black}
+For a system of N particles only, the sum collapses to one term, 
+that for n=N, which gives 
 \begin{equation}\label{PV/kBT_reduces_for_N}\frac{PV}{k_BT}=\ln{\left(\lambda^NZ_{oN}Q_N\right)}
 %=\ln\lambda^n + \ln{Z}_{on}+\ln{Q}_n
 =\beta\mu{N} + \ln{Z}_{oN} +\ln{Q}_N\end{equation}
@@ -2283,45 +2314,35 @@ gives
 where $B_2(T)$ is given by
 \begin{equation}B_2=-\frac{1}{2}\int_{Volume}f(r)d\vec{r} \end{equation}
 
-\color{red}This result was for low densities where higher terms in the 
+This result was for low densities where higher terms in the 
 expression for the excess free energy were neglected. The full virial 
-equation is given by\color{black}
+equation is given by
 \begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
 
-%------------------n(r)--move to ``back" later---------------------
-------------------------------------------------------------------
 
-The actual positions of atoms in a microstate  \color{red}?at time t, or averaged over time?:\color{black}
-\begin{equation}\rho_{s}(\vec r)=\sum_{i=1}^N\delta(\vec r - \vec r_i)\end{equation}
-The equilibrium single number density distribution equals the ensemble average over all microstates, and is independent of time:
-\begin{equation}n(\vec r)=\rho^{(1)}(\vec r)=~<\rho_s(\vec r)>~\end{equation}
-The reduced equilibrium phase-space probablity density of n particles in volume $dr^ndp^n$:
-\begin{equation}f_o^{(n)}(\vec r^n, \vec p^n)=\rho^{(n)}(\vec r^n)f_M^{(n)}(\vec p^n)\end{equation}
-The relation between the  reduced equilibrium phase-space probablity density and the equilibrium phase-space probablity density:
-\begin{equation}f_o^{(n)}(\vec r^n, \vec p^n)=\frac{N!}{(N-n)!}\int\dot~\dot~\dot~\int f_o^{[N]}(\vec r^N, \vec p^N) d\vec r^{N-n} d\vec p^{N-n}\end{equation}
-The canonical equilibrium phase-space probablity density:
-\begin{equation}f_o^{[N]}(\vec r^N, \vec p^N)=\frac{1}{N!}\frac{1}{h^{3N}}\frac{e^{-\beta H}}{partian function}\end{equation}
-where
+\section{Derivation of $F = -k_BTln(Z)$}
+The canonical equilibrium phase-space probablity density is given by
+\begin{equation}P_{eq}(\vec r^N, \vec p^N)=\frac{1}{N!}\frac{1}{h^{3N}}\frac{e^{-\beta H}}{partian function}\end{equation}
 \begin{equation}{partian function}=\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\end{equation}
-The equilibrium phase-space probablity density integrated over all continuous microstates $(\vec r^N,\vec p^N)$ is 1:
-\begin{equation}\int\dot~\dot~\dot~\int f_o^{[N]}(\vec r^N, \vec p^N) d\vec r^{N} d\vec p^{N}=1\end{equation}
-The equilibrium phase-space probablity density is independent of time:
-\begin{equation}f_o^{[N]}(\vec r^N, \vec p^N) = f_o^{[N]}(\vec r^N, \vec p^N; t)\end{equation}
-The Helmholtz free energy is a functional of the equilibrium phase-space probability density:
-\begin{equation}U = <E> = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N}\end{equation}
-\begin{equation}TS = -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln\left(N!~h^{3N}f_o^{[N]}\right) d\vec r^{N} d\vec p^{N} \end{equation}
-\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln\left(\frac{e^{-\beta H}}{\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}}\right) d\vec r^{N} d\vec p^{N} \end{equation}
-\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[f_o^{[N]}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right] \end{equation}
-\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[f_o^{[N]}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right] \end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln(Z)d\vec r^{N} d\vec p^{N}\end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}d\vec r^{N} d\vec p^{N}\right]\end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[1\right]\end{equation}
-and so 
-\begin{equation}F = U - TS\end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N}-\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} -k_BTln(Z)\end{equation}
+The Helmholtz free energy is given by 
+\begin{equation}\label{F=U-TS}F = U - TS\end{equation}
+where
+\begin{equation}U = <E> = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N}\end{equation}
+\begin{align}
+ TS &= T\left[-k_B\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}\operatorname{ln}\left(N!~h^{3N}P_{eq}\right) d\vec r^{N} d\vec p^{N}\right]   \\
+	&= -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}\operatorname{ln}\left(\frac{e^{-\beta H}}{\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}}\right) d\vec r^{N} d\vec p^{N}   \\
+	&= -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[P_{eq}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right]  \\ 
+    &= -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[P_{eq}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right]   
+\end{align}  
+\begin{align}  
+    &= \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} +k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}ln(Z)d\vec r^{N} d\vec p^{N}     \\
+    &= \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}d\vec r^{N} d\vec p^{N}\right]   \\
+    &= \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[1\right]   
+\end{align}
+Plugging these into Equation~\ref{F=U-TS} gives
+%\begin{equation}F = U - TS\end{equation}
+\begin{equation} F = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N}-\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} -k_BTln(Z)\end{equation}
 \begin{equation}F = -k_BTln(Z)\end{equation}
-
-----------------------------------------------
 
 \bibliography{thesis}
 \bibliographystyle{unsrt}
