@@ -12,13 +12,13 @@
 \major{Physics}
 \advisor{David Roundy}
 \submitdate{October ??, 2020}
-\commencementyear{2020}
+\commencementyear{2021}
 
 \usepackage{color}
 \usepackage{amsmath}
 \usepackage{subcaption}
 
-\date{August 2020}
+\date{October 2020}
 
 \abstract{
   We use Classical Density Functional Theory (cDFT) to predict the 
@@ -41,65 +41,29 @@
 
 \chapter{Introduction}
 
-Classically, fluids have been modeled by a collection of small, 
-impenetrable spheres colliding with one another like billiard balls. 
-In the simplest case, the spheres are treated as having only a replulsive 
-potential. This model, called the Hard-Sphere fluid, has served as the 
-primary reference system for fluids. This is due to the fact that the 
-repulsion between atoms is much stronger than their attraction, and so 
-the repulsive potential, which is descriptive of hard spheres, dominates 
-the interactions between atoms. In 1954 Zwanzig introduced the Square-well 
-fluid which is a perturbation of the Hard-Sphere fluid created by adding 
-a hard-edge attractive potential to the repulsive potential of the 
-Hard-Sphere fluid~\cite{ZwanzigSqrWell}. In 1964 Rowlinson studied 
-spheres with softly fading replusive potentials which he modeled by making
-the radius of the spheres temperature dependent~\cite{rowlinson1964statistical}. 
-This reflects the idea that soft-spheres penetrate more deeply into 
-each other when they collide at higher temperatures. 
+The goal of this project is to generate computationally temperature-density 
+and pressure-temperature phase diagrams for a Weeks-Chandler-Anderson (WCA) 
+model fluid using classical Density Functional Theory (cDFT). 
+To do this we need to find the Helmholtz free energies that the fluid
+would have in a liquid state, and in a crystalline solid state 
+at a given temperature and density. 
+In general, the Helmholtz free energy, which consists of an ideal part 
+and an excess part, can be written as a functional of the number density 
+profile $n(\vec{r})$ which describes the way the average number 
+density varies spatially. 
+\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
 
-In 1967 Barker and Henderson combined the perturabtion approach of Zwanzig 
-with Rowlinson's idea of using temperature-dependent radii to model spheres 
-with soft repulsive potentials to create the Barker-Henderson model 
-fluid~\cite{barker1967perturbation}, where a soft-sphere fluid by is 
-modeled by using a Hard-Sphere fluid with hard spheres of larger radii 
-at low temperatures, and smaller radii at high temperatures. In 1971 Weeks, 
-Chandler, and Anderson used temperature and density dependent hard-sphere 
-radii to model spheres with the more realistic softly fading repulsive 
-portion of the Leonard-Jones potential~\cite{andersen1971relationship}, 
-which is known as the Weeks-Chandler-Anderson model fluid. 
-
-While models for particular fluids were being created, powerful methods 
-to describe the properties of fluids in general were also being developed. 
-In the late 1950s, Scaled Particle Theory (SPT)~\cite{ReissSPT} was 
-introduced from which an equation of state, and an expression for the 
-excess Helmholtz free energy of a homogeneous Hard-Sphere fluid can be 
-obtained~\cite{Hansen}. \color{red}ADD Percus-Yevick introduced an 
-alternative method...OZ... \color{black}
-%Percus and Yevick took another approach to the Hard-Sphere fluid.
-In 1961 Morita and Hiroike introduced a density functional 
-approach~\cite{MoritaDFT} to finding the equilibrium grand free energy 
-(the equilibrium Helmholtz free energy in the case of a canonical 
-ensemble), and the cooresponding equilibrium number density profile for 
-inhomogeneous fluids. To use this approach, a functional must be 
-constructed for a particular fluid.
-%DFT Evans 1979
-%Led by the consistency bewteen results from SPT and Percus-Yevick, 
-In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989} 
-(which can be constructed from SPT~\cite{santos2012phi3}) to form a 
-functional for the Hard-Sphere fluid. Tarazona later improved on the 
-method by introducing a tensor version of the functional~\cite{tarazonaphi3, 
-santos2012phi3}, and in 1999 Schmidt adopted FMT for soft spheres 
-forming Soft Fundamental Measure Theory (SFMT)\cite{schmidt1999density}. 
-
-Schmidt applied his Soft Fundamental Measure Theory to various fluids 
-with soft repulsive and soft attractive potentials, and developed an erf 
-model for spheres with steep, short-range soft repulsive 
-potentials~\cite{schmidt2000fluid}. In this paper, Density Functional 
-Theory (DFT) will be used to predict the freezing of a Weeks-Chandler-Anderson 
-model fluid by applying SFMT with Schmidt's proposed erf model, and our temperature
-dependent parameters to form the functional for the excess Helmholtz free energy. 
-%for generating the weight funcions, and Tarazona's tensor functional. 
-Results will be compared to those generated from Monte-Carlo simulations.
+Classical Density Functional Theory is used to find the equilibrium 
+Helmholtz free energy, and Soft Fundamental Measure Theory (SFMT) will 
+be used to form the functional for the excess Helmholtz free energy. 
+According to classical Density Functional Theory the equilbrium 
+Helmholtz free energy of the system can be found by varying the number 
+density profile $n(\vec{r})$ until the free energy is minimized. 
+SFMT makes the task of forming an expression
+for the excess Helmholtz free energy of a particular model fluid 
+much easier since the interaction that each sphere, or atom, 
+has with every other sphere does not have to be taken explicitly into account.
+Results will be compared to those from Monte-Carlo simulations.
 
 \chapter{Theory}
 
@@ -165,8 +129,6 @@ form spontaneously when electrons are redistributed as atoms come into
 close proximty. These are often characterized as Van der Walls, or London 
 dispersion forces. The attraction grows stronger as two atoms move closer 
 together until their atomic orbitals begin to overlap. 
-%At this point the electrons in each atom begin to repel the electrons 
-%in the other atom and oppose the overlap of the two atoms.
 At this point the electrons in each atom begin to oppose the overlap of 
 the two atoms through their replusion. The repulsion increases rapidly and 
 approaches infinity as the distance between the atoms conintues to decrease.  
@@ -210,12 +172,14 @@ which when added together regenerate the full Leonard-Jones potential.
   \end{figure}
 
 The repulsive portion of the Leonard-Jones potential forms the potential for a 
-Weeks-Chandler-Anderson (WCA) model fluid, shown in Figure \ref{fig:WCA_potential}. 
+Weeks-Chandler-Anderson (WCA) model fluid~\cite{andersen1971relationship}, 
+shown in Figure \ref{fig:WCA_potential}. 
 The WCA potential is described by the equation: 
 \begin{equation}{V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.}\end{equation} 
 As seen in Figure \ref{fig:WCA_potential}, the WCA potential decreases 
 from infinity as the distance between the centers of the atoms r increases, 
-and becomes, and remains, essentially zero when r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ 
+and becomes, and remains, essentially zero when 
+r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ 
 where R is the radius of the sphere as shown in Figure \ref{fig:TwoSpheres}. 
 As with the Lenard-Jones potential, the repulsive WCA potential increases 
 rapidly and approches infinity as the two spheres begin to overlap. This 
@@ -248,20 +212,18 @@ density that result are affected by the interatomic potential. When repulsive,
 soft sphere fluids (that are not too soft) freeze, they form lattice 
 structures composed of Face Centered Cubic (FCC) crystal cells~\cite{Hansen}, 
 as do hard spheres. 
-%This structure is the three-dimensional equivilant to the two-dimensional 
-%structure that one would see by filling the bottom of a box with a single layer of marbles. 
 This structure is what one would see by filling a cube with marbles. It 
 results in the highest density achievable for hard, and nearly-hard, spheres 
 that are purely repulsive. 
 
 For pure substances, a phase transition occurs along a line on a 
 Pressure-Temperature (P-T) phase diagram, such as can be seen in the phase 
-diagram shown in Figure \ref{fig:P-T_Diagram}. This phase diagram is 
+diagram shown in Figure~\ref{fig:P-T_Diagram}. This phase diagram is 
 representative of some arbitrary, unknown substance composed of atoms, 
 or molecules which exibit both attraction and repulsion. However, since 
 the atoms in a WCA fliud do not exhibit attraction there will not be a 
-dividing line between the gas and liquid phases, and so the term ``liquid" 
-or ``gas" is not used, but simply ``fluid". Points along the line that 
+dividing line between the gas and liquid phases, and so the term "liquid" 
+or "gas" is not used, but simply "fluid". Points along the line that 
 separates the solid and the fluid phases indicate a phase transition, 
 and show that the solid and the fluid both have the same temperature and 
 the same pressure at a phase transistion.
@@ -294,7 +256,7 @@ free energy per atom with respect to the inverse number density.
 %density of the liquid and the density of the solid at the point of freezing 
 %can be found from identifying the inverse densties at which the tangents 
 %to each curve have the same slope.%
-Two such curves are shown in Figure \ref{fig:MaxwellDT}, one for the liquid 
+Two such curves are shown in Figure~\ref{fig:MaxwellDT}, one for the liquid 
 and one for the solid at a fixed temperature. Since the pressure of the 
 liquid is the same as the pressure of the solid at the point of transistion, 
 the density of the liquid and the density of the solid at the point of 
@@ -349,13 +311,13 @@ density plots for both the liquid and the solid.
   \end{figure}
 %CURVE FITTING! - put in methods/analysis
 
-
 Once the pressure is known for the transition point, the density of the 
 liquid at the transition point can be found from a plot of the pressure 
 versus the inverse of the density for the liquid. The density of the solid 
 at the transition point can be found the same way, as shown in Figure 
-\ref{fig:Pvsinvn}. A Temperature-Density (T-n) phase diagram, such as that in Figure \ref{fig:T-n_Diagram}, 
-can be generated by repeating this procedure for various temperatures. 
+\ref{fig:Pvsinvn}. A Temperature-Density (T-n) phase diagram, such as 
+that in Figure \ref{fig:T-n_Diagram}, can be generated by repeating this 
+procedure for various temperatures. 
 %The lowest density the crystal exhibts and the highest density the fluid 
 %exhibits at the phase transistion can then be identified for each temperature.  
 
@@ -394,7 +356,7 @@ a minimum at equilibrium means that the equilibrium free energy of the
 system ${f_{equil}}{[}\rho{(}\vec{r}{)]}$, and its corresponding equilibrium 
 number density profile $\rho{(}\vec{r}{)}$, can be found simply by varying 
 $n(\vec{r})$ through all possible spatial profiles until the free energy 
-is minimized. 
+is minimized~\cite{MoritaDFT}. 
 
 \begin{displaymath}{f[n(}\vec{r}{)]}\rightarrow{f_{equil}}{[}\rho{(}\vec{r}{)]}  \mbox{ as $f$ is minimized} \end{displaymath}
 \begin{displaymath}{\mbox{where }  n(\vec{r})=\rho{(}\vec{r})  \mbox{ at equilibrium}}\end{displaymath}
@@ -458,33 +420,8 @@ of energy (the first law of thermodynamics) which says that energy lost
 (or gained) by the system is gained (or lost) by the surroundings 
 $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that 
 changes in the free energy will be negative for spontaneous processes 
-when the natural variables of the free energy are held fixed. 
-%And so the free energy tends toward a minimum. 
-%How will a system at a fixed temperature, volume, and number of 
-%particles respond to a small offset from equilibrium? 
-
-Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
-\begin{equation}
-  df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
-\end{equation}
-and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that 
-$dT=0$ gives
-\begin{equation}
-  f_{N-System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}
-\end{equation}
-where conservation of energy was also applied. Fixing the volume and the 
-number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, 
-results in
-\begin{equation}
-  df_{N-System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings}
-\end{equation}
-which, for fixed N, is the same as
-\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} 
-Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number 
-of particles are fixed, the change in the free energy of the system will 
-always be negative, and thus the free energy tends toward a 
-minimum~\cite{schroeder}. This illustrates the tendancy toward minimization 
-for a system near equilibrium. A general proof of minimization 
+when the natural variables of the free energy are held fixed~\cite{schroeder}. 
+A general proof of minimization 
 can be found in Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
 
 The Helmholtz free energy can be written as
@@ -551,15 +488,15 @@ Now consider the excess free energy which is written most generally as
 This integral can be greatly simplified if it can be assumed that the 
 potential energy $V(\vec{r_1},\vec{r_2},...\vec{r_N})$ is a sum of the 
 potential energies between pairs of atoms, where each atom is paired in 
-turn with each of the other atoms in the system. In this case $V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ 
-becomes 
+turn with each of the other atoms in the system. In this case 
+$V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ becomes 
 \begin{equation}{V(\vec{r_1},\vec{r_2},...\vec{r_N})=\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}\end{equation} 
 %\begin{displaymath}{=V_{12}(\vec{r_1},\vec{r_2})+V_{13}(\vec{r_1},\vec{r_3}) + V_{14}(\vec{r_1},\vec{r_4}) + ...}\end{displaymath}
 %\begin{displaymath}{+ V_{23}(\vec{r_2},\vec{r_3})+V_{24}(\vec{r_2},\vec{r_4})+V_{25}(\vec{r_2},\vec{r_5})+ ...}\end{displaymath} 
 %\begin{displaymath}{+ V_{34}(\vec{r_3},\vec{r_4})+V_{35}(\vec{r_3},\vec{r_5})+V_{36}(\vec{r_3},\vec{r_6})+...}\end{displaymath}
 Using this potential, and setting the external potential 
 $V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ to zero, the exponent in 
-Equation~\ref{Fexcess} becomes
+Equation~\ref{Fexcess-mostgeneral} becomes
 
 \begin{displaymath}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{displaymath}    \begin{equation}{\approx-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
 where each exponential term is simplified by a Taylor expansion $e^x\approx{1+x}$. 
@@ -631,7 +568,7 @@ energy for the particular fluid being modeled must be formed. But forming
 an expression based on Equation~\ref{eq:Fexcess-simplified} can be challenging. 
 For the Hard Sphere fluid, there is another way to form an expression for 
 the excess Helmholtz free energy in terms of a homogeneous number density 
-and, that is to use Scaled Particle Theory (SPT).
+and, that is to use Scaled Particle Theory (SPT)~\cite{ReissSPT}.
 
 Scaled Particle Theory seeks a general expression for the excess chemical 
 potential of a homogeneous Hard Sphere fluid which can then be integrated 
@@ -657,7 +594,7 @@ hard sphere, R, and the cavity is either filled or not. \color{black}
 %For cavities that are much larger than one of the hard spheres, 
 Forming a more general result for different sizes of cavities in the fluid, 
 Scaled Partical Theory arrives at an expression for the excess Helmholtz 
-free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
+free energy of a homogeneous fluid~\cite{Hansen} in terms of the packing fraction $\eta$ 
 \begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
 where
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
@@ -665,12 +602,12 @@ where
 
 An expression for the excess Helmholtz free energy as a functional of the 
 number density profile $n(\vec r)$ can be found using Fundamental Measure 
-Theory (FMT). FMT was developed for hard sphere fluids, and has been very 
+Theory (FMT)~\cite{rosenfeld1989}. FMT was developed for hard sphere fluids, and has been very 
 sucessful at predicting the thermodynamic properties of inhomogeneous hard 
 sphere fluids starting from an expression for the excess Helmholtz free 
-energy obtained from Scaled Partical Theory. Soft Fundamental Measure 
-Theory (SFMT), which will be addressed later, extends FMT to fluids with 
-soft potentials like that of the WCA fluid.
+energy obtained from Scaled Partical Theory~\cite{santos2012phi3}. 
+Soft Fundamental Measure Theory (SFMT), which will be addressed later, 
+extends FMT to fluids with soft potentials like that of the WCA fluid.
 
 %\begin{equation}{\eta = \frac{NR_{3}}{V}}\end{equation}
 %\begin{equation}{\eta = \left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}}\end{equation}
@@ -764,7 +701,8 @@ which matches Equation~\ref{mayerder}.
 
 Incorporating into Equation~\ref{FexfromSPT} the two vector weights which 
 were added to satisfy Equation~\ref{mayer_deconvolution}, and an updated 
-expression for $\Phi_3$ developed by Tarazona, the excess free energy becomes
+expression for $\Phi_3$ developed by Tarazona~\cite{tarazonaphi3, santos2012phi3}, 
+the excess free energy becomes
 \begin{displaymath}{F_{excess}=k_{B}T\left(-n_{0}ln(1-n_{3})+\frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}}\color{white}\right)}\end{displaymath}
 \begin{equation}{\color{white}\left(\color{black}+\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}\right)\color{black}V}\end{equation} 
 where the tensor weight is given by
@@ -792,64 +730,106 @@ The equations developed so far have been for a hard sphere fluid. All of
 the weight function equations, as well as the equation for the deriviative 
 of the mayer function, can be expressed in terms of $w_{2}(r)$ which consists 
 of a delta function characteristic of hard spheres. Soft Fundamental Measure 
-Theory (SFMT) extends the Fundamental Measure Theory discussed so far to 
+Theory extends the Fundamental Measure Theory discussed so far to 
 fluids with soft potenials by keeping the relationships between the weight 
-functions, and that the weight functions satisfy the same, but replacing 
+functions, and which the weight functions satisfy the same, but replacing 
 $w_{2}(r)$ with a weight function appropriate for a soft sphere potential. 
-A new set of weight functions can then be derived for a system of soft spheres. 
+A new set of weight functions can then be derived for a system of soft 
+spheres which is what we do in forming our functional for the 
+Weeks-Chandler-Anderson fluid as detailed in the chapter on Methods.
 
 \chapter{Methods}
 
-\section{Overview}
-We use classical Density Functional Theory (cDFT) in conjunction 
-with Soft Fundamental Measure Theory (SFMT) to find the equilibrium free 
-energy of a system, and the corresponding equilibrium number density profile. 
-In particular, SFMT is used to form the expression for the excess free energy 
-without having to take into account the interaction each sphere, or atom, 
-has with every other sphere. The excess free energy is then added to the 
-ideal free energy calculated analytically to find the resulting free energy 
-for the system. 
-\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
-For a spatially varying number density, as would be expected for a crystal, 
-the free energy is a functional of the number density profile $n(\vec{r})$  
-\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
+\section{The Overall Approach}
+%
+%The goal of this project is to generate phase diagrams for a 
+%Weeks-Chandler-Anderson model fluid using a computer program. 
+%To do this we find the Helmholtz free energies that the fluid
+%would have at a given temperature and density in a  
+%liquid state, and in a crystalline solid state. 
+%%Once the Helmholtz free energy for both the crystal and liquid states of 
+%%the fluid are found for a given temperature and density, they can be 
+%%compared to find the resulting state of the fluid. 
+%Outside the region of 
+%coexistence which exists between the liquid and crystal states, 
+%the fluid will be completely in a crystalline state if the 
+%crystal free energy is lower than the liquid free energy, and it will be 
+%completely in a liquid state if the liquid free energy is lower than 
+%the crystal free energy. Maxwell's Double Tangent Construction is used 
+%to determine the actual number densities of the crystal and liquid states
+%at the boundaries of the coexistance region for a given temperature, 
+%and construct phase diagrams.
 
-To implement cDFT, the number density profile $n(\vec{r})$ is varied with 
-the temperature fixed until the free energy is minimized. The minimum free 
-energy and its corresponding number density profile are then the equilibrium 
-values for that temperature. Once the Helmholtz free energy for both the crystal and liquid states of 
-the fluid are found, they can be compared to find the resulting state of 
-the fluid. Outside the region of coexistence, the fluid will be completely 
-in a crystalline state if the crystal free energy is lower than the liquid 
-free energy, and it will be completely in a liquid state if the liquid 
-free energy is lower than the crystal free energy.
+%%In general, if at some number density and temperature the crystal free energy 
+%%is lower than the homogeneous free energy of the liquid, then the fluid will 
+%%be in the crystalline state. If the homogeneous liquid free energy is lower 
+%%than the crystal free energy, then the fluid will be in the liquid state. 
+%
+%%To find the equilibrium Helmholtz free energies we use classical Density 
+%%Functional Theory (cDFT) in conjunction with Soft Fundamental Measure Theory (SFMT).
+%%%the corresponding equilibrium number density profile. 
+%%In particular, 
+%
+%In general, the Helmholtz free energy can be written as a functional of 
+%the number density profile $n(\vec{r})$ which describes the way the average number 
+%density varies spatially. 
+%\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
+%Classical Density Functional Theory is used to find the equilbrium 
+%Helmholtz free energy of the system at a given temperature and density
+%by varying the number density profile $n(\vec{r})$ until the free energy 
+%is minimized. The minimum free energy, and its corresponding number 
+%density profile are then the equilibrium values for that temperature 
+%and number density. 
+%
+%The Helmholtz free energy consists of two parts: the ideal Helmholtz free energy
+%and the excess Helmholtz free energy.
+%The ideal Helmholtz free energy is the free energy the fluid would have in
+%the absence of any interactomic potential energy $V(r)$ between the spheres, 
+%or atoms that make up the fluid. The excess Helmholtz free energy is that 
+%additional energy which results from the presence of an interatmoic potential 
+%energy $V(r)$ between the spheres.
+%%\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
+%%For a spatially varying number density, as would be expected for a crystal, 
+%%the free energy is a functional of the number density profile $n(\vec{r})$  
+%%The Helmholtz free energy excess free energy is then added to the ideal free energy calculated 
+%%analytically to find the resulting free energy for the system. 
+%Soft Fundamental Measure Theory is used to form the expression 
+%for the excess Helmholtz free energy without having to take explicitly 
+%into account the interaction each sphere, or atom, has with every other 
+%sphere. 
+  
+Our goal is to generate computationally temperature-density and pressure-
+temperature phase diagrams for a Weeks-Chandler-Anderson model fluid using 
+classical Density Functional Theory. 
+A temperature-density phase diagram for a fluid that does not
+have attraction between the particles that make up the fluid will show
+two discinct regions - one at lower densities, and one at higher densities,
+seperated by a coexistence region in which there is found a mixture of the 
+fluid at some fixed lower density, and at some fixed higher density. An 
+abrupt change from some maximum lower density to some minimum higher density 
+occurs for certian combinations of pressure and temperature which form
+a line on a pressure-temperature phase diagram. This line distinguishes 
+the region in which the fluid exhibits lower densities from the region 
+in which the fluid exhbits higher densities. These two regions are known
+as the liquid state and the solid state of the fluid.
 
-***** DFT uses n(r) for BOTH Fideal and Fexcess ******
-
-To implement cDFT computationally, we begin by picturing one single crystal 
-cell. Although the crystal structure is composed of Face Centered Cubic (FCC) 
-cells, the entire lattice can be generated with a cell one-fourth the size 
-called a primitive cell shown by the shaded region in Figure \ref{fig:primitivecell}. 
-The primitive cell has the shape of a parallelpiped, and contains the 
-equivalent of one atom.
-
-%move this paragraph to methods?
------------*****-------------
-
-Although the entire crystal lattice can be constructed with FCC cells, 
+It is known that a fluid with a soft potential like the WCA fluid will 
+form a Face Centered Cubic (FCC) crystal in its solid state~\cite{Hansen}. 
+The transition between the liquid 
+and solid states is abruptly inhomogeneous, and we study the behavior 
+of the fluid by treating the liquid as homogeneous, and by constructing 
+a crystal lattice in real space for the solid. Although the entire 
+crystal lattice can be constructed with FCC cells, 
 FCC cells are not the smallest cells with which the lattice can be built. 
-The shaded parallepiped shown within a FCC cell in Figure \ref{fig:primitivecell} 
+The shaded parallepiped shown within the FCC cell in Figure \ref{fig:primitivecell} 
 is the smallest structure that, when repeated, re-creates the entire crystal 
-lattice. The parallepiped primitive cell takes up one-fourth the volume 
-of an FCC cell, includes portions of eight atoms for a total of one full 
-atom, and has eight lattice sites convenietly reachable by moving along 
-one of three different lattice vectors to step from one atom to the next. 
-The three lattice vectors will be useful in creating the lattice structure 
-computationally, and will also make the program run faster.
-
-----------****--------------
-%-------------------------------
-
+lattice. This parallepiped primitive cell takes up one-fourth the volume 
+of an FCC cell, and contains the equivalent of one atom.
+It includes portions of eight atoms each located on a lattice site convenietly 
+reachable by moving along one of three different lattice vectors to step 
+from one atom to the next. The three lattice vectors will be useful in 
+creating the lattice structure computationally, and will also make the 
+program run faster.
 
   \begin{figure}[h!]
     \centering
@@ -858,39 +838,48 @@ computationally, and will also make the program run faster.
     \label{fig:primitivecell}
   \end{figure}
 
-  \begin{figure}[h!]
-    \centering
-    % FIXME \includegraphics[height=4.5cm]{Simple_Cell.png}
-    \caption{A Simplified Crystal Cell}
-    \label{fig:simplecell}
-  \end{figure}
+  %\begin{figure}[h!]
+    %\centering
+    %% FIXME \includegraphics[height=4.5cm]{Simple_Cell.png}
+    %%\caption{A Simplified Crystal Cell}
+    %\label{fig:simplecell}
+  %\end{figure}
 
-This cell is rather complicated for the purposes of this discussion, so 
-consider instead a simplified crystal cell with one atom in its center 
-as shown in Figure \ref{fig:simplecell}. The Helmholtz free energy is 
-minimized for a fixed volume (and temperature and number of particles).  
-A fixed cubical volume called the ``bold-box" volume, $V_{bold-box}$ will 
-be used for illustration. The number density n for a collection of 
-simplified cells is simply 1 atom per fixed bold-box volume.
-\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} 
-It is easier to think of 1 atom per ``box" (a reduced number density) 
-than 1 atom per some length$^3$ (the actual number density). Reduced number 
-density is given by $n^*$ and is equal to the number of atoms in a ``box" 
-of size $\sigma^3$.
-\begin{displaymath}{n^*=n\sigma^3}\end{displaymath} If $V_{bold-box}$  
-has a volume of $\sigma^3$, the reduced number density is just the number 
-of atoms in the fixed bold-box volume. 
-\begin{displaymath}\text{Reduced Number Density of the simple cell = 1 atom}\end{displaymath} 
-
-In a large collection of simple cells, the atom at the center of each cell 
+%\textcolor{red}{This cell is rather complicated for the purposes of this discussion, so 
+%consider instead a simplified crystal cell with one atom in its center 
+%as shown in Figure \ref{fig:simplecell}. The Helmholtz free energy is 
+%minimized for a fixed volume (and temperature and number of particles).  
+%A fixed cubical volume called the ``bold-box" volume, $V_{bold-box}$ will 
+%be used for illustration. The number density n for a collection of 
+%simplified cells is simply 1 atom per fixed bold-box volume.
+%\begin{displaymath}{n = \frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{displaymath} 
+%It is easier to think of 1 atom per ``box" (a reduced number density) 
+%than 1 atom per some length$^3$ (the actual number density). Reduced number 
+%density is given by $n^*$ and is equal to the number of atoms in a ``box" 
+%of size $\sigma^3$.
+%\begin{displaymath}{n^*=n\sigma^3}\end{displaymath} If $V_{bold-box}$  
+%has a volume of $\sigma^3$, the reduced number density is just the number 
+%of atoms in the fixed bold-box volume. 
+%\begin{displaymath}\text{Reduced Number Density of the simple cell = 1 atom}\end{displaymath} 
+%}
+In a large collection of cells, the atom at each lattice site of 
 will not realistically reside exactly at the lattice point in the center 
 of the cell. Statistically there will typically be a normal distribution 
 of positions about the lattice point as pictured in the far right box in 
 Figure \ref{fig:Ensemble_Gaus}. A plot of a 2-dimensional Gaussian 
-distribution is shown in Figure \ref{fig:Gaus_plot}. A 3-dimenstional 
-Gaussian distribution centered at a lattice point can be used to represent 
+distribution is shown in Figure \ref{fig:Gaus_plot}. 
+A 3-dimensional Gaussian distribution centered at a lattice point can be used to represent 
 a number density profile $n(\vec{r})$  which describes how the atoms are 
-statistically distrubuted over a collection of cells.
+statistically distrubuted over a collection of cells. 
+%In 3-dimensions, the Gaussian function takes on the form
+%\begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int{e}^{-\frac{r^2}{2\sigma^2}}d\vec{r}}\end{equation} 
+It is important to note that the number density does not change when introducing a number 
+density profile. There are still the same number of atoms over some fixed volume. 
+%There is still a total of one atom per ``bold box" volume.
+%\begin{equation}{n=<n(\vec{r})>=\frac{1}{V_{bold-box}}\overbrace{\int_{bold-box}{n(\vec{r})}{d\vec{r}}}=\frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{equation}
+\begin{equation}{n=<n(\vec{r})>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}=\frac{1~\text{atom}}{V}}\end{equation}
+where $n(\vec r)$ is itself an ensemble average over all microstates, and is independent of time:
+\begin{equation}n(\vec r)=~<\sum_{i=1}^N\delta(\vec r - \vec r_i)>~\end{equation}
 
   \begin{figure}[h!]
     \centering
@@ -906,194 +895,250 @@ statistically distrubuted over a collection of cells.
     \label{fig:Gaus_plot}
   \end{figure}  
 
-It is important to note that the number density does not change when 
-introducing a number density profile. There is still a total of one atom 
-per ``bold box" volume.
-
-\begin{equation}{n=<n(\vec{r})>=\frac{1}{V_{bold-box}}\overbrace{\int_{bold-box}{n(\vec{r})}{d\vec{r}}}=\frac{N}{V}=\frac{1~\text{atom}}{V_{bold-box}}}\end{equation}
-
-In a large collection of cells, not all lattice sites will be occupied. 
-Vacancies can be taken into account while keeping the volume of the 
-bold box, and thus the overall number density, the same. This is done by 
+It may be that not all lattice sites are occupied. Vacancies can be taken 
+into account while keeping %the volume of the bold box, and thus 
+the overall number density the same. This is done by 
 making the cells smaller. A large collection of smaller cells creates a 
 new number density profile shown in Figure \ref{fig:Ensemble_Smallcells} 
-with eight smaller Gaussians of one-eigth the height.
+with eight smaller Gaussians of one-eigth the height. 
+Instead of thinking of an atom in one of the eight small cells, the same 
+Gaussian distribution can be obtained from thinking of one-eigth of an 
+atom in each small cell. This makes it convenient to describe the new 
+number density in terms of the fraction of vacancies, $f_v$: 
+\begin{displaymath}{ n = (1-f_v){n_{no.vacancies}}}\end{displaymath} 
+%\begin{align}
+  %n(\vec{r})=(1-f_v)\frac{\exp^{-\frac{{\vec{r}}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}
+%\end{align}
 
  \begin{figure}[h!]
     \centering
-    % FIXME \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
+    \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
     \caption{A Gaussian Distribution Number Density Profile}
     \label{fig:Ensemble_Smallcells}
   \end{figure} 
 
-Instead of thinking of an atom in one of the eight small cells, the same 
-Gaussian distribution can be obtained from thinking of one-eigth of an 
-atom in each small cell. This makes it convenient to describe the new 
-reduced number density in terms of the fraction of vacancies, $f_v$: 
-
-\begin{displaymath}{ n^* = (1-f_v){n_{no.vacancies}^*}}\end{displaymath} 
-
 \begin{figure}[h!]
     \centering
-    % FIXME \includegraphics[height=2.5cm]{SameStatPic.png}
+    \includegraphics[height=2.5cm]{SameStatPic.png}
     \caption{Front views of a cube with eight smaller cells. The two views 
     show two ways of picturing a fraction of vacancies, $f_v$ of 7/8 which 
     give rise to the same Gaussian distribution statistically}
     \label{fig:SameStatPic}
   \end{figure} 
 
-By varying the width of the Gaussians and the fraction of vacancies, new 
-number density profiles can be generated as shown in Figure \ref{fig:Ensemble_vary}.
+By varying the width of the Gaussians and the fraction of vacancies, various
+number density profiles can be generated as shown in Figure~\ref{fig:Ensemble_vary}.
+Once again, it is important to note that the number density is the same 
+for all these number density profiles $n(\vec{r})$. 
+%There is still a total of one atom per ``bold box" volume. 
+%This prodcedure is used only to find the crystal free energy as the number density 
+%profile for a liquid is homogeneous, as shown in Figure \ref{fig:homogen_denisty}.  
+A homogeneous number density profile is used for a liquid is shown in Figure \ref{fig:homogen_denisty}.
 
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{VaryWidthandVacancies.png}
     \caption{Several Gaussian Distribution Number Density Profiles all 
-    with a number density of 1 atom per $V_{bold box}$}
+    with the same number density, that is, there is one atom over the fixed volume.}
     \label{fig:Ensemble_vary}
   \end{figure}  
-
-Once again, it is important to note that the number density is the same 
-for all these number density profiles $n(\vec{r})$. There is still a total 
-of one atom per ``bold box" volume. This prodcedure is used only to find 
-the crystal free energy as number density profile for a liquid is 
-homogeneous, as shown in Figure \ref{fig:homogen_denisty}.  
 
  \begin{figure}[h!]
     \centering
     \includegraphics[height=4cm]{figs/homogeneous_bold-box.pdf}
-    % FIXME \includegraphics[height=4cm]{Homogeneous_bold-box.pdf}
     \caption{A homogeneouse number density profile $n(\vec{r})$}
     \label{fig:homogen_denisty}
-  \end{figure}    
- 
-A simplified flowchart of the program created to investigate the freezing 
-of a WCA fluid is shown below. The program takes four inputs: reduced number 
-density n*, reduced temperature t*, a range of Gaussian 
-widths gw, and a range of fraction of vacancies fv. The number density 
-profile is varied by varying gw and fv, and the free energy $F[n(\vec{r})]$ 
-is calculated for each profile until the minimum free energy is found for 
-that combination of $n^*$ and $t^*$, which is known from cDFT to be unique. 
-The process is then repeated to find the free energies at other number 
-densities and temperatures. 
+  \end{figure}   
 
-%Program Implementation
-The program computes both the crystal and the homogeneous Helmholtz free 
-energies. The Helmholtz free energy is minimized for a system with a fixed 
-temperature, volume, and number density. The temperature, T is an input to 
-the program. The number density, which is also an input to the program, 
-is used to calculate the volume of one primitive cell over which the free 
-energy is computed. The number of atoms in one primitive cell is one. To 
-compute the free energy, it is necessary to compute both the ideal and 
-excess free energies and add them, $F = F_{ideal} + F_{excess}$.
-%\begin{displaymath}F_{homogeneous} = F_{ideal.homogeneous} + F_{excess.homogeneous}\end{displaymath}
-%\begin{displaymath}F_{crystal} = F_{ideal.crystal} + F_{excess.crystal}\end{displaymath}
-%\newline
-%\newline\noindent Inputs: 
-%t*, n*, range of gw values , range of fv values
-%\newline Outputs: Homogeneous (liquid)  Helmholtz free energy (at the given T,V,N) 
-%\newline\indent\indent\indent Crystal Helmholtz free energy (at the given T,V,N)
+%Classical Density Functional Theory is used to find the equilbrium 
+%Helmholtz free energy of the system at a given temperature and density
+%by varying the number density profile $n(\vec{r})$ until the free energy 
+%is minimized. The minimum free energy, and its corresponding number 
+%density profile are then the equilibrium values for that temperature 
+%and number density. 
 
-%\noindent Input:
-\begin{displaymath}\text{Input:~~~~~~~~~~~~~~~~~~~~~~~~~~~T,~~ n,~~Range of fv,~~Range of gw~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
-%\noindent Set:
-%\begin{displaymath}\text{N = 1}\end{displaymath}
-\begin{displaymath}\text{Set:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~N~=~1~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
-\begin{displaymath}\text{Best}\left(\frac{F}{N}\right)_{diff}= 1e100\end{displaymath}
-%Outer Loop:  %set fv to one of the input values
-Loop: 
-\begin{displaymath}\text{fv = one of the fv values from input}\end{displaymath}
-\begin{equation}N_{primitive.cell}=(1-\text{fv})\text{N}\end{equation}
-\begin{equation}V_{primitive.cell}=\frac{\text{1}}{\text{n}}(1-\text{fv})\text{N}\end{equation}
-%\indent\indent\indent Inner Loop : %set gw to one of the input values
-\begin{displaymath}\sigma = \text{one of the gw values from input}\end{displaymath}
-\begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int\exp^{-\frac{|\vec{r}-\vec{R}|^2}{2\sigma^2}}d\vec{r}}\end{equation} 
-\begin{equation}\left(\frac{F}{N}\right)_{crystal}=\frac{cFideal_{primitive.cell} + cFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
-\begin{equation}\left(\frac{F}{N}\right)_{homogeneous}=\frac{hFideal_{primitive.cell} + hFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
-\begin{equation}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{crystal}-{~~}\left(\frac{F}{N}\right)_{homogeneous}\end{equation}
+%The number density profile is varied by varying gw and fv, and the 
+For a given combination of temperature and number density, a suite of number 
+density profiles are generated similiar to those represented in the example 
+set of profiles shown in Figure~\ref{fig:Ensemble_vary}. 
+The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number 
+density profile, and also for the homogeneous number denisty profile 
+characteristic of a liquid. Both the ideal and excess free energies are 
+found, and added together to get the total Helmholtz free energy.
+According to classical Density Functional Theory, the minimum free energy, 
+and its corresponding number density profile are then the equilibrium values 
+for that temperature and number density.
+%The Helmholtz free energy is minimized for a system with a fixed temperature, 
+%volume, and number of particles. Setting the number of particles to one, 
+%the volume can be found from the number density.
+The process is repeated to find the free energies at other combinations 
+of temperatures and number densities. 
 
-%Compare:
-\begin{displaymath}\text{If~~~~~~}\left(\frac{F}{N}\right)_{diff}<\text{~~~~Best}\left(\frac{F}{N}\right)_{diff}\end{displaymath}
-\begin{displaymath}\text{Then~~~~~~}\text{Best}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{diff}\end{displaymath}
-%\noindent Output:
-\begin{displaymath}\text{Output:~~~~~~~~~~~~ Best}\left(\frac{F}{N}\right)_{crystal}\text{~~and~~~~~~}\left(\frac{F}{N}\right)_{homogeneous}\text{~~~~for the given T, n ~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
-%\begin{displaymath}\text{Best}\left(\frac{F}{N}\right)_{crystal}\end{displaymath}
-%\begin{displaymath}\left(\frac{F}{N}\right)_{homogeneous}\end{displaymath}
-%lattice_constant= pow(4*(1-fv)/reduced_density, 1.0/3)
-\newline
-\newline
-*****   start stuff  ******
+%Once the Helmholtz free energy for both the crystal and liquid states of 
+%the fluid are found for a given temperature and density, they can be 
+%compared to find the resulting state of the fluid. 
+Outside the region of coexistence which exists between the liquid and 
+crystal states, the fluid will be completely in a crystalline state if the 
+crystal free energy is lower than the liquid free energy, and it will be 
+completely in a liquid state if the liquid free energy is lower than 
+the crystal free energy. Maxwell's Double Tangent Construction is used 
+to determine the actual number densities of the crystal and liquid states
+at the boundaries of the coexistance region for a given temperature, 
+and construct phase diagrams as described in the section on The Theory of
+Freezing and Maxwell's Double Tangent Construction.
 
-In general, if the crystal free energy at some $n^*$ and $t^*$ is lower 
-than the homogeneous free energy of a liquid at that same $n^*$ and $t^*$, 
-then the crystaline state dominates. But if the crystal free energy is 
-higher than the homogeneous free energy, the liquid state dominates. 
-However, there is a region of densities between the liquid and crystal 
-states that are forbidden, and so the actual state can not be determined 
-just by which energy is lower at that particular $n^*$ and $t^*$. Maxwell's 
-Double Tangent Construction must be implemented using the date collected 
-to determine the actual crystal and liquid states, and construct phase 
-diagrams. 
+\section{Computing the Liquid and Crystal Helmholtz free energies}
 
-*****  end  stuff  ******
-
-\section{Computing the Liquid and Crystal Ideal Helmholtz free energies}
-
-The liquid ideal Helmholtz free energy $F_{Hideal}$ is computed 
-analytically for a given homogeneous reduced density $n^*$, and reduced 
-temperature $t^*$ from the equation 
+The liquid ideal Helmholtz free energy is computed analytically 
+using Equation~\ref{eq:Fideal} 
+for a given homogeneous reduced density $n^*$, and reduced temperature $t^*$. 
+%from the equation 
 %\begin{displaymath}{\frac{F_{Hideal}}{V}=k_BTn(\ln(\frac{n*2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)-DELETE-EQN!}\end{displaymath} 
-\begin{align}
-  \frac{F_{Hideal}}{V}=k_BTn(\ln(n\Lambda^3)-1.0)
-\end{align}
-where $\sigma=1$ (which gives $n^*=n\sigma^3$=n), and $\epsilon=1$ (which 
-gives $t^*=\frac{k_BT}{\epsilon}=k_BT$). The quantity $\Lambda$ is the DeBroglie 
-wavelength given by
-\begin{displaymath}{\Lambda =\sqrt{\frac{2\pi\hbar^2}{k_BTm}}}\end{displaymath}  
-where in our program we have set
-\begin{displaymath}\left(\sqrt{\frac{2\hbar^2}{m}}\right)^3=4.752731840013864\text{x}10^{-7}\color{red}units?\color{black}\end{displaymath} 
+%\begin{align}
+  %\frac{F_{Hideal}}{V}=k_BTn(\ln(n\Lambda^3)-1.0)
+%\end{align}
+%The quantity $\Lambda$ is the DeBroglie wavelength given by
+%\begin{displaymath}{\Lambda =\sqrt{\frac{2\pi\hbar^2}{k_BTm}}}\end{displaymath}  
+%where in our program we have set
+%\begin{displaymath}\left(\sqrt{\frac{2\hbar^2}{m}}\right)^3=4.752731840013864\text{x}10^{-7}\color{red}units?\color{black}\end{displaymath} 
 %\begin{displaymath}{m=}\end{displaymath}  
 %\begin{displaymath}{\hbar=}\end{displaymath} 
 %\begin{displaymath}{k_B=}\end{displaymath} 
-
-The crystal ideal Helmholtz free energy $F_{Cideal}$ is computed from the equation 
+The crystal ideal Helmholtz free energy is computed computationally 
+from Equation~\ref{eq:Fideal-n(r)} with the varying number density profile given by
+%\begin{align}
+  %F_{ideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV
+%\end{align} 
 \begin{align}
-  F_{Cideal}[n(\vec{r})]= k_BT\int[n(\vec{r})\ln(n(\vec{r})\Lambda^3)-n(\vec{r})]dV
+  n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{e^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}}
 \end{align}
-with the varying number density profile given by 
-\begin{displaymath}
-  {n(|\vec{r}-\vec{R_i}|)=\sum_i{(1-f_v)\frac{\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}}
-\end{displaymath}
-For small gw values it is assumed that the Guassians do not overlap, 
-in which case the equation for the free energy can be simplified, and solved
-analytically with the result
-\begin{equation}
- F_{Cideal}=(1-f_v)k_BT\left(\ln((1-f_v)\Lambda^3)-3\ln(\sqrt{2\pi{gw}})-\frac{5.0}{2}\right)
-\end{equation}
-For larger gw values it is assumed that the Gaussians do overlap, 
-and so the free energy is caluculated computationally. First dx is scaled by gw,
-\begin{equation}
-  dx_{scaled} = (dx_{input})(gw)
-\end{equation}
-and then $n(\vec{r})$ is computed at one position of $\vec{r}$ within the 
-primitive cell taking into account the contribution of Gaussians from 
-many (5x5x5) nearby cells whose centers are given by $R_i$.
-%\begin{displaymath}{n(|\vec{r}-\vec{R_i}|)+=\frac{(1-f_v)\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}\end{displaymath}
-The contribution to the free energy of $n(\vec{r})$ at the one position is then
-added to the accumulating sum.
-%\begin{displaymath}{cF_{ideal}+=k_BTn(ln(\frac{(n)2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)dV-DELETE-EQN!}\end{displaymath}
-%\begin{displaymath}{cF_{ideal}+=k_BTn(\ln(n\Lambda^3)-1.0)dV}\end{displaymath}
-This process is repeated for all positions within one primitive cell to get the
-crystal ideal free energy for the primitive cell. This energy is then divided by
-the volume of the primitive cell to get the crystal ideal free energy per
-volume.
+%For small gw values it is assumed that the Guassians do not overlap, 
+%in which case the equation for the free energy can be simplified, and solved
+%analytically with the result
+%\begin{equation}
+ %F_{Cideal}=(1-f_v)k_BT\left(\ln((1-f_v)\Lambda^3)-3\ln(\sqrt{2\pi{gw}})-\frac{5.0}{2}\right)
+%\end{equation}
+%For larger gw values it is assumed that the Gaussians do overlap, 
+%and so the free energy is caluculated computationally. First dx is scaled by gw,
+%\begin{equation}
+  %dx_{scaled} = (dx_{input})(gw)
+%\end{equation}
+%and then $n(\vec{r})$ is computed at one position of $\vec{r}$ within the 
+%primitive cell taking into account the contribution of Gaussians from 
+%many (5x5x5) nearby cells whose centers are given by $R_i$.
+%%\begin{displaymath}{n(|\vec{r}-\vec{R_i}|)+=\frac{(1-f_v)\exp^{-\frac{{|\vec{r}-\vec{R_i}|}^2}{2{(gw)}^2}}}{\left(\sqrt{2\pi}gw\right)^3}}\end{displaymath}
+%The contribution to the free energy of $n(\vec{r})$ at the one position is then
+%added to the accumulating sum.
+%%\begin{displaymath}{cF_{ideal}+=k_BTn(ln(\frac{(n)2.646476976618268x10^{-6}}{\sqrt{(k_BT)^3}})-1.0)dV-DELETE-EQN!}\end{displaymath}
+%%\begin{displaymath}{cF_{ideal}+=k_BTn(\ln(n\Lambda^3)-1.0)dV}\end{displaymath}
+%This process is repeated for all positions within one primitive cell to get the
+%crystal ideal free energy for the primitive cell. This energy is then divided by
+%the volume of the primitive cell to get the crystal ideal free energy per
+%volume.
+%
+The liquid excess Helmholtz free energy is computed analytically  
+%for a given homogeneous reduced density $n^*$, and reduced temperature $t^*$ 
+using SFMT with a uniform number density profile, n that does not depend 
+on $\vec r$. 
+%done in hf.energy() note- does not depend on fv or gw but does use SFMT):
+%\begin{displaymath}{\frac{F_{Hexcess}}{V} = k_BT(\Phi_1+\Phi_2+\Phi_3)}\end{displaymath} 
+%For the case of a homogeneous number density n, $\Phi_2$, and $\Phi_3$ simplify to:
+%\begin{displaymath}{\Phi_1= -n_0\ln(1-n_3)}\end{displaymath} 
+%\begin{displaymath}{\Phi_2= \frac{n_1n_2}{1-n_3}}\end{displaymath} 
+%\color{red}\begin{displaymath}{\Phi_3=\frac{n_2^3}{24\pi(1-n_3)^2}}\end{displaymath}\color{black}
+%The weighted densities are found from
+%\begin{displaymath}{n_i=nw_i}\end{displaymath} 
+%where the weights $w_i$ are given by Equations~\ref{eq:weights}.
+
+The crystal excess Helmholtz free energy is computed computationally 
+using SFMT with a number density profile $n(\vec r)$ that varies spacially.
+%First dx is scaled by $\Xi$ or gw, whichever is larger \begin{displaymath}{dx_{scaled}=(dx_{input})(\Xi + gw)}\end{displaymath}
+%Then the crystal, or inhomogeneous, excess free energy is found from
+%\begin{displaymath}{F_{Cexcess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{displaymath} 
+Monte-Carlo integration is used to compute the weighted densities 
+$n_0(\vec{r})$, $n_1(\vec{r})$, $n_2(\vec{r})$, $n_3(\vec{r})$.
+%form $\Phi_1(\vec{r})$, $\Phi_2(\vec{r})$, and $\Phi_3(\vec{r})$.
+%
+The center of with weighting function is placed at some vector $\vec{r}=\vec{r}_k$ 
+within the primitive cell, and a vector $\vec{R}_j$ to the center of one of 
+the Gaussians is selected that is within the primitive cell, or one of the 
+neighboring cells within a prudently picked inclusion radius as Gaussians 
+farther away will not contriubute much (see Figure \ref{fig:InclusionRadius}).
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[height=5cm]{InclusionRadius.png}
+    \caption{The Gaussians at each lattice point are of width gw. 
+    After a radius of few gw's the Gaussians go to zero and can be neglected.}
+    \label{fig:InclusionRadius}
+  \end{figure} 
+
+The weighted densities $n_0(\vec{r}_k)$, $n_1(\vec{r}_k)$, $n_2(\vec{r}_k)$, 
+$n_3(\vec{r}_k)$ at $\vec{r}_k$ are then computed using the weight functions 
+$w_0(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$, $w_1(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$, 
+$w_2(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$, $w_3(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$ 
+where $\vec{dr}$ is a vector from the Gaussian centered at $\vec{R}_j$ to 
+some point in space. Monte-Carlo integration works by randomly generating 
+$\vec{dr}$ according to a Gaussian distribution. Setting $\vec{r}'=\vec{R}_j + 
+\vec{dr}$, and $n(\vec{r'})=(1-f_v)n_g(\vec{r'})$ where $n_g(\vec{r'})$ 
+is the gaussian number density profile for no vacancies, the equation:
+
+\begin{equation}{n_i(\vec{r})= \int_{r'}{(1-f_v)n_g(\vec{r'})w_i(|\vec{r}-\vec{r}'|)} {d}\vec{r}'}\end{equation} 
+implemented computationally in the form:
+\begin{equation}{n_i(\vec{r})= \sum_{r'}{(1-f_v)n_g(\vec{r'})w_i(|\vec{r}-\vec{r}'|)dV}}\end{equation} 
+becomes:
+\begin{equation}{n_i(\vec{r})= \sum_{NumPoints}(1-f_v)P_{\vec{dr}}w_i(|\vec{r}-\vec{r}'|)}\end{equation} 
+where NumPoints is the number of vectors $\vec{r'}$ randomly generated, and $n_g(\vec{r'})$ 
+(the value of the Gaussian at at radius of $|\vec{r'}|$) is equal to a probability density 
+which when multiplied by dV gives the probability $P_{\vec{dr}}$ at which the value of 
+$w_i(|\vec{r}-\vec{r}'|)$ will occur. 
+Using the relation:
+\begin{displaymath}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{displaymath} 
+$n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\vec{r}'|)$:
+\begin{equation}{n_i(\vec{r})=\sum_{NumPoints}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}'|)}{NumPoints}}\end{equation}
+The result can be made more accurate by increasing NumPoints which is the 
+number of vectors randomly generated. 
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[height=6cm]{GaussandW2_actual.png}
+    \caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional 
+    view of $w_2$ centered at $\vec{r}'$ is shown in purple. Here, the weight function 
+    is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ 
+    is generated randomly according to a Gaussian distribution.} 
+  \label{fig:GaussandW2_actual}
+  \end{figure} 
+
+ \begin{figure}[h!]
+    \centering
+    \includegraphics[height=6cm]{GaussandW2_thinkas.png}
+    \caption{An alternative way of viewing Figure~\ref{fig:GaussandW2_actual} where 
+    the weight function, shown by the purple dashed lines, is centered at $\vec{r}$  
+    and fixed in place as $\vec{dr}$ varies randomly.} 
+  \label{fig:GaussandW2_thinkas}
+  \end{figure} 
+
+%Monte-Carlo integration is employed to more efficiently 
+%compute the weighted densities used to calculate the excess free energy which is then 
+%added to the ideal free energy (computed analytically) to get the total free energy 
+%which is minimized. 
 
 \section{Our Functional for the Excess Helmholtz free energy}
-
+In order to apply classical Density Functional Theory, the Helmholtz energy
+must be found. Computing the ideal portion of the Helmholtz free energy is
+straightforward, but computing the excess portion of the Helmholtz free energy 
+is difficult since it depends on the interatomic potential energy $V(r)$ between 
+each sphere with all the other spheres. Soft Fundamental Measure Theory is a method
+developed to form an expression for the excess Helmholtz free energy without
+explicitly taking into account the interaction of each sphere with all the others, 
+but it must be taylored to fit a particular fluid\cite{schmidt1999density}. 
 %The excess Helmholtz free energy is particular to the fluid being modeled, 
 %as it depends on the interatomic potential V(r). 
-We use Soft Fundamental Measure Theory to find the excess Helmholtz free energy.
-The functional is written in general form as 
+
+We use Soft Fundamental Measure Theory to form a functional for the excess 
+Helmholtz free energy appropriate for the WCA fluid by introducing our 
+temperature dependent parameters $\alpha(T)$ and $\Xi(T)$. The functional 
+is written in general form as 
 \begin{align}
   F_{excess}[n(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
 \end{align}
@@ -1106,7 +1151,12 @@ where
 and Tarazona's tensor expression~\cite{tarazonaphi3, santos2012phi3} is used 
 for $\Phi_3$. The weighted densities $n_0, n_1, n_2,$ and $n_3$ are found from
 \begin{equation}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
-where the weight functions $w_0, w_1, w_2,$ and $w_3$ are given by
+where the number density profile $n(\vec r)$ within the integral is given 
+by a Gaussian function centered at a lattice point,
+%\begin{align}
+  %n(\vec r)=(1-f_v)\frac{\exp^{-\frac{r^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}
+%\end{align}
+and the weight functions $w_0, w_1, w_2,$ and $w_3$ are given by
 \begin{align}\label{eq:weights}
   w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
   w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
@@ -1114,6 +1164,57 @@ where the weight functions $w_0, w_1, w_2,$ and $w_3$ are given by
   \\
   w_3(r)&=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]
 \end{align}
+%
+ \begin{figure}[h!]
+    \centering
+    %\includegraphics[height=6cm]{GaussandW2_actual.png}
+    %\caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional 
+    %view of $w_2$ centered at $\vec{r}'$ is shown in purple. Here, the weight function 
+    %is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ 
+    %is generated randomly according to a Gaussian distribution.} 
+  \label{fig:GaussandW2_actual}
+  \end{figure} 
+
+Figure \ref{fig:weight_functions} shows a one dimensional view of the weight functions 
+$w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance along the z-axis. In three 
+dimensions, the weighting functions $w_0$, $w_1$, $w_2$ are spherical shells 
+centered at $\vec{r}$. As shown in the cross-sectional view in Figure \ref{fig:W0andW3}a, 
+$w_2$ peaks at a radius of $|\vec{r}-\vec{r'}|=\frac{\alpha}{2}$, a width determined 
+by $\frac{\Xi}{\sqrt{2}}$, and edges that tapers off on either side of the peak giving 
+the shell. The weighting function $w_3$, shown in Figure \ref{fig:W0andW3}b is a solid 
+sphere up to $\frac{\alpha-4\Xi}{2}$ after which it tapers off. 
+$\Xi$ is related to the width of the functions which 
+become wider in general as the temperature increases. 
+The radial distance 
+to the peak is related to $\alpha$, and decreases as the temperature 
+increases, that is, the shells shrink, as does 
+the sphere.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[height=8cm]{weight_functions.pdf}
+    \caption{The weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the 
+    z-axis for a reduced temperature of 2.}
+    \label{fig:weight_functions}
+  \end{figure}  
+
+ \begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.4\linewidth}
+      \includegraphics[height=5cm]{W2.png}
+      % \includegraphics[width=5cm]{figs/w2-ring}
+      \caption{A crossectional view of $w_2$}
+    \end{subfigure} 
+    \begin{subfigure}[b]{0.4\linewidth}
+      \includegraphics[height=5cm]{W3.png}
+      \caption{A crossectional view of $w_3$}
+    \end{subfigure} 
+    \caption{Cross-sectional views of the 3D weight functions. (a) $w_2$ is a 
+    spherical shell in 3D with soft edges. Weight functions $w_0$ and $w_1$ 
+    have a similar shape. (b) $w_3$ is a sphere with soft edges in 3D.}
+    \label{fig:W0andW3}
+    \end{figure} 
+
 The weight fucntions $w_{2}(r)$ and $w_{3}(r)$ are constructed using 
 Schmidt's proposed erf model~\cite{schmidt2000fluid} in which he set
 \begin{equation}{w_3(r)=\frac{1}{2}}\left[1-\operatorname{erf}\left(\frac{r-\frac{\sigma}{2}}{\frac{\text{a}}{\sqrt{2}}}\right)\right]\end{equation} 
@@ -1177,8 +1278,7 @@ WCA potential $V_{WCA}$.
 The second virial coefficient can be derived from Euler's equation for 
 the internal energy of a system, 
 \begin{equation}U=TS-PV+\mu{N}\end{equation}
-using the relations from statistical thermophysics which views the 
-thermodynamic quantities as ensemble averages
+using the relations
 \begin{equation}S=-k_B\sum_{i=0}^\infty{P_i\ln{P_i}}\end{equation}
 \begin{equation}U=<E>=\sum_{i=0}^\infty{P_iE_i}\end{equation}
 \begin{equation}N=<n>=\sum_{i=0}^\infty{P_in_i}\end{equation}
@@ -1212,7 +1312,7 @@ potential which is not temperature dependent.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=9cm]{B2_vs_T_with_xi_fromB2.pdf}
+    \includegraphics[height=8cm]{B2_vs_T_with_xi_fromB2.pdf}
     \caption{Shows the temperature dependence of $B_2$ generated from 
     matching the second virial coeficients for $V_{erf}(r)$ and $V_{WCA}(r)$ 
     at each temperature.}
@@ -1221,7 +1321,7 @@ potential which is not temperature dependent.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=9cm]{xi_fromB2.pdf}
+    \includegraphics[height=8cm]{xi_fromB2.pdf}
     \caption{Shows the temperature dependence of $\Xi$ generated from 
     matching the second virial coeficients for $V_{erf}(r)$ and $V_{WCA}(r)$ 
     at each temperature.}
@@ -1230,7 +1330,7 @@ potential which is not temperature dependent.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[height=9cm]{erf_Potential_xifromB2.pdf}
+    \includegraphics[height=8cm]{erf_Potential_xifromB2.pdf}
     \caption{Error Function Potential $V_{erf}(r)$ at several temperatures 
     with $\sigma=1$, $\epsilon=1$, compared to the WCA potential $V_{WCA}(r)$ 
     shown in black.}
@@ -1246,177 +1346,59 @@ potential which is not temperature dependent.
 %is smaller than the mean distance between the spheres. Thus, the WCA fluid can be treated as a 
 %classical fluid.
 
-\color{red}
-Figure \ref{fig:weight_functions} shows a 1 dimensional view of the weight functions 
-$w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance along the z-axis. In three 
-dimensions, the weighting functions $w_0$, $w_1$, $w_2$ are spherical shells 
-centered at $\vec{r}$. As shown in the cross-sectional view in Figure \ref{fig:W0andW3}a, 
-$w_2$ peaks at a radius of $|\vec{r}-\vec{r'}|=\frac{\alpha}{2}$, a width determined 
-by $\frac{\Xi}{\sqrt{2}}$, and edges that tapers off on either side of the peak giving 
-the shell. The weighting function $w_3$, shown in Figure \ref{fig:W0andW3}b is a solid 
-sphere up to a radius of ?FIX? after which it tapers off over a distance of ?FIX?.
 
-The parameters $\alpha$ and $\Xi$ are temperature dependent, as shown earlier in 
-Figure \ref{fig:alphaXivsT}. $\Xi$ is related to the width of the functions which 
-become wider in general as the temperature increases. The radial distance to the 
-peak decreases as the temperature increases, that is, the shells shrink, as does 
-the sphere. The functions can be treated as neglible outside of a distance of 
-about $3(\frac{\Xi}{\sqrt{2}}) + \frac{\alpha}{2}$ CHECK!! from the center of 
-the weight function.
+%Figure \ref{fig:weight_functions} shows a one dimensional view of the weight functions 
+%$w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance along the z-axis. In three 
+%dimensions, the weighting functions $w_0$, $w_1$, $w_2$ are spherical shells 
+%centered at $\vec{r}$. As shown in the cross-sectional view in Figure \ref{fig:W0andW3}a, 
+%$w_2$ peaks at a radius of $|\vec{r}-\vec{r'}|=\frac{\alpha}{2}$, a width determined 
+%by $\frac{\Xi}{\sqrt{2}}$, and edges that tapers off on either side of the peak giving 
+%the shell. The weighting function $w_3$, shown in Figure \ref{fig:W0andW3}b is a solid 
+%sphere up to $\frac{\alpha-4\Xi}{2}$ after which it tapers off.
+%The temperature dependence of parameters $\alpha$ and $\Xi$ 
+%%shown in Figures~\ref{fig:alphaXivsT} and \ref{fig:xi_fromB2vsT} 
+%can be related 
+%to the weight functions. 
+%$\Xi$ is related to the width of the functions which 
+%become wider in general as the temperature increases. 
+%The radial distance 
+%to the peak is related to $\alpha$, and decreases as the temperature 
+%increases, that is, the shells shrink, as does 
+%the sphere.
+%The functions can be treated as neglible outside of a distance of 
+%about $3(\frac{\Xi}{\sqrt{2}}) + \frac{\alpha}{2}$ CHECK!! from the center of 
+%the weight function.
 
- \begin{figure}[h!]
-    \centering
-    \includegraphics[height=6cm]{weight_functions.pdf}
-    \caption{The weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the 
-    z-axis for a reduced temperature of 2.}
-    \label{fig:weight_functions}
-  \end{figure}  
+ %\begin{figure}[h!]
+    %\centering
+    %\includegraphics[height=7cm]{weight_functions.pdf}
+    %\caption{The weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the 
+    %z-axis for a reduced temperature of 2.}
+    %\label{fig:weight_functions}
+  %\end{figure}  
 
- \begin{figure}[h!]
-    \centering
-    \begin{subfigure}[b]{0.4\linewidth}
-      \includegraphics[height=5cm]{W2.png}
-      % \includegraphics[width=5cm]{figs/w2-ring}
-      \caption{A crossectional view of $w_2$}
-    \end{subfigure} 
-    \begin{subfigure}[b]{0.4\linewidth}
-      \includegraphics[height=5cm]{W3.png}
-      \caption{A crossectional view of $w_3$}
-    \end{subfigure} 
-    \caption{Cross-sectional views of the 3D weight functions. (a) $w_2$ is a 
-    spherical shell in 3D with soft edges. Weight functions $w_0$ and $w_1$ 
-    have a similar shape. (b) $w_3$ is a sphere with soft edges in 3D.}
-    \label{fig:W0andW3}
-    \end{figure} 
-\color{black}
+ %\begin{figure}[h!]
+    %\centering
+    %\begin{subfigure}[b]{0.4\linewidth}
+      %\includegraphics[height=5cm]{W2.png}
+      %% \includegraphics[width=5cm]{figs/w2-ring}
+      %\caption{A crossectional view of $w_2$}
+    %\end{subfigure} 
+    %\begin{subfigure}[b]{0.4\linewidth}
+      %\includegraphics[height=5cm]{W3.png}
+      %\caption{A crossectional view of $w_3$}
+    %\end{subfigure} 
+    %\caption{Cross-sectional views of the 3D weight functions. (a) $w_2$ is a 
+    %spherical shell in 3D with soft edges. Weight functions $w_0$ and $w_1$ 
+    %have a similar shape. (b) $w_3$ is a sphere with soft edges in 3D.}
+    %\label{fig:W0andW3}
+    %\end{figure} 
 
-\section{Computing the Liquid and Crystal Excess Helmholtz free energies}
-
-The liquid excess free energy $F_{Hexcess}$ is computed analytically for 
-a given homogeneous reduced density $n^*$, and reduced temperature $t^*$ 
-using SFMT with a uniform number density profile, n that does not depend 
-on $\vec r$. 
-%done in hf.energy() note- does not depend on fv or gw but does use SFMT):
-\begin{displaymath}{\frac{F_{Hexcess}}{V} = k_BT(\Phi_1+\Phi_2+\Phi_3)}\end{displaymath} 
-For the case of a homogeneous number density n, $\Phi_2$, and $\Phi_3$ simplify to:
-%\begin{displaymath}{\Phi_1= -n_0\ln(1-n_3)}\end{displaymath} 
-\begin{displaymath}{\Phi_2= \frac{n_1n_2}{1-n_3}}\end{displaymath} 
-\color{red}\begin{displaymath}{\Phi_3=\frac{n_2^3}{24\pi(1-n_3)^2}}\end{displaymath}\color{black}
-The weighted densities are found from
-\begin{displaymath}{n_i=nw_i}\end{displaymath} 
-where the weights $w_i$ are given by Equations~\ref{eq:weights}.
-
-The crystal excess free energy $F_{Cexcess}$ is computed computationally 
-using SFMT with a number density profile $n(\vec r)$ that varies spacially.
-%First dx is scaled by $\Xi$ or gw, whichever is larger \begin{displaymath}{dx_{scaled}=(dx_{input})(\Xi + gw)}\end{displaymath}
-%Then the crystal, or inhomogeneous, excess free energy is found from
-\begin{displaymath}{F_{Cexcess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{displaymath} 
-Monte-Carlo integration is used to compute the weighted densities 
-$n_0(\vec{r})$, $n_1(\vec{r})$, $n_2(\vec{r})$, $n_3(\vec{r})$.
-%form $\Phi_1(\vec{r})$, $\Phi_2(\vec{r})$, and $\Phi_3(\vec{r})$.
-
-The center of with weighting function is placed at some vector $\vec{r}=\vec{r}_k$ 
-within the primitive cell, and a vector $\vec{R}_j$ to the center of one of 
-the Gaussians is selected that is within the primitive cell, or one of the 
-neighboring cells within a prudently picked inclusion radius as Gaussians 
-farther away will not contriubute much (see Figure \ref{fig:InclusionRadius}).
-
- \begin{figure}[h!]
-    \centering
-    \includegraphics[height=5cm]{InclusionRadius.png}
-    \caption{The Gaussians at each lattice point are of width gw. 
-    After a radius of few gw's the Gaussians go to zero and can be neglected.}
-    \label{fig:InclusionRadius}
-  \end{figure} 
-
-The weighted densities $n_0(\vec{r}_k)$, $n_1(\vec{r}_k)$, $n_2(\vec{r}_k)$, 
-$n_3(\vec{r}_k)$ at $\vec{r}_k$ are then computed using the weight functions 
-$w_0(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$, $w_1(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$, 
-$w_2(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$, $w_3(|\vec{r}_k-\vec{R_j}-\vec{dr}|)$ 
-where $\vec{dr}$ is a vector from the Gaussian centered at $\vec{R}_j$ to 
-some point in space. Monte-Carlo integration works by randomly generating 
-$\vec{dr}$ according to a Gaussian distribution. Setting $\vec{r}'=\vec{R}_j + 
-\vec{dr}$, and $n(\vec{r'})=(1-f_v)n_g(\vec{r'})$ where $n_g(\vec{r'})$ 
-is the gaussian number density profile for no vacancies, the equation:
-
-\begin{equation}{n_i(\vec{r})= \int_{r'}{(1-f_v)n_g(\vec{r'})w_i(|\vec{r}-\vec{r}'|)} {d}\vec{r}'}\end{equation} 
-implemented computationally in the form:
-\begin{equation}{n_i(\vec{r})= \sum_{r'}{(1-f_v)n_g(\vec{r'})w_i(|\vec{r}-\vec{r}'|)dV}}\end{equation} 
-becomes:
-\begin{equation}{n_i(\vec{r})= \sum_{NumPoints}(1-f_v)P_{\vec{dr}}w_i(|\vec{r}-\vec{r}'|)}\end{equation} 
-where NumPoints is the number of vectors $\vec{r'}$ randomly generated, and $n_g(\vec{r'})$ 
-(the value of the Gaussian at at radius of $|\vec{r'}|$) is equal to a probability density 
-which when multiplied by dV gives the probability $P_{\vec{dr}}$ at which the value of 
-$w_i(|\vec{r}-\vec{r}'|)$ will occur. 
-Using the relation:
-\begin{displaymath}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{displaymath} 
-$n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\vec{r}'|)$:
-\begin{equation}{n_i(\vec{r})=\sum_{NumPoints}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}'|)}{NumPoints}}\end{equation}
-
-The result can be made more accurate by increasing NumPoints which is the 
-number of vectors randomly generated. In order to further reduce the error 
-in the average, antithetic variates are used. Rather than computing an average 
-of a set of random points, each random point in the set is paired with a 
-point along the same line as the first point, but opposite in direction, 
-as shown in Figure \ref{fig:AntitheticVariate}. This reduces first order 
-error in the average by filtering out an erroneous offset of values along 
-the line connecting the two points by averaging the two results, one of 
-which may be erroneously higher than it should be while the other is 
-erronesously lower than it should be.
-
- \begin{figure}[h!]
-    \centering
-    \includegraphics[height=4cm]{AntitheticVariate.png}
-    \caption{Antithetic variates reduce first order error in an average. 
-    Each point in the average is paired with another point from along 
-    the same line as the first, and at an equal, but opposite distance.}
-    \label{fig:AntitheticVariate}
-  \end{figure} 
-Incorporating antithetic variates $-\vec{dr}$ for every $\vec{dr}$ equation ?? becomes:
-\begin{displaymath}{n_i(\vec{r}_k, \vec{R}_j)=\sum_{NumPoints}\frac{1}{2}\frac{(1-f_v)\left[w_i(|\vec{r}-\vec{R_j}-\vec{dr}|) +w_i(|\vec{r}-\vec{R_j}+\vec{dr}|)\right]}{NumPoints}}\end{displaymath}   The process is repeated for all the other $\vec{R}_j$'s to get the total weighted densities at vector $\vec{r}_k$ due to all the Gaussians. 
-\begin{displaymath}{n_i(\vec{r}_k)=\sum_j{n_i(\vec{r}_k, \vec{R}_j)}}\end{displaymath}
-Then the entire process repeated for each vector $\vec{r}_k$ to get the 
-total weighted densities $n_i(\vec{r})$ as a function of the position $\vec{r}$. 
-
-The standard error of the mean (SEM) is given by:
-\begin{equation}{SD_{mean}=\frac{SD}{\sqrt{N}}}\end{equation} which gives 
-a measure of the error in $n_3=\overline{w}_3$:
-\begin{equation}{Error=\sqrt{\frac{\overline{w_3^2}-(\overline{w}_3)^2}{NumPoints}}}\end{equation} 
-NumPoints, the number of vectors randomly generated, is increased until:
-\begin{equation}{Error<\frac{|1-n_3|}{4}}\end{equation} where the maximum 
-value that $n_3$ can be without error is 1.
-
-Figure \ref{fig:GaussandW2_actual} ......
-
- \begin{figure}[h!]
-    \centering
-    % FIXME \includegraphics[height=6cm]{GaussandW2_actual.png}
-    \caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional 
-    view of $w_2$ centered at $\vec{r}'$ is shown in purple. Here, the weight function 
-    is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ 
-    is generated randomly according to a Gaussian distribution.} 
-  \label{fig:GaussandW2_actual}
-  \end{figure} 
-
- \begin{figure}[h!]
-    \centering
-    % FIXME \includegraphics[height=6cm]{GaussandW2_thinkas.png}
-    \caption{An alternative way of viewing Figure \ref{fig:GaussandW2_actual} where 
-    the weight function, shown by the purple dashed lines, is centered at $\vec{r}$  
-    and fixed in place as $\vec{dr}$ varies randomly.} 
-  \label{fig:GaussandW2_thinkas}
-  \end{figure} 
-
-
-%Monte-Carlo integration is employed to more efficiently 
-%compute the weighted densities used to calculate the excess free energy which is then 
-%added to the ideal free energy (computed analytically) to get the total free energy 
-%which is minimized. 
 
 \chapter{Results and Discussion}
 
 Phase diagrams for the WCA fluid are shown in Figures~\ref{fig:Phase_Diagram_of_T_vs_n} 
-through \ref{fig:Phase_Diagram_P_vs_T_AS}. In all cases $\sigma=1$ and $\epsilon=1$. 
+and \ref{fig:Phase_Diagram_P_vs_T}. In all cases $\sigma=1$ and $\epsilon=1$. 
 In Figure~\ref{fig:Phase_Diagram_of_T_vs_n} the reduced temperature $T^*=\frac{kT}{\epsilon}$ 
 is plotted against the reduced number density $n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. 
 The red area is fluid, and the blue area is crystal. The gray area that separates the fluid, 
@@ -1424,7 +1406,7 @@ and the crystal regions is where some fluid and crystal exist together at varyin
 The region of coexistence slants slightly to the right toward higher density as the temperature 
 increases. This is expected since at higher temperatures, the fluid would have to be under 
 greater compression before forming a solid. The white lines show results from Monte-Carlo 
-simulations of the WCA fluid. Overall, the general shape, and position of the lines correspond
+simulations of the WCA fluid~\cite{May}. Overall, the general shape, and position of the lines correspond
 fairly closely to the edges of the region of coexistance predicted from the DFT method, 
 but the width of the coexistance region is about one-third larger for the Monte-Carlo results 
 for most temperatures. The white line on the right, representing the density of the solid at 
@@ -1432,17 +1414,17 @@ each temperature, is in fairly good aggreement with our DFT results for all temp
 However, the white line on the left, representing the density of the liquid at each temperature, 
 is consistenty farther left than the liquid transition densities our method predicted.
 
-Figure~\ref{fig:Phase_Diagram_of_T_vs_n_AS} shows our results for a wider 
-range of reduced temperatures from kT=0.5 to 38. The white lines show the results
-of molecular simulations of the WCA fluid made by Ahmed and Sadus~\cite{ahmedsadus}.
-As can be seen in the figure, the region of coexistence in our simulations 
-falls within the region of coexistance predicted by Ahmed and Sadus at almost 
-all temperatures from approximately kT=0.5 to 28. At the low temperature of kT=0.5,
-the width of the coexistance regions are nearly the same, while moving to 
-higher temperatures,the width of our coexistance region ranges from about 
-one-half to one-forth the size. Although, our coexistence region is only 
-about one-forth the size at kT=28, it is centered within the coexistence 
-region predicted by Ahmed and Sadus. 
+%Figure~\ref{fig:Phase_Diagram_of_T_vs_n_AS} shows our results for a wider 
+%range of reduced temperatures from kT=0.5 to 38. The white lines show the results
+%of molecular simulations of the WCA fluid made by Ahmed and Sadus~\cite{ahmedsadus}.
+%As can be seen in the figure, the region of coexistence in our simulations 
+%falls within the region of coexistance predicted by Ahmed and Sadus at almost 
+%all temperatures from approximately kT=0.5 to 28. At the low temperature of kT=0.5,
+%the width of the coexistance regions are nearly the same, while moving to 
+%higher temperatures,the width of our coexistance region ranges from about 
+%one-half to one-forth the size. Although, our coexistence region is only 
+%about one-forth the size at kT=28, it is centered within the coexistence 
+%region predicted by Ahmed and Sadus. 
 
 \begin{figure}
   \centering
@@ -1456,11 +1438,11 @@ region predicted by Ahmed and Sadus.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
   %\includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n_AS}
-  \caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
-  White lines show the liquid and solid transition densities at each temperature from 
-  simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
+  %\caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
+  %White lines show the liquid and solid transition densities at each temperature from 
+  %simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
   \label{fig:Phase_Diagram_of_T_vs_n_AS}
 \end{figure}
 
@@ -1471,10 +1453,11 @@ temperatures and pressures is what would be expected, with the WCA fluid becomin
 a higher pressure for a higher temperatuer, or becoming a liquid at a higher temperature 
 for a higher pressure. But the transition pressures and temperatures are consistently higher 
 than the Monte-Carlo simulations shown by the white line, and the descripancy grows as 
-the temperature increases. Figure~\ref{fig:Phase_Diagram_P_vs_T_AS} shows our results for a larger 
-range of reduced temperatures from kT=0.5 to 38, compated with the results
-from Ahmed and Sadus's molecular simulations. Here again, our transition 
-pressures and temperatures are consistently higher.
+the temperature increases. 
+%Figure~\ref{fig:Phase_Diagram_P_vs_T_AS} shows our results for a larger 
+%range of reduced temperatures from kT=0.5 to 38, compated with the results
+%from Ahmed and Sadus's molecular simulations. Here again, our transition 
+%pressures and temperatures are consistently higher.
 
 \begin{figure}
   \centering
@@ -1487,26 +1470,26 @@ pressures and temperatures are consistently higher.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T_AS}
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T_AS}
   %\includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T_AS}
-  \caption{Phase Diagram of the reduced pressure verses the reduced temperature. 
-  The white line marks the boundary from simulations by Ahmed and Sadus~\cite{ahmedsadus}.}
+  %\caption{Phase Diagram of the reduced pressure verses the reduced temperature. 
+  %The white line marks the boundary from simulations by Ahmed and Sadus~\cite{ahmedsadus}.}
   \label{fig:Phase_Diagram_P_vs_T_AS}
 \end{figure}
 
-Figure~\ref{fig:p-vs-T_at_fixed_density} shows individual plots of the 
-reduced pressure versus the reduced temperature at fixed reduced densities 
-from $n^*$ = 0.7 to 1.2. As can be seen by comparison with Figure 
-\ref{fig:Phase_Diagram_P_vs_T_AS}, the plotted lines display kinks when 
-the WCA fluid transistions into a solid. These downward bends align to 
-form the curved interface separating the blue and red areas in 
-Figures~\ref{fig:Phase_Diagram_P_vs_T} and \ref{fig:Phase_Diagram_P_vs_T_AS}.
+%Figure~\ref{fig:p-vs-T_at_fixed_density} shows individual plots of the 
+%reduced pressure versus the reduced temperature at fixed reduced densities 
+%from $n^*$ = 0.7 to 1.2. As can be seen by comparison with Figure 
+%\ref{fig:Phase_Diagram_P_vs_T_AS}, the plotted lines display kinks when 
+%the WCA fluid transistions into a solid. These downward bends align to 
+%form the curved interface separating the blue and red areas in 
+%Figures~\ref{fig:Phase_Diagram_P_vs_T} and \ref{fig:Phase_Diagram_P_vs_T_AS}.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n_noMC}
-  \caption{Plot of the reduced pressure verses the reduced temperature. 
-  The lines bending downward indicate freezing.}
+  %\includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n_noMC}
+  %\caption{Plot of the reduced pressure verses the reduced temperature. 
+  %The lines bending downward indicate freezing.}
   \label{fig:p-vs-T_at_fixed_density}
 \end{figure}
 
@@ -1543,8 +1526,12 @@ forming temperature dependent parameters $\alpha(T)$ and $\Xi(T)$ to use
 in Schmidt's erf model to better fit our results to those expected for a
 WCA fluid. We were able to generate a temperature-density 
 phase diagram that yielded coexistence regions that approximately 
-matched the Monte-Carlo and molecular simulation results for 
-values of kT=0.5 to 38. We are also able to generate a pressure-temperature
+matched the Monte-Carlo
+% and molecular simulation 
+results. 
+%for values of kT=0.5 to 3. 
+%kT=0.5 to 38
+We are also able to generate a pressure-temperature
 phase diagram with a shape that is expected, but the transition 
 temperatures and pressures were too high. 
 
@@ -1778,10 +1765,10 @@ Calculate $\widetilde{w}_{{m2}_{x'x'}}(k)$
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta'\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\cos^2\phi'~d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
 \begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
 
-\color{blue}
+%\color{blue}
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
 \begin{equation}\label{compare_equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
-\color{black}
+%\color{black}
 
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}\right)d{r}}\end{displaymath} 
 \begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}\right)d{r}}\end{equation}
@@ -2083,8 +2070,8 @@ results in
 
 \begin{equation}\frac{PV}{k_BT}=\ln{\left(\sum_{n=0}^\infty \lambda^nZ_{on}Q_n\right)} \end{equation}
 where $Q_n$ is the configuration integral.
-\color{red}For a system of N particles only, the sum collapses to one term, 
-that for n=N, which gives \color{black}
+For a system of N particles only, the sum collapses to one term, 
+that for n=N, which gives 
 \begin{equation}\label{PV/kBT_reduces_for_N}\frac{PV}{k_BT}=\ln{\left(\lambda^NZ_{oN}Q_N\right)}
 %=\ln\lambda^n + \ln{Z}_{on}+\ln{Q}_n
 =\beta\mu{N} + \ln{Z}_{oN} +\ln{Q}_N\end{equation}
@@ -2107,243 +2094,75 @@ gives
 where $B_2(T)$ is given by
 \begin{equation}B_2=-\frac{1}{2}\int_{Volume}f(r)d\vec{r} \end{equation}
 
-\color{red}This result was for low densities where higher terms in the 
+This result was for low densities where higher terms in the 
 expression for the excess free energy were neglected. The full virial 
-equation is given by\color{black}
+equation is given by
 \begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
 
-%------------------n(r)--move to ``back" later---------------------
-------------------------------------------------------------------
 
-The actual positions of atoms in a microstate  \color{red}?at time t, or averaged over time?:\color{black}
-\begin{equation}\rho_{s}(\vec r)=\sum_{i=1}^N\delta(\vec r - \vec r_i)\end{equation}
-The equilibrium single number density distribution equals the ensemble average over all microstates, and is independent of time:
-\begin{equation}n(\vec r)=\rho^{(1)}(\vec r)=~<\rho_s(\vec r)>~\end{equation}
-The reduced equilibrium phase-space probablity density of n particles in volume $dr^ndp^n$:
-\begin{equation}f_o^{(n)}(\vec r^n, \vec p^n)=\rho^{(n)}(\vec r^n)f_M^{(n)}(\vec p^n)\end{equation}
-The relation between the  reduced equilibrium phase-space probablity density and the equilibrium phase-space probablity density:
-\begin{equation}f_o^{(n)}(\vec r^n, \vec p^n)=\frac{N!}{(N-n)!}\int\dot~\dot~\dot~\int f_o^{[N]}(\vec r^N, \vec p^N) d\vec r^{N-n} d\vec p^{N-n}\end{equation}
-The canonical equilibrium phase-space probablity density:
-\begin{equation}f_o^{[N]}(\vec r^N, \vec p^N)=\frac{1}{N!}\frac{1}{h^{3N}}\frac{e^{-\beta H}}{partian function}\end{equation}
-where
+\section{Derivation of $F = -k_BTln(Z)$}
+The canonical equilibrium phase-space probablity density is given by
+\begin{equation}P_{eq}(\vec r^N, \vec p^N)=\frac{1}{N!}\frac{1}{h^{3N}}\frac{e^{-\beta H}}{partian function}\end{equation}
 \begin{equation}{partian function}=\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\end{equation}
-The equilibrium phase-space probablity density integrated over all continuous microstates $(\vec r^N,\vec p^N)$ is 1:
-\begin{equation}\int\dot~\dot~\dot~\int f_o^{[N]}(\vec r^N, \vec p^N) d\vec r^{N} d\vec p^{N}=1\end{equation}
-The equilibrium phase-space probablity density is independent of time:
-\begin{equation}f_o^{[N]}(\vec r^N, \vec p^N) = f_o^{[N]}(\vec r^N, \vec p^N; t)\end{equation}
-The Helmholtz free energy is a functional of the equilibrium phase-space probability density:
-\begin{equation}U = <E> = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N}\end{equation}
-\begin{equation}TS = -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln\left(N!~h^{3N}f_o^{[N]}\right) d\vec r^{N} d\vec p^{N} \end{equation}
-\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln\left(\frac{e^{-\beta H}}{\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}}\right) d\vec r^{N} d\vec p^{N} \end{equation}
-\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[f_o^{[N]}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right] \end{equation}
-\begin{equation}  =-k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[f_o^{[N]}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right] \end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}ln(Z)d\vec r^{N} d\vec p^{N}\end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}d\vec r^{N} d\vec p^{N}\right]\end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[1\right]\end{equation}
-and so 
-\begin{equation}F = U - TS\end{equation}
-\begin{equation} = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N}-\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int f_o^{[N]}~H~d\vec r^{N} d\vec p^{N} -k_BTln(Z)\end{equation}
+The Helmholtz free energy is given by 
+\begin{equation}\label{F=U-TS}F = U - TS\end{equation}
+where
+\begin{equation}U = <E> = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N}\end{equation}
+\begin{align}
+ TS &= T\left[-k_B\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}\operatorname{ln}\left(N!~h^{3N}P_{eq}\right) d\vec r^{N} d\vec p^{N}\right]   \\
+	&= -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}\operatorname{ln}\left(\frac{e^{-\beta H}}{\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}}\right) d\vec r^{N} d\vec p^{N}   \\
+	&= -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[P_{eq}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right]  \\ 
+    &= -k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int \left[P_{eq}\left(\frac{-1}{k_BT}H\right)-ln\left(\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\right) d\vec r^{N} d\vec p^{N}\right]   
+\end{align}  
+\begin{align}  
+    &= \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} +k_BT\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}ln(Z)d\vec r^{N} d\vec p^{N}     \\
+    &= \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}d\vec r^{N} d\vec p^{N}\right]   \\
+    &= \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} +k_BTln(Z)\left[1\right]   
+\end{align}
+Plugging these into Equation~\ref{F=U-TS} gives
+\begin{equation} F = \frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N}-\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int P_{eq}~H~d\vec r^{N} d\vec p^{N} -k_BTln(Z)\end{equation}
 \begin{equation}F = -k_BTln(Z)\end{equation}
 
-----------------------------------------------
+
+%\section{Program Flowchart}
+
+%\begin{displaymath}F_{homogeneous} = F_{ideal.homogeneous} + F_{excess.homogeneous}\end{displaymath}
+%\begin{displaymath}F_{crystal} = F_{ideal.crystal} + F_{excess.crystal}\end{displaymath}
+%\newline
+
+%\newline\noindent Inputs: 
+%t*, n*, range of gw values , range of fv values
+%\newline Outputs: Homogeneous (liquid)  Helmholtz free energy (at the given T,V,N) 
+%\newline\indent\indent\indent Crystal Helmholtz free energy (at the given T,V,N)
+
+%PROGRAM FLOWCHART:
+%\begin{displaymath}\text{Input:~~~~~~~~~~~~~~~~~~~~~~~~~~~T,~~ n,~~Range of fv,~~Range of gw~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
+%\begin{displaymath}\text{Set:~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~N~=~1~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
+%\begin{displaymath}\text{Best}\left(\frac{F}{N}\right)_{diff}= 1e100\end{displaymath}
+%Loop: 
+%\begin{displaymath}\text{fv = one of the fv values from input}\end{displaymath}
+%\begin{equation}N_{primitive.cell}=(1-\text{fv})\text{N}\end{equation}
+%\begin{equation}V_{primitive.cell}=\frac{\text{1}}{\text{n}}(1-\text{fv})\text{N}\end{equation}
+%\begin{displaymath}\sigma = \text{one of the gw values from input}\end{displaymath}
+%\begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int\exp^{-\frac{|\vec{r}-\vec{R}|^2}{2\sigma^2}}d\vec{r}}\end{equation} 
+%\begin{equation}\left(\frac{F}{N}\right)_{crystal}=\frac{cFideal_{primitive.cell} + cFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
+%\begin{equation}\left(\frac{F}{N}\right)_{homogeneous}=\frac{hFideal_{primitive.cell} + hFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
+%\begin{equation}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{crystal}-{~~}\left(\frac{F}{N}\right)_{homogeneous}\end{equation}
+%\begin{displaymath}\text{If~~~~~~}\left(\frac{F}{N}\right)_{diff}<\text{~~~~Best}\left(\frac{F}{N}\right)_{diff}\end{displaymath}
+%\begin{displaymath}\text{Then~~~~~~}\text{Best}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{diff}\end{displaymath}
+%\begin{displaymath}\text{Output:~~~~~~~~~~~~ Best}\left(\frac{F}{N}\right)_{crystal}\text{~~and~~~~~~}\left(\frac{F}{N}\right)_{homogeneous}\text{~~~~for the given T, n ~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
+
+%\begin{displaymath}\text{Best}\left(\frac{F}{N}\right)_{crystal}\end{displaymath}
+%\begin{displaymath}\left(\frac{F}{N}\right)_{homogeneous}\end{displaymath}
+%lattice_constant= pow(4*(1-fv)/reduced_density, 1.0/3)
+
+%The number of atoms in one primitive cell is one. 
 
 \bibliography{thesis}
 \bibliographystyle{unsrt}
 
 \end{document}
 
-  %\cite{TschoppBHextended}	
-
-%\cite{rowlinson1964statistical}
-%\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-%  lafitte2013accurate}
-%\cite{carnahan1969equation}
-%\cite{rosenfeld1989, rosenfeld1997,
-%  roth2002whitebear}
-
-	%\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density, hughes2013classical, krebs2014improved}
-%\cite{cuesta1997dimensional, hansen2009fundamental, marechal2013density}
-%\cite{schmidt2000density, groh2001density, kim2001adsorption,
-%  sweatman2002fundamental}
-
-%\cite{weeks1971}
-	%\cite{rosenfeld1989}
-	%%\cite{tarazonaFIXME,santos2012phi3}
-	%\cite{schmidt1999density} 
-	%\cite{schmidt2000fluid}
-	
-%\cite{barker1967perturbation}
-%\cite{roth2002whitebear} 
-	%\cite{roth2002whitebear}
-	
-%\cite{mikolaj2004structure, eggert2002quantitative,
-%yarnell1973structure}
-	%\cite{verlet1967computer}
-
-
-%-------------Minimization-----------------
-%The minimization can be shown by considering that according to the second law of thermodynamics, a system that is not in equilibrium will exprience spontanteous processes that increase the total entropy of a system and its surroundings until equilibrium is reached, $\Delta{S}_{System + Surroundings} \geq 0$. Here ``surroundings" means the entire universe minus the system. This, together with the conservation of energy (the first law of thermodynamics) which says that whatever energy is lost (or gained) by the system is gained (or lost) by the surroundings $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that any change in the free energy will be negative with each spontaneous process until a minimum is reached if the natural variables of the free energy are held fixed.  How will a system at a fixed temperature, volume, and number of particles respond to a small offset from equilibrium? Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
-%\begin{equation}d\left(\frac{F}{N}\right)_{System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\frac{S}{N}dT_{System}\end{equation}
-%and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that $dT=0$ gives
-%\begin{equation}d\left(\frac{F}{N}\right)_{System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}\end{equation}
-%where conservation of energy was also applied. Fixing the volume and the number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, results in
-%\begin{equation}d\left(\frac{F}{N}\right)_{System}=-\frac{T}{N}dS_{System+Surroundings} \end{equation}which, for fixed N, is the same as
-%\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number of particles are fixed, the change in the free energy of the system will always be negative. (reference schroder)
-
-%More generally, the Helmholtz free energy is the value assumed by U-TS for a system that has a fixed volume, number of particles, and temperature that equals the temperature of the reservoir, or surroundings as it settles spontaneously to equilibrium. Under these conditions, the quantity U-TS settles to a minimum at equilibrium with respect to unconstrained variables, such as the number density profile $n(\vec r)$.
-%\begin{equation}F=\text{min}_{U}(U_{Not.equilibrium} - TS_{Not.equilibrium}) = U_{equilibrium}-TS_{equilibrium}\end{equation}
-%An extremum is reached when
-%\begin{equation}\frac{\partial{F}}{\partial{U}}=0\end{equation}
-
-%\begin{equation}F=U-TS\end{equation}
-%\begin{equation}\frac{F}{N}=\frac{U}{N}-\frac{TS}{N}\end{equation}
-%\begin{equation}\label{usetoshowmin}d\left(\frac{F}{N}\right)=d\left(\frac{U}{N}\right)-d\left(\frac{TS}{N}\right)\end{equation}
-%\begin{equation}d\left(\frac{F}{N}\right)=d\left(\frac{U}{N}\right)-\frac{T}{N}dS-\frac{S}{N}dT-TS d\left(\frac{1}{N}\right)\end{equation}
-%Setting $f_N=\frac{F}{N}$ this becomes
-%\begin{equation}df_N=-\frac{S}{N}dT-\frac{P}{N}dV-PVd\left(\frac{1}{N}\right)\end{equation}
 
 
 
-%-------Scaled Partical Theory-----------------
-Scaled particle theory seeks a general expression for the excess chemical potential of a homogeneous Hard Sphere fluid 
-which can then be integrated to find the excess Helmholtz free energy.
-\begin{equation}F_{ex}=\int{\mu_{ex}dN}\end{equation}
-It is an extension of the work done by Widom who showed that the excess chemical potential of a homogenesous fluid corredsponds to the reversible work 
-of inserting a sphere of radius R into a fluid consisting of hard spheres of radius R. 
-
-Widom's result was obtained by considering the difference in the excess Helmholtz free energy when one atom is added to an otherwise closed system. 
-He showed that the excess chemcial potential is related to the ensemble average of the Boltzman factor for the potential energy difference $V_{diff}$ 
-between a system with N atoms and one with N+1 atoms. The resulting equation is known as Widom's Insertion Formula.
-%\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
-\begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
-\begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-%Equation~\ref{widom} is called Widom's Insertion Formula. 
-
-%%COME BACK TO THIS POINT! >>>>>\color{red}For a system... $<e^{-\beta{V_{diff}}}> \rightarrow e^{-\beta{V_{diff}}}$, and Equation~\ref{widoms-insertion-formula} becomes \begin{equation}\mu_{ex}=-k_BT\ln\left(e^{-\beta{V_{diff}}}\right)=-k_BT(-\beta{V}_{diff})=V_{diff}=W_{rev}\end{equation}\color{black}
-
-%In a randomly positioned (I think it has to be homogeneous!)
-\noindent To evaluate Equation~\ref{widoms-insertion-formula} for a Hard Sphere fluid consider that
-no energy would be required to place a hard sphere at points surrounded by an empty space the size of a hard sphere. 
-But a hard sphere cannot be placed at points where a hard sphere would overlap another hard sphere; 
-the energy required to do that would be infinite. Thus, for a Hard Sphere fluid, Equation~\ref{widoms-insertion-formula} becomes
-\begin{equation}\mu_{ex}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{V}_{NoOverlap}}+P_{Overlap}e^{-\beta{V}_{Overlap}}\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{0}}+P_{Overlap}e^{-\beta\infty}\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}(1)+P_{Overlap}(0)\right)\end{equation}
-\begin{equation}=-k_BT\ln\left(P_{NoOverlap}\right)\end{equation}
-where $P_{NoOverlap}$ is the probablity of positions existing in the hard fluid that are surrounded by an empty space the size of a hard sphere.
-
-\begin{figure}[h!]
-    \centering
-    %\includegraphics[height=5cm]{Probability-of-overlap.pdf}
-    \caption{No energy is needed to place a sphere at a position where there is no overlap such 
-             as shown by the black dot at the center of the dotted region near the top. 
-             But it is not possible to place a sphere at a position where an overlap occurs.}
-    \label{fig:p_overlap}
-  \end{figure}
-
-For a homogeneous system, the probablity of positions existing in the hard fluid that are surrounded 
-by an empty space the size of a hard sphere, $P_{NoOverlap}$, can be found by considering 
-that $P_{NoOverlap}~=1-~P_{Overlap}$ where $P_{Overlap}$ is simply the number density times the volume of one sphere. 
-%\color{red}Thus the chemical potential for a fluid with cavities having a radius equal to the radius R of a hard sphere is \color{black}
-\color{red}Thus, for cavities having a radius Ro equal to the radius R of a hard sphere, the chemical potential is found to be \color{black}
-%\begin{equation}P_{Overlap}=nV_{sphere}\right)\end{equation}
-\begin{equation}\mu_{ex}(Ro=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
-\color{red} ???More generally, for Ro $<$ R this becomes???
-\begin{equation}???\mu_{ex}(Ro < R)=-k_BT(\ln(1-n\frac{4\pi}{3}(R_o+R)^3))???\end{equation}
-\color{black}
-
-NOW DO UPPER LIMIT  Ro $>>$ R
-
-For Ro $>>$ R ...
---------------------------------------------------
-
-%\section{Derivation of the Excess Free Energy from Scaled Particle Theory}
-%The excess chemical potential of a homogeneous fluid corresdponds to the 
-%reversible work of inserting a sphere of radius R 
-%into a fluid consisting of hard spheres of radius R. 
-%\begin{displaymath}\mu_{ex}=W_{rev}(R){~~~~}\text{work to insert a hard sphere of radius R}\end{displaymath}
-%This result is obtained by considering the difference in the excess Helmholtz 
-%free energy when one atom is added to the system. It was shown by Widom 
-%to be related to the ensemble average of the Boltzman factor for the 
-%potential energy difference $V_{diff}$ of a system with N atoms and one 
-%with N+1 atoms. The resulting equation is known as Widom's Insertion Formula.
-%%\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
-%\begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
-%\begin{equation}\label{widom}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-%%Equation~\ref{widom} is called Widom's Insertion Formula. 
-%\color{red}For a system... $<e^{-\beta{V_{diff}}}> \rightarrow e^{-\beta{V_{diff}}}$, and Equation~\ref{widom} becomes 
-%\begin{equation}\mu_{ex}=-k_BT\ln\left(e^{-\beta{V_{diff}}}\right)=-k_BT(-\beta{V}_{diff})=V_{diff}=W_{rev}\end{equation}\color{black}
-%%In a randomly positioned (I think it has to be homogeneous!)
-%\indent In a collection of hard spheres making up a hard sphere fluid, 
-%no energy would be required to place a hard sphere at points 
-%surrounded by an empty space the size of a hard sphere. But a hard sphere 
-%cannot be placed at points where a hard sphere would 
-%overlap another hard sphere; the energy required to do that would be infinite. 
-%Thus, for a Hard Sphere fluid, Equation~\ref{widom} becomes
-%\begin{equation}\mu_{ex}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{V}_{NoOverlap}}+P_{Overlap}e^{-\beta{V}_{Overlap}}\right)\end{equation}
-%\begin{equation}=-k_BT\ln\left(P_{NoOverlap}e^{-\beta{0}}+P_{Overlap}e^{-\beta\infty}\right)\end{equation}
-%\begin{equation}=-k_BT\ln\left(P_{NoOverlap}(1)+P_{Overlap}(0)\right)\end{equation}
-%\begin{equation}=-k_BT\ln\left(P_{NoOverlap}\right)\end{equation}
-%where $P_{NoOverlap}$ is the probablity of positions existing in the hard 
-%fluid that are surrounded by an empty space the size of a hard sphere.
-
-%\begin{figure}[h!]
-    %\centering
-    %% FIXME \includegraphics[height=3cm]{Probability-of-overlap.pdf}
-    %\caption{No energy is needed to place a sphere at a position where 
-    %there is no overlap such as shown by the black dot at the center of 
-    %the dotted region near the top. But it is not possible to place a 
-    %sphere at a position where an overlap occurs.}
-    %\label{fig:p_overlap}
-  %\end{figure}
-
-%For a homogeneous system, the probablity of positions existing in the hard 
-%fluid that are surrounded by an empty space the size of a hard sphere, 
-%$P_{NoOverlap}$, can be found by considering 
-%that $P_{NoOverlap}~=1-~P_{Overlap}$ where $P_{Overlap}$ is simply the 
-%number density times the volume of one sphere. 
-%%\color{red}Thus the chemical potential for a fluid with cavities having 
-%%a radius equal to the radius R of a hard sphere is \color{black}
-%\color{red}Thus, considering cavities having a radius Ro equal to the 
-%radius R of a hard sphere, the chemical potential is found to be \color{black}
-%%\begin{equation}P_{Overlap}=nV_{sphere}\right)\end{equation}
-%\begin{equation}\label{mu_excess}\mu_{ex}(R_{cavity}=R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
-
-%%\begin{equation}\mu_{ex}(R)=-k_BT\ln\left(1-nV_{sphere}\right)\end{equation}
-
-%Using this result, scaled particle theory seeks a more general expression 
-%of the excess chemical potential of a hard sphere fluid by considering the 
-%work of inserting a hard sphere into a cavity of radius $R_{cavity}$ 
-%where the size of $R_{cavity}$ falls into three different cases: 
-%$R_{cavity} >> R$, $R_{cavity} > R$, and $R_{cavity} \leq R$. 
-
-%\begin{equation}\label{3_parts_to_mu_ex}{W_{rev}(R_{cavity})=\left\{ \begin{array}{rc} P\frac{4\pi}{3}R_{cavity}^3 & R_{cavity} >> R 
-%\\ P\frac{4\pi}{3}R_{cavity}^3 + c_2R_{cavity}^2 + c_1R_{cavity}^1 + c_0R_{cavity}^0  & R_{cavity} > R \\ -k_BT(\ln(1-n\frac{4\pi}{3}(R_{cavity})^3)) & R_{cavity} \leq R\end{array}\right.}\end{equation}
-
-%%The first function, valid for $R_o >> R$, yields the dominant term to which the second function, valid for $R_o > R$,  
-%%must tend toward in the limit that $R_o$ goes to infinity. By expanding the logrythmic term (ln(1-x)= ...) 
-%%in the last function, valid for $R_o < R$, the function can be expressed in terms of powers of $R_o$. 
-
-%%The first and last functions in Equation~\ref{3_parts_to_mu_ex} are derived from theory, and since they 
-%The first and last functions in Equation~\ref{3_parts_to_mu_ex} can be expressed in terms of powers of $R_{cavity}$, 
-%and so it is assumed that the middle function, which is valid for values of $R_{cavity}$ in between the two extremes, 
-%can also be expressed in terms of powers of $R_{cavity}$.  
-%The coeficients $c_2$, $c_1$ and $c_0$ are determnined by considering that the three functions must be conintuous at 
-%the boundaries along with their first and second derivatives, and using Equation~\ref{mu_excess}.The chemical potential then becomes
-%\begin{equation}\mu_{ex}=-k_BT\left(\ln(1-\eta) + \frac{6\eta}{1-\eta}+\frac{9\eta^2}{2(1-\eta)^2}+\frac{PV\eta}{k_BTN}\right)\end{equation}
-%where $\eta$ is the packing fraction given by
-%\begin{displaymath}\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}=\frac{N\frac{4}{3}\pi{R}^3}{V}\end{displaymath} 
-
-%%The last two functions, valid for $R_o > R$, and $R_o < R$, and their first and second derivatives must be continuous at $R_o=R$. 
-%%From these considerations, factors $c_2$, $c_1$ and $c_0$ can be determnined, and using the relation 
-%%...ADD!...P, an expression is found for the reversible work done when $R_o=R$ which is equal to the excess chemical potential. 
-%%From the expression for pressure given by
-
-%The pressure can be obtained from \color{red}
-%\begin{equation}{\frac{\partial{P}}{\partial{N}}\bigg|_{T,V}V=N\frac{\partial\mu}{\partial{N}}\bigg|_{T,V}}\end{equation} \color{black}
-%%The excess Hemlholtz free energy is then found from the relation
-%and the Helmholz free energy from
-%\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\text{or}{~~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{displaymath}
-%which gives
-%%\begin{displaymath}F_{ex}=\end{displaymath}
-%\begin{equation}F_{excess}=k_BTN\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)\end{equation} 
