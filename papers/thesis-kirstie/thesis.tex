@@ -1399,7 +1399,8 @@ using SFMT with a number density profile
 %that is composed of Guassian distributions centered at each lattice site.
 that consists of Guassian distributions 
 %$n(|\vec r'-\vec R_j|)$ 
-centered at each lattice site.
+centered at lattice sites specified by position vectors $\vec R$. 
+%where j indicates the jth lattice site.
 %specified by position vectors $\vec R$.
 The weight functions $w_i(|\vec r - \vec r'|)$ are centered at $\vec r'$,
 as shown for $w_2$ in Figure~\ref{fig:GaussandW2_actual}. 
@@ -1442,28 +1443,28 @@ Monte-Carlo integration can be used to compute the weighted densities $n_i(\vec 
 %some point in space.
 %Monte-Carlo integration works 
 by randomly generating vectors
-$\vec{r'}$ according to a Gaussian distribution. 
+$\vec r' -\vec R$ according to a Gaussian distribution. 
 %Setting $\vec{r}'=\vec{R}_j + \vec{dr}$, and 
 %Setting $\vec{dr}=\vec r' - \vec{R}_j$,  and 
 %$n(\vec{r'})=(1-f_v)n_g(\vec{r'})$ where $n_g(\vec{r'})$ 
 %where $n_g(\vec{r'})$ is the gaussian number density profile for no vacancies. 
-Only lengths for $\vec{r'}$ that are within an inclusion radius
+Only lengths for $\vec r'- \vec R$ that are within an inclusion radius
 about a lattice site, like that shown in Figure \ref{fig:InclusionRadius}, 
 will be taken into account as Gaussians 
 farther away will not contriubute much.
 The equation for the contribution to the weighted density from a 
-Gaussian centered about a lattice site is given by
+Gaussian centered at the jth lattice site located at $\vec R_j$ is given by
 %lattice point located at $\vec R_j$ is given by
-\begin{equation}{n_i(\vec{r})= \int_{r'}{(1-f_v)n(\vec{r'})w_i(|\vec{r}-\vec{r}'|)} {d}\vec{r}'}\end{equation} 
+\begin{equation}{n_i(\vec r)= \int_{r'}{(1-f_v)n(\vec r' - \vec R_j)w_i(|\vec{r}-\vec{r}'|)} {d}\vec{r}'}\end{equation} 
 and is implemented computationally in the form
-\begin{equation}{n_i(\vec{r})= \sum_{r'}{(1-f_v)n(\vec{r'})w_i(|\vec{r}-\vec{r}'|)dV}}\end{equation} 
+\begin{equation}{n_i(\vec r)= \sum_{r'}{(1-f_v)n(\vec r' -\vec R_j)w_i(|\vec{r}-\vec{r}'|)dV}}\end{equation} 
 which can be written as
-\begin{equation}{n_i(\vec{r})= \sum_{NumPoints}(1-f_v)P_{r'}w_i(|\vec{r}-\vec{r}'|)}\end{equation} 
-where NumPoints is the number of vectors $\vec{r'}$ randomly generated, 
+\begin{equation}{n_i(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_i(|\vec{r}-\vec{r}'|)}\end{equation} 
+NumPoints is the number of vectors $\vec r' - \vec R_j$ randomly generated about the jth lattice site, 
 %and $n_g(\vec{r'} - \vec R_j)$ 
 %(the value of the Gaussian at a radius of $|\vec{r'}|$) 
 %(the value of the Gaussian at a radius of $|\vec{dr}|$) 
-and $n(\vec r')$
+and $n(\vec r' - \vec R_j)$
 is equal to a probability density 
 which when multiplied by dV gives the probability $P_{r'}$ at which the value of 
 $w_i(|\vec{r}-\vec{r}'|)$ will occur. 
@@ -1472,59 +1473,70 @@ Using the relation
 $n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\vec{r}'|)$:
 \begin{equation}{n_i(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}'|)}{\text{NumPoints}}}\end{equation}
 This process is repeated to get the contributions to the weighted density 
-from the Gaussians around each lattice point which are then added together 
-to get the final value of the weighted density. 
-The result can be made more accurate by increasing NumPoints which is the 
-number of vectors randomly generated.
+$n_i(\vec r)$ from the Guassians around each lattice point which begin to 
+merge together as the width of the Guassians increases.
+All the contributions are then added together 
+to get the final value of the weighted density at some point $\vec r$.
 
+The result can be made more accurate by increasing NumPoints (the 
+number of vectors randomly generated), and by using antithetic variates.
+%
  \begin{figure}[h!]
     \centering
     %\includegraphics[height=6cm]{GaussandW2_actual.png}
     \includegraphics[height=7cm]{weightandGuass1.pdf}
     %\caption{A Gaussian centered at $\vec{R}$ is shown in blue, and a cross-sectional 
     %view of $w_2$ centered at $\vec{r}'$ is shown in purple.} 
-    \caption{A Gaussian distribution about a lattice site is shown in blue, and a cross-sectional 
+    \caption{A Gaussian distribution about a lattice site located at 
+    $\vec R$ is shown in blue, and a cross-sectional 
     view of $w_2$ centered at $\vec{r}'$ is shown in purple.} 
     %Here, the weight function 
     %is evaluated at $\vec{r}-\vec{r}'$ where $\vec{r}'=\vec{R}+\vec{dr}$ and $\vec{dr}$ 
     %is generated randomly according to a Gaussian distribution.} 
   \label{fig:GaussandW2_actual}
   \end{figure} 
-
+%
  \begin{figure}[h!]
     \centering
     %\includegraphics[height=6cm]{GaussandW2_thinkas.png}
     \includegraphics[height=7cm]{weightandGuass2.pdf}
     \caption{An alternative way of viewing Figure~\ref{fig:GaussandW2_actual} where 
     the weight function, shown by the purple dashed lines, is centered at $\vec{r}$,  
-    and fixed in place as $\vec r'$
+    and fixed in place as $\vec r' - \vec R$
     %as $\vec{dr}=\vec{r}'-\vec{R}$ 
     varies randomly with a probability according to a Gaussian distribution.} 
   \label{fig:GaussandW2_thinkas}
   \end{figure} 
-
+%
 %Monte-Carlo integration is employed to more efficiently 
 %compute the weighted densities used to calculate the excess free energy which is then 
 %added to the ideal free energy (computed analytically) to get the total free energy 
 %which is minimized. 
-
+%
 %-------Antithetic-------------------
-In order to further reduce the error 
-in the average, antithetic variates are used. Rather than computing an average 
-of a set of random points, each random point in the set is paired with a 
-point along the same line as the first point, but opposite in direction, 
-as shown in Figure \ref{fig:AntitheticVariate}. This reduces first order 
-error in the average by filtering out an erroneous offset of values along 
-the line connecting the two points by averaging the two results, one of 
+%To further reduce the error in the average, antithetic variates are used. 
+%Rather than computing an average of a set of random points, 
+%antithetic variates can be used to reduce error. 
+To use antithetic variates,
+each randomly generated  vector is paired with a 
+vector of equal magnitude, but opposite in direction. 
+%as shown in Figure \ref{fig:AntitheticVariate}. 
+%The quantity that is a function of the randomly generated vector
+%now has two values that can be averaged to get a more accurate value. 
+First order error is reduced
+%in the quantity that is a function of the randomly generated vector
+%average by filtering out an erroneous offset of values 
+%along the line connecting the two points 
+by averaging the two results, one of 
 which may be erroneously higher than it should be while the other is 
 erronesously lower than it should be.
 
  \begin{figure}[h!]
     \centering
-    \includegraphics[height=4cm]{AntitheticVariate.png}
-    \caption{Antithetic variates reduce first order error in an average. 
-    Each point in the average is paired with another point from along 
-    the same line as the first, and at an equal, but opposite distance.}
+    %\includegraphics[height=4cm]{AntitheticVariate.png}
+    %\caption{Antithetic variates reduce first order error in an average. 
+    %Each point in the average is paired with another point from along 
+    %the same line as the first, and at an equal, but opposite distance.}
     \label{fig:AntitheticVariate}
   \end{figure} 
 %Incorporating antithetic variates $-\vec{dr}$ for every $\vec{dr}$ equation ?? becomes:
@@ -1543,7 +1555,9 @@ To compute the error, the standard deviation of weight function $w_3$ is used
 \begin{equation}{Error=\sqrt{\frac{\overline{w_3^2}-(\overline{w}_3)^2}{\text{NumPoints}}}}\end{equation} 
 NumPoints, the number of vectors randomly generated, is increased until
 \begin{equation}{Error<\frac{|1-n_3|}{4}}\end{equation}
-where the maximum value that $n_3$ (which equals $\overline{w}_3$) can have without error is 1.
+where the maximum value that the weighted density $n_3$ 
+%(which equals $\overline{w}_3$) 
+can properly have is 1.
 
 %Figure \ref{fig:GaussandW2_actual} ......
 
