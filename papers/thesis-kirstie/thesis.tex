@@ -373,7 +373,7 @@ is minimized~\cite{MoritaDFT}.
 %that the shortest distance between two points is a straight line by 
 %varying the path between the two points until the distance is minimized.
 
-A description of cDFT ordinarily begins with considering the Grand Free 
+A description of cDFT often begins with considering the Grand Free 
 Energy defined as
 \begin{equation}\Phi=F-\mu{N}\end{equation}
 %\begin{equation}\int\frac{N}{V}\frac{V_{ext}}{N}dV\end{equation}
@@ -381,8 +381,10 @@ which can then be expressed in terms of a varrying number density
 profile $n(\vec r)$
 %\begin{equation}\Phi=F-\int n(\vec{r})\phi{(\vec r)}d\vec{r} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu{N}\end{equation}
 \begin{equation}\label{GrandFE}\Phi= F_{int} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu\int n(\vec r)d\vec{r}\end{equation}
-where $\phi=\frac{V_{ext}}{N}$, $V_{ext}(\vec r)$ is an externally 
-applied potential energy, and the Helmholtz free energy is expressed as
+where $\phi=\frac{V_{ext}}{N}$ 
+is the externally 
+applied potential energy $V_{ext}(\vec r)$ per particle, 
+and the Helmholtz free energy is expressed as
 \begin{equation}F = F_{int} + \int n(\vec{r})\phi{(\vec r)}d\vec{r}\end{equation}  
 %If $\mu=0$ and $V_{ext}=0$, then the Grand free energy $\Phi$ reduces 
 %to the Helmholz free energy $F$. %The second and third terms in Eq~\ref{GrandFE} 
@@ -558,19 +560,46 @@ excess Helmholtz free energy given in Equation~\ref{eq:Fexcess-simplified}.
 %is a function of the number density n. For a spatially varying number density, 
 %as would be expected for a crystal, the free energy becomes a functional of 
 %the number density profile $n(\vec{r})$.  
- 
-The functional for the ideal Helmholtz free energy is given by 
-Equation~\ref{eq:Fideal-n(r)}, and the functional for the excess Helmholtz 
-free energy depends on the particular fluid as defined by the spheres' 
-interatomic potential V(r). To implement cDFT, the number density profile 
-$n(\vec{r})$ is varied with the temperature fixed until the free energy 
-is minimized. 
+
+%According to classical Density Functional Theory, 
+
+%A number density profile is a time-invariant average 
+%of the spacial distribution of the particles that make up the fluid, and
+%There will be one, and only one 
+%that minimizes the Helmholtz free energy.
+%The minimum free energy, 
+%is the value of the Helmholtz free energy that
+%the system will have when it is in equilibrium at that temperature, 
+%and its corresponding number density profile 
+%are the equilibrium values the system will have at that temperature.
+%is the equilibrium number density profile. 
+%
+In this section 
+%To form the functional for the Helmholtz free energy, expressions for 
+a functional for the Helmholtz free energy was formed by adding 
+the ideal and the excess portions of the free 
+energy.
 \begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation}
-The minimum free energy and its corresponding number density 
-profile are then the equilibrium values for that temperature.  
+The functional for the ideal portion of the Helmholtz free energy is given by 
+Equation~\ref{eq:Fideal-n(r)}, and a functional for the excess portion of the Helmholtz 
+free energy is given in Equation~\ref{eq:Fexcess-simplified}. The specific 
+form for the excess Helmholtz free energy depends on the particular 
+fluid being modeled as defined by the  
+interatomic potential energy V(r) between the spheres, which can make
+forming an expression difficult. 
+Once an expression for the Helmholtz free energy as a functional of the
+number density profile $n(\vec r)$ is formed then, according to classical 
+Density Functional Theory, the equilibrium value of the 
+Helmholtz energy, and its cooresonding equilibrium density profile can be
+found by varying the number density profile
+%can be varied 
+through all possible configurations at some fixed temperature
+until the free energy is minimized.  
+
 
 \section{Soft Fundamental Measure Theory (SFMT)}
-In order to use cDFT, a functional for the excess Helmholtz free
+In order to use classical Density Functional Theory, a functional for 
+the excess Helmholtz free
 energy for the particular fluid being modeled must be formed. But forming 
 an expression based on Equation~\ref{eq:Fexcess-simplified} can be challenging. 
 For the Hard Sphere fluid, there is another way to form an expression for 
