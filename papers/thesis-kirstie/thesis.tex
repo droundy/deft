@@ -604,19 +604,21 @@ a fixed temperature, volume, and nubmer of particles, a functional for
 the Helmholtz free energy must first be formed. An expression for the ideal 
 portion of the Helmnoltz free energy is given by Equation~\ref{eq:Fideal-n(r)}, 
 but forming an expression for the excess Helmholtz free
-energy for the particular fluid being modeled 
-from Equation~\ref{eq:Fexcess-simplified} can be challenging. 
+energy from Equation~\ref{eq:Fexcess-simplified} for the particular fluid 
+being modeled can be challenging. 
 Soft Fundamental Measure Theory (SFMT) is a method for forming an 
-expression for the excess Helmholtz free energy of a Soft-sphere fluid,
-and will be adapted in the Methods section of this paper to fit the 
-soft-sphere WCA fluid.
+expression for the excess Helmholtz free energy of a Soft-sphere fluid
+that does not depend on  explicitly taking into account the interaction 
+that each sphere with every other sphere in the fluid as required by 
+Equation~\ref{eq:Fexcess-simplified}. In the next chapter on methods, we
+will use an SFMT functional that we adapt to fit the soft-sphere WCA fluid.
+
 SFMT is an extension of Fundamental Measure Theory (FMT)
 that was developed for the Hard-sphere fluid, and which can be derived from
 Scaled Particle Theory (SPT).  
 %For the Hard Sphere fluid, there is another way to form an expression for 
 %the excess Helmholtz free energy in terms of a homogeneous number density 
 %and, that is to use Scaled Particle Theory (SPT)~\cite{ReissSPT}.
-
 Scaled Particle Theory seeks a general expression for the excess chemical 
 potential of a homogeneous Hard Sphere fluid which can then be integrated 
 to find the excess Helmholtz free energy according to the relation
@@ -627,40 +629,66 @@ It is an extension of the work done by Widom who showed that the excess
 chemical potential of a homogenesous fluid corredsponds to the reversible 
 work of inserting a sphere of radius R into a fluid consisting of hard 
 spheres of radius R. 
-\begin{displaymath}\mu_{ex}=W_{rev}(R){~~~~}\text{work to insert a hard sphere of radius R}\end{displaymath}
+\begin{align}
+	\mu_{ex}=W_{rev}(R){~~~~}\text{work to insert a hard sphere of radius R}
+\end{align}
 Widom's result was obtained by considering the difference 
 in the excess Helmholtz free energy when one atom is added to an otherwise 
 closed system. He showed that the excess chemcial potential is related to 
 the ensemble average of the Boltzman factor for the potential energy 
 difference $V_{diff}$ between a system with N atoms and one with N+1 atoms. 
-The resulting equation is known as Widom's Insertion Formula.
+The resulting equation, shown below, is known as Widom's Insertion 
+Formula~\cite{Hansen}.
 %\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
 \begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-Considering that at each point in the fluid, there is a probability that 
-either a hard sphere of radius R could be inserted, or not, and using 
-these two probablities to evaluate $<e^{-\beta{V_{diff}}}>$ this becomes
-\begin{equation}{~}=-k_BT\ln\left(e^{-\beta{V_{diff}}}+1\right)\end{equation}
-\begin{equation}{~}=V_{diff}=W_{rev}(R)\end{equation}
-Returning to Widom's insertion formula Equation~\ref{widoms-insertion-formula},
-and considering that it takes no energy for a hard sphere to be placed at a point
-in the fluid where it does not overlap with any other spheres, but would require
-infinite energy to place a sphere where it would overlap another sphere, 
-Equation~\ref{widoms-insertion-formula} becomes
-\begin{equation}\mu_{excess}=-k_BT\ln(1-n\frac{4\pi}{3}R_{cavity}^3)\end{equation}
-where the probability of a position existing in a homogeneous Hard-sphere fluid 
-with number density n that a hard sphere of radius R can be placed without 
-overlapping another sphere is given by the number density times the volume 
-of the sphere, $nV_{Sphere}$.
+The quantity $<e^{-\beta{V_{diff}}}>$ can be evaluated by considering
+that at each point in the fluid, there is a probability that 
+a hard sphere of radius R has space available to exist at that point
+without overlapping with other spheres, or it does not, as shown in 
+Figure~\ref{fig:p_overlap}. 
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[height=7cm]{P_overlap.pdf}
+    \caption{No energy is needed to place a sphere at a position where 
+    there is no overlap such as shown by the black dot at the center of 
+    the dotted region near the top. But it is not possible to place a 
+    sphere at a position where an overlap occurs.}
+    \label{fig:p_overlap}
+  \end{figure}
+
+Widom's Insertion formula Equation~\ref{widoms-insertion-formula}, then becomes
+\begin{align}
+	\mu_{ex} &= -k_BT\ln\left(e^{-\beta{V_{diff}}}+1\right)  \\
+	         &= V_{diff} \\
+             &= W_{rev}(R)
+\end{align}
+The quantity $<e^{-\beta{V_{diff}}}>$ can also be evaluated by considering
+that it takes no energy for a hard sphere to be placed at a point
+in the fluid where it does not overlap with any other spheres 
+($V_{diff}=0$), but it would require infinite energy ($V_{diff}=\infty$)
+to place a sphere where it would overlap another sphere. 
+In this case Equation~\ref{widoms-insertion-formula} becomes
+%\begin{equation}\mu_{excess}=-k_BT\ln(1-n\frac{4\pi}{3}R_{cavity}^3) &  \mbox{for} & R_{\cavity}=R\end{equation}
+\begin{align}
+  \mu_{excess}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3) 
+\end{align}
+where the radius of the cavity $R_{cavity}$ equals the radius of a hard sphere R,
+and $nV_{Sphere}$ is the probability that a sphere cannot be placed at
+some random point in the homogeneous fluid of number density, $n$, without
+overlapping with another sphere.
 
 %where the radius of the cavity $R_{cavity}$ is equal to the radius of a 
 %hard sphere, R, and $<e^{-\beta{V_{diff}}}>$ is evaluated using the 
 %probablities that the cavity is either filled or not filled~\cite{Hansen}.
 %For cavities that are much larger than one of the hard spheres, 
-Forming a more general result for different sizes of cavities in the fluid, 
-Scaled Partical Theory arrives at an expression for the excess Helmholtz 
-free energy of a homogeneous fluid~\cite{Hansen} in terms of the packing fraction $\eta$ 
+Forming a more general result by requiring 
+continuity at the boundaries between equations for fluids with 
+cavities of a radius $\operatorname{R}_{cavity}$, that is larger, or very 
+much larger than the hard sphere radius R, Scaled Partical Theory arrives at an 
+expression~\cite{Hansen} for the excess Helmholtz 
+free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
 \begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
 where
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
