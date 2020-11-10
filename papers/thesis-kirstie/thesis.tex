@@ -14,6 +14,8 @@
 \submitdate{October ??, 2020}
 \commencementyear{2021}
 
+\newcommand\davidsays[1]{\textcolor{red}{[\it D: #1]}}
+
 \usepackage{color}
 \usepackage{amsmath}
 \usepackage{subcaption}
@@ -1125,9 +1127,11 @@ for $\Phi_3$. The weigthed densities $n_0, n_1, n_2,$ and $n_3$ are found from
 \begin{align}\label{eq:numdenprofile}
 	n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}
 \end{align}
-where the number density profile $n(\vec r)$ within the integral will be 
-given in our program by a Gaussian function centered at a lattice point, 
-and $w(r)$ is a weight function.
+%where the number density profile $n(\vec r)$ within the integral will be 
+%given in our program by a Gaussian function centered at a lattice point, 
+%and $w(r)$ is a weight function.
+where the number density profile $n(\vec r)$ within the integral is given 
+by a Gaussian function centered at a lattice point.
 %\begin{align}
   %n(\vec r)=(1-f_v)\frac{\exp^{-\frac{r^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}
 %\end{align}
@@ -1233,11 +1237,58 @@ gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$
 	V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]
 \end{equation}  
 
+%<<<<<<< HEAD
+%\davidsays{Maybe say this before presenting the weights? But also, I don't think
+%there is any benefit to introducing $a$ and $\sigma$ here.} 
+The weight functions $w_{2}(r)$ and $w_{3}(r)$ are constructed using 
+Schmidt's proposed erf model~\cite{schmidt2000fluid} in which he set
+\begin{equation}
+  w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\sigma}{2}}{\frac{\text{a}}{\sqrt{2}}}\right)\right]
+\end{equation} 
+where $w_3(r)$ is subject to the boundary conditions $w_3(0)\approx{1}$ 
+and $w_3(\infty)=0$. 
+%\color{red}These boundary conditions are satisfied for $\Xi{\sqrt{2}<<\alpha}$, or $k_BT << 2.21$. \color{black} 
+Our functional is  created by replacing Schmidt's parameters $\sigma$ 
+and $a$ with temperature-dependent parameters $\alpha(T)$ and $\Xi(T)$.
+\begin{equation}\sigma = \alpha(T)\text{~~~~~~~and~~~~~~~} a = \Xi(T)\end{equation}
+
+The two parameters $\alpha$ and $\Xi$ are used to compensate for the 
+temperature dependence that enters in through the expression for the 
+error function potential $V_{\operatorname{erf}}(r)$ which is used to approximate the
+non-temperature dependent WCA potential that is more difficult to 
+implement computationally. The erf potential emerges from the relationships
+that the weight functions must satisfy\davidsays{In order for what?}.
+%potential at temperatures of interest will be used instead of the WCA potential. 
+Using Equation~\ref{w2_w3_relation}, shown again below, 
+\begin{align}
+  w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
+\end{align}
+and solving for $w_2(r)$
+\begin{align}
+  \frac{dw_3(r)}{dr}\bigg|_{\infty}-\frac{dw_3(r)}{dr}\bigg|_{r}=w_2(r)
+\end{align} 
+we get \begin{equation}{ w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2} }\end{equation} %From the deconvolution equation \begin{equation}{-\frac{1}{2}f(r)=w_0*w_3 + w_1*w_2 -\vec{w}_{V1}*\vec{w}_{V2}}\end{equation} it follows that $w_2$ must satisfy the relation
+Putting $w_2(r)$ into Equation~\ref{mayerder=w2convolution}, shown again below, 
+\begin{displaymath}{\frac{df(r)}{dr}=\int_{-\infty}^{\infty}{w_2(r')w_2(r-r')dr'}}\end{displaymath}
+gives
+\begin{equation}{\frac{df(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\alpha}{\Xi}\right)^2}}\end{equation} 
+which can be integrated to obtain the Mayer function
+\begin{equation}{f(r)=\int_{\infty}^r{ \frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r'-\alpha}{\Xi}\right)^2}{dr'}}}\end{equation} 
+The Mayer function for the error function potential $V_{\operatorname{erf}}(r)$ is thus 
+given by
+\begin{equation}{f(r)=-\frac{1}{2}\left[1-\operatorname{\operatorname{erf}}\left(\frac{r-\alpha}{\Xi}\right)\right]}\end{equation} 
+Combining this result with the definition of the Mayer function \begin{displaymath}f(r)=e^{-\frac{V(r)}{K_BT}}-1\end{displaymath} 
+%This gives an interatomic potential of \begin{equation}{V_{\operatorname{erf}}=-k_BT\ln(f(r)-1)}\end{equation} 
+gives an expression for the for the error function potential  $V(r)=V_{\operatorname{erf}}(r)$ 
+\begin{equation}
+	V_{\operatorname{erf}}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]
+\end{equation}  
+
 Figure \ref{fig:weight_functions} shows a one dimensional view of the weight functions 
 $w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance along the z-axis. In three 
 dimensions, the weighting functions $w_0$, $w_1$, $w_2$ are spherical shells 
 centered at $\vec{r}$. As shown in the cross-sectional view in Figure \ref{fig:W0andW3}a, 
-$w_2$ peaks at a radius of $|\vec{r}-\vec{r'}|=\frac{\alpha}{2}$, a width determined 
+$w_2$ peaks at a radius of $|\vec{r}-\vec{r'}|=\frac{\alpha}{2}$, with a width determined 
 by $\frac{\Xi}{\sqrt{2}}$, and edges that tapers off on either side of the peak giving 
 the shell. The weighting function $w_3$, shown in Figure \ref{fig:W0andW3}b is a solid 
 sphere up to $\frac{\alpha-4\Xi}{2}$ after which it tapers off. 
@@ -1275,9 +1326,10 @@ the sphere.
 
 Expressions for $\alpha(T)$ and $\Xi(T)$  can be found as follows. 
 The parameter $\alpha(T)$ is derived by setting 
-the erf potential equal to the WCA potential when r equals $\alpha$ 
-\begin{equation}{V_{erf}(r=\alpha)=V_{WCA}(r=\alpha)}\end{equation} 
-and is given by 
+the erf potential equal to the WCA potential when $r=\alpha$, i.e. at the
+maximum of $w_2(r)$,
+% \begin{equation}{V_{\operatorname{erf}}(r=\alpha)=V_{WCA}(r=\alpha)}\end{equation} 
+which gives us
 \begin{equation}\label{alphaT}
 	{\alpha(T)=\sigma\left(\frac{2}{1+\sqrt{\frac{k_BT}{\epsilon}\ln(2)}}\right)^\frac{1}{6}}
 \end{equation} 
@@ -1290,18 +1342,22 @@ when $\sigma=1$ and $\epsilon=1$.
     for $\sigma=1$ and $\epsilon=1$}
     \label{fig:alphaXivsT}
   \end{figure}
-The value of $\Xi$ at a given temperature, T, can be found computationally 
-by equating the second virial coefficient, $B_2$, evaluated for the error function 
-potential $V_{erf}(r)$, and the second virial coefficent evalued for the 
+
+We determine value of $\Xi$ at a given temperature $T$,
+by equating the second virial coefficient evaluated for the error function 
+potential $V_{\operatorname{erf}}(r)$, and the second virial coefficent evaluated for the 
 WCA potential $V_{WCA}$.
-\begin{equation}B_{2erf}(T) =B_{2WCA}(T)\end{equation}
+\begin{equation}B_{2\operatorname{erf}}(T) =B_{2WCA}(T)\end{equation}
+\davidsays{I think we'd benefit from cutting much of the following, since you
+show the standard equations, but skip the bit where we put in the pair potential,
+which is the tricky step.}
 The second virial coefficient can be derived from Euler's equation for 
 the internal energy of a system, 
 \begin{equation}U=TS-PV+\mu{N}\end{equation}
 using the relations (discrete versions are shown here for clarity)
 \begin{equation}S=-k_B\sum_{i=0}^\infty{P_i\ln{P_i}}\end{equation}
-\begin{equation}U=<E>=\sum_{i=0}^\infty{P_iE_i}\end{equation}
-\begin{equation}N=<n>=\sum_{i=0}^\infty{P_in_i}\end{equation}
+\begin{equation}U=\langle E\rangle=\sum_{i=0}^\infty{P_iE_i}\end{equation}
+\begin{equation}N=\langle n\rangle=\sum_{i=0}^\infty{P_in_i}\end{equation}
 which, for a canonical ensemble, gives
 \begin{equation}\frac{PV}{k_BT}=N + \beta\frac{\partial{F}_{excess}}{\partial{N}}{N} - \frac{F_{excess}}{k_BT}\end{equation}
 Expressing the Helmholtz free energy in terms of the pair potential 
@@ -1315,7 +1371,7 @@ where
 \end{equation}
 Evaluating $B_{2}$ for the erf potential gives
 \begin{equation}
-	B_{2erf}(T) = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{erf}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]
+	B_{2\operatorname{erf}}(T) = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{\operatorname{erf}}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]
 \end{equation}
 where $\alpha(T)$ is given by Equation~\ref{alphaT}. Similarly, 
 $B_{2WCA}$ can be found computationally from 
@@ -1323,6 +1379,16 @@ $B_{2WCA}$ can be found computationally from
 	B_{2WCA}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{WCA}(r)}-1\right)d\vec{r} 
 \end{equation}
 
+\davidsays{Some of this is worth showing, but I think you're giving too many
+plots here.
+In general, we'd like to only show plots if we have something to say about them,
+so either we want more words, or fewer figures.  e.g. what does the reader learn
+from looking at your plot of $B_2$ versus $T$? If there is something they should
+learn from it, then you should write that down, so they don't have to figure it
+out on their own.  If there isn't anything to say, then probably you can skip
+it. There \emph{are} times to just show a plot, but it's usually if it's an
+prediction, and you want to say \emph{something} about the plot beyond its
+existence.}
 A plot of the resulting second virial coefficient $B_2(T)$  with respect 
 to temperature is given in Figure~\ref{fig:B2vsT}, and a plot of $\Xi(T)$ obtained 
 through this method is shown in Figure~\ref{fig:xi_fromB2vsT}. 
@@ -1334,7 +1400,7 @@ potential which is not temperature dependent.
     \centering
     \includegraphics[height=8cm]{B2_vs_T_with_xi_fromB2.pdf}
     \caption{Shows the temperature dependence of $B_2$ generated from 
-    matching the second virial coeficients for $V_{erf}(r)$ and $V_{WCA}(r)$ 
+    matching the second virial coeficients for $V_{\operatorname{erf}}(r)$ and $V_{WCA}(r)$ 
     at each temperature.}
     \label{fig:B2vsT}
   \end{figure}
@@ -1343,7 +1409,7 @@ potential which is not temperature dependent.
     \centering
     \includegraphics[height=8cm]{xi_fromB2.pdf}
     \caption{Shows the temperature dependence of $\Xi$ generated from 
-    matching the second virial coeficients for $V_{erf}(r)$ and $V_{WCA}(r)$ 
+    matching the second virial coeficients for $V_{\operatorname{erf}}(r)$ and $V_{WCA}(r)$ 
     at each temperature.}
     \label{fig:xi_fromB2vsT}
   \end{figure}
@@ -1351,7 +1417,7 @@ potential which is not temperature dependent.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{erf_Potential_xifromB2.pdf}
-    \caption{Error Function Potential $V_{erf}(r)$ at several temperatures 
+    \caption{Error Function Potential $V_{\operatorname{erf}}(r)$ at several temperatures 
     with $\sigma=1$, $\epsilon=1$, compared to the WCA potential $V_{WCA}(r)$ 
     shown in black.}
     \label{fig:erf_Potential_xifromB2}
@@ -2218,9 +2284,9 @@ Putting this into the expression for $n_{m2ij}(\vec{r})$ gives
 \begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}}\end{equation} 
 
 
-\section{Second Virial Coefficient $B_{2}$ for the Error Function Potential $V_{erf}$}
+\section{Second Virial Coefficient $B_{2}$ for the Error Function Potential $V_{\operatorname{erf}}$}
 \begin{equation}B_2=-\frac{1}{2}\int_{allspace}f(\vec{r})d\vec r\end{equation}
-The mayer function for the Error Function potential $V_{erf}$ is
+The mayer function for the Error Function potential $V_{\operatorname{erf}}$ is
 \begin{equation}f(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} from which it can be seen that $f(r)$ is approximately 0 for $r>r_{max}$ where $r_{max}$ is some maximum value of $r$.
 \begin{align}
  B_2 &= -\frac{1}{2}\int_0^{\pi}\int_0^{2\pi}\int_0^\infty\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]r^2\sin{\theta}d{\theta}d{\phi}dr \\
@@ -2271,10 +2337,10 @@ Putting this result into Eq~\ref{B3} gives
 Since the Mayer function does not depend on $\phi$ and $\theta$, this reduced to
 \begin{equation}B_3=-\frac{4\pi}{3}\int{|\widetilde{f}(\vec k)|^3k^2dk}\end{equation}
 
-The Mayer function for the Error Function potential $V_{erf}$, and its Fourier Transform are
-\begin{equation}f_{erf}(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} 
+The Mayer function for the Error Function potential $V_{\operatorname{erf}}$, and its Fourier Transform are
+\begin{equation}f_{\operatorname{erf}}(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} 
 
-\begin{equation}\widetilde{f}_{erf}(k)=-\frac{4\pi}{k^3}e^{-\frac{k^2\Xi^2}{4}}\left[\left(1+\frac{k^2\Xi^2}{2}\right)\sin(k\alpha)-k\alpha\cos(k\alpha)\right]\end{equation} 
+\begin{equation}\widetilde{f}_{\operatorname{erf}}(k)=-\frac{4\pi}{k^3}e^{-\frac{k^2\Xi^2}{4}}\left[\left(1+\frac{k^2\Xi^2}{2}\right)\sin(k\alpha)-k\alpha\cos(k\alpha)\right]\end{equation} 
 
 The Mayer function for the WCA potential $V_{WCA}$, and its Fourier Transform are
 
