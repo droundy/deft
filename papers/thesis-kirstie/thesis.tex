@@ -574,19 +574,6 @@ excess Helmholtz free energy given in Equation~\ref{eq:Fexcess-simplified}.
 %are the equilibrium values the system will have at that temperature.
 %is the equilibrium number density profile. 
 %
-In this section 
-%To form the functional for the Helmholtz free energy, expressions for 
-a functional for the Helmholtz free energy was formed by adding 
-the ideal and the excess portions of the free 
-energy.
-\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation}
-The functional for the ideal portion of the Helmholtz free energy is given by 
-Equation~\ref{eq:Fideal-n(r)}, and a functional for the excess portion of the Helmholtz 
-free energy is given in Equation~\ref{eq:Fexcess-simplified}. The specific 
-form for the excess Helmholtz free energy depends on the particular 
-fluid being modeled as defined by the  
-interatomic potential energy V(r) between the spheres, which can make
-forming an expression difficult. 
 Once an expression for the Helmholtz free energy as a functional of the
 number density profile $n(\vec r)$ is formed then, according to classical 
 Density Functional Theory, the equilibrium value of the 
@@ -595,38 +582,81 @@ found by varying the number density profile
 %can be varied 
 through all possible configurations at some fixed temperature
 until the free energy is minimized.  
-
+In this section 
+%To form the functional for the Helmholtz free energy, expressions for 
+a functional for the Helmholtz free energy was formed by finding 
+general expressions for the ideal and the excess portions of the free 
+energy, and adding them together.
+\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation}
+The functional for the ideal portion of the Helmholtz free energy is given by 
+Equation~\ref{eq:Fideal-n(r)}, and a functional for the excess portion of the Helmholtz 
+free energy is given in Equation~\ref{eq:Fexcess-simplified}. The specific 
+form for the excess Helmholtz free energy depends on the particular 
+fluid being modeled as defined by the  
+interatomic potential energy V(r) between the spheres, which can make
+forming an expression difficult. In this paper, Soft Fundamental Measure
+Theory will be used to form an epxression for the excess Helmholtz free 
+energy, as explained in the next section.
 
 \section{Soft Fundamental Measure Theory (SFMT)}
-In order to use classical Density Functional Theory, a functional for 
-the excess Helmholtz free
-energy for the particular fluid being modeled must be formed. But forming 
-an expression based on Equation~\ref{eq:Fexcess-simplified} can be challenging. 
-For the Hard Sphere fluid, there is another way to form an expression for 
-the excess Helmholtz free energy in terms of a homogeneous number density 
-and, that is to use Scaled Particle Theory (SPT)~\cite{ReissSPT}.
+In order to apply classical Density Functional Theory to a system that has
+a fixed temperature, volume, and nubmer of particles, a functional for 
+the Helmholtz free energy must first be formed. An expression for the ideal 
+portion of the Helmnoltz free energy is given by Equation~\ref{eq:Fideal-n(r)}, 
+but forming an expression for the excess Helmholtz free
+energy for the particular fluid being modeled 
+from Equation~\ref{eq:Fexcess-simplified} can be challenging. 
+Soft Fundamental Measure Theory (SFMT) is a method for forming an 
+expression for the excess Helmholtz free energy of a Soft-sphere fluid,
+and will be adapted in the Methods section of this paper to fit the 
+soft-sphere WCA fluid.
+SFMT is an extension of Fundamental Measure Theory (FMT)
+that was developed for the Hard-sphere fluid, and which can be derived from
+Scaled Particle Theory (SPT).  
+%For the Hard Sphere fluid, there is another way to form an expression for 
+%the excess Helmholtz free energy in terms of a homogeneous number density 
+%and, that is to use Scaled Particle Theory (SPT)~\cite{ReissSPT}.
 
 Scaled Particle Theory seeks a general expression for the excess chemical 
 potential of a homogeneous Hard Sphere fluid which can then be integrated 
-to find the excess Helmholtz free energy.
+to find the excess Helmholtz free energy according to the relation
 %\begin{equation}F_{ex}=\int{\mu_{ex}dN}\end{equation}
 %\begin{equation}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~}\rightarrow{~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{equation}
 It is an extension of the work done by Widom who showed that the excess 
 chemical potential of a homogenesous fluid corredsponds to the reversible 
 work of inserting a sphere of radius R into a fluid consisting of hard 
-spheres of radius R. Widom's result was obtained by considering the difference 
+spheres of radius R. 
+\begin{displaymath}\mu_{ex}=W_{rev}(R){~~~~}\text{work to insert a hard sphere of radius R}\end{displaymath}
+Widom's result was obtained by considering the difference 
 in the excess Helmholtz free energy when one atom is added to an otherwise 
 closed system. He showed that the excess chemcial potential is related to 
 the ensemble average of the Boltzman factor for the potential energy 
 difference $V_{diff}$ between a system with N atoms and one with N+1 atoms. 
-The resulting equation is known as Widom's Insertion Formula given by
+The resulting equation is known as Widom's Insertion Formula.
 %\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
 \begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-\color{red} \begin{equation}=-k_BT\ln(1-n\frac{4\pi}{3}R_{cavity}^3)\end{equation}
-where the radius of the cavity $R_{cavity}$ is equal to the radius of a 
-hard sphere, R, and the cavity is either filled or not. \color{black}
+Considering that at each point in the fluid, there is a probability that 
+either a hard sphere of radius R could be inserted, or not, and using 
+these two probablities to evaluate $<e^{-\beta{V_{diff}}}>$ this becomes
+\begin{equation}{~}=-k_BT\ln\left(e^{-\beta{V_{diff}}}+1\right)\end{equation}
+\begin{equation}{~}=V_{diff}=W_{rev}(R)\end{equation}
+Returning to Widom's insertion formula Equation~\ref{widoms-insertion-formula},
+and considering that it takes no energy for a hard sphere to be placed at a point
+in the fluid where it does not overlap with any other spheres, but would require
+infinite energy to place a sphere where it would overlap another sphere, 
+Equation~\ref{widoms-insertion-formula} becomes
+\begin{equation}\mu_{excess}=-k_BT\ln(1-n\frac{4\pi}{3}R_{cavity}^3)\end{equation}
+where the probability of a position existing in a homogeneous Hard-sphere fluid 
+with number density n that a hard sphere of radius R can be placed without 
+overlapping another sphere is given by the number density times the volume 
+of the sphere, $nV_{Sphere}$.
+
+
+%where the radius of the cavity $R_{cavity}$ is equal to the radius of a 
+%hard sphere, R, and $<e^{-\beta{V_{diff}}}>$ is evaluated using the 
+%probablities that the cavity is either filled or not filled~\cite{Hansen}.
 %For cavities that are much larger than one of the hard spheres, 
 Forming a more general result for different sizes of cavities in the fluid, 
 Scaled Partical Theory arrives at an expression for the excess Helmholtz 
@@ -746,17 +776,15 @@ Incorporating into Equation~\ref{FexfromSPT} the two vector weights which
 were added to satisfy Equation~\ref{mayer_deconvolution}, and an updated 
 expression for $\Phi_3$ developed by Tarazona~\cite{tarazonaphi3, santos2012phi3}, 
 the excess free energy becomes
-\begin{displaymath}{F_{excess}=k_{B}T\left(-n_{0}ln(1-n_{3})+\frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}}\color{white}\right)}\end{displaymath}
-\begin{equation}{\color{white}\left(\color{black}+\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}\right)\color{black}V}\end{equation} 
-where the tensor weight is given by
-\begin{equation}\label{eq:tensorweight}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation} 
-%and $\Phi_3$ is now
-and
+\begin{equation}{F_{excess} = k_BT(\Phi_1+\Phi_2+\Phi_3)V}\end{equation}
+where
 \begin{align}
 \Phi_1 &= -n_{0}ln(1-n_{3}) \label{eq:Phi1}\\
 \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \label{eq:Phi2} \\
 \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  \label{eq:Phi3}
 \end{align}
+and the tensor weight is given by
+\begin{equation}\label{eq:tensorweight}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation} 
 
 The expression for the weighted densities can be written in a way that 
 accomodates both homogenious fluids where the number denstiy n is constant, 
