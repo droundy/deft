@@ -645,12 +645,12 @@ Formula~\cite{Hansen}.
 %\begin{displaymath}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~~}\end{displaymath}
 \begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
+
 The quantity $<e^{-\beta{V_{diff}}}>$ can be evaluated by considering
 that at each point in the fluid, there is a probability that 
 a hard sphere of radius R has space available to exist at that point
 without overlapping with other spheres, or it does not, as shown in 
 Figure~\ref{fig:p_overlap}. 
-
 \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{figs/P_overlap.pdf}
@@ -660,12 +660,11 @@ Figure~\ref{fig:p_overlap}.
     sphere at a position where an overlap occurs.}
     \label{fig:p_overlap}
   \end{figure}
-
 Widom's Insertion formula Equation~\ref{widoms-insertion-formula}, then becomes
-\begin{align}
+\begin{align} 
 	\mu_{ex} &= -k_BT\ln\left(e^{-\beta{V_{diff}}}+1\right)  \\
 	         &= V_{diff} \\
-             &= W_{rev}(R)
+             &= W_{rev}(R)  \label{workrev}
 \end{align}
 The quantity $<e^{-\beta{V_{diff}}}>$ can also be evaluated by considering
 that it takes no energy for a hard sphere to be placed at a point
@@ -675,171 +674,215 @@ to place a sphere where it would overlap another sphere, as described
 in Figure~\ref{fig:p_overlap}.
 In this case Equation~\ref{widoms-insertion-formula} becomes
 %\begin{equation}\mu_{excess}=-k_BT\ln(1-n\frac{4\pi}{3}R_{cavity}^3) &  \mbox{for} & R_{\cavity}=R\end{equation}
-\begin{align}
+\begin{align} \label{muexcess}
   \mu_{excess}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3) 
 \end{align}
 where the radius of the cavity $R_{cavity}$ equals the radius of a hard sphere R,
 and $nV_{Sphere}$ is the probability that a sphere cannot be placed at
 some random point in the homogeneous fluid of number density, $n$, without
-overlapping with another sphere.
-
+overlapping with another sphere. Combining  Equations~\ref{workrev} and \ref{muexcess} gives
+\begin{align}
+  W_{rev}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3) 
+\end{align}
 %where the radius of the cavity $R_{cavity}$ is equal to the radius of a 
 %hard sphere, R, and $<e^{-\beta{V_{diff}}}>$ is evaluated using the 
 %probablities that the cavity is either filled or not filled~\cite{Hansen}.
 %For cavities that are much larger than one of the hard spheres, 
-Forming a more general result by requiring 
-continuity at the boundaries between equations written for fluids with 
-cavities of a radius $\operatorname{R}_{cavity}$, that is larger, or very 
-much larger than the hard sphere radius R, Scaled Partical Theory arrives at an 
-expression~\cite{Hansen} for the excess Helmholtz 
-free energy of a homogeneous fluid in terms of the packing fraction $\eta$ 
+Forming a more general result by requiring continuity of the functions, 
+along with their first and second derivatives, for the reversible work
+written for fluids with a cavitiy radius 
+%$\operatorname{R}_{cavity}$ 
+equal to, larger than, or very 
+much larger than the hard sphere radius R, Scaled Partical Theory arrives 
+at an expression~\cite{Hansen} for the excess Helmholtz free energy of 
+a homogeneous Hard-Sphere fluid in terms of the packing fraction $\eta$ 
 \begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
 where
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
 \begin{equation}{\eta = \frac{N\frac{4}{3}\pi{R^3}}{V}}\end{equation}
 
-An expression for the excess Helmholtz free energy as a functional of the 
-number density profile $n(\vec r)$ can be found using Fundamental Measure 
-Theory (FMT)~\cite{rosenfeld1989}. FMT was developed for hard sphere fluids, and has been very 
-sucessful at predicting the thermodynamic properties of inhomogeneous hard 
-sphere fluids starting from an expression for the excess Helmholtz free 
-energy obtained from Scaled Partical Theory~\cite{santos2012phi3}. 
-Soft Fundamental Measure Theory (SFMT), which will be addressed later, 
-extends FMT to fluids with soft potentials like that of the WCA fluid.
 
+%for the excess Helmholtz 
+%free energy obtained from Scaled Partical Theory for a homogeneous 
+%Hard-Sphere fluid, 
+Fundamental Measure Theory~\cite{rosenfeld1989} (FMT) 
+can be constructed from Equation~\ref{Fexcess-SPT}~\cite{santos2012phi3},  
+and provides an expression for the excess Helmholtz free energy of an 
+inhomogeneous 
+Hard-Sphere fluid as a functional of the number density profile $n(\vec r)$. 
+%FMT was developed for hard sphere fluids, and has been very sucessful 
+%at predicting the thermodynamic properties of inhomogeneous hard sphere fluids. 
+Soft Fundamental Measure Theory (SFMT), which will be used in this paper, 
+is an extension of FMT and provides an expression for the excess Helmoholtz
+free energy of fluids with soft potentials like that of the WCA fluid. 
+It will be helpful to continue looking at FMT before addressing SFMT.
+
+Fundamental Mearsure Theory begins by noticing that 
 %\begin{equation}{\eta = \frac{NR_{3}}{V}}\end{equation}
 %\begin{equation}{\eta = \left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}}\end{equation}
 %\begin{equation}{\eta = n\frac{4}{3}\pi{R^3}=nR_{3}=n_{3}}\end{equation}
-From Equation~\ref{Fexcess-SPT}, a quantity $\zeta_{3}$ can be defined as follows
-\begin{equation}{\eta =\left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}=n\zeta_{3}}\end{equation}
-where $\zeta_{3}$ is the volume of a sphere. Likewise,
-\begin{equation}{\zeta_{2}=4\pi{R^2}}\end{equation}
-\begin{equation}{\zeta_{1}=R}\end{equation}
-\begin{equation}{\zeta_{0}=1}\end{equation}
-where $\zeta_{2}$ is the surface area of a sphere, and $\zeta_{1}$ is the 
-radius of a sphere. The quantities $\zeta_{3}, \zeta_{2}, \zeta_{1},$ 
-and $\zeta_{0}$ are fundamental geometric measures of a sphere, and they 
-will prove useful by defining a set of weighted densities $n_{i}=n\zeta_{i}$ 
-where $n=\frac{N}{V}$. 
-\begin{equation}\label{n3}{n_{3}=n\zeta_{3}=\left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}=\eta}\end{equation}
-\begin{equation}\label{n2}{n_{2}=n\zeta_{2}=\left(\frac{N}{V}\right)4\pi{R^2}=\frac{3\eta}{R}}\end{equation}
-\begin{equation}\label{n1}{n_{1}=n\zeta_{1}=\left(\frac{N}{V}\right)R}\end{equation}
-\begin{equation}\label{n0}{n_{0}=n\zeta_{0}=\left(\frac{N}{V}\right)}\end{equation}
-
-\noindent The excess free energy in Eq~\ref{Fexcess-SPT} can be written 
-in terms of the number density $\frac{N}{V}$
-\begin{equation}{F_{excess}=k_{B}T\left(-\frac{N}{V}ln(1-\eta)+\frac{N}{V}\frac{3\eta}{1-\eta}+\frac{N}{V}\frac{3{\eta}^2}{2(1-\eta)^2}\right)V}\end{equation}
-and using the expressions in Equations~\ref{n3} through~\ref{n0}, this becomes
-\begin{equation}\label{FexfromSPT}{F_{excess}=k_{B}T\left(-n_{0}ln(1-n_{3})+\frac{n_{1}n_{2}}{1-n_{3}}+\frac{n_{2}^3}{24\pi(1-n_{3})^2}\right)V}\end{equation}
+from Equation~\ref{Fexcess-SPT}, a quantity $G_{3}$ can be defined as follows
+\begin{equation}{\eta =\left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}=nG_{3}}\end{equation}
+where $G_{3}$ is the volume of a sphere. Likewise, by defining
+quantities
+\begin{equation}{G_{2}=4\pi{R^2}}\end{equation}
+\begin{equation}{G_{1}=R}\end{equation}
+\begin{equation}{G_{0}=1}\end{equation}
+where $G_{2}$ is the surface area of a sphere, and $G_{1}$ is the 
+radius of a sphere, Equation~\ref{Fexcess-SPT} can be written as
+%reproduced by introducing a set of weighted densities $n_{i}=nG_{i}$.
+\begin{equation}\label{FexfromSPTinthermsofG}{F_{excess}=k_{B}T\left(-nG_{0}ln(1-nG_{3})+\frac{nG_{1}nG_{2}}{1-nG_{3}}+\frac{nG_{2}^3}{24\pi(1-Gn_{3})^2}\right)V}\end{equation}
+The quantities $G_{3}, G_{2}, G_{1},$ and $G_{0}$ are fundamental 
+geometric measures of a sphere, and are what give rise to the name
+Fundamental Measure Theory. Introducing a set of weighted densities $n_{i}=nG_{i}$ 
+given by
+%and they will prove useful by introducing a set of weighted densities 
+%$n_{i}=nG_{i}$ where $n=\frac{N}{V}$. 
+\begin{equation}\label{n3}{n_{3}=nG_{3}=\left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}=\eta}\end{equation}
+\begin{equation}\label{n2}{n_{2}=nG_{2}=\left(\frac{N}{V}\right)4\pi{R^2}=\frac{3\eta}{R}}\end{equation}
+\begin{equation}\label{n1}{n_{1}=nG_{1}=\left(\frac{N}{V}\right)R}\end{equation}
+\begin{equation}\label{n0}{n_{0}=nG_{0}=\left(\frac{N}{V}\right)}\end{equation}
+Equation~\ref{FexfromSPTinthermsofG} can be written as
+%Writing Eq~\ref{Fexcess-SPT} in terms of the number density $n=\frac{N}{V}$
+%\begin{equation}{F_{excess}=k_{B}T\left(-\frac{N}{V}ln(1-\eta)+\frac{N}{V}\frac{3\eta}{1-\eta}+\frac{N}{V}\frac{3{\eta}^2}{2(1-\eta)^2}\right)V}\end{equation}
+%and using the expressions in Equations~\ref{n3} through~\ref{n0}, this becomes
+\begin{align}\label{FexfromSPT}
+    F_{excess}=k_{B}T\left(-n_{0}ln(1-n_{3})+\frac{n_{1}n_{2}}{1-n_{3}}+\frac{n_{2}^3}{24\pi(1-n_{3})^2}\right)V
+\end{align}
 which has the form 
-\begin{equation}{F_{excess} = k_BT(\Phi_1+\Phi_2+\Phi_3)V}\end{equation}
+\begin{align}
+    F_{excess} = k_BT(\Phi_1+\Phi_2+\Phi_3)V
+\end{align}
+or for a spatially varying number density $n(\vec{r})$, 
+\begin{equation}\label{eq:F_ex-n-of-r}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{equation} 
 where 
 \begin{align}
    \Phi_1 &= -n_{0}ln(1-n_{3}) \\
    \Phi_2 &= \frac{n_{1}n_{2}}{1-n_{3}} \\
-   \Phi_3 &= \frac{n_{2}^3}{24\pi(1-n_{3})^2} 
+   \Phi_3 &= \frac{n_{2}^3}{24\pi(1-n_{3})^2}   \label{oldPhi3equation}
 \end{align}
 
 The quantities $n_{0},n_{1},n_{2},n_{3}$ can be considered as weighted 
-densities given the relation $n_{i}=n\zeta_{i}$, where the weights are 
-given by $\zeta_{0},\zeta_{1},\zeta_{2},\zeta_{3}$ respectively. These 
-weights are valid for determining the excess free energy of a system of 
+densities where the weights are given by $G_{0},G_{1},G_{2},G_{3}$ respectively.
+\begin{align}
+    n_{i}=nG_{i}
+\end{align}
+These weights are valid for determining the excess free energy of a system of 
 hard spheres with a homogeneous number density n. But these weights, and 
 their related  weighted densities, can be written in a more general form 
 allowing for their extention to a system with a spacially varying number 
-density, that is, an inhomogeneous fluid. 
-
-Using a backwards Heavyside step function defined as
+density, that is, an inhomogeneous fluid. Using a backwards Heavyside step function defined as
 \begin{displaymath}{\Theta(|\vec{r}|-R)=\left\{ \begin{array}{rc} 1 & 0<r \leq R \\ 0  & r>R \end{array}\right.}\end{displaymath}
 the following expressions are obtained
-\begin{equation}{\zeta_{3}=\int_{Volume}{\Theta(|\vec{r}|-R)d{\vec{r}}} = \frac{4}{3}\pi{R^3}}\end{equation}
-\begin{equation}{\zeta_{2}=\int_{Volume}{\delta(|\vec{r}|-R)d{\vec{r}}} = 4\pi{R^2}}\end{equation}
-
-%\begin{equation}{\zeta_{1}=\frac{R_{2}}{4\pi{R}}=R}\end{equation}
-\begin{equation}{\zeta_{1}=\int_{Volume}{\frac{\delta(|\vec{r}|-R)}{r}d{\vec{r}}} = R}\end{equation}
-%\begin{equation}{\zeta_{0}=\frac{R_{2}}{4\pi{R}^2}=1}\end{equation}
-\begin{equation}{\zeta_{0}=\int_{Volume}{\frac{\delta(|\vec{r}|-R)}{r^2}d{\vec{r}}} = 1}\end{equation}
-
-The weighted densities can now be expressed as
-\begin{equation}{\color{red} CHECK!~~\color{black}n_{i}=\int_{Volume}{nw_{i}(r)}d{\vec{r}}}\end{equation} 
+\begin{equation}{G_{3}=\int_{Volume}{\Theta(|\vec{r}|-R)d{\vec{r}}} = \frac{4}{3}\pi{R^3}}\end{equation}
+\begin{equation}{G_{2}=\int_{Volume}{\delta(|\vec{r}|-R)d{\vec{r}}} = 4\pi{R^2}}\end{equation}
+%\begin{equation}{G_{1}=\frac{R_{2}}{4\pi{R}}=R}\end{equation}
+\begin{equation}{G_{1}=\int_{Volume}{\frac{\delta(|\vec{r}|-R)}{r}d{\vec{r}}} = R}\end{equation}
+%\begin{equation}{G_{0}=\frac{R_{2}}{4\pi{R}^2}=1}\end{equation}
+\begin{equation}{G_{0}=\int_{Volume}{\frac{\delta(|\vec{r}|-R)}{r^2}d{\vec{r}}} = 1}\end{equation}
+where the weighted densities can now be expressed as
+%CHECK
+\begin{align}
+    n_{i}=\int_{Volume}{nw_{i}(r)}d{\vec{r}}
+\end{align} 
+or for a spatially varying number density $n(\vec{r})$,
+\begin{equation}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
 with weight functions
 \begin{equation}\label{eq:w3}{w_{3}=\Theta(|\vec{r}|-R)}\end{equation}
 \begin{equation}\label{eq:w2}{w_{2}=\delta(|\vec{r}|-R)}\end{equation}
-
 %\begin{equation}{w_{1}=\frac{w_{2}}{4\pi{R}}}\end{equation}
 \begin{equation}\label{eq:w1}{w_{1}=\frac{w_{2}}{4\pi{r}}}\end{equation}
 %\begin{equation}{w_{0}=\frac{w_{2}}{4\pi{R}^2}}\end{equation}
 \begin{equation}\label{eq:w0}{w_{0}=\frac{w_{2}}{4\pi{r}^2}}\end{equation}
-where the weight functions $w_{2}$ and $w_{3}$ have the relation
+The weight functions $w_{2}$ and $w_{3}$ have the relation
 \begin{equation}\label{w2_w3_relation}{w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)}\end{equation}
+which will be important to keep in tact when moving to SFMT.
+
 
 The weight functions can be related to the mayer function 
-\begin{equation}{f(r)=\exp^{-\frac{V(r)}{k_{B}T}}-1}\end{equation} 
-where r is the distance between the centers of two hard spheres. 
-For a hard sphere fluid the interatomic potential $V(r)$ is given by 
-\begin{displaymath}{V(r)=\left\{ \begin{array}{rc} \infty & 0<r \leq 2R \\ 0  & r>2R \end{array}\right.}\end{displaymath}
-and so the mayer function for a hard sphere is given by 
+\begin{align}
+     f(r)=\exp^{-\frac{V(r)}{k_{B}T}}-1
+\end{align} 
+where r is the distance between the centers of two hard spheres, and 
+$V(r)$ is the interatomic potential between two hard spheres given by 
+\begin{align}
+    V(r)=\left\{ \begin{array}{rc} \infty & 0<r \leq 2R \\ 0  & r>2R \end{array}\right.
+\end{align}
+Evaluating Equation with $V(r)$ given by Equation,  
+the mayer function for a Hard-sphere fluid is found to be
 \begin{equation}\label{f(r)step}{f(r)=-\Theta(|\vec{r}|-2R)}\end{equation} 
-The mayer function can be written in terms of weight functions if two 
+which can be written in terms of the weight functions if two 
 additional vector weight functions $\vec{w_2}$ and $\vec{w_1}$ are introduced
-\begin{equation}\label{mayer_deconvolution}{f(r)=-\Theta(|\vec{r}|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})}\end{equation}  
-where the vector weights are defined as 
 \begin{equation}\label{eq:w_v2}{\vec{w_{2}}=w_{2}\frac{\vec{r}}{r}}\end{equation}
 \begin{equation}\label{eq:w_v1}{\vec{w_{1}}=w_{1}\frac{\vec{r}}{r}}\end{equation} 
+The mayor function can then be written in terms of the weight functions~\cite{Hansen}
+\begin{equation}\label{mayer_deconvolution}{f(r)=-\Theta(|\vec{r}|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})}\end{equation}  
 
-Taking the derivative of the mayer function in Eq~\ref{f(r)step} will 
-prove useful, and is given by
-\begin{equation}\label{mayerder=w2convolution}{\frac{df(r)}{dr} = w_2 \otimes w_2 = \int{w_2(r')w_2(r-r')dr'}}\end{equation} 
-where, for a hard sphere fluid the left side of Equation~\ref{mayerder=w2convolution} gives
+Taking the derivative of the mayer function in Eq~\ref{f(r)step} provides 
+another relation that will be important to keep in tact when moving to SFMT.
+\begin{align}\label{mayerder=w2convolution}
+     \frac{df(r)}{dr} = w_2 \otimes w_2 = \int{w_2(r')w_2(r-r')dr'}
+\end{align} 
+This can easily be checked by evalating the left side for a Hard-sphere fluid as follows,
+%where, for a hard sphere fluid the left side of Equation~\ref{mayerder=w2convolution} gives
 \begin{displaymath}{\frac{df(r)}{dr}=\left\{ \begin{array}{rc} \frac{d}{dr}(-1)=0 & r<2R \\\frac{d}{dr}(\text{vertical line})=+\infty & r=2R \\ \frac{d}{dr}(0)=0  & r>2R \end{array}\right.}\end{displaymath}
 \begin{equation}\label{mayerder}{\frac{df(r)}{dr} = \delta(r-2R)}\end{equation} 
-Using the general relation for convolution, which is equal to the inverse 
-Fourier Transform of a product of Fourier Transforms 
-\begin{equation}{f \otimes g = \text{IFT[ FT}[f]\text{ x FT[g] }]}\end{equation} 
-with
-\begin{equation}{w_2(r)=\delta(r-R)}\end{equation} 
-\begin{equation}{\text{Fourier Transform}[w_2]=\int_{-\infty}^{\infty}\delta(r-R)e^{-ikr}dr=e^{-ikR}}\end{equation} 
-the right side of Equation~\ref{mayerder=w2convolution} gives
-\begin{equation}{w_2 \otimes w_2 = \text{Inverse Fourier Transform}[e^{-ikR}e^{-ikR}]}\end{equation} 
+and evaluating the right side by using the general relation for convolution which is equal to the Inverse 
+Fourier Transform of a product of Fourier Transforms. 
+\begin{equation}{f \otimes g = \text{I.F.T.[ F.T.}[f]\text{ x F.T.[g] }]}\end{equation} 
+Taking the Fourier Transform of the weight function $w_2(r)=\delta(r-R)$ 
+%\begin{equation}{w_2(r)=\delta(r-R)}\end{equation} 
+gives
+\begin{equation}{\text{F.T.}[w_2]=\int_{-\infty}^{\infty}\delta(r-R)e^{-ikr}dr=e^{-ikR}}\end{equation} 
+and the right side of Equation~\ref{mayerder=w2convolution} becomes
+\begin{equation}{w_2 \otimes w_2 = \text{I.F.T.}[e^{-ikR}e^{-ikR}]}\end{equation} 
 \begin{equation}\label{w2convolution}{=\int_{-\infty}^{\infty}e^{-ik2R}e^{ikr}dk=\int_{-\infty}^{\infty}e^{ik(r-2R)}dk=\delta(r-2R)}\end{equation} 
 which matches Equation~\ref{mayerder}.
 
-Incorporating into Equation~\ref{FexfromSPT} the two vector weights which 
-were added to satisfy Equation~\ref{mayer_deconvolution}, and an updated 
-expression for $\Phi_3$ developed by Tarazona~\cite{tarazonaphi3, santos2012phi3}, 
-the excess free energy becomes
-\begin{equation}{F_{excess} = k_BT(\Phi_1+\Phi_2+\Phi_3)V}\end{equation}
-where
+Tarazona later improved upon the original FMT equations by replacing the
+expression for $\Phi3$ given by Equation~\ref{oldPhi3equation} with the
+more accurate expression~\cite{tarazonaphi3, santos2012phi3} 
+%
+%The final FMT expression for the excess Helmholtz free energy is given by
+%
+%Incorporating the two vector weights which 
+%were added to satisfy Equation~\ref{mayer_deconvolution}, and an updated 
+%expression for $\Phi_3$ developed by Tarazona~\cite{tarazonaphi3, santos2012phi3}, 
+%into Equation~\ref{FexfromSPT} the excess free energy becomes
+%\begin{equation}{F_{excess} = k_BT(\Phi_1+\Phi_2+\Phi_3)V}\end{equation}
+%where
 \begin{align}
-\Phi_1 &= -n_{0}ln(1-n_{3}) \label{eq:Phi1}\\
-\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \label{eq:Phi2} \\
+%\Phi_1 &= -n_{0}ln(1-n_{3}) \label{eq:Phi1}\\
+%\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \label{eq:Phi2} \\
 \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  \label{eq:Phi3}
 \end{align}
-and the tensor weight is given by
+in which a tensor weight is incoporated given by
 \begin{equation}\label{eq:tensorweight}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation} 
+All the other FMT equations remain the same.
 
-The expression for the weighted densities can be written in a way that 
-accomodates both homogenious fluids where the number denstiy n is constant, 
-and inhomogeneous fluids where the number density becomes a function of 
-the position $n(\vec{r})$.
-\begin{equation}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
+%The expression for the weighted densities can be written in a way that 
+%accomodates both homogenious fluids where the number denstiy n is constant, 
+%and inhomogeneous fluids where the number density becomes a function of 
+%the position $n(\vec{r})$.
+%\begin{equation}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
 %The equatons above were derived for a uniform fluid where the number density n is constant, 
 %but they can be extended for inhomogenious fluids where the number density becomes a function of r, $n(\vec{r})$.
-For a spatially varying number density $n(\vec{r})$, the excess Free 
-Energy becomes a functional of the number density profile $n(\vec{r})$ :
-\begin{equation}\label{eq:F_ex-n-of-r}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{equation} 
+%For a spatially varying number density $n(\vec{r})$, the excess Free 
+%Energy becomes a functional of the number density profile $n(\vec{r})$ 
+%\begin{equation}\label{eq:F_ex-n-of-r}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{equation} 
 
-The equations developed so far have been for a hard sphere fluid. All of 
-the weight function equations, as well as the equation for the deriviative 
-of the mayer function, can be expressed in terms of $w_{2}(r)$ which consists 
-of a delta function characteristic of hard spheres. Soft Fundamental Measure 
-Theory extends the Fundamental Measure Theory discussed so far to 
-fluids with soft potenials by keeping the relationships between the weight 
-functions, and which the weight functions satisfy the same, but replacing 
-$w_{2}(r)$ with a weight function appropriate for a soft sphere potential. 
-A new set of weight functions can then be derived for a system of soft 
-spheres which is what we do in forming our functional for the 
-Weeks-Chandler-Anderson fluid as detailed in the chapter on Methods.
+The FMT equations developed so far have been for a Hard-sphere fluid.
+All of the weight functions, the relations between them, and the equation 
+for the deriviative of the mayer function, can be expressed in terms of 
+$w_{2}(r)$ which, for a Hard-sphere fluid, consists of a delta function 
+characteristic of hard spheres. 
+Soft Fundamental Measure Theory extends FMT discussed so far to fluids 
+with soft potenials by keeping the relationships between the weight 
+functions the same, but replacing $w_{2}(r)$ with a weight function 
+appropriate for a soft sphere potential. This is what we do to
+%A new set of weight functions can then be derived for a system of soft spheres  
+form a functional for the 
+Weeks-Chandler-Anderson fluid as detailed in the next chapter on Methods.
 
 \chapter{Methods}
 
