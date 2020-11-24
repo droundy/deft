@@ -1125,6 +1125,12 @@ to get the final value of the weighted density at some point $\vec r$.
 
 The result can be made more accurate by increasing NumPoints (the 
 number of vectors randomly generated), and by using antithetic variates.
+To use antithetic variates, each randomly generated  vector is paired 
+with a vector of equal magnitude, but opposite in direction. 
+First order error is reduced by averaging the two results that depend on 
+the vectors, one of which may be erroneously higher than it should be 
+while the other is erronesously lower than it should be.
+
  \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{figs/weightandGauss1.pdf}
@@ -1143,13 +1149,6 @@ number of vectors randomly generated), and by using antithetic variates.
     varies randomly with a probability according to a Gaussian distribution.} 
   \label{fig:GaussandW2_thinkas}
   \end{figure} 
-To use antithetic variates,
-each randomly generated  vector is paired with a 
-vector of equal magnitude, but opposite in direction. 
-First order error is reduced
-by averaging the two results that depend on the vectors, one of 
-which may be erroneously higher than it should be while the other is 
-erronesously lower than it should be.
 
 The standard error of the mean (SEM) is given in general by
 \begin{equation}{SD_{mean}=\frac{SD}{\sqrt{N}}}\end{equation} 
