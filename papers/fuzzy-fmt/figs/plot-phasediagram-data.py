@@ -319,6 +319,8 @@ plt.ylabel('$T^*$')
 plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_l$', color='white')
 plt.plot([0.96, 0.98, 0.99, 1.00, 1.11,1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_s$', color='white')
 plt.legend()
+plt.xlim(0.1,1.8)
+plt.ylim(0.5,3)
 
 plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
 
@@ -338,7 +340,8 @@ plt.ylabel('$p^*$')
 ##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
 plt.plot([0.7, 0.8,0.9,1.0,2.0, 3], [6.24, 7.62, 8.78, 9.99, 25.5, 43.8], label='MC', color='white')
 plt.legend()
-
+plt.ylim(0,80)
+plt.xlim(0.5,3)
 plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
 
 if 'show' in sys.argv:

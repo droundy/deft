@@ -28,6 +28,8 @@ xi=alpha/(6*np.sqrt(PI)*(np.sqrt((epsilon*np.log(2))/KbT)+np.log(2)))
 
 ##Plot alpha
 plt.plot(KbT,alpha, label = 'alpha')
+plt.xlim(right=KbT.max())
+plt.ylim(top=alpha.max())
 plt.xlabel('KbT')
 plt.ylabel('alpha')
 plt.title('Alpha vs Temp')
@@ -36,7 +38,7 @@ plt.savefig('plot_alpha.pdf')
 
 plt.figure()
 
-##Plot xi
+##Plot xi  - old method
 plt.plot(KbT,xi, label = 'xi')
 plt.xlabel('KbT')
 plt.ylabel('xi')

@@ -30,6 +30,8 @@ r=np.linspace(1.11, 2.5, 2000)
 V=(r/r) - 1
 plt.plot(r/sigma, V/epsilon, color='blue')
 
+plt.xlim(left=0.91,right=2.5)
+plt.ylim(top=5)
 
 plt.xlabel('r/$\sigma$')
 plt.ylabel('$V(r)/\epsilon$')

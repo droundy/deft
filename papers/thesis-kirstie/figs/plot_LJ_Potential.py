@@ -31,6 +31,8 @@ sigma_over_r_to_pow6=(r_dless)*(r_dless)*(r_dless)*(r_dless)*(r_dless)*(r_dless)
 V=4*epsilon*(sigma_over_r_to_pow6*sigma_over_r_to_pow6 - sigma_over_r_to_pow6)  #LJ potential 
 
 plt.plot(1/r_dless,V)
+plt.xlim(right=2.5)
+plt.ylim(top=V.max())
 plt.xlabel('r/$\sigma$')
 #plt.xlabel('r')
 plt.ylabel('V(r)/$\epsilon$')

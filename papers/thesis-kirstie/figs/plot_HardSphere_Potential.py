@@ -28,6 +28,7 @@ r=np.linspace(1.1225, 4, 2000) #zero portion only
 V=(r/r)-1   #the r/r makes x and y have the same dimensions for plotting
 plt.plot(r/sigma, V/epsilon, color='blue')
 
+plt.ylim(top=3)
 
 #plt.xlabel('r/$\sigma$')
 #plt.ylabel('V_HS/$\epsilon$')
