@@ -11,7 +11,7 @@
 \depthead{Head}
 \major{Physics}
 \advisor{David Roundy}
-\submitdate{October ??, 2020}
+\submitdate{December 10, 2020}
 \commencementyear{2021}
 
 \newcommand\davidsays[1]{\textcolor{red}{[\it D: #1]}}
@@ -20,7 +20,7 @@
 \usepackage{amsmath}
 \usepackage{subcaption}
 
-\date{October 2020}
+\date{December 2020}
 
 \abstract{
   We use Classical Density Functional Theory (cDFT) to predict the 
@@ -33,7 +33,7 @@
   parameters to fit the results to those predicted by Monte-Carlo simulations.
   Our functional was successful in predicting the freezing of the WCA fluid 
   with a fairly good match to Monte-Carlo simulations. This result suggests 
-  that SFMT may provide a solid foundation for future density functionals 
+  that SFMT may provide a strong foundation for future density functionals 
   that will model real fluids.
 }
 
@@ -60,12 +60,12 @@ SFMT is a method that makes the task of
 forming an expression for the excess Helmholtz free energy of a particular 
 model fluid much easier since the interaction that each sphere, or atom, 
 has with every other sphere does not have to be taken explicitly into account.
-Once the functional for the Helmholtz free energy is formed, classical 
-Density Functional Theory is used to find the equilibrium 
-Helmholtz free energy at a particular temperature and density. 
-According to cDFT the equilibrium 
-Helmholtz free energy of the system can be found by varying the number 
+Once the functional for the Helmholtz free energy is formed, then 
+according to cDFT, the equilibrium
+Helmholtz free energy of the system can be found for a particular 
+temperature and density by varying the number 
 density profile $n(\vec{r})$ until the free energy is minimized. 
+Phase diagrams can then be constructed using Maxwell's Double Tangent Construction. 
 Results will be compared to those from Monte-Carlo simulations.
 
 \chapter{Theory}
@@ -744,9 +744,13 @@ The weight function $w_{2}(r)$ is in turn related to $w_{3}(r)$ through
 Equation~\ref{w2_w3_relation}.
 Soft Fundamental Measure Theory extends FMT discussed so far to fluids 
 with soft potentials by keeping the relationships between the weight 
-functions the same, but replacing $w_{3}(r)$ with a weight function 
-appropriate for a soft sphere potential~\cite{schmidt1999density}. 
-This is what we do to form a functional for the Weeks-Chandler-Anderson 
+functions (given by Equations~\ref{eq:w0},~\ref{eq:w1},~\ref{eq:w_v1},
+~\ref{eq:w_v2},~\ref{w2_w3_relation},~\ref{eq:tensorweight}) and the 
+equation for the derivative of the mayer function 
+(given by Equation~\ref{mayerder=w2convolution}) the same, 
+but replacing $w_{3}(r)$ with a weight function 
+appropriate for a soft sphere potential~\cite{schmidt1999density, schmidt2000fluid}. 
+This is what we do in forming a functional for the Weeks-Chandler-Anderson 
 fluid as detailed in the next chapter on Methods.
 
 \chapter{Methods}
@@ -754,66 +758,88 @@ fluid as detailed in the next chapter on Methods.
 \section{The Overall Approach}
   
 Our goal is to generate temperature-density and pressure-temperature 
-phase diagrams for a Weeks-Chandler-Anderson model fluid using 
-classical Density Functional Theory. 
+phase diagrams for a Weeks-Chandler-Anderson model fluid. 
 A temperature-density phase diagram for a fluid that does not
 have attraction between the particles that make up the fluid will show
-two distinct regions - one at lower densities, and one at higher densities,
-separated by a coexistence region in which there is found a mixture of the 
-fluid at some fixed lower density, and at some fixed higher density. An 
-abrupt change from some maximum lower density to some minimum higher density 
-occurs for certain combinations of pressure and temperature which form
-a line on a pressure-temperature phase diagram. This line distinguishes 
-the liquid region which exhibits lower densities from the 
-solid which exhibits higher densities. 
+two distinct regions - a "liquid" region at lower densities, and a solid 
+region at higher densities. 
+A phase transition between a liquid and a solid is accompanied by an 
+abrupt change in the number density, and so there is a gap between the 
+purely liquid and the purely solid regions. Within the gap, or coexistence
+region, is found mixtures of various amounts of liquid and solid.  
+Within the coexistence region, the liquid and solid have number densities 
+that are fixed at the values they had at the phase transition. To construct
+the phase diagram, these liquid and solid phase transition number densities
+must be found. Maxwell's double tangent construction can be used to find 
+these number densities given plots of the liquid and the solid Helmholtz 
+free energies verses the inverse density at a given temperature. 
+To construct these plots we use classical Density Functional Theory 
+to find the Helmholtz free energies of the liquid and the solid. 
+A functional for the ideal portion of the
+Helmholtz free energy is given by Equation~\ref{eq:Fideal-n(r)}, and a 
+functional for 
+the excess Helmholtz free energy, which depends on the interatomic potential
+between particles, will be developed in the next section using SFMT. 
+Once a functional is constructed, the Helmholtz free energy can be found - 
+but not directly. The equilibrium number density profile must first be 
+identified. According to cDFT, the equilibrium number density profile, 
+and its corresponding equilibrium Helmholtz free energy can be found 
+by trying many different number densities, and identifying the one that 
+minimizes the Helmholtz free energy. In this section, we look at how to 
+generate various number density profiles that can be used to implement cDFT. 
 
-The transition between the liquid 
-and solid state is abruptly inhomogeneous in terms of the number density, 
-and we study the behavior 
-of the fluid by treating the liquid as having a homogeneous number density, 
-and by constructing a crystal lattice in real space for the solid. 
 It is known that a fluid with a soft potential like the WCA fluid will 
 form a Face Centered Cubic (FCC) crystal in its solid state~\cite{Hansen}. 
 Although the entire 
 crystal lattice can be constructed with FCC cells, 
 FCC cells are not the smallest cells with which the lattice can be built. 
-The shaded parallepiped shown within the FCC cell in Figure \ref{fig:primitivecell} 
+The shaded parallelepiped shown within the FCC cell in Figure \ref{fig:primitivecell} 
 is the smallest structure that, when repeated, re-creates the entire crystal 
-lattice. This parallepiped primitive cell takes up one-fourth the volume 
+lattice. This parallelepiped primitive cell takes up one-fourth the volume 
 of an FCC cell, and contains the equivalent of one atom.
 It includes portions of eight atoms each located on a lattice site conveniently 
-reachable by moving along one of three different lattice vectors to step 
-from one atom to the next. The three lattice vectors will be useful in 
+reachable by moving along one of three different lattice vectors. 
+The three lattice vectors will be useful in 
 creating the lattice structure computationally, and will also make the 
 program run faster.
 
   \begin{figure}[h!]
     \centering
     \includegraphics[height=3.5cm]{PrimitiveCellLightBlue.png}
-    \caption{The Primitive Crystal Cell is shown by the shaded parallelpiped}
+    \caption{The Primitive Crystal Cell is shown by the shaded parallelepiped}
     \label{fig:primitivecell}
   \end{figure}
 
-In a large collection of cells, the atom at each lattice site
-will not realistically reside exactly at the lattice point. 
+An atom will not realistically reside exactly at a lattice point. 
 Statistically there will typically be a normal, or Gaussian distribution 
-of positions about the lattice point as pictured in the far right box in 
-Figure \ref{fig:Ensemble_Gaus}. 
-A plot of a Gaussian distribution in 2-dimensions is shown in Figure~\ref{fig:Gaus_plot}
-where the width of the Gaussian is described by $\sigma$.  
-A 3-dimensional Gaussian distribution centered at a lattice point can be used to represent 
-a number density profile $n(\vec{r})$  which describes how the atoms are 
-statistically distributed over a collection of cells. 
-It is important to note that the number density does not change when introducing a number 
-density profile. There are still the same number of atoms over some fixed volume. 
-\begin{equation}{n=<n(\vec{r})>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}=\frac{1~\text{atom}}{V}}\end{equation}
-where $n(\vec r)$ is itself an ensemble average over all microstates, and is independent of time.
-\begin{equation}n(\vec r)=~<\sum_{i=1}^N\delta(\vec r - \vec r_i)>~\end{equation}
+of positions about the lattice point. 
+Of course, atoms are always in motion, so when talking about "the location" 
+of an atom, we are talking about a time averaged position, so that it 
+does not change with time.
+Figure \ref{fig:Ensemble_Gaus} shows examples 
+of four possible positions an atom (shown in blue) might have in a crystal 
+cell that has one lattice site (represented by a black dot the center of 
+the cell). The atom is slightly off the lattice site in each example, and 
+a sampling of many possibilities - more than just the four given 
+as examples - would create an average profile that looks like a Gaussian
+distribution, as shown on the right.
+A plot of a Gaussian distribution in 2-dimensions is shown in 
+Figure~\ref{fig:Gaus_plot} where the width of the Gaussian is described 
+by $\sigma$ (not to be confused with the $\sigma$ related to the 
+Lennard-Jones model).
+ 
+3-dimensional Gaussian distributions centered at lattice points can be 
+used to represent a number density profile $n(\vec{r})$  which describes 
+how the atoms are distributed on average over a collection of cells. 
 
-  \begin{figure}[h!]
+ \begin{figure}[h!]
     \centering
     \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
-    \caption{A Gaussian Distribution Number Density Profile}
+    \caption{Four examples of possible positions an atom (blue sphere) 
+    might have within a cell that has one lattice site (black dot) at 
+    the center are shown on the left. A large number of such 
+    possibilities would give rise to a Gaussian distribution, 
+    as shown on the right.}
     \label{fig:Ensemble_Gaus}
   \end{figure} 
 
@@ -823,7 +849,30 @@ where $n(\vec r)$ is itself an ensemble average over all microstates, and is ind
     \caption{A 2D Gaussian Distribution of width 2$\sigma$}
     \label{fig:Gaus_plot}
   \end{figure}  
+  
+There can be many different number density profiles for a given number
+density. The number density is the number of atoms per volume, whereas
+the number density profile describes how much "atom" will be found at various 
+points in the cell. 
+It can be thought of as an average over a large collection of actual cells
+of various possible spatial distributions of the atoms within a cell, or
+more precisely, as an ensemble average over all possible microstates.
+\begin{align}
+    n(\vec r)=~<\sum_{i=1}^N\delta(\vec r - \vec r_i)>~
+\end{align} 
+By varying the width of the Gaussian distributions, a number of different 
+number density profiles can be generated for a given number density.
+It is important to note that the number density does not change when 
+introducing a number density profile.  
+There are still the same number of atoms over some fixed volume. 
+Taking the average of the number density profile over some volume 
+gives the number density. 
+\begin{align}
+    n=<n(\vec{r})>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}
+\end{align}
 
+Besides changing the width of the Gaussians, there is another way to 
+generate different number density profiles for a given number density.
 It may be that not all lattice sites are occupied. Vacancies can be taken 
 into account while keeping the overall number density the same by 
 making the cells smaller. A large collection of smaller cells creates a 
@@ -839,7 +888,11 @@ number density in terms of the fraction of vacancies, $f_v$:
  \begin{figure}[h!]
     \centering
     \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
-    \caption{A Gaussian Distribution Number Density Profile.}
+    \caption{Four examples of possible positions an atom (blue sphere) might 
+    have within a fixed volume containing eight cells are shown on the left. 
+    Each cell has one lattice site at the center represented by a black dot. 
+    A large number of such possibilities would give rise to the Gaussian 
+    distributions shown on the right.}
     \label{fig:Ensemble_Smallcells}
   \end{figure} 
 
@@ -852,30 +905,26 @@ number density in terms of the fraction of vacancies, $f_v$:
     \label{fig:SameStatPic}
   \end{figure} 
 
-By varying the width of the Gaussians and the fraction of vacancies, various
-number density profiles can be generated as shown in Figure~\ref{fig:Ensemble_vary}.
+By varying the width of the Gaussians and the fraction of vacancies, 
+various number density profiles can be generated for a given combination 
+of temperature and number density, as shown in Figure~\ref{fig:Ensemble_vary}.
+A homogeneous number density profile is used for a liquid is shown in 
+Figure \ref{fig:homogen_denisty}.
 Once again, it is important to note that the number density is the same 
 for all these number density profiles $n(\vec{r})$. 
-A homogeneous number density profile is used for a liquid is shown in Figure \ref{fig:homogen_denisty}.
-
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{VaryWidthandVacancies.png}
     \caption{Several Gaussian Distribution Number Density Profiles all 
-    with the same number density, that is, there is one atom over the fixed volume.}
+    with the same number density of one atom over the fixed volume.}
     \label{fig:Ensemble_vary}
   \end{figure}  
-
  \begin{figure}[h!]
     \centering
     \includegraphics[height=4cm]{figs/homogeneous_bold-box.pdf}
     \caption{A homogeneous number density profile $n(\vec{r})$.}
     \label{fig:homogen_denisty}
   \end{figure}   
-
-For a given combination of temperature and number density, a suite of number 
-density profiles are generated similar to those represented in the example 
-set of profiles shown in Figure~\ref{fig:Ensemble_vary}. 
 The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number 
 density profile, and also for the homogeneous number density profile 
 characteristic of a liquid. Both the ideal and excess free energies are 
@@ -897,8 +946,7 @@ completely in a liquid state if the liquid free energy is lower than
 the crystal free energy. Maxwell's Double Tangent Construction is used 
 to determine the actual number densities of the crystal and liquid states
 at the boundaries of the coexistence region for a given temperature, 
-and construct phase diagrams as described in the section on The Theory of
-Freezing and Maxwell's Double Tangent Construction.
+and construct phase diagrams as described in Section 2.2.
 
 \section{Our Functional for the Excess Helmholtz free energy}
 In order to apply classical Density Functional Theory, an expression 
@@ -1165,24 +1213,61 @@ Phase diagrams for the WCA fluid are shown in Figures~\ref{fig:Phase_Diagram_of_
 and \ref{fig:Phase_Diagram_P_vs_T}. In all cases $\sigma=1$ and $\epsilon=1$. 
 In Figure~\ref{fig:Phase_Diagram_of_T_vs_n} the reduced temperature 
 $T^*=\frac{kT}{\epsilon}$ is plotted against the reduced number density 
-$n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. The red area is fluid, 
-and the blue area is crystal. The gray area that separates the fluid, 
-and the crystal regions is where some fluid and crystal exist together 
-at varying proportions. The region of coexistence slants slightly to the 
-right toward higher density as the temperature increases. 
-This is expected since at higher temperatures, the fluid would have to 
-be under greater compression before forming a solid. The white lines show 
-results from Monte-Carlo simulations of the WCA fluid~\cite{May}. 
-Overall, the general shape, and position of the lines correspond
-fairly closely to the edges of the region of coexistance predicted from 
-the DFT method, but the width of the coexistence region is about one-third 
-larger for the Monte-Carlo results for most temperatures. The white line 
-on the right, representing the density of the solid at each temperature, 
-is in fairly good agreement with our DFT results for all temperatures. 
-However, the white line on the left, representing the density of the 
-liquid at each temperature, is consistently farther left than the liquid 
-transition densities our method predicted.
+$n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. 
+It is seen that in general, a liquid exists at lower number densities, 
+and a solid exists at higher number densities. 
+Phase transitions between the liquid and solid phases will occur when the liquid 
+and solid are at the same temperature, pressure and chemical potential. 
+Looking at one temperature, it is seen that as the density of the 
+liquid increases, a maximum number density is reached for the liquid. 
+This is the liquid phase transition number density, and 
+marks the beginning of a coexistence region where various amounts 
+of liquid and solid can exist together in equilibrium.
+Moving on toward higher number densities, the end of the coexistence 
+region is marked by the minimum number density that the solid can have.
+This is the solid phase transition number density. At a phase transition 
+there is an abrupt change in the number density as seen here where the
+density changes suddenly, and abruptly from the liquid 
+phase transition number density to the solid phase transition number density.
+Within the coexistence region, the number density of the liquid is fixed 
+at the liquid phase transition number density, and the number density of 
+the solid is fixed at the solid phase transition number density, while
+varying amounts of liquid and solid combine to give the infinite number 
+of possible densities seen within the coexistence region. 
 
+\begin{figure}
+  \centering
+  \includegraphics[height=9cm]{figs/Phase_Diagram_of_T_vs_n}
+  \caption{Phase Diagram of the reduced temperature verses the reduced 
+  density for the WCA fluid. The red region is liquid, and the blue region is 
+  solid. The gray area that separates the liquid and solid regions 
+  is the region of coexistence where some liquid and solid exist together 
+  at varying proportions. White lines show the boundaries of the coexistence 
+  region generated from Monte-Carlo of the WCA fluid.}
+  \label{fig:Phase_Diagram_of_T_vs_n}
+\end{figure}
+
+Looking at the coexistence region as a whole for all temperatures, 
+it is seen to extend over a narrow range of number densities which 
+gradually shifts towards higher densities as the temperature increases. 
+This is expected since at higher temperatures the fluid would have to 
+be under greater compression before forming a solid. 
+White lines superimposed on the phase diagram show the boundaries of the 
+coexistence region as predicted by Monte-Carlo simulations~\cite{May} 
+of the WCA fluid. 
+Overall, the general shape, and position of the two coexistence regions 
+correspond fairly closely, but the Monte-Carlo region is a little wider
+and shifted a bit toward smaller densities. For example, at a temperature 
+of kT=1, the cDFT liquid transition reduced number density is 0.96, 
+and the solid transition reduced number density is 1.02, giving a spread 
+of 0.06, whereas the Monte-Carlo results give a liquid transition 
+reduced number density of 0.92, and a solid transition reduced number 
+density of 1.00, giving a spread of 0.08. 
+%The solid phase transition number densities predicted by each method 
+%are very nearly the same along all temperatures, but the liquid phase 
+%transition number densities predicted by cDFT are notably higher than 
+%those predicted by the Monte-Carlo simulations, making the width of the 
+%Monte-Carlo region about one-third larger for most temperatures above KT=1. 
 %Figure~\ref{fig:Phase_Diagram_of_T_vs_n_AS} shows our results for a wider 
 %range of reduced temperatures from kT=0.5 to 38. The white lines show the results
 %of molecular simulations of the WCA fluid made by Ahmed and Sadus~\cite{ahmedsadus}.
@@ -1194,47 +1279,62 @@ transition densities our method predicted.
 %one-half to one-forth the size. Although, our coexistence region is only 
 %about one-forth the size at kT=28, it is centered within the coexistence 
 %region predicted by Ahmed and Sadus. 
+%
+%
+%
+%\begin{figure}
+  %\centering
+  %%\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
+  %%\includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n_AS}
+  %%\caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
+  %%White lines show the liquid and solid transition densities at each temperature from 
+  %%simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
+  %\label{fig:Phase_Diagram_of_T_vs_n_AS}
+%\end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n}
-  \caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fluid. 
-  White lines show the liquid and solid transition densities at each temperature from 
-  Monte-Carlo simulations of the WCA fluid. The gray region is the region of coexistence.}
-  \label{fig:Phase_Diagram_of_T_vs_n}
+  \includegraphics[height=9cm]{figs/Phase_Diagram_of_P_vs_T}
+  \caption{Phase Diagram of the reduced pressure verses the reduced 
+  temperature. The blue region is solid, and the red region is liquid.
+  The white line marks the solid-liquid boundary as predicted by 
+  Monte-Carlo simulations.}
+  \label{fig:Phase_Diagram_P_vs_T}
 \end{figure}
 
-\begin{figure}
-  \centering
-  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
-  %\includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n_AS}
-  %\caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
-  %White lines show the liquid and solid transition densities at each temperature from 
-  %simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
-  \label{fig:Phase_Diagram_of_T_vs_n_AS}
-\end{figure}
-
-Figure~\ref{fig:Phase_Diagram_P_vs_T} shows the reduced pressure $p^*=\frac{P\sigma^3}{\epsilon}$ 
-plotted against the reduced temperature for temperatures of kT = 0.5 to 3.0. Again, the red area 
-is fluid, and the blue area is crystal. The general trend of the values for the transition 
-temperatures and pressures is what would be expected, with the WCA fluid becoming a solid at
-a higher pressure for a higher temperature, or becoming a liquid at a higher temperature 
-for a higher pressure. But the transition pressures and temperatures are consistently higher 
-than the Monte-Carlo simulations shown by the white line, and the discrepancy grows as 
-the temperature increases. 
+Figure~\ref{fig:Phase_Diagram_P_vs_T} shows the reduced pressure 
+$p^*=\frac{P\sigma^3}{\epsilon}$ plotted against the reduced temperature 
+for temperatures of kT = 0.5 to 3.0. 
+The black line marks the phase boundary between the solid and liquid regions, 
+and indicates the various temperature-pressure combinations at which a 
+phase transition occurs, and where various amounts of solid and liquid 
+can coexist. 
+It is seen that the higher the temperature, the higher the pressure must be
+to undergo a phase transition from a liquid to a solid, as would be expected. 
+The slope of the phase boundary $\frac{dP}{dT}$ at some point (P,T) is given by
+\begin{align} 
+    \frac{dP}{dT}=\frac{S_l-S_s}{V_l-V_s}
+\end{align}
+Since the entropy and the volume of the liquid is greater than the entropy
+and the volume of the solid, the slope should be positive.
+Comparing the slope of the phase boundary predicted by cDFT to that
+from Monte-Carlo simulations shown by the white line, it is seen that
+the cDFT transition temperatures are consistently higher, and the 
+discrepancy grows as the temperature increases. For example, at a 
+temperature of kT=1, the phase transition reduced pressure predicted by 
+cDFT is 15.24, whereas the Monte-Carlo simulation predicted a value of 9.99,
+and at a temperature of kT=3, cDFT gives a value of 77.27 whereas the 
+Monte-Carlo simulation predicts 43.80.
+This may indicate that either the difference between the liquid 
+and solid phase transition entropies predicted by cDFT is too high, or 
+the difference in the volumes is too low. 
+%
 %Figure~\ref{fig:Phase_Diagram_P_vs_T_AS} shows our results for a larger 
 %range of reduced temperatures from kT=0.5 to 38, compated with the results
 %from Ahmed and Sadus's molecular simulations. Here again, our transition 
 %pressures and temperatures are consistently higher.
-
-\begin{figure}
-  \centering
-  \includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T}
-  \caption{Phase Diagram of the reduced pressure verses the reduced temperature. 
-  The white line marks the boundary from Monte-Carlo simulations.}
-  \label{fig:Phase_Diagram_P_vs_T}
-\end{figure}
-
+%
+%
 \begin{figure}
   \centering
   %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T_AS}
@@ -1243,7 +1343,7 @@ the temperature increases.
   %The white line marks the boundary from simulations by Ahmed and Sadus~\cite{ahmedsadus}.}
   \label{fig:Phase_Diagram_P_vs_T_AS}
 \end{figure}
-
+%
 %Figure~\ref{fig:p-vs-T_at_fixed_density} shows individual plots of the 
 %reduced pressure versus the reduced temperature at fixed reduced densities 
 %from $n^*$ = 0.7 to 1.2. As can be seen by comparison with Figure 
@@ -1251,7 +1351,7 @@ the temperature increases.
 %the WCA fluid transistions into a solid. These downward bends align to 
 %form the curved interface separating the blue and red areas in 
 %Figures~\ref{fig:Phase_Diagram_P_vs_T} and \ref{fig:Phase_Diagram_P_vs_T_AS}.
-
+%
 \begin{figure}
   \centering
   %\includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n_noMC}
@@ -1262,20 +1362,34 @@ the temperature increases.
 
 
 \chapter{Conclusion}
-In this paper we were successful in predicting the freezing of a 
-Weeks-Chandler-Anderson fluid using our SFMT functional built by 
-forming temperature dependent parameters $\alpha(T)$ and $\Xi(T)$ to use 
-in Schmidt's erf model to better fit our results to those expected for a
-WCA fluid. We were able to generate a temperature-density 
+We were successful in predicting the freezing of a Weeks-Chandler-Anderson 
+fluid using classical Density Functional Theory. To construct a Helmholtz 
+free energy functional $F[n(r)]$, we used SFMT with Schmidt's error 
+function model, and defined two temperature dependent parameters, $\alpha$ 
+and $\Xi$, to model a WCA fluid. 
+$\alpha$ was found by setting the error function potential equal to the 
+WCA potential at $r=\alpha$, and $\Xi$ was found for each temperature by 
+setting the second virial coefficients for the error function potential 
+and the WCA potential equal to each other, $B_{2erf}(T)=B_{2wca}(T)$.
+To implement cDFT we used Gaussian distribution functions centered at 
+lattice points to represent the number density profile which was then varied
+by changing the width of the Gaussians, and the fraction of vacant lattice
+sites until the Helmholtz free energy was minimized. Once the equilibrium 
+Helmholtz free energy for the liquid and solid states were found for a given
+temperature and number density, Maxwell's Double Tangent Construction 
+was used to find the number densities of the liquid and the solid at 
+the phase transition.
+Using this information, we generated a temperature-density 
 phase diagram that yielded coexistence regions that approximately 
 matched the Monte-Carlo
 % and molecular simulation 
-results. 
+results, though shifted a bit toward higher densities. 
 %for values of kT=0.5 to 3. 
 %kT=0.5 to 38
-We are also able to generate a pressure-temperature
-phase diagram with a shape that is expected, but the transition 
-temperatures and pressures were too high. 
+We also generated a pressure-temperature
+phase diagram, but the slope was notably steeper than that
+predicted from Monte-Carlo simulations, giving transition 
+temperatures and pressures that were too high. 
 
 
 
@@ -1719,7 +1833,7 @@ Letting $r_{max}\rightarrow\infty$ this becomes
 \end{align}
 \begin{equation}B_2 = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{erf}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]\end{equation}
 
-\section{Third Virial Coefficient $B_{3}$}
+\section{Third Virial Coefficient $B_{3}$ General Approach}
 
 \begin{equation}\label{B3}B_3=-\frac{1}{3}\int_{allspace}\int_{allspace}f(\vec{r})f(\vec{r'})f(\vec{r}-\vec{r'})d\vec rd\vec r'\end{equation}
 
@@ -1758,7 +1872,7 @@ The Mayer function for the WCA potential $V_{WCA}$, and its Fourier Transform ar
 \begin{equation}\widetilde{f}_{WCA}(k)=\frac{4\pi}{k}\int_0^{\infty}{\left(e^{-\frac{1}{k_BT}\left[4\epsilon\left(\sigma^{12}r^{-12}-\sigma^{6}r^{-6}\right)+\epsilon\right]}-1\right) r\sin(kr)dr}\end{equation} 
 
 
-\section{Derivation of the Virial Equation}
+\section{General Derivation of the Virial Equation}
 The second virial coefficient can be derived from Euler's equation for 
 the internal energy of a system.
 \begin{equation}PV=TS-(U-\mu{N})\end{equation}
@@ -1819,7 +1933,7 @@ equation is given by
 \begin{equation}\frac{PV}{k_BT}=N\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
 
 
-\section{Derivation of $F = -k_BTln(Z)$}
+\section{Derivation of $F = -k_BTln(Z)$ for Continuous Systems}
 The canonical equilibrium phase-space probablity density is given by
 \begin{equation}P_{eq}(\vec r^N, \vec p^N)=\frac{1}{N!}\frac{1}{h^{3N}}\frac{e^{-\beta H}}{partian function}\end{equation}
 \begin{equation}{partian function}=\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\end{equation}
