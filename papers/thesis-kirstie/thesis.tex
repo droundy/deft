@@ -110,7 +110,8 @@ This model came about by considering the near incompressibility of liquids
 indicating that the particles making up the liquid strongly resist being 
 pushed closer together. This behavior can be described by an interatomic 
 potential energy that is zero when two spheres are not in contact, but 
-goes instantly to infinity when contact is made. The inability to push 
+goes instantly to infinity when contact is made, as shown in 
+Figure~\ref{fig:HardSphere_potential}. The inability to push 
 real atoms closer together is due to the repulsion of the electrons in 
 each atom, and is the dominating interparticle electrostatic interaction. 
 Thus, the hard-sphere model - which is the simplest, but still effective 
@@ -178,8 +179,7 @@ which when added together regenerate the full Lennard-Jones potential.
   \end{figure}
 
 The repulsive portion of the Lennard-Jones potential forms the potential for a 
-Weeks-Chandler-Anderson (WCA) model fluid~\cite{andersen1971relationship}, 
-shown in Figure \ref{fig:WCA_potential}. 
+Weeks-Chandler-Anderson (WCA) model fluid~\cite{andersen1971relationship}. 
 The WCA potential is described by the equation: 
 \begin{align} \label{eq:VWCA}
     V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.
@@ -215,12 +215,11 @@ entropy of a pure substance in its liquid state is lower than the entropy
 that it would have in its solid state at the same temperature (necessary 
 for thermal equilibrium), the same pressure (necessary for mechanical 
 equilibrium), and the same chemical potential (necessary for diffusive 
-equilibrium), an abrupt phase transition occurs, that is, the liquid freezes 
-forming a crystalline structure. The particular crystalline structure and 
-density that result are affected by the interatomic potential. When repulsive, 
-soft sphere fluids (that are not too soft) freeze, they form lattice 
-structures composed of Face Centered Cubic (FCC) crystal cells~\cite{Hansen}, 
-as do hard spheres. 
+equilibrium), an abrupt phase transition occurs, that is, the liquid 
+freezes. The particular structure and density that result are affected 
+by the interatomic potential. When repulsive, soft sphere fluids 
+(that are not too soft) freeze, they form lattice structures composed of 
+Face Centered Cubic (FCC) crystal cells~\cite{Hansen}, as do hard spheres. 
 This structure is what one would see by filling a cube with marbles. It 
 results in the highest density achievable for hard, and nearly-hard, spheres 
 that are purely repulsive. 
@@ -231,11 +230,11 @@ diagram shown in Figure~\ref{fig:P-T_Diagram}. This phase diagram is
 representative of some arbitrary, unknown substance composed of atoms, 
 or molecules which exhibit both attraction and repulsion. However, since 
 the atoms in a WCA fluid do not exhibit attraction there will not be a 
-dividing line between the gas and liquid phases, and so the term "liquid" 
-or "gas" is not used, but simply "fluid". Points along the line that 
-separates the solid and the fluid phases indicate a phase transition, 
-and show that the solid and the fluid both have the same temperature and 
-the same pressure at a phase transition.
+dividing line between the gas and liquid phases, there will just simply
+be a fluid, which might be referred to as a "liquid". Points along the 
+line that separates the solid and the liquid phases indicate a phase 
+transition, and show that the solid and the liquid both have the same 
+temperature and the same pressure at a phase transition.
 
 \begin{figure}[h!]
     \centering
@@ -256,11 +255,17 @@ free energy per atom, $f$,  with respect to the inverse number density.
 \begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} Thus, the pressure corresponds to the slope of the curve on a plot of the Helmholtz free energy per atom versus the inverse density at fixed temperature. 
 
 Two such curves are shown in Figure~\ref{fig:MaxwellDT}, one for the liquid 
-and one for the solid at a fixed temperature. The slope of the curves is 
+and one for the solid at a fixed temperature. Each curve consists of a 
+collection of data points $(\frac{F}{N}, \frac{1}{n})$ for the liquid and
+the solid respectively.
+We will use cDFT (discussed in the next section) to find the Helmholtz
+free energies of the liquid and the solid at a given temperature and 
+number density needed to create these curves. 
+The slope of the curves is 
 related to the pressure. Since the pressure of the 
 liquid is the same as the pressure of the solid at the point of transition, 
 the density of the liquid and the density of the solid at the point of 
-freezing can be found from identifying the inverse densities at which the 
+freezing can be found from identifying the points at which the 
 tangents to each curve have the same slope. This process is called 
 Maxwell's Double Tangent Construction. 
 
@@ -279,24 +284,25 @@ Helmholtz free energy per atom $f$ in terms of the Gibbs free energy
 per atom  $g$ (which is also the chemical potential)  
 \begin{align}{\frac{F}{N}=-P\frac{V}{N}+\frac{G}{N}}\end{align} 
 \begin{align}{f=-P\frac{1}{n}+g}\end{align}
-This equation has the form of a line:
+This equation has the form of a line
 \begin{align}{y=mx+y_o}\end{align}
 and describes the black line shown in Figure~\ref{fig:MaxwellDT} with the 
 pressure given by the negative of the slope of the line, and the Gibb's 
 free energy per atom given by the y-intercept. 
 At the point of phase transition the chemical potential of the liquid is 
-the same as the chemical potential of the solid.
-\begin{align}{g_L=g_S}\end{align} 
-\begin{align}{f_L+P\frac{1}{n_L}=f_S+P\frac{1}{n_S}}\end{align}
-
-The pressure at the transition point can be obtained from the point of 
-intersection that occurs when the Gibbs free energy per atom is plotted 
-against the pressure for both the liquid and the solid at fixed temperature, 
-as shown in Figure~\ref{fig:GibbsvsP}. These curves are constructed from 
-the slope and corresponding y-intercept data collected from lines tangent 
+the same as the chemical potential of the solid, as is the pressure.
+\begin{align}{g_L=g_S\mbox{~~~~and~~~~}P_L=P_S\mbox{~~~~at a phase transition}}\end{align} 
+The pressure at the phase transition can be obtained from the point of 
+intersection that occurs when the Gibbs free energy per atom, or chemical
+potential, is plotted against the pressure for both the liquid and the 
+solid at fixed temperature, as shown in Figure~\ref{fig:GibbsvsP}. 
+These curves are constructed from data collected from lines tangent 
 along the curves on the the Helmholtz free energy per atom verses inverse 
 density plots (like that of Figure~\ref{fig:MaxwellDT}) for both the 
 liquid and the solid at a given temperature. 
+The slope gives -P and corresponding y-intercept gives $g$. The 
+curves in Figure~\ref{fig:GibbsvsP} consist of a collection of data 
+points ($g$,P) for the liquid and the solid respectively.
 
 \begin{figure}[h!]
     \centering
@@ -307,9 +313,9 @@ liquid and the solid at a given temperature.
 
 Once the pressure is known for the transition point, the density of the 
 liquid at the transition point can be found from a plot of the pressure 
-versus the inverse of the density for the liquid. The density of the solid 
-at the transition point can be found the same way, as shown in Figure 
-\ref{fig:Pvsinvn}. A Temperature-Density (T-n) phase diagram, such as 
+versus the inverse of the density for the liquid, as shown in Figure 
+\ref{fig:Pvsinvn}. The density of the solid at the transition point can 
+be found the same way. A Temperature-Density (T-n) phase diagram, such as 
 that in Figure \ref{fig:T-n_Diagram}, can be generated by repeating this 
 procedure for various temperatures. 
 
@@ -340,13 +346,16 @@ density, or atoms per volume, varies spatially on average.
 \begin{displaymath}{f[n(}\vec{r}{)]}\end{displaymath}
 This, coupled with the fact that the free energy of a system tends toward 
 a minimum at equilibrium means that the equilibrium free energy of the 
-system ${f_{equil}}{[}\rho{(}\vec{r}{)]}$, and its corresponding equilibrium 
-number density profile $\rho{(}\vec{r}{)}$, can be found simply by varying 
+system ${f_{eq}}{[}\rho{(}\vec{r}{)]}$, and its corresponding equilibrium 
+number density profile $n_{eq}(\vec r)$, can be found simply by varying 
 $n(\vec{r})$ through all possible spatial profiles until the free energy 
 is minimized~\cite{MoritaDFT}. 
-
-\begin{displaymath}{f[n(}\vec{r}{)]}\rightarrow{f_{equil}}{[}\rho{(}\vec{r}{)]}  \mbox{ as $f$ is minimized} \end{displaymath}
-\begin{displaymath}{\mbox{where }  n(\vec{r})=\rho{(}\vec{r})  \mbox{ at equilibrium}}\end{displaymath}
+\begin{displaymath}f[n(\vec r)]\rightarrow f_{eq}[n_{eq}(\vec r)]  \mbox{ as $f$ is minimized} \end{displaymath}
+\begin{displaymath}{\mbox{where }  n(\vec{r})=n_{eq}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}
+%The reason this works is because DFT satisfies the conditions of the 
+%variational principle, the same mathematical principle used to determine 
+%that the shortest distance between two points is a straight line by 
+%varying the path between the two points until the distance is minimized.
 
 A description of cDFT often begins with considering the Grand Free 
 Energy defined as
@@ -354,18 +363,17 @@ Energy defined as
 which can then be expressed in terms of a varying number density 
 profile $n(\vec r)$
 \begin{equation}\label{GrandFE}\Phi= F_{int} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu\int n(\vec r)d\vec{r}\end{equation}
-where $\phi=\frac{V_{ext}}{N}$ 
-is the externally 
-applied potential energy $V_{ext}(\vec r)$ per particle, 
-and the Helmholtz free energy is expressed as
-\begin{equation}F = F_{int} + \int n(\vec{r})\phi{(\vec r)}d\vec{r}\end{equation}  
+where $\phi=\frac{V_{ext}}{N}$ is an externally applied potential energy 
+$V_{ext}(\vec r)$ per particle, and an intrinsic Helmholtz free energy 
+is defined as
+\begin{equation}F_{int} = F - \int n(\vec{r})\phi{(\vec r)}d\vec{r}\end{equation}  
 
 The Grand free energy is applicable to systems with a varying number of 
 particles and fixed chemical potential, temperature and volume. But in 
 this paper a system with a fixed temperature, volume, and number of 
 particles will be of interest in which case
 \begin{equation}\int n(\vec r)d\vec{r}=N\end{equation}
-and so 
+and so the Grand free energy is constrained
 \begin{equation}\label{GrandFE}\Phi_{constrained}= F[n(\vec r)]-\mu N\end{equation}
 The dependence on $n(\vec r)$ is now only present in the expression for 
 the Helmholtz free energy, and so it is the Helmholtz energy as a functional 
@@ -381,7 +389,8 @@ per particle $f_N$ are temperature, volume and one over the number of
 particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. 
 \begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
  
-The minimization can be illustrated by considering that according to the 
+The minimization can be illustrated for a system near 
+equilibrium by considering that according to the 
 second law of thermodynamics, a system that is not in equilibrium will 
 experience spontaneous processes that increase the total entropy of a 
 system and its surroundings until equilibrium is reached, 
@@ -392,6 +401,27 @@ of energy (the first law of thermodynamics) which says that energy lost
 $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that 
 changes in the free energy will be negative for spontaneous processes 
 when the natural variables of the free energy are held fixed~\cite{schroeder}. 
+%Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
+%\begin{equation}
+  %df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
+%\end{equation}
+%and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that 
+%$dT=0$ gives
+%\begin{equation}
+  %f_{N-System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}
+%\end{equation}
+%where conservation of energy was also applied. Fixing the volume and the 
+%number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, 
+%results in
+%\begin{equation}
+  %df_{N-System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings}
+%\end{equation}
+%which, for fixed N, is the same as
+%\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} 
+%Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number 
+%of particles are fixed, the change in the free energy of the system will 
+%always be negative, and thus the free energy tends toward a minimum.
+%~\cite{schroeder}. 
 A general proof of minimization 
 can be found in Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
 
@@ -429,9 +459,9 @@ where
 The ideal partitian function $Z_{ideal}$ is associated with an ideal gas 
 which exhibits no interaction between the atoms - a condition approached 
 by a gas at low density where the atoms rarely encounter one another. 
-he excess partitian function $Z_{excess}$ accounts for the interaction 
-of all the atoms according to their interatomic potential. The free energy 
-can also be broken into two parts using Equation~\ref{Zmultiply} giving
+The excess partitian function $Z_{excess}$ accounts for the interaction 
+of all the atoms according to their interatomic potential. Using 
+Equation~\ref{Zmultiply}, the free energy can also be broken into two parts.
 \begin{equation}{F=-k_{B}T\ln(Z_{ideal}Z_{excess})}\end{equation}
 \begin{equation}{F=-k_{B}T\ln(Z_{ideal})-k_{B}T\ln(Z_{excess})}\end{equation}
 \begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
@@ -457,7 +487,7 @@ For a spatially varying number density, the ideal free energy in
 Equation~\ref{eq:Fideal} becomes
 \begin{equation}\label{eq:Fideal-n(r)}{F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]d\vec{r}}\end{equation} 
 
-Now consider the excess free energy which is written most generally as
+The excess Helmholtz free energy is written most generally as
 \begin{equation}\label{Fexcess-mostgeneral}{F_{excess}= -k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)}}\end{equation} 
 This integral can be greatly simplified if it can be assumed that the 
 potential energy $V(\vec{r_1},\vec{r_2},...\vec{r_N})$ is a sum of the 
@@ -471,9 +501,12 @@ Equation~\ref{Fexcess-mostgeneral} becomes
 
 \begin{displaymath}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{displaymath}    \begin{equation}{\approx-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
 where each exponential term is simplified by a Taylor expansion $e^x\approx{1+x}$.  
-The function $f_{ij}$ is called a Mayer function, and is given by
-\begin{equation}\label{eq:mayerfunction}{f_{ij}(\vec{r_i},\vec{r_j})=e^{-\frac{V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}-1}\end{equation} 
-Multiplying the Mayer function terms, the excess free energy can be written as
+The function $f_{ij}$ the Mayer function given by
+\begin{align}\label{eq:mayerfunction}
+     f_{ij}(\vec{r_i},\vec{r_j})=e^{-\frac{V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}-1
+\end{align} 
+Multiplying the Mayer function terms, the excess free energy can be 
+written as~\cite{schroeder}
 \begin{equation}\label{eq:Fexcess-simplified}{F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}\left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}} +\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)  }}\end{equation}
 
   \begin{figure}[h!]
@@ -495,13 +528,15 @@ two atoms in the pair.
 With a careful counting of the resulting number of such pairs, the excess 
 free energy can then be written~\cite{schroeder} as
 \begin{equation}\label{eq:Fexcess}{\frac{F_{excess}}{N}=k_BTn\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)}\end{equation} 
-in the thermodynamic limit of large N 
-where the quantity in parenthesis can be recognized 
+in the thermodynamic limit of large N. 
+The quantity in parenthesis can be recognized 
 as the second virial expansion coefficient typically called $B_2$. 
-It is important that the expression for the excess Helmholtz free energy 
+It is important that an expression for the excess Helmholtz free energy 
 correctly reduces to this result in the low-density limit. 
 Outside of the low density limit, it is quite difficult to evaluate the 
 excess Helmholtz free energy given in Equation~\ref{eq:Fexcess-simplified}. 
+SFMT, discussed in the next section, provides a way around this problem
+for some types of fluids.
 
 Once an expression for the Helmholtz free energy as a functional of the
 number density profile $n(\vec r)$ is formed then, according to classical 
@@ -510,20 +545,20 @@ Helmholtz energy, and its corresponding equilibrium density profile can be
 found by varying the number density profile
 through all possible configurations at some fixed temperature
 until the free energy is minimized.  
-In this section 
-a functional for the Helmholtz free energy was formed by finding 
-general expressions for the ideal and the excess portions of the free 
-energy, and adding them together.
-\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation}
-The functional for the ideal portion of the Helmholtz free energy is given by 
-Equation~\ref{eq:Fideal-n(r)}, and a functional for the excess portion of the Helmholtz 
-free energy is given in Equation~\ref{eq:Fexcess-simplified}. The specific 
-form for the excess Helmholtz free energy depends on the particular 
-fluid being modeled as defined by the  
-interatomic potential energy V(r) between the spheres, which can make
-forming an expression difficult. In this paper, Soft Fundamental Measure
-Theory will be used to form an expression for the excess Helmholtz free 
-energy, as explained in the next section.
+%In this section 
+%a functional for the Helmholtz free energy was formed by finding 
+%general expressions for the ideal and the excess portions of the free 
+%energy, and adding them together.
+%\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation}
+%The functional for the ideal portion of the Helmholtz free energy is given by 
+%Equation~\ref{eq:Fideal-n(r)}, and a functional for the excess portion of the Helmholtz 
+%free energy is given in Equation~\ref{eq:Fexcess-simplified}. The specific 
+%form for the excess Helmholtz free energy depends on the particular 
+%fluid being modeled as defined by the  
+%interatomic potential energy V(r) between the spheres, which can make
+%forming an expression difficult. In this paper, Soft Fundamental Measure
+%Theory will be used to form an expression for the excess Helmholtz free 
+%energy, as explained in the next section.
 
 \section{Soft Fundamental Measure Theory (SFMT)}
 In order to apply classical Density Functional Theory to a system that has
