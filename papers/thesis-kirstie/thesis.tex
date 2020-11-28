@@ -121,7 +121,7 @@ between real atoms, is currently the most widely used model for fluids.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{plot_HardSphere_Potential.pdf}
-    \caption{A Hard Sphere Potential is zero for $r>2R$, and infinity 
+    \caption{A hard-sphere Potential is zero for $r>2R$, and infinity 
     for $r\leq{2R}$ where R is the radius of a hard sphere (which is 
     approximately 1.225/2 in this example).}
     \label{fig:HardSphere_potential}
@@ -150,7 +150,7 @@ approaches infinity as the distance between the atoms continues to decrease.
 The combined attractive and repulsive effects produce the overall shape of 
 the Lennard-Jones interatomic potential shown in Figure \ref{fig:LJ_potential}. 
 The potential is zero when the distance r between the centers of two atoms 
-is equal to $\sigma$ (shown in the figure at r/$\sigma$=1). At this point 
+is equal to $\sigma$. At this point 
 the attraction between the atoms just cancels their repulsion. As the distance 
 between the centers of the two atoms decreases below $\sigma$, the potential 
 rapidly approaches positive infinity corresponding to infinite repulsion. 
@@ -192,7 +192,7 @@ where R is the radius of the sphere.
 
 As with the Lenard-Jones potential, the repulsive WCA potential increases 
 rapidly and approaches infinity as the two spheres begin to overlap. This 
-is a more realistic repulsive potential than that of the Hard Sphere model 
+is a more realistic repulsive potential than that of the hard-sphere model 
 which goes instantly to infinity when the two spheres make contact (at r=2R), 
 and is zero otherwise. Because the WCA spheres have no hard boundary in 
 their interatomic potential, they are called ``soft spheres'' and their 
@@ -231,10 +231,11 @@ representative of some arbitrary, unknown substance composed of atoms,
 or molecules which exhibit both attraction and repulsion. However, since 
 the atoms in a WCA fluid do not exhibit attraction there will not be a 
 dividing line between the gas and liquid phases, there will just simply
-be a fluid, which might be referred to as a "liquid". Points along the 
-line that separates the solid and the liquid phases indicate a phase 
-transition, and show that the solid and the liquid both have the same 
-temperature and the same pressure at a phase transition.
+be a fluid, which we will refer to as a liquid in this paper.
+%which may be referred to as a "liquid", since at the phase boundary the fluid is dense. 
+Points along the line that separates the solid and the liquid phases 
+indicate a phase transition, and show that the solid and the liquid 
+both have the same temperature and the same pressure at a phase transition.
 
 \begin{figure}[h!]
     \centering
@@ -252,17 +253,18 @@ at a fixed temperature T and number of particles N equals the pressure.
 number of particles, the partial derivative of the Helmholtz free energy 
 with respect to volume becomes the partial derivative of the Helmholtz 
 free energy per atom, $f$,  with respect to the inverse number density. 
-\begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} Thus, the pressure corresponds to the slope of the curve on a plot of the Helmholtz free energy per atom versus the inverse density at fixed temperature. 
+\begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
+Thus, the pressure corresponds to the negative of the slope of the curve 
+on a plot of the Helmholtz free energy per atom versus the inverse 
+density at fixed temperature. 
 
 Two such curves are shown in Figure~\ref{fig:MaxwellDT}, one for the liquid 
 and one for the solid at a fixed temperature. Each curve consists of a 
 collection of data points $(\frac{F}{N}, \frac{1}{n})$ for the liquid and
-the solid respectively.
-We will use cDFT (discussed in the next section) to find the Helmholtz
-free energies of the liquid and the solid at a given temperature and 
-number density needed to create these curves. 
-The slope of the curves is 
-related to the pressure. Since the pressure of the 
+the solid respectively, which will be obtained by using cDFT to find the 
+Helmholtz free energies of the liquid and the solid for various 
+temperatures and number densities. 
+Since the pressure of the 
 liquid is the same as the pressure of the solid at the point of transition, 
 the density of the liquid and the density of the solid at the point of 
 freezing can be found from identifying the points at which the 
@@ -339,6 +341,10 @@ procedure for various temperatures.
 
 \section{Classical Density Functional Theory (cDFT)}
 
+Classical Density Fucntional Theory will be used to find the 
+Helmholtz free energies of the liquid and the solid for various 
+temperatures and number densities, so that phase diagrams can be 
+constructed using Maxwell's Double Tangent Construction. 
 The key idea behind classical Density Functional Theory (cDFT) is that 
 free energy can be written as a functional (a function of a function) of 
 a number density profile $n(\vec{r})$ which describes the way the number 
@@ -352,10 +358,6 @@ $n(\vec{r})$ through all possible spatial profiles until the free energy
 is minimized~\cite{MoritaDFT}. 
 \begin{displaymath}f[n(\vec r)]\rightarrow f_{eq}[n_{eq}(\vec r)]  \mbox{ as $f$ is minimized} \end{displaymath}
 \begin{displaymath}{\mbox{where }  n(\vec{r})=n_{eq}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}
-%The reason this works is because DFT satisfies the conditions of the 
-%variational principle, the same mathematical principle used to determine 
-%that the shortest distance between two points is a straight line by 
-%varying the path between the two points until the distance is minimized.
 
 A description of cDFT often begins with considering the Grand Free 
 Energy defined as
@@ -388,7 +390,11 @@ This result shows that the natural variables of the Helmholtz free energy
 per particle $f_N$ are temperature, volume and one over the number of 
 particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. 
 \begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
- 
+
+%The reason the minimization works is because DFT satisfies the conditions of the 
+%variational principle, the same mathematical principle used to determine 
+%that the shortest distance between two points is a straight line by 
+%varying the path between the two points until the distance is minimized.
 The minimization can be illustrated for a system near 
 equilibrium by considering that according to the 
 second law of thermodynamics, a system that is not in equilibrium will 
@@ -401,6 +407,7 @@ of energy (the first law of thermodynamics) which says that energy lost
 $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that 
 changes in the free energy will be negative for spontaneous processes 
 when the natural variables of the free energy are held fixed~\cite{schroeder}. 
+And so over time teh free energy settles to a minimum. 
 %Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
 %\begin{equation}
   %df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
@@ -422,7 +429,7 @@ when the natural variables of the free energy are held fixed~\cite{schroeder}.
 %of particles are fixed, the change in the free energy of the system will 
 %always be negative, and thus the free energy tends toward a minimum.
 %~\cite{schroeder}. 
-A general proof of minimization 
+A proof of minimization in general
 can be found in Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
 
 The Helmholtz free energy can be written as
@@ -430,19 +437,19 @@ The Helmholtz free energy can be written as
 which results from equating the expressions for the Helmholtz free energy 
 from thermodynamics to those of statistical mechanics. The paritian function 
 Z is integrated over all of phase space for N identical particles each with 
-a momentum $\vec{p}$ and a position $\vec{r}$ is given by
+a momentum $\vec{p}$ and a position $\vec{r}$, and is given by
 \begin{equation}{Z=}\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dPdQ}~e^\frac{-H(\vec{p}_1,\vec{p}_2,...\vec{p}_N,\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\end{equation}
-\begin{displaymath}{dP=d\vec{p}_1d\vec{p}_2...d\vec{p}_N \mbox{~~~~where~~~~} d\vec{p}=dp_xdp_ydp_z}\end{displaymath}
-\begin{displaymath}{dQ=d\vec{r}_1d\vec{r}_2...d\vec{r}_N \mbox{~~~~where~~~~} d\vec{r}=dxdydz\mbox{~~~~}}\end{displaymath}
-
-Breaking the Hamiltonian, H into its component energies
+where
+\begin{displaymath}{dP=d\vec{p}_1d\vec{p}_2...d\vec{p}_N \mbox{~~~~and~~~~} d\vec{p}=dp_xdp_ydp_z}\end{displaymath}
+\begin{displaymath}{dQ=d\vec{r}_1d\vec{r}_2...d\vec{r}_N \mbox{~~~~and~~~~} d\vec{r}=dxdydz\mbox{~~~~}}\end{displaymath}
+Writing the Hamiltonian, H in terms of its component kinetic and potential energies gives
 \begin{equation}{H = KE + V + V_{ext} = \sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)+V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)+V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{equation}
 where the translational kinetic energy of the N atoms is given by 
 \begin{displaymath}{\sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)}\end{displaymath}
-the potential energy of the total interaction of each atom with the other 
+and the potential energy of the total interaction of each atom with the other 
 N-1 atoms is given by
 \begin{displaymath}{V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
-and \begin{displaymath}{V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
+and where \begin{displaymath}{V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
 is an externally applied potential that varies spatially, such that its 
 effects on each atom depend on the atom's position. Often $V_{ext}$ is 
 set to zero, as it is in this paper. 
@@ -450,12 +457,18 @@ set to zero, as it is in this paper.
 Noting that the kinetic energy depends only on momentum while the total 
 interatomic and external potential energies depend only on position, 
 the integral in equation (8) can be separated into two parts 
-\begin{equation}{Z=\frac{1}{N!}\frac{1}{h^{3N}}\int...\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+\frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\int...\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}}\end{equation}  Multiplying by $\frac{V^N}{V^N}$ where V is the real space volume satisfying \begin{equation}{V^N=}\int{...}\int{dQ}\end{equation} 
+\begin{equation}{Z=\frac{1}{N!}\frac{1}{h^{3N}}\int...\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+\frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\int...\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}}\end{equation}  
+Multiplying by $\frac{V^N}{V^N}$ where V is the real space volume, and 
+\begin{equation}{V^N=}\int{...}\int{dQ}\end{equation} 
 the partitian function can be expressed as
 \begin{equation}\label{Zmultiply}{Z=Z_{ideal}Z_{excess}}\end{equation}
 where
-\begin{equation}{Z_{ideal}=V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}}\end{equation}
-\begin{equation}{Z_{excess}=\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N )}{k_BT}}\end{equation} 
+\begin{align} \label{eq:Zideal}
+    Z_{ideal}=V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}
+\end{align}
+\begin{align} \label{eq:Zexcess}
+    Z_{excess}=\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N )}{k_BT}
+\end{align} 
 The ideal partitian function $Z_{ideal}$ is associated with an ideal gas 
 which exhibits no interaction between the atoms - a condition approached 
 by a gas at low density where the atoms rarely encounter one another. 
@@ -463,10 +476,13 @@ The excess partitian function $Z_{excess}$ accounts for the interaction
 of all the atoms according to their interatomic potential. Using 
 Equation~\ref{Zmultiply}, the free energy can also be broken into two parts.
 \begin{equation}{F=-k_{B}T\ln(Z_{ideal}Z_{excess})}\end{equation}
-\begin{equation}{F=-k_{B}T\ln(Z_{ideal})-k_{B}T\ln(Z_{excess})}\end{equation}
+\begin{align} \label{eq:Finparts}
+    F=-k_{B}T\ln(Z_{ideal})-k_{B}T\ln(Z_{excess})
+\end{align}
 \begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
 
-The ideal Helmholtz free energy is
+Putting Equation~\ref{eq:Zideal} into Equation~\ref{eq:Finparts}, 
+the ideal Helmholtz free energy is
 \begin{displaymath}{F_{ideal}=-k_BT\ln{\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\right)}}\end{displaymath}  
 
 \begin{equation}{\label{Fidealmultipleint}}{=-k_BT\ln\left(V^N\frac{1}{N!}\frac{1}{h^{3}}\int{d\vec{p}_1}~e^\frac{-\frac{|\vec{p}_1|^2}{2m}}{k_BT}\frac{1}{h^{3}}\int{d\vec{p}_2}~e^\frac{-\frac{|\vec{p}_2|^2}{2m}}{k_BT}{...}\frac{1}{h^{3}}\int{d\vec{p}_N}~e^\frac{-\frac{|\vec{p}_N|^2}{2m}}{k_BT}\right)}\end{equation}
@@ -487,7 +503,8 @@ For a spatially varying number density, the ideal free energy in
 Equation~\ref{eq:Fideal} becomes
 \begin{equation}\label{eq:Fideal-n(r)}{F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]d\vec{r}}\end{equation} 
 
-The excess Helmholtz free energy is written most generally as
+Putting Equation~\ref{eq:Zexcess} into Equation~\ref{eq:Finparts}, 
+the excess Helmholtz free energy is written most generally as
 \begin{equation}\label{Fexcess-mostgeneral}{F_{excess}= -k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)}}\end{equation} 
 This integral can be greatly simplified if it can be assumed that the 
 potential energy $V(\vec{r_1},\vec{r_2},...\vec{r_N})$ is a sum of the 
@@ -507,7 +524,9 @@ The function $f_{ij}$ the Mayer function given by
 \end{align} 
 Multiplying the Mayer function terms, the excess free energy can be 
 written as~\cite{schroeder}
-\begin{equation}\label{eq:Fexcess-simplified}{F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}\left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}} +\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)  }}\end{equation}
+\begin{align} \label{eq:Fexcess-simplified}
+    F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}\left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}} +\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)}
+\end{align}
 
   \begin{figure}[h!]
     \centering
@@ -520,6 +539,9 @@ written as~\cite{schroeder}
     \label{fig:diagrammic}
   \end{figure}
 
+Equation~\ref{eq:Fexcess-simplified} is difficult to solve in general, 
+but it can be solved for low densities, and this provides a way to check
+a more general solution.
 At low densities, it is not likely to find two or more atoms in close 
 proximity, and so only interactions between individual pairs of spheres, 
 such as those shown in green in Figure~\ref{fig:diagrammic}, are considered.
@@ -569,17 +591,17 @@ but forming an expression for the excess Helmholtz free
 energy from Equation~\ref{eq:Fexcess-simplified} for the particular fluid 
 being modeled can be challenging. 
 Soft Fundamental Measure Theory (SFMT) is a method for forming an 
-expression for the excess Helmholtz free energy of a Soft-sphere fluid
+expression for the excess Helmholtz free energy of a soft-sphere fluid
 that does not depend on  explicitly taking into account the interaction 
-that each sphere with every other sphere in the fluid as required by 
-Equation~\ref{eq:Fexcess-simplified}. In the next chapter on methods, we
+that each sphere with every other sphere in the fluid (as required by 
+Equation~\ref{eq:Fexcess-simplified}). In the next chapter on methods, we
 will use an SFMT functional that we adapt to fit the soft-sphere WCA fluid.
 
-SFMT is an extension of Fundamental Measure Theory (FMT)
-that was developed for the Hard-sphere fluid, and which can be derived from
-Scaled Particle Theory (SPT).  
+SFMT is an extension of Fundamental Measure Theory (FMT)~\cite{rosenfeld1989}
+that was developed for the hard-sphere fluid. FMT can be derived from
+Scaled Particle Theory (SPT)~\cite{santos2012phi3}.  
 Scaled Particle Theory seeks a general expression for the excess chemical 
-potential of a homogeneous Hard Sphere fluid which can then be integrated 
+potential of a homogeneous hard-sphere fluid which can then be integrated 
 to find the excess Helmholtz free energy according to the relation
 \begin{equation}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~}\rightarrow{~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{equation}
 It is an extension of the work done by Widom who showed that the excess 
@@ -599,20 +621,12 @@ Formula~\cite{Hansen}.
 \begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
 
-The quantity $<e^{-\beta{V_{diff}}}>$ can be evaluated by considering
-that at each point in the fluid, there is a probability that 
-a hard sphere of radius R has space available to exist at that point
-without overlapping with other spheres, or it does not, as shown in 
-Figure~\ref{fig:p_overlap}. 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[height=7cm]{figs/P_overlap.pdf}
-    \caption{No energy is needed to place a sphere at a position where 
-    there is no overlap such as shown by the black dot at the center of 
-    the dotted region near the top. But it is not possible to place a 
-    sphere at a position where an overlap occurs.}
-    \label{fig:p_overlap}
-  \end{figure}
+The quantity $<e^{-\beta{V_{diff}}}>$ can be evaluated by considering that
+there will be a change in the potential energy of $V_{diff}$ if one sphere
+is added, but $V_{diff}$ will be zero if no sphere is added. 
+%at each point in the fluid, there is a probability that 
+%a hard sphere of radius R has space available to exist at that point
+%without overlapping with other spheres, or it does not, as shown in 
 Widom's Insertion formula Equation~\ref{widoms-insertion-formula}, then becomes
 \begin{align} 
 	\mu_{ex} &= -k_BT\ln\left(e^{-\beta{V_{diff}}}+1\right)  \\
@@ -624,45 +638,59 @@ that it takes no energy for a hard sphere to be placed at a point
 in the fluid where it does not overlap with any other spheres 
 ($V_{diff}=0$), but it would require infinite energy ($V_{diff}=\infty$)
 to place a sphere where it would overlap another sphere, as described 
-in Figure~\ref{fig:p_overlap}.
+in Figure~\ref{fig:p_overlap}. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[height=7cm]{figs/P_overlap.pdf}
+    \caption{No energy is needed to place a sphere at a position where 
+    there is no overlap such as shown by the black dot at the center of 
+    the dotted region near the top. But it is not possible to place a 
+    sphere at a position where an overlap occurs.}
+    \label{fig:p_overlap}
+  \end{figure}
 In this case Equation~\ref{widoms-insertion-formula} becomes
 \begin{align} \label{muexcess}
   \mu_{excess}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3) 
 \end{align}
-where the radius of the cavity $R_{cavity}$ equals the radius of a hard sphere R,
-and $nV_{Sphere}$ is the probability that a sphere cannot be placed at
-some random point in the homogeneous fluid of number density, $n$, without
-overlapping with another sphere. Combining  Equations~\ref{workrev} and \ref{muexcess} gives
+where the radius of the cavity $R_{cavity}$ equals the radius of a 
+hard sphere R, and $nV_{Sphere}$, which is equal to the total volume 
+occupied by the spheres divided by the total volumet avaliable, 
+is the probability that a sphere cannot be placed at some random
+point in the homogeneous fluid of number density, $n$, without
+overlapping with another sphere. Combining  Equations~\ref{workrev} 
+and \ref{muexcess} gives
 \begin{align}
-  W_{rev}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3) 
+  %W_{rev}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3)
+  W_{rev}(R_{cavity}=R)=-k_BT\ln(1-\eta) 
 \end{align}
-Forming a more general result by requiring continuity of the functions, 
-along with their first and second derivatives, for the reversible work
-written for fluids with a cavity radius 
-equal to, larger than, or very 
-much larger than the hard sphere radius R, Scaled Particle Theory arrives 
-at an expression~\cite{Hansen} for the excess Helmholtz free energy of 
-a homogeneous Hard-Sphere fluid in terms of the packing fraction $\eta$ 
-\begin{equation}\label{Fexcess-SPT}{\frac{\beta{F_{excess}}}{N}=-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}}\end{equation} 
-where
+where $\eta$ is the packing fraction defined as
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
 \begin{equation}{\eta = \frac{N\frac{4}{3}\pi{R^3}}{V}}\end{equation}
+Forming a more general result by requiring continuity of the functions, 
+along with their first and second derivatives, for the reversible work
+written for fluids with a cavity radius equal to, larger than, or very 
+much larger than the hard sphere radius R, Scaled Particle Theory arrives 
+at an expression for the excess Helmholtz free energy of 
+a homogeneous hard-sphere fluid in terms of the packing fraction $\eta$.
+For details, see Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}. 
+\begin{align}\label{Fexcess-SPT}
+    F_{excess}=k_BT\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)N
+\end{align} 
 
-Fundamental Measure Theory~\cite{rosenfeld1989} (FMT) 
-can be constructed from Equation~\ref{Fexcess-SPT}~\cite{santos2012phi3},  
-and provides an expression for the excess Helmholtz free energy of an 
-inhomogeneous 
-Hard-Sphere fluid as a functional of the number density profile $n(\vec r)$. 
-Soft Fundamental Measure Theory (SFMT), which will be used in this paper, 
-is an extension of FMT and provides an expression for the excess Helmholtz
-free energy of fluids with soft potentials like that of the WCA fluid. 
-It will be helpful to continue looking at FMT before addressing SFMT.
-
-Fundamental Measure Theory begins by noticing that 
-from Equation~\ref{Fexcess-SPT}, a quantity $G_{3}$ can be defined as follows
+Fundamental Measure Theory can be constructed from Equation~\ref{Fexcess-SPT}  
+%and provides an expression for the excess Helmholtz free energy of an 
+%inhomogeneous 
+%hard-sphere fluid as a functional of the number density profile $n(\vec r)$. 
+%
+%Soft Fundamental Measure Theory (SFMT), which will be used in this paper, 
+%is an extension of FMT and provides an expression for the excess Helmholtz
+%free energy of fluids with soft potentials like that of the WCA fluid. 
+%It will be helpful to continue looking at FMT before addressing SFMT.
+%FMT begins 
+by noticing that a quantity $G_{3}$ can be defined such that
 \begin{equation}{\eta =\left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}=nG_{3}}\end{equation}
-where $G_{3}$ is the volume of a sphere. Likewise, by defining
-quantities
+where $G_{3}$ is the volume of a sphere. 
+Likewise, by defining quantities
 \begin{equation}{G_{2}=4\pi{R^2}}\end{equation}
 \begin{equation}{G_{1}=R}\end{equation}
 \begin{equation}{G_{0}=1}\end{equation}
@@ -671,7 +699,8 @@ radius of a sphere, Equation~\ref{Fexcess-SPT} can be written as
 \begin{equation}\label{FexfromSPTinthermsofG}{F_{excess}=k_{B}T\left(-nG_{0}ln(1-nG_{3})+\frac{nG_{1}nG_{2}}{1-nG_{3}}+\frac{nG_{2}^3}{24\pi(1-Gn_{3})^2}\right)V}\end{equation}
 The quantities $G_{3}, G_{2}, G_{1},$ and $G_{0}$ are fundamental 
 geometric measures of a sphere, and are what give rise to the name
-Fundamental Measure Theory. Introducing a set of weighted densities $n_{i}=nG_{i}$ 
+Fundamental Measure Theory. Introducing a set of variables
+%weighted densities $n_{i}=nG_{i}$ 
 given by
 \begin{equation}\label{n3}{n_{3}=nG_{3}=\left(\frac{N}{V}\right)\frac{4}{3}\pi{R^3}=\eta}\end{equation}
 \begin{equation}\label{n2}{n_{2}=nG_{2}=\left(\frac{N}{V}\right)4\pi{R^2}=\frac{3\eta}{R}}\end{equation}
@@ -685,8 +714,6 @@ which has the form
 \begin{align}
     F_{excess} = k_BT(\Phi_1+\Phi_2+\Phi_3)V
 \end{align}
-or for a spatially varying number density $n(\vec{r})$, 
-\begin{equation}\label{eq:F_ex-n-of-r}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{equation} 
 where 
 \begin{align}
    \Phi_1 &= -n_{0}ln(1-n_{3}) \\
@@ -703,7 +730,10 @@ These weights are valid for determining the excess free energy of a system of
 hard spheres with a homogeneous number density n. But these weights, and 
 their related  weighted densities, can be written in a more general form 
 allowing for their extension to a system with a spatially varying number 
-density, that is, an inhomogeneous fluid. Using a backwards Heavyside step function defined as
+density $n(\vec{r})$, that is, an inhomogeneous fluid, in which case, the
+excess Helmholtz free energy is written as
+\begin{equation}\label{eq:F_ex-n-of-r}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{equation} 
+Using a backwards Heavyside step function defined as
 \begin{displaymath}{\Theta(|\vec{r}|-R)=\left\{ \begin{array}{rc} 1 & 0<r \leq R \\ 0  & r>R \end{array}\right.}\end{displaymath}
 the following expressions are obtained
 \begin{equation}{G_{3}=\int_{Volume}{\Theta(|\vec{r}|-R)d{\vec{r}}} = \frac{4}{3}\pi{R^3}}\end{equation}
@@ -735,7 +765,7 @@ $V(r)$ is the interatomic potential between two hard spheres given by
     V(r)=\left\{ \begin{array}{rc} \infty & 0<r \leq 2R \\ 0  & r>2R \end{array}\right.
 \end{align}
 Evaluating Equation with $V(r)$ given by Equation,  
-the mayer function for a Hard-sphere fluid is found to be
+the mayer function for a hard-sphere fluid is found to be
 \begin{equation}\label{f(r)step}{f(r)=-\Theta(|\vec{r}|-2R)}\end{equation} 
 which can be written in terms of the weight functions if two 
 additional vector weight functions $\vec{w_2}$ and $\vec{w_1}$ are introduced
@@ -750,11 +780,12 @@ SFMT~\cite{schmidt2000fluid}.
 \begin{align}\label{mayerder=w2convolution}
      \frac{df(r)}{dr} = w_2 \otimes w_2 = \int{w_2(r')w_2(r-r')dr'}
 \end{align} 
-This can easily be checked by evaluating the left side for a Hard-sphere fluid as follows,
+This relation can easily be checked for a hard-sphere fluid where
 \begin{displaymath}{\frac{df(r)}{dr}=\left\{ \begin{array}{rc} \frac{d}{dr}(-1)=0 & r<2R \\\frac{d}{dr}(\text{vertical line})=+\infty & r=2R \\ \frac{d}{dr}(0)=0  & r>2R \end{array}\right.}\end{displaymath}
 \begin{equation}\label{mayerder}{\frac{df(r)}{dr} = \delta(r-2R)}\end{equation} 
-and evaluating the right side by using the general relation for convolution which is equal to the Inverse 
-Fourier Transform of a product of Fourier Transforms. 
+The right side can be evaluated by using the general relation for 
+convolution which is equal to the Inverse Fourier Transform 
+of a product of Fourier Transforms. 
 \begin{equation}{f \otimes g = \text{I.F.T.[ F.T.}[f]\text{ x F.T.[g] }]}\end{equation} 
 Taking the Fourier Transform of the weight function $w_2(r)=\delta(r-R)$ 
 gives
@@ -765,7 +796,7 @@ and the right side of Equation~\ref{mayerder=w2convolution} becomes
 which matches Equation~\ref{mayerder}.
 
 Tarazona later improved upon the original FMT equations by replacing the
-expression for $\Phi3$ given by Equation~\ref{oldPhi3equation} with the
+expression for $\Phi_3$ given by Equation~\ref{oldPhi3equation} with the
 more accurate expression~\cite{tarazonaphi3, santos2012phi3} 
 \begin{align}
 \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  \label{eq:Phi3}
@@ -774,10 +805,10 @@ in which a tensor weight is incorporated given by
 \begin{equation}\label{eq:tensorweight}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation} 
 All the other FMT equations remain the same. 
 
-The FMT equations developed so far have been for a Hard-sphere fluid.
+The FMT equations developed so far have been for a hard-sphere fluid.
 All of the weight functions, the relations between them, and the equation 
 for the derivative of the mayer function, can be expressed in terms of 
-$w_{2}(r)$ which, for a Hard-sphere fluid, consists of a delta function.
+$w_{2}(r)$ which, for a hard-sphere fluid, consists of a delta function.
 The weight function $w_{2}(r)$ is in turn related to $w_{3}(r)$ through 
 Equation~\ref{w2_w3_relation}.
 Soft Fundamental Measure Theory extends FMT discussed so far to fluids 
@@ -787,7 +818,7 @@ functions (given by Equations~\ref{eq:w0},~\ref{eq:w1},~\ref{eq:w_v1},
 equation for the derivative of the mayer function 
 (given by Equation~\ref{mayerder=w2convolution}) the same, 
 but replacing $w_{3}(r)$ with a weight function 
-appropriate for a soft sphere potential~\cite{schmidt1999density, schmidt2000fluid}. 
+appropriate for a soft-sphere potential~\cite{schmidt1999density, schmidt2000fluid}. 
 This is what we do in forming a functional for the Weeks-Chandler-Anderson 
 fluid as detailed in the next chapter on Methods.
 
