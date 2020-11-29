@@ -835,14 +835,14 @@ region at higher densities.
 A phase transition between a liquid and a solid is accompanied by an 
 abrupt change in the number density, and so there is a gap between the 
 purely liquid and the purely solid regions. Within the gap, or coexistence
-region, is found mixtures of various amounts of liquid and solid.  
-Within the coexistence region, the liquid and solid have number densities 
-that are fixed at the values they had at the phase transition. To construct
+region, is found mixtures of various amounts of liquid and solid each of
+which have number densities that are fixed at the values they had at the 
+phase transition. To construct
 the phase diagram, these liquid and solid phase transition number densities
 must be found. Maxwell's double tangent construction can be used to find 
 these number densities given plots of the liquid and the solid Helmholtz 
-free energies verses the inverse density at a given temperature. 
-To construct these plots we use classical Density Functional Theory 
+free energies verses the inverse density at a given temperature, as
+discussed in Section 2.2. We use classical Density Functional Theory 
 to find the Helmholtz free energies of the liquid and the solid. 
 A functional for the ideal portion of the
 Helmholtz free energy is given by Equation~\ref{eq:Fideal-n(r)}, and a 
@@ -859,9 +859,9 @@ generate various number density profiles that can be used to implement cDFT.
 
 It is known that a fluid with a soft potential like the WCA fluid will 
 form a Face Centered Cubic (FCC) crystal in its solid state~\cite{Hansen}. 
-Although the entire 
+Although an entire 
 crystal lattice can be constructed with FCC cells, 
-FCC cells are not the smallest cells with which the lattice can be built. 
+they are not the smallest cells with which the lattice can be built. 
 The shaded parallelepiped shown within the FCC cell in Figure \ref{fig:primitivecell} 
 is the smallest structure that, when repeated, re-creates the entire crystal 
 lattice. This parallelepiped primitive cell takes up one-fourth the volume 
@@ -869,7 +869,7 @@ of an FCC cell, and contains the equivalent of one atom.
 It includes portions of eight atoms each located on a lattice site conveniently 
 reachable by moving along one of three different lattice vectors. 
 The three lattice vectors will be useful in 
-creating the lattice structure computationally, and will also make the 
+creating the lattice structure computationally, and will also make our 
 program run faster.
 
   \begin{figure}[h!]
@@ -882,22 +882,21 @@ program run faster.
 An atom will not realistically reside exactly at a lattice point. 
 Statistically there will typically be a normal, or Gaussian distribution 
 of positions about the lattice point. 
-Of course, atoms are always in motion, so when talking about "the location" 
+Atoms are always in motion, so when talking about "the location" 
 of an atom, we are talking about a time averaged position, so that it 
 does not change with time.
 Figure \ref{fig:Ensemble_Gaus} shows examples 
 of four possible positions an atom (shown in blue) might have in a crystal 
-cell that has one lattice site (represented by a black dot the center of 
-the cell). The atom is slightly off the lattice site in each example, and 
+cell that has one lattice site at its center (represented by a black dot). 
+The atom is slightly off the lattice site in each example, and 
 a sampling of many possibilities - more than just the four given 
-as examples - would create an average profile that looks like a Gaussian
-distribution, as shown on the right.
+as examples - would create an average distribution profile that looks 
+like a Gaussian distribution, as shown on the right.
 A plot of a Gaussian distribution in 2-dimensions is shown in 
 Figure~\ref{fig:Gaus_plot} where the width of the Gaussian is described 
 by $\sigma$ (not to be confused with the $\sigma$ related to the 
-Lennard-Jones model).
- 
-3-dimensional Gaussian distributions centered at lattice points can be 
+Lennard-Jones model). 
+Three-dimensional Gaussian distributions centered at lattice points can be 
 used to represent a number density profile $n(\vec{r})$  which describes 
 how the atoms are distributed on average over a collection of cells. 
 
@@ -925,7 +924,10 @@ the number density profile describes how much "atom" will be found at various
 points in the cell. 
 It can be thought of as an average over a large collection of actual cells
 of various possible spatial distributions of the atoms within a cell, or
-more precisely, as an ensemble average over all possible microstates.
+more precisely, as an ensemble average over all possible microstates, 
+each of which consists of a unique set of positions for the atoms in 
+that occupy the cell. Mathematically, the microstates are represented 
+by a set of delta functions.
 \begin{align}
     n(\vec r)=~<\sum_{i=1}^N\delta(\vec r - \vec r_i)>~
 \end{align} 
@@ -951,8 +953,11 @@ Instead of thinking of an atom in one of the eight small cells, the same
 Gaussian distribution can be obtained from thinking of one-eighth of an 
 atom in each small cell as shown in Figure~\ref{fig:SameStatPic}. 
 This makes it convenient to describe the new 
-number density in terms of the fraction of vacancies, $f_v$: 
-\begin{displaymath}{ n = (1-f_v){n_{no.vacancies}}}\end{displaymath} 
+number density in terms of the fraction of vacancies, $f_v$. 
+The resulting number density is then given by
+\begin{align}
+    n = (1-f_v){n_{no.vacancies}}
+\end{align} 
 
  \begin{figure}[h!]
     \centering
@@ -974,10 +979,11 @@ number density in terms of the fraction of vacancies, $f_v$:
     \label{fig:SameStatPic}
   \end{figure} 
 
-By varying the width of the Gaussians and the fraction of vacancies, 
-various number density profiles can be generated for a given combination 
-of temperature and number density, as shown in Figure~\ref{fig:Ensemble_vary}.
-A homogeneous number density profile is used for a liquid is shown in 
+To implement classical Density Functional Theory, 
+a set of number density profiles is generated by varying the Gaussian width 
+and the fraction of vacancies at a given combination of temperature and 
+number density, as shown by the example in Figure~\ref{fig:Ensemble_vary}.
+A homogeneous number density profile is used for a liquid, as shown in 
 Figure \ref{fig:homogen_denisty}.
 Once again, it is important to note that the number density is the same 
 for all these number density profiles $n(\vec{r})$. 
@@ -993,16 +999,15 @@ for all these number density profiles $n(\vec{r})$.
     \includegraphics[height=4cm]{figs/homogeneous_bold-box.pdf}
     \caption{A homogeneous number density profile $n(\vec{r})$.}
     \label{fig:homogen_denisty}
-  \end{figure}   
+  \end{figure}  
 The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number 
-density profile, and also for the homogeneous number density profile 
+density profile in the set, and also for the homogeneous number density profile 
 characteristic of a liquid. Both the ideal and excess free energies are 
 found, and added together to get the total Helmholtz free energy.
-According to classical Density Functional Theory, of all the Helmholtz 
-free energies calculated is the minimum Helmholtz free energy, and its 
-corresponding number density profile that are the actual equilibrium values 
-for that temperature and number density.
-The process is repeated to find the free energies at other combinations 
+According to cDFT, the actual equilibrium Helmholtz free energy at
+the given temperature and number density will be the one
+that corresponds to the number density profile that minimizes the functional. 
+This process is repeated to find the free energies at other combinations 
 of temperatures and number densities. 
 
 Once the Helmholtz free energy for both the crystal and liquid states of 
@@ -1024,12 +1029,12 @@ must be found. Computing the ideal portion of the
 Helmholtz free energy is straightforward, but computing the excess portion 
 of the Helmholtz free energy is difficult since it depends on the interatomic 
 potential energy $V(r)$ that exists between each sphere with all the other spheres, 
-as is shown in Equations~\ref{eq:mayerfunction} and \ref{eq:Fexcess-simplified}.
-Soft Fundamental Measure Theory (SFMT) is a method
+as is shown by Equations~\ref{eq:mayerfunction} and \ref{eq:Fexcess-simplified}.
+Soft Fundamental Measure Theory is a method
 developed to form an expression for the excess Helmholtz free energy without
 explicitly taking into account the interaction of each sphere with all the others, 
 but it must be tailored to fit a particular fluid\cite{schmidt1999density}.  
-Our SFMT functional is taylored to fit a WCA fluid, and 
+Our SFMT functional is tailored to fit a WCA fluid, and 
 is written in general form as 
 \begin{align}\label{eq:Fexfunctional}
   F_{excess}[n(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
@@ -1046,14 +1051,7 @@ The weighted densities $n_0, n_1, n_2,$ and $n_3$ are found from
 \end{align}
 where the number density profile $n(\vec r)$ within the integral is given 
 by Gaussian functions centered at each lattice point.
-There are four scalar weight functions, two vector weight functions, and 
-one tensor weight function all of which 
-depend on the expression for $w_3(r)$ 
-which in turn depends on the interatomic potential $V(r)$ that exists 
-between the spheres, and which defines the particular fluid being modeled.
-We introduce our temperature dependent parameters $\alpha(T)$ and $\Xi(T)$ 
-to fit the functional to a WCA fluid.
-The scalar weight functions are given by
+There are four scalar weight functions given by
 \begin{align}\label{eq:weights}
   w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
   w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
@@ -1061,11 +1059,14 @@ The scalar weight functions are given by
   &= \frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}  \\
   w_3(r) &=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]  
 \end{align}
-The vector weights are given by 
+two vector weight functions given by 
 \begin{equation}\label{eq:w_v2}{  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  }\end{equation}
 \begin{equation}\label{eq:w_v1}{  \vec{w_{1}}=w_{1}\frac{\vec{r}}{r}  }\end{equation} 
-The tensor weight is given by
+and one tensor weight function which is given by
 \begin{equation}\label{eq:tensorweight-methods}\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)\end{equation}
+All of the weight functions depend on the expression for $w_3(r)$ 
+which in turn depends on the interatomic potential $V(r)$ that exists 
+between the spheres, and which defines the particular fluid being modeled.
 
 The weight functions $w_{2}(r)$ and $w_{3}(r)$ are constructed using 
 Schmidt's proposed error function model~\cite{schmidt2000fluid} designed 
@@ -1075,12 +1076,13 @@ subject to the boundary conditions $w_3(0)\approx{1}$
 and $w_3(\infty)=0$. 
 Our functional is  created by replacing Schmidt's parameters $\sigma$ 
 and $a$ with our temperature dependent parameters $\alpha$ and $\Xi$.
-The two parameters $\alpha$ and $\Xi$ make temperature-dependent error 
-function potential $V_{erf}(r)$ approximate in the region of interest 
-of the temperature-independent WCA potential which is difficult 
-to implement computationally. $\Xi$ is determined by setting the second virial 
-coefficient $B_2$ of the error function potential $V_{erf}(r)$ and of the
-WCA potential equal.  
+The two parameters $\alpha$ and $\Xi$ make the temperature-dependent error 
+function potential $V_{erf}(r)$ approximate, in the region of interest, 
+the temperature-independent WCA potential which is difficult 
+to implement computationally. 
+%$\Xi(T)$ is determined by setting the second virial coefficient $B_2$ of 
+%the error function potential $V_{erf}(r)$ equal to that of the
+%WCA potential, $B_{2erf}(T)=B_{2wca}(T)$ for a given temperature.  
 The error function potential emerges from $w_{3}(r)$, and the relationships 
 in Equations~\ref{w2_w3_relation} and~\ref{mayerder=w2convolution}.
 Using Equation~\ref{w2_w3_relation},
@@ -1111,13 +1113,14 @@ gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$
 \end{equation}  
 
 The parameter $\alpha(T)$ is derived by setting 
-the error function potential $V_{erf}(r)$ given by Equation~\ref{eq:Verf} 
-equal to the WCA potential given by Equation~\ref{eq:VWCA} when $r=\alpha$. 
+the error function potential $V_{erf}(r)$ 
+equal to the WCA potential given by Equation~\ref{eq:VWCA} at $r=\alpha$. 
+\begin{align}
+    V_{erf}(\alpha)=V_{WCA}(\alpha)
+\end{align}
 This gives
-\begin{equation}\label{alphaT}
-	{\alpha(T)=\sigma\left(\frac{2}{1+\sqrt{\frac{k_BT}{\epsilon}\ln(2)}}\right)^\frac{1}{6}}
-\end{equation} 
-Figure \ref{fig:alphaXivsT} shows how $\alpha$ varies with temperature 
+\begin{equation}\label{alphaT}\alpha(T)=\sigma\left(\frac{2}{1+\sqrt{\frac{k_BT}{\epsilon}\ln(2)}}\right)^\frac{1}{6}\end{equation} 
+Figure \ref{fig:alphaXivsT} shows how $\alpha(T)$ varies with temperature 
 when $\sigma=1$ and $\epsilon=1$.    
 \begin{figure}[h!]
     \centering
@@ -1127,18 +1130,17 @@ when $\sigma=1$ and $\epsilon=1$.
     \label{fig:alphaXivsT}
   \end{figure}
 
-We determine the value of $\Xi$ at a given temperature $T$,
-by equating the second virial coefficient evaluated for the error 
-function potential $V_{\operatorname{erf}}(r)$, and the second virial 
-coefficient evaluated for the WCA potential $V_{WCA}$.
+We determine the value of $\Xi(T)$ at a given temperature $T$,
+by setting the second virial coefficient evaluated for the error 
+function potential $V_{\operatorname{erf}}(r)$ equal to the second virial 
+coefficient evaluated for the WCA potential $V_{WCA}(r)$.
 \begin{equation}B_{2\operatorname{erf}}(T) =B_{2WCA}(T)\end{equation}
-The second virial coefficient can be derived from Euler's equation for 
-the internal energy of a system and is given by
+The second virial coefficient is given by
 \begin{equation}B_2=-\frac{1}{2}\int_{Volume}f(\vec{r})d\vec r\end{equation}
-As shown in detail in the Appendix, evaluating the second virial coefficient 
-$B_{2}$ for the error function potential $V_{erf}$ with the mayer function 
-given by Equation~\ref{eq:VerfMayerfunction} 
-gives 
+Using the mayer function for the error function potential given by 
+Equation~\ref{eq:VerfMayerfunction} we found (see Appendix) the second 
+virial coefficient $B_{2}$ for the error function potential $V_{erf}(r)$ 
+to be
 \begin{equation} \label{eq:B2erf}
 	B_{2\operatorname{erf}}(T) = \frac{\pi}{3}\Xi^3\left[\left(\frac{\alpha^3}{\Xi^3}+\frac{3\alpha}{2\Xi}\right)\left(1+\operatorname{\operatorname{erf}}\left(\frac{\alpha}{\Xi}\right)\right)+\frac{1}{\sqrt{\pi}}\left(\frac{\alpha^2}{\Xi^2}+1\right)e^{-\left(\frac{\alpha}{\Xi}\right)^2}\right]
 \end{equation}
@@ -1147,7 +1149,7 @@ $B_{2WCA}$ can be found computationally from
 \begin{equation} \label{eq:B2wca}
 	B_{2WCA}=-\frac{1}{2}\int_{Volume}\left(e^{-\beta{V}_{WCA}(r)}-1\right)d\vec{r} 
 \end{equation}
-The parameter $\Xi$ is found to be the value that makes Equations~\ref{eq:B2erf} 
+The parameter $\Xi(T)$ is found to be the value that makes Equations~\ref{eq:B2erf} 
 and \ref{eq:B2wca} equal each other for a given temperature T. 
 A plot of $\Xi(T)$ obtained through this method is shown in 
 Figure~\ref{fig:xi_fromB2vsT}.
