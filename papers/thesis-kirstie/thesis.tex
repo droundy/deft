@@ -121,8 +121,8 @@ between real atoms, is currently the most widely used model for fluids.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{plot_HardSphere_Potential.pdf}
-    \caption{A hard-sphere Potential is zero for $r>2R$, and infinity 
-    for $r\leq{2R}$ where R is the radius of a hard sphere (which is 
+    \caption{A hard-sphere potential is zero for $r>2R$, and infinity 
+    for $r<{2R}$ where R is the radius of a hard sphere (which is 
     approximately 1.225/2 in this example).}
     \label{fig:HardSphere_potential}
   \end{figure}
@@ -143,7 +143,7 @@ approaches infinity as the distance between the atoms continues to decrease.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{LJ_Potential.pdf}
-    \caption{Lennard-Jones Potential for $\sigma=1$, $\epsilon=1$}
+    \caption{Lennard-Jones potential for $\sigma=1$, $\epsilon=1$}
     \label{fig:LJ_potential}
   \end{figure}
 
@@ -167,14 +167,14 @@ which when added together regenerate the full Lennard-Jones potential.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{LJ_Potential_2part.pdf}
-    \caption{Lennard-Jones Potential broken into two parts for $\sigma=1$, $\epsilon=1$}
+    \caption{Lennard-Jones potential broken into two parts for $\sigma=1$, $\epsilon=1$}
     \label{fig:LJ_potential_2parts}
   \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{WCA_Potential.pdf}
-    \caption{WCA Potential for $\sigma=1$, $\epsilon=1$}
+    \caption{WCA potential for $\sigma=1$, $\epsilon=1$}
     \label{fig:WCA_potential}
   \end{figure}
 
@@ -274,8 +274,8 @@ Maxwell's Double Tangent Construction.
 \begin{figure}[h!]
     \centering
      \includegraphics[height=8cm]{figs/MaxwellDTC-Fig1.pdf}
-    \caption{Densities at the solid-liquid transition are identified using 
-    Maxwell's Double Tangent Construction}
+    \caption{Liquid and solid densities at the solid-liquid phase 
+    transition are identified using Maxwell's Double Tangent Construction}
     \label{fig:MaxwellDT}
   \end{figure}
 
@@ -293,7 +293,7 @@ pressure given by the negative of the slope of the line, and the Gibb's
 free energy per atom given by the y-intercept. 
 At the point of phase transition the chemical potential of the liquid is 
 the same as the chemical potential of the solid, as is the pressure.
-\begin{align}{g_L=g_S\mbox{~~~~and~~~~}P_L=P_S\mbox{~~~~at a phase transition}}\end{align} 
+\begin{align}{\mu_L=\mu_S\mbox{~~~~and~~~~}P_L=P_S\mbox{~~~~at a phase transition}}\end{align} 
 The pressure at the phase transition can be obtained from the point of 
 intersection that occurs when the Gibbs free energy per atom, or chemical
 potential, is plotted against the pressure for both the liquid and the 
@@ -302,14 +302,16 @@ These curves are constructed from data collected from lines tangent
 along the curves on the the Helmholtz free energy per atom verses inverse 
 density plots (like that of Figure~\ref{fig:MaxwellDT}) for both the 
 liquid and the solid at a given temperature. 
-The slope gives -P and corresponding y-intercept gives $g$. The 
+The slope gives the negative of the pressure, and the corresponding
+y-intercept gives the chemical potential. The 
 curves in Figure~\ref{fig:GibbsvsP} consist of a collection of data 
-points ($g$,P) for the liquid and the solid respectively.
+points (P,~$\mu$) for the liquid and the solid respectively.
 
 \begin{figure}[h!]
     \centering
      \includegraphics[height=8cm]{figs/MaxwellDTC-Fig2.pdf}
-    \caption{Pressure is found at point of intersection which occurs when $g_L=g_S$}
+    \caption{Pressure is found at point of intersection which occurs 
+    when $\mu_L=\mu_S$.}
     \label{fig:GibbsvsP}
   \end{figure}
 
@@ -324,7 +326,7 @@ procedure for various temperatures.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{figs/MaxwellDTC-Fig3.pdf}
-    \caption{The liquid and solid densities at the point of transistion are 
+    \caption{The liquid and solid densities at the phase transistion are 
     found from a plot of pressure vs inverse denisty for both the liquid and the solid.}
     \label{fig:Pvsinvn}
   \end{figure}
@@ -407,7 +409,7 @@ of energy (the first law of thermodynamics) which says that energy lost
 $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that 
 changes in the free energy will be negative for spontaneous processes 
 when the natural variables of the free energy are held fixed~\cite{schroeder}. 
-And so over time teh free energy settles to a minimum. 
+And so over time the free energy settles to a minimum. 
 %Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
 %\begin{equation}
   %df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
@@ -445,7 +447,7 @@ where
 Writing the Hamiltonian, H in terms of its component kinetic and potential energies gives
 \begin{equation}{H = KE + V + V_{ext} = \sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)+V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)+V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{equation}
 where the translational kinetic energy of the N atoms is given by 
-\begin{equation}{\sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)}\end{equation}
+\begin{equation}{\text{KE}=\sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)}\end{equation}
 and the potential energy of the total interaction of each atom with the other 
 N-1 atoms is given by
 \begin{displaymath}{V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
@@ -532,11 +534,11 @@ written as~\cite{schroeder}
   \begin{figure}[h!]
     \centering
     \includegraphics[height=7cm]{figs/diagrammic.pdf}
-    \caption{Two-pair Interactions $f_{ij}f_{kl}$ for N=4 atoms. Interactions 
-    between individual pairs of atoms are shown in green. Interactions 
-    between pairs of atoms with an atom shared in common are shown in red. 
-    At low densities only the interactions shown in green are considered, 
-    since atoms are not likely to be clustered.}
+    \caption{Two-pair interactions $f_{ij}f_{kl}$ are shown for N=4 atoms. 
+    Interactions between individual pairs of atoms are shown in green. 
+    Interactions between pairs of atoms with an atom shared in common 
+    are shown in red. At low densities only the interactions shown in 
+    green are considered, since atoms are not likely to be clustered.}
     \label{fig:diagrammic}
   \end{figure}
 
@@ -644,9 +646,9 @@ in Figure~\ref{fig:p_overlap}.
     \centering
     \includegraphics[height=7cm]{figs/P_overlap.pdf}
     \caption{No energy is needed to place a sphere at a position where 
-    there is no overlap such as shown by the black dot at the center of 
-    the dotted region near the top. But it is not possible to place a 
-    sphere at a position where an overlap occurs.}
+    there is no overlap, such as that shown by the black dot near the 
+    top. But it is not possible to place a sphere at a position where 
+    an overlap occurs.}
     \label{fig:p_overlap}
   \end{figure}
 In this case Equation~\ref{widoms-insertion-formula} becomes
@@ -655,7 +657,7 @@ In this case Equation~\ref{widoms-insertion-formula} becomes
 \end{align}
 where the radius of the cavity $R_{cavity}$ equals the radius of a 
 hard sphere R, and $nV_{Sphere}$, which is equal to the total volume 
-occupied by the spheres divided by the total volumet avaliable, 
+occupied by the spheres divided by the total volume avaliable, 
 is the probability that a sphere cannot be placed at some random
 point in the homogeneous fluid of number density, $n$, without
 overlapping with another sphere. Combining  Equations~\ref{workrev} 
@@ -876,7 +878,7 @@ program run faster.
   \begin{figure}[h!]
     \centering
     \includegraphics[height=3.5cm]{PrimitiveCellLightBlue.png}
-    \caption{The Primitive Crystal Cell is shown by the shaded parallelepiped}
+    \caption{A primitive crystal cell is shown by the shaded parallelepiped.}
     \label{fig:primitivecell}
   \end{figure}
 
@@ -904,9 +906,9 @@ how the atoms are distributed on average over a collection of cells.
  \begin{figure}[h!]
     \centering
     \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
-    \caption{Four examples of possible positions an atom (blue sphere) 
-    might have within a cell that has one lattice site (black dot) at 
-    the center are shown on the left. A large number of such 
+    \caption{On the left are shown four examples of possible positions 
+    that an atom (blue sphere) might have within a cell that has one 
+    lattice site (black dot) at the center. A large number of such 
     possibilities would give rise to a Gaussian distribution, 
     as shown on the right.}
     \label{fig:Ensemble_Gaus}
@@ -963,11 +965,11 @@ The resulting number density is then given by
  \begin{figure}[h!]
     \centering
     \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
-    \caption{Four examples of possible positions an atom (blue sphere) might 
-    have within a fixed volume containing eight cells are shown on the left. 
-    Each cell has one lattice site at the center represented by a black dot. 
-    A large number of such possibilities would give rise to the Gaussian 
-    distributions shown on the right.}
+    \caption{On the left are shown four examples of possible positions 
+    that an atom (blue sphere) might have within a fixed volume 
+    containing eight cells. Each cell has one lattice site at the center 
+    represented by a black dot. A large number of such possibilities 
+    would give rise to the Gaussian distributions shown on the right.}
     \label{fig:Ensemble_Smallcells}
   \end{figure} 
 
@@ -976,7 +978,8 @@ The resulting number density is then given by
     \includegraphics[height=2.5cm]{SameStatPic.png}
     \caption{Front views of a cube with eight smaller cells. The two views 
     show two ways of picturing a fraction of vacancies, $f_v$ of 7/8 which 
-    give rise to the same Gaussian distribution statistically.}
+    give rise to the same Gaussian distribution statistically, 
+    and the same number density.}
     \label{fig:SameStatPic}
   \end{figure} 
 
@@ -991,7 +994,8 @@ for all these number density profiles $n(\vec{r})$.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{VaryWidthandVacancies.png}
-    \caption{Several Gaussian Distribution Number Density Profiles all 
+    \caption{Shows an example set of Gaussian distribution number density 
+    profiles $n(vec r)$ all with the same number density.
     with the same number density of one atom over the fixed volume.}
     \label{fig:Ensemble_vary}
   \end{figure}  
@@ -1126,7 +1130,7 @@ when $\sigma=1$ and $\epsilon=1$.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{plot_alpha.pdf}
-    \caption{Shows the temperature dependence of $\alpha$ vs $k_BT/{\epsilon}$ 
+    \caption{Shows the temperature dependence of $\alpha$ vs $k_BT$ 
     for $\sigma=1$ and $\epsilon=1$.}
     \label{fig:alphaXivsT}
   \end{figure}
@@ -1176,8 +1180,8 @@ as the temperature increases.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{weight_functions.pdf}
-    \caption{The weight functions $w_0$, $w_1$, $w_2$, $w_3$ vary along the 
-    z-axis for a reduced temperature of 2.}
+    \caption{Shows how the weight functions $w_0$, $w_1$, $w_2$, $w_3$ 
+    vary along the z-axis for a reduced temperature of $K_BT=2$.}
     \label{fig:weight_functions}
   \end{figure}  
 
@@ -1200,41 +1204,42 @@ The crystal excess Helmholtz free energy is computed
 using SFMT with a number density profile 
 that consists of Gaussian distributions 
 centered at lattice sites specified by position vectors $\vec R$. 
-The weight functions $w_i(|\vec r - \vec r'|)$ are centered at $\vec r'$,
+The weight functions $w_i(|\vec r - \vec r~'|)$ are centered at $\vec r'$,
 as shown for $w_2$ in Figure~\ref{fig:GaussandW2_actual}. 
 But because the weight function is a function of the magnitude of the 
-difference between $\vec r$ and $\vec r'$, it can be thought of as 
+difference between $\vec r$ and $\vec r~'$, it can be thought of as 
 centered at $\vec r$, as shown in Figure~\ref{fig:GaussandW2_thinkas}. 
 Keeping the weight function centered at $\vec r$, 
 Monte-Carlo integration can be used to compute the weighted densities $n_i(\vec r)$
 \begin{figure}[h!]
    \centering
    \includegraphics[height=5cm]{InclusionRadius.png}
-   \caption{The Gaussians at each lattice point are of width gw. 
-   After a radius of few gw's the Gaussians go to zero and can be neglected.}
+   \caption{Gaussians are centered at each lattice point. After a radius 
+   of a few Gaussian widths about each lattice point, the Gaussians go to 
+   zero and can be neglected.}
    \label{fig:InclusionRadius}
 \end{figure} 
 by randomly generating vectors
-$\vec r' -\vec R$ according to a Gaussian distribution. 
-Only lengths for $\vec r'- \vec R$ that are within an inclusion radius
+$\vec r~' -\vec R$ according to a Gaussian distribution. 
+Only lengths for $\vec r~'- \vec R$ that are within an inclusion radius
 about a lattice site, like that shown in Figure \ref{fig:InclusionRadius}, 
 will be taken into account as Gaussians 
 farther away will not contribute much.
 The equation for the contribution to the weighted density from a 
 Gaussian centered at the jth lattice site located at $\vec R_j$ is given by
-\begin{equation}{n_i(\vec r)= \int_{r'}{(1-f_v)n(\vec r' - \vec R_j)w_i(|\vec{r}-\vec{r}'|)} {d}\vec{r}'}\end{equation} 
+\begin{equation}{n_i(\vec r)= \int_{r'}{(1-f_v)n(\vec r~' - \vec R_j)w_i(|\vec{r}-\vec{r}~'|)} {d}\vec{r}~'}\end{equation} 
 and is implemented computationally in the form
-\begin{equation}{n_i(\vec r)= \sum_{r'}{(1-f_v)n(\vec r' -\vec R_j)w_i(|\vec{r}-\vec{r}'|)dV}}\end{equation} 
+\begin{equation}{n_i(\vec r)= \sum_{r'}{(1-f_v)n(\vec r~' -\vec R_j)w_i(|\vec{r}-\vec{r}~'|)dV}}\end{equation} 
 which can be written as
-\begin{equation}{n_i(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_i(|\vec{r}-\vec{r}'|)}\end{equation} 
-NumPoints is the number of vectors $\vec r' - \vec R_j$ randomly 
-generated about the jth lattice site, and $n(\vec r' - \vec R_j)$
+\begin{equation}{n_i(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_i(|\vec{r}-\vec{r}~'|)}\end{equation} 
+NumPoints is the number of vectors $\vec r~' - \vec R_j$ randomly 
+generated about the jth lattice site, and $n(\vec r~' - \vec R_j)$
 is equal to a probability density which when multiplied by dV gives 
-the probability $P_{r'}$ at which the value of $w_i(|\vec{r}-\vec{r}'|)$ 
+the probability $P_{r'}$ at which the value of $w_i(|\vec{r}-\vec{r}~'|)$ 
 will occur. Using the relation
 \begin{equation}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{equation} 
-$n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\vec{r}'|)$:
-\begin{equation}{n_i(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}'|)}{\text{NumPoints}}}\end{equation}
+$n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\vec{r}~'|)$:
+\begin{equation}{n_i(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}~'|)}{\text{NumPoints}}}\end{equation}
 This process is repeated to get the contributions to the weighted density 
 $n_i(\vec r)$ from the Gaussians around each lattice point which begin to 
 merge together as the width of the Gaussians increases.
@@ -1254,7 +1259,7 @@ while the other is erroneously lower than it should be.
     \includegraphics[height=7cm]{figs/weightandGauss1.pdf}
     \caption{A Gaussian distribution about a lattice site located at 
     $\vec R$ is shown in blue, and a cross-sectional 
-    view of $w_2$ centered at $\vec{r}'$ is shown in purple.} 
+    view of $w_2$ centered at $\vec r~'$ is shown in purple.} 
   \label{fig:GaussandW2_actual}
   \end{figure} 
   
@@ -1263,7 +1268,7 @@ while the other is erroneously lower than it should be.
     \includegraphics[height=7cm]{figs/weightandGauss2.pdf}
     \caption{An alternative way of viewing Figure~\ref{fig:GaussandW2_actual} where 
     the weight function, shown by the purple dashed lines, is centered at $\vec{r}$,  
-    and fixed in place as $\vec r' - \vec R$
+    and fixed in place as $\vec r~' - \vec R$
     varies randomly with a probability according to a Gaussian distribution.} 
   \label{fig:GaussandW2_thinkas}
   \end{figure} 
@@ -1314,7 +1319,7 @@ density of 1.00, giving a spread of 0.08.
   solid. The gray area that separates the liquid and solid regions 
   is the region of coexistence where some liquid and solid exist together 
   at varying proportions. White lines show the boundaries of the coexistence 
-  region generated from Monte-Carlo of the WCA fluid.}
+  region generated from Monte-Carlo simulations of the WCA fluid.}
   \label{fig:Phase_Diagram_of_T_vs_n}
 \end{figure}
 
@@ -1375,9 +1380,10 @@ the difference in the volumes is too low.
   \centering
   \includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T}
   \caption{Phase Diagram of the reduced pressure verses the reduced 
-  temperature. The blue region is solid, and the red region is liquid.
-  The white line marks the solid-liquid boundary as predicted by 
-  Monte-Carlo simulations.}
+  temperature. The blue region is solid, the red region is liquid,
+  and the black line shows the phase boundary where the solid and liquid
+  phases coexist. The white line marks the solid-liquid phase boundary  
+  as predicted by Monte-Carlo simulations.}
   \label{fig:Phase_Diagram_P_vs_T}
 \end{figure}
 %
