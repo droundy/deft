@@ -445,7 +445,7 @@ where
 Writing the Hamiltonian, H in terms of its component kinetic and potential energies gives
 \begin{equation}{H = KE + V + V_{ext} = \sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)+V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)+V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{equation}
 where the translational kinetic energy of the N atoms is given by 
-\begin{displaymath}{\sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)}\end{displaymath}
+\begin{equation}{\sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)}\end{equation}
 and the potential energy of the total interaction of each atom with the other 
 N-1 atoms is given by
 \begin{displaymath}{V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
@@ -483,7 +483,7 @@ Equation~\ref{Zmultiply}, the free energy can also be broken into two parts.
 
 Putting Equation~\ref{eq:Zideal} into Equation~\ref{eq:Finparts}, 
 the ideal Helmholtz free energy is
-\begin{displaymath}{F_{ideal}=-k_BT\ln{\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\right)}}\end{displaymath}  
+\begin{equation}{F_{ideal}=-k_BT\ln{\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\right)}}\end{equation}  
 
 \begin{equation}{\label{Fidealmultipleint}}{=-k_BT\ln\left(V^N\frac{1}{N!}\frac{1}{h^{3}}\int{d\vec{p}_1}~e^\frac{-\frac{|\vec{p}_1|^2}{2m}}{k_BT}\frac{1}{h^{3}}\int{d\vec{p}_2}~e^\frac{-\frac{|\vec{p}_2|^2}{2m}}{k_BT}{...}\frac{1}{h^{3}}\int{d\vec{p}_N}~e^\frac{-\frac{|\vec{p}_N|^2}{2m}}{k_BT}\right)}\end{equation}
 These integrals can conveniently be written in terms of the de Broglie 
@@ -516,7 +516,8 @@ Using this potential, and setting the external potential
 $V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ to zero, the exponent in 
 Equation~\ref{Fexcess-mostgeneral} becomes
 
-\begin{displaymath}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{displaymath}    \begin{equation}{\approx-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
+\begin{equation}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{equation}
+\begin{equation}{\approx-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
 where each exponential term is simplified by a Taylor expansion $e^x\approx{1+x}$.  
 The function $f_{ij}$ the Mayer function given by
 \begin{align}\label{eq:mayerfunction}
@@ -734,7 +735,7 @@ density $n(\vec{r})$, that is, an inhomogeneous fluid, in which case, the
 excess Helmholtz free energy is written as
 \begin{equation}\label{eq:F_ex-n-of-r}{F_{excess}[n(\vec{r})]= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}}\end{equation} 
 Using a backwards Heavyside step function defined as
-\begin{displaymath}{\Theta(|\vec{r}|-R)=\left\{ \begin{array}{rc} 1 & 0<r \leq R \\ 0  & r>R \end{array}\right.}\end{displaymath}
+\begin{equation}{\Theta(|\vec{r}|-R)=\left\{ \begin{array}{rc} 1 & 0<r \leq R \\ 0  & r>R \end{array}\right.}\end{equation}
 the following expressions are obtained
 \begin{equation}{G_{3}=\int_{Volume}{\Theta(|\vec{r}|-R)d{\vec{r}}} = \frac{4}{3}\pi{R^3}}\end{equation}
 \begin{equation}{G_{2}=\int_{Volume}{\delta(|\vec{r}|-R)d{\vec{r}}} = 4\pi{R^2}}\end{equation}
@@ -781,7 +782,7 @@ SFMT~\cite{schmidt2000fluid}.
      \frac{df(r)}{dr} = w_2 \otimes w_2 = \int{w_2(r')w_2(r-r')dr'}
 \end{align} 
 This relation can easily be checked for a hard-sphere fluid where
-\begin{displaymath}{\frac{df(r)}{dr}=\left\{ \begin{array}{rc} \frac{d}{dr}(-1)=0 & r<2R \\\frac{d}{dr}(\text{vertical line})=+\infty & r=2R \\ \frac{d}{dr}(0)=0  & r>2R \end{array}\right.}\end{displaymath}
+\begin{equation}{\frac{df(r)}{dr}=\left\{ \begin{array}{rc} \frac{d}{dr}(-1)=0 & r<2R \\\frac{d}{dr}(\text{vertical line})=+\infty & r=2R \\ \frac{d}{dr}(0)=0  & r>2R \end{array}\right.}\end{equation}
 \begin{equation}\label{mayerder}{\frac{df(r)}{dr} = \delta(r-2R)}\end{equation} 
 The right side can be evaluated by using the general relation for 
 convolution which is equal to the Inverse Fourier Transform 
@@ -813,12 +814,11 @@ The weight function $w_{2}(r)$ is in turn related to $w_{3}(r)$ through
 Equation~\ref{w2_w3_relation}.
 Soft Fundamental Measure Theory extends FMT discussed so far to fluids 
 with soft potentials by keeping the relationships between the weight 
-functions (given by Equations~\ref{eq:w0},~\ref{eq:w1},~\ref{eq:w_v1},
-~\ref{eq:w_v2},~\ref{w2_w3_relation},~\ref{eq:tensorweight}) and the 
-equation for the derivative of the mayer function 
-(given by Equation~\ref{mayerder=w2convolution}) the same, 
-but replacing $w_{3}(r)$ with a weight function 
-appropriate for a soft-sphere potential~\cite{schmidt1999density, schmidt2000fluid}. 
+functions, and the equation for the derivative of the mayer function 
+the same (Equations~\ref{eq:w0},~\ref{eq:w1},~\ref{eq:w_v1},~\ref{eq:w_v2},
+~\ref{w2_w3_relation},~\ref{eq:tensorweight},~\ref{mayerder=w2convolution}), 
+ but replacing $w_{3}(r)$ with a weight function appropriate 
+for a soft-sphere potential~\cite{schmidt1999density, schmidt2000fluid}. 
 This is what we do in forming a functional for the Weeks-Chandler-Anderson 
 fluid as detailed in the next chapter on Methods.
 
@@ -837,8 +837,9 @@ abrupt change in the number density, and so there is a gap between the
 purely liquid and the purely solid regions. Within the gap, or coexistence
 region, is found mixtures of various amounts of liquid and solid each of
 which have number densities that are fixed at the values they had at the 
-phase transition. To construct
-the phase diagram, these liquid and solid phase transition number densities
+phase transition. 
+
+To construct the phase diagram, the liquid and solid phase transition number densities
 must be found. Maxwell's double tangent construction can be used to find 
 these number densities given plots of the liquid and the solid Helmholtz 
 free energies verses the inverse density at a given temperature, as
@@ -1085,7 +1086,7 @@ to implement computationally.
 %WCA potential, $B_{2erf}(T)=B_{2wca}(T)$ for a given temperature.  
 The error function potential emerges from $w_{3}(r)$, and the relationships 
 in Equations~\ref{w2_w3_relation} and~\ref{mayerder=w2convolution}.
-Using Equation~\ref{w2_w3_relation},
+Using Equation~\ref{w2_w3_relation} repeated here,
 \begin{displaymath}
      w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
 \end{displaymath}
@@ -1226,13 +1227,12 @@ and is implemented computationally in the form
 \begin{equation}{n_i(\vec r)= \sum_{r'}{(1-f_v)n(\vec r' -\vec R_j)w_i(|\vec{r}-\vec{r}'|)dV}}\end{equation} 
 which can be written as
 \begin{equation}{n_i(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_i(|\vec{r}-\vec{r}'|)}\end{equation} 
-NumPoints is the number of vectors $\vec r' - \vec R_j$ randomly generated about the jth lattice site, 
-and $n(\vec r' - \vec R_j)$
-is equal to a probability density 
-which when multiplied by dV gives the probability $P_{r'}$ at which the value of 
-$w_i(|\vec{r}-\vec{r}'|)$ will occur. 
-Using the relation
-\begin{displaymath}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{displaymath} 
+NumPoints is the number of vectors $\vec r' - \vec R_j$ randomly 
+generated about the jth lattice site, and $n(\vec r' - \vec R_j)$
+is equal to a probability density which when multiplied by dV gives 
+the probability $P_{r'}$ at which the value of $w_i(|\vec{r}-\vec{r}'|)$ 
+will occur. Using the relation
+\begin{equation}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{equation} 
 $n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\vec{r}'|)$:
 \begin{equation}{n_i(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}'|)}{\text{NumPoints}}}\end{equation}
 This process is repeated to get the contributions to the weighted density 
@@ -1287,37 +1287,8 @@ $T^*=\frac{kT}{\epsilon}$ is plotted against the reduced number density
 $n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. 
 It is seen that in general, a liquid exists at lower number densities, 
 and a solid exists at higher number densities. 
-Phase transitions between the liquid and solid phases will occur when the liquid 
-and solid are at the same temperature, pressure and chemical potential. 
-Looking at one temperature, it is seen that as the density of the 
+For a given temperature, it is seen that as the density of the 
 liquid increases, a maximum number density is reached for the liquid. 
-This is the liquid phase transition number density, and 
-marks the beginning of a coexistence region where various amounts 
-of liquid and solid can exist together in equilibrium.
-Moving on toward higher number densities, the end of the coexistence 
-region is marked by the minimum number density that the solid can have.
-This is the solid phase transition number density. At a phase transition 
-there is an abrupt change in the number density as seen here where the
-density changes suddenly, and abruptly from the liquid 
-phase transition number density to the solid phase transition number density.
-Within the coexistence region, the number density of the liquid is fixed 
-at the liquid phase transition number density, and the number density of 
-the solid is fixed at the solid phase transition number density, while
-varying amounts of liquid and solid combine to give the infinite number 
-of possible densities seen within the coexistence region. 
-
-\begin{figure}
-  \centering
-  \includegraphics[height=9cm]{figs/Phase_Diagram_of_T_vs_n}
-  \caption{Phase Diagram of the reduced temperature verses the reduced 
-  density for the WCA fluid. The red region is liquid, and the blue region is 
-  solid. The gray area that separates the liquid and solid regions 
-  is the region of coexistence where some liquid and solid exist together 
-  at varying proportions. White lines show the boundaries of the coexistence 
-  region generated from Monte-Carlo of the WCA fluid.}
-  \label{fig:Phase_Diagram_of_T_vs_n}
-\end{figure}
-
 Looking at the coexistence region as a whole for all temperatures, 
 it is seen to extend over a narrow range of number densities which 
 gradually shifts towards higher densities as the temperature increases. 
@@ -1334,6 +1305,19 @@ and the solid transition reduced number density is 1.02, giving a spread
 of 0.06, whereas the Monte-Carlo results give a liquid transition 
 reduced number density of 0.92, and a solid transition reduced number 
 density of 1.00, giving a spread of 0.08. 
+
+\begin{figure}
+  \centering
+  \includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n}
+  \caption{Phase Diagram of the reduced temperature verses the reduced 
+  density for the WCA fluid. The red region is liquid, and the blue region is 
+  solid. The gray area that separates the liquid and solid regions 
+  is the region of coexistence where some liquid and solid exist together 
+  at varying proportions. White lines show the boundaries of the coexistence 
+  region generated from Monte-Carlo of the WCA fluid.}
+  \label{fig:Phase_Diagram_of_T_vs_n}
+\end{figure}
+
 %The solid phase transition number densities predicted by each method 
 %are very nearly the same along all temperatures, but the liquid phase 
 %transition number densities predicted by cDFT are notably higher than 
@@ -1363,31 +1347,18 @@ density of 1.00, giving a spread of 0.08.
   %\label{fig:Phase_Diagram_of_T_vs_n_AS}
 %\end{figure}
 
-\begin{figure}
-  \centering
-  \includegraphics[height=9cm]{figs/Phase_Diagram_of_P_vs_T}
-  \caption{Phase Diagram of the reduced pressure verses the reduced 
-  temperature. The blue region is solid, and the red region is liquid.
-  The white line marks the solid-liquid boundary as predicted by 
-  Monte-Carlo simulations.}
-  \label{fig:Phase_Diagram_P_vs_T}
-\end{figure}
-
 Figure~\ref{fig:Phase_Diagram_P_vs_T} shows the reduced pressure 
 $p^*=\frac{P\sigma^3}{\epsilon}$ plotted against the reduced temperature 
 for temperatures of kT = 0.5 to 3.0. 
-The black line marks the phase boundary between the solid and liquid regions, 
-and indicates the various temperature-pressure combinations at which a 
-phase transition occurs, and where various amounts of solid and liquid 
-can coexist. 
+The black line marks the phase boundary between the solid and liquid regions. 
 It is seen that the higher the temperature, the higher the pressure must be
 to undergo a phase transition from a liquid to a solid, as would be expected. 
-The slope of the phase boundary $\frac{dP}{dT}$ at some point (P,T) is given by
+Ideally, the slope of the phase boundary $\frac{dP}{dT}$ at some point (P,T) is given by
 \begin{align} 
     \frac{dP}{dT}=\frac{S_l-S_s}{V_l-V_s}
 \end{align}
 Since the entropy and the volume of the liquid is greater than the entropy
-and the volume of the solid, the slope should be positive.
+and the volume of the solid, the slope should be positive. 
 Comparing the slope of the phase boundary predicted by cDFT to that
 from Monte-Carlo simulations shown by the white line, it is seen that
 the cDFT transition temperatures are consistently higher, and the 
@@ -1399,6 +1370,16 @@ Monte-Carlo simulation predicts 43.80.
 This may indicate that either the difference between the liquid 
 and solid phase transition entropies predicted by cDFT is too high, or 
 the difference in the volumes is too low. 
+
+\begin{figure}
+  \centering
+  \includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T}
+  \caption{Phase Diagram of the reduced pressure verses the reduced 
+  temperature. The blue region is solid, and the red region is liquid.
+  The white line marks the solid-liquid boundary as predicted by 
+  Monte-Carlo simulations.}
+  \label{fig:Phase_Diagram_P_vs_T}
+\end{figure}
 %
 %Figure~\ref{fig:Phase_Diagram_P_vs_T_AS} shows our results for a larger 
 %range of reduced temperatures from kT=0.5 to 38, compated with the results
@@ -1569,9 +1550,12 @@ Integrating by parts with
    \\
   -\int_{0}^{\infty}\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\left(\frac{2}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\right)dr\Bigg]
 \end{multline}
-Evaluating the integral by doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$, and setting the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero this becomes
+Evaluating the integral by doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$, 
+and setting the lower limit to $-\infty$  since the integrand is 
+nearly zero by the time r is zero this becomes
 \begin{equation}{\widetilde{w}_3(k)=\frac{4\pi}{k^3}e^{-\frac{k^2a^2}{4}}\left[\left(1+\frac{k^2a^2}{2}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_3(k)$ becomes
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for 
+$\widetilde{w}_3(k)$ becomes
 \begin{equation}{\widetilde{w}_3(k)=\frac{4\pi}{k^3}e^{-\frac{k^2\Xi^2}{8}}\left[\left(1+\frac{k^2\Xi^2}{4}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
 
 \section{Fourier Transform of Vector Weight Function $\vec{w}_{1}(r)$}
@@ -1586,13 +1570,15 @@ temporarily set
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}\vec{w}_1(\vec{r})e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
+Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated 
+coordinate system $(x',y'z')$ 
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
 where
 \begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
 \begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
 \begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
-The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
+The components in the $x'$ and $y'$ directions vanish due to symmetry 
+about $z'$. That leaves
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
 
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{1}{4\pi\sqrt{\pi}a}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos{\theta}'e^{-ikr\cos\theta'}d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
@@ -1606,7 +1592,8 @@ The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)+\frac{\pi}{2k}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]\right]{~~}\hat{z}'}\end{equation}
 
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]-e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_1(k)$ becomes
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for 
+$\widetilde{\vec{w}}_1(k)$ becomes
 \begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}{\sqrt{2}\Xi}\right)\right]-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
 
 \section{Fourier Transform of Vector Weight Function $\vec{w}_{2}(r)$}
@@ -1618,13 +1605,15 @@ temporarily set
 \begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
 
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
+Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate 
+system $(x',y'z')$ 
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
 where 
 \begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
 \begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
 \begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
-The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
+The components in the $x'$ and $y'$ directions vanish due to symmetry 
+about $z'$. That leaves
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
 
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
@@ -1637,7 +1626,8 @@ The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$
 \begin{displaymath}{+{~~}\frac{4\sqrt{\pi}i}{ak^2}\left[a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]{~~}\hat{z}'}\end{displaymath}
 
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2a^2}{4}}\left[\left(\frac{a^2k}{2}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_2(k)$ becomes
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for 
+$\widetilde{\vec{w}}_2(k)$ becomes
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2\Xi^2}{8}}\left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
 
 \section{Fourier Transform of Tensor Weight $w_{m2}$}
@@ -1654,10 +1644,18 @@ with temporarily setting
 \begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
 The fourier transform of the tensor weight matrix elements are given by
 \begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})=\int_{allspace}{w_{{m2}_{ij}}}(\vec{r})e^{-i\vec{k}\cdot\vec{r}}d{\vec{r}}}\end{equation}
-Since the integration is over all space, the integral can be simplified by setting 
+Since the integration is over all space, the integral can be simplified 
+by setting 
 \begin{equation}{\vec{k}=k\hat{z}}\end{equation}
 \begin{equation}{\vec{k}\cdot\vec{r}=kr\cos\theta\hat{z}}\end{equation}
-Instead of constraining vector $\vec{k}$ to be in the z direction, however, a rotated coordinate system $(x',y',z')$ is used which is rotated from the (x,y,z) coordinate system in such a way that $\hat{z}'$ points in the direction of vector $\vec{k}$. After solving for the elements of the transformed weight function in coordinate system $(x',y',z')$, they will be expressed again in terms of vector $\vec{k}$ as it appears in coordinate system (x,y,z) to get the elements of the transformed weight function in coordinate system (x,y,z).%The weight components of interest are those corresponding to the component of vector $\vec{r}$ parallel to vector $\vec{k}$ which will be called $r_{z'}$, and to the two components of $\vec{r}$ perpendicular to vector $\vec{k}$ (and to each other) which will be called $r_{x'}$ and $r_{y'}$. 
+Instead of constraining vector $\vec{k}$ to be in the z direction, 
+owever, a rotated coordinate system $(x',y',z')$ is used which is 
+rotated from the (x,y,z) coordinate system in such a way that $\hat{z}'$ 
+points in the direction of vector $\vec{k}$. After solving for the 
+elements of the transformed weight function in coordinate system 
+$(x',y',z')$, they will be expressed again in terms of vector $\vec{k}$ 
+as it appears in coordinate system (x,y,z) to get the elements of the 
+transformed weight function in coordinate system (x,y,z). 
 \begin{equation}{\widetilde{w}_{m2_{ij}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
 where $r=r'$ and
 \begin{displaymath}{r_{x'}=r\sin\theta\cos\phi}\end{displaymath}
@@ -1707,7 +1705,8 @@ Set the lower limit to -infinity since the integrand is nearly zero by the time 
 
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-2\pi{a}^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{displaymath} 
 \begin{equation}{+\frac{2\pi\sqrt{\pi}}{k^3a}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
-Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_{{m2}_{xx}}(k)$ becomes
+Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for 
+$\widetilde{w}_{{m2}_{xx}}(k)$ becomes
 
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi{\Xi}^2}{3}-\frac{4\pi}{k^2}\right)e^{-\frac{k^2\Xi^2}{8}}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\frac{k^2\Xi^2}{8}}\sin(\frac{k\alpha}{2})}\end{displaymath} 
 \begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
@@ -1739,7 +1738,8 @@ Calculate $\widetilde{w}_{{m2}_{z'z'}}(k)$
 This is the same as -2 times equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=-2\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
 
 %\subsection{The tensor weight components in the coordinate system (x,y,z)}
-\noindent The tensor weight components in the coordinate system $(x',y',z')$ are:
+\noindent The tensor weight components in the coordinate system 
+$(x',y',z')$ are:
 \begin{equation}\label{tensorcomp}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
 
 \begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{array}\right)'+ \widetilde{w}_{{m2}_{y'y'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{array}\right)' + \widetilde{w}_{{m2}_{z'z'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{array}\right)'}\end{displaymath}
@@ -1761,15 +1761,19 @@ and the results from earlier
 \begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
 Equation \ref{tensorcomp} then becomes 
 \begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{z}'\hat{z}')\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
-\noindent In the $(x',y',z')$ coordinate system, vector $\vec{k}$ had been aligned with the $\hat{z}'$ direction so that 
+\noindent In the $(x',y',z')$ coordinate system, vector $\vec{k}$ had 
+been aligned with the $\hat{z}'$ direction so that 
 \begin{displaymath}{\hat{k}=\hat{z'}}\end{displaymath}
 Replacing $\hat{z}'$ with $\hat{k}$ gives
 \begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
-Now  $\vec{k}$ can be expressed in the $(x,y,z)$ coordinate system, $\vec{k}=k_x\hat{x} + k_y\hat{y} + k_z\hat{z}$. The components of the tensor weight in the $(x,y,z)$ coordinate system are then given by
+Now  $\vec{k}$ can be expressed in the $(x,y,z)$ coordinate system, 
+$\vec{k}=k_x\hat{x} + k_y\hat{y} + k_z\hat{z}$. The components of the 
+tensor weight in the $(x,y,z)$ coordinate system are then given by
 \begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
 
 %\subsection{Transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero}
-\noindent Check that the transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero:
+\noindent Check that the transform of tensor weight ${w}_{m2}(r)$ 
+goes to zero as k goes to zero:
 \begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
 \begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
 
@@ -1862,10 +1866,12 @@ Putting this into the expression for $n_{m2ij}(\vec{r})$ gives
 \begin{displaymath}{\Phi_3=\frac{12\pi^2R^6}{(1-\eta)^2}\left(\frac{1}{4\pi{R}^2}\right)^3\left[\vec{n}_{2v}\cdot\left({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}}\right)\cdot\vec{n}_{2v}-n_2|\vec{n}_{2v}|^2-\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^3\right)\color{white}\right]\color{black}}\end{displaymath}
 \begin{equation}{\color{white}\left[\color{black}+n_2\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^2\right)\right]}\end{equation}
 
-\begin{displaymath}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\frac{2}{3}n_2\vec{n}_{v2}\cdot\vec{n}_{v2}-\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^3\right)\color{white}\right]\color{black}}\end{displaymath}\begin{equation}{\color{white}\left[\color{black}+n_2\operatorname{Tr}\left((\overleftrightarrow{n}_{m2}+\frac{n_2}{3}\hat{\operatorname{I}})^2\right)\right]}\end{equation}
+\begin{displaymath}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\frac{2}{3}n_2\vec{n}_{v2}\cdot\vec{n}_{v2}-\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^3\right)\color{white}\right]\color{black}}\end{displaymath}
+\begin{equation}{\color{white}\left[\color{black}+n_2\operatorname{Tr}\left((\overleftrightarrow{n}_{m2}+\frac{n_2}{3}\hat{\operatorname{I}})^2\right)\right]}\end{equation}
 
 \begin{displaymath}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left(\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\frac{2}{3}n_2|\vec{n}_{v2}|^2-\operatorname{Tr}({\overleftrightarrow{n}_{m2}^3})
--n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)\color{white}\right)\color{black}}\end{displaymath} \begin{equation}{\color{white}\left(\color{black}-\frac{1}{3}{n_2}^2\operatorname{Tr}(\overleftrightarrow{n}_{m2})-\frac{1}{9}{n_2}^3+n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)+\frac{1}{3}{n_2}^3+\frac{2}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
+-n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)\color{white}\right)\color{black}}\end{displaymath} 
+\begin{equation}{\color{white}\left(\color{black}-\frac{1}{3}{n_2}^2\operatorname{Tr}(\overleftrightarrow{n}_{m2})-\frac{1}{9}{n_2}^3+n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)+\frac{1}{3}{n_2}^3+\frac{2}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
 
 \begin{equation}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left(\frac{2}{9}{n_2}^3-\frac{2}{3}n_2|\vec{n}_{v2}|^2+\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}_{m2}}^3)+\frac{1}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
 
@@ -1881,7 +1887,9 @@ Putting this into the expression for $n_{m2ij}(\vec{r})$ gives
 \section{Second Virial Coefficient $B_{2}$ for the Error Function Potential $V_{\operatorname{erf}}$}
 \begin{equation}B_2=-\frac{1}{2}\int_{allspace}f(\vec{r})d\vec r\end{equation}
 The mayer function for the Error Function potential $V_{\operatorname{erf}}$ is
-\begin{equation}f(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} from which it can be seen that $f(r)$ is approximately 0 for $r>r_{max}$ where $r_{max}$ is some maximum value of $r$.
+\begin{equation}f(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} 
+from which it can be seen that $f(r)$ is approximately 0 for $r>r_{max}$ 
+where $r_{max}$ is some maximum value of $r$.
 \begin{align}
  B_2 &= -\frac{1}{2}\int_0^{\pi}\int_0^{2\pi}\int_0^\infty\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]r^2\sin{\theta}d{\theta}d{\phi}dr \\
      &= -\frac{1}{2}4\pi\frac{1}{2}\int_{0}^{r_{max}}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]r^2dr \\
@@ -1931,7 +1939,8 @@ Putting this result into Eq~\ref{B3} gives
 Since the Mayer function does not depend on $\phi$ and $\theta$, this reduced to
 \begin{equation}B_3=-\frac{4\pi}{3}\int{|\widetilde{f}(\vec k)|^3k^2dk}\end{equation}
 
-The Mayer function for the Error Function potential $V_{\operatorname{erf}}$, and its Fourier Transform are
+The Mayer function for the Error Function potential $V_{\operatorname{erf}}$, 
+and its Fourier Transform are
 \begin{equation}f_{\operatorname{erf}}(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} 
 
 \begin{equation}\widetilde{f}_{\operatorname{erf}}(k)=-\frac{4\pi}{k^3}e^{-\frac{k^2\Xi^2}{4}}\left[\left(1+\frac{k^2\Xi^2}{2}\right)\sin(k\alpha)-k\alpha\cos(k\alpha)\right]\end{equation} 
