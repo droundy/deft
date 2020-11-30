@@ -207,7 +207,7 @@ Figure~\ref{fig:TwoSpheres}.
     \label{fig:TwoSpheres}
     \end{figure} 
     
-\section{The Theory of Freezing and Maxwell's Double Tangent Construction}
+\section{Freezing and Maxwell's Double Tangent Construction}
 
 Freezing is governed by entropy, which the universe, or any closed system, 
 seeks to maximize according to the second law of Thermodynamics. When the 
@@ -360,6 +360,10 @@ $n(\vec{r})$ through all possible spatial profiles until the free energy
 is minimized~\cite{MoritaDFT}. 
 \begin{displaymath}f[n(\vec r)]\rightarrow f_{eq}[n_{eq}(\vec r)]  \mbox{ as $f$ is minimized} \end{displaymath}
 \begin{displaymath}{\mbox{where }  n(\vec{r})=n_{eq}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}
+%The reason the minimization works is because DFT satisfies the conditions of the 
+%variational principle, the same mathematical principle used to determine 
+%that the shortest distance between two points is a straight line by 
+%varying the path between the two points until the distance is minimized.
 
 A description of cDFT often begins with considering the Grand Free 
 Energy defined as
@@ -393,10 +397,6 @@ per particle $f_N$ are temperature, volume and one over the number of
 particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. 
 \begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
 
-%The reason the minimization works is because DFT satisfies the conditions of the 
-%variational principle, the same mathematical principle used to determine 
-%that the shortest distance between two points is a straight line by 
-%varying the path between the two points until the distance is minimized.
 The minimization can be illustrated for a system near 
 equilibrium by considering that according to the 
 second law of thermodynamics, a system that is not in equilibrium will 
@@ -407,32 +407,36 @@ the entire universe minus the system. This, together with the conservation
 of energy (the first law of thermodynamics) which says that energy lost 
 (or gained) by the system is gained (or lost) by the surroundings 
 $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that 
-changes in the free energy will be negative for spontaneous processes 
-when the natural variables of the free energy are held fixed~\cite{schroeder}. 
-And so over time the free energy settles to a minimum. 
+changes in the free energy 
+will be negative for spontaneous processes 
+when the natural variables of the free energy are held fixed. 
+For our case, with a fixed temperature, volume, and number of particles
+we get
 %Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
 %\begin{equation}
-  %df_{N-System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
+  %df_{System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
 %\end{equation}
 %and holding the temperature fixed ($T_{System}=T_{Surroundings}$) so that 
 %$dT=0$ gives
 %\begin{equation}
-  %f_{N-System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}
+  %f_{System}=-d\left(\frac{U}{N}\right)_{Surroundings}-Td\left(\frac{S}{N}\right)_{System}
 %\end{equation}
 %where conservation of energy was also applied. Fixing the volume and the 
 %number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, 
 %results in
-%\begin{equation}
-  %df_{N-System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings}
-%\end{equation}
+\begin{equation}
+  df_{System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings}
+\end{equation}
 %which, for fixed N, is the same as
 %\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} 
 %Since $dS_{System+Surroundings} \geq{0}$, and the temperature and number 
 %of particles are fixed, the change in the free energy of the system will 
 %always be negative, and thus the free energy tends toward a minimum.
 %~\cite{schroeder}. 
-A proof of minimization in general
-can be found in Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
+and so the free energy tends toward a minimum. 
+Details of this procedure be found in Thermal Physics by Schroeder~\cite{schroeder}, 
+and a proof of minimization in general can be found in 
+Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
 
 The Helmholtz free energy can be written as
 \begin{equation}{F=-k_{B}T\ln(Z)}\end{equation}
@@ -601,7 +605,7 @@ Equation~\ref{eq:Fexcess-simplified}). In the next chapter on methods, we
 will use an SFMT functional that we adapt to fit the soft-sphere WCA fluid.
 
 SFMT is an extension of Fundamental Measure Theory (FMT)~\cite{rosenfeld1989}
-that was developed for the hard-sphere fluid. FMT can be derived from
+that was developed for the hard-sphere fluid which can be derived from
 Scaled Particle Theory (SPT)~\cite{santos2012phi3}.  
 Scaled Particle Theory seeks a general expression for the excess chemical 
 potential of a homogeneous hard-sphere fluid which can then be integrated 
@@ -621,16 +625,19 @@ the ensemble average of the Boltzman factor for the potential energy
 difference $V_{diff}$ between a system with N atoms and one with N+1 atoms. 
 The resulting equation, shown below, is known as Widom's Insertion 
 Formula~\cite{Hansen}.
-\begin{equation}\mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}\end{equation}
+\begin{align} \label{mu-der-int}
+    \mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}
+\end{align}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
 
 The quantity $<e^{-\beta{V_{diff}}}>$ can be evaluated by considering that
 there will be a change in the potential energy of $V_{diff}$ if one sphere
-is added, but $V_{diff}$ will be zero if no sphere is added. 
+is added, but no change in potential energy if no sphere is added ($V_{diff}=0$). 
 %at each point in the fluid, there is a probability that 
 %a hard sphere of radius R has space available to exist at that point
 %without overlapping with other spheres, or it does not, as shown in 
-Widom's Insertion formula Equation~\ref{widoms-insertion-formula}, then becomes
+Widom's Insertion formula Equation~\ref{widoms-insertion-formula}, 
+then becomes~\cite{Hansen}
 \begin{align} 
 	\mu_{ex} &= -k_BT\ln\left(e^{-\beta{V_{diff}}}+1\right)  \\
 	         &= V_{diff} \\
@@ -651,7 +658,7 @@ in Figure~\ref{fig:p_overlap}.
     an overlap occurs.}
     \label{fig:p_overlap}
   \end{figure}
-In this case Equation~\ref{widoms-insertion-formula} becomes
+In this case Equation~\ref{widoms-insertion-formula} becomes~\cite{Hansen}
 \begin{align} \label{muexcess}
   \mu_{excess}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3) 
 \end{align}
@@ -669,13 +676,34 @@ and \ref{muexcess} gives
 where $\eta$ is the packing fraction defined as
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
 \begin{equation}{\eta = \frac{N\frac{4}{3}\pi{R^3}}{V}}\end{equation}
-Forming a more general result by requiring continuity of the functions, 
-along with their first and second derivatives, for the reversible work
-written for fluids with a cavity radius equal to, larger than, or very 
-much larger than the hard sphere radius R, Scaled Particle Theory arrives 
-at an expression for the excess Helmholtz free energy of 
-a homogeneous hard-sphere fluid in terms of the packing fraction $\eta$.
-For details, see Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}. 
+Scaled Particle Theory forms a more general result for the reversible work 
+as a function of the radius of the cavity by considering additional 
+cases where the cavity is larger, and much larger than the radius of 
+a hard sphere, and requiring continuity of the functions for the 
+different cases and their derivatives (first and second). 
+By setting the radius of the cavity to the hard sphere radius, the 
+more general work equation becomes equal to the chemical potential. 
+Details of this procedure can be found 
+in Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.  
+An expression for the excess Helmholtz free energy in terms of the
+packing fraction $\eta$ can then be obtained through 
+Equation~\ref{mu-der-int}. 
+%
+%By requiring continuity of the functions valid for different cavity 
+%sizes, along with their first and second derivatives, an equation for 
+%the work is obtained which can then be used to form 
+%set equal to the excess chemical 
+%potential by setting the cavity radius to the radius of hard sphere. 
+%
+%Forming a more general result by requiring continuity of the functions, 
+%along with their first and second derivatives, for the reversible work
+%written for fluids with a cavity radius equal to, larger than, or very 
+%much larger than the hard sphere radius R, 
+%
+%Scaled Particle Theory arrives at 
+%an expression for the excess Helmholtz free energy of 
+%a homogeneous hard-sphere fluid in terms of the packing fraction $\eta$.
+%For details, see Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}. 
 \begin{align}\label{Fexcess-SPT}
     F_{excess}=k_BT\left(-ln(1-\eta)+\frac{3\eta}{1-\eta}+\frac{3{\eta}^2}{2(1-\eta)^2}\right)N
 \end{align} 
@@ -808,7 +836,7 @@ in which a tensor weight is incorporated given by
 \begin{equation}\label{eq:tensorweight}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation} 
 All the other FMT equations remain the same. 
 
-The FMT equations developed so far have been for a hard-sphere fluid.
+The FMT equations shown so far have been for a hard-sphere fluid~\cite{Hansen}.
 All of the weight functions, the relations between them, and the equation 
 for the derivative of the mayer function, can be expressed in terms of 
 $w_{2}(r)$ which, for a hard-sphere fluid, consists of a delta function.
