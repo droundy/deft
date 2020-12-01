@@ -607,8 +607,9 @@ will use an SFMT functional that we adapt to fit the soft-sphere WCA fluid.
 
 SFMT is an extension of Fundamental Measure Theory (FMT)~\cite{rosenfeld1989}
 that was developed for the hard-sphere fluid which can be derived from
-Scaled Particle Theory (SPT)~\cite{santos2012phi3}.  
-Scaled Particle Theory seeks a general expression for the excess chemical 
+Scaled Particle Theory (SPT)~\cite{santos2012phi3}. 
+Scaled Particle Theory~\cite{ReissSPT} 
+seeks a general expression for the excess chemical 
 potential of a homogeneous hard-sphere fluid which can then be integrated 
 to find the excess Helmholtz free energy according to the relation
 \begin{equation}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~}\rightarrow{~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{equation}
@@ -630,10 +631,18 @@ Formula~\cite{Hansen}.
     \mu_{ex}=\frac{F_{ex}(N+1)-F_{ex}(N)}{\Delta{N}}\bigg|_{T,V}
 \end{align}
 \begin{equation}\label{widoms-insertion-formula}{~}=-k_BT\ln\left(<e^{-\beta{V_{diff}}}>\right)\end{equation}
-
+where 
+\begin{align}
+    <e^{-\beta{V_{diff}}}>=\sum_s{P_se^{-\beta V_s}}
+\end{align}
+and
+\begin{align}
+    Z=\sum_s{e^{-\beta V_s}}
+\end{align}
 The quantity $<e^{-\beta{V_{diff}}}>$ can be evaluated by considering that
 there will be a change in the potential energy of $V_{diff}$ if one sphere
 is added, but no change in potential energy if no sphere is added ($V_{diff}=0$). 
+In this case, $P_s=\frac{e^{-\beta V_s}}{Z}$.
 %at each point in the fluid, there is a probability that 
 %a hard sphere of radius R has space available to exist at that point
 %without overlapping with other spheres, or it does not, as shown in 
@@ -668,7 +677,9 @@ hard sphere R, and $nV_{Sphere}$, which is equal to the total volume
 occupied by the spheres divided by the total volume available, 
 is the probability that a sphere cannot be placed at some random
 point in the homogeneous fluid of number density, $n$, without
-overlapping with another sphere. Combining  Equations~\ref{workrev} 
+overlapping with another sphere. $P_s$ would then have values of
+$nV_{Sphere}$ and $1-nV_{Sphere}$.
+Combining  Equations~\ref{workrev} 
 and \ref{muexcess} gives
 \begin{align}
   %W_{rev}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3)
@@ -1919,7 +1930,7 @@ Putting this into the expression for $n_{m2ij}(\vec{r})$ gives
 \begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}}\end{equation} 
 
 
-\section{Second Virial Coefficient $B_{2}$ for the Error Function Potential $V_{\operatorname{erf}}$}
+\section{Second Virial Coefficient $B_{2}$ for the Error Function Potential}
 \begin{equation}B_2=-\frac{1}{2}\int_{allspace}f(\vec{r})d\vec r\end{equation}
 The Mayer function for the Error Function potential $V_{\operatorname{erf}}$ is
 \begin{equation}f(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} 
