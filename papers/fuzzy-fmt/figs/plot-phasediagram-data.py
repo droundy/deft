@@ -183,7 +183,7 @@ for p in [2,5,10,20]:
 plt.legend(loc='best')
 plt.xlabel('$n^*$')
 plt.ylabel('$T^*$')
-plt.savefig('./figs/T-vs-n_at_fixed_P.pdf')
+plt.savefig('./figs/T-vs-n_at_fixed_P.pdf', transparent=True)
 
 # - OR - uncomment the plot you want
    
@@ -210,7 +210,7 @@ plt.ylim(0, 45)
 plt.xlim(0, 1.1)
 plt.xlabel('$n^*$')
 plt.ylabel('$p^*$')
-plt.savefig('./figs/p-vs-n_at_fixed_T.pdf')
+plt.savefig('./figs/p-vs-n_at_fixed_T.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
 
@@ -224,7 +224,7 @@ plt.ylim(0, 26)
 plt.xlim(0.95, 1.6)
 plt.xlabel('Volume per atom')
 plt.ylabel('$p^*$')
-plt.savefig('./figs/p-vs-V_at_fixed_T.pdf')
+plt.savefig('./figs/p-vs-V_at_fixed_T.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
 
@@ -291,7 +291,7 @@ plt.xlim(0,3) #for paper
 #plt.xlim(0.5,3) #for thesis
 plt.ylim(0)
 plt.tight_layout()
-plt.savefig('./figs/p-vs-T_at_fixed_n.pdf')
+plt.savefig('./figs/p-vs-T_at_fixed_n.pdf', transparent=True)
 
 # - OR - uncomment the plot you want
    ##Plot T vs P  at constant n 
@@ -325,7 +325,8 @@ plt.legend()
 plt.xlim(0.2,1.8)
 plt.ylim(0.5,3)
 
-plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
+plt.tight_layout()
+plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
 
@@ -345,7 +346,9 @@ plt.plot([0.7, 0.8,0.9,1.0,2.0, 3], [6.24, 7.62, 8.78, 9.99, 25.5, 43.8], label=
 plt.legend()
 plt.ylim(0,80)
 plt.xlim(0.5,3)
-plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
+
+plt.tight_layout()
+plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf', transparent=True)
 
 if 'show' in sys.argv:
    plt.show()
