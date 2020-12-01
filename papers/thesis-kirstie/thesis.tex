@@ -326,8 +326,8 @@ procedure for various temperatures.
 \begin{figure}[h!]
     \centering
     \includegraphics[height=8cm]{figs/MaxwellDTC-Fig3.pdf}
-    \caption{The liquid and solid densities at the phase transistion are 
-    found from a plot of pressure vs inverse denisty for both the liquid and the solid.}
+    \caption{The liquid and solid densities at the phase transition are 
+    found from a plot of pressure vs inverse density for both the liquid and the solid.}
     \label{fig:Pvsinvn}
   \end{figure}
 
@@ -343,7 +343,7 @@ procedure for various temperatures.
 
 \section{Classical Density Functional Theory (cDFT)}
 
-Classical Density Fucntional Theory will be used to find the 
+Classical Density Functional Theory will be used to find the 
 Helmholtz free energies of the liquid and the solid for various 
 temperatures and number densities, so that phase diagrams can be 
 constructed using Maxwell's Double Tangent Construction. 
@@ -360,8 +360,9 @@ $n(\vec{r})$ through all possible spatial profiles until the free energy
 is minimized~\cite{MoritaDFT}. 
 \begin{displaymath}f[n(\vec r)]\rightarrow f_{eq}[n_{eq}(\vec r)]  \mbox{ as $f$ is minimized} \end{displaymath}
 \begin{displaymath}{\mbox{where }  n(\vec{r})=n_{eq}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}
-%The reason the minimization works is because DFT satisfies the conditions of the 
-%variational principle, the same mathematical principle used to determine 
+The reason the minimization works is because DFT satisfies the conditions 
+of the variational principle. 
+%the same mathematical principle used to determine 
 %that the shortest distance between two points is a straight line by 
 %varying the path between the two points until the distance is minimized.
 
@@ -612,7 +613,7 @@ potential of a homogeneous hard-sphere fluid which can then be integrated
 to find the excess Helmholtz free energy according to the relation
 \begin{equation}\mu_{ex}=\frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V}{~~~~~}\rightarrow{~~~~~}F_{ex}=\int{\mu_{ex}dN}\end{equation}
 It is an extension of the work done by Widom who showed that the excess 
-chemical potential of a homogenesous fluid corresponds to the reversible 
+chemical potential of a homogeneous fluid corresponds to the reversible 
 work of inserting a sphere of radius R into a fluid consisting of hard 
 spheres of radius R. 
 \begin{align}
@@ -664,7 +665,7 @@ In this case Equation~\ref{widoms-insertion-formula} becomes~\cite{Hansen}
 \end{align}
 where the radius of the cavity $R_{cavity}$ equals the radius of a 
 hard sphere R, and $nV_{Sphere}$, which is equal to the total volume 
-occupied by the spheres divided by the total volume avaliable, 
+occupied by the spheres divided by the total volume available, 
 is the probability that a sphere cannot be placed at some random
 point in the homogeneous fluid of number density, $n$, without
 overlapping with another sphere. Combining  Equations~\ref{workrev} 
@@ -786,7 +787,7 @@ The weight functions $w_{2}$ and $w_{3}$ have the relation
 \begin{equation}\label{w2_w3_relation}{w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)}\end{equation}
 which will be important to keep in tact when moving to SFMT~\cite{schmidt1999density}.
 
-The weight functions can be related to the mayer function 
+The weight functions can be related to the Mayer function 
 \begin{align}
      f(r)=\exp^{-\frac{V(r)}{k_{B}T}}-1
 \end{align} 
@@ -796,7 +797,7 @@ $V(r)$ is the interatomic potential between two hard spheres given by
     V(r)=\left\{ \begin{array}{rc} \infty & 0<r \leq 2R \\ 0  & r>2R \end{array}\right.
 \end{align}
 Evaluating Equation with $V(r)$ given by Equation,  
-the mayer function for a hard-sphere fluid is found to be
+the Mayer function for a hard-sphere fluid is found to be
 \begin{equation}\label{f(r)step}{f(r)=-\Theta(|\vec{r}|-2R)}\end{equation} 
 which can be written in terms of the weight functions if two 
 additional vector weight functions $\vec{w_2}$ and $\vec{w_1}$ are introduced
@@ -805,7 +806,7 @@ additional vector weight functions $\vec{w_2}$ and $\vec{w_1}$ are introduced
 The mayor function can then be written in terms of the weight functions~\cite{Hansen}
 \begin{equation}\label{mayer_deconvolution}{f(r)=-\Theta(|\vec{r}|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})}\end{equation}  
 
-Taking the derivative of the mayer function in Eq~\ref{f(r)step} provides 
+Taking the derivative of the Mayer function in Eq~\ref{f(r)step} provides 
 another relation that will be important to keep in tact when moving to 
 SFMT~\cite{schmidt2000fluid}.
 \begin{align}\label{mayerder=w2convolution}
@@ -838,13 +839,13 @@ All the other FMT equations remain the same.
 
 The FMT equations shown so far have been for a hard-sphere fluid~\cite{Hansen}.
 All of the weight functions, the relations between them, and the equation 
-for the derivative of the mayer function, can be expressed in terms of 
+for the derivative of the Mayer function, can be expressed in terms of 
 $w_{2}(r)$ which, for a hard-sphere fluid, consists of a delta function.
 The weight function $w_{2}(r)$ is in turn related to $w_{3}(r)$ through 
 Equation~\ref{w2_w3_relation}.
 Soft Fundamental Measure Theory extends FMT discussed so far to fluids 
 with soft potentials by keeping the relationships between the weight 
-functions, and the equation for the derivative of the mayer function 
+functions, and the equation for the derivative of the Mayer function 
 the same (Equations~\ref{eq:w0},~\ref{eq:w1},~\ref{eq:w_v1},~\ref{eq:w_v2},
 ~\ref{w2_w3_relation},~\ref{eq:tensorweight},~\ref{mayerder=w2convolution}), 
  but replacing $w_{3}(r)$ with a weight function appropriate 
@@ -1170,7 +1171,7 @@ coefficient evaluated for the WCA potential $V_{WCA}(r)$.
 \begin{equation}B_{2\operatorname{erf}}(T) =B_{2WCA}(T)\end{equation}
 The second virial coefficient is given by
 \begin{equation}B_2=-\frac{1}{2}\int_{Volume}f(\vec{r})d\vec r\end{equation}
-Using the mayer function for the error function potential given by 
+Using the Mayer function for the error function potential given by 
 Equation~\ref{eq:VerfMayerfunction} we found (see Appendix) the second 
 virial coefficient $B_{2}$ for the error function potential $V_{erf}(r)$ 
 to be
@@ -1360,10 +1361,10 @@ density of 1.00, giving a spread of 0.08.
 %range of reduced temperatures from kT=0.5 to 38. The white lines show the results
 %of molecular simulations of the WCA fluid made by Ahmed and Sadus~\cite{ahmedsadus}.
 %As can be seen in the figure, the region of coexistence in our simulations 
-%falls within the region of coexistance predicted by Ahmed and Sadus at almost 
+%falls within the region of coexistence predicted by Ahmed and Sadus at almost 
 %all temperatures from approximately kT=0.5 to 28. At the low temperature of kT=0.5,
-%the width of the coexistance regions are nearly the same, while moving to 
-%higher temperatures,the width of our coexistance region ranges from about 
+%the width of the coexistence regions are nearly the same, while moving to 
+%higher temperatures,the width of our coexistence region ranges from about 
 %one-half to one-forth the size. Although, our coexistence region is only 
 %about one-forth the size at kT=28, it is centered within the coexistence 
 %region predicted by Ahmed and Sadus. 
@@ -1374,7 +1375,7 @@ density of 1.00, giving a spread of 0.08.
   %\centering
   %%\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
   %%\includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n_AS}
-  %%\caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fuild. 
+  %%\caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fluid. 
   %%White lines show the liquid and solid transition densities at each temperature from 
   %%simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
   %\label{fig:Phase_Diagram_of_T_vs_n_AS}
@@ -1416,7 +1417,7 @@ the difference in the volumes is too low.
 \end{figure}
 %
 %Figure~\ref{fig:Phase_Diagram_P_vs_T_AS} shows our results for a larger 
-%range of reduced temperatures from kT=0.5 to 38, compated with the results
+%range of reduced temperatures from kT=0.5 to 38, compared with the results
 %from Ahmed and Sadus's molecular simulations. Here again, our transition 
 %pressures and temperatures are consistently higher.
 %
@@ -1434,7 +1435,7 @@ the difference in the volumes is too low.
 %reduced pressure versus the reduced temperature at fixed reduced densities 
 %from $n^*$ = 0.7 to 1.2. As can be seen by comparison with Figure 
 %\ref{fig:Phase_Diagram_P_vs_T_AS}, the plotted lines display kinks when 
-%the WCA fluid transistions into a solid. These downward bends align to 
+%the WCA fluid transitions into a solid. These downward bends align to 
 %form the curved interface separating the blue and red areas in 
 %Figures~\ref{fig:Phase_Diagram_P_vs_T} and \ref{fig:Phase_Diagram_P_vs_T_AS}.
 %
@@ -1920,7 +1921,7 @@ Putting this into the expression for $n_{m2ij}(\vec{r})$ gives
 
 \section{Second Virial Coefficient $B_{2}$ for the Error Function Potential $V_{\operatorname{erf}}$}
 \begin{equation}B_2=-\frac{1}{2}\int_{allspace}f(\vec{r})d\vec r\end{equation}
-The mayer function for the Error Function potential $V_{\operatorname{erf}}$ is
+The Mayer function for the Error Function potential $V_{\operatorname{erf}}$ is
 \begin{equation}f(r)=\frac{1}{2}\left[\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)-1\right]\end{equation} 
 from which it can be seen that $f(r)$ is approximately 0 for $r>r_{max}$ 
 where $r_{max}$ is some maximum value of $r$.
@@ -2031,7 +2032,7 @@ Noting that $Q_N=1$ for an ideal gas since $V(r)=0$ for an ideal gas
 and Equation~\ref{PV/kBT_reduces_for_N} becomes
 \begin{equation}\frac{PV}{k_BT}=N + \beta\mu_{excess}{N} + \ln{Q}_N\end{equation}
 \begin{equation}\frac{PV}{k_BT}=N + \beta\frac{\partial{F}_{excess}}{\partial{N}}{N} - \frac{F_{excess}}{k_BT}\end{equation}
-Plugging in the expression for $F_{excess}$ in terms of the mayer function 
+Plugging in the expression for $F_{excess}$ in terms of the Mayer function 
 for low density fluids
 \begin{equation}F_{excess}=k_BT\frac{N^2}{V}\left(-\frac{1}{2}\int{f(r)d\vec{r}}\right)\end{equation}
 gives
