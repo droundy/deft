@@ -1677,14 +1677,14 @@ The tensor weight matrix elements are then given by
 \begin{equation}{w_{m2_{ij}}(\vec{r})=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
 with temporarily setting
 \begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-The fourier transform of the tensor weight matrix elements are given by
+The Fourier transform of the tensor weight matrix elements are given by
 \begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})=\int_{allspace}{w_{{m2}_{ij}}}(\vec{r})e^{-i\vec{k}\cdot\vec{r}}d{\vec{r}}}\end{equation}
 Since the integration is over all space, the integral can be simplified 
 by setting 
 \begin{equation}{\vec{k}=k\hat{z}}\end{equation}
 \begin{equation}{\vec{k}\cdot\vec{r}=kr\cos\theta\hat{z}}\end{equation}
 Instead of constraining vector $\vec{k}$ to be in the z direction, 
-owever, a rotated coordinate system $(x',y',z')$ is used which is 
+however, a rotated coordinate system $(x',y',z')$ is used which is 
 rotated from the (x,y,z) coordinate system in such a way that $\hat{z}'$ 
 points in the direction of vector $\vec{k}$. After solving for the 
 elements of the transformed weight function in coordinate system 
@@ -1868,7 +1868,7 @@ Adding the three terms gives:
 \section{Derivation of Tensor Density $n_{m2ij}(\vec{r})$}
 \begin{equation}{\overleftrightarrow{n}_{m2}(\vec{r})=\int_{allspace}n(\vec{r'})\overleftrightarrow{w}_{m2}(\vec{r}-\vec{r'})d{\vec{r'}}}\end{equation} 
 \begin{equation}{n_{m2ij}(\vec{r})=\int_{allspace}{n(\vec{r}')w_{m2ij}(\vec{r}-\vec{r}'){}d{\vec{r}'}}}\end{equation}
-Using the definintion of the delta function
+Using the definition of the delta function
 \begin{equation}{\delta}((\vec{r}-\vec{r}')-\vec{r}'')={ \frac{1}{\left(2\pi\right)^3}\int e^{i\vec k\cdot ((\vec r-\vec r')-\vec{r}'')}d\vec{k}}\end{equation} 
 $w_{m2ij}(\vec{r}-\vec{r}')$ can be expressed as
 \begin{align}
@@ -2002,7 +2002,7 @@ Equation~\ref{Euler_rearranged} then becomes
 {n_i}})\end{equation}
 \begin{equation}\frac{PV}{k_BT}=-\sum{P_i}\left[\ln{P_i}+\beta(E_i-\mu
 {n_i})\right]\end{equation}
-For a Grand Canonical Ensemble the probablity of a state given by
+For a Grand Canonical Ensemble the probability of a state given by
 \begin{equation}P_{n,s(n)}=\frac{e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\end{equation}
 results in 
 \begin{equation}\frac{PV}{k_BT}=-\sum_{n=0}^\infty\sum_{s(n)}P_{n,s(n)}\left[\ln{\left(\frac{ e^{-\beta(E_{s(n)}-\mu{n})}}{\sum_{n=0}^\infty\sum_{s(n)}e^{-\beta(E_{s(n)}-\mu{n})}}\right)}+\beta(E_{s(n)}-\mu{n})\right]\end{equation}
@@ -2049,7 +2049,7 @@ equation is given by
 
 
 \section{Derivation of $F = -k_BTln(Z)$ for Continuous Systems}
-The canonical equilibrium phase-space probablity density is given by
+The canonical equilibrium phase-space probability density is given by
 \begin{equation}P_{eq}(\vec r^N, \vec p^N)=\frac{1}{N!}\frac{1}{h^{3N}}\frac{e^{-\beta H}}{partian function}\end{equation}
 \begin{equation}{partian function}=\frac{1}{N!}\frac{1}{h^{3N}}\int\dot~\dot~\dot~\int e^{-\beta H} d\vec r^{N} d\vec p^{N}\end{equation}
 The Helmholtz free energy is given by 
