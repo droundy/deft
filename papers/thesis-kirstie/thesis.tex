@@ -29,15 +29,15 @@
   A WCA fluid consists of soft spheres that exhibit the repulsive 
   portion of the Lennard-Jones potential widely used to model the 
   interaction of two neutral atoms. Our cDFT functional is constructed 
-  using Soft Fundamental Theory (SFMT) with Tarazona's tensor expression 
-  for $\Phi_3$, and Schmidt's error function model in which we have 
-  incorporated our temperature dependent parameters $\alpha$ and $\Xi$. 
-  We find $\Xi$ by making the second virial coefficients of the error 
-  function potential and the WCA potential equal. Our functional was 
+  using Soft Fundamental Theory (SFMT) Schmidt's error function model 
+  in which we have incorporated temperature dependent parameters to make
+  %$\alpha$ and $\Xi$. We find $\Xi$ by making the second virial 
+  %coefficients of the error function potential and the WCA potential equal. 
+  the second virial coefficient correct. Our functional was 
   successful in predicting the freezing of the WCA fluid with a fairly 
-  good match to Monte-Carlo simulations. 
-  This result suggests that SFMT may provide a strong foundation for 
-  future density functionals that will model real fluids.
+  good match to Monte-Carlo simulations. This result suggests that SFMT 
+  may provide a strong foundation for future density functionals that 
+  will model real fluids.
 }
 
 \begin{document}
@@ -605,9 +605,16 @@ that each sphere with every other sphere in the fluid (as required by
 Equation~\ref{eq:Fexcess-simplified}). In the next chapter on methods, we
 will use an SFMT functional that we adapt to fit the soft-sphere WCA fluid.
 
-SFMT is an extension of Fundamental Measure Theory (FMT)~\cite{rosenfeld1989}
-that was developed for the hard-sphere fluid which can be derived from
+SFMT was developed by Schmidt~\cite{schmidt1999density, schmidt2000fluid} 
+for soft-spheres, and is an extension of Fundamental Measure Theory (FMT). 
+FMT was developed 
+by Rosenfeld~\cite{rosenfeld1989, rosenfeld1994,fmtfromsptandsignerror}, 
+for the hard-sphere fluid,
+%, and which can be 
+and derived from 
+%by expanding 
 Scaled Particle Theory (SPT)~\cite{santos2012phi3}. 
+%to inhomogeneous, or non-uniform hard-sphere fluids.
 Scaled Particle Theory~\cite{ReissSPT} 
 seeks a general expression for the excess chemical 
 potential of a homogeneous hard-sphere fluid which can then be integrated 
@@ -859,7 +866,7 @@ with soft potentials by keeping the relationships between the weight
 functions, and the equation for the derivative of the Mayer function 
 the same (Equations~\ref{eq:w0},~\ref{eq:w1},~\ref{eq:w_v1},~\ref{eq:w_v2},
 ~\ref{w2_w3_relation},~\ref{eq:tensorweight},~\ref{mayerder=w2convolution}), 
- but replacing $w_{3}(r)$ with a weight function appropriate 
+but replacing $w_{3}(r)$ with a weight function appropriate 
 for a soft-sphere potential~\cite{schmidt1999density, schmidt2000fluid}. 
 This is what we do in forming a functional for the Weeks-Chandler-Anderson 
 fluid as detailed in the next chapter on Methods.
