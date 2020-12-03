@@ -29,11 +29,9 @@
   A WCA fluid consists of soft spheres that exhibit the repulsive 
   portion of the Lennard-Jones potential widely used to model the 
   interaction of two neutral atoms. Our cDFT functional is constructed 
-  using Soft Fundamental Theory (SFMT) Schmidt's error function model 
-  in which we have incorporated temperature dependent parameters to make
-  %$\alpha$ and $\Xi$. We find $\Xi$ by making the second virial 
-  %coefficients of the error function potential and the WCA potential equal. 
-  the second virial coefficient correct. Our functional was 
+  using Soft Fundamental Theory (SFMT) with Schmidt's error function 
+  model in which we have incorporated temperature dependent parameters 
+  to make the second virial coefficient correct. Our functional was 
   successful in predicting the freezing of the WCA fluid with a fairly 
   good match to Monte-Carlo simulations. This result suggests that SFMT 
   may provide a strong foundation for future density functionals that 
@@ -47,8 +45,8 @@
 \chapter{Introduction}
 
 The goal of this project is to generate temperature-density 
-and pressure-temperature phase diagrams for a Weeks-Chandler-Anderson (WCA) 
-model fluid using classical Density Functional Theory (cDFT). 
+and pressure-temperature phase diagrams for a Weeks-Chandler-Anderson 
+(WCA) model fluid using classical Density Functional Theory (cDFT). 
 To do this, the Helmholtz free energies of the fluid
 in a liquid state and in a crystalline solid state must be found.
 In general, the Helmholtz free energy, which consists of an ideal part 
@@ -122,8 +120,8 @@ between real atoms, is currently the most widely used model for fluids.
     \centering
     \includegraphics[height=7cm]{plot_HardSphere_Potential.pdf}
     \caption{A hard-sphere potential is zero for $r>2R$, and infinity 
-    for $r<{2R}$ where R is the radius of a hard sphere (which is 
-    approximately 1.225/2 in this example).}
+    for $r<{2R}$ where R is the radius of a hard sphere 
+    (R$=\frac{r}{2}\approx$1.22/2=0.61 in this example).}
     \label{fig:HardSphere_potential}
   \end{figure}
 
@@ -179,17 +177,16 @@ which when added together regenerate the full Lennard-Jones potential.
   \end{figure}
 
 The repulsive portion of the Lennard-Jones potential forms the potential for a 
-Weeks-Chandler-Anderson (WCA) model fluid~\cite{andersen1971relationship}. 
-The WCA potential is described by the equation: 
+Weeks-Chandler-Anderson (WCA) model fluid~\cite{andersen1971relationship},
+shown in Figure \ref{fig:WCA_potential}. 
+The WCA potential is described by the equation 
 \begin{align} \label{eq:VWCA}
     V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.
 \end{align} 
-As seen in Figure \ref{fig:WCA_potential} the WCA potential decreases 
-from infinity as the distance between the centers of the atoms r increases, 
-and becomes, and remains, essentially zero when 
-r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ 
-where R is the radius of the sphere. 
-
+The WCA potential decreases from infinity as the distance between the 
+centers of the atoms r increases, and becomes, and remains, essentially 
+zero when r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ where R is the 
+radius of the sphere. 
 As with the Lenard-Jones potential, the repulsive WCA potential increases 
 rapidly and approaches infinity as the two spheres begin to overlap. This 
 is a more realistic repulsive potential than that of the hard-sphere model 
@@ -220,9 +217,16 @@ freezes. The particular structure and density that result are affected
 by the interatomic potential. When repulsive, soft sphere fluids 
 (that are not too soft) freeze, they form lattice structures composed of 
 Face Centered Cubic (FCC) crystal cells~\cite{Hansen}, as do hard spheres. 
-This structure is what one would see by filling a cube with marbles. It 
+This structure is what one would see by filling a box with marbles. It 
 results in the highest density achievable for hard, and nearly-hard, spheres 
 that are purely repulsive. 
+
+\begin{figure}
+    \centering
+    \includegraphics[height=6cm]{figs/P-T_Diagram.pdf}
+    \caption{Conceptual Pressure-Temperature Phase Diagram}
+    \label{fig:P-T_Diagram}
+\end{figure}
 
 For pure substances, a phase transition occurs along a line on a 
 Pressure-Temperature (P-T) phase diagram, such as can be seen in the phase 
@@ -234,20 +238,15 @@ dividing line between the gas and liquid phases, there will just simply
 be a fluid, which we will refer to as a liquid in this paper.
 %which may be referred to as a "liquid", since at the phase boundary the fluid is dense. 
 Points along the line that separates the solid and the liquid phases 
-indicate a phase transition, and show that the solid and the liquid 
-both have the same temperature and the same pressure at a phase transition.
+indicate a phase transition where the solid and liquid phases coexist, 
+and show that both the solid and the liquid have the same temperature 
+and the same pressure at a phase transition.
 
-\begin{figure}
-    \centering
-    \includegraphics[height=6cm]{figs/P-T_Diagram.pdf}
-    \caption{Conceptual Pressure-Temperature Phase Diagram}
-    \label{fig:P-T_Diagram}
-\end{figure}
 The pressure can be related to the Helmholtz free energy F, which is minimized 
-for a system at fixed temperature, volume and number of particles as the 
+for a system at fixed temperature, volume and number of particles, as the 
 entropy of the system and its surroundings is maximized. The negative of 
-the partial derivative of the Helmholtz free energy with respect to volume V 
-at a fixed temperature T and number of particles N equals the pressure. 
+the partial derivative of the Helmholtz free energy with respect to volume V, 
+and at a fixed temperature T and number of particles N, equals the pressure. 
 \begin{equation}{P=-\frac{\partial{F}}{\partial{V}}\bigg|_{T,N}}\end{equation}
 \noindent Dividing both the Helmholtz free energy and the volume by the 
 number of particles, the partial derivative of the Helmholtz free energy 
@@ -257,6 +256,14 @@ free energy per atom, $f$,  with respect to the inverse number density.
 Thus, the pressure corresponds to the negative of the slope of the curve 
 on a plot of the Helmholtz free energy per atom versus the inverse 
 density at fixed temperature. 
+ 
+ \begin{figure}
+    \centering
+     \includegraphics[height=8cm]{figs/MaxwellDTC-Fig1.pdf}
+    \caption{Liquid and solid densities at the solid-liquid phase 
+    transition are identified using Maxwell's Double Tangent Construction}
+    \label{fig:MaxwellDT}
+  \end{figure}
 
 Two such curves are shown in Figure~\ref{fig:MaxwellDT}, one for the liquid 
 and one for the solid at a fixed temperature. Each curve consists of a 
@@ -268,61 +275,37 @@ Since the pressure of the
 liquid is the same as the pressure of the solid at the point of transition, 
 the density of the liquid and the density of the solid at the point of 
 freezing can be found from identifying the points at which the 
-tangents to each curve have the same slope. This process is called 
-Maxwell's Double Tangent Construction. 
+tangents to each curve have the same slope, as shown by the black line. 
+This process is called Maxwell's Double Tangent Construction. 
 
-\begin{figure}
-    \centering
-     \includegraphics[height=8cm]{figs/MaxwellDTC-Fig1.pdf}
-    \caption{Liquid and solid densities at the solid-liquid phase 
-    transition are identified using Maxwell's Double Tangent Construction}
-    \label{fig:MaxwellDT}
-  \end{figure}
-
-To facilitate finding the pressure at the phase transition, 
+To facilitate finding the pressure at the phase transition computationally, 
 it is helpful to consider the Gibbs free energy given by G=F+PV. 
 Rearranging the terms and dividing by N gives an  expression for the 
 Helmholtz free energy per atom $f$ in terms of the Gibbs free energy 
 per atom  $g$ (which is also the chemical potential)  
-\begin{align}{\frac{F}{N}=-P\frac{V}{N}+\frac{G}{N}}\end{align} 
-\begin{align}{f=-P\frac{1}{n}+g}\end{align}
+\begin{align}\frac{F}{N} = -P\frac{V}{N}+\frac{G}{N} \end{align}
+\begin{align}f=-P\frac{1}{n}+g\end{align}
 This equation has the form of a line
-\begin{align}{y=mx+y_o}\end{align}
+\begin{equation}
+    y=mx+y_o
+\end{equation}
 and describes the black line shown in Figure~\ref{fig:MaxwellDT} with the 
 pressure given by the negative of the slope of the line, and the Gibb's 
-free energy per atom given by the y-intercept. 
+free energy per atom, or chemical potential given by the y-intercept. 
 At the point of phase transition the chemical potential of the liquid is 
 the same as the chemical potential of the solid, as is the pressure.
-\begin{align}{\mu_L=\mu_S\mbox{~~~~and~~~~}P_L=P_S\mbox{~~~~at a phase transition}}\end{align} 
-The pressure at the phase transition can be obtained from the point of 
-intersection that occurs when the Gibbs free energy per atom, or chemical
-potential, is plotted against the pressure for both the liquid and the 
-solid at fixed temperature, as shown in Figure~\ref{fig:GibbsvsP}. 
-These curves are constructed from data collected from lines tangent 
-along the curves on the the Helmholtz free energy per atom verses inverse 
-density plots (like that of Figure~\ref{fig:MaxwellDT}) for both the 
-liquid and the solid at a given temperature. 
-The slope gives the negative of the pressure, and the corresponding
-y-intercept gives the chemical potential. The 
-curves in Figure~\ref{fig:GibbsvsP} consist of a collection of data 
-points (P,~$\mu$) for the liquid and the solid respectively.
+\begin{equation}
+    \mu_L=\mu_S\mbox{~~~~and~~~~}P_L=P_S\mbox{~~~~at a phase transition}
+\end{equation} 
 
-\begin{figure}
+ \begin{figure}
     \centering
      \includegraphics[height=8cm]{figs/MaxwellDTC-Fig2.pdf}
     \caption{Pressure is found at point of intersection which occurs 
     when $\mu_L=\mu_S$.}
     \label{fig:GibbsvsP}
   \end{figure}
-
-Once the pressure is known for the transition point, the density of the 
-liquid at the transition point can be found from a plot of the pressure 
-versus the inverse of the density for the liquid, as shown in Figure 
-\ref{fig:Pvsinvn}. The density of the solid at the transition point can 
-be found the same way. A Temperature-Density (T-n) phase diagram, such as 
-that in Figure \ref{fig:T-n_Diagram}, can be generated by repeating this 
-procedure for various temperatures. 
-
+  
 \begin{figure}
     \centering
     \includegraphics[height=8cm]{figs/MaxwellDTC-Fig3.pdf}
@@ -330,6 +313,20 @@ procedure for various temperatures.
     found from a plot of pressure vs inverse density for both the liquid and the solid.}
     \label{fig:Pvsinvn}
   \end{figure}
+
+The pressure at the phase transition can be obtained from the point of 
+intersection that occurs when the chemical potential 
+is plotted against the pressure for both the liquid and the 
+solid at fixed temperature, as shown in Figure~\ref{fig:GibbsvsP}. 
+This plot is constructed from data collected from lines tangent 
+along the curves on the Helmholtz free energy per atom verses inverse 
+density plots (like that of Figure~\ref{fig:MaxwellDT}) for both the 
+liquid and the solid at a given temperature. 
+The slope of the tangent line at a given point gives the negative of the 
+pressure at that point, and the corresponding y-intercept of the tangent 
+line gives the chemical potential at that point. Collecting this data 
+(P,~$\mu$) at each point for the liquid and the solid respectively, 
+produces the curves in Figure~\ref{fig:GibbsvsP}. 
 
 \begin{figure}
     \centering
@@ -340,6 +337,17 @@ procedure for various temperatures.
     and are therefore not pure states.}
     \label{fig:T-n_Diagram}
   \end{figure} 
+  
+Once the pressure is known at the point of phase transition, for a given 
+temperature and number density, the liquid and solid number densities at 
+the phase transition can be found from plots of the pressure versus the 
+inverse of the number density for both the solid and the liquid, 
+as shown in Figure \ref{fig:Pvsinvn}. By repeating this procedure to 
+find the liquid and solid number densities at the phase transition 
+for various temperatures, a Temperature-Density (T-n) phase diagram 
+can be generated, similar to that shown in Figure \ref{fig:T-n_Diagram}, 
+but without the gray hump that is characteristic of fluids that have 
+both attractive and repulsive interatomic potentials. 
 
 \section{Classical Density Functional Theory (cDFT)}
 
@@ -542,8 +550,8 @@ written as~\cite{schroeder}
     \caption{Two-pair interactions $f_{ij}f_{kl}$ are shown for N=4 atoms. 
     Interactions between individual pairs of atoms are shown in green. 
     Interactions between pairs of atoms with an atom shared in common 
-    are shown in red. At low densities only the interactions shown in 
-    green are considered, since atoms are not likely to be clustered.}
+    are shown in red. At low densities only the green interactions
+    are considered, since atoms are not likely to be clustered.}
     \label{fig:diagrammic}
   \end{figure}
 
@@ -591,31 +599,55 @@ until the free energy is minimized.
 %energy, as explained in the next section.
 
 \section{Soft Fundamental Measure Theory (SFMT)}
-In order to apply classical Density Functional Theory to a system that has
-a fixed temperature, volume, and number of particles, a functional for 
-the Helmholtz free energy must first be formed. An expression for the ideal 
-portion of the Helmholtz free energy is given by Equation~\ref{eq:Fideal-n(r)}, 
-but forming an expression for the excess Helmholtz free
-energy from Equation~\ref{eq:Fexcess-simplified} for the particular fluid 
-being modeled can be challenging. 
 Soft Fundamental Measure Theory (SFMT) is a method for forming an 
-expression for the excess Helmholtz free energy of a soft-sphere fluid
-that does not depend on  explicitly taking into account the interaction 
+expression for the excess Helmholtz free energy of a soft-sphere fluid.
+In the next chapter, 
+we will adapt an SFMT functional to fit the soft-sphere WCA fluid.
+Recall that in order to apply classical Density Functional Theory 
+to a system that has a fixed temperature, volume, and number of particles, 
+a functional for the Helmholtz free energy must first be formed. 
+The ideal portion of the Helmholtz free energy is given by 
+Equation~\ref{eq:Fideal-n(r)}, but forming an expression for the excess 
+Helmholtz free energy from Equation~\ref{eq:Fexcess-simplified} for the 
+particular fluid being modeled can be challenging. 
+SFMT is a method for forming an 
+expression for the excess Helmholtz free energy
+that does not depend on explicitly taking into account the interaction 
 that each sphere with every other sphere in the fluid (as required by 
-Equation~\ref{eq:Fexcess-simplified}). In the next chapter on methods, we
-will use an SFMT functional that we adapt to fit the soft-sphere WCA fluid.
-
+Equation~\ref{eq:Fexcess-simplified}).
+%In the next chapter on methods, we will use an SFMT functional that we 
+%adapt to fit the soft-sphere WCA fluid.
 SFMT was developed by Schmidt~\cite{schmidt1999density, schmidt2000fluid} 
-for soft-spheres, and is an extension of Fundamental Measure Theory (FMT). 
-FMT was developed 
-by Rosenfeld~\cite{rosenfeld1989, rosenfeld1994,fmtfromsptandsignerror}, 
-for the hard-sphere fluid,
-%, and which can be 
-and derived from 
-%by expanding 
-Scaled Particle Theory (SPT)~\cite{santos2012phi3}. 
+for soft-spheres, and is an extension of Fundamental Measure Theory (FMT) 
+originally developed by 
+Rosenfeld~\cite{rosenfeld1989, rosenfeld1994, rosenfeld1996, fmtfromsptandsignerror} 
+for the hard-sphere fluid. FMT in turn extented  
+Scaled Particle Theory (SPT)~\cite{ReissSPT, santos2012phi3}, which was 
+developed for homogeneous hard-sphere fluids, 
+to inhomogeneous, or non-uniform hard-sphere fluids.
+
+%In order to apply classical Density Functional Theory to a system that has
+%a fixed temperature, volume, and number of particles, a functional for 
+%the Helmholtz free energy must first be formed. An expression for the ideal 
+%portion of the Helmholtz free energy is given by Equation~\ref{eq:Fideal-n(r)}, 
+%but forming an expression for the excess Helmholtz free
+%energy from Equation~\ref{eq:Fexcess-simplified} for the particular fluid 
+%being modeled can be challenging. 
+%Soft Fundamental Measure Theory (SFMT) is a method for forming an 
+%expression for the excess Helmholtz free energy of a soft-sphere fluid
+%that does not depend on explicitly taking into account the interaction 
+%that each sphere with every other sphere in the fluid (as required by 
+%Equation~\ref{eq:Fexcess-simplified}). In the next chapter on methods, we
+%will use an SFMT functional that we adapt to fit the soft-sphere WCA fluid.
+%SFMT was developed by Schmidt~\cite{schmidt1999density, schmidt2000fluid} 
+%for soft-spheres. It is an extension of Fundamental Measure Theory (FMT) 
+%originally developed by 
+%Rosenfeld~\cite{rosenfeld1989, rosenfeld1994, rosenfeld1996, fmtfromsptandsignerror} 
+%for the hard-sphere fluid, and which expanded 
+%Scaled Particle Theory (SPT)~\cite{santos2012phi3} 
 %to inhomogeneous, or non-uniform hard-sphere fluids.
-Scaled Particle Theory~\cite{ReissSPT} 
+
+Scaled Particle Theory
 seeks a general expression for the excess chemical 
 potential of a homogeneous hard-sphere fluid which can then be integrated 
 to find the excess Helmholtz free energy according to the relation
@@ -646,6 +678,7 @@ and
 \begin{align}
     Z=\sum_s{e^{-\beta V_s}}
 \end{align}
+
 The quantity $<e^{-\beta{V_{diff}}}>$ can be evaluated by considering that
 there will be a change in the potential energy of $V_{diff}$ if one sphere
 is added, but no change in potential energy if no sphere is added ($V_{diff}=0$). 
@@ -660,12 +693,6 @@ then becomes~\cite{Hansen}
 	         &= V_{diff} \\
              &= W_{rev}(R)  \label{workrev}
 \end{align}
-The quantity $<e^{-\beta{V_{diff}}}>$ can also be evaluated by considering
-that it takes no energy for a hard sphere to be placed at a point
-in the fluid where it does not overlap with any other spheres 
-($V_{diff}=0$), but it would require infinite energy ($V_{diff}=\infty$)
-to place a sphere where it would overlap another sphere, as described 
-in Figure~\ref{fig:p_overlap}. 
 \begin{figure}
     \centering
     \includegraphics[height=7cm]{figs/P_overlap.pdf}
@@ -675,6 +702,12 @@ in Figure~\ref{fig:p_overlap}.
     an overlap occurs.}
     \label{fig:p_overlap}
   \end{figure}
+The quantity $<e^{-\beta{V_{diff}}}>$ can also be evaluated by considering
+that it takes no energy for a hard sphere to be placed at a point
+in the fluid where it does not overlap with any other spheres 
+($V_{diff}=0$), but it would require infinite energy ($V_{diff}=\infty$)
+to place a sphere where it would overlap another sphere, as described 
+in Figure~\ref{fig:p_overlap}. 
 In this case Equation~\ref{widoms-insertion-formula} becomes~\cite{Hansen}
 \begin{align} \label{muexcess}
   \mu_{excess}(R_{cavity}=R)=-k_BT\ln(1-n\frac{4\pi}{3}R^3) 
@@ -695,6 +728,7 @@ and \ref{muexcess} gives
 where $\eta$ is the packing fraction defined as
 \begin{equation}{\eta = \frac{\mbox{Volume occupied by the spheres}}{\mbox{Total Volume}}}\end{equation}
 \begin{equation}{\eta = \frac{N\frac{4}{3}\pi{R^3}}{V}}\end{equation}
+
 Scaled Particle Theory forms a more general result for the reversible work 
 as a function of the radius of the cavity by considering additional 
 cases where the cavity is larger, and much larger than the radius of 
@@ -907,6 +941,13 @@ by trying many different number densities, and identifying the one that
 minimizes the Helmholtz free energy. In this section, we look at how to 
 generate various number density profiles that can be used to implement cDFT. 
 
+\begin{figure}
+  \centering
+  \includegraphics[height=3.5cm]{PrimitiveCellLightBlue.png}
+  \caption{A primitive crystal cell is shown by the shaded parallelepiped.}
+  \label{fig:primitivecell}
+\end{figure}
+
 It is known that a fluid with a soft potential like the WCA fluid will 
 form a Face Centered Cubic (FCC) crystal in its solid state~\cite{Hansen}. 
 Although an entire 
@@ -922,12 +963,16 @@ The three lattice vectors will be useful in
 creating the lattice structure computationally, and will also make our 
 program run faster.
 
-  \begin{figure}
-    \centering
-    \includegraphics[height=3.5cm]{PrimitiveCellLightBlue.png}
-    \caption{A primitive crystal cell is shown by the shaded parallelepiped.}
-    \label{fig:primitivecell}
-  \end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
+  \caption{On the left are shown four examples of possible positions 
+  that an atom (blue sphere) might have within a cell that has one 
+  lattice site (black dot) at the center. A large number of such 
+  possibilities would give rise to a Gaussian distribution, 
+  as shown on the right.}
+  \label{fig:Ensemble_Gaus}
+\end{figure} 
 
 An atom will not realistically reside exactly at a lattice point. 
 Statistically there will typically be a normal, or Gaussian distribution 
@@ -950,23 +995,12 @@ Three-dimensional Gaussian distributions centered at lattice points can be
 used to represent a number density profile $n(\vec{r})$  which describes 
 how the atoms are distributed on average over a collection of cells. 
 
- \begin{figure}
-    \centering
-    \includegraphics[height=2.5cm]{Ensemble_Gaussian.png}
-    \caption{On the left are shown four examples of possible positions 
-    that an atom (blue sphere) might have within a cell that has one 
-    lattice site (black dot) at the center. A large number of such 
-    possibilities would give rise to a Gaussian distribution, 
-    as shown on the right.}
-    \label{fig:Ensemble_Gaus}
-  \end{figure} 
-
- \begin{figure}
-    \centering
-    \includegraphics[height=6cm]{Gaussian}
-    \caption{A 2D Gaussian Distribution of width 2$\sigma$}
-    \label{fig:Gaus_plot}
-  \end{figure}  
+\begin{figure}
+  \centering
+  \includegraphics[height=6cm]{Gaussian}
+  \caption{A 2D Gaussian Distribution of width 2$\sigma$}
+  \label{fig:Gaus_plot}
+\end{figure}  
   
 There can be many different number density profiles for a given number
 density. The number density is the number of atoms per volume, whereas
@@ -992,6 +1026,27 @@ gives the number density.
     n=<n(\vec{r})>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}
 \end{align}
 
+\begin{figure}
+   \centering
+   \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
+   \caption{On the left are shown four examples of possible positions 
+   that an atom (blue sphere) might have within a fixed volume 
+   containing eight cells. Each cell has one lattice site at the center 
+   represented by a black dot. A large number of such possibilities 
+   would give rise to the Gaussian distributions shown on the right.}
+   \label{fig:Ensemble_Smallcells}
+\end{figure} 
+
+\begin{figure}
+   \centering
+   \includegraphics[height=2.5cm]{SameStatPic.png}
+   \caption{Front views of a cube with eight smaller cells. The two views 
+   show two ways of picturing a fraction of vacancies, $f_v$ of 7/8 which 
+   give rise to the same Gaussian distribution statistically, 
+   and the same number density.}
+   \label{fig:SameStatPic}
+\end{figure} 
+
 Besides changing the width of the Gaussians, there is another way to 
 generate different number density profiles for a given number density.
 It may be that not all lattice sites are occupied. Vacancies can be taken 
@@ -1009,26 +1064,21 @@ The resulting number density is then given by
     n = (1-f_v){n_{no.vacancies}}
 \end{align} 
 
- \begin{figure}
-    \centering
-    \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
-    \caption{On the left are shown four examples of possible positions 
-    that an atom (blue sphere) might have within a fixed volume 
-    containing eight cells. Each cell has one lattice site at the center 
-    represented by a black dot. A large number of such possibilities 
-    would give rise to the Gaussian distributions shown on the right.}
-    \label{fig:Ensemble_Smallcells}
-  \end{figure} 
-
 \begin{figure}
-    \centering
-    \includegraphics[height=2.5cm]{SameStatPic.png}
-    \caption{Front views of a cube with eight smaller cells. The two views 
-    show two ways of picturing a fraction of vacancies, $f_v$ of 7/8 which 
-    give rise to the same Gaussian distribution statistically, 
-    and the same number density.}
-    \label{fig:SameStatPic}
-  \end{figure} 
+   \centering
+   \includegraphics[height=8cm]{VaryWidthandVacancies.png}
+   \caption{Shows an example set of Gaussian distribution number density 
+   profiles $n(vec r)$ all with the same number density.
+   with the same number density of one atom over the fixed volume.}
+   \label{fig:Ensemble_vary}
+\end{figure}  
+  
+\begin{figure}
+   \centering
+   \includegraphics[height=4cm]{figs/homogeneous_bold-box.pdf}
+   \caption{A homogeneous number density profile $n(\vec{r})$.}
+   \label{fig:homogen_denisty}
+\end{figure} 
 
 To implement classical Density Functional Theory, 
 a set of number density profiles is generated by varying the Gaussian width 
@@ -1037,21 +1087,7 @@ number density, as shown by the example in Figure~\ref{fig:Ensemble_vary}.
 A homogeneous number density profile is used for a liquid, as shown in 
 Figure \ref{fig:homogen_denisty}.
 Once again, it is important to note that the number density is the same 
-for all these number density profiles $n(\vec{r})$. 
-\begin{figure}
-    \centering
-    \includegraphics[height=8cm]{VaryWidthandVacancies.png}
-    \caption{Shows an example set of Gaussian distribution number density 
-    profiles $n(vec r)$ all with the same number density.
-    with the same number density of one atom over the fixed volume.}
-    \label{fig:Ensemble_vary}
-  \end{figure}  
- \begin{figure}
-    \centering
-    \includegraphics[height=4cm]{figs/homogeneous_bold-box.pdf}
-    \caption{A homogeneous number density profile $n(\vec{r})$.}
-    \label{fig:homogen_denisty}
-  \end{figure}  
+for all these number density profiles $n(\vec{r})$.  
 The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number 
 density profile in the set, and also for the homogeneous number density profile 
 characteristic of a liquid. Both the ideal and excess free energies are 
@@ -1086,12 +1122,13 @@ Soft Fundamental Measure Theory is a method
 developed to form an expression for the excess Helmholtz free energy without
 explicitly taking into account the interaction of each sphere with all the others, 
 but it must be tailored to fit a particular fluid\cite{schmidt1999density}.  
+
 Our SFMT functional is tailored to fit a WCA fluid, and 
-is written in general form as 
+is written as 
 \begin{align}\label{eq:Fexfunctional}
   F_{excess}[n(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
 \end{align}
-where
+%where 
 \begin{align}
 \Phi_1 &= -n_{0}\ln(1-n_{3}) \\
 \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
@@ -1120,13 +1157,6 @@ All of the weight functions depend on the expression for $w_3(r)$
 which in turn depends on the interatomic potential $V(r)$ that exists 
 between the spheres, and which defines the particular fluid being modeled.
 
-\begin{figure}
-  \centering
-  \includegraphics[height=8cm]{plot_alpha.pdf}
-  \caption{Shows the temperature dependence of $\alpha$ vs $k_BT$ 
-  for $\sigma=1$ and $\epsilon=1$.}
-  \label{fig:alphaXivsT}
-\end{figure}
 The weight functions $w_{2}(r)$ and $w_{3}(r)$ are constructed using 
 Schmidt's proposed error function model~\cite{schmidt2000fluid} designed 
 to model a steep, soft potential in which he set
@@ -1170,6 +1200,15 @@ gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$
 \begin{equation} \label{eq:Verf}
 	V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]
 \end{equation}  
+
+\begin{figure}
+  \centering
+  \includegraphics[height=8cm]{plot_alpha.pdf}
+  \caption{Shows the temperature dependence of $\alpha$ vs $k_BT$ 
+  for $\sigma=1$ and $\epsilon=1$.}
+  \label{fig:alphaXivsT}
+\end{figure}
+
 The parameter $\alpha(T)$ is derived by setting 
 the error function potential $V_{erf}(r)$ 
 equal to the WCA potential given by Equation~\ref{eq:VWCA} at $r=\alpha$. 
@@ -1181,14 +1220,14 @@ This gives
 Figure \ref{fig:alphaXivsT} shows how $\alpha(T)$ varies with temperature 
 when $\sigma=1$ and $\epsilon=1$.    
 
-  \begin{figure}
-    \centering
-    \includegraphics[height=8cm]{xi_fromB2.pdf}
-    \caption{Shows the temperature dependence of $\Xi$ generated from 
-    matching the second virial coefficients for $V_{\operatorname{erf}}(r)$ and $V_{WCA}(r)$ 
-    at each temperature.}
-    \label{fig:xi_fromB2vsT}
-  \end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[height=8cm]{xi_fromB2.pdf}
+  \caption{Shows the temperature dependence of $\Xi$ generated from 
+  matching the second virial coefficients for $V_{\operatorname{erf}}(r)$ and $V_{WCA}(r)$ 
+  at each temperature.}
+  \label{fig:xi_fromB2vsT}
+\end{figure}
 
 We determine the value of $\Xi(T)$ at a given temperature $T$,
 by setting the second virial coefficient evaluated for the error 
@@ -1221,6 +1260,7 @@ Figure~\ref{fig:xi_fromB2vsT}.
   vary along the z-axis for a reduced temperature of $K_BT=2$.}
   \label{fig:weight_functions}
 \end{figure}
+
 Figure \ref{fig:weight_functions} shows a one dimensional view of the 
 weight functions $w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance 
 along the z-axis. In three dimensions, the weighting functions 
@@ -1245,6 +1285,7 @@ where $\vec R_j$ is the position vector of the jth lattice site.
 The liquid excess Helmholtz free energy is computed analytically  
 using SFMT Equations~\ref{eq:Fexfunctional} through \ref{eq:tensorweight-methods} 
 with a uniform number density profile, n that does not depend on $\vec r$. 
+
 \begin{figure}
   \centering
   (a) \includegraphics[height=7cm]{figs/weightandGauss1.pdf}\\
@@ -1269,6 +1310,15 @@ with a uniform number density profile, n that does not depend on $\vec r$.
 % \label{fig:GaussandW2_thinkas}
 % \end{figure}
 
+\begin{figure}
+   \centering
+   \includegraphics[height=5cm]{InclusionRadius.png}
+   \caption{Gaussians are centered at each lattice point. After a radius 
+   of a few Gaussian widths about each lattice point, the Gaussians go to 
+   zero and can be neglected.}
+   \label{fig:InclusionRadius}
+\end{figure} 
+
 The crystal excess Helmholtz free energy is computed  
 using SFMT with a number density profile 
 that consists of Gaussian distributions 
@@ -1280,14 +1330,6 @@ difference between $\vec r$ and $\vec r~'$, it can be thought of as
 centered at $\vec r$, as shown in Figure~\ref{fig:GaussandW2_actual}b.
 Keeping the weight function centered at $\vec r$, 
 Monte-Carlo integration can be used to compute the weighted densities $n_i(\vec r)$
-\begin{figure}
-   \centering
-   \includegraphics[height=5cm]{InclusionRadius.png}
-   \caption{Gaussians are centered at each lattice point. After a radius 
-   of a few Gaussian widths about each lattice point, the Gaussians go to 
-   zero and can be neglected.}
-   \label{fig:InclusionRadius}
-\end{figure} 
 by randomly generating vectors
 $\vec r~' -\vec R$ according to a Gaussian distribution. 
 Only lengths for $\vec r~'- \vec R$ that are within an inclusion radius
@@ -1349,6 +1391,7 @@ it is seen to extend over a narrow range of number densities which
 gradually shifts towards higher densities as the temperature increases. 
 This is expected since at higher temperatures the fluid would have to 
 be under greater compression before forming a solid. 
+
 White lines superimposed on the phase diagram show the boundaries of the 
 coexistence region as predicted by Monte-Carlo simulations~\cite{May} 
 of the WCA fluid. 
@@ -1414,6 +1457,7 @@ Ideally, the slope of the phase boundary $\frac{dP}{dT}$ at some point (P,T) is 
 \end{align}
 Since the entropy and the volume of the liquid is greater than the entropy
 and the volume of the solid, the slope should be positive. 
+
 Comparing the slope of the phase boundary predicted by cDFT to that
 from Monte-Carlo simulations shown by the white line, it is seen that
 the cDFT transition temperatures are consistently higher, and the 
