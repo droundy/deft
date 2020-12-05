@@ -73,34 +73,16 @@
 %\end{frame}
 
 \section*{WCA Fluid}
+
 \subsection*{Why do we care about it?}
-\subsection*{WCA potential}
+\begin{frame}{}
+stuff...
+\end{frame}
 
+\subsection*{WCA Model Fluid}
 \begin{frame}{The WCA Model Fluid}
-    \begin{figure}
-        \centering
-        \includegraphics[height=3.5cm]{figs/TwoSpheres.pdf} 
-        %\caption{(Left) The WCA potential is a minimum at r=2R. 
-                 %(Right) The WCA potential increases rapidly for $r<2R$.}
-        \label{fig:TwoSpheres}
-    \end{figure} 
-    
-    \begin{itemize}
-		\item Composed of slightly "squishy" spheres
-		\item Classical fluid
-	\end{itemize}
-\end{frame}    
-
-\begin{frame}{The WCA potential}
 	\begin{columns}[t]
-		\column{.5\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=\columnwidth]{WCA_Potential.pdf}
-            \caption{WCA potential}
-            \label{fig:WCA_potential}
-          \end{figure}
-		\column{.5\textwidth}
+       \column{.5\textwidth}
 		\begin{block}{Real Liquids}
 			\begin{itemize}
 				\item Short range repulsion 
@@ -109,46 +91,185 @@
 		\end{block}
 		\begin{block}{WCA Model Fluid}
 			\begin{itemize}
-				\item Repulsion only
-				\item Soft, short range
+				\item Soft, short range repulsion
+				\item Classical fluid
+				\item Slightly "squishy" spheres
 			\end{itemize}
-		\end{block}
+		\end{block}		
+		\column{.5\textwidth}
+		\vspace{-3em}
+          \begin{figure}
+             \centering
+             \includegraphics[width=1.1\columnwidth]{figs/TwoSpheresandplot.pdf} 
+          \end{figure} 	 
 	\end{columns}	
 \end{frame}
 
-
-\subsection*{Freezing}
-\begin{frame}{Crystal forms at Freezing}
+\subsection*{Freezing and Phase Diagrams}
+\begin{frame}{WCA Crystalline Structure}
 	\begin{columns}[t]
 		\column{.5\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=0.7\columnwidth]{PrimitiveCellLightBlue.png}
-            \caption{Primitive Cell (in blue)}
-          \end{figure}
-		\column{.5\textwidth}
+	    \vspace{-1em}
 		\begin{block}{WCA Fluid forms crystals}
 			\begin{itemize}
+			    \item Structure depends on V(r)
 				\item Face-Center-Cubic cells 
 				\item Filling a box with marbles
-				\item Parallelpiped primitive cell 
+				\item Parallelpiped primitive cell - 
+				smallest unit that reproduces lattice
 				\item One atom per primitive cell
 			\end{itemize}
 		\end{block}
+		\column{.5\textwidth}
+        \vspace{-0.5em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.6
+            \columnwidth]{PrimitiveCellLightBlue.png}
+            %\caption{Primitive Cell (in blue)}
+          \end{figure}
+          
+          $~~~~~~~$Primitive cell (in blue)
 	\end{columns}	
 \end{frame}
-%\begin{frame}{FCC crystal formed at freezing}
-   %\begin{figure}
-      %\centering
-      %\includegraphics{PrimitiveCellLightBlue.png}
-      %%\caption{A primitive crystal cell is shown by the shaded parallelepiped.}
-      %\label{fig:primitivecell}
-      %\vspace{+2em}
-      
-      %A paralllelepiped primitive cell inside an FCC cell
-   %\end{figure}
+
+%\begin{frame}{Freezing of a WCA Fluid}
+	%\begin{columns}[t]
+		%\column{.5\textwidth}
+	    %%\vspace{-3em}
+		%\begin{block}{Freezing...}
+		     %\begin{itemize}
+				%\item Driven by entropy?				
+				%\item Abrupt change in density
+				%\item Liquid and solid coexist
+			%\end{itemize}		
+		%\end{block}
+	    %\column{.5\textwidth}
+		%\begin{block}{At Freezing ...}
+		     %\begin{itemize}
+				%\item Thermal equilibrium 
+				
+				%($\text{T}_{Liquid}$ = $\text{T}_{Solid}$)
+			    %\item Mechanical equilibrium 
+			    
+			    %($\text{P}_{Liquid}$ = $\text{P}_{Solid}$)
+				%\item Diffusive equilibrium 
+				
+				%($\mu_{Liquid}$ = $\mu_{Solid}$)
+			%\end{itemize}		
+		%\end{block}		
+	%\end{columns}	
 %\end{frame}
 
+%\subsection*{Phase Diagrams}
+\begin{frame}{Freezing of a WCA Fluid}
+	\begin{columns}[t]
+		\column{.5\textwidth}
+		\begin{block}{At Freezing...}
+		     \begin{itemize}
+				\item Driven by entropy?				
+				\item Abrupt change in density
+				\item Liquid and solid coexist
+			 \end{itemize}		
+		\end{block} 
+		\begin{block}{WCA Phase Diagram}
+		     \begin{itemize}
+				\item No coexistence "hump"				
+			  \end{itemize}				 
+		\end{block}			       
+		\column{.5\textwidth}
+	    \vspace{-2em}
+		 \begin{figure}
+            \centering
+            \includegraphics[width=1.1\columnwidth]{figs/T-n_Diagram.pdf}
+            %\caption{}
+          \end{figure}
+          \vspace{-1em}
+         $~~$Conceptual T-n Phase Diagram          
+	\end{columns}
+    \vspace{+1em}
+\end{frame}
+
+\begin{frame}{Freezing of a WCA Fluid}
+	\begin{columns}[t]
+		\column{.5\textwidth}
+	    \vspace{-0.5em}
+         \begin{block}{At Phase Transition}
+		     \begin{itemize}
+				\item Thermal equilibrium 
+				
+				($\text{T}_{Liquid}$ = $\text{T}_{Solid}$)
+			    \item Mechanical equilibrium 
+			    
+			    ($\text{P}_{Liquid}$ = $\text{P}_{Solid}$)
+				\item Diffusive equilibrium 
+				
+				($\mu_{Liquid}$ = $\mu_{Solid}$)
+			\end{itemize}		
+		\end{block}	
+		\begin{block}{WCA Phase Diagram}
+		     \begin{itemize}
+				\item No liquid/gas boundary				
+			  \end{itemize}				 
+		\end{block}	
+		\column{.5\textwidth}
+	    \vspace{-1.5em}
+		\begin{figure}
+            \centering
+            \includegraphics[width=\columnwidth]{figs/P-T_Diagram.pdf}
+            %\caption{}
+         \end{figure} 
+	    \vspace{-1em}                  
+         $~~$Conceptual P-T Phase Diagram
+	\end{columns}
+    \vspace{+1em}	
+\end{frame}
+
+
+
+%KEEP -------
+%\begin{frame}{Freezing of a WCA Fluid}
+	%\begin{columns}[t]
+		%\column{.5\textwidth}
+	    %\vspace{-3em}
+		%\begin{block}{}
+		     %\begin{itemize}
+				%\item Driven by entropy 
+				%\item Abrupt change in density
+				%\item Liquid and solid coexist
+			%\end{itemize}		
+		%\end{block}
+		%\begin{block}{At Freezing ...}
+		     %\begin{itemize}
+				%\item Thermal equilibrium 
+				
+				%($\text{T}_{Liquid}$ = $\text{T}_{Solid}$)
+			    %\item Mechanical equilibrium 
+			    
+			    %($\text{P}_{Liquid}$ = $\text{P}_{Solid}$)
+				%\item Diffusive equilibrium 
+				
+				%($\mu_{Liquid}$ = $\mu_{Solid}$)
+			%\end{itemize}		
+		%\end{block}		
+		%\column{.5\textwidth}
+	    %\vspace{-1.5em}
+		%\begin{block}{WCA Fluid forms crystals}
+			%\begin{itemize}
+				%\item Face-Center-Cubic cells 
+				%\item Filling a box with marbles
+				%\item Parallelpiped primitive cell - 
+				%smallest unit that reproduces lattice (shown in blue)
+				%\item One atom per primitive cell
+			%\end{itemize}
+		%\end{block}
+        %\begin{figure}
+            %\centering
+            %\includegraphics[width=0.4\columnwidth]{PrimitiveCellLightBlue.png}
+            %%\caption{Primitive Cell (in blue)}
+          %\end{figure}
+	%\end{columns}	
+%\end{frame}
 
 
 %\begin{frame}{Conceptual Phase Diagrams}
@@ -160,32 +281,129 @@
      %\end{figure}
 %\end{frame}
 
+%KEEP------
+%\subsection*{Phase Diagrams}
+%\begin{frame}{Conceptual Phase Diagrams}
+	%\begin{columns}[t]
+		%\column{.5\textwidth}
+        %\begin{figure}
+            %\centering
+            %\includegraphics[width=.9\columnwidth]{figs/P-T_Diagram.pdf}
+            %%\caption{}
+          %\end{figure}
+		%\column{.5\textwidth}
+		 %\begin{figure}
+            %\centering
+            %\includegraphics[width=\columnwidth]{figs/T-n_Diagram.pdf}
+            %%\caption{}
+          %\end{figure}
+	%\end{columns}
+    %\vspace{+1em}
+%Expect WCA phase diagrams to look like these - and not like these.	
+%\end{frame}
 
-\begin{frame}{Conceptual Phase Diagrams}
+\subsection*{Finding coexistence}
+\begin{frame}{Maxwell's Double Tangent Construction}
 	\begin{columns}[t]
 		\column{.5\textwidth}
         \begin{figure}
             \centering
-            \includegraphics[width=.9\columnwidth]{figs/P-T_Diagram.pdf}
-            %\caption{}
+            \includegraphics[width=\columnwidth]{figs/MaxwellDTC-Fig1.pdf}
           \end{figure}
 		\column{.5\textwidth}
-		 \begin{figure}
-            \centering
-            \includegraphics[width=\columnwidth]{figs/T-n_Diagram.pdf}
-            %\caption{}
-          \end{figure}
-	\end{columns}
-    \vspace{+1em}
-Expect WCA phase diagrams to look like these - and not like these.	
+		\begin{block}{}
+			\begin{itemize}
+				\item Data from cDFT 
+				\item Temperature fixed
+				\item Pressure = -slope
+				\item $\mu$ = y-intercept
+			\end{itemize}
+	    \end{block}
+	\end{columns}	
 \end{frame}
 
- 
+\begin{frame}{Maxwell's Double Tangent Construction}
+	\begin{columns}[t]
+		\column{.5\textwidth}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\columnwidth]{figs/MaxwellDTC-Fig2.pdf}
+          \end{figure}
+		\column{.5\textwidth}
+		\begin{block}{At Phase Transition}
+			\begin{itemize}
+				\item $\text{T}_{Liquid}$ = $\text{T}_{Solid}$
+			    \item $\text{P}_{Liquid}$ = $\text{P}_{Solid}$
+				\item $\mu_{Liquid}$ = $\mu_{Solid}$
+			\end{itemize}
+	    \end{block}
+	    \begin{block}{Plot $\mu$ vs P }
+			\begin{itemize}
+				\item Pressure at phase transition found
+				from intersection
+			\end{itemize}
+		\end{block}
+	\end{columns}	
+\end{frame}
+
+\begin{frame}{Maxwell's Double Tangent Construction}
+	\begin{columns}[t]
+		\column{.5\textwidth}
+        \begin{figure}
+            \centering
+            \includegraphics[width=\columnwidth]{figs/MaxwellDTC-Fig3.pdf}
+          \end{figure}
+		\column{.5\textwidth}
+		\begin{block}{Identify phase transition...}
+			\begin{itemize}
+				\item Liquid number density
+				\item Solid number density
+			\end{itemize}
+		\end{block}
+		\begin{block}{Construct phase diagrams}
+	    \end{block}
+	\end{columns}	
+\end{frame}
+
+
 \section*{Classical density functional theory}
+\subsection*{cDFT}
+\begin{frame}{Classical Density Functional Theory (cDFT)}
+    \begin{itemize}
+       \item Vary the number density profile 
+       \item Minimize the Helmholtz free energy
+       \item Equilibrium Free Energy found!
+       \item Form Functional using SFMT
+     \end{itemize}
+\end{frame}
+
+\subsection*{SPT}
+\begin{frame}{Scaled Particle Theory}
+  SPT
+\end{frame}
+
+\subsection*{SFMT}
+\begin{frame}{Soft Fundamental Measure Theory}
+  SFMT
+\end{frame}
+
+\subsection*{Our Functional}
+\begin{frame}{Our Functional}
+    \begin{align}\label{eq:Fexfunctional}
+        F_{excess}[n(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
+     \end{align}
+     %where 
+     \begin{align}
+         \Phi_1 &= -n_{0}\ln(1-n_{3}) \\
+         \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
+         \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
+      \end{align} 
+\end{frame}
+
 \section*{Identifying freezing}
 \subsection*{Density of a crystal}
 
-\begin{frame}{Creating number density profiles $n(\vec r)$}
+\begin{frame}{Creating number density profiles $\text{n}(\vec r)$}
     \begin{itemize}
 	    \item Atoms not exactly on lattice sites
 		\item Gaussian distribution results
@@ -217,30 +435,7 @@ Expect WCA phase diagrams to look like these - and not like these.
     
 %\end{frame}
 
-\begin{frame}{Gaussian Distributions}
-	\begin{columns}[t]
-		\column{.5\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=\columnwidth]{Gaussian}
-            A 2D Gaussian Distribution of width 2$\sigma$
-          \end{figure}
-		\column{.5\textwidth}
-		 \begin{figure}
-            \centering
-            \includegraphics[width=1.02\columnwidth]{InclusionRadius.png}
-            Gaussians at lattice sites in primitive cell
-          \end{figure}
-	\end{columns}	
-
-	
-\end{frame}
-
-
-
-
-
-\begin{frame}{Creating number density profiles $n(\vec r)$}
+\begin{frame}{Creating number density profiles $\text{n}(\vec r)$}
     \begin{itemize}
 	    \item Not all lattice sites are occupied
 		\item More Gaussian Distributions, but shorter
@@ -284,27 +479,25 @@ Expect WCA phase diagrams to look like these - and not like these.
     Number density profiles $n(\vec r)$, with the same number density, n.
 \end{frame}
 
-\begin{frame}{Classical Density Functional Theory}
-    \begin{itemize}
-       \item Vary the number density profile 
-       \item Minimize the Helmholtz free energy
-       \item Equilibrium Free Energy found!
-       \item Form Functional using SFMT
-     \end{itemize}
+\begin{frame}{Monte-Carlo Integration}
+	\begin{columns}[t]
+		%\column{.5\textwidth}
+        %\begin{figure}
+            %\centering
+            %\includegraphics[width=\columnwidth]{Gaussian}
+            %A 2D Gaussian Distribution of width 2$\sigma$
+          %\end{figure}
+		\column{.5\textwidth}
+		 \begin{figure}
+            \centering
+            \includegraphics[width=1.02\columnwidth]{InclusionRadius.png}
+            A primitive cell with Gaussians at lattice sites
+          \end{figure}
+	\end{columns}	
+
+	
 \end{frame}
 
-
-\begin{frame}{Our Functional}
-\begin{align}\label{eq:Fexfunctional}
-  F_{excess}[n(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
-\end{align}
-%where 
-\begin{align}
-\Phi_1 &= -n_{0}\ln(1-n_{3}) \\
-\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
-\Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
-\end{align} 
-\end{frame}
 
 %\begin{figure}
    %\centering
@@ -335,71 +528,9 @@ Expect WCA phase diagrams to look like these - and not like these.
     %\end{figure}    
 %\end{frame}
 
-\subsection*{Finding coexistence}
-\begin{frame}{Maxwell's Double Tangent Construction}
-	\begin{columns}[t]
-		\column{.5\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=\columnwidth]{figs/MaxwellDTC-Fig1.pdf}
-          \end{figure}
-		\column{.5\textwidth}
-		\begin{block}{}
-			\begin{itemize}
-				\item Data from cDFT 
-				\item Temperature fixed
-				\item Pressure = -slope
-				\item $\mu$ = y-intercept
-				\item Collect ($\mu$, P) data
-			\end{itemize}
-	    \end{block}
-	\end{columns}	
-\end{frame}
-
-\begin{frame}{Maxwell's Double Tangent Construction}
-	\begin{columns}[t]
-		\column{.5\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=\columnwidth]{figs/MaxwellDTC-Fig2.pdf}
-          \end{figure}
-		\column{.5\textwidth}
-		\begin{block}{At phase Transition}
-			\begin{itemize}
-				\item $\text{T}_{Liquid}$ = $\text{T}_{Solid}$
-			    \item $\text{P}_{Liquid}$ = $\text{P}_{Solid}$
-				\item $\mu_{Liquid}$ = $\mu_{Solid}$
-			\end{itemize}
-	    \end{block}
-		\begin{block}{Plot ($\mu$, P) data}
-			\begin{itemize}
-				\item Pressure at intersection 
-			\end{itemize}
-	    \end{block}
-	\end{columns}	
-\end{frame}
-
-\begin{frame}{Maxwell's Double Tangent Construction}
-	\begin{columns}[t]
-		\column{.5\textwidth}
-        \begin{figure}
-            \centering
-            \includegraphics[width=\columnwidth]{figs/MaxwellDTC-Fig3.pdf}
-          \end{figure}
-		\column{.5\textwidth}
-		\begin{block}{Identify phase transition...}
-			\begin{itemize}
-				\item Liquid number density
-				\item Solid number density
-			\end{itemize}
-		\end{block}
-		\begin{block}{Construct phase diagrams}
-	    \end{block}
-	\end{columns}	
-\end{frame}
 
 
-\subsection*{Results}
+\subsection*{WCA Phase Diagrams}
 \begin{frame}{Temperature-Density Phase Diagram}
     \begin{figure}
         \centering
