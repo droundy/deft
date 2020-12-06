@@ -137,14 +137,18 @@
 			\end{itemize}
 		\end{block}
 		\column{.5\textwidth}
-        \vspace{-0.5em}
+        \vspace{-2em}
+        \begin{block}{}
+            \begin{itemize}
+			    \item Driven by entropy - maximize the entropy of the universe
+				\item Extract energy to freeze, add energy to melt  
+			\end{itemize}   
+	    \end{block}
         \begin{figure}
             \centering
-            \includegraphics[width=0.6
-            \columnwidth]{PrimitiveCellLightBlue.png}
+            \includegraphics[width=0.4\columnwidth]{PrimitiveCellLightBlue.png}
             %\caption{Primitive Cell (in blue)}
           \end{figure}
-          
           $~~~~~~~$Primitive cell (in blue)
 	\end{columns}	
 \end{frame}
@@ -182,11 +186,13 @@
 	\begin{columns}[t]
 		\column{.5\textwidth}
 		%\begin{block}{At Freezing...}
-		\begin{block}{Freezing Characteristics}
+		\begin{block}{Phase Transitions}
 		     \begin{itemize}
-				\item Driven by entropy - maximize the entropy of the universe				
+				%\item Driven by entropy - maximize the entropy of the universe				
 				\item Abrupt change in density
-				\item Liquid and solid coexist
+				\item Liquid and solid coexist 
+				
+				in varying amounts
 			 \end{itemize}		
 		\end{block} 
 		\begin{block}{WCA Phase Diagram}
@@ -393,16 +399,76 @@
 \section*{Classical density functional theory}
 \subsection*{cDFT}
 \begin{frame}{Classical Density Functional Theory (cDFT)}
+    %\vspace{+1em} 
+    \begin{block}{1) Free energy can be written as functional $\text f[\text{n}(\vec r)]$}  
+       \begin{itemize}
+          \item A functional is a function of a function (ie. intergral)
+          \item Number density, n is number of atoms per volume $\text n=\frac{\text N}{\text V}$
+          \item Number density profile, $\text n(\vec{r})$ describes how 
+             number density varies spatially on average %(smear atoms)
+          \begin{displaymath} \text n=<\text n(\vec{r})>=\frac{1}{\text V}\int{\text n(\vec{r})}{d\vec{r}}=\frac{\text N}{\text V}\end{displaymath}
+          \begin{displaymath}\text n(\vec r)=~<\sum_{i=1}^{\text N}\delta(\vec r - \vec r_i)>~\end{displaymath} 
+        \end{itemize}
+    \end{block}
+\end{frame}  
+  
+\begin{frame}{Classical Density Functional Theory (cDFT)}
+    %\vspace{+1em}    
+    \begin{block}{2) Free energy tends toward a minimum at equilibrium }
     \begin{itemize}
-       \item Vary the number density profile 
-       \item Minimize the Helmholtz free energy
-       \item Equilibrium Free Energy found!
-       \item Form Functional using SFMT
-     \end{itemize}
+       %\item Minimize the Helmholtz free energy
+       %\item Form Functional using SFMT
+	   %\item Free energy written as a functional of a number density profile $\text f[\text{n}(\vec r)]$       
+       %\item Free energy tends toward a minimum at equilibrium 
+       %\item Vary $\text n(\vec{r})$ until the free energy is minimized 
+       %\item Equilibrium Free Energy found!
+       \item For a closed system (energy conserved)
+       \item As the entropy of the universe is maximized
+       \item While holding natural variables FIXED
+       \item Natural variables for Helmholtz free energy per atom, f(T,$\frac{1}{\text V}$,N) are:
+       temperature, inverse volume,  and number of particles
+        %\begin{itemize}
+            %\item Temperature$~~~~$1/Volume$~~~~$Number of particles
+            %\item Volume, V
+            %\item Number of particles, N
+        %\end{itemize}       
+       %temperature, volume, and number of particles 
+     \end{itemize} 
+     
+     \begin{displaymath} \text{df}_{\text{System}}=-\left(\frac{\text T}{\text N}\right)\text{dS}_{\text{System+Surroundings}} \end{displaymath}
+     \end{block}     
 \end{frame}
 
-\subsection*{SPT}
+\begin{frame}{Classical Density Functional Theory (cDFT)}
+    \begin{block}{Implementing cDFT}
+    \begin{itemize}
+       %\item Minimize the Helmholtz free energy
+       %\item Form Functional using SFMT
+	   %\item Free energy written as a functional of a number density profile $\text f[\text{n}(\vec r)]$       
+       %\item Free energy tends toward a minimum at equilibrium 
+       \item Form a functional $\text f[\text n(\vec r)]$
+       \item n is fixed, $\text n(\vec{r})$ is set free
+       \item Vary $\text n(\vec{r})$ until the free energy is minimized 
+       \item Free Energy goes to its equilibrium value when minimized      
+       \begin{displaymath}\text f[\text n(\vec r)]\rightarrow \text f_{\text{eq}}[\text n_{\text{eq}}(\vec r)]  \mbox{ as f is minimized} \end{displaymath}
+       and $\text n(\vec{r})$ goes to its equilibrium value as well!
+       %\begin{displaymath}{\mbox{where }  \text n(\vec{r})=\text n_{eq}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}              
+       
+       %\item Equilibrium Free Energy and number density profile found!
+       %\item equilibrium free energy and equilibrium number density profile
+     \end{itemize} 
+     \end{block}
+The reason this works is because cDFT satisfies the conditions 
+of the variational principle.     
+\end{frame}
+
+%\subsection*{SPT}
 \begin{frame}{Scaled Particle Theory}
+  SPT
+\end{frame}
+
+%\subsection*{FMT}
+\begin{frame}{Fundamental Measure Theory}
   SPT
 \end{frame}
 
