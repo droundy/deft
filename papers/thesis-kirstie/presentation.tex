@@ -78,13 +78,19 @@
 \begin{frame}{Fluid Behavior Drives Interest}
 	\begin{columns}[t]
        \column{.5\textwidth}
+       	\vspace{-1em}
 		\begin{block}{A search for answers...}
 			\begin{itemize}
-				\item 1960 theoretical chemist identified 3 "bottlenecks" one of which was the lack of a good theory of liquids 
-				\item  
+				\item In the preface to his book, Fundamentals of 
+				Inhomogeneous Fluids published in 1992, Douglas Henderson,
+				an expert physisist in the field of fluids,
+				says that around 1960 Joe Hirschfelder identified 3 
+				"bottlenecks" in theoretical chemistry - one of which 
+				was an inadequate theory of liquids.  
 			\end{itemize}
 		\end{block}
 	    \column{.5\textwidth}
+	    \vspace{-1em}
 		\begin{block}{Behavior to explain}
 			\begin{itemize}
 				\item 
@@ -125,6 +131,20 @@
 \begin{frame}{Freezing of a WCA Fluid}
 	\begin{columns}[t]
 		\column{.5\textwidth}
+        \vspace{-2em}
+        \begin{block}{}
+            \begin{itemize}
+			    \item Driven by entropy - maximize the entropy of the universe
+				\item Extract energy to freeze %(add energy to melt)  
+			\end{itemize}   
+	    \end{block}
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.4\columnwidth]{PrimitiveCellLightBlue.png}
+            %\caption{Primitive Cell (in blue)}
+          \end{figure}
+          $~~~~~~~$Primitive cell (in blue)
+        \column{.5\textwidth}
 	    \vspace{-1em}
 		\begin{block}{Crystalline Structure}
 			\begin{itemize}
@@ -136,20 +156,6 @@
 				\item One atom per primitive cell, 4 atoms in FCC cell
 			\end{itemize}
 		\end{block}
-		\column{.5\textwidth}
-        \vspace{-2em}
-        \begin{block}{}
-            \begin{itemize}
-			    \item Driven by entropy - maximize the entropy of the universe
-				\item Extract energy to freeze, add energy to melt  
-			\end{itemize}   
-	    \end{block}
-        \begin{figure}
-            \centering
-            \includegraphics[width=0.4\columnwidth]{PrimitiveCellLightBlue.png}
-            %\caption{Primitive Cell (in blue)}
-          \end{figure}
-          $~~~~~~~$Primitive cell (in blue)
 	\end{columns}	
 \end{frame}
 
@@ -407,15 +413,8 @@
           \item Number density profile, $\text n(\vec{r})$ is an ensemble average
           
            that describes how number density varies spatially on average. 
-        \begin{displaymath}
-            \text n(\vec r)=~\left<\sum_{i=1}^{\text N}\delta(\vec r - \vec r_i)\right>
-        \end{displaymath}
-        \begin{displaymath}
-            \text n=\left<\text n(\vec{r})\right>
-            =\frac{1}{\text V}\int{\text n(\vec{r})}{d\vec{r}}
-            =\frac{\text N}{\text V}
-        \end{displaymath}
-
+          \begin{displaymath}\text n(\vec r)=~\left<\sum_{i=1}^{\text N}\delta(\vec r - \vec r_i)\right>~\end{displaymath} 
+          \begin{displaymath} \text n=\frac{1}{\text V}\int_{vol}{\text n(\vec{r})}{d\vec{r}}=\frac{\text N}{\text V}\end{displaymath}
         \end{itemize}
     \end{block}
 \end{frame}  
@@ -464,10 +463,11 @@
        \item Form a functional $\text f[\text n(\vec r)]$
        \item n is fixed, $\text n(\vec{r})$ is set free
        \item Vary $\text n(\vec{r})$ until the free energy is minimized 
-       \item Free Energy goes to its equilibrium value when minimized      
+       
+       Free Energy goes to its equilibrium value when minimized      
        \begin{displaymath}\text f[\text n(\vec r)]\rightarrow \text f_{\text{eq}}[\text n_{\text{eq}}(\vec r)]  \mbox{ as f is minimized} \end{displaymath}
-       and $\text n(\vec{r})$ goes to its equilibrium value as well!
-       %\begin{displaymath}{\mbox{where }  \text n(\vec{r})=\text n_{eq}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}              
+       %and $\text n(\vec{r})$ goes to its equilibrium value as well!
+       \begin{displaymath}{\mbox{where }  \text n(\vec{r}) = \text n_{\text{eq}}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}              
        
        %\item Equilibrium Free Energy and number density profile found!
        %\item equilibrium free energy and equilibrium number density profile
@@ -475,29 +475,70 @@
      \end{block}
 The reason this works is because cDFT satisfies the conditions 
 of the variational principle which requires that  $\text f[\text n(\vec r)]$ 
-be a unique functional of  $\text n_{eq}(\vec{r})$, and that it has 
-minimum extremum at $\text n_{eq}(\vec{r})$.
+be a unique functional of  $\text n_{\text{eq}}(\vec{r})$, and that it has 
+minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 \end{frame}
 
-%\subsection*{SPT}
-\begin{frame}{Scaled Particle Theory}
-  SPT
+\begin{frame}{Classical Density Functional Theory (cDFT)}
+    \begin{block}{Helmholtz free energy breaks into 2 parts:}
+        \begin{displaymath}F=F_{ideal} + F_{excess}\end{displaymath}
+        \begin{itemize}            
+           \item Ideal - \textcolor{blue}{EASY} to find - does not depend on V(r) 
+           \begin{displaymath}F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]d\vec{r}\end{displaymath}
+           \item Excess - \textcolor{red}{HARD} to find - depends on V(r) 
+            
+            \small Simplified expression in terms of Mayer function, \footnotesize $f(r)=e^{-\frac{V(r)}{k_{B}T}}-1$
+        \end{itemize}
+        %Simplified expression:
+        \tiny
+        \begin{displaymath} 
+             F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{...}\int d\vec r^1{...}d\vec r^N  d\vec p^1{...}d\vec p^N \left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}}                        
+             +\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)}
+        \end{displaymath}
+        \normalsize
+     \end{block}
 \end{frame}
 
-%\subsection*{FMT}
-\begin{frame}{Fundamental Measure Theory}
-  SPT
-\end{frame}
+
+%%\subsection*{SPT}
+%\begin{frame}{Scaled Particle Theory}
+  %SPT
+%\end{frame}
+
+%%\subsection*{FMT}
+%\begin{frame}{Fundamental Measure Theory}
+  %SPT
+%\end{frame}
 
 \subsection*{SFMT}
 \begin{frame}{Soft Fundamental Measure Theory}
-  SFMT
+  \begin{block}{Scaled Particle Theory (SPT)} 
+       \begin{itemize}       
+           \item Finds $F_{excess}$ for a homogeneous (uniform number density) 
+           
+           hard-sphere fluid
+       \end{itemize}
+  \end{block} 
+  \begin{block}{Fundamental Measure Theory (FMT)} 
+       \begin{itemize}
+           \item Developed by Rosenfeld, generalization of SPT 
+           \item Finds $F_{excess}$ for an inhomogeneous hard-sphere fluid
+       \end{itemize} 
+  \end{block} 
+  \begin{block}{SFMT}
+     \begin{itemize}            
+           \item Developed by Schmidt, extension of FMT 
+           \item Finds $F_{excess}$ for an inhomogeneous soft-sphere fluid
+     \end{itemize}
+  \end{block}  
+    %More coming soon .... Schmidt's and Rosenfeld's secret sauce
 \end{frame}
 
-\subsection*{Our Functional}
-\begin{frame}{Our Functional}
+\subsection*{Our WCA Functional}
+\begin{frame}{Our WCA Functional}
+    %\small
     \begin{align}\label{eq:Fexfunctional}
-        F_{excess}[\text{n}(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
+        F_{excess}[\textcolor{blue}{\text{n}(\vec{r})}]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
      \end{align}
      %where 
      \begin{align}
@@ -505,10 +546,129 @@ minimum extremum at $\text n_{eq}(\vec{r})$.
          \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
          \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
       \end{align} 
+      \begin{align}\label{eq:numdenprofile}
+	      n_i(\vec{r})=\int_{Volume}{\textcolor{blue}{\text n(\vec{r'})}w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}
+      \end{align}
+      %\begin{align}\label{eq:weights}
+  %w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
+  %w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
+  %w_2(r) &=-\frac{\partial{w_3(r)}}{\partial{r}} \\
+  %&= \frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}  \\
+  %w_3(r) &=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]  
+%\end{align}
+%\begin{equation}\label{eq:w_v2}{  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  }\end{equation}
+%\begin{equation}\label{eq:w_v1}{  \vec{w_{1}}=w_{1}\frac{\vec{r}}{r}  }\end{equation} 
+%\begin{equation}\label{eq:tensorweight-methods}\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)\end{equation}
+\normalsize
 \end{frame}
 
+\begin{frame}{Our WCA Functional}
+    %\small
+    %\begin{align}\label{eq:Fexfunctional}
+        %F_{excess}[\text{n}(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
+     %\end{align}
+     %%where 
+     %\begin{align}
+         %\Phi_1 &= -n_{0}\ln(1-n_{3}) \\
+         %\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
+         %\Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
+      %\end{align} 
+      \begin{align}\label{eq:weights}
+          w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
+          w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
+          w_2(r) &=-\frac{\partial{w_3(r)}}{\partial{r}} = \frac{\sqrt{2}}{\textcolor{red}{\Xi}\sqrt\pi}\exp^{-\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\textcolor{red}{\Xi}/\sqrt{2}}\right)^2}  \\
+          w_3(r) &= \frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\frac{\textcolor{red}{\Xi}}{\sqrt{2}}}\right)\right]  
+      \end{align}
+\begin{equation}\label{eq:w_v2}  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  {~~~~~~~~~~}\vec{w_{1}}=w_{1}\frac{\vec{r}}{r} \end{equation}
+%\begin{equation}\label{eq:w_v2}  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  \end{equation}
+%\begin{equation}\label{eq:w_v1}  \vec{w_{1}}=w_{1}\frac{\vec{r}}{r}  \end{equation} 
+\begin{equation}\label{eq:tensorweight-methods}\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{\text I}{3}\right)\end{equation}
+\normalsize
+\end{frame}
+
+\begin{frame}{Our WCA Functional}
+    \small
+     Evaluate:
+    \begin{equation} \frac{df(r)}{dr}=\int_{-\infty}^{\infty}{w_2(r')w_2(r-r')dr'}\end{equation}
+    %\begin{displaymath}{\frac{df(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\alpha}{\Xi}\right)^2}}\end{displaymath} 
+    % integrate
+    \begin{displaymath}{f(r)=\int_{\infty}^r{ \frac{1}{\textcolor{red}{\Xi}\sqrt{\pi}}e^{-\left(\frac{r'-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)^2}{dr'}}}\end{displaymath} 
+    $V_{erf}(r)$  Mayer function:
+    \begin{equation} f(r)=-\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)\right]\end{equation} 
+    %the Mayer function is
+    \begin{displaymath}f(r)=e^{-\frac{V(r)}{K_BT}}-1\end{displaymath} 
+    \begin{equation} 
+        V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)+1\right)\right]
+    \end{equation} 
+        \normalsize      
+\end{frame}
+
+\begin{frame}{Our WCA Functional}
+	\begin{columns}[t]
+		\column{.5\textwidth}
+	    \vspace{-0.5em}
+		\begin{block}{Determine alpha, $\textcolor{red}{\alpha{(}T)}$}
+			\begin{itemize}
+			    \item $V_{erf}$ is temperature dependent, $V_{WCA}$ is not
+			    \item Match at a point, r = $\alpha$
+			    \begin{displaymath} V_{erf}(\alpha)=V_{WCA}(\alpha) \end{displaymath}
+			\end{itemize}
+		\end{block}
+		\vspace{-1em}
+		  \begin{figure}
+            \centering
+            \includegraphics[width=.7\columnwidth]{plot_alpha.pdf}
+          \end{figure}
+		\column{.5\textwidth}
+        \vspace{-0.5em}
+        \begin{block}{Determine Xi, $\textcolor{red}{\Xi{(}T)}$}
+            \begin{itemize}
+			    \item Match 2nd Virial Coefficients
+			\end{itemize}
+		    \vspace{+0.5em}
+		    \begin{displaymath}B_2=-\frac{1}{2}\int_{Volume} e^{-\frac{V(r)}{k_{B}T}}-1~d\vec r\end{displaymath} 
+			\begin{displaymath}B_{2\operatorname{erf}}(T) =B_{2WCA}(T)\end{displaymath}  
+	    \end{block}
+        \begin{figure}
+            \centering
+            \includegraphics[width=.7\columnwidth]{xi_fromB2.pdf}
+          \end{figure}
+          %$~~~~~~~$fig...
+          
+	\end{columns}	
+\end{frame}
 \section*{Identifying freezing}
 \subsection*{Density of a crystal}
+
+\begin{frame}{Classical Density Functional Theory (cDFT)}
+    \begin{block}{Implementing cDFT}
+    \begin{itemize}
+       %\item Minimize the Helmholtz free energy
+       %\item Form Functional using SFMT
+	   %\item Free energy written as a functional of a number density profile $\text f[\text{n}(\vec r)]$       
+       %\item Free energy tends toward a minimum at equilibrium 
+       \item Form a functional $\text f[\text n(\vec r)]$  \checkmark
+       \item n is fixed, $\text n(\vec{r})$ is set free \textcolor{red}{$\rightarrow$ need to create many $\text n(\vec{r})$}
+       \item Vary $\text n(\vec{r})$ until the free energy is minimized 
+       
+       Free Energy goes to its equilibrium value when minimized      
+       \begin{displaymath}\text f[\text n(\vec r)]\rightarrow \text f_{\text{eq}}[\text n_{\text{eq}}(\vec r)]  \mbox{ as f is minimized} \end{displaymath}
+       %and $\text n(\vec{r})$ goes to its equilibrium value as well!
+       \begin{displaymath}{\mbox{where }  \text n(\vec{r}) = \text n_{\text{eq}}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}              
+       
+       %\item Equilibrium Free Energy and number density profile found!
+       %\item equilibrium free energy and equilibrium number density profile
+     \end{itemize} 
+     \end{block}
+\end{frame}
+
+\begin{frame}{Creating number density profiles $\text{n}(\vec r)$}
+\begin{figure}
+       \centering
+       \includegraphics[height=4cm]{Simple_cell.png}
+       A simplified cell
+ \end{figure} 
+\end{frame}
 
 \begin{frame}{Creating number density profiles $\text{n}(\vec r)$}
     \begin{itemize}
@@ -526,7 +686,7 @@ minimum extremum at $\text n_{eq}(\vec{r})$.
        %possibilities would give rise to a Gaussian distribution, 
        %as shown on the right.}
        \label{fig:Ensemble_Gaus}
-        An atom in a cell
+        Front view of an atom in a simplified cell
      \end{figure}     
 \end{frame}	
 
@@ -559,7 +719,7 @@ minimum extremum at $\text n_{eq}(\vec{r})$.
        %would give rise to the Gaussian distributions shown on the right.}
        \label{fig:Ensemble_Smallcells}
        
-       An atom in a smaller cell
+       An atom in a cube consisting of 8 smaller simplified cells
     \end{figure}     
 \end{frame}
 
@@ -584,6 +744,31 @@ minimum extremum at $\text n_{eq}(\vec{r})$.
        \label{fig:Ensemble_vary}
     \end{figure}  
     Number density profiles $n(\vec r)$, with the same number density, n.
+\end{frame}
+
+\begin{frame}{Classical Density Functional Theory (cDFT)}
+    \begin{block}{Implementing cDFT}
+    \begin{itemize}
+       %\item Minimize the Helmholtz free energy
+       %\item Form Functional using SFMT
+	   %\item Free energy written as a functional of a number density profile $\text f[\text{n}(\vec r)]$       
+       %\item Free energy tends toward a minimum at equilibrium 
+       \item Form a functional $\text f[\text n(\vec r)]$  \checkmark
+       \item n is fixed, $\text n(\vec{r})$ is set free $\rightarrow$ create many $\text n(\vec{r})$ \checkmark
+       \item \textcolor{red}{Vary $\text n(\vec{r})$ at fixed T until the free energy is minimized} 
+       
+       Free Energy goes to its equilibrium value when minimized      
+       \begin{displaymath}\text f[\text n(\vec r)]\rightarrow \text f_{\text{eq}}[\text n_{\text{eq}}(\vec r)]  \mbox{ as f is minimized} \end{displaymath}
+       %and $\text n(\vec{r})$ goes to its equilibrium value as well!
+       \begin{displaymath}{\mbox{where }  \text n(\vec{r}) = \text n_{\text{eq}}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}              
+    \end{itemize}      
+       Collect (f,$\frac{1}{n}$) data for each temperature T
+       to use in Maxwell's Double Tanget Construction to get the pressure P,
+       and the liquid and solid number densities at each phase transition $\text n_L, \text n_S$
+       %\item Equilibrium Free Energy and number density profile found!
+       %\item equilibrium free energy and equilibrium number density profile
+ 
+     \end{block}
 \end{frame}
 
 %Monte-Carlo Integration
@@ -636,21 +821,23 @@ minimum extremum at $\text n_{eq}(\vec{r})$.
 
 
 
-\subsection*{Phase diagrams}
+\subsection*{WCA Phase diagrams}
 \begin{frame}{Temperature-Density Phase Diagram}
     \begin{figure}
         \centering
-        \includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
+        \includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_T_vs_n}\\
         %\caption{$T-n$ Phase Diagram}
-        \label{fig:Phase_Diagram_of_T_vs_n}
-    \end{figure}
+    \end{figure}        
+    \vspace{-1em}
+    \small *Monte-Carlo data from Christopher May, OSU undergraduate thesis
 \end{frame}
 
 \begin{frame}{Pressure-Temperature Phase Diagram}
     \centering
     \includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_P_vs_T}\\
-    \vspace{-1em}
+    %\vspace{-1em}
     %Here is a figure
+    \small *Monte-Carlo data from Christopher May, OSU undergraduate thesis
 \end{frame}
 
 
