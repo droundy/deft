@@ -404,10 +404,12 @@
        \begin{itemize}
           \item A functional is a function of a function (ie. intergral)
           \item Number density, n is number of atoms per volume $\text n=\frac{\text N}{\text V}$
-          \item Number density profile, $\text n(\vec{r})$ describes how 
-             number density varies spatially on average %(smear atoms)
-          \begin{displaymath} \text n=<\text n(\vec{r})>=\frac{1}{\text V}\int{\text n(\vec{r})}{d\vec{r}}=\frac{\text N}{\text V}\end{displaymath}
+          \item Number density profile, $\text n(\vec{r})$ is an ensemble average
+          
+           that describes how number density varies spatially on average. 
           \begin{displaymath}\text n(\vec r)=~<\sum_{i=1}^{\text N}\delta(\vec r - \vec r_i)>~\end{displaymath} 
+          \begin{displaymath} \text n=<\text n(\vec{r})>=\frac{1}{\text V}\int{\text n(\vec{r})}{d\vec{r}}=\frac{\text N}{\text V}\end{displaymath}
+
         \end{itemize}
     \end{block}
 \end{frame}  
@@ -428,9 +430,9 @@
     \end{itemize}
     
        %Natural variables for Helmholtz free energy F(T,V,N) are Temperature, Volume, and Number of particles
-       Natural variables for Helmholtz free energy per atom  
+       Natural variables for Helmholtz free energy per atom,  
        %, f(T,$\frac{1}{\text V}$,N) are T, 1/V, N
-       f(T,$\frac{1}{n}$) are temperature and number density.
+       f(T,$\frac{1}{n}$) are temperature and inverse number density.
        %\begin{displaymath}df=\frac{\partial f}{\partial T}dT + \frac{\partial f}{\partial \left(\frac{1}{V}\right)}d\left(\frac{1}{V}\right)+\frac{\partial f}{N}dN\end{displaymath}
        \begin{displaymath}df=\frac{\partial f}{\partial T}dT + \frac{\partial f}{\partial \frac{1}{n}}d\left(\frac{1}{n}\right)\end{displaymath}
        %\begin{displaymath}dn=d\left(\frac{N}{V}\right)=Nd\left(\frac{1}{V}\right)+\frac{1}{V}dN\end{displaymath}
