@@ -405,6 +405,14 @@ This result shows that the natural variables of the Helmholtz free energy
 per particle $f_N$ are temperature, volume and one over the number of 
 particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. 
 \begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
+Taking the differential
+\begin{displaymath}df_N=\frac{\partial f_N}{\partial T}dT +\frac{\partial f_N}{V}dV+ \frac{\partial f_N}{\partial \left(\frac{1}{N}\right)}d\left(\frac{1}{N}\right)\end{displaymath}
+and using the relation
+\begin{displaymath}d\left(\frac{1}{n}\right)=Vd\left(\frac{1}{N}\right)+\frac{1}{N}dV\end{displaymath}
+we get
+\begin{displaymath}df_N=\frac{\partial f_N}{\partial T}dT + \frac{\partial f_N}{\partial \frac{1}{n}}d\left(\frac{1}{n}\right)\end{displaymath}
+
+\begin{equation}f_N(T,\frac{1}{n})\end{equation}
 
 The minimization can be illustrated for a system near 
 equilibrium by considering that according to the 
@@ -419,8 +427,8 @@ $\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that
 changes in the free energy 
 will be negative for spontaneous processes 
 when the natural variables of the free energy are held fixed. 
-For our case, with a fixed temperature, volume, and number of particles
-we get
+
+For our case, with a fixed temperature and number density we get
 %Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
 %\begin{equation}
   %df_{System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
@@ -798,7 +806,7 @@ which has the form
 \begin{align}
     F_{excess} = k_BT(\Phi_1+\Phi_2+\Phi_3)V
 \end{align}
-where 
+%where 
 \begin{align}
    \Phi_1 &= -n_{0}ln(1-n_{3}) \\
    \Phi_2 &= \frac{n_{1}n_{2}}{1-n_{3}} \\

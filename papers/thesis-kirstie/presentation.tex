@@ -425,15 +425,22 @@
        \item For a closed system (energy conserved)
        \item As the entropy of the universe is maximized
        \item While holding natural variables FIXED
-       \item Natural variables for Helmholtz free energy per atom, f(T,$\frac{1}{\text V}$,N) are:
-       temperature, inverse volume,  and number of particles
+    \end{itemize}
+    
+       %Natural variables for Helmholtz free energy F(T,V,N) are Temperature, Volume, and Number of particles
+       Natural variables for Helmholtz free energy per atom  
+       %, f(T,$\frac{1}{\text V}$,N) are T, 1/V, N
+       f(T,$\frac{1}{n}$) are temperature and number density.
+       %\begin{displaymath}df=\frac{\partial f}{\partial T}dT + \frac{\partial f}{\partial \left(\frac{1}{V}\right)}d\left(\frac{1}{V}\right)+\frac{\partial f}{N}dN\end{displaymath}
+       \begin{displaymath}df=\frac{\partial f}{\partial T}dT + \frac{\partial f}{\partial \frac{1}{n}}d\left(\frac{1}{n}\right)\end{displaymath}
+       %\begin{displaymath}dn=d\left(\frac{N}{V}\right)=Nd\left(\frac{1}{V}\right)+\frac{1}{V}dN\end{displaymath}
         %\begin{itemize}
             %\item Temperature$~~~~$1/Volume$~~~~$Number of particles
             %\item Volume, V
             %\item Number of particles, N
         %\end{itemize}       
        %temperature, volume, and number of particles 
-     \end{itemize} 
+ 
      
      \begin{displaymath} \text{df}_{\text{System}}=-\left(\frac{\text T}{\text N}\right)\text{dS}_{\text{System+Surroundings}} \end{displaymath}
      \end{block}     
@@ -459,7 +466,9 @@
      \end{itemize} 
      \end{block}
 The reason this works is because cDFT satisfies the conditions 
-of the variational principle.     
+of the variational principle which requires that  $\text f[\text n(\vec r)]$ 
+be a unique functional of  $\text n_{eq}(\vec{r})$, and that it has 
+minimum extremum at $\text n_{eq}(\vec{r})$.
 \end{frame}
 
 %\subsection*{SPT}
