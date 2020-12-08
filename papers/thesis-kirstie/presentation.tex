@@ -484,23 +484,26 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 
 \subsection*{SFMT}
 \begin{frame}{Soft Fundamental Measure Theory}
-  \begin{block}{Scaled Particle Theory (SPT)} 
-       \begin{itemize}       
-           \item Finds $F_{excess}$ for a homogeneous (uniform number density) 
-           
-           hard-sphere fluid
-       \end{itemize}
-  \end{block} 
+%   \begin{block}{Scaled Particle Theory (SPT)}
+%        \begin{itemize}
+%            \item Finds $F_{excess}$ for a homogeneous (uniform number density)
+%            hard-sphere fluid
+%        \end{itemize}
+%   \end{block}
   \begin{block}{Fundamental Measure Theory (FMT)} 
        \begin{itemize}
-           \item Developed by Rosenfeld, generalization of SPT 
-           \item Finds $F_{excess}$ for an inhomogeneous hard-sphere fluid
-       \end{itemize} 
+           \item DFT for hard spheres developed by Rosenfeld
+           \item Based on \structure{weighted densities}, involving
+                 ``fundamental measures'' like the surface area
+           \item Weighting functions such as Dirac $\delta$-function shells
+       \end{itemize}
   \end{block} 
   \begin{block}{SFMT}
      \begin{itemize}            
            \item Developed by Schmidt, extension of FMT 
            \item Finds $F_{excess}$ for an inhomogeneous soft-sphere fluid
+           \item Smooth weighting functions for
+                continuous ``soft'' potentials
      \end{itemize}
   \end{block}  
     %More coming soon .... Schmidt's and Rosenfeld's secret sauce
@@ -534,7 +537,23 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 \normalsize
 \end{frame}
 
-\begin{frame}{Our WCA Functional}
+\begin{frame}{Our weighting function}
+    \begin{itemize}
+        \item All the weighting functions are derived from $w_2(r)$
+        \item $w_2$ is related to $V(r)$ by
+        \begin{align}
+          %\frac{df}{dr} &= 
+          -\beta \frac{dV}{dr}e^{-\beta V(r)}
+             = \int_{-\infty}^{\infty}w_2(r')w_2(r-r')dr'
+      \end{align}
+      but this equation is hard to solve
+      \item Following Schmidt, we approximate $w_2$ by as a gaussian
+    %   \begin{align}\label{eq:weights}
+    %       w_2(r) % &=-\frac{\partial{w_3(r)}}{\partial{r}}
+    %        = \frac{\sqrt{2}}{\textcolor{red}{\Xi}\sqrt\pi}\exp^{-\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\textcolor{red}{\Xi}/\sqrt{2}}\right)^2}
+    %   \end{align}
+      \item and adjust FIXME parameters to approximate the above...
+    \end{itemize}
     %\small
     %\begin{align}\label{eq:Fexfunctional}
         %F_{excess}[\text{n}(\vec{r})]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
@@ -545,17 +564,18 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
          %\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
          %\Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
       %\end{align} 
-      \begin{align}\label{eq:weights}
-          w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
-          w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
-          w_2(r) &=-\frac{\partial{w_3(r)}}{\partial{r}} = \frac{\sqrt{2}}{\textcolor{red}{\Xi}\sqrt\pi}\exp^{-\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\textcolor{red}{\Xi}/\sqrt{2}}\right)^2}  \\
-          w_3(r) &= \frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\frac{\textcolor{red}{\Xi}}{\sqrt{2}}}\right)\right]  
-      \end{align}
-\begin{equation}\label{eq:w_v2}  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  {~~~~~~~~~~}\vec{w_{1}}=w_{1}\frac{\vec{r}}{r} \end{equation}
-%\begin{equation}\label{eq:w_v2}  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  \end{equation}
-%\begin{equation}\label{eq:w_v1}  \vec{w_{1}}=w_{1}\frac{\vec{r}}{r}  \end{equation} 
-\begin{equation}\label{eq:tensorweight-methods}\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{\text I}{3}\right)\end{equation}
-\normalsize
+    %   \begin{align}\label{eq:weights}
+        %   w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
+        %   w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
+        %   w_2(r) % &=-\frac{\partial{w_3(r)}}{\partial{r}}
+        %    = \frac{\sqrt{2}}{\textcolor{red}{\Xi}\sqrt\pi}\exp^{-\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\textcolor{red}{\Xi}/\sqrt{2}}\right)^2}  \\
+        %   w_3(r) &= \frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\frac{\textcolor{red}{\Xi}}{\sqrt{2}}}\right)\right]  
+    %   \end{align}
+% \begin{equation}\label{eq:w_v2}  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  {~~~~~~~~~~}\vec{w_{1}}=w_{1}\frac{\vec{r}}{r} \end{equation}
+% %\begin{equation}\label{eq:w_v2}  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  \end{equation}
+% %\begin{equation}\label{eq:w_v1}  \vec{w_{1}}=w_{1}\frac{\vec{r}}{r}  \end{equation} 
+% \begin{equation}\label{eq:tensorweight-methods}\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{\text I}{3}\right)\end{equation}
+% \normalsize
 \end{frame}
 
 \begin{frame}{Our WCA Functional}
