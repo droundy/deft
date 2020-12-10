@@ -989,7 +989,7 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 	    \vspace{-2em}
         \begin{block}{}
             \begin{itemize}
-              \item Data shown for dimensionless temperatures from $K_BT=~$0.5 to 3.0
+              \item Data shown for temperatures from $K_BT=~$0.5 to 3.0
               \item Freezing indicated by 
             
                presence of coexistence
@@ -997,9 +997,13 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
                region, abrupt change 
             
                in density!
-              \item Nearly matches results from Monte-Carlo simulations, 
+              \item Monte-Carlo coexistence 
               
-              coexistence region at slightly higher densities
+              region at lower densities
+              
+              \item Close match with 
+              
+              Monte-Carlo solid boundary
             \end{itemize}
             \end{block}
        \column{.65\textwidth}
@@ -1018,15 +1022,15 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 \begin{frame}{Pressure-Temperature Phase Diagram}
 \begin{columns}
    \column{.5\textwidth}
-	    \vspace{-2.2em}
+	    \vspace{-3em}
         \begin{block}{}
             \begin{itemize}
-            \item Data shown for dimensionless temperatures from $K_BT=~$0.5 to 3.0
+            \item Data shown for temperatures from $K_BT=~$0.5 to 3.0
             \item Freezing at phase boundary
-            \item Does not closely match 
+            \item Not close match with 
             
-            results from Monte-Carlo simulations 
-            \item Discrepancy gets worse as pressures and temperatures increase
+            Monte-Carlo results 
+            \item Discrepancy worse at higher pressures and temperatures
             \end{itemize}
             \end{block}
        \column{.65\textwidth} 
@@ -1071,17 +1075,24 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 
 
 
-%\begin{frame}{Conclusions and Further Research}
-          %\begin{block}{Some things we could do}
-            %\begin{itemize}
-            %\item We have constructed a functional for a WCA fluid by creating 
-            %temperature dependent parameters that fit the functional 
-            %to the WCA fluid
-            %\item 
-            %\item
-            %\end{itemize}
-         %\end{block}
-%\end{frame}
+\begin{frame}{Conclusions and Further Research}
+          \begin{block}{Promising Results}
+            \begin{itemize}
+            \item Our functional successful at predicting freezing for WCA fluid
+            \item Improvement needed
+            \end{itemize}
+          \end{block}
+          \begin{block}{Further work}
+            \begin{itemize}
+            \item Tune our temperature dependent parameters to better 
+            
+            fit a WCA fluid
+            \item Develope methods for generating finer number density profiles
+            %\item reduce error
+            %\item Try other functionals 
+            \end{itemize}
+          \end{block}
+\end{frame}
 
 
 \end{document}
