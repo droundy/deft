@@ -46,7 +46,7 @@
 
 \section*{WCA Fluid}
 
-\subsection*{WCA Model Fluid}
+\subsection*{Weeks-Chandler-Anderson (WCA) Model Fluid}
 \begin{frame}{The WCA Model Fluid}
 	\begin{columns}[t]
        \column{.5\textwidth}
@@ -249,14 +249,21 @@
        %\item Free energy tends toward a minimum at equilibrium 
        %\item Vary $\text n(\vec{r})$ until the free energy is minimized 
        %\item Equilibrium Free Energy found!
-       \item For a closed system (energy conserved)
-       \item As the entropy of the universe is maximized
-       \item While holding natural variables FIXED
+       %\item For a closed system (energy conserved) WRONG
+       %\item As the entropy of the universe is maximized
+       \item Hold natural variables FIXED
+       \item Natural variables for Helmholtz free energy/atom are:
+       
+       %f(T,$\frac{V}{N}$) are:
+       \begin{itemize}
+          \item Temperature 
+          \item Volume per particle (or inverse number density). 
+        \end{itemize}  
     \end{itemize}
     
        %Natural variables for Helmholtz free energy F(T,V,N) are Temperature, Volume, and Number of particles
-       Natural variables for Helmholtz free energy per atom,          %good-keep 
-       f(T,$\frac{V}{N}$) are temperature and specific volume (or inverse number density). 
+       %Natural variables for Helmholtz free energy per atom,          %good-keep 
+       %f(T,$\frac{V}{N}$) are temperature and specific volume (or inverse number density). 
        %f(T,$\frac{1}{n}$) are temperature and inverse number density. %good-keep 
        %\begin{displaymath}df=\frac{\partial f}{\partial T}dT + \frac{\partial f}{\partial \frac{1}{n}}d\left(\frac{1}{n}\right)\end{displaymath}    %good-keep 
        %\begin{displaymath} \text{df}_{\text{System}}=-\left(\frac{\text T}{\text N}\right)\text{dS}_{\text{System+Surroundings}} \end{displaymath}  %good-keep
@@ -283,10 +290,10 @@
        %\item equilibrium free energy and equilibrium number density profile
      \end{itemize} 
      \end{block}
-The reason this works is because cDFT satisfies the conditions 
-of the variational principle which requires that  $\text f[\text n(\vec r)]$ 
-be a unique functional of  $\text n_{\text{eq}}(\vec{r})$, and that it has 
-minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
+%The reason this works is because cDFT satisfies the conditions 
+%of the variational principle which requires that  $\text f[\text n(\vec r)]$ 
+%be a unique functional of  $\text n_{\text{eq}}(\vec{r})$, and that it has 
+%minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 \end{frame}
 
 
@@ -329,13 +336,13 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
              = \int_{-\infty}^{\infty}w_2(r')w_2(r-r')dr'
       \end{align}
       but this equation is hard to solve
-      \item Following Schmidt, we approximate $w_2$ by as a Gaussian
+      \item Following Schmidt, we approximate $w_2$ by a Gaussian
       %\begin{displaymath}w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}\end{displaymath}
     %   \begin{align}\label{eq:weights}
     %       w_2(r) % &=-\frac{\partial{w_3(r)}}{\partial{r}}
     %        = \frac{\sqrt{2}}{\textcolor{red}{\Xi}\sqrt\pi}\exp^{-\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\textcolor{red}{\Xi}/\sqrt{2}}\right)^2}
     %   \end{align}
-      \item Adjust parameters $\alpha$ and $\Xi$ to approximate the above relation with a resluting $V(r)$
+      \item Adjust parameters $\alpha$ and $\Xi$ to approximate the above relation with a resulting $V(r)$
 that gives the correct second virial coefficient of a WCA fluid at each temperature
       %\begin{displaymath}w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}\end{displaymath}
     \end{itemize}
@@ -381,7 +388,7 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
         %\normalsize      
 %\end{frame}
 
-\begin{frame}{Determine alpha, $\alpha{(}T)$}
+\begin{frame}{Determine $\alpha{(}T)$}
 	\begin{columns}[t]
 		\column{.5\textwidth}
 	    \vspace{-01em}
@@ -425,7 +432,7 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 \end{frame}
 
 
-\begin{frame}{Determine Xi, $\Xi{(}T)$}
+\begin{frame}{Determine $\Xi{(}T)$}
 	\begin{columns}[t]
 		\column{.5\textwidth}
 	    \vspace{-0.5em}
@@ -511,10 +518,9 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
             distributions, each  
             
             centered at a lattice site
-            \item Atoms not exactly on lattice
+            \item Atoms move about lattice
             
-            sites, width of 
-            Gaussians vary
+            sites % gives rise to Gaussian
             \item Not all lattice sites occupied,
             shrink cells as fraction of 
             
@@ -582,8 +588,8 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
        %and $\text n(\vec{r})$ goes to its equilibrium value as well!
        \begin{displaymath}{\mbox{where }  \text n(\vec{r}) = \text n_{\text{eq}}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}              
     \end{itemize}   
-    
-       Construct phase diagrams using (f,$\frac{1}{n}$) data for each temperature to find P, $\text n_L, \text n_S$  at phase transitions.
+    \vspace{+1em}
+       $~~~~$NEXT: Construct phase diagrams %using (f,$\frac{1}{n}$) data for each temperature to find P, $\text n_L, \text n_S$  at phase transitions.
        %Collect (f,$\frac{1}{n}$) data for each temperature T
        %to use in Maxwell's Double Tangent Construction 
        %to get the pressure P,
@@ -667,7 +673,7 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
        %\vspace{-2em}
         \begin{block}{Constructed a functional for a WCA fluid using cDFT}
             \begin{itemize}
-              \item Gaussian weighted-density  
+              \item Gaussian weight function  
               \item Temperature dependent parameters designed to fit WCA fluid
            \end{itemize}
         \end{block}
@@ -692,11 +698,7 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
           \begin{block}{Promising results}
             \begin{itemize}
             \item Our functional successful at predicting freezing for WCA fluid
-            \item Improvement needed
-            \end{itemize}
-          \end{block}
-          \begin{block}{Further work}
-            \begin{itemize}
+            %\item Improvement needed
             \item Tune our temperature dependent parameters to better 
             
             fit a WCA fluid
@@ -704,8 +706,11 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
             profiles with more possibilities, and sensitivity to fraction of vacancies
             \item Improve methods for identifying phase transition 
             pressure and number densities that will reduce error
-            %\item Combine with a functional for an attractive potential?
-            %\item Try other functionals 
+            \end{itemize}
+          \end{block}
+          \begin{block}{Further work}
+            \begin{itemize}
+              \item Add an attractive potential 
             \end{itemize}
           \end{block}
 \end{frame}
