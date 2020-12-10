@@ -1023,8 +1023,10 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
             \begin{itemize}
             \item Data shown for dimensionless temperatures from $K_BT=~$0.5 to 3.0
             \item Freezing at phase boundary
-            \item Does not match results from Monte-Carlo simulations, 
-            gets worse as pressures and temperatures increase
+            \item Does not closely match 
+            
+            results from Monte-Carlo simulations 
+            \item Discrepancy gets worse as pressures and temperatures increase
             \end{itemize}
             \end{block}
        \column{.65\textwidth} 
@@ -1041,21 +1043,72 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 \end{frame}
 
 
-\begin{frame}{Summary}
-\vspace{-2em}
-        \begin{block}{}
+\begin{frame}{What we have done}
+       %\vspace{-2em}
+        \begin{block}{Constructed a functional for a WCA fluid using cDFT}
             \begin{itemize}
-            \item 
-            \item
-            \end{itemize}
+              \item Gaussian weighted-density  
+              \item Temperature dependent parameters designed to fit WCA fluid
+           \end{itemize}
+        \end{block}
+        \begin{block}{Created an array of number density profiles to model crystal}
+           \begin{itemize}
+              %\item to model a crystal
+              \item Consists of a sum of Guassian distributions %centered at lattice sites
+              \item Vary by changing width and fraction of vacancies
+           \end{itemize}
+         \end{block}
+         \begin{block}{Constructed T-n, and P-T phase diagrams}
+           \begin{itemize}
+              \item Showed freezing of WCA fluid over broad range of temperatures
+              \item Farily good match with Monte-Carlo simulations
+           \end{itemize}
          \end{block}
 \end{frame}
 
-\begin{frame}{Further Research}
-\end{frame}
+
+
+
+%\begin{frame}{Conclusions and Further Research}
+          %\begin{block}{Some things we could do}
+            %\begin{itemize}
+            %\item We have constructed a functional for a WCA fluid by creating 
+            %temperature dependent parameters that fit the functional 
+            %to the WCA fluid
+            %\item 
+            %\item
+            %\end{itemize}
+         %\end{block}
+%\end{frame}
 
 
 \end{document}
+
+%\begin{frame}{What we have done}
+%\vspace{-2em}
+        %\begin{block}{}
+            %\begin{itemize}
+            %\item We have constructed a functional for a WCA fluid 
+            
+            %using cDFT by using a Gaussian weighted-density, 
+            
+            %and
+            %creating temperature dependent 
+            %parameters 
+            
+            %to fit the functional to a WCA fluid.
+            %\item We have created an array of number density profiles 
+            
+            %to use in the functional to model a crystal, which 
+            
+            %consist of a sum of Guassian distributions centered at lattice sites,
+            
+            %which are varied in width and by vancancies.
+            %\item We have constructed T-n, and P-T phase diagrams which 
+            %show freezing of a WCA fluid over a broad range of temperatures
+            %\end{itemize}
+         %\end{block}
+%\end{frame}
 
 
 %Chris's old stuff...
