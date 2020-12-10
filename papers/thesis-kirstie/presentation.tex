@@ -76,10 +76,12 @@
 \begin{frame}{The WCA Model Fluid}
 	\begin{columns}[t]
        \column{.5\textwidth}
+       	\vspace{-1em}
 		\begin{block}{Real Liquids}
 			\begin{itemize}
 				\item Short range repulsion 
 				\item Long range attraction 
+				\item Still a need for a better model
 			\end{itemize}
 		\end{block}
 		\begin{block}{WCA Model Fluid}
@@ -322,19 +324,21 @@
 			   %\begin{displaymath}{P = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{displaymath} 
 				%\begin{displaymath} \mu = f + \frac{1}{n}P\end{displaymath}
 			\begin{itemize} 
-                 \item Phase transition pressure at intersection where $P_L=P_S$ and $\mu_L=\mu_S$ with T fixed							
-			    %\item Phase transition liquid and solid number densities found at phase transition pressure
-			    %item Find Helmholtz free energy
-			    \vspace{+1em}
-			    \item If know Helmholtz free energy per atom, $f=\frac{F}{N}$ at T,n
-				%\item %Pressure = -slope								
-				\begin{displaymath}{P = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{displaymath} 
-				%\item %$\mu$ = y-intercept
-				\begin{displaymath} \mu = f + \frac{1}{n}P\end{displaymath}				
+                 \item Phase transition pressure at point where $P_L=P_S$ and $\mu_L=\mu_S$ for a given T							
+			     %\item Phase transition liquid and solid number densities found at phase transition pressure
+			     %item Find Helmholtz free energy
+			     \vspace{+1em}
+			     \item Helmholtz free energy per atom, $f=\frac{F}{N}$ at T, n gives
+
+				 %\item %Pressure = -slope								
+				 \begin{displaymath}{P = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{displaymath} 
+				 %\item %$\mu$ = y-intercept
+				 \begin{displaymath} \mu = f + \frac{1}{n}P\end{displaymath}		
+				 Find pressure at intersection 		
 			\end{itemize}
 	    \end{block}	    
 	    \column{.55\textwidth}
-		\vspace{-3em}
+		\vspace{-2em}
             \begin{figure}
                 \centering
                 %\includegraphics[width=1.2\columnwidth]{figs/MaxwellDTC-Fig1-realplot.pdf}
@@ -992,7 +996,7 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
             
                region, abrupt change 
             
-               in density
+               in density!
               \item Nearly matches results from Monte-Carlo simulations, 
               
               coexistence region at slightly higher densities
