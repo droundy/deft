@@ -648,22 +648,23 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 \begin{frame}{Determine alpha, $\alpha{(}T)$}
 	\begin{columns}[t]
 		\column{.5\textwidth}
-	    \vspace{-0.5em}
+	    \vspace{-01em}
 		\begin{block}{}
 			\begin{itemize}
 			    %\item $V_{erf}$ is temperature dependent, $V_{WCA}$ is not
 			    \item Make $V(r)=V_{WCA}(r)$ at $r=\alpha$ where 
 			    the convolution of w2 with itself is greatest
-			    %\item Ideally, would like these curves to match
+			    \item Ideally, curves would match
 			    %\item $\alpha$ decreases with temperature 
 			    %\item radius of weight functions equal to $\alpha/2$
 			\end{itemize}
-			    \begin{figure}
-            \centering
-            \includegraphics[width=.9\columnwidth]{figs/df_dr_with_xi_fromB2_pic.pdf}
-            %\includegraphics[width=.7\columnwidth]{plot_alpha.pdf}
-            %\includegraphics[width=.7\columnwidth]{figs/w2-w3.pdf}
-          \end{figure}
+				\vspace{-0.5em}
+			   \begin{figure}
+                   \centering
+                   \includegraphics[width=.9\columnwidth]{figs/df_dr_with_xi_fromB2_pic.pdf}
+                   %\includegraphics[width=.7\columnwidth]{plot_alpha.pdf}
+                   %\includegraphics[width=.7\columnwidth]{figs/w2-w3.pdf}
+                \end{figure}
 		\end{block}	  
 		\column{.55\textwidth}
         \vspace{-0.5em}
@@ -884,6 +885,20 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 	\end{columns}
 \end{frame}
 
+%\begin{frame}{Monte-Carlo Integration}
+   %\begin{columns}
+		%\column{.5\textwidth}
+		%\begin{block}{}
+		  %\begin{itemize}
+		  %\item 
+		  %\item
+		  %\end{itemize}
+		%\end{block}
+	    %\column{.65\textwidth}
+	    %\includegraphics[height=4cm]{InclusionRadius.png}
+   %\end{columns}
+%\end{frame}
+
 \begin{frame}{Classical Density Functional Theory (cDFT)}
     \begin{block}{Implementing cDFT}
     \begin{itemize}
@@ -963,39 +978,83 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 
 
 \subsection*{WCA Phase diagrams}
+
 \begin{frame}{Temperature-Density Phase Diagram}
+\begin{columns}
+    \column{.5\textwidth}
+	    \vspace{-2em}
+        \begin{block}{}
+            \begin{itemize}
+              \item Data shown for dimensionless temperatures from $K_BT=~$0.5 to 3.0
+              \item Freezing indicated by 
+            
+               presence of coexistence
+            
+               region, abrupt change 
+            
+               in density
+              \item Nearly matches results from Monte-Carlo simulations, 
+              
+              coexistence region at slightly higher densities
+            \end{itemize}
+            \end{block}
+       \column{.65\textwidth}
     \begin{figure}
         \centering
-        \includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_T_vs_n}\\
-        %\caption{$T-n$ Phase Diagram}
+        \includegraphics[width=.9\columnwidth]{figs/Phase_Diagram_of_T_vs_n}\\
     \end{figure}        
     \vspace{-1em}
-    \small *Monte-Carlo data from Chris May, OSU undergraduate thesis
+    \footnotesize $~~~~~~~~~~~~$Monte-Carlo data from Chris May, 
+    
+     $~~~~~~~~~~~~$OSU undergraduate thesis
+     \normalsize
+     \end{columns}
 \end{frame}
 
 \begin{frame}{Pressure-Temperature Phase Diagram}
-    \centering
-    \includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_P_vs_T}\\
-    %\vspace{-1em}
-    %Here is a figure
-    \small *Monte-Carlo data from Chris May, OSU undergraduate thesis
+\begin{columns}
+   \column{.5\textwidth}
+	    \vspace{-2.2em}
+        \begin{block}{}
+            \begin{itemize}
+            \item Data shown for dimensionless temperatures from $K_BT=~$0.5 to 3.0
+            \item Freezing at phase boundary
+            \item Does not match results from Monte-Carlo simulations, 
+            gets worse as pressures and temperatures increase
+            \end{itemize}
+            \end{block}
+       \column{.65\textwidth} 
+         \begin{figure}       
+           \centering
+            \includegraphics[width=.9\columnwidth]{figs/Phase_Diagram_of_P_vs_T}\\
+          \end{figure}  
+        \vspace{-1em}
+        \footnotesize $~~~~~~~~~~~~$Monte-Carlo data from Chris May, 
+    
+         $~~~~~~~~~~~~$OSU undergraduate thesis
+        \normalsize
+     \end{columns}
 \end{frame}
 
 
+\begin{frame}{Summary}
+\vspace{-2em}
+        \begin{block}{}
+            \begin{itemize}
+            \item 
+            \item
+            \end{itemize}
+         \end{block}
+\end{frame}
+
+\begin{frame}{Further Research}
+\end{frame}
 
 
+\end{document}
 
-%\section*{Figures}
-%\begin{frame}{}
-    %\includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
-%\end{frame}
-%\begin{frame}{}
-    %\includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
-%\end{frame}
-%\begin{frame}{}
-    %\includegraphics[width=0.8\columnwidth]{figs/TwoSpheres}
-%\end{frame}
 
+%Chris's old stuff...
 %\section*{Next section}
 %\begin{frame}{What is free energy?}
 	%\begin{block}{Intuitive}
@@ -1088,13 +1147,3 @@ that gives the correct second virial coefficient of a WCA fluid at each temperat
 	%\end{itemize}
 %\end{frame}
 
-
-
-\begin{frame}{Conclusion}
-\end{frame}
-
-\begin{frame}{Further Research}
-\end{frame}
-
-
-\end{document}
