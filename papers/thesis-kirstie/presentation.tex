@@ -48,7 +48,7 @@
 \section*{WCA Fluid}
 
 %\subsection*{Why do we care about it?}
-\begin{frame}{}
+%\begin{frame}{}
 	%%\begin{columns}[t]
        %%\column{.5\textwidth}
        	%\vspace{-1em}
@@ -70,7 +70,7 @@
 			%\end{itemize}
 		%\end{block}		   	 
 	%%\end{columns}	
-\end{frame}
+%\end{frame}
 
 \subsection*{WCA Model Fluid}
 \begin{frame}{The WCA Model Fluid}
@@ -100,7 +100,7 @@
 \end{frame}
 
 \subsection*{Freezing}
-\begin{frame}{}
+%\begin{frame}{}
 	%\begin{columns}[t]
 		%\column{.5\textwidth}
         %\vspace{-2em}
@@ -129,7 +129,7 @@
 			%\end{itemize}
 		%\end{block}
 	%\end{columns}	
-\end{frame}
+%\end{frame}
 
 %\begin{frame}{Freezing of a WCA Fluid}
 	%\begin{columns}[t]
@@ -168,12 +168,13 @@
 		     \begin{itemize}
 				%\item Driven by entropy - maximize the entropy of the universe				
 				\item Abrupt change in density
-				\item Coexistence region
+				
+				across coexistence region
 			 \end{itemize}		
 		\end{block} 
 		\begin{block}{WCA Phase Diagram}
 		     \begin{itemize}
-				\item No attraction	so no
+				\item No attraction	- so no
 				
 				liquid/gas boundary
 				\item Fluid is homogeneous (has
@@ -313,7 +314,42 @@
 %\end{frame}
 
 \subsection*{Finding coexistence}
-\begin{frame}
+\begin{frame}{Find Pressure and Number Densities at  Phase Transition}
+	\begin{columns}[t]
+		\column{.5\textwidth}
+		\vspace{-2em}
+		\begin{block}{}
+			   %\begin{displaymath}{P = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{displaymath} 
+				%\begin{displaymath} \mu = f + \frac{1}{n}P\end{displaymath}
+			\begin{itemize} 
+                 \item Phase transition pressure at intersection where $P_L=P_S$ and $\mu_L=\mu_S$ with T fixed							
+			    %\item Phase transition liquid and solid number densities found at phase transition pressure
+			    %item Find Helmholtz free energy
+			    \vspace{+1em}
+			    \item If know Helmholtz free energy per atom, $f=\frac{F}{N}$ at T,n
+				%\item %Pressure = -slope								
+				\begin{displaymath}{P = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{displaymath} 
+				%\item %$\mu$ = y-intercept
+				\begin{displaymath} \mu = f + \frac{1}{n}P\end{displaymath}				
+			\end{itemize}
+	    \end{block}	    
+	    \column{.55\textwidth}
+		\vspace{-3em}
+            \begin{figure}
+                \centering
+                %\includegraphics[width=1.2\columnwidth]{figs/MaxwellDTC-Fig1-realplot.pdf}
+                \includegraphics[width=0.9\columnwidth]{figs/MaxwellDTC-Fig3-realplot.pdf}
+            \end{figure}
+            \vspace{-.5em}
+			\begin{itemize} 						
+			    \item Phase transition liquid and solid number densities, $\text n_L$ and $\text n_S$ found at $\text P_{phase.transition}$
+			\end{itemize}
+            
+            %\textcolor{blue}{$~~~~~~~~~~~\rightarrow$ Find Helmholtz free energy}
+	\end{columns}	
+\end{frame}
+
+%\begin{frame}
 %\begin{frame}{Maxwell's Double Tangent Construction}
 	%\begin{columns}[t]
 		%\column{.5\textwidth}
@@ -338,7 +374,7 @@
                 %\includegraphics[width=1.2\columnwidth]{figs/MaxwellDTC-Fig1-realplot.pdf}
             %\end{figure}
 	%\end{columns}	
-\end{frame}
+%\end{frame}
 
 %\begin{frame}{Maxwell's Double Tangent Construction}
 	%\begin{columns}[t]
@@ -383,16 +419,45 @@
 	%\end{columns}	
 %\end{frame}
 
+\begin{frame}{Helmholtz Free Energy Breaks into Two Parts}
+    \begin{block}{}
+        \vspace{-2em}
+        \begin{displaymath}F=F_{ideal} + F_{excess}\end{displaymath}
+        \vspace{-.7em}        
+        \begin{itemize}            
+           \item Ideal - \textcolor{blue}{EASY} to find - does not depend on V(r) 
+           \begin{displaymath}F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]d\vec{r}\end{displaymath}
+           \vspace{+0.01em} 
+           \item Excess - \textcolor{red}{HARD} to find - depends on V(r) 
+           
+        \vspace{+1.5em} 
+            $~~~~~~~$Classical Density Functional Theory (cDFT) is 
+            
+            $~~~~~~~$our way out of this problem!
+            %\small Simplified expression in terms of Mayer function, 
+            %\footnotesize $f(r)=e^{-\frac{V(r)}{k_{B}T}}-1$ for pairs of atoms is:
+        \end{itemize}
+        %%\vspace{+0.02em} 
+        %\footnotesize
+        %%
+        %\begin{displaymath} 
+             %F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{...}\int d\vec r^1{...}d\vec r^N \left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}}                        
+             %+\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)}
+        %\end{displaymath}
+        %\normalsize
+     \end{block}
+\end{frame}
+
 
 \section*{Classical density functional theory}
 \subsection*{cDFT}
-\begin{frame}{Classical Density Functional Theory (cDFT)}
+\begin{frame}{First Key Idea in Classical Density Functional Theory}
     %\vspace{+1em} 
     \begin{block}{1) Free energy can be written as functional $\text f[\text{n}(\vec r)]$}  
        \begin{itemize}
           \item A functional is a function of a function (ie. integral)
-          \item Number density, n is number of atoms per volume $\text n=\frac{\text N}{\text V}$
           \item Number density profile, $\text n(\vec{r})$ is an ensemble average
+          %\item Number density, n is number of atoms per volume $\text n=\frac{\text N}{\text V}$
           
            that describes how number density varies spatially on average. 
           \begin{displaymath}\text n(\vec r)=~\left<\sum_{i=1}^{\text N}\delta(\vec r - \vec r_i)\right>~\end{displaymath} 
@@ -401,7 +466,7 @@
     \end{block}
 \end{frame}  
   
-\begin{frame}{Classical Density Functional Theory (cDFT)}
+\begin{frame}{Second Key Idea Classical Density Functional Theory}
     %\vspace{+1em}    
     \begin{block}{2) Free energy tends toward a minimum at equilibrium }
     \begin{itemize}
@@ -418,7 +483,7 @@
     
        %Natural variables for Helmholtz free energy F(T,V,N) are Temperature, Volume, and Number of particles
        Natural variables for Helmholtz free energy per atom,          %good-keep 
-       f(T,$\frac{V}{N}$) are temperature and specific volume. 
+       f(T,$\frac{V}{N}$) are temperature and specific volume (or inverse number density). 
        %f(T,$\frac{1}{n}$) are temperature and inverse number density. %good-keep 
        %\begin{displaymath}df=\frac{\partial f}{\partial T}dT + \frac{\partial f}{\partial \frac{1}{n}}d\left(\frac{1}{n}\right)\end{displaymath}    %good-keep 
        %\begin{displaymath} \text{df}_{\text{System}}=-\left(\frac{\text T}{\text N}\right)\text{dS}_{\text{System+Surroundings}} \end{displaymath}  %good-keep
@@ -451,26 +516,6 @@ be a unique functional of  $\text n_{\text{eq}}(\vec{r})$, and that it has
 minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 \end{frame}
 
-\begin{frame}{Classical Density Functional Theory (cDFT)}
-    \begin{block}{Helmholtz free energy breaks into 2 parts:}
-        \begin{displaymath}F=F_{ideal} + F_{excess}\end{displaymath}
-        \begin{itemize}            
-           \item Ideal - \textcolor{blue}{EASY} to find - does not depend on V(r) 
-           \begin{displaymath}F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]d\vec{r}\end{displaymath}
-           \item Excess - \textcolor{red}{HARD} to find - depends on V(r) 
-            
-            \small Simplified expression in terms of Mayer function, \footnotesize $f(r)=e^{-\frac{V(r)}{k_{B}T}}-1$
-        \end{itemize}
-        %Simplified expression:
-        \tiny
-        \begin{displaymath} 
-             F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{...}\int d\vec r^1{...}d\vec r^N \left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}}                        
-             +\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)}
-        \end{displaymath}
-        \normalsize
-     \end{block}
-\end{frame}
-
 
 %%\subsection*{SPT}
 %\begin{frame}{Scaled Particle Theory}
@@ -492,7 +537,7 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 %   \end{block}
   \begin{block}{Fundamental Measure Theory (FMT)} 
        \begin{itemize}
-           \item DFT for hard spheres developed by Rosenfeld
+           \item cDFT for hard spheres developed by Rosenfeld
            \item Based on \structure{weighted densities}, involving
                  ``fundamental measures'' like the surface area
            \item Weighting functions such as Dirac $\delta$-function shells
@@ -510,36 +555,37 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 \end{frame}
 
 \subsection*{Our WCA Functional}
-\begin{frame}{Our WCA Functional}
-    %\small
-    \begin{align}\label{eq:Fexfunctional}
-        F_{excess}[\textcolor{blue}{\text{n}(\vec{r})}]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
-     \end{align}
-     %where 
-     \begin{align}
-         \Phi_1 &= -n_{0}\ln(1-n_{3}) \\
-         \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
-         \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
-      \end{align} 
-      \begin{align}\label{eq:numdenprofile}
-	      n_i(\vec{r})=\int_{Volume}{\textcolor{blue}{\text n(\vec{r'})}w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}
-      \end{align}
-      %\begin{align}\label{eq:weights}
-  %w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
-  %w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
-  %w_2(r) &=-\frac{\partial{w_3(r)}}{\partial{r}} \\
-  %&= \frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}  \\
-  %w_3(r) &=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]  
-%\end{align}
-%\begin{equation}\label{eq:w_v2}{  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  }\end{equation}
-%\begin{equation}\label{eq:w_v1}{  \vec{w_{1}}=w_{1}\frac{\vec{r}}{r}  }\end{equation} 
-%\begin{equation}\label{eq:tensorweight-methods}\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)\end{equation}
-\normalsize
-\end{frame}
+%\begin{frame}
+%\begin{frame}{Our WCA Functional}
+    %%\small
+    %\begin{align}\label{eq:Fexfunctional}
+        %F_{excess}[\textcolor{blue}{\text{n}(\vec{r})}]=k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
+     %\end{align}
+     %%where 
+     %\begin{align}
+         %\Phi_1 &= -n_{0}\ln(1-n_{3}) \\
+         %\Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
+         %\Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
+      %\end{align} 
+      %\begin{align}\label{eq:numdenprofile}
+	      %n_i(\vec{r})=\int_{Volume}{\textcolor{blue}{\text n(\vec{r'})}w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}
+      %\end{align}
+      %%\begin{align}\label{eq:weights}
+  %%w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
+  %%w_{1}(r) &=\frac{w_{2}}{4\pi{r}} \\
+  %%w_2(r) &=-\frac{\partial{w_3(r)}}{\partial{r}} \\
+  %%&= \frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}  \\
+  %%w_3(r) &=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]  
+%%\end{align}
+%%\begin{equation}\label{eq:w_v2}{  \vec{w_{2}}=w_{2}\frac{\vec{r}}{r}  }\end{equation}
+%%\begin{equation}\label{eq:w_v1}{  \vec{w_{1}}=w_{1}\frac{\vec{r}}{r}  }\end{equation} 
+%%\begin{equation}\label{eq:tensorweight-methods}\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)\end{equation}
+%\normalsize
+%\end{frame}
 
 \begin{frame}{Our weighting function}
     \begin{itemize}
-        \item All the weighting functions are derived from $w_2(r)$
+        \item All the weighting functions can be derived from $w_2(r)$
         \item $w_2$ is related to $V(r)$ by
         \begin{align}
           %\frac{df}{dr} &= 
@@ -548,11 +594,14 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
       \end{align}
       but this equation is hard to solve
       \item Following Schmidt, we approximate $w_2$ by as a gaussian
+      %\begin{displaymath}w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}\end{displaymath}
     %   \begin{align}\label{eq:weights}
     %       w_2(r) % &=-\frac{\partial{w_3(r)}}{\partial{r}}
     %        = \frac{\sqrt{2}}{\textcolor{red}{\Xi}\sqrt\pi}\exp^{-\left(\frac{r-\frac{\textcolor{red}{\alpha}}{2}}{\textcolor{red}{\Xi}/\sqrt{2}}\right)^2}
     %   \end{align}
-      \item and adjust FIXME parameters to approximate the above...
+      \item Adjust parameters $\alpha$ and $\Xi$ to approximate the above relation with a resluting $V(r)$
+that gives the correct second virial coefficient of a WCA fluid at each temperature
+      %\begin{displaymath}w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}{2}}{\Xi/\sqrt{2}}\right)^2}\end{displaymath}
     \end{itemize}
     %\small
     %\begin{align}\label{eq:Fexfunctional}
@@ -578,57 +627,115 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 % \normalsize
 \end{frame}
 
-\begin{frame}{Our WCA Functional}
-    \small
-     Evaluate:
-    \begin{equation} \frac{df(r)}{dr}=\int_{-\infty}^{\infty}{w_2(r')w_2(r-r')dr'}\end{equation}
-    %\begin{displaymath}{\frac{df(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\alpha}{\Xi}\right)^2}}\end{displaymath} 
-    % integrate
-    \begin{displaymath}{f(r)=\int_{\infty}^r{ \frac{1}{\textcolor{red}{\Xi}\sqrt{\pi}}e^{-\left(\frac{r'-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)^2}{dr'}}}\end{displaymath} 
-    $V_{erf}(r)$  Mayer function:
-    \begin{equation} f(r)=-\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)\right]\end{equation} 
-    %the Mayer function is
-    \begin{displaymath}f(r)=e^{-\frac{V(r)}{K_BT}}-1\end{displaymath} 
-    \begin{equation} 
-        V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)+1\right)\right]
-    \end{equation} 
-        \normalsize      
-\end{frame}
+%\begin{frame}
+%\begin{frame}{Our WCA Functional}
+    %\small
+     %Evaluate:
+    %\begin{equation} \frac{df(r)}{dr}=\int_{-\infty}^{\infty}{w_2(r')w_2(r-r')dr'}\end{equation}
+    %%\begin{displaymath}{\frac{df(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\alpha}{\Xi}\right)^2}}\end{displaymath} 
+    %% integrate
+    %\begin{displaymath}{f(r)=\int_{\infty}^r{ \frac{1}{\textcolor{red}{\Xi}\sqrt{\pi}}e^{-\left(\frac{r'-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)^2}{dr'}}}\end{displaymath} 
+    %$V_{erf}(r)$  Mayer function:
+    %\begin{equation} f(r)=-\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)\right]\end{equation} 
+    %%the Mayer function is
+    %\begin{displaymath}f(r)=e^{-\frac{V(r)}{K_BT}}-1\end{displaymath} 
+    %\begin{equation} 
+        %V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\textcolor{red}{\alpha}}{\textcolor{red}{\Xi}}\right)+1\right)\right]
+    %\end{equation} 
+        %\normalsize      
+%\end{frame}
 
-\begin{frame}{Our WCA Functional}
+\begin{frame}{Determine alpha, $\alpha{(}T)$}
 	\begin{columns}[t]
 		\column{.5\textwidth}
 	    \vspace{-0.5em}
-		\begin{block}{Determine alpha, $\textcolor{red}{\alpha{(}T)}$}
+		\begin{block}{}
 			\begin{itemize}
-			    \item $V_{erf}$ is temperature dependent, $V_{WCA}$ is not
-			    \item Match at a point, r = $\alpha$
-			    \begin{displaymath} V_{erf}(\alpha)=V_{WCA}(\alpha) \end{displaymath}
+			    %\item $V_{erf}$ is temperature dependent, $V_{WCA}$ is not
+			    \item Make $V(r)=V_{WCA}(r)$ at $r=\alpha$ where 
+			    the convolution of w2 with itself is greatest
+			    %\item Ideally, would like these curves to match
+			    %\item $\alpha$ decreases with temperature 
+			    %\item radius of weight functions equal to $\alpha/2$
 			\end{itemize}
-		\end{block}
-		\vspace{-1em}
-		  \begin{figure}
+			    \begin{figure}
             \centering
-            \includegraphics[width=.7\columnwidth]{plot_alpha.pdf}
+            \includegraphics[width=.9\columnwidth]{figs/df_dr_with_xi_fromB2_pic.pdf}
+            %\includegraphics[width=.7\columnwidth]{plot_alpha.pdf}
+            %\includegraphics[width=.7\columnwidth]{figs/w2-w3.pdf}
           \end{figure}
-		\column{.5\textwidth}
+		\end{block}	  
+		\column{.55\textwidth}
         \vspace{-0.5em}
-        \begin{block}{Determine Xi, $\textcolor{red}{\Xi{(}T)}$}
+        \begin{block}{}
+        %\vspace{-1em}	
+        \begin{itemize}
+			    %\item $V_{erf}$ is temperature dependent, $V_{WCA}$ is not
+			    %\item Make $V(r)=V_{WCA}(r)$ at $r=\alpha$ where 
+			    %the convolution of w2 with itself is greatest
+			    %\item Ideally, would like these curves to match
+			    \item $\alpha$ decreases with temperature 
+			    \item $\alpha$ is related to the radius of weight functions
+			\end{itemize}
+        \begin{figure}
+            \centering
+            %\includegraphics[width=\columnwidth]{figs/df_dr_with_xi_fromB2_pic.pdf}
+            %\includegraphics[width=.7\columnwidth]{plot_alpha.pdf}
+            \includegraphics[width=\columnwidth]{figs/w2-w3-radius.png}
+          \end{figure}
+	    \end{block}          
+	\end{columns}	
+\end{frame}
+
+
+\begin{frame}{Determine Xi, $\Xi{(}T)$}
+	\begin{columns}[t]
+		\column{.5\textwidth}
+	    \vspace{-0.5em}
+		\begin{block}{}
             \begin{itemize}
 			    \item Match 2nd Virial Coefficients
 			\end{itemize}
-		    \vspace{+0.5em}
-		    \begin{displaymath}B_2=-\frac{1}{2}\int_{Volume} e^{-\frac{V(r)}{k_{B}T}}-1~d\vec r\end{displaymath} 
-			\begin{displaymath}B_{2\operatorname{erf}}(T) =B_{2WCA}(T)\end{displaymath}  
+		    %\vspace{+0.5em}
+		    
+		    \begin{displaymath}B_2=-\frac{1}{2}\int_{Volume} e^{-\frac{V(r)}{k_{B}T}}-1~d\vec r\end{displaymath} 					    
+		     %\vspace{+0.5em}
+		     
+			\begin{displaymath}B_{2\operatorname{V(r)}}(T) =B_{2WCA}(T)\end{displaymath}         
+	        %\item $\Xi$ increases with temperature 
+			%\item $\Xi$ is related to the thickness of weight functions	    
 	    \end{block}
+		%\vspace{-1em}
+		\column{.5\textwidth}
+        \vspace{-0.5em}       
+        %\begin{figure}
+            %\centering
+            %\includegraphics[width=.7\columnwidth]{xi_fromB2.pdf}
+          %\end{figure}            
+        \vspace{-0.5em}
+        \begin{block}{}
+        %\vspace{-1em}	
+        \begin{itemize}
+			    %\item $V_{erf}$ is temperature dependent, $V_{WCA}$ is not
+			    %\item Make $V(r)=V_{WCA}(r)$ at $r=\alpha$ where 
+			    %the convolution of w2 with itself is greatest
+			    %\item Ideally, would like these curves to match
+			    \item $\Xi$ increases with temperature 
+			    \item $\Xi$ is related to the thickness of weight functions
+			\end{itemize}
+	    \vspace{-2em} 
         \begin{figure}
             \centering
-            \includegraphics[width=.7\columnwidth]{xi_fromB2.pdf}
+            %\includegraphics[width=\columnwidth]{figs/df_dr_with_xi_fromB2_pic.pdf}
+            %\includegraphics[width=.7\columnwidth]{plot_alpha.pdf}
+            \includegraphics[width=1.1\columnwidth]{figs/w2-w3-thickness.png}
           \end{figure}
-          %$~~~~~~~$fig...
-          
+	    \end{block}              
 	\end{columns}	
 \end{frame}
+
+
+
 \section*{Identifying freezing}
 \subsection*{Density of a crystal}
 
@@ -654,15 +761,15 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
      \end{block}
 \end{frame}
 
-\begin{frame}{}
+%\begin{frame}{}
 %\begin{figure}
        %\centering
        %\includegraphics[height=4cm]{Simple_cell.png}
        %A simplified cell
  %\end{figure} 
-\end{frame}
+%\end{frame}
 
-\begin{frame}{}
+%\begin{frame}{}
     %\begin{itemize}
 	    %\item Atoms not exactly on lattice sites
 		%\item Gaussian distribution results
@@ -680,7 +787,7 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
        %\label{fig:Ensemble_Gaus}
         %Front view of an atom in a simplified cell
      %\end{figure}     
-\end{frame}	
+%\end{frame}	
 
 %\begin{frame}{A Gaussian Distribution}
     %\begin{figure}
@@ -694,7 +801,7 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
     
 %\end{frame}
 
-\begin{frame}{}
+%\begin{frame}{}
     %\begin{itemize}
 	    %\item Not all lattice sites are occupied
 		%\item More Gaussian Distributions, but shorter
@@ -713,7 +820,7 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
        
        %An atom in a cube consisting of 8 smaller simplified cells
     %\end{figure}     
-\end{frame}
+%\end{frame}
 
 %\begin{figure}
    %\centering
@@ -728,14 +835,53 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 
 
 \begin{frame}{Number Density Profiles}
-    \begin{figure}
-       \centering
-       \includegraphics[height=5cm]{VaryWidthandVacancies.png}
-       %\caption{Number density profiles $n(\vec r)$, all with 
-       %the same number density, n.}
-       \label{fig:Ensemble_vary}
-    \end{figure}  
-    Number density profiles $n(\vec r)$, with the same number density, n.
+	\begin{columns}[t]
+		\column{.5\textwidth}
+	    \vspace{-2em}
+        \begin{block}{}
+            \begin{itemize}
+            %\item Gaussian distribution at each lattice site
+            \item $\text n(\vec{r})$ is sum of Gaussian 
+            
+            distributions, each  
+            
+            centered at a lattice site
+            \item Atoms not exactly on lattice
+            
+            sites, width of 
+            Gaussians vary
+            \item Not all lattice sites occupied,
+            shrink cells as fraction of 
+            
+            vacancies increase to keep 
+            
+            number density same
+            \item Each $n(\vec r)$ is the equilibrium profile
+            valid for some fixed external potential. 
+            
+            \end{itemize}
+        \end{block}
+		\column{.65\textwidth}
+		\vspace{-2.5em}
+		%%\small{$~~~~~~~$Simplified cell}
+		    \begin{figure}
+               %%\centering
+               \includegraphics[height=1.5cm]{figs/Simplified_cell.pdf}
+            \end{figure}
+    \normalsize
+             \vspace{-2em} 
+    	    \begin{figure}
+               \centering
+               \includegraphics[height=4.5cm]{VaryWidthandVacancies.png}
+               %\caption{Number density profiles $n(\vec r)$, all with 
+               %the same number density, n.}
+            \end{figure} 
+             \vspace{-0.5em} 
+                \footnotesize
+    $~~~~~~~~~~$Many number density profiles $n(\vec r)$, 
+    
+    $~~~~~~~~~~$all with the same number density, n.
+	\end{columns}
 \end{frame}
 
 \begin{frame}{Classical Density Functional Theory (cDFT)}
@@ -753,10 +899,13 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
        \begin{displaymath}\text f[\text n(\vec r)]\rightarrow \text f_{\text{eq}}[\text n_{\text{eq}}(\vec r)]  \mbox{ as f is minimized} \end{displaymath}
        %and $\text n(\vec{r})$ goes to its equilibrium value as well!
        \begin{displaymath}{\mbox{where }  \text n(\vec{r}) = \text n_{\text{eq}}(\vec r)  \mbox{ at equilibrium}}\end{displaymath}              
-    \end{itemize}      
-       Collect (f,$\frac{1}{n}$) data for each temperature T
-       to use in Maxwell's Double Tanget Construction to get the pressure P,
-       and the liquid and solid number densities at each phase transition $\text n_L, \text n_S$
+    \end{itemize}   
+    
+       Construct phase diagrams using (f,$\frac{1}{n}$) data for each temperature to find P, $\text n_L, \text n_S$  at phase transitions.
+       %Collect (f,$\frac{1}{n}$) data for each temperature T
+       %to use in Maxwell's Double Tanget Construction 
+       %to get the pressure P,
+       %and the liquid and solid number densities $\text n_L, \text n_S$ at the phase transition for each T
        %\item Equilibrium Free Energy and number density profile found!
        %\item equilibrium free energy and equilibrium number density profile
  
@@ -821,7 +970,7 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
         %\caption{$T-n$ Phase Diagram}
     \end{figure}        
     \vspace{-1em}
-    \small *Monte-Carlo data from Christopher May, OSU undergraduate thesis
+    \small *Monte-Carlo data from Chris May, OSU undergraduate thesis
 \end{frame}
 
 \begin{frame}{Pressure-Temperature Phase Diagram}
@@ -829,7 +978,7 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
     \includegraphics[width=0.8\columnwidth]{figs/Phase_Diagram_of_P_vs_T}\\
     %\vspace{-1em}
     %Here is a figure
-    \small *Monte-Carlo data from Christopher May, OSU undergraduate thesis
+    \small *Monte-Carlo data from Chris May, OSU undergraduate thesis
 \end{frame}
 
 
@@ -938,5 +1087,14 @@ minimum extremum at $\text n_{\text{eq}}(\vec{r})$.
 		%\item A. Valeske, ``Determining free energies of hard sphere fluids via monte carlo simulation'' (2015), Oregon State University.
 	%\end{itemize}
 %\end{frame}
+
+
+
+\begin{frame}{Conclusion}
+\end{frame}
+
+\begin{frame}{Further Research}
+\end{frame}
+
 
 \end{document}
