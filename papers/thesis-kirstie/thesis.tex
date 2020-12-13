@@ -59,7 +59,6 @@ spheres with softly fading replusive potentials which he modeled by making
 the radius of the spheres temperature dependent~\cite{rowlinson1964statistical}. 
 This reflects the idea that soft-spheres penetrate more deeply into 
 each other when they collide at higher temperatures. 
-
 In 1967 Barker and Henderson combined the perturabtion approach of Zwanzig 
 with Rowlinson's idea of using temperature-dependent radii to model spheres 
 with soft repulsive potentials to create the Barker-Henderson model 
@@ -94,18 +93,20 @@ must be constructed for a particular fluid.
 %DFT Evans 1979
 %Led by the consistency bewteen results from SPT and Percus-Yevick, 
 In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989} 
-(which can be constructed from SPT~\cite{rosenfeld1989,Hansen,santos2012phi3}) 
-to form a functional for the hard-sphere fluid.
-FMT is based on the idea that for a hard-sphere fluid the
-lowest term in the virial expansion of the excess chemical potential can 
+to form a functional for the hard-sphere fluid based on the idea that 
+the lowest term in the virial expansion 
+of the excess chemical potential for a hard-sphere fluid can 
 be expressed in terms of a sum of weighted densities using a weight 
 function of the form of a backward Heavyside step function (shown below) 
 that can be expressed in terms of a sum of convolutions involving 
-a set of weight functions that can be related to the geometry of a sphere.
+a set of weight functions related to the geometry of a sphere.
 \begin{displaymath}
    \theta(|\vec r - \vec r'|-(\vec R_i + \vec R_j)) = \end{displaymath}
 \begin{equation} w_i^{(3)} x w_j^{(0)} + w_j^{(3)} x w_i^{(0)} + w_i^{(1)} x w_j^{(2)} + w_j^{(1)} x w_i^{(2)} + \vec w_i^{(1)} x \vec w_j^{(2)} + \vec w_j^{(1)} x \vec w_i^{(2)}
 \end{equation}
+FMT gives the same result for the excess Helmholtz free energy of the hard-sphere fluid as 
+SPT (from which it can be constructed~\cite{rosenfeld1989,Hansen,santos2012phi3}),
+and for the direct correlation function as Percus-Yevick.
 Tarazona later improved on the 
 method by introducing a tensor version of one of the energy density terms 
 in the functional~\cite{tarazonaphi3, 
@@ -244,8 +245,9 @@ approaches infinity as the distance between the atoms continues to decrease.
 The combined attractive and repulsive effects produce the overall shape of 
 the Lennard-Jones interatomic potential shown in Figure \ref{fig:LJ_potential}. 
 The potential is zero when the distance r between the centers of two atoms 
-is equal to $\sigma$. At this point 
-the attraction between the atoms just cancels their repulsion. As the distance 
+is equal to $\sigma$. 
+%At this point the attraction between the atoms just cancels their repulsion. 
+As the distance 
 between the centers of the two atoms decreases below $\sigma$, the potential 
 rapidly approaches positive infinity corresponding to infinite repulsion. 
 Above $\sigma$ the potential becomes negative indicating a net attraction 
