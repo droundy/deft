@@ -71,6 +71,7 @@ portion of the Leonard-Jones potential~\cite{andersen1971relationship},
 which is known as the Weeks-Chandler-Anderson model fluid. 
 
 ADD MORE HERE TO COME UP TO DATE!!
+\newline
 
 While models for particular fluids were being created, powerful methods 
 to describe the properties of fluids were also being developed. 
@@ -101,8 +102,8 @@ function of the form of a backward Heavyside step function (shown below)
 that can be expressed in terms of a sum of convolutions involving 
 a set of weight functions related to the geometry of a sphere.
 \begin{displaymath}
-   \theta(|\vec r - \vec r'|-(\vec R_i + \vec R_j)) = \end{displaymath}
-\begin{equation} w_i^{(3)} x w_j^{(0)} + w_j^{(3)} x w_i^{(0)} + w_i^{(1)} x w_j^{(2)} + w_j^{(1)} x w_i^{(2)} + \vec w_i^{(1)} x \vec w_j^{(2)} + \vec w_j^{(1)} x \vec w_i^{(2)}
+   \theta(|\vec r - \vec r'|-(\vec R_i + \vec R_j)) = w_i^{(3)} \otimes w_j^{(0)} + w_j^{(3)} \otimes w_i^{(0)} + w_i^{(1)} \otimes w_j^{(2)} + w_j^{(1)} \otimes w_i^{(2)}\end{displaymath}
+\begin{equation}   + \vec w_i^{(1)} \otimes \vec w_j^{(2)} + \vec w_j^{(1)} \otimes \vec w_i^{(2)}
 \end{equation}
 FMT gives the same result for the excess Helmholtz free energy of the hard-sphere fluid as 
 SPT (from which it can be constructed~\cite{rosenfeld1989,Hansen,santos2012phi3}),
