@@ -77,13 +77,13 @@ While models for particular fluids were being created, powerful methods
 to describe the properties of fluids were also being developed. 
 In the late 1950s, Scaled Particle Theory (SPT)~\cite{ReissSPT} was 
 introduced from which an equation of state, and an expression for the 
-excess Helmholtz free energy of a homogeneous hard-Sphere fluid can be 
+excess Helmholtz free energy of a homogeneous hard-sphere fluid can be 
 obtained~\cite{Hansen}. 
 %\textcolor{red}{
 In 1958, Percus-Yevick introduced an alternative method 
 for the hard-sphere fluid based on an approximate closure to the 
 Ornstein-Zernike integral equation~\cite{PercusYevick}.
-%Percus and Yevick took another approach to the hard-Sphere fluid.
+%Percus and Yevick took another approach to the hard-sphere fluid.
 In 1961 Morita and Hiroike introduced a density functional 
 approach~\cite{MoritaDFT} to finding the equilibrium Grand and Helmholtz free energies, 
 and the cooresponding equilibrium number density profile for 
@@ -93,7 +93,7 @@ as a functional of an average number density that varies spatially
 must be constructed for a particular fluid.
 %DFT Evans 1979
 %Led by the consistency bewteen results from SPT and Percus-Yevick, 
-In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989} 
+In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989,rosenfeld1988} 
 to form a functional for the hard-sphere fluid based on the idea that 
 the lowest term in the virial expansion 
 of the excess chemical potential for a hard-sphere fluid can 
@@ -106,8 +106,8 @@ a set of weight functions related to the geometry of a sphere.
 \begin{equation}   + \vec w_i^{(1)} \otimes \vec w_j^{(2)} + \vec w_j^{(1)} \otimes \vec w_i^{(2)}
 \end{equation}
 FMT gives the same result for the excess Helmholtz free energy of the hard-sphere fluid as 
-SPT (from which it can be constructed~\cite{rosenfeld1989,Hansen,santos2012phi3}),
-and for the direct correlation function as Percus-Yevick.
+SPT does, from which it can be constructed~\cite{rosenfeld1989,Hansen,santos2012phi3},
+and for the direct correlation function given by Percus-Yevick.
 Tarazona later improved on the 
 method by introducing a tensor version of one of the energy density terms 
 in the functional~\cite{tarazonaphi3, 
@@ -381,8 +381,8 @@ To facilitate finding the pressure at the phase transition computationally,
 it is helpful to consider the Gibbs free energy given by G=F+PV. 
 Rearranging the terms and dividing by N gives an  expression for the 
 Helmholtz free energy per atom $f$ in terms of the Gibbs free energy 
-per atom  $g$ (which is also the chemical potential)  
-\begin{align}\frac{F}{N} = -P\frac{V}{N}+\frac{G}{N} \end{align}
+per atom  $g$ (which is the chemical potential)  
+\begin{equation}\frac{F}{N} = -P\frac{V}{N}+\frac{G}{N} \end{equation}
 \begin{align}f=-P\frac{1}{n}+g\end{align}
 This equation has the form of a line
 \begin{equation}
@@ -445,7 +445,7 @@ as shown in Figure \ref{fig:Pvsinvn}. By repeating this procedure to
 find the liquid and solid number densities at the phase transition 
 for various temperatures, a Temperature-Density (T-n) phase diagram 
 can be generated, similar to that shown in Figure \ref{fig:T-n_Diagram}, 
-but without the gray hump that is characteristic of fluids that have 
+but without the gray hump characteristic of fluids that have 
 both attractive and repulsive interatomic potentials. 
 
 \section{Classical Density Functional Theory (cDFT)}
