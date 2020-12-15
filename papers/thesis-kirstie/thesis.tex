@@ -44,30 +44,128 @@
 
 \chapter{Introduction}
 
-The goal of this project is to generate temperature-density 
-and pressure-temperature phase diagrams for a Weeks-Chandler-Anderson 
-(WCA) model fluid using classical Density Functional Theory (cDFT). 
-To do this, the Helmholtz free energies of the fluid
-in a liquid state and in a crystalline solid state must be found.
-In general, the Helmholtz free energy, which consists of an ideal part 
-and an excess part, can be written as a functional of the number density 
-profile $n(\vec{r})$ which describes the way the average number 
-density varies spatially. 
-\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
+Classically, fluids have been modeled by a collection of small, 
+impenetrable spheres colliding with one another like billiard balls. 
+In the simplest case, the spheres are treated as having only a repulsive 
+potential. This model, called the hard-sphere fluid, has served as the 
+primary reference system for fluids. This is due to the fact that the 
+repulsion between atoms is much stronger than their attraction, and so 
+the repulsive potential, which is descriptive of hard spheres, dominates 
+the interactions between atoms. In 1954 Zwanzig introduced the Square-well 
+fluid which is a perturbation of the hard-sphere fluid created by adding 
+a hard-edge attractive potential to the repulsive potential of the 
+hard-sphere fluid~\cite{ZwanzigSqrWell}. In 1964 Rowlinson studied 
+spheres with softly fading repulsive potentials which he modeled by making
+the radius of the spheres temperature dependent~\cite{rowlinson1964statistical}. 
+This reflects the idea that soft-spheres penetrate more deeply into 
+each other when they collide at higher temperatures. 
+In 1967 Barker and Henderson combined the perturbation approach of Zwanzig 
+with Rowlinson's idea of using temperature-dependent radii to model spheres 
+with soft repulsive potentials to create the Barker-Henderson model 
+fluid~\cite{barker1967perturbation}. In this model, a soft-sphere fluid is 
+modeled by using a hard-sphere fluid with hard spheres of larger radii 
+at low temperatures, and smaller radii at high temperatures. In 1971 Weeks, 
+Chandler, and Anderson used temperature and density dependent hard-sphere 
+radii to model spheres with the more realistic softly fading repulsive 
+portion of the Leonard-Jones potential~\cite{andersen1971relationship}, 
+which is known as the Weeks-Chandler-Anderson model fluid. 
 
-Soft Fundamental Measure Theory (SFMT) will be used to form the 
-functional for the excess Helmholtz free energy. 
-SFMT is a method that makes the task of 
-forming an expression for the excess Helmholtz free energy of a particular 
-model fluid much easier since the interaction that each sphere, or atom, 
-has with every other sphere does not have to be taken explicitly into account.
-Once the functional for the Helmholtz free energy is formed, then 
-according to cDFT, the equilibrium
-Helmholtz free energy of the system can be found for a particular 
-temperature and density by varying the number 
-density profile $n(\vec{r})$ until the free energy is minimized. 
-Phase diagrams can then be constructed using Maxwell's Double Tangent Construction. 
-Results will be compared to those from Monte-Carlo simulations.
+ADD MORE HERE TO COME UP TO DATE!!
+\newline
+
+While models for particular fluids were being created, powerful methods 
+to describe the properties of fluids were also being developed. 
+In the late 1950s, Scaled Particle Theory (SPT)~\cite{ReissSPT} was 
+introduced from which an equation of state, and an expression for the 
+excess Helmholtz free energy of a homogeneous hard-sphere fluid can be 
+obtained~\cite{Hansen}. 
+%\textcolor{red}{
+In 1958, Percus-Yevick introduced an alternative method 
+for the hard-sphere fluid based on an approximate closure to the 
+Ornstein-Zernike integral equation~\cite{PercusYevick}.
+%Percus and Yevick took another approach to the hard-sphere fluid.
+In 1961 Morita and Hiroike introduced a density functional 
+approach~\cite{MoritaDFT} to finding the equilibrium Grand and Helmholtz free energies, 
+and the corresponding equilibrium number density profile for 
+inhomogeneous fluids. To use the classical Density Functional Theory (cDFT) 
+approach, an expression for the free energy 
+as a functional of an average number density that varies spatially 
+must be constructed for a particular fluid.
+%DFT Evans 1979
+%Led by the consistency between results from SPT and Percus-Yevick, 
+In 1989 Rosenfeld introduced Fundamental Measure Theory (FMT)~\cite{rosenfeld1989,rosenfeld1988} 
+to form a functional for the hard-sphere fluid based on the idea that 
+the lowest term in the virial expansion 
+of the excess chemical potential for a hard-sphere fluid can 
+be expressed in terms of a sum of weighted densities using a weight 
+function of the form of a backward Heavyside step function (shown below) 
+that can be expressed in terms of a sum of convolutions involving 
+a set of weight functions related to the geometry of a sphere.
+\begin{displaymath}
+   \theta(|\vec r - \vec r'|-(\vec R_i + \vec R_j)) = w_i^{(3)} \otimes w_j^{(0)} + w_j^{(3)} \otimes w_i^{(0)} + w_i^{(1)} \otimes w_j^{(2)} + w_j^{(1)} \otimes w_i^{(2)}\end{displaymath}
+\begin{equation}   + \vec w_i^{(1)} \otimes \vec w_j^{(2)} + \vec w_j^{(1)} \otimes \vec w_i^{(2)}
+\end{equation}
+FMT gives the same result for the excess Helmholtz free energy of the hard-sphere fluid as 
+SPT does, from which it can be constructed~\cite{rosenfeld1989,Hansen,santos2012phi3},
+and for the direct correlation function approximation given by Percus-Yevick.
+Tarazona later improved on the 
+method by introducing a tensor version of one of the energy density terms 
+in the functional~\cite{tarazonaphi3, 
+santos2012phi3}, and in 1999 Schmidt adopted FMT for spheres with soft 
+interatomic potential energies
+(which rise to infinity over a distance, rather than instantaneously 
+like the potential energy between hard spheres)
+forming Soft Fundamental Measure Theory (SFMT)\cite{schmidt1999density}. 
+
+%by replacing $w^{(3)}$ with a weight function that would result in  
+%soft interatomic potentials (which rise to infinity over a distance, 
+%rather than instantaneously).
+
+Schmidt applied his Soft Fundamental Measure Theory to various fluids 
+with soft repulsive and soft attractive potentials, and developed an error function  
+model 
+%based on a Gaussian weight function 
+for spheres with steep, short-range soft repulsive 
+potentials~\cite{schmidt2000fluid}.
+%, similar to that exhibited by a WCA fluid. 
+In this paper, classical Density Functional 
+Theory will be used to predict the freezing of a Weeks-Chandler-Anderson 
+model fluid by applying SFMT with Schmidt's proposed error function model, 
+in which we have incorporated our temperature dependent parameters to fit the 
+functional to the soft-sphere WCA fluid.
+%form the functional for the excess Helmholtz free energy. 
+%for generating the weight functions, and Tarazona's tensor functional. 
+Results will be compared to those generated from Monte-Carlo simulations.
+
+%Results will be compared to those from Monte-Carlo simulations.
+
+
+
+%Newer Intro....
+%The goal of this project is to generate temperature-density 
+%and pressure-temperature phase diagrams for a Weeks-Chandler-Anderson 
+%(WCA) model fluid using classical Density Functional Theory (cDFT). 
+%To do this, the Helmholtz free energies of the fluid
+%in a liquid state and in a crystalline solid state must be found.
+%In general, the Helmholtz free energy, which consists of an ideal part 
+%and an excess part, can be written as a functional of the number density 
+%profile $n(\vec{r})$ which describes the way the average number 
+%density varies spatially. 
+%\begin{equation}{F[n(\vec{r})]=F_{ideal}[n(\vec{r})] + F_{excess}[n(\vec{r})]}\end{equation} 
+
+%Soft Fundamental Measure Theory (SFMT) will be used to form the 
+%functional for the excess Helmholtz free energy. 
+%SFMT is a method that makes the task of 
+%forming an expression for the excess Helmholtz free energy of a particular 
+%model fluid much easier since the interaction that each sphere, or atom, 
+%has with every other sphere does not have to be taken explicitly into account.
+%Once the functional for the Helmholtz free energy is formed, then 
+%according to cDFT, the equilibrium
+%Helmholtz free energy of the system can be found for a particular 
+%temperature and density by varying the number 
+%density profile $n(\vec{r})$ until the free energy is minimized. 
+%Phase diagrams can then be constructed using Maxwell's Double Tangent Construction. 
+%Results will be compared to those from Monte-Carlo simulations.
 
 \chapter{Theory}
 
@@ -148,8 +246,9 @@ approaches infinity as the distance between the atoms continues to decrease.
 The combined attractive and repulsive effects produce the overall shape of 
 the Lennard-Jones interatomic potential shown in Figure \ref{fig:LJ_potential}. 
 The potential is zero when the distance r between the centers of two atoms 
-is equal to $\sigma$. At this point 
-the attraction between the atoms just cancels their repulsion. As the distance 
+is equal to $\sigma$. 
+%At this point the attraction between the atoms just cancels their repulsion. 
+As the distance 
 between the centers of the two atoms decreases below $\sigma$, the potential 
 rapidly approaches positive infinity corresponding to infinite repulsion. 
 Above $\sigma$ the potential becomes negative indicating a net attraction 
@@ -204,9 +303,9 @@ Figure~\ref{fig:TwoSpheres}.
     \label{fig:TwoSpheres}
 \end{figure} 
     
-\section{Freezing and Maxwell's Double Tangent Construction}
+\section{Freezing and the Construction of Phase Diagrams}
 
-Freezing is governed by entropy, which the universe, or any closed system, 
+Freezing is governed by entropy, which the universe %, or any closed system, 
 seeks to maximize according to the second law of Thermodynamics. When the 
 entropy of a pure substance in its liquid state is lower than the entropy 
 that it would have in its solid state at the same temperature (necessary 
@@ -223,7 +322,7 @@ that are purely repulsive.
 
 \begin{figure}
     \centering
-    \includegraphics[height=6cm]{figs/P-T_Diagram.pdf}
+    \includegraphics[height=8cm]{figs/P-T_Diagram.pdf}
     \caption{Conceptual Pressure-Temperature Phase Diagram}
     \label{fig:P-T_Diagram}
 \end{figure}
@@ -282,8 +381,8 @@ To facilitate finding the pressure at the phase transition computationally,
 it is helpful to consider the Gibbs free energy given by G=F+PV. 
 Rearranging the terms and dividing by N gives an  expression for the 
 Helmholtz free energy per atom $f$ in terms of the Gibbs free energy 
-per atom  $g$ (which is also the chemical potential)  
-\begin{align}\frac{F}{N} = -P\frac{V}{N}+\frac{G}{N} \end{align}
+per atom  $g$ (which is the chemical potential)  
+\begin{equation}\frac{F}{N} = -P\frac{V}{N}+\frac{G}{N} \end{equation}
 \begin{align}f=-P\frac{1}{n}+g\end{align}
 This equation has the form of a line
 \begin{equation}
@@ -330,11 +429,11 @@ produces the curves in Figure~\ref{fig:GibbsvsP}.
 
 \begin{figure}
     \centering
-    \includegraphics[height=6cm]{figs/T-n_Diagram.pdf}
+    \includegraphics[height=8cm]{figs/T-n_Diagram.pdf}
     \caption{Conceptual Temperature-Density Phase Diagram used to identify 
     the number densities of the liquid and the solid during a phase 
-    transition. The gray region is where the liquid and the solid coexist, 
-    and are therefore not pure states.}
+    transition. The gray region is where different phases coexist in 
+    varying amounts at their phase transition number densities.}
     \label{fig:T-n_Diagram}
   \end{figure} 
   
@@ -346,7 +445,7 @@ as shown in Figure \ref{fig:Pvsinvn}. By repeating this procedure to
 find the liquid and solid number densities at the phase transition 
 for various temperatures, a Temperature-Density (T-n) phase diagram 
 can be generated, similar to that shown in Figure \ref{fig:T-n_Diagram}, 
-but without the gray hump that is characteristic of fluids that have 
+but without the gray hump characteristic of fluids that have 
 both attractive and repulsive interatomic potentials. 
 
 \section{Classical Density Functional Theory (cDFT)}
@@ -354,7 +453,7 @@ both attractive and repulsive interatomic potentials.
 Classical Density Functional Theory will be used to find the 
 Helmholtz free energies of the liquid and the solid for various 
 temperatures and number densities, so that phase diagrams can be 
-constructed using Maxwell's Double Tangent Construction. 
+constructed. 
 The key idea behind classical Density Functional Theory (cDFT) is that 
 free energy can be written as a functional (a function of a function) of 
 a number density profile $n(\vec{r})$ which describes the way the number 
@@ -931,10 +1030,16 @@ which have number densities that are fixed at the values they had at the
 phase transition. 
 
 To construct the phase diagram, the liquid and solid phase transition number densities
-must be found. Maxwell's double tangent construction can be used to find 
-these number densities given plots of the liquid and the solid Helmholtz 
-free energies verses the inverse density at a given temperature, as
-discussed in Section 2.2. We use classical Density Functional Theory 
+are found 
+
+%Maxwell's double tangent construction can be used to find 
+%these number densities given plots of 
+
+from the liquid and the solid Helmholtz 
+free energies and inverse densities at a given temperature, as
+discussed in Section 2.2. 
+
+We use classical Density Functional Theory 
 to find the Helmholtz free energies of the liquid and the solid. 
 A functional for the ideal portion of the
 Helmholtz free energy is given by Equation~\ref{eq:Fideal-n(r)}, and a 
@@ -1110,8 +1215,8 @@ Outside the region of coexistence which exists between the liquid and
 crystal states, the fluid will be completely in a crystalline state if the 
 crystal free energy is lower than the liquid free energy, and it will be 
 completely in a liquid state if the liquid free energy is lower than 
-the crystal free energy. Maxwell's Double Tangent Construction is used 
-to determine the actual number densities of the crystal and liquid states
+the crystal free energy. 
+We determine the actual number densities of the crystal and liquid states
 at the boundaries of the coexistence region for a given temperature, 
 and construct phase diagrams as described in Section 2.2.
 
@@ -1265,6 +1370,31 @@ Figure~\ref{fig:xi_fromB2vsT}.
   vary along the z-axis for a reduced temperature of $K_BT=2$.}
   \label{fig:weight_functions}
 \end{figure}
+
+%\begin{figure}
+  %\centering
+  %%\includegraphics[height=8cm]{figs/w2-w3-radius-thickness.png}
+  %%\caption{}
+  %\label{fig:weight_functions}
+%\end{figure}
+
+%\begin{figure}
+  %\centering
+  %%\includegraphics[height=8cm]{figs/df-dr_withXi_fromB2.pdf}
+  %%\caption{}
+%\end{figure}
+
+%\begin{figure}
+  %\centering
+  %%\includegraphics[height=8cm]{figs/erf_Potential_overkT-xifromB2.pdf}
+  %%\caption{}
+%\end{figure}
+
+%\begin{figure}
+  %\centering
+  %%\includegraphics[height=8cm]{figs/B2_vs_T_with_xi_fromB2.pdf}
+  %%\caption{}
+%\end{figure}
 
 Figure \ref{fig:weight_functions} shows a one dimensional view of the 
 weight functions $w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance 
@@ -1533,9 +1663,9 @@ lattice points to represent the number density profile which was then varied
 by changing the width of the Gaussians, and the fraction of vacant lattice
 sites until the Helmholtz free energy was minimized. Once the equilibrium 
 Helmholtz free energy for the liquid and solid states were found for a given
-temperature and number density, Maxwell's Double Tangent Construction 
-was used to find the number densities of the liquid and the solid at 
-the phase transition.
+temperature and number density, 
+we used this data 
+to find the number densities of the liquid and the solid at the phase transition.
 Using this information, we generated a temperature-density 
 phase diagram that yielded coexistence regions that approximately 
 matched the Monte-Carlo
@@ -2170,7 +2300,6 @@ Loop:
 \bibliographystyle{unsrt}
 
 \end{document}
-
 
 
 
