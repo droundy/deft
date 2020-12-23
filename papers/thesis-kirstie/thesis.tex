@@ -962,7 +962,7 @@ which can be written in terms of the weight functions if two
 additional vector weight functions $\vec{w_2}$ and $\vec{w_1}$ are introduced
 \begin{equation}\label{eq:w_v2}{\vec{w_{2}}=w_{2}\frac{\vec{r}}{r}}\end{equation}
 \begin{equation}\label{eq:w_v1}{\vec{w_{1}}=w_{1}\frac{\vec{r}}{r}}\end{equation} 
-The mayor function can then be written in terms of the weight functions~\cite{Hansen}
+The Mayer function can then be written in terms of the weight functions~\cite{Hansen}
 \begin{equation}\label{mayer_deconvolution}{f(r)=-\Theta(|\vec{r}|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})}\end{equation}  
 
 Taking the derivative of the Mayer function in Eq~\ref{f(r)step} provides 
@@ -2032,7 +2032,7 @@ Adding the three terms gives:
 \begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}-\frac{\pi\alpha^2}{3}+\frac{4\pi}{k^2}-\frac{\pi\alpha^2}{6}-\frac{\pi\Xi^2}{6}}\end{displaymath} 
 \begin{displaymath}{\approx0}\end{displaymath} 
 
-\textbf{4. Integrals used to Compute Fourier Transforms of Weight Functions}
+\section{Integrals used to Compute Weight Function Fourier Transforms}
 \begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}}\end{equation} 
 \begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}\cos{\theta}{~}d{\cos{\theta}}}=-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)}\end{equation} 
 
@@ -2084,7 +2084,7 @@ Putting this into the expression for $n_{m2ij}(\vec{r})$ gives
     &=  \frac{1}{\left(2\pi\right)^3}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)
     e^{i\vec k\cdot \vec r}\left(\frac{1}{\left(2\pi\right)^3}\int d\vec r'e^{i(\vec k'-\vec k)\cdot \vec r'}\right)
     \\
-   &= \frac{1}{\left(2\pi\right)^3}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\delta(\vec k'-\vec k) \\
+    &= \frac{1}{\left(2\pi\right)^3}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\delta(\vec k'-\vec k) \\
     &= \frac{1}{\left(2\pi\right)^3}\int d\vec k \left(\int d\vec k' n(\vec k')\delta(\vec k'-\vec k)\right) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
     \\
     &= \frac{1}{\left(2\pi\right)^3}\int d\vec k\, n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
@@ -2118,6 +2118,137 @@ Putting this into the expression for $n_{m2ij}(\vec{r})$ gives
 
 \begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}}\end{equation} 
 
+
+\section{Deconvolution of the Hard-Sphere Mayer Function} 
+
+The Mayer function written in terms of convolutions of weight functions is
+\begin{align}
+    f(r)=-\Theta(|\vec{r}|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})  
+\end{align}
+where the mayer function of the hard-sphere fluid is 
+\begin{align}
+   f(r) &= e^{\frac{V(r)}{kBT}}-1 \\
+        &= -\frac{\theta(|\vec r|-2R)}{2}
+\end{align}
+and $V(r)$ is given by
+\begin{align}
+    V(r)=\left\{ \begin{array}{rc} \infty & 0<r \leq 2R \\ 0  & r>2R \end{array}\right.
+\end{align}
+$\theta(|\vec r|-2R)$ is a backwards Heavyside step function 
+given by 
+\begin{align}
+     \Theta(|\vec{r}|-2R)=\left\{ \begin{array}{rc} 1 & 0<r \leq 2R \\ 0  & r>2R \end{array}\right.
+\end{align}
+We can verfy that 
+\begin{align}  \label{equation-to-verify}
+     \frac{\Theta(|\vec{r}|-2R)}{2}= w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1}
+\end{align}
+by using the relation
+\begin{align}
+    f \otimes g = \text{I.F.T.[ F.T.}[f]\text{ x F.T.[g] }]
+\end{align} 
+\begin{align}\label{FTdecon}
+    F.T.\left(\frac{\Theta(|\vec{r}|-2R)}{2}\right) 
+        &= F.T.\left[w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1}\right]  \\                                                  
+        &= F.T.\left[I.F.T\left(\widetilde{w}_3\widetilde{w}_0 + \widetilde{w}_2\widetilde{w}_1 + \widetilde{\vec w}_2 \cdot \widetilde{\vec w}_1\right)\right]  \\
+        &= \widetilde{w}_3\widetilde{w}_0 + \widetilde{w}_2\widetilde{w}_1 + \widetilde{\vec w}_2 \cdot \widetilde{\vec w}_1 
+\end{align}
+
+Setting $\hat k$ in the $\hat z'$ direction, the right hand of Equation~\ref{FTdecon} gives
+\begin{align} \label{leftside}
+    F.T.\left(\frac{\Theta(|\vec{r}|-2R)}{2}\right) 
+       &=\frac{1}{2}\int_0^\pi \int_{-1}^1\int_0^{2R}(1)e^{-ikr\cos \theta'}r^2~dr~d\cos \theta'~d\phi'   \\
+       &=\frac{2\pi}{2}\int_0^{2R} r^2~dr\int_{-1}^1 e^{-ikr\cos \theta'}~d\cos \theta'~d\phi'   \\
+       &=\pi\int_0^{2R} r^2\left(\frac{2\sin (kr)}{kr}\right)~dr  \\
+       &=\frac{2\pi}{k}\int_0^{2R} r\sin (kr)~dr  \\
+       &=\frac{2\pi}{k}\left[\frac{\sin (kr)-kr\cos (kr))}{k^2}\right] \bigg|_0^{2R} \\
+       &= \frac{2\pi}{k^3}\sin (2kR)-\frac{4\pi R}{k^2}\cos (2kR)  \\
+      \label{leftside-solved} &= \frac{4\pi}{k^3}\sin (kR)\cos (kR) - \frac{4 \pi R}{k^2}\cos^2 (kR) + \frac{4\pi R}{k^2} \sin^2 (kR)
+\end{align}
+
+The Fourier transforms of the hard-sphere weight functions give
+\begin{align}
+    \widetilde{w}_2 &= \int\int\int\delta(r-R)e^{-ikr\cos \theta'} r^2~dr~d\cos \theta'~d\phi   \\
+                    &= 2\pi\int\delta(r-R)r^2 \frac{2\sin (kr)}{kr}~dr  \\
+                    &= 2\pi R^2 \frac{2\sin (kR)}{kR}  \\
+                    &= \frac{4\pi R}{k} \sin (kR)
+\end{align}
+
+\begin{align}
+    \widetilde{w}_1 &= \frac{\widetilde{w}_2}{4\pi R}= \frac{\sin (kR)}{k} 
+                    %&= \frac{\sin (kR)}{k} 
+\end{align}
+\begin{align}
+    \widetilde{w}_0 &= \frac{\widetilde{w}_2}{4\pi R^2}= \frac{\sin (kR)}{kR}
+                   % &= \frac{\sin (kR)}{kR} 
+\end{align}
+
+\begin{align}
+    \widetilde{w}_3 &= \int\int\int\theta(r-R)e^{-ikr\cos \theta'}r^2~dr~d\cos\theta'~d\phi  \\
+                    &= 2\pi\int\theta(r-R)\left(\frac{2\sin (kr)}{kr}\right)r^2~dr   \\
+                    &= \frac{4\pi}{k}\int_0^R (1)r\sin (kr)~dr   \\
+                    &= \frac{4\pi}{k}\left[\frac{\sin (kr) - kr\cos (kr)}{k^2}\right]\bigg|_0^R   \\
+                    &= \frac{4\pi}{k^3}\left[\sin (kR) - kR\cos (kR)\right]
+\end{align}
+
+\begin{align}
+    \widetilde{\vec w}_2  &= \int\int\int\delta(r-R)e^{-ikr\cos \theta'}r^2~\frac{\vec r}{r}~dr~d\cos\theta'~d\phi  \\
+                          &= \int\int\int\delta(r-R)e^{-ikr\cos \theta'}r~(r_{x'} \hat x' + r_{y'} \hat y'+ r_{z'} \hat z')~dr~d\cos\theta'~d\phi  
+\end{align}
+Again $\vec{k}$ is set in the direction of $\hat{z}'$ of a rotated coordinate 
+system $(x',y'z')$ where
+\begin{align}
+     r_{x'} &= r\sin\theta'\cos\phi'  \\
+     r_{y'} &= r\sin\theta'\sin\phi'   \\
+     r_{z'} &= r\cos\theta'  \\
+     \text{and~~~} r &=|\vec r| = |\vec r'|
+\end{align}
+The terms in the $\hat x'$ and $\hat y'$ direction give zero due to symmetry ($\int_0^{2\pi} \cos \phi ~d\phi= 0$ and $\int_0^{2\pi} \sin \phi~d\phi= 0$), 
+and so only the term in the $\hat z'$ direction remains.
+
+\begin{align}
+    \widetilde{\vec w}_2  &= \int\int\int\delta(r-R)e^{-ikr\cos \theta'}r~(r\cos \theta')~dr~d\cos\theta'~d\phi~\hat k   \\
+                          &= 2\pi\int\delta(r-R)r^2~dr\int_{-1}^1 e^{-ikr\cos \theta'}\cos \theta'~d\cos\theta'~\hat k   \\
+                          &= 2\pi\int\delta(r-R)r^2 \left(\frac{-2i}{kr}\cos (kr)+ \frac{2i}{k^2r^2}\sin (kr)\right)dr~\hat k   \\
+                          &= 2\pi\left[\frac{-2iR}{k}\cos (kR)+ \frac{2i}{k^2}\sin (kR)\right]~\hat k   \\
+                          &= \left(\frac{-4\pi iR}{k}\cos (kR)+ \frac{4\pi i}{k^2}\sin (kR)\right)\hat k 
+\end{align}
+
+\begin{align}
+    \widetilde{\vec w}_1  &= \frac{\widetilde{\vec w}_2}{4\pi R}   \\
+                          &= \left(\frac{-i}{k}\cos (kR)+ \frac{i}{Rk^2}\sin (kR)\right)\hat k
+\end{align}
+The terms on the right side of Equation~\ref{FTdecon} are then
+\begin{align}
+    \widetilde{w}_0\widetilde{w}_3 &= \left(\frac{\sin (kR)}{kR}\right)\left(\frac{4\pi}{k^3}\left[\sin (kR) - kR\cos (kR)\right]\right)  \\
+                                   &= \frac{4\pi}{k^4R}\sin^2 (kR) - \frac{4\pi}{k^3}\sin(kR)\cos(kR)
+\end{align}
+
+\begin{align}
+    \widetilde{w}_1\widetilde{w}_2 &= \left(\frac{\sin (kR)}{k}\right)\left(\frac{4\pi R}{k} \sin (kR)\right)  \\                                
+                                   &= \frac{4\pi R}{k^2}\sin^2 (kR)
+\end{align}
+
+\begin{align}
+   \widetilde{\vec w}_1\cdot\widetilde{\vec w}_2   
+    &= \left(\frac{-4\pi iR}{k}\cos (kR)+ \frac{4\pi i}{k^2}\sin (kR)\right)\hat k \cdot \left(\frac{-i}{k}\cos (kR)+ \frac{i}{Rk^2}\sin (kR)\right) \hat k   \\
+    &= -\frac{4\pi R}{k^2}\cos^2(kR) + \frac{8\pi}{k^3}\sin(kR)\cos(kR) - \frac{4\pi}{Rk^4}\sin^2(kR)
+\end{align}
+Adding the terms together gives
+\begin{align}
+    \widetilde{w}_3\widetilde{w}_0 + \widetilde{w}_2\widetilde{w}_1 + \widetilde{\vec w}_2 \cdot \widetilde{\vec w}_1 
+    &= \frac{4\pi}{k^4R}\sin^2 (kR) - \frac{4\pi}{k^3}\sin(kR)\cos(kR) \\
+    &+ \frac{4\pi R}{k^2}\sin^2 (kR) \\
+    &- \frac{4\pi R}{k^2}\cos^2(kR) + \frac{8\pi}{k^3}\sin(kR)\cos(kR) -  \frac{4\pi}{Rk^4}\sin^2(kR)  \\                                                                                                                     
+    &= \left(\frac{4\pi}{k^4R}+\frac{4\pi R}{k^2}-\frac{4\pi}{k^4R}\right)\sin^2(kR)\\
+    &-\frac{4\pi R}{k^2}\cos^2(kR) +\left(-\frac{4\pi}{k^3} + \frac{8\pi}{k^3}\right)\sin(kR)\cos(kR)   \\                                                                                                                  
+    &=\frac{4\pi R}{k^2}\sin^2(kR)-\frac{4\pi R}{k^2}\cos^2(kR)+\frac{4\pi}{k^3}\sin(kR)\cos(kR)
+\end{align}
+which equals Equation~\ref{leftside-solved}, and so
+%\begin{align}
+     %\Theta(|\vec{r}|-2R)= 2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})
+%\end{align}
+Equation~\ref{equation-to-verify} is satisfied.
 
 \section{Second Virial Coefficient $B_{2}$ for the Error Function Potential}
 \begin{equation}B_2=-\frac{1}{2}\int_{allspace}f(\vec{r})d\vec r\end{equation}
