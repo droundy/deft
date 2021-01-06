@@ -77,8 +77,8 @@ which is known as the Weeks-Chandler-Anderson model fluid.
 Models continue to be developed to characterize fluids with particular 
 properties, or to address particular problems like surface tension, 
 interfaces, adsorption, wetting or confinment.
-\textcolor{red}{A review of model fluids, and problems studied more 
-recently is given in ...}
+\textcolor{red}{A review of some model fluids and problems that have been
+studied more recently is given by L\"{o}wen~\cite{lowen}.}
 
 While models for particular fluids were being created, powerful methods 
 to predict the properties of fluids were also being developed. 
@@ -118,10 +118,10 @@ a backward Heaviside step function}
 %\end{equation}
 that can itself be expressed in terms of a sum of convolutions involving 
 a set of weight functions related to the geometry of a sphere. 
-For a hard-sphere fluid with spheres of two different sized radii, 
+For two spheres with radii, 
 $R_i$  and $R_j$, the convolution is written as~\cite{rosenfeld1989}
 \begin{displaymath}
-   \theta(|\vec r - \vec r'|-(\vec R_i + \vec R_j)) = w_i^{(3)} \otimes w_j^{(0)} + w_j^{(3)} \otimes w_i^{(0)} + w_i^{(1)} \otimes w_j^{(2)} + w_j^{(1)} \otimes w_i^{(2)}\end{displaymath}
+   \theta(|\vec r - \vec r'|-(R_i + R_j)) = w_i^{(3)} \otimes w_j^{(0)} + w_j^{(3)} \otimes w_i^{(0)} + w_i^{(1)} \otimes w_j^{(2)} + w_j^{(1)} \otimes w_i^{(2)}\end{displaymath}
 \begin{equation}   + \vec w_i^{(1)} \otimes \vec w_j^{(2)} + \vec w_j^{(1)} \otimes \vec w_i^{(2)}
 \end{equation}
 FMT gives the same result for the excess Helmholtz free energy of the hard-sphere fluid as 
@@ -155,20 +155,28 @@ an error function model
 for spheres with steep, short-range soft repulsive 
 potentials~\cite{schmidt2000fluid}.
 %, similar to that exhibited by a WCA fluid. 
-\textcolor{red}{For more recent developments in classical 
-Density Functional Theory see (2020), Evan's review~\cite{evansreview} (2016), 
-and Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen} (2013).}
+\textcolor{red}{For some more recent developments, see the review of new developments in 
+classical Density Functional Theory by Evans ~\cite{evansreview} (2016), 
+Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen} (2013), 
+and a recent generalization of the Barker-Henderson model to inhomogeneous 
+fluids by Tschopp, Vuijk, Sharma and Brader~\cite{BHextended} (2020).}
 
-FREEZING in literature :
-\textcolor{red}{Classical density functional theory was used
-to ... (paper from 2010), but not until recently has there been good success 
-(other 23 papers...), and in all these the hard-sphere fluid has been 
-used as the reference system.} 
-In this paper, classical Density Functional 
-Theory will be used to predict the freezing of a Weeks-Chandler-Anderson 
-model fluid by applying SFMT with Schmidt's proposed error function model, 
-in which we have incorporated our temperature dependent parameters to fit the 
-functional to the soft-sphere WCA fluid.
+\textcolor{red}{Classical density functional theory has also been applied 
+to phase transitions, and freezing, but not until recently has there
+been good progress. Ramakrishnan and Yussouff studied freezing by viewing a 
+crystal as a highly inhomogeneous liquid~\cite{} (1979). Oettel and fellow 
+researchers studied hard-sphere crystals with ~\cite{} (2010). Mortazavifar and Oettel
+studied the fluid and crystal phases of the Asakura-Oosawa model fluid (2016). 
+Lutsko and Lam studied studied crystallization of the Leonard-Jones fluid~\cite{lutsko} (2018),
+and Lutsko and Schoonen looked at cDFT applied to the solid state~\cite{2020}.
+In all these studies the hard-sphere fluid has been used as the reference system,
+which is implemented with FMT, and to which other terms are added to create 
+the full functional for the fluid being studied.}
+In this paper, classical Density Functional Theory will be used to predict 
+the freezing of a Weeks-Chandler-Anderson model fluid directly by applying 
+SFMT with Schmidt's proposed error function model, 
+in which we have incorporated our temperature dependent parameters to 
+fit the functional to the soft-sphere WCA fluid. 
 %form the functional for the excess Helmholtz free energy. 
 %for generating the weight functions, and Tarazona's tensor functional. 
 Results will be compared to those generated from Monte-Carlo simulations.
@@ -341,14 +349,29 @@ Figure~\ref{fig:TwoSpheres}.
     
 \section{Freezing and the Construction of Phase Diagrams}
 
-Freezing of simple fluids is governed by entropy, which the universe
-seeks to maximize according to the second law of Thermodynamics. When the 
-entropy of a pure substance in its liquid state is lower than the entropy 
-that it would have in its solid state at the same temperature (necessary 
-for thermal equilibrium), the same pressure (necessary for mechanical 
-equilibrium), and the same chemical potential (necessary for diffusive 
-equilibrium), a phase transition occurs, that is, the liquid 
-freezes. 
+%Freezing of simple fluids is governed by entropy, which the universe
+%seeks to maximize according to the second law of Thermodynamics. When the 
+%entropy of a pure substance in its liquid state is lower than the entropy 
+%that it would have in its solid state at the same temperature (necessary 
+%for thermal equilibrium with the environment), the same pressure (necessary for mechanical 
+%equilibrium with the environment), and the same chemical potential (necessary for diffusive 
+%equilibrium with the environment), a phase transition occurs, that is, the liquid 
+%freezes. 
+%%Along the phase boundary between pure liquid and pure solid states, both 
+%%liquid and solid states can coexist in equilibrium. 
+%Freezing of simple fluids can be seen when the entropy that a pure substance 
+%would have in a liquid state is lower than the entropy 
+%that it would have in its solid state at the same temperature (necessary 
+%for thermal equilibrium), the same pressure (necessary for mechanical 
+%equilibrium), and the same chemical potential (necessary for diffusive 
+%equilibrium). 
+ 
+A liquid will eventually freeze as heat is removed, or the liquid is compressed. 
+The state of a simple fluid can be characterized by its entropy per particle~\cite{entropyfingerprint}.
+The entropy of a pure substance in a crystalline state is higher than the entropy 
+that it would have in its liquid state at a given temperature and pressure, 
+since there is more freedom for a particle to move between atoms  
+at lattice sites than in a dense liquid with irregular and blocked pathways~\cite{Hansen}.
 Both the entropy and the volume (and thus the density) change abruptly 
 at the phase transition.
 The particular structure and density that result are affected 
@@ -366,19 +389,26 @@ that are purely repulsive.
     \label{fig:P-T_Diagram}
 \end{figure}
 
-For pure substances, a phase transition occurs along a line on a 
+\textcolor{red}{A phase transition occurs along a line on a 
 Pressure-Temperature (P-T) phase diagram, such as can be seen in the phase 
-diagram shown in Figure~\ref{fig:P-T_Diagram}. This phase diagram is 
+diagram shown in Figure~\ref{fig:P-T_Diagram}. 
+%
+Points along the line that separates the solid and the liquid phases 
+indicate a phase transition where the solid and liquid phases coexist, 
+and show that both the solid and the liquid have the same temperature (necessary 
+for thermal equilibrium)
+and the same pressure (necessary for mechanical 
+equilibrium)at a phase transition.
+%
+, and the same chemical potential (necessary for diffusive equilibrium). 
+%
+This phase diagram is 
 representative of some arbitrary, unknown substance composed of atoms, 
 or molecules which exhibit both attraction and repulsion. However, since 
 the atoms in a WCA fluid do not exhibit attraction there will not be a 
 dividing line between the gas and liquid phases, there will just simply
-be a fluid, which we will refer to as a liquid in this paper.
+be a fluid, which we will refer to as a liquid in this paper.}
 %which may be referred to as a "liquid", since at the phase boundary the fluid is dense. 
-Points along the line that separates the solid and the liquid phases 
-indicate a phase transition where the solid and liquid phases coexist, 
-and show that both the solid and the liquid have the same temperature 
-and the same pressure at a phase transition.
 
 The pressure can be related to the Helmholtz free energy F, which is minimized 
 for a system at fixed temperature, volume and number of particles, as the 
@@ -773,47 +803,173 @@ developed for homogeneous hard-sphere fluids,
 to inhomogeneous, or non-uniform hard-sphere fluids.
 
 \textcolor{blue}{
-Rosenfeld begins the development of FMT by considering the lowest order 
-term in the virial expansion of the excess chemical potential.
-Taking the partial derivative of the free energy in the low density limit given 
-by Equation~\ref{eq:Fexcess} gives
-\begin{align}
-   \mu_{ex} &= \frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V} \nonumber \\
-            &= k_BT\int -f(r)~n~d\vec r
-\end{align}
-For a hard-sphere fluid (simplified in this account by considering only 
-equal sized spheres), the Mayer function, $f(r)$ can be written in terms 
-of a backward Heaviside step function
+%Rosenfeld begins the development of FMT by considering the lowest order 
+%term in the virial expansion of the excess chemical potential.
+%Taking the partial derivative of the free energy in the low density limit given 
+%by Equation~\ref{eq:Fexcess} gives
+%\begin{align}
+   %\mu_{ex} &= \frac{\partial{F_{ex}}}{\partial{N}}\bigg|_{T,V} \nonumber \\
+            %&= k_BT\int -f(r)~n~d\vec r
+%\end{align}
+Rosenfeld, who was studying mixtures, begins the development of FMT by considering that 
+for a hard-sphere fluid the Mayer function, $f(r)$, can be written in terms 
+of a backward Heaviside step function which, for a hard-sphere fluid 
+composed of a mixture of spheres of radius $R_i$ and $R_j$, is
+written as
 \begin{align} 
-    f(r) = -\theta(|\vec r|-2R)
+    f(r) = -\theta(|\vec r_i - \vec r_j|-(R_i + R_j))
 \end{align}
-where and $\vec r$ is the distance between the centers of two spheres.
-The low-density excess free energy given by Equation~\ref{eq:Fexcess} 
-can then be written as a weighted density.
+where and $|\vec r_i - \vec r_j|$ is the distance between the centers of two spheres.
+%
+%The low-density excess free energy given by Equation~\ref{eq:Fexcess}
+%The lowest order term of the excess chemical potential  
+%can then be written as a weighted density.
+%\begin{align}
+     %\mu_{excess}=k_BT\int n\theta(|\vec r|-2R)~d\vec r
+      %%F_{excess}=k_BT\left(\int n^2\frac{\theta(|\vec r|-2R)}{2}~d\vec r\right) V
+%\end{align} 
+%where $n \rightarrow n(\vec r)$ for an inhomogeneous fluid.
+%The excess Helmholtz free energy given in Equation~\ref{eq:Fexcess} 
+%can then be written as
+%\begin{align}
+      %F_{excess} = k_BTV\int n^2\frac{\theta(|\vec r|-2R)}{2}~d\vec r  
+%\end{align} 
+Rosenfeld recognized that the integral of the Heaviside step function
+is equal to the volume of a sphere with a radius equal to that of the radii 
+of two hard spheres added together. For a mixture of hard spheres of radius $R_i$ and $R_j$
+this becomes
 \begin{align}
-     F_{excess}=k_BT\left(\int n^2(\vec r)\frac{\theta(|\vec r|-2R)}{2}~d\vec r\right) V
+       \int_{Volume} \theta(|\vec r_i- \vec r_j|-(R_i+R_j))~d\vec r &=\frac{4\pi}{3}(R_i+R_j)^3  \\
+       &= \frac{4\pi}{3}R_i^3 + (4\pi R_i^2)R_j + (4\pi R_j^2)R_i + \frac{4\pi}{3}R_j^3  \nonumber \\
+       &= V_i(1) + S_iR_j + R_iS_j+ V_j(1)
+\end{align}  
+where the volume, surface area, radius, and the number 1 can be written as
+\begin{align}
+        V &= \int_{Volume} \theta(r-R)d\vec r \\
+        S &= \int_{Volume} \delta(r-R) d\vec r \\
+        R &= \int_{Volume} \frac{\delta(r-R)}{4\pi r} d\vec r \\
+                1 &= \int_{Volume} \frac{\delta(r-R)}{4\pi r^2} d\vec r   
+\end{align}
+Limiting this discussion to a homogeneous hard-sphere fluid composed of hard spheres that have the same
+radius R, the lowest order term of the virial expansion of the excess Helmholtz free energy which is given in Equation~\ref{eq:Fexcess} 
+can now be written as
+\begin{align}
+      F_{excess} &= k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)V   \\
+                 &= k_BTn^2\left(\int \frac{\theta(|\vec r|-2R)}{2}~d\vec r\right)V  \\
+                 &= k_BTn^2(2V(1) + 2SR)V  \\
+                 &= k_BT\left[\left(\int n\theta(r-R)d\vec r\right)\left(\int n\frac{\delta(r-R)}{4\pi R^2} d\vec r \right)\color{white} \right]   \nonumber \\
+                 &+ \color{white}\left[\color{black}\left(\int n\delta(r-R) d\vec r\right)\left(\int n\frac{\delta(r-R)}{4\pi R} d\vec r \right) \right]\color{black}V   \\          
+                 &= k_BT(n_3n_0 + n_2n_1)V \\
+                 &= k_BT(\Phi_1 + \Phi_2)V \\
+                 &= k_BT\Phi(\{n_i\})V
 \end{align} 
-where $n \rightarrow n(\vec r)$ for an inhomogeneous fluid.
-Rosenfeld recognized that the Heaviside function describes mathmetically 
-the exclusion volume of a pair of spheres, one of the two variables 
-(the other one being the "overlap volume") in which the total 
-excess chemical potential can be expanded. He also noted that the 
-Heaviside function can uniquely be deconvolved into a set of weight functions
-related to the geometry of a sphere.
+where $n_i$ are weighted densities of the form
+\begin{align}
+     n_i=\int nw_i(r) d\vec r
+\end{align}
+with weight functions defined as
+\begin{align} 
+      w_3 &= \theta(r-R)  \label{scalor-weight3} \\
+      w_2 &= \delta(r-R)  \\
+      w_1 &= \frac{w_2}{4\pi r}  \\
+      w_0 &= \frac{w_2}{4\pi r^2} \label{scalor-weight0}
+\end{align}
+and dimensionless energy densities $\Phi_1$ and $\Phi_2$ are defined as
+\begin{align}
+      \Phi_1 = n_3n_0  \\
+      \Phi_2 = n_1n_2
+\end{align}
+The excess Helmholtz free energy can also be expressed in terms of the
+packing fraction $\eta=nV$ as
+\begin{align}
+     F_{excess} &= k_BT(n_3n_0 + n_2n_1)V  \\
+                &= k_BT\left(\left(\eta\right)\left(n\right) + \left(\frac{3\eta}{R}\right)\left(\frac{3\eta}{4\pi R^2}\right)\right)V  \\      
+                &= k_BT\left(\eta^2+3\eta^2\frac{3}{4\pi R^3}V\right)  \\
+                &= k_BT4\eta^2
+\end{align} 
+%
+For the inhomogeneous case where the number density varies spatially,
+$n\rightarrow n(\vec r)$, Equation~\ref{eq:Fexcess} becomes
+\begin{align}
+     F_{excess} = k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)~\frac{\theta(|\vec r_a-\vec r_b|-2R)}{2}
+\end{align}
+where $\vec r_a$ is a position vector of one sphere, $\vec r_b$ is a position vector to another sphere, and 
+$|\vec r_a - \vec r_b|$ is the distance between the centers of the two spheres.
+Rosenfeld recognized that the Heaviside function can be written as 
+a convolution of the weight functions, 
 \begin{align}
     f(r)=-\Theta(|\vec{r}|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})
 \end{align} 
-where again this expression is simplified in this account by considering only 
-equal sized spheres. 
-The excess free energy in the low density limit then takes the form
+where the weights are the same ones given in Equations~\ref{scalor-weight3} through~\ref{scalor-weight0}, 
+and the two vector weights are given by
 \begin{align}
-     F_{excess}=k_BT\left(\int n^2(\vec r)(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})~d\vec r\right)V
+      \vec {w}_2 &= w_2~\hat r \\
+      \vec {w}_1 &= w_1~\hat r
 \end{align}
-%which can now be expressed in terms of a set of weighted densities
+which are needed for the relation to be satisfied (although other expressions 
+have been developed without using vector weights). 
+%a uniquely deconvolved 
+%into a set of weight functions related to the geometry of a sphere, and that it
+%describes mathmetically 
+%the exclusion volume of a pair of spheres, one of the two variables 
+%(the other one being the "overlap volume") in which the total 
+%excess chemical potential can be expanded. 
+%
+He then noted the following relation
 \begin{align}
-     F_{excess}=k_BT\left(\int n(\vec r)w_3 \otimes n(\vec r)w_0 + n(\vec r)w_2 \otimes n(\vec r)w_1 + n(\vec r)\vec{w_2} \otimes n(\vec r)\vec{w_1}~d\vec r\right)V
+     w_\alpha(\vec r_a - \vec r_b) \otimes w_\gamma(\vec r_a - \vec r_b) &= \int w_\alpha(\vec r_a - \vec x) w_\gamma(\vec r_b - \vec x) d\vec x \\
+                                                                         &= \int w_\alpha(\vec x - \vec r_a) w_\gamma(\vec x - \vec r_b) d\vec x
 \end{align}
+which simplifies the equation for the excess Helmholtz free energy
+\begin{align}
+     F_{excess} &= k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)~\frac{\theta(|\vec r_a-\vec r_b|-2R)}{2}  \\
+                &= k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)~(w_0\otimes w_3+ w_1 \otimes w_2+\vec {w}_1\otimes \vec {w}_2)  \\
+                &= k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)\left(\int w_3(\vec x - \vec r_a)w_0(\vec x - \vec r_b) \vec dx \color{white}\right)  \nonumber \\
+                &+ \color{white}\left(\color{black}\int w_1(\vec x - \vec r_a)w_2(\vec x - \vec r_b) d\vec x  + \int \vec w_1(\vec x - \vec r_a)\cdot\vec w_2(\vec x - \vec r_b) d\vec x\right)    \\
+                &= k_BT\int \left[\int n(\vec r_a) w_3(\vec x - \vec r_a)~d\vec r_a \int n(\vec r_b) w_0(\vec x - \vec r_b)~d\vec r_b \color{white}\right]  \nonumber \\
+                &+ \int n(\vec r_a) w_2(\vec x - \vec r_a)~d\vec r_a \int n(\vec r_b) w_1(\vec x - \vec r_b)~d\vec r_b  \nonumber \\
+                &+ \color{white}\left[\color{black} \int n(\vec r_a) \vec {w}_2(\vec x - \vec r_a)~d\vec r_a \cdot \int n(\vec r_b) \vec {w}_1(\vec x - \vec r_b)~d\vec r_b \right]\color{black}d\vec x  \\
+                &= k_BT\int n_3n_0 + n_2n_1 + \vec n_1\cdot\vec n_2~d\vec x  \\
+                &= k_BT\int \Phi_1 + \Phi_2 + \Phi_3~d\vec x  \\
+                & =k_BT\int \Phi(\{n_i(\vec r)\})~d\vec r               
+\end{align}
+where $\vec n_1\cdot\vec n_2$=0 for the homogeneous case, 
+and the weighted densities $n_i$ are defined as
+\begin{align}
+    n_i(\vec r)=\int n(\vec r')w_i(\vec r-\vec r')~d\vec r'
+\end{align} 
+%The excess free energy in the low density limit then takes the form
+%\begin{align}
+%    F_{excess}=k_BT\left(\int n^2(\vec r)(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})~d\vec r\right)V
+%\end{align}
+%%which can now be expressed in terms of a set of weighted densities
+%\begin{align}
+%     F_{excess}=k_BT\left(\int n(\vec r)w_3 \otimes n(\vec r)w_0 + n(\vec r)w_2 \otimes n(\vec r)w_1 + n(\vec r)\vec{w_2} \otimes n(\vec r)\vec{w_1}~d\vec r\right)V
+%\end{align}
+%For a homogeneous fluid in the low density limit, the excess Helmholtz free
+%energy can then be expressed as
+%\begin{align}
+      %F_{excess}=k_BTV\int n^2\frac{\theta(|\vec r|-2R)}{2}~d\vec r
+%\end{align} 
+%
+%Rosenfeld arrived at an expression for the excess Helmholtz free energy 
+%based on a set of weighted densities
+%\begin{align}
+    %F_{excess}=k_BT\int \Phi(\{n_i(\vec r)\})~d\vec r
+%\end{align} 
+%
+%The resulting expression for the excess Helmholtz free energy which is
+%applicable to the more general case of an inhomogeneous fluid, reduces 
+%to the same result obtained from Scaled Particle Theory for a homogeneous 
+%hard-sphere fluid. 
+}\textcolor{red}{
+Lifting the restriction to the low density limit,
+The expression for the excess Helmholtz free energy derived from FMT
+is applicable to the more general case of an inhomogeneous fluid, but reduces 
+to the same result obtained from Scaled Particle Theory for a homogeneous 
+hard-sphere fluid. 
 }
+
 %In order to apply classical Density Functional Theory to a system that has
 %a fixed temperature, volume, and number of particles, a functional for 
 %the Helmholtz free energy must first be formed. An expression for the ideal 
@@ -834,7 +990,7 @@ The excess free energy in the low density limit then takes the form
 %for the hard-sphere fluid, and which expanded 
 %Scaled Particle Theory (SPT)~\cite{santos2012phi3} 
 %to inhomogeneous, or non-uniform hard-sphere fluids.
-
+%
 Scaled Particle Theory
 seeks a general expression for the excess chemical 
 potential of a homogeneous hard-sphere fluid which can then be integrated 
