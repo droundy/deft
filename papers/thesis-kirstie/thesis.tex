@@ -817,9 +817,9 @@ of a backward Heaviside step function which, for a hard-sphere fluid
 composed of a mixture of spheres of radius $R_i$ and $R_j$, is
 written as
 \begin{align} 
-    f(r) = -\theta(|\vec r_i - \vec r_j|-(R_i + R_j))
+    f(r) = -\Theta(r-(R_i + R_j))
 \end{align}
-where and $|\vec r_i - \vec r_j|$ is the distance between the centers of two spheres.
+where $r=|\vec r_i - \vec r_j|$ is the distance between the centers of two spheres.
 %
 %The low-density excess free energy given by Equation~\ref{eq:Fexcess}
 %The lowest order term of the excess chemical potential  
@@ -836,16 +836,16 @@ where and $|\vec r_i - \vec r_j|$ is the distance between the centers of two sph
 %\end{align} 
 Rosenfeld recognized that the integral of the Heaviside step function
 is equal to the volume of a sphere with a radius equal to that of the radii 
-of two hard spheres added together. For a mixture of hard spheres of radius $R_i$ and $R_j$
+of two hard spheres added together. For a mixture of hard spheres of radius $R_a$ and $R_b$
 this becomes
 \begin{align}
-       \int_{Volume} \theta(|\vec r_i- \vec r_j|-(R_i+R_j))~d\vec r &=\frac{4\pi}{3}(R_i+R_j)^3  \\
-       &= \frac{4\pi}{3}R_i^3 + (4\pi R_i^2)R_j + (4\pi R_j^2)R_i + \frac{4\pi}{3}R_j^3  \nonumber \\
+       \int_{Volume} \Theta(r-(R_i+R_j))~d\vec r &=\frac{4\pi}{3}(R_i+R_j)^3  \label{exclusion-volume}\\
+       &= \frac{4\pi}{3}R_i^3 + (4\pi R_i^2)R_j + R_i(4\pi R_j^2) + \frac{4\pi}{3}R_j^3  \nonumber \\
        &= V_i(1) + S_iR_j + R_iS_j+ V_j(1)
 \end{align}  
 where the volume, surface area, radius, and the number 1 can be written as
 \begin{align}
-        V &= \int_{Volume} \theta(r-R)d\vec r \\
+        V &= \int_{Volume} \Theta(r-R)d\vec r \\
         S &= \int_{Volume} \delta(r-R) d\vec r \\
         R &= \int_{Volume} \frac{\delta(r-R)}{4\pi r} d\vec r \\
                 1 &= \int_{Volume} \frac{\delta(r-R)}{4\pi r^2} d\vec r   
@@ -855,59 +855,69 @@ radius R, the lowest order term of the virial expansion of the excess Helmholtz 
 can now be written as
 \begin{align}
       F_{excess} &= k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)V   \\
-                 &= k_BTn^2\left(\int \frac{\theta(|\vec r|-2R)}{2}~d\vec r\right)V  \\
+                 &= k_BTn^2\left(\int \frac{\Theta(r-2R)}{2}~d\vec r\right)V  \\
                  &= k_BTn^2(2V(1) + 2SR)V  \\
-                 &= k_BT\left[\left(\int n\theta(r-R)d\vec r\right)\left(\int n\frac{\delta(r-R)}{4\pi R^2} d\vec r \right)\color{white} \right]   \nonumber \\
-                 &+ \color{white}\left[\color{black}\left(\int n\delta(r-R) d\vec r\right)\left(\int n\frac{\delta(r-R)}{4\pi R} d\vec r \right) \right]\color{black}V   \\          
-                 &= k_BT(n_3n_0 + n_2n_1)V \\
+                 &= k_BT\left[\left(\int n\Theta(r-R)d\vec r\right)\left(\int n\frac{\delta(r-R)}{4\pi R^2} d\vec r \right)\color{white} \right]   \nonumber \\
+                 &+ \color{white}\left[\color{blue}\left(\int n\delta(r-R) d\vec r\right)\left(\int n\frac{\delta(r-R)}{4\pi R} d\vec r \right) \right]\color{blue}V   \\          
+                 &= k_BT(n_3n_0 + n_2n_1)V \label{Fexlowden-homo} \\
                  &= k_BT(\Phi_1 + \Phi_2)V \\
-                 &= k_BT\Phi(\{n_i\})V
+                 &= k_BT\Phi(\{n_\alpha\})V
 \end{align} 
-where $n_i$ are weighted densities of the form
-\begin{align}
-     n_i=\int nw_i(r) d\vec r
-\end{align}
-with weight functions defined as
-\begin{align} 
-      w_3 &= \theta(r-R)  \label{scalor-weight3} \\
-      w_2 &= \delta(r-R)  \\
-      w_1 &= \frac{w_2}{4\pi r}  \\
-      w_0 &= \frac{w_2}{4\pi r^2} \label{scalor-weight0}
-\end{align}
-and dimensionless energy densities $\Phi_1$ and $\Phi_2$ are defined as
+The quantity $\Phi$ has dimensions of $V^{-1}$ and is an energy density 
+with a dimensionless energy composed 
+of the sum of $\Phi_1$ and $\Phi_2$ which are defined as
 \begin{align}
       \Phi_1 = n_3n_0  \\
       \Phi_2 = n_1n_2
 \end{align}
-The excess Helmholtz free energy can also be expressed in terms of the
-packing fraction $\eta=nV$ as
+where $n_i$ are weighted densities of the form
 \begin{align}
-     F_{excess} &= k_BT(n_3n_0 + n_2n_1)V  \\
-                &= k_BT\left(\left(\eta\right)\left(n\right) + \left(\frac{3\eta}{R}\right)\left(\frac{3\eta}{4\pi R^2}\right)\right)V  \\      
-                &= k_BT\left(\eta^2+3\eta^2\frac{3}{4\pi R^3}V\right)  \\
-                &= k_BT4\eta^2
-\end{align} 
+     n_\alpha=\int nw_\alpha(r) d\vec r
+\end{align}
+with weight functions defined as
+\begin{align} 
+      w_3 &= \Theta(r-R)  \label{scalor-weight3} \\
+      w_2 &= \delta(r-R)  \\
+      w_1 &= \frac{w_2}{4\pi r}  \\
+      w_0 &= \frac{w_2}{4\pi r^2} \label{scalor-weight0}
+\end{align}
+%The excess Helmholtz free energy can also be expressed in terms of the
+%packing fraction $\eta=nV$ as
+%\begin{align}
+     %F_{excess} &= k_BT(n_3n_0 + n_2n_1)V  \\
+                %&= k_BT\left(\left(\eta\right)\left(n\right) + \left(\frac{3\eta}{R}\right)\left(\frac{3\eta}{4\pi R^2}\right)\right)V  \\      
+                %&= k_BT\left(\eta^2+3\eta^2\frac{3}{4\pi R^3}V\right)  \\
+                %&= k_BT4\eta^2
+%\end{align} 
 %
 For the inhomogeneous case where the number density varies spatially,
 $n\rightarrow n(\vec r)$, Equation~\ref{eq:Fexcess} becomes
 \begin{align}
-     F_{excess} = k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)~\frac{\theta(|\vec r_a-\vec r_b|-2R)}{2}
+     F_{excess} = k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\frac{\Theta(|\vec r_i-\vec r_j|-2R)}{2}
 \end{align}
-where $\vec r_a$ is a position vector of one sphere, $\vec r_b$ is a position vector to another sphere, and 
-$|\vec r_a - \vec r_b|$ is the distance between the centers of the two spheres.
+where $\vec r_i$ is a position vector of one sphere, $\vec r_j$ is a 
+position vector to another sphere, and $|\vec r_i - \vec r_j|$ 
+is the distance between the centers of the two spheres.
 Rosenfeld recognized that the Heaviside function can be written as 
-a convolution of the weight functions, 
+a convolution of the weight functions which, for a fluid composed of 
+spheres of radius R, is given by
 \begin{align}
-    f(r)=-\Theta(|\vec{r}|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})
+    f(|\vec r_i-\vec r_j|)=-\Theta(|\vec r_i-\vec r_j|-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})
 \end{align} 
-where the weights are the same ones given in Equations~\ref{scalor-weight3} through~\ref{scalor-weight0}, 
-and the two vector weights are given by
+%where the weights are the same ones given in Equations~\ref{scalor-weight3} through~\ref{scalor-weight0}, 
+where the two vector weights are given by
 \begin{align}
-      \vec {w}_2 &= w_2~\hat r \\
-      \vec {w}_1 &= w_1~\hat r
+      \vec {w}_2 &= w_2~\frac{\vec r_i-\vec r_j}{|\vec r_i-\vec r_j|} \\
+      \vec {w}_1 &= w_1~\frac{\vec r_i-\vec r_j}{|\vec r_i-\vec r_j|}
 \end{align}
-which are needed for the relation to be satisfied (although other expressions 
-have been developed without using vector weights). 
+which are added for the relation to be satisfied, 
+and the other weights take the form 
+\begin{align} 
+      w_3 &= \Theta(|\vec r_i-\vec r_j|-R)  \label{scalor-weight3} \\
+      w_2 &= \delta(|\vec r_i-\vec r_j|-R)  \\
+      w_1 &= \frac{w_2}{4\pi |\vec r_i-\vec r_j|}  \\
+      w_0 &= \frac{w_2}{4\pi |\vec r_i-\vec r_j|^2} \label{scalor-weight0}
+\end{align}
 %a uniquely deconvolved 
 %into a set of weight functions related to the geometry of a sphere, and that it
 %describes mathmetically 
@@ -915,29 +925,50 @@ have been developed without using vector weights).
 %(the other one being the "overlap volume") in which the total 
 %excess chemical potential can be expanded. 
 %
-He then noted the following relation
+The convolution of the weight functions can be written as
 \begin{align}
-     w_\alpha(\vec r_a - \vec r_b) \otimes w_\gamma(\vec r_a - \vec r_b) &= \int w_\alpha(\vec r_a - \vec x) w_\gamma(\vec r_b - \vec x) d\vec x \\
-                                                                         &= \int w_\alpha(\vec x - \vec r_a) w_\gamma(\vec x - \vec r_b) d\vec x
+     w_\alpha\otimes w_\gamma(\vec r_i - \vec r_j) &= \int w_\alpha(\vec r') w_\gamma(\vec r_i -\vec r_j - \vec r') d\vec r'   \\                                                             
+                                                   &= \int w_\alpha(\vec u - \vec r_j) w_\gamma(\vec r_i -\vec r_j -(\vec u - \vec r_j))d\vec u     \\                                                               
+                                                   &= \int w_\alpha(\vec u - \vec r_j) w_\gamma(\vec r_i - \vec u) d\vec u  \\  
+                                                   %&= \int w_\gamma(\vec r_a - \vec u)w_\alpha(\vec u - \vec r_b) d\vec u  \\                                                              
+                                                   &= \int w_\gamma(-(\vec u - \vec r_i))w_\alpha(\vec u - \vec r_j))  d\vec u  
 \end{align}
-which simplifies the equation for the excess Helmholtz free energy
-\begin{align}
-     F_{excess} &= k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)~\frac{\theta(|\vec r_a-\vec r_b|-2R)}{2}  \\
-                &= k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)~(w_0\otimes w_3+ w_1 \otimes w_2+\vec {w}_1\otimes \vec {w}_2)  \\
-                &= k_BT\int d\vec r_a \int d\vec r_b~n(\vec r_a)~n(\vec r_b)\left(\int w_3(\vec x - \vec r_a)w_0(\vec x - \vec r_b) \vec dx \color{white}\right)  \nonumber \\
-                &+ \color{white}\left(\color{black}\int w_1(\vec x - \vec r_a)w_2(\vec x - \vec r_b) d\vec x  + \int \vec w_1(\vec x - \vec r_a)\cdot\vec w_2(\vec x - \vec r_b) d\vec x\right)    \\
-                &= k_BT\int \left[\int n(\vec r_a) w_3(\vec x - \vec r_a)~d\vec r_a \int n(\vec r_b) w_0(\vec x - \vec r_b)~d\vec r_b \color{white}\right]  \nonumber \\
-                &+ \int n(\vec r_a) w_2(\vec x - \vec r_a)~d\vec r_a \int n(\vec r_b) w_1(\vec x - \vec r_b)~d\vec r_b  \nonumber \\
-                &+ \color{white}\left[\color{black} \int n(\vec r_a) \vec {w}_2(\vec x - \vec r_a)~d\vec r_a \cdot \int n(\vec r_b) \vec {w}_1(\vec x - \vec r_b)~d\vec r_b \right]\color{black}d\vec x  \\
-                &= k_BT\int n_3n_0 + n_2n_1 + \vec n_1\cdot\vec n_2~d\vec x  \\
-                &= k_BT\int \Phi_1 + \Phi_2 + \Phi_3~d\vec x  \\
-                & =k_BT\int \Phi(\{n_i(\vec r)\})~d\vec r               
+For the scalor weights this is the same as
+\begin{align} 
+                                                   &= \int w_\gamma(\vec u - \vec r_i)w_\alpha(\vec u - \vec r_j)  d\vec u  
 \end{align}
-where $\vec n_1\cdot\vec n_2$=0 for the homogeneous case, 
-and the weighted densities $n_i$ are defined as
+and for the vector weights this becomes
+\begin{align} 
+                                                   &= -\int \vec {w}_\gamma(\vec u - \vec r_i)\cdot\vec {w}_\alpha(\vec u - \vec r_j)  d\vec u  
+\end{align}
+%
+%which can also be written as
+%\begin{align}
+     %\color{white}w_\alpha\otimes w_\gamma(\vec r_a - \vec r_b)\color{blue} &=\int w_\alpha(\vec x - \vec r_a) w_\gamma(\vec x - \vec r_b) d\vec x
+%\end{align}
+%since the weight functions involve the distances $|\vec r_a - \vec x|=|\vec x - \vec r_a|$.
+The lowest order term of the excess Helmholtz free energy can then be written as
 \begin{align}
-    n_i(\vec r)=\int n(\vec r')w_i(\vec r-\vec r')~d\vec r'
-\end{align} 
+     F_{excess} &= k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\left(\frac{-f(|\vec r_i-\vec r_j|)}{2}\right)  \\
+                &= k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\frac{\Theta(|\vec r_i-\vec r_j|-2R)}{2}  \\
+                &= k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~(w_3\otimes w_0+ w_2 \otimes w_1+\vec {w}_2\otimes \vec {w}_1)  \\
+                &= k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)\left(\int w_0(\vec u - \vec r_i)w_3(\vec u - \vec r_j) d\vec u \color{white}\right)  \nonumber \\
+                &+ \color{white}\left(\color{blue}\int w_1(\vec u - \vec r_i)w_2(\vec u - \vec r_j) d\vec x ~-\int \vec {w}_1(\vec u - \vec r_i)\cdot\vec {w}_2(\vec u - \vec r_j) d\vec u\right)    \\
+                &= k_BT\int \left[\int n(\vec r_i) w_0(\vec u - \vec r_i)~d\vec r_i \int n(\vec r_j) w_3(\vec u - \vec r_j)~d\vec r_j \color{white}\right]  \nonumber \\
+                &+ \int n(\vec r_i) w_1(\vec u - \vec r_i)~d\vec r_i \int n(\vec r_j) w_2(\vec u - \vec r_j)~d\vec r_j  \nonumber \\
+                &+ \color{white}\left[\color{blue} \int n(\vec r_i) \vec {w}_1(\vec u - \vec r_i)~d\vec r_i \cdot \int n(\vec r_j) \vec {w}_2(\vec u - \vec r_j)~d\vec r_j \right]\color{blue}d\vec u  \\
+                &= k_BT\int n_0n_3 + n_1n_2 - \vec n_1\cdot\vec n_2~d\vec u  \label{Fexlowden-inhomo}\\
+                &= k_BT\int \Phi_1 + \Phi_2 + \Phi_3~d\vec u  \\
+                &= k_BT\int \Phi(\{n_\alpha(\vec u)\})~d\vec u  \\
+                &\text{or replacing u notation with r} \nonumber \\
+                &= k_BT\int \Phi(\{n_\alpha(\vec r)\})~d\vec r             
+\end{align}
+where the weighted densities $n_\alpha$ have the form
+\begin{align}
+    n_\alpha(\vec r)=\int n(\vec r')w_\alpha(\vec r-\vec r')~d\vec r'  
+    %n_\alpha(\vec u)=\int n(\vec r')w_\alpha(\vec u-\vec r')~d\vec r'  
+\end{align}  
+For the homogenesous case $\vec n_1\cdot\vec n_2$=0, and Equation~\ref{Fexlowden-inhomo} reduces to Equation~\ref{Fexlowden-homo}.
 %The excess free energy in the low density limit then takes the form
 %\begin{align}
 %    F_{excess}=k_BT\left(\int n^2(\vec r)(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})~d\vec r\right)V
@@ -962,14 +993,27 @@ and the weighted densities $n_i$ are defined as
 %applicable to the more general case of an inhomogeneous fluid, reduces 
 %to the same result obtained from Scaled Particle Theory for a homogeneous 
 %hard-sphere fluid. 
-}\textcolor{red}{
-Lifting the restriction to the low density limit,
-The expression for the excess Helmholtz free energy derived from FMT
-is applicable to the more general case of an inhomogeneous fluid, but reduces 
-to the same result obtained from Scaled Particle Theory for a homogeneous 
-hard-sphere fluid. 
+%
+}\textcolor{blue}{
+Lifting the restriction to the low density limit, Rosenfeld derived an
+expression for the excess Helmholtz free energy by noting that the higher
+order terms in the virial expansion can all be written in terms of an 
+"exclusion volume" which is given by Equation~\ref{exclusion-volume}, 
+and an "overlap volume".
+The exclusion volume is the spherical volume about the center of one sphere 
+which the center of another sphere can not enter, and is used to describe
+terms with $f_{ij}=f(|\vec r_i - \vec r_j|)$ as has been seen. The overlap volume is 
+the volume of intersection between two spheres that overlap, and is used in conjunction 
+with the exclusion volume to describe higher order terms in the expansion~\cite{rosenfeld1988}. 
+%
+The resulting expression for the excess Helmholtz free energy is given in 
+Equation~\ref{FexfromSPT} with $\Phi$'s defined in Equations~\ref{Phi1equation} 
+through~\ref{oldPhi3equation}, and
+and weighted densities defined in Equation~\ref{weighted-density}, 
+and reduces to the same result obtained from Scaled Particle Theory for a 
+homogeneous hard-sphere fluid. 
 }
-
+%
 %In order to apply classical Density Functional Theory to a system that has
 %a fixed temperature, volume, and number of particles, a functional for 
 %the Helmholtz free energy must first be formed. An expression for the ideal 
@@ -990,7 +1034,7 @@ hard-sphere fluid.
 %for the hard-sphere fluid, and which expanded 
 %Scaled Particle Theory (SPT)~\cite{santos2012phi3} 
 %to inhomogeneous, or non-uniform hard-sphere fluids.
-%
+
 Scaled Particle Theory
 seeks a general expression for the excess chemical 
 potential of a homogeneous hard-sphere fluid which can then be integrated 
@@ -1144,7 +1188,7 @@ which has the form
 \end{align}
 %where 
 \begin{align}
-   \Phi_1 &= -n_{0}\ln(1-n_{3}) \\
+   \Phi_1 &= -n_{0}\ln(1-n_{3}) \label{Phi1equation} \\
    \Phi_2 &= \frac{n_{1}n_{2}}{1-n_{3}} \\
    \Phi_3 &= \frac{n_{2}^3}{24\pi(1-n_{3})^2}   \label{oldPhi3equation}
 \end{align}
@@ -1173,7 +1217,7 @@ where the weighted densities can now be expressed as
     n_{i}=\int_{Volume}{nw_{i}(r)}d{\vec{r}}
 \end{align} 
 or for a spatially varying number density $n(\vec{r})$,
-\begin{equation}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
+\begin{equation}\label{weighted-density}{n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}}\end{equation}
 with weight functions
 \begin{equation}\label{eq:w3}{w_{3}=\Theta(|\vec{r}|-R)}\end{equation}
 \begin{equation}\label{eq:w2}{w_{2}=\delta(|\vec{r}|-R)}\end{equation}
@@ -1231,7 +1275,7 @@ more accurate expression~\cite{tarazonaphi3, santos2012phi3}
 \end{align}
 in which a tensor weight is incorporated given by
 \begin{equation}\label{eq:tensorweight}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation} 
-All the other FMT equations remain the same. 
+%All the other FMT equations remain the same. 
 
 The FMT equations shown so far have been for a hard-sphere fluid~\cite{Hansen}.
 All of the weight functions, the relations between them, and the equation 
@@ -2724,5 +2768,24 @@ Loop:
 
 \end{document}
 
+%my notes
+Definition of a convolution:
+\begin{align}
+    w_\alpha \otimes w_\gamma(\vec r) &= \int w_\alpha(\vec r')w_\gamma(\vec r-\vec r')d\vec r'
+\end{align}
 
+\begin{align}
+    w_\alpha\otimes w_\gamma(\vec r) &= \int w_\alpha(\vec r')w_\gamma(\vec r'-\vec r)d\vec r
+\end{align}
 
+Set $\vec r' = \vec r_i-\vec r$
+\begin{align}
+     w_\alpha\otimes w_\gamma(\vec r) &= \int w_\alpha(\vec r_i-\vec r)w_\gamma(\vec r_i-\vec r-\vec r)d\vec r
+\end{align}
+
+Put in $\color{blue}\vec r=\vec r_i-\vec r_j\color{black}$
+\begin{align}
+     w_\alpha\otimes w_\gamma(\vec r) &= \int w_\alpha(\vec r_i-\vec r)w_\gamma(\vec r_i-(\color{blue}\vec r_i-\vec r_j\color{black})-r)d\vec r  \\
+                                    &= \int w_\alpha(\vec r_i-\vec r)w_\gamma(\vec r_i-\vec r_i+\vec r_j-\vec r)d\vec r \\
+                                    &= \int w_\alpha(\vec r_i-\vec r)w_\gamma(\vec r_j-\vec r)d\vec r
+\end{align}
