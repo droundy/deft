@@ -190,7 +190,7 @@ Results will be compared to those generated from Monte-Carlo simulations.
 %and pressure-temperature phase diagrams for a Weeks-Chandler-Anderson 
 %(WCA) model fluid using classical Density Functional Theory (cDFT). 
 %To do this, the Helmholtz free energies of the fluid
-%in a liquid state and in a crystalline solid state must be found.
+%in a fluid state and in a crystalline solid state must be found.
 %In general, the Helmholtz free energy, which consists of an ideal part 
 %and an excess part, can be written as a functional of the number density 
 %profile $n(\vec{r})$ which describes the way the average number 
@@ -366,14 +366,8 @@ Figure~\ref{fig:TwoSpheres}.
 %equilibrium), and the same chemical potential (necessary for diffusive 
 %equilibrium). 
  
-A liquid will eventually freeze as heat is removed, or the liquid is compressed. 
-The state of a simple fluid can be characterized by its entropy per particle~\cite{entropyfingerprint}.
-The entropy of a pure substance in a crystalline state is higher than the entropy 
-that it would have in its liquid state at a given temperature and pressure, 
-since there is more freedom for a particle to move between atoms  
-at lattice sites than in a dense liquid with irregular and blocked pathways~\cite{Hansen}.
-Both the entropy and the volume (and thus the density) change abruptly 
-at the phase transition.
+A liquid will eventually freeze as heat is removed, or the liquid is compressed, and 
+the density will change abruptly at the phase transition.
 The particular structure and density that result are affected 
 by the interatomic potential. When repulsive, soft sphere fluids 
 (that are not too soft) freeze, they form lattice structures composed of 
@@ -384,31 +378,37 @@ that are purely repulsive.
 
 \begin{figure}
     \centering
-    \includegraphics[height=8cm]{figs/P-T_Diagram.pdf}
+    \includegraphics[height=6cm]{figs/P-T_Diagram.pdf}
     \caption{Conceptual Pressure-Temperature Phase Diagram}
     \label{fig:P-T_Diagram}
 \end{figure}
 
-\textcolor{red}{A phase transition occurs along a line on a 
+A phase transition occurs along a line on a 
 Pressure-Temperature (P-T) phase diagram, such as can be seen in the phase 
 diagram shown in Figure~\ref{fig:P-T_Diagram}. 
 %
-Points along the line that separates the solid and the liquid phases 
-indicate a phase transition where the solid and liquid phases coexist, 
-and show that both the solid and the liquid have the same temperature (necessary 
-for thermal equilibrium)
-and the same pressure (necessary for mechanical 
-equilibrium)at a phase transition.
-%
-, and the same chemical potential (necessary for diffusive equilibrium). 
+%Points along the phase boundary that separates the solid and the fluid phases 
+%indicate a phase transition where the solid and fluid phases coexist, 
+%and show that both the solid and the fluid have the same temperature (necessary 
+%for thermal equilibrium)
+%and the same pressure (necessary for mechanical 
+%equilibrium)at a phase transition, and the same chemical potential 
+%(necessary for diffusive equilibrium). 
 %
 This phase diagram is 
-representative of some arbitrary, unknown substance composed of atoms, 
-or molecules which exhibit both attraction and repulsion. However, since 
+representative of some substance 
+which exhibits both attraction and repulsion. However, since 
 the atoms in a WCA fluid do not exhibit attraction there will not be a 
 dividing line between the gas and liquid phases, there will just simply
-be a fluid, which we will refer to as a liquid in this paper.}
-%which may be referred to as a "liquid", since at the phase boundary the fluid is dense. 
+be a fluid.\textcolor{red}{liquid in this paper.}
+The phase diagram indicates the equilibrium state a substance will be in at
+different temperatures and pressures.
+At a phase tranition, both the fluid and the solid have 
+the same temperature (necessary 
+for thermal equilibrium), the same pressure (necessary for mechanical 
+equilibrium) and the same chemical potential (necessary for diffusive equilibrium).
+%The temperature , pressure, and chemical potential will be the same for both
+%the fluid and the solid at a fluid-solid phase transition. 
 
 The pressure can be related to the Helmholtz free energy F, which is minimized 
 for a system at fixed temperature, volume and number of particles, as the 
@@ -428,26 +428,28 @@ density at fixed temperature.
  \begin{figure}
     \centering
      \includegraphics[height=8cm]{figs/MaxwellDTC-Fig1.pdf}
-    \caption{Liquid and solid densities at the solid-liquid phase 
+    \caption{Fluid and solid densities at the solid-fluid phase 
     transition are identified using Maxwell's Double Tangent Construction}
     \label{fig:MaxwellDT}
   \end{figure}
 
-Two such curves are shown in Figure~\ref{fig:MaxwellDT}, one for the liquid 
-and one for the solid at a fixed temperature. Each curve consists of a 
-collection of data points $(\frac{F}{N}, \frac{1}{n})$ for the liquid and
-the solid respectively, which will be obtained by using cDFT to find the 
-Helmholtz free energies of the liquid and the solid for various 
-temperatures and number densities. 
+Two such curves are shown in Figure~\ref{fig:MaxwellDT}, one for the fluid
+and one for the solid at a fixed temperature. 
+%Each curve consists of a collection of data points $(\frac{F}{N}, \frac{1}{n})$ 
+The data for the curves 
+%and the solid respectively, which 
+will be obtained by using cDFT. 
+%to find the Helmholtz free energies of the fluid and the solid for various 
+%temperatures and number densities. 
 Since the pressure of the 
-liquid is the same as the pressure of the solid at the point of transition, 
-the density of the liquid and the density of the solid at the point of 
+fluid is the same as the pressure of the solid at the phase transition, 
+the density of the fluid and the density of the solid at 
 freezing can be found from identifying the points at which the 
 tangents to each curve have the same slope, as shown by the black line. 
 This process is called Maxwell's Double Tangent Construction. 
 
 To facilitate finding the pressure at the phase transition computationally, 
-it is helpful to consider the Gibbs free energy given by G=F+PV. 
+it is helpful to take different approach by considering the Gibbs free energy given by G=F+PV. 
 Rearranging the terms and dividing by N gives an  expression for the 
 Helmholtz free energy per atom $f$ in terms of the Gibbs free energy 
 per atom  $g$ (which is the chemical potential)  
@@ -460,67 +462,68 @@ This equation has the form of a line
 and describes the black line shown in Figure~\ref{fig:MaxwellDT} with the 
 pressure given by the negative of the slope of the line, and the Gibb's 
 free energy per atom, or chemical potential given by the y-intercept. 
-At the point of phase transition the chemical potential of the liquid is 
+At the point of phase transition the chemical potential of the fluid is 
 the same as the chemical potential of the solid, as is the pressure.
 \begin{equation}
-    \mu_L=\mu_S\mbox{~~~~and~~~~}P_L=P_S\mbox{~~~~at a phase transition}
+    \mu_F=\mu_S\mbox{~~~~and~~~~}P_F=P_S\mbox{~~~~at a phase transition}
 \end{equation} 
 
  \begin{figure}
     \centering
      \includegraphics[height=8cm]{figs/MaxwellDTC-Fig2.pdf}
     \caption{Pressure is found at point of intersection which occurs 
-    when $\mu_L=\mu_S$.}
+    when $\mu_F=\mu_S$.}
     \label{fig:GibbsvsP}
   \end{figure}
   
 \begin{figure}
     \centering
     \includegraphics[height=8cm]{figs/MaxwellDTC-Fig3.pdf}
-    \caption{The liquid and solid densities at the phase transition are 
-    found from a plot of pressure vs inverse density for both the liquid and the solid.}
+    \caption{The fluid and solid densities at the phase transition are 
+    found from a plot of pressure vs inverse density for both the fluid and the solid.}
     \label{fig:Pvsinvn}
   \end{figure}
 
 The pressure at the phase transition can be obtained from the point of 
 intersection that occurs when the chemical potential 
-is plotted against the pressure for both the liquid and the 
+is plotted against the pressure for both the fluid and the 
 solid at fixed temperature, as shown in Figure~\ref{fig:GibbsvsP}. 
 This plot is constructed from data collected from lines tangent 
 along the curves on the Helmholtz free energy per atom verses inverse 
 density plots (like that of Figure~\ref{fig:MaxwellDT}) for both the 
-liquid and the solid at a given temperature. 
+fluid and the solid at a given temperature. 
 The slope of the tangent line at a given point gives the negative of the 
 pressure at that point, and the corresponding y-intercept of the tangent 
 line gives the chemical potential at that point. Collecting this data 
-(P,~$\mu$) at each point for the liquid and the solid respectively, 
+(P,~$\mu$) at each point for the fluid and the solid respectively, 
 produces the curves in Figure~\ref{fig:GibbsvsP}. 
 
 \begin{figure}
     \centering
-    \includegraphics[height=8cm]{figs/T-n_Diagram.pdf}
+    \includegraphics[height=7cm]{figs/T-n_Diagram.pdf}
     \caption{Conceptual Temperature-Density Phase Diagram used to identify 
-    the number densities of the liquid and the solid during a phase 
+    the number densities of the fluid and the solid during a phase 
     transition. The gray region is where different phases coexist in 
     varying amounts at their phase transition number densities.}
     \label{fig:T-n_Diagram}
   \end{figure} 
   
 Once the pressure is known at the point of phase transition, for a given 
-temperature and number density, the liquid and solid number densities at 
+temperature and number density, the fluid and solid number densities at 
 the phase transition can be found from plots of the pressure versus the 
-inverse of the number density for both the solid and the liquid, 
+inverse of the number density for both the solid and the fluid, 
 as shown in Figure \ref{fig:Pvsinvn}. By repeating this procedure to 
-find the liquid and solid number densities at the phase transition 
+find the fluid and solid number densities at the phase transition 
 for various temperatures, a Temperature-Density (T-n) phase diagram 
 can be generated, similar to that shown in Figure \ref{fig:T-n_Diagram}, 
 but without the gray hump characteristic of fluids that have 
-both attractive and repulsive interatomic potentials. 
+attractive interatomic potentials, and which represents the region where
+vapor coexists with liquid as evidenced by an interface.  
 
 \section{Classical Density Functional Theory (cDFT)}
 
 Classical Density Functional Theory will be used to find the 
-Helmholtz free energies of the liquid and the solid for various 
+Helmholtz free energies of the fluid and the solid for various 
 temperatures and number densities, so that phase diagrams can be 
 constructed. 
 The key idea behind classical Density Functional Theory (cDFT) is that 
@@ -759,6 +762,7 @@ Helmholtz energy, and its corresponding equilibrium density profile can be
 found by varying the number density profile
 through all possible configurations at some fixed temperature
 until the free energy is minimized.  
+ 
 %In this section 
 %a functional for the Helmholtz free energy was formed by finding 
 %general expressions for the ideal and the excess portions of the free 
@@ -797,12 +801,13 @@ SFMT was developed by Schmidt~\cite{schmidt1999density, schmidt2000fluid}
 for soft-spheres, and is an extension of Fundamental Measure Theory (FMT) 
 originally developed by 
 Rosenfeld~\cite{rosenfeld1989, rosenfeld1994, rosenfeld1996, fmtfromsptandsignerror} 
-for the hard-sphere fluid. FMT in turn extended  
-Scaled Particle Theory (SPT)~\cite{ReissSPT, santos2012phi3}, which was 
-developed for homogeneous hard-sphere fluids, 
-to inhomogeneous, or non-uniform hard-sphere fluids.
+for the hard-sphere fluid. 
+%FMT in turn extended  
+%Scaled Particle Theory (SPT)~\cite{ReissSPT, santos2012phi3}, which was 
+%developed for homogeneous hard-sphere fluids, 
+%to inhomogeneous, or non-uniform hard-sphere fluids.
 
-\textcolor{red}{FROM HERE}
+%\textcolor{red}{FROM HERE}
 %\begin{equation}{\Theta(|\vec{r}|-R)=\left\{ \begin{array}{rc} 1 & 0<r \leq R \\ 0  & r>R \end{array}\right.}\end{equation}
 %Rosenfeld begins the development of FMT by considering the lowest order 
 %term in the virial expansion of the excess chemical potential.
@@ -821,15 +826,16 @@ given by
     f(r) = -\Theta(r-(R_i + R_j))
 \end{align}
 where $r=|\vec r_i - \vec r_j|$ is the distance between the centers of two spheres.
-%This can easily be shown by putting the interatomic potential between two hard spheres
-%given by 
-%\begin{align}
-    %V(r)=\left\{ \begin{array}{rc} \infty & 0<r \leq 2R \\ 0  & r>2R \end{array}\right.
-%\end{align}
-%into the equation for the Mayer function
-%\begin{align}
-     %f(r)=\exp^{-\frac{V(r)}{k_{B}T}}-1
-%\end{align} 
+This can easily be shown by putting the interatomic potential between two hard spheres
+$V(r)$
+into the equation for the Mayer function
+\begin{align}
+     f(r)=\exp^{-\frac{V(r)}{k_{B}T}}-1
+\end{align} 
+where
+\begin{align}
+    V(r)=\left\{ \begin{array}{rc} \infty & 0<r \leq R_i+R_j \\ 0  & r> R_i+R_j \end{array}\right.
+\end{align}
 %
 %The low-density excess free energy given by Equation~\ref{eq:Fexcess}
 %The lowest order term of the excess chemical potential  
@@ -1014,7 +1020,8 @@ The exclusion volume is the spherical volume about the center of one sphere
 which the center of another sphere can not enter, and is used to describe
 terms with $f_{ij}=f(|\vec r_i - \vec r_j|)$ as has been seen. The overlap volume is 
 the volume of intersection between two spheres that overlap, and is used in conjunction 
-with the exclusion volume to describe higher order terms in the expansion~\cite{rosenfeld1988}. 
+with the exclusion volume to describe higher order terms in the expansion
+in Equation~\ref{eq:Fexcess-simplified}~\cite{rosenfeld1988}. 
 %
 The resulting expression for the excess Helmholtz free energy with an 
 updated version of $\Phi_3$ that was later constructed by Tarazona is given by
@@ -1048,7 +1055,7 @@ the relation
     w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivilantly,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
 \end{align}
 %which will be important to keep in tact when moving to SFMT~\cite{schmidt1999density}.
-Taking the derivative of the Mayer function in Eq~\ref{f(r)step} provides 
+Taking the derivative of the Mayer function provides 
 another important relation expressed in terms of $w_{2}(r)$ 
 %that will be important 
 %to keep in tact when moving to SFMT~\cite{schmidt2000fluid}.
@@ -1356,24 +1363,24 @@ Our goal is to generate temperature-density and pressure-temperature
 phase diagrams for a Weeks-Chandler-Anderson model fluid. 
 A temperature-density phase diagram for a fluid that does not
 have attraction between the particles that make up the fluid will show
-two distinct regions - a "liquid" region at lower densities, and a solid 
+two distinct regions - a fluid region at lower densities, and a solid 
 region at higher densities. 
-A phase transition between a liquid and a solid is accompanied by an 
+A phase transition between a fluid and a solid is accompanied by an 
 abrupt change in the number density, and so there is a gap between the 
-purely liquid and the purely solid regions. Within the gap, or coexistence
-region, is found mixtures of various amounts of liquid and solid each of
+purely fluid and the purely solid regions. Within the gap, or coexistence
+region, is found mixtures of various amounts of fluid and solid each of
 which have number densities that are fixed at the values they had at the 
 phase transition. 
-To construct the phase diagram, the liquid and solid phase transition number densities
-are found 
+To construct the phase diagram, the fluid and solid phase transition 
+number densities are found 
 %Maxwell's double tangent construction can be used to find 
 %these number densities given plots of 
-from the liquid and the solid Helmholtz 
+from the fluid and the solid Helmholtz 
 free energies and inverse densities at a given temperature, as
 discussed in Section 2.2. 
 
 We use classical Density Functional Theory 
-to find the Helmholtz free energies of the liquid and the solid. 
+to find the Helmholtz free energies of the fluid and the solid. 
 A functional for the ideal portion of the
 Helmholtz free energy is given by Equation~\ref{eq:Fideal-n(r)}, and a 
 functional for 
@@ -1527,13 +1534,13 @@ To implement classical Density Functional Theory,
 a set of number density profiles is generated by varying the Gaussian width 
 and the fraction of vacancies at a given combination of temperature and 
 number density, as shown by the example in Figure~\ref{fig:Ensemble_vary}.
-A homogeneous number density profile is used for a liquid, as shown in 
+A homogeneous number density profile is used for a fluid, as shown in 
 Figure \ref{fig:homogen_denisty}.
 Once again, it is important to note that the number density is the same 
 for all these number density profiles $n(\vec{r})$.  
 The Helmholtz free energy $F[n(\vec{r})]$ is calculated for each number 
 density profile in the set, and also for the homogeneous number density profile 
-characteristic of a liquid. Both the ideal and excess free energies are 
+characteristic of a fluid. Both the ideal and excess free energies are 
 found, and added together to get the total Helmholtz free energy.
 According to cDFT, the actual equilibrium Helmholtz free energy at
 the given temperature and number density will be the one
@@ -1541,15 +1548,15 @@ that corresponds to the number density profile that minimizes the functional.
 This process is repeated to find the free energies at other combinations 
 of temperatures and number densities. 
 
-Once the Helmholtz free energy for both the crystal and liquid states of 
+Once the Helmholtz free energy for both the crystal and fluid states of 
 the fluid are found for a given temperature and density, they can be 
 used to construct phase diagrams.
-Outside the region of coexistence which exists between the liquid and 
+Outside the region of coexistence which exists between the fluid and 
 crystal states, the fluid will be completely in a crystalline state if the 
-crystal free energy is lower than the liquid free energy, and it will be 
-completely in a liquid state if the liquid free energy is lower than 
+crystal free energy is lower than the fluid free energy, and it will be 
+completely in a fluid state if the fluid free energy is lower than 
 the crystal free energy. 
-We determine the actual number densities of the crystal and liquid states
+We determine the actual number densities of the crystal and fluid states
 at the boundaries of the coexistence region for a given temperature, 
 and construct phase diagrams as described in Section 2.2.
 
@@ -1739,9 +1746,9 @@ become thicker, or taper off longer as the temperature increases.
 $\alpha$ is related to the radius of the shell, or sphere, and decreases 
 as the temperature increases.
 
-\section{Computing the Liquid and Crystal Helmholtz free energies}
+\section{Computing the Fluid and Crystal Helmholtz free energies}
 
-The liquid ideal Helmholtz free energy is computed analytically 
+The fluid ideal Helmholtz free energy is computed analytically 
 using Equation~\ref{eq:Fideal} 
 for a given homogeneous reduced density $n^*$, and reduced temperature $t^*$. 
 The crystal ideal Helmholtz free energy is computed computationally 
@@ -1750,7 +1757,7 @@ from Equation~\ref{eq:Fideal-n(r)} with the varying number density profile given
   n(|\vec{r}-\vec{R_j}|)=\sum_j{(1-f_v)\frac{e^{-\frac{{|\vec{r}-\vec{R_j}|}^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}}
 \end{align}
 where $\vec R_j$ is the position vector of the jth lattice site.
-The liquid excess Helmholtz free energy is computed analytically  
+The fluid excess Helmholtz free energy is computed analytically  
 using SFMT Equations~\ref{eq:Fexfunctional} through \ref{eq:tensorweight-methods} 
 with a uniform number density profile, n that does not depend on $\vec r$. 
 
@@ -1850,10 +1857,10 @@ and \ref{fig:Phase_Diagram_P_vs_T}. In all cases $\sigma=1$ and $\epsilon=1$.
 In Figure~\ref{fig:Phase_Diagram_of_T_vs_n} the reduced temperature 
 $T^*=\frac{kT}{\epsilon}$ is plotted against the reduced number density 
 $n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. 
-It is seen that in general, a liquid exists at lower number densities, 
+It is seen that in general, a fluid exists at lower number densities, 
 and a solid exists at higher number densities. 
 For a given temperature, it is seen that as the density of the 
-liquid increases, a maximum number density is reached for the liquid. 
+fluid increases, a maximum number density is reached for the fluid. 
 Looking at the coexistence region as a whole for all temperatures, 
 it is seen to extend over a narrow range of number densities which 
 gradually shifts towards higher densities as the temperature increases. 
@@ -1866,9 +1873,9 @@ of the WCA fluid.
 Overall, the general shape, and position of the two coexistence regions 
 correspond fairly closely, but the Monte-Carlo region is a little wider
 and shifted a bit toward smaller densities. For example, at a temperature 
-of kT=1, the cDFT liquid transition reduced number density is 0.96, 
+of kT=1, the cDFT fluid transition reduced number density is 0.96, 
 and the solid transition reduced number density is 1.02, giving a spread 
-of 0.06, whereas the Monte-Carlo results give a liquid transition 
+of 0.06, whereas the Monte-Carlo results give a fluid transition 
 reduced number density of 0.92, and a solid transition reduced number 
 density of 1.00, giving a spread of 0.08. 
 
@@ -1876,16 +1883,16 @@ density of 1.00, giving a spread of 0.08.
   \centering
   \includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n}
   \caption{Phase Diagram of the reduced temperature verses the reduced 
-  density for the WCA fluid. The red region is liquid, and the blue region is 
-  solid. The gray area that separates the liquid and solid regions 
-  is the region of coexistence where some liquid and solid exist together 
+  density for the WCA fluid. The red region is fluid, and the blue region is 
+  solid. The gray area that separates the fluid and solid regions 
+  is the region of coexistence where some fluid and solid exist together 
   at varying proportions. White lines show the boundaries of the coexistence 
   region generated from Monte-Carlo simulations of the WCA fluid.}
   \label{fig:Phase_Diagram_of_T_vs_n}
 \end{figure}
 
 %The solid phase transition number densities predicted by each method 
-%are very nearly the same along all temperatures, but the liquid phase 
+%are very nearly the same along all temperatures, but the fluid phase 
 %transition number densities predicted by cDFT are notably higher than 
 %those predicted by the Monte-Carlo simulations, making the width of the 
 %Monte-Carlo region about one-third larger for most temperatures above KT=1. 
@@ -1908,7 +1915,7 @@ density of 1.00, giving a spread of 0.08.
   %%\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n_AS}
   %%\includegraphics[height=10cm]{figs/Phase_Diagram_of_T_vs_n_AS}
   %%\caption{Phase Diagram of the reduced temperature verses the reduced density for the WCA fluid. 
-  %%White lines show the liquid and solid transition densities at each temperature from 
+  %%White lines show the fluid and solid transition densities at each temperature from 
   %%simulations of a WCA fluid by Ahmed and Sadus~\cite{ahmedsadus}. The gray region is the region of coexistence.}
   %\label{fig:Phase_Diagram_of_T_vs_n_AS}
 %\end{figure}
@@ -1916,15 +1923,15 @@ density of 1.00, giving a spread of 0.08.
 Figure~\ref{fig:Phase_Diagram_P_vs_T} shows the reduced pressure 
 $p^*=\frac{P\sigma^3}{\epsilon}$ plotted against the reduced temperature 
 for temperatures of kT = 0.5 to 3.0. 
-The black line marks the phase boundary between the solid and liquid regions. 
+The black line marks the phase boundary between the solid and fluid regions. 
 It is seen that the higher the temperature, the higher the pressure must be
-to undergo a phase transition from a liquid to a solid, as would be expected. 
+to undergo a phase transition from a fluid to a solid, as would be expected. 
 Ideally, the slope of the phase boundary $\frac{dP}{dT}$ at some point (P,T) 
 is given by
 \begin{align} 
     \frac{dP}{dT}=\frac{S_l-S_s}{V_l-V_s}
 \end{align}
-Since the entropy and the volume of the liquid is greater than the entropy
+Since the entropy and the volume of the fluid is greater than the entropy
 and the volume of the solid, the slope should be positive. 
 
 Comparing the slope of the phase boundary predicted by cDFT to that
@@ -1935,7 +1942,7 @@ temperature of kT=1, the phase transition reduced pressure predicted by
 cDFT is 15.24, whereas the Monte-Carlo simulation predicted a value of 9.99,
 and at a temperature of kT=3, cDFT gives a value of 77.27 whereas the 
 Monte-Carlo simulation predicts 43.80.
-This may indicate that either the difference between the liquid 
+This may indicate that either the difference between the fluid 
 and solid phase transition entropies predicted by cDFT is too high, or 
 the difference in the volumes is too low. 
 
@@ -1943,9 +1950,9 @@ the difference in the volumes is too low.
   \centering
   \includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T}
   \caption{Phase Diagram of the reduced pressure verses the reduced 
-  temperature. The blue region is solid, the red region is liquid,
-  and the black line shows the phase boundary where the solid and liquid
-  phases coexist. The white line marks the solid-liquid phase boundary  
+  temperature. The blue region is solid, the red region is fluid,
+  and the black line shows the phase boundary where the solid and fluid
+  phases coexist. The white line marks the solid-fluid phase boundary  
   as predicted by Monte-Carlo simulations.}
   \label{fig:Phase_Diagram_P_vs_T}
 \end{figure}
@@ -1996,10 +2003,10 @@ To implement cDFT we used Gaussian distribution functions centered at
 lattice points to represent the number density profile which was then varied
 by changing the width of the Gaussians, and the fraction of vacant lattice
 sites until the Helmholtz free energy was minimized. Once the equilibrium 
-Helmholtz free energy for the liquid and solid states were found for a given
+Helmholtz free energy for the fluid and solid states were found for a given
 temperature and number density, 
 we used this data 
-to find the number densities of the liquid and the solid at the phase transition.
+to find the number densities of the fluid and the solid at the phase transition.
 Using this information, we generated a temperature-density 
 phase diagram that yielded coexistence regions that approximately 
 matched the Monte-Carlo
@@ -2808,12 +2815,12 @@ Loop:
 \begin{equation}V_{primitive.cell}=\frac{\text{1}}{\text{n}}(1-\text{fv})\text{N}\end{equation}
 \begin{displaymath}\sigma = \text{one of the gw values from input}\end{displaymath}
 \begin{equation}{n(r)=\frac{1}{\left(\sqrt{2\pi}\sigma\right)^3}\int\exp^{-\frac{|\vec{r}-\vec{R}|^2}{2\sigma^2}}d\vec{r}}\end{equation} 
-\begin{equation}\left(\frac{F}{N}\right)_{crystal}=\frac{cFideal_{primitive.cell} + cFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
-\begin{equation}\left(\frac{F}{N}\right)_{liquid}=\frac{lFideal_{primitive.cell} + lFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
-\begin{equation}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{crystal}-{~~}\left(\frac{F}{N}\right)_{liquid}\end{equation}
+\begin{equation}\left(\frac{F}{N}\right)_{crystal}=\frac{crystalFideal_{primitive.cell} + crystalFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
+\begin{equation}\left(\frac{F}{N}\right)_{fluid}=\frac{fluidFideal_{primitive.cell} + fluidFexcess_{primitive.cell}}{N_{primitive.cell}}\end{equation}
+\begin{equation}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{crystal}-{~~}\left(\frac{F}{N}\right)_{fluid}\end{equation}
 \begin{displaymath}\text{If~~~~~~}\left(\frac{F}{N}\right)_{diff}<\text{~~~~Best}\left(\frac{F}{N}\right)_{diff}\end{displaymath}
 \begin{displaymath}\text{Then~~~~~~}\text{Best}\left(\frac{F}{N}\right)_{diff}=\left(\frac{F}{N}\right)_{diff}\end{displaymath}
-\begin{displaymath}\text{Output:~~~~~~~~~~~~ Best}\left(\frac{F}{N}\right)_{crystal}\text{~~and~~~~~~}\left(\frac{F}{N}\right)_{liquid}\text{~~~~for the given T, n ~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
+\begin{displaymath}\text{Output:~~~~~~~~~~~~ Best}\left(\frac{F}{N}\right)_{crystal}\text{~~and~~~~~~}\left(\frac{F}{N}\right)_{fluid}\text{~~~~for the given T, n ~~~~~~~~~~~~~~~~~~~~~~~~~}\end{displaymath} 
 
 %lattice_constant= pow(4*(1-fv)/reduced_density, 1.0/3)
 %The number of atoms in one primitive cell is one. 
