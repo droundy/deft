@@ -1547,9 +1547,9 @@ density. The number density is the number of atoms per volume, whereas
 the number density profile describes how much "atom" will be found at various 
 points in the cell. 
 It can be thought of as an average over a large collection of actual cells
-of various possible spatial distributions of the atoms within a cell, or
+with various possible spatial distributions of the atoms within the cell, or
 more precisely, as an ensemble average over all possible microstates, 
-each of which consists of a unique set of positions for the atoms in 
+each of which consists of a unique set of positions for the atoms 
 that occupy the cell. Mathematically, the microstates are represented 
 by a set of delta functions.
 \begin{align}
@@ -1587,8 +1587,8 @@ gives the number density.
    \label{fig:SameStatPic}
 \end{figure} 
 
-Besides changing the width of the Gaussians, there is another way to 
-generate different number density profiles for a given number density.
+There is another way to generate different number density profiles for 
+a given number density besides changing the width of the Gaussians. 
 It may be that not all lattice sites are occupied. Vacancies can be taken 
 into account while keeping the overall number density the same by 
 making the cells smaller. A large collection of smaller cells creates a 
@@ -1635,17 +1635,16 @@ that corresponds to the number density profile that minimizes the functional.
 This process is repeated to find the free energies at other combinations 
 of temperatures and number densities. 
 
-Once the Helmholtz free energy for both the crystal and fluid states of 
-the fluid are found for a given temperature and density, they can be 
+Once the Helmholtz free energy for both the crystal and fluid 
+are found for a given temperature and density, they can be 
 used to construct phase diagrams.
-Outside the region of coexistence which exists between the fluid and 
-crystal states, the fluid will be completely in a crystalline state if the 
-crystal free energy is lower than the fluid free energy, and it will be 
-completely in a fluid state if the fluid free energy is lower than 
+Outside the region of coexistence, a purely crystalline state will exist 
+if the crystal free energy is lower than the fluid free energy, and 
+a purely fluid state will exist if the fluid free energy is lower than 
 the crystal free energy. 
-We determine the actual number densities of the crystal and fluid states
-at the boundaries of the coexistence region for a given temperature, 
-and construct phase diagrams as described in Section 2.2.
+After the actual number densities of the crystal and fluid states
+at the boundaries of the coexistence region are determined for a given 
+temperature, phase diagrams can be constructed as described in Section 2.2.
 
 \section{Our Functional for the Excess Helmholtz free energy}
 In order to apply classical Density Functional Theory, an expression 
@@ -1653,7 +1652,7 @@ for the Helmholtz free energy as a functional of a number density profile
 must be found. Computing the ideal portion of the 
 Helmholtz free energy is straightforward, but computing the excess portion 
 of the Helmholtz free energy is difficult since it depends on the interatomic 
-potential energy $V(r)$ that exists between each sphere with all the other spheres, 
+potential energy $V(r)$ that exists between each sphere and all the other spheres, 
 as is shown by Equations~\ref{eq:mayerfunction} and \ref{eq:Fexcess-simplified}.
 Soft Fundamental Measure Theory is a method
 developed to form an expression for the excess Helmholtz free energy without
@@ -1671,9 +1670,9 @@ is written as
 \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
 \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
 \end{align} 
-The weighted densities $n_0, n_1, n_2,$ and $n_3$ are found from
+The weighted densities $n_0, n_1, n_2, n_3, \vec {n}_1, \vec {n}_2$ and $\overleftrightarrow{n}_{m2}$ are found from
 \begin{align}\label{eq:numdenprofile}
-	n_i(\vec{r})=\int_{Volume}{n(\vec{r'})w_i(|\vec{r}-\vec{r'}|)d{\vec{r'}}}
+	n_\alpha(\vec{r})=\int_{Volume}{n(\vec{r'})w_\alpha(|\vec{r}-\vec{r'}|)d{\vec{r'}}}
 \end{align}
 where the number density profile $n(\vec r)$ within the integral is given 
 by Gaussian functions centered at each lattice point.
@@ -1702,16 +1701,21 @@ subject to the boundary conditions $w_3(0)\approx{1}$
 and $w_3(\infty)=0$. 
 Our functional is  created by replacing Schmidt's parameters $\sigma$ 
 and $a$ with our temperature dependent parameters $\alpha$ and $\Xi$.
-The two parameters $\alpha$ and $\Xi$ make the temperature-dependent error 
-function potential $V_{erf}(r)$ approximate, in the region of interest, 
-the temperature-independent WCA potential which is difficult 
+%The two parameters $\alpha$ and $\Xi$ make the temperature-dependent error 
+%function potential $V_{erf}(r)$ approximate, in the region of interest, 
+%the temperature-independent WCA potential which is difficult 
+%to implement computationally. 
+The two parameters $\alpha$ and $\Xi$ are designed to make the functional
+produce results which approximate, in the region of interest, that of  
+a WCA fluid using the temperature-dependent error function potential $V_{erf}(r)$ 
+instead of the temperature-independent WCA potential which is difficult 
 to implement computationally. 
 %$\Xi(T)$ is determined by setting the second virial coefficient $B_2$ of 
 %the error function potential $V_{erf}(r)$ equal to that of the
 %WCA potential, $B_{2erf}(T)=B_{2wca}(T)$ for a given temperature.  
 The error function potential emerges from $w_{3}(r)$, and the relationships 
 in Equations~\ref{w2_w3_relation} and~\ref{mayerder=w2convolution}.
-Using Equation~\ref{w2_w3_relation} repeated here,
+Using Equation~\ref{w2_w3_relation}(repeated below),
 \begin{displaymath}
      w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivalently,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
 \end{displaymath}
@@ -1826,27 +1830,28 @@ Figure~\ref{fig:xi_fromB2vsT}.
 Figure \ref{fig:weight_functions} shows a one dimensional view of the 
 weight functions $w_0$, $w_1$, $w_2$, $w_3$ as they vary with distance 
 along the z-axis. In three dimensions, the weighting functions 
-$w_0$, $w_1$, $w_2$ are spherical shells centered at $\vec{r}$, 
+$w_0$, $w_1$, $w_2$ are spherical shells, 
 and $w_3$ is a solid sphere with an edge that tapers off.
 $\Xi$ is related to the width of the weight functions which 
-become thicker, or taper off longer as the temperature increases. 
+become thicker, or taper off longer as the temperature increases, and 
 $\alpha$ is related to the radius of the shell, or sphere, and decreases 
 as the temperature increases.
 
 \section{Computing the Fluid and Crystal Helmholtz free energies}
-
+The Helmholtz free energy is composed of two parts: an ideal Helmholtz free energy 
+and an excess Helmholtz free energy that are added together to get the total
+Helmholtz free energy, $F=F_{ideal} + F_{excess}$. 
+And so the ideal and excess Helmholtz free energies
+must be computed for both the fluid and the crystal states.
 The fluid ideal Helmholtz free energy is computed analytically 
-using Equation~\ref{eq:Fideal} 
-for a given homogeneous reduced density $n^*$, and reduced temperature $t^*$. 
+using Equation~\ref{eq:Fideal} for a given homogeneous reduced 
+(or dimensionless) number density $n^*$ and temperature $t^*$. 
 The crystal ideal Helmholtz free energy is computed computationally 
 from Equation~\ref{eq:Fideal-n(r)} with the varying number density profile given by
 \begin{align}
   n(|\vec{r}-\vec{R_j}|)=\sum_j{(1-f_v)\frac{e^{-\frac{{|\vec{r}-\vec{R_j}|}^2}{2{\sigma}^2}}}{\left(\sqrt{2\pi}\sigma\right)^3}}
 \end{align}
 where $\vec R_j$ is the position vector of the jth lattice site.
-The fluid excess Helmholtz free energy is computed analytically  
-using SFMT Equations~\ref{eq:Fexfunctional} through \ref{eq:tensorweight-methods} 
-with a uniform number density profile, n that does not depend on $\vec r$. 
 
 \begin{figure}
   \centering
@@ -1881,17 +1886,20 @@ with a uniform number density profile, n that does not depend on $\vec r$.
    \label{fig:InclusionRadius}
 \end{figure} 
 
+The fluid excess Helmholtz free energy is computed analytically  
+using SFMT Equations~\ref{eq:Fexfunctional} through \ref{eq:tensorweight-methods} 
+with a uniform number density profile, n that does not depend on $\vec r$. 
 The crystal excess Helmholtz free energy is computed  
 using SFMT with a number density profile 
 that consists of Gaussian distributions 
 centered at lattice sites specified by position vectors $\vec R$. 
-The weight functions $w_i(|\vec r - \vec r~'|)$ are centered at $\vec r'$,
+The weight functions $w_\alpha(|\vec r - \vec r~'|)$ are centered at $\vec r'$,
 as shown for $w_2$ in Figure~\ref{fig:GaussandW2_actual}a. 
 But because the weight function is a function of the magnitude of the 
 difference between $\vec r$ and $\vec r~'$, it can be thought of as 
 centered at $\vec r$, as shown in Figure~\ref{fig:GaussandW2_actual}b.
 Keeping the weight function centered at $\vec r$, 
-Monte-Carlo integration can be used to compute the weighted densities $n_i(\vec r)$
+Monte-Carlo integration can be used to compute the weighted densities $n_\alpha(\vec r)$
 by randomly generating vectors
 $\vec r~' -\vec R$ according to a Gaussian distribution. 
 Only lengths for $\vec r~'- \vec R$ that are within an inclusion radius
@@ -1900,21 +1908,21 @@ will be taken into account as Gaussians
 farther away will not contribute much.
 The equation for the contribution to the weighted density from a 
 Gaussian centered at the jth lattice site located at $\vec R_j$ is given by
-\begin{equation}{n_i(\vec r)= \int_{r'}{(1-f_v)n(\vec r~' - \vec R_j)w_i(|\vec{r}-\vec{r}~'|)} {d}\vec{r}~'}\end{equation} 
+\begin{equation}{n_\alpha(\vec r)= \int_{r'}{(1-f_v)n(\vec r~' - \vec R_j)w_\alpha(|\vec{r}-\vec{r}~'|)} {d}\vec{r}~'}\end{equation} 
 and is implemented computationally in the form
-\begin{equation}{n_i(\vec r)= \sum_{r'}{(1-f_v)n(\vec r~' -\vec R_j)w_i(|\vec{r}-\vec{r}~'|)dV}}\end{equation} 
+\begin{equation}{n_\alpha(\vec r)= \sum_{r'}{(1-f_v)n(\vec r~' -\vec R_j)w_\alpha(|\vec{r}-\vec{r}~'|)dV}}\end{equation} 
 which can be written as
-\begin{equation}{n_i(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_i(|\vec{r}-\vec{r}~'|)}\end{equation} 
+\begin{equation}{n_\alpha(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_\alpha(|\vec{r}-\vec{r}~'|)}\end{equation} 
 NumPoints is the number of vectors $\vec r~' - \vec R_j$ randomly 
 generated about the jth lattice site, and $n(\vec r~' - \vec R_j)$
 is equal to a probability density which when multiplied by dV gives 
-the probability $P_{r'}$ at which the value of $w_i(|\vec{r}-\vec{r}~'|)$ 
+the probability $P_{r'}$ at which the value of $w_\alpha(|\vec{r}-\vec{r}~'|)$ 
 will occur. Using the relation
 \begin{equation}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{equation} 
-$n_i(\vec{r})$ can be expressed as the average value of $(1-f_v)w_i(|\vec{r}-\vec{r}~'|)$:
-\begin{equation}{n_i(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_i(|\vec{r}-\vec{r}~'|)}{\text{NumPoints}}}\end{equation}
+$n_\alpha(\vec{r})$ can be expressed as the average value of $(1-f_v)w_\alpha(|\vec{r}-\vec{r}~'|)$:
+\begin{equation}{n_\alpha(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_\alpha(|\vec{r}-\vec{r}~'|)}{\text{NumPoints}}}\end{equation}
 This process is repeated to get the contributions to the weighted density 
-$n_i(\vec r)$ from the Gaussians around each lattice point which begin to 
+$n_\alpha(\vec r)$ from the Gaussians around each lattice point which begin to 
 merge together as the width of the Gaussians increases.
 All the contributions are then added together 
 to get the final value of the weighted density at some point $\vec r$.
@@ -1940,14 +1948,15 @@ can properly have is 1.
 \chapter{Results and Discussion}
 
 Phase diagrams for the WCA fluid are shown in Figures~\ref{fig:Phase_Diagram_of_T_vs_n} 
-and \ref{fig:Phase_Diagram_P_vs_T}. In all cases $\sigma=1$ and $\epsilon=1$. 
+and \ref{fig:Phase_Diagram_P_vs_T}. 
 In Figure~\ref{fig:Phase_Diagram_of_T_vs_n} the reduced temperature 
 $T^*=\frac{kT}{\epsilon}$ is plotted against the reduced number density 
 $n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. 
+In all cases $\sigma=1$ and $\epsilon=1$. 
 It is seen that in general, a fluid exists at lower number densities, 
 and a solid exists at higher number densities. 
-For a given temperature, it is seen that as the density of the 
-fluid increases, a maximum number density is reached for the fluid. 
+For a given temperature, it is seen that as the density increases, 
+a maximum number density is reached for the fluid. 
 Looking at the coexistence region as a whole for all temperatures, 
 it is seen to extend over a narrow range of number densities which 
 gradually shifts towards higher densities as the temperature increases. 
@@ -2016,17 +2025,19 @@ to undergo a phase transition from a fluid to a solid, as would be expected.
 Ideally, the slope of the phase boundary $\frac{dP}{dT}$ at some point (P,T) 
 is given by
 \begin{align} 
-    \frac{dP}{dT}=\frac{S_l-S_s}{V_l-V_s}
+    \frac{dP}{dT}=\frac{S_f-S_s}{V_f-V_s}
 \end{align}
 Since the entropy and the volume of the fluid is greater than the entropy
 and the volume of the solid, the slope should be positive. 
 
 Comparing the slope of the phase boundary predicted by cDFT to that
 from Monte-Carlo simulations shown by the white line, it is seen that
-the cDFT transition temperatures are consistently higher, and the 
+the phase transition pressures and temperatures predicted by cDFT 
+are consistently higher, and the 
 discrepancy grows as the temperature increases. For example, at a 
 temperature of kT=1, the phase transition reduced pressure predicted by 
-cDFT is 15.24, whereas the Monte-Carlo simulation predicted a value of 9.99,
+cDFT is 15.24, whereas the Monte-Carlo simulation predicted a reduced 
+pressure of 9.99,
 and at a temperature of kT=3, cDFT gives a value of 77.27 whereas the 
 Monte-Carlo simulation predicts 43.80.
 This may indicate that either the difference between the fluid 
@@ -2085,7 +2096,8 @@ and $\Xi$, to model a WCA fluid.
 $\alpha$ was found by setting the error function potential equal to the 
 WCA potential at $r=\alpha$, and $\Xi$ was found for each temperature by 
 setting the second virial coefficients for the error function potential 
-and the WCA potential equal to each other, $B_{2erf}(T)=B_{2wca}(T)$.
+and the WCA potential equal to each other, $B_{2erf}(T)=B_{2wca}(T)$ 
+at each temperature.
 To implement cDFT we used Gaussian distribution functions centered at 
 lattice points to represent the number density profile which was then varied
 by changing the width of the Gaussians, and the fraction of vacant lattice
