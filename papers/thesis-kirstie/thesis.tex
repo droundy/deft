@@ -540,7 +540,7 @@ density, or atoms per volume, varies spatially on average.
 \begin{displaymath}{f[n(}\vec{r}{)]}\end{displaymath}
 This, coupled with the fact that the free energy of a system tends toward 
 a minimum at equilibrium means that the equilibrium free energy of the 
-system ${f_{eq}}{[}\rho{(}\vec{r}{)]}$, and its corresponding equilibrium 
+system $f_{eq}[n_{eq}(\vec r)]$, and its corresponding equilibrium 
 number density profile $n_{eq}(\vec r)$, can be found simply by varying 
 $n(\vec{r})$ through all possible spatial profiles until the free energy 
 is minimized~\cite{MoritaDFT}. 
@@ -874,9 +874,9 @@ where the volume, surface area, radius, and the number 1 can be written as
         R &= \int_{Volume} \frac{\delta(r_{ij} -R)}{4\pi r_{ij}} d\vec r_{ij} \\
         1 &= \int_{Volume} \frac{\delta(r_{ij} -R)}{4\pi r_{ij}^2} d\vec r_{ij}    
 \end{align}
-Rosenfeld also recognized that the Heaviside function can be written as 
-a convolution of the weight functions which, for a fluid composed of 
-spheres of radius R, is given by
+where R is either $R_i$ or $R_j$ accordingly. Rosenfeld also recognized that the 
+Heaviside function can be written as a convolution of the weight functions 
+which, for a fluid composed only of spheres of radius R, is given by
 \begin{align} \label{mayerconvolution}
     f(r_{ij})=-\Theta(r_{ij}-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})
 \end{align} 
@@ -1054,13 +1054,14 @@ which can be written as
                 &\approx k_BT\int n_0n_3 + n_1n_2 - \vec n_1\cdot\vec n_2~d\vec u  \label{Fexlowden-inhomo}\\                
                 &\approx k_BT\int \Phi_1 + \Phi_2 + \Phi_3~d\vec u  \\
                 &\approx k_BT\int \Phi(\{n_\alpha(\vec u)\})~d\vec u  \\
-                %&\text{or replacing u notation with r} \nonumber \\
+                &\text{Or, replacing u notation with r} \nonumber \\
                 &\approx k_BT\int \Phi(\vec r)~d\vec r             
 \end{align}
-where the weighted densities $n_\alpha$ all depend on the spatially varying 
+The weighted densities $n_\alpha$ all depend on the spatially varying 
 number density profile $n(\vec r)$, and have the form
 \begin{align}
-    n_\alpha(\vec u)=\int n(\vec {r}~')w_\alpha(\vec u-\vec {r}~')~d\vec {r}~'  
+    n_\alpha(\vec r) &= \int n(\vec {r}~')w_\alpha(\vec r-\vec {r}~')~d\vec {r}~'  \label{weighted_densities}  \\
+                     &= n\otimes w_\alpha(\vec r)
     %n_\alpha(\vec u)=\int n(\vec r')w_\alpha(\vec u-\vec r')~d\vec r'  
 \end{align}  
 and  $\vec n_1\cdot\vec n_2$=0 for the homogenesous case where $n(\vec r)\rightarrow n$.
@@ -1103,8 +1104,8 @@ terms with $f_{ij}=f(|\vec r_i - \vec r_j|)$ as has been seen. Used in conjuncti
 with the overlap volume, the higher order terms in the expansion
 in Equation~\ref{eq:Fexcess-simplified}~\cite{rosenfeld1988} can be described. 
 %
-The resulting expression for the excess Helmholtz free energy with an 
-updated version of $\Phi_3$ that was later constructed by Tarazona is given by
+The resulting expression for the excess Helmholtz free energy with Tarazona's $\Phi_3$
+(see Introduction) is given by
 \begin{align}
     F_{excess}[n(\vec{r})] &= k_BT\int(\Phi_1(\vec{r})+\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r} \\
     %\Phi_1 &= -n_{0}ln(1-n_{3})  \\
@@ -1114,7 +1115,9 @@ updated version of $\Phi_3$ that was later constructed by Tarazona is given by
     \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
     \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
 \end{align}
-where in addition to the weight functions already defined,  
+%where in addition to the weight functions already defined,  
+where the weighted densities are given by Equation~\ref{weighted_densities} with 
+weight functions
 \begin{align} 
       w_3 &= \Theta(r-R)  \label{scalar-weight3} \\
       w_2 &= \delta(r-R)  \\
@@ -1123,7 +1126,7 @@ where in addition to the weight functions already defined,
       \vec {w}_2 &= w_2~\hat r \\
       \vec {w}_1 &= w_1~\hat r
 \end{align}
-a tensor weight function is given by
+and a tensor weight function given by
 \begin{align}\label{eq:tensorweight-methods}
      \overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right) 
 \end{align}
