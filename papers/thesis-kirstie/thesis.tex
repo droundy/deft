@@ -47,11 +47,11 @@
 Classically, fluids have been modeled by a collection of small, 
 impenetrable spheres colliding with one another like billiard balls. 
 In the simplest case, the spheres are treated as having only a repulsive 
-potential. This model, called the hard-sphere fluid, has served as the 
+potential that rises instantly to infinity when the spheres make contact. 
+This model, called the hard-sphere fluid, has served as the 
 primary reference system for fluids. This is due to the fact that the 
 short-range repulsion between atoms is much stronger than their long-range 
-attraction, and so the repulsive potential, which is descriptive of 
-hard spheres, dominates the interactions between atoms. 
+attraction, and thus dominates the interactions between atoms. 
 
 In more recent times, other model fluids have been developed.
 Zwanzig introduced the square-well 
@@ -72,11 +72,11 @@ at low temperatures, and smaller radii at high temperatures.
 In 1971 Weeks, 
 Chandler, and Anderson used temperature and density dependent hard-sphere 
 radii to model spheres with a more realistic softly fading repulsive 
-potential similar to that between neutral atoms
+potential similar to that between neutral atoms.
 %portion of the Leonard-Jones potential
-which is known as the Weeks-Chandler-Anderson model fluid~\cite{andersen1971relationship} . 
+Their is known as the Weeks-Chandler-Anderson (WCA) model fluid~\cite{andersen1971relationship} . 
 Models continue to be developed to characterize fluids with particular 
-properties, or to address particular problems like surface tension, 
+properties, or to address problems like surface tension, 
 interfaces, adsorption, wetting and confinement.
 A review of some model fluids and problems that have been
 studied more recently is given by L\"{o}wen~\cite{lowen}.
@@ -97,11 +97,11 @@ approach~\cite{MoritaDFT} to finding the equilibrium Grand and Helmholtz free en
 of a classical inhomogeneous fluid. 
 Density functional theory was further developed for inhomogeneous classical fluids
 by Stillinger and Buff (1962)~\cite{stillingerandbuff}, Lebowitz and 
-Percus (1963)~\cite{lobowitzandpercus}, and Mermin (1965)~\cite{merium} amoung others. A review
+Percus (1963)~\cite{lobowitzandpercus}, and Mermin (1965)~\cite{merium} among others. A review
 of the development of cDFT is found in Fundamentals of Inhomogeneous fluids~\cite{inhomogeneousfluids}.
 
 To use classical Density Functional Theory (cDFT), an expression for the free energy 
-as a functional of a spatially varying average single-particle number density 
+as a functional of a spatially varying average single-particle number density $n(\vec r)$
 %that varies spatially 
 is constructed for a particular fluid.
 %DFT Evans 1979
@@ -124,17 +124,18 @@ a set of weight functions related to the geometry of a sphere.
 For two spheres with radii, 
 $R_i$  and $R_j$, the convolution is written as~\cite{rosenfeld1989}
 \begin{displaymath}
-   \theta(|\vec r - \vec r'|-(R_i + R_j)) = w_i^{(3)} \otimes w_j^{(0)} + w_j^{(3)} \otimes w_i^{(0)} + w_i^{(1)} \otimes w_j^{(2)} + w_j^{(1)} \otimes w_i^{(2)}\end{displaymath}
+   \Theta(|\vec r - \vec r'|-(R_i + R_j)) = w_i^{(3)} \otimes w_j^{(0)} + w_j^{(3)} \otimes w_i^{(0)} + w_i^{(1)} \otimes w_j^{(2)} + w_j^{(1)} \otimes w_i^{(2)}\end{displaymath}
 \begin{equation}   + \vec w_i^{(1)} \otimes \vec w_j^{(2)} + \vec w_j^{(1)} \otimes \vec w_i^{(2)}
 \end{equation}
+
 FMT gives the same result for the excess Helmholtz free energy of the hard-sphere fluid as 
 SPT does, from which it can be constructed~\cite{rosenfeld1989,Hansen,santos2012phi3},
 and for the direct correlation function approximation given by Percus-Yevick. 
 However, it did not predict freezing due to one term in the expression that
 diverged when the fluid was highly confined.  
-Tarazona later solved this problem by introducing a tensor version of 
+Tarazona later solved this problem by introducing a tensor version of $\Phi_3$,
 one of the energy density terms 
-in the functional~\cite{tarazonaphi3, santos2012phi3} 
+in the functional,~\cite{tarazonaphi3, santos2012phi3} 
 which took into account the non-spherical, and thus 
 non-symmetric, shape of the cavity in which the fluid is confined 
 while also yielding the correct excess free energy for the fluid as its 
@@ -151,29 +152,33 @@ forming Soft Fundamental Measure Theory (SFMT)~\cite{schmidt1999density}.
 %by replacing $w^{(3)}$ with a weight function that would result in  
 %soft interatomic potentials (which rise to infinity over a distance, 
 %rather than instantaneously).
-Schmidt applied his Soft Fundamental Measure Theory to various fluids 
-with soft, short-range repulsive and attractive potentials, and developed 
+Schmidt applied his Soft Fundamental Measure Theory to various fluids, 
+%with soft, short-range repulsive and attractive potentials, 
+and developed 
 an error function model 
 %based on a Gaussian weight function 
 for spheres with steep, short-range soft repulsive 
 potentials~\cite{schmidt2000fluid}.
 %, similar to that exhibited by a WCA fluid. 
-For some more recent developments, see the review of new developments in 
-classical Density Functional Theory by Evans ~\cite{evansreview} (2016), 
+For some more recent developments in classical Density Functional Theory, 
+see the review by Evans ~\cite{evansreview} (2016), the book 
 Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen} (2013), 
-and a generalization of the Barker-Henderson model to inhomogeneous 
-fluids by Tschopp and coworkers~\cite{BHextended} (2020).
+and the paper by Tschopp and coworkers~\cite{BHextended} (2020) in which 
+they extend the Barker-Henderson model to inhomogeneous 
+fluids from first principles.
 
 Classical density functional theory has also been applied 
 to phase transitions, and freezing, but not until recently has there
-been good progress. Ramakrishnan and Yussouff studied freezing by viewing a 
-crystal as a highly inhomogeneous liquid~\cite{ramakrishnanandyussouff} (1979). 
-Oettel and fellow researchers studied hard-sphere crystals with fully developed FMT~\cite{Oettel2010} (2010). 
-Mortazavifar and Oettel studied the fluid and crystal phases of the 
-Asakura-Oosawa model fluid with FMT~\cite{asakuraoosawa} (2016). 
+been promising progress. In 1979 Ramakrishnan and Yussouff studied 
+freezing by viewing a 
+crystal as a highly inhomogeneous liquid~\cite{ramakrishnanandyussouff}. 
+In 2010 Oettel and fellow researchers studied hard-sphere crystals with 
+fully developed FMT~\cite{Oettel2010}, and 
+in 2016 FMT was used to find the fluid and crystal phases of the 
+Asakura-Oosawa model fluid~\cite{asakuraoosawa}. 
 Lutsko and Lam studied studied crystallization of the Leonard-Jones 
-fluid~\cite{lutsko} (2018), and Lutsko and Schoonen looked at cDFT applied 
-to the solid state~\cite{lutskoschoonen2020} (2020).
+fluid~\cite{lutsko} in 2018, and Lutsko and Schoonen looked at cDFT applied 
+to the solid state~\cite{lutskoschoonen2020} in 2020.
 In all these studies the hard-sphere fluid has been used as the reference 
 system to which other terms are added to create 
 the full functional for the fluid being studied.
@@ -430,7 +435,7 @@ density at fixed temperature.
  \begin{figure}
     \centering
      \includegraphics[height=8cm]{figs/MaxwellDTC-Fig1.pdf}
-    \caption{Fluid and solid densities at the solid-fluid phase 
+    \caption{Fluid and solid densities at the fluid-solid phase 
     transition are identified using Maxwell's Double Tangent Construction}
     \label{fig:MaxwellDT}
   \end{figure}
@@ -473,8 +478,7 @@ the same as the chemical potential of the solid, as is the pressure.
  \begin{figure}
     \centering
      \includegraphics[height=8cm]{figs/MaxwellDTC-Fig2.pdf}
-    \caption{Pressure is found at point of intersection which occurs 
-    when $\mu_F=\mu_S$.}
+    \caption{Pressure is found at the point of intersection where $\mu_F=\mu_S$.}
     \label{fig:GibbsvsP}
   \end{figure}
   
@@ -505,7 +509,7 @@ line gives the chemical potential at a given point.
     \centering
     \includegraphics[height=7cm]{figs/T-n_Diagram.pdf}
     \caption{Conceptual Temperature-Density Phase Diagram used to identify 
-    the number densities of the fluid and the solid during a phase 
+    the number densities of the fluid and the solid at a phase 
     transition. The gray region is where different phases coexist in 
     varying amounts at their phase transition number densities.}
     \label{fig:T-n_Diagram}
@@ -796,7 +800,7 @@ particular fluid being modeled can be challenging.
 SFMT is a method for forming an 
 expression for the excess Helmholtz free energy
 that does not depend on explicitly taking into account the interaction 
-that each sphere with every other sphere in the fluid (as required by 
+that each sphere has with every other sphere in the fluid (as required by 
 Equation~\ref{eq:Fexcess-simplified}).
 %In the next chapter on methods, we will use an SFMT functional that we 
 %adapt to fit the soft-sphere WCA fluid.
@@ -822,7 +826,7 @@ for the hard-sphere fluid.
 %\end{align}
 Rosenfeld, who was studying mixtures, begins the development of FMT by considering that 
 for a hard-sphere fluid the Mayer function, $f(r)$, can be written in terms 
-of a backward Heaviside step function which, for a hard-sphere fluid 
+of a backward Heaviside step function $\Theta$ which, for a hard-sphere fluid 
 composed of a mixture of spheres of radius $R_i$ and $R_j$, is
 given by
 \begin{align} 
@@ -873,7 +877,7 @@ where the volume, surface area, radius, and the number 1 can be written as
 Rosenfeld also recognized that the Heaviside function can be written as 
 a convolution of the weight functions which, for a fluid composed of 
 spheres of radius R, is given by
-\begin{align}
+\begin{align} \label{mayerconvolution}
     f(r_{ij})=-\Theta(r_{ij}-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})
 \end{align} 
 where the weights are  
@@ -888,7 +892,7 @@ and the two vector weights are
       \vec {w}_2 &= w_2~\frac{\vec r_i-\vec r_j}{r_{ij}} \\
       \vec {w}_1 &= w_1~\frac{\vec r_i-\vec r_j}{r_{ij}}
 \end{align}
-which are needed for the relation to be satisfied.
+which are needed for the relation in Equation~\ref{mayerconvolution} to be satisfied.
 %%SAVE the following - connects to convolution! ------------------------
 %Rewriting the first term V(1) in Equation~\ref{VSR1sum} gives
 %\begin{align}
@@ -1008,7 +1012,7 @@ which are needed for the relation to be satisfied.
 %(the other one being the "overlap volume") in which the total 
 %excess chemical potential can be expanded. 
 %
-The convolution of the weight functions can be written as
+The convolution of two weight functions can be written as
 \begin{align}
      w_\alpha\otimes w_\gamma(\vec r_i - \vec r_j) &= \int w_\alpha(\vec r') w_\gamma(\vec r_i -\vec r_j - \vec r') d\vec r'   \\                                                             
                                                    &= \int w_\alpha(\vec u - \vec r_j) w_\gamma(\vec r_i -\vec r_j -(\vec u - \vec r_j))d\vec u     \\                                                               
@@ -1036,7 +1040,7 @@ free energy (for a zero external potential) is given by
 \begin{align}
      F_{excess} &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\left(\frac{-f(|\vec r_i-\vec r_j|)}{2}\right)  
 \end{align} 
-can then be written as 
+which can be written as 
 \begin{align}      
      F_{excess} &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\frac{\Theta(|\vec r_i-\vec r_j|-2R)}{2}  \\
                 &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~(w_3\otimes w_0+ w_2 \otimes w_1+\vec {w}_2\otimes \vec {w}_1)  \\
@@ -1090,14 +1094,14 @@ and  $\vec n_1\cdot\vec n_2$=0 for the homogenesous case where $n(\vec r)\righta
 Lifting the restriction to the low density limit, Rosenfeld derived an
 expression for the excess Helmholtz free energy by noting that the higher
 order terms in the virial expansion can all be written in terms of an 
-"exclusion volume" which is given by Equation~\ref{exclusion-volume}, 
-and an "overlap volume".
+"exclusion volume" (given by Equation~\ref{exclusion-volume}), 
+and an "overlap volume" which is the volume of intersection between two 
+overlapping spherical regions.
 The exclusion volume is the spherical volume about the center of one sphere 
 which the center of another sphere can not enter, and is used to describe
-terms with $f_{ij}=f(|\vec r_i - \vec r_j|)$ as has been seen. The overlap volume is 
-the volume of intersection between two spheres that overlap, and is used in conjunction 
-with the exclusion volume to describe higher order terms in the expansion
-in Equation~\ref{eq:Fexcess-simplified}~\cite{rosenfeld1988}. 
+terms with $f_{ij}=f(|\vec r_i - \vec r_j|)$ as has been seen. Used in conjunction 
+with the overlap volume, the higher order terms in the expansion
+in Equation~\ref{eq:Fexcess-simplified}~\cite{rosenfeld1988} can be described. 
 %
 The resulting expression for the excess Helmholtz free energy with an 
 updated version of $\Phi_3$ that was later constructed by Tarazona is given by
@@ -1570,7 +1574,7 @@ gives the number density.
    \centering
    \includegraphics[height=2.5cm]{Ensemble_Smallcells.png}
    \caption{On the left are shown four examples of possible positions 
-   that an atom (blue sphere) might have within a fixed volume 
+   that an atom (blue sphere) might have within a volume 
    containing eight cells. Each cell has one lattice site at the center 
    represented by a black dot. A large number of such possibilities 
    would give rise to the Gaussian distributions shown on the right.}
@@ -1583,7 +1587,8 @@ gives the number density.
    \caption{Front views of a cube with eight smaller cells. The two views 
    show two ways of picturing a fraction of vacancies, $f_v$ of 7/8 which 
    give rise to the same Gaussian distribution statistically, 
-   and the same number density.}
+   and the same number density. In reality, the fraction of vacancies will
+   be very small.}
    \label{fig:SameStatPic}
 \end{figure} 
 
@@ -1982,8 +1987,8 @@ density of 1.00, giving a spread of 0.08.
   density for the WCA fluid. The red region is fluid, and the blue region is 
   solid. The gray area that separates the fluid and solid regions 
   is the region of coexistence where some fluid and solid exist together 
-  at varying proportions. White lines show the boundaries of the coexistence 
-  region generated from Monte-Carlo simulations of the WCA fluid.}
+  in varying proportions. White lines show the boundaries of the coexistence 
+  region generated from Monte-Carlo simulations.}
   \label{fig:Phase_Diagram_of_T_vs_n}
 \end{figure}
 
@@ -2048,8 +2053,8 @@ the difference in the volumes is too low.
   \centering
   \includegraphics[height=10cm]{figs/Phase_Diagram_of_P_vs_T}
   \caption{Phase Diagram of the reduced pressure verses the reduced 
-  temperature. The blue region is solid, the red region is fluid,
-  and the black line shows the phase boundary where the solid and fluid
+  temperature. The blue region is solid, the red region is fluid.
+  The black line shows the phase boundary where the solid and fluid
   phases coexist. The white line marks the solid-fluid phase boundary  
   as predicted by Monte-Carlo simulations.}
   \label{fig:Phase_Diagram_P_vs_T}
