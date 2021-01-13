@@ -385,7 +385,7 @@ that are purely repulsive.
 
 \begin{figure}
     \centering
-    \includegraphics[height=6cm]{figs/P-T_Diagram.pdf}
+    \includegraphics[height=7cm]{figs/P-T_Diagram.pdf}
     \caption{Conceptual Pressure-Temperature Phase Diagram}
     \label{fig:P-T_Diagram}
 \end{figure}
@@ -533,7 +533,7 @@ Classical Density Functional Theory will be used to find the
 Helmholtz free energies of the fluid and the solid for various 
 temperatures and number densities, so that phase diagrams can be 
 constructed. 
-The key idea behind classical Density Functional Theory (cDFT) is that 
+The key idea behind classical Density Functional Theory is that 
 free energy can be written as a functional (a function of a function) of 
 a number density profile $n(\vec{r})$ which describes the way the number 
 density, or atoms per volume, varies spatially on average. 
@@ -557,18 +557,19 @@ Energy defined as
 \begin{equation}\Phi=F-\mu{N}\end{equation}
 which can then be expressed in terms of a varying number density 
 profile $n(\vec r)$
-\begin{equation}\label{GrandFE}\Phi= F_{int} +\int n(\vec{r})\phi{(\vec r)}d\vec{r}-\mu\int n(\vec r)d\vec{r}\end{equation}
-where $\phi=\frac{V_{ext}}{N}$ is an externally applied potential energy 
-$V_{ext}(\vec r)$ per particle, and an intrinsic Helmholtz free energy 
+\begin{equation}\label{GrandFE}\Phi= F_{int} +\int n(\vec{r})\phi_{ext}{(\vec r)}d\vec{r}-\mu\int n(\vec r)d\vec{r}\end{equation}
+where $\phi_{ext}=\frac{V_{ext}}{N}$ is an externally applied potential energy 
+$V_{ext}(\vec r)$ per particle, an intrinsic Helmholtz free energy 
 is defined as
-\begin{equation}F_{int} = F - \int n(\vec{r})\phi{(\vec r)}d\vec{r}\end{equation}  
-
+\begin{equation}F_{int} = F - \int n(\vec{r})\phi_{ext}{(\vec r)}d\vec{r}\end{equation}  
+and 
+\begin{equation}\int n(\vec r)d\vec{r}=N\end{equation}%
 The Grand free energy is applicable to systems with a varying number of 
 particles and fixed chemical potential, temperature and volume. But in 
 this paper a system with a fixed temperature, volume, and number of 
 particles will be of interest in which case
-\begin{equation}\int n(\vec r)d\vec{r}=N\end{equation}
-and so the Grand free energy is constrained
+%\begin{equation}\int n(\vec r)d\vec{r}=N\end{equation} and so
+the Grand free energy is constrained
 \begin{equation}\label{GrandFE}\Phi_{constrained}= F[n(\vec r)]-\mu N\end{equation}
 The dependence on $n(\vec r)$ is now only present in the expression for 
 the Helmholtz free energy, and so it is the Helmholtz energy as a functional 
@@ -579,34 +580,44 @@ or atom,  $f_N=\frac{F}{N}$ will be minimized which is given by
 with differential
 \begin{equation}\label{usetoshowmin}df_N=d\left(\frac{U}{N}\right)-d\left(\frac{TS}{N}\right)\end{equation}
 \begin{equation}df_N=-\frac{S}{N}dT-\frac{P}{N}dV-PVd\left(\frac{1}{N}\right)\end{equation}
-This result shows that the natural variables of the Helmholtz free energy 
-per particle $f_N$ are temperature, volume and one over the number of 
-particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. 
-\begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
-Taking the differential
+%This result shows that the natural variables of the Helmholtz free energy 
+%per particle $f_N$ are temperature, volume and one over the number of 
+%particles, which in turn also holds the number density $n=\frac{V}{N}$ fixed. 
+%\begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
+%Taking the differential
+which can be set equal to 
 \begin{displaymath}df_N=\frac{\partial f_N}{\partial T}dT +\frac{\partial f_N}{V}dV+ \frac{\partial f_N}{\partial \left(\frac{1}{N}\right)}d\left(\frac{1}{N}\right)\end{displaymath}
-and using the relation
+Using the relation
 \begin{displaymath}d\left(\frac{1}{n}\right)=Vd\left(\frac{1}{N}\right)+\frac{1}{N}dV\end{displaymath}
 we get
 \begin{displaymath}df_N=\frac{\partial f_N}{\partial T}dT + \frac{\partial f_N}{\partial \frac{1}{n}}d\left(\frac{1}{n}\right)\end{displaymath}
-
 \begin{equation}f_N(T,\frac{1}{n})\end{equation}
+This result shows that temperature and the inverse number density, 
+or volume per particle, are natural variables of the Helmholtz free energy 
+per particle $f_N$.
+%which will thus be minimized when these natural variables are held fixed.
 
 The minimization can be illustrated for a system near 
 equilibrium by considering that according to the 
 second law of thermodynamics, a system that is not in equilibrium will 
 experience spontaneous processes that increase the total entropy of a 
-system and its surroundings until equilibrium is reached, 
-$\Delta{S}_{System + Surroundings} \geq 0$. Here ``surroundings" means 
+system and its surroundings until equilibrium is reached
+\begin{align}
+    \Delta{S}_{System + Surroundings} \geq 0 
+\end{align}
+Here "surroundings" means 
 the entire universe minus the system. This, together with the conservation 
 of energy (the first law of thermodynamics) which says that energy lost 
 (or gained) by the system is gained (or lost) by the surroundings 
-$\Delta{U}_{System}=-\Delta{U}_{Surroundings}$, gives the result that 
+\begin{align}
+    \Delta{U}_{System}=-\Delta{U}_{Surroundings} 
+\end{align}
+gives the result that 
 changes in the free energy 
 will be negative for spontaneous processes 
 when the natural variables of the free energy are held fixed. 
-
-For our case, with a fixed temperature and number density we get
+For our case, the temperature and inverse number density are the natural 
+variables, and so holding these fixed we get
 %Rewriting Eq~\ref{usetoshowmin} to show the system terms explicitly
 %\begin{equation}
   %df_{System}=d\left(\frac{U}{N}\right)_{System}-Td\left(\frac{S}{N}\right)_{System}+\left(\frac{S}{N}\right)dT_{System}
@@ -620,7 +631,7 @@ For our case, with a fixed temperature and number density we get
 %number of particles, so that $dV=0$ and $d\left(\frac{1}{N}\right)=0$, 
 %results in
 \begin{equation}
-  df_{System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings}
+  df_{N~System}=-\left(\frac{T}{N}\right)dS_{System+Surroundings}
 \end{equation}
 %which, for fixed N, is the same as
 %\begin{equation}dF_{System}=-TdS_{System+Surroundings} \end{equation} 
@@ -628,7 +639,8 @@ For our case, with a fixed temperature and number density we get
 %of particles are fixed, the change in the free energy of the system will 
 %always be negative, and thus the free energy tends toward a minimum.
 %~\cite{schroeder}. 
-and so the free energy tends toward a minimum. 
+Since the changes in the total entropy are always positive, the changes
+in the free energy are negative and the free energy tends toward a minimum. 
 Details of this procedure be found in Thermal Physics by Schroeder~\cite{schroeder}, 
 and a proof of minimization in general can be found in 
 Theory of Simple Fluids by Hansen and McDonald~\cite{Hansen}.
@@ -639,10 +651,12 @@ which results from equating the expressions for the Helmholtz free energy
 from thermodynamics to those of statistical mechanics. The paritian function 
 Z is integrated over all of phase space for N identical particles each with 
 a momentum $\vec{p}$ and a position $\vec{r}$, and is given by
-\begin{equation}{Z=}\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dPdQ}~e^\frac{-H(\vec{p}_1,\vec{p}_2,...\vec{p}_N,\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\end{equation}
+\begin{align}  \label{Z_total}
+     Z=\frac{1}{N!}\frac{1}{h^{3N}}\int{dP}\int{dQ}~e^\frac{-H(\vec{p}_1,\vec{p}_2,...\vec{p}_N,\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}
+\end{align}
 where
-\begin{displaymath}{dP=d\vec{p}_1d\vec{p}_2...d\vec{p}_N \mbox{~~~~and~~~~} d\vec{p}=dp_xdp_ydp_z}\end{displaymath}
-\begin{displaymath}{dQ=d\vec{r}_1d\vec{r}_2...d\vec{r}_N \mbox{~~~~and~~~~} d\vec{r}=dxdydz\mbox{~~~~}}\end{displaymath}
+\begin{displaymath}{dP=d\vec{p}_1d\vec{p}_2...d\vec{p}_N \mbox{~~~~and~each~} d\vec{p}=dp_xdp_ydp_z}\end{displaymath}
+\begin{displaymath}{dQ=d\vec{r}_1d\vec{r}_2...d\vec{r}_N \mbox{~~~~and~each~} d\vec{r}=dxdydz\mbox{~~~~}}\end{displaymath}
 Writing the Hamiltonian, H in terms of its component kinetic and potential energies gives
 \begin{equation}{H = KE + V + V_{ext} = \sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)+V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)+V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{equation}
 where the translational kinetic energy of the N atoms is given by 
@@ -657,35 +671,40 @@ set to zero, as it is in this paper.
 
 Noting that the kinetic energy depends only on momentum while the total 
 interatomic and external potential energies depend only on position, 
-the integral in equation (8) can be separated into two parts 
-\begin{equation}{Z=\frac{1}{N!}\frac{1}{h^{3N}}\int...\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+\frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\int...\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}}\end{equation}  
+the integral in Equation~\ref{Z_total} can be separated into two parts 
+\begin{equation}{Z=\frac{1}{N!}\frac{1}{h^{3N}}\int{dP}~e^\frac{-\left(\frac{|\vec{p}_1|^2}{2m}+\frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m}\right)}{k_BT}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}}\end{equation}  
 Multiplying by $\frac{V^N}{V^N}$ where V is the real space volume, and 
-\begin{equation}{V^N=}\int{...}\int{dQ}\end{equation} 
-the partitian function can be expressed as
+\begin{equation}V^N=\int dQ\end{equation} 
+the partitian function can then be expressed as
 \begin{equation}\label{Zmultiply}{Z=Z_{ideal}Z_{excess}}\end{equation}
 where
 \begin{align} \label{eq:Zideal}
-    Z_{ideal}=V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}
+    Z_{ideal}=V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{dP}~e^\frac{-\left(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m}\right)}{k_BT}
 \end{align}
 \begin{align} \label{eq:Zexcess}
-    Z_{excess}=\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N )}{k_BT}
+    Z_{excess}=\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N )}{k_BT}
 \end{align} 
 The ideal partitian function $Z_{ideal}$ is associated with an ideal gas 
 which exhibits no interaction between the atoms - a condition approached 
 by a gas at low density where the atoms rarely encounter one another. 
 The excess partitian function $Z_{excess}$ accounts for the interaction 
-of all the atoms according to their interatomic potential. Using 
-Equation~\ref{Zmultiply}, the free energy can also be broken into two parts.
-\begin{equation}{F=-k_{B}T\ln(Z_{ideal}Z_{excess})}\end{equation}
+of all the atoms according to their interatomic potential. 
+
+Using Equation~\ref{Zmultiply}, the free energy can also be broken into two parts.
+%\begin{equation}{F=-k_{B}T\ln(Z_{ideal}Z_{excess})}\end{equation}
 \begin{align} \label{eq:Finparts}
-    F=-k_{B}T\ln(Z_{ideal})-k_{B}T\ln(Z_{excess})
+     F &= -k_{B}T\ln(Z_{ideal}Z_{excess})  \\
+       &= -k_{B}T\ln(Z_{ideal})-k_{B}T\ln(Z_{excess}) \\
+       &= F_{ideal} + F_{excess}
 \end{align}
-\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
+%\begin{equation}{F=F_{ideal} + F_{excess}}\end{equation} 
 
-Putting Equation~\ref{eq:Zideal} into Equation~\ref{eq:Finparts}, 
-the ideal Helmholtz free energy is
-\begin{equation}{F_{ideal}=-k_BT\ln{\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{...}\int{dP}~e^\frac{-(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m})}{k_BT}\right)}}\end{equation}  
-
+The ideal Helmholtz free energy is given by 
+%(put Equation~\ref{eq:Zideal} into Equation~\ref{eq:Finparts})
+\begin{align}
+    F_{ideal} &= -k_{B}T\ln(Z_{ideal}) \\
+              &= -k_BT\ln{\left(V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{dP}~e^\frac{-\left(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m}\right)}{k_BT}\right)} 
+\end{align}  
 \begin{equation}{\label{Fidealmultipleint}}{=-k_BT\ln\left(V^N\frac{1}{N!}\frac{1}{h^{3}}\int{d\vec{p}_1}~e^\frac{-\frac{|\vec{p}_1|^2}{2m}}{k_BT}\frac{1}{h^{3}}\int{d\vec{p}_2}~e^\frac{-\frac{|\vec{p}_2|^2}{2m}}{k_BT}{...}\frac{1}{h^{3}}\int{d\vec{p}_N}~e^\frac{-\frac{|\vec{p}_N|^2}{2m}}{k_BT}\right)}\end{equation}
 These integrals can conveniently be written in terms of the de Broglie 
 wavelength $\Lambda$, or the quantum volume $\text{n}_\text{Q}$
@@ -695,18 +714,21 @@ Rewriting Equation~\ref{Fidealmultipleint} in terms of $\Lambda$ gives
 \begin{equation}{F_{ideal}= -k_BT[\ln(V^N)-\ln(N!) - \ln(\Lambda^{3N})]}\end{equation}
 Using Stirling's approximation \begin{equation}{\ln(N!)=N\ln{N}-N}\end{equation} 
 this becomes
-\begin{equation}{F_{ideal}= k_BT[N\ln(\frac{N\Lambda^{3}}{V}{)-N}]}\end{equation} 
+\begin{equation}F_{ideal}= k_BT[N\ln\left(\frac{N\Lambda^{3}}{V}\right)-N]\end{equation} 
 Rewriting the equation in terms of the number density $n=\frac{N}{V}$, 
 and the quantum volume, $\text{n}_\text{Q}$ gives
 \begin{equation}{F_{ideal}= k_BT\left[\frac{N}{V}\ln{\left(\frac{N}{V}\frac{1}{\text{n}_\text{Q}}\right)}-\frac{N}{V}\right]}V\end{equation}
 \begin{equation}\label{eq:Fideal}{F_{ideal}= k_BT[n\ln(n/\text{n}_\text{Q})-n]V}\end{equation}   
 For a spatially varying number density, the ideal free energy in 
 Equation~\ref{eq:Fideal} becomes
-\begin{equation}\label{eq:Fideal-n(r)}{F_{ideal}[n(\vec{r})]= k_BT\int_{Vol}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]d\vec{r}}\end{equation} 
+\begin{equation}\label{eq:Fideal-n(r)}{F_{ideal}[n(\vec{r})]= k_BT\int_{Volume}[n(\vec{r})\ln(n(\vec{r})/\text{n}_\text{Q})-n(\vec{r})]~d\vec{r}}\end{equation} 
 
-Putting Equation~\ref{eq:Zexcess} into Equation~\ref{eq:Finparts}, 
-the excess Helmholtz free energy is written most generally as
-\begin{equation}\label{Fexcess-mostgeneral}{F_{excess}= -k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)}}\end{equation} 
+%Putting Equation~\ref{eq:Zexcess} into Equation~\ref{eq:Finparts}, 
+The excess Helmholtz free energy is written most generally as
+\begin{align}
+      F_{excess} &= -k_{B}T\ln(Z_{excess}) \\
+                 &= -k_BT\ln{\left(\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)} \label{Fexcess-mostgeneral}
+\end{align} 
 This integral can be greatly simplified if it can be assumed that the 
 potential energy $V(\vec{r_1},\vec{r_2},...\vec{r_N})$ is a sum of the 
 potential energies between pairs of atoms, where each atom is paired in 
@@ -720,19 +742,19 @@ Equation~\ref{Fexcess-mostgeneral} becomes
 \begin{equation}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{equation}
 \begin{equation}{\approx-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
 where each exponential term is simplified by a Taylor expansion $e^x\approx{1+x}$.  
-The function $f_{ij}$ the Mayer function given by
+The function $f_{ij}$ is the Mayer function given by
 \begin{align}\label{eq:mayerfunction}
      f_{ij}(\vec{r_i},\vec{r_j})=e^{-\frac{V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}-1
 \end{align} 
 Multiplying the Mayer function terms, the excess free energy can be 
 written as~\cite{schroeder}
 \begin{align} \label{eq:Fexcess-simplified}
-    F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{...}\int{dQ}\left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}} +\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)}
+    F_{excess}=-k_BT\ln{\left(\frac{1}{V^N}\int{dQ}\left[1 + \sum{f_{ij}} + \sum{f_{ij}f_{kl}} +\sum{f_{ij}f_{kl}f_{mn}} +... \right]\right)}
 \end{align}
 
   \begin{figure}
     \centering
-    \includegraphics[height=7cm]{figs/diagrammic.pdf}
+    \includegraphics[height=6.5cm]{figs/diagrammic.pdf}
     \caption{Two-pair interactions $f_{ij}f_{kl}$ are shown for N=4 atoms. 
     Interactions between individual pairs of atoms are shown in green. 
     Interactions between pairs of atoms with an atom shared in common 
@@ -749,14 +771,19 @@ proximity, and so only interactions between individual pairs of spheres,
 such as those shown in green in Figure~\ref{fig:diagrammic}, are considered.
 Each pair can then be described by a function of the distance between the 
 two atoms in the pair. 
-With a careful counting of the resulting number of such pairs, the excess 
-free energy can then be written~\cite{schroeder} as
-\begin{equation}\label{eq:Fexcess}{\frac{F_{excess}}{N}\approx k_BTn\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)}\end{equation} 
+With a careful counting of the resulting number of such pairs, the 
+low-density excess free energy for a homogeneous fluid can then be 
+written~\cite{schroeder} as
+\begin{align}\label{eq:Fexcess}
+    F_{excess} &\approx k_BTn^2\int d\vec {r}~'\int d\vec {r}~"\left(-\frac{1}{2}f(|\vec {r}~'-\vec {r}~"|)\right) \\
+               &\approx k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)V
+    %\frac{F_{excess}}{N} &\approx k_BTn\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)
+\end{align} 
 in the thermodynamic limit of large N. 
 The quantity in parenthesis can be recognized 
 as the second virial expansion coefficient typically called $B_2$. 
-It is important that an expression for the excess Helmholtz free energy 
-correctly reduces to this result in the low-density limit. 
+A correct expression for the excess Helmholtz free energy should 
+reduce to this result in the low-density limit. 
 Outside of the low density limit, it is quite difficult to evaluate the 
 excess Helmholtz free energy given in Equation~\ref{eq:Fexcess-simplified}. 
 SFMT, discussed in the next section, provides a way around this problem
@@ -767,8 +794,7 @@ number density profile $n(\vec r)$ is formed then, according to classical
 Density Functional Theory, the equilibrium value of the 
 Helmholtz energy, and its corresponding equilibrium density profile can be
 found by varying the number density profile
-through all possible configurations at some fixed temperature
-until the free energy is minimized.  
+at some fixed temperature until the free energy is minimized.  
  
 %In this section 
 %a functional for the Helmholtz free energy was formed by finding 
@@ -836,14 +862,15 @@ where $r_{ij}=|\vec r_i - \vec r_j|$ is the distance between the centers of two 
 and $\Theta$ is 1 for $r_{ij}<R_i+R_j$ and 0 for $r_{ij}>R_i+R_j$.
 This can easily be shown by putting the interatomic potential between two hard spheres
 $V(r_{ij})$
+\begin{align}
+    V(r_{ij})=\left\{ \begin{array}{rc} \infty & 0<r_{ij} \leq R_i+R_j \\ 0  & r_{ij}> R_i+R_j \end{array}\right.
+\end{align}
 into the equation for the Mayer function
 \begin{align}
      f(r_{ij})=\exp^{-\frac{V(r_{ij})}{k_{B}T}}-1
 \end{align} 
-where
-\begin{align}
-    V(r_{ij})=\left\{ \begin{array}{rc} \infty & 0<r_{ij} \leq R_i+R_j \\ 0  & r_{ij}> R_i+R_j \end{array}\right.
-\end{align}
+%where
+
 %
 %The low-density excess free energy given by Equation~\ref{eq:Fexcess}
 %The lowest order term of the excess chemical potential  
@@ -870,7 +897,9 @@ this becomes
 where the volume, surface area, radius, and the number 1 can be written as
 \begin{align}
         V &= \int_{Volume} \Theta(r_{ij}-R)d\vec r_{ij} \\
-        S &= \int_{Volume} \delta(r_{ij} -R) d\vec r_{ij}  \\
+        S &= \int_{Volume} \delta(r_{ij} -R) d\vec r_{ij}  
+\end{align}
+\begin{align}
         R &= \int_{Volume} \frac{\delta(r_{ij} -R)}{4\pi r_{ij}} d\vec r_{ij} \\
         1 &= \int_{Volume} \frac{\delta(r_{ij} -R)}{4\pi r_{ij}^2} d\vec r_{ij}    
 \end{align}
@@ -880,7 +909,7 @@ which, for a fluid composed only of spheres of radius R, is given by
 \begin{align} \label{mayerconvolution}
     f(r_{ij})=-\Theta(r_{ij}-2R)= -2(w_3 \otimes w_0 + w_2 \otimes w_1 + \vec{w_2} \otimes \vec{w_1})
 \end{align} 
-where the weights are  
+where the scalar weights are given by
 \begin{align} 
       w_3 &= \Theta(r_{ij}-R)  \label{scalar-weight3} \\
       w_2 &= \delta(r_{ij}-R)  \\
@@ -1011,7 +1040,7 @@ which are needed for the relation in Equation~\ref{mayerconvolution} to be satis
 %the exclusion volume of a pair of spheres, one of the two variables 
 %(the other one being the "overlap volume") in which the total 
 %excess chemical potential can be expanded. 
-%
+
 The convolution of two weight functions can be written as
 \begin{align}
      w_\alpha\otimes w_\gamma(\vec r_i - \vec r_j) &= \int w_\alpha(\vec r') w_\gamma(\vec r_i -\vec r_j - \vec r') d\vec r'   \\                                                             
@@ -1042,19 +1071,20 @@ free energy (for a zero external potential) is given by
 \end{align} 
 which can be written as 
 \begin{align}      
-     F_{excess} &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\frac{\Theta(|\vec r_i-\vec r_j|-2R)}{2}  \\
+     F_{excess} &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\frac{\Theta(|\vec r_i-\vec r_j|-2R)}{2}                                                              
+\end{align} 
+\begin{align} 
                 &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~(w_3\otimes w_0+ w_2 \otimes w_1+\vec {w}_2\otimes \vec {w}_1)  \\
                 &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)\left(\int w_0(\vec u - \vec r_i)w_3(\vec u - \vec r_j) d\vec u \color{white}\right)  \nonumber \\
-                &+ \color{white}\left(\color{black}\int w_1(\vec u - \vec r_i)w_2(\vec u - \vec r_j) d\vec u ~-\int \vec {w}_1(\vec u - \vec r_i)\cdot\vec {w}_2(\vec u - \vec r_j) d\vec u\right)    \\              
+                &+ \color{white}\left(\color{black}\int w_1(\vec u - \vec r_i)w_2(\vec u - \vec r_j) d\vec u ~-\int \vec {w}_1(\vec u - \vec r_i)\cdot\vec {w}_2(\vec u - \vec r_j) d\vec u\right)  \\  
                 &\approx k_BT\int \left[\int n(\vec r_i) w_0(\vec u - \vec r_i)~d\vec r_i \int n(\vec r_j) w_3(\vec u - \vec r_j)~d\vec r_j \color{white}\right]  \nonumber \\
                 &+ \int n(\vec r_i) w_1(\vec u - \vec r_i)~d\vec r_i \int n(\vec r_j) w_2(\vec u - \vec r_j)~d\vec r_j  \nonumber \\
-                &- \color{white}\left[\color{black} \int n(\vec r_i) \vec {w}_1(\vec u - \vec r_i)~d\vec r_i \cdot \int n(\vec r_j) \vec {w}_2(\vec u - \vec r_j)~d\vec r_j \right]\color{black}d\vec u  
-\end{align} 
-\begin{align}                
-                &\approx k_BT\int n_0n_3 + n_1n_2 - \vec n_1\cdot\vec n_2~d\vec u  \label{Fexlowden-inhomo}\\                
+                &- \color{white}\left[\color{black} \int n(\vec r_i) \vec {w}_1(\vec u - \vec r_i)~d\vec r_i \cdot \int n(\vec r_j) \vec {w}_2(\vec u - \vec r_j)~d\vec r_j \right]\color{black}d\vec u  \\              
+                &\approx k_BT\int n_0n_3 + n_1n_2 - \vec n_1\cdot\vec n_2~d\vec u  \label{Fexlowden-inhomo}  \\                
                 &\approx k_BT\int \Phi_1 + \Phi_2 + \Phi_3~d\vec u  \\
                 &\approx k_BT\int \Phi(\{n_\alpha(\vec u)\})~d\vec u  \\
                 &\text{Or, replacing u notation with r} \nonumber \\
+                &\approx k_BT\int \Phi(\{n_\alpha(\vec r)\})~d\vec r  \\
                 &\approx k_BT\int \Phi(\vec r)~d\vec r             
 \end{align}
 The weighted densities $n_\alpha$ all depend on the spatially varying 
@@ -1122,14 +1152,17 @@ weight functions
       w_3 &= \Theta(r-R)  \label{scalar-weight3} \\
       w_2 &= \delta(r-R)  \\
       w_1 &= \frac{w_2}{4\pi r}  \\
-      w_0 &= \frac{w_2}{4\pi r^2} \label{scalar-weight0}  \\
+      w_0 &= \frac{w_2}{4\pi r^2} \label{scalar-weight0}  
+\end{align}
+\begin{align}      
       \vec {w}_2 &= w_2~\hat r \\
-      \vec {w}_1 &= w_1~\hat r
+      \vec {w}_1 &= w_1~\hat r \\
+      \overleftrightarrow{w}_{m2}(\vec{r}) &= w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right) 
 \end{align}
-and a tensor weight function given by
-\begin{align}\label{eq:tensorweight-methods}
-     \overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right) 
-\end{align}
+%and a tensor weight function given by
+%\begin{align}\label{eq:tensorweight-methods}
+     %\overleftrightarrow{w}_{m2}(\vec{r}) = w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right) 
+%\end{align}
 %The weighted densities $n_0, n_1, n_2, n_3, \vec{n}_1, \vec{n}_2$ and $\overleftrightarrow{n}_{m2}$
 %all depend on the spatially varying number density profile $n(\vec r)$.
 %\begin{align}%\label{eq:numdenprofile}
@@ -1141,25 +1174,25 @@ for a homogeneous hard-sphere fluid.
 The FMT equations shown so far have been for a hard-sphere fluid~\cite{Hansen}.
 All of the weight functions can be expressed in terms of 
 $w_{2}(r)$ which, for a hard-sphere fluid, consists of a delta function.
-The weight function $w_{2}(r)$ is in turn related to $w_{3}(r)$ through 
-the relation
-\begin{align}\label{w2_w3_relation}
-    w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivalently,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
-\end{align}
-%which will be important to keep in tact when moving to SFMT~\cite{schmidt1999density}.
-Taking the derivative of the Mayer function provides 
+The derivative of the Mayer function provides 
 another important relation expressed in terms of $w_{2}(r)$ 
 %that will be important 
 %to keep in tact when moving to SFMT~\cite{schmidt2000fluid}.
 \begin{align}\label{mayerder=w2convolution}
      \frac{df(r)}{dr} = w_2 \otimes w_2 = \int{w_2(r')w_2(r-r')dr'}
 \end{align} 
+The weight function $w_{2}(r)$ is in turn related to $w_{3}(r)$ through 
+the relation
+\begin{align}\label{w2_w3_relation}
+    w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivalently,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
+\end{align}
+%which will be important to keep in tact when moving to SFMT~\cite{schmidt1999density}.
 Thus, all the weight functions, and the above relation are determined
 by $w_{3}(r)$.
 Soft Fundamental Measure Theory extends FMT to fluids 
 with soft potentials by keeping the relationships between the weight 
 functions, and Equation~\ref{mayerder=w2convolution} 
-for the derivative of the Mayer function 
+%for the derivative of the Mayer function 
 the same, but replacing $w_{3}(r)$ with a weight function appropriate 
 for a soft-sphere potential~\cite{schmidt1999density, schmidt2000fluid}. 
 This is what we do in forming a functional for the Weeks-Chandler-Anderson 
@@ -1752,7 +1785,7 @@ gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$
 
 \begin{figure}
   \centering
-  \includegraphics[height=8cm]{plot_alpha.pdf}
+  \includegraphics[height=7cm]{plot_alpha.pdf}
   \caption{Shows the temperature dependence of $\alpha$ vs $k_BT$ 
   for $\sigma=1$ and $\epsilon=1$.}
   \label{fig:alphaXivsT}
@@ -1771,7 +1804,7 @@ when $\sigma=1$ and $\epsilon=1$.
 
 \begin{figure}
   \centering
-  \includegraphics[height=8cm]{xi_fromB2.pdf}
+  \includegraphics[height=7cm]{xi_fromB2.pdf}
   \caption{Shows the temperature dependence of $\Xi$ generated from 
   matching the second virial coefficients for $V_{\operatorname{erf}}(r)$ and $V_{WCA}(r)$ 
   at each temperature.}
