@@ -59,7 +59,7 @@ fluid in 1954 which is a perturbation of the hard-sphere fluid created by adding
 a hard-edge short-range attractive potential to the repulsive potential of the 
 hard-sphere fluid~\cite{ZwanzigSqrWell}. In 1964 Rowlinson studied 
 spheres with softly fading short-range repulsive potentials which he modeled by making
-the radius of the spheres temperature dependent~\cite{rowlinson1964statistical}. 
+the radius of hard spheres temperature dependent~\cite{rowlinson1964statistical}. 
 This reflects the idea that soft-spheres penetrate more deeply into 
 each other when they collide at higher temperatures. 
 In 1967 Barker and Henderson combined the perturbation approach of Zwanzig 
@@ -128,9 +128,10 @@ $R_i$  and $R_j$, the convolution is written as~\cite{rosenfeld1989}
 \begin{equation}   + \vec w_i^{(1)} \otimes \vec w_j^{(2)} + \vec w_j^{(1)} \otimes \vec w_i^{(2)}
 \end{equation}
 
-FMT gives the same result for the excess Helmholtz free energy of the hard-sphere fluid as 
-SPT does, from which it can be constructed~\cite{rosenfeld1989,Hansen,santos2012phi3},
-and for the direct correlation function approximation given by Percus-Yevick. 
+FMT gives the same result for the excess Helmholtz free energy of the 
+hard-sphere fluid as SPT does, from which it can be 
+constructed~\cite{rosenfeld1989,Hansen,santos2012phi3}. It also gives the same 
+result for the direct correlation function approximation given by Percus-Yevick. 
 However, it did not predict freezing due to one term in the expression that
 diverged when the fluid was highly confined.  
 Tarazona later solved this problem by introducing a tensor version of $\Phi_3$,
@@ -168,8 +169,7 @@ they extend the Barker-Henderson model to inhomogeneous
 fluids from first principles.
 
 Classical density functional theory has also been applied 
-to phase transitions, and freezing, but not until recently has there
-been promising progress. In 1979 Ramakrishnan and Yussouff studied 
+to phase transitions, and freezing. In 1979 Ramakrishnan and Yussouff studied 
 freezing by viewing a 
 crystal as a highly inhomogeneous liquid~\cite{ramakrishnanandyussouff}. 
 In 2010 Oettel and fellow researchers studied hard-sphere crystals with 
@@ -246,7 +246,7 @@ interference effects as the mass of the spheres, and the temperature
 are taken to be large enough that the de Broglie wavelength is smaller 
 than the mean distance between the spheres. The fluid can then be treated 
 as a classical fluid where the spheres interact with each other according 
-to their electrostatic interatomic potential. 
+to their interatomic potential. 
 
 There are many interatomic potentials which can be used to model a fluid 
 each of which describes the interaction between two real atoms to some 
@@ -303,10 +303,11 @@ As the distance
 between the centers of the two atoms decreases below $\sigma$, the potential 
 rapidly approaches positive infinity corresponding to infinite repulsion. 
 Above $\sigma$ the potential becomes negative indicating a net attraction 
-between the atoms. The net attraction is maximized at a distance of 
+between the atoms. The net attractive energy is maximized at a distance of 
 r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ where R is the radius of 
 the sphere given by $R={2^{-\frac{5}{6}}}\sigma$. At this point the depth of
-the potential well, given by epsilon $\epsilon$, is a maximum. As r increases 
+the potential well, given by epsilon $\epsilon$, is a maximum, and the force
+between the spheres is zero. As r increases 
 further, the net attraction decreases and the potential approaches zero
 asymptotically. The attractive and repulsive effects can be separated into two
 potentials, shown with different colors in Figure \ref{fig:LJ_potential_2parts}, 
@@ -315,14 +316,14 @@ which when added together regenerate the full Lennard-Jones potential.
 \begin{figure}
     \centering
     \includegraphics[height=7cm]{LJ_Potential_2part.pdf}
-    \caption{Lennard-Jones potential broken into two parts for $\sigma=1$, $\epsilon=1$}
+    \caption{Lennard-Jones potential broken into two parts}
     \label{fig:LJ_potential_2parts}
   \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[height=7cm]{WCA_Potential.pdf}
-    \caption{WCA potential for $\sigma=1$, $\epsilon=1$}
+    \caption{WCA potential}
     \label{fig:WCA_potential}
   \end{figure}
 
@@ -333,7 +334,7 @@ The WCA potential is described by the equation
 \begin{align} \label{eq:VWCA}
     V_{WCA}=\left\{\begin{array}{rcl} {4\epsilon{\left[\left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]}+\epsilon} & \mbox{for} & 0<r<{2R} \\ 0 & \mbox{for} & r>2R \end{array}\right.
 \end{align} 
-The WCA potential decreases from as the distance between the 
+The WCA potential decreases as the distance between the 
 centers of the atoms r increases, and becomes, and remains, essentially 
 zero when r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ where R is the 
 radius of the sphere. 
@@ -349,7 +350,7 @@ Figure~\ref{fig:TwoSpheres}.
 \begin{figure}
     \centering
     \includegraphics[height=3.5cm]{figs/TwoSpheres.pdf} 
-    \caption{(Left) The WCA potential is a minimum at r=2R. 
+    \caption{(Left) The WCA potential is zero at r=2R. 
              (Right) The WCA potential increases rapidly for $r<2R$.}
     \label{fig:TwoSpheres}
 \end{figure} 
@@ -375,7 +376,7 @@ Figure~\ref{fig:TwoSpheres}.
  
 %A liquid will eventually freeze as heat is removed, or the liquid is compressed, and 
 A liquid will freeze when the free energy it would have as a solid is lower 
-than the free energy that it has as a liquid under the same conditions.
+than the free energy that it has as a liquid at the same density.
 At the phase transition the density will change abruptly, and
 the particular structure and density that result will be affected 
 by the interatomic potential. When repulsive, soft sphere fluids 
@@ -408,7 +409,7 @@ This phase diagram is
 representative of some substance 
 which exhibits both attraction and repulsion. However, since 
 the atoms in a WCA fluid do not exhibit attraction there will not be a 
-dividing line between the gas and liquid phases, there will just simply
+dividing line between the gas and liquid phases, there will simply
 be a fluid.
 The phase diagram indicates the equilibrium state a substance will be in at
 different temperatures and pressures.
@@ -420,7 +421,7 @@ equilibrium) and the same chemical potential (necessary for diffusive equilibriu
 %the fluid and the solid at a fluid-solid phase transition. 
 
 The pressure can be related to the Helmholtz free energy F, which is minimized 
-for a system at fixed temperature, volume, and number of particles as the 
+for a system at fixed temperature, volume, and number of particles, as the 
 entropy of the system and its surroundings added together is maximized. The negative of 
 the partial derivative of the Helmholtz free energy with respect to the volume V 
 at a fixed temperature T and number of particles N, equals the pressure. 
@@ -588,11 +589,14 @@ with differential
 %\begin{equation}f_N(T,V, \frac{1}{N})\end{equation}
 %Taking the differential
 which can be set equal to 
-\begin{displaymath}df_N=\frac{\partial f_N}{\partial T}dT +\frac{\partial f_N}{V}dV+ \frac{\partial f_N}{\partial \left(\frac{1}{N}\right)}d\left(\frac{1}{N}\right)\end{displaymath}
+\begin{displaymath}df_N=\frac{\partial f_N}{\partial T}\bigg|_{V,\frac{1}{N}}dT 
++\frac{\partial f_N}{V}\bigg|_{T,\frac{1}{N}}dV + \frac{\partial f_N}
+{\partial \left(\frac{1}{N}\right)}\bigg|_{T,V}d\left(\frac{1}{N}\right)\end{displaymath}
 Using the relation
 \begin{displaymath}d\left(\frac{1}{n}\right)=Vd\left(\frac{1}{N}\right)+\frac{1}{N}dV\end{displaymath}
 we get
-\begin{displaymath}df_N=\frac{\partial f_N}{\partial T}dT + \frac{\partial f_N}{\partial \frac{1}{n}}d\left(\frac{1}{n}\right)\end{displaymath}
+\begin{displaymath}df_N=\frac{\partial f_N}{\partial T}\bigg|_{\frac{1}{n}}dT 
++ \frac{\partial f_N}{\partial \frac{1}{n}}\bigg|_{T}d\left(\frac{1}{n}\right)\end{displaymath}
 \begin{equation}f_N(T,\frac{1}{n})\end{equation}
 This result shows that temperature and the inverse number density, 
 or volume per particle, are natural variables of the Helmholtz free energy 
@@ -686,7 +690,7 @@ where
 \begin{align} \label{eq:Zexcess}
     Z_{excess}=\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N )}{k_BT}
 \end{align} 
-The ideal partitian function $Z_{ideal}$ is associated with an ideal gas 
+The ideal partitian function $Z_{ideal}$ is that of an ideal gas 
 which exhibits no interaction between the atoms - a condition approached 
 by a gas at low density where the atoms rarely encounter one another. 
 The excess partitian function $Z_{excess}$ accounts for the interaction 
@@ -731,7 +735,7 @@ The excess Helmholtz free energy is written most generally as
       F_{excess} &= -k_{B}T\ln(Z_{excess}) \\
                  &= -k_BT\ln{\left(\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)} \label{Fexcess-mostgeneral}
 \end{align} 
-This integral can be greatly simplified if it can be assumed that the 
+This integral can be somewhat simplified if it can be assumed that the 
 potential energy $V(\vec{r_1},\vec{r_2},...\vec{r_N})$ is a sum of the 
 potential energies between pairs of atoms, where each atom is paired in 
 turn with each of the other atoms in the system. In this case 
@@ -741,10 +745,12 @@ Using this potential, and setting the external potential
 $V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)$ to zero, the exponent in 
 Equation~\ref{Fexcess-mostgeneral} becomes
 
-\begin{equation}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{equation}
-\begin{equation}{\approx-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
-where each exponential term is simplified by a Taylor expansion $e^x\approx{1+x}$.  
-The function $f_{ij}$ is the Mayer function given by
+\begin{equation}{e^{-\frac{\frac{1}{2}\sum^N_i\sum^N_{j\neq{i}}V_{ij}(\vec{r_i},
+\vec{r_j})}{k_BT}}=e^{\frac{-V_{12}(\vec{r_1},\vec{r_2})}{k_BT}}e^{-\frac{V_{13}
+(\vec{r_1},\vec{r_3})}{k_BT}}e^{-\frac{V_{14}(\vec{r_1},\vec{r_4})}{k_BT}}...}\end{equation}
+\begin{equation}{=-(1+f_{12})(1+f_{13})(1+f_{14})...}\end{equation}
+%where each exponential term is simplified by a Taylor expansion $e^x\approx{1+x}$.  
+where function $f_{ij}$ is the Mayer function given by
 \begin{align}\label{eq:mayerfunction}
      f_{ij}(\vec{r_i},\vec{r_j})=e^{-\frac{V_{ij}(\vec{r_i},\vec{r_j})}{k_BT}}-1
 \end{align} 
@@ -768,7 +774,7 @@ written as~\cite{schroeder}
 Equation~\ref{eq:Fexcess-simplified} is difficult to solve in general, 
 but it can be solved for low densities, and this provides a way to check
 a more general solution.
-At low densities, it is not likely to find two or more atoms in close 
+At low densities, it is not likely to find more than two atoms in close 
 proximity, and so only interactions between individual pairs of spheres, 
 such as those shown in green in Figure~\ref{fig:diagrammic}, are considered.
 Each pair can then be described by a function of the distance between the 
@@ -815,7 +821,7 @@ at some fixed temperature until the free energy is minimized.
 
 \section{Soft Fundamental Measure Theory (SFMT)}
 Soft Fundamental Measure Theory (SFMT) is a method for forming an 
-expression for the excess Helmholtz free energy of a soft-sphere fluid.
+approximation for the excess Helmholtz free energy of a soft-sphere fluid.
 In the next chapter, 
 we will adapt an SFMT functional to fit the soft-sphere WCA fluid.
 Recall that in order to apply classical Density Functional Theory 
@@ -1127,8 +1133,8 @@ and  $\vec n_1\cdot\vec n_2$=0 for the homogenesous case where $n(\vec r)\righta
 Lifting the restriction to the low density limit, Rosenfeld derived an
 expression for the excess Helmholtz free energy by noting that the higher
 order terms in the virial expansion can all be written in terms of an 
-"exclusion volume" (given by Equation~\ref{exclusion-volume}), 
-and an "overlap volume" which is the volume of intersection between two 
+``exclusion volume" (given by Equation~\ref{exclusion-volume}), 
+and an ``overlap volume" which is the volume of intersection between two 
 overlapping spherical regions.
 The exclusion volume is the spherical volume about the center of one sphere 
 which the center of another sphere can not enter, and is used to describe
@@ -1559,7 +1565,7 @@ program run faster.
 An atom will not realistically reside exactly at a lattice point. 
 Statistically there will typically be a normal, or Gaussian distribution 
 of positions about the lattice point. 
-Atoms are always in motion, so when talking about "the location" 
+Atoms are always in motion, so when talking about ``the location" 
 of an atom, we are talking about a time averaged position, so that it 
 does not change with time.
 Figure \ref{fig:Ensemble_Gaus} shows examples 
@@ -1586,7 +1592,7 @@ how the atoms are distributed on average over a collection of cells.
   
 There can be many different number density profiles for a given number
 density. The number density is the number of atoms per volume, whereas
-the number density profile describes how much "atom" will be found at various 
+the number density profile describes how much ``atom" will be found at various 
 points in the cell. 
 It can be thought of as an average over a large collection of actual cells
 with various possible spatial distributions of the atoms within the cell, or
@@ -1595,7 +1601,7 @@ each of which consists of a unique set of positions for the atoms
 that occupy the cell. Mathematically, the microstates are represented 
 by a set of delta functions.
 \begin{align}
-    n(\vec r)=~<\sum_{i=1}^N\delta(\vec r - \vec r_i)>~
+    n(\vec r)=~\left<\sum_{i=1}^N\delta(\vec r - \vec r_i)\right>
 \end{align} 
 By varying the width of the Gaussian distributions, a number of different 
 number density profiles can be generated for a given number density.
@@ -1605,7 +1611,7 @@ There are still the same number of atoms over some fixed volume.
 Taking the average of the number density profile over some volume 
 gives the number density. 
 \begin{align}
-    n=<n(\vec{r})>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}
+    n=\left<n(\vec{r})\right>=\frac{1}{V}\int{n(\vec{r})}{d\vec{r}}=\frac{N}{V}
 \end{align}
 
 \begin{figure}
@@ -1920,18 +1926,18 @@ where $\vec R_j$ is the position vector of the jth lattice site.
 % \label{fig:GaussandW2_thinkas}
 % \end{figure}
 
-\begin{figure}
-   \centering
-   \includegraphics[height=5cm]{InclusionRadius.png}
-   \caption{Gaussians are centered at each lattice point. After a radius 
-   of a few Gaussian widths about each lattice point, the Gaussians go to 
-   zero and can be neglected.}
-   \label{fig:InclusionRadius}
-\end{figure} 
+%\begin{figure}
+   %\centering
+   %\includegraphics[height=5cm]{InclusionRadius.png}
+   %\caption{Gaussians are centered at each lattice point. After a radius 
+   %of a few Gaussian widths about each lattice point, the Gaussians go to 
+   %zero and can be neglected.}
+   %\label{fig:InclusionRadius}
+%\end{figure} 
 
 The fluid excess Helmholtz free energy is computed analytically  
 using SFMT Equations~\ref{eq:Fexfunctional} through \ref{eq:tensorweight-methods} 
-with a uniform number density profile, n that does not depend on $\vec r$. 
+with a uniform number density profile, $n$ that does not depend on $\vec r$. 
 The crystal excess Helmholtz free energy is computed  
 using SFMT with a number density profile 
 that consists of Gaussian distributions 
@@ -1944,58 +1950,61 @@ centered at $\vec r$, as shown in Figure~\ref{fig:GaussandW2_actual}b.
 Keeping the weight function centered at $\vec r$, 
 Monte-Carlo integration can be used to compute the weighted densities $n_\alpha(\vec r)$
 by randomly generating vectors
-$\vec r~' -\vec R$ according to a Gaussian distribution. 
-Only lengths for $\vec r~'- \vec R$ that are within an inclusion radius
-about a lattice site, like that shown in Figure \ref{fig:InclusionRadius}, 
-will be taken into account as Gaussians 
-farther away will not contribute much.
-The equation for the contribution to the weighted density from a 
-Gaussian centered at the jth lattice site located at $\vec R_j$ is given by
-\begin{equation}{n_\alpha(\vec r)= \int_{r'}{(1-f_v)n(\vec r~' - \vec R_j)w_\alpha(|\vec{r}-\vec{r}~'|)} {d}\vec{r}~'}\end{equation} 
-and is implemented computationally in the form
-\begin{equation}{n_\alpha(\vec r)= \sum_{r'}{(1-f_v)n(\vec r~' -\vec R_j)w_\alpha(|\vec{r}-\vec{r}~'|)dV}}\end{equation} 
-which can be written as
-\begin{equation}{n_\alpha(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_\alpha(|\vec{r}-\vec{r}~'|)}\end{equation} 
-NumPoints is the number of vectors $\vec r~' - \vec R_j$ randomly 
-generated about the jth lattice site, and $n(\vec r~' - \vec R_j)$
-is equal to a probability density which when multiplied by dV gives 
-the probability $P_{r'}$ at which the value of $w_\alpha(|\vec{r}-\vec{r}~'|)$ 
-will occur. Using the relation
-\begin{equation}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{equation} 
-$n_\alpha(\vec{r})$ can be expressed as the average value of $(1-f_v)w_\alpha(|\vec{r}-\vec{r}~'|)$:
-\begin{equation}{n_\alpha(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_\alpha(|\vec{r}-\vec{r}~'|)}{\text{NumPoints}}}\end{equation}
-This process is repeated to get the contributions to the weighted density 
-$n_\alpha(\vec r)$ from the Gaussians around each lattice point which begin to 
-merge together as the width of the Gaussians increases.
-All the contributions are then added together 
-to get the final value of the weighted density at some point $\vec r$.
+$\vec r~' -\vec R$ according to a Gaussian distribution.
+%
+%ERRORS IN HERE... 
+%Only lengths for $\vec r~'- \vec R$ that are within an inclusion radius
+%about a lattice site, like that shown in Figure \ref{fig:InclusionRadius}, 
+%will be taken into account as Gaussians 
+%farther away will not contribute much.
+%The equation for the contribution to the weighted density from a 
+%Gaussian centered at the jth lattice site located at $\vec R_j$ is given by
+%\begin{equation}{n_\alpha(\vec r)= \int_{r'}{(1-f_v)n(\vec r~' - \vec R_j)w_\alpha(|\vec{r}-\vec{r}~'|)} {d}\vec{r}~'}\end{equation} 
+%and is implemented computationally in the form
+%\begin{equation}{n_\alpha(\vec r)= \sum_{r'}{(1-f_v)n(\vec r~' -\vec R_j)w_\alpha(|\vec{r}-\vec{r}~'|)dV}}\end{equation} 
+%which can be written as
+%\begin{equation}{n_\alpha(\vec r)= \sum_{NumPoints}(1-f_v)P_{r'}w_\alpha(|\vec{r}-\vec{r}~'|)}\end{equation} 
+%NumPoints is the number of vectors $\vec r~' - \vec R_j$ randomly 
+%generated about the jth lattice site, and $n(\vec r~' - \vec R_j)$
+%is equal to a probability density which when multiplied by dV gives 
+%the probability $P_{r'}$ at which the value of $w_\alpha(|\vec{r}-\vec{r}~'|)$ 
+%will occur. Using the relation
+%\begin{equation}{f_{average}=\sum_i^N{P_if_i}=\sum_i{\frac{f_i}{N}}}\end{equation} 
+%$n_\alpha(\vec{r})$ can be expressed as the average value of $(1-f_v)w_\alpha(|\vec{r}-\vec{r}~'|)$:
+%\begin{equation}{n_\alpha(\vec{r})=\sum_{\text{NumPoints}}\frac{(1-f_v)w_\alpha(|\vec{r}-\vec{r}~'|)}{\text{NumPoints}}}\end{equation}
+%This process is repeated to get the contributions to the weighted density 
+%$n_\alpha(\vec r)$ from the Gaussians around each lattice point which begin to 
+%merge together as the width of the Gaussians increases.
+%All the contributions are then added together 
+%to get the final value of the weighted density at some point $\vec r$.
 
-The result can be made more accurate by increasing NumPoints (the 
-number of vectors randomly generated), and by using antithetic variates.
-To use antithetic variates, each randomly generated  vector is paired 
-with a vector of equal magnitude, but opposite in direction. 
-First order error is reduced by averaging the two results that depend on 
-the vectors, one of which may be erroneously higher than it should be 
-while the other is erroneously lower than it should be.
+%The result can be made more accurate by increasing NumPoints (the 
+%number of vectors randomly generated), and by using antithetic variates.
+%To use antithetic variates, each randomly generated  vector is paired 
+%with a vector of equal magnitude, but opposite in direction. 
+%First order error is reduced by averaging the two results that depend on 
+%the vectors, one of which may be erroneously higher than it should be 
+%while the other is erroneously lower than it should be.
 
-The standard error of the mean (SEM) is given in general by
-\begin{equation}{SD_{mean}=\frac{SD}{\sqrt{N}}}\end{equation} 
-To compute the error, the standard deviation of weight function $w_3$ is used 
-\begin{equation}SD=\sqrt{\overline{w_3^2}-(\overline{w}_3)^2}\end{equation} 
-\begin{equation}{Error=\sqrt{\frac{\overline{w_3^2}-(\overline{w}_3)^2}{\text{NumPoints}}}}\end{equation} 
-NumPoints, the number of vectors randomly generated, is increased until
-\begin{equation}{Error<\frac{|1-n_3|}{4}}\end{equation}
-where the maximum value that the weighted density $n_3$ 
-can properly have is 1.
+%The standard error of the mean (SEM) is given in general by
+%\begin{equation}{SD_{mean}=\frac{SD}{\sqrt{N}}}\end{equation} 
+%To compute the error, the standard deviation of weight function $w_3$ is used 
+%\begin{equation}SD=\sqrt{\overline{w_3^2}-(\overline{w}_3)^2}\end{equation} 
+%\begin{equation}{Error=\sqrt{\frac{\overline{w_3^2}-(\overline{w}_3)^2}{\text{NumPoints}}}}\end{equation} 
+%NumPoints, the number of vectors randomly generated, is increased until
+%\begin{equation}{Error<\frac{|1-n_3|}{4}}\end{equation}
+%where the maximum value that the weighted density $n_3$ 
+%can properly have is 1.
+%end ERRORONEOUS SECTION
 
 \chapter{Results and Discussion}
 
 Phase diagrams for the WCA fluid are shown in Figures~\ref{fig:Phase_Diagram_of_T_vs_n} 
 and \ref{fig:Phase_Diagram_P_vs_T}. 
 In Figure~\ref{fig:Phase_Diagram_of_T_vs_n} the reduced temperature 
-$T^*=\frac{kT}{\epsilon}$ is plotted against the reduced number density 
-$n^*=n\sigma^3$ for temperatures of kT = 0.5 to 3.0. 
-In all cases $\sigma=1$ and $\epsilon=1$. 
+$T^*\equiv\frac{kT}{\epsilon}$ is plotted against the reduced number density 
+$n^*\equiv n\sigma^3$ for temperatures of $T^*$ = 0.5 to 3.0. 
+%In all cases $\sigma=1$ and $\epsilon=1$. 
 It is seen that in general, a fluid exists at lower number densities, 
 and a solid exists at higher number densities. 
 For a given temperature, it is seen that as the density increases, 
@@ -2012,7 +2021,7 @@ of the WCA fluid.
 Overall, the general shape, and position of the two coexistence regions 
 correspond fairly closely, but the Monte-Carlo region is a little wider
 and shifted a bit toward smaller densities. For example, at a temperature 
-of kT=1, the cDFT fluid transition reduced number density is 0.96, 
+of $T^*$=1, the cDFT fluid transition reduced number density is 0.96, 
 and the solid transition reduced number density is 1.02, giving a spread 
 of 0.06, whereas the Monte-Carlo results give a fluid transition 
 reduced number density of 0.92, and a solid transition reduced number 
@@ -2060,8 +2069,8 @@ density of 1.00, giving a spread of 0.08.
 %\end{figure}
 
 Figure~\ref{fig:Phase_Diagram_P_vs_T} shows the reduced pressure 
-$p^*=\frac{P\sigma^3}{\epsilon}$ plotted against the reduced temperature 
-for temperatures of kT = 0.5 to 3.0. 
+$p^*\equiv\frac{P\sigma^3}{\epsilon}$ plotted against the reduced temperature 
+for temperatures of $T^*$ = 0.5 to 3.0. 
 The black line marks the phase boundary between the solid and fluid regions. 
 It is seen that the higher the temperature, the higher the pressure must be
 to undergo a phase transition from a fluid to a solid, as would be expected. 
@@ -2078,10 +2087,10 @@ from Monte-Carlo simulations shown by the white line, it is seen that
 the phase transition pressures and temperatures predicted by cDFT 
 are consistently higher, and the 
 discrepancy grows as the temperature increases. For example, at a 
-temperature of kT=1, the phase transition reduced pressure predicted by 
+temperature of $T^*$=1, the phase transition reduced pressure predicted by 
 cDFT is 15.24, whereas the Monte-Carlo simulation predicted a reduced 
 pressure of 9.99,
-and at a temperature of kT=3, cDFT gives a value of 77.27 whereas the 
+and at a temperature of $T^*$=3, cDFT gives a value of 77.27 whereas the 
 Monte-Carlo simulation predicts 43.80.
 This may indicate that either the difference between the fluid 
 and solid phase transition entropies predicted by cDFT is too high, or 
