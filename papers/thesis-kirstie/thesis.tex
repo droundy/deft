@@ -394,7 +394,7 @@ that are purely repulsive.
     \label{fig:P-T_Diagram}
 \end{figure}
 
-A phase transition occurs along a phase boundary line on a phase diagram
+A phase transition occurs along a phase boundary line %on a phase diagram
 such as can be seen in the pressure-temperature (P-T) phase diagram
 shown in Figure~\ref{fig:P-T_Diagram}. 
 %
@@ -908,9 +908,9 @@ this becomes
 where the volume, surface area, radius, and the number 1 can be written as
 \begin{align}
         V &= \int_{Volume} \Theta(r_{ij}-R)d\vec r_{ij} \\
-        S &= \int_{Volume} \delta(r_{ij} -R) d\vec r_{ij}  
-\end{align}
-\begin{align}
+        S &= \int_{Volume} \delta(r_{ij} -R) d\vec r_{ij}  \\
+%\end{align}
+%\begin{align}
         R &= \int_{Volume} \frac{\delta(r_{ij} -R)}{4\pi r_{ij}} d\vec r_{ij} \\
         1 &= \int_{Volume} \frac{\delta(r_{ij} -R)}{4\pi r_{ij}^2} d\vec r_{ij}    
 \end{align}
@@ -922,8 +922,10 @@ which, for a fluid composed only of spheres of radius R, is given by
 \end{align} 
 where the scalar weights are given by
 \begin{align} 
-      w_3 &= \Theta(r_{ij}-R)  \label{scalar-weight3} \\
-      w_2 &= \delta(r_{ij}-R)  \\
+      w_3 &= \Theta(r_{ij}-R)  \label{scalar-weight3} 
+\end{align} 
+\begin{align} 
+      w_2 &= \delta(r_{ij}-R) \\
       w_1 &= \frac{w_2}{4\pi r_{ij}}  \\
       w_0 &= \frac{w_2}{4\pi r_{ij}^2} \label{scalar-weight0}
 \end{align}
@@ -1082,12 +1084,15 @@ free energy (for a zero external potential) is given by
 \end{align} 
 which can be written as 
 \begin{align}      
-     F_{excess} &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\frac{\Theta(|\vec r_i-\vec r_j|-2R)}{2}                                                              
-\end{align} 
-\begin{align} 
+     F_{excess} &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~\frac{\Theta(|\vec r_i-\vec r_j|-2R)}{2}         \\ 
                 &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~(w_3\otimes w_0+ w_2 \otimes w_1+\vec {w}_2\otimes \vec {w}_1)  \\
-                &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)\left(\int w_0(\vec u - \vec r_i)w_3(\vec u - \vec r_j) d\vec u \color{white}\right)  \nonumber \\
-                &+ \color{white}\left(\color{black}\int w_1(\vec u - \vec r_i)w_2(\vec u - \vec r_j) d\vec u ~-\int \vec {w}_1(\vec u - \vec r_i)\cdot\vec {w}_2(\vec u - \vec r_j) d\vec u\right)  \\  
+                &\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)\left(\int w_0(\vec u - \vec r_i)w_3(\vec u - \vec r_j) d\vec u \color{white}\right)  \nonumber    \\
+                &+ \color{white}\left(\color{black}\int w_1(\vec u - \vec r_i)w_2(\vec u - \vec r_j) d\vec u ~-\int \vec {w}_1(\vec u - \vec r_i)\cdot\vec {w}_2(\vec u - \vec r_j) d\vec u\right) \\                                                    
+%\end{align} 
+%\begin{align} 
+                %&\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)~(w_3\otimes w_0+ w_2 \otimes w_1+\vec {w}_2\otimes \vec {w}_1)  \\
+                %&\approx k_BT\int d\vec r_i \int d\vec r_j~n(\vec r_i)~n(\vec r_j)\left(\int w_0(\vec u - \vec r_i)w_3(\vec u - \vec r_j) d\vec u \color{white}\right)  \nonumber \\
+                %&+ \color{white}\left(\color{black}\int w_1(\vec u - \vec r_i)w_2(\vec u - \vec r_j) d\vec u ~-\int \vec {w}_1(\vec u - \vec r_i)\cdot\vec {w}_2(\vec u - \vec r_j) d\vec u\right)  \\  
                 &\approx k_BT\int \left[\int n(\vec r_i) w_0(\vec u - \vec r_i)~d\vec r_i \int n(\vec r_j) w_3(\vec u - \vec r_j)~d\vec r_j \color{white}\right]  \nonumber \\
                 &+ \int n(\vec r_i) w_1(\vec u - \vec r_i)~d\vec r_i \int n(\vec r_j) w_2(\vec u - \vec r_j)~d\vec r_j  \nonumber \\
                 &- \color{white}\left[\color{black} \int n(\vec r_i) \vec {w}_1(\vec u - \vec r_i)~d\vec r_i \cdot \int n(\vec r_j) \vec {w}_2(\vec u - \vec r_j)~d\vec r_j \right]\color{black}d\vec u  \\              
@@ -1163,9 +1168,9 @@ weight functions
       w_3 &= \Theta(r-R)  \label{scalar-weight3} \\
       w_2 &= \delta(r-R)  \\
       w_1 &= \frac{w_2}{4\pi r}  \\
-      w_0 &= \frac{w_2}{4\pi r^2} \label{scalar-weight0}  
-\end{align}
-\begin{align}      
+      w_0 &= \frac{w_2}{4\pi r^2} \label{scalar-weight0}  \\
+%\end{align}
+%\begin{align}      
       \vec {w}_2 &= w_2~\hat r \\
       \vec {w}_1 &= w_1~\hat r \\
       \overleftrightarrow{w}_{m2}(\vec{r}) &= w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right) 
