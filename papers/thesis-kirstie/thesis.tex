@@ -131,7 +131,7 @@ $R_i$  and $R_j$, the convolution is written as~\cite{rosenfeld1989}
 FMT gives the same result for the excess Helmholtz free energy of the 
 hard-sphere fluid as SPT does, from which it can be 
 constructed~\cite{rosenfeld1989,Hansen,santos2012phi3}. It also gives the same 
-result for the direct correlation function approximation given by Percus-Yevick. 
+result for the direct correlation function found by Percus-Yevick. 
 However, it did not predict freezing due to one term in the expression that
 diverged when the fluid was highly confined.  
 Tarazona later solved this problem by introducing a tensor version of $\Phi_3$,
@@ -302,14 +302,15 @@ is equal to $\sigma$.
 As the distance 
 between the centers of the two atoms decreases below $\sigma$, the potential 
 rapidly approaches positive infinity corresponding to infinite repulsion. 
-Above $\sigma$ the potential becomes negative indicating a net attraction 
-between the atoms. The net attractive energy is maximized at a distance of 
+Above $\sigma$ the potential becomes negative indicating a net attractive energy 
+between the atoms, even though the force may be repulsive. 
+The net attractive energy is maximized at a distance of 
 r=$2^\frac{1}{6}\sigma=2R\approx{1.122}\sigma$ where R is the radius of 
 the sphere given by $R={2^{-\frac{5}{6}}}\sigma$. At this point the depth of
 the potential well, given by epsilon $\epsilon$, is a maximum, and the force
 between the spheres is zero. As r increases 
-further, the net attraction decreases and the potential approaches zero
-asymptotically. The attractive and repulsive effects can be separated into two
+further, the net attractive energy decreases and the potential approaches zero
+asymptotically. The attractive and repulsive forces can be separated into two
 potentials, shown with different colors in Figure \ref{fig:LJ_potential_2parts}, 
 which when added together regenerate the full Lennard-Jones potential. 
 
@@ -375,8 +376,8 @@ Figure~\ref{fig:TwoSpheres}.
 %equilibrium). 
  
 %A liquid will eventually freeze as heat is removed, or the liquid is compressed, and 
-A liquid will freeze when the free energy it would have as a solid is lower 
-than the free energy that it has as a liquid at the same density.
+A system will be solid when the free energy it would have as a solid is lower 
+than the free energy that it has as a liquid at the same temperature and density.
 At the phase transition the density will change abruptly, and
 the particular structure and density that result will be affected 
 by the interatomic potential. When repulsive, soft sphere fluids 
@@ -564,10 +565,9 @@ profile $n(\vec r)$
 where
 \begin{equation}\int n(\vec r)d\vec{r}=N\end{equation}%
 and the intrinsic Helmholtz free energy is defined as
-\begin{equation}F_{int} = F - \int n(\vec{r})\phi_{ext}{(\vec r)}d\vec{r}\end{equation}  
+\begin{equation}F_{int} = F - \int n(\vec{r})V_{ext}{(\vec r)}d\vec{r}\end{equation}  
 %The quantity $\phi_{ext}$
-where $\phi_{ext}=\frac{V_{ext}}{N}$ and $V_{ext}(\vec r)$
-is the externally applied potential energy given in Equation~\ref{Hamiltonian}. 
+where $V_{ext}$ is an externally applied potential. 
 The Grand free energy is applicable to systems with a varying number of 
 particles and fixed chemical potential, temperature and volume. But in 
 this paper a system with a fixed temperature, volume, and number of 
@@ -665,21 +665,23 @@ where
 \begin{displaymath}{dP=d\vec{p}_1d\vec{p}_2...d\vec{p}_N \mbox{~~~~and~each~} d\vec{p}=dp_xdp_ydp_z}\end{displaymath}
 \begin{displaymath}{dQ=d\vec{r}_1d\vec{r}_2...d\vec{r}_N \mbox{~~~~and~each~} d\vec{r}=dxdydz\mbox{~~~~}}\end{displaymath}
 Writing the Hamiltonian, H in terms of its component kinetic and potential energies gives
-\begin{equation}\label{Hamiltonian}{H = KE + V + V_{ext} = \sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)+V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)+V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{equation}
+\begin{equation}\label{Hamiltonian}{H = KE + V = \sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)+V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{equation}
 where the translational kinetic energy of the N atoms is given by 
 \begin{equation}{\text{KE}=\sum_{i=1}^N\left(\frac{|\vec{p}_i|^2}{2m}\right)}\end{equation}
 and the potential energy of the total interaction of each atom with the other 
 N-1 atoms is given by
 \begin{displaymath}{V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
-and where \begin{displaymath}{V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
-is an externally applied potential that varies spatially, such that its 
-effects on each atom depend on the atom's position. Often $V_{ext}$ is 
-set to zero, as it is in this paper. 
+%and where \begin{displaymath}{V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}\end{displaymath} 
+%is an externally applied potential that varies spatially, such that its 
+%effects on each atom depend on the atom's position. Often $V_{ext}$ is 
+%set to zero, as it is in this paper. 
 
 Noting that the kinetic energy depends only on momentum while the total 
 interatomic and external potential energies depend only on position, 
 the integral in Equation~\ref{Z_total} can be separated into two parts 
-\begin{equation}{Z=\frac{1}{N!}\frac{1}{h^{3N}}\int{dP}~e^\frac{-\left(\frac{|\vec{p}_1|^2}{2m}+\frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m}\right)}{k_BT}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}}\end{equation}  
+\begin{equation}{Z=\frac{1}{N!}\frac{1}{h^{3N}}\int{dP}~e^\frac{-\left(\frac{|\vec{p}_1|^2}{2m}
++\frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m}\right)}{k_BT}\int{dQ}
+~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}}\end{equation}  
 Multiplying by $\frac{V^N}{V^N}$ where V is the real space volume, and 
 \begin{equation}V^N=\int dQ\end{equation} 
 the partitian function can then be expressed as
@@ -689,7 +691,7 @@ where
     Z_{ideal}=V^N\frac{1}{N!}\frac{1}{h^{3N}}\int{dP}~e^\frac{-\left(\frac{|\vec{p}_1|^2}{2m}+ \frac{|\vec{p}_2|^2}{2m}+...\frac{|\vec{p}_N|^2}{2m}\right)}{k_BT}
 \end{align}
 \begin{align} \label{eq:Zexcess}
-    Z_{excess}=\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)-V_{ext}(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N )}{k_BT}
+    Z_{excess}=\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1,\vec{r}_2,{...},\vec{r}_N)}{k_BT}
 \end{align} 
 The ideal partitian function $Z_{ideal}$ is that of an ideal gas.
 %an ideal gas which exhibits no interaction between the atoms - a condition approached 
@@ -734,7 +736,7 @@ Equation~\ref{eq:Fideal} becomes
 The excess Helmholtz free energy is written most generally as
 \begin{align}
       F_{excess} &= -k_{B}T\ln(Z_{excess}) \\
-                 &= -k_BT\ln{\left(\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)-V_{ext}(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)} \label{Fexcess-mostgeneral}
+                 &= -k_BT\ln{\left(\frac{1}{V^N}\int{dQ}~e^\frac{-V(\vec{r}_1, \vec{r}_2,...\vec{r}_N)}{k_BT}\right)} \label{Fexcess-mostgeneral}
 \end{align} 
 This integral can be somewhat simplified if it can be assumed that the 
 potential energy $V(\vec{r_1},\vec{r_2},...\vec{r_N})$ is a sum of the 
@@ -1181,8 +1183,8 @@ This result reduces to the same result obtained from Scaled Particle Theory
 for a homogeneous hard-sphere fluid.
 
 The FMT equations shown so far have been for a hard-sphere fluid~\cite{Hansen}.
-To model a fluid with "soft" spheres which have an interatomic potential 
-that decreases smoothly from infinity over a distance of 2R rather than instanteously 
+To model a fluid with ``soft" spheres which have an interatomic potential 
+that decreases smoothly from infinity to zero over a distance of 2R rather than instanteously 
 at 2R like that of hard spheres, Schmidt noted that 
 all of the weight functions can be expressed in terms of 
 $w_{2}(r)$ which, for a hard-sphere fluid, consists of a delta function.
@@ -1190,12 +1192,12 @@ He also noted that the derivative of the Mayer function
 %provides another important relation 
 can be expressed in terms of $w_{2}(r)$, 
 \begin{align}\label{mayerder=w2convolution}
-     \frac{df(r)}{dr} = w_2 \otimes w_2(r) = \int{w_2(r')w_2(r-r')dr'}
+     \frac{df(r)}{dr} = \int_{-\infty}^\infty{w_2(r')w_2(r-r')dr'}
 \end{align} 
 and that the weight function $w_{2}(r)$ is in turn related to $w_{3}(r)$ through 
 the relation
 \begin{align}\label{w2_w3_relation}
-    w_{3}=\int_{r}^{\infty}{w_{2}(\vec{r})dr}\mbox{~~~~or equivalently,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
+    w_{3}=\int_{r}^{\infty}{w_{2}(r)dr}\mbox{~~~~or equivalently,~~~~}-\frac{\partial{w_3(r)}}{\partial{r}}=w_2(r)
 \end{align}
 %which will be important to keep in tact when moving to SFMT~\cite{schmidt1999density}.
 %Thus, all the weight functions, and the above relation are determined by $w_{3}(r)$.
@@ -1792,7 +1794,6 @@ gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$
 \begin{equation} \label{eq:Verf}
 	V_{erf}(r)=-k_BT\ln\left[\frac{1}{2}\left(\operatorname{erf}\left(\frac{r-\alpha}{\Xi}\right)+1\right)\right]
 \end{equation}  
-
 \begin{figure}
   \centering
   \includegraphics[height=7cm]{plot_alpha.pdf}
@@ -1800,14 +1801,12 @@ gives an expression for the for the error function potential  $V(r)=V_{erf}(r)$
   for $\sigma=1$ and $\epsilon=1$.}
   \label{fig:alphaXivsT}
 \end{figure}
-
-Unlike the WCA potential, the error function potential $V_{erf}(r)$ is temperature dependent.
-To compensate for this temperature dependence so that our functional better approximates
-a WCA potential, we make the parameters $\alpha$ and $\Xi$ functions of temperature as well. 
-The parameter $\alpha(T)$ is derived by setting 
-the error function potential $V_{erf}(r)$ 
+Unlike physical potential energies, the error function potential $V_{erf}(r)$ is temperature dependent.
+We construct temperature-dependent parameters $\alpha$ and $\Xi$ 
+to model a WCA potential. 
+The parameter $\alpha(T)$ is derived by setting the error function potential $V_{erf}(r)$ 
 equal to the WCA potential given by Equation~\ref{eq:VWCA} at $r=\alpha$, since 
-the derivative of the mayer function peaks at this value. 
+the derivative of the Mayer function peaks at this value. 
 \begin{align}
     V_{erf}(\alpha)=V_{WCA}(\alpha)
 \end{align}
@@ -2090,9 +2089,9 @@ and the volume of the solid, the slope should be positive.
 
 Comparing the slope of the phase boundary predicted by cDFT to that
 from Monte-Carlo simulations shown by the white line, it is seen that
-the phase transition pressures and temperatures predicted by cDFT 
+the phase transition pressures predicted by cDFT 
 are consistently higher, and the 
-discrepancy grows as the temperature increases. For example, at a 
+discrepancy grows as the pressure increases. For example, at a 
 temperature of $T^*$=1, the phase transition reduced pressure predicted by 
 cDFT is 15.24, whereas the Monte-Carlo simulation predicted a reduced 
 pressure of 9.99,
@@ -2174,7 +2173,7 @@ results, though shifted a bit toward higher densities.
 We also generated a pressure-temperature
 phase diagram, but the slope was notably steeper than that
 predicted from Monte-Carlo simulations, giving transition 
-temperatures and pressures that were too high. 
+pressures that were too high. 
 
 
 
