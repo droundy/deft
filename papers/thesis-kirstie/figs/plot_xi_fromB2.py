@@ -148,23 +148,35 @@ plt.figure()
 
 
 #Plot df/dr and w2*w2 for comparison - Figure 3
-r=np.linspace(.7, 1.1225, 2000) #Use this for full range of temperatures
+r=np.linspace(.6, 1.1225, 2000) #Use this for full range of temperatures
 #r=np.linspace(0.9, 1.20, 2000) #Use to match Eric's diagram
+#r=np.linspace(0.7, 1.25, 2000) #
 
 KbT=2 #this is actually kBT/epsilon with epsilon=1
+
+print(alpha(KbT))
 
 w2_w2_Eric=(1.0/(xi_Eric(KbT)*np.sqrt(PI)))*np.exp(-pow((r-alpha(KbT))/xi_Eric(KbT),2))  #convolution of w2 with itself
 w2_w2_B2=(1.0/(find_Xi(KbT)*np.sqrt(PI)))*np.exp(-pow((r-alpha(KbT))/find_Xi(KbT),2))  #convolution of w2 with itself  (use this with Xi from B2)
 
 df_dr= np.exp(-(1/KbT)*(4*epsilon*(pow(sigma,12)*pow(r,-12)-pow(sigma,6)*pow(r,-6))+epsilon))*((1/KbT)*4*epsilon*(12*pow(sigma,12)*pow(r,-13)-6*pow(sigma,6)*pow(r,-7))) #derivative of the mayer function from the WCA potential
 
-plt.plot(r/sigma, df_dr, label='WCA df_dr')
-plt.plot(r/sigma, w2_w2_Eric, label='Eric w2_w2', linestyle='dashed', color='orange')
-plt.plot(r/sigma, w2_w2_B2, label='B2 w2_w2', linestyle='dashed', color='blue')
+plt.plot(r/alpha(KbT), df_dr, label='WCA df_dr', color='black')
+#plt.plot(r/sigma, w2_w2_Eric, label='Eric w2_w2', linestyle='dashed', color='orange')
+plt.plot(r/alpha(KbT), w2_w2_B2, label='w2*w2', color='blue') #with Xi from matching B2
 
-plt.xlabel('r/$\sigma$')
-plt.ylabel('df(r)/dr, w2*w2')
-plt.title('Compare match with Eq12 for low density kT=%g' % (KbT))
+plt.xlim(left=0.6,right=1.12)
+plt.ylim(bottom=0,top=8.2)
+
+#plt.xticks([0], [' '])
+plt.xticks([1], [])
+plt.yticks([0], [' '])
+
+
+#plt.xlabel('r/$\sigma$')
+#plt.xlabel('r/alpha')
+#plt.ylabel('df(r)/dr, w2*w2')
+#plt.title('Compare match with Eq12 for low density kT=%g' % (KbT))
 plt.legend()
 plt.savefig("df_dr_with_xi_fromB2.pdf")
 

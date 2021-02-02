@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+##!/usr/bin/python3
 
 #RUN this program from the directory it is listed in
 #with command ./plot_WCA_Potential_fixed.py
@@ -35,9 +35,29 @@ plt.ylim(top=5)
 
 plt.xlabel('r/$\sigma$')
 plt.ylabel('$V(r)/\epsilon$')
-plt.title('WCA Potential')
+plt.title('WCA Potential Energy vs r')
 #plt.legend()
 plt.savefig('WCA_Potential.pdf')
+
+#plt.figure()
+
+#Plot repulsive portion from r=1.1225 to rmax:
+r=np.linspace(1.11, 1.5, 2000) 
+V=(r/r) - 1
+plt.plot(r/sigma, V/epsilon, color='blue')
+
+plt.xlim(left=0.91,right=1.5)
+plt.ylim(top=5)
+
+plt.xticks([0], [' '])
+#plt.xticks([1.1], ['2R'])
+plt.yticks([0], [' '])
+
+#plt.xlabel('r')
+#plt.ylabel('V(r)')
+#plt.title('WCA Potential Energy vs r')
+#plt.legend()
+plt.savefig('WCA_Potential-nonumbers.pdf')
 
 # plt.show()
 

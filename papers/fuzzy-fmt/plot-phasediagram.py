@@ -38,7 +38,11 @@ pressure_data = []  #index corresponds to kT
 #for kT in np.arange(0.4, 2.05, 0.05):   # new normal
 #for kT in (1, 2, 4, 6, 8, 10, 12, 14, 16, 18):
 #for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2): #for paper
-for kT in (1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25): #use for kT from 1 to 38 and 0.5 
+#for kT in (1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 26, 28, 30, 32, 34, 35, 37, 38): #use for kT from 1 to 38 and 0.5 
+for kT in (0.5, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 26, 28, 30, 33, 34, 37, 38): #THESIS-AS for kT from 1 to 38 and 0.5 (35 does not work)
+#for kT in (5, 7, 9): #THESIS-p-vs-n plot
+#for kT in (13, 15, 17, 19, 21, 26, 33): #THESIS-P-vs-V/atom plot for kT from 1 to 38 and 0.5 (35 does not work)
+#for kT in (1, 3, 5, 7, 9, 11): #THESIS-MC for kT from 1 to 38 and 0.5 (35 does not work)
 #for kT in (2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38): #use for kT from 1 to 38 and 0.5 
 #for kT in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 38): #use for kT from 1 to 38 and 0.5 
 #for kT in np.arange(0.1, 1.05, 0.05):   #data files with these temperatures will be plotted  DEBUG
@@ -182,7 +186,7 @@ plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, col
 
 #Plot T vs n  at constant P 
 #for p in [2,5,10,20]:  #paper
-for p in [20, 60, 100, 200, 600, 1000, 2000, 4000, 6000]:  #use for kT from 1 to 38 and 0.5
+for p in [20, 60, 100, 200, 600, 1000, 2000, 6000]:  #use for kT from 1 to 38 and 0.5
    n_mid_at_p_list = []
    kT_at_p_list = []
    for i in range(0, len(kT_data)) :  #number of temperatures kT
@@ -195,11 +199,11 @@ for p in [20, 60, 100, 200, 600, 1000, 2000, 4000, 6000]:  #use for kT from 1 to
             n_mid_at_p_list.append((nlo*(phi - p) + nhi*(p - plo))/(phi - plo))
             kT_at_p_list.append(kT_data[i])
 
-   plt.plot(n_mid_at_p_list, kT_at_p_list, '.-', label= 'P=%g' % p)
-plt.title("Temperature vs Number Density at fixed Pressure")
+   plt.plot(n_mid_at_p_list, kT_at_p_list, label= 'P=%g' % p)
+#plt.title("Temperature vs Number Density at fixed Pressure")
 plt.legend(loc='best')
-plt.xlabel('Number Density')
-plt.ylabel('Temperature')
+plt.xlabel('n*')
+plt.ylabel('T*')
 
 # - OR - uncomment the plot you want
    
@@ -217,18 +221,18 @@ for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       #Plot P vs n  at constant kT
       plt.plot(density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
-plt.title("Pressure vs Number Density at kT")
+#plt.title("Pressure vs Number Density at kT")
 plt.legend(loc='best')
 #plt.ylim(0, 26)
 #plt.ylim(0, 500)
 #plt.ylim(0, 45) #paper
-plt.ylim(0, 6000) #use for  kT from 1 to 38 and 0.5
+plt.ylim(0, 1000) #use for  kT from 1 to 38 and 0.5
 #plt.xlim(0, 1.1)
 #plt.xlim(0, 1.8)
 #plt.xlim(0, 1.1)  #paper
-plt.xlim(0, 2.2)  #use for  kT from 1 to 38 and 0.5
-plt.xlabel('Number Density')
-plt.ylabel('Pressure')
+plt.xlim(0.65, 1.8)  #use for  kT from 1 to 38 and 0.5
+plt.xlabel('n*')
+plt.ylabel('p*')
 
 plt.figure('p-vs-V at fixed T')
 
@@ -237,12 +241,14 @@ plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing, 1/n_crystal_at_fre
 for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
-plt.title("Pressure vs volume at kT")
+#plt.title("Pressure vs volume at kT")
 plt.legend(loc='best')
-plt.ylim(0, 26)
-plt.xlim(0.95, 1.6)
+#plt.ylim(0, 26)
+#plt.xlim(0.95, 1.6)
+plt.ylim(0, 6000)
+plt.xlim(0.45, 0.7)
 plt.xlabel('Volume per atom')
-plt.ylabel('Pressure')
+plt.ylabel('p*')
 
 plt.figure('p-vs-T at fixed n')
 
@@ -251,7 +257,8 @@ plt.figure('p-vs-T at fixed n')
 #for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]:    #densities to show on the plot
 #for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1]:  #densities to show on the plot
 #for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the plot - paper
-for n in [0.7, 0.8, 0.9, 1, 2, 2.2]:  #densities to show on the plot - use for kT from 1 to 38 and 0.5
+#for n in [0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.4, 1.6]:  #densities to show on the plot - use for kT from 1 to 38 and 0.5
+for n in [0.7, 0.8, 0.9, 1, 1.1, 1.2]:  #densities to show on the plot - use for kT from 1 to 38 and 0.5
    p_mid_at_n_list = []
    kT_at_n_list = []
    for i in range(0, len(kT_data)) :  #number of temperatures kT
@@ -264,11 +271,13 @@ for n in [0.7, 0.8, 0.9, 1, 2, 2.2]:  #densities to show on the plot - use for k
             p_mid_at_n_list.append((plo*(nhi - n) + phi*(n - nlo))/(nhi - nlo))
             kT_at_n_list.append(kT_data[i])
 
-   plt.plot(kT_at_n_list, p_mid_at_n_list, '.-', label= 'n=%g' % n)
-plt.title("Pressure vs Temperature at fixed n")
+   #plt.plot(kT_at_n_list, p_mid_at_n_list, '.-', label= 'n=%g' % n)
+   plt.plot(kT_at_n_list, p_mid_at_n_list, label= 'n=%g' % n)
+#plt.title("Pressure vs Temperature at fixed n")
 plt.legend(loc='best')
-plt.ylabel('Pressure')
-plt.xlabel('Temperature')
+#plt.ylim(0, 2500)
+plt.ylabel('p*')
+plt.xlabel('T*')
 
 # - OR - uncomment the plot you want
    ##Plot T vs P  at constant n 
@@ -285,22 +294,25 @@ plt.figure('Phase Diagram of T vs n')
 plt.plot(n_homogeneous_at_freezing, kT_data, label='liquid', color='red')
 plt.plot(n_crystal_at_freezing, kT_data, label='solid', color='blue')
 #plt.fill_betweenx(kT_data, .1, n_homogeneous_at_freezing, color='red')     #paper 
-plt.fill_betweenx(kT_data, .4, n_homogeneous_at_freezing, color='red')     #use for kT from 1 to 38 and 0.5 
+plt.fill_betweenx(kT_data, .6, n_homogeneous_at_freezing, color='red')     #use THESIS-AS for kT from 1 to 38 and 0.5 
+#plt.fill_betweenx(kT_data, .4, n_homogeneous_at_freezing, color='red')     #use THESIS-MC for kT from 1 to 38 and 0.5 
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
 #plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')
 #plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')    #paper  
 plt.fill_betweenx(kT_data, n_crystal_at_freezing, 2.14, color='blue')    #use for kT from 1 to 38 and 0.5       
-plt.title("Temperature vs Number Density")
+#plt.title("Temperature vs Number Density")
 #plt.legend(loc='best')
-plt.xlabel('Number Density')
-plt.ylabel('Temperature')
+plt.xlabel('n*')
+plt.ylabel('T*')
 
 ##plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
 ##plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
 #plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
 #plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
-plt.plot([0.88, 0.90, 0.91, 0.92, 1.04],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_l', color='green')
-plt.plot([0.96, 0.98, 0.99, 1.00, 1.11],[0.7, 0.8, 0.9, 1.0, 2.0], label='MC_s', color='green')
+#plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='MC_l', color='yellow')
+#plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='MC_s', color='yellow')
+plt.plot([0.87, 0.91, 0.95, 1.07, 1.17, 1.29, 1.41, 1.51, 1.66, 1.92],[0.5, 0.7, 1, 2, 3.6, 5.4, 8, 10.5, 15.4, 28.6], label='AS_l', color='white')
+plt.plot([0.94, 0.98, 1.016, 1.14, 1.22, 1.34, 1.48, 1.58, 1.73, 2.0],[0.5, 0.7, 1, 2, 3.6, 5.4, 8, 10.5, 15.4, 28.6], label='AS_s', color='white')
 plt.legend()
 
 plt.figure('Phase Diagram of P vs T')
@@ -308,18 +320,20 @@ plt.figure('Phase Diagram of P vs T')
 ##Pressure vs Temperature Phase Diagram
 plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
 #plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
-plt.fill_between(kT_data, p_at_freezing, 6500, color='blue')  #use for kT 1 to 38 and 0.5
+plt.fill_between(kT_data, p_at_freezing, 6500, color='blue')  #use THESIS-AS for kT 1 to 38 and 0.5
+#plt.fill_between(kT_data, p_at_freezing, 1000, color='blue')  #use THESIS-MC for kT 1 to 38 and 0.5
 #plt.fill_between(kT_data, p_at_freezing, 50, color='blue')   #paper
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
-plt.title("Pressure vs Temperature")
-plt.xlabel('Temperature')
-plt.ylabel('Pressure')
+#plt.title("Pressure vs Temperature")
+plt.xlabel('T*')
+plt.ylabel('p*')
 
 #plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
 ##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
-plt.plot([0.7, 0.8,0.9,1.0,2.0], [6.24, 7.62, 8.78, 9.99, 25.5], label='MC', color='green')
+#plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5, 43.8, 85.6, 210], label='MC', color='yellow')
+plt.plot([3.6, 5.4, 8, 10.5, 15.4, 28.6], [66.3, 113.48, 191.1, 274.7, 450.9, 1021.9], label='AS', color='white')
 plt.legend()
 
 plt.show()
