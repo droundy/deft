@@ -10,7 +10,7 @@
 #and creates the 'figs/crystal-data/kT-%.3f.dat' files used by this program.
 
 #NOTE: Run this program from directory deft/papers/fuzzy-fmt 
-#with command:   python3 ./figs/plot-phasediagram-data.py
+#with command:   python3 ./figs/plot-phasediagram-data.py  [show (to show plots)]
 
 from __future__ import print_function, division
 
@@ -183,7 +183,7 @@ for p in [2,5,10,20]:
 plt.legend(loc='best')
 plt.xlabel('$n^*$')
 plt.ylabel('$T^*$')
-plt.savefig('./figs/T-vs-n_at_fixed_P.pdf')
+plt.savefig('./figs/T-vs-n_at_fixed_P.pdf', transparent=True)
 
 # - OR - uncomment the plot you want
    
@@ -210,7 +210,7 @@ plt.ylim(0, 45)
 plt.xlim(0, 1.1)
 plt.xlabel('$n^*$')
 plt.ylabel('$p^*$')
-plt.savefig('./figs/p-vs-n_at_fixed_T.pdf')
+plt.savefig('./figs/p-vs-n_at_fixed_T.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
 
@@ -224,7 +224,7 @@ plt.ylim(0, 26)
 plt.xlim(0.95, 1.6)
 plt.xlabel('Volume per atom')
 plt.ylabel('$p^*$')
-plt.savefig('./figs/p-vs-V_at_fixed_T.pdf')
+plt.savefig('./figs/p-vs-V_at_fixed_T.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
 
@@ -232,7 +232,8 @@ plt.figure(figsize=myfigsize)
 #Plot P vs T  at constant n 
 #for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]:    #densities to show on the plot
 #for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1]:  #densities to show on the plot
-for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the plot
+for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  #densities to show on the plot in paper
+#for n in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:  #densities to show on the plot in thesis
    p_mid_at_n_list = []
    kT_at_n_list = []
    for i in range(0, len(kT_data)) :  #number of temperatures kT
@@ -278,6 +279,7 @@ bhnans = bhpressures != bhpressures
 bhpressures[bhnans] = 1e30
 bhtemperatures, bhn_reduced = np.meshgrid(bhtemp, bhnred)
 
+#Plot Barker-Henderson results
 for i in range(9, len(bhn_reduced[:, 0]), 10)[:10]:
    plt.plot(bhtemperatures[i,:], bhpressures[i,:],
             styles.density_color(bhn_reduced[i, 0])+':')
@@ -285,10 +287,11 @@ for i in range(9, len(bhn_reduced[:, 0]), 10)[:10]:
 plt.legend(loc='best')
 plt.ylabel('$p^*$')
 plt.xlabel('$T^*$')
-plt.xlim(0)
+plt.xlim(0,3) #for paper
+#plt.xlim(0.5,3) #for thesis
 plt.ylim(0)
 plt.tight_layout()
-plt.savefig('./figs/p-vs-T_at_fixed_n.pdf')
+plt.savefig('./figs/p-vs-T_at_fixed_n.pdf', transparent=True)
 
 # - OR - uncomment the plot you want
    ##Plot T vs P  at constant n 
@@ -304,7 +307,7 @@ plt.figure(figsize=myfigsize)
 #Temperature vs Density Phase Diagram
 plt.plot(n_homogeneous_at_freezing, kT_data, label='liquid', color='red')
 plt.plot(n_crystal_at_freezing, kT_data, label='solid', color='blue')
-plt.fill_betweenx(kT_data, .1, n_homogeneous_at_freezing, color='red')       
+plt.fill_betweenx(kT_data, .2, n_homogeneous_at_freezing, color='red')       
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
 #plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')
 plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')           
@@ -319,16 +322,19 @@ plt.ylabel('$T^*$')
 plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_l$', color='white')
 plt.plot([0.96, 0.98, 0.99, 1.00, 1.11,1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_s$', color='white')
 plt.legend()
+plt.xlim(0.2,1.8)
+plt.ylim(0.5,3)
 
-plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf')
+plt.tight_layout()
+plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
 
 ##Pressure vs Temperature Phase Diagram
-plt.fill_between(kT_data, 0, p_at_freezing, color='red')      
+plt.fill_between(kT_data, 0, p_at_freezing, label='liquid', color='red')      
 #plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
 #plt.fill_between(kT_data, p_at_freezing, 1500, color='blue') 
-plt.fill_between(kT_data, p_at_freezing, 80, color='blue') 
+plt.fill_between(kT_data, p_at_freezing, 80, label='solid', color='blue') 
 plt.plot(kT_data, p_at_freezing, color='black')
 #plt.ylim(0, 40)
 #plt.xlim(kT_data.min(), kT_data.max())     #FIX!  
@@ -338,8 +344,11 @@ plt.ylabel('$p^*$')
 ##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
 plt.plot([0.7, 0.8,0.9,1.0,2.0, 3], [6.24, 7.62, 8.78, 9.99, 25.5, 43.8], label='MC', color='white')
 plt.legend()
+plt.ylim(0,80)
+plt.xlim(0.5,3)
 
-plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf')
+plt.tight_layout()
+plt.savefig('./figs/Phase_Diagram_of_P_vs_T.pdf', transparent=True)
 
 if 'show' in sys.argv:
    plt.show()

@@ -150,7 +150,7 @@ c_coexistence_free_energy = np.interp(invnc, invn[::-1], cfe[::-1])
 #plt.plot(invn, fit_cfe, label="fit crystal free energy")
 plt.plot(invn, hfe, 'red', label="Liquid")
 plt.plot(invn, cfe, 'blue', label="Solid")
-plt.plot([invnh, invnc], [h_coexistence_free_energy, c_coexistence_free_energy], 'o')
+plt.plot([invnh, invnc], [h_coexistence_free_energy, c_coexistence_free_energy], 'o', color='black')
 plt.plot(invn, ((invn - invnh)*c_coexistence_free_energy + (invnc - invn)*h_coexistence_free_energy)/(invnc - invnh),
          'k-')
 # plt.xticks([invnc,invnh], [r'$\frac{1}{n_S}$', r'$\frac{1}{n_L}$'])
@@ -160,15 +160,21 @@ plt.plot(invn, ((invn - invnh)*c_coexistence_free_energy + (invnc - invn)*h_coex
 #plt.plot([invnh, invnh], [-163, -77.82], 'k-')
 #plt.plot([invnc, invnh], [-68.09, -77.82], 'k-') 
 #plt.plot([0.55, invnh], [-77.82 - ((invnh-0.55)*(-77.8-(-68.07))/(invnh-invnc)), -77.82], 'k-')
-plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
-plt.xlabel('Inverse Density')
-plt.xlim(2*invnc - invnh, 2*invnh - invnc)
-plt.ylim(2*h_coexistence_free_energy-c_coexistence_free_energy,
-         2*c_coexistence_free_energy-h_coexistence_free_energy)
+#plt.title("Helmholtz Free Energy/atom vs 1/Reduced Density at Fixed kT=%g" % (kT))
+#plt.xlabel('Inverse Density')
+#plt.xlim(2*invnc - invnh, 2*invnh - invnc)
+#plt.ylim(2*h_coexistence_free_energy-c_coexistence_free_energy,
+#         2*c_coexistence_free_energy-h_coexistence_free_energy)
+
+plt.xticks([], [])
+plt.yticks([], [])
+plt.xlim(left=0.63,right=0.69)
+plt.ylim(bottom=-85,top=-60)
+
 #plt.xlabel(r'Inverse Reduced Density = $\frac{1}{n\sigma^3}$')
-plt.ylabel('Helmholtz Free Energy/atom')
+#plt.ylabel('Helmholtz Free Energy/atom')
 plt.legend()
-plt.savefig('plot-pressure-helmholtz-vs-inverse-density.pdf')
+plt.savefig('plot-pressure_Fig1.pdf')
 
 plt.figure()
 
@@ -185,17 +191,26 @@ plt.figure()
 
 plt.plot(hpressure, mid_h_gibbs, 'red', label="Liquid")
 plt.plot(cpressure, mid_c_gibbs, 'blue', label="Solid")
-plt.xticks([p_inter], [r'$p_{Trans}$'])
-plt.yticks([g_inter], [r'$\mu_{Trans}$'])
+#plt.xticks([p_inter], [r'$p_{Trans}$'])
+#plt.yticks([g_inter], [r'$\mu_{Trans}$'])
+
+plt.xticks([], [])
+plt.yticks([], [])
+
 plt.plot([0, p_inter], [g_inter, g_inter], 'k-')
 plt.plot([p_inter, p_inter], [-137, g_inter], 'k-')
 plt.plot(p_inter, g_inter, 'o', color='orange', markersize=10)
 #plt.plot(pf_inter, gf_inter, 'o', color='orange', markersize=10)
-plt.ylabel('Chemical Potential')
+#plt.ylabel('Chemical Potential')
+
+#plt.xlim(left=300,right=800)
+#plt.ylim(bottom=100,top=450)
+plt.xlim(left=200,right=1000)
+plt.ylim(bottom=0,top=600)
 
 #plt.xlabel('Reduced Pressure')
-plt.xlabel('Pressure')
-plt.title("Chemical Potential vs Pressure at Fixed kT=%g" % (kT))
+#plt.xlabel('Pressure')
+#plt.title("Chemical Potential vs Pressure at Fixed kT=%g" % (kT))
 plt.legend()
 plt.savefig('plot-pressure_Fig2.pdf')
 #note: chemical potential = Gibbs Free Energy/atom
@@ -204,8 +219,12 @@ plt.figure()
 
 
 # Plot Pressure vs 1/Reduced Density with point of intersection - Figure 3
-plt.xticks([invnc,invnh], [r'$\frac{1}{n_S}$', r'$\frac{1}{n_L}$'])
-plt.yticks([p_inter], [r'$p_{Trans}$'])
+#plt.xticks([invnc,invnh], [r'$\frac{1}{n_S}$', r'$\frac{1}{n_L}$'])
+#plt.yticks([p_inter], [r'$p_{Trans}$'])
+
+plt.xticks([], [])   #for no labels
+plt.yticks([], [])   #for no labels
+
 plt.plot([invnc, invnc], [0, p_inter], 'k-')
 plt.plot([invnh, invnh], [0, p_inter], 'k-')
 plt.plot([0, invnh], [p_inter, p_inter], 'k-')
@@ -215,11 +234,13 @@ fit_p = np.dot(pressure_functions, coeff)
 #plt.plot(invn, fit_p, 'g.-', label="fit crystal pressure")
 plt.plot(mid_invn, hpressure,  'red', label="Liquid")
 plt.plot(mid_invn, cpressure, 'blue', label="Solid")
-plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
+plt.xlim(left=0.55,right=.7)
+plt.ylim(bottom=0,top=1500)
+#plt.title("Reduced Pressure vs 1/Reduced Density at Fixed kT=%g" % (kT))
 #plt.xlabel(r'Inverse Reduced Density = $\frac{1}{n\sigma^3}$')
 #plt.ylabel(r'Reduced Pressure = $\frac{P\sigma^3}{\epsilon}$')
-plt.xlabel('Inverse Density')
-plt.ylabel('Pressure')
+#plt.xlabel('Inverse Density')
+#plt.ylabel('Pressure')
 plt.legend()
 plt.savefig('plot-pressure_Fig3.pdf')
 
