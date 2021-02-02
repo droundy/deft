@@ -305,7 +305,7 @@ plt.savefig('./figs/p-vs-T_at_fixed_n.pdf', transparent=True)
 plt.figure(figsize=myfigsize)
 
 #Temperature vs Density Phase Diagram
-plt.plot(n_homogeneous_at_freezing, kT_data, label='liquid', color='red')
+plt.plot(n_homogeneous_at_freezing, kT_data, label='fluid', color='red')
 plt.plot(n_crystal_at_freezing, kT_data, label='solid', color='blue')
 plt.fill_betweenx(kT_data, .2, n_homogeneous_at_freezing, color='red')       
 plt.fill_betweenx(kT_data, n_homogeneous_at_freezing, n_crystal_at_freezing, color='gray') 
@@ -319,7 +319,7 @@ plt.ylabel('$T^*$')
 ##plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
 #plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
 #plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
-plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_l$', color='white')
+plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_f$', color='white')
 plt.plot([0.96, 0.98, 0.99, 1.00, 1.11,1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3], '-', label='$MC_s$', color='white')
 plt.legend()
 plt.xlim(0.2,1.8)
@@ -331,7 +331,7 @@ plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf', transparent=True)
 plt.figure(figsize=myfigsize)
 
 ##Pressure vs Temperature Phase Diagram
-plt.fill_between(kT_data, 0, p_at_freezing, label='liquid', color='red')      
+plt.fill_between(kT_data, 0, p_at_freezing, label='fluid', color='red')      
 #plt.fill_between(kT_data, p_at_freezing, 50, color='blue')    #FIX - change 30
 #plt.fill_between(kT_data, p_at_freezing, 1500, color='blue') 
 plt.fill_between(kT_data, p_at_freezing, 80, label='solid', color='blue') 
