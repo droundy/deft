@@ -34,7 +34,7 @@ double seed=1;
 long mc_prefactor=50000;
 long mc_constant=100;
 int my_experiment =0;   //set to 1 to run my experiment
-bool use_tensor_weight=false;
+bool use_tensor_weight=true;
 
 char *free_energy_output_file = 0;
 
@@ -52,16 +52,6 @@ static inline void took(const char *name) {
   printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
   fflush(stdout);
   last_time = t;
-}
-
-double inhomogeneity(Vector n) {
-  double maxn = n[0];
-  double minn = n[0];
-  for (int i=0; i<n.get_size(); i++) {
-    if (n[i] > maxn) maxn = n[i];
-    if (n[i] < minn) minn = n[i];
-  }
-  return (maxn - minn)/fabs(minn);
 }
 
 struct data {
