@@ -29,7 +29,7 @@
 double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.05;
+double dx = 0.02;
 
 static void took(const char *name) {
   static clock_t last_time = 0;
@@ -43,27 +43,26 @@ static void took(const char *name) {
 void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
   Minimize min(f);
   min.set_relative_precision(0);
-  min.set_maxiter(100);
+  min.set_maxiter(1000);
   min.set_miniter(9);
   min.precondition(true);
 
   char *fname = new char[5000];
   mkdir("new-data", 0777); // make sure the directory exists
-  snprintf(fname, 5000, "new-data/radial-lj-%06.4f-%04.2f.dat", kT, reduced_density);
+  snprintf(fname, 5000, "new-data/radial-lj-%06.4f-%04.2f.dat", kT, reduced_density);  
 
   printf("========================================\n");
   printf("| Working on rho* = %4g and kT = %4g |\n", reduced_density, kT);
   printf("========================================\n");
   do {
-    //f->run_finite_difference_test("SFMT");   
+    //f->run_finite_difference_test("SFMT", 0, 100*min.recent_stepsize());
 
     took("Doing the minimization step");
 
     const int Nz = f->Nz();
-    Vector Vext = f->Vext();
     Vector r = f->get_r();
     Vector n = f->get_n();
-    f->get_Fideal(); // FIXME this is a hokey trick to make dV be defined    //ADD this to match wca ?
+    f->get_Fideal(); // FIXME this is a hokey trick to make dV be defined
         
     printf("The length of the vectors is %d", n.get_size());
     FILE *o = fopen(fname, "w");
@@ -72,7 +71,7 @@ void run_minimization(double reduced_density, SFMTFluidVeff *f, double kT) {
       exit(1);
     }
     for (int i=0; i<Nz/2; i++) {
-      fprintf(o, "%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i]);
+      fprintf(o, "%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3));
       if (i == int(Nz/2) - 1) {
         printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
         printf("   n -> %.9g (i.e. g -> %g)\n",
@@ -135,9 +134,9 @@ int main(int argc, char **argv) {
       }
     }
   }
-  printf("my energy is %g\n", f.energy());
-  took("Finding the energy a single time");
+  took("setting up the potential and Veff");
 
   run_minimization(reduced_density, &f, temp);
+  
   return 0;
 }

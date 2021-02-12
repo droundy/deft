@@ -30,7 +30,7 @@
 double zmax = 16;
 double ymax = zmax;
 double xmax = zmax;
-double dx = 0.05;
+double dx = 0.02;
 
 static void took(const char *name) {
   static clock_t last_time = 0;
@@ -61,11 +61,9 @@ void run_minimization(double reduced_density,WhiteBearFluidVeff *f, double kT) {
     took("Doing the minimization step");
 
     const int Nz = f->Nz();
-    Vector Vext = f->Vext();  
     Vector r = f->get_r();
     Vector n = f->get_n();
     f->get_Fideal(); // FIXME this is a hokey trick to make dV be defined
-    Vector n3 = f->get_n3();
 
     printf("The length of the vectors is %d", n.get_size());
     FILE *o = fopen(fname, "w");
@@ -74,7 +72,7 @@ void run_minimization(double reduced_density,WhiteBearFluidVeff *f, double kT) {
       exit(1);
     }
     for (int i=0; i<Nz/2; i++) {
-      fprintf(o, "%g\t%g\t%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3), Vext[i], n3[i]);
+      fprintf(o, "%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3));
       if (i == int(Nz/2) - 1) {
         printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
         printf("   n -> %.9g (i.e. g -> %g)\n",
@@ -113,18 +111,16 @@ int main(int argc, char **argv) {
   sscanf(argv[2], "%lg", &temp);
 
   HomogeneousWhiteBearFluid hf = bh_homogeneous(reduced_density, temp);
-  printf("dividing by sigma = %g\n", sigma);    //OLD - ASK
-  printf("eta is %g\n", hf.n()*uipow(radius,3)*M_PI*4/3);    //OLD - ASK
   hf.mu() = 0;
   hf.mu() = hf.d_by_dn(); // set mu based on derivative of hf
   printf("bulk energy is %g\n", hf.energy());
   //hf.printme("XXX:");
-  printf("cell energy should be %g\n", hf.energy()*dx*dx*dx);
+  printf("cell energy should be %g\n", hf.energy()*xmax*ymax*zmax);
 
-  WhiteBearFluidVeff f = bh_inhomogeneous(temp, xmax, ymax, zmax, dx);
+  WhiteBearFluidVeff f = bh_inhomogeneous(temp, xmax, ymax, zmax, dx);  
   f.mu() = hf.mu();
   f.Vext() = 0;
-  f.Veff() = -temp*log(hf.n());
+  f.Veff() = -temp*log(hf.n()); // start with a uniform density as a guess
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector r = f.get_r();
