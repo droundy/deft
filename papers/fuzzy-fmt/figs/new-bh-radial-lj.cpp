@@ -74,11 +74,11 @@ void run_minimization(double reduced_density,WhiteBearFluidVeff *f, double kT) {
     for (int i=0; i<Nz/2; i++) {
       fprintf(o, "%g\t%g\n", r[i]/sigma, n[i]*uipow(sigma, 3));
       if (i == int(Nz/2) - 1) {
-       printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
-       printf("   n -> %.9g (i.e. g -> %g)\n",
-          n[i]*uipow(sigma, 3), n[i]*uipow(sigma, 3)/reduced_density);
-       printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
-      }  
+        printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+        printf("   n -> %.9g (i.e. g -> %g)\n",
+           n[i]*uipow(sigma, 3), n[i]*uipow(sigma, 3)/reduced_density);
+        printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+      }
     }
     fclose(o);
 
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
   //hf.printme("XXX:");
   printf("cell energy should be %g\n", hf.energy()*xmax*ymax*zmax);
 
-  WhiteBearFluidVeff f = bh_inhomogeneous(temp, xmax, ymax, zmax, dx); 
+  WhiteBearFluidVeff f = bh_inhomogeneous(temp, xmax, ymax, zmax, dx);
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.Veff() = -temp*log(hf.n()); // start with a uniform density as a guess
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
       if (!(f.Vext()[i] < Vmax)) f.Vext()[i] = Vmax;
       
       if (f.Vext()[i] > 0) {
-        f.Veff()[i] += f.Vext()[i]*temp/10; // adjust uniform guess based on repulsive potential
+        f.Veff()[i] += f.Vext()[i]; // adjust uniform guess based on repulsive potential
       }
     }
   }
