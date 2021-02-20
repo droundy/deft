@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #This program creates a plot of Free Energy difference vs gw at a specified 
 #temperature and density from data in kT*n*alldat.dat (or kT*n*alldat_tensor.dat) files
