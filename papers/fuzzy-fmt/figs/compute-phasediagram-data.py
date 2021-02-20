@@ -10,7 +10,7 @@
 #from data stored in the 'figs/crystal-data/kT-%.3f.dat' files.
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand:  python3 ./figs/compute-phasediagram-data.py
+#with comand: ./figs/compute-phasediagram-data.py
 
 from __future__ import print_function, division
 
