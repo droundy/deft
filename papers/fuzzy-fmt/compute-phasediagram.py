@@ -28,7 +28,7 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwstart, gwend, gwstep)
     cmd += ' --fv %g --dx %g --seed %g' % (fv, dx, seed)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
-    cmd += ' --d newdata_tensor/phase-diagram4'   #once new results are compared to the old, remove the "2" at the end of phase-diagram
+    cmd += ' --d newdata_tensor/phase-diagram4' 
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
