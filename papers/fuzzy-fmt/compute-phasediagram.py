@@ -44,12 +44,9 @@ kTs = np.arange(39, 0.5, -2)
 #kTs=np.append(kTs, 0.01)
 for kT in kTs:
     #for n in np.arange(0.01, 0.59, 0.02):   #homogeneous fluid
-        #run_new_melting(kT, n, 0.001, 0.001, 0.001, avoid_rq=True)    #temp, density, gw_start, gw_end, gw_step
+        #run_new_melting(kT, n, gwstart=0.001, gwend=0.001, gwstep=0.001, avoid_rq=True)
     # for n in np.arange(0.59, 1.2, 0.02):    #crystal
-        # if args.tensor:
-            # run_new_melting(kT, n, 0.01, 0.2, 0.01)    #temp, density, gw_start, gw_end, gw_step
-        # else:
-            # run_new_melting(kT, n, 0.01, 0.2, 0.01)
+        #run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
     for n in np.arange(0.60, 2.32, 0.02):
          #run_new_melting(kT, n, 0.001, 0.001, 0.001) #super fast for homogeneous at the high temps I'm running
          run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
