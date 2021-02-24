@@ -39,7 +39,7 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
 #kTs = np.arange(200, 20, -20)
 #kTs = np.arange(.05, .005, -0.02)
 ###kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
-kTs = np.arange(2.7, 0.05, -0.1)  #for small plot in paper
+kTs = np.arange(1.6, 0.05, -0.1)  #for small plot in paper
 #kTs = np.arange(200, 100, -20)
 #kTs = np.arange(1.15, 0.7, -0.05)
 #kTs=np.append(kTs, 0.01)
