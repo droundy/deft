@@ -56,6 +56,6 @@ for kT in kTs:
         #run_new_melting(kT, n, 0.01, 0.2, 0.01)
     #for n in np.arange(1.82, 2.8, 0.2):
         #run_new_melting(kT, n, 0.01, 0.2, 0.01)
-    for n in np.arange(0.29, 0.57, 0.02):    #crystal                                      #for small plot in paper
+    for n in np.arange(0.29, 0.59, 0.02):    #crystal                                      #for small plot in paper
         run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)  
 
