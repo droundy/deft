@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import division
 # We need the following two lines in order for matplotlib to work
