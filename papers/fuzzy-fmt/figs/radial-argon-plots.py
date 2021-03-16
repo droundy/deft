@@ -1,12 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import division
 # We need the following two lines in order for matplotlib to work
 # without access to an X server.
-import matplotlib, sys
-if 'show' not in sys.argv:
-  matplotlib.use('Agg')
+import matplotlib
 from pylab import *
+import os
 
 sigma = 0.3405 #nm
 sigma_over_R=2**(5/6)
