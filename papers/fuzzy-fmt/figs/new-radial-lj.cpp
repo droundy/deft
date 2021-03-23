@@ -120,7 +120,6 @@ int main(int argc, char **argv) {
   f.mu() = hf.mu();
   f.Vext() = 0;
   f.Veff() = -temp*log(hf.n()); // start with a uniform density as a guess
-
   {
     const int Ntot = f.Nx()*f.Ny()*f.Nz();
     const Vector r = f.get_r();
