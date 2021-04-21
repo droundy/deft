@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #This program produces temperature vs density, and pressure vs temperature phase diagrams
 #as well as plots of P-vs-T at fixed n, P-vs_V at fixed T, P-vs-n at fixed T, and T-vs-n at fixed P
