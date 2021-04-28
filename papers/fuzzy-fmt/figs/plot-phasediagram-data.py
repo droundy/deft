@@ -10,7 +10,7 @@
 #and creates the 'figs/crystal-data/kT-%.3f.dat' files used by this program.
 
 #NOTE: Run this program from directory deft/papers/fuzzy-fmt 
-#with command:   python3 ./figs/plot-phasediagram-data.py  [show (to show plots)]
+#with command: ./figs/plot-phasediagram-data.py  [show (to show plots)]
 
 from __future__ import print_function, division
 
