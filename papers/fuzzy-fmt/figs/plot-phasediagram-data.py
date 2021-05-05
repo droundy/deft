@@ -36,9 +36,11 @@ kT_data = []
 density_data = []   #index corresponds to kT
 pressure_data = []  #index corresponds to kT
 
+our_kTs = (0.5, 1, 1.5, 2, 2.5, 3)
+
 #for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
 #for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3): #for paper
-for kT in (0.5, 1, 1.5, 2, 2.5, 3): #for paper
+for kT in our_kTs: #for paper
 #for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3, 10, 14, 22, 30): #added higher temps
    n = []
    invn = []
@@ -221,9 +223,43 @@ plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing, 1/n_crystal_at_fre
 for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
+
+for temp in our_kTs:
+   volumes = []
+   pressures = []
+   for rd in np.arange(1.00, 0.25, -0.1):
+      fname = 'figs/mcfcc-%.4f-%.4f.dat.prs' % (rd, temp)
+      if os.path.exists(fname):
+         p = np.loadtxt(fname)
+         # we account below for the fact that the MC code does not spit
+         # out a reduced pressure, so we need to do a conversion.
+         p = p*2.0**(5/2.0)
+         pressures.append(p)
+         volumes.append(1/rd)
+   plt.plot(volumes, pressures, '.-', label='MC %g' % temp)
+
+for temp in our_kTs:
+   volumes = []
+   pressures = []
+   for rd in np.arange(1.8, 0.25, -0.01):
+      fname = 'data/mc/ff-%.4g_temp-%.1f-press.dat' % (rd, temp)
+      if os.path.exists(fname):
+         p = np.loadtxt(fname)
+         # we account below for the fact that the MC code does not spit
+         # out a reduced pressure, so we need to do a conversion.
+         # ????
+         # p = p*2.0**(5/2.0)
+
+         # Is it p or p_excess?!
+         # p = p + rd*temp
+         pressures.append(p)
+         volumes.append(1/rd)
+   if len(volumes) > 0:
+      plt.plot(volumes, pressures, 'x-', label='MC %g' % temp)
+
 plt.legend(loc='best')
 plt.ylim(0, 40)
-plt.xlim(0.95, 1.6)
+plt.xlim(0.95, 2.6)
 plt.xlabel('Volume per atom')
 plt.ylabel('$p^*$')
 plt.savefig('./figs/p-vs-V_at_fixed_T.pdf', transparent=True)
