@@ -36,8 +36,10 @@ kT_data = []
 density_data = []   #index corresponds to kT
 pressure_data = []  #index corresponds to kT
 
-for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3): #for paper
-   
+#for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
+#for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3): #for paper
+for kT in (0.5, 1, 1.5, 2, 2.5, 3): #for paper
+#for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3, 10, 14, 22, 30): #added higher temps
    n = []
    invn = []
    hfe = []
@@ -220,7 +222,7 @@ for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
 plt.legend(loc='best')
-plt.ylim(0, 26)
+plt.ylim(0, 40)
 plt.xlim(0.95, 1.6)
 plt.xlabel('Volume per atom')
 plt.ylabel('$p^*$')
