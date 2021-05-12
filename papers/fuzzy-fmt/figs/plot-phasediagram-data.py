@@ -38,6 +38,11 @@ pressure_data = []  #index corresponds to kT
 
 our_kTs = (0.5, 1, 1.5, 2, 2.5, 3)
 
+homogeneous_data = np.loadtxt('figs/homogeneous.dat')
+homogeneous_temperature = homogeneous_data[0, 1:]
+homogeneous_density = homogeneous_data[1:, 0]
+homogeneous_pressures = homogeneous_data[1:, 1:]
+
 #for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
 #for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3): #for paper
 for kT in our_kTs: #for paper
@@ -223,6 +228,11 @@ plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing, 1/n_crystal_at_fre
 for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
+
+for i in range(99, len(homogeneous_temperature), 100):
+   if homogeneous_temperature[i] > 3:
+      print(f'temp[{i}] = {homogeneous_temperature[i]}')
+      plt.plot(1/homogeneous_density, homogeneous_pressures[:,i], '--', label='kT=%g' % homogeneous_temperature[i])
 
 for temp in our_kTs:
    volumes = []
