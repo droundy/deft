@@ -216,7 +216,7 @@ plt.xlabel('$n^*$')
 plt.ylabel('$p^*$')
 plt.savefig('./figs/p-vs-n_at_fixed_T.pdf', transparent=True)
 
-plt.figure(figsize=myfigsize)
+plt.figure('p vs volume', figsize=myfigsize)
 
 #Plot P vs 1/n (or V) at constant kT
 plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing, 1/n_crystal_at_freezing, color='#eeeeee') 
