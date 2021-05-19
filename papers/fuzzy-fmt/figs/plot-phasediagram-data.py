@@ -277,7 +277,7 @@ for temp in our_kTs:
          p = p*2.0**(5/2.0)
          pressures.append(p)
          volumes.append(1/rd)
-   plt.plot(volumes, pressures, '.-', label='MC %g' % temp)
+   plt.plot(volumes, pressures, '.', label='MC %g' % temp)
 
 for temp in our_kTs:
    volumes = []
@@ -296,7 +296,7 @@ for temp in our_kTs:
          pressures.append(p)
          volumes.append(1/rd)
    if len(volumes) > 0:
-      plt.plot(volumes, pressures, 'x-', label='MC %g' % temp)
+      plt.plot(volumes, pressures, 'x', label='MC %g' % temp)
 
 plt.legend(loc='best')
 plt.ylim(0, 40)
