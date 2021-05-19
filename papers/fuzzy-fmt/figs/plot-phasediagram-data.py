@@ -44,12 +44,6 @@ print(homogeneous_temperature)
 homogeneous_density = homogeneous_data[1:, 0]
 homogeneous_pressures = homogeneous_data[1:, 1:]
 
-homogeneousbh_data = np.loadtxt('figs/homogeneous-bh.dat')
-homogeneousbh_temperature = homogeneousbh_data[0, 1:]
-print(homogeneousbh_temperature)
-homogeneousbh_density = homogeneousbh_data[1:, 0]
-homogeneousbh_pressures = homogeneousbh_data[1:, 1:]
-
 #for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
 #for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3): #for paper
 for kT in our_kTs: #for paper
@@ -236,15 +230,40 @@ for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
 
+temperatures_to_isotherm = [0.5, 1, 1.5, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
+
 for i in range(99, len(homogeneous_temperature), 100):
-   if homogeneous_temperature[i] > 3:
+   if homogeneous_temperature[i] in [T for T in temperatures_to_isotherm if T > 3]:
       print(f'temp[{i}] = {homogeneous_temperature[i]}')
       plt.plot(1/homogeneous_density, homogeneous_pressures[:,i], '--', label='kT=%g' % homogeneous_temperature[i])
-      
-for i in range(99, len(homogeneousbh_temperature), 100):
-   #if homogeneousbh_temperature[i] > 3:
-      print(f'temp[{i}] = {homogeneousbh_temperature[i]}')
-      plt.plot(1/homogeneousbh_density, homogeneousbh_pressures[:,i], ':', label='kT=%g' % homogeneousbh_temperature[i])
+
+def R_BH(kT):
+   eps = 1.0
+   sigma = 1.0 # /* Let's define sigma == 1 for this one? */
+   R = sigma*2.0**(1.0/6.0)
+   N = 10000
+   bh_diameter = 0
+   dr = R/N
+   beta = 1.0/kT
+   for r_cur in np.arange(dr/2, R, dr):
+      s6 = (sigma/r_cur)**6
+      bh_diameter += (1 - np.exp(-beta*(4*eps*(s6*s6 - s6) + eps)))*dr
+   return bh_diameter/2
+
+def p_carnahan_starling(density, kT):
+   eta = density*4*np.pi*R_BH(kT)**3/3
+   return density*kT*(1 + eta + eta**2 - eta**3)/(1 - eta)**3
+
+for kT in temperatures_to_isotherm:
+   V_BH = 4*np.pi*R_BH(kT)**3/3
+   V_freezing = V_BH/0.494 # This is the volume at which the fluid should freeze
+   V_melting = V_BH/0.545 # This is the volume at which the solid should melt
+   
+   my_V = np.arange(V_melting, 3, 0.01)
+   my_p = p_carnahan_starling(1/my_V, kT)
+   my_p[my_V<V_freezing] = p_carnahan_starling(1/V_freezing, kT)
+   
+   plt.plot(my_V, my_p, ':', label='kT=%g' % kT)
 
 for temp in our_kTs:
    volumes = []
