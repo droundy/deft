@@ -279,6 +279,18 @@ for temp in our_kTs:
          volumes.append(1/rd)
    plt.plot(volumes, pressures, '.', label='MC %g' % temp)
 
+# TODO Items week after May 19 2021
+#
+# - Change this code to make the colors the same at each temperature.  Show minimal legends.
+#
+# - Maybe try updating other visualizations to see if they are better
+#
+# - Try changing V range, p range, and T choices for clarity
+#
+# - Start looking again at the paper text.  Does anything need writing?
+#
+# - David: see about getting the new MC data into here?
+
 for temp in our_kTs:
    volumes = []
    pressures = []
