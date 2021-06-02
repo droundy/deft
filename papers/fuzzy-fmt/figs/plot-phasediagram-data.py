@@ -17,9 +17,13 @@ from __future__ import print_function, division
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import os
 import sys
 import styles
+
+from cycler import cycler
+
 
 matplotlib.rc('text', usetex=True)
 figscale = 1.1
@@ -230,6 +234,8 @@ for i in range(len(kT_data)):
    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
       plt.plot(1/density_data[i], pressure_data[i], label= 'kT=%g' % kT_data[i])
 
+#plt.gca().set_color_cycle(None)
+
 temperatures_to_isotherm = [0.5, 1, 1.5, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
 
 for i in range(99, len(homogeneous_temperature), 100):
@@ -310,6 +316,11 @@ for temp in our_kTs:
    if len(volumes) > 0:
       plt.plot(volumes, pressures, 'x', label='MC %g' % temp)
 
+
+plt.plot([], [], 'k--', label='SFMT')
+plt.plot([], [], 'k.', label='Monte Carlo - Z')
+plt.plot([], [], 'kx', label='Monte Carlo - Chris')
+plt.plot([], [], 'k:', label='Barker Henderson')
 plt.legend(loc='best')
 plt.ylim(0, 40)
 plt.xlim(0.95, 2.6)
