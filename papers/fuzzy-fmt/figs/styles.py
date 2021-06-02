@@ -15,12 +15,14 @@ def density_color(rd):
         return dc[key]
     return 'k'
 
-color = { 100.0: 'k',
+color = { 100.0: 'xkcd:dark blue',
+          20.0: 'xkcd:forest green',
           10.0: 'c',
           5.0: 'g',
-          2.5: 'k',
+          3.0: 'xkcd:orange',
+          2.5: 'xkcd:hot pink',
           2.0: 'g',
-          1.5: 'k',
+          1.5: 'xkcd:bright blue',
           1.0: 'b',
           0.6: 'm',
           0.5: 'r',
@@ -67,3 +69,8 @@ def bh_dft(kT):
     if kT in color:
         return color[kT] + ':'
     return ':'
+
+def color_from_kT(kT):
+    if kT in color:
+        return color[kT]
+    return 'xkcd:vomit'
