@@ -37,37 +37,17 @@ color = { 100.0: 'xkcd:dark blue',
           0.0: 'k' }
 line = { 'wcadft': '-',
          'wcamc' :'--'}
-coarsedft = {}
-dft = {}
-new_dft_code = {}
-dftwca = {}
-mc = {}
-mcwca = {}
 
-for k in color:
-    dftwca[k] = color[k] + ':'
-    dft[k] = color[k] + '--'
-    coarsedft[k] = color[k] + '-'
-    mc[k] = color[k] + ':'
-
-def new_dft_code(kT):
-    if kT in color:
-        return color[kT] + '-'
+def new_dft_linestyle():
     return '-'
 
-def mcwca(kT):
-    if kT in color:
-        return color[kT] + '--'
+def mcwca_linestyle():
     return '--'
 
-def other_mcwca(kT):
-    if kT in color:
-        return color[kT] + '.'
+def other_mcwca_linestyle():
     return '.'
 
-def bh_dft(kT):
-    if kT in color:
-        return color[kT] + ':'
+def bh_dft_linestyle():
     return ':'
 
 def color_from_kT(kT):

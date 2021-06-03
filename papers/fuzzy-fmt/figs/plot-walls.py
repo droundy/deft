@@ -38,9 +38,9 @@ def plot_walls(reduced_density, temps):
         z -= z.min()
         nreduced_density = data[:, 1]
         if have_labelled_dft:
-            plot(z, nreduced_density, styles.new_dft_code(temp))
+            plot(z, nreduced_density, styles.new_dft_linestyle(), color = styles.color_from_kT(temp))
         else:
-            plot(z, nreduced_density, styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
+            plot(z, nreduced_density, styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = 'DFT $T^* = %g$' % temp)
             have_labelled_dft = True
 
         fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
@@ -49,9 +49,9 @@ def plot_walls(reduced_density, temps):
         z -= z.min()
         nreduced_density = data[:, 1]
         if have_labelled_bh:
-            plot(z, nreduced_density, styles.color[temp]+':')
+            plot(z, nreduced_density, styles.bh_dft_linestyle(), color = styles.color[temp])
         else:
-            plot(z, nreduced_density, styles.color[temp]+':', label = 'BH $T^* = %g$' % temp)
+            plot(z, nreduced_density, styles.bh_dft_linestyle(), color = styles.color[temp], label = 'BH $T^* = %g$' % temp)
             have_labelled_bh = True
 
         # fname = 'figs/mcfcc-walls-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
@@ -67,7 +67,7 @@ def plot_walls(reduced_density, temps):
         smoothed = smooth(data[:, 1], NUM)
         print(reduced_density/100, temp, smoothed[len(smoothed)//2])
         plot(smooth(z, NUM), smooth(data[:, 1], NUM),
-             styles.mcwca(temp), label = 'soft-walls-backwards WCA MC $T^*$ = %g' % temp)
+             styles.mcwca_linestyle(), color = styles.color_from_kT(temp), label = 'soft-walls-backwards WCA MC $T^*$ = %g' % temp)
 
     title('Hard walls with bulk $n^* = %g$' % (reduced_density/100))
     xlabel(r'$z/\sigma$')

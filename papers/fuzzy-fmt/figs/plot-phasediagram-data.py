@@ -26,7 +26,7 @@ from cycler import cycler
 
 
 matplotlib.rc('text', usetex=True)
-figscale = 1.1
+figscale = 1.5
 myfigsize = (4*figscale, 3*figscale)
 
 # pressure at freezing (intersection point between homogeneous and crystal plots)
@@ -305,22 +305,23 @@ for temp in our_kTs:
              # label='MC %g' % temp
              )
 
-for V in np.arange(1.0, 5, 0.5):
-    fname = 'data/mc/zeno-n%.1f.dat' % V
-    if os.path.exists(fname):
-        print('found ', fname)
-        data = np.loadtxt(fname)
-        p_zeno = data[:, 1]
-        T_zeno = data[:, 0]
-        print(data)
-        for i in range(len(p_zeno)):
-            if T_zeno[i] in temperatures_to_isotherm:
-                print('got ', T_zeno[i], p_zeno[i])
-                plt.plot(V, p_zeno[i], '+',
-                         color=styles.color_from_kT(T_zeno[i]),
-                         )
-    else:
-        print(fname, 'not here')
+for T in temperatures_to_isotherm:
+   V_zeno_T = []
+   p_zeno_T = []
+   for V in np.arange(1.0, 5, 0.01):
+      fname = 'data/mc/z-wca-32-%.2f-p-vs-T.dat' % V
+      if os.path.exists(fname):
+         data = np.loadtxt(fname)
+         p_zeno = data[:, 1]
+         T_zeno = data[:, 0]
+         for i in range(len(p_zeno)):
+               if T_zeno[i] == T:
+                  p_zeno_T.append(p_zeno[i])
+                  V_zeno_T.append(V)
+      plt.plot(V_zeno_T, p_zeno_T, '-.',
+               color=styles.color_from_kT(T),
+               linewidth=0.5,
+               )
 
 # TODO Items week after May 19 2021
 #

@@ -52,10 +52,10 @@ def plot_soft_walls(reduced_density, temps):
         nreduced_density = data[:, 1]
         Vext = data[:, 2]
         if have_labelled_dft:
-            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_code(temp))
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp))
             # plot(z, Vext, 'r-')
         else:
-            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_code(temp), label = 'DFT $T^* = %g$' % temp)
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = 'DFT $T^* = %g$' % temp)
             have_labelled_dft = True
 
         fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
@@ -66,9 +66,9 @@ def plot_soft_walls(reduced_density, temps):
         z = z - z_center
         nreduced_density = data[:, 1]
         if have_labelled_bh:
-            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.color[temp]+':')
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.bh_dft_linestyle(), color = styles.color[temp])
         else:
-            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.color[temp]+':', label = 'BH $T^* = %g$' % temp)
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.bh_dft_linestyle(), color = styles.color[temp], label = 'BH $T^* = %g$' % temp)
             have_labelled_bh = True
         # plot(z-z_center, Vext, '--', label=f'Vext bh {temp}')
 
@@ -84,7 +84,7 @@ def plot_soft_walls(reduced_density, temps):
         smoothed_z = smooth(z-z_center, NUM)
         smoothed_n = smooth(data[:, 1], NUM)
         plot(smoothed_z[smoothed_z<=zmax], smoothed_n[smoothed_z<=zmax],
-             styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
+             styles.mcwca_linestyle(), color = styles.color_from_kT(temp), label = 'WCA MC $T^*$ = %g' % temp)
         # plot(z-z_center, Vext, '.', label=f'Vext mc {temp}')
         # plt.ylim(0,5)
 
