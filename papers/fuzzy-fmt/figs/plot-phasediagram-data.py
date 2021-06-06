@@ -309,6 +309,24 @@ for T in temperatures_to_isotherm:
    V_zeno_T = []
    p_zeno_T = []
    for V in np.arange(1.0, 5, 0.01):
+      fname = 'data/mc/z-wca-108-%.2f-p-vs-T.dat' % V
+      if os.path.exists(fname):
+         data = np.loadtxt(fname)
+         p_zeno = data[:, 1]
+         T_zeno = data[:, 0]
+         for i in range(len(p_zeno)):
+               if T_zeno[i] == T:
+                  p_zeno_T.append(p_zeno[i])
+                  V_zeno_T.append(V)
+      plt.plot(V_zeno_T, p_zeno_T, 'x-.',
+               color=styles.color_from_kT(T),
+               linewidth=0.5,
+               )
+
+for T in temperatures_to_isotherm:
+   V_zeno_T = []
+   p_zeno_T = []
+   for V in np.arange(1.0, 5, 0.01):
       fname = 'data/mc/z-wca-32-%.2f-p-vs-T.dat' % V
       if os.path.exists(fname):
          data = np.loadtxt(fname)
@@ -318,7 +336,7 @@ for T in temperatures_to_isotherm:
                if T_zeno[i] == T:
                   p_zeno_T.append(p_zeno[i])
                   V_zeno_T.append(V)
-      plt.plot(V_zeno_T, p_zeno_T, '-.',
+      plt.plot(V_zeno_T, p_zeno_T, '+-.',
                color=styles.color_from_kT(T),
                linewidth=0.5,
                )
