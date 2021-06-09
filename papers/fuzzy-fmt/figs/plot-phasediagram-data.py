@@ -245,7 +245,7 @@ for i in range(len(kT_data)):
 
 # plt.gca().set_color_cycle(None)
 
-temperatures_to_isotherm = [0.5, 1, 1.5, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
+temperatures_to_isotherm = [0.5, 1, 1.5, 2.0, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
 
 for i in range(99, len(homogeneous_temperature), 100):
     if homogeneous_temperature[i] in [T for T in temperatures_to_isotherm if T > 3]:
