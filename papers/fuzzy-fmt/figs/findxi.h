@@ -57,10 +57,10 @@ static inline double find_Xi(double T) {
   } while (xi_hi - xi_lo > 0.000000001);
   last_T = T;
   last_Xi = xi_mid;
-  printf("our alpha at T=%g is %g\n", T, find_alpha(T));
-  printf("our Xi at T=%g is %g\n", T, xi_mid);
-  printf("our B2 = %g\n", B2_erf(xi_mid, T));
-  printf("correct B2 = %g\n", B2_wca(T));
+  // printf("our alpha at T=%g is %g\n", T, find_alpha(T));
+  // printf("our Xi at T=%g is %g\n", T, xi_mid);
+  // printf("our B2 = %g\n", B2_erf(xi_mid, T));
+  // printf("correct B2 = %g\n", B2_wca(T));
   return xi_mid;
 }
 

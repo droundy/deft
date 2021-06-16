@@ -234,21 +234,20 @@ plt.savefig('./figs/p-vs-n_at_fixed_T.pdf', transparent=True)
 
 plt.figure('p vs volume', figsize=myfigsize)
 
+temperatures_to_isotherm = [0.5, 1, 1.5, 2.0, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
+temperatures_to_isotherm = [0.5, 1, 1.5, 2.0, 2.5, 3, 5, 10, 15, 20, 30]
+
 # Plot P vs 1/n (or V) at constant kT
 plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing,
                   1/n_crystal_at_freezing, color='#eeeeee')
 for i in range(len(kT_data)):
-    if kT_data[i] in [0.1, 0.2, 0.5, 1.0] or True:
+    if kT_data[i] in temperatures_to_isotherm:
         plt.plot(1/density_data[i], pressure_data[i],
                  color=styles.color_from_kT(kT_data[i]),
                  label='kT=%g' % kT_data[i])
 
-# plt.gca().set_color_cycle(None)
-
-temperatures_to_isotherm = [0.5, 1, 1.5, 2.0, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
-
-for i in range(99, len(homogeneous_temperature), 100):
-    if homogeneous_temperature[i] in [T for T in temperatures_to_isotherm if T > 3]:
+for i in range(99, len(homogeneous_temperature)):
+    if homogeneous_temperature[i] in [T for T in temperatures_to_isotherm if T not in kT_data]:
         print(f'temp[{i}] = {homogeneous_temperature[i]}')
         plt.plot(1/homogeneous_density, homogeneous_pressures[:, i], '--',
                  color=styles.color_from_kT(homogeneous_temperature[i]),
@@ -288,46 +287,46 @@ for kT in temperatures_to_isotherm:
              # label='BH kT=%g' % kT
              )
 
-for temp in our_kTs:
-    volumes = []
-    pressures = []
-    for rd in np.arange(1.00, 0.25, -0.1):
-        fname = 'figs/mcfcc-%.4f-%.4f.dat.prs' % (rd, temp)
+# for temp in our_kTs:
+#     volumes = []
+#     pressures = []
+#     for rd in np.arange(1.00, 0.25, -0.1):
+#         fname = 'figs/mcfcc-%.4f-%.4f.dat.prs' % (rd, temp)
+#         if os.path.exists(fname):
+#             p = np.loadtxt(fname)
+#             # we account below for the fact that the MC code does not spit
+#             # out a reduced pressure, so we need to do a conversion.
+#             p = p*2.0**(5/2.0)
+#             pressures.append(p)
+#             volumes.append(1/rd)
+#     plt.plot(volumes, pressures, '.',
+#              color=styles.color_from_kT(temp),
+#              # label='MC %g' % temp
+#              )
+
+for T in temperatures_to_isotherm:
+    V_zeno_T = []
+    p_zeno_T = []
+    for V in np.arange(1.0, 5, 0.01):
+        fname = 'data/mc/z-wca-108-%.2f-p-vs-T.dat' % V
         if os.path.exists(fname):
-            p = np.loadtxt(fname)
-            # we account below for the fact that the MC code does not spit
-            # out a reduced pressure, so we need to do a conversion.
-            p = p*2.0**(5/2.0)
-            pressures.append(p)
-            volumes.append(1/rd)
-    plt.plot(volumes, pressures, '.',
-             color=styles.color_from_kT(temp),
-             # label='MC %g' % temp
-             )
+            data = np.loadtxt(fname)
+            p_zeno = data[:, 1]
+            T_zeno = data[:, 0]
+            for i in range(len(p_zeno)):
+                if T_zeno[i] == T:
+                    p_zeno_T.append(p_zeno[i])
+                    V_zeno_T.append(V)
+        plt.plot(V_zeno_T, p_zeno_T, '.-.',
+                 color=styles.color_from_kT(T),
+                 linewidth=0.5,
+                 )
 
 for T in temperatures_to_isotherm:
    V_zeno_T = []
    p_zeno_T = []
    for V in np.arange(1.0, 5, 0.01):
-      fname = 'data/mc/z-wca-108-%.2f-p-vs-T.dat' % V
-      if os.path.exists(fname):
-         data = np.loadtxt(fname)
-         p_zeno = data[:, 1]
-         T_zeno = data[:, 0]
-         for i in range(len(p_zeno)):
-               if T_zeno[i] == T:
-                  p_zeno_T.append(p_zeno[i])
-                  V_zeno_T.append(V)
-      plt.plot(V_zeno_T, p_zeno_T, 'x-.',
-               color=styles.color_from_kT(T),
-               linewidth=0.5,
-               )
-
-for T in temperatures_to_isotherm:
-   V_zeno_T = []
-   p_zeno_T = []
-   for V in np.arange(1.0, 5, 0.01):
-      fname = 'data/mc/z-wca-32-%.2f-p-vs-T.dat' % V
+      fname = 'data/mc/z-wca-256-%.2f-p-vs-T.dat' % V
       if os.path.exists(fname):
          data = np.loadtxt(fname)
          p_zeno = data[:, 1]
@@ -353,32 +352,32 @@ for T in temperatures_to_isotherm:
 #
 # - David: see about getting the new MC data into here?
 
-for temp in our_kTs:
-    volumes = []
-    pressures = []
-    for rd in np.arange(1.8, 0.25, -0.01):
-        fname = 'data/mc/ff-%.4g_temp-%.1f-press.dat' % (rd, temp)
-        if os.path.exists(fname):
-            p = np.loadtxt(fname)
-            # we account below for the fact that the MC code does not spit
-            # out a reduced pressure, so we need to do a conversion.
-            # ????
-            # p = p*2.0**(5/2.0)
+# for temp in our_kTs:
+#     volumes = []
+#     pressures = []
+#     for rd in np.arange(1.8, 0.25, -0.01):
+#         fname = 'data/mc/ff-%.4g_temp-%.1f-press.dat' % (rd, temp)
+#         if os.path.exists(fname):
+#             p = np.loadtxt(fname)
+#             # we account below for the fact that the MC code does not spit
+#             # out a reduced pressure, so we need to do a conversion.
+#             # ????
+#             # p = p*2.0**(5/2.0)
 
-            # Is it p or p_excess?!
-            # p = p + rd*temp
-            pressures.append(p)
-            volumes.append(1/rd)
-    if len(volumes) > 0:
-        plt.plot(volumes, pressures, 'x',
-                 color=styles.color_from_kT(temp),
-                 # label='MC %g' % temp
-                 )
+#             # Is it p or p_excess?!
+#             # p = p + rd*temp
+#             pressures.append(p)
+#             volumes.append(1/rd)
+#     if len(volumes) > 0:
+#         plt.plot(volumes, pressures, 'x',
+#                  color=styles.color_from_kT(temp),
+#                  # label='MC %g' % temp
+#                  )
 
 
 plt.plot([], [], 'k--', label='SFMT')
-plt.plot([], [], 'k.', label='Monte Carlo - Patrick')
-plt.plot([], [], 'kx', label='Monte Carlo - Chris')
+plt.plot([], [], 'k.-.', linewidth=0.5, label='Monte Carlo - Zeno')
+# plt.plot([], [], 'kx', label='Monte Carlo - Chris')
 plt.plot([], [], 'k:', label='Barker Henderson')
 plt.legend(loc='best')
 plt.ylim(0, 40)
