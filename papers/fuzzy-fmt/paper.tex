@@ -137,24 +137,36 @@ k_BT/\epsilon$.
 The excess free energy of SFMT, like that of Rosenfeld's
 FMT~\cite{rosenfeld1989}, is derived using dimensional crossover 
 from the exact free energy in the zero-dimensional cavity limit~\cite{schmidt1999density}. 
-It is written as an integral of functions
+It is written as an integral of a set of functions
 \begin{equation}
 A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; , \label{eq:sfmt-excess-free}
 \end{equation}
-with integrands
+%with integrands
+defined as
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{1-n_3} \\
-%\Phi_3 &= \frac{{n_2}^3-3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}+\frac{9}{2}[\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}\\
-\Phi_3 &= \frac{1}{24\pi(1-n_3)^2}\left({n_2}^3-3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}\color{white}\frac{1}{1}\right)\color{black}
-%+\frac{9}{2}[\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
+%\Phi_3 &= \frac{{n_2}^3-3n_2\mathbf{n}_{V2}\cdot\mathbf{n}_{V2}+\frac{9}{2}
+%[\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}
+%-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}\\
+\Phi_3 &= \frac{1}{24\pi(1-n_3)^2}\left({n_2}^3-3n_2\mathbf{n}_{V2}
+\cdot\mathbf{n}_{V2}\color{white}\frac{1}{1}\right)\color{black}
+%+\frac{9}{2}[\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}
+%\cdot{\mathbf{n}_{V2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
 \label{eq:sfmt-phi3}
 \end{align}
-\begin{displaymath}\color{white}\left(\color{black}+\frac{9}{2}[\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
-where we have used the tensor version of $\Phi_3$ formulated by Tarazona~\cite{tarazonaFIXME,santos2012phi3}.
-The integrands are functions of a set of weighted densities $n_{i}(\textbf{r})$ given by %known as \emph{fundamental measures}.
-%The integrand functions are functions of a set of weighted densities known as \emph{fundamental measures} derived using dimensional crossover from the exact free energy
+\begin{displaymath}\color{white}\left(\color{black}+\frac{9}{2}
+[\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-
+\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
+where we have used the tensor version of $\Phi_3$ formulated by 
+Tarazona~\cite{tarazonaFIXME,santos2012phi3}.
+%The integrands 
+These are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
+given by %known as \emph{fundamental measures}.
+%The integrand functions are functions of a set of weighted densities 
+%known as \emph{fundamental measures} derived using dimensional crossover 
+%from the exact free energy
 %in the zero-dimensional cavity limit~\cite{schmidt1999density}.
 %which are functions of a set of weighted densities known as \emph{fundamental measures}, 
 %and which are derived using dimensional crossover from the exact free energy
@@ -165,8 +177,10 @@ The integrands are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
   n(\textbf{r}')w_i(|\textbf{r}-\textbf{r}'|) d\textbf{r}'
   \label{eq:n-convolution}
 \end{equation}
-are defined as convolutions with weight functions similar to those of
-hard-sphere FMT. Like hard-sphere fundamental measures, the new weight
+%where the weighted densities are 
+and defined as convolutions with weight 
+functions similar to those of hard-sphere FMT. 
+Like hard-sphere fundamental measures, the new weight
 functions are constructed so as to deconvolve the Mayer function,
 \begin{equation}
   f(r) = e^{-\beta V(r)} - 1
@@ -193,7 +207,8 @@ The weighting functions are related by
   \label{eq:n-3}
 \end{equation}
 where we note that the integral in Eq.~\ref{eq:n-3} is a
-one-dimensional integral over radius. Schmidt proved that as in traditional hard-sphere fundamental measure theory, 
+one-dimensional integral over radius. Schmidt proved that as in traditional 
+hard-sphere fundamental measure theory, 
 SFMT reproduces the exact functional in the low-density limit, provided the 
 weighting function that defines $n_2$ is related to the slope of the Mayer 
 function by a convolution with itself
@@ -206,7 +221,8 @@ function by a convolution with itself
 %are satisfied by traditional hard-sphere FMT as well as SFMT, for the same
 %reason: they are needed in order to ensure the correct low-density
 %behavior.  
-%One way of using Equation~\ref{eq:mayerandw2}, would be to choose a pair potential and deconvolve the Mayer
+%One way of using Equation~\ref{eq:mayerandw2}, would be to choose a pair 
+%potential and deconvolve the Mayer
 %function to solve for $w_2$. 
 %Equation~\ref{eq:mayerandw2} is the challenge point for SFMT:
 %There are two options for constructing a theory directly using SFMT:
@@ -218,10 +234,12 @@ function by a convolution with itself
 %However, deconvolving the Mayer $f$ function for a realistic potential is
 %From Equations~\ref{eq:Mayerfunction} and \ref{eq:mayerandw2} it can be seen that  
 
-One way to satisfy Equation~\ref{eq:mayerandw2} is to choose a pair potential $V(r)$ and deconvolve the Mayer function $f(r)$ to solve for $w_2(r)$. 
-However, deconvolving the Mayer function for a realistic potential is challenging, which has limited the number of applications of this
-theory to liquids in which the potential energy of interaction is
-proportional to the temperature. 
+One way to satisfy Equation~\ref{eq:mayerandw2} is to choose a pair 
+potential $V(r)$ and deconvolve the Mayer function $f(r)$ to solve for $w_2(r)$. 
+However, deconvolving the Mayer function for a realistic potential is 
+challenging. %which has limited the number of applications of this
+%theory to liquids in which the potential energy of interaction is
+%proportional to the temperature. 
 In the original papers introducing SFMT, Schmidt
 exclusively studied models analytically in which the potential is
 proportional to temperature~\cite{schmidt1999density,
@@ -231,47 +249,45 @@ several papers~\cite{schmidt1999density}, this assumption is not
 applicable to energetic interactions such as dominate the repulsion
 between molecules.
 
-Alternatively, one can 
-construct a $w_2(r)$, and use Equation~\ref{eq:mayerandw2} to solve for the pair potential that weighting
-function represents.  
+Another way to satisfy Equation~\ref{eq:mayerandw2} is to 
+construct a $w_2(r)$ and solve for 
+the pair potential that weighting function represents.  
 %In this paper, we will 
 %This is the approach we use in this paper.
-This is the approach we use in this paper. We use a weighting function for $w_2(r)$ introduced by Schmidt in Ref.~\citenum{schmidt2000fluid} which has the form of a Gaussian 
-%is formed using the analytically simple \emph{error function model} (or \emph{erf model}) introduced by Schmidt in 
+This is the approach we use in this paper. We use a weighting function 
+for $w_2(r)$ introduced by Schmidt in Ref.~\citenum{schmidt2000fluid} 
+which has the form of a Gaussian 
+%is formed using the analytically simple \emph{error function model} 
+%(or \emph{erf model}) introduced by Schmidt in 
 %Ref.~\citenum{schmidt2000fluid}.
 %which is a analytically simple functional form.  
-%In the erf model, the weighting function $w_2$ has the form of a Gaussian %The erf model corresponds to a Gaussian form for the
+%In the erf model, the weighting function $w_2$ has the form of a Gaussian 
+%The erf model corresponds to a Gaussian form for the
 %weighting function $w_2$:
 \begin{align}
-  w_2(r) &= \frac{\sqrt{2}}{\Xi \sqrt{\pi}} e^{-\left( \frac{r-\alpha/2}{\frac{\Xi}{\sqrt{2}}} \right)^2}
+  w_2(r) &= \frac{\sqrt{2}}{\Xi \sqrt{\pi}} e^{-\left( \frac{r-\alpha/2}
+  {\frac{\Xi}{\sqrt{2}}} \right)^2}
   \label{eq:gaussianw2}
 \end{align}
 where $\Xi$ and $\alpha$ are parameters with dimensions of length.
 This choice for $w_2(r)$ results in analytically simple forms 
 for the $w_3(r)$ weighting function, the Mayer function, and the pair
-potential where each contains an error function:
+potential:
 \begin{align}
-  w_3(r) &= \tfrac12 \left( 1 - \mathrm{erf}\left(\frac{r-\alpha/2}{\frac{\Xi}{\sqrt{2}}}\right) \right) \\
-  f(r) &= \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} \right) - 1 \right)
-  \label{eq:mayer-approx} \\
+  w_3(r) &= \tfrac12 \left( 1 - \mathrm{erf}\left(\frac{r-\alpha/2}
+  {\frac{\Xi}{\sqrt{2}}}\right) \right) \\
+  f(r) &= \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} 
+  \right) - 1 \right) \label{eq:mayer-approx} \\
   \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
-This model is called the \emph{error function model} (or \emph{erf model}). The erf potential is shown in Fig.~\ref{fig:potential-plot}, and the
-first derivative of the Mayer $f$ function corresponding to this
-potential is shown in Fig.~\ref{fig:w2-comparison}.  
+This model is called the \emph{error function model} (or \emph{erf model}). 
+%Fourier transforms of the weight functions are used to solve for the 
+%weighted densities in Equation~\ref{eq:n-convolution}.  
+Analytical expressions for the Fourier transforms of each of the 
+weighting functions is provided in Appendix~\ref{sec:fourier}.
 
-Fourier transforms of the weight functions are used to solve for the weighted densities in Equation~\ref{eq:n-convolution}.  Analytical expressions for the Fourier transforms of each of the weighting functions is provided in Appendix~\ref{sec:fourier}.
 \subsection{Soft FMT for the WCA fluid}
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/potential-plot}
-\end{center}
-\caption{The WCA potential, and approximations to this potential
-  constructed for two different temperatures.}
-\label{fig:potential-plot}
-\end{figure}
 
 %Our approach is to approximate the effect a soft repulsive potential
 %%(specifically the potential of the WCA fluid) by using the erf
@@ -284,17 +300,17 @@ Fourier transforms of the weight functions are used to solve for the weighted de
 %erf potential in the same way that the Barker-Henderson approach uses
 %the hard-sphere potential to model a soft repulsive fluid.)
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/w2-comparison}
-\end{center}
-\caption{The derivative of the Mayer function $f(r)$ from the WCA
-  potential, and the convolution of the fitted Gaussian $w_2$ with
-  itself at two different temperatures.  According to
-  Eq.~\ref{eq:mayerandw2} these should be identical in order to
-  accurately reproduce the low-density behavior of the fluid.}
-\label{fig:w2-comparison}
-\end{figure}
+%\begin{figure}
+%\begin{center}
+%\includegraphics[width=\columnwidth]{figs/w2-comparison}
+%\end{center}
+%\caption{The derivative of the Mayer function $f(r)$ from the WCA
+  %potential, and the convolution of the fitted Gaussian $w_2$ with
+  %itself at two different temperatures.  According to
+  %Eq.~\ref{eq:mayerandw2} these should be identical in order to
+  %accurately reproduce the low-density behavior of the fluid.}
+%\label{fig:w2-comparison}
+%\end{figure}
 
 %As is evident
 %from Eq.~\ref{eq:Verf}, if the potential energy of interaction is
@@ -313,21 +329,27 @@ for one temperature.  At other temperatures, the same potential leads
 to an entirely different form for $f(r)$ and $w_2(r)$, which is not
 analytically tractable.
 
-Our approach is to use the erf potential with temperature-dependent parameters. 
-We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ at distance
-$\alpha$ corresponding to
-the maximum slope of the Mayer function. This tells us that the $\alpha$ parameter must be given by
+Our approach is to make the $\alpha$ and $\Xi$ parameters in the erf potential 
+temperature-dependent. 
+We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
+at distance $\alpha$ corresponding to
+the maximum slope of the Mayer function. This tells us that the $\alpha$ 
+parameter must be given by
 \begin{align}
   \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         \ln 2}} \right)^{\frac{1}{6}}.
 \end{align}
 The alpha parameter roughly measures the length-scale of the
-interaction, and like the Barker-Henderson diameter discussed later, decreases with
-increasing temperature.  Next, we set the second virial coeffecient formed using 
-the mayer function for the $\Vwca(r)$ potential in Eq.~\ref{eq:Vwca} equal to the second virial coefficent formed using the mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, and solve for the parameter $\Xi$ at a given temperature.
+interaction and, like the Barker-Henderson diameter discussed later, 
+decreases with increasing temperature.  Next, we set the second virial 
+coeffecient formed using the mayer function for the $\Vwca(r)$ potential 
+in Eq.~\ref{eq:Vwca} equal to the second virial coefficent formed using 
+the mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, 
+and solve for the parameter $\Xi$ at a given temperature.
 %\begin{displaymath}B_2=-\frac{1}{2}\int{f(r)~d{r}}\end{displaymath}
 \begin{equation}B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}\end{equation}
-%\begin{displaymath}\int{(e^{-\beta V_{wca}(r)} - 1)~d{r}}=\int{(e^{-\beta V_{erf}(r)} - 1)~d{r}}\end{displaymath}
+%\begin{displaymath}\int{(e^{-\beta V_{wca}(r)} - 1)~d{r}}=
+%\int{(e^{-\beta V_{erf}(r)} - 1)~d{r}}\end{displaymath}
 %Finally, equating the slope of both
 %potentials at $r = \alpha$ yields the other parameter
 %\begin{align}
@@ -337,25 +359,69 @@ the mayer function for the $\Vwca(r)$ potential in Eq.~\ref{eq:Vwca} equal to th
 The Xi parameter is a measure of the effective softness of the interaction, and
 increases with the temperature.  
 
-We show the resulting approximation
-for the potential in Figures~\ref{fig:potential-plot} for two
-different temperatures.  We see the temperature dependence of the
-approximation in comparison to the WCA potential, with the
-approximation at higher temperatures being more accurate for smaller
-differences. Vertical dotted lines show the values of $\alpha$ at
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/potential-plot}
+\end{center}
+\caption{The WCA potential, and approximations to this potential
+  constructed for two different temperatures.}
+\label{fig:potential-plot}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/w2-comparison}
+\end{center}
+\caption{The derivative of the Mayer function $f(r)$ from the WCA
+  potential, and the convolution of the fitted Gaussian $w_2$ with
+  itself at two different temperatures.  According to
+  Eq.~\ref{eq:mayerandw2} these should be identical in order to
+  accurately reproduce the low-density behavior of the fluid.}
+\label{fig:w2-comparison}
+\end{figure}
+
+Fig.~\ref{fig:potential-plot} shows the erf potential at two different 
+tempertures alongside the temperature independent WCA potential.  
+%
+%We show the resulting approximation for the potential in 
+%%Fig.~\ref{fig:potential-plot} for two different temperatures.  
+%
+Vertical dotted lines show the values of $\alpha$ at
 which $\Verf$ and $\Vwca$ are matched, a solid black vertical line
 represents the distance at which the WCA force goes to zero, and the
-horizontal dotted lines illustrate the two temperatures.  At both
-temperatures, the largest deviations are seen at very small distances,
+horizontal dotted lines illustrate the two temperatures. 
+% 
+%We see the temperature dependence of the approximation in comparison to  
+%the WCA potential, with the approximation at higher temperatures being 
+%more accurate for smaller differences. %Is this true anymore?? don't think so!
+%
+\textcolor{red}{We see the approximation is more accurate at higher 
+temperatures for smaller differences.} %Not so! - fix
+%
+At both temperatures, the largest deviations are seen at very small distances,
 and thus very high potential energies.
 
-Figure~\ref{fig:w2-comparison} compares the derivative of the Mayer
-function corresponding to the WCA pair potential with convolution of
-the the fitted Gaussian $w_2$ from Eq.~\ref{eq:gaussianw2} with
-itself, as in Eq.~\ref{eq:mayerandw2}.  \color{red}The two vertical dotted lines
-show the $\alpha$ where the potential functions have been matched, and
+%The erf potential is shown in Fig.~\ref{fig:potential-plot}, and the
+%
+%The first derivatives of the Mayer $f$ function corresponding to the erf
+%potential and to the WCA potential is shown %for the two different temperatures 
+%in Fig.~\ref{fig:w2-comparison} for comparison. %NO 
+%
+%Fig.~\ref{fig:w2-comparison} compares the derivative of the Mayer
+%function 
+%corresponding to the WCA pair potential 
+The derivative of the Mayer function corresponding to the WCA pair potential 
+is shown in Fig.~\ref{fig:w2-comparison} where it is compared to the 
+fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
+% as in Eq.~\ref{eq:mayerandw2}.  
+Ideally, the curves would match for each temperature provided 
+Eq.~\ref{eq:mayerandw2} is satisfied.
+The two vertical dotted lines
+show the value of $\alpha$ at which the potential functions have been matched, and
 the the solid vertical line shows where the WCA force, and potential,
-and thus $f'_{\mathrm{wca}}$, goes to zero. The erf result extends
+and thus $f'_{\mathrm{wca}}$, goes to zero. 
+%
+The erf result extends
 slightly past the cutoff at which $f'_{\mathrm{wca}}$ vanishes for
 both temperatures, but does quickly go to zero. At lower lower
 temperatures $w_2$ and $f'$ are more peaked and approach the cutoff, as
@@ -369,50 +435,60 @@ are Dirac $\delta$ functions.\color{black}
 
 \subsection{Freezing of the WCA fluid}
 
-Freezing is governed by entropy which the universe, or any closed system, 
-seeks to maximize according to the second law of Thermodynamics. When the 
-entropy of a pure substance in its liquid state is lower than the entropy 
-that it would have in its solid state at the same temperature, pressure, 
-and chemical potential an abrupt phase transistion occurs, that is, the 
-liquid freezes forming a crystalline structure. The particular crystalline 
+Freezing of a pure substance occurs when the free energy it would have 
+in its solid state is lower than what it would have its 
+fluid state at the same temperature, pressure, and chemical potential. 
+At freezing an abrupt phase transistion occurs and the particular %crystalline
+%a WCA fluid forms a crystalline structure. The 
 structure and density that result are affected by the interatomic potential. 
-When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) lattice 
-is formed~\cite{reference!} with a total of one atom in each parallelpiped-shaped 
-primative cell. 
+When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) 
+crystalline lattice structure is formed~\cite{reference!}.
+% with a total of one atom in each parallelpiped-shaped primative cell. 
 
+%Holding the temperature and number density fixed, 
 The equilibrium Helmholtz free energy of the crystal, and its corresponding 
-equilibrium number density profile $n(\vec{r})$ can be found at a given 
-temperature simply by varying the number density spatially 
+equilibrium number density profile $n(\vec{r})$ can be found for a given 
+temperature and overall number density simply by varying the number density profile spatially 
 %, the spatially varying number density, 
 %by changing %the spatial profile of the number density by varying 
 %the width of the gaussians centered at each lattice point, and the crystal cell size 
 until the free energy
 % - which is a functional of $n(\vec{r})$ - 
-is minimized. For the crystal the $n(\vec{r})$ used in the integral in Eq.\ref{eq:n-convolution} 
-is given by Gaussians centered at each lattice point specified by $\vec{R_i}$. 
-\begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}\int{e^{-\frac{|\vec{r}-\vec{R}|^2}{2\left(\sigma_g\right)^2}}d{\vec{r}}}  \end{equation}  
-$n(\vec{r})$ is changed by varying the width of the gaussians, \color{red} and by changing 
-the size of the crystal cell. \color{black}As the gaussian width gets large, the number 
-density becomes homogeneous. \color{red}A larger crystal cell models a larger fraction 
-of vacancies. \color{black} Monte-Carlo integration is employed to more efficiently 
+is minimized. 
+We use a sum of 
+%For the crystal the $n(\vec{r})$ used in the integral 
+%in Eq.\ref{eq:n-convolution} is given by 
+Gaussians, each centered at a lattice point specified by $\vec{R_i}$, to form 
+the number density profile 
+\begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
+\int{e^{-\frac{|\vec{r}-\vec{R_i}|^2}{2\left(\sigma_g\right)^2}}d{\vec{r}}}  \end{equation}  
+We can vary the number density profile $n(\vec{r})$ by changing the width of the gaussians s
+and the size of the crystal cell. \color{black}As the gaussian width gets large, the number 
+density becomes homogeneous as would be expected for a fluid. A larger crystal cell models a larger fraction 
+of vacancies. Monte-Carlo integration is employed to more efficiently 
 compute the weighted densities used to calculate the excess free energy which is then 
 added to the ideal free energy (computed analytically) to get the total free energy 
-which is minimized. The pressure is found from the negative of the slope of the Helmholtz 
+which is minimized. 
+
+Pressure is found from the negative of the slope of the Helmholtz 
 free energy per atom with respect to the inverse number density. 
-\begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
-The densities of both the solid and the liquid at the solid-liquid transition can then 
-be found using Maxwell's double tangent construction which equates the pressure of the 
-fluid and of the solid at the phase transition.
-
-
-
+\begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} 
+= -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
+The pressure at the phase transition can be obtained from the point of intersection
+that occurs when the chemical potential, or Gibbs free energy per atom,
+is plotted against the pressure for both the fluid and the solid at fixed temperature. 
+The number densities of both the solid and the liquid at the phase transition can then 
+be found from a plot of pressure verses the inverse density. 
+%using Maxwell's double tangent construction which equates the pressure of the 
+%fluid and of the solid at the phase transition.
 
 \subsection{Comparison to Barker-Henderson hard sphere}
 
 %Another approach to account for the temperature dependence of
 %realistic fluids is Barker-Henderson's
 %approach~\cite{barker1967perturbation}. This theory takes any general
-The Barker-Henderson fluid is known to give good results, so we use it as a reference to compare with our DFT results. 
+The Barker-Henderson fluid is known to give good results, so we use it 
+as a reference to compare with our DFT results. 
 In the BH approach, any general
 repulsive pair potential, $V(r)$ is used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter. The hard
