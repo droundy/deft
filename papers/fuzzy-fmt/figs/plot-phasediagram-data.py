@@ -91,17 +91,20 @@ for kT in our_kTs:  # for paper
     #print('coeff', coeff)
     fit_cfe = np.dot(functions, coeff)
 
-    dhfe = np.diff(hfe)  # Caution: depends on order of data files!
-    dcfe = np.diff(cfe)  # Caution: depends on order of data files!
-    dinvn = np.diff(invn)  # Caution: depends on order of data files!
-    mid_invn = invn[0:len(invn)-1]+dinvn/2
+    # pressure_skip is the number of points to skip over when
+    # taking finite difference derivatives.
+    pressure_skip = 1
+    dhfe = hfe[pressure_skip:] - hfe[:-pressure_skip]
+    dcfe = cfe[pressure_skip:] - cfe[:-pressure_skip]
+    dinvn = invn[pressure_skip:] - invn[:-pressure_skip]
+    mid_invn = invn[:-pressure_skip] + dinvn/2
+    mid_hfe = hfe[:-pressure_skip] + dhfe/2
+    mid_cfe = cfe[:-pressure_skip] + dcfe/2
+
     hpressure = -(dhfe/dinvn)  # for fixed N and Te
     cpressure = -(dcfe/dinvn)  # for fixed N and Te
 
     fit_p = np.dot(pressure_functions, coeff)
-
-    mid_hfe = 0.5*(hfe[1:] + hfe[:-1])
-    mid_cfe = 0.5*(cfe[1:] + cfe[:-1])
 
     mid_h_gibbs = mid_hfe + mid_invn*hpressure
     mid_c_gibbs = mid_cfe + mid_invn*cpressure
@@ -235,7 +238,7 @@ plt.savefig('./figs/p-vs-n_at_fixed_T.pdf', transparent=True)
 plt.figure('p vs volume', figsize=myfigsize)
 
 temperatures_to_isotherm = [0.5, 1, 1.5, 2.0, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
-temperatures_to_isotherm = [0.5, 1, 1.5, 2.0, 2.5, 3, 5, 10, 15, 20, 30]
+temperatures_to_isotherm = [0.5, 1, 2.0, 5, 10, 15, 20, 30]
 
 # Plot P vs 1/n (or V) at constant kT
 plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing,
@@ -379,7 +382,7 @@ plt.plot([], [], 'k--', label='SFMT')
 plt.plot([], [], 'k.-.', linewidth=0.5, label='Monte Carlo - Zeno')
 # plt.plot([], [], 'kx', label='Monte Carlo - Chris')
 plt.plot([], [], 'k:', label='Barker Henderson')
-plt.legend(loc='best')
+plt.legend(loc='upper right')
 plt.ylim(0, 60)
 plt.xlim(0.9, 2)
 plt.xlabel('Volume per atom')
