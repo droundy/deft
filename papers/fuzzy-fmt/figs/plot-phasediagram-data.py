@@ -391,11 +391,13 @@ plt.savefig('./figs/p-vs-V_at_fixed_T.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
 
+densities_to_plot = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+
 # --------------NEW
 # Plot P vs T  at constant n
 # for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]:    #densities to show on the plot
 # for n in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1]:  #densities to show on the plot
-for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  # densities to show on the plot in paper
+for n in densities_to_plot:  # densities to show on the plot in paper
     # for n in [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:  #densities to show on the plot in thesis
     p_mid_at_n_list = []
     kT_at_n_list = []
@@ -414,6 +416,24 @@ for n in [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:  # densities to show on th
     plt.plot(kT_at_n_list, p_mid_at_n_list,
              styles.density_color(n)+'-', label='n=%g' % n)
 
+for n in densities_to_plot:
+    fname = 'data/mc/z-wca-108-n%.2f-p-vs-T.dat' % n
+    if os.path.exists(fname):
+        data = np.loadtxt(fname)
+        p_zeno = data[:, 1]
+        T_zeno = data[:, 0]
+        plt.plot(T_zeno, p_zeno, '-.',
+                    color=styles.density_color(n),
+                    linewidth=0.5)
+for n in densities_to_plot:
+    fname = 'data/mc/z-wca-256-n%.2f-p-vs-T.dat' % n
+    if os.path.exists(fname):
+        data = np.loadtxt(fname)
+        p_zeno = data[:, 1]
+        T_zeno = data[:, 0]
+        plt.plot(T_zeno, p_zeno, '.--',
+                    color=styles.density_color(n),
+                    linewidth=0.5)
 
 for rd in np.arange(1.00, 0.25, -0.1):
     temps = []
@@ -455,7 +475,7 @@ plt.ylabel('$p^*$')
 plt.xlabel('$T^*$')
 plt.xlim(0, 3)  # for paper
 # plt.xlim(0.5,3) #for thesis
-plt.ylim(0, 40)
+plt.ylim(0, 35)
 plt.tight_layout()
 plt.savefig('./figs/p-vs-T_at_fixed_n.pdf', transparent=True)
 
