@@ -36,13 +36,14 @@ def B2_wca_numerical(T):
 def Xi(alpha, T, sigma = 1, eps = 1):
     B2wca = B2_wca_numerical(T)   #use with B2 wca numerical method  (default)
     xi_lo = 0
-    xi_hi = 1
+    xi_hi = sigma
     while xi_hi - xi_lo > 0.000001:
         xi_mid = 0.5*(xi_hi + xi_lo)
         if B2_erf_analytical(alpha, xi_mid, T) > B2wca:    #use with B2 erf analytical method (default)
             xi_hi = xi_mid
         else:
             xi_lo = xi_mid
+    print('Xi is', xi_mid)
     return xi_mid
 
 # # #CHECK---------------------------------------------------------------------
