@@ -1,4 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+
+# NOTE: Run this program from directory deft/papers/fuzzy-fmt
+# with command: ./figs/w2-comparison.py  [show (to show plots)]
 
 from __future__ import division, print_function
 # We need the following two lines in order for matplotlib to work
