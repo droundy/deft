@@ -33,7 +33,8 @@ def find_alpha(kT, sigma = 1, eps = 1):
 
 def parameters(kT, sigma = 1, eps = 1):
     # alpha = ( 2.0/(1.0 + np.sqrt(np.log(2)*kT/eps)) )**(1/6)
-    alpha = find_alpha(kT, sigma, eps)
+    #alpha = find_alpha(kT, sigma, eps)
+    alpha = find_xi.find_alpha(kT)
     # alpha = find_alpha(kT, sigma, eps)
     print(f'alpha = {alpha}')
     if np.isnan(alpha):

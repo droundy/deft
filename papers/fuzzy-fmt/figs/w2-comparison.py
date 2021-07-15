@@ -20,11 +20,12 @@ import styles
 kT = 2.5
 sigma = 1
 
-rmin=0.9
+rmin=0.7
 rmax=1.2
 
 alpha, Xi, diameter = wca_erf.parameters(kT)
 
+print(Xi)
 dr = 0.05*Xi
 r = np.linspace(rmin, diameter, int(rmax/dr))
 
