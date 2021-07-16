@@ -51,7 +51,7 @@ KbT=2
 rz=np.linspace(.01, 1, 20000)
 
 alpha=sigma*np.cbrt(np.sqrt((2/(1+np.sqrt((KbT*np.log(2))/epsilon)))))
-zeta = find_xi.Xi(alpha, KbT)
+zeta = find_xi.find_Xi(alpha, KbT)
 def w2(r):
     return (1/(zeta*np.sqrt(PI)))*np.exp(-(((r-(alpha/2))/zeta)*((r-(alpha/2))/zeta)))
 w1=w2(rz)/(4*PI*rz)
