@@ -1,6 +1,8 @@
 from __future__ import division, print_function
-#This program finds xi for a given temperture T (really kT) by setting the second virial coefficient
-#computed with V_wca equal to the second virial coefficient computed with V_erf.
+#This program finds alpha and xi for a given temperture T (really kT).
+#Xi is the variance of the derivative of the mayer function with respect to the radius r.
+#Alpha is found by setting the second virial coefficient computed with V_wca equal 
+#to the second virial coefficient computed with V_erf.
 #It is referenced by wca_erf.py which is referenced by potential-plot.py and by w2-comparison.py.
 
 from scipy import special
