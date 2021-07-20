@@ -16,11 +16,11 @@ def B2_erf_analytical(alpha, Xi, T) :
 
 
 #Compute B2_wca numerically by evaluating the integral (default method):
-def Vwca(r):
-    return 4*((1/r)**12-(1/r)**6) +  1
+def Vwca(r, sigma = 1, eps = 1):
+    return 4*eps*((sigma/r)**12-(sigma/r)**6) +  eps
     
-def Vwca_prime(r):
-	return 4*(-12*(1/r)**13+6*(1/r)**7)
+def Vwca_prime(r, sigma = 1, eps = 1):
+	return 4*eps*(-12*(sigma/r)**12+6*(sigma/r)**6)/r
     
 def f_wca(r, T):
     return np.exp(-Vwca(r)/T) - 1
