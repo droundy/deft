@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #This program plots Xi(T) and alpha(T)
-#Run this program from the directory it is listed in
+#Run this program from deft/papers/fuzzy-fmt 
 #with command ./figs/plot_xi.py
 
 import numpy as np
