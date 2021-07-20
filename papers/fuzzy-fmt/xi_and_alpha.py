@@ -1,7 +1,7 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 #Run this program from the directory it is listed in
-#with command ./Xi_and_alpha.py
+#with command ./xi_and_alpha.py
 
 from scipy import special
 from scipy.special import iv
