@@ -1,5 +1,5 @@
 from __future__ import division, print_function
-#This program finds alpha and xi for a given temperture T (really kT).
+#This program finds alpha and Xi for a given temperature T (really kT).
 #Xi is the variance of the derivative of the mayer function with respect to the radius r.
 #Alpha is found by setting the second virial coefficient computed with V_wca equal 
 #to the second virial coefficient computed with V_erf.
