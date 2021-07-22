@@ -33,14 +33,15 @@ def w1(r):
 
 def w0(r):
     return w2(r)/(4*PI*r*r)
+    
+KbT=2    #good up to 200
+alpha= find_xi.find_alpha(KbT)
+Xi = find_xi.find_Xi(alpha, KbT)
 
 
 plt.figure('weights vs r')
 
 ##Plot w0, w1, w2, w3 vs rz at KbT
-KbT=2    #good up to 200
-alpha= find_xi.find_alpha(KbT)
-Xi = find_xi.find_Xi(alpha, KbT)
 rz=np.linspace(.01, 1, 20000)
 plt.plot(rz/(alpha/2),w0(rz), label = 'w0', color='purple')
 plt.plot(rz/(alpha/2),w1(rz), label = 'w1', color='red')
