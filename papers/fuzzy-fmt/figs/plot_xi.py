@@ -16,6 +16,9 @@ alpha=[]
 for kT in np.arange(0.5, 200, 0.5):
     alpha_at_T = find_xi.find_alpha(kT)
     Xi_at_T = find_xi.find_Xi(alpha, kT)
+    #print ('T=', kT)
+    #print ('Xi_at_T=', Xi_at_T)
+    #print ('alpha_at_T=', alpha_at_T)
     alpha.append(alpha_at_T)
     Xi.append(Xi_at_T)
     T.append(kT)
