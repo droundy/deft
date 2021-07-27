@@ -47,7 +47,7 @@ double R_BH(const double kT) {
 
 int main(int, char **) {
   FILE *out = fopen("papers/fuzzy-fmt/figs/homogeneous-bh.dat", "w");
-  const double Tmax = 3.1, dT = 0.01, Tmin = dT;
+  const double Tmax = 20.1, dT = 0.01, Tmin = dT;
   fprintf(out, "# n_reduced");
   for (double T = Tmin; T<= Tmax + dT/2; T += dT) {
     fprintf(out, "\tp(kT=%g)/nkT", T);

@@ -39,7 +39,8 @@ bool use_tensor_weight=true;
 char *free_energy_output_file = 0;
 
 // radius we need to integrate around a gaussian, in units of gw.
-const double inclusion_radius = 6.0;
+const double inclusion_radius = 6.0; //original MS
+//const double inclusion_radius = 6.0;   //testing higher temps 2021
 
 static inline double time() {
   return clock()/double(CLOCKS_PER_SEC);
@@ -563,7 +564,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           for (int k=0; k<Nl; k++) {
             vector3d r=i*da1 + j*da2 + k*da3;
 
-            const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over
+            const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over   // original MS
+            //const int many_cells=4 + 12*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over   // testing higher temps 2021
             //Gaussians father away won't contriubute much
             double n = 0;
             const double kT = temp;
@@ -861,7 +863,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     // Create all output data filename
     char *alldat_filename = new char[1024];
     char *alldat_filedescriptor = new char[1024];
-    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",
+    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",     //original  MS
+    //sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%06.5f",       //testing higher temps 2021
             temp, reduced_density, fv, gwidth);
     if (use_tensor_weight)  {
       sprintf(alldat_filename, "%s/%s-alldat_tensor.dat", data_dir, alldat_filedescriptor);

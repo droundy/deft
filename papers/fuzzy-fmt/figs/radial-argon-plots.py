@@ -88,4 +88,4 @@ legend(loc='best')
 tight_layout()
 savefig('figs/argon-plots.pdf')
 
-show()
+# show()
