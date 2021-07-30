@@ -96,8 +96,10 @@ with weight functions
 \begin{align}
     f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1(\vec{r}{) d}\vec{r}  \\ \nonumber\\
     \mu_1 &= \int \frac{\delta f_{v1ex}[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V} d\vec{r} \\
-          &= -\frac{k_BT}{V} \int d\vec r \int d \vec r' w_0(\vec r - \vec r')\ln(1-n_3(\vec r')) - w_3(\vec r - \vec r')\frac{n_o(\vec r')}{1-n_3(\vec r')}
-          &= 
+          &= -\frac{k_BT}{V} \int d\vec r \int d \vec r' w_0(\vec r - \vec r')
+              \ln(1-n_3(\vec r')) - w_3(\vec r - \vec r')\frac{n_o(\vec r')}{1-n_3(\vec r')} \\
+          &= -\frac{k_BT}{V} \int d\vec r' \ln(1-n_3(\vec r')) \int d \vec r  w_0(\vec r - \vec r') \\
+          &+ \frac{k_BT}{V} \int d\vec r' \frac{n_o(\vec r')}{1-n_3(\vec r')} \int d \vec r  w_3(\vec r - \vec r')
 \end{align}
 
 %\begin{align}
