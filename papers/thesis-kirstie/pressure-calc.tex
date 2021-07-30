@@ -1,0 +1,107 @@
+%This document address an alternative way to caluclate pressure
+
+\documentclass[double,12pt]{beavtex}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{subcaption}
+
+
+\begin{document}
+We want to find the pressure of our system from the chemical potential $\mu$
+given the number density $n$ and the Helmholtz free energy per volume $f_v$. 
+
+\begin{align}
+	F &= U - TS  \\
+	  &= TS -PV + \mu N - TS  \\
+	  &= -PV + \mu N  \\ \nonumber\\
+%
+	P &= \frac{\mu N}{V} - \frac{F}{V} \\
+	  &= \mu n - f_v   \\ \nonumber\\
+%
+	dF &= dU - TdS -SdT \\
+	   &= TdS - PdV + \mu N  - TdS -SdT\\
+	   &=  -SdT - PdV + \mu N \\
+	   &= \frac{\partial F}{\partial T}\bigg|_{V,N}dT 
+	       + \frac{\partial F}{\partial V}\bigg|_{T,N}dV 
+	       + \frac{\partial F}{\partial N}\bigg|_{T,V}dN \\ \nonumber\\
+%
+    \mu &= \frac{\partial F}{\partial N}\bigg|_{T,V} \\
+        &= \frac{\partial \frac{F}{V}}{\partial \frac{N}{V}}\bigg|_{T,V} \\
+        &= \frac{\partial f_v}{\partial n}\bigg|_{T,V}  
+\end{align}
+
+In terms of virtual variations of the functional $f_v[n(\vec r)]$, 
+$\mu$ is given by
+\begin{align}
+    \mu &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V} d\vec{r}
+\end{align}
+
+The excess Helmholtz free energy per volume is given by
+\begin{align}
+    f_{v_{ex}}[n(\vec{r})] &= \frac{k_BT}{V}\int(\Phi_1(\vec{r})
+    +\Phi_2(\vec{r})+\Phi_3(\vec{r}{)) d}\vec{r}
+\end{align}     
+where
+\begin{align}
+    \Phi_1 &= -n_{0}\ln(1-n_{3}) \\
+    \Phi_2 &= \frac{n_{1}n_{2}-\vec{n_{1}}\cdot\vec{n_{2}}}{1-n_{3}} \\
+    \Phi_3 &= \frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}
+       [\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}
+       -\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}  
+\end{align}
+and the weighted densities are given by 
+\begin{align}
+    n_\alpha(\vec r) &= \int n(\vec {r}~')w_\alpha(\vec r-\vec {r}~')
+                    ~d\vec {r}~'  \label{weighted_densities}  \\
+                     &= n\otimes w_\alpha(\vec r)
+\end{align}  
+with weight functions
+\begin{align}\label{eq:weights}
+  w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
+  w_{1}(r) &=\frac{w_{2}}{4\pi{r}} 
+\end{align}
+\begin{align}
+  w_2(r) &=\frac{\sqrt{2}}{\Xi\sqrt\pi}\exp^{-\left(\frac{r-\frac{\alpha}
+           {2}}{\Xi/\sqrt{2}}\right)^2}  \\
+  w_3(r) &=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r
+          -\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]  \\
+%    
+      \vec {w}_2 &= w_2~\hat r \\
+      \vec {w}_1 &= w_1~\hat r \\
+      \overleftrightarrow{w}_{m2}(\vec{r}) &= w_2(r)\left(\frac{\vec{r}
+                                        \vec{r}}{r^2}-\frac{I}{3}\right) 
+\end{align}
+
+\begin{equation}
+    {\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi{\Xi}^2}{3}
+   -\frac{4\pi}{k^2}\right)e^{-\frac{k^2\Xi^2}{8}}\cos(\frac{k\alpha}{2})
+   -\frac{2\pi\alpha}{3k}e^{-\frac{k^2\Xi^2}{8}}\sin(\frac{k\alpha}{2})}\nonumber
+\end{equation} 
+\begin{equation} %equation continued...
+   {+\frac{{(2\pi)}^{\frac{3}{2}}}{k^3\Xi}e^{-\left(\frac{\alpha^2}
+   {2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2^\frac{3}{2}}
+   +i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}
+   {2^\frac{3}{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}
+\end{equation} 
+
+\begin{align}
+    \widetilde{w}_{m2_{ij}}(\vec{k}) &= (\delta{ij}-3\frac{k_ik_j}{k^2})
+                                    \widetilde{w}_{{m2}_{x'x'}}(\vec{k})
+\end{align}
+\begin{align}
+    n_{m2ij}(\vec r) &=  \frac{1}{\left(2\pi\right)^3}\int d\vec k\, 
+                       n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
+\end{align} 
+\begin{align}
+    f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1(\vec{r}{) d}\vec{r}  \\ \nonumber\\
+    \mu_1 &= \int \frac{\delta f_{v1ex}[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V} d\vec{r} \\
+          &= -\frac{k_BT}{V} \int d\vec r \int d \vec r' w_0(\vec r - \vec r')\ln(1-n_3(\vec r')) - w_3(\vec r - \vec r')\frac{n_o(\vec r')}{1-n_3(\vec r')}
+          &= 
+\end{align}
+
+%\begin{align}
+%\end{align}
+
+
+\end{document}
