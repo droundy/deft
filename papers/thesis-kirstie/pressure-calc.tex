@@ -172,7 +172,7 @@ with weight functions
    -\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~}\vec{k}  \\
     & \approx  \frac{4\pi{i}}{k^2}\left(1-\frac{k^2\Xi^2}{8}\right)\left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\left(1\right)\right]{~}\vec{k}\\
     & \approx  \left(\frac{4\pi{i}}{k^2}-\frac{4\pi i\Xi^2}{8}\right)\left[\frac{\Xi^2k^2\alpha}{8}+\frac{\alpha}{2}-\frac{\alpha}{2}\right]{~}\vec{k} \\
-    \widetilde{\vec w}_2(k=0) & \approx \frac{\pi\Xi^2\alpha i}{4}  \mbox{\textcolor{red}{~~ERROR}}
+    \widetilde{\vec w}_2(k=0) & \approx \frac{\pi\Xi^2\alpha i}{4} {~}\vec{k} = 0\mbox{\textcolor{red}{~~ERROR?}}
 \end{align}
 
 \begin{align}
@@ -182,13 +182,19 @@ with weight functions
    +\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}{\sqrt{2}\Xi}
    \right)\right]\color{white}\right]\color{black}  \nonumber \\
  & \color{white}\left[\color{black}-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~}\color{black}\vec{k} \\
-    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}2\operatorname{Re}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right) -\frac{i}{k^2}\left(1-\frac{k^2\Xi^2}{8}\right)\left(1\right) \\
-    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[e^{\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\frac{4}{\sqrt{\pi}}\left(\frac{k\Xi}{(\sqrt{2})^3} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{k^3\Xi^3}{(\sqrt{2})^3}\right)\right] \nonumber \\
-    &-\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) \\
-    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}\frac{4}{\sqrt{\pi}}\left(\frac{k\Xi}{(\sqrt{2})^3} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{k^3\Xi^3}{(\sqrt{2})^3}\right)-\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) \\
-    & \approx  \frac{i}{\sqrt{2}k^2} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{i\Xi^2}{\sqrt{2}}-\frac{i}{k^2}+\frac{i\Xi^2}{8} \\
-     \widetilde{\vec w}_1(k=0) & \approx  \infty    \mbox{\textcolor{red}{~~ERROR}}
+    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)\right)\right] \nonumber \\
+    &-\frac{i}{k^2}\left(1-\frac{k^2\Xi^2}{8}\right)\left(1\right) {~}\vec{k} \\
+    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}\frac{2}{\sqrt{\pi}}   \left(\frac{k\Xi}{2\sqrt{2}}   -\frac{2\left(\frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}\right)^3\right)\right] \nonumber \\
+    &-\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) {~}\vec{k}\\
+    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}\left[\frac{4}{\sqrt{\pi}}\left(\frac{k\Xi}{(\sqrt{2})^3} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{k^3\Xi^3}{(\sqrt{2})^3}\right)\right] -\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) {~}\vec{k}\\
+    & \approx  \frac{4i}{\sqrt{2}k^3\Xi}\left(\frac{k\Xi}{(\sqrt{2})^3} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{k^3\Xi^3}{(\sqrt{2})^3}\right)-\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) {~~~}\vec{k}\\
+    & \approx  \frac{i}{k^2} -\frac{(\frac{\alpha^2}{\Xi^2}+1)i\Xi^2}{3}-\frac{i}{k^2}+\frac{i\Xi^2}{8} {~~~}\vec{k}\\
+    & \approx  -\frac{(\frac{\alpha^2}{\Xi^2}+1)i\Xi^2}{3}+\frac{i\Xi^2}{8} {~~~}\vec{k}\\
+     \widetilde{\vec w}_1(k=0) = 0 
 \end{align}
+
+
+
 
 
 \end{document}
