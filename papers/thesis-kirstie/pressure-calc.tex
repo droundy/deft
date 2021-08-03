@@ -8,8 +8,9 @@
 
 
 \begin{document}
-We want to find the pressure of our system from the chemical potential $\mu$
-given the number density $n$ and the Helmholtz free energy per volume $f_v$. 
+We want to find the pressure of our system from the chemical potential 
+$\mu$ given the number density $n$ and the Helmholtz free energy per 
+volume $f_v$. 
 
 \begin{align}
 	F &= U - TS  \\
@@ -27,14 +28,15 @@ given the number density $n$ and the Helmholtz free energy per volume $f_v$.
 	       + \frac{\partial F}{\partial N}\bigg|_{T,V}dN \\ \nonumber\\
 %
     \mu &= \frac{\partial F}{\partial N}\bigg|_{T,V} \\
-        &= \frac{\partial \frac{F}{V}}{\partial \frac{N}{V}}\bigg|_{T,V} \\
+        &= \frac{\partial \frac{F}{V}}{\partial \frac{N}{V}}\bigg|_{T,V}\\
         &= \frac{\partial f_v}{\partial n}\bigg|_{T,V}  
 \end{align}
 
 In terms of virtual variations of the functional $f_v[n(\vec r)]$, 
 $\mu$ is given by
 \begin{align}
-    \mu &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V} d\vec{r}
+    \mu &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}
+    \bigg|_{T,V} d\vec{r}
 \end{align}
 
 The excess Helmholtz free energy per volume is given by
@@ -76,7 +78,8 @@ with weight functions
 \begin{equation}
     {\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi{\Xi}^2}{3}
    -\frac{4\pi}{k^2}\right)e^{-\frac{k^2\Xi^2}{8}}\cos(\frac{k\alpha}{2})
-   -\frac{2\pi\alpha}{3k}e^{-\frac{k^2\Xi^2}{8}}\sin(\frac{k\alpha}{2})}\nonumber
+   -\frac{2\pi\alpha}{3k}e^{-\frac{k^2\Xi^2}{8}}\sin(\frac{k\alpha}{2})}
+   \nonumber
 \end{equation} 
 \begin{equation} %equation continued...
    {+\frac{{(2\pi)}^{\frac{3}{2}}}{k^3\Xi}e^{-\left(\frac{\alpha^2}
@@ -94,47 +97,136 @@ with weight functions
                        n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
 \end{align} 
 \begin{align}
-    f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1(\vec{r}{) d}\vec{r}  \\ \nonumber\\
-    \mu_1 &= \int \frac{\delta f_{v1ex}[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V} d\vec{r} \\
-          &= -\frac{k_BT}{V} \int d\vec r \int d \vec r' w_0(\vec r - \vec r')
-              \ln(1-n_3(\vec r')) - w_3(\vec r - \vec r')\frac{n_o(\vec r')}{1-n_3(\vec r')} \\ \nonumber\\
-          &= -\frac{k_BT}{V} \int d\vec r' \ln(1-n_3(\vec r')) \int d \vec r  w_0(\vec r - \vec r') \nonumber\\
-          &+ \frac{k_BT}{V} \int d\vec r' \frac{n_o(\vec r')}{1-n_3(\vec r')} \int d \vec r  w_3(\vec r - \vec r')
+    f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1(\vec{r}{) d}\vec{r} \\ \nonumber\\
+    \mu_1 &= \int \frac{\delta f_{v1ex}[n(\vec r)]}{\delta n(\vec r)}
+    \bigg|_{T,V} d\vec{r} \\
+        &= -\frac{k_BT}{V} \int d\vec r \int d \vec r' w_0(\vec r - \vec r')
+          \ln(1-n_3(\vec r')) - w_3(\vec r - \vec r')\frac{n_o(\vec r')}
+          {1-n_3(\vec r')} \\ \nonumber\\
+        &= -\frac{k_BT}{V} \int d\vec r' \ln(1-n_3(\vec r')) \int d \vec r  
+          w_0(\vec r - \vec r') \nonumber\\
+        &+ \frac{k_BT}{V} \int d\vec r' \frac{n_o(\vec r')}{1-n_3(\vec r')} 
+          \int d \vec r  w_3(\vec r - \vec r')  \\ \\
+        &= -\frac{k_BT}{V} \int d\vec r' \ln(1-n_3(\vec r'))(1)
+          + \frac{k_BT}{V} \int d\vec r' \frac{n_o(\vec r')}{1-n_3(\vec r')}
+          \left(\frac{\pi\Xi^2\alpha}{2}\right) \\ \\
+        &= -\frac{k_BT}{V}\int\ln(1-n_3(\vec r'))-\left(
+        \frac{\pi\Xi^2\alpha}{2}\right)\frac{n_o(\vec r')}{1-n_3(\vec r')}~d\vec r'
 \end{align}
 
 \begin{align}
-    f_{v2ex} &= \frac{k_BT}{V}\int \Phi_2(\vec{r}{) d}\vec{r}  \\ \nonumber\\
-    \mu_2 &= \int \frac{\delta f_{v2ex}[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V} d\vec{r} \\
-          &= \frac{k_BT}{V} \int d\vec r \int d \vec r' w_1(\vec r - \vec r')\frac{n_2(\vec r')}{1-n_3(\vec r')}   \nonumber\\
-          &+\frac{k_BT}{V} \int d\vec r \int d \vec r' w_2(\vec r - \vec r')\frac{n_1(\vec r')}{1-n_3(\vec r')}   \nonumber\\
-          &-\frac{k_BT}{V} \int d\vec r \int d \vec r'\frac{\vec w_1(\vec r - \vec r')\cdot \vec n_{v2}(\vec r')}{1-n_3(\vec r')}  \nonumber\\
-          &-\frac{k_BT}{V} \int d\vec r \int d \vec r'\frac{\vec w_2(\vec r - \vec r')\cdot \vec n_{v1}(\vec r')}{1-n_3(\vec r')}  \nonumber\\
-          &+\frac{k_BT}{V} \int d\vec r \int d \vec r' w_3(\vec r - \vec r') \frac{n_1(\vec r')n_2(\vec r')}{(1-n_3(\vec r'))^2}  \nonumber\\
-          &-\frac{k_BT}{V} \int d\vec r \int d \vec r' w_3(\vec r - \vec r') \frac{\vec n_{v1}(\vec r')\cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2}  \\  \nonumber\\
+    f_{v2ex} &= \frac{k_BT}{V}\int \Phi_2(\vec{r}{) d}\vec{r} \\ \nonumber\\
+    \mu_2 &= \int \frac{\delta f_{v2ex}[n(\vec r)]}{\delta n(\vec r)}
+          \bigg|_{T,V} d\vec{r} \\
+          &= \frac{k_BT}{V} \int d\vec r \int d \vec r' w_1(\vec r-\vec r')
+          \frac{n_2(\vec r')}{1-n_3(\vec r')}   \nonumber\\
+          &+\frac{k_BT}{V} \int d\vec r \int d \vec r' w_2(\vec r-\vec r')
+          \frac{n_1(\vec r')}{1-n_3(\vec r')}   \nonumber\\
+          &-\frac{k_BT}{V} \int d\vec r \int d \vec r'\frac{\vec w_1(\vec r 
+          - \vec r')\cdot \vec n_{v2}(\vec r')}{1-n_3(\vec r')}  \nonumber\\
+          &-\frac{k_BT}{V} \int d\vec r \int d \vec r'\frac{\vec w_2(\vec r 
+          - \vec r')\cdot \vec n_{v1}(\vec r')}{1-n_3(\vec r')}  \nonumber\\
+          &+\frac{k_BT}{V} \int d\vec r \int d \vec r' w_3(\vec r - \vec r') 
+          \frac{n_1(\vec r')n_2(\vec r')}{(1-n_3(\vec r'))^2}  \nonumber\\
+          &-\frac{k_BT}{V} \int d\vec r \int d \vec r' w_3(\vec r - \vec r')
+           \frac{\vec n_{v1}(\vec r')\cdot \vec n_{v2}(\vec r')}
+           {(1-n_3(\vec r'))^2} \\ \nonumber\\
 %          
-          &= \frac{k_BT}{V} \int d\vec r' \frac{n_1(\vec r')\int d \vec r ~w_2(\vec r - \vec r')+n_2(\vec r')\int d \vec r ~w_1(\vec r - \vec r')}{1-n_3(\vec r')} \nonumber\\
-          &+\frac{k_BT}{V} \int d\vec r' \frac{n_1(\vec r')n_2(\vec r')-\vec n_{v1}(\vec r')\cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2} \int d \vec r ~w_3(\vec r - \vec r')
+          &= \frac{k_BT}{V} \int d\vec r' \frac{n_1(\vec r')\int d \vec r
+           ~w_2(\vec r - \vec r')
+          +n_2(\vec r')\int d \vec r ~w_1(\vec r - \vec r')}
+          {1-n_3(\vec r')} \nonumber\\
+          &+\frac{k_BT}{V} \int d\vec r' \frac{n_1(\vec r')n_2(\vec r')
+          -\vec n_{v1}(\vec r')
+          \cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2} \int d \vec r 
+          ~w_3(\vec r - \vec r') \\ \nonumber \\
+%%            
+           %&= \frac{k_BT}{V}\int d\vec r' \frac{n_1(\vec r')
+           %\pi(\Xi^2 + \alpha^2)
+          %+n_2(\vec r')\left(\frac{\alpha}{2}\right)}{1-n_3(\vec r')} 
+          %\nonumber \\
+          %&+ \frac{k_BT}{V}\int d\vec r' \frac{n_1(\vec r')n_2(\vec r')
+          %-\vec n_{v1}(\vec r')
+          %\cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2}
+          %\left(\frac{\pi\Xi^2\alpha}{2}\right)   \\ \\
+%
+           &= \frac{k_BT}{V}\int  \frac{n_1(\vec r')
+           \pi(\Xi^2 + \alpha^2)
+          +n_2(\vec r')\left(\frac{\alpha}{2}\right)}{1-n_3(\vec r')} 
+          \nonumber \\
+          &+ \frac{n_1(\vec r')n_2(\vec r')
+          -\vec n_{v1}(\vec r')
+          \cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2}
+          \left(\frac{\pi\Xi^2\alpha}{2}\right)   ~d\vec r'
+%%            
+           %&= \frac{k_BT}{V}\int  \frac{\left[n_1(\vec r')
+           %\pi(\Xi^2 + \alpha^2)+n_2(\vec r')\left(\frac{\alpha}{2}\right)\right]
+           %\left(1-n_3(\vec r')\right)}{(1-n_3(\vec r'))^2} 
+          %\nonumber \\
+          %&+ \frac{\left[n_1(\vec r')n_2(\vec r')-\vec n_{v1}(\vec r')
+          %\cdot \vec n_{v2}(\vec r')\right]}{(1-n_3(\vec r'))^2}
+          %\left(\frac{\pi\Xi^2\alpha}{2}\right)  ~d\vec r' \\
+%%            
+           %&= \frac{k_BT}{V}\int \left(n_1(\vec r')\pi(\Xi^2 + \alpha^2)  
+          %+n_2(\vec r')\left(\frac{\alpha}{2}\right)\right)\left(1-n_3(\vec r')\right)
+          %+ \left(n_1(\vec r')n_2(\vec r')-\vec n_{v1}(\vec r')
+          %\cdot \vec n_{v2}(\vec r')\right)\left(\frac{\pi\Xi^2\alpha}{2}\right)
+          %\frac{1}{(1-n_3(\vec r'))^2} ~d\vec r'
 \end{align}
 
 \begin{align}
-    f_{v3ex} &= \frac{k_BT}{V}\int \Phi_3(\vec{r}{) d}\vec{r}  \\ \nonumber\\
-    \mu_3 &= \int \frac{\delta f_{v3ex}[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V} d\vec{r} \\
+    f_{v3ex} &= \frac{k_BT}{V}\int \Phi_3(\vec{r}{) d}\vec{r}  \\ 
+    \nonumber\\
+    \mu_3 &= \int \frac{\delta f_{v3ex}[n(\vec r)]}{\delta n(\vec r)}
+    \bigg|_{T,V} d\vec{r} \\
           &= \frac{k_BT}{V} \int d\vec r \int d \vec r'   \nonumber\\
-\end{align}          
+\end{align}      
+
+
+
+
+    
 
 \begin{align}
-   \int_{all space} w_i(r) ~d\vec r &= \int w_i(r)e^{i\vec k \cdot \vec r}~d\vec r  = \widetilde{w}_i(k) \mbox{~~with $\vec k = 0$}
+   \int_{all space} w_i(r) ~d\vec r &= \int w_i(r)e^{i\vec k \cdot 
+   \vec r}~d\vec r 
+    = \widetilde{w}_i(k) \mbox{~~with $\vec k = 0$}
+\end{align}
+
+%\begin{align}
+    %\widetilde{w}_0(k=0)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(
+         %\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}
+         %\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)
+          %+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}
+          %{\sqrt{2}\Xi}\right)\right]
+%\end{align}
+
+\begin{align}
+    \widetilde{w}_0(k) &= \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(
+    \frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}
+    \left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)
+    +\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}
+    {\sqrt{2}\Xi}\right)\right] \\
+    & \approx   \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}
+    {2\Xi^2}\right)}\left[2\operatorname{Re}\left(\operatorname{erf}
+    \left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)
+    \right)\right] \\
+    & \approx   \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}
+    {2\Xi^2}\right)}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}
+    \frac{2}{\sqrt{\pi}}\left(\frac{k\Xi}{2\sqrt{2}} -\frac{2\left(
+    \frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}
+    \right)^3\right)\right] \\
+    & \approx   \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}\left(\frac{4}{\sqrt{\pi}}
+    \right)\left(\frac{k\Xi}{2\sqrt{2}} -\frac{\frac{\alpha^2}{\Xi^2}+1}
+    {3}\left(\frac{k^3\Xi^3}{16\sqrt{2}}\right)\right) \\
+     \widetilde{w}_0(k=0) & \approx 1
 \end{align}
 
 \begin{align}
-    \widetilde{w}_0(k=0)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}
-                         \left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)
-                         +\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]
-\end{align}
-
-\begin{align}
-    \widetilde{w}_1(k) &= \frac{1}{k}e^{-\frac{k^2\Xi^2}{8}}\sin\left(\frac{k\alpha}{2}\right)  \\
-  & \approx\left(\frac{1}{k}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(\frac{k\alpha}{2}\right)  \\
+    \widetilde{w}_1(k) &= \frac{1}{k}e^{-\frac{k^2\Xi^2}{8}}
+    \sin\left(\frac{k\alpha}{2}\right)  \\
+  & \approx\left(\frac{1}{k}\right)\left(1-\frac{k^2\Xi^2}{8}\right)
+  \left(\frac{k\alpha}{2}\right)  \\
   \widetilde{w}_1(k=0) & \approx\frac{\alpha}{2}
 \end{align}
 
@@ -142,58 +234,74 @@ with weight functions
      \widetilde{w}_2(k) &= \frac{2\pi}{k}e^{-\frac{k^2\Xi^2}{8}}
        \left[\frac{k\Xi^2}{2}\cos\left(\frac{k\alpha}{2}\right)
        +\alpha\sin\left(\frac{k\alpha}{2}\right)\right] \\
-       &  \approx\left(\frac{2\pi}{k}\right)\left(1-\frac{k^2\Xi^2}{8}\right)
-       \left[\frac{k\Xi^2}{2}\left(1\right)+\alpha\left(\frac{k\alpha}{2}\right)\right] \\
+       &  \approx\left(\frac{2\pi}{k}\right)\left(1-\frac{k^2\Xi^2}{8}
+       \right)\left[\frac{k\Xi^2}{2}\left(1\right)+\alpha\left(
+       \frac{k\alpha}{2}\right)\right] \\
        \widetilde{w}_2(k=0) & \approx \pi(\Xi^2 + \alpha^2)
 \end{align}
 
 \begin{align}
-     \widetilde{w}_3(k) &= \frac{4\pi}{k^3}e^{-\frac{k^2\Xi^2}{8}}
-       \left[\left(1+\frac{k^2\Xi^2}{4}\right)\sin\left(\frac{k\alpha}{2}\right)
-       -\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right] \\
-       & \approx \left(\frac{4\pi}{k^3}\right)\left(1-\frac{k^2\Xi^2}{8}\right)
-          \left[\left(1+\frac{k^2\Xi^2}{4}\right)\left(\frac{k\alpha}{2}\right)-\frac{k\alpha}{2}\left(1\right)\right] \\
-       \widetilde{w}_3(k=0) & \approx \frac{\pi\Xi^2\alpha}{2}
+  \widetilde{w}_3(k) &= \frac{4\pi}{k^3}e^{-\frac{k^2\Xi^2}{8}}
+    \left[\left(1+\frac{k^2\Xi^2}{4}\right)\sin\left(\frac{k\alpha}{2}
+    \right)-\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right] \\
+    & \approx \left(\frac{4\pi}{k^3}\right)\left(1-\frac{k^2\Xi^2}{8}
+    \right)\left[\left(1+\frac{k^2\Xi^2}{4}\right)\left(\frac{k\alpha}
+    {2}\right)-\frac{k\alpha}{2}\left(1\right)\right] \\
+     \widetilde{w}_3(k=0) & \approx \frac{\pi\Xi^2\alpha}{2}
 \end{align}
 
 \begin{align}
-    \widetilde{w}_0(k) &= \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}
-    \left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)
-    +\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right] \\
-    & \approx   \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)\right)\right]  \\
-    & \approx   \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}\frac{2}{\sqrt{\pi}}\left(\frac{k\Xi}{2\sqrt{2}} -\frac{2\left(\frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}\right)^3\right)\right]  \\
-    & \approx   \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}\left(\frac{4}{\sqrt{\pi}}\right)\left(\frac{k\Xi}{2\sqrt{2}} -\frac{\frac{\alpha^2}{\Xi^2}+1}{3}\left(\frac{k^3\Xi^3}{16\sqrt{2}}\right)\right) \\
-     \widetilde{w}_0(k=0) & \approx 1
+   \widetilde{\vec{w}}_2(\vec{k})&= \frac{4\pi{i}}{k^2}
+   e^{-\frac{k^2\Xi^2}{8}}
+   \left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\sin\left(
+   \frac{k\alpha}{2}\right)
+   -\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]
+   {~}\vec{k} \\
+    & \approx  \frac{4\pi{i}}{k^2}\left(1-\frac{k^2\Xi^2}{8}\right)
+    \left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\left(\frac{k\alpha}
+    {2}\right)-\frac{\alpha}{2}\left(1\right)\right]{~}\vec{k}\\
+    & \approx  \left(\frac{4\pi{i}}{k^2}-\frac{4\pi i\Xi^2}{8}\right)
+    \left[\frac{\Xi^2k^2\alpha}{8}+\frac{\alpha}{2}-\frac{\alpha}{2}
+    \right]{~}\vec{k} \\
+    \widetilde{\vec w}_2(\vec k=0) & \approx \frac{\pi\Xi^2\alpha i}{4} 
+    {~}\vec{k} = 0
 \end{align}
 
 \begin{align}
-   \widetilde{\vec{w}}_2(\vec{k})&= \frac{4\pi{i}}{k^2}e^{-\frac{k^2\Xi^2}{8}}
-   \left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)
-   -\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~}\vec{k}  \\
-    & \approx  \frac{4\pi{i}}{k^2}\left(1-\frac{k^2\Xi^2}{8}\right)\left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\left(1\right)\right]{~}\vec{k}\\
-    & \approx  \left(\frac{4\pi{i}}{k^2}-\frac{4\pi i\Xi^2}{8}\right)\left[\frac{\Xi^2k^2\alpha}{8}+\frac{\alpha}{2}-\frac{\alpha}{2}\right]{~}\vec{k} \\
-    \widetilde{\vec w}_2(k=0) & \approx \frac{\pi\Xi^2\alpha i}{4} {~}\vec{k} = 0\mbox{\textcolor{red}{~~ERROR?}}
-\end{align}
-
-\begin{align}
-   \widetilde{\vec{w}}_1(\vec{k}) &= \frac{i}{k^2}\left[\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}
+   \widetilde{\vec{w}}_1(\vec{k}) &= \frac{i}{k^2}\left[\frac{\sqrt{\pi}}
+   {\sqrt{2}k\Xi}
    e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}
    \left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)
-   +\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}{\sqrt{2}\Xi}
+   +\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}
+   {\sqrt{2}\Xi}
    \right)\right]\color{white}\right]\color{black}  \nonumber \\
- & \color{white}\left[\color{black}-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~}\color{black}\vec{k} \\
-    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)\right)\right] \nonumber \\
-    &-\frac{i}{k^2}\left(1-\frac{k^2\Xi^2}{8}\right)\left(1\right) {~}\vec{k} \\
-    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}\frac{2}{\sqrt{\pi}}   \left(\frac{k\Xi}{2\sqrt{2}}   -\frac{2\left(\frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}\right)^3\right)\right] \nonumber \\
+ & \color{white}\left[\color{black}-e^{-\frac{k^2\Xi^2}{8}}\cos\left(
+    \frac{k\alpha}{2}\right)\right]{~}\color{black}\vec{k} \\
+    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}
+    {\sqrt{2}\Xi}\right)^2}\left[2\operatorname{Re}\left(\operatorname{erf}
+    \left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)
+    \right)\right] \nonumber \\
+    &-\frac{i}{k^2}\left(1-\frac{k^2\Xi^2}{8}\right)\left(1\right) 
+    {~}\vec{k} \\
+    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}e^{-\left(\frac{\alpha}
+    {\sqrt{2}\Xi}\right)^2}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}
+    \frac{2}{\sqrt{\pi}}   \left(\frac{k\Xi}{2\sqrt{2}}   -\frac{2\left(
+    \frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}
+    \right)^3\right)\right] \nonumber \\
     &-\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) {~}\vec{k}\\
-    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}\left[\frac{4}{\sqrt{\pi}}\left(\frac{k\Xi}{(\sqrt{2})^3} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{k^3\Xi^3}{(\sqrt{2})^3}\right)\right] -\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) {~}\vec{k}\\
-    & \approx  \frac{4i}{\sqrt{2}k^3\Xi}\left(\frac{k\Xi}{(\sqrt{2})^3} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{k^3\Xi^3}{(\sqrt{2})^3}\right)-\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) {~~~}\vec{k}\\
-    & \approx  \frac{i}{k^2} -\frac{(\frac{\alpha^2}{\Xi^2}+1)i\Xi^2}{3}-\frac{i}{k^2}+\frac{i\Xi^2}{8} {~~~}\vec{k}\\
-    & \approx  -\frac{(\frac{\alpha^2}{\Xi^2}+1)i\Xi^2}{3}+\frac{i\Xi^2}{8} {~~~}\vec{k}\\
-     \widetilde{\vec w}_1(k=0) = 0 
+    & \approx  \frac{i\sqrt{\pi}}{\sqrt{2}k^3\Xi}\left[\frac{4}{\sqrt{\pi}}
+    \left(\frac{k\Xi}{(\sqrt{2})^3} -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}
+    \frac{k^3\Xi^3}{(\sqrt{2})^3}\right)\right] -\left(\frac{i}{k^2}
+    -\frac{i\Xi^2}{8}\right) {~}\vec{k}\\
+    & \approx  \frac{4i}{\sqrt{2}k^3\Xi}\left(\frac{k\Xi}{(\sqrt{2})^3} 
+    -\frac{(\frac{\alpha^2}{\Xi^2}+1)}{3}\frac{k^3\Xi^3}{(\sqrt{2})^3}
+    \right)-\left(\frac{i}{k^2}-\frac{i\Xi^2}{8}\right) {~~~}\vec{k}\\
+    & \approx  \frac{i}{k^2} -\frac{(\frac{\alpha^2}{\Xi^2}+1)i\Xi^2}{3}
+    -\frac{i}{k^2}+\frac{i\Xi^2}{8} {~~~}\vec{k}\\
+    & \approx  -\frac{(\frac{\alpha^2}{\Xi^2}+1)i\Xi^2}{3}
+    +\frac{i\Xi^2}{8} {~~~}\vec{k}\\
+     \widetilde{\vec w}_1(\vec k=0) = 0 
 \end{align}
-
-
 
 
 
