@@ -140,15 +140,6 @@ with weight functions
           -\vec n_{v1}(\vec r')
           \cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2} \int d \vec r 
           ~w_3(\vec r - \vec r') \\ \nonumber \\
-%%            
-           %&= \frac{k_BT}{V}\int d\vec r' \frac{n_1(\vec r')
-           %\pi(\Xi^2 + \alpha^2)
-          %+n_2(\vec r')\left(\frac{\alpha}{2}\right)}{1-n_3(\vec r')} 
-          %\nonumber \\
-          %&+ \frac{k_BT}{V}\int d\vec r' \frac{n_1(\vec r')n_2(\vec r')
-          %-\vec n_{v1}(\vec r')
-          %\cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2}
-          %\left(\frac{\pi\Xi^2\alpha}{2}\right)   \\ \\
 %
            &= \frac{k_BT}{V}\int  \frac{n_1(\vec r')
            \pi(\Xi^2 + \alpha^2)
@@ -158,20 +149,6 @@ with weight functions
           -\vec n_{v1}(\vec r')
           \cdot \vec n_{v2}(\vec r')}{(1-n_3(\vec r'))^2}
           \left(\frac{\pi\Xi^2\alpha}{2}\right)   ~d\vec r'
-%%            
-           %&= \frac{k_BT}{V}\int  \frac{\left[n_1(\vec r')
-           %\pi(\Xi^2 + \alpha^2)+n_2(\vec r')\left(\frac{\alpha}{2}\right)\right]
-           %\left(1-n_3(\vec r')\right)}{(1-n_3(\vec r'))^2} 
-          %\nonumber \\
-          %&+ \frac{\left[n_1(\vec r')n_2(\vec r')-\vec n_{v1}(\vec r')
-          %\cdot \vec n_{v2}(\vec r')\right]}{(1-n_3(\vec r'))^2}
-          %\left(\frac{\pi\Xi^2\alpha}{2}\right)  ~d\vec r' \\
-%%            
-           %&= \frac{k_BT}{V}\int \left(n_1(\vec r')\pi(\Xi^2 + \alpha^2)  
-          %+n_2(\vec r')\left(\frac{\alpha}{2}\right)\right)\left(1-n_3(\vec r')\right)
-          %+ \left(n_1(\vec r')n_2(\vec r')-\vec n_{v1}(\vec r')
-          %\cdot \vec n_{v2}(\vec r')\right)\left(\frac{\pi\Xi^2\alpha}{2}\right)
-          %\frac{1}{(1-n_3(\vec r'))^2} ~d\vec r'
 \end{align}
 
 \begin{align}
@@ -234,7 +211,8 @@ with weight functions
      &- 3w_2(\vec r-\vec r')\vec n_{v2}
      (\vec r') \cdot \vec n_{v2}(\vec r') + 2n_2(\vec r')
      \vec w_{v2}(\vec r-\vec r')\cdot \vec n_{v2}(\vec r') \nonumber \\
-     &+\frac{9}{2}\left(\color{white}\frac{1}{1}\color{black}\vec w_{v2}(\vec r-\vec r')
+     &+\frac{9}{2}\left(\color{white}\frac{1}{1}\color{black}\vec w_{v2}
+     (\vec r-\vec r')
      \cdot \overleftrightarrow n_{m2}(\vec r')\cdot \vec n_{v2}( \vec r')
      +\vec n_{v2}(\vec r')\cdot \overleftrightarrow w_{m2}(\vec r-\vec r')
      \cdot \vec n_{v2}( \vec r')\color{white}\right) \nonumber\\
@@ -256,11 +234,14 @@ with weight functions
     + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}\frac{1}{1}
      \color{black}n_2(\vec r')^2
      \int d\vec r w_2(\vec r-\vec r') \color{white}\right]\\
-     &- 3\left(\int d\vec r w_2(\vec r-\vec r')\right)\vec n_{v2}(\vec r') \cdot \vec n_{v2}(\vec r')
-      + 2n_2(\vec r')\left(\int d\vec r \vec w_{v2}(\vec r-\vec r')\right)\cdot \vec n_{v2}(\vec r')  \nonumber \\
-     &+\frac{9}{2}\left(\color{white}\frac{1}{1}\color{black}\left(\int d\vec r \vec w_{v2}(\vec r-\vec r')\right)\color{white}\right)\color{black}
+     &- 3\left(\int d\vec r w_2(\vec r-\vec r')\right)\vec n_{v2}(\vec r')
+      \cdot \vec n_{v2}(\vec r')+ 2n_2(\vec r')\left(\int d\vec r \vec 
+     w_{v2}(\vec r-\vec r')\right)\cdot \vec n_{v2}(\vec r')\nonumber \\
+     &+\frac{9}{2}\left(\color{white}\frac{1}{1}\color{black}\left(\int 
+     d\vec r \vec w_{v2}(\vec r-\vec r')\right)\color{white}\right)\color{black}
      \cdot \overleftrightarrow n_{m2}(\vec r')\cdot \vec n_{v2}( \vec r') \\
-     &+\vec n_{v2}(\vec r')\cdot \left(\int d\vec r \overleftrightarrow w_{m2}(\vec r-\vec r')\right)
+     &+\vec n_{v2}(\vec r')\cdot \left(\int d\vec r \overleftrightarrow 
+     w_{m2}(\vec r-\vec r')\right)
      \cdot \vec n_{v2}( \vec r') \nonumber\\
      &+ \color{white}\left(\color{black}\vec n_{v2}( \vec r')\cdot 
      \overleftrightarrow n_{m2}(\vec r')
@@ -275,8 +256,8 @@ with weight functions
      \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
      \right) \nonumber\\
      &~\left(\frac{2}{24\pi(1-n_3)^3}\left(\frac{\pi\Xi^2\alpha}{2}\right)
-     \right) + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}\frac{1}{1}
-     \color{black}n_2(\vec r')^2
+     \right) + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}
+     \frac{1}{1}\color{black}n_2(\vec r')^2
      \pi(\Xi^2 + \alpha^2) \color{white}\right]\\
      &- 3\left(\pi(\Xi^2 + \alpha^2)\vec n_{v2}
      (\vec r') \cdot \vec n_{v2}(\vec r')\right) + 2n_2(\vec r')(0)\cdot 
@@ -294,21 +275,21 @@ with weight functions
      \color{white}\left[\frac{1}{1}\color{black}\right]\\ \\
 %
 &=\frac{k_BT}{V}\int d\vec r' \left( {n_2}^3-3n_2
-    \vec{n}_{v2}\cdot\vec{n}_{v2} 
-     +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
-     \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
-     \right) \nonumber\\
-     &~\left(\frac{\pi\Xi^2\alpha}{24\pi(1-n_3)^3}
-     \right) + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}\frac{1}{1}
-     \color{black}n_2(\vec r')^2
-     \pi(\Xi^2 + \alpha^2) \color{white}\right] \\
-     &- 3\left(\pi(\Xi^2 + \alpha^2)\vec n_{v2}
-     (\vec r') \cdot \vec n_{v2}(\vec r')\right) \\
-     &+\frac{9}{2}\left(\vec n_{v2}(\vec r')\cdot \frac{\delta \overleftrightarrow n_{m2}
-     (\vec r')}{\delta n(\vec r)}\cdot \vec n_{v2}( \vec r')-\frac{\delta}
-     {\delta n(\vec r)}\left(\operatorname{Tr}
-     ({\overleftrightarrow{n}^3_{m2}})\right)\right) 
-     \color{white}\left[\frac{1}{1}\color{black}\right]
+   \vec{n}_{v2}\cdot\vec{n}_{v2} 
+    +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
+    \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
+    \right) \nonumber\\
+    &~\left(\frac{\pi\Xi^2\alpha}{24\pi(1-n_3)^3}
+    \right) + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}
+    \frac{1}{1}\color{black}n_2(\vec r')^2
+    \pi(\Xi^2 + \alpha^2) \color{white}\right] \\
+    &- 3\left(\pi(\Xi^2 + \alpha^2)\vec n_{v2}
+    (\vec r') \cdot \vec n_{v2}(\vec r')\right) \\
+    &+\frac{9}{2}\left(\vec n_{v2}(\vec r')\cdot \frac{\delta
+    \overleftrightarrow n_{m2}(\vec r')}{\delta n(\vec r)}\cdot\vec n_{v2}
+    ( \vec r')-\frac{\delta}{\delta n(\vec r)}\left(\operatorname{Tr}
+    ({\overleftrightarrow{n}^3_{m2}})\right)\right) 
+    \color{white}\left[\frac{1}{1}\color{black}\right]
 \end{align}      
 
 
