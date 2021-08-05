@@ -268,9 +268,7 @@ with weight functions
      \right)\\
      &+ \color{white}\left(\color{black}\vec n_{v2}( \vec r')\cdot 
      \overleftrightarrow n_{m2}(\vec r')
-     \cdot 0-\int d\vec r 
-     \frac{\delta}{\delta n(\vec r)}\left(\operatorname{Tr}
-     ({\overleftrightarrow{n}^3_{m2}})\right)\right) 
+     \cdot 0-0\right) 
      \color{white}\left[\frac{1}{1}\color{black}\right]\\ \\
 %
 &=\frac{k_BT}{V}\int d\vec r' \left({n_2}^3-3n_2
@@ -285,23 +283,42 @@ with weight functions
     &- 3\left(\pi(\Xi^2 + \alpha^2)\vec n_{v2}
     (\vec r') \cdot \vec n_{v2}(\vec r')\right) 
     \color{white}\left[\frac{1}{1}\color{black}\right]
-\end{align}      
+\end{align} 
 
+\begin{align} 
+  n(\vec r) &= \int \delta (\vec r~'-\vec r)n(\vec r~') d\vec r~'\\
+  \delta n(\vec r) &= \int \delta (\vec r~'-\vec r)\delta n(\vec r~')
+  d\vec r~'
+\end{align} 
+But for a functional,
+\begin{align} 
+\delta n(\vec r) &= \int \frac{\delta n(\vec r)}{\delta n(\vec r~')}
+\delta n(\vec r~')d\vec r~'
+\end{align} 
+and so
+\begin{align} 
+  \frac{\delta n(\vec r)}{\delta n(\vec r~')} &= \delta (\vec r~'-\vec r)
+\end{align} 
 
-
+\begin{align} 
+   \frac{\delta n_i(\vec r)}{\delta n(\vec r~')}  &= \frac{\delta}
+   {\delta n(\vec r~')}\int n(\vec r~'')w_i(\vec r~-\vec r~'')d\vec r~''\\
+   &= \int \frac{\delta n(\vec r~'')}{\delta n(\vec r~')}w_i(\vec r
+   -\vec r~'') d\vec r~'' \\
+   &= \int \delta (\vec r~' -\vec r~'')w_i(\vec r-\vec r~'') d\vec r~''\\
+   &= \color{red}w_i(\vec r-\vec r~') 
+   \mbox{~~~? minus sign??}\color{black}
+\end{align}   
+%where
+%\begin{align} 
+    %\delta (\vec r-\vec r~') &= \delta (\vec r~'-\vec r)
+    %\color{red}\mbox{~~~ERROR? minus sign??}\color{black}
+%\end{align} 
 \begin{align}
    \int_{all space} w_i(r) ~d\vec r &= \int w_i(r)e^{i\vec k \cdot 
    \vec r}~d\vec r 
     = \widetilde{w}_i(k) \mbox{~~with $\vec k = 0$}
 \end{align}
-
-%\begin{align}
-    %\widetilde{w}_0(k=0)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(
-         %\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}
-         %\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)
-          %+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}
-          %{\sqrt{2}\Xi}\right)\right]
-%\end{align}
 
 \begin{align}
     \widetilde{w}_0(k) &= \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(
