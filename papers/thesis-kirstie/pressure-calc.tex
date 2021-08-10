@@ -33,16 +33,23 @@ volume $f_v$.
 \end{align}
 
 In terms of virtual variations of the functional $f_v[n(\vec r)]$, 
-$\mu[n(\vec r)]$ is given by
+%$\mu(\vec r)$ is given by
+%\begin{align}
+    %\mu(\vec r) &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r~'')}
+    %\bigg|_{T,V} d\vec r~''
+%\end{align}
 \begin{align}
-    \mu[n(\vec r)] &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r~'')}
-    \bigg|_{T,V} d\vec r~''
-\end{align}
+    \mu(\vec r) &= \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}
+    \bigg|_{T,V} \\
+                &= \int \frac{\delta f_v[n(\vec r)]}{\delta n_i(\vec r~'')}
+    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~''
+\end{align} \textcolor{red}{units?}
+
 
 The excess Helmholtz free energy per volume is given by
 \begin{align}
-    f_{v_{ex}}[n(\vec r)] &= \frac{k_BT}{V}\int\Phi_1(n(\vec r))
-    +\Phi_2(n(\vec r))+\Phi_3(n(\vec r))~~d\vec r
+    f_{v_{ex}}[n(\vec r)] &= \frac{k_BT}{V}\int\Phi_1
+    +\Phi_2+\Phi_3~~d\vec r
 \end{align}     
 where
 \begin{align}
@@ -127,13 +134,44 @@ and so
    &= \int \delta (\vec r~'' -\vec r~')w_i(\vec r-\vec r~') d\vec r~'\\
    &= \int \delta (\vec r~' -\vec r~'')w_i(\vec r-\vec r~') d\vec r~'\\
    &= w_i(\vec r-\vec r~'') 
-\end{align}   
+\end{align}
+
+
+%\begin{align}  \\old way 
+    %f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1~d\vec r \\ \nonumber\\
+    %\mu_1 &= \int \frac{\delta f_{v1ex}[n(\vec r)]}{\delta n(\vec r~'')}
+    %\bigg|_{T,V} d\vec r~'' \\
+        %&= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~ \frac{\delta}
+        %{\delta n(\vec r~'')}n_o(\vec r)\ln(1-n_3(\vec r)) \\ \nonumber\\
+%%
+        %&= -\frac{k_BT}{V}\int d\vec r~''\int d\vec r~\frac{\delta n_o(\vec r)}
+        %{\delta n(\vec r~'')}\ln(1-n_3(\vec r))+\frac{n_o(\vec r)}
+          %{1-n_3(\vec r)}\left(-\frac{\delta n_3(\vec r)}{\delta n(\vec r~'')}
+          %\right) \\ \nonumber\\
+%%
+        %&= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~w_0(\vec r - \vec r~'')
+          %\ln(1-n_3(\vec r)) - w_3(\vec r - \vec r~'')\frac{n_o(\vec r)}
+          %{1-n_3(\vec r)} \\ \nonumber\\
+%%
+        %&= -\frac{k_BT}{V} \int d\vec r~\ln(1-n_3(\vec r)) \int d \vec r~''  
+          %~w_0(\vec r - \vec r~'') \nonumber\\
+        %&- \frac{k_BT}{V} \int d\vec r ~\frac{n_o(\vec r)}{1-n_3(\vec r)} 
+          %\int d \vec r~''~w_3(\vec r - \vec r~'')  \\ \\
+%%
+        %&= -\frac{k_BT}{V} \int d\vec r ~\ln(1-n_3(\vec r))(1)
+          %- \frac{k_BT}{V} \int d\vec r ~\frac{n_o(\vec r)}{1-n_3(\vec r)}
+          %\left(\frac{\pi\Xi^2\alpha}{2}\right) \\ \\
+%%
+        %&= -\frac{k_BT}{V}\int\ln(1-n_3(\vec r))+\left(
+        %\frac{\pi\Xi^2\alpha}{2}\right)\frac{n_o(\vec r)}{1-n_3(\vec r)}~d\vec r
+%\end{align}   
 
 
 \begin{align}
-    f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1(n(\vec r))~d\vec r \\ \nonumber\\
-    \mu_1 &= \int \frac{\delta f_{v1ex}[n(\vec r)]}{\delta n(\vec r~'')}
-    \bigg|_{T,V} d\vec r~'' \\
+    f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1~d\vec r \\ \nonumber\\
+    \mu_1 &= \int \frac{\delta f_v[n(\vec r)]}{\delta n_i(\vec r~'')}
+    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~''\\ \nonumber \\
+%
         &= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~ \frac{\delta}
         {\delta n(\vec r~'')}n_o(\vec r)\ln(1-n_3(\vec r)) \\ \nonumber\\
 %
