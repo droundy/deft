@@ -42,9 +42,13 @@ In terms of virtual variations of the functional $f_v[n(\vec r)]$,
     \mu(\vec r) &= \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}
     \bigg|_{T,V} \\
                 &= \int \frac{\delta f_v[n(\vec r)]}{\delta n_i(\vec r~'')}
-    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~''
-\end{align} \textcolor{red}{units?}
-
+    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~'' \color{red}\mbox{~~~UNITS?}
+\end{align} 
+\begin{align}
+    \mu &= \left<\mu(\vec r)\right> = \frac{1}{V} \int \mu(\vec r)~d\vec r~    \\
+        &= \frac{1}{V} \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}
+    \bigg|_{T,V}~d\vec r~          
+\end{align}
 
 The excess Helmholtz free energy per volume is given by
 \begin{align}
@@ -135,6 +139,13 @@ and so
    &= \int \delta (\vec r~' -\vec r~'')w_i(\vec r-\vec r~') d\vec r~'\\
    &= w_i(\vec r-\vec r~'') 
 \end{align}
+Or, more simply,
+\begin{align} 
+   n_i(\vec r)  &= \int n(\vec r~')w_i(\vec r~-\vec r~')d\vec r~'\\
+   \delta n_i(\vec r)  &= \int \delta n(\vec r~')w_i(\vec r~-\vec r~')d\vec r~'\\
+   \delta n_i(\vec r)  &= \int \delta n(\vec r~')\frac{\delta n_i(\vec r)}{\delta n(\vec r~')}d\vec r~'\\
+   \frac{\delta n_i(\vec r)}{\delta n(\vec r~')}&= w_i(\vec r-\vec r~') 
+\end{align}
 
 
 %\begin{align}  \\old way 
@@ -169,8 +180,7 @@ and so
 
 \begin{align}
     f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1~d\vec r \\ \nonumber\\
-    \mu_1 &= \int \frac{\delta f_v[n(\vec r)]}{\delta n_i(\vec r~'')}
-    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~''\\ \nonumber \\
+    \mu_1 &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)} d\vec r \\ \nonumber\\
 %
         &= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~ \frac{\delta}
         {\delta n(\vec r~'')}n_o(\vec r)\ln(1-n_3(\vec r)) \\ \nonumber\\
