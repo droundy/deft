@@ -49,8 +49,8 @@ In terms of virtual variations of the functional $F[n(\vec r)]$,
     \mu &= \left<\mu(\vec r)\right> = \frac{1}{V} \int \mu(\vec r)~d\vec r~    \\
         &= \frac{1}{V} \int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)}
            \bigg|_{T,V}~d\vec r~  \\
-        &= \frac{1}{V} \int \frac{\delta F[n(\vec r)]}{\delta n_i(\vec r~'')}
-    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~''    
+        &= \frac{1}{V} \int d\vec r \int d\vec r~'' ~\frac{\delta F[n(\vec r)]}{\delta n_i(\vec r~'')}
+    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}   
 \end{align}
 
 The excess Helmholtz free energy per volume is given by
@@ -111,27 +111,50 @@ with weight functions
                        n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
 \end{align} 
 
+%\begin{align} old primes
+  %n(\vec r) &= \int \delta (\vec r~''-\vec r)n(\vec r~'') d\vec r~''\\
+  %\delta n(\vec r) &= \int \delta (\vec r~''-\vec r)\delta n(\vec r~'')
+  %d\vec r~''
+%\end{align} 
+%But for a functional,
+%\begin{align} 
+%\delta n(\vec r) &= \int \frac{\delta n(\vec r)}{\delta n(\vec r~'')}
+%\delta n(\vec r~'')d\vec r~''
+%\end{align} 
+%and so
+%\begin{align} 
+  %\frac{\delta n(\vec r)}{\delta n(\vec r~'')} &= \delta (\vec r~''-\vec r) \\
+                                               %&= \delta (\vec r-\vec r~'') 
+%\end{align} 
+%\begin{align} 
+   %\frac{\delta n_i(\vec r)}{\delta n(\vec r~'')}  &= \frac{\delta}
+   %{\delta n(\vec r~'')}\int n(\vec r~')w_i(\vec r~-\vec r~')d\vec r~'\\
+   %&= \int \frac{\delta n(\vec r~')}{\delta n(\vec r~'')}w_i(\vec r
+   %-\vec r~') d\vec r~' \\
+   %&= \int \delta (\vec r~' -\vec r~'')w_i(\vec r-\vec r~') d\vec r~'\\
+   %&= w_i(\vec r-\vec r~'') 
+%\end{align}
+%Or, more simply,
 \begin{align} 
-  n(\vec r) &= \int \delta (\vec r~''-\vec r)n(\vec r~'') d\vec r~''\\
-  \delta n(\vec r) &= \int \delta (\vec r~''-\vec r)\delta n(\vec r~'')
-  d\vec r~''
+  n(\vec r) &= \int \delta (\vec r~'-\vec r)n(\vec r~') d\vec r~'\\
+  \delta n(\vec r) &= \int \delta (\vec r~'-\vec r)\delta n(\vec r~')
+  d\vec r~'
 \end{align} 
 But for a functional,
 \begin{align} 
-\delta n(\vec r) &= \int \frac{\delta n(\vec r)}{\delta n(\vec r~'')}
-\delta n(\vec r~'')d\vec r~''
+\delta n(\vec r) &= \int \frac{\delta n(\vec r)}{\delta n(\vec r~')}
+\delta n(\vec r~')d\vec r~'
 \end{align} 
 and so
 \begin{align} 
-  \frac{\delta n(\vec r)}{\delta n(\vec r~'')} &= \delta (\vec r~''-\vec r)
+  \frac{\delta n(\vec r)}{\delta n(\vec r~')} &= \delta (\vec r~'-\vec r) \\
+                                               &= \delta (\vec r-\vec r~') 
 \end{align} 
-
 \begin{align} 
    \frac{\delta n_i(\vec r)}{\delta n(\vec r~'')}  &= \frac{\delta}
    {\delta n(\vec r~'')}\int n(\vec r~')w_i(\vec r~-\vec r~')d\vec r~'\\
    &= \int \frac{\delta n(\vec r~')}{\delta n(\vec r~'')}w_i(\vec r
    -\vec r~') d\vec r~' \\
-   &= \int \delta (\vec r~'' -\vec r~')w_i(\vec r-\vec r~') d\vec r~'\\
    &= \int \delta (\vec r~' -\vec r~'')w_i(\vec r-\vec r~') d\vec r~'\\
    &= w_i(\vec r-\vec r~'') 
 \end{align}
@@ -143,11 +166,10 @@ Or, more simply,
    \frac{\delta n_i(\vec r)}{\delta n(\vec r~')}&= w_i(\vec r-\vec r~') 
 \end{align}
 
-
-%\begin{align}  \\old way 
-    %f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1~d\vec r \\ \nonumber\\
-    %\mu_1 &= \int \frac{\delta f_{v1ex}[n(\vec r)]}{\delta n(\vec r~'')}
-    %\bigg|_{T,V} d\vec r~'' \\
+%\begin{align}   %old primes
+    %F_{1ex} &= k_BT\int \Phi_1~d\vec r \\ \nonumber\\
+    %\mu_1 &= \frac{1}{V}\int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)} d\vec r \\ \nonumber\\
+%%
         %&= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~ \frac{\delta}
         %{\delta n(\vec r~'')}n_o(\vec r)\ln(1-n_3(\vec r)) \\ \nonumber\\
 %%
@@ -171,36 +193,35 @@ Or, more simply,
 %%
         %&= -\frac{k_BT}{V}\int\ln(1-n_3(\vec r))+\left(
         %\frac{\pi\Xi^2\alpha}{2}\right)\frac{n_o(\vec r)}{1-n_3(\vec r)}~d\vec r
-%\end{align}   
-
-
+%\end{align}
+ 
 \begin{align}
-    F_{1ex} &= k_BT\int \Phi_1~d\vec r \\ \nonumber\\
+    F_{1ex} &= k_BT\int \Phi_1~d\vec r~' \\ \nonumber\\
     \mu_1 &= \frac{1}{V}\int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)} d\vec r \\ \nonumber\\
 %
-        &= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~ \frac{\delta}
-        {\delta n(\vec r~'')}n_o(\vec r)\ln(1-n_3(\vec r)) \\ \nonumber\\
+        &= -\frac{k_BT}{V} \int d\vec r~' \int d\vec r~ \frac{\delta}
+        {\delta n(\vec r)}n_o(\vec r~')\ln(1-n_3(\vec r~')) \\ \nonumber\\
 %
-        &= -\frac{k_BT}{V}\int d\vec r~''\int d\vec r~\frac{\delta n_o(\vec r)}
-        {\delta n(\vec r~'')}\ln(1-n_3(\vec r))+\frac{n_o(\vec r)}
-          {1-n_3(\vec r)}\left(-\frac{\delta n_3(\vec r)}{\delta n(\vec r~'')}
+        &= -\frac{k_BT}{V}\int d\vec r~'\int d\vec r~\frac{\delta n_o(\vec r~')}
+        {\delta n(\vec r)}\ln(1-n_3(\vec r~'))+\frac{n_o(\vec r~')}
+          {1-n_3(\vec r)}\left(-\frac{\delta n_3(\vec r~')}{\delta n(\vec r)}
           \right) \\ \nonumber\\
 %
-        &= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~w_0(\vec r - \vec r~'')
-          \ln(1-n_3(\vec r)) - w_3(\vec r - \vec r~'')\frac{n_o(\vec r)}
-          {1-n_3(\vec r)} \\ \nonumber\\
+        &= -\frac{k_BT}{V} \int d\vec r~' \int d\vec r~w_0(\vec r - \vec r~')
+          \ln(1-n_3(\vec r~')) - w_3(\vec r - \vec r~')\frac{n_o(\vec r~')}
+          {1-n_3(\vec r~')} \\ \nonumber\\
 %
-        &= -\frac{k_BT}{V} \int d\vec r~\ln(1-n_3(\vec r)) \int d \vec r~''  
-          ~w_0(\vec r - \vec r~'') \nonumber\\
-        &- \frac{k_BT}{V} \int d\vec r ~\frac{n_o(\vec r)}{1-n_3(\vec r)} 
-          \int d \vec r~''~w_3(\vec r - \vec r~'')  \\ \\
+        &= -\frac{k_BT}{V} \int d\vec r~'\ln(1-n_3(\vec r~')) \int d \vec r  
+          ~w_0(\vec r - \vec r~') \nonumber\\
+        &- \frac{k_BT}{V} \int d\vec r~' ~\frac{n_o(\vec r~')}{1-n_3(\vec r~')} 
+          \int d \vec r~w_3(\vec r - \vec r~')  \\ \\
 %
-        &= -\frac{k_BT}{V} \int d\vec r ~\ln(1-n_3(\vec r))(1)
-          - \frac{k_BT}{V} \int d\vec r ~\frac{n_o(\vec r)}{1-n_3(\vec r)}
+        &= -\frac{k_BT}{V} \int d\vec r~' ~\ln(1-n_3(\vec r~'))(1)
+          - \frac{k_BT}{V} \int d\vec r~' ~\frac{n_o(\vec r~')}{1-n_3(\vec r~')}
           \left(\frac{\pi\Xi^2\alpha}{2}\right) \\ \\
 %
-        &= -\frac{k_BT}{V}\int\ln(1-n_3(\vec r))+\left(
-        \frac{\pi\Xi^2\alpha}{2}\right)\frac{n_o(\vec r)}{1-n_3(\vec r)}~d\vec r
+        &= -\frac{k_BT}{V}\int\ln(1-n_3(\vec r~'))+\left(
+        \frac{\pi\Xi^2\alpha}{2}\right)\frac{n_o(\vec r~')}{1-n_3(\vec r~')}~d\vec r~'
 \end{align}
 
 \begin{align}
