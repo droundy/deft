@@ -29,11 +29,11 @@ volume $f_v$.
 %
     \mu &= \frac{\partial F}{\partial N}\bigg|_{T,V} \\
         &= \frac{\partial \frac{F}{V}}{\partial \frac{N}{V}}\bigg|_{T,V}\\
-        &= \frac{\partial f_v}{\partial n}\bigg|_{T,V} \\
+       % &= \frac{\partial f_v}{\partial n}\bigg|_{T,V} \\
         &= \frac{1}{V}\frac{\partial F}{\partial n}\bigg|_{T,V}        
 \end{align}
 
-In terms of virtual variations of the functional $f_v[n(\vec r)]$, 
+In terms of virtual variations of the functional $F[n(\vec r)]$, 
 %$\mu(\vec r)$ is given by
 %\begin{align}
     %\mu(\vec r) &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r~'')}
@@ -105,19 +105,12 @@ with weight functions
 
 \begin{align}
     \widetilde{w}_{m2_{ij}}(\vec{k}) &= (\delta{ij}-3\frac{k_ik_j}{k^2})
-                                    \widetilde{w}_{{m2}_{x'x'}}(\vec{k})
-\end{align}
-\begin{align}
+                                    \widetilde{w}_{{m2}_{x'x'}}(\vec{k}) \\ \nonumber \\
+%\end{align}
+%\begin{align}
     n_{m2ij}(\vec r) &=  \frac{1}{\left(2\pi\right)^3}\int d\vec k\, 
                        n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
 \end{align} 
-
-\color{white}
-\begin{align}
-     &=  \\ 
-     &= 
-\end{align} 
-\color{black}
 
 \begin{align} 
   n(\vec r) &= \int \delta (\vec r~''-\vec r)n(\vec r~'') d\vec r~''\\
@@ -143,7 +136,7 @@ and so
    &= \int \delta (\vec r~' -\vec r~'')w_i(\vec r-\vec r~') d\vec r~'\\
    &= w_i(\vec r-\vec r~'') 
 \end{align}
-Or, more simply,
+%Or, more simply,
 \begin{align} 
    n_i(\vec r)  &= \int n(\vec r~')w_i(\vec r~-\vec r~')d\vec r~'\\
    \delta n_i(\vec r)  &= \int \delta n(\vec r~')w_i(\vec r~-\vec r~')d\vec r~'\\
