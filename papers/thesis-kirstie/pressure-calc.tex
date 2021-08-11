@@ -29,7 +29,8 @@ volume $f_v$.
 %
     \mu &= \frac{\partial F}{\partial N}\bigg|_{T,V} \\
         &= \frac{\partial \frac{F}{V}}{\partial \frac{N}{V}}\bigg|_{T,V}\\
-        &= \frac{\partial f_v}{\partial n}\bigg|_{T,V}  
+        &= \frac{\partial f_v}{\partial n}\bigg|_{T,V} \\
+        &= \frac{1}{V}\frac{\partial F}{\partial n}\bigg|_{T,V}        
 \end{align}
 
 In terms of virtual variations of the functional $f_v[n(\vec r)]$, 
@@ -38,21 +39,24 @@ In terms of virtual variations of the functional $f_v[n(\vec r)]$,
     %\mu(\vec r) &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r~'')}
     %\bigg|_{T,V} d\vec r~''
 %\end{align}
-\begin{align}
-    \mu(\vec r) &= \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}
-    \bigg|_{T,V} \\
-                &= \int \frac{\delta f_v[n(\vec r)]}{\delta n_i(\vec r~'')}
-    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~'' \color{red}\mbox{~~~UNITS?}
-\end{align} 
+%\begin{align}
+    %\mu(\vec r) &= \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}
+    %\bigg|_{T,V} \\
+                %&= \int \frac{\delta f_v[n(\vec r)]}{\delta n_i(\vec r~'')}
+    %\bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~'' \color{red}\mbox{~~~UNITS?}
+%\end{align} 
 \begin{align}
     \mu &= \left<\mu(\vec r)\right> = \frac{1}{V} \int \mu(\vec r)~d\vec r~    \\
-        &= \frac{1}{V} \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)}
-    \bigg|_{T,V}~d\vec r~          
+        &= \frac{1}{V} \int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)}
+           \bigg|_{T,V}~d\vec r~  \\
+        &= \frac{1}{V} \int \frac{\delta F[n(\vec r)]}{\delta n_i(\vec r~'')}
+    \bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~'' 
+         ~d\vec r~    
 \end{align}
 
 The excess Helmholtz free energy per volume is given by
 \begin{align}
-    f_{v_{ex}}[n(\vec r)] &= \frac{k_BT}{V}\int\Phi_1
+    F_{{ex}}[n(\vec r)] &= \frac{k_BT}{V}\int\Phi_1
     +\Phi_2+\Phi_3~~d\vec r
 \end{align}     
 where
@@ -179,8 +183,8 @@ Or, more simply,
 
 
 \begin{align}
-    f_{v1ex} &= \frac{k_BT}{V}\int \Phi_1~d\vec r \\ \nonumber\\
-    \mu_1 &= \int \frac{\delta f_v[n(\vec r)]}{\delta n(\vec r)} d\vec r \\ \nonumber\\
+    F_{v1ex} &= \frac{k_BT}{V}\int \Phi_1~d\vec r \\ \nonumber\\
+    \mu_1 &= \frac{1}{V}\int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)} d\vec r \\ \nonumber\\
 %
         &= -\frac{k_BT}{V} \int d\vec r~'' \int d\vec r~ \frac{\delta}
         {\delta n(\vec r~'')}n_o(\vec r)\ln(1-n_3(\vec r)) \\ \nonumber\\
@@ -208,8 +212,8 @@ Or, more simply,
 \end{align}
 
 \begin{align}
-    f_{v2ex} &= \frac{k_BT}{V}\int \Phi_2(\vec{r}{) d}\vec{r} \\ \nonumber\\
-    \mu_2 &= \int \frac{\delta f_{v2ex}[n(\vec r)]}{\delta n(\vec r~'')}
+    F_{v2ex} &= \frac{k_BT}{V}\int \Phi_2(\vec{r}{) d}\vec{r} \\ \nonumber\\
+    \mu_2 &= \int \frac{\delta F_{2ex}[n(\vec r)]}{\delta n(\vec r~'')}
           \bigg|_{T,V} d\vec{r~''} \\
 %
           &= \frac{k_BT}{V} \int d\vec r~'' \int d \vec r ~
@@ -272,9 +276,9 @@ Or, more simply,
 \end{align}
 
 \begin{align}
-  f_{v3ex} &= \frac{k_BT}{V}\int \Phi_3(\vec r) d\vec r  \\ 
+  F_{v3ex} &= \frac{k_BT}{V}\int \Phi_3(\vec r) d\vec r  \\ 
   \nonumber\\ 
-  \mu_3 &= \int \frac{\delta f_{v3ex}[n(\vec r)]}{\delta n(\vec r~'')}
+  \mu_3 &= \int \frac{\delta F_{3ex}[n(\vec r)]}{\delta n(\vec r~'')}
   \bigg|_{T,V} d\vec r~'' \\ \nonumber \\
 %
    &= \frac{k_BT}{V}\int d\vec r~''\int d\vec r~\frac{\delta}{\delta 
