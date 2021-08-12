@@ -54,7 +54,8 @@ static inline void took(const char *name) {
   clock_t t = clock();
   assert(name); // so it'll count as being used...
   double peak = peak_memory()/1024.0/1024;
-  printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)/double(CLOCKS_PER_SEC), peak);
+  printf("\t\t%s took %g seconds and %g M memory\n", name, (t-last_time)
+        /double(CLOCKS_PER_SEC), peak);
   fflush(stdout);
   last_time = t;
 }
@@ -70,8 +71,6 @@ double find_lattice_constant(double reduced_density, double fv) {
   return pow(4*(1-fv)/reduced_density, 1.0/3);
 }
 
-//%%%%%%%%%%%NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 struct weight {
   double n_0;
   double n_1;
@@ -86,7 +85,8 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
   return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
 }
 
-static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
+static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, 
+                     double alpha, double Xi) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   weight w;
@@ -123,9 +123,9 @@ static inline double radius_of_peak(double gwidth, double T) {
 }
 
 //This slower brute-force method was replaced by faster monte-carlo
-//weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
-                                //double lattice_constant, double gwidth, double norm,
-                                //double reduced_density) {
+//weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, 
+     //double temp, double lattice_constant, double gwidth, double norm,
+     //double reduced_density) {
   //const vector3d lattice_vectors[3] = {
     //vector3d(0,lattice_constant/2,lattice_constant/2),
     //vector3d(lattice_constant/2,0,lattice_constant/2),
@@ -199,9 +199,8 @@ static inline double radius_of_peak(double gwidth, double T) {
   //return w_den_R;
 //}
 
-weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
-                                   double lattice_constant,
-                                   double gwidth, double fv) {
+weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx,   //dx is not used but keeping format
+  double temp, double lattice_constant, double gwidth, double fv) {
   weight n = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
     return n;
@@ -512,7 +511,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
   double cFexcess_of_primitive_cell=0;  //Crystal Excess Free Energy over one primitive cell
-  double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0;
+  double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0, total_mu=0;
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
@@ -529,7 +528,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       for (int k=0; k<Nl; k++) {
         vector3d r= i*da1 + j*da2 + k*da3;
 
-        double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities  (fundamental measures)
+        double n_0=0, n_1=0, n_2=0, n_3=0;  //weighted densities
         vector3d nv_1, nv_2;
         tensor3d nm_2;
         weight n_weight;
@@ -567,6 +566,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
         double phi_3;
+        double mu_of_r;
         if (use_tensor_weight) {
           //double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
                                         //nm_2.y.y*nm_2.y.y +
@@ -592,6 +592,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           phi_3 =( n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2)) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))
             /(24*M_PI*uipow(1-n_3,2));         // Santos (2012) - yes
           //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));      // Sweatman, Groh & Schmidt  (2001) - same as Santos with different w_nm
+          mu_of_r = -1.0*log(1.0-1.0*n_3)+(M_PI*uipow(Xi,2)*alpha/2)*(n_0/(1.0-1.0*n_3))
+          +(n_1*M_PI*(uipow(Xi,2)+uipow(alpha,2))+n_2*(alpha/2))/(1.0-1.0*n_3)
+          +((n_1*n_2-nv_1.dot(nv_2))*(M_PI*uipow(Xi,2)*alpha/2))/(uipow((1.0-1.0*n_3),2))         
+          +(n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2))+(9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) 
+          -traceof_nm_2cubed))*((uipow(Xi,2)*alpha)/(24*(1.0-1.0*n_3)*uipow((1.0-1.0*n_3),2)))
+          +(1/(24*uipow((1.0-1.0*n_3),2)))*(uipow(n_2,2)*M_PI*(uipow(Xi,2)
+          +uipow(alpha,2))-3*M_PI*(uipow(Xi,2)+uipow(alpha,2))*nv_2.dot(nv_2));
         } else {
           // The following was Rosenfelds early vector version of the functional
           //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
@@ -617,6 +624,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         total_phi_1 += temp*phi_1*dV;
         total_phi_2 += temp*phi_2*dV;
         total_phi_3 += temp*phi_3*dV;
+        total_mu += temp*mu_of_r*dV;   //FIX - should be temp/vol
         cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is Bolatzman constant times temperature divided by epsilon (which is 1)
         if (isnan(cFexcess_of_primitive_cell)) {                        // temp is a reduced temperature given by t* in the paper
           printf("free energy is a NaN!\n");
@@ -810,7 +818,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
 }
-//%%%%%%%%%%%%%%%%%%%%%%%%%END NEW ENERGY FUNCTION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 int main(int argc, const char **argv) {
   //double seed=1;
