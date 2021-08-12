@@ -116,7 +116,6 @@ static inline weight find_weights(vector3d r, vector3d rp, double temp) {
   return find_weights_from_alpha_Xi(r, rp, find_alpha(temp), find_Xi(temp));
 }
 
-
 // radius_of_peak tells us how far we need to integrate away from a
 // peak with width gwidth, if the temperature is T, when finding the
 // weighted densities.  This is basically asking when the weighting
@@ -280,10 +279,6 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   return n;
 }
 
-
-
-
-
 double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
                        double gwidth, double fv, double alpha, double Xi) {
   weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
@@ -324,11 +319,6 @@ double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
   } while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
   return n3_error;
 }
-
-
-
-
-
 
 long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ONLY
                              double gwidth, double fv, double alpha, double Xi) {
@@ -410,7 +400,6 @@ weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, 
   return n_var;
 }
 
-
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx_input, bool verbose=false) {
   double start_time = time();
   printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g, mc NUM_POINTS=%li\n", temp, reduced_density, fv, gwidth, dx_input, NUM_POINTS);  //debug
@@ -419,9 +408,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double lattice_constant = find_lattice_constant(reduced_density, fv);
   printf("lattice_constant=%g\n", lattice_constant);
   // const double cubic_cell_volume = uipow(lattice_constant, 3);
-
-
-
 
   const vector3d lattice_vectors[3] = {
     vector3d(0,lattice_constant/2,lattice_constant/2),
@@ -1091,6 +1077,5 @@ int main(int argc, const char **argv) {
   } else {
     find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
   }
-
   return 0;
 }
