@@ -544,7 +544,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                                                        lattice_constant, gwidth, fv);
                 } else {
                   n_weight=find_weighted_den_aboutR_mc_accurately(r, R, gwidth, fv, alpha, Xi);
-                }
+                //}
                   //double n3_error=report_my_error(r, R, gwidth, fv, alpha, Xi);  //FOR DEBUG - delete!
                   //printf(">>>>n3_error=%g\n",n3_error);   //FOR DEBUG - delete!
                   //long total_num_points=report_total_num_points(r, R, gwidth, fv, alpha, Xi);  //FOR DEBUG - delete!
