@@ -179,32 +179,33 @@ weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
   return w_den_R;
 }
 
-weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
-    double lattice_constant,
-    double gwidth, double fv) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
-    return w_den_R;
-  }
-  for (int i=-1; i<3; i=i+2) {
-    for (int j=-1; j<3; j=j+2) {
-      for (int k=-1; k<3; k=k+2) {
-        vector3d r_prime = R+gwidth*vector3d(i, j, k);  //note: GQ abscissa=sqrt(2)/2 and this times sqrt(2)*gw = gw
-        weight w = find_weights(r, r_prime, temp);
+//Gausian Quadrature was faster method replaced by more accurate monte-carlo
+//weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
+    //double lattice_constant,
+    //double gwidth, double fv) {
+  //weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
+  //if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
+    //return w_den_R;
+  //}
+  //for (int i=-1; i<3; i=i+2) {
+    //for (int j=-1; j<3; j=j+2) {
+      //for (int k=-1; k<3; k=k+2) {
+        //vector3d r_prime = R+gwidth*vector3d(i, j, k);  //note: GQ abscissa=sqrt(2)/2 and this times sqrt(2)*gw = gw
+        //weight w = find_weights(r, r_prime, temp);
 
-        w_den_R.n_0 += .125*(1-fv)*w.n_0;
-        w_den_R.n_1 += .125*(1-fv)*w.n_1;
-        w_den_R.n_2 += .125*(1-fv)*w.n_2;
-        w_den_R.n_3 += .125*(1-fv)*w.n_3;
+        //w_den_R.n_0 += .125*(1-fv)*w.n_0;
+        //w_den_R.n_1 += .125*(1-fv)*w.n_1;
+        //w_den_R.n_2 += .125*(1-fv)*w.n_2;
+        //w_den_R.n_3 += .125*(1-fv)*w.n_3;
 
-        w_den_R.nv_1 += .125*(1-fv)*w.nv_1;
-        w_den_R.nv_2 += .125*(1-fv)*w.nv_2;
-        w_den_R.nm_2 += .125*(1-fv)*w.nm_2;
-      }
-    }
-  }
-  return w_den_R;
-}
+        //w_den_R.nv_1 += .125*(1-fv)*w.nv_1;
+        //w_den_R.nv_2 += .125*(1-fv)*w.nv_2;
+        //w_den_R.nm_2 += .125*(1-fv)*w.nm_2;
+      //}
+    //}
+  //}
+  //return w_den_R;
+//}
 
 weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
                                    double lattice_constant,
