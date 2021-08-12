@@ -14,6 +14,12 @@
 //
 // Please see the file AUTHORS for a list of authors.
 
+//Run this program from /deft/papers/fuzzy-fmt with command like:
+//figs/new-melting.mkdat --kT 0.5 --n 1.06 --gwstart 0.01 --gwend 0.2 
+//--gwstep 0.01 --fv 0.01 --dx 0.5 --mc-error 0.001 --mc-constant 5 
+//--mc-prefactor 50000 --filename isotherm-kT-0.5_tensor.dat --tensor
+//For help on options, enter:  figs/new-melting.mkdat --help
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -24,7 +30,6 @@
 #include "new/Minimize.h"
 #include "version-identifier.h"
 #include "vector3d.h"
-
 #include "findxi.h"
 
 //Number of points for Monte-Carlo
