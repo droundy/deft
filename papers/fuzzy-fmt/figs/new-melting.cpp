@@ -202,9 +202,9 @@ static inline double radius_of_peak(double gwidth, double T) {
 weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
                                    double lattice_constant,
                                    double gwidth, double fv) {
-  weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
+  weight n = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
   if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
-    return w_den_R;
+    return n;
   }
 
   for (long i=0; i<NUM_POINTS; i++) {
@@ -214,16 +214,16 @@ weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx, double tem
     weight w = find_weights(r, r_prime, temp);
     weight w2 = find_weights(r, r_prime2, temp);
 
-    w_den_R.n_0 += (0.5/NUM_POINTS)*(1-fv)*(w.n_0 + w2.n_0);
-    w_den_R.n_1 += (0.5/NUM_POINTS)*(1-fv)*(w.n_1 + w2.n_1);
-    w_den_R.n_2 += (0.5/NUM_POINTS)*(1-fv)*(w.n_2 + w2.n_2);
-    w_den_R.n_3 += (0.5/NUM_POINTS)*(1-fv)*(w.n_3 + w2.n_3);
+    n.n_0 += (0.5/NUM_POINTS)*(1-fv)*(w.n_0 + w2.n_0);
+    n.n_1 += (0.5/NUM_POINTS)*(1-fv)*(w.n_1 + w2.n_1);
+    n.n_2 += (0.5/NUM_POINTS)*(1-fv)*(w.n_2 + w2.n_2);
+    n.n_3 += (0.5/NUM_POINTS)*(1-fv)*(w.n_3 + w2.n_3);
 
-    w_den_R.nv_1 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_1 + w2.nv_1);
-    w_den_R.nv_2 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_2 + w2.nv_2);
-    w_den_R.nm_2 += (0.5/NUM_POINTS)*(1-fv)*(w.nm_2 + w2.nm_2);
+    n.nv_1 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_1 + w2.nv_1);
+    n.nv_2 += (0.5/NUM_POINTS)*(1-fv)*(w.nv_2 + w2.nv_2);
+    n.nm_2 += (0.5/NUM_POINTS)*(1-fv)*(w.nm_2 + w2.nm_2);
   }
-  return w_den_R;
+  return n;
 }
 
 weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
