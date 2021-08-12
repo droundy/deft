@@ -815,9 +815,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             use_tensor_weight);
     fclose(f);
   }
-  if (my_experiment > 0) {
-    printf("My experiment\n");
-  }
   //printf("scaled num_points=%g\n", 20+200*gwidth); // HERE!
   //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
