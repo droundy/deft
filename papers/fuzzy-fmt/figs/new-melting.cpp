@@ -843,34 +843,16 @@ int main(int argc, const char **argv) {
   //reduced_density is the homogeneous (flat) number density accounting for sphere vacancies MULTIPLIED BY the WCA sigma^3 to make it dimensionless
   //temp is the Boltzman constant MULTIPLIED BY the temperature in Kelvin
 
-
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
   double fv_start=0, fv_end=.1, fv_step=0.01, gw_start=0.01, gw_end=0.5, gw_step=0.01, gw_lend=0.5, gw_lstep=0.01; //default settings
 
   double dx=0.01;        //default grid point spacing dx=dy=dz=0.01
   int verbose = false;
-  int downhill = false;
-
-  //Downhill Simplex starting guess
-  //1st col = fv,  2nd col = gw,  3rd col= Diff in Free Energy  (Crystal FE-Homogeneous FE)
-  //When sorted, the first row will contain the BEST value of Free Energy Diff (lowest value),
-  //the middle row will contain the MIDDLE Free Energy Diff,
-  //and the last row will contain the WORST value of Free Energy Diff(highest value).
-  double simplex_fe[3][3] = {{0.8,  0.1,   0},
-    {0.4,  0.2,   0},
-    {0.2,  0.05,  0}
-  };
-  //double simplex_fe[3][3] = {{80, 20, 0},  //best when ordered   TEST SIMPLEX
-  //                           {40, 30, 0},   //mid when ordered
-  //                           {20, 10, 0}    //worst when ordered
-  //};
 
   char *data_dir = new char[1024];
   sprintf(data_dir,"crystallization");
 
-
   //********************Setup POPT to get inputs from command line*******************
-
   // ----------------------------------------------------------------------------
   // Parse input options
   // ----------------------------------------------------------------------------
