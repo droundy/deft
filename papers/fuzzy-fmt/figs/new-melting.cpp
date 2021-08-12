@@ -43,8 +43,7 @@ bool use_tensor_weight=true;
 char *free_energy_output_file = 0;
 
 // radius we need to integrate around a gaussian, in units of gw.
-const double inclusion_radius = 6.0; //original MS
-//const double inclusion_radius = 6.0;   //testing higher temps 2021
+const double inclusion_radius = 6.0; 
 
 static inline double time() {
   return clock()/double(CLOCKS_PER_SEC);
@@ -462,8 +461,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           for (int k=0; k<Nl; k++) {
             vector3d r=i*da1 + j*da2 + k*da3;
 
-            const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over   // original MS
-            //const int many_cells=4 + 12*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over   // testing higher temps 2021
+            const int many_cells=2 + 6*gwidth*sqrt(2)/lattice_constant; // how many cells to sum over
             //Gaussians father away won't contriubute much
             double n = 0;
             const double kT = temp;
@@ -497,7 +495,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double hfree_energy_per_vol;
 
   printf("\nCalculating Homogeneous Free Energy analytically ...\n");
-  HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);   //note: homogeneousFE/atom does not depend on fv or gw
+  HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);
+  //Note: homogeneousFE/atom does not depend on fv or gw
   //Note: hf.energy() returns energy/volume
 
   hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
@@ -761,8 +760,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     // Create all output data filename
     char *alldat_filename = new char[1024];
     char *alldat_filedescriptor = new char[1024];
-    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f",     //original  MS
-    //sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%06.5f",       //testing higher temps 2021
+    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%04.3f", 
+    //sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%06.5f", //smaller gw for higher temps
             temp, reduced_density, fv, gwidth);
     if (use_tensor_weight)  {
       sprintf(alldat_filename, "%s/%s-alldat_tensor.dat", data_dir, alldat_filedescriptor);
@@ -896,7 +895,6 @@ int main(int argc, const char **argv) {
     {"mc-constant", '\0', POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT, &mc_constant, 0, "Monte-Carlo mc-constant", "LONG"},   //temporary - delete later!
 
     /*** PARAMETERS DETERMINING OUTPUT FILE DIRECTORY AND NAMES ***/
-    // Where to save the free energy info
     {
       "filename", '\0', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &free_energy_output_file, 0,
       "File to append free energy info to", "FNAME"
