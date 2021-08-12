@@ -33,7 +33,6 @@ double MC_ERROR = 0.0;
 double seed=1;
 long mc_prefactor=50000;
 long mc_constant=100;
-int my_experiment =0;   //set to 1 to run my experiment
 bool use_tensor_weight=true;
 
 char *free_energy_output_file = 0;
@@ -750,8 +749,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n", data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
   printf("data_out is: diffperatom=%g\n", data_out.diff_free_energy_per_atom);
 
-  int create_alldat_file = 1;  //set to 0 for no alldat file, set to 1 to create alldat file
-  // that saves data for every combination of gw and fv values ran
+  int create_alldat_file = 1;  //set to 0 for no alldat file, set to 1 to create
+  //alldat filethat saves data for every combination of gw and fv values ran
   double run_time = time() - start_time; // run time in seconds
   if (create_alldat_file > 0)  {
     // Create all output data filename
@@ -824,9 +823,11 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 int main(int argc, const char **argv) {
   //double seed=1;
   double reduced_density=1.0, gw=-1, fv=-1, temp=1.0;
-  //gw is standard deviation of a Gaussian function typically called "sigma" (not to be confused with the sigma of the WCA potential!)
+  //gw is standard deviation of a Gaussian function typically called 
+  //"sigma" (not to be confused with the sigma of the WCA potential!)
   //in this program the term sigma means the sigma of the WCA potential
-  //reduced_density is the homogeneous (flat) number density accounting for sphere vacancies MULTIPLIED BY the WCA sigma^3 to make it dimensionless
+  //reduced_density is the homogeneous (flat) number density accounting for
+  //sphere vacancies MULTIPLIED BY the WCA sigma^3 to make it dimensionless
   //temp is the Boltzman constant MULTIPLIED BY the temperature in Kelvin
 
   //double fv_start=0.0, fv_end=.99, fv_step=0.01, gw_start=0.01, gw_end=1.5, gw_step=0.1, gw_lend=0.5, gw_lstep=0.1; //default settings
