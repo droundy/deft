@@ -86,25 +86,16 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
   return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
 }
 
-//static inline double find_Xi(double temp) {
-  //const double epsilon=1;
-  //const double alpha = find_alpha(temp);
-  //return alpha/(6*sqrt(M_PI)*(sqrt(epsilon*log(2)/temp)+log(2)));
-//}
-
 static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   weight w;
-  //w.n_2=(1/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/Xi,2));
   w.n_2=(sqrt(2)/(Xi*sqrt(M_PI)))*exp(-uipow((rdiff_magnitude - alpha/2)/(Xi/sqrt(2)),2));
   w.n_0=w.n_2/(4*M_PI*rdiff_magnitude*rdiff_magnitude);
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));   // Schmidt, Santos (2012) - use!
-  //w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude));   // Groh & Schmidt don't use
-  //w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/Xi));
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));  // Schmidt, Santos (2012)
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/(Xi/sqrt(2))));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
@@ -131,6 +122,7 @@ static inline double radius_of_peak(double gwidth, double T) {
   return 0.5*alpha + 3*Xi + inclusion_radius*gwidth;
 }
 
+//This slower brute-force method was replaced by faster monte-carlo
 //weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, double temp,
                                 //double lattice_constant, double gwidth, double norm,
                                 //double reduced_density) {
