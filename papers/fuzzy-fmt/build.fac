@@ -9,3 +9,6 @@
 ? figs/weight-functions.mkdat 0.5
 < figs/weight-functions.mkdat
 > figs/weight-functions-0.5.dat
+
+| pdflatex pressure-calc && pdflatex pressure-calc
+> pressure-calc.pdf
