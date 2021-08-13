@@ -60,7 +60,14 @@ static inline double variance_fprime_wca_radius(double T) {
   return mean_fprime_wca_radius_squared(T) - uipow(mean_fprime_wca_radius(T),2);
 }
 
+static double cached_T = -1.0;
+static double cached_alpha = -1.0;
+static double cached_Xi = -1.0;
+
 static inline double find_Xi(double T) {
+  if (cached_T == T) {
+    return cached_Xi;
+  }
   return sqrt(2*variance_fprime_wca_radius(T));
 }
 
@@ -82,10 +89,8 @@ static inline double B2_erf(double alpha, double Xi, double T) {
 
 //Find alpha(T) by matching second virial coefficeints B2 for WCA and Erf potentials: 
 static inline double find_alpha(double T) {
-  static double last_T = 0.0;
-  static double last_alpha = 0.0;
-  if (last_T == T) {
-    return last_alpha;
+  if (cached_T == T) {
+    return cached_alpha;
   }
   double Xi = find_Xi(T);
   double B2wca = B2_wca(T);
@@ -100,12 +105,13 @@ static inline double find_alpha(double T) {
       alpha_lo = alpha_mid;
     }
   } while (alpha_hi - alpha_lo > 0.000000001);
-  last_T = T;
-  last_alpha = alpha_mid;
   printf("\nXi at T=%g is %g\n", T, find_Xi(T));
   printf("alpha at T=%g is %g\n", T, alpha_mid);
   printf("our B2 = %g\n", B2_erf(alpha_mid, Xi, T));
   printf("correct B2 = %g\n\n", B2_wca(T));
+  cached_T = T;
+  cached_Xi = Xi;
+  cached_alpha = alpha_mid;
   return alpha_mid;
 }
 

@@ -674,15 +674,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           data_out.hpressure=hpressure;
           return data_out;
         }
-        printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell); //debug
-        printf("      finished %.5f%% of the integral\n",
-            100*((i)/double(Nl)+(j)/uipow(Nl,2)+(k + 1)/uipow(Nl,3))); //debug
+        // printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell); //debug
+        // printf("      finished %.5f%% of the integral\n",
+        //     100*((i)/double(Nl)+(j)/uipow(Nl,2)+(k + 1)/uipow(Nl,3))); //debug
       }
-      ////const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
-      ////const double t = time()/60/60;
-      ////const double time_total = t/fraction_complete;
-      ////printf("   finished %.3f%% of the integral (%g/%g hours left)\n",
-      ////       100*fraction_complete, time_total - t, time_total);
+      const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
+      const double t = time()/60/60;
+      const double time_total = t/fraction_complete;
+      printf("   finished %.2g%% of the integral (%g/%g hours left)\n",
+            100*fraction_complete, time_total - t, time_total);
     }
     //printf("finished %.1f%% of the integral\n",
     //       100*(i + 1)/double(Nl));
