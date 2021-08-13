@@ -17,8 +17,9 @@
 //Run this program from /deft/papers/fuzzy-fmt with command like:
 //figs/new-melting.mkdat --kT 0.5 --n 1.06 --gwstart 0.01 --gwend 0.2 
 //--gwstep 0.01 --fv 0.01 --dx 0.5 --mc-error 0.001 --mc-constant 5 
-//--mc-prefactor 50000 --filename isotherm-kT-0.5_tensor.dat --tensor
-// OR simply, figs/new-melting.mkdat --kT 1 --n 1.2
+//--mc-prefactor 50000 --filename isotherm-kT-0.5_tensor.dat 
+// OR simply, figs/new-melting.mkdat --kT 1 --n 1.2 
+// OR, figs/new-melting.mkdat --kT 2 --n 1 --gw 0.01 --fv 0 
 //For help on options, enter:  figs/new-melting.mkdat --help
 
 #include <stdio.h>
@@ -65,6 +66,8 @@ struct data {
   double cfree_energy_per_atom;
   double hfree_energy_per_vol;
   double cfree_energy_per_vol;
+  double cpressure;
+  double hpressure;
 };
 
 double find_lattice_constant(double reduced_density, double fv) {
@@ -440,8 +443,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
     const double analytic_ideal_free_energy =
       (1-fv)*temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
-                   - 3*log(sqrt(2*M_PI)*gwidth)
-                   - 5.0/2);
+                   - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2);
     if (gwidth < 0.01*lattice_constant) {
       printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
       cFideal_of_primitive_cell = analytic_ideal_free_energy;
@@ -486,6 +488,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   double cfree_energy_per_vol;
   double hfree_energy_per_atom;
   double hfree_energy_per_vol;
+  double cpressure;
+  double hpressure;
 
   printf("\nCalculating Homogeneous Free Energy analytically ...\n");
   HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);
@@ -511,7 +515,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
   double cFexcess_of_primitive_cell=0;  //Crystal Excess Free Energy over one primitive cell
-  double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0, total_mu=0;
+  double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0, total_muV = 0, total_V = 0;
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
@@ -624,8 +628,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         total_phi_1 += temp*phi_1*dV;
         total_phi_2 += temp*phi_2*dV;
         total_phi_3 += temp*phi_3*dV;
-        total_mu += temp*mu_of_r*dV;   //FIX - should be temp/vol
         cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is Bolatzman constant times temperature divided by epsilon (which is 1)
+        total_muV += temp*mu_of_r*dV;  // total mu = total_muV/total_V
+        total_V += dV;
         if (isnan(cFexcess_of_primitive_cell)) {                        // temp is a reduced temperature given by t* in the paper
           printf("free energy is a NaN!\n");
           printf("position is: %g %g %g\n", r.x, r.y, r.z);
@@ -665,13 +670,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           data_out.cfree_energy_per_atom=cFexcess_of_primitive_cell;
           data_out.hfree_energy_per_vol=hfree_energy_per_vol;
           data_out.cfree_energy_per_vol=cFexcess_of_primitive_cell;
+          data_out.cpressure=cpressure;
+          data_out.hpressure=hpressure;
           return data_out;
         }
-        //printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell);   //debug
-        //printf("      finished %.5f%% of the integral\n",
-        //       100*((i)/double(Nl)
-        //           +(j)/uipow(Nl, 2)
-        //           +(k + 1)/uipow(Nl, 3)));
+        printf("cFexcess_of_primitive_cell is now... %g\n", cFexcess_of_primitive_cell); //debug
+        printf("      finished %.5f%% of the integral\n",
+            100*((i)/double(Nl)+(j)/uipow(Nl,2)+(k + 1)/uipow(Nl,3))); //debug
       }
       ////const double fraction_complete = ((i)/double(Nl) + (j + 1)/uipow(Nl, 2));
       ////const double t = time()/60/60;
@@ -739,12 +744,17 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("Crystal Excess free energy per volume = %g\n", cFexcess_of_primitive_cell/primitive_cell_volume);
   printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol);
   printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
+  
+  cpressure = (total_muV/total_V)*reduced_density-cfree_energy_per_vol;
+  printf("crystal pressure = %g\n", cpressure);
 
   data data_out;
   data_out.diff_free_energy_per_atom=cfree_energy_per_atom-hfree_energy_per_atom;
   data_out.cfree_energy_per_atom=cfree_energy_per_atom;
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
   data_out.cfree_energy_per_vol=cfree_energy_per_vol;
+  data_out.cpressure=cpressure;
+  data_out.hpressure=hpressure;
 
   printf("*Homogeneous free energy calculated analytically\n");
 
@@ -818,6 +828,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //printf("scaled num_points=50000\n"); // HERE!
   return data_out;
 }
+
+
 
 int main(int argc, const char **argv) {
   //double seed=1;
@@ -955,6 +967,7 @@ int main(int argc, const char **argv) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
     double hfree_energy_pervol, cfree_energy_pervol;
+    double hpressure, cpressure;
     const int num_to_compute = int(0.3/0.05*1/0.01);  //program progress feedback
     int num_computed = 0;
     for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {
@@ -992,6 +1005,8 @@ int main(int argc, const char **argv) {
           best_lattice_constant=lattice_constant;
           hfree_energy_pervol=e_data.hfree_energy_per_vol;
           cfree_energy_pervol=e_data.cfree_energy_per_vol;
+          hpressure=e_data.hpressure;
+          cpressure=e_data.cpressure;
         }
       }
     }
@@ -1025,6 +1040,7 @@ int main(int argc, const char **argv) {
     double best_energy_diff = 1e100;
     double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
     double hfree_energy_pervol, cfree_energy_pervol;
+    double hpressure, cpressure;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     if (gw == -2) {
@@ -1043,6 +1059,8 @@ int main(int argc, const char **argv) {
         best_lattice_constant=lattice_constant;
         hfree_energy_pervol=e_data.hfree_energy_per_vol;
         cfree_energy_pervol=e_data.cfree_energy_per_vol;
+        hpressure=e_data.hpressure;
+        cpressure=e_data.cpressure;
       }
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
