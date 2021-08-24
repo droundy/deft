@@ -46,17 +46,54 @@ In terms of virtual variations of the functional $F[n(\vec r)]$,
     %\bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~'' \color{red}\mbox{~~~UNITS?}
 %\end{align} 
 \begin{align}
-    \mu &= \left<\mu(\vec r)\right> = \frac{1}{V} \int \mu(\vec r)~d\vec r~    \\
+    \mu &= \left<\mu(\vec r)\right> = \frac{1}{V}\int \mu(\vec r)~d\vec r~\\
         &= \frac{1}{V} \int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)}
            \bigg|_{T,V}~d\vec r~  
         %&= \frac{1}{V} \int d\vec r \int d\vec r~'' ~\frac{\delta 
         %F[n(\vec r)]}{\delta n_i(\vec r~'')}\bigg|_{T,V} 
         %\frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}   
 \end{align}
-
-The excess Helmholtz free energy per volume is given by
+The Helmholtz free energy can be broken into an ideal and an excess part.
 \begin{align}
-    F_{{ex}}[n(\vec r)] &= \frac{k_BT}{V}\int\Phi_1
+    F = F_{id}+ F_{ex}
+\end{align} 
+\begin{align}
+   F_{ideal}  &= k_BTN[\ln\left(\frac{N\Lambda^{3}}{V}\right)-1]  \\
+%
+  \mu_{ideal} &= \frac{\partial F}{\partial N}\bigg|_{T,V}   \\
+              &= k_BT\ln\left(\frac{N\Lambda^{3}}{V}\right)  \\
+              &= k_BT\ln\left(\frac{n}{n_Q}\right)
+\end{align} 
+For a spatially varying number density, the ideal free energy in becomes
+\begin{align}
+    F_{ideal}[n(\vec{r})] &= k_BT\int_{Volume}n(\vec r~')
+      \left[\ln\left(\frac{n(\vec r~')}{n_Q}\right)-1\right] ~d\vec r~' 
+      \\ \nonumber \\
+%
+ \mu_{ideal} &= \frac{1}{V}\int \frac{\delta F[n(\vec r)]}{\delta 
+              n(\vec r)} d\vec r \\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~\frac{\delta}{\delta n(\vec r)}
+    \left(\int d\vec r~'~ n(\vec r~')\left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right]\right) \\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~
+    \left(\int d\vec r~'~ \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right] + n(\vec r~')\frac{1}{\frac{n(\vec r~')}
+    {n_Q}}\frac{1}{n_Q} \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \right)\\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~
+    \left(\int d\vec r~'~ \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)\right]\right) - \frac{\delta n(\vec r~')}{\delta 
+    n(\vec r)}+\frac{\delta n(\vec r~')}{\delta n(\vec r)}\\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~ \left(\int d\vec r~'~\delta(\vec r~'-
+    \vec r)\left[\ln\left(\frac{n(\vec r~')}{n_Q}\right)\right]\right) 
+    \\ \nonumber\\  
+    &= \frac{k_BT}{V} \int d\vec r ~\ln\left(\frac{n(\vec r)}{n_Q}\right)   
+\end{align} 
+The excess Helmholtz free energy is given by
+\begin{align}
+    F_{{ex}}[n(\vec r)] &= k_BT\int\Phi_1
     +\Phi_2+\Phi_3~~d\vec r
 \end{align}     
 where
@@ -73,7 +110,8 @@ and the weighted densities are given by
                     ~d\vec {r}~'  \label{weighted_densities}  \\
                      &= n\otimes w_\alpha(\vec r)
 \end{align}  
-with weight functions
+where $n(\vec r)$ = n for the homogeneous case.
+The weight functions are
 \begin{align}\label{eq:weights}
   w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
   w_{1}(r) &=\frac{w_{2}}{4\pi{r}} 
@@ -476,9 +514,9 @@ Final equation for $\mu$:
 
 
 \begin{align}
-   \int_{all space} w_i(r) ~d\vec r &= \int w_i(r)e^{i\vec k \cdot 
+   \int_{all space} w_i(\vec r) ~d\vec r &= \int w_i(\vec r)e^{i\vec k \cdot 
    \vec r}~d\vec r 
-    = \widetilde{w}_i(k) \mbox{~~with $\vec k = 0$}
+    = \widetilde{w}_i(\vec k) \mbox{~~with $\vec k = 0$}
 \end{align}
 
 \begin{align}
@@ -588,5 +626,16 @@ As shown in the thesis,
   \widetilde{\overleftrightarrow w}_{m2}(\vec k=0) &= 0  \\
   \widetilde w_{m2ik}(\vec k = 0) &= 0
 \end{align}
+
+For the homogeneous case,
+\begin{align}
+    F_{ex} &= K_BT\Phi_1 V\\
+ \mu1_{ex} &= \frac{1}{V}\frac{\partial F_{ex}}{\partial n} \bigg|_{T,V}\\
+           &= -k_BT\int w_0 \ln(1-n \int w_3)  \\
+           &= - k_BT(1)\ln(1-n)\frac{\pi\Xi^2\alpha}{2} -n(1)\frac{\frac{\pi\Xi^2\alpha}{2}}{1-n\frac{\pi\Xi^2\alpha}{2}} \\
+           &= - k_BT\ln(1-n)\frac{\pi\Xi^2\alpha}{2} -n\frac{\frac{\pi\Xi^2\alpha}{2}}{1-n\frac{\pi\Xi^2\alpha}{2}}
+\end{align}
+
+
 
 \end{document}
