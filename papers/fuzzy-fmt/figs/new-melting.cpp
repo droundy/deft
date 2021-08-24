@@ -418,6 +418,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
 
   double cFideal_of_primitive_cell=0;
+  double c_mu_ideal_times_vol= 0;
+  double cpressure_ideal =0;
   {
     //Find inhomogeneous Fideal of one crystal primitive cell
     // scale our dx by w.
@@ -444,9 +446,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     const double analytic_ideal_free_energy =
       (1-fv)*temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
                    - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2);
+    const double  analytic_ideal_mu = 
+       temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
+                   - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2)+ temp;  //CHECK!        
     if (gwidth < 0.01*lattice_constant) {
       printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
       cFideal_of_primitive_cell = analytic_ideal_free_energy;
+      cpressure_ideal = analytic_ideal_mu*reduced_density - cFideal_of_primitive_cell; //CHECK!
       printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
     } else {
@@ -472,6 +478,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             if (n > 1e-200) { // Only use n values that are large enough - avoid underflow and n=0 issues ln(0)=ERROR
               // printf("n = %g  dF = %g\n", n, dF);
               cFideal_of_primitive_cell += kT*n*(log(n*2.646476976618268e-6/(sqrt(kT)*kT)) - 1.0)*dV;
+              c_mu_ideal_times_vol += kT*log(n*2.646476976618268e-6/(sqrt(kT)*kT))*dV; //????CHECK!
             }
           }
         }
@@ -480,6 +487,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
              cFideal_of_primitive_cell/primitive_cell_volume);
       printf("analytic ideal gas free energy per vol   = %g\n",
              analytic_ideal_free_energy/primitive_cell_volume);
+      cpressure_ideal = (c_mu_ideal_times_vol/primitive_cell_volume)
+        *reduced_density-cFideal_of_primitive_cell/primitive_cell_volume;  //CHECK!
+      printf("crystal ideal pressure   = %g\n", cpressure_ideal ); //CHECK!
     }
   }
 
@@ -498,7 +508,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
 
   hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
   hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
+  hpressure = reduced_density*hf.d_by_dn() - hfree_energy_per_vol;  //CHECK
   hf.printme("     homogeneous:");
+  printf("homogeneous pressure is %g", hpressure); //hpressure = Pideal+Pexcess
   printf("homogeneous free_energy per vol is %g\n", hf.energy());
   printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);
 
@@ -745,7 +757,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol);
   printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
   
-  cpressure = (total_muV/total_V)*reduced_density-cfree_energy_per_vol;
+  cpressure = (total_muV/total_V)*reduced_density-cfree_energy_per_vol 
+               + cpressure_ideal;  // Check!
   printf("crystal pressure = %g\n", cpressure);
 
   data data_out;
