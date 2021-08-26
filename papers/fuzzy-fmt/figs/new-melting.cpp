@@ -455,6 +455,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       cpressure_ideal = analytic_ideal_mu*reduced_density - cFideal_of_primitive_cell; //CHECK!
       printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
+      printf("analytic crystal ideal pressure = %.12g\n",
+             cpressure_ideal);
     } else {
 
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
