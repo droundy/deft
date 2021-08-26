@@ -510,7 +510,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
   hpressure = reduced_density*hf.d_by_dn() - hfree_energy_per_vol;  //CHECK
   hf.printme("     homogeneous:");
-  printf("homogeneous pressure is %g", hpressure); //hpressure = Pideal+Pexcess
+  printf("homogeneous pressure is %g\n", hpressure); //hpressure = Pideal+Pexcess
   printf("homogeneous free_energy per vol is %g\n", hf.energy());
   printf("homogeneous free_energy per atom is %g\n", hfree_energy_per_atom);
 
