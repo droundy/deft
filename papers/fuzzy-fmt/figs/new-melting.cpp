@@ -220,7 +220,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
 
   double cFideal_of_primitive_cell=0;
-  double c_mu_ideal_times_vol= 0;
   double cpressure_ideal =0;
   {
     //Find inhomogeneous Fideal of one crystal primitive cell
@@ -258,7 +257,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
     } else {
-
+      double c_mu_ideal_times_vol= 0;
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
         for (int j=0; j<Nl; j++) {
           for (int k=0; k<Nl; k++) {
@@ -298,19 +297,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //Integrate over one primitive cell (a parallelepiped) to find free energy
   double cfree_energy_per_atom;
   double cfree_energy_per_vol;
-  double hfree_energy_per_atom;
-  double hfree_energy_per_vol;
-  double cpressure;
-  double hpressure;
 
   printf("\nCalculating Homogeneous Free Energy analytically ...\n");
   HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);
   //Note: homogeneousFE/atom does not depend on fv or gw
   //Note: hf.energy() returns energy/volume
 
-  hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
-  hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
-  hpressure = reduced_density*hf.d_by_dn() - hfree_energy_per_vol;  //CHECK
+  double hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
+  double hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
+  const double hpressure = reduced_density*hf.d_by_dn() - hfree_energy_per_vol;  //CHECK
   hf.printme("     homogeneous:");
   printf("homogeneous pressure is %g", hpressure); //hpressure = Pideal+Pexcess
   printf("homogeneous free_energy per vol is %g\n", hf.energy());
@@ -484,7 +479,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           data_out.cfree_energy_per_atom=cFexcess_of_primitive_cell;
           data_out.hfree_energy_per_vol=hfree_energy_per_vol;
           data_out.cfree_energy_per_vol=cFexcess_of_primitive_cell;
-          data_out.cpressure=cpressure;
           data_out.hpressure=hpressure;
           return data_out;
         }
@@ -559,16 +553,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol);
   printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
   
-  cpressure = (total_muV/total_V)*reduced_density-cfree_energy_per_vol 
-               + cpressure_ideal;  // Check!
-  printf("crystal pressure = %g\n", cpressure);
-
   data data_out;
   data_out.diff_free_energy_per_atom=cfree_energy_per_atom-hfree_energy_per_atom;
   data_out.cfree_energy_per_atom=cfree_energy_per_atom;
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
   data_out.cfree_energy_per_vol=cfree_energy_per_vol;
-  data_out.cpressure=cpressure;
+  data_out.cpressure=(total_muV/total_V)*reduced_density-cfree_energy_per_vol + cpressure_ideal;
+  printf("crystal pressure = %g\n", data_out.cpressure);
   data_out.hpressure=hpressure;
 
   printf("*Homogeneous free energy calculated analytically\n");
