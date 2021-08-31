@@ -303,8 +303,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //Note: homogeneousFE/atom does not depend on fv or gw
   //Note: hf.energy() returns energy/volume
 
-  double hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
-  double hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
+  const double hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
+  const double hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
   const double hpressure = reduced_density*hf.d_by_dn() - hfree_energy_per_vol;  //CHECK
   hf.printme("     homogeneous:");
   printf("homogeneous pressure is %g", hpressure); //hpressure = Pideal+Pexcess
