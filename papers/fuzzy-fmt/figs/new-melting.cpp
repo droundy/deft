@@ -378,7 +378,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           }
         }
 
-        double phi_1 = -n_0*1.0*log(1.0-1.0*n_3);
+        double phi_1 = -n_0*log(1.0-n_3);
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
         double phi_3;
         double mu_of_r;
@@ -403,16 +403,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             3*nm_2.x.y*nm_2.y.z*nm_2.z.x + // xy yz zx three cyclic permutations
             3*nm_2.x.z*nm_2.z.y*nm_2.y.x;  // xz zy yx == the above, but these are the non-cyclic permutations
 
-          //phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3.0*nm_2.determinant()))/(24*M_PI*uipow(1.0-1.0*n_3,2));        // Schmidt equation 5  (2000) - ok
+          //phi_3 = (uipow(n_2,3) - 3.0*n_2*nv_2.dot(nv_2) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2))-3.0*nm_2.determinant()))/(24*M_PI*uipow(1.0-n_3,2));        // Schmidt equation 5  (2000) - ok
           phi_3 =( n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2)) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))
             /(24*M_PI*uipow(1-n_3,2));         // Santos (2012) - yes
-          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-1.0*n_3,2));      // Sweatman, Groh & Schmidt  (2001) - same as Santos with different w_nm
-          mu_of_r = -1.0*log(1.0-1.0*n_3)+(M_PI*uipow(Xi,2)*alpha/2)*(n_0/(1.0-1.0*n_3))
-          +(n_1*M_PI*(uipow(Xi,2)+uipow(alpha,2))+n_2*(alpha/2))/(1.0-1.0*n_3)
-          +((n_1*n_2-nv_1.dot(nv_2))*(M_PI*uipow(Xi,2)*alpha/2))/(uipow((1.0-1.0*n_3),2))         
+          //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-n_3,2));      // Sweatman, Groh & Schmidt  (2001) - same as Santos with different w_nm
+          mu_of_r = -log(1.0-n_3)+(M_PI*uipow(Xi,2)*alpha/2)*(n_0/(1.0-n_3))
+          +(n_1*M_PI*(uipow(Xi,2)+uipow(alpha,2))+n_2*(alpha/2))/(1.0-n_3)
+          +((n_1*n_2-nv_1.dot(nv_2))*(M_PI*uipow(Xi,2)*alpha/2))/(uipow((1.0-n_3),2))         
           +(n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2))+(9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) 
-          -traceof_nm_2cubed))*((uipow(Xi,2)*alpha)/(24*(1.0-1.0*n_3)*uipow((1.0-1.0*n_3),2)))
-          +(1/(24*uipow((1.0-1.0*n_3),2)))*(uipow(n_2,2)*M_PI*(uipow(Xi,2)
+          -traceof_nm_2cubed))*((uipow(Xi,2)*alpha)/(24*(1.0-n_3)*uipow((1.0-n_3),2)))
+          +(1/(24*uipow((1.0-n_3),2)))*(uipow(n_2,2)*M_PI*(uipow(Xi,2)
           +uipow(alpha,2))-3*M_PI*(uipow(Xi,2)+uipow(alpha,2))*nv_2.dot(nv_2));
         } else {
           // The following was Rosenfelds early vector version of the functional
@@ -561,6 +561,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
   data_out.cfree_energy_per_vol=cfree_energy_per_vol;
   data_out.cpressure=(total_muV/total_V)*reduced_density-cfree_energy_per_vol + cpressure_ideal;
+  printf("crystal excess pressure = %g\n", (total_muV/total_V)*reduced_density-cfree_energy_per_vol);
   printf("crystal pressure = %g\n", data_out.cpressure);
   data_out.hpressure=hpressure;
 
