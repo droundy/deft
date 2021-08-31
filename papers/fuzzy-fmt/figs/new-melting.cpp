@@ -88,8 +88,7 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
   return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
 }
 
-static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, 
-                     double alpha, double Xi) {
+static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   weight w;
@@ -98,7 +97,7 @@ static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp,
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));  // Schmidt, Santos (2012)
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));   // Schmidt, Santos (2012)
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/(Xi/sqrt(2))));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
@@ -251,7 +250,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                    - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2);
     const double  analytic_ideal_mu = 
        temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
-                   - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2)+ temp;  //CHECK!        
+                   - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2)+ temp;
     if (gwidth < 0.01*lattice_constant) {
       printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
       cFideal_of_primitive_cell = analytic_ideal_free_energy;
@@ -281,7 +280,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             if (n > 1e-200) { // Only use n values that are large enough - avoid underflow and n=0 issues ln(0)=ERROR
               // printf("n = %g  dF = %g\n", n, dF);
               cFideal_of_primitive_cell += kT*n*(log(n*2.646476976618268e-6/(sqrt(kT)*kT)) - 1.0)*dV;
-              c_mu_ideal_times_vol += kT*log(n*2.646476976618268e-6/(sqrt(kT)*kT))*dV; //????CHECK!
+              c_mu_ideal_times_vol += kT*log(n*2.646476976618268e-6/(sqrt(kT)*kT))*dV;
             }
           }
         }
