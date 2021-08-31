@@ -88,8 +88,7 @@ static inline double density_gaussian(double r, double gwidth, double norm) {
   return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
 }
 
-static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, 
-                     double alpha, double Xi) {
+static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   weight w;
@@ -98,7 +97,7 @@ static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp,
   w.n_1=w.n_2/(4*M_PI*rdiff_magnitude);
   w.nv_1 = w.n_1*(rdiff/rdiff_magnitude);
   w.nv_2 = w.n_2*(rdiff/rdiff_magnitude);
-  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));  // Schmidt, Santos (2012)
+  w.nm_2 = w.n_2*(rdiff.outer(rdiff)/sqr(rdiff_magnitude) - identity_tensor()*(1.0/3));   // Schmidt, Santos (2012)
   w.n_3=(1.0/2)*(1-erf((rdiff_magnitude-(alpha/2))/(Xi/sqrt(2))));
   if (rdiff_magnitude == 0) {
     w.n_0=0;
@@ -125,82 +124,6 @@ static inline double radius_of_peak(double gwidth, double T) {
   return 0.5*alpha + 3*Xi + inclusion_radius*gwidth;
 }
 
-//This slower brute-force method was replaced by faster monte-carlo
-//weight find_weighted_den_aboutR(vector3d r, vector3d R, double dx, 
-     //double temp, double lattice_constant, double gwidth, double norm,
-     //double reduced_density) {
-  //const vector3d lattice_vectors[3] = {
-    //vector3d(0,lattice_constant/2,lattice_constant/2),
-    //vector3d(lattice_constant/2,0,lattice_constant/2),
-    //vector3d(lattice_constant/2,lattice_constant/2,0),
-  //};
-
-  //const int inc_Ntot= (inclusion_radius*gwidth/dx) +1; //round up! Number of infinitesimal lengths along one of the lattice_vectors
-
-  //weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
-    //return w_den_R;
-  //}
-
-  //const double df = dx/(lattice_constant/2);  // fraction of lattice vector corresponding to dx
-  //printf("df=dx/(lattice_constant/2))=%g\n", df);
-  //const vector3d da1 = lattice_vectors[0]*df; //infinitesimal lattice vectors of length df
-  //const vector3d da2 = lattice_vectors[1]*df;
-  //const vector3d da3 = lattice_vectors[2]*df;
-  //const double dVp = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
-  //assert(dVp > 0);
-  //for (int l=-inc_Ntot; l<=inc_Ntot; l++) { //integrate only over infinitesimal lattice vectors within 2 x inlusion radius
-    //for (int m=-inc_Ntot; m<=inc_Ntot; m++) {
-      //for (int o=-inc_Ntot; o<=inc_Ntot; o++) {
-        //const vector3d rp_from_R = l*da1 + m*da2 + o*da3;
-        //const vector3d rp = R + rp_from_R;
-        //// only bother including points within the inclusion radius:
-        //if (rp_from_R.norm() < inclusion_radius*gwidth) {
-          //weight w = find_weights(r, rp, temp);
-          //double n_rp = density_gaussian((rp_from_R).norm(), gwidth, norm);  // want density a distance rp-R from center of Gaussian
-          //w_den_R.n_0 += w.n_0*n_rp*dVp;
-          //w_den_R.n_1 += w.n_1*n_rp*dVp;
-          //w_den_R.n_2 += w.n_2*n_rp*dVp;
-          //w_den_R.n_3 += w.n_3*n_rp*dVp;
-
-          //w_den_R.nv_1 += w.nv_1*n_rp*dVp;
-          //w_den_R.nv_2 += w.nv_2*n_rp*dVp;
-          //w_den_R.nm_2 += w.nm_2*n_rp*dVp;
-        //}
-      //}
-    //}
-  //}
-
-  //return w_den_R;
-//}
-
-//Gausian Quadrature was faster method replaced by more accurate monte-carlo
-//weight find_weighted_den_aboutR_guasquad(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
-    //double lattice_constant,
-    //double gwidth, double fv) {
-  //weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
-    //return w_den_R;
-  //}
-  //for (int i=-1; i<3; i=i+2) {
-    //for (int j=-1; j<3; j=j+2) {
-      //for (int k=-1; k<3; k=k+2) {
-        //vector3d r_prime = R+gwidth*vector3d(i, j, k);  //note: GQ abscissa=sqrt(2)/2 and this times sqrt(2)*gw = gw
-        //weight w = find_weights(r, r_prime, temp);
-
-        //w_den_R.n_0 += .125*(1-fv)*w.n_0;
-        //w_den_R.n_1 += .125*(1-fv)*w.n_1;
-        //w_den_R.n_2 += .125*(1-fv)*w.n_2;
-        //w_den_R.n_3 += .125*(1-fv)*w.n_3;
-
-        //w_den_R.nv_1 += .125*(1-fv)*w.nv_1;
-        //w_den_R.nv_2 += .125*(1-fv)*w.nv_2;
-        //w_den_R.nm_2 += .125*(1-fv)*w.nm_2;
-      //}
-    //}
-  //}
-  //return w_den_R;
-//}
 
 weight find_weighted_den_aboutR_mc(vector3d r, vector3d R, double dx,   //dx is not used but keeping format
   double temp, double lattice_constant, double gwidth, double fv) {
@@ -278,127 +201,6 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   return n;
 }
 
-//double report_my_error(vector3d r, vector3d R,     //Temporary- FOR DEBUG ONLY
-                       //double gwidth, double fv, double alpha, double Xi) {
-  //weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //double n3_sqr = 0;
-
-  //// On the following line, we include the ratio of gaussian peak
-  //// volume to the weight function volume so as to increase the odds
-  //// that we get a random point that overlaps with the weight
-  //// functions on our first try.
-  //long num_points = mc_constant + mc_prefactor*uipow(gwidth/(0.5*alpha), 3);   // HERE!
-  //// printf("Starting with num_points = %ld\n", num_points*4);
-  //long i=0;
-  //double n3_error;
-  //do {
-    //num_points *= 4;
-    //for (; i<num_points; i++) {
-      //vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
-      //vector3d r_prime = R + dr;
-      //vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
-      //weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
-      //weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
-
-      //w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
-      //w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
-      //w_den_R.n_2 += 0.5*(1-fv)*(w.n_2 + w2.n_2);
-      //w_den_R.n_3 += 0.5*(1-fv)*(w.n_3 + w2.n_3);
-
-      //w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
-      //w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
-      //w_den_R.nm_2 += 0.5*(1-fv)*(w.nm_2 + w2.nm_2);
-
-      //n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
-    //}
-    //// we only consider error in n3, because it is dimensionless and
-    //// pretty easy to reason about, and the others are closely
-    //// related.
-    //n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
-  //} while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
-  //return n3_error;
-//}
-
-//long report_total_num_points(vector3d r, vector3d R,   //Temporary- FOR DEBUG ONLY
-                             //double gwidth, double fv, double alpha, double Xi) {
-  //weight w_den_R = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //double n3_sqr = 0;
-
-  //// On the following line, we include the ratio of gaussian peak
-  //// volume to the weight function volume so as to increase the odds
-  //// that we get a random point that overlaps with the weight
-  //// functions on our first try.
-  //long num_points = mc_constant + mc_prefactor*uipow(gwidth/(0.5*alpha), 3);   // HERE!
-  //// printf("Starting with num_points = %ld\n", num_points*4);
-  //long i=0;
-  //double n3_error;
-  //do {
-    //num_points *= 4;
-    //for (; i<num_points; i++) {
-      //vector3d dr = vector3d::ran(gwidth);  //A vector is randomly selected from a Gaussian distribution of width gwidth
-      //vector3d r_prime = R + dr;
-      //vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
-      //weight w = find_weights_from_alpha_Xi(r, r_prime, alpha, Xi);
-      //weight w2 = find_weights_from_alpha_Xi(r, r_prime2, alpha, Xi);
-
-      //w_den_R.n_0 += 0.5*(1-fv)*(w.n_0 + w2.n_0);
-      //w_den_R.n_1 += 0.5*(1-fv)*(w.n_1 + w2.n_1);
-      //w_den_R.n_2 += 0.5*(1-fv)*(w.n_2 + w2.n_2);
-      //w_den_R.n_3 += 0.5*(1-fv)*(w.n_3 + w2.n_3);
-
-      //w_den_R.nv_1 += 0.5*(1-fv)*(w.nv_1 + w2.nv_1);
-      //w_den_R.nv_2 += 0.5*(1-fv)*(w.nv_2 + w2.nv_2);
-      //w_den_R.nm_2 += 0.5*(1-fv)*(w.nm_2 + w2.nm_2);
-
-      //n3_sqr += 0.25*(1-fv)*(1-fv)*sqr(w.n_3 + w2.n_3);
-    //}
-    //// we only consider error in n3, because it is dimensionless and
-    //// pretty easy to reason about, and the others are closely
-    //// related.
-    //n3_error = sqrt(fabs(n3_sqr/num_points - sqr(w_den_R.n_3/num_points))/num_points);  //Standard Error of the Mean (SEM)
-  //} while (n3_error > MC_ERROR || (n3_error > 0.25*fabs(1-w_den_R.n_3/num_points) && n3_error < 1e-15));  //whichever is smaller
-  //return num_points;
-//}
-
-//weight find_weighted_den_variances_aboutR_mc(vector3d r, vector3d R, double dx, double temp,  //dx is not used but keeping format
-    //double lattice_constant,
-    //double gwidth, double fv) {
-  //weight avg_w_sqr = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //weight avg_w = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //if ((r-R).norm() > radius_of_peak(gwidth, temp)) {
-    //return {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //}
-
-  //for (long i=0; i<NUM_POINTS; i++) {
-    //vector3d dr = vector3d::ran(gwidth); //A vector is randomly selected from a Gaussian distribution of width gwidth
-    //vector3d r_prime = R + dr;
-    //vector3d r_prime2 = R - dr; // using an "antithetic variate" to cancel out first-order error
-    //weight w = find_weights(r, r_prime, temp);
-    //weight w2 = find_weights(r, r_prime2, temp);
-
-    ////Compute average of squared weight:
-    //avg_w_sqr.n_0 += (0.25/NUM_POINTS)*sqr(w.n_0 + w2.n_0);
-    //avg_w_sqr.n_1 += (0.25/NUM_POINTS)*sqr(w.n_1 + w2.n_1);
-    //avg_w_sqr.n_2 += (0.25/NUM_POINTS)*sqr(w.n_2 + w2.n_2);
-    //avg_w_sqr.n_3 += (0.25/NUM_POINTS)*sqr(w.n_3 + w2.n_3);
-
-    ////Compute square of average weight:
-    //avg_w.n_0 += (0.5/NUM_POINTS)*(w.n_0 + w2.n_0);
-    //avg_w.n_1 += (0.5/NUM_POINTS)*(w.n_1 + w2.n_1);
-    //avg_w.n_2 += (0.5/NUM_POINTS)*(w.n_2 + w2.n_2);
-    //avg_w.n_3 += (0.5/NUM_POINTS)*(w.n_3 + w2.n_3);
-  //}
-
-  //// Compute total w variance = average of squared weight - square of average weight
-  //weight n_var = {0,0,0,0,vector3d(0,0,0), vector3d(0,0,0), zero_tensor()};
-  //n_var.n_0 = (1-fv)*(avg_w_sqr.n_0 - sqr(avg_w.n_0))/NUM_POINTS;
-  //n_var.n_1 = (1-fv)*(avg_w_sqr.n_1 - sqr(avg_w.n_1))/NUM_POINTS;
-  //n_var.n_2 = (1-fv)*(avg_w_sqr.n_2 - sqr(avg_w.n_2))/NUM_POINTS;
-  //n_var.n_3 = (1-fv)*(avg_w_sqr.n_3 - sqr(avg_w.n_3))/NUM_POINTS;
-
-  //return n_var;
-//}
-
 data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx_input, bool verbose=false) {
   double start_time = time();
   printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g, mc NUM_POINTS=%li\n", temp, reduced_density, fv, gwidth, dx_input, NUM_POINTS);  //debug
@@ -418,7 +220,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
 
   double cFideal_of_primitive_cell=0;
-  double c_mu_ideal_times_vol= 0;
   double cpressure_ideal =0;
   {
     //Find inhomogeneous Fideal of one crystal primitive cell
@@ -448,7 +249,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                    - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2);
     const double  analytic_ideal_mu = 
        temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
-                   - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2)+ temp;  //CHECK!        
+                   - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2)+ temp;
     if (gwidth < 0.01*lattice_constant) {
       printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
       cFideal_of_primitive_cell = analytic_ideal_free_energy;
@@ -458,7 +259,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
       printf("analytic crystal ideal pressure = %.12g\n",
              cpressure_ideal);
     } else {
-
+      double c_mu_ideal_times_vol= 0;
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
         for (int j=0; j<Nl; j++) {
           for (int k=0; k<Nl; k++) {
@@ -480,7 +281,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             if (n > 1e-200) { // Only use n values that are large enough - avoid underflow and n=0 issues ln(0)=ERROR
               // printf("n = %g  dF = %g\n", n, dF);
               cFideal_of_primitive_cell += kT*n*(log(n*2.646476976618268e-6/(sqrt(kT)*kT)) - 1.0)*dV;
-              c_mu_ideal_times_vol += kT*log(n*2.646476976618268e-6/(sqrt(kT)*kT))*dV; //????CHECK!
+              c_mu_ideal_times_vol += kT*log(n*2.646476976618268e-6/(sqrt(kT)*kT))*dV;
             }
           }
         }
@@ -498,19 +299,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   //Integrate over one primitive cell (a parallelepiped) to find free energy
   double cfree_energy_per_atom;
   double cfree_energy_per_vol;
-  double hfree_energy_per_atom;
-  double hfree_energy_per_vol;
-  double cpressure;
-  double hpressure;
 
   printf("\nCalculating Homogeneous Free Energy analytically ...\n");
   HomogeneousSFMTFluid hf = sfmt_homogeneous(reduced_density, temp);
   //Note: homogeneousFE/atom does not depend on fv or gw
   //Note: hf.energy() returns energy/volume
 
-  hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
-  hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
-  hpressure = reduced_density*hf.d_by_dn() - hfree_energy_per_vol;  //CHECK
+  const double hfree_energy_per_atom = (hf.energy()*primitive_cell_volume)/reduced_num_spheres;
+  const double hfree_energy_per_vol = hf.energy();    // hf.energy() is free energy per vol
+  const double hpressure = reduced_density*hf.d_by_dn() - hfree_energy_per_vol;  //CHECK
   hf.printme("     homogeneous:");
   printf("homogeneous pressure is %g\n", hpressure); //hpressure = Pideal+Pexcess
   printf("homogeneous free_energy per vol is %g\n", hf.energy());
@@ -684,7 +481,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           data_out.cfree_energy_per_atom=cFexcess_of_primitive_cell;
           data_out.hfree_energy_per_vol=hfree_energy_per_vol;
           data_out.cfree_energy_per_vol=cFexcess_of_primitive_cell;
-          data_out.cpressure=cpressure;
           data_out.hpressure=hpressure;
           return data_out;
         }
@@ -759,16 +555,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("     Total crystal free energy per volume = %g\n", cfree_energy_per_vol);
   printf("cFideal_of_primitive_cell = %g\n", cFideal_of_primitive_cell);
   
-  cpressure = (total_muV/total_V)*reduced_density-cfree_energy_per_vol 
-               + cpressure_ideal;  // Check!
-  printf("crystal pressure = %g\n", cpressure);
-
   data data_out;
   data_out.diff_free_energy_per_atom=cfree_energy_per_atom-hfree_energy_per_atom;
   data_out.cfree_energy_per_atom=cfree_energy_per_atom;
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
   data_out.cfree_energy_per_vol=cfree_energy_per_vol;
-  data_out.cpressure=cpressure;
+  data_out.cpressure=(total_muV/total_V)*reduced_density-cfree_energy_per_vol + cpressure_ideal;
+  printf("crystal pressure = %g\n", data_out.cpressure);
   data_out.hpressure=hpressure;
 
   printf("*Homogeneous free energy calculated analytically\n");
