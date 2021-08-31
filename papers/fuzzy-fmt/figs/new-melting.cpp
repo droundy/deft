@@ -884,10 +884,11 @@ int main(int argc, const char **argv) {
     FILE *newmeltbest = fopen(bestdat_filename, "w");
     if (newmeltbest) {
       fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttensor\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
+      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttensor\thpressure\tcpressure\n");
+      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
               best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, use_tensor_weight);    //Nsph=1-fv for parallepiped
+              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, use_tensor_weight,
+              hpressure, cpressure);    //Nsph=1-fv for parallepiped
       fclose(newmeltbest);
     } else {
       printf("Unable to open file %s!\n", bestdat_filename);
