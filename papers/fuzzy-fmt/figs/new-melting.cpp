@@ -431,6 +431,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           phi_1 = 0;
           phi_2 = 0;
           phi_3 = 0;
+          mu_of_r = 0;
         }
 
         mean_n0 += n_0*dV;
