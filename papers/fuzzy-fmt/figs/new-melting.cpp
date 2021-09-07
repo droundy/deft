@@ -775,11 +775,11 @@ int main(int argc, const char **argv) {
     printf("gw loop variables: gwidth start=%g, gwidth end=lattice constant*%g, step=lattice constant*%g\n", gw_start, gw_lend, gw_lstep);
   }
 
+  double best_energy_diff = 1e100;
+  double best_fv = -1, best_gwidth = -1, best_lattice_constant = -1, best_cfree_energy = -1;
+  double hfree_energy_pervol = -1, cfree_energy_pervol = -1;
+  double hpressure = -1, cpressure = -1;
   if (fv == -1) {
-    double best_energy_diff = 1e100;
-    double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
-    double hfree_energy_pervol, cfree_energy_pervol;
-    double hpressure, cpressure;
     const int num_to_compute = int(0.3/0.05*1/0.01);  //program progress feedback
     int num_computed = 0;
     for (double fv=fv_start; fv<fv_end+fv_step; fv+=fv_step) {
@@ -832,28 +832,7 @@ int main(int argc, const char **argv) {
       sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
     }
 
-    //Create bestdataout file
-    printf("Create best data file: %s\n", bestdat_filename);
-    FILE *newmeltbest = fopen(bestdat_filename, "w");
-    if (newmeltbest) {
-      fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-
-      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttensor\thpressure\tcpressure\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\n", temp, reduced_density, best_fv, best_gwidth,
-              best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, use_tensor_weight,
-              hpressure, cpressure);    //Nsph=1-fv for parallepiped
-      fclose(newmeltbest);
-    } else {
-      printf("Unable to open file %s!\n", bestdat_filename);
-    }
-    delete[] bestdat_filename;
-
   } else if (gw < 0) {
-    double best_energy_diff = 1e100;
-    double best_fv, best_gwidth, best_lattice_constant, best_cfree_energy;
-    double hfree_energy_pervol, cfree_energy_pervol;
-    double hpressure, cpressure;
     double lattice_constant = find_lattice_constant(reduced_density, fv);
     printf("lattice_constant is %g\n", lattice_constant);
     if (gw == -2) {
@@ -877,33 +856,33 @@ int main(int argc, const char **argv) {
       }
     }
     printf("For fv %g, Best: gwidth %g  energy Difference %g\n", best_fv, best_gwidth, best_energy_diff);
-
-    //Create bestdataout filename (to be used if we are looping)
-    char *bestdat_filename = new char[1024];
-    if (use_tensor_weight) {
-      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tensor.dat", data_dir, temp, reduced_density);
-    } else {
-      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
-    }
-
-    //Create bestdataout file
-    printf("Create best data file: %s\n", bestdat_filename);
-    FILE *newmeltbest = fopen(bestdat_filename, "w");
-    if (newmeltbest) {
-      fprintf(newmeltbest, "# git version: %s\n", version_identifier());
-      fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttensor\thpressure\tcpressure\n");
-      fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
-              best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
-              best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, use_tensor_weight,
-              hpressure, cpressure);    //Nsph=1-fv for parallepiped
-      fclose(newmeltbest);
-    } else {
-      printf("Unable to open file %s!\n", bestdat_filename);
-    }
-    delete[] bestdat_filename;
-
   } else {
     find_energy_new(temp, reduced_density, fv, gw, data_dir, dx, bool(verbose));
+    return 0; // avoid creating a "best" dat file, if we are just running with a single gw/fv
   }
+
+  //Create bestdataout filename (to be used if we are looping)
+  char *bestdat_filename = new char[1024];
+  if (use_tensor_weight) {
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tensor.dat", data_dir, temp, reduced_density);
+  } else {
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
+  }
+
+  //Create bestdataout file
+  printf("Create best data file: %s\n", bestdat_filename);
+  FILE *newmeltbest = fopen(bestdat_filename, "w");
+  if (newmeltbest) {
+    fprintf(newmeltbest, "# git version: %s\n", version_identifier());
+    fprintf(newmeltbest, "#kT\tn\tfv\tgwidth\thFE/atom\tbest_cFE/atom\tbest_FEdiff/atom\tbest_lat_const\tNsph\tdx\tmcerror\tmcseed\thFE/volume\tbest_cFE/volume\tmcconstant\tmcprefactor\ttensor\thpressure\tcpressure\n");
+    fprintf(newmeltbest, "%g\t%g\t%g\t%g\t%g\t%g\t\t%g\t\t%g\t\t%g\t%g\t%g\t%g\t%g\t%g\t%li\t%li\t%d\t%g\t%g\n", temp, reduced_density, best_fv, best_gwidth,
+            best_cfree_energy-best_energy_diff, best_cfree_energy, best_energy_diff,
+            best_lattice_constant, 1-fv, dx, MC_ERROR, seed, hfree_energy_pervol, cfree_energy_pervol, mc_constant, mc_prefactor, use_tensor_weight,
+            hpressure, cpressure);    //Nsph=1-fv for parallepiped
+    fclose(newmeltbest);
+  } else {
+    printf("Unable to open file %s!\n", bestdat_filename);
+  }
+  delete[] bestdat_filename;
   return 0;
 }
