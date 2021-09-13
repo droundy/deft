@@ -40,7 +40,7 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
 kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
 
 for kT in kTs:
-    for n in np.arange(0.01, 1.53, 0.02):   #homogeneous fluid
+    for n in np.arange(0.01, 1.53, 0.02):
 		#To run super fast for homogeneous free energy (not used for paper) use:
         #run_new_melting(kT, n, gwstart=0.001, gwend=0.001, gwstep=0.001, avoid_rq=True) 
         #To produce small plot in paper use: 
