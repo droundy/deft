@@ -1,18 +1,18 @@
 #!/usr/bin/python3
 
-#This program runs figs/new-melting.cpp for many different densities for 
-#input parameters specified within this program.
-#It is used to reproduce data, which is why the input paratmeters are 
-#specified within the program, and are not intended to be changed.
-#(Use compute-isotherm.py to run figs/new-melting.cpp for many different 
-#densities and temperatures that are not fixed to reproduce published data.)
-#ie. figs/new-melting.mkdat --kT 0.5 --n 1.06 --gwstart 0.01 --gwend 0.2 
+# This program runs figs/new-melting.cpp for many different densities for 
+# input parameters specified within this program.
+# It is used to reproduce data, which is why the input paratmeters are 
+# specified within the program, and are not intended to be changed.
+# (Use compute-isotherm.py to run figs/new-melting.cpp for many different 
+# densities and temperatures that are not fixed to reproduce published data.)
+# ie. figs/new-melting.mkdat --kT 0.5 --n 1.06 --gwstart 0.01 --gwend 0.2 
 #    --gwstep 0.01 --fv 0 --dx 0.5 --mc-error 0.001 --mc-constant 5 
 #    --mc-prefactor 50000 --d newdata_tensor/phase-diagram4 
 #    --filename isotherm-kT-0.5_tensor.dat
 
-#NOTE: Run this script from directory it is listed in 
-#      with command ./compute-phasediagram.py
+# NOTE: Run this script from directory it is listed in 
+#       with command ./compute-phasediagram.py
 
 import numpy as np
 import matplotlib.mlab as mlab
