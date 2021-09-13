@@ -29,7 +29,7 @@ matplotlib.rc('text', usetex=True)
 figscale = 1.5
 myfigsize = (4*figscale, 3*figscale)
 
-# pressure at freezing (intersection point between homogeneous and crystal plots)
+# pressure at freezing (at intersection of homogeneous and crystal plots)
 p_at_freezing = []
 n_homogeneous_at_freezing = []
 n_crystal_at_freezing = []
