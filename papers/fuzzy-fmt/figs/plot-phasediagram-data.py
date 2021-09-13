@@ -51,8 +51,7 @@ homogeneous_pressures = homogeneous_data[1:, 1:]
 
 # for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
 # for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3): #for paper
-for kT in our_kTs:  # for paper
-    # for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3, 10, 14, 22, 30): #added higher temps
+for kT in our_kTs:
     n = []
     invn = []
     hfe = []
@@ -116,7 +115,6 @@ for kT in our_kTs:  # for paper
             m1 = (g1[i+1]-g1[i])/(p1[i+1]-p1[i])
             for j in range(1, len(g2)-1):
                 m2 = (g2[j+1]-g2[j])/(p2[j+1]-p2[j])
-                # print(m2) #debug ASK!
                 if m1 != m2:
                     P_inter = (g2[j] - m2*p2[j] - g1[i] + m1*p1[i])/(m1-m2)
                     if p1[i] < P_inter < p1[i+1] and p2[j] < P_inter < p2[j+1]:
