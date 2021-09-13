@@ -11,7 +11,7 @@
 #    --mc-prefactor 50000 --d newdata_tensor/phase-diagram4 
 #    --filename isotherm-kT-0.5_tensor.dat
 
-#NOTE: Run this script from directory deft/papers/fuzzy-fmt 
+#NOTE: Run this script from directory it is listed in 
 #      with command ./compute-phasediagram.py
 
 import numpy as np
