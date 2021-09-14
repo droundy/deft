@@ -496,14 +496,8 @@ plt.fill_betweenx(kT_data, n_homogeneous_at_freezing,
                   n_crystal_at_freezing, color='gray')
 #plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')
 plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')
-# plt.legend(loc='best')
 plt.xlabel('$n^*$')
 plt.ylabel('$T^*$')
-
-##plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_l', color='green')
-##plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19],[0.7, 0.8, 0.9, 1.0, 2.0, 3.0], label='chris_s', color='green')
-#plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12, 1.24, 1.44],[0.7, 0.8, 0.9, 1.0, 2.0, 3,5,10], label='chris_l', color='green')
-#plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19, 1.31, 1.51],[0.7, 0.8, 0.9, 1.0, 2.0, 3, 5, 10], label='chris_s', color='green')
 plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12], [0.7, 0.8, 0.9,
          1.0, 2.0, 3], '-', label='$MC_f$', color='white')
 plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19], [0.7, 0.8, 0.9,
@@ -527,8 +521,6 @@ plt.plot(kT_data, p_at_freezing, color='black')
 # plt.xlim(kT_data.min(), kT_data.max())     #FIX!
 plt.xlabel('$T^*$')
 plt.ylabel('$p^*$')
-#plt.plot([0.7, 0.8,0.9,1.0,2.0,3.0], [6.24, 7.62, 8.78, 9.99, 25.5,43.8], label='chris_l', color='green')
-##plt.plot([0.7, 0.8,0.9,1.0,2.0, 3, 5, 10], [6.24, 7.62, 8.78, 9.99, 25.5,43.8, 85.6, 210], label='chris_l', color='green')
 plt.plot([0.7, 0.8, 0.9, 1.0, 2.0, 3], [6.24, 7.62, 8.78,
          9.99, 25.5, 43.8], label='MC', color='white')
 plt.legend()
