@@ -46,17 +46,54 @@ In terms of virtual variations of the functional $F[n(\vec r)]$,
     %\bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~'' \color{red}\mbox{~~~UNITS?}
 %\end{align} 
 \begin{align}
-    \mu &= \left<\mu(\vec r)\right> = \frac{1}{V} \int \mu(\vec r)~d\vec r~    \\
+    \mu &= \left<\mu(\vec r)\right> = \frac{1}{V}\int \mu(\vec r)~d\vec r~\\
         &= \frac{1}{V} \int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)}
            \bigg|_{T,V}~d\vec r~  
         %&= \frac{1}{V} \int d\vec r \int d\vec r~'' ~\frac{\delta 
         %F[n(\vec r)]}{\delta n_i(\vec r~'')}\bigg|_{T,V} 
         %\frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}   
 \end{align}
-
-The excess Helmholtz free energy per volume is given by
+The Helmholtz free energy can be broken into an ideal and an excess part.
 \begin{align}
-    F_{{ex}}[n(\vec r)] &= \frac{k_BT}{V}\int\Phi_1
+    F = F_{id}+ F_{ex}
+\end{align} 
+\begin{align}
+   F_{ideal}  &= k_BTN[\ln\left(\frac{N\Lambda^{3}}{V}\right)-1]  \\
+%
+  \mu_{ideal} &= \frac{\partial F}{\partial N}\bigg|_{T,V}   \\
+              &= k_BT\ln\left(\frac{N\Lambda^{3}}{V}\right)  \\
+              &= k_BT\ln\left(\frac{n}{n_Q}\right)
+\end{align} 
+For a spatially varying number density, the ideal free energy in becomes
+\begin{align}
+    F_{ideal}[n(\vec{r})] &= k_BT\int_{Volume}n(\vec r~')
+      \left[\ln\left(\frac{n(\vec r~')}{n_Q}\right)-1\right] ~d\vec r~' 
+      \\ \nonumber \\
+%
+ \mu_{ideal} &= \frac{1}{V}\int \frac{\delta F[n(\vec r)]}{\delta 
+              n(\vec r)} d\vec r \\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~\frac{\delta}{\delta n(\vec r)}
+    \left(\int d\vec r~'~ n(\vec r~')\left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right]\right) \\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~
+    \left(\int d\vec r~'~ \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right] + n(\vec r~')\frac{1}{\frac{n(\vec r~')}
+    {n_Q}}\frac{1}{n_Q} \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \right)\\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~
+    \left(\int d\vec r~'~ \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)\right]\right) - \frac{\delta n(\vec r~')}{\delta 
+    n(\vec r)}+\frac{\delta n(\vec r~')}{\delta n(\vec r)}\\ \nonumber\\
+    &= \frac{k_BT}{V} \int d\vec r ~ \left(\int d\vec r~'~\delta(\vec r~'-
+    \vec r)\left[\ln\left(\frac{n(\vec r~')}{n_Q}\right)\right]\right) 
+    \\ \nonumber\\  
+    &= \frac{k_BT}{V} \int d\vec r ~\ln\left(\frac{n(\vec r)}{n_Q}\right)   
+\end{align} 
+The excess Helmholtz free energy is given by
+\begin{align}
+    F_{{ex}}[n(\vec r)] &= k_BT\int\Phi_1
     +\Phi_2+\Phi_3~~d\vec r
 \end{align}     
 where
@@ -73,7 +110,8 @@ and the weighted densities are given by
                     ~d\vec {r}~'  \label{weighted_densities}  \\
                      &= n\otimes w_\alpha(\vec r)
 \end{align}  
-with weight functions
+where $n(\vec r)$ = n for the homogeneous case.
+The weight functions are
 \begin{align}\label{eq:weights}
   w_{0}(r) &=\frac{w_{2}}{4\pi{r}^2} \\
   w_{1}(r) &=\frac{w_{2}}{4\pi{r}} 
@@ -214,14 +252,14 @@ Or, more simply,
 %
         &= -\frac{k_BT}{V} \int d\vec r~'\ln(1-n_3(\vec r~')) \int d \vec r  
           ~w_0(\vec r - \vec r~') \nonumber\\
-        &- \frac{k_BT}{V} \int d\vec r~' ~\frac{n_o(\vec r~')}{1-n_3(\vec r~')} 
+        &+ \frac{k_BT}{V} \int d\vec r~' ~\frac{n_o(\vec r~')}{1-n_3(\vec r~')} 
           \int d \vec r~w_3(\vec r - \vec r~')  \\ \\
 %
         &= -\frac{k_BT}{V} \int d\vec r~' ~\ln(1-n_3(\vec r~'))(1)
-          - \frac{k_BT}{V} \int d\vec r~' ~\frac{n_o(\vec r~')}{1-n_3(\vec r~')}
+          + \frac{k_BT}{V} \int d\vec r~' ~\frac{n_o(\vec r~')}{1-n_3(\vec r~')}
           \left(\frac{\pi\Xi^2\alpha}{2}\right) \\ \\
 %
-        &= -\frac{k_BT}{V}\int d\vec r~'~ \ln(1-n_3(\vec r~'))+\left(
+        &= \frac{k_BT}{V}\int d\vec r~'~ -\ln(1-n_3(\vec r~'))+\left(
         \frac{\pi\Xi^2\alpha}{2}\right)\frac{n_o(\vec r~')}{1-n_3(\vec r~')}
 \end{align}
 
@@ -301,150 +339,148 @@ Or, more simply,
     -\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}
      \nonumber \\ \\
 %
-     &=\frac{k_BT}{V}\int d\vec r~\int d\vec r~'~ \left( {n_2}^3-3n_2
+     &=\frac{k_BT}{V}\int d\vec r~\int d\vec r~'~ \color{blue}\left( {n_2}^3-3n_2
      \vec{n}_{v2}\cdot\vec{n}_{v2} 
      +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
      \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
      \right) \nonumber\\
-      &~ \frac{\delta}{\delta n(\vec r)}\left(\frac{1}{24\pi(1-n_3)^2}
+      &~\color{blue} \frac{\delta}{\delta n(\vec r)}\left(\frac{1}{24\pi(1-n_3)^2}
       \right) \nonumber\\
-     &+ \left(\frac{1}{24\pi(1-n_3)^2}\right)\frac{\delta}
+     &+ \color{red}\left(\frac{1}{24\pi(1-n_3)^2}\right)\frac{\delta}
      {\delta n(\vec r)}\left({n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}
      +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
      \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
      \right) \\ \nonumber \\
 %
-    &=\frac{k_BT}{V}\int d\vec r~\int d\vec r~'~\left( {n_2}^3-3n_2
+    &=\frac{k_BT}{V}\int d\vec r~\int d\vec r~'~\color{blue}\left( {n_2}^3-3n_2
     \vec{n}_{v2}\cdot\vec{n}_{v2} 
      +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
      \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
      \right) \nonumber\\
-     &~\left(\frac{2}{24\pi(1-n_3)^3}\frac{\delta n_3(\vec r~')}{n(\vec r)}
+     &~\color{blue}\left(\frac{2}{24\pi(1-n_3)^3}\frac{\delta n_3(\vec r~')}{n(\vec r)}
      \right) 
-     + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[n_2(\vec r~')^2
-     \frac{\delta n_2(\vec r~')}{\delta n(\vec r)} \color{white}\right]
+     \color{red}
+     + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[3n_2(\vec r~')^2
+     \frac{\delta n_2(\vec r~')}{\delta n(\vec r)} \right.
       \nonumber\\
-     &- 3\left(\frac{\delta n_{2}(\vec r~')}{\delta n(\vec r)}\vec n_{v2}
-     (\vec r~') \cdot \vec n_{v2}(\vec r~')\right) + 2n_2(\vec r~')\frac{\delta
+     &\color{red} - 3\left(\frac{\delta n_{2}(\vec r~')}{\delta n(\vec r)}\vec n_{v2}
+     (\vec r~') \cdot \vec n_{v2}(\vec r~')\right) + 2*3n_2(\vec r~')\frac{\delta
      \vec n_{v2}(\vec r~')}{\delta n(\vec r)}\cdot \vec n_{v2}(\vec r~') 
      \nonumber\\
-     &+\frac{9}{2}\left(\frac{\delta \vec n_{v2}(\vec r~')}{\delta n(\vec r)}
+     &\color{red}+\frac{9}{2}\left(\frac{\delta \vec n_{v2}(\vec r~')}{\delta n(\vec r)}
      \cdot \overleftrightarrow n_{m2}(\vec r~')\cdot \vec n_{v2}( \vec r~')
      +\vec n_{v2}(\vec r~')\cdot \frac{\delta \overleftrightarrow n_{m2}
      (\vec r~')}{\delta n(\vec r)}\cdot \vec n_{v2}(\vec r~')\color{white}
      \right)\nonumber\\
-     &+ \color{white}\left(\color{black}\vec n_{v2}(\vec r~')\cdot 
+     &\color{red}+ \left.\vec n_{v2}(\vec r~')\cdot 
      \overleftrightarrow n_{m2}(\vec r~')
      \cdot \frac{\vec n_{v2}(\vec r~')}{\delta n(\vec r)}-
      \frac{\delta}{\delta n(\vec r)}\sum_x\sum_y\sum_z n_{m2ij}n_{m2jk}
-     n_{m2ik}\right) 
-\end{align} 
-
+     n_{m2ik}\right)
+     \Bigg]
+\end{align}
 \begin{align}   % mu_3 equation continued...
-&=\frac{k_BT}{V}\int d\vec r~\int d\vec r~'~ \left( {n_2}^3-3n_2
+&=\frac{k_BT}{V}\int d\vec r~\int d\vec r~'~ \color{blue}\Bigg( {n_2}^3-3n_2
     \vec{n}_{v2}\cdot\vec{n}_{v2} 
      +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
      \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
-     \right) \nonumber\\
-     &~\left(\frac{2}{24\pi(1-n_3)^3} w_3(\vec r-\vec r~')
-     \right) 
-     + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}\frac{1}{1}
-     \color{black}n_2(\vec r~')^2
-     w_2(\vec r-\vec r~') \color{white}\right] \nonumber\\
-     &- 3w_2(\vec r-\vec r~')\vec n_{v2}
-     (\vec r~') \cdot \vec n_{v2}(\vec r~') + 2n_2(\vec r~')
+     \Bigg) \nonumber\\
+     &~\color{blue}\Bigg(\frac{2}{24\pi(1-n_3)^3} w_3(\vec r-\vec r~')
+     \Bigg) 
+     + \color{red}\Bigg(\frac{1}{24\pi(1-n_3)^2}\Bigg)
+     \Bigg[
+     3n_2(\vec r~')^2
+     w_2(\vec r-\vec r~') \nonumber\\
+     &\color{red}- 3w_2(\vec r-\vec r~')\vec n_{v2}
+     (\vec r~') \cdot \vec n_{v2}(\vec r~') + 6n_2(\vec r~')
      \vec w_{v2}(\vec r-\vec r~')\cdot \vec n_{v2}(\vec r~') \nonumber \\
-     &+\frac{9}{2}\left(\color{white}\frac{1}{1}\color{black}\vec w_{v2}
+     &\color{red}+\frac{9}{2}\Bigg(\vec w_{v2}
      (\vec r-\vec r~')
      \cdot \overleftrightarrow n_{m2}(\vec r~')\cdot \vec n_{v2}( \vec r~')
      +\vec n_{v2}(\vec r~')\cdot \overleftrightarrow w_{m2}(\vec r-\vec r~')
-     \cdot \vec n_{v2}( \vec r~')\color{white}\right) \nonumber\\
-     &+ \vec n_{v2}(\vec r~')\cdot \overleftrightarrow n_{m2}(\vec r~') 
+     \cdot \vec n_{v2}( \vec r~') \nonumber\\
+     &\color{red}+ \vec n_{v2}(\vec r~')\cdot \overleftrightarrow n_{m2}(\vec r~') 
      \cdot \vec w_{v2}(\vec r-\vec r~')
      -\frac{\delta n_{m2ij}(\vec r~')}{\delta n(\vec r)}n_{m2jk}(\vec r~')
      n_{m2ik}(\vec r~') \nonumber \\     
-     &-\color{black}n_{m2ij}(\vec r~')\frac{\delta n_{m2jk}(\vec r~')}
+     &\color{red}-n_{m2ij}(\vec r~')\frac{\delta n_{m2jk}(\vec r~')}
      {\delta n(\vec r)}n_{m2ik}(\vec r~') - n_{m2ij}(\vec r~')n_{m2jk}
-     (\vec r~')\color{white}\left(\color{black}\frac{\delta n_{m2ik}(\vec r~')}
-     {\delta n(\vec r)}\right)
-     \color{white}\left[\frac{1}{1}\color{black}\right]   \\ \nonumber \\
+     (\vec r~')\frac{\delta n_{m2ik}(\vec r~')}
+     {\delta n(\vec r)}\Bigg)
+     \Bigg]   \\ \nonumber \\
 %
-&=\frac{k_BT}{V}\int d\vec r~' \left( {n_2}^3-3n_2
+&=\frac{k_BT}{V}\int d\vec r~' \color{blue}\left( {n_2}^3-3n_2
     \vec{n}_{v2}\cdot\vec{n}_{v2} 
      +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
      \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
      \right) \nonumber\\
-     &~\left(\frac{2}{24\pi(1-n_3)^3}\right) \int d\vec r~ w_3(\vec r
+     &\color{blue}~\left(\frac{2}{24\pi(1-n_3)^3}\right) \int d\vec r~ w_3(\vec r
      -\vec r~') \nonumber\\
-     &+\left(\frac{1}{24\pi(1-n_3)^2}\right)\left[
-     \color{white}\frac{1}{1}\color{black}n_2(\vec r~')^2
-     \int d\vec r~ w_2(\vec r-\vec r~')
-     \color{white}\right]\nonumber\\
-     &- 3\left(\int d\vec r ~w_2(\vec r-\vec r~')\right)\vec n_{v2}(\vec r~')
+     &\color{red}+\left(\frac{1}{24\pi(1-n_3)^2}\right)
+     \Bigg[ 
+     3n_2(\vec r~')^2
+     \int d\vec r~ w_2(\vec r-\vec r~') 
+     \nonumber \\
+     &\color{red}-3\left(\int d\vec r ~w_2(\vec r-\vec r~')\right)\vec n_{v2}(\vec r~')
      \cdot \vec n_{v2}(\vec r~') \nonumber\\
-      &+ 2n_2(\vec r~')\left(\int d\vec r ~\vec 
+     &\color{red}+6n_2(\vec r~')\left(\int d\vec r ~\vec 
      w_{v2}(\vec r-\vec r~')\right)\cdot \vec n_{v2}(\vec r~')\nonumber \\
-     &+\frac{9}{2}\left[\color{white}\frac{1}{1}\color{black}\left(\int 
-     d\vec r ~\vec w_{v2}(\vec r-\vec r~')\right)\color{white}\right]
-     \color{black}
+     &\color{red}+\frac{9}{2}\Bigg(\Bigg(\int d\vec r ~\vec w_{v2}(\vec r-\vec r~')
+     \Bigg)
      \cdot \overleftrightarrow n_{m2}(\vec r~')\cdot \vec n_{v2}(\vec r~') 
      \nonumber\\
-     &+\vec n_{v2}(\vec r~')\cdot \left(\int d\vec r ~\overleftrightarrow 
-     w_{m2}(\vec r-\vec r~')\right)
-     \cdot \vec n_{v2}( \vec r~') \nonumber\\
-%     
-     &+ \color{white}\color{black}\vec n_{v2}( \vec r~')\cdot 
-     \overleftrightarrow n_{m2}(\vec r~')
+     &\color{red}+\vec n_{v2}(\vec r~')\cdot \left(\int d\vec r ~\overleftrightarrow 
+     w_{m2}(\vec r-\vec r~')\right) \cdot \vec n_{v2}( \vec r~') \nonumber\\    
+     &\color{red}+\vec n_{v2}( \vec r~')\cdot \overleftrightarrow n_{m2}(\vec r~')
      \cdot \left(\int d\vec r ~\vec w_{v2}(\vec r-\vec r~')\right)
      \nonumber\\
-     &-n_{m2jk}(\vec r~')n_{m2ik}(\vec r~')\left(\int d\vec r~w_{m2ij}
+     &\color{red}-n_{m2jk}(\vec r~')n_{m2ik}(\vec r~')\left(\int d\vec r~w_{m2ij}
      (\vec r-\vec r~')\right) \nonumber \\
-     &-n_{m2ij}(\vec r~')n_{m2ik}(\vec r~')\left(\int d\vec r~w_{m2jk}
+     &\color{red}-n_{m2ij}(\vec r~')n_{m2ik}(\vec r~')\left(\int d\vec r~w_{m2jk}
      (\vec r-\vec r~')\right)\nonumber \\
-     &-n_{m2ij}(\vec r~')n_{m2ji}(\vec r)\left(\int d\vec r~w_{m2ik}
+     &\color{red}-n_{m2ij}(\vec r~')n_{m2ji}(\vec r)\left(\int d\vec r~w_{m2ik}
      (\vec r-\vec r~')\right)     
-     \color{white}\left[\frac{1}{1}\color{black}\right] 
+     \Bigg)\Bigg] 
 \end{align} 
 
 \begin{align} % mu_3 equation continued...
 %
-&=\frac{k_BT}{V}\int d\vec r~' \left( {n_2}^3-3n_2
+&=\frac{k_BT}{V}\int d\vec r~' \color{blue}\left( {n_2}^3-3n_2
     \vec{n}_{v2}\cdot\vec{n}_{v2} 
      +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
      \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
      \right) \nonumber\\
-     &~\left(\frac{2}{24\pi(1-n_3)^3}\left(\frac{\pi\Xi^2\alpha}{2}\right)
-     \right) + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}
-     \frac{1}{1}\color{black}n_2(\vec r~')^2
-     \pi(\Xi^2 + \alpha^2) \color{white}\right] \nonumber\\
-     &- 3\pi(\Xi^2 + \alpha^2)\vec n_{v2}(\vec r~') \cdot \vec n_{v2}
-     (\vec r~') + 2n_2(\vec r~')(0)\cdot \vec n_{v2}(\vec r~')\nonumber \\
-     &+\frac{9}{2}\left(0\cdot \overleftrightarrow n_{m2}(\vec r~')\cdot 
+     & \color{blue}~\left(\frac{2}{24\pi(1-n_3)^3}\left(\frac{\pi\Xi^2\alpha}{2}\right)
+     \right) +\color{red} \left(\frac{1}{24\pi(1-n_3)^2}\right)\Bigg[3n_2(\vec r~')^2
+     \pi(\Xi^2 + \alpha^2) \color{white}\Bigg] \nonumber\\
+     &\color{red}- 3\pi(\Xi^2 + \alpha^2)\vec n_{v2}(\vec r~') \cdot \vec n_{v2}
+     (\vec r~') + 6n_2(\vec r~')(0)\cdot \vec n_{v2}(\vec r~')\nonumber \\
+     &\color{red}+\frac{9}{2}\left(0\cdot \overleftrightarrow n_{m2}(\vec r~')\cdot 
      \vec n_{v2}( \vec r~')+\vec n_{v2}(\vec r~')\cdot 0 \cdot \vec n_{v2}
-     (\vec r~')\color{white}\right)+ \color{white}\left(\color{black}
+     (\vec r~')\color{white}\right)+ \color{white}\left(\color{black}\color{red}
      \vec n_{v2}(\vec r~')\cdot\overleftrightarrow n_{m2}(\vec r~')
      \cdot 0-0\right) 
-     \color{white}\left[\frac{1}{1}\color{black}\right] \\
+     \color{white}\Bigg[\color{black}\color{red}\Bigg] \\
 %
-&=\frac{k_BT}{V}\int d\vec r~' \left({n_2}^3-3n_2
+&=\frac{k_BT}{V}\int d\vec r~' \color{blue}\left({n_2}^3-3n_2
    \vec{n}_{v2}\cdot\vec{n}_{v2} 
     +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
     \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
     \right) \nonumber\\
-    &~\left(\frac{\pi\Xi^2\alpha}{24\pi(1-n_3)^3}
-    \right) + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}
-    \frac{1}{1}\color{black}n_2(\vec r~')^2
-    \pi(\Xi^2 + \alpha^2) \color{white}\right] \\
-    &- 3\pi(\Xi^2 + \alpha^2)\vec n_{v2}
+    &\color{blue}~\left(\frac{\Xi^2\alpha}{24(1-n_3)^3}
+    \right) + \color{black}\color{red}\left(\frac{1}{24\pi(1-n_3)^2}\right)\Bigg[\color{white}
+    \color{red}n_2(\vec r~')^2
+    \pi(\Xi^2 + \alpha^2) \color{white}\Bigg] \\
+    &\color{red}- 3\pi(\Xi^2 + \alpha^2)\vec n_{v2}
     (\vec r~') \cdot \vec n_{v2}(\vec r~')
-    \color{white}\left[\frac{1}{1}\color{black}\right]
+    \color{white}\Bigg[\color{black}\color{red}\Bigg]
 \end{align}
 
 Final equation for $\mu$:  
 \begin{align}
   %\mu &= \frac{1}{V}\int \frac{\delta F_{ex}[n(\vec r)]}{\delta n(\vec r)}
   %\bigg|_{T,V} d\vec r \\ \\
-   \mu &=   \mu_1 + \mu_2 + \mu_3  \\ \nonumber \\
+   \mu &= \mu_1 + \mu_2 + \mu_3  \\ \nonumber \\
 %
    \mu &=\frac{k_BT}{V}\int d\vec r~' (-1)\ln(1-n_3)+\left(
         \frac{\pi\Xi^2\alpha}{2}\right)\frac{n_o}
@@ -454,17 +490,17 @@ Final equation for $\mu$:
        &+ \frac{n_1n_2-\vec n_{v1}
          \cdot \vec n_{v2}}{(1-n_3)^2}
           \left(\frac{\pi\Xi^2\alpha}{2}\right) \\
-   &+\left({n_2}^3-3n_2
+   &\color{blue}+\left({n_2}^3-3n_2
    \vec{n}_{v2}\cdot\vec{n}_{v2} 
     +\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{
     \vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]
     \right) \\
-    &~\left(\frac{\Xi^2\alpha}{24(1-n_3)^3}
-    \right) + \left(\frac{1}{24\pi(1-n_3)^2}\right)\left[\color{white}
-    \frac{1}{1}\color{black}n_2^2
-    \pi(\Xi^2 + \alpha^2) \color{white}\right] \\
-    &- 3\pi(\Xi^2 + \alpha^2)\vec n_{v2} \cdot \vec n_{v2}
-    \color{white}\left[\frac{1}{1}\color{black}\right]
+    &\color{blue}~\left(\frac{\Xi^2\alpha}{24(1-n_3)^3}
+    \right) + \color{red}\left(\frac{1}{24\pi(1-n_3)^2}\right)\Bigg[
+    \color{white}\color{black}
+    \color{red}3n_2^2\pi(\Xi^2 + \alpha^2) \color{white}\Bigg] \\
+    &\color{red}- 3\pi(\Xi^2 + \alpha^2)\vec n_{v2} \cdot \vec n_{v2}
+    \color{white}\Bigg[\color{black}\color{red}\Bigg]
 \end{align}
 
 \[\]
@@ -476,9 +512,9 @@ Final equation for $\mu$:
 
 
 \begin{align}
-   \int_{all space} w_i(r) ~d\vec r &= \int w_i(r)e^{i\vec k \cdot 
+   \int_{all space} w_i(\vec r) ~d\vec r &= \int w_i(\vec r)e^{i\vec k \cdot 
    \vec r}~d\vec r 
-    = \widetilde{w}_i(k) \mbox{~~with $\vec k = 0$}
+    = \widetilde{w}_i(\vec k) \mbox{~~with $\vec k = 0$}
 \end{align}
 
 \begin{align}
@@ -499,7 +535,10 @@ Final equation for $\mu$:
     & \approx   \frac{\sqrt{\pi}}{\sqrt{2}k\Xi}\left(\frac{4}{\sqrt{\pi}}
     \right)\left(\frac{k\Xi}{2\sqrt{2}} -\frac{\frac{\alpha^2}{\Xi^2}+1}
     {3}\left(\frac{k^3\Xi^3}{16\sqrt{2}}\right)\right) \\
-     \widetilde{w}_0(k=0) & \approx 1
+     & \approx   \frac{\sqrt{\pi}}{\sqrt{2}\Xi}\left(\frac{4}{\sqrt{\pi}}
+    \right)\left(\frac{\Xi}{2\sqrt{2}} -\frac{\frac{\alpha^2}{\Xi^2}+1}
+    {3}\left(\frac{k^2\Xi^3}{16\sqrt{2}}\right)\right) \\
+     \widetilde{w}_0(k=0) & = 1
 \end{align}
 
 \begin{align}
@@ -588,5 +627,16 @@ As shown in the thesis,
   \widetilde{\overleftrightarrow w}_{m2}(\vec k=0) &= 0  \\
   \widetilde w_{m2ik}(\vec k = 0) &= 0
 \end{align}
+
+For the homogeneous case,
+\begin{align}
+    F_{ex} &= K_BT\Phi_1 V\\
+ \mu1_{ex} &= \frac{1}{V}\frac{\partial F_{ex}}{\partial n} \bigg|_{T,V}\\
+           &= -k_BT\int w_0 \ln(1-n \int w_3)  \\
+           &= - k_BT(1)\ln(1-n)\frac{\pi\Xi^2\alpha}{2} -n(1)\frac{\frac{\pi\Xi^2\alpha}{2}}{1-n\frac{\pi\Xi^2\alpha}{2}} \\
+           &= - k_BT\ln(1-n)\frac{\pi\Xi^2\alpha}{2} -n\frac{\frac{\pi\Xi^2\alpha}{2}}{1-n\frac{\pi\Xi^2\alpha}{2}}
+\end{align}
+
+
 
 \end{document}
