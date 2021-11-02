@@ -38,11 +38,16 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     assert(os.system(cmd) == 0)
 
 kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
+densities = np.arange(0.01, 1.53, 0.02)
 
 for kT in kTs:
-    for n in np.arange(0.01, 1.53, 0.02):
-		#To run super fast for homogeneous free energy (not used for paper) use:
-        #run_new_melting(kT, n, gwstart=0.001, gwend=0.001, gwstep=0.001, avoid_rq=True) 
-        #To produce small plot in paper use: 
-        run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)                      
-
+    for n in densities:
+        # It seems that for low temperature and high density we need to run a more
+        # accurate and precise Monte Carlo, otherwise we end up seeing n_3 > 1 and get
+        # NaNs.
+        if kT > 0.501 or kT < 0.499 and n > 0.94 and n < 1.15:
+            pass # for now, skip these simulations that we already ran.
+            # run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
+        else:
+            # We want high accuracy for this one!
+            run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4)
