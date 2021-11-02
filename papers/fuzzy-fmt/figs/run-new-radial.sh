@@ -33,14 +33,14 @@ rq run -J radialbh-1-2.5 --mem 88 -o new-data/radial-bh-wca-1.0000-2.50.out ./ne
 #Run new-radial-lj.cpp 
 rq run -J radiallj-0.83890-0.71 --mem 88 -o new-data/radial-lj-0.71-0.83890.out ./new-radial-lj.mkdat 0.83890 0.71 
 #rq run -J radiallj-6-5 --mem 88 -o new-data/radial-lj-2.48-0.957.out ./new-radial-lj.mkdat 0.957 2.48     
-rq run -J radiallj-0.5844-1.235 --mem 88 -o new-data/radial-lj-wca-1.235-0.5844.out ./new-radial-lj.mkdat 0.5844 1.235  
+rq run -J radiallj-0.5844-1.235 --mem 88 -o new-data/radial-lj-1.235-0.5844.out ./new-radial-lj.mkdat 0.5844 1.235  
 rq run -J radiallj-1.095-2.48 --mem 88 -o new-data/radial-lj-2.48-1.095.out ./new-radial-lj.mkdat 1.095 2.48     
 
 
 #Run new-bh-radial-lj.cpp
 rq run -J radialbh-lj-0.83890-0.71 --mem 88 -o new-data/radial-bh-lj-0.71-0.83890.out ./new-bh-radial-lj.mkdat 0.83890 0.71
 rq run -J radialbh-lj-1.095-2.48 --mem 88 -o new-data/radial-bh-lj-2.48-1.095.out ./new-bh-radial-lj.mkdat  1.095 2.48     
-rq run -J radialbh-lj-0.5844-1.235 --mem 88 -o new-data/radial-bh-lj-wca-1.235-0.5844.out ./new-bh-radial-lj.mkdat 0.5844 1.235  
+rq run -J radialbh-lj-0.5844-1.235 --mem 88 -o new-data/radial-bh-lj-1.235-0.5844.out ./new-bh-radial-lj.mkdat 0.5844 1.235  
     
 
 
