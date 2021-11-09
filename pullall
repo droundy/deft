@@ -3,7 +3,6 @@
 import os
 
 repos = ['/home/droundy/git/deft.git',
-         '/home/jordan/deft',
          '/home/kirstie/git/deft.git',
          '/home/kirstie/deft',
 ]
