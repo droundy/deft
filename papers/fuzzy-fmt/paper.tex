@@ -53,18 +53,17 @@
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
-\item Document all the Fourier transforms we are using. (vectors)
-\item Find new expressions for alpha and Xi based on virial expansion. (B3)
-\item Edit paper to describe/use tensor functional.
-\item Write up section on freezing with figures.
-\item Decide which equation of state figure to use. (And make pretty.)
-\item Touch up the freezing figures.
- 
+\item Review all the Fourier transforms we are using.
+%\item Find new expressions for alpha and Xi based on virial expansion. (B3)
+\item Finish section describing use of tensor functional.
+\item Finish freezing section with figures.
+\item Finish p vs V equation of state figure and format on all plots.
+%\item Touch up the freezing figures.
 \end{enumerate}
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
-\item go over plots.
+\item go over plots and begin looking at text (and text in blue)
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
@@ -126,9 +125,9 @@ pair potential is given by
 \end{align}
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
-2^{5/6} R$. In this paper we will use the dimensionless reduced
+2^{5/6} R$. \textcolor {blue}{In this paper we will use the dimensionless reduced
 density $n^* \equiv n \sigma^3$ and reduced temperature $T^* \equiv
-k_BT/\epsilon$.
+k_BT/\epsilon$.}
 
 \section{Methods}
 
@@ -143,7 +142,7 @@ A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; , \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
-defined as
+where the functions are defined as
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{1-n_3} \\
@@ -159,7 +158,7 @@ defined as
 \begin{displaymath}\color{white}\left(\color{black}+\frac{9}{2}
 [\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-
 \operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
-where we have used the tensor version of $\Phi_3$ formulated by 
+and we have used the tensor version of $\Phi_3$ formulated by 
 Tarazona~\cite{tarazonaFIXME,santos2012phi3}.
 %The integrands 
 These are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
