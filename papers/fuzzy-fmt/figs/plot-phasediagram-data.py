@@ -250,7 +250,8 @@ for i in range(len(kT_data)):
 for i in range(99, len(homogeneous_temperature)):
     if homogeneous_temperature[i] in [T for T in temperatures_to_isotherm if T not in kT_data]:
         print(f'temp[{i}] = {homogeneous_temperature[i]}')
-        plt.plot(1/homogeneous_density, homogeneous_pressures[:, i], '--',
+        
+        plt.plot(1/homogeneous_density, homogeneous_pressures[:, i], '-',
                  color=styles.color_from_kT(homogeneous_temperature[i]),
                  label='kT=%g' % homogeneous_temperature[i])
 
@@ -336,7 +337,7 @@ for T in temperatures_to_isotherm:
                 if T_zeno[i] == T:
                     p_zeno_T.append(p_zeno[i])
                     V_zeno_T.append(V)
-    plt.plot(V_zeno_T, p_zeno_T, '+-.',
+    plt.plot(V_zeno_T, p_zeno_T, '.-.',
                 color=styles.color_from_kT(T),
                 linewidth=0.5,
                 )
@@ -376,7 +377,7 @@ for T in temperatures_to_isotherm:
 #                  )
 
 
-plt.plot([], [], 'k--', label='SFMT')
+plt.plot([], [], 'k-', label='SFMT')
 plt.plot([], [], 'k.-.', linewidth=0.5, label='Monte Carlo - Zeno')
 # plt.plot([], [], 'kx', label='Monte Carlo - Chris')
 plt.plot([], [], 'k:', label='Barker Henderson')
