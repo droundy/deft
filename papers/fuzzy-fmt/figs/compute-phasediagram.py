@@ -45,7 +45,10 @@ for kT in kTs:
         # It seems that for low temperature and high density we need to run a more
         # accurate and precise Monte Carlo, otherwise we end up seeing n_3 > 1 and get
         # NaNs.
-        if 0.499 < kT < 0.501 and 0.94 < (1/n) < 1.15:
+        #if 0.499 < kT < 0.501 and 0.94 < (1/n) < 1.15:
+        #if 0.499 < kT < 0.501 and (0.89 < (1/n) < 0.94 or 1.15 < (1/n) < 1.3):
+        if 0.499 < kT < 0.501 and 1.15 < (1/n) < 1.3:
+        #if 0.499 < kT < 0.501 and 0.89 < (1/n) < 0.94:
 	    # We want high accuracy for this one!
             run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4)
             #print(kT, 1/n)
