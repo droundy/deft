@@ -468,6 +468,9 @@ for i in range(9, len(bhn_reduced[:, 0]), 10)[:10]:
     plt.plot(bhtemperatures[i, :], bhpressures[i, :],
              styles.density_color(bhn_reduced[i, 0])+':')
 
+plt.plot([], [], 'k-', label='SFMT')
+plt.plot([], [], 'k.-.', linewidth=0.5, label='Monte Carlo - Zeno')
+plt.plot([], [], 'k:', label='Barker Henderson')
 plt.legend(loc='best')
 plt.ylabel('$p^*$')
 plt.xlabel('$T^*$')
