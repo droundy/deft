@@ -15,8 +15,8 @@
 #       with command ./figs/compute-phasediagram.py
 
 import numpy as np
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
+#import matplotlib.mlab as mlab
+#import matplotlib.pyplot as plt
 import os
 import argparse
 import array as arr
@@ -47,8 +47,8 @@ for kT in kTs:
         # NaNs.
         #if 0.499 < kT < 0.501 and 0.94 < (1/n) < 1.15:
         #if 0.499 < kT < 0.501 and (0.89 < (1/n) < 0.94 or 1.15 < (1/n) < 1.3):
-        if 0.499 < kT < 0.501 and 1.15 < (1/n) < 1.3:
-        #if 0.499 < kT < 0.501 and 0.89 < (1/n) < 0.94:
+        #if 0.499 < kT < 0.501 and 1.15 < (1/n) < 1.3:
+        if 0.499 < kT < 0.501 and 0.89 < (1/n) < 0.94:
 	    # We want high accuracy for this one!
             run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4)
             #print(kT, 1/n)
