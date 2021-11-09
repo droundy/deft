@@ -15,8 +15,6 @@
 from __future__ import print_function, division
 
 import numpy as np
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
 import os, glob
 import argparse
 import sys
