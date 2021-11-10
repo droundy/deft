@@ -53,17 +53,18 @@
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
+\item Update section II.B
 \item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
-\item Finish section describing use of tensor functional.
+%\item Finish section describing use of tensor functional.
 \item Finish freezing section with figures.
-\item Finish p vs V equation of state figure and format on all plots.
+\item Finish p vs V equation plot and format plots.
 %\item Touch up the freezing figures.
 \end{enumerate}
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
-\item go over plots and begin looking at text (and text in blue)
+\item Go over plots and look at text I. and II.A (ASK about text in red)
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
@@ -125,24 +126,28 @@ pair potential is given by
 \end{align}
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
-2^{5/6} R$. \textcolor {blue}{In this paper we will use the dimensionless reduced
-density $n^* \equiv n \sigma^3$ and reduced temperature $T^* \equiv
-k_BT/\epsilon$.}
+2^{5/6} R$. \textcolor {red}{Results are presented in this paper 
+in terms of the dimensionless reduced
+density $n^* \equiv n \sigma^3$, reduced temperature $T^* \equiv
+k_BT/\epsilon$, reduced pressure $P^* \equiv P\sigma^3/\epsilon$, and 
+reduced volume per particle $V^* \equiv V/\sigma^3$.}
 
 \section{Methods}
 
 \subsection{Soft Fundamental Measure Theory}
 
 The excess free energy of SFMT, like that of Rosenfeld's
-FMT~\cite{rosenfeld1989}, is derived using dimensional crossover 
-from the exact free energy in the zero-dimensional cavity limit~\cite{schmidt1999density}. 
-It is written as an integral of a set of functions
+FMT~\cite{rosenfeld1989}, is a functional of the number density 
+profile $n(\textbf{r})$ derived using dimensional crossover from the exact 
+free energy in the 
+zero-dimensional cavity limit~\cite{schmidt1999density}. 
+It is written as an integral 
 \begin{equation}
 A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
-\Phi_3(\rr)\right) d\rr \; , \label{eq:sfmt-excess-free}
+\Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
-where the functions are defined as
+of \textcolor{red}{a set of functions} defined as
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{1-n_3} \\
@@ -158,9 +163,9 @@ where the functions are defined as
 \begin{displaymath}\color{white}\left(\color{black}+\frac{9}{2}
 [\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-
 \operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
-and we have used the tensor version of $\Phi_3$ formulated by 
-Tarazona~\cite{tarazonaFIXME,santos2012phi3}.
-%The integrands 
+where we have used the tensor version of $\Phi_3$ later formulated by 
+\textcolor{red}{Tarazona~\cite{tarazonaFIXME,santos2012phi3} to take 
+into account lost cases}. 
 These are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
 given by %known as \emph{fundamental measures}.
 %The integrand functions are functions of a set of weighted densities 
@@ -179,6 +184,7 @@ given by %known as \emph{fundamental measures}.
 %where the weighted densities are 
 and defined as convolutions with weight 
 functions similar to those of hard-sphere FMT. 
+
 Like hard-sphere fundamental measures, the new weight
 functions are constructed so as to deconvolve the Mayer function,
 \begin{equation}
@@ -214,6 +220,13 @@ function by a convolution with itself
 \begin{equation}\label{eq:mayerandw2}
   \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
 \end{equation}
+%Given that all the weighting functions are related to $w_2(r)$, 
+%a complete set of weighting functions can be constructed by finding 
+%a weighting function $w_2(r)$ that satisfies Equation~\ref{eq:mayerandw2}.
+%All the weighting functions are related to $w_2(r)$ and so 
+By finding a weighting function $w_2(r)$ that satisfies 
+Equation~\ref{eq:mayerandw2}, a complete set of weighting functions
+can be constructed since they all relate to $w_2(r)$.
 %with the other weighting functions given by the equations above
 %~\cite{schmidt2000fluid}.  
 %We note that these equations %---which equations exactly???----
@@ -250,12 +263,12 @@ between molecules.
 
 Another way to satisfy Equation~\ref{eq:mayerandw2} is to 
 construct a $w_2(r)$ and solve for 
-the pair potential that weighting function represents.  
+the pair potential to which that weighting function corresponds.  
 %In this paper, we will 
 %This is the approach we use in this paper.
 This is the approach we use in this paper. We use a weighting function 
-for $w_2(r)$ introduced by Schmidt in Ref.~\citenum{schmidt2000fluid} 
-which has the form of a Gaussian 
+for $w_2(r)$ which has a Gaussian form as was first introduced by Schmidt~\cite{schmidt2000fluid} 
+%which has the form of a Gaussian 
 %is formed using the analytically simple \emph{error function model} 
 %(or \emph{erf model}) introduced by Schmidt in 
 %Ref.~\citenum{schmidt2000fluid}.
@@ -268,8 +281,10 @@ which has the form of a Gaussian
   {\frac{\Xi}{\sqrt{2}}} \right)^2}
   \label{eq:gaussianw2}
 \end{align}
-where $\Xi$ and $\alpha$ are parameters with dimensions of length.
-This choice for $w_2(r)$ results in analytically simple forms 
+where $\Xi$ and $\alpha$ are parameters with dimensions of length. 
+This model, called the \emph{error function model} or \emph{erf model},
+%This choice for $w_2(r)$ 
+results in analytically simple forms 
 for the $w_3(r)$ weighting function, the Mayer function, and the pair
 potential:
 \begin{align}
@@ -280,11 +295,13 @@ potential:
   \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
-This model is called the \emph{error function model} (or \emph{erf model}). 
+We then make the $\alpha$ and $\Xi$ parameters temperature-dependent 
+to approximate the soft, repulsive potential of the WCA fluid,
+as will be described in the next section. 
 %Fourier transforms of the weight functions are used to solve for the 
 %weighted densities in Equation~\ref{eq:n-convolution}.  
 Analytical expressions for the Fourier transforms of each of the 
-weighting functions is provided in Appendix~\ref{sec:fourier}.
+weighting functions is provided in \textcolor{red}{Appendix~\ref{sec:fourier}}.
 
 \subsection{Soft FMT for the WCA fluid}
 
@@ -319,17 +336,30 @@ weighting functions is provided in Appendix~\ref{sec:fourier}.
 %analytically tractable.
 
 %Our approach is to 
-We approximate the effect of a soft repulsive potential
-(specifically the potential of the WCA fluid) by using the erf
-potential. However, as is evident
-from Eq.~\ref{eq:Verf}, if the potential energy of interaction is
-temperature-independent, then this simple form for $w_2(r)$ can only hold
-for one temperature.  At other temperatures, the same potential leads
-to an entirely different form for $f(r)$ and $w_2(r)$, which is not
-analytically tractable.
+%We approximate the effect of a soft repulsive potential
+%(specifically the potential of the WCA fluid) by using the erf
+%potential. However, as is evident
+%from Eq.~\ref{eq:Verf}, if the potential energy of interaction is
+%temperature-independent, then this simple form for $w_2(r)$ can only hold
+%for one temperature.  At other temperatures, the same potential leads
+%to an entirely different form for $f(r)$ and $w_2(r)$, which is not
+%analytically tractable.
 
-Our approach is to make the $\alpha$ and $\Xi$ parameters in the erf potential 
+As is evident from Eq.~\ref{eq:Verf}, a potential energy of interaction 
+that is temperature-independent can only be modeled by evaluating the 
+expressions of the error function model at one temperature.
+%error function model 
+%evaluated at only one temperature.  
+%can only be represented by the error function model described by expressions 
+%that are valid at only one temperatirure., then this simple form for 
+%$w_2(r)$ can only hold for one temperature.  
+At other temperatures, the same potential leads
+to an entirely different form for $f(r)$, and thus $w_2(r)$, which is not
+analytically tractable. 
+In order to approximate the temperature-independent potential of the WCA 
+fluid, we make the $\alpha$ and $\Xi$ parameters in the erf potential 
 temperature-dependent. 
+
 We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
 at distance $\alpha$ corresponding to
 the maximum slope of the Mayer function. This tells us that the $\alpha$ 
