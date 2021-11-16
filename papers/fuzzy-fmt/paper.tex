@@ -126,11 +126,7 @@ pair potential is given by
 \end{align}
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
-2^{5/6} R$. \textcolor {red}{Results are presented in this paper 
-in terms of the dimensionless reduced
-density $n^* \equiv n \sigma^3$, reduced temperature $T^* \equiv
-k_BT/\epsilon$, reduced pressure $P^* \equiv P\sigma^3/\epsilon$, and 
-reduced volume per particle $V^* \equiv V/\sigma^3$.}
+2^{5/6} R$.
 
 \section{Methods}
 
@@ -140,14 +136,18 @@ The excess free energy of SFMT, like that of Rosenfeld's
 FMT~\cite{rosenfeld1989}, is a functional of the number density 
 profile $n(\textbf{r})$ derived using dimensional crossover from the exact 
 free energy in the 
-zero-dimensional cavity limit~\cite{schmidt1999density}. 
+zero-dimensional cavity limit~\cite{schmidt1999density}.
+\davidsays{Rosenfeld's original FMT did not use dimensional crossover.}
 It is written as an integral 
 \begin{equation}
 A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
-of \textcolor{red}{a set of functions} defined as
+of the free energy densities \davidsays{Probably want to spend more space on
+``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
+use tensor weights? If so we need to say.
+}
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{1-n_3} \\
@@ -164,9 +164,9 @@ of \textcolor{red}{a set of functions} defined as
 [\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-
 \operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
 where we have used the tensor version of $\Phi_3$ later formulated by 
-\textcolor{red}{Tarazona~\cite{tarazonaFIXME,santos2012phi3} to take 
-into account lost cases}. 
-These are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
+Tarazona~\cite{tarazona2000,santos2012phi3}, which produces excellent
+results for the crystallization of hard spheres.
+The free energy densities are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
 given by %known as \emph{fundamental measures}.
 %The integrand functions are functions of a set of weighted densities 
 %known as \emph{fundamental measures} derived using dimensional crossover 
@@ -185,7 +185,7 @@ given by %known as \emph{fundamental measures}.
 and defined as convolutions with weight 
 functions similar to those of hard-sphere FMT. 
 
-Like hard-sphere fundamental measures, the new weight
+Like hard-sphere fundamental measures, the SFMT weight
 functions are constructed so as to deconvolve the Mayer function,
 \begin{equation}
   f(r) = e^{-\beta V(r)} - 1
@@ -267,7 +267,7 @@ the pair potential to which that weighting function corresponds.
 %In this paper, we will 
 %This is the approach we use in this paper.
 This is the approach we use in this paper. We use a weighting function 
-for $w_2(r)$ which has a Gaussian form as was first introduced by Schmidt~\cite{schmidt2000fluid} 
+for $w_2(r)$ which has a Gaussian form as introduced by Schmidt~\cite{schmidt2000fluid} 
 %which has the form of a Gaussian 
 %is formed using the analytically simple \emph{error function model} 
 %(or \emph{erf model}) introduced by Schmidt in 
@@ -282,7 +282,7 @@ for $w_2(r)$ which has a Gaussian form as was first introduced by Schmidt~\cite{
   \label{eq:gaussianw2}
 \end{align}
 where $\Xi$ and $\alpha$ are parameters with dimensions of length. 
-This model, called the \emph{error function model} or \emph{erf model},
+This model, called the \emph{error function model} or \emph{$\erf$ model},
 %This choice for $w_2(r)$ 
 results in analytically simple forms 
 for the $w_3(r)$ weighting function, the Mayer function, and the pair
@@ -297,11 +297,9 @@ potential:
 \end{align}
 We then make the $\alpha$ and $\Xi$ parameters temperature-dependent 
 to approximate the soft, repulsive potential of the WCA fluid,
-as will be described in the next section. 
-%Fourier transforms of the weight functions are used to solve for the 
-%weighted densities in Equation~\ref{eq:n-convolution}.  
-Analytical expressions for the Fourier transforms of each of the 
-weighting functions is provided in \textcolor{red}{Appendix~\ref{sec:fourier}}.
+as will be described in the next section.
+% Analytical expressions for the Fourier transforms of each of the 
+% weighting functions is provided in \textcolor{red}{Appendix~\ref{sec:fourier}}.
 
 \subsection{Soft FMT for the WCA fluid}
 
@@ -831,26 +829,12 @@ sphere fluids.
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
  
+% \end{document}
+
+\appendix
 \begin{widetext}
-\[{}\]
-%\[{}\]
+  \section{Fourier transforms of weight functions}\label{sec:fourier}
 
-
-Appendix
-\begin{enumerate}
-\item A. Fourier Transfrom of Weight Functions $w_0(r), w_1(r), w_2(r)$, and $w_3(r)$ 
-\item B. Fourier Transfrom of Vector Weight Functions $\vec{w}_1(r)$ and $\vec{w}_2(r)$  
-\item C. Foureir Transform of Tensor Weight $\overleftrightarrow{w}_{m2}(r)$
-\item D. show trasform of tensor weight $\overleftrightarrow{w}_{m2}(r)$ goes to zero as k goes to 0
-\item E. The tensor weight components in the coordinate system (x,y,z) 
-\item F. Integrals used to compute tensor weights
-\item G. Deriviation of Tensor Density $n_{m2ij}(\vec{r})$ - Work out how tensor weight in Fourier space relates to the tensor density.
-\item H. Deriviation of $\Phi_3$ 
-\end{enumerate}
-
-%\section{fourier}
-
-\[{}\]
 %\tiny
 \subsection{Fourier Transform of Weight Functions $w_0(r), w_1(r), w_2(r)$, and $w_3(r)$ }
 \noindent\textbf{Weight Function $w_0(r)$:}
