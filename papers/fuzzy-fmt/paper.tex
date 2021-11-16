@@ -64,7 +64,7 @@
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
-\item Go over plots and look at text I. and II.A (ASK about text in red)
+\item Go over plots and text sections I. and II.A (ASK about text in red)
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
@@ -346,8 +346,8 @@ weighting functions is provided in \textcolor{red}{Appendix~\ref{sec:fourier}}.
 %analytically tractable.
 
 As is evident from Eq.~\ref{eq:Verf}, a potential energy of interaction 
-that is temperature-independent can only be modeled using the error 
-function model if the expressions are evaluated at one temperature.
+that is temperature-independent can only be modeled at one temperature 
+using the error function model.
 %error function model 
 %evaluated at only one temperature.  
 %can only be represented by the error function model described by expressions 
@@ -360,21 +360,40 @@ In order to approximate the temperature-independent potential of the WCA
 fluid, we make the $\alpha$ and $\Xi$ parameters in the erf potential 
 temperature-dependent. 
 
-We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
-at distance $\alpha$ corresponding to
-the maximum slope of the Mayer function. This tells us that the $\alpha$ 
-parameter must be given by
+%NEW Method in findxi.h  
+%\textcolor{red}{Xi is the variance of the derivative of the mayer function 
+%with respect to the radius r.
+%Alpha is found by setting the second virial coefficient computed with Vwca equal 
+%to the second virial coefficient computed with Verf.}
+We begin by relating the parameter $\Xi$ to the variance of the deriviative 
+of the mayer function with respect to the radius r at a given temperature.
 \begin{align}
-  \alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
-        \ln 2}} \right)^{\frac{1}{6}}.
+    \frac{\Xi}{\sqrt 2}= \sqrt{(<r^2>-<r>^2)} 
 \end{align}
-The alpha parameter roughly measures the length-scale of the
-interaction and, like the Barker-Henderson diameter discussed later, 
-decreases with increasing temperature.  Next, we set the second virial 
-coeffecient formed using the mayer function for the $\Vwca(r)$ potential 
+where
+\begin{align}
+    <r> = \frac{\int f'_{wca}(r)~r~d\vec r}{\int f'_{wca}(r)~d\vec r}
+\end{align}
+and 
+\begin{align}
+    f'_{wca}(r)= -\frac{1}{kT}e^{-V_{wca}(r)/kT}\frac{dV_{wca}(r)}{dr}
+\end{align}
+%%We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
+%%at distance $\alpha$ corresponding to
+%%the maximum slope of the Mayer function. This tells us that the $\alpha$ 
+%%parameter must be given by
+%%\begin{align}
+  %%\alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
+        %%\ln 2}} \right)^{\frac{1}{6}}.
+%%\end{align}
+The $\Xi$ parameter is a measure of the effective softness of the interaction, and
+increases with the temperature. 
+
+Next, we set the second virial 
+coeffecient, $B_2$, formed using the mayer function for the $\Vwca(r)$ potential 
 in Eq.~\ref{eq:Vwca} equal to the second virial coefficent formed using 
 the mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, 
-and solve for the parameter $\Xi$ at a given temperature.
+and solve for the parameter $\alpha$ at a given temperature.
 %\begin{displaymath}B_2=-\frac{1}{2}\int{f(r)~d{r}}\end{displaymath}
 \begin{equation}B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}\end{equation}
 %\begin{displaymath}\int{(e^{-\beta V_{wca}(r)} - 1)~d{r}}=
@@ -385,8 +404,10 @@ and solve for the parameter $\Xi$ at a given temperature.
 %  \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
 %      2} + \ln 2 \right)},
 %\end{align}
-The Xi parameter is a measure of the effective softness of the interaction, and
-increases with the temperature.  
+The $\alpha$ parameter roughly measures the length-scale of the
+interaction and, like the Barker-Henderson diameter discussed later, 
+decreases with increasing temperature. 
+ 
 
 \begin{figure}
 \begin{center}
@@ -416,7 +437,7 @@ tempertures alongside the temperature independent WCA potential.
 %%Fig.~\ref{fig:potential-plot} for two different temperatures.  
 %
 Vertical dotted lines show the values of $\alpha$ at
-which $\Verf$ and $\Vwca$ are matched, a solid black vertical line
+which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical line
 represents the distance at which the WCA force goes to zero, and the
 horizontal dotted lines illustrate the two temperatures. 
 % 
@@ -446,7 +467,7 @@ fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself.
 Ideally, the curves would match for each temperature provided 
 Eq.~\ref{eq:mayerandw2} is satisfied.
 The two vertical dotted lines
-show the value of $\alpha$ at which the potential functions have been matched, and
+show the value of $\alpha$ at, or near where the potential peaks and
 the the solid vertical line shows where the WCA force, and potential,
 and thus $f'_{\mathrm{wca}}$, goes to zero. 
 %
