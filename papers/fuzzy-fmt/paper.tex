@@ -53,7 +53,7 @@
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
-\item Update section II.B
+\item Update section II.C
 \item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 %\item Finish section describing use of tensor functional.
@@ -64,7 +64,7 @@
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
-\item Go over plots and text sections I. and II.A (ASK about text in red)
+\item Go over plots and text sections II.B (ASK about text in red)
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
@@ -132,8 +132,7 @@ and $R$ is a single sphere radius which is related by $\sigma =
 
 \subsection{Soft Fundamental Measure Theory}
 
-The excess free energy of SFMT, like that of Rosenfeld's
-FMT~\cite{rosenfeld1989}, is a functional of the number density 
+The excess free energy of SFMT is a functional of the number density 
 profile $n(\textbf{r})$ derived using dimensional crossover from the exact 
 free energy in the 
 zero-dimensional cavity limit~\cite{schmidt1999density}.
@@ -183,7 +182,8 @@ given by %known as \emph{fundamental measures}.
 \end{equation}
 %where the weighted densities are 
 and defined as convolutions with weight 
-functions similar to those of hard-sphere FMT. 
+functions similar to those of 
+Rosenfeld's hard-sphere FMT~\cite{rosenfeld1989}. 
 
 Like hard-sphere fundamental measures, the SFMT weight
 functions are constructed so as to deconvolve the Mayer function,
@@ -363,8 +363,12 @@ temperature-dependent.
 %with respect to the radius r.
 %Alpha is found by setting the second virial coefficient computed with Vwca equal 
 %to the second virial coefficient computed with Verf.}
-We begin by relating the parameter $\Xi$ to the variance of the deriviative 
-of the mayer function with respect to the radius r at a given temperature.
+We begin by relating the parameter $\Xi$ to the variance of the radius 
+about the peak of the derivative of the mayer function of the WCA potential
+%about the peak at $r=\alpha$
+%found from integrating the radius times the deriviative of the mayer 
+%function with respect to the radius r 
+for a given temperature.
 \begin{align}
     \frac{\Xi}{\sqrt 2}= \sqrt{(<r^2>-<r>^2)} 
 \end{align}
@@ -437,7 +441,7 @@ tempertures alongside the temperature independent WCA potential.
 Vertical dotted lines show the values of $\alpha$ at
 which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical line
 represents the distance at which the WCA force goes to zero, and the
-horizontal dotted lines illustrate the two temperatures. 
+horizontal dotted lines \textcolor{red}{illustrate the two temperatures.} 
 % 
 %We see the temperature dependence of the approximation in comparison to  
 %the WCA potential, with the approximation at higher temperatures being 
@@ -465,8 +469,8 @@ fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself.
 Ideally, the curves would match for each temperature provided 
 Eq.~\ref{eq:mayerandw2} is satisfied.
 The two vertical dotted lines
-show the value of $\alpha$ at, or near where the potential peaks and
-the the solid vertical line shows where the WCA force, and potential,
+show the value of $\alpha$ where the erf potential peaks and
+the the solid vertical line shows where the WCA force and potential,
 and thus $f'_{\mathrm{wca}}$, goes to zero. 
 %
 The erf result extends
