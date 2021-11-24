@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 #This program finds alpha and Xi for a given temperature T (really kT).
-#Xi is the variance of the derivative of the mayer function with respect to the radius r.
+#Xi is the variance of r about the peak of the derivative of the mayer function with respect to the radius r
 #Alpha is found by setting the second virial coefficient computed with V_wca equal 
 #to the second virial coefficient computed with V_erf.
 #It is referenced by wca_erf.py which is referenced by potential-plot.py and by w2-comparison.py.
@@ -15,7 +15,6 @@ def B2_erf_analytical(alpha, Xi, T) :
     return np.pi/3*((alpha**3 + 1.5*alpha*Xi**2)*(1+erf(alpha/Xi)) + 1/np.sqrt(np.pi)*(alpha**2*Xi + Xi**3)*np.exp(-(alpha/Xi)**2))
 
 
-#Compute B2_wca numerically by evaluating the integral (default method):
 def Vwca(r, sigma = 1, eps = 1):
     return 4*eps*((sigma/r)**12-(sigma/r)**6) +  eps
     
@@ -34,7 +33,7 @@ def mean_fprime_wca_radius(T):    #mean of the values of r
     fp = fp_wca(r, T)
     fp[0] = 0
     dr = r[1] - r[0]
-    return (4*np.pi*r**3*dr*fp).sum()/(4*np.pi*r**2*dr*fp).sum() 
+    return (r*dr*fp).sum()/(dr*fp).sum() 
     
 def mean_fprime_wca_radius_squared(T):
     rmax = 2.0**(1/6)
@@ -42,7 +41,7 @@ def mean_fprime_wca_radius_squared(T):
     fp = fp_wca(r, T)
     fp[0] = 0
     dr = r[1] - r[0]
-    return (4*np.pi*r**4*dr*fp).sum()/(4*np.pi*r**2*dr*fp).sum() 
+    return (r**2*dr*fp).sum()/(dr*fp).sum() 
 
 def variance_fprime_wca_radius(T):
 	return mean_fprime_wca_radius_squared(T) - (mean_fprime_wca_radius(T))**2
@@ -51,6 +50,7 @@ def find_Xi(alpha, T, sigma = 1, eps = 1):
 	print("variance", variance_fprime_wca_radius(T))
 	return (2*variance_fprime_wca_radius(T))**0.5
 
+#Compute B2_wca numerically by evaluating the integral (default method):
 def B2_wca_numerical(T):
     rmax = 2.0**(1/6)
     r = np.linspace(0, rmax, 10000)

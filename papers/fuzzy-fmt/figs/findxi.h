@@ -1,7 +1,7 @@
 #pragma once
 
 //This program finds alpha and xi for a given temperature T (really kT).
-//Xi is the variance of the derivative of the mayer function with respect to the radius r.
+//Xi is the variance of r about the peak of the derivative of the mayer function with respect to the radius r
 //Alpha is found by setting the second virial coefficient computed with V_wca equal 
 //to the second virial coefficient computed with V_erf.
 //It is referenced by new-melting.cpp
@@ -39,8 +39,8 @@ static inline double mean_fprime_wca_radius(double T) {
   double f_sum_bottom=0;
   const double dr = Rmax/N;
   for (double r=dr/2; r < Rmax; r += dr) {
-  f_sum_top += uipow(r,3)*dr*fp_wca(r,T);
-  f_sum_bottom += uipow(r,2)*dr*fp_wca(r,T);
+  f_sum_top += r*dr*fp_wca(r,T);
+  f_sum_bottom += dr*fp_wca(r,T);
   }
   return f_sum_top/f_sum_bottom;
 }
@@ -51,8 +51,8 @@ static inline double mean_fprime_wca_radius_squared(double T) {
   double f_sum_bottom=0;
   const double dr = Rmax/N;
   for (double r=dr/2; r < Rmax; r += dr) {
-  f_sum_top += uipow(r,4)*dr*fp_wca(r,T);
-  f_sum_bottom += uipow(r,2)*dr*fp_wca(r,T);
+  f_sum_top += uipow(r,2)*dr*fp_wca(r,T);
+  f_sum_bottom += dr*fp_wca(r,T);
   }
   return f_sum_top/f_sum_bottom;
 }
