@@ -7,8 +7,8 @@
 # (Use compute-isotherm.py to run figs/new-melting.cpp for many different 
 # densities and temperatures that are not fixed to reproduce published data.)
 # ie. figs/new-melting.mkdat --kT 0.5 --n 1.06 --gwstart 0.01 --gwend 0.2 
-#    --gwstep 0.01 --fv 0 --dx 0.5 --mc-error 0.001 --mc-constant 5 
-#    --mc-prefactor 50000 --d newdata_tensor/phase-diagram4 
+#    --gwstep 0.01 --fv 0 --dx 0.5 --seed 1 --mc-error 0.001 --mc-constant 5 
+#    --mc-prefactor 50000 --d data/phase-diagram 
 #    --filename isotherm-kT-0.5_tensor.dat
 
 # NOTE: Run this script from deft/papers/fuzzy-fmt
