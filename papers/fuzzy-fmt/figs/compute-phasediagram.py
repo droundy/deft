@@ -49,6 +49,6 @@ for kT in kTs:
             run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4)
             #print(kT, 1/n)
         else:
-            pass # for now, skip these simulations that we already ran.
-            #run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
+            #pass # for now, skip these simulations that we already ran.
+            run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
 
