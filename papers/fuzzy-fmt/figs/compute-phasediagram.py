@@ -35,7 +35,8 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     print(cmd)
     assert(os.system(cmd) == 0)
 
-kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
+#kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
+kTs = np.arange(1.5, 0.05, -0.1)  #finishing ...
 densities = np.arange(0.01, 1.53, 0.02)
 
 for kT in kTs:
