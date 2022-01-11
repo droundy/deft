@@ -35,7 +35,8 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     print(cmd)
     assert(os.system(cmd) == 0)
 
-kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
+#kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
+kTs = np.arange(0.5, 0.45, -0.1)  #trouble data points
 densities = np.arange(0.01, 1.53, 0.02)
 
 for kT in kTs:
@@ -44,11 +45,13 @@ for kT in kTs:
         # accurate and precise Monte Carlo, otherwise we end up seeing n_3 > 1 and get
         # NaNs.
         #if 0.499 < kT < 0.501 and 0.94 < (1/n) < 1.15:
-        if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1.3:
+        #if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1.3:   #for small plot in paper
+        if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1:    #trouble data points
 	    # We want high accuracy for this one!
-            run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4)
+            #run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4) #for small plot in paper
+            run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-5) #trouble data points
             #print(kT, 1/n)
         else:
-            #pass # for now, skip these simulations that we already ran.
-            run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
+            pass # for now, skip these simulations that we already ran.
+            #run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
 
