@@ -46,8 +46,12 @@ In terms of virtual variations of the functional $F[n(\vec r)]$,
     %\bigg|_{T,V} \frac{\delta n_i(\vec r~'')}{\delta n(\vec r)}~~d\vec r~'' \color{red}\mbox{~~~UNITS?}
 %\end{align} 
 \begin{align}
+    \mu(\vec r) &=  \frac{1}{V}\frac{\delta F[n(\vec r)]}{\delta n(\vec r)}\bigg|_{T,V}  
+\end{align}
+and the average chemical potential over all space is
+\begin{align}
     \mu &= \left<\mu(\vec r)\right> = \frac{1}{V}\int \mu(\vec r)~d\vec r~\\
-        &= \frac{1}{V} \int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)}
+        &= \frac{1}{V^2} \int \frac{\delta F[n(\vec r)]}{\delta n(\vec r)}
            \bigg|_{T,V}~d\vec r~  
         %&= \frac{1}{V} \int d\vec r \int d\vec r~'' ~\frac{\delta 
         %F[n(\vec r)]}{\delta n_i(\vec r~'')}\bigg|_{T,V} 
@@ -61,35 +65,69 @@ The Helmholtz free energy can be broken into an ideal and an excess part.
    F_{ideal}  &= k_BTN[\ln\left(\frac{N\Lambda^{3}}{V}\right)-1]  \\
 %
   \mu_{ideal} &= \frac{\partial F}{\partial N}\bigg|_{T,V}   \\
-              &= k_BT\ln\left(\frac{N\Lambda^{3}}{V}\right)  \\
+              &= k_BT\ln\left(\frac{N\Lambda^{3}}{V}\right)  \\ 
               &= k_BT\ln\left(\frac{n}{n_Q}\right)
 \end{align} 
-For a spatially varying number density, the ideal free energy in becomes
+For a spatially varying number density, the ideal free energy becomes
 \begin{align}
     F_{ideal}[n(\vec{r})] &= k_BT\int_{Volume}n(\vec r~')
       \left[\ln\left(\frac{n(\vec r~')}{n_Q}\right)-1\right] ~d\vec r~' 
-      \\ \nonumber \\
-%
- \mu_{ideal} &= \frac{1}{V}\int \frac{\delta F[n(\vec r)]}{\delta 
+       % p.64 EQ 3.1.22 Simple Liquids
+\end{align}
+\begin{align}
+ \mu_{ideal}(\vec r) &= \frac{1}{V}\frac{\delta F[n(\vec r)]}{\delta 
+              n(\vec r)}\bigg|_{T,V} \\ \nonumber\\
+    &= \frac{1}{V}\frac{\delta}{\delta n(\vec r)}
+    \left(k_BT\int d\vec r~'~ n(\vec r~')\left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right]\right) \\ \nonumber\\
+    &= \frac{k_BT}{V}\int d\vec r~'~ \frac{\delta}{\delta n(\vec r)}\left(n(\vec r~')\left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right]\right) \\ \nonumber\\
+    &= \frac{k_BT}{V}\left(\int d\vec r~'~ \frac{\delta n(\vec r~')}
+    {\delta n(\vec r)}\left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right] + n(\vec r~')\frac{n_Q}{n(\vec r~')}
+    \frac{1}{n_Q} \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \right)\\ \nonumber\\
+    &= \frac{k_BT}{V}\left(\int d\vec r~'~ \frac{\delta n(\vec r~')}
+    {\delta n(\vec r)}\left[\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1\right] + \frac{\delta n(\vec r~')}{\delta n(\vec r)}
+    \right)\\ \nonumber\\
+    &= \frac{k_BT}{V}\int d\vec r~'~ \frac{\delta n(\vec r~')}
+    {\delta n(\vec r)}\left(\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)-1 + 1\right)\\ \nonumber\\
+    &= \frac{k_BT}{V}\int d\vec r~'~ \frac{\delta n(\vec r~')}
+    {\delta n(\vec r)}\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)\\ \nonumber\\
+    &= \frac{k_BT}{V}\int d\vec r~'~ \delta(\vec r~'-
+    \vec r)\ln\left(\frac{n(\vec r~')}
+    {n_Q}\right)\\ \nonumber\\
+    &= \frac{k_BT}{V}\ln\left(\frac{n(\vec r)}
+    {n_Q}\right)  \text{WRONG! should not have V}
+    %p. 64 EQ 3.1.20 Simple Liquids
+\end{align}
+
+\begin{align}
+ \mu_{ideal} &= \frac{1}{V^2}\int \frac{\delta F[n(\vec r)]}{\delta 
               n(\vec r)} d\vec r \\ \nonumber\\
-    &= \frac{k_BT}{V} \int d\vec r ~\frac{\delta}{\delta n(\vec r)}
+    &= \frac{k_BT}{V^2} \int d\vec r ~\frac{\delta}{\delta n(\vec r)}
     \left(\int d\vec r~'~ n(\vec r~')\left[\ln\left(\frac{n(\vec r~')}
     {n_Q}\right)-1\right]\right) \\ \nonumber\\
-    &= \frac{k_BT}{V} \int d\vec r ~
+    &= \frac{k_BT}{V^2} \int d\vec r ~
     \left(\int d\vec r~'~ \frac{\delta n(\vec r~')}{\delta n(\vec r)}
     \left[\ln\left(\frac{n(\vec r~')}
     {n_Q}\right)-1\right] + n(\vec r~')\frac{1}{\frac{n(\vec r~')}
     {n_Q}}\frac{1}{n_Q} \frac{\delta n(\vec r~')}{\delta n(\vec r)}
     \right)\\ \nonumber\\
-    &= \frac{k_BT}{V} \int d\vec r ~
+    &= \frac{k_BT}{V^2} \int d\vec r ~
     \left(\int d\vec r~'~ \frac{\delta n(\vec r~')}{\delta n(\vec r)}
     \left[\ln\left(\frac{n(\vec r~')}
     {n_Q}\right)\right]\right) - \frac{\delta n(\vec r~')}{\delta 
     n(\vec r)}+\frac{\delta n(\vec r~')}{\delta n(\vec r)}\\ \nonumber\\
-    &= \frac{k_BT}{V} \int d\vec r ~ \left(\int d\vec r~'~\delta(\vec r~'-
+    &= \frac{k_BT}{V^2} \int d\vec r ~ \left(\int d\vec r~'~\delta(\vec r~'-
     \vec r)\left[\ln\left(\frac{n(\vec r~')}{n_Q}\right)\right]\right) 
     \\ \nonumber\\  
-    &= \frac{k_BT}{V} \int d\vec r ~\ln\left(\frac{n(\vec r)}{n_Q}\right)   
+    &= \frac{k_BT}{V^2} \int d\vec r ~\ln\left(\frac{n(\vec r)}{n_Q}\right)  
+    %&= \frac{k_BT}{V} (V) ~\ln\left(\frac{n(\vec r)}{n_Q}\right) \\
+    %&= k_BT~\ln\left(\frac{n(\vec r)}{n_Q}\right) %p. 64 EQ 3.1.20 Simple Liquids
 \end{align} 
 The excess Helmholtz free energy is given by
 \begin{align}
