@@ -761,11 +761,9 @@ Compare to the homogeneous case,
             &= k_BT \frac{\partial}{\partial n}\left[\frac{n\left(\int w_1\right) n\left(\int w_2\right)- n\left(\int \vec w_1\right)\cdot n\left(\int \vec w_2\right)}{1-n\left(\int w_3\right)}\right] \\ \\          
 %            
             &= k_BT \left(\frac{\partial}{\partial n}\left[n\left(\int w_1\right)\right]\frac{n\left(\int w_2\right)}{1-n\left(\int w_3\right)} \color{white}\right]\color{black} \\
-            &+ \frac{\partial}{\partial n}\left[n\left(\int w_2\right)\right]\frac{n\left(\int w_1\right)}{1-n\left(\int w_3\right)} \\
-%            
-            &+ \frac{\partial}{\partial n}\left[n\left(\int \vec w_1\right)\right]\frac{n\left(\int \vec w_2\right)}{1-n\left(\int w_3\right)} \color{white}\right]\color{black} \\
-            &+ \frac{\partial}{\partial n}\left[n\left(\int \vec w_2\right)\right]\frac{n\left(\int \vec w_1\right)}{1-n\left(\int w_3\right)} \\
- %           
+            &+ \frac{\partial}{\partial n}\left[n\left(\int w_2\right)\right]\frac{n\left(\int w_1\right)}{1-n\left(\int w_3\right)} \\           
+            &+ \frac{\partial}{\partial n}\left[n\left(\int \vec w_1\right)\right]\frac{n\left(\int \vec w_2\right)}{1-n\left(\int w_3\right)} \\ %\color{white}\right]\color{black} \\ %??
+            &+ \frac{\partial}{\partial n}\left[n\left(\int \vec w_2\right)\right]\frac{n\left(\int \vec w_1\right)}{1-n\left(\int w_3\right)} \\           
             &+ \color{white}\left(\color{black}\frac{\partial}{\partial n}\left[\frac{1}{1-n\left(\int w_3\right)}\right]n\left(\int w_1\right)n\left(\int w_2\right) \right)\\ \\
 %            
             &= k_BT \left[\left(\int w_1\right)\frac{n\left(\int w_2\right)}{1-n\left(\int w_3\right)} \color{white}\right]\color{black} \\
@@ -793,28 +791,28 @@ Compare to the homogeneous case,
 \end{align}
 
 \begin{align}
-    %F_{3ex} &= K_BT\Phi_3 V  \\
-            %&= k_BT\left(\frac{{n_2}^3-3n_2\vec n_{v2}\cdot\vec n_{v2}+\frac{9}{2}
-       %\left[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}
-       %-\operatorname{Tr}({\overleftrightarrow n^3_{m2}})\right]}{24\pi(1-n_3)^2} \right)V  \\
-%%       
-       %\mu_{3ex} &= \frac{1}{V}\frac{\partial F_{3ex}}{\partial n} \bigg|_{T,V} \\
-         %&= \frac{k_BTV}{V} \frac{\partial}{\partial n}\left[
-       %\frac{{n_2}^3-3n_2\vec n_{v2}\cdot\vec n_{v2}+\frac{9}{2}
-       %[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}
-       %-\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-n_3)^2}\right]  \\       
-       %&= \frac{k_BTV}{V} \frac{\partial}{\partial n}
-       %\left[\frac{\left(\int n w_2\right)^3-3\int n w_2\int \vec n w_{v2}\cdot\int 
-       %\vec n w_{v2}+\frac{9}{2}\left[\int n\vec w_{v2}\cdot{\int n\overleftrightarrow{w}_{m2}}
+    F_{3ex} &= K_BT\Phi_3 V  \\
+            &= k_BT\left(\frac{{n_2}^3-3n_2\vec n_{v2}\cdot\vec n_{v2}+\frac{9}{2}
+       \left[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}
+       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})\right]}{24\pi(1-n_3)^2} \right)V  \\
+%       
+       \mu_{3ex} &= \frac{1}{V}\frac{\partial F_{3ex}}{\partial n} \bigg|_{T,V} \\
+         &= \frac{k_BTV}{V} \frac{\partial}{\partial n}\left[
+       \frac{{n_2}^3-3n_2\vec n_{v2}\cdot\vec n_{v2}+\frac{9}{2}
+       [\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}
+       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-n_3)^2}\right]  \\       
+       %&= \frac{k_BTV}{V} \frac{\partial}{\partial n}  %ERROR
+       %\Bigg[\frac{\left(\int n w_2\right)^3-3\int n w_2\int \vec n w_{v2}\cdot\int 
+       %\vec n w_{v2}+\frac{9}{2}\Bigg[\int n\vec w_{v2}\cdot{\int n\overleftrightarrow{w}_{m2}}
        %\cdot{\int n\vec w_{v2}}-\operatorname{Tr}({\left(\int n\overleftrightarrow w_{m2}}
-       %\right)^3)\right]
-       &= \frac{k_BT}{24\pi(1-\int n w_3)^2}\left[3\left(\int n w_2\right)^2\left(\int w_2\right)
-       -3\int w_2\int \vec n w_{v2}\cdot\int \vec n w_{v2} \color{white}\right]\color{black} \\ 
-       &- 2*3\int nw_2\int \vec w_{v2}\cdot\int \vec n w_{v2}
-       +\frac{9}{2}\left[\color{white}\right]\color{black}
-       \int \vec n w_{v2}\cdot{\int n\overleftrightarrow{w}_{m2}}
-       \cdot{\int \vec n w_{v2}}-\operatorname{Tr}({\left(\int n\overleftrightarrow w_{m2}}
-       \right)^3)\color{white}\left[\color{black}\right]\color{white}\left[\color{black}\right]
+       %\right)^3)\Bigg]\Bigg]
+       %&= \frac{k_BT}{24\pi(1-\int n w_3)^2}\left[3\left(\int n w_2\right)^2\left(\int w_2\right)
+       %%-3\int w_2\int \vec n w_{v2}\cdot\int \vec n w_{v2} \color{white}\right]\color{black} \\ 
+       %&- 2*3\int nw_2\int \vec w_{v2}\cdot\int \vec n w_{v2}
+       %+\frac{9}{2}\left[\color{white}\right]\color{black}
+       %\int \vec n w_{v2}\cdot{\int n\overleftrightarrow{w}_{m2}}
+       %\cdot{\int \vec n w_{v2}}-\operatorname{Tr}({\left(\int n\overleftrightarrow w_{m2}}
+       %\right)^3)\color{white}\left[\color{black}\right]\color{white}\left[\color{black}\right]
 \end{align} 
 
 NEW METHOD - Jan -------------------------------------------------------
@@ -877,7 +875,7 @@ Collecting terms
 \begin{align}
   \mu &= \frac{\partial F}{\partial N} = \frac{dF[Cn(\vec r)]}{d(CN)} = \frac{1}{N}\frac{dF[Cn(\vec r)]}{dC}\\
    F[Cn(\vec r)] &= k_BT\int \Phi_1 +\Phi_2+\Phi_3 ~d\vec r \\
-   &= k_BT\int -Cn_0\ln\left(1-Cn_3\right) + \frac{Cn_1Cn_2-C\vec n_1\cdotC\vec n_2}{1-Cn_3} \\
+   &= k_BT\int -Cn_0\ln\left(1-Cn_3\right) + \frac{Cn_1Cn_2-C\vec n_1\cdot C\vec n_2}{1-Cn_3} \\
    &+ \frac{{C^3n_2}^3-3Cn_2C\vec n_{v2}\cdot C\vec n_{v2}+\frac{9}{2}
        [C\vec n_{v2}\cdot{C\overleftrightarrow{n}_{m2}}\cdot{C\vec n_{v2}}
        -\operatorname{Tr}({C^3\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}    \\ \\
