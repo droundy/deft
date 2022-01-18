@@ -515,8 +515,8 @@ crystalline lattice structure is formed~\cite{reference!}.
 
 %Holding the temperature and number density fixed, 
 The equilibrium Helmholtz free energy of the crystal, and its corresponding 
-equilibrium number density profile $n(\vec{r})$ can be found for a given 
-temperature and overall number density simply by varying the number density profile spatially 
+equilibrium number density profile, $n(\vec{r})$, can be found for a given 
+temperature and overall number density, $n$, simply by varying the number density profile spatially 
 %, the spatially varying number density, 
 %by changing %the spatial profile of the number density by varying 
 %the width of the gaussians centered at each lattice point, and the crystal cell size 
@@ -530,7 +530,7 @@ Gaussians, each centered at a lattice point specified by $\vec{R_i}$, to form
 the number density profile 
 \begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
 \int{e^{-\frac{|\vec{r}-\vec{R_i}|^2}{2\left(\sigma_g\right)^2}}d{\vec{r}}}  \end{equation}  
-We can vary the number density profile $n(\vec{r})$ by changing the width of the gaussians s
+We can vary the number density profile, $n(\vec{r})$, by changing the width of the gaussians
 and the size of the crystal cell. \color{black}As the gaussian width gets large, the number 
 density becomes homogeneous as would be expected for a fluid. A larger crystal cell models a larger fraction 
 of vacancies. Monte-Carlo integration is employed to more efficiently 
@@ -543,7 +543,7 @@ free energy per atom with respect to the inverse number density.
 \begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} 
 = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
 The pressure at the phase transition can be obtained from the point of intersection
-that occurs when the chemical potential, or Gibbs free energy per atom g,
+that occurs when the chemical potential, which is the Gibbs free energy per atom g,
 is plotted against the pressure for both the fluid and the solid at fixed temperature. 
 \begin{equation}{g = \frac{1}{n}P + f}\end{equation}
 The number densities of both the solid and the liquid at the phase transition can then
