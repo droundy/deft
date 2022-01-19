@@ -573,7 +573,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   printf("crystal pressure = %g\n", data_out.cpressure);
   data_out.hpressure=hpressure;
 
-  printf("*Homogeneous free energy calculated analytically\n");
+  printf("***Homogeneous free energy calculated analytically\n");
 
   printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", hfree_energy_per_atom, data_out.cfree_energy_per_atom);
   printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n", data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
