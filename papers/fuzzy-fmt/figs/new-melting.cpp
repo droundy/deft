@@ -564,6 +564,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.cfree_energy_per_atom=cfree_energy_per_atom;
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
   data_out.cfree_energy_per_vol=cfree_energy_per_vol;
+  //data_out.cpressure=(total_muV/(total_V)*reduced_density-cfree_energy_per_vol + cpressure_ideal; //  old
   data_out.cpressure=(total_muV/(reduced_num_spheres*total_V))*reduced_density-cfree_energy_per_vol + cpressure_ideal; // P = un - F/V where u=kT/N int(simplified integrand terms dV)
   //printf("\n\ncrystal excess pressure mu term = %g\n\n\n", (total_muV/total_V)*reduced_density);  //old
   //printf("crystal excess pressure = %g\n", (total_muV/total_V)*reduced_density-cfree_energy_per_vol);  //old
