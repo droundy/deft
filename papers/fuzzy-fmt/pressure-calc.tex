@@ -878,26 +878,36 @@ Collecting terms
    &+ \frac{{C^3n_2}^3-3Cn_2C\vec n_{v2}\cdot C\vec n_{v2}+\frac{9}{2}
        [C\vec n_{v2}\cdot{C\overleftrightarrow{n}_{m2}}\cdot{C\vec n_{v2}}
        -\operatorname{Tr}({C^3\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}    \\ \\
+   &= k_BT\int \Phi_1 +\Phi_2+\Phi_3 ~d\vec r \\
+   &= k_BT\int -Cn_0\ln\left(1-Cn_3\right) + C^2\frac{n_1n_2-\vec n_1\cdot \vec n_2}{1-Cn_3} \\
+   &+ C^3\frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2}+\frac{9}{2}
+       [\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}
+       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}    \\ \\
 %   
-  \frac{dF[n(\vec r)]}{dC}    &= k_BT\int -n_0\ln\left(1-Cn_3\right) + C^2\frac{n_0}{1-Cn_3} \\
-   &+ 2C\frac{n_1n_2-\vec n_1\cdot\vec n_2}{1-Cn_3} +C^3 \frac{n_1n_2-\vec n_1\cdot\vec n_2}{(1-Cn_3)^2} \\   
-   &+ \frac{{3C^2n_2}^3-9C^2n_2\vec n_{v2}\cdot \vec n_{v2} 
-   + \frac{27}{2}[C^2\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}} 
-       -\operatorname{Tr}({C^2\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}   \\ 
-    &+ \frac{{C^4n_2}^3-3C^4n_2\vec n_{v2}\cdot \vec n_{v2} 
-    + \frac{9}{2}[C^4\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}   
-       -\operatorname{Tr}({C^4\overleftrightarrow n^3_{m2}})]}{12\pi(1-Cn_3)^3}     
+  \frac{dF[n(\vec r)]}{dC}    &= k_BT\int -n_0\ln\left(1-Cn_3\right) + Cn_3\frac{n_0}{1-Cn_3} \\
+   &+ 2C\frac{n_1n_2-\vec n_1\cdot\vec n_2}{1-Cn_3} +C^2n_3 \frac{n_1n_2-\vec n_1\cdot\vec n_2}{(1-Cn_3)^2} \\   
+   &+ 3C^2\frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2} 
+   + \frac{9}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}} 
+       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}   \\ 
+    &+ \Bigg(\frac{2C^3n_3}{1-Cn_3}\Bigg)\frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2} 
+    + \frac{9}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}   
+       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}     
 \end{align} 
 Setting C=1 gives
+%\begin{align}
+   %\frac{dF[n(\vec r)]}{dC} &= k_BT\int -n_0\ln\left(1-n_3\right) + \frac{n_0}{1-n_3} \\
+   %&+ 2\frac{n_1n_2-\vec n_1\cdot\vec n_2}{1-n_3} + \frac{n_1n_2-\vec n_1\cdot\vec n_2}{(1-n_3)^2} \\   
+   %&+ \frac{{3n_2}^3-9n_2\vec n_{v2}\cdot \vec n_{v2} 
+   %+ \frac{27}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}} 
+       %-\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-n_3)^2}   \\ 
+    %&+ \frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2} 
+    %+ \frac{9}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}   
+       %-\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{12\pi(1-n_3)^3}     
+%\end{align} 
+
 \begin{align}
-   \frac{dF[n(\vec r)]}{dC} &= k_BT\int -n_0\ln\left(1-n_3\right) + \frac{n_0}{1-n_3} \\
-   &+ \frac{n_1n_2-\vec n_1\cdot\vec n_2}{1-n_3} + \frac{n_1n_2-\vec n_1\cdot\vec n_2}{(1-n_3)^2} \\   
-   &+ \frac{{3n_2}^3-9n_2\vec n_{v2}\cdot \vec n_{v2} 
-   + \frac{27}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}} 
-       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-n_3)^2}   \\ 
-    &+ \frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2} 
-    + \frac{9}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}   
-       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{12\pi(1-n_3)^3}     
+   \mu = \frac{1}{N}\frac{dF[n(\vec r)]}{dC} &= \frac{k_BT}{N}\int \Phi_1 + \frac{n_0n_3}{1-n_3} 
+   + 2\Phi_2 + \frac{\Phi_2 n_3}{1-n_3} + 3\Phi_3 + \frac{2n_3\Phi_3}{1-n_3} ~d\vec r    
 \end{align} 
 
 \end{document}
