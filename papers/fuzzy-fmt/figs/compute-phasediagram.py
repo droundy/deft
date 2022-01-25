@@ -49,7 +49,7 @@ for kT in kTs:
         if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1:    #trouble data points
 	    # We want high accuracy for this one!
             #run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4) #for small plot in paper
-            run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-5) #trouble data points
+            run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4) #trouble data points
             #print(kT, 1/n)
         else:
             pass # for now, skip these simulations that we already ran.
