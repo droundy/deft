@@ -873,27 +873,31 @@ Collecting terms
 
 \begin{align}
   \mu &= \frac{\partial F}{\partial N} = \frac{dF[Cn(\vec r)]}{d(CN)} = \frac{1}{N}\frac{dF[Cn(\vec r)]}{dC}\\
-   F[Cn(\vec r)] &= k_BT\int \Phi_1 +\Phi_2+\Phi_3 ~d\vec r \\
-   &= k_BT\int -Cn_0\ln\left(1-Cn_3\right) + \frac{Cn_1Cn_2-C\vec n_1\cdot C\vec n_2}{1-Cn_3} \\
+   F_{excess}[Cn(\vec r)] &= k_BT\int \Phi_1 +\Phi_2+\Phi_3 ~d\vec r \\
+   &= k_BT\int -Cn_0\ln\left(1-Cn_3\right) + \frac{Cn_1Cn_2-C\vec n_1\cdot C\vec n_2}{1-Cn_3} \nonumber \\
    &+ \frac{{C^3n_2}^3-3Cn_2C\vec n_{v2}\cdot C\vec n_{v2}+\frac{9}{2}
        [C\vec n_{v2}\cdot{C\overleftrightarrow{n}_{m2}}\cdot{C\vec n_{v2}}
-       -\operatorname{Tr}({C^3\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}    \\ \\
-   &= k_BT\int \Phi_1 +\Phi_2+\Phi_3 ~d\vec r \\
-   &= k_BT\int -Cn_0\ln\left(1-Cn_3\right) + C^2\frac{n_1n_2-\vec n_1\cdot \vec n_2}{1-Cn_3} \\
+       -\operatorname{Tr}({C^3\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}    \\ \nonumber\\
+   &= k_BT\int -Cn_0\ln\left(1-Cn_3\right) + C^2\frac{n_1n_2-\vec n_1\cdot \vec n_2}{1-Cn_3} \nonumber \\
    &+ C^3\frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2}+\frac{9}{2}
        [\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}
-       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}    \\ \\
-%   
-  \frac{dF[n(\vec r)]}{dC}    &= k_BT\int -n_0\ln\left(1-Cn_3\right) + Cn_3\frac{n_0}{1-Cn_3} \\
-   &+ 2C\frac{n_1n_2-\vec n_1\cdot\vec n_2}{1-Cn_3} +C^2n_3 \frac{n_1n_2-\vec n_1\cdot\vec n_2}{(1-Cn_3)^2} \\   
+       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}    
+\end{align} 
+Taking the dervative of the integrand with respect to C, and treating n 
+as a constant, gives
+\begin{align} 
+  \frac{d}{dC}\Bigg(\text{integrand}\Bigg)    &= -n_0\ln\left(1-Cn_3\right) + Cn_3\frac{n_0}{1-Cn_3} \nonumber \\
+   &+ 2C\frac{n_1n_2-\vec n_1\cdot\vec n_2}{1-Cn_3} +C^2n_3 \frac{n_1n_2-\vec n_1\cdot\vec n_2}{(1-Cn_3)^2} \nonumber \\   
    &+ 3C^2\frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2} 
    + \frac{9}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}} 
-       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}   \\ 
+       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}  \nonumber  \\ 
     &+ \Bigg(\frac{2C^3n_3}{1-Cn_3}\Bigg)\frac{{n_2}^3-3n_2\vec n_{v2}\cdot \vec n_{v2} 
     + \frac{9}{2}[\vec n_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec n_{v2}}   
-       -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}     
+      -\operatorname{Tr}({\overleftrightarrow n^3_{m2}})]}{24\pi(1-Cn_3)^2}     \\
+    \text{which for} ~~C&=1~~~\text{becomes}~~~ \nonumber\\
+    &= \Phi_1 + \frac{n_0n_3}{1-n_3} + 2\Phi_2 + \frac{\Phi_2 n_3}{1-n_3} + 3\Phi_3 + \frac{2n_3\Phi_3}{1-n_3} 
 \end{align} 
-Setting C=1 gives
+
 %\begin{align}
    %\frac{dF[n(\vec r)]}{dC} &= k_BT\int -n_0\ln\left(1-n_3\right) + \frac{n_0}{1-n_3} \\
    %&+ 2\frac{n_1n_2-\vec n_1\cdot\vec n_2}{1-n_3} + \frac{n_1n_2-\vec n_1\cdot\vec n_2}{(1-n_3)^2} \\   
@@ -906,8 +910,29 @@ Setting C=1 gives
 %\end{align} 
 
 \begin{align}
-   \mu = \frac{1}{N}\frac{dF[n(\vec r)]}{dC} &= \frac{k_BT}{N}\int \Phi_1 + \frac{n_0n_3}{1-n_3} 
+    F_{ideal}[n(\vec{r})] &= k_BT\int_{Volume}n(\vec r~')
+      \left[\ln\left(\frac{n(\vec r~')}{n_Q}\right)-1\right] ~d\vec r~' \\
+%
+    F_{ideal}[Cn(\vec{r})] &= k_BT\int_{Volume}Cn(\vec r~')
+      \left[\ln\left(\frac{Cn(\vec r~')}{n_Q}\right)-1\right] ~d\vec r~' 
+\end{align} 
+Taking the dervative of the integrand with respect to C, and treating n 
+as a constant, gives
+\begin{align}
+  \frac{d}{dC}\Bigg(\text{integrand}\Bigg) &= n(\vec r)\Bigg[\ln\left(
+  \frac{Cn(\vec r)}{n_Q}\right)-1\Bigg] + Cn(\vec r)\frac{n_Q}{Cn(\vec r)}\frac{n(\vec r)}{n_Q}\\
+  \text{which for} ~~C&=1~~~\text{becomes}~~~ \nonumber\\
+  &= n(\vec r)\ln\left(\frac{n(\vec r)}{n_Q}\right)
+\end{align} 
+And so, for C=1
+\begin{align}
+   \mu &= \frac{1}{N}\frac{dF[Cn(\vec r)]}{dC} \\
+   &= \frac{k_BT}{N}\int n(\vec r~')\ln\left(\frac{n(\vec r~')}{n_Q}\right)
+   + \Phi_1 + \frac{n_0n_3}{1-n_3} 
    + 2\Phi_2 + \frac{\Phi_2 n_3}{1-n_3} + 3\Phi_3 + \frac{2n_3\Phi_3}{1-n_3} ~d\vec r    
 \end{align} 
+
+
+
 
 \end{document}
