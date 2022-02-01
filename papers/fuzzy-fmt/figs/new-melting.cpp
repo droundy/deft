@@ -84,11 +84,16 @@ struct weight {
   tensor3d nm_2;
 };
 
-static inline double density_gaussian(double r, double gwidth, double norm) {
-  return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
-}
+//static inline double density_gaussian(double r, double gwidth, double norm) {
+  //return norm*exp(-r*r*(0.5/(gwidth*gwidth)));
+//}
 
-static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, double alpha, double Xi) {
+//static inline double density_gaussian(double r, double gwidth) {              //new
+  //return (1/(uipow(sqrt(2*M_PI)*gwidth,3)))*exp(-r*r*(0.5/(gwidth*gwidth)));
+//}
+
+static inline weight find_weights_from_alpha_Xi(vector3d r, vector3d rp, 
+  double alpha, double Xi) {
   vector3d rdiff=r-rp;
   double rdiff_magnitude=rdiff.norm();
   weight w;
@@ -201,9 +206,11 @@ weight find_weighted_den_aboutR_mc_accurately(vector3d r, vector3d R,
   return n;
 }
 
-data find_energy_new(double temp, double reduced_density, double fv, double gwidth, char *data_dir, double dx_input, bool verbose=false) {
+data find_energy_new(double temp, double reduced_density, double fv, 
+  double gwidth, char *data_dir, double dx_input, bool verbose=false) {
   double start_time = time();
-  printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g, mc NUM_POINTS=%li\n", temp, reduced_density, fv, gwidth, dx_input, NUM_POINTS);  //debug
+  printf("\n\n#Running find_energy_new with values: temp=%g, reduced_density=%g, fv=%g, gwidth=%g, dx=%g, mc NUM_POINTS=%li\n", 
+      temp, reduced_density, fv, gwidth, dx_input, NUM_POINTS);  //debug
   //printf("\nCalculating many_cells...\n");
   double reduced_num_spheres = 1-fv; // number of spheres in one primitive cell based on input vacancy fraction fv
   double lattice_constant = find_lattice_constant(reduced_density, fv);
@@ -220,7 +227,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double primitive_cell_volume = lattice_vectors[0].cross(lattice_vectors[1]).dot(lattice_vectors[2]);
 
   double cFideal_of_primitive_cell=0;
-  double cpressure_ideal =0;
   {
     //Find inhomogeneous Fideal of one crystal primitive cell
     // scale our dx by w.
@@ -247,19 +253,12 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
     const double analytic_ideal_free_energy =
       (1-fv)*temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
                    - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2);
-    const double  analytic_ideal_mu = 
-       temp*(log((1-fv)*2.646476976618268e-6/sqrt(temp*temp*temp))
-                   - 3*log(sqrt(2*M_PI)*gwidth)- 5.0/2)+ temp;
     if (gwidth < 0.01*lattice_constant) {
       printf("gwidth is very small, so I'm trusting our analytic ideal free energy.\n");
       cFideal_of_primitive_cell = analytic_ideal_free_energy;
-      cpressure_ideal = analytic_ideal_mu*reduced_density - cFideal_of_primitive_cell; //CHECK!
       printf("analytic crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
-      printf("analytic crystal ideal pressure = %.12g\n",
-             cpressure_ideal);
-    } else {
-      double c_mu_ideal_times_vol= 0;
+     } else {
       for (int i=0; i<Nl; i++) {  //integrate over one primitive cell
         for (int j=0; j<Nl; j++) {
           for (int k=0; k<Nl; k++) {
@@ -281,18 +280,15 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
             if (n > 1e-200) { // Only use n values that are large enough - avoid underflow and n=0 issues ln(0)=ERROR
               // printf("n = %g  dF = %g\n", n, dF);
               cFideal_of_primitive_cell += kT*n*(log(n*2.646476976618268e-6/(sqrt(kT)*kT)) - 1.0)*dV;
-              c_mu_ideal_times_vol += kT*log(n*2.646476976618268e-6/(sqrt(kT)*kT))*dV;
+              //crystal_mu_ideal_times_prim_vol += kT*log(n*2.646476976618268e-6/(sqrt(kT)*kT))*dV; //the chem pot of an ideal gas is negative, 1 atom in primitive vol
             }
           }
         }
       }  //End inhomogeneous Fideal calculation
       printf("crystal ideal gas free energy per volume = %.12g\n",
              cFideal_of_primitive_cell/primitive_cell_volume);
-      printf("analytic ideal gas free energy per vol   = %g\n",
-             analytic_ideal_free_energy/primitive_cell_volume);
-      cpressure_ideal = (c_mu_ideal_times_vol/primitive_cell_volume)
-        *reduced_density-cFideal_of_primitive_cell/primitive_cell_volume;  //CHECK!
-      printf("crystal ideal pressure   = %g\n", cpressure_ideal ); //CHECK!
+      //printf("analytic ideal gas free energy per vol   = %g\n",
+             //analytic_ideal_free_energy/primitive_cell_volume);
     }
   }
 
@@ -326,7 +322,8 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double dV = da1.cross(da2).dot(da3); //volume of infinitesimal parallelpiped
 
   double cFexcess_of_primitive_cell=0;  //Crystal Excess Free Energy over one primitive cell
-  double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0, total_muV = 0, total_V = 0;
+  double mu_crystal=0;
+  double total_phi_1 = 0, total_phi_2 = 0, total_phi_3 = 0;
 
   const double max_distance_considered = radius_of_peak(gwidth, temp);
   const int many_cells = 2*max_distance_considered/lattice_constant+1;
@@ -338,6 +335,10 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   const double Xi = find_Xi(temp);
 
   double mean_n0 = 0, mean_n1 = 0, mean_n2 = 0, mean_n3 = 0;
+  double integrand_ideal_term;
+  double integrand_excess_term;
+  double mu_integrand;
+  
   for (int i=0; i<Nl; i++) {
     for (int j=0; j<Nl; j++) {
       for (int k=0; k<Nl; k++) {
@@ -347,11 +348,13 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         vector3d nv_1, nv_2;
         tensor3d nm_2;
         weight n_weight;
+        double n_of_r = 0;
 
         for (int t=-many_cells; t <=many_cells; t++) {
           for(int u=-many_cells; u<=many_cells; u++)  {
             for (int v=-many_cells; v<= many_cells; v++) {
               const vector3d R = t*lattice_vectors[0] + u*lattice_vectors[1] + v*lattice_vectors[2];
+              double deltar = (r-R).norm();
               if ((R-r).norm() < max_distance_considered) {
                 if (MC_ERROR == 0) {
                   n_weight=find_weighted_den_aboutR_mc(r, R, dx, temp,
@@ -373,15 +376,16 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
                 nv_1 +=n_weight.nv_1;
                 nv_2 +=n_weight.nv_2;
                 nm_2 += n_weight.nm_2;
-              }
+         
+              } 
+              n_of_r += (1-fv)*exp(-deltar*deltar*(0.5/(gwidth*gwidth)))/uipow(sqrt(2*M_PI)*gwidth,3);  
             }
           }
         }
 
         double phi_1 = -n_0*log(1.0-n_3);
         double phi_2 = (n_1*n_2 - nv_1.dot(nv_2))/(1-n_3);
-        double phi_3;
-        double mu_of_r;
+        double phi_3;       
         if (use_tensor_weight) {
           //double traceof_nm_2squared =  nm_2.x.x*nm_2.x.x +
                                         //nm_2.y.y*nm_2.y.y +
@@ -407,16 +411,6 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           phi_3 =( n_2*(uipow(n_2,2) - 3.0*nv_2.dot(nv_2)) + (9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))
             /(24*M_PI*uipow(1-n_3,2));         // Santos (2012) - yes
           //phi_3 = (nv_2.dot(nm_2.dot(nv_2))-n_2*nv_2.dot(nv_2) - traceof_nm_2cubed + n_2*traceof_nm_2squared)/((16/3.0)*M_PI*uipow(1.0-n_3,2));      // Sweatman, Groh & Schmidt  (2001) - same as Santos with different w_nm
-          mu_of_r = phi_1 + n_0*n_3/(1-n_3) +2*phi_2 + phi_2*n_3/(1-n_3)
-           +3*phi_3 + 2*phi_3*n_3/(1-n_3); //This is no longer u(r), but simplified integrands, keeping the name
-          //mu_of_r = -log(1-n_3)  //older - last term has error somewhere
-                    //+(M_PI*uipow(Xi,2)*alpha/2)*(n_0/(1-n_3))
-            //+(n_1*M_PI*(uipow(Xi,2)+uipow(alpha,2))+n_2*(alpha/2))/(1-n_3)
-            //+((n_1*n_2-nv_1.dot(nv_2))*(M_PI*uipow(Xi,2)*alpha/2))/uipow((1-n_3),2)
-            //+(n_2*(uipow(n_2,2) - 3*nv_2.dot(nv_2))+(9/2.0)*(nv_2.dot(nm_2.dot(nv_2)) - traceof_nm_2cubed))
-                    //*((uipow(Xi,2)*alpha)/(24*uipow((1-n_3),3)))
-            //+(1/(24*uipow((1-n_3),2)))*(3*uipow(n_2,2)*M_PI*(uipow(Xi,2)+uipow(alpha,2))
-                                        //-3*M_PI*(uipow(Xi,2)+uipow(alpha,2))*nv_2.dot(nv_2));
         } else {
           // The following was Rosenfelds early vector version of the functional
           //double phi_3 = (uipow(n_2,3) - 3*n_2*nv_2.normsquared())/(24*M_PI*uipow(1-n_3,2));
@@ -433,8 +427,14 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
           phi_1 = 0;
           phi_2 = 0;
           phi_3 = 0;
-          mu_of_r = 0;
+          mu_integrand = 0;
         }
+        
+        integrand_ideal_term = n_of_r*log(n_of_r*2.646476976618268e-6/sqrt(temp*temp*temp));
+        integrand_excess_term = phi_1 + n_0*n_3/(1-n_3)+2*phi_2 + phi_2*n_3/(1-n_3) +3*phi_3 + 2*phi_3*n_3/(1-n_3); 
+        mu_integrand = integrand_ideal_term + integrand_excess_term;
+        //printf("integrand_ideal_term = %g\n", integrand_ideal_term);   //For debug only - delete when working!
+        //printf("integrand_excess_term = %g\n", integrand_excess_term);   //For debug only - delete when working!
 
         mean_n0 += n_0*dV;
         mean_n1 += n_1*dV;
@@ -444,8 +444,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
         total_phi_2 += temp*phi_2*dV;
         total_phi_3 += temp*phi_3*dV;
         cFexcess_of_primitive_cell += temp*(phi_1 + phi_2 + phi_3)*dV;  //NOTE: temp is Bolatzman constant times temperature divided by epsilon (which is 1)
-        total_muV += temp*mu_of_r*dV;  // total mu = total_muV/total_V
-        total_V += dV;
+        mu_crystal += (temp/reduced_num_spheres)*mu_integrand*dV;       //integrating over 1 primitive cell
         if (isnan(cFexcess_of_primitive_cell)) {                        // temp is a reduced temperature given by t* in the paper
           printf("free energy is a NaN!\n");
           printf("position is: %g %g %g\n", r.x, r.y, r.z);
@@ -510,7 +509,7 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
          mean_n0, mean_n1, mean_n2, mean_n3);
   printf("homo n0 = %g, homo n1 = %g, homo n2 = %g, homo n3 = %g\n",
          hf.get_n0(), hf.get_n1(), hf.get_n2(), hf.get_n3());
-
+  
   double diff_n0=mean_n0- hf.get_n0();
   double diff_n1=mean_n1- hf.get_n1();
   double diff_n2=mean_n2- hf.get_n2();
@@ -549,7 +548,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   cfree_energy_per_atom=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/reduced_num_spheres; //Fideal is the total inhomogeneous ideal free energy for 1 primitive cell
   cfree_energy_per_vol=(cFideal_of_primitive_cell + cFexcess_of_primitive_cell)/primitive_cell_volume; //
   printf("primitive cell volume = %g\n", primitive_cell_volume); //
-  printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", lattice_constant*lattice_constant*lattice_constant, (lattice_constant*lattice_constant*lattice_constant)/4); //
+  printf("cubic cell volume = %g;   cubic cell volume/4= %g\n", 
+         lattice_constant*lattice_constant*lattice_constant, 
+        (lattice_constant*lattice_constant*lattice_constant)/4); //
   printf("             phi_1 per volume = %g\n", total_phi_1/primitive_cell_volume); //
   printf("             phi_2 per volume = %g\n", total_phi_2/primitive_cell_volume); //
   printf("             phi_3 per volume = %g\n", total_phi_3/primitive_cell_volume); //
@@ -564,13 +565,9 @@ data find_energy_new(double temp, double reduced_density, double fv, double gwid
   data_out.cfree_energy_per_atom=cfree_energy_per_atom;
   data_out.hfree_energy_per_vol=hfree_energy_per_vol;
   data_out.cfree_energy_per_vol=cfree_energy_per_vol;
-  //data_out.cpressure=(total_muV/(total_V)*reduced_density-cfree_energy_per_vol + cpressure_ideal; //  old
-  data_out.cpressure=(total_muV/(reduced_num_spheres*total_V))*reduced_density-cfree_energy_per_vol + cpressure_ideal; // P = un - F/V where u=kT/N int(simplified integrand terms dV)
-  //printf("\n\ncrystal excess pressure mu term = %g\n\n\n", (total_muV/total_V)*reduced_density);  //old
-  //printf("crystal excess pressure = %g\n", (total_muV/total_V)*reduced_density-cfree_energy_per_vol);  //old
-  printf("\n\ncrystal excess pressure mu term = %g\n\n\n", (total_muV/(reduced_num_spheres*total_V))*reduced_density);
-  printf("crystal excess pressure = %g\n", (total_muV/(reduced_num_spheres*total_V))*reduced_density-cfree_energy_per_vol);
+  data_out.cpressure = mu_crystal*reduced_density-cfree_energy_per_vol; // P = un - F/V where u=kT/N*int(simplified integrand terms dV)
   printf("crystal pressure = %g\n", data_out.cpressure);
+  printf("mu_crystal = %g\n", mu_crystal);  //For debug only - delete when working!
   data_out.hpressure=hpressure;
 
   printf("***Homogeneous free energy calculated analytically\n");
