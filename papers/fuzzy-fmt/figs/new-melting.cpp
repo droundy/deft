@@ -335,9 +335,9 @@ data find_energy_new(double temp, double reduced_density, double fv,
   const double Xi = find_Xi(temp);
 
   double mean_n0 = 0, mean_n1 = 0, mean_n2 = 0, mean_n3 = 0;
-  double integrand_ideal_term;
-  double integrand_excess_term;
-  double mu_integrand;
+  double integrand_ideal_term=0;
+  double integrand_excess_term=0;
+  double mu_integrand=0;
   
   for (int i=0; i<Nl; i++) {
     for (int j=0; j<Nl; j++) {
@@ -429,12 +429,14 @@ data find_energy_new(double temp, double reduced_density, double fv,
           phi_3 = 0;
           mu_integrand = 0;
         }
-        
+
         integrand_ideal_term = n_of_r*log(n_of_r*2.646476976618268e-6/sqrt(temp*temp*temp));
-        integrand_excess_term = phi_1 + n_0*n_3/(1-n_3)+2*phi_2 + phi_2*n_3/(1-n_3) +3*phi_3 + 2*phi_3*n_3/(1-n_3); 
-        mu_integrand = integrand_ideal_term + integrand_excess_term;
-        //printf("integrand_ideal_term = %g\n", integrand_ideal_term);   //For debug only - delete when working!
-        //printf("integrand_excess_term = %g\n", integrand_excess_term);   //For debug only - delete when working!
+        printf("integrand_ideal_term = %g\n", integrand_ideal_term);   //For debug only - delete when working!
+        integrand_excess_term = phi_1 + n_0*n_3/(1-n_3)+2*phi_2 + phi_2*n_3/(1-n_3) +3*phi_3 + 2*phi_3*n_3/(1-n_3);
+        printf("integrand_excess_term = %g\n", integrand_excess_term);   //For debug only - delete when working!
+        if (n_of_r > 1e-200) { // Only use n values that are large enough - avoid underflow and n=0 issues ln(0)=ERROR
+			mu_integrand = n_of_r*log(n_of_r*2.646476976618268e-6/sqrt(temp*temp*temp)) + integrand_excess_term;
+        }
 
         mean_n0 += n_0*dV;
         mean_n1 += n_1*dV;
