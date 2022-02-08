@@ -40,8 +40,12 @@ kT_in_plot = []
 kT_data = []
 density_data = []  # index corresponds to kT
 pressure_data = []  # index corresponds to kT
+density_data_nm = []  # index corresponds to kT
+pressure_data_nm = []  # index corresponds to kT
 
-our_kTs = (0.5, 1, 1.5, 2, 2.5, 3)
+#our_kTs = (0.5, 1, 1.5, 2, 2.5, 3)
+#our_kTs = (0.5, 2.8, 2.9, 3) #debug
+our_kTs = (0.5,3) #debug
 
 homogeneous_data = np.loadtxt('figs/homogeneous.dat')
 homogeneous_temperature = homogeneous_data[0, 1:]
@@ -56,19 +60,42 @@ for kT in our_kTs:
     invn = []
     hfe = []
     cfe = []
+    hpressure_nm = []
+    cpressure_nm = []
+    actual_pressure_nm = []
+    actual_density_nm = []
 
-    f = ('figs/crystal-data/kT-%.3f.dat' % kT)
+    #f = ('figs/crystal-data/kT-%.3f.dat' % kT)
+    f = ('figs/crystal-data/kT-%.3f-test.dat' % kT)    #debug
     data = np.loadtxt(f)
 
     n = data[:, 0]  # density
     invn = 1/n
     hfe = data[:, 1]  # homogeneous free energy/atom
     cfe = data[:, 2]  # crystal free energy/atom
+    hpressure_nm = data[:,3]
+    cpressure_nm = data[:,4]
 
     hfe = np.array(hfe)
     cfe = np.array(cfe)
     invn = np.array(invn)
     n = np.array(n)
+    
+    for i in range(len(n)):
+       if cfe[i] < hfe[i]:
+           pressure_nm=cpressure_nm[i]
+       if hfe[i] < cfe[i]:
+           pressure_nm=hpressure_nm[i] 
+       if hfe[i] == 0:     #debug only - delete when working
+           pressure_nm=0  #debug only - delete when working            
+       actual_pressure_nm.append(pressure_nm)
+       actual_density_nm.append(n[i])  
+                
+    actual_pressure_nm = np.array(actual_pressure_nm) 
+    actual_density_nm = np.array(actual_density_nm)
+       
+    #for i in range(len(n)):
+       #print(n[i], actual_pressure_nm[i])  #debug only - delete when working                
 
     functions = np.vstack((np.ones_like(invn),
                            invn**-1,
@@ -165,14 +192,23 @@ for kT in our_kTs:
         if cpressure[i] > p_inter:
             actual_pressure.append(cpressure[i])
             actual_density.append(1/mid_invn[i])
+    print('kT, actual density', kT, actual_density)        
     actual_pressure = np.array(actual_pressure)
     actual_density = np.array(actual_density)
-
+    
     # print (kT, p_inter, 1/invnh, 1/invnc)   #Use >> phase_diagram_data.dat (or phase_diagram_data-tensor.dat) to store data for reference
 
     kT_data.append(kT)  # holds all values of kT in a list
     density_data.append(actual_density)
     pressure_data.append(actual_pressure)
+    density_data_nm.append(actual_density_nm)
+    pressure_data_nm.append(actual_pressure_nm)
+
+print('density_data', density_data)
+print('density_data_nm', density_data_nm)
+
+print('density_data[0]', density_data[0])
+print('density_data_nm[0]', density_data_nm[0])
 
 n_homogeneous_at_freezing = np.array(n_homogeneous_at_freezing)
 n_crystal_at_freezing = np.array(n_crystal_at_freezing)
@@ -222,6 +258,9 @@ for i in range(len(kT_data)):
         # Plot P vs n  at constant kT
         plt.plot(density_data[i], pressure_data[i],
                  label=r'$T^*=%g$' % kT_data[i])
+        plt.plot(density_data_nm[i], pressure_data_nm[i], 
+                 label=r'$T^*=%gnm$' % kT_data[i])
+    
 plt.legend(loc='best')
 #plt.ylim(0, 26)
 #plt.ylim(0, 500)
