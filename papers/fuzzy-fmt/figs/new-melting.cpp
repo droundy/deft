@@ -433,7 +433,7 @@ data find_energy_new(double temp, double reduced_density, double fv,
           // printf("integrand_ideal_term = %g with n %g\n", integrand_ideal_term, n_of_r);   //For debug only - delete when working!
           integrand_excess_term = phi_1 + n_0*n_3/(1-n_3)+2*phi_2 + phi_2*n_3/(1-n_3) +3*phi_3 + 2*phi_3*n_3/(1-n_3);
           // printf("integrand_excess_term = %g with n3 %g and phi3 %g\n", integrand_excess_term, n_3, phi_3);   //For debug only - delete when working!
-          mu_integrand = n_of_r*log(n_of_r*2.646476976618268e-6/sqrt(temp*temp*temp)) + integrand_excess_term;
+          mu_integrand = integrand_ideal_term + integrand_excess_term;
         }
 
         mean_n0 += n_0*dV;
