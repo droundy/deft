@@ -258,7 +258,7 @@ for i in range(len(kT_data)):
         # Plot P vs n  at constant kT
         plt.plot(density_data[i], pressure_data[i],
                  label=r'$T^*=%g$' % kT_data[i])
-        plt.plot(density_data_nm[i], pressure_data_nm[i], 
+        plt.plot(density_data_nm[i], pressure_data_nm[i], '--',
                  label=r'$T^*=%gnm$' % kT_data[i])
     
 plt.legend(loc='best')
