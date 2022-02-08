@@ -44,8 +44,8 @@ density_data_nm = []  # index corresponds to kT
 pressure_data_nm = []  # index corresponds to kT
 
 #our_kTs = (0.5, 1, 1.5, 2, 2.5, 3)
-#our_kTs = (0.5, 2.8, 2.9, 3) #debug
-our_kTs = (0.5,3) #debug
+our_kTs = (0.5, 2.8, 2.9, 3) #debug
+#our_kTs = (0.5,3) #debug
 
 homogeneous_data = np.loadtxt('figs/homogeneous.dat')
 homogeneous_temperature = homogeneous_data[0, 1:]
