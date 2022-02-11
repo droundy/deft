@@ -570,7 +570,7 @@ data find_energy_new(double temp, double reduced_density, double fv,
   printf("mu_crystal = %g\n", mu_crystal);  //For debug only - delete when working!
   data_out.hpressure=hpressure;
 
-  printf("***Homogeneous free energy calculated analytically\n");
+  printf("-*-Homogeneous free energy calculated analytically\n");
 
   printf("data_out is: homFEperatom=%g, cryFEperatom=%g\n", hfree_energy_per_atom, data_out.cfree_energy_per_atom);
   printf("data_out is: homFEpervol=%g, cryFEpervol=%g\n", data_out.hfree_energy_per_vol, data_out.cfree_energy_per_vol);
@@ -587,9 +587,9 @@ data find_energy_new(double temp, double reduced_density, double fv,
     //sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.2f_gw%06.5f", //smaller gw for higher temps
             temp, reduced_density, fv, gwidth);
     if (use_tensor_weight)  {
-      sprintf(alldat_filename, "%s/%s-alldat_tensor.dat", data_dir, alldat_filedescriptor);
+      sprintf(alldat_filename, "%s/%s-seed%g-alldat_tensor.dat", data_dir, alldat_filedescriptor, seed);
     } else {
-      sprintf(alldat_filename, "%s/%s-alldat.dat", data_dir, alldat_filedescriptor);
+      sprintf(alldat_filename, "%s/%s-seed%g-alldat.dat", data_dir, alldat_filedescriptor, seed);
     }
     printf("Create data file: %s\n", alldat_filename);
 
@@ -829,9 +829,9 @@ int main(int argc, const char **argv) {
     //Create bestdataout filename (to be used if we are looping)
     char *bestdat_filename = new char[1024];
     if (use_tensor_weight)  {
-      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tensor.dat", data_dir, temp, reduced_density);
+      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_seed%g_best_tensor.dat", data_dir, temp, reduced_density, seed);
     } else {
-      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
+      sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_seed%g_best.dat", data_dir, temp, reduced_density, seed);
     }
 
   } else if (gw < 0) {
@@ -866,9 +866,9 @@ int main(int argc, const char **argv) {
   //Create bestdataout filename (to be used if we are looping)
   char *bestdat_filename = new char[1024];
   if (use_tensor_weight) {
-    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best_tensor.dat", data_dir, temp, reduced_density);
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_seed%g_best_tensor.dat", data_dir, temp, reduced_density, seed);
   } else {
-    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_best.dat", data_dir, temp, reduced_density);
+    sprintf(bestdat_filename, "%s/kT%05.3f_n%05.3f_seed%g_best.dat", data_dir, temp, reduced_density, seed);
   }
 
   //Create bestdataout file

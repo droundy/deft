@@ -6,10 +6,7 @@
 # specified within the program, and are not intended to be changed.
 # (Use compute-isotherm.py to run figs/new-melting.cpp for many different 
 # densities and temperatures that are not fixed to reproduce published data.)
-# ie. figs/new-melting.mkdat --kT 0.5 --n 1.06 --gwstart 0.01 --gwend 0.2 
-#    --gwstep 0.01 --fv 0 --dx 0.5 --seed 1 --mc-error 0.001 --mc-constant 5 
-#    --mc-prefactor 50000 --d data/phase-diagram 
-#    --filename isotherm-kT-0.5_tensor.dat
+# ie. figs/new-melting.mkdat --kT 3 --n 1.39 --gwstart 0.01 --gwend 0.2 --gwstep 0.01 --fv 0 --dx 0.5 --seed 1 --mc-error 0.001 --mc-constant 5 --mc-prefactor 50000 --d data/phase-diagram --filename nm-kT_3-n_1.39.dat
 
 # NOTE: Run this script from deft/papers/fuzzy-fmt
 #       with command ./figs/compute-phasediagram.py
@@ -22,7 +19,7 @@ import array as arr
 def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
                     mcerror=1e-3, mcconstant=5, mcprefactor=50000,
                     avoid_rq=False):
-    name = 'nm-kT_%g-n_%g' % (kT, n)
+    name = 'nm-kT_%g-n_%g_seed1' % (kT, n)
     cmd = 'rq run -J %s' % name
     if avoid_rq:
         cmd = ''
@@ -36,7 +33,9 @@ def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
     assert(os.system(cmd) == 0)
 
 #kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
-kTs = np.arange(0.5, 0.45, -0.1)  #trouble data points
+#kTs = np.arange(2.7, 0.05, -0.1)  #finish....then delete
+kTs = np.arange(3, 0.05, -2.5)  #finish....then delete
+#kTs = np.arange(0.5, 0.45, -0.1)  #trouble data points
 densities = np.arange(0.01, 1.53, 0.02)
 
 for kT in kTs:
@@ -48,10 +47,10 @@ for kT in kTs:
         #if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1.3:   #for small plot in paper
         if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1:    #trouble data points
 	    # We want high accuracy for this one!
-            #run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4) #for small plot in paper
-            run_new_melting(kT, n, gwstart=0.01, gwend=0.07, gwstep=0.01, mcerror=1e-4) #trouble data points
+            #run_new_melting(kT, n, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #for small plot in paper
+            run_new_melting(kT, n, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #trouble data points
             #print(kT, 1/n)
         else:
             pass # for now, skip these simulations that we already ran.
-            #run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
+            run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
 
