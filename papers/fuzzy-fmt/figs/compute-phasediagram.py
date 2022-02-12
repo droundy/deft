@@ -16,10 +16,10 @@ import os
 import argparse
 import array as arr
 
-def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=5,
+def run_new_melting(kT, n, gwstart, gwend, gwstep, fv=0, dx=0.5, seed=1,
                     mcerror=1e-3, mcconstant=5, mcprefactor=50000,
                     avoid_rq=False):
-    name = 'nm-kT_%g-n_%g_seed5' % (kT, n)
+    name = 'nm-kT_%g-n_%g_seed1' % (kT, n)
     cmd = 'rq run -J %s' % name
     if avoid_rq:
         cmd = ''
@@ -47,10 +47,8 @@ for kT in kTs:
         #if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1.3:   #for small plot in paper
         if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1:    #trouble data points
 	    # We want high accuracy for this one!
-            #run_new_melting(kT, n, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #for small plot in paper
             run_new_melting(kT, n, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #trouble data points
-            #print(kT, 1/n)
         else:
-            pass # for now, skip these simulations that we already ran.
+            #pass # for now, skip these simulations that we already ran.
             run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
 
