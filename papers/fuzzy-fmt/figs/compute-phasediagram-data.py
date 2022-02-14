@@ -34,7 +34,8 @@ for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
    hpressure_nm = []
    cpressure_nm = []
 
-   files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT))) 
+   #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
+   files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*seed1_best_tensor.dat' % kT)))  
 
    if len(files) == 0:
 	   continue
@@ -52,4 +53,4 @@ for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
    cpressure_nm = np.array(cpressure_nm)
    n = np.array(n)
    #np.savetxt('figs/crystal-data/kT-%.3f.dat' % kT, np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')
-   np.savetxt('figs/crystal-data/kT-%.3f-test.dat' % kT, np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')   #for debug only - delete when done
+   np.savetxt('figs/crystal-data/kT-%.3f-seed1.dat' % kT, np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')   #for debug only - delete when done
