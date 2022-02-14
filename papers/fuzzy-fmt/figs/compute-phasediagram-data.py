@@ -24,8 +24,9 @@ os.system('mkdir -p figs/crystal-data')
 kT_data = []
 density_data = []   #index corresponds to kT
 
-for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 
- 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3): #for paper
+for seed in (1, 2, 3, 4, 5):
+ for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 
+  1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3): #for paper
    
    n = []
    invn = []
@@ -35,7 +36,7 @@ for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
    cpressure_nm = []
 
    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
-   files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*seed1_best_tensor.dat' % kT)))  
+   files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*seed%g_best_tensor.dat' % (kT, seed))))  
 
    if len(files) == 0:
 	   continue
@@ -53,4 +54,4 @@ for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
    cpressure_nm = np.array(cpressure_nm)
    n = np.array(n)
    #np.savetxt('figs/crystal-data/kT-%.3f.dat' % kT, np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')
-   np.savetxt('figs/crystal-data/kT-%.3f-seed1.dat' % kT, np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')   #for debug only - delete when done
+   np.savetxt('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')  
