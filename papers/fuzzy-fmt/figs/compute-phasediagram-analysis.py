@@ -9,17 +9,37 @@
 # ie. figs/new-melting.mkdat --kT 3 --n 1.39 --gwstart 0.01 --gwend 0.2 --gwstep 0.01 --fv 0 --dx 0.5 --seed 1 --mc-error 0.001 --mc-constant 5 --mc-prefactor 50000 --d data/phase-diagram --filename nm-kT_3-n_1.39.dat
 
 # NOTE: Run this script from deft/papers/fuzzy-fmt
-#       with command ./figs/compute-phasediagram-analysis.py
+#       with command ./figs/compute-phasediagram-analysis.py  --kT [temp] --n [density]  --mcerror [1e-3]
 
 import numpy as np
 import os
 import argparse
 import array as arr
 
-def run_new_melting(kT, n, fv, seed, gwstart, gwend, gwstep, dx=0.5, 
-                    mcerror=1e-3, mcconstant=5, mcprefactor=50000,
+parser = argparse.ArgumentParser(description='Creates a plot of FEdiff vs gw specified temperature, density, and mcerror for a determined set of fraction of vacancies and seeds 1-5.')
+
+parser.add_argument('--kT', metavar='temperature', type=float,
+                    help='reduced temperature - REQUIRED')
+parser.add_argument('--n', metavar='density', type=float,
+                    help='reduced temperature - REQUIRED')
+parser.add_argument('--mcerror', metavar='temperature', type=float,
+                    help='reduced temperature - REQUIRED')
+
+args=parser.parse_args()
+
+kT=args.kT
+n=args.n
+mcerror=args.mcerror   
+
+if mcerror == 1e-3:
+   directory_name='mcerr3'
+if mcerror == 1e-4:
+   directory_name='mcerr4'               
+
+def run_new_melting(kT, n, fv, seed, mcerror, gwstart, gwend, gwstep, dx=0.5, 
+                    mcconstant=5, mcprefactor=50000,
                     avoid_rq=False):
-    name = 'nm-kT_%g-n_%g_fv_%g_mcerr4_seed%g' % (kT, n, fv, seed)    
+    name = 'nm-kT_%g-n_%g_fv_%g_%s_seed%g' % (kT, n, fv, directory_name, seed)    
     cmd = 'rq run -J %s' % name
     if avoid_rq:
         cmd = ''
@@ -27,22 +47,18 @@ def run_new_melting(kT, n, fv, seed, gwstart, gwend, gwstep, dx=0.5,
     cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwstart, gwend, gwstep)
     cmd += ' --fv %g --dx %g --seed %g' % (fv, dx, seed)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
-    cmd += ' --d data/phase-diagram-test-mcerr4'
+    cmd += ' --d data/phase-diagram-test-%s'  % (directory_name)
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
     
-#kTs = np.arange(3, 0.05, -2.5)    #only do kT=3 and kT=0.5
-#kTs = np.arange(3, 0.05, -3.5)    #only do kT=3
-kTs = np.arange(0.5, 0.45, -0.1)  #only do kT=0.5
-densities = np.arange(1.01, 1.12, 0.06)  #only do n=1.01 and n=1.07
 fvs = (0, 1e-1, 1e-2, 1e-3, 1e-4)
 seeds = (1, 2, 3, 4, 5)
 
 for seed in seeds:
  for fv in fvs:
-  for kT in kTs:
-    for n in densities:
+  #for kT in kTs:
+    #for n in densities:
         # It seems that for low temperature and high density we need to run a more
         # accurate and precise Monte Carlo, otherwise we end up seeing n_3 > 1 and get
         # NaNs.
@@ -52,5 +68,5 @@ for seed in seeds:
         #else:
             #pass # for now, skip these simulations that we already ran.
             #run_new_melting(kT, n, fv, seed, gwstart=0.01, gwend=0.2, gwstep=0.01)
-            run_new_melting(kT, n, fv, seed, gwstart=0.01, gwend=0.2, gwstep=0.01, mcerror=1e-4)
+            run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.2, gwstep=0.01)
 
