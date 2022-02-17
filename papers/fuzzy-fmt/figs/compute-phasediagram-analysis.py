@@ -19,7 +19,7 @@ import array as arr
 def run_new_melting(kT, n, fv, seed, gwstart, gwend, gwstep, dx=0.5, 
                     mcerror=1e-3, mcconstant=5, mcprefactor=50000,
                     avoid_rq=False):
-    name = 'nm-kT_%g-n_%g_fv_%g_mcerr3_seed%g' % (kT, n, fv, seed)    
+    name = 'nm-kT_%g-n_%g_fv_%g_mcerr4_seed%g' % (kT, n, fv, seed)    
     cmd = 'rq run -J %s' % name
     if avoid_rq:
         cmd = ''
@@ -27,7 +27,7 @@ def run_new_melting(kT, n, fv, seed, gwstart, gwend, gwstep, dx=0.5,
     cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwstart, gwend, gwstep)
     cmd += ' --fv %g --dx %g --seed %g' % (fv, dx, seed)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
-    cmd += ' --d data/phase-diagram-test-mcerr3'
+    cmd += ' --d data/phase-diagram-test-mcerr4'
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
@@ -51,6 +51,6 @@ for seed in seeds:
             #run_new_melting(kT, n, fv, seed, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #trouble data points           
         #else:
             #pass # for now, skip these simulations that we already ran.
-            run_new_melting(kT, n, fv, seed, gwstart=0.01, gwend=0.2, gwstep=0.01)
-            #run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01, mcerror=1e-4)
+            #run_new_melting(kT, n, fv, seed, gwstart=0.01, gwend=0.2, gwstep=0.01)
+            run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01, mcerror=1e-4)
 
