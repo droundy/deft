@@ -9,7 +9,7 @@
 # ie. figs/new-melting.mkdat --kT 3 --n 1.39 --gwstart 0.01 --gwend 0.2 --gwstep 0.01 --fv 0 --dx 0.5 --seed 1 --mc-error 0.001 --mc-constant 5 --mc-prefactor 50000 --d data/phase-diagram --filename nm-kT_3-n_1.39.dat
 
 # NOTE: Run this script from deft/papers/fuzzy-fmt
-#       with command ./figs/compute-phasediagram-analysis.py  --kT [temp] --n [density]  --mcerror [1e-3]
+#       with command ./figs/compute-phasediagram-analysis.py  --kT [temp] --n [density]  --mcerror [1e-3 or 1e-4]
 
 import numpy as np
 import os
