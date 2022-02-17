@@ -22,8 +22,8 @@ parser.add_argument('--kT', metavar='temperature', type=float,
                     help='reduced temperature - REQUIRED')
 parser.add_argument('--n', metavar='density', type=float,
                     help='reduced temperature - REQUIRED')
-parser.add_argument('--mcerror', metavar='temperature', type=float,
-                    help='reduced temperature - REQUIRED')
+parser.add_argument('--mcerror', metavar='mcerror', type=float,
+                    help='enter 1e-3 or 1e-4 - REQUIRED')
 
 args=parser.parse_args()
 
