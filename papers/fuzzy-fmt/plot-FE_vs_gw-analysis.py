@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-parser = argparse.ArgumentParser(description='Creates a plot of FEdiff vs gw at a specified temperature, density, and fraction of vacancies.')
+parser = argparse.ArgumentParser(description='Creates a plot of FEdiff vs gw at a specified temperature, density, and one or more fraction of vacancies for five seeds.')
 
 parser.add_argument('--kT', metavar='temperature', type=float, required=True,
                     help='reduced temperature - REQUIRED')
