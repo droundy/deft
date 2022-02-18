@@ -33,6 +33,8 @@ parser.add_argument('--fv', metavar='fraction of vacancies', type=float,
                     help='fv - OPTIONAL enter 0, 1e-1, 1e-2, 1e-3, or 1e-4')
 parser.add_argument('directory', metavar='directory', type=str,
                     help='directory with data to plot ie. data/phase-diagram-test-mcerr3 or data/phase-diagram-test-mcerr4') 
+parser.add_argument('show', metavar='pltshow', type=str,
+                    help='show plot') 
 
 args=parser.parse_args()
 
