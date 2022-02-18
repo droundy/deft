@@ -10,6 +10,7 @@
 
 # NOTE: Run this script from deft/papers/fuzzy-fmt
 #       with command ./figs/compute-phasediagram-analysis.py  --kT [temp] --n [density]  --mcerror [1e-3 or 1e-4]
+#ie.    ./figs/compute-phasediagram-analysis.py  --kT 0.5 --n 1.07  --mcerror 1e-3
 
 import numpy as np
 import os
