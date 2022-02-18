@@ -64,9 +64,16 @@ if doallfvs == 1:
         plt.plot(gw, fe_difference, '.-', color='red')
         #plt.plot(gw, fe_difference, '.-', label='fv=%g seed%g' % (fv, seed))
       mcerror= data[12]	
+ plt.plot([],[], color='blue', label='fv=0.1 or 1e-1')
+ plt.plot([],[], color='green', label='fv=0.01 or 1e-2')
+ plt.plot([],[], color='purple', label='fv=0.001 or 1e-3')
+ plt.plot([],[], color='orange', label='fv=0.0001 or 1e-4')
+ plt.plot([],[], color='red', label='fv=0')
+ plt.plot([],[], color='white', label='5 seeds for each fv')
+ 
         	
 if doallfvs == 0:	
-  for seed in seeds:
+ for seed in seeds:
     gw = []
     fe_difference = []  
     files = sorted(list(glob.glob('%s/kT%.3f_n%.3f_fv%.6f*seed%g-alldat_tensor.dat' % (args.directory, kT, n, fv, seed)))) 
@@ -85,16 +92,6 @@ if doallfvs == 0:
       if seed == 5:
         plt.plot(gw, fe_difference, '.-', color='red')
       mcerror= data[12]	
-    
-if doallfvs==1:
- plt.plot([],[], color='blue', label='fv=0.1 or 1e-1')
- plt.plot([],[], color='green', label='fv=0.01 or 1e-2')
- plt.plot([],[], color='purple', label='fv=0.001 or 1e-3')
- plt.plot([],[], color='orange', label='fv=0.0001 or 1e-4')
- plt.plot([],[], color='red', label='fv=0')
- plt.plot([],[], color='white', label='5 seeds for each fv')
- 
-if doallfvs == 0:
  plt.plot([],[], color='white', label='fv=%g' % (fv))
  plt.plot([],[], color='blue', label='seed1')
  plt.plot([],[], color='green', label='seed2')
