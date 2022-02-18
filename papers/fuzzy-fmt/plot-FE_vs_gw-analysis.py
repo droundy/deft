@@ -1,16 +1,21 @@
 #!/usr/bin/python3
 
 #This program creates a plot of Free Energy difference vs gw at a specified 
-#temperature and density from data in kT*n*alldat.dat (or kT*n*alldat_tensor.dat) files
-#which are generated as output data files by figs/new-melting.cpp
+#temperature and density from data in kT*n*alldat.dat (or kT*n*alldat_tensor.dat) 
+#files which are generated as output data files by figs/new-melting.cpp
 #The program compute-phasediagram-analysis.py is used to run new-melting 
 #for various temperatures and densities.
+#There are 2 plot options: 
+#Plot option #1: FEdiff-vs-gw for a set of fv values with 5 seeds each (default)
+#ie:  ./plot-FE_vs_gw-analysis.py --kT 0.5 --n 1.05 data/phase-diagram-test-mcerr3
+#Plot option #2: FEdiff-vs-gw for one fv value with 5 seeds
+#ie:  ./plot-FE_vs_gw-analysis.py --kT 0.5 --n 1.05 --fv 0 data/phase-diagram-test-mcerr3
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
 #with comand ./plot-FE_vs_gw-analysis.py --kT [temp] --n [density] 
 #                 --fv [OPTIONAL: enter 0, 1e-1, 1e-2, 1e-3, or 1e-4]  
 #                 directory [data/phase-diagram-test-mcerr3]
-#ie:  ./plot-FE_vs_gw-analysis.py --kT 0.5 --n 1.05 data/phase-diagram-test-mcerr3
+
 
 import os, glob
 import argparse
