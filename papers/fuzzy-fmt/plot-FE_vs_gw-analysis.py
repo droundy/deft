@@ -5,7 +5,9 @@
 #which are generated as output data files by figs/new-melting.cpp
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
-#with comand ./plot-FE_vs_gw-analysis.py --kT [temp] --n [density] --fv [OPTIONAL: enter 0, 1e-1, 1e-2, 1e-3, or 1e-4]  directory [data/phase-diagram-test-mcerr3]
+#with comand ./plot-FE_vs_gw-analysis.py --kT [temp] --n [density] 
+#                 --fv [OPTIONAL: enter 0, 1e-1, 1e-2, 1e-3, or 1e-4]  
+#                 directory [data/phase-diagram-test-mcerr3]
 
 import os, glob
 import argparse
