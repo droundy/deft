@@ -108,7 +108,10 @@ plt.title('Free Energy difference vs gw  for kT=%g, n=%g, mcerror=%g' % (kT, n, 
 plt.ylabel('FEdiff')
 plt.xlabel('gw')
 
-plt.savefig('./figs/FE-vs-gw_kT%g_n%g_mcerror%g.pdf' % (kT, n, mcerror), transparent=True)
+if doallfvs==1:
+  plt.savefig('./figs/FE-vs-gw_kT%g_n%g_mcerror%g.pdf' % (kT, n, mcerror), transparent=True)
+if doallfvs==0:
+  plt.savefig('./figs/FE-vs-gw_kT%g_n%g_fv_%g_mcerror%g.pdf' % (kT, n, fv, mcerror), transparent=True)
 
 plt.show()
 
