@@ -9,12 +9,12 @@
 #Plot option #1: FEdiff-vs-gw for a set of fv values with 5 seeds each (default)
 #ie:  ./plot-FE_vs_gw-analysis.py --kT 0.5 --n 1.05 data/phase-diagram-test-mcerr3
 #Plot option #2: FEdiff-vs-gw for one fv value with 5 seeds
-#ie:  ./plot-FE_vs_gw-analysis.py --kT 0.5 --n 1.05 --fv 0 data/phase-diagram-test-mcerr3
+#ie:  ./plot-FE_vs_gw-analysis.py --kT 0.5 --n 1.07 --fv 0 data/phase-diagram-test-mcerr3
 
 #NOTE: Run this plot script from directory deft/papers/fuzzy-fmt 
 #with comand ./plot-FE_vs_gw-analysis.py --kT [temp] --n [density] 
 #                 --fv [OPTIONAL: enter 0, 1e-1, 1e-2, 1e-3, or 1e-4]  
-#                 directory [data/phase-diagram-test-mcerr3]
+#                 directory [data/phase-diagram-test-mcerr3]  [show (to show plots)]
 
 
 import os, glob
@@ -118,6 +118,8 @@ if doallfvs==1:
 if doallfvs==0:
   plt.savefig('./figs/FE-vs-gw_kT%g_n%g_fv_%g_mcerror%g.pdf' % (kT, n, fv, mcerror), transparent=True)
 
-plt.show()
+if 'show' in sys.argv:
+    plt.show()
+
 
 
