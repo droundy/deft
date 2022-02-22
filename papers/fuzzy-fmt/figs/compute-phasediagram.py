@@ -52,6 +52,6 @@ for seed in seeds:
             run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #trouble data points
         else:
             #pass # for now, skip these simulations that we already ran.
-            #run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01)
-            run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01, mcerror=1e-4)
+            run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01)
+            #run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01, mcerror=1e-4)
 
