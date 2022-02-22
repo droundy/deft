@@ -50,6 +50,7 @@ else:
 fvs=(1e-1, 1e-2, 1e-3, 1e-4, 0)
 seeds=(1,2,3,4,5)
 
+#Plots all seeds for all fvs:
 if doallfvs == 1:
  for fv in fvs:
   for seed in seeds:
@@ -79,7 +80,7 @@ if doallfvs == 1:
  plt.plot([],[], color='red', label='fv=0')
  plt.plot([],[], color='white', label='5 seeds for each fv')
  
-        	
+#Plots all seeds at one fv:
 if doallfvs == 0:	
  for seed in seeds:
     gw = []
