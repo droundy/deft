@@ -299,109 +299,99 @@ for seed in seeds:
    n_homogeneous_at_freezing_seed5 = np.array(n_homogeneous_at_freezing_seed5)
    n_crystal_at_freezing_seed5 = np.array(n_crystal_at_freezing_seed5)
    p_at_freezing_seed5 = np.array(p_at_freezing_seed5)
-  if seed ==6:      
-   n_homogeneous_at_freezing_seed6 = np.array(n_homogeneous_at_freezing_seed6)
-   n_crystal_at_freezing_seed6 = np.array(n_crystal_at_freezing_seed6)
-   p_at_freezing_seed6 = np.array(p_at_freezing_seed6)
+  # if seed ==6:
+   # n_homogeneous_at_freezing_seed6 = np.array(n_homogeneous_at_freezing_seed6)
+   # n_crystal_at_freezing_seed6 = np.array(n_crystal_at_freezing_seed6)
+   # p_at_freezing_seed6 = np.array(p_at_freezing_seed6)
 
 # Plot P vs n  at constant kT
 plt.figure('p vs n', figsize=myfigsize)
 plt.fill_betweenx(p_at_freezing_seed1, n_homogeneous_at_freezing_seed1,
                   n_crystal_at_freezing_seed1, color='#eeeeee')
-i=0  #kT=0.5   
-#i=1  #kT=3               
+i=0  #kT=0.5
 for seed in seeds:
- if seed ==1: 
+ #print pressure data for kT=0.5 from differential for all seeds:
+ if seed ==1:
             plt.plot(density_data_seed1[i], pressure_data_seed1[i], color='red',
-                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed1[i], seed))      
+                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed1[i], seed))
  if seed ==2:
             plt.plot(density_data_seed2[i], pressure_data_seed2[i], color='green',
-                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed2[i], seed))           
- if seed ==3:		 	  
+                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed2[i], seed))
+ if seed ==3:
             plt.plot(density_data_seed3[i], pressure_data_seed3[i], color='blue',
-                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed3[i], seed))              
- if seed ==4:	
+                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed3[i], seed))
+ if seed ==4:
             plt.plot(density_data_seed4[i], pressure_data_seed4[i], color='orange',
-                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed4[i], seed))           
- if seed ==5:  
+                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed4[i], seed))
+ if seed ==5:
             plt.plot(density_data_seed5[i], pressure_data_seed5[i], color='brown',
                  label=r'$T^*=%g$~~seed%g' % (kT_data_seed5[i], seed))
- # if seed ==6:  
-            # plt.plot(density_data_seed5[i], pressure_data_seed5[i], color='black',
-                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed5[i], seed))
+ # if seed ==6:  #not really seed=6, rather, seed=1 at higher accuracy!
+            # plt.plot(density_data_seed6[i], pressure_data_seed6[i], color='black',
+                 # label=r'$T^*=%g$~~seed1 at mcerr4' % (kT_data_seed6[i]))
                  
-#i=0  #kT=0.5   
-i=1  #kT=3               
-for seed in seeds:
- if seed ==1: 
-            plt.plot(density_data_seed1[i], pressure_data_seed1[i], color='red',
-                 label=r'$T^*=%g$~~seed%g' % (kT_data_seed1[i], seed))      
- # if seed ==2:	  
-            # plt.plot(density_data_seed2[i], pressure_data_seed2[i], color='green',
-                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed2[i], seed))           
- # if seed ==3:		 	  
-            # plt.plot(density_data_seed3[i], pressure_data_seed3[i], color='blue',
-                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed3[i], seed))              
- # if seed ==4:	
-            # plt.plot(density_data_seed4[i], pressure_data_seed4[i], color='orange',
-                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed4[i], seed))           
- # if seed ==5:  
-            # plt.plot(density_data_seed5[i], pressure_data_seed5[i], color='brown',
-                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed5[i], seed))
- # if seed ==6:  
-            # plt.plot(density_data_seed5[i], pressure_data_seed5[i], color='black',
-                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed5[i], seed))
- 
- # if seed ==1: 
+ # #print pressure data for kT=0.5 from new-melting for all seeds:
+ # if seed ==1:
             # plt.plot(density_data_nm_seed1[i], pressure_data_nm_seed1[i], '--', color='red',
-                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed1[i], seed))                 
- # # if seed ==2:	  
-            # # plt.plot(density_data_nm_seed2[i], pressure_data_nm_seed2[i], '--', color='green',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed2[i], seed))
- # # if seed ==3:		 	  
-            # # plt.plot(density_data_nm_seed3[i], pressure_data_nm_seed3[i], '--', color='blue',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed3[i], seed))                 
- # # if seed ==4:	
-            # # plt.plot(density_data_nm_seed4[i], pressure_data_nm_seed4[i], '--', color='orange',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed4[i], seed))                 
- # # if seed ==5:  
-            # # plt.plot(density_data_nm_seed5[i], pressure_data_nm_seed5[i], '--', color='brown',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed5[i], seed))
- # if seed ==6:  
-            # plt.plot(density_data_nm_seed5[i], pressure_data_nm_seed5[i], '--', color='black',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed1[i], seed))
+ # if seed ==2:
+            # plt.plot(density_data_nm_seed2[i], pressure_data_nm_seed2[i], '--', color='green',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed2[i], seed))
+ # if seed ==3:
+            # plt.plot(density_data_nm_seed3[i], pressure_data_nm_seed3[i], '--', color='blue',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed3[i], seed))
+ # if seed ==4:
+            # plt.plot(density_data_nm_seed4[i], pressure_data_nm_seed4[i], '--', color='orange',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed4[i], seed))
+ # if seed ==5:
+            # plt.plot(density_data_nm_seed5[i], pressure_data_nm_seed5[i], '--', color='brown',
                  # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed5[i], seed))
+ # # if seed ==6:   #not really seed=6, rather, seed=1 at higher accuracy!
+            # # plt.plot(density_data_nm_seed6[i], pressure_data_nm_seed6[i], '--', color='black',
+                 # # label=r'$T^*=%gnm$~~seed1 at mcerr4' % (kT_data_seed6[i]))
 
-# # if seed ==1: 
-            # # plt.plot(density_data_seed1[i], pressure_data_seed1[i], color='red',
-                 # # label=r'$T^*=%g$~~seed%g' % (kT_data_seed1[i], seed))
-            # # plt.plot(density_data_nm_seed1[i], pressure_data_nm_seed1[i], '--', color='red',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed1[i], seed))                 
- # # if seed ==2:	  
-            # # plt.plot(density_data_seed2[i], pressure_data_seed2[i], color='green',
-                 # # label=r'$T^*=%g$~~seed%g' % (kT_data_seed2[i], seed))
-            # # plt.plot(density_data_nm_seed2[i], pressure_data_nm_seed2[i], '--', color='green',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed2[i], seed))
- # # if seed ==3:		 	  
-            # # plt.plot(density_data_seed3[i], pressure_data_seed3[i], color='blue',
-                 # # label=r'$T^*=%g$~~seed%g' % (kT_data_seed3[i], seed))
-            # # plt.plot(density_data_nm_seed3[i], pressure_data_nm_seed3[i], '--', color='blue',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed3[i], seed))                 
- # # if seed ==4:	
-            # # plt.plot(density_data_seed4[i], pressure_data_seed4[i], color='orange',
-                 # # label=r'$T^*=%g$~~seed%g' % (kT_data_seed4[i], seed))
-            # # plt.plot(density_data_nm_seed4[i], pressure_data_nm_seed4[i], '--', color='orange',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed4[i], seed))                 
- # # if seed ==5:  
-            # # plt.plot(density_data_seed5[i], pressure_data_seed5[i], color='brown',
-                 # # label=r'$T^*=%g$~~seed%g' % (kT_data_seed5[i], seed))
-            # # plt.plot(density_data_nm_seed5[i], pressure_data_nm_seed5[i], '--', color='brown',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed5[i], seed))
+# i=1  #kT=3
+# for seed in seeds:
+ # #print pressure data for kT=3 from differential for all seeds:
+ # if seed ==1:
+            # plt.plot(density_data_seed1[i], pressure_data_seed1[i], color='purple',
+                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed1[i], seed))
+ # if seed ==2:
+            # plt.plot(density_data_seed2[i], pressure_data_seed2[i], color='xkcd:forest green',
+                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed2[i], seed))
+ # if seed ==3:
+            # plt.plot(density_data_seed3[i], pressure_data_seed3[i], color='xkcd:dark blue',
+                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed3[i], seed))
+ # if seed ==4:
+            # plt.plot(density_data_seed4[i], pressure_data_seed4[i], color='xkcd:hot pink',
+                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed4[i], seed))
+ # if seed ==5:
+            # plt.plot(density_data_seed5[i], pressure_data_seed5[i], color='xkcd:magenta',
+                 # label=r'$T^*=%g$~~seed%g' % (kT_data_seed5[i], seed))
+ # # if seed ==6:   #not really seed=6, rather, seed=1 at higher accuracy!
+            # # plt.plot(density_data_seed6[i], pressure_data_seed6[i], color='black',
+                 # # label=r'$T^*=%g$~~seed1 at mcerr4' % (kT_data_seed6[i]))
                  
-      # # if i==1:          
-          # # plt.plot(density_data[i], pressure_data[i], color='blue',
-                 # # label=r'$T^*=%g$~~seed%g' % (kT_data[i], seed))
-          # # plt.plot(density_data_nm[i], pressure_data_nm[i], '--', color='blue',
-                 # # label=r'$T^*=%gnm$~~seed%g' % (kT_data[i], seed))
+
+ # #print pressure data for kT=3 from new-melting for all seeds:
+ # if seed ==1:
+            # plt.plot(density_data_nm_seed1[i], pressure_data_nm_seed1[i], '--', color='purple',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed1[i], seed))
+ # if seed ==2:
+            # plt.plot(density_data_nm_seed2[i], pressure_data_nm_seed2[i], '--', color='xkcd:forest green',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed2[i], seed))
+ # if seed ==3:
+            # plt.plot(density_data_nm_seed3[i], pressure_data_nm_seed3[i], '--', color='xkcd:dark blue',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed3[i], seed))
+ # if seed ==4:
+            # plt.plot(density_data_nm_seed4[i], pressure_data_nm_seed4[i], '--', color='xkcd:hot pink',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed4[i], seed))
+ # if seed ==5:
+            # plt.plot(density_data_nm_seed5[i], pressure_data_nm_seed5[i], '--', color='xkcd:magenta',
+                 # label=r'$T^*=%gnm$~~seed%g' % (kT_data_seed5[i], seed))
+ # # if seed ==6:   #not really seed=6, rather, seed=1 at higher accuracy!
+            # # plt.plot(density_data_nm_seed6[i], pressure_data_nm_seed6[i], '--', color='black',
+                 # # label=r'$T^*=%gnm$~~seed1 at mcerr4' % (kT_data_seed6[i]))
     
 plt.legend(loc='best')
 plt.ylim(0, 45)
