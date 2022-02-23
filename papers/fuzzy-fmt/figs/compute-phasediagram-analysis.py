@@ -69,5 +69,5 @@ for seed in seeds:
         #else:
             #pass # for now, skip these simulations that we already ran.
             #run_new_melting(kT, n, fv, seed, gwstart=0.01, gwend=0.2, gwstep=0.01)
-            run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.2, gwstep=0.01)
-
+            run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.13, gwstep=0.01)  #for smaller densities can stop at lower gw
+            #run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.2, gwstep=0.01)  #goes to higher gw (default)
