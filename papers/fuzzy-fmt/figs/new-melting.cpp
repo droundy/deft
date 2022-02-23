@@ -583,8 +583,8 @@ data find_energy_new(double temp, double reduced_density, double fv,
     // Create all output data filename
     char *alldat_filename = new char[1024];
     char *alldat_filedescriptor = new char[1024];
-    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.6f_gw%04.3f", 
-    //sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.6f_gw%06.5f", //smaller gw for higher temps
+    sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.9f_gw%04.3f", 
+    //sprintf(alldat_filedescriptor, "kT%5.3f_n%05.3f_fv%04.9f_gw%06.5f", //smaller gw for higher temps
             temp, reduced_density, fv, gwidth);
     if (use_tensor_weight)  {
       sprintf(alldat_filename, "%s/%s-seed%g-alldat_tensor.dat", data_dir, alldat_filedescriptor, seed);
