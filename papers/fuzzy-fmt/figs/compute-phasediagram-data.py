@@ -32,8 +32,8 @@ for seed in (1, 2, 3, 4, 5):
    invn = []
    hfe = []
    cfe = []
-   hpressure_nm = []
-   cpressure_nm = []
+   #nm#hpressure_nm = []
+   #nm#cpressure_nm = []
 
    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
    files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*seed%g_best_tensor.dat' % (kT, seed))))  
@@ -46,12 +46,13 @@ for seed in (1, 2, 3, 4, 5):
       invn.append(1/data[1])
       hfe.append(data[4])   #homogeneous free energy/atom
       cfe.append(data[5])   #crystal free energy/atom
-      hpressure_nm.append(data[17])
-      cpressure_nm.append(data[18])
+      #nm#hpressure_nm.append(data[17])
+      #nm#cpressure_nm.append(data[18])
    hfe = np.array(hfe)
    cfe = np.array(cfe)
-   hpressure_nm = np.array(hpressure_nm)
-   cpressure_nm = np.array(cpressure_nm)
+   #nm#hpressure_nm = np.array(hpressure_nm)
+   #nm#cpressure_nm = np.array(cpressure_nm)
    n = np.array(n)
    #np.savetxt('figs/crystal-data/kT-%.3f.dat' % kT, np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')
-   np.savetxt('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')  
+   #nm#np.savetxt('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')  
+   np.savetxt('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe), axis=1), fmt='%.6g')  
