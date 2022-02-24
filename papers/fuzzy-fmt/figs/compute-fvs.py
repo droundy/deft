@@ -9,7 +9,7 @@
 # ie. figs/new-melting.mkdat --kT 3 --n 1.39 --gwstart 0.01 --gwend 0.2 --gwstep 0.01 --fv 0 --dx 0.5 --seed 1 --mc-error 0.001 --mc-constant 5 --mc-prefactor 50000 --d data/phase-diagram --filename nm-kT_3-n_1.39.dat
 
 # NOTE: Run this script from deft/papers/fuzzy-fmt
-#       with command ./figs/compute-phasediagram-analysis.py  --kT [temp] --n [density]  --mcerror [1e-3 or 1e-4]
+#       with command ./figs/compute-fvs.py  --kT [temp] --n [density]  --mcerror [1e-3 or 1e-4]
 #ie.    ./figs/compute-fvs.py  --kT 0.5 --n 1.07  --mcerror 1e-3
 
 import numpy as np
@@ -58,5 +58,6 @@ seeds = (1, 2, 3, 4, 5)
 
 for seed in seeds:
  for fv in fvs:
-     run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.05, gwstep=0.04)  
+     run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.05, gwstep=0.04) 
+     run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.04, gwend=0.1, gwstep=0.04)  
            
