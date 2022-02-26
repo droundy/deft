@@ -16,10 +16,10 @@ import os
 import argparse
 import array as arr
 
-def run_new_melting(kT, n, seed, gwstart, gwend, gwstep, fv=0, dx=0.5, 
+def run_new_melting(kT, n, seed, gwstart, gwend, gwstep, fv=1e-4, dx=0.5, 
                     mcerror=1e-3, mcconstant=5, mcprefactor=50000,
                     avoid_rq=False):
-    name = 'nm-kT_%g-n_%g_mcerr4_seed%g' % (kT, n, seed)    
+    name = 'nm-kT_%g-n_%g_fv1e-4_seed%g' % (kT, n, seed)    
     cmd = 'rq run -J %s' % name
     if avoid_rq:
         cmd = ''
@@ -27,14 +27,14 @@ def run_new_melting(kT, n, seed, gwstart, gwend, gwstep, fv=0, dx=0.5,
     cmd += ' --gwstart %g --gwend %g --gwstep %g' % (gwstart, gwend, gwstep)
     cmd += ' --fv %g --dx %g --seed %g' % (fv, dx, seed)
     cmd += ' --mc-error %g --mc-constant %g --mc-prefactor %g' % (mcerror, mcconstant, mcprefactor)
-    cmd += ' --d data/phase-diagram_mcerr4'
+    cmd += ' --d data/phase-diagram_fv1e-4'
     cmd += ' --filename %s.dat' % name
     print(cmd)
     assert(os.system(cmd) == 0)
 
 #kTs = np.arange(3, 0.05, -0.1)  #for small plot in paper
-kTs = np.arange(3, 0.05, -3.5)  #only do kT=3
-#kTs = np.arange(3, 0.05, -2.5)  #only do kT=3 and kT=0.5
+#kTs = np.arange(3, 0.05, -3.5)  #only do kT=3
+kTs = np.arange(3, 0.05, -2.5)  #only do kT=3 and kT=0.5
 #kTs = np.arange(0.5, 0.45, -0.1)  #trouble data points
 densities = np.arange(0.01, 1.53, 0.02)
 seeds = (1, 2, 3, 4, 5)
