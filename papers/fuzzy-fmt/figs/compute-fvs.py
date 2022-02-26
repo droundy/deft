@@ -58,6 +58,5 @@ seeds = (1, 2, 3, 4, 5)
 
 for seed in seeds:
  for fv in fvs:
-     run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.05, gwstep=0.04) 
-     run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.04, gwend=0.1, gwstep=0.04)  
-           
+     run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.01, gwend=0.05, gwstep=0.04) #gw=0.01 and gw=0.05
+     run_new_melting(kT, n, fv, seed, mcerror, gwstart=0.04, gwend=0.1, gwstep=0.04)  #gw=0.04 and gw=0.08
