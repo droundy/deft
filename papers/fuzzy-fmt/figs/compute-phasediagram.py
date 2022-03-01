@@ -38,7 +38,7 @@ kTs = np.arange(3, 0.05, -2.5)  #only do kT=3 and kT=0.5
 #kTs = np.arange(0.5, 0.45, -0.1)  #trouble data points
 #densities = np.arange(0.01, 1.53, 0.02)
 densities = np.arange(1.09, 1.1, 0.02)
-seeds = (1, 2, 3, 4, 5)
+seeds = (4, 5)
 
 for seed in seeds:
   for kT in kTs:
