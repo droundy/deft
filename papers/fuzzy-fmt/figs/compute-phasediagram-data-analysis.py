@@ -36,7 +36,8 @@ for seed in (1, 2, 3, 4, 5):
    cpressure_nm = []
 
    #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*_best_tensor.dat' % kT)))
-   files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*seed%g_best_tensor.dat' % (kT, seed))))  
+   #files = sorted(list(glob.glob('data/phase-diagram/kT%.3f_n*seed%g_best_tensor.dat' % (kT, seed))))  
+   files = sorted(list(glob.glob('data/phase-diagram_fv1e-4/kT%.3f_n*seed%g_best_tensor.dat' % (kT, seed))))
 
    if len(files) == 0:
 	   continue
@@ -54,5 +55,6 @@ for seed in (1, 2, 3, 4, 5):
    cpressure_nm = np.array(cpressure_nm)
    n = np.array(n)
    #np.savetxt('figs/crystal-data/kT-%.3f.dat' % kT, np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')
-   np.savetxt('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')  
+   #np.savetxt('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')
+   np.savetxt('figs/crystal-data/kT-%.3f-fv1e-4-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe, hpressure_nm, cpressure_nm), axis=1), fmt='%.6g')  
    #np.savetxt('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed), np.stack((n, hfe, cfe), axis=1), fmt='%.6g')  
