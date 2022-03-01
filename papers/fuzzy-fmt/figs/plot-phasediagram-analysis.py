@@ -95,7 +95,8 @@ for seed in seeds:
     actual_pressure_nm = []
     actual_density_nm = []
 
-    f = ('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed))    #debug
+    #f = ('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed))  
+    f = ('figs/crystal-data/kT-%.3f-fv1e-4-seed%g.dat' % (kT, seed))   
     data = np.loadtxt(f)
 
     n = data[:, 0]  # density
