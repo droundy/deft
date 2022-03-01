@@ -52,6 +52,7 @@ else:
 fvs = (0, 1e-9, 1e-8, 1e-6, 1e-4, 1e-2)
 seeds=(1,2,3,4,5)
 
+
 #Plots FEdifference for all seeds for all fvs:
 #if doallfvs == 1:
 lowest_fe_difference =0
@@ -67,8 +68,11 @@ number_of_nans_at_fv_2 = [numseed,numseed,numseed,numseed]
 number_of_nans_at_fv_3 = [numseed,numseed,numseed,numseed]
 number_of_nans_at_fv_4 = [numseed,numseed,numseed,numseed]
 number_of_nans_at_fv_5 = [numseed,numseed,numseed,numseed]
+    
+fe_variance = []   #one entry for each value of fv
 
-for fv in fvs:
+for fv in fvs: 
+  fe_crystal = [0,0,0,0,0]	#one entry for each seed	
   for seed in seeds:
     gw = []
     fe_difference = []  
@@ -94,6 +98,7 @@ for fv in fvs:
             number_of_nans_at_fv_5[1] = number_of_nans_at_fv_5[1]-1
         if data[3] == 0.05:
             number_of_nans_at_fv_5[2] = number_of_nans_at_fv_5[2]-1
+            fe_crystal.append(data[5])   #Find uncertainty for gw=0.05, fv=0.01
         if data[3] == 0.08:
             number_of_nans_at_fv_5[3] = number_of_nans_at_fv_5[3]-1
       if fv == 1e-4:
@@ -105,6 +110,8 @@ for fv in fvs:
             number_of_nans_at_fv_4[1] = number_of_nans_at_fv_4[1]-1
         if data[3] == 0.05:
             number_of_nans_at_fv_4[2] = number_of_nans_at_fv_4[2]-1
+            fe_crystal.append(data[5])   #Find uncertainty for gw=0.05, fv=1e-4
+            #print(fe_crystal, seed)
         if data[3] == 0.08:
             number_of_nans_at_fv_4[3] = number_of_nans_at_fv_4[3]-1
       if fv == 1e-6:
@@ -116,6 +123,7 @@ for fv in fvs:
             number_of_nans_at_fv_3[1] = number_of_nans_at_fv_3[1]-1
         if data[3] == 0.05:
             number_of_nans_at_fv_3[2] = number_of_nans_at_fv_3[2]-1
+            fe_crystal.append(data[5])   #Find uncertainty for gw=0.05, fv=1e-6
         if data[3] == 0.08:
             number_of_nans_at_fv_3[3] = number_of_nans_at_fv_3[3]-1
       if fv == 1e-8:
@@ -127,6 +135,7 @@ for fv in fvs:
             number_of_nans_at_fv_2[1] = number_of_nans_at_fv_2[1]-1
         if data[3] == 0.05:
             number_of_nans_at_fv_2[2] = number_of_nans_at_fv_2[2]-1
+            fe_crystal.append(data[5])   #Find uncertainty for gw=0.05, fv=0.01
         if data[3] == 0.08:
             number_of_nans_at_fv_2[3] = number_of_nans_at_fv_2[3]-1
       if fv == 1e-9:
@@ -138,6 +147,7 @@ for fv in fvs:
             number_of_nans_at_fv_1[1] = number_of_nans_at_fv_1[1]-1
         if data[3] == 0.05:
             number_of_nans_at_fv_1[2] = number_of_nans_at_fv_1[2]-1
+            fe_crystal.append(data[5])   #Find uncertainty for gw=0.05, fv=0.01
         if data[3] == 0.08:
             number_of_nans_at_fv_1[3] = number_of_nans_at_fv_1[3]-1
       if fv == 0:
@@ -149,6 +159,7 @@ for fv in fvs:
             number_of_nans_at_fv_0[1] = number_of_nans_at_fv_0[1]-1
         if data[3] == 0.05:
             number_of_nans_at_fv_0[2] = number_of_nans_at_fv_0[2]-1
+            fe_crystal.append(data[5])   #Find uncertainty for gw=0.05, fv=0.01
         if data[3] == 0.08:
             number_of_nans_at_fv_0[3] = number_of_nans_at_fv_0[3]-1
       mcerror= data[12]	
@@ -157,7 +168,21 @@ for fv in fvs:
          lowest_fe_difference = data[6]
          lowest_fv = fv
          lowest_seed=seed 
-         lowest_gw = data[3]     
+         lowest_gw = data[3] 
+  sum_fe = 0
+  sum_fe_squared = 0
+  variance = 0
+  if len(fe_crystal) > 0:  
+   for i in range(len(fe_crystal)):
+     sum_fe = sum_fe + fe_crystal[i]
+     sum_fe_squared = sum_fe_squared + fe_crystal[i]*fe_crystal[i]
+   avg_fe = sum_fe/len(fe_crystal)
+   avg_fe_squared = sum_fe_squared/len(fe_crystal)
+   variance = avg_fe_squared - avg_fe*avg_fe
+   fe_variance.append(variance)
+  print('variance in fe = %g for gw=0.05 and fv=%g' % (variance, fv)) 
+#print(fe_variance)
+         
 plt.plot([],[], color='yellow', label='fv=1e-2')
 plt.plot([],[], color='blue', label='fv=1e-4')
 plt.plot([],[], color='green', label='fv=1e-6')
@@ -179,8 +204,7 @@ print(number_of_nans_at_fv)
 number_of_nans = (maxcount - count_0)*2 + (maxcount-count_1)*1
 print('count_0=%g, count_1=%g' % (count_0, count_1))
 print('number_of_nans = %g' % (number_of_nans))
-# print ('kT=%g, n=%g, lowest_gw=%g, lowest_fv=%g, lowest_seed=%g, lowest_fe_difference=%g' % (kT, n, lowest_gw, lowest_fv, lowest_seed, lowest_fe_difference))
-
+# print ('kT=%g, n=%g, lowest_gw=%g, lowest_fv=%g, lowest_seed=%g, lowest_fe_difference=%g' % (kT, n, lowest_gw, lowest_fv, lowest_seed, lowest_fe_difference))   
 
 #Bar plot showing frequency of Nans for each fv
 plt.figure('Frequency of NANs')
