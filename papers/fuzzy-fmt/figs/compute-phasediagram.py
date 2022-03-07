@@ -36,8 +36,9 @@ def run_new_melting(kT, n, seed, gwstart, gwend, gwstep, fv=1e-4, dx=0.5,
 #kTs = np.arange(3, 0.05, -3.5)  #only do kT=3
 #kTs = np.arange(0.5, 0.02, -0.1)  #only do kT=0.5
 #kTs = np.arange(3, 0.05, -2.5)  #only do kT=3 and kT=0.5
-kTs = np.arange(2.9, 0.65, -0.1)  
-densities = np.arange(0.01, 1.53, 0.02)
+kTs = np.arange(2.9, 2.8, -0.15)  
+#densities = np.arange(0.01, 1.53, 0.02)
+densities = np.arange(0.89, 0.9, 0.02)
 #densities = np.arange(1.09, 1.1, 0.02)
 #seeds = (1,2,3,4,5)
 
