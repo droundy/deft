@@ -16,7 +16,7 @@ import os
 import argparse
 import array as arr
 
-def run_new_melting(kT, n, seed, gwstart, gwend, gwstep, fv=1e-4, dx=0.5, 
+def run_new_melting(kT, n, seed, gwstart, gwend, gwstep, fv=1e-4, dx=0.5,
                     mcerror=1e-3, mcconstant=5, mcprefactor=50000,
                     avoid_rq=False):
     name = 'nm-kT_%g-n_%g_fv1e-4_seed%g' % (kT, n, seed)    
@@ -42,8 +42,8 @@ densities = np.arange(1.01, 1.12, 0.02) #only do trouble points
 #seeds = (1,2,3,4,5)
 seeds = (1,4,5)
 
-#for seed in seeds:
-for kT in kTs:
+for seed in seeds:
+  for kT in kTs:
     for n in densities:
         # It seems that for low temperature and high density we need to run a more
         # accurate and precise Monte Carlo, otherwise we end up seeing n_3 > 1 and get
@@ -52,9 +52,9 @@ for kT in kTs:
         #if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1.3:   #for small plot in paper
         if 0.499 < kT < 0.501 and 0.89 < (1/n) < 1:    #trouble data points
 	    # We want high accuracy for this one!
-            run_new_melting(kT, n, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #trouble data points
+            run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.11, gwstep=0.01, mcerror=1e-4) #trouble data points
         else:
             #pass # for now, skip these simulations that we already ran.
-            run_new_melting(kT, n, gwstart=0.01, gwend=0.2, gwstep=0.01)
+            run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01)
             #run_new_melting(kT, n, seed, gwstart=0.01, gwend=0.2, gwstep=0.01, mcerror=1e-4)
 
