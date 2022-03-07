@@ -40,7 +40,7 @@ kTs = np.arange(0.5, 0.45, -0.1)  #only do kT=0.5
 densities = np.arange(1.01, 1.12, 0.02) #only do trouble points
 #densities = np.arange(1.09, 1.1, 0.02)
 #seeds = (1,2,3,4,5)
-seeds = (4,5)
+seeds = (1,4,5)
 
 #for seed in seeds:
 for kT in kTs:
