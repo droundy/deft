@@ -51,7 +51,7 @@ print(homogeneous_temperature)
 homogeneous_density = homogeneous_data[1:, 0]
 homogeneous_pressures = homogeneous_data[1:, 1:]
 
-# for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
+#for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
 # for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3): #for paper
 
 for kT in our_kTs:
@@ -64,7 +64,8 @@ for kT in our_kTs:
     #nm#actual_pressure_nm = []
     #nm#actual_density_nm = []
 
-    f = ('figs/crystal-data/kT-%.3f.dat' % kT)
+    #f = ('figs/crystal-data/kT-%.3f.dat' % kT)
+    f = ('figs/crystal-data/kT-%.3f-fv1e-4-seed1.dat' % kT)
     #seeds#f = ('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed))    #debug
     data = np.loadtxt(f)
 
