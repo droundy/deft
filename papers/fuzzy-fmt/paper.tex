@@ -25,7 +25,7 @@
 
 \begin{document}
 \title{Soft Fundamental Measure Theory Functional for the
-  Weeks-Chandler-Anderson Repulsive Potential}
+  Weeks-Chandler-Andersen Repulsive Potential}
 
 \author{Eric J. Krebs}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
@@ -42,7 +42,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
   We introduce an easy-to-implement variation on the Soft Fundamental
-  Measure Theory (SFMT) approach for the Weeks-Chandler-Anderson (WCA)
+  Measure Theory (SFMT) approach for the Weeks-Chandler-Andersen (WCA)
   fluid.  This approach is readily extensible to other soft repulsive
   potentials.  We demonstrate that this approach is comparable in
   accuracy to the Barker-Henderson approach combined with the White
@@ -50,6 +50,161 @@
 \end{abstract}
 
 \maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
+\section{Introduction}
+The idea of liquids as composed of hard spheres dates back over two
+millenia~\cite{lucretius}.  In the 20th century, we came to understand
+atoms as inherently soft with no abrupt border, but it was shown that their repulsion could
+still be accurately described using a hard-sphere model, provided the
+radius is chosen to be temperature dependent~\cite{rowlinson1964statistical, barker1967perturbation,
+  andersen1971relationship}. This reflects the effect of collisions during which 
+the particles are pushed closer together at higher temperatures. 
+
+Rowlinson introduced a temperature dependent reduced length given by
+\begin{align}
+  \rho &= \bigg(\frac{\epsilon}{k_BT}\bigg)^{\frac{1}{n}}\bigg[1+\frac{\gamma}{n}\bigg]
+\end{align}
+for the inverse-power potential 
+\begin{align}
+  u(r) &= \bigg\epsilon\bigg(\frac{r}{R_m}\bigg)^{-n}
+\end{align}
+which is of a form similar to a portion of the Lennard-Jones potential 
+where $\epsilon$ and $R_m$ correspond to the Lennard-Jones parameters. 
+He showed that the Helmholtz free energy could then be expressed in terms
+of the Helmholtz free energy of a hard sphere fluid adjusted by the 
+temperature dependent reduced length
+\begin{align}
+  A_n(V,T) &= A_{HS}(V\rho^{-3}, T) - 3RT\ln\rho
+\end{align}
+and cites the correspondence of the form of this equation to that derived by 
+Longuet-Higgens~\cite{?} to take into account the change of molecular size on the 
+free energy of a conformal assembly.
+
+Inspired by Rowlinson's work~\cite{?}, Barker-Henderson generalized the method.
+In the widely celebrated Barker-Henderson approach, any 
+repulsive pair potential, $u(r)$ can be used to construct a corresponding hard
+sphere reference fluid with a temperature dependent diameter given by
+\begin{align}
+  d &= \int_0^{\infty}\left( 1 - e^{-\beta u(r)} \right)\mathrm{dr}.
+  \label{eq:bh-diameter}
+\end{align}
+Weeks-Chandler-Andersen (WCA) derived a density and temperature dependent
+hard sphere diameter to model a soft, repulsive potential given by~\cite{?}
+\newcommand\erf{\mathrm{erf}}
+\newcommand\Vwca{V_{\mathrm{wca}}}
+\newcommand\Verf{V_{\erf}}
+\begin{align}
+  \Vwca(r) =
+  \begin{cases}
+    4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
+    \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
+    0, & \textrm{otherwise}.
+  \end{cases}
+\label{eq:Vwca}
+\end{align}
+where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
+and $R$ is a single sphere radius which is related by $\sigma =
+2^{5/6} R$.
+The WCA potential reproduces
+the repulsive \textcolor{red}{force?} of a Lennard-Jones interaction, which makes it an
+ideal model for interatomic repulsion. 
+
+%------------------------
+\color{red}FIX!...through meeting the condition 
+\begin{align}
+  \int \big(y_d(r) e^{-\beta u_o} -1 \big)~d\vec r &= \int \big(y_d(r) e^{-\beta u_d} -1 \big)~d\vec r
+\end{align}} 
+Tang~\cite{?} later arrived a result similar to that of Weeks-Chandler-Andersen 
+by following along the 
+line of Barker-Henderson's derivation but making the first order 
+correction to the free energy vanish exactly.
+\begin{align}
+  \int_0^\sigma y_o(r) e^{-\beta u_{rep}(r)}r^2 ~\mathrm{dr} &= 
+  \int_d^\sigma y_o(r) r^2~\mathrm{dr}
+\end{align}
+\color{black}
+%-----------------------
+%split the Lennard-Jones potential differently than BH
+%  \davidsays{This might be a good place to mention more about BH and similar?}
+%T
+%\textcolor{red}{Given that the repulsive interaction between particles is the dominate 
+%factor in determining the structure of fluids at high densities, these SITE THIS!}
+%works cemented the hard-sphere
+%model as the reference system of choice for the theory of
+%liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
+  %lafitte2013accurate}.  
+  
+The hard-sphere fluid
+%is widely studied and well understood. 
+has served as the reference system of choice for the theory of
+liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
+  lafitte2013accurate}
+not only for the homogeneous
+fluid~\cite{carnahan1969equation}, but also in the more challenging
+case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
+  roth2002whitebear}.  However, the hard-sphere fluid remains a
+non-physical model, which can also be numerically inconvenient due to its
+discontinuous potential, and the requirement for delta functions in
+computing weighted densities.
+
+In this paper, we introduce a soft sphere reference fluid 
+%with a potential that approximates the potential of
+to model
+a WCA fluid by making the second virial coefficent temperature dependent 
+so that it can be made to match the second virial coefficent of a 
+WCA fluid. 
+\begin{align}
+    B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}
+\end{align}
+We use Soft Fundamental Measure Theory
+(SFMT) introduced in 1999 by Schmidt~\cite{schmidt1999density} with the 
+tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}
+to obtain the free energy directly from the potential.
+%without the need to refer to a hard-sphere fluid??
+%
+%In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
+%(SFMT)~\cite{schmidt1999density} which 
+SFMT is a classical density functional
+theory that directly treats soft repulsive potentials in a framework
+based on the highly successful Fundamental Measure Theory (FMT) developed
+by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
+Due to its combination of
+computational efficiency with accuracy, FMT has been used as the
+basis for a wide variety of classical density
+functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
+  marechal2013density, hughes2013classical, krebs2014improved}, and
+SFMT has been used to describe the behavior of a star polymer in
+solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
+  sweatman2002fundamental}, as well as repulsive potentials applicable
+to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
+
+%% In his 2010 review of FMT, Roth states that the most important future
+%% developments in equilibrium DFT will involve treating soft repulsions
+%% and attractions~\cite{}.
+
+%In this paper, we will apply SFMT to study the Weeks-Chandler-Andersen
+%(WCA) repulsive potential~\cite{weeks1971}.  This potential reproduces
+%the repulsive \textcolor{red}{force?} of a Lennard-Jones interaction, which makes it an
+%ideal model for interatomic repulsion.  Mathematically, the WCA
+%pair potential is given by
+%\newcommand\erf{\mathrm{erf}}
+%\newcommand\Vwca{V_{\mathrm{wca}}}
+%\newcommand\Verf{V_{\erf}}
+%\begin{align}
+  %\Vwca(r) =
+  %\begin{cases}
+    %4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
+    %\left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
+    %0, & \textrm{otherwise}.
+  %\end{cases}
+%\label{eq:Vwca}
+%\end{align}
+%where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
+%and $R$ is a single sphere radius which is related by $\sigma =
+%2^{5/6} R$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
@@ -67,68 +222,7 @@
 \item Go over plots and text sections II.B (ASK about text in red)
 \end{enumerate}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
-\section{Introduction}
-The idea of liquids as composed of hard spheres dates back over two
-millenia~\cite{lucretius}.  In the 20th century, we came to understand
-atoms as inherently soft, but it was shown that their repulsion could
-still be accurately described using a hard-sphere model, provided the
-radius is chosen to be temperature
-dependent~\cite{rowlinson1964statistical, barker1967perturbation,
-  andersen1971relationship}.
-  \davidsays{This might be a good place to mention more about BH and similar?}
-These works cemented the hard-sphere
-model as the reference system of choice for the theory of
-liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate}.  The hard-sphere fluid is
-widely studied and well understood, not only for the homogeneous
-fluid~\cite{carnahan1969equation}, but also in the more challenging
-case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
-  roth2002whitebear}.  However, the hard-sphere fluid remains a
-non-physical model, which can also be numerically inconvenient due to its
-discontinuous potential, and the requirement for delta functions in
-computing weighted densities.
-
-Fundamental Measure Theory~(FMT) is a classical density functional
-theory for the free energy of the hard-sphere fluid developed by
-Rosenfeld~\cite{rosenfeld1989}.  Due to its combination of
-computational efficiency with accuracy, FMT has since been used as the
-basis for a wide variety of classical density
-functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
-  marechal2013density, hughes2013classical, krebs2014improved}.
-%
-In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
-(SFMT)~\cite{schmidt1999density}, which directly treats soft repulsive
-potentials in a framework based on the highly successful FMT.  SFMT
-has been used to describe the behavior of a star polymer in
-solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
-  sweatman2002fundamental}, as well as repulsive potentials applicable
-to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
-
-%% In his 2010 review of FMT, Roth states that the most important future
-%% developments in equilibrium DFT will involve treating soft repulsions
-%% and attractions~\cite{}.
-
-In this paper, we will apply SFMT to study the Weeks-Chandler-Anderson
-(WCA) repulsive potential~\cite{weeks1971}.  This potential reproduces
-the repulsive force of a Lennard-Jones interaction, which makes it an
-ideal model for interatomic repulsion.  Mathematically, the WCA
-pair potential is given by
-\newcommand\erf{\mathrm{erf}}
-\newcommand\Vwca{V_{\mathrm{wca}}}
-\newcommand\Verf{V_{\erf}}
-\begin{align}
-  \Vwca(r) =
-  \begin{cases}
-    4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
-    \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
-    0, & \textrm{otherwise}.
-  \end{cases}
-\label{eq:Vwca}
-\end{align}
-where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
-and $R$ is a single sphere radius which is related by $\sigma =
-2^{5/6} R$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Methods}
 
@@ -558,6 +652,7 @@ be found from a plot of pressure verses the inverse density.
 %approach~\cite{barker1967perturbation}. This theory takes any general
 The Barker-Henderson fluid is known to give good results, so we use it 
 as a reference to compare with our DFT results. 
+----
 In the BH approach, any general
 repulsive pair potential, $V(r)$ is used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter given by
@@ -565,6 +660,7 @@ sphere reference fluid with a temperature dependent diameter given by
   d = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
 \end{align}
+----
 We utilize this variable diameter with the White Bear FMT free energy
 functional for the hard sphere fluid~\cite{roth2002whitebear} as a
 comparison for the SFMT presented in this paper.
