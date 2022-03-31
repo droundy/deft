@@ -55,46 +55,71 @@
 \section{Introduction}
 The idea of liquids as composed of hard spheres dates back over two
 millenia~\cite{lucretius}.  In the 20th century, we came to understand
-atoms as inherently soft with no abrupt border, but it was shown that their repulsion could
-still be accurately described using a hard-sphere model, provided the
-radius is chosen to be temperature dependent~\cite{rowlinson1964statistical, barker1967perturbation,
-  andersen1971relationship}. This reflects the effect of collisions during which 
-the particles are pushed closer together at higher temperatures. 
+atoms as inherently soft with no abrupt border, but it was shown that 
+heir repulsion could still be accurately described using a hard-sphere 
+model, provided the radius is chosen to be temperature dependent
+~\cite{rowlinson1964statistical, barker1967perturbation,
+andersen1971relationship}. A temperature-dependent hard sphere radius 
+reflects the effect of collisions during which the particles are pushed 
+closer together at higher temperatures. 
 
-Rowlinson introduced a temperature dependent reduced length given by
-\begin{align}
-  \rho &= \bigg(\frac{\epsilon}{k_BT}\bigg)^{\frac{1}{n}}\bigg[1+\frac{\gamma}{n}\bigg]
-\end{align}
+Rowlinson introduced a temperature dependent reduced length 
+%given by
+%\begin{align}
+  %\rho &= \bigg(\frac{\epsilon}{k_BT}\bigg)^{\frac{1}{n}}\bigg[1+\frac{\gamma}{n}\bigg]
+%\end{align}
 for the inverse-power potential 
 \begin{align}
   u(r) &= \epsilon\bigg(\frac{r}{R_m}\bigg)^{-n}
 \end{align}
-which is of a form similar to a portion of the Lennard-Jones potential 
+which is of a form similar to the repulsive portion of the Lennard-Jones potential 
 where $\epsilon$ and $R_m$ correspond to the Lennard-Jones parameters. 
 He showed that the Helmholtz free energy could then be expressed in terms
-of the Helmholtz free energy of a hard sphere fluid adjusted by the 
-temperature dependent reduced length
-\begin{align}
-  A_n(V,T) &= A_{HS}(V\rho^{-3}, T) - 3RT\ln\rho
-\end{align}
-and cites the correspondence of the form of this equation to that derived by 
-Longuet-Higgens~%\cite{?} 
-to take into account the change of molecular size on the 
-free energy of a conformal assembly.
+of the Helmholtz free energy of a hard sphere reference fluid adjusted 
+by the temperature-dependent reduced length.
+%, $\rho$
+%\begin{align}
+  %A_n(V,T) &= A_{HS}(V\rho^{-3}, T) - 3RT\ln\rho
+%\end{align}
+%and cites the correspondence of the form of this equation to that derived by 
+%Longuet-Higgens~%\cite{?} 
+%to take into account the change of molecular size on the 
+%free energy of a conformal assembly.
 
-In the widely celebrated Barker-Henderson approach, which is a generalization
-of Rowlinson's method, any 
+Barker-Henderson generalized Rowlinson's method by developing an approach
+where 
+%In the widely celebrated Barker-Henderson approach, which is a generalization
+%of Rowlinson's method, 
+any 
 repulsive pair potential, $u(r)$ can be used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter given by
 \begin{align}
   d &= \int_0^{\infty}\left( 1 - e^{-\beta u(r)} \right)~\mathrm{dr}
   \label{eq:bh-diameter}
 \end{align}
-This diameter ...
+This diameter eliminates a low-order term in the expansion of the Helmholtz
+free energy about a steepness paramenter $\alpha$ that describes the 
+steepness of the repulsive part of the potential, and a well-depth parameter $\gamma$
+that describes the depth of the attractive part of the potential energy well. 
+When both parameters are set to equal one, the resulting potential equals
+the Lennard-Jones potential, whereas when both parameters are set to zero, 
+the resulting potential equals that of a hard sphere fluid. When the low-order term 
+referring to the steepness of the repulsive potential is eliminated in the 
+expansion of the Helmholtz free energy along 
+with higher order terms that are neglected, only the Helmholtz free energy 
+of a hard sphere reference fluid remains along with a low-order term associated
+with the well-depth parameter of the attractive potential energy. This enables
+the use of perturbation theory to describe the Helmholtz free energy of 
+the full potential.
 \begin{align}
-  A &= A_o + \alpha stuff\bigg(d + \int_0^\sigma (1 - e^{-u(z)/k_BT})~dz \bigg) + \mathrm{...}  \\
-    &= A_o + \alpha stuff\bigg(d - d\bigg) + \mathrm{...}
+  A &= A_{HS} + \alpha(0) + \gamma(...) + \text{higher order terms}  \\
+  A &\approx A_{HS} + \gamma(...) 
 \end{align}
+where $A_{HS}$ is evaluated using the temperature-dependent diameter.
+%\begin{align}
+  %A &= A_o + \alpha stuff\bigg(d + \int_0^\sigma (1 - e^{-u(z)/k_BT})~dz \bigg) + \mathrm{...}  \\
+    %&= A_o + \alpha stuff\bigg(d - d\bigg) + \mathrm{...}
+%\end{align}
 
 Weeks-Chandler-Andersen (WCA) 
 created a soft, repulsive reference fluid 
@@ -109,7 +134,7 @@ a soft, repulsive reference potential
 %which is 
 associated only with the 
 repulsive forces between particles 
-to which a perturbative potential associated with attractive forces
+to which a perturbative potential associated with only attractive forces
 is added to recover the full Lennard-Jones potential. 
 %which, when added to the reference potential
 %recovers the full Lennard-Jones potential. 
@@ -177,10 +202,6 @@ correction to the free energy vanish exactly.
   \int_0^\sigma y_o(r) e^{-\beta u_{rep}(r)}r^2 ~\mathrm{dr} &= 
   \int_d^\sigma y_o(r) r^2~\mathrm{dr}
 \end{align}
-\color{black}
-The WCA potential reproduces
-the repulsive force of a Lennard-Jones interaction, which makes it an
-ideal model for interatomic repulsion. 
 %-----------------------
 %split the Lennard-Jones potential differently than BH
 %  \davidsays{This might be a good place to mention more about BH and similar?}
@@ -205,21 +226,31 @@ non-physical model, which can also be numerically inconvenient due to its
 discontinuous potential, and the requirement for delta functions in
 computing weighted densities.
 
-In this paper, we introduce a temperature dependent 
+In this paper, we introduce a temperature-dependent 
 \textit{soft} sphere reference fluid 
 %with a potential that approximates the potential of
 to model
-the WCA fluid by making the second virial coefficent of the soft sphere 
+the soft, repulsive potential of the WCA fluid. 
+The WCA potential reproduces
+the repulsive force of a Lennard-Jones interaction, which makes it an
+ideal model for interatomic repulsion. 
+We model the WCA fluid by constructing a soft-sphere potential with 
+temperature-dependent parameters, $\alpha$ and $\Xi$, 
+that we use to
+make the second virial coefficent of our soft sphere 
 reference fluid match the second virial coeficent of the WCA fluid at 
 each temperature.
 \begin{align}
-    B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}
+    B_2(T) &=-\frac{1}{2}\int{(e^{-\beta V(r, \alpha(T), \Xi(T))} - 1)~d{\vec{r}}}  \\
+        &=-\frac{1}{2}\int{(e^{-\beta V_{wca}(r)} - 1)~d{\vec{r}}}
 \end{align}
-To obtain the free energy of the soft sphere fluid, from which 
-thermodynamic properites can be found, 
+
+To obtain the free energy of the soft sphere fluid from which the
+thermodynamic properites of the fluid can be found, 
 we use Soft Fundamental Measure Theory
-(SFMT) introduced in 1999 by Schmidt~\cite{schmidt1999density} with the 
-tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}.
+(SFMT) introduced in 1999 by Schmidt~\cite{schmidt1999density} with a 
+tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3} 
+that same year.
 %without the need to refer to a hard-sphere fluid??
 %
 %In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
@@ -228,11 +259,37 @@ SFMT is a classical density functional
 theory that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
 by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
+It is a mean-value thereom, that uses a set of weighted densities 
+to express the free energy of the system
+as a functional of the number density profile 
+and can be used for inhomogeneous systems.
+\begin{align}
+    A[n(\vec r)]=\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
+\end{align}
+The weighted densities are formed using a set of weight functions 
+$\lbrace{w_i\rbrace}$ with forms that arise from noting that 
+the mayer function of a hard sphere fluid can be expressed in terms of 
+convolutions involving the set of simple weight functions.
+\begin{align}
+    f(r) = w_0*w_3 + w_1*w_2 + \vec {w}_1*\vec {w}_2
+\end{align}
+SFMT extends the use of the weight functions to soft sphere fluids 
+by preserving the general 
+form of the relations between the weights which are all related to each other,
+and replacing the particular expression used for one of the weights with 
+a form compatible with a soft sphere potential from which the particular 
+expressions for the other weights can be derived.
+...and which 
+...preserves/satisfies ? conditions...  discuss forms of the s$\Phi$s ...
+
+There have been a few versions of SFMT differring in the explicit form 
+of the expression for $\Phi_3$. 
+
 Due to its combination of
 computational efficiency with accuracy, FMT has been used as the
 basis for a wide variety of classical density
 functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
-  marechal2013density, hughes2013classical, krebs2014improved}.
+  marechal2013density, hughes2013classical, krebs2014improved}, and
 SFMT has been used to describe the behavior of a star polymer in
 solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
   sweatman2002fundamental}, as well as repulsive potentials applicable
@@ -297,7 +354,7 @@ A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
-of the free energy densities \davidsays{Probably want to spend more space on
+of free energy densities \davidsays{Probably want to spend more space on
 ``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
 use tensor weights? If so we need to say.
 }
@@ -510,6 +567,13 @@ analytically tractable.
 In order to approximate the temperature-independent potential of the WCA 
 fluid, we make the $\alpha$ and $\Xi$ parameters in the erf potential 
 temperature-dependent.
+The $\alpha$ parameter roughly measures the length-scale of the
+interaction and decreases with increasing temperature 
+like the Barker-Henderson diameter 
+and other temperature-dependent diameters discussed earlier. 
+The $\Xi$ parameter is a measure of the effective softness of the 
+interaction, and also increases with the temperature. 
+
 \davidsays{Maybe worth making a comparison with Barker-Hendersen here?}
 
 \davidsays{What things do we make true using our method?
@@ -557,8 +621,6 @@ and
   %%\alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         %%\ln 2}} \right)^{\frac{1}{6}}.
 %%\end{align}
-The $\Xi$ parameter is a measure of the effective softness of the interaction, and
-increases with the temperature. 
 
 Next, we set the second virial 
 coeffecient, $B_2$, formed using the mayer function for the $\Vwca(r)$ potential 
@@ -575,9 +637,7 @@ and solve for the parameter $\alpha$ at a given temperature.
 %  \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
 %      2} + \ln 2 \right)},
 %\end{align}
-The $\alpha$ parameter roughly measures the length-scale of the
-interaction and, like the Barker-Henderson diameter discussed later, 
-decreases with increasing temperature. \davidsays{Maybe discuss it earlier?}
+%\davidsays{Maybe discuss it earlier? - done}
  
 
 \begin{figure}
