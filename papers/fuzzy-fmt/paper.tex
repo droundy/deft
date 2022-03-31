@@ -82,18 +82,38 @@ Longuet-Higgens~%\cite{?}
 to take into account the change of molecular size on the 
 free energy of a conformal assembly.
 
-Inspired by Rowlinson's work~%\cite{?}
-, Barker-Henderson generalized the method.
-In the widely celebrated Barker-Henderson approach, any 
+In the widely celebrated Barker-Henderson approach, which is a generalization
+of Rowlinson's method, any 
 repulsive pair potential, $u(r)$ can be used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter given by
 \begin{align}
-  d &= \int_0^{\infty}\left( 1 - e^{-\beta u(r)} \right)\mathrm{dr}.
+  d &= \int_0^{\infty}\left( 1 - e^{-\beta u(r)} \right)~\mathrm{dr}
   \label{eq:bh-diameter}
 \end{align}
-Weeks-Chandler-Andersen (WCA) derived a density and temperature dependent
-hard sphere diameter to model a soft, repulsive potential given by~
-%\cite{?}
+This diameter ...
+\begin{align}
+  A &= A_o + \alpha stuff\bigg(d + \int_0^\sigma (1 - e^{-u(z)/k_BT})~dz \bigg) + \mathrm{...}  \\
+    &= A_o + \alpha stuff\bigg(d - d\bigg) + \mathrm{...}
+\end{align}
+
+Weeks-Chandler-Andersen (WCA) 
+created a soft, repulsive reference fluid 
+modeled by a hard sphere fluid with a density and 
+temperature dependent hard sphere diameter.
+They split the Lennard-Jones potential into two
+parts differently than Barker-Henderson had done 
+%where one part is 
+to create 
+a soft, repulsive reference potential 
+%that arises from only
+%which is 
+associated only with the 
+repulsive forces between particles 
+to which a perturbative potential associated with attractive forces
+is added to recover the full Lennard-Jones potential. 
+%which, when added to the reference potential
+%recovers the full Lennard-Jones potential. 
+The repulsive WCA potential is given by 
 \newcommand\erf{\mathrm{erf}}
 \newcommand\Vwca{V_{\mathrm{wca}}}
 \newcommand\Verf{V_{\erf}}
@@ -109,15 +129,46 @@ hard sphere diameter to model a soft, repulsive potential given by~
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
-The WCA potential reproduces
-the repulsive \textcolor{red}{force?} of a Lennard-Jones interaction, which makes it an
-ideal model for interatomic repulsion. 
-
+%and to which 
+%along with 
+%to which is added
+%to which 
+%which, when added, 
+%associated with attractive forces.
+%which can be added to the reference potential
+%added 
+%recovers 
+%to recover the full Lennard-Jones potential. 
+%with is added to account for attractive forces.
+%The WCA potential is modeled by a hard sphere fluid with a 
+A density and 
+temperature dependent hard sphere diameter 
+%derived
+%to model the soft, purely repulsive reference potential 
+%for a reference fluid consisting of the soft, repulsive part of the potential which is 
+%given by
+%\cite{?}
 %------------------------
-\color{red}FIX!...through meeting the condition 
+%\color{red}
+%The hard sphere diameter 
+%of the corresponding hard sphere reference fluid 
+%The hard sphere diameter of this reference fluid 
+is 
+determined by making the compressibility of the hard sphere fluid equal that
+of the WCA potential
+through meeting the condition 
 \begin{align}
-  \int \big(y_d(r) e^{-\beta u_o} -1 \big)~d\vec r &= \int \big(y_d(r) e^{-\beta u_d} -1 \big)~d\vec r
+  \int \big(y_{HS}(r) e^{-\beta V_{wca}} -1 \big)~d\vec r &= \int \big(y_{HS}(r) e^{-\beta V_{HS}} -1 \big)~d\vec r
 \end{align} 
+where it is assumed that
+\begin{align}
+  y_{wca}(r) &\equiv g_{wca}(r)e^{V_{wca}(r)/k_BT} \\
+         &\approx g_{HS}(r)e^{V_{HS}(r)/k_BT} \\
+         &\approx y_{HS}(r)
+\end{align} 
+%The WCA potential reproduces
+%the repulsive force of a Lennard-Jones interaction, which makes it an
+%ideal model for interatomic repulsion. 
 Tang~\cite{?} later arrived a result similar to that of Weeks-Chandler-Andersen 
 by following along the 
 line of Barker-Henderson's derivation but making the first order 
@@ -127,6 +178,9 @@ correction to the free energy vanish exactly.
   \int_d^\sigma y_o(r) r^2~\mathrm{dr}
 \end{align}
 \color{black}
+The WCA potential reproduces
+the repulsive force of a Lennard-Jones interaction, which makes it an
+ideal model for interatomic repulsion. 
 %-----------------------
 %split the Lennard-Jones potential differently than BH
 %  \davidsays{This might be a good place to mention more about BH and similar?}
@@ -138,7 +192,7 @@ correction to the free energy vanish exactly.
 %liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
   %lafitte2013accurate}.  
   
-The hard-sphere fluid
+The hard-sphere fluid is well understood and
 %is widely studied and well understood. 
 has served as the reference system of choice for the theory of
 liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
@@ -151,19 +205,21 @@ non-physical model, which can also be numerically inconvenient due to its
 discontinuous potential, and the requirement for delta functions in
 computing weighted densities.
 
-In this paper, we introduce a soft sphere reference fluid 
+In this paper, we introduce a temperature dependent 
+\textit{soft} sphere reference fluid 
 %with a potential that approximates the potential of
 to model
-a WCA fluid by making the second virial coefficent temperature dependent 
-so that it can be made to match the second virial coefficent of a 
-WCA fluid. 
+the WCA fluid by making the second virial coefficent of the soft sphere 
+reference fluid match the second virial coeficent of the WCA fluid at 
+each temperature.
 \begin{align}
     B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}
 \end{align}
-We use Soft Fundamental Measure Theory
+To obtain the free energy of the soft sphere fluid, from which 
+thermodynamic properites can be found, 
+we use Soft Fundamental Measure Theory
 (SFMT) introduced in 1999 by Schmidt~\cite{schmidt1999density} with the 
-tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}
-to obtain the free energy directly from the potential.
+tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}.
 %without the need to refer to a hard-sphere fluid??
 %
 %In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
@@ -176,7 +232,7 @@ Due to its combination of
 computational efficiency with accuracy, FMT has been used as the
 basis for a wide variety of classical density
 functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
-  marechal2013density, hughes2013classical, krebs2014improved}, and
+  marechal2013density, hughes2013classical, krebs2014improved}.
 SFMT has been used to describe the behavior of a star polymer in
 solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
   sweatman2002fundamental}, as well as repulsive potentials applicable
@@ -702,15 +758,23 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
 
 \subsection{Homogeneous limit}
 
+%\begin{figure}
+%\begin{center}
+%\includegraphics[width=3.5in]{figs/p-vs-T}
+%\end{center}
+%\caption{Reduced pressure versus temperature.  The SFMT result is
+  %plotted as solid lines, with simulation results as dashed lines.
+  %The reduced pressure is defined in terms of the Lennard-Jones
+  %parameters as $p^{*} \equiv p \sigma^3/\epsilon$.}
+%\label{fig:p-vs-T}
+%\end{figure}
+
 \begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/p-vs-T}
-\end{center}
-\caption{Reduced pressure versus temperature.  The SFMT result is
-  plotted as solid lines, with simulation results as dashed lines.
-  The reduced pressure is defined in terms of the Lennard-Jones
-  parameters as $p^{*} \equiv p \sigma^3/\epsilon$.}
-\label{fig:p-vs-T}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
+ \end{center}
+\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
+\label{fig:p-vs-V_at_fixed_T}
 \end{figure}
 
 As a simple test for the equation of state, we compare the theory for
@@ -837,6 +901,7 @@ temperatures. While both Barker-Henderson hard spheres and our DFT
 both overestimate the density at contact, our theory differs more at
 the lowest temperature shown here. For the density oscillations, our
 DFT's error is comparable to that of the Barker-Henderson results.
+\newline
 
 \begin{figure*}
   \begin{center}
@@ -848,7 +913,13 @@ DFT's error is comparable to that of the Barker-Henderson results.
   \label{fig:argon-plots}
 \end{figure*}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}
+ \centering
+  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
+\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
+\label{fig:Phase_Diagram_of_T_vs_n}
+\end{figure}
+
 \subsection{Argon}
 
 Finally, to connect with experiment, we model liquid the radial
@@ -876,26 +947,18 @@ Barker-Henderson approach.  Both theories significantly overestimate
 the height of the first peak.
 
 
-
-
 \subsection{Freezing of the WCA fluid}
 
-Phase diagrams for the WCA fluid are shown below. In all cases $\sigma=1$ and $\epsilon=1$.
+A phase diagram for the WCA fluid is shown below with $\sigma=1$ and $\epsilon=1$.
 
-\begin{figure}
- \centering
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
-\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
-\label{fig:Phase_Diagram_of_T_vs_n}
-\end{figure}
 
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
- \end{center}
-\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
-\label{fig:Phase_Diagram_P_vs_T}
-\end{figure}
+%\begin{figure}
+ %\begin{center}
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
+ %\end{center}
+%\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
+%\label{fig:Phase_Diagram_P_vs_T}
+%\end{figure}
 
 
 
@@ -921,21 +984,21 @@ sphere fluids.
 %\label{fig:T-vs-n_at_fixed_P}
 %\end{figure}
 
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n}
- \end{center}
-\caption{Plot of the reduced pressure verses the reduced temperature. The lines bending downward indicate freezing.}
-\label{fig:p-vs-T_at_fixed_density}
-\end{figure}
+%\begin{figure}
+ %\begin{center}
+  %\includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n}
+ %\end{center}
+%\caption{Plot of the reduced pressure verses the reduced temperature. The lines bending downward indicate freezing.}
+%\label{fig:p-vs-T_at_fixed_density}
+%\end{figure}
 
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
- \end{center}
-\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
-\label{fig:p-vs-V_at_fixed_T}
-\end{figure}
+%%\begin{figure}
+ %%\begin{center}
+  %%\includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
+ %%\end{center}
+%%\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
+%%\label{fig:p-vs-V_at_fixed_T}
+%%\end{figure}
 
 %\begin{figure}
  %\begin{center}
