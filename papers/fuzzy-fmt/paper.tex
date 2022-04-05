@@ -260,31 +260,34 @@ SFMT is a classical density functional
 theory that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
 by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
-It is a mean-value thereom, that uses a set of weighted densities $\lbrace{n_i(\vec r)\rbrace}$ 
+Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\vec r)\rbrace}$ 
 to express the free energy of the system
-as a functional of the number density profile.
+as a functional of the number density profile. 
+The SFMT free energy functional is constructed so as to yield results 
+consistent with the low-density limit of the virial expansion
+and with the limiting case of a zero-dimensional cavity.
 %and can be used for inhomogeneous systems.
-\begin{align}
-    A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
-\end{align}
-The weighted densities are formed using a set of weight functions 
-$\lbrace{w_i(\vec r)\rbrace}$ with forms that arise from noting that 
-the mayer function of a hard sphere fluid can be expressed in terms of 
-convolutions involving the set of simple weight functions.
-\begin{align}
-    f_{hs}(r) = -2(w_0*w_3 + w_1*w_2 + \vec {w}_1*\vec {w}_2)
-\end{align}
-SFMT extends the use of the weight functions to soft sphere fluids 
-by preserving the general 
-form of the relations between the weight functions (which are all related to each other)
-and replacing the particular expression used for one of the weight functions with 
-a form compatible with a soft sphere potential from which the particular 
-expressions for all the other weights can then be derived.
-...and which 
-...preserves/satisfies ? conditions...  discuss forms of the s$\Phi$s ...
+%\begin{align}
+    %A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
+%\end{align}
+%The weighted densities are formed using a set of weight functions 
+%$\lbrace{w_i(\vec r)\rbrace}$ with forms that arise from noting that 
+%the Mayer function of a hard sphere fluid can be expressed in terms of 
+%convolutions involving the set of simple weight functions.
+%\begin{align}
+    %f_{hs}(r) = -2(w_0*w_3 + w_1*w_2 + \vec {w}_1*\vec {w}_2)
+%\end{align}
+%SFMT extends the use of the weight functions to soft sphere fluids 
+%by preserving the general 
+%form of the relations between the weight functions (which are all related to each other)
+%and replacing the particular expression used for one of the weight functions with 
+%a form compatible with a soft sphere potential from which the particular 
+%expressions for all the other weights can then be derived.
+%...and which 
+%...preserves/satisfies ? conditions...  discuss forms of the s$\Phi$s ...
 
-There have been a few versions of SFMT differring in the explicit form 
-of the expression for $\Phi_3$. 
+%There have been a few versions of SFMT differring in the explicit form 
+%of the expression for $\Phi_3$. 
 
 Due to its combination of
 computational efficiency with accuracy, FMT has been used as the
