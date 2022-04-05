@@ -94,7 +94,7 @@ any
 repulsive pair potential, $u(r)$ can be used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter given by
 \begin{align}
-  d &= \int_0^{\infty}\left( 1 - e^{-\beta u(r)} \right)~\mathrm{dr}
+  d(T) &= \int_0^{\infty or \sigma? CHECK!}\left( 1 - e^{-\beta u(r)} \right)~\mathrm{dr}
   \label{eq:bh-diameter}
 \end{align}
 This diameter eliminates a low-order term in the expansion of the Helmholtz
@@ -112,10 +112,10 @@ with the well-depth parameter of the attractive potential energy. This enables
 the use of perturbation theory to describe the Helmholtz free energy of 
 the full potential.
 \begin{align}
-  A &= A_{HS} + \alpha(0) + \gamma(...) + \text{higher order terms}  \\
-  A &\approx A_{HS} + \gamma(...) 
+  A &= A_{hs} + \alpha(0) + \gamma(...) + \text{higher order terms}  \\
+  A &\approx A_{hs} + \gamma(...) 
 \end{align}
-where $A_{HS}$ is evaluated using the temperature-dependent diameter.
+where the free energy of the hard sphere fluid, $A_{hs}$, is evaluated using the temperature-dependent diameter.
 %\begin{align}
   %A &= A_o + \alpha stuff\bigg(d + \int_0^\sigma (1 - e^{-u(z)/k_BT})~dz \bigg) + \mathrm{...}  \\
     %&= A_o + \alpha stuff\bigg(d - d\bigg) + \mathrm{...}
@@ -123,8 +123,8 @@ where $A_{HS}$ is evaluated using the temperature-dependent diameter.
 
 Weeks-Chandler-Andersen (WCA) 
 created a soft, repulsive reference fluid 
-modeled by a hard sphere fluid with a density and 
-temperature dependent hard sphere diameter.
+modeled by a hard sphere fluid with a temperature and density
+dependent hard sphere diameter.
 They split the Lennard-Jones potential into two
 parts differently than Barker-Henderson had done 
 %where one part is 
@@ -166,8 +166,8 @@ and $R$ is a single sphere radius which is related by $\sigma =
 %to recover the full Lennard-Jones potential. 
 %with is added to account for attractive forces.
 %The WCA potential is modeled by a hard sphere fluid with a 
-A density and 
-temperature dependent hard sphere diameter 
+They derived a temperature and density
+dependent hard sphere diameter 
 %derived
 %to model the soft, purely repulsive reference potential 
 %for a reference fluid consisting of the soft, repulsive part of the potential which is 
@@ -178,29 +178,30 @@ temperature dependent hard sphere diameter
 %The hard sphere diameter 
 %of the corresponding hard sphere reference fluid 
 %The hard sphere diameter of this reference fluid 
-is 
-determined by making the compressibility of the hard sphere fluid equal that
+by making the compressibility of the hard sphere fluid equal that
 of the WCA potential
 through meeting the condition 
 \begin{align}
-  \int \big(y_{HS}(r) e^{-\beta V_{wca}} -1 \big)~d\vec r &= \int \big(y_{HS}(r) e^{-\beta V_{HS}} -1 \big)~d\vec r
+  %\int \big(y_{HS}(r) e^{-\beta V_{wca}(r)} -1 \big)d\vec r &= \int \big(y_{HS}(r) e^{-\beta V_{HS}(r)} -1 \big)d\vec r
+  \int y_{hs}(r) e^{-\beta V_{wca}(r)} -1 ~d\vec r &= \int y_{hs}(r) e^{-\beta V_{hs}(r)} -1 ~d\vec r
 \end{align} 
 where it is assumed that
 \begin{align}
   y_{wca}(r) &\equiv g_{wca}(r)e^{V_{wca}(r)/k_BT} \\
-         &\approx g_{HS}(r)e^{V_{HS}(r)/k_BT} \\
-         &\approx y_{HS}(r)
+         &\approx g_{hs}(r)e^{V_{hs}(r)/k_BT} \\
+         &\approx y_{hs}(r)
 \end{align} 
 %The WCA potential reproduces
 %the repulsive force of a Lennard-Jones interaction, which makes it an
 %ideal model for interatomic repulsion. 
-Tang~\cite{?} later arrived a result similar to that of Weeks-Chandler-Andersen 
+Tang~\cite{?} later arrived at a result similar to that of Weeks-Chandler-Andersen 
 by following along the 
 line of Barker-Henderson's derivation but making the first order 
-correction to the free energy vanish exactly.
+correction to the expansion of the Helmholz free energy of a repulsive potential 
+about that of a hard sphere fluid vanish exactly.
 \begin{align}
-  \int_0^\sigma y_o(r) e^{-\beta u_{rep}(r)}r^2 ~\mathrm{dr} &= 
-  \int_d^\sigma y_o(r) r^2~\mathrm{dr}
+  \int_0^\sigma y_{hs}(r) e^{-\beta u(r)}r^2 ~\mathrm{dr} &= 
+  \int_d^\sigma y_{hs}(r) r^2~\mathrm{dr}
 \end{align}
 %-----------------------
 %split the Lennard-Jones potential differently than BH
@@ -227,7 +228,7 @@ discontinuous potential, and the requirement for delta functions in
 computing weighted densities.
 
 In this paper, we introduce a temperature-dependent 
-\textit{soft} sphere reference fluid 
+\textit{soft} sphere fluid 
 %with a potential that approximates the potential of
 to model
 the soft, repulsive potential of the WCA fluid. 
@@ -259,7 +260,7 @@ SFMT is a classical density functional
 theory that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
 by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
-It is a mean-value thereom, that uses a set of weighted densities 
+It is a mean-value thereom, that uses a set of weighted densities $\lbrace{n_i(\vec r)\rbrace}$ 
 to express the free energy of the system
 as a functional of the number density profile.
 %and can be used for inhomogeneous systems.
@@ -267,18 +268,18 @@ as a functional of the number density profile.
     A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
 \end{align}
 The weighted densities are formed using a set of weight functions 
-$\lbrace{w_i\rbrace}$ with forms that arise from noting that 
+$\lbrace{w_i(\vec r)\rbrace}$ with forms that arise from noting that 
 the mayer function of a hard sphere fluid can be expressed in terms of 
 convolutions involving the set of simple weight functions.
 \begin{align}
-    f(r) = w_0*w_3 + w_1*w_2 + \vec {w}_1*\vec {w}_2
+    f_{hs}(r) = -2(w_0*w_3 + w_1*w_2 + \vec {w}_1*\vec {w}_2)
 \end{align}
 SFMT extends the use of the weight functions to soft sphere fluids 
 by preserving the general 
-form of the relations between the weights which are all related to each other,
-and replacing the particular expression used for one of the weights with 
+form of the relations between the weight functions (which are all related to each other)
+and replacing the particular expression used for one of the weight functions with 
 a form compatible with a soft sphere potential from which the particular 
-expressions for the other weights can be derived.
+expressions for all the other weights can then be derived.
 ...and which 
 ...preserves/satisfies ? conditions...  discuss forms of the s$\Phi$s ...
 
