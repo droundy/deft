@@ -241,17 +241,17 @@ that we use to
 make the second virial coefficent of our soft sphere 
 reference fluid match the second virial coeficent of the WCA fluid at 
 each temperature.
-\begin{align}
-    B_2(T) &=-\frac{1}{2}\int{(e^{-\beta V(r, \alpha(T), \Xi(T))} - 1)~d{\vec{r}}}  \\
-        &=-\frac{1}{2}\int{(e^{-\beta V_{wca}(r)} - 1)~d{\vec{r}}}
-\end{align}
+%\begin{align}
+    %B_2(T) &=-\frac{1}{2}\int{(e^{-\beta V(r, \alpha(T), \Xi(T))} - 1)~d{\vec{r}}}  \\
+        %&=-\frac{1}{2}\int{(e^{-\beta V_{wca}(r)} - 1)~d{\vec{r}}}
+%\end{align}
 
 To obtain the free energy of the soft sphere fluid from which the
 thermodynamic properites of the fluid can be found, 
 we use Soft Fundamental Measure Theory
 (SFMT) introduced in 1999 by Schmidt~\cite{schmidt1999density} with a 
-tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3} 
-that same year.
+tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}
+shortly after.
 %without the need to refer to a hard-sphere fluid??
 %
 %In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
@@ -263,9 +263,13 @@ by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
 Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\vec r)\rbrace}$ 
 to express the free energy of the system
 as a functional of the number density profile. 
-The SFMT free energy functional is constructed so as to yield results 
+Schmidt's SFMT free energy functional is constructed so as to yield results 
 consistent with the low-density limit of the virial expansion
-and with the limiting case of a zero-dimensional cavity.
+and with the limiting case of a zero-dimensional cavity. Tarazona's tensor 
+weight eliminates the problem of divergences present in earlier versions 
+of FMT so that it can be applied to freezing.
+ %that prevented them from giving good results for freezing.
+
 %and can be used for inhomogeneous systems.
 %\begin{align}
     %A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
@@ -298,6 +302,9 @@ SFMT has been used to describe the behavior of a star polymer in
 solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
   sweatman2002fundamental}, as well as repulsive potentials applicable
 to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
+
+%and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
+%the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
 
 %% In his 2010 review of FMT, Roth states that the most important future
 %% developments in equilibrium DFT will involve treating soft repulsions
@@ -574,11 +581,14 @@ temperature-dependent.
 The $\alpha$ parameter roughly measures the length-scale of the
 interaction and decreases with increasing temperature 
 like the Barker-Henderson diameter 
-and other temperature-dependent diameters discussed earlier. 
+%and other temperature-dependent diameters 
+discussed earlier. 
 The $\Xi$ parameter is a measure of the effective softness of the 
-interaction, and also increases with the temperature. 
+interaction, and increases with the temperature, again reflecting the
+effect of collisions which pushes the particles
+closer together at higher temperatures.
 
-\davidsays{Maybe worth making a comparison with Barker-Hendersen here?}
+%\davidsays{Maybe worth making a comparison with Barker-Hendersen here?}
 
 \davidsays{What things do we make true using our method?
 \begin{enumerate}
@@ -616,6 +626,15 @@ where
 and 
 \begin{align}
     f'_{wca}(r)= -\frac{1}{kT}e^{-V_{wca}(r)/kT}\frac{dV_{wca}(r)}{dr}
+\end{align}
+In this way, we reproduce the exact width, or variance of the derivative 
+of the Mayer function of the WCA potential when our $w_2(r)$, given by 
+Equation~\ref{eq:gaussianw2}, is used in     
+Equation~\ref{eq:mayerandw2} 
+%resulting in a function with variance $\frac{\Xi^2}{2}$
+%so that the right side of Equation~\ref{eq:mayerandw2} gives
+\begin{align}
+   \frac{1}{\Xi\sqrt{\pi}}e^{-\big(\frac{r-\alpha}{\Xi}\big)^2}
 \end{align}
 %%We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
 %%at distance $\alpha$ corresponding to
