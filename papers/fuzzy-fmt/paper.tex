@@ -52,6 +52,27 @@
 \maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{\kirstiesays{Kirstie to-do list}}
+\begin{enumerate}
+\item Update Results section and enlarge font on plots
+%\item Review all the Fourier transforms we are using.
+%\item Find new expressions for alpha and Xi based on virial expansion. (B3)
+%\item Finish section describing use of tensor functional.
+\item Finish items in red
+%\item Finish p vs V equation plot and format plots.
+\item Clean up and streamline appendix
+\end{enumerate}
+
+\subsection{Meeting to-do list}
+\begin{enumerate}
+\item TBA
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Introduction}
 The idea of liquids as composed of hard spheres dates back over two
 millenia~\cite{lucretius}.  In the 20th century, we came to understand
@@ -265,9 +286,11 @@ to express the free energy of the system
 as a functional of the number density profile. 
 Schmidt's SFMT free energy functional is constructed so as to yield results 
 consistent with the low-density limit of the virial expansion
-and with the limiting case of a zero-dimensional cavity. Tarazona's tensor 
+and with the limiting case of a zero-dimensional cavity which are known 
+exactly. Tarazona's tensor 
 weight eliminates the problem of divergences present in earlier versions 
-of FMT so that it can be applied to freezing.
+of FMT so that it can be applied to freezing and inhomogeneous fluids 
+with superior results.
  %that prevented them from giving good results for freezing.
 
 %and can be used for inhomogeneous systems.
@@ -331,25 +354,6 @@ to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 %and $R$ is a single sphere radius which is related by $\sigma =
 %2^{5/6} R$.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{\kirstiesays{Kirstie to-do list}}
-\begin{enumerate}
-\item Update section II.C
-\item Review all the Fourier transforms we are using.
-%\item Find new expressions for alpha and Xi based on virial expansion. (B3)
-%\item Finish section describing use of tensor functional.
-\item Finish freezing section with figures.
-\item Finish p vs V equation plot and format plots.
-%\item Touch up the freezing figures.
-\end{enumerate}
-
-\subsection{Meeting to-do list}
-\begin{enumerate}
-\item Go over plots and text sections II.B (ASK about text in red)
-\end{enumerate}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Methods}
 
@@ -516,7 +520,7 @@ potential:
   \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
-We then make the $\alpha$ and $\Xi$ parameters temperature-dependent 
+We make the $\alpha$ and $\Xi$ parameters temperature-dependent 
 to approximate the soft, repulsive potential of the WCA fluid,
 as will be described in the next section.
 % Analytical expressions for the Fourier transforms of each of the 
@@ -611,11 +615,12 @@ I think also reproduces $B_2$.
 %Alpha is found by setting the second virial coefficient computed with Vwca equal 
 %to the second virial coefficient computed with Verf.}
 We begin by relating the parameter $\Xi$ to the variance of the radius 
-about the peak of the derivative of the Mayer function of the WCA potential
+about the peak of the derivative of the Mayer function 
+of the WCA potential, $f'_{wca}(r)$,
 %about the peak at $r=\alpha$
 %found from integrating the radius times the deriviative of the mayer 
 %function with respect to the radius r 
-for a given temperature.
+at a given temperature.
 \begin{align}
     \frac{\Xi^2}{2}= \langle r^2\rangle-\left<r\right>^2
 \end{align}
@@ -623,19 +628,26 @@ where
 \begin{align}
     \langle r\rangle = \frac{\int f'_{wca}(r)~r~dr}{\int f'_{wca}(r)~dr}
 \end{align}
-and 
-\begin{align}
-    f'_{wca}(r)= -\frac{1}{kT}e^{-V_{wca}(r)/kT}\frac{dV_{wca}(r)}{dr}
-\end{align}
+%and 
+%\begin{align}
+    %f'_{wca}(r)= -\frac{1}{kT}e^{-V_{wca}(r)/kT}\frac{dV_{wca}(r)}{dr}
+%\end{align}
 In this way, we reproduce the exact width, or variance of the derivative 
 of the Mayer function of the WCA potential when our $w_2(r)$, given by 
-Equation~\ref{eq:gaussianw2}, is used in     
-Equation~\ref{eq:mayerandw2} 
+Eq.~\ref{eq:gaussianw2}, is used in     
+Eq.~\ref{eq:mayerandw2} 
 %resulting in a function with variance $\frac{\Xi^2}{2}$
 %so that the right side of Equation~\ref{eq:mayerandw2} gives
 \begin{align}
    \frac{1}{\Xi\sqrt{\pi}}e^{-\big(\frac{r-\alpha}{\Xi}\big)^2}
 \end{align}
+\kirstiesays{I have not yet been able to demonstrate that this gives us equal softness.}
+The derivative of the Mayer function corresponding to the WCA pair potential 
+is shown in Fig.~\ref{fig:w2-comparison} where it is compared to the 
+fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
+% as in Eq.~\ref{eq:mayerandw2}.  
+Ideally, the curves would match for each temperature provided 
+Eq.~\ref{eq:mayerandw2} is satisfied.
 %%We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
 %%at distance $\alpha$ corresponding to
 %%the maximum slope of the Mayer function. This tells us that the $\alpha$ 
@@ -645,11 +657,12 @@ Equation~\ref{eq:mayerandw2}
         %%\ln 2}} \right)^{\frac{1}{6}}.
 %%\end{align}
 
-Next, we set the second virial 
-coeffecient, $B_2$, formed using the mayer function for the $\Vwca(r)$ potential 
+Next, we set the second virial coeffecient, $B_2$, formed using the Mayer 
+function for the $\Vwca(r)$ potential 
 in Eq.~\ref{eq:Vwca} equal to the second virial coefficent formed using 
-the mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, 
+the Mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, 
 and solve for the parameter $\alpha$ at a given temperature.
+%The second virial coefficient, $B_2$ is given by
 %\begin{displaymath}B_2=-\frac{1}{2}\int{f(r)~d{r}}\end{displaymath}
 \begin{equation}B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}\end{equation}
 %\begin{displaymath}\int{(e^{-\beta V_{wca}(r)} - 1)~d{r}}=
@@ -661,28 +674,49 @@ and solve for the parameter $\alpha$ at a given temperature.
 %      2} + \ln 2 \right)},
 %\end{align}
 %\davidsays{Maybe discuss it earlier? - done}
- 
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/potential-plot}
-\end{center}
-\caption{The WCA potential, and approximations to this potential
-  constructed for two different temperatures.}
-\label{fig:potential-plot}
-\end{figure}
-
+In the low-density excess limit, the free energy of a homogeneous fluid 
+with a large number of particles is given by
+\begin{align}\label{eq:Fexcess}
+    F_{excess} &\approx k_BTn^2 B_2 V
+    %\frac{F_{excess}}{N} &\approx k_BTn\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)
+\end{align} 
+The virial equation is given by
+%\begin{equation}\frac{P}{k_BT}=\frac{N}{V}\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
+\begin{equation}\frac{P}{k_BT}=n+n^2B_2+n^3B_3+ \cdot\cdot\cdot \end{equation}
+\kirstiesays{I'm not sure how to tie this into how accurate our functional is at 
+low densities...still working on this}
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/w2-comparison}
 \end{center}
 \caption{The derivative of the Mayer function $f(r)$ from the WCA
   potential, and the convolution of the fitted Gaussian $w_2$ with
-  itself at two different temperatures.  According to
+  itself at three different temperatures. According to
   Eq.~\ref{eq:mayerandw2} these should be identical in order to
-  accurately reproduce the low-density behavior of the fluid.}
+  accurately reproduce the low-density behavior of the fluid.
+  The vertical dotted lines
+  show the value of $\alpha$ where the erf potential peaks and
+  the the solid vertical line shows where the WCA force and potential,
+  and thus $f'_{\mathrm{wca}}$, goes to zero. 
+  The erf result extends slightly past the cutoff at which 
+  $f'_{\mathrm{wca}}$ vanishes for
+  both temperatures, but does quickly go to zero. 
+  At lower temperatures $w_2$ and $f'_{\mathrm{wca}}$ are more 
+  peaked and approach the cutoff, as
+  the system approaches hard-sphere behavior in which these functions
+  are Dirac $\delta$ functions. }
 \label{fig:w2-comparison}
 \end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/potential-plot}
+\end{center}
+\caption{\kirstiesays{fix dotted lines} The WCA potential, and approximations to this potential
+  constructed for two different temperatures.}
+\label{fig:potential-plot}
+\end{figure}
+
 
 Fig.~\ref{fig:potential-plot} shows the erf potential at two different 
 tempertures alongside the temperature independent WCA potential.  
@@ -692,15 +726,15 @@ tempertures alongside the temperature independent WCA potential.
 %
 Vertical dotted lines show the values of $\alpha$ at
 which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical line
-represents the distance at which the WCA force goes to zero, and the
-horizontal dotted lines \textcolor{red}{illustrate the two temperatures.} 
+represents the distance at which the WCA force goes to zero. 
+%and the horizontal dotted lines \textcolor{red}{illustrate the two temperatures.} 
 % 
 %We see the temperature dependence of the approximation in comparison to  
 %the WCA potential, with the approximation at higher temperatures being 
 %more accurate for smaller differences. %Is this true anymore?? don't think so!
 %
-\textcolor{red}{We see the approximation is more accurate at higher 
-temperatures for smaller differences.} %Not so! - fix
+%\textcolor{red}{We see the approximation is more accurate at higher 
+%temperatures for smaller differences.} %Not so! - fix
 %
 At both temperatures, the largest deviations are seen at very small distances,
 and thus very high potential energies.
@@ -714,23 +748,7 @@ and thus very high potential energies.
 %Fig.~\ref{fig:w2-comparison} compares the derivative of the Mayer
 %function 
 %corresponding to the WCA pair potential 
-The derivative of the Mayer function corresponding to the WCA pair potential 
-is shown in Fig.~\ref{fig:w2-comparison} where it is compared to the 
-fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
-% as in Eq.~\ref{eq:mayerandw2}.  
-Ideally, the curves would match for each temperature provided 
-Eq.~\ref{eq:mayerandw2} is satisfied.
-The two vertical dotted lines
-show the value of $\alpha$ where the erf potential peaks and
-the the solid vertical line shows where the WCA force and potential,
-and thus $f'_{\mathrm{wca}}$, goes to zero. 
-%
-The erf result extends
-slightly past the cutoff at which $f'_{\mathrm{wca}}$ vanishes for
-both temperatures, but does quickly go to zero. At lower lower
-temperatures $w_2$ and $f'$ are more peaked and approach the cutoff, as
-the system approaches hard-sphere behavior in which these functions
-are Dirac $\delta$ functions.\color{black} 
+
 
 %In this step, we make one additional approximation beyond the erf
 %approximation, which is to approximate $w_0$ as a linear combination
@@ -794,7 +812,6 @@ be found from a plot of pressure verses the inverse density.
 %approach~\cite{barker1967perturbation}. This theory takes any general
 The Barker-Henderson fluid is known to give good results, so we use it 
 as a reference to compare with our DFT results. 
-----
 In the BH approach, any general
 repulsive pair potential, $V(r)$ is used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter given by
@@ -802,14 +819,13 @@ sphere reference fluid with a temperature dependent diameter given by
   d = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
 \end{align}
-----
 We utilize this variable diameter with the White Bear FMT free energy
 functional for the hard sphere fluid~\cite{roth2002whitebear} as a
 comparison for the SFMT presented in this paper.
 
 The White Bear version of the Fundamental-Measure Theory~(FMT)
 functional~\cite{roth2002whitebear}, describes the excess free energy
-of an \emph{inhomogeneous} hard-sphere fluid.  This functional differs
+of an inhomogeneous hard-sphere fluid.  This functional differs
 from the equations of SFMT presented in
 Equations~\ref{eq:sfmt-excess-free}-\ref{eq:n-3} only in replacing
 Eq.~\ref{eq:sfmt-phi3} with the following equation:
@@ -829,7 +845,7 @@ given by the Dirac $\delta$ function:
 \end{align}
 where $R$ is the hard-sphere radius.  The remaining weighting
 functions are derived from $w_2$ according to
-Eqs.~\ref{eq:n-0-1}-\ref{eq:n-3}, as in SFMT.
+Eqs.~\ref{eq:n-0-1}, \ref{eq:n-vectors} and \ref{eq:n-3}, as in SFMT.
 
 \section{Results}
 In this section the results of our SFMT method will be compared to the results of simulations for a reference fluid.
