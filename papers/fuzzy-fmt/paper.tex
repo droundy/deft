@@ -57,18 +57,21 @@
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
+\item CURRENTLY WORKING ON... writing Results-Part F
 \item Update Results section and enlarge font on plots
 %\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 %\item Finish section describing use of tensor functional.
 \item Finish items in red
+\item fix citations
 %\item Finish p vs V equation plot and format plots.
 \item Clean up and streamline appendix
 \end{enumerate}
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
-\item TBA
+\item removed unwanted content in introduction
+\item read over everything except Results-part F
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -271,8 +274,7 @@ To obtain the free energy of the soft sphere fluid from which the
 thermodynamic properites of the fluid can be found, 
 we use Soft Fundamental Measure Theory
 (SFMT) introduced in 1999 by Schmidt~\cite{schmidt1999density} with a 
-tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}
-shortly after.
+tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}.
 %without the need to refer to a hard-sphere fluid??
 %
 %In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
@@ -683,8 +685,8 @@ with a large number of particles is given by
 The virial equation is given by
 %\begin{equation}\frac{P}{k_BT}=\frac{N}{V}\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
 \begin{equation}\frac{P}{k_BT}=n+n^2B_2+n^3B_3+ \cdot\cdot\cdot \end{equation}
-\kirstiesays{I'm not sure how to tie this into how accurate our functional is at 
-low densities...still working on this}
+\kirstiesays{I'm not yet sure how to tie this into how accurate our functional is at 
+low densities}
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/w2-comparison}
@@ -712,21 +714,29 @@ low densities...still working on this}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/potential-plot}
 \end{center}
-\caption{\kirstiesays{fix dotted lines} The WCA potential, and approximations to this potential
-  constructed for two different temperatures.}
+\caption{\kirstiesays{fix dotted lines} The WCA potential, 
+   and approximations to this potential
+   at two different temperatures constructed using the erf potential 
+   with incorparated temperature-dependent parameters $\alpha$ and $\Xi$. 
+   The vertical dotted lines show the values of $\alpha$ at
+   which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical 
+   line represents the distance at which the WCA force goes to zero. }
 \label{fig:potential-plot}
 \end{figure}
 
 
-Fig.~\ref{fig:potential-plot} shows the erf potential at two different 
-tempertures alongside the temperature independent WCA potential.  
+The temperature-dependent parameters $\alpha$ and $\Xi$ are incorporated 
+into the erf potential as shown in Eq.~\ref{eq:Verf} to make the 
+erf potential approximate the temperature-independent WCA for each temperature.
+Fig.~\ref{fig:potential-plot} 
+shows plots of the erf potential at two different 
+tempertures alongside WCA potential.  
+At both temperatures, the largest deviations are seen at very small distances,
+and thus very high potential energies.
 %
 %We show the resulting approximation for the potential in 
 %%Fig.~\ref{fig:potential-plot} for two different temperatures.  
 %
-Vertical dotted lines show the values of $\alpha$ at
-which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical line
-represents the distance at which the WCA force goes to zero. 
 %and the horizontal dotted lines \textcolor{red}{illustrate the two temperatures.} 
 % 
 %We see the temperature dependence of the approximation in comparison to  
@@ -736,9 +746,7 @@ represents the distance at which the WCA force goes to zero.
 %\textcolor{red}{We see the approximation is more accurate at higher 
 %temperatures for smaller differences.} %Not so! - fix
 %
-At both temperatures, the largest deviations are seen at very small distances,
-and thus very high potential energies.
-
+%
 %The erf potential is shown in Fig.~\ref{fig:potential-plot}, and the
 %
 %The first derivatives of the Mayer $f$ function corresponding to the erf
@@ -867,14 +875,6 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
   %parameters as $p^{*} \equiv p \sigma^3/\epsilon$.}
 %\label{fig:p-vs-T}
 %\end{figure}
-
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
- \end{center}
-\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
-\label{fig:p-vs-V_at_fixed_T}
-\end{figure}
 
 As a simple test for the equation of state, we compare the theory for
 a homogeneous soft-sphere fluid to Monte Carlo simulation. The results
@@ -1011,6 +1011,14 @@ DFT's error is comparable to that of the Barker-Henderson results.
     K and 1.1 GPa, and at 48 K and 9.92 MPa. \davidsays{FIXME these don't match.}}
   \label{fig:argon-plots}
 \end{figure*}
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
+ \end{center}
+\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
+\label{fig:p-vs-V_at_fixed_T}
+\end{figure}
 
 \begin{figure}
  \centering
