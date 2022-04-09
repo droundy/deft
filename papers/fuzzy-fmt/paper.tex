@@ -57,21 +57,19 @@
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
-\item CURRENTLY WORKING ON... writing Results-Part F
-\item Update Results section and enlarge font on plots
+\item Update Results sections A and B
+\item fix citations
 %\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 %\item Finish section describing use of tensor functional.
-\item Finish items in red
-\item fix citations
 %\item Finish p vs V equation plot and format plots.
 \item Clean up and streamline appendix
 \end{enumerate}
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
-\item removed unwanted content in introduction
-\item read over everything except Results-part F
+%\item removed unwanted content in introduction
+\item address red comments and read over everything 
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -86,83 +84,27 @@ model, provided the radius is chosen to be temperature dependent
 andersen1971relationship}. A temperature-dependent hard sphere radius 
 reflects the effect of collisions during which the particles are pushed 
 closer together at higher temperatures. 
+In the widely celebrated Barker-Henderson approach, \textcolor{red}{any} 
+repulsive pair potential can be used to construct a corresponding 
+hard sphere reference fluid with a temperature dependent diameter. 
 
-Rowlinson introduced a temperature dependent reduced length 
-%given by
-%\begin{align}
-  %\rho &= \bigg(\frac{\epsilon}{k_BT}\bigg)^{\frac{1}{n}}\bigg[1+\frac{\gamma}{n}\bigg]
-%\end{align}
-for the inverse-power potential 
-\begin{align}
-  u(r) &= \epsilon\bigg(\frac{r}{R_m}\bigg)^{-n}
-\end{align}
-which is of a form similar to the repulsive portion of the Lennard-Jones potential 
-where $\epsilon$ and $R_m$ correspond to the Lennard-Jones parameters. 
-He showed that the Helmholtz free energy could then be expressed in terms
-of the Helmholtz free energy of a hard sphere reference fluid adjusted 
-by the temperature-dependent reduced length.
-%, $\rho$
-%\begin{align}
-  %A_n(V,T) &= A_{HS}(V\rho^{-3}, T) - 3RT\ln\rho
-%\end{align}
-%and cites the correspondence of the form of this equation to that derived by 
-%Longuet-Higgens~%\cite{?} 
-%to take into account the change of molecular size on the 
-%free energy of a conformal assembly.
+The hard-sphere fluid is widely studied and well understood. It 
+has served as the reference system of choice for the theory of
+liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
+  lafitte2013accurate} not only for the homogeneous
+fluid~\cite{carnahan1969equation}, but also in the more challenging
+case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997, 
+roth2002whitebear}.  However, the hard-sphere fluid remains a
+non-physical model, which can also be numerically inconvenient due to its
+discontinuous potential, and the requirement for delta functions in
+computing weighted densities.
 
-Barker-Henderson generalized Rowlinson's method by developing an approach
-where 
-%In the widely celebrated Barker-Henderson approach, which is a generalization
-%of Rowlinson's method, 
-any 
-repulsive pair potential, $u(r)$ can be used to construct a corresponding hard
-sphere reference fluid with a temperature dependent diameter given by
-\begin{align}
-  d(T) &= \int_0^{\infty}\left( 1 - e^{-\beta u(r)} \right)~\mathrm{dr}
-  \label{eq:bh-diameter}
-\end{align}
-This diameter eliminates a low-order term in the expansion of the Helmholtz
-free energy about a steepness paramenter $\alpha$ that describes the 
-steepness of the repulsive part of the potential, and a well-depth parameter $\gamma$
-that describes the depth of the attractive part of the potential energy well. 
-When both parameters are set to equal one, the resulting potential equals
-the Lennard-Jones potential, whereas when both parameters are set to zero, 
-the resulting potential equals that of a hard sphere fluid. When the low-order term 
-referring to the steepness of the repulsive potential is eliminated in the 
-expansion of the Helmholtz free energy along 
-with higher order terms that are neglected, only the Helmholtz free energy 
-of a hard sphere reference fluid remains along with a low-order term associated
-with the well-depth parameter of the attractive potential energy. This enables
-the use of perturbation theory to describe the Helmholtz free energy of 
-the full potential.
-\begin{align}
-  A &= A_{hs} + \alpha(0) + \gamma(...) + \text{higher order terms}  \\
-  A &\approx A_{hs} + \gamma(...) 
-\end{align}
-where the free energy of the hard sphere fluid, $A_{hs}$, is evaluated using the temperature-dependent diameter.
-%\begin{align}
-  %A &= A_o + \alpha stuff\bigg(d + \int_0^\sigma (1 - e^{-u(z)/k_BT})~dz \bigg) + \mathrm{...}  \\
-    %&= A_o + \alpha stuff\bigg(d - d\bigg) + \mathrm{...}
-%\end{align}
-
-Weeks-Chandler-Andersen (WCA) 
-created a soft, repulsive reference fluid 
-modeled by a hard sphere fluid with a temperature and density
-dependent hard sphere diameter.
-They split the Lennard-Jones potential into two
-parts differently than Barker-Henderson had done 
-%where one part is 
-to create 
-a soft, repulsive reference potential 
-%that arises from only
-%which is 
-associated only with the 
-repulsive forces between particles 
-to which a perturbative potential associated with only attractive forces
-is added to recover the full Lennard-Jones potential. 
-%which, when added to the reference potential
-%recovers the full Lennard-Jones potential. 
-The repulsive WCA potential is given by 
+In this paper, we introduce a \textit{soft} sphere fluid 
+with temperature-dependent parameters to model the soft, repulsive 
+potential of a Weeks-Chandler-Andersen (WCA) fluid. 
+The WCA potential reproduces the repulsive force of a Lennard-Jones 
+interaction, which makes it an ideal model for interatomic repulsion. 
+The repulsive potential of the WCA fluid is given by 
 \newcommand\erf{\mathrm{erf}}
 \newcommand\Vwca{V_{\mathrm{wca}}}
 \newcommand\Verf{V_{\erf}}
@@ -178,148 +120,31 @@ The repulsive WCA potential is given by
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
-%and to which 
-%along with 
-%to which is added
-%to which 
-%which, when added, 
-%associated with attractive forces.
-%which can be added to the reference potential
-%added 
-%recovers 
-%to recover the full Lennard-Jones potential. 
-%with is added to account for attractive forces.
-%The WCA potential is modeled by a hard sphere fluid with a 
-They derived a temperature and density
-dependent hard sphere diameter 
-%derived
-%to model the soft, purely repulsive reference potential 
-%for a reference fluid consisting of the soft, repulsive part of the potential which is 
-%given by
-%\cite{?}
-%------------------------
-%\color{red}
-%The hard sphere diameter 
-%of the corresponding hard sphere reference fluid 
-%The hard sphere diameter of this reference fluid 
-by making the compressibility of the hard sphere fluid equal that
-of the WCA potential
-through meeting the condition 
-\begin{align}
-  %\int \big(y_{HS}(r) e^{-\beta V_{wca}(r)} -1 \big)d\vec r &= \int \big(y_{HS}(r) e^{-\beta V_{HS}(r)} -1 \big)d\vec r
-  \int y_{hs}(r) e^{-\beta V_{wca}(r)} -1 ~d\vec r &= \int y_{hs}(r) e^{-\beta V_{hs}(r)} -1 ~d\vec r
-\end{align} 
-where it is assumed that
-\begin{align}
-  y_{wca}(r) &\equiv g_{wca}(r)e^{V_{wca}(r)/k_BT} \\
-         &\approx g_{hs}(r)e^{V_{hs}(r)/k_BT} \\
-         &\approx y_{hs}(r)
-\end{align} 
-%The WCA potential reproduces
-%the repulsive force of a Lennard-Jones interaction, which makes it an
-%ideal model for interatomic repulsion. 
-Tang~\cite{?} later arrived at a result similar to that of Weeks-Chandler-Andersen 
-by following along the 
-line of Barker-Henderson's derivation but making the first order 
-correction to the expansion of the Helmholz free energy of a repulsive potential 
-about that of a hard sphere fluid vanish exactly.
-\begin{align}
-  \int_0^\sigma y_{hs}(r) e^{-\beta u(r)}r^2 ~\mathrm{dr} &= 
-  \int_d^\sigma y_{hs}(r) r^2~\mathrm{dr}
-\end{align}
-%-----------------------
-%split the Lennard-Jones potential differently than BH
-%  \davidsays{This might be a good place to mention more about BH and similar?}
-%T
-%\textcolor{red}{Given that the repulsive interaction between particles is the dominate 
-%factor in determining the structure of fluids at high densities, these SITE THIS!}
-%works cemented the hard-sphere
-%model as the reference system of choice for the theory of
-%liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  %lafitte2013accurate}.  
-  
-The hard-sphere fluid is well understood and
-%is widely studied and well understood. 
-has served as the reference system of choice for the theory of
-liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate}
-not only for the homogeneous
-fluid~\cite{carnahan1969equation}, but also in the more challenging
-case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
-  roth2002whitebear}.  However, the hard-sphere fluid remains a
-non-physical model, which can also be numerically inconvenient due to its
-discontinuous potential, and the requirement for delta functions in
-computing weighted densities.
-
-In this paper, we introduce a temperature-dependent 
-\textit{soft} sphere fluid 
-%with a potential that approximates the potential of
-to model
-the soft, repulsive potential of the WCA fluid. 
-The WCA potential reproduces
-the repulsive force of a Lennard-Jones interaction, which makes it an
-ideal model for interatomic repulsion. 
-We model the WCA fluid by constructing a soft-sphere potential with 
-temperature-dependent parameters, $\alpha$ and $\Xi$, 
-that we use to
-make the second virial coefficent of our soft sphere 
-reference fluid match the second virial coeficent of the WCA fluid at 
-each temperature.
-%\begin{align}
-    %B_2(T) &=-\frac{1}{2}\int{(e^{-\beta V(r, \alpha(T), \Xi(T))} - 1)~d{\vec{r}}}  \\
-        %&=-\frac{1}{2}\int{(e^{-\beta V_{wca}(r)} - 1)~d{\vec{r}}}
-%\end{align}
 
 To obtain the free energy of the soft sphere fluid from which the
 thermodynamic properites of the fluid can be found, 
 we use Soft Fundamental Measure Theory
-(SFMT) introduced in 1999 by Schmidt~\cite{schmidt1999density} with a 
-tensor weight introduced by Tarazona~\cite{tarazona2000,santos2012phi3}.
-%without the need to refer to a hard-sphere fluid??
-%
-%In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
-%(SFMT)~\cite{schmidt1999density} which 
+(SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999 .
 SFMT is a classical density functional
 theory that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
 by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
 Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\vec r)\rbrace}$ 
 to express the free energy of the system
-as a functional of the number density profile. 
+as a functional of the number density profile.
 Schmidt's SFMT free energy functional is constructed so as to yield results 
 consistent with the low-density limit of the virial expansion
 and with the limiting case of a zero-dimensional cavity which are known 
-exactly. Tarazona's tensor 
-weight eliminates the problem of divergences present in earlier versions 
-of FMT so that it can be applied to freezing and inhomogeneous fluids 
-with superior results.
- %that prevented them from giving good results for freezing.
+exactly. 
+There have been a few versions of Rosenfelds's FMT with improvements 
+made for inhomogeneous situations. 
+We use Schmidt's version of SFMT that 
+has Tarazona's tensor weight which eliminates the problem of divergences 
+present in the earlier versions of FMT so that it can be applied well to 
+freezing and inhomogeneous fluids~\cite{S and T}.
 
-%and can be used for inhomogeneous systems.
-%\begin{align}
-    %A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
-%\end{align}
-%The weighted densities are formed using a set of weight functions 
-%$\lbrace{w_i(\vec r)\rbrace}$ with forms that arise from noting that 
-%the Mayer function of a hard sphere fluid can be expressed in terms of 
-%convolutions involving the set of simple weight functions.
-%\begin{align}
-    %f_{hs}(r) = -2(w_0*w_3 + w_1*w_2 + \vec {w}_1*\vec {w}_2)
-%\end{align}
-%SFMT extends the use of the weight functions to soft sphere fluids 
-%by preserving the general 
-%form of the relations between the weight functions (which are all related to each other)
-%and replacing the particular expression used for one of the weight functions with 
-%a form compatible with a soft sphere potential from which the particular 
-%expressions for all the other weights can then be derived.
-%...and which 
-%...preserves/satisfies ? conditions...  discuss forms of the s$\Phi$s ...
-
-%There have been a few versions of SFMT differring in the explicit form 
-%of the expression for $\Phi_3$. 
-
-Due to its combination of
-computational efficiency with accuracy, FMT has been used as the
+Due to its combination of computational efficiency with accuracy, 
+FMT has been used as the
 basis for a wide variety of classical density
 functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
   marechal2013density, hughes2013classical, krebs2014improved}, and
@@ -327,36 +152,11 @@ SFMT has been used to describe the behavior of a star polymer in
 solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
   sweatman2002fundamental}, as well as repulsive potentials applicable
 to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
-
 %and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
 %the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
-
-%% In his 2010 review of FMT, Roth states that the most important future
-%% developments in equilibrium DFT will involve treating soft repulsions
-%% and attractions~\cite{}.
-
-%In this paper, we will apply SFMT to study the Weeks-Chandler-Andersen
-%(WCA) repulsive potential~\cite{weeks1971}.  This potential reproduces
-%the repulsive \textcolor{red}{force?} of a Lennard-Jones interaction, which makes it an
-%ideal model for interatomic repulsion.  Mathematically, the WCA
-%pair potential is given by
-%\newcommand\erf{\mathrm{erf}}
-%\newcommand\Vwca{V_{\mathrm{wca}}}
-%\newcommand\Verf{V_{\erf}}
-%\begin{align}
-  %\Vwca(r) =
-  %\begin{cases}
-    %4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
-    %\left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
-    %0, & \textrm{otherwise}.
-  %\end{cases}
-%\label{eq:Vwca}
-%\end{align}
-%where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
-%and $R$ is a single sphere radius which is related by $\sigma =
-%2^{5/6} R$.
-
-
+In his 2010 review of FMT, Roth states that the most important future
+developments in equilibrium DFT will involve treating soft repulsions
+and attractions~\cite{}.
 \section{Methods}
 
 \subsection{Soft Fundamental Measure Theory}
@@ -676,17 +476,23 @@ and solve for the parameter $\alpha$ at a given temperature.
 %      2} + \ln 2 \right)},
 %\end{align}
 %\davidsays{Maybe discuss it earlier? - done}
-In the low-density excess limit, the free energy of a homogeneous fluid 
-with a large number of particles is given by
-\begin{align}\label{eq:Fexcess}
-    F_{excess} &\approx k_BTn^2 B_2 V
-    %\frac{F_{excess}}{N} &\approx k_BTn\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)
+In the low-density limit, where it is not likely to find more than two
+particles in close proximity at any point in time, 
+the excess free energy of an inhomogeneous fluid is given by
+\begin{align}\label{eq:Fexcess_low-density_homogeneous}
+    F_{ex} &= k_BT\int d\vec {r}~'\rho(\vec r~')\int d\vec {r}~"\rho(\vec r~")\left(-\frac{1}{2}f(|\vec {r}~'-\vec {r}~"|)\right) 
 \end{align} 
-The virial equation is given by
+which, for homogeneous fluids, becomes
+\begin{align}\label{eq:Fexcess_low-density_inhomogeneous}
+    F_{ex} &= k_BTn^2\int d\vec {r}~'\int d\vec {r}~"\left(-\frac{1}{2}f(|\vec {r}~'-\vec {r}~"|)\right) \\
+               &= k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)V \\
+               &= k_BTn^2 B_2 V
+\end{align} 
+The equation of state  is given by the virial equation 
 %\begin{equation}\frac{P}{k_BT}=\frac{N}{V}\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
 \begin{equation}\frac{P}{k_BT}=n+n^2B_2+n^3B_3+ \cdot\cdot\cdot \end{equation}
-\kirstiesays{I'm not yet sure how to tie this into how accurate our functional is at 
-low densities}
+\kirstiesays{still looking at this...}
+
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/w2-comparison}
@@ -714,7 +520,7 @@ low densities}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/potential-plot}
 \end{center}
-\caption{\kirstiesays{fix dotted lines} The WCA potential, 
+\caption{The WCA potential, 
    and approximations to this potential
    at two different temperatures constructed using the erf potential 
    with incorparated temperature-dependent parameters $\alpha$ and $\Xi$. 
@@ -824,7 +630,7 @@ In the BH approach, any general
 repulsive pair potential, $V(r)$ is used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter given by
 \begin{align}
-  d = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
+  d_{BH} = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
 \end{align}
 We utilize this variable diameter with the White Bear FMT free energy
@@ -842,7 +648,7 @@ Eq.~\ref{eq:sfmt-phi3} with the following equation:
   n_3 + (1-n_3)^2 \ln(1-n_3)
 }{
   36\pi n_3^2\left( 1 - n_3 \right)^2
-} ,
+} , 
 \end{align}
 which causes the functional to reduce to the Carnahan-Starling free
 energy rather than scaled-particle theory for homogeneous systems. In
@@ -851,9 +657,10 @@ given by the Dirac $\delta$ function:
 \begin{align}
   w_2(r) = \delta(r - R),
 \end{align}
-where $R$ is the hard-sphere radius.  The remaining weighting
+where $R$ is the hard-sphere radius. The remaining weighting
 functions are derived from $w_2$ according to
-Eqs.~\ref{eq:n-0-1}, \ref{eq:n-vectors} and \ref{eq:n-3}, as in SFMT.
+Eqs.~\ref{eq:n-0-1}-\ref{eq:n-3}, as in SFMT.
+%, \ref{eq:n-vectors} and 
 
 \section{Results}
 In this section the results of our SFMT method will be compared to the results of simulations for a reference fluid.
@@ -862,6 +669,14 @@ sphere fluid with a diameter determined by Eq.~\ref{eq:bh-diameter}
 using a WCA potential as the pair potential. The excess free energy functional of the 
 BH fluid is constructed using White Bear FMT. %The BH fluid is known
 %to give good results, so we use it as a reference for our DFT.
+
+\begin{figure}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
+ \end{center}
+\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
+\label{fig:p-vs-V_at_fixed_T}
+\end{figure}
 
 \subsection{Homogeneous limit}
 
@@ -898,6 +713,8 @@ as is evident from Fig.~\ref{fig:p-vs-T}.  In contrast, the very high
 reduced density of 1.0 is well beyond the point where our SFMT has
 considerably broken down quantitatively, and can demonstrate how it
 fails.
+
+\subsection{Freezing Region}
 
 \subsection{Soft spheres near a hard wall}
 
@@ -1008,28 +825,20 @@ DFT's error is comparable to that of the Barker-Henderson results.
   \end{center}
   \caption{Radial distribution functions of Argon. From left to right
     the experimental data was taken at 85 K and vapor pressure, at 293
-    K and 1.1 GPa, and at 48 K and 9.92 MPa. \davidsays{FIXME these don't match.}}
+    K and 1.1 GPa, and at 148 K and 9.92 MPa.}
   \label{fig:argon-plots}
 \end{figure*}
 
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
- \end{center}
-\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
-\label{fig:p-vs-V_at_fixed_T}
-\end{figure}
-
-\begin{figure}
- \centering
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
-\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
-\label{fig:Phase_Diagram_of_T_vs_n}
-\end{figure}
+%\begin{figure}
+ %\centering
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
+%\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
+%\label{fig:Phase_Diagram_of_T_vs_n}
+%\end{figure}
 
 \subsection{Argon}
 
-Finally, to connect with experiment, we model liquid the radial
+Finally, to connect with experiment, we generate the radial
 distribution function of Argon by computing the radial distribution of
 a WCA fluid surrounding a single Lennard-Jones particle.  We consider
 three density/temperature pairs for which experimental data is
@@ -1037,11 +846,11 @@ available~\cite{mikolaj2004structure, eggert2002quantitative,
 yarnell1973structure}, and which roughly span the range of reduced
 densities from 0.6 to 1.0. The three experimental results were
 performed at vapor pressure, 9.92 MPa, and 1.1 GPa; and at
-temperatures of 85 K, 48 K, and 293 K respectively. For each system we
+temperatures of 85 K, 148 K, and 293 K respectively. For each system we
 compute the radial distribution function with Monte Carlo simulation,
 as well as SFMT and the Barker-Henderson approach.  For our WCA fluid
 and Lennard-Jones test particle, we used the Lennard-Jones parameters
-developed by Verlet: $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon =
+developed by Verlet: $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon/k_B =
 119.8$~K~\cite{verlet1967computer}.
 
 Figure~\ref{fig:argon-plots} shows the resulting radial distribution
@@ -1053,12 +862,6 @@ larger, but again our new functional performs comparably to the
 Barker-Henderson approach.  Both theories significantly overestimate
 the height of the first peak.
 
-
-\subsection{Freezing of the WCA fluid}
-
-A phase diagram for the WCA fluid is shown below with $\sigma=1$ and $\epsilon=1$.
-
-
 %\begin{figure}
  %\begin{center}
   %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
@@ -1066,14 +869,6 @@ A phase diagram for the WCA fluid is shown below with $\sigma=1$ and $\epsilon=1
 %\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
 %\label{fig:Phase_Diagram_P_vs_T}
 %\end{figure}
-
-
-
-%\[{}\]
-%\[{}\]
-%\[{}\]
-
-
 
 \section{Conclusion}
 
@@ -1083,43 +878,8 @@ advantage of our theory is that we can use it \emph{as is} rather than
 needing to accommodate for discontinuities and delta functions of hard
 sphere fluids.
 
-%\begin{figure}
- %\begin{center}
-  %\includegraphics[width=\columnwidth]{figs/T-vs-n_at_fixed_P}
- %\end{center}
-%\caption{Phase Diagram of the reduced temperature verses the reduced density. The grey region indicates coexistence.}
-%\label{fig:T-vs-n_at_fixed_P}
-%\end{figure}
-
-%\begin{figure}
- %\begin{center}
-  %\includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n}
- %\end{center}
-%\caption{Plot of the reduced pressure verses the reduced temperature. The lines bending downward indicate freezing.}
-%\label{fig:p-vs-T_at_fixed_density}
-%\end{figure}
-
-%%\begin{figure}
- %%\begin{center}
-  %%\includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
- %%\end{center}
-%%\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
-%%\label{fig:p-vs-V_at_fixed_T}
-%%\end{figure}
-
-%\begin{figure}
- %\begin{center}
-  %\includegraphics[width=\columnwidth]{figs/p-vs-n_at_fixed_T}
- %\end{center}
-%\caption{Phase Diagram of the reduced pressure verses the reduced density. The grey region indicates coexistence.}
-%\label{fig:p-vs-n_at_fixed_T}
-%\end{figure}
-
-
 \bibliography{paper}% Produces the bibliography via BibTeX.
  
-% \end{document}
-
 \appendix
 \begin{widetext}
   \section{Fourier transforms of weight functions}\label{sec:fourier}
