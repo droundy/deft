@@ -1,9 +1,3 @@
-% TODO:
-
-% Write ``Liquid-vapor interface'' section A.
-
-% Look up question-mark references (citations).
-
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
@@ -58,7 +52,8 @@
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
 \item Update Results sections A and B
-\item fix citations
+\item fix citations and figure notation(ask)%ASK: Fig.  or Figure ?
+\item spelling
 %\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 %\item Finish section describing use of tensor functional.
@@ -341,17 +336,6 @@ as will be described in the next section.
 %erf potential in the same way that the Barker-Henderson approach uses
 %the hard-sphere potential to model a soft repulsive fluid.)
 
-%\begin{figure}
-%\begin{center}
-%\includegraphics[width=\columnwidth]{figs/w2-comparison}
-%\end{center}
-%\caption{The derivative of the Mayer function $f(r)$ from the WCA
-  %potential, and the convolution of the fitted Gaussian $w_2$ with
-  %itself at two different temperatures.  According to
-  %Eq.~\ref{eq:mayerandw2} these should be identical in order to
-  %accurately reproduce the low-density behavior of the fluid.}
-%\label{fig:w2-comparison}
-%\end{figure}
 
 %As is evident
 %from Eq.~\ref{eq:Verf}, if the potential energy of interaction is
@@ -360,6 +344,7 @@ as will be described in the next section.
 %to an entirely different form for $f(r)$ and $w_2(r)$, which is not
 %analytically tractable.
 
+%KEEP!!!!!!!
 %Our approach is to 
 %We approximate the effect of a soft repulsive potential
 %(specifically the potential of the WCA fluid) by using the erf
@@ -536,8 +521,8 @@ into the erf potential as shown in Eq.~\ref{eq:Verf} to make the
 erf potential approximate the temperature-independent WCA for each temperature.
 Fig.~\ref{fig:potential-plot} 
 shows plots of the erf potential at two different 
-tempertures alongside WCA potential.  
-At both temperatures, the largest deviations are seen at very small distances,
+temperatures alongside WCA potential. At both temperatures, the largest 
+deviations are seen at very small distances,
 and thus very high potential energies.
 %
 %We show the resulting approximation for the potential in 
@@ -678,7 +663,7 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
 \label{fig:p-vs-V_at_fixed_T}
 \end{figure}
 
-\subsection{Homogeneous limit}
+\subsection{Homogeneous limit-\textcolor{red}{UPDATE}}
 
 %\begin{figure}
 %\begin{center}
@@ -692,27 +677,31 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
 %\end{figure}
 
 As a simple test for the equation of state, we compare the theory for
-a homogeneous soft-sphere fluid to Monte Carlo simulation. The results
-shown in Figure~\ref{fig:p-vs-T} display very good agreement for lower
-densities across all temperatures shown in Figure and at higher
+a homogeneous soft-sphere fluid to Monte Carlo simulation and to 
+simulations of the Barker-Henderson fluid. The results
+shown in Figure~\ref{fig:p-vs-V_at_fixed_T} display very good agreement 
+for lower densities across all temperatures shown and at higher
 temperatures which are not shown. Differences between the DFT (solid
 lines) and MC results (dashed lines) become quite apparent at
 $n^*=0.6$ and above, even at temperatures above the melting
-transition. Our theory consistently predicts higher pressures than
+transition. 
+\textcolor{red}{Our theory consistently predicts higher pressures than
 simulations show, which is surprising given that
 Fig.~\ref{fig:potential-plot} shows that the force should be
-\emph{underestimated} by our theory at high packing.
+\emph{underestimated} by our theory at high packing.}
 
 For the remainder of our figures, we will focus on just two bulk
 reduced densities: 0.6 and 1.0.  We have examined a wide variety of
 densities, and found that the agreement with simulation consistently
 improves as the density is decreased, and so we decided to focus on
-just these two interesting cases.  At a reduced density of 0.6, our
+just these two interesting cases.  
+\textcolor{red}{At a reduced density of 0.6, our
 functional is right on the brink of its discrepancy with simulation,
-as is evident from Fig.~\ref{fig:p-vs-T}.  In contrast, the very high
+as is evident from Fig.~\ref{fig:p-vs-V_at_fixed_T}.  
+In contrast, the very high
 reduced density of 1.0 is well beyond the point where our SFMT has
 considerably broken down quantitatively, and can demonstrate how it
-fails.
+fails.}
 
 \subsection{Freezing Region}
 
@@ -866,7 +855,8 @@ the height of the first peak.
  %\begin{center}
   %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
  %\end{center}
-%\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
+%\caption{Phase Diagram of the reduced pressure verses the reduced 
+%temperature. The green line marks the boundary from Monte-Carlo simulations.}
 %\label{fig:Phase_Diagram_P_vs_T}
 %\end{figure}
 
