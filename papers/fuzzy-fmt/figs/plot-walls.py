@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import division
 # We need the following two lines in order for matplotlib to work
@@ -11,6 +11,9 @@ import matplotlib.lines as mlines
 import os
 
 import styles
+
+figscale=1
+plt.figure(figsize=(9*figscale, 14.5*figscale))
 
 def smooth(x, N):
     '''
@@ -69,10 +72,12 @@ def plot_walls(reduced_density, temps):
         plot(smooth(z, NUM), smooth(data[:, 1], NUM),
              styles.mcwca_linestyle(), color = styles.color_from_kT(temp), label = 'soft-walls-backwards WCA MC $T^*$ = %g' % temp)
 
-    title('Hard walls with bulk $n^* = %g$' % (reduced_density/100))
-    xlabel(r'$z/\sigma$')
-    ylabel('$n^*(r)$')
-    legend()
+    title('Hard walls with bulk $n^* = %g$' % (reduced_density/100), fontsize=20)
+    xlabel(r'$z/\sigma$', fontsize=18)
+    plt.xticks(fontsize=17)
+    ylabel('$n^*(r)$', fontsize=18)
+    plt.yticks(fontsize=17)
+    legend(fontsize=18)
     plt.ylim(0)
     plt.xlim(0, 2.5)
 
@@ -85,7 +90,6 @@ def plot_walls(reduced_density, temps):
 
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (0.6, temp) for temp in [10.0, 2.5]]
 # input: ['figs/mcfcc-walls-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
-figure(figsize=(9, 14.5))
 
 subplot(2, 1, 1)
 plot_walls(60, [10.0, 2.5, 1.0])
@@ -96,3 +100,4 @@ plot_walls(100, [10.0, 5.0, 2.5]) # 1.0 could work?
 plt.tight_layout();
 savefig('figs/hard-walls.pdf', bbox_inches=0)
 print('figs/hard-walls.pdf')
+

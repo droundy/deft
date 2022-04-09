@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import division
 
@@ -25,7 +25,7 @@ rmin = 0.9
 rmax = 1.2
 dr = 0.01
 
-figscale=1.5
+figscale=1
 plt.figure(figsize=(4*figscale, 3*figscale))
 
 r = np.arange(rmin, diameter, dr)
@@ -36,7 +36,7 @@ Verf = -kT*np.log(0.5*(erf ((r-alpha)/Xi)+1))
 
 plt.plot(r, Verf, 'g--', label=r'$V_{erf}$ for $kT/\epsilon = %g$' % kT)
 
-plt.axhline(kT, color='g', ls=':')
+#plt.axhline(kT, color='g', ls=':')
 plt.axvline(alpha, color='g', linestyle=':')
 
 #kT = .1
@@ -45,16 +45,18 @@ r = np.arange(rmin, rmax, dr)
 alpha, Xi, diameter = wca_erf.parameters(kT)
 Verf = -kT*np.log(0.5*(erf ((r-alpha)/Xi)+1))
 plt.plot(r, Verf, 'b--', label=r'$V_{erf}$ for $kT/\epsilon = %g$' % kT)
-plt.axhline(kT, color='b', ls=':')
+# plt.axhline(kT, color='b', ls=':')
 plt.axvline(alpha, color='b', linestyle=':')
 
+plt.tight_layout()
 plt.axvline(diameter, color='k', linestyle='-')
-
 plt.xlim(rmin, rmax)
+plt.xticks(fontsize=8)
 plt.ylim(0, 5)
-plt.ylabel('$V/\epsilon$')
-plt.xlabel('$r/\sigma$')
-plt.legend(loc='best')
+plt.yticks(fontsize=8)
+plt.ylabel('$V/\epsilon$', fontsize=10)
+plt.xlabel('$r/\sigma$', fontsize=10)
+plt.legend(loc='best', fontsize=8)
 
 plt.savefig('figs/potential-plot.pdf')
 plt.show()
