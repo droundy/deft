@@ -51,8 +51,8 @@
 
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
-\item Update Results sections A and B
-\item fix citations and figure notation(ask)%ASK: Fig.  or Figure ?
+\item Update Results section 
+\item fix citations and equation and figure notation(ask)%ASK: Fig.  or Figure ?
 \item spelling
 %\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
@@ -430,7 +430,7 @@ Eq.~\ref{eq:mayerandw2}
 \end{align}
 \kirstiesays{I have not yet been able to demonstrate that this gives us equal softness.}
 The derivative of the Mayer function corresponding to the WCA pair potential 
-is shown in Fig.~\ref{fig:w2-comparison} where it is compared to the 
+is shown in Figure~\ref{fig:w2-comparison} where it is compared to the 
 fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
 % as in Eq.~\ref{eq:mayerandw2}.  
 Ideally, the curves would match for each temperature provided 
@@ -519,7 +519,7 @@ The equation of state  is given by the virial equation
 The temperature-dependent parameters $\alpha$ and $\Xi$ are incorporated 
 into the erf potential as shown in Eq.~\ref{eq:Verf} to make the 
 erf potential approximate the temperature-independent WCA for each temperature.
-Fig.~\ref{fig:potential-plot} 
+Figure~\ref{fig:potential-plot} 
 shows plots of the erf potential at two different 
 temperatures alongside WCA potential. At both temperatures, the largest 
 deviations are seen at very small distances,
@@ -663,8 +663,8 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
 \label{fig:p-vs-V_at_fixed_T}
 \end{figure}
 
-\subsection{Homogeneous limit-\textcolor{red}{UPDATE}}
-
+%\subsection{Homogeneous limit-\textcolor{red}{UPDATE}}
+\subsection{Bulk Fluid - \textcolor{red}{UPDATE}}
 %\begin{figure}
 %\begin{center}
 %\includegraphics[width=3.5in]{figs/p-vs-T}
@@ -678,32 +678,38 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
 
 As a simple test for the equation of state, we compare the theory for
 a homogeneous soft-sphere fluid to Monte Carlo simulation and to 
-simulations of the Barker-Henderson fluid. The results
+simulations of the Barker-Henderson fluid with the white bear 
+hard-sphere functional as described earlier. The results
 shown in Figure~\ref{fig:p-vs-V_at_fixed_T} display very good agreement 
-for lower densities across all temperatures shown and at higher
-temperatures which are not shown. Differences between the DFT (solid
-lines) and MC results (dashed lines) become quite apparent at
-$n^*=0.6$ and above, even at temperatures above the melting
-transition. 
-\textcolor{red}{Our theory consistently predicts higher pressures than
+for higher volumes at temperatures of 10 kT and under. 
+Differences between the DFT (solid lines) and MC results (dashed lines) 
+become quite apparent at lower volumes or higher temperatures 
+%and above, even at temperatures above the melting transition. 
+\textcolor{red}{??ASK-Our theory consistently predicts higher pressures than
 simulations show, which is surprising given that
-Fig.~\ref{fig:potential-plot} shows that the force should be
-\emph{underestimated} by our theory at high packing.}
+Figure~\ref{fig:potential-plot} shows that the force should be
+\emph{underestimated} by our theory at high packing.} 
+In the freezing region, we found that the pressure shows some 
+agreement with the Monte-Carlo simulations in the freezing region 
+at lower temperatures, but the pressure grows larger than what is 
+redicted by the monte-carlo simulations and this
+descripency grows as the volume gets smaller.
 
 For the remainder of our figures, we will focus on just two bulk
-reduced densities: 0.6 and 1.0.  We have examined a wide variety of
+reduced densities: 0.6 and 1.0.  
+We have examined a wide variety of
 densities, and found that the agreement with simulation consistently
 improves as the density is decreased, and so we decided to focus on
 just these two interesting cases.  
 \textcolor{red}{At a reduced density of 0.6, our
 functional is right on the brink of its discrepancy with simulation,
-as is evident from Fig.~\ref{fig:p-vs-V_at_fixed_T}.  
+as is evident from Figure~\ref{fig:p-vs-V_at_fixed_T}.  
 In contrast, the very high
 reduced density of 1.0 is well beyond the point where our SFMT has
 considerably broken down quantitatively, and can demonstrate how it
-fails.}
+fails.} 
 
-\subsection{Freezing Region}
+%\subsection{Freezing Region}
 
 \subsection{Soft spheres near a hard wall}
 
@@ -789,7 +795,7 @@ For three dimensional comparisons, we plot radial distribution
 functions computed using the test-particle approach.  Results for
 reduced densities below $n^* = 0.6$ have been
 omitted as they were exact over temperature ranges from $T^*=0.01$ to
-$T^*=10$. The top frame of Fig.~\ref{fig:radial-distribution} (top) shows
+$T^*=10$. The top frame of Figure~\ref{fig:radial-distribution} (top) shows
 the radial distribution for a range of temperatures at a reduced
 density of $n^* = 0.6$. We see very good agreement of our DFT with
 Monte-Carlo simulation at this reduced density. Our DFT's behavior at
@@ -800,7 +806,7 @@ amplitude of oscillation. Comparison with the Barker-Henderson results
 shows our DFT to have a similar magnitude of error relative the exact
 radial distribution function.
 
-In Fig.~\ref{fig:radial-distribution} (bottom), we plot the results
+In Figure~\ref{fig:radial-distribution} (bottom), we plot the results
 for a reduced density of $n^*=1.0$ for three different
 temperatures. While both Barker-Henderson hard spheres and our DFT
 both overestimate the density at contact, our theory differs more at
