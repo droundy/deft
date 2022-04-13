@@ -52,7 +52,7 @@
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
 \item Update Results section 
-\item fix citations and equation and figure notation(ask)%ASK: Fig.  or Figure ?
+\item fix citations and figure notation(ask)%ASK: Fig.  or Figure ?
 \item spelling
 %\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
@@ -64,7 +64,7 @@
 \subsection{Meeting to-do list}
 \begin{enumerate}
 %\item removed unwanted content in introduction
-\item address red comments and read over everything 
+\item address 1st "Kirstie says" in red; what should go in appendix
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -119,7 +119,7 @@ and $R$ is a single sphere radius which is related by $\sigma =
 To obtain the free energy of the soft sphere fluid from which the
 thermodynamic properites of the fluid can be found, 
 we use Soft Fundamental Measure Theory
-(SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999 .
+(SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999.
 SFMT is a classical density functional
 theory that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
@@ -133,10 +133,10 @@ and with the limiting case of a zero-dimensional cavity which are known
 exactly. 
 There have been a few versions of Rosenfelds's FMT with improvements 
 made for inhomogeneous situations. 
-We use Schmidt's version of SFMT that 
+We use Schmidt's version of SFMT introduced in 2000 that 
 has Tarazona's tensor weight which eliminates the problem of divergences 
 present in the earlier versions of FMT so that it can be applied well to 
-freezing and inhomogeneous fluids~%\cite{S and T}.
+freezing and inhomogeneous fluids~\cite{schmidt2000fluid,tarazona2000}.
 
 Due to its combination of computational efficiency with accuracy, 
 FMT has been used as the
@@ -151,7 +151,7 @@ to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 %the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
 In his 2010 review of FMT, Roth states that the most important future
 developments in equilibrium DFT will involve treating soft repulsions
-and attractions~\cite{}.
+and attractions~\cite{roth2010fundamental}.
 \section{Methods}
 
 \subsection{Soft Fundamental Measure Theory}
@@ -247,7 +247,7 @@ function by a convolution with itself
 %a weighting function $w_2(r)$ that satisfies Equation~\ref{eq:mayerandw2}.
 %All the weighting functions are related to $w_2(r)$ and so 
 By finding a weighting function $w_2(r)$ that satisfies 
-Equation~\ref{eq:mayerandw2}, a complete set of weighting functions
+Eq.~\ref{eq:mayerandw2}, a complete set of weighting functions
 can be constructed since they all relate to $w_2(r)$.
 %with the other weighting functions given by the equations above
 %~\cite{schmidt2000fluid}.  
@@ -268,7 +268,7 @@ can be constructed since they all relate to $w_2(r)$.
 %However, deconvolving the Mayer $f$ function for a realistic potential is
 %From Equations~\ref{eq:Mayerfunction} and \ref{eq:mayerandw2} it can be seen that  
 
-One way to satisfy Equation~\ref{eq:mayerandw2} is to choose a pair 
+One way to satisfy Eq.~\ref{eq:mayerandw2} is to choose a pair 
 potential $V(r)$ and deconvolve the Mayer function $f(r)$ to solve for $w_2(r)$. 
 However, deconvolving the Mayer function for a realistic potential is 
 challenging. %which has limited the number of applications of this
@@ -283,7 +283,7 @@ several papers~\cite{schmidt1999density}, this assumption is not
 applicable to energetic interactions such as dominate the repulsion
 between molecules.
 
-Another way to satisfy Equation~\ref{eq:mayerandw2} is to 
+Another way to satisfy Eq.~\ref{eq:mayerandw2} is to 
 construct a $w_2(r)$ and solve for 
 the pair potential to which that weighting function corresponds.  
 %In this paper, we will 
@@ -626,7 +626,7 @@ The White Bear version of the Fundamental-Measure Theory~(FMT)
 functional~\cite{roth2002whitebear}, describes the excess free energy
 of an inhomogeneous hard-sphere fluid.  This functional differs
 from the equations of SFMT presented in
-Equations~\ref{eq:sfmt-excess-free}-\ref{eq:n-3} only in replacing
+Eqs.~\ref{eq:sfmt-excess-free}-\ref{eq:n-3} only in replacing
 Eq.~\ref{eq:sfmt-phi3} with the following equation:
 \begin{align}
 \Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
@@ -771,7 +771,7 @@ and is infinite for $z\leq 0$.
 
 In Figure \ref{fig:soft-walls}, we compare our soft sphere DFT
 against MC simulation and a BH fluid near a soft wall
-with the potential given in Equation~\ref{eq:soft-wall-potential}. We
+with the potential given in Eq.~\ref{eq:soft-wall-potential}. We
 plot the reduced density versus reduced distance from the surface of
 the wall for $n^*=0.6$ at different temperatures. Again, the results
 of our soft sphere fluid is as good as the BH fluid
