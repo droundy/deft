@@ -52,19 +52,17 @@
 \subsection{\kirstiesays{Kirstie to-do list}}
 \begin{enumerate}
 \item Update Results section 
-\item fix citations and figure notation(ask)%ASK: Fig.  or Figure ?
-\item spelling
+\item fix citations
 %\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 %\item Finish section describing use of tensor functional.
 %\item Finish p vs V equation plot and format plots.
-\item Clean up and streamline appendix
 \end{enumerate}
 
 \subsection{Meeting to-do list}
 \begin{enumerate}
 %\item removed unwanted content in introduction
-\item address 1st "Kirstie says" in red; what should go in appendix
+\item address "Kirstie says" in red
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -117,7 +115,7 @@ and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
 
 To obtain the free energy of the soft sphere fluid from which the
-thermodynamic properites of the fluid can be found, 
+thermodynamic properties of the fluid can be found, 
 we use Soft Fundamental Measure Theory
 (SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999.
 SFMT is a classical density functional
@@ -127,11 +125,14 @@ by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
 Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\vec r)\rbrace}$ 
 to express the free energy of the system
 as a functional of the number density profile.
+%\begin{align}
+    %A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
+%\end{align}
 Schmidt's SFMT free energy functional is constructed so as to yield results 
 consistent with the low-density limit of the virial expansion
 and with the limiting case of a zero-dimensional cavity which are known 
 exactly. 
-There have been a few versions of Rosenfelds's FMT with improvements 
+There have been a few versions of Rosenfeld's FMT with improvements 
 made for inhomogeneous situations. 
 We use Schmidt's version of SFMT introduced in 2000 that 
 has Tarazona's tensor weight which eliminates the problem of divergences 
@@ -152,6 +153,7 @@ to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 In his 2010 review of FMT, Roth states that the most important future
 developments in equilibrium DFT will involve treating soft repulsions
 and attractions~\cite{roth2010fundamental}.
+
 \section{Methods}
 
 \subsection{Soft Fundamental Measure Theory}
@@ -162,7 +164,7 @@ free energy in the
 zero-dimensional cavity limit~\cite{schmidt1999density}.
 It is written as an integral 
 \begin{equation}
-A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
+F_\textit{ex-SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
@@ -240,7 +242,7 @@ SFMT reproduces the exact functional in the low-density limit, provided the
 weighting function that defines $n_2$ is related to the slope of the Mayer 
 function by a convolution with itself
 \begin{equation}\label{eq:mayerandw2}
-  \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
+  \frac{d f(r)}{dr} = \int_{-\infty}^{\infty} dr' w_2(r') w_2 (r-r').
 \end{equation}
 %Given that all the weighting functions are related to $w_2(r)$, 
 %a complete set of weighting functions can be constructed by finding 
@@ -314,7 +316,7 @@ potential:
   {\frac{\Xi}{\sqrt{2}}}\right) \right) \\
   f(r) &= \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} 
   \right) - 1 \right) \label{eq:mayer-approx} \\
-  \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
+  \Verf(r) &= -k_BT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
 We make the $\alpha$ and $\Xi$ parameters temperature-dependent 
@@ -426,15 +428,16 @@ Eq.~\ref{eq:mayerandw2}
 %resulting in a function with variance $\frac{\Xi^2}{2}$
 %so that the right side of Equation~\ref{eq:mayerandw2} gives
 \begin{align}
-   \frac{1}{\Xi\sqrt{\pi}}e^{-\big(\frac{r-\alpha}{\Xi}\big)^2}
+   \frac{df_{erf}(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\big(\frac{r-\alpha}{\Xi}\big)^2}
 \end{align}
-\kirstiesays{I have not yet been able to demonstrate that this gives us equal softness.}
-The derivative of the Mayer function corresponding to the WCA pair potential 
-is shown in Figure~\ref{fig:w2-comparison} where it is compared to the 
-fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
-% as in Eq.~\ref{eq:mayerandw2}.  
-Ideally, the curves would match for each temperature provided 
-Eq.~\ref{eq:mayerandw2} is satisfied.
+The Mayer function changes from -1 to 0 as the distance between the centers
+of two spheres given by r increases and the potential drops from infinity to zero. 
+The wider the range of r over which the Mayer function changes rapidly, 
+the softer the potential and the greater the width of the curve of the 
+derivative of the Mayer function verses r. Thus, we acheive comparable 
+softness by matching the widths of the derivatives of the 
+Mayor functions of the WCA and erf potentials. 
+
 %%We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
 %%at distance $\alpha$ corresponding to
 %%the maximum slope of the Mayer function. This tells us that the $\alpha$ 
@@ -444,14 +447,14 @@ Eq.~\ref{eq:mayerandw2} is satisfied.
         %%\ln 2}} \right)^{\frac{1}{6}}.
 %%\end{align}
 
-Next, we set the second virial coeffecient, $B_2$, formed using the Mayer 
+Next, we set the second virial coefficient, $B_2$, formed using the Mayer 
 function for the $\Vwca(r)$ potential 
 in Eq.~\ref{eq:Vwca} equal to the second virial coefficent formed using 
 the Mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, 
 and solve for the parameter $\alpha$ at a given temperature.
 %The second virial coefficient, $B_2$ is given by
 %\begin{displaymath}B_2=-\frac{1}{2}\int{f(r)~d{r}}\end{displaymath}
-\begin{equation}B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}\end{equation}
+\begin{equation}B_2=-\frac{1}{2}\int (e^{-\beta V(r)} - 1)~d\textbf{r}\end{equation}
 %\begin{displaymath}\int{(e^{-\beta V_{wca}(r)} - 1)~d{r}}=
 %\int{(e^{-\beta V_{erf}(r)} - 1)~d{r}}\end{displaymath}
 %Finally, equating the slope of both
@@ -465,18 +468,35 @@ In the low-density limit, where it is not likely to find more than two
 particles in close proximity at any point in time, 
 the excess free energy of an inhomogeneous fluid is given by
 \begin{align}\label{eq:Fexcess_low-density_homogeneous}
-    F_{ex} &= k_BT\int d\vec {r}~'\rho(\vec r~')\int d\vec {r}~"\rho(\vec r~")\left(-\frac{1}{2}f(|\vec {r}~'-\vec {r}~"|)\right) 
+    F_{ex} &\rightarrow k_BT\int d\textbf{r}'\int d\textbf{r}^{\prime\prime} n(\textbf{r}')
+    n(\textbf{r}^{\prime\prime})\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) 
 \end{align} 
 which, for homogeneous fluids, becomes
 \begin{align}\label{eq:Fexcess_low-density_inhomogeneous}
-    F_{ex} &= k_BTn^2\int d\vec {r}~'\int d\vec {r}~"\left(-\frac{1}{2}f(|\vec {r}~'-\vec {r}~"|)\right) \\
-               &= k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\vec{r}}\right)V \\
-               &= k_BTn^2 B_2 V
+    F_{ex} &\rightarrow k_BTn^2\int d\textbf{r}'\int d\textbf{r}^{\prime\prime}\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) \\
+           &\rightarrow k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\textbf{r}}\right)V \\
+           &\rightarrow k_BTn^2B_2V
 \end{align} 
-The equation of state  is given by the virial equation 
+The equation of state  is given by a virial expansion 
 %\begin{equation}\frac{P}{k_BT}=\frac{N}{V}\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
-\begin{equation}\frac{P}{k_BT}=n+n^2B_2+n^3B_3+ \cdot\cdot\cdot \end{equation}
+%\begin{equation}\frac{P}{k_BTn}=1+nB_2+n^2B_3+ \cdot\cdot\cdot \end{equation}
+\begin{equation}\frac{P}{k_BTn}=1+nB_2+ \cdot\cdot\cdot \end{equation}  %So ideal pressure must be greater than excess pressure
 \kirstiesays{still looking at this...}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{figs/potential-plot}
+\end{center}
+\caption{The WCA potential, 
+   and approximations to this potential
+   at two different temperatures constructed using the erf potential 
+   with incorporated temperature-dependent parameters $\alpha$ and $\Xi$. 
+   The vertical dotted lines show the values of $\alpha$ at
+   which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical 
+   line represents the distance at which the WCA force goes to zero. }
+\label{fig:potential-plot}
+\end{figure}
+
 
 \begin{figure}
 \begin{center}
@@ -501,21 +521,6 @@ The equation of state  is given by the virial equation
 \label{fig:w2-comparison}
 \end{figure}
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=\columnwidth]{figs/potential-plot}
-\end{center}
-\caption{The WCA potential, 
-   and approximations to this potential
-   at two different temperatures constructed using the erf potential 
-   with incorparated temperature-dependent parameters $\alpha$ and $\Xi$. 
-   The vertical dotted lines show the values of $\alpha$ at
-   which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical 
-   line represents the distance at which the WCA force goes to zero. }
-\label{fig:potential-plot}
-\end{figure}
-
-
 The temperature-dependent parameters $\alpha$ and $\Xi$ are incorporated 
 into the erf potential as shown in Eq.~\ref{eq:Verf} to make the 
 erf potential approximate the temperature-independent WCA for each temperature.
@@ -524,6 +529,11 @@ shows plots of the erf potential at two different
 temperatures alongside WCA potential. At both temperatures, the largest 
 deviations are seen at very small distances,
 and thus very high potential energies.
+The derivative of the Mayer function corresponding to the WCA pair potential 
+is shown in Figure~\ref{fig:w2-comparison} where it is compared to the 
+fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
+Ideally, the curves would match for each temperature provided 
+Eq.~\ref{eq:mayerandw2} is satisfied.
 %
 %We show the resulting approximation for the potential in 
 %%Fig.~\ref{fig:potential-plot} for two different temperatures.  
@@ -559,7 +569,7 @@ and thus very high potential energies.
 Freezing of a pure substance occurs when the free energy it would have 
 in its solid state is lower than what it would have its 
 fluid state at the same temperature, pressure, and chemical potential. 
-At freezing an abrupt phase transistion occurs and the particular %crystalline
+At freezing an abrupt phase transition occurs and the particular %crystalline
 %a WCA fluid forms a crystalline structure. The 
 structure and density that result are affected by the interatomic potential. 
 When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) 
@@ -582,9 +592,9 @@ We use a sum of
 Gaussians, each centered at a lattice point specified by $\vec{R_i}$, to form 
 the number density profile 
 \begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
-\int{e^{-\frac{|\vec{r}-\vec{R_i}|^2}{2\left(\sigma_g\right)^2}}d{\vec{r}}}  \end{equation}  
-We can vary the number density profile, $n(\vec{r})$, by changing the width of the gaussians
-and the size of the crystal cell. \color{black}As the gaussian width gets large, the number 
+\int{e^{-\frac{|\textbf{r}-\textbf{R}_i|^2}{2\left(\sigma_g\right)^2}}d{\textbf{r}}}  \end{equation}  
+We can vary the number density profile, $n(\textbf{r})$, by changing the width of the Gaussians
+and the size of the crystal cell. \color{black}As the Gaussian width gets large, the number 
 density becomes homogeneous as would be expected for a fluid. A larger crystal cell models a larger fraction 
 of vacancies. Monte-Carlo integration is employed to more efficiently 
 compute the weighted densities used to calculate the excess free energy which is then 
@@ -659,12 +669,12 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
  \begin{center}
   \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
  \end{center}
-\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
+\caption{Plot of the reduced pressure verses the reduced volume. The gray region indicates coexistence.}
 \label{fig:p-vs-V_at_fixed_T}
 \end{figure}
 
 %\subsection{Homogeneous limit-\textcolor{red}{UPDATE}}
-\subsection{Bulk soft sphere fluid - \textcolor{red}{UPDATE}}
+\subsection{Soft spheres in bulk}
 %\begin{figure}
 %\begin{center}
 %\includegraphics[width=3.5in]{figs/p-vs-T}
@@ -692,8 +702,8 @@ Figure~\ref{fig:potential-plot} shows that the force should be
 In the freezing region, we found that the pressure shows some 
 agreement with the Monte-Carlo simulations in the freezing region 
 at lower temperatures, but the pressure grows larger than what is 
-predicted by the monte-carlo simulations and this
-descripency grows as the volume gets smaller.
+predicted by the Monte-Carlo simulations and this
+discrepancy grows as the volume gets smaller.
 
 For the remainder of our figures, we will focus on just two bulk
 reduced densities: 0.6 and 1.0.  
@@ -893,7 +903,8 @@ Fourier Transforms are expressed in general as
 %%temporarily set 
 %%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
 %%\begin{equation}{w_0(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
-\begin{equation}{w_0(r)=\frac{\sqrt{2}}{4{\pi}\sqrt{\pi}\Xi}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%%NOTE TO ME: \begin{equation}\frac{\sqrt{2}}{4{\pi}\sqrt{\pi}\Xi}= \frac{1}{\Xi(\sqrt{2\pi})^3}\end{equation}
+\begin{equation}{w_0(r)=\frac{1}{\Xi(\sqrt{2\pi})^3}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
 %\[{}\]
 %\begin{equation}{\widetilde{w}_0(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_0(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 %%Set $\vec{k}$ in the direction of $\hat{z}$
@@ -910,7 +921,7 @@ Fourier Transforms are expressed in general as
 %%\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation}
 %%\[{}\] %\color{red}
 %%Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ becomes
-\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+\begin{equation}{\widetilde{w}_0(k)=\sqrt{\frac{\pi}{2}}\frac{1}{k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
 \color{black}
 
 \noindent\textbf{Fourier Transform of Weight Function $w_1(r)$:}
@@ -920,7 +931,7 @@ Fourier Transforms are expressed in general as
 %%temporarily set 
 %%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
 %%\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
-\begin{equation}{w_1(r)=\frac{\sqrt{2}}{4{\pi}\sqrt{\pi}\Xi}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+\begin{equation}{w_1(r)=\frac{1}{\Xi(\sqrt{2\pi})^3}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
 %%\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 %%Set $\vec{k}$ in the direction of $\hat{z}$ 
 %%\begin{equation}{\widetilde{w}_1(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
@@ -946,7 +957,7 @@ Fourier Transforms are expressed in general as
 %%set 
 %%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
 %%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\sqrt{\pi}\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
-\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\sqrt{\pi}\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+\begin{equation}{w_2(r)=\sqrt{\frac{2}{\pi}}\frac{1}{\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
 %%\begin{equation}{\widetilde{w}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 %%Set $\vec{k}$ in the direction of $\hat{z}$ 
 %%\begin{equation}{\widetilde{w}_2(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
@@ -1015,7 +1026,7 @@ Fourier Transforms are expressed in general as
 %%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
 %%\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
 
-\begin{equation}{\vec{w}_1(\vec{r})=\frac{\sqrt{2}}{4{\pi}\sqrt{\pi}\Xi}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\frac{\vec{r}}{r}}\end{equation}
+\begin{equation}{\vec{w}_1(\vec{r})=\frac{1}{\Xi(\sqrt{2\pi})^3}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\frac{\vec{r}}{r}}\end{equation}
 
 %%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}\vec{w}_1(\vec{r})e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 %%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
@@ -1040,7 +1051,7 @@ Fourier Transforms are expressed in general as
 
 %%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]-e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
 %%Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_1(k)$ becomes
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}{\sqrt{2}\Xi}\right)\right]-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\sqrt{\frac{\pi}{2}}\frac{1}{k\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+\frac{i\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-\frac{i\alpha}{\sqrt{2}\Xi}\right)\right]-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
 \[{}\]
 
 %\subsection{Fourier Transform of Vector Weight Function $\vec{w}_{2}(r)$}
@@ -1052,7 +1063,7 @@ Fourier Transforms are expressed in general as
 %%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
 %%\begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
 
-\begin{equation}{\vec{w}_2(\vec{r})=\frac{\sqrt{2}}{\sqrt{\pi}\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\frac{\vec{r}}{r}}\end{equation}
+\begin{equation}{\vec{w}_2(\vec{r})=\sqrt{\frac{2}{\pi}}\frac{1}{\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\frac{\vec{r}}{r}}\end{equation}
 
 %%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 %%Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
@@ -1090,7 +1101,7 @@ Fourier Transforms are expressed in general as
 %%\begin{equation}{I=\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{array}\right)}\end{equation}
 %%The tensor weight matrix elements are then given by
 %%\begin{equation}{w_{m2_{ij}}(\vec{r})=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
-\begin{equation}{w_{m2_{ij}}(\vec{r})=\frac{\sqrt{2}}{\sqrt{\pi}\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
+\begin{equation}{w_{m2_{ij}}(\vec{r})=\sqrt{\frac{2}{\pi}}\frac{1}{\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
 %%with temporarily setting
 %%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
 %%The fourier transform of the tensor weight matrix elements are given by
@@ -1239,7 +1250,7 @@ Fourier Transforms are expressed in general as
 
 \begin{align}
   \widetilde{w}_{m2_{ij}}(\vec{k})&= \bigg(\delta{ij}-3\frac{k_ik_j}{k^2}\bigg)\bigg[\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2}) \nonumber\\ 
-   &+ \frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]\bigg]
+   &+ \frac{(\sqrt{2\pi})^3}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]\bigg]
 \end{align} 
 
 %%\[{}\]
@@ -1369,9 +1380,9 @@ Deriviation of tensor density elements $n_{m2ij}(\vec{r})$:
 \begin{equation}{\Phi_3=\frac{12\pi^2R^6}{(1-\eta)^2}\left[\overrightarrow{\operatorname{V}}\cdot\overleftrightarrow{\operatorname{T}}\cdot\overrightarrow{\operatorname{V}}-n\overrightarrow{\operatorname{V}}\cdot\overrightarrow{\operatorname{V}}-\operatorname{Tr}\left(\overleftrightarrow{\operatorname{T}}^3\right)+n\operatorname{Tr}\left(\overleftrightarrow{\operatorname{T}}^2\right)\right]}\end{equation}
 \[{}\]
 \begin{equation}{\overleftrightarrow{\operatorname{T}}=\frac{{\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}}}{4\pi{R}^2}}\end{equation}
-\[{}\]
+
 \begin{equation}{\overrightarrow{\operatorname{V}}=\frac{\vec{n}_2}{4\pi{R}^2}}\end{equation}
-\[{}\]
+
 \begin{displaymath}{\Phi_3=\frac{12\pi^2R^6}{(1-\eta)^2}\left(\frac{1}{4\pi{R}^2}\right)^3\left[\vec{n}_{2v}\cdot\left({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}}\right)\cdot\vec{n}_{2v}-n_2|\vec{n}_{2v}|^2-\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^3\right)\color{white}\right]\color{black}}\end{displaymath}
 \begin{equation}{\color{white}\left[\color{black}+n_2\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^2\right)\right]}\end{equation}
 \[{}\]
@@ -1381,14 +1392,17 @@ Deriviation of tensor density elements $n_{m2ij}(\vec{r})$:
 -n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)\color{white}\right)\color{black}}\end{displaymath} \begin{equation}{\color{white}\left(\color{black}-\frac{1}{3}{n_2}^2\operatorname{Tr}(\overleftrightarrow{n}_{m2})-\frac{1}{9}{n_2}^3+n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)+\frac{1}{3}{n_2}^3+\frac{2}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
 \[{}\]
 \begin{equation}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left(\frac{2}{9}{n_2}^3-\frac{2}{3}n_2|\vec{n}_{v2}|^2+\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}_{m2}}^3)+\frac{1}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
-\[{}\]
+
 \begin{equation}{\operatorname{Tr}(\overleftrightarrow{n}_{m2})=0}\end{equation} 
-\[{}\]
+
 \begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2|\vec{n}_{v2}|^2+\frac{9}{2}(\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}})-\frac{9}{2}\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})}{24\pi(1-\eta)^2}}\end{equation} 
-\[{}\]
+
 \begin{equation}{\eta=n_3}\end{equation} 
-\[{}\]
+
 \begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}}\end{equation} 
+\[{}\]
+\[{}\]
+\[{}\]
 \end{widetext}
 
 \end{document}
