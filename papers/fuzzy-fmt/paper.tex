@@ -114,7 +114,7 @@ The repulsive potential of the WCA fluid is given by
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
-
+%
 To obtain the free energy of the soft sphere fluid from which the
 thermodynamic properties of the fluid can be found, 
 we use Soft Fundamental Measure Theory
@@ -133,13 +133,14 @@ Schmidt's SFMT free energy functional is constructed so as to yield results
 consistent with the low-density limit of the virial expansion
 and with the limiting case of a zero-dimensional cavity which are known 
 exactly. 
-There have been a few versions of Rosenfeld's FMT with improvements 
-made for inhomogeneous situations like freezing.
+%There have been a few versions of Rosenfeld's FMT with improvements 
+%made for inhomogeneous situations like freezing.
 We use Schmidt's version of SFMT introduced in 2000 that
-has Tarazona's tensor weight which eliminates the problem of divergences 
-present in the earlier versions of FMT that affected predictions of
-freezing~\cite{schmidt2000fluid,tarazona2000}.
-
+has Tarazona's tensor weight~\cite{schmidt2000fluid,tarazona2000}
+which eliminates the problem of divergences 
+present in the earlier versions of FMT 
+for highly inhomogeneous situations like freezing.
+% that affected predictions of freezing.
 Due to its combination of computational efficiency with accuracy, 
 FMT has been used as the
 basis for a wide variety of classical density
@@ -163,13 +164,13 @@ The excess free energy of SFMT is a functional of the number density
 profile $n(\textbf{r})$ derived using dimensional crossover from the exact 
 free energy in the 
 zero-dimensional cavity limit~\cite{schmidt1999density}.
-It is written as an integral 
+It is written as an integral of free energy densities
 \begin{equation}
 F_\textit{ex-SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
-of free energy densities 
+%of free energy densities 
 
 %\davidsays{Probably want to spend more space on
 %``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
@@ -191,7 +192,7 @@ of free energy densities
 \begin{displaymath}\color{white}\left(\color{black}+\frac{9}{2}
 [\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-
 \operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
-where we have used the tensor version of $\Phi_3$ later formulated by 
+where we have used the tensor version of $\Phi_3$ formulated by 
 Tarazona~\cite{tarazona2000,santos2012phi3}, which produces excellent
 results for the crystallization of hard spheres.
 The free energy densities are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
@@ -830,10 +831,10 @@ overall.
 \end{figure}
 
 For three dimensional comparisons, we plot radial distribution
-functions computed using the test-particle approach.  \textcolor{red}{delete?:Results for
-reduced densities below $n^* = 0.6$ have been
-omitted as they were exact over temperature ranges from $T^*=1$ to
-$T^*=10$.} The top frame of Figure~\ref{fig:radial-distribution} (top) shows
+functions computed using the test-particle approach.  
+%\textcolor{red}{delete?:Results for reduced densities below $n^* = 0.6$ have been
+%omitted as they were exact over temperature ranges from $T^*=1$ to $T^*=10$.} 
+The top frame of Figure~\ref{fig:radial-distribution} (top) shows
 the radial distribution for a range of temperatures at a reduced
 density of $n^* = 0.6$. We see very good agreement of our DFT with
 Monte-Carlo simulation at this reduced density. Our DFT's behavior at
