@@ -33,7 +33,7 @@ plt.plot(r, wca_erf.V(r), 'k-', label='$V_{wca}$')
 r = np.arange(rmin, rmax, dr)
 Verf = -kT*np.log(0.5*(erf ((r-alpha)/Xi)+1))
 
-plt.plot(r, Verf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'$V_{erf}$  $T* = %g$' % kT)
+plt.plot(r, Verf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'$V_{erf}$  $T^* = %g$' % kT)
 
 #plt.axhline(kT, color='g', ls=':')
 #plt.axvline(alpha, color='g', linestyle=':')
@@ -43,7 +43,7 @@ kT = 1
 r = np.arange(rmin, rmax, dr)
 alpha, Xi, diameter = wca_erf.parameters(kT)
 Verf = -kT*np.log(0.5*(erf ((r-alpha)/Xi)+1))
-plt.plot(r, Verf, color=styles.color_from_kT(kT), linewidth=1, label=r'$V_{erf}$  $T* = %g$' % kT)
+plt.plot(r, Verf, color=styles.color_from_kT(kT), linewidth=1, label=r'$V_{erf}$  $T^* = %g$' % kT)
 # plt.axhline(kT, color='b', ls=':')
 plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
 
@@ -63,7 +63,7 @@ plt.ylim(0, 5)
 plt.yticks(fontsize=8)
 plt.ylabel('$V/\epsilon$', fontsize=10)
 plt.xlabel('$r/\sigma$', fontsize=10)
-plt.legend(loc='best', fontsize=8)
+plt.legend(loc='best', fontsize=9)
 
 plt.savefig('figs/potential-plot.pdf')
 plt.show()

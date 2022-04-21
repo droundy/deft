@@ -39,7 +39,7 @@ plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$f
 
 r = np.linspace(rmin, rmax, int(rmax/dr))
 fp_erf = np.exp(-(r-alpha)**2/Xi**2)/Xi/np.sqrt(np.pi)
-plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$  $T^* = %g$" % kT)
+plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$   $T^* = %g$" % kT)
 
 plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
 
@@ -53,7 +53,7 @@ plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$f
 alpha, Xi, diameter = wca_erf.parameters(kT)
 r = np.linspace(rmin, rmax, int(rmax/dr))
 fp_erf = np.exp(-(r-alpha)**2/Xi**2)/Xi/np.sqrt(np.pi)
-plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$  $T^* = %g$" % kT)
+plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$   $T^* = %g$" % kT)
 #plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'approximation $kT/\epsilon = %g$' % kT)
 
 plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
@@ -70,7 +70,7 @@ plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$f
 alpha, Xi, diameter = wca_erf.parameters(kT)
 r = np.linspace(rmin, rmax, int(rmax/dr))
 fp_erf = np.exp(-(r-alpha)**2/Xi**2)/Xi/np.sqrt(np.pi)
-plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$  $T^* = %g$" % kT)
+plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$   $T^* = %g$" % kT)
 #plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'approximation $kT/\epsilon = %g$' % kT)
 
 plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
@@ -85,7 +85,7 @@ plt.yticks(fontsize=8)
 plt.ylabel("$f'$", fontsize=10)
 plt.xticks(fontsize=8)
 plt.xlabel('$r/\sigma$', fontsize=10)
-plt.legend(loc='best', fontsize=8)
+plt.legend(loc='best', fontsize=9)
 
 plt.savefig('figs/w2-comparison.pdf')
 plt.show()
