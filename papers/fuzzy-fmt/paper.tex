@@ -603,20 +603,28 @@ Gaussians, each centered at a lattice point specified by $\textbf{R}_i$, to form
 the number density profile 
 \begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
 \int{e^{-\frac{|\textbf{r}-\textbf{R}_i|^2}{2\left(\sigma_g\right)^2}}d{\textbf{r}}}  \end{equation}  
-We can vary the number density profile, $n(\textbf{r})$, by changing the width of the Gaussians
-and the size of the crystal cell. \color{black}As the Gaussian width gets large, the number 
-density becomes homogeneous as would be expected for a fluid. A larger crystal cell models a larger fraction 
-of vacancies. Monte-Carlo integration is employed to more efficiently 
-compute the weighted densities used to calculate the excess free energy which is then 
+We can vary the number density profile, $n(\textbf{r})$, by changing the 
+width of the Gaussians, $\sigma_{g}$, 
+and the fraction of vacant lattice sites which effectively changes the size 
+of the crystal cell so that the overall number density remains the same.
+%the size of the crystal cell. 
+As the Gaussian width gets large, the number 
+density becomes homogeneous as would be expected for a fluid. 
+A very small fraction of vacancies helps to avoid computational 
+difficulties. 
+Monte-Carlo integration is employed to more efficiently 
+compute the weighted densities used to calculate the excess free energy
+which is then 
 added to the ideal free energy (computed analytically) to get the total free energy 
 which is minimized. 
+%to find the equilibrium free energy and number density profile. 
 
 Pressure is found from the negative of the slope of the Helmholtz 
 free energy per atom with respect to the inverse number density. 
 \begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} 
 = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
 The pressure at the phase transition can be obtained from the point of intersection
-that occurs when the chemical potential, which is the Gibbs free energy per atom g,
+that occurs when the chemical potential, which is the Gibbs free energy per atom, $g$,
 is plotted against the pressure for both the fluid and the solid at fixed temperature. 
 \begin{equation}{g = \frac{1}{n}P + f}\end{equation}
 The number densities of both the solid and the liquid at the phase transition can then
