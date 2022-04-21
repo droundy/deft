@@ -499,7 +499,7 @@ particles in close proximity at any point in time.
 \end{center}
 \caption{The WCA potential, 
    and approximations to this potential
-   at two different temperatures constructed using the erf potential 
+   at two different temperatures ($T^*=k_BT/\epsilon$) constructed using the erf potential 
    with incorporated temperature-dependent parameters $\alpha$ and $\Xi$. 
    The vertical dotted lines show the values of $\alpha$ at
    which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical 
@@ -675,6 +675,9 @@ functions are derived from $w_2$ according to
 Eqs.~\ref{eq:n-0-1},~\ref{eq:n-vectors} and~\ref{eq:n-3}, as in SFMT.
 %, \ref{eq:n-vectors} and 
 
+
+
+
 \section{Results}
 In this section the results of our SFMT method will be compared to the results of simulations for a reference fluid.
 For our reference simulations, we construct a Barker-Henderson hard
@@ -688,16 +691,15 @@ We will also compare our results with Monte-Carlo (MC) simulations of the WCA fl
  \begin{center}
   \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
  \end{center}
-\caption{Plot of the reduced pressure verses the reduced volume per atom. The gray region indicates coexistence.}
+\caption{Plot of the reduced pressure ($P\sigma^3/\epsilon$) verses the reduced volume per atom ($1/n\sigma^3$). The gray region indicates coexistence.}
 \label{fig:p-vs-V_at_fixed_T}
 \end{figure}
-
 
 \begin{figure}
 \begin{center}
   \includegraphics[width=\columnwidth]{figs/hard-walls}
 \end{center}
-\caption{Density distribution of WCA fluid near a hard wall.}
+\caption{Density distribution of WCA fluid near a hard wall ($n^*(r)=n(r)\sigma^3$).}
 \label{fig:hard-walls}
 \end{figure}
 
@@ -707,6 +709,7 @@ We will also compare our results with Monte-Carlo (MC) simulations of the WCA fl
   \caption{Density distribution of a WCA fluid near a soft wall.}
   \label{fig:soft-walls}
 \end{figure}
+
 
 %\subsection{Homogeneous limit-\textcolor{red}{UPDATE}}
 \subsection{Soft spheres in bulk}
@@ -721,6 +724,7 @@ We will also compare our results with Monte-Carlo (MC) simulations of the WCA fl
 %\label{fig:p-vs-T}
 %\end{figure}
 
+
 As a simple test for the equation of state, we plot in 
 Figure~\ref{fig:p-vs-V_at_fixed_T} the 
 reduced pressure versus the reduced volume per atom 
@@ -731,6 +735,7 @@ over a wide range of temperatures.
 %simulations of the Barker-Henderson fluid with the white bear 
 %hard-sphere functional as described earlier. 
 %
+
 The results
 %shown in Figure~\ref{fig:p-vs-V_at_fixed_T} 
 display very good agreement with both BH and MC results
@@ -772,6 +777,7 @@ considerably broken down quantitatively, and can demonstrate how it
 fails. 
 
 %\subsection{Freezing Region}
+
 
 \subsection{Soft spheres near a hard wall}
 
@@ -829,8 +835,6 @@ the wall for $n^*=0.6$ at different temperatures. Again, the results
 of our soft sphere fluid is as good as the BH fluid
 overall.
 
-\subsection{Soft spheres radial distribution function - \textcolor{red}{UPDATE with Plots finish!}}
-
 \begin{figure}
 \begin{center}
   \includegraphics[width=\columnwidth]{figs/radial-distribution}
@@ -842,6 +846,18 @@ overall.
   Barker-Henderson approach.}
 \label{fig:radial-distribution}
 \end{figure}
+
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=7.0in]{figs/argon-plots}
+  \end{center}
+  \caption{Radial distribution functions of Argon. From left to right
+    the experimental data was taken at 85 K and vapor pressure, at 293
+    K and 1.1 GPa, and at 148 K and 9.92 MPa.}
+  \label{fig:argon-plots}
+\end{figure*}
+
+\subsection{Soft spheres radial distribution function - \textcolor{red}{UPDATE with Plots finish!}}
 
 For three dimensional comparisons, we plot radial distribution
 functions computed using the test-particle approach.  
@@ -864,17 +880,8 @@ temperatures. While both Barker-Henderson hard spheres and our DFT
 both overestimate the density at contact, our theory differs more at
 the lowest temperature shown here. For the density oscillations, our
 DFT's error is comparable to that of the Barker-Henderson results.
-\newline
+%\newline
 
-\begin{figure*}
-  \begin{center}
-    \includegraphics[width=7.0in]{figs/argon-plots}
-  \end{center}
-  \caption{Radial distribution functions of Argon. From left to right
-    the experimental data was taken at 85 K and vapor pressure, at 293
-    K and 1.1 GPa, and at 148 K and 9.92 MPa.}
-  \label{fig:argon-plots}
-\end{figure*}
 
 %\begin{figure}
  %\centering
@@ -908,6 +915,9 @@ peak.  Here the discrepancy between theory and simulation is somewhat
 larger, but again our new functional performs comparably to the
 Barker-Henderson approach.  Both theories significantly overestimate
 the height of the first peak.
+
+
+
 
 %\begin{figure}
  %\begin{center}
