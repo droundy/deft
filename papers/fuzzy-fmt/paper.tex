@@ -37,7 +37,10 @@
 \begin{abstract}
   We introduce an easy-to-implement variation on the Soft Fundamental
   Measure Theory (SFMT) approach for the Weeks-Chandler-Andersen (WCA)
-  fluid.  This approach is readily extensible to other soft repulsive
+  fluid that incorporates temperature-dependent parameters associated
+  with the length-scale and effective softness of the interaction and 
+  which reproduces the second virial coefficent of the WCA fluid.
+  This approach is readily extensible to other soft repulsive
   potentials.  We demonstrate that this approach is comparable in
   accuracy to the Barker-Henderson approach combined with the White
   Bear density functional for the hard-sphere fluid.
@@ -49,21 +52,21 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{\kirstiesays{Kirstie to-do list}}
-\begin{enumerate}
-\item Update Results section 
-\item fix citations
+%\subsection{\kirstiesays{Kirstie to-do list}}
+%\begin{enumerate}
+%\item Update Results section 
+%\item fix citations
 %\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 %\item Finish section describing use of tensor functional.
 %\item Finish p vs V equation plot and format plots.
-\end{enumerate}
+%\end{enumerate}
 
-\subsection{Meeting to-do list}
-\begin{enumerate}
+%\subsection{Meeting to-do list}
+%\begin{enumerate}
 %\item removed unwanted content in introduction
-\item address "Kirstie says" in red
-\end{enumerate}
+%\item address "Kirstie says" in red
+%\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -122,7 +125,7 @@ SFMT is a classical density functional
 theory that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
 by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
-Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\vec r)\rbrace}$ 
+Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ 
 to express the free energy of the system
 as a functional of the number density profile.
 %\begin{align}
@@ -151,7 +154,7 @@ to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 %and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
 %the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
 In his 2010 review of FMT, Roth states that the most important future
-developments in equilibrium DFT will involve treating soft repulsions
+developments in equilibrium Density Functional Theory (DFT) will involve treating soft repulsions
 and attractions~\cite{roth2010fundamental}.
 
 \section{Methods}
@@ -168,10 +171,13 @@ F_\textit{ex-SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
-of free energy densities \davidsays{Probably want to spend more space on
-``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
-use tensor weights? If so we need to say.
-}
+of free energy densities 
+
+%\davidsays{Probably want to spend more space on
+%``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
+%use tensor weights? If so we need to say.
+%}
+
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{1-n_3} \\
@@ -383,20 +389,20 @@ closer together at higher temperatures.
 
 %\davidsays{Maybe worth making a comparison with Barker-Hendersen here?}
 
-\davidsays{What things do we make true using our method?
-\begin{enumerate}
-\item We make our functional reproduce the exact second virial coefficient,
-  which makes it how accurate at low densities?
-\item We reproduce the exact width (variance) of the peak of df/dr, which
-  hopefully ensures that we have an equally ``soft'' interaction. ???
-\item Reproducing the variance of $r$ in df/dr should also reproduce the correct
-variance of $r$ in $w_2$.  Actually only if we reproduce it for a 1D integral.
-:(
-\end{enumerate}
-I'd like to see these points introduced early (about here in the section), and
-explained at the time on physical grounds.  Perhaps also compared with BH, which
-I think also reproduces $B_2$.
-}
+%\davidsays{What things do we make true using our method?
+%\begin{enumerate}
+%\item We make our functional reproduce the exact second virial coefficient,
+  %which makes it how accurate at low densities?
+%\item We reproduce the exact width (variance) of the peak of df/dr, which
+  %hopefully ensures that we have an equally ``soft'' interaction. ???
+%\item Reproducing the variance of $r$ in df/dr should also reproduce the correct
+%variance of $r$ in $w_2$.  Actually only if we reproduce it for a 1D integral.
+%:(
+%\end{enumerate}
+%I'd like to see these points introduced early (about here in the section), and
+%explained at the time on physical grounds.  Perhaps also compared with BH, which
+%I think also reproduces $B_2$.
+%}
 
 %NEW Method in findxi.h  
 %\textcolor{red}{Xi is the variance of the derivative of the mayer function 
@@ -464,24 +470,29 @@ and solve for the parameter $\alpha$ at a given temperature.
 %      2} + \ln 2 \right)},
 %\end{align}
 %\davidsays{Maybe discuss it earlier? - done}
-In the low-density limit, where it is not likely to find more than two
-particles in close proximity at any point in time, 
-the excess free energy of an inhomogeneous fluid is given by
-\begin{align}\label{eq:Fexcess_low-density_homogeneous}
-    F_{ex} &\rightarrow k_BT\int d\textbf{r}'\int d\textbf{r}^{\prime\prime} n(\textbf{r}')
-    n(\textbf{r}^{\prime\prime})\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) 
-\end{align} 
-which, for homogeneous fluids, becomes
-\begin{align}\label{eq:Fexcess_low-density_inhomogeneous}
-    F_{ex} &\rightarrow k_BTn^2\int d\textbf{r}'\int d\textbf{r}^{\prime\prime}\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) \\
-           &\rightarrow k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\textbf{r}}\right)V \\
-           &\rightarrow k_BTn^2B_2V
-\end{align} 
-The equation of state  is given by a virial expansion 
+Matching the second virial coefficient to that of the WCA fluid 
+makes the first order correction to the pressure equal to that of a WCA fluid 
+in the low-density limit where it is not likely to find more than two
+particles in close proximity at any point in time. 
+
+%In the low density limit, where it is not likely to find more than two
+%particles in close proximity at any point in time, 
+%the excess free energy of an inhomogeneous fluid is given by
+%\begin{align}\label{eq:Fexcess_low-density_homogeneous}
+    %F_{ex} &\rightarrow k_BT\int d\textbf{r}'\int d\textbf{r}^{\prime\prime} n(\textbf{r}')
+    %n(\textbf{r}^{\prime\prime})\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) 
+%\end{align} 
+%which, for homogeneous fluids, becomes
+%\begin{align}\label{eq:Fexcess_low-density_inhomogeneous}
+    %F_{ex} &\rightarrow k_BTn^2\int d\textbf{r}'\int d\textbf{r}^{\prime\prime}\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) \\
+           %&\rightarrow k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\textbf{r}}\right)V \\
+           %&\rightarrow k_BTn^2B_2V
+%\end{align} 
+%The equation of state  is given by a virial expansion 
 %\begin{equation}\frac{P}{k_BT}=\frac{N}{V}\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
 %\begin{equation}\frac{P}{k_BTn}=1+nB_2+n^2B_3+ \cdot\cdot\cdot \end{equation}
 \begin{equation}\frac{P}{k_BTn}=1+nB_2+ \cdot\cdot\cdot \end{equation}  %So ideal pressure must be greater than excess pressure
-\kirstiesays{still looking at this...}
+%\kirstiesays{still looking at this...}
 
 \begin{figure}
 \begin{center}
@@ -619,7 +630,7 @@ be found from a plot of pressure verses the inverse density.
 %Another approach to account for the temperature dependence of
 %realistic fluids is Barker-Henderson's
 %approach~\cite{barker1967perturbation}. This theory takes any general
-The Barker-Henderson fluid is known to give good results, so we use it 
+The Barker-Henderson (BH) fluid is known to give good results, so we use it 
 as a reference to compare with our DFT results. 
 In the BH approach, any general
 repulsive pair potential, $V(r)$ is used to construct a corresponding hard
@@ -659,17 +670,18 @@ Eqs.~\ref{eq:n-0-1},~\ref{eq:n-vectors} and~\ref{eq:n-3}, as in SFMT.
 
 \section{Results}
 In this section the results of our SFMT method will be compared to the results of simulations for a reference fluid.
-For all of our reference simulations, we construct a Barker-Henderson hard
+For our reference simulations, we construct a Barker-Henderson hard
 sphere fluid with a diameter determined by Eq.~\ref{eq:bh-diameter}
 using a WCA potential as the pair potential. The excess free energy functional of the 
-BH fluid is constructed using White Bear FMT. %The BH fluid is known
+BH fluid is constructed using White Bear FMT. 
+We will also compare our results with Monte-Carlo (MC) simulations of the WCA fluid. %The BH fluid is known
 %to give good results, so we use it as a reference for our DFT.
 
 \begin{figure}
  \begin{center}
   \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
  \end{center}
-\caption{Plot of the reduced pressure verses the reduced volume. The gray region indicates coexistence.}
+\caption{Plot of the reduced pressure verses the reduced volume per atom. The gray region indicates coexistence.}
 \label{fig:p-vs-V_at_fixed_T}
 \end{figure}
 
@@ -686,24 +698,40 @@ BH fluid is constructed using White Bear FMT. %The BH fluid is known
 %\label{fig:p-vs-T}
 %\end{figure}
 
-As a simple test for the equation of state, we compare the theory for
-a homogeneous soft-sphere fluid to Monte Carlo simulation and to 
-simulations of the Barker-Henderson fluid with the white bear 
-hard-sphere functional as described earlier. The results
-shown in Figure~\ref{fig:p-vs-V_at_fixed_T} display very good agreement 
+As a simple test for the equation of state, we plot the 
+reduced pressure versus the reduced volume per atom in Figure~\ref{fig:p-vs-V_at_fixed_T} 
+over a wide range of temperatures.
+%
+%we compare the theory for
+%a homogeneous soft-sphere fluid to Monte Carlo simulation and to 
+%simulations of the Barker-Henderson fluid with the white bear 
+%hard-sphere functional as described earlier. 
+%
+The results
+%shown in Figure~\ref{fig:p-vs-V_at_fixed_T} 
+display very good agreement with both BH and MC results
 for higher volumes at temperatures of 10 kT and under. 
 Differences between the DFT (solid lines) and MC results (dashed lines) 
-become quite apparent at lower volumes or higher temperatures 
+become quite apparent at lower volumes approaching the coexistence region,
+and also as the temperature increases. 
+Differences between the DFT (solid lines) and BH results (dotted lines) 
+for the homogeneous fluid become more apparent as the temperature increases.
 %and above, even at temperatures above the melting transition. 
-\textcolor{red}{??ASK-Our theory consistently predicts higher pressures than
+\textcolor{red}{ASK-Our theory %consistently 
+predicts higher pressures than
 simulations show, which is surprising given that
 Figure~\ref{fig:potential-plot} shows that the force should be
 \emph{underestimated} by our theory at high packing.} 
-In the freezing region, we found that the pressure shows some 
-agreement with the Monte-Carlo simulations in the freezing region 
-at lower temperatures, but the pressure grows larger than what is 
-predicted by the Monte-Carlo simulations and this
-discrepancy grows as the volume gets smaller.
+%In the freezing region, we found that the pressure shows some 
+%agreement with the Monte-Carlo simulations in the freezing region 
+%at lower temperatures, but the pressure grows larger than what is 
+%predicted by the Monte-Carlo simulations and this
+%discrepancy grows as the volume gets smaller.
+The DFT results show the onset of freezing at distinctly larger 
+pressures than the BH fluid, but shows good aggreement with the MC results.
+However, the DFT results for the pressure departs from the MC results 
+once in the crystalline region where the DFT pressure grows larger than 
+that predicated by MC as the volume is gets smaller.
 
 For the remainder of our figures, we will focus on just two bulk
 reduced densities: 0.6 and 1.0.  
@@ -711,13 +739,13 @@ We have examined a wide variety of
 densities, and found that the agreement with simulation consistently
 improves as the density is decreased, and so we decided to focus on
 just these two interesting cases.  
-\textcolor{red}{At a reduced density of 0.6, our
+At a reduced density of 0.6, our
 functional is right on the brink of its discrepancy with simulation,
 as is evident from Figure~\ref{fig:p-vs-V_at_fixed_T}.  
 In contrast, the very high
 reduced density of 1.0 is well beyond the point where our SFMT has
 considerably broken down quantitatively, and can demonstrate how it
-fails.} 
+fails. 
 
 %\subsection{Freezing Region}
 
@@ -731,17 +759,19 @@ fails.}
 \label{fig:hard-walls}
 \end{figure}
 
-To begin with the simplest test for inhomogeneous one dimensional
+As the simplest test for inhomogeneous one dimensional
 behavior, we will look at the density profile for the soft sphere
 fluid near a hard wall. We note that a hard wall, in this context, is
 interpreted as a potential felt by our spheres that abruptly
-transitions from zero to infinity, in contrast to the hard wall felt
+transitions from zero to infinity, \textcolor{red}{ASK:in contrast to the hard wall felt
 by a rubber ball, which has a soft potential energy as the ball
-changes shape.  Figure~\ref{fig:hard-walls} shows the density profile
+changes shape.}  Figure~\ref{fig:hard-walls} shows the density profile
 for the WCA fluid near a hard wall.  The top plot shows density
-profiles for $n^*=0.6$ and the bottom for $n^*=1.0$. We see that lower
-densities and higher temperatures produce almost exact results, while
-lower temperatures and higher densities reveal disagreement.
+profiles for $n^*=0.6$ and the bottom for $n^*=1.0$. We see that 
+overall there is very good aggreement between our results and that of both BH and MC
+with
+lower densities and higher temperatures producing almost exact results, while
+lower temperatures and higher densities reveal some disagreement.
 
 We find that the Barker-Henderson approach with the White Bear
 hard-sphere functional gives almost identical predictions to our
@@ -787,7 +817,7 @@ the wall for $n^*=0.6$ at different temperatures. Again, the results
 of our soft sphere fluid is as good as the BH fluid
 overall.
 
-\subsection{Soft spheres radial distribution function}
+\subsection{Soft spheres radial distribution function - \textcolor{red}{UPDATE with Plots finish!}}
 
 \begin{figure}
 \begin{center}
@@ -802,10 +832,10 @@ overall.
 \end{figure}
 
 For three dimensional comparisons, we plot radial distribution
-functions computed using the test-particle approach.  Results for
+functions computed using the test-particle approach.  \textcolor{red}{delete?:Results for
 reduced densities below $n^* = 0.6$ have been
-omitted as they were exact over temperature ranges from $T^*=0.01$ to
-$T^*=10$. The top frame of Figure~\ref{fig:radial-distribution} (top) shows
+omitted as they were exact over temperature ranges from $T^*=1$ to
+$T^*=10$.} The top frame of Figure~\ref{fig:radial-distribution} (top) shows
 the radial distribution for a range of temperatures at a reduced
 density of $n^* = 0.6$. We see very good agreement of our DFT with
 Monte-Carlo simulation at this reduced density. Our DFT's behavior at
