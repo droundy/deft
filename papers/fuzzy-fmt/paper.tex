@@ -24,7 +24,7 @@
 \author{Eric J. Krebs}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
-\author{Kirstie Finster}
+\author{Kirstie Finster (order?)}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
 \author{Patrick Kreitzberg}
@@ -37,9 +37,9 @@
 \begin{abstract}
   We introduce an easy-to-implement variation on the Soft Fundamental
   Measure Theory (SFMT) approach for the Weeks-Chandler-Andersen (WCA)
-  fluid that incorporates temperature-dependent parameters associated
-  with the length-scale and effective softness of the interaction and 
-  which reproduce the second virial coefficient of the WCA fluid.
+  fluid. Our model incorporates temperature-dependent parameters associated
+  with both the length-scale and effective softness of the interaction,
+  and which reproduce the second virial coefficient of the WCA fluid.
   This approach is readily extensible to other soft repulsive
   potentials.  We demonstrate that this approach is comparable in
   accuracy to the Barker-Henderson approach combined with the White
@@ -119,8 +119,8 @@ To obtain the free energy of the soft sphere fluid from which the
 thermodynamic properties of the fluid can be found, 
 we use Soft Fundamental Measure Theory
 (SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999.
-SFMT is a classical density functional
-theory that directly treats soft repulsive potentials in a framework
+SFMT is a classical Density Functional 
+theory (cDFT) that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
 by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
 Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ 
@@ -153,7 +153,8 @@ to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
 %and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
 %the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
 In his 2010 review of FMT, Roth states that the most important future
-developments in equilibrium Density Functional Theory (DFT) will involve treating soft repulsions
+developments in classical equilibrium Density Functional Theory 
+will involve treating soft repulsions
 and attractions~\cite{roth2010fundamental}.
 
 \section{Methods}
@@ -166,7 +167,7 @@ free energy in the
 zero-dimensional cavity limit~\cite{schmidt1999density}.
 It is written as an integral of free energy densities
 \begin{equation}
-F_\textit{ex-SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
+F_\textit{ex}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
@@ -745,12 +746,15 @@ become quite apparent at lower volumes approaching the coexistence region,
 and also as the temperature increases. 
 Differences between the DFT (solid lines) and BH results (dotted lines) 
 for the homogeneous fluid become more apparent as the temperature increases.
-%and above, even at temperatures above the melting transition. 
-\textcolor{red}{ASK-Our theory %consistently 
-predicts higher pressures than
-simulations show, which is surprising given that
-Figure~\ref{fig:potential-plot} shows that the force should be
-\emph{underestimated} by our theory at high packing.} 
+%and above, even at temperatures above the melting transition.
+%
+% ASK DR. ROUNDY!
+%%%\textcolor{red}{ASK-Our theory %consistently 
+%%%predicts higher pressures than
+%%%simulations show, which is surprising given that
+%%%Figure~\ref{fig:potential-plot} shows that the force should be
+%%%\emph{underestimated} by our theory at high packing.} 
+%
 %In the freezing region, we found that the pressure shows some 
 %agreement with the Monte-Carlo simulations in the freezing region 
 %at lower temperatures, but the pressure grows larger than what is 
@@ -786,9 +790,14 @@ behavior, we plot the density profile for the WCA soft sphere
 fluid near a hard wall, as shown in Figure~\ref{fig:hard-walls}. 
 We note that a hard wall, in this context, is
 interpreted as a potential felt by our spheres that abruptly
-transitions from zero to infinity, \textcolor{red}{ASK:in contrast to the hard wall felt
-by a rubber ball, which has a soft potential energy as the ball
-changes shape.}  
+transitions from zero to infinity, 
+%
+%
+%%%%\textcolor{red}{ASK:in contrast to the hard wall felt
+%%%%by a rubber ball, which has a soft potential energy as the ball
+%%%%changes shape.}  
+%
+%
 %Figure~\ref{fig:hard-walls} shows the density profile
 %for the WCA fluid near a hard wall.  
 The top plot shows density
@@ -857,7 +866,7 @@ overall.
   \label{fig:argon-plots}
 \end{figure*}
 
-\subsection{Soft spheres radial distribution function - \textcolor{red}{UPDATE with Plots finish!}}
+\subsection{Soft spheres radial distribution function - \textcolor{red}{UPDATE when plots finish!}}
 
 For three dimensional comparisons, we plot radial distribution
 functions computed using the test-particle approach.  
