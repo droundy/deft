@@ -57,12 +57,6 @@ def plot_walls(reduced_density, temps):
             plot(z, nreduced_density, styles.bh_dft_linestyle(), color = styles.color[temp], label = 'BH $T^* = %g$' % temp)
             have_labelled_bh = True
 
-        # fname = 'figs/mcfcc-walls-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
-        # data = loadtxt(fname)
-        # zmin = data[:, 0].min()
-        # plot(smooth((data[:, 0]-zmin)/sigma_over_R, num), smooth(data[:, 1]*sigma_over_R**3, num),
-        #      styles.mcwca(temp), label = 'WCA MC $T^*$ = %g' % temp)
-
         fname = 'figs/mc-soft-wall-%04.4f-%.4f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
         z = -data[:,0]
@@ -70,7 +64,7 @@ def plot_walls(reduced_density, temps):
         smoothed = smooth(data[:, 1], NUM)
         print(reduced_density/100, temp, smoothed[len(smoothed)//2])
         plot(smooth(z, NUM), smooth(data[:, 1], NUM),
-             styles.mcwca_linestyle(), color = styles.color_from_kT(temp), label = 'soft-walls-backwards WCA MC $T^*$ = %g' % temp)
+             styles.mcwca_linestyle(), color = styles.color_from_kT(temp), label = 'WCA MC $T^*$ = %g' % temp)
 
     title('Hard walls with bulk $n^* = %g$' % (reduced_density/100), fontsize=20)
     xlabel(r'$z/\sigma$', fontsize=18)
