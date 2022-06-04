@@ -1,9 +1,3 @@
-% TODO:
-
-% Write ``Liquid-vapor interface'' section A.
-
-% Look up question-mark references (citations).
-
 \documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
@@ -25,12 +19,12 @@
 
 \begin{document}
 \title{Soft Fundamental Measure Theory Functional for the
-  Weeks-Chandler-Anderson Repulsive Potential}
-
-\author{Eric J. Krebs}
+  Weeks-Chandler-Andersen Repulsive Potential}
+  
+\author{Kirstie Finster}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
-\author{Kirstie Finster}
+\author{Eric J. Krebs}
 \affiliation{Department of Physics, Oregon State University, Corvallis, OR 97331}
 
 \author{Patrick Kreitzberg}
@@ -42,8 +36,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
   We introduce an easy-to-implement variation on the Soft Fundamental
-  Measure Theory (SFMT) approach for the Weeks-Chandler-Anderson (WCA)
-  fluid.  This approach is readily extensible to other soft repulsive
+  Measure Theory (SFMT) approach for the Weeks-Chandler-Andersen (WCA)
+  fluid. Our model incorporates temperature-dependent parameters associated
+  with both the length-scale and effective softness of the interaction,
+  and which reproduce the second virial coefficient of the WCA fluid.
+  This approach is readily extensible to other soft repulsive
   potentials.  We demonstrate that this approach is comparable in
   accuracy to the Barker-Henderson approach combined with the White
   Bear density functional for the hard-sphere fluid.
@@ -51,69 +48,57 @@
 
 \maketitle
 
-\subsection{\kirstiesays{Kirstie to-do list}}
-\begin{enumerate}
-\item Update section II.C
-\item Review all the Fourier transforms we are using.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\subsection{\kirstiesays{Kirstie to-do list}}
+%\begin{enumerate}
+%\item Update Results section 
+%\item fix citations
+%\item Review all the Fourier transforms we are using.
 %\item Find new expressions for alpha and Xi based on virial expansion. (B3)
 %\item Finish section describing use of tensor functional.
-\item Finish freezing section with figures.
-\item Finish p vs V equation plot and format plots.
-%\item Touch up the freezing figures.
-\end{enumerate}
+%\item Finish p vs V equation plot and format plots.
+%\end{enumerate}
 
-\subsection{Meeting to-do list}
-\begin{enumerate}
-\item Go over plots and text sections II.B (ASK about text in red)
-\end{enumerate}
+%\subsection{Meeting to-do list}
+%\begin{enumerate}
+%\item removed unwanted content in introduction
+%\item address "Kirstie says" in red
+%\end{enumerate}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%a
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Introduction}
 The idea of liquids as composed of hard spheres dates back over two
-millenia~\cite{lucretius}.  In the 20th century, we came to understand
-atoms as inherently soft, but it was shown that their repulsion could
-still be accurately described using a hard-sphere model, provided the
-radius is chosen to be temperature
-dependent~\cite{rowlinson1964statistical, barker1967perturbation,
-  andersen1971relationship}.
-  \davidsays{This might be a good place to mention more about BH and similar?}
-These works cemented the hard-sphere
-model as the reference system of choice for the theory of
+millenia~\cite{lucretius}.  In the 20th century, we came to understand atoms as
+inherently soft with no abrupt border, but it was shown that their repulsion
+could still be accurately described using a hard-sphere model, provided the
+radius is chosen to be temperature dependent~\cite{rowlinson1964statistical,
+barker1967perturbation, andersen1971relationship}. A temperature-dependent hard
+sphere radius reflects the effect of collisions during which the particles are
+pushed closer together at higher temperatures. In the widely used
+Barker-Henderson approach, an arbitrary potential function can be used to
+construct a corresponding hard sphere reference fluid with a temperature
+dependent diameter.
+The hard-sphere fluid is widely studied and well understood, and
+has served as the reference system of choice for the theory of
 liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate}.  The hard-sphere fluid is
-widely studied and well understood, not only for the homogeneous
+  lafitte2013accurate} not only for the homogeneous
 fluid~\cite{carnahan1969equation}, but also in the more challenging
-case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997,
-  roth2002whitebear}.  However, the hard-sphere fluid remains a
+case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997, 
+roth2002whitebear}.  However, the hard-sphere fluid remains a
 non-physical model, which can also be numerically inconvenient due to its
 discontinuous potential, and the requirement for delta functions in
 computing weighted densities.
 
-Fundamental Measure Theory~(FMT) is a classical density functional
-theory for the free energy of the hard-sphere fluid developed by
-Rosenfeld~\cite{rosenfeld1989}.  Due to its combination of
-computational efficiency with accuracy, FMT has since been used as the
-basis for a wide variety of classical density
-functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
-  marechal2013density, hughes2013classical, krebs2014improved}.
-%
-In 1999, Schmidt introduced \emph{Soft} Fundamental Measure Theory
-(SFMT)~\cite{schmidt1999density}, which directly treats soft repulsive
-potentials in a framework based on the highly successful FMT.  SFMT
-has been used to describe the behavior of a star polymer in
-solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
-  sweatman2002fundamental}, as well as repulsive potentials applicable
-to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
-
-%% In his 2010 review of FMT, Roth states that the most important future
-%% developments in equilibrium DFT will involve treating soft repulsions
-%% and attractions~\cite{}.
-
-In this paper, we will apply SFMT to study the Weeks-Chandler-Anderson
-(WCA) repulsive potential~\cite{weeks1971}.  This potential reproduces
-the repulsive force of a Lennard-Jones interaction, which makes it an
-ideal model for interatomic repulsion.  Mathematically, the WCA
-pair potential is given by
+In this paper, we introduce a \textit{soft} sphere fluid 
+with temperature-dependent parameters to model the soft, repulsive 
+potential of a Weeks-Chandler-Andersen (WCA) fluid. 
+The WCA potential reproduces the repulsive force of a Lennard-Jones 
+interaction, which makes it an ideal model for interatomic repulsion. 
+The repulsive potential of the WCA fluid is given by 
 \newcommand\erf{\mathrm{erf}}
 \newcommand\Vwca{V_{\mathrm{wca}}}
 \newcommand\Verf{V_{\erf}}
@@ -129,6 +114,48 @@ pair potential is given by
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
+%
+To obtain the free energy of the soft sphere fluid from which the
+thermodynamic properties of the fluid can be found, 
+we use Soft Fundamental Measure Theory
+(SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999.
+SFMT is a classical Density Functional 
+theory (cDFT) that directly treats soft repulsive potentials in a framework
+based on the highly successful Fundamental Measure Theory (FMT) developed
+by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
+Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ 
+to express the free energy of the system
+as a functional of the number density profile.
+%\begin{align}
+    %A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
+%\end{align}
+Schmidt's SFMT free energy functional is constructed so as to yield results 
+consistent with the low-density limit of the virial expansion
+and with the limiting case of a zero-dimensional cavity which are known 
+exactly. 
+%There have been a few versions of Rosenfeld's FMT with improvements 
+%made for inhomogeneous situations like freezing.
+We use Schmidt's version of SFMT introduced in 2000 that
+has Tarazona's tensor weight~\cite{schmidt2000fluid,tarazona2000}
+which eliminates the problem of divergences 
+present in the earlier versions of FMT 
+for highly inhomogeneous situations like freezing.
+% that affected predictions of freezing.
+Due to its combination of computational efficiency with accuracy, 
+FMT has been used as the
+basis for a wide variety of classical density
+functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
+  marechal2013density, hughes2013classical, krebs2014improved}, and
+SFMT has been used to describe the behavior of a star polymer in
+solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
+  sweatman2002fundamental}, as well as repulsive potentials applicable
+to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
+%and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
+%the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
+In his 2010 review of FMT, Roth states that the most important future
+developments in classical equilibrium Density Functional Theory 
+will involve treating soft repulsions
+and attractions~\cite{roth2010fundamental}.
 
 \section{Methods}
 
@@ -138,16 +165,19 @@ The excess free energy of SFMT is a functional of the number density
 profile $n(\textbf{r})$ derived using dimensional crossover from the exact 
 free energy in the 
 zero-dimensional cavity limit~\cite{schmidt1999density}.
-It is written as an integral 
+It is written as an integral of free energy densities
 \begin{equation}
-A_\textit{SFMT}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
+F_\textit{ex}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
-of the free energy densities \davidsays{Probably want to spend more space on
-``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
-use tensor weights? If so we need to say.
-}
+%of free energy densities 
+
+%\davidsays{Probably want to spend more space on
+%``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
+%use tensor weights? If so we need to say.
+%}
+
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{1-n_3} \\
@@ -163,7 +193,7 @@ use tensor weights? If so we need to say.
 \begin{displaymath}\color{white}\left(\color{black}+\frac{9}{2}
 [\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-
 \operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
-where we have used the tensor version of $\Phi_3$ later formulated by 
+where we have used the tensor version of $\Phi_3$ formulated by 
 Tarazona~\cite{tarazona2000,santos2012phi3}, which produces excellent
 results for the crystallization of hard spheres.
 The free energy densities are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
@@ -218,14 +248,14 @@ SFMT reproduces the exact functional in the low-density limit, provided the
 weighting function that defines $n_2$ is related to the slope of the Mayer 
 function by a convolution with itself
 \begin{equation}\label{eq:mayerandw2}
-  \frac{d f(r)}{dr} = \int dr' w_2(r') w_2 (r-r').
+  \frac{d f(r)}{dr} = \int_{-\infty}^{\infty} dr' w_2(r') w_2 (r-r').
 \end{equation}
 %Given that all the weighting functions are related to $w_2(r)$, 
 %a complete set of weighting functions can be constructed by finding 
 %a weighting function $w_2(r)$ that satisfies Equation~\ref{eq:mayerandw2}.
 %All the weighting functions are related to $w_2(r)$ and so 
 By finding a weighting function $w_2(r)$ that satisfies 
-Equation~\ref{eq:mayerandw2}, a complete set of weighting functions
+Eq.~\ref{eq:mayerandw2}, a complete set of weighting functions
 can be constructed since they all relate to $w_2(r)$.
 %with the other weighting functions given by the equations above
 %~\cite{schmidt2000fluid}.  
@@ -246,7 +276,7 @@ can be constructed since they all relate to $w_2(r)$.
 %However, deconvolving the Mayer $f$ function for a realistic potential is
 %From Equations~\ref{eq:Mayerfunction} and \ref{eq:mayerandw2} it can be seen that  
 
-One way to satisfy Equation~\ref{eq:mayerandw2} is to choose a pair 
+One way to satisfy Eq.~\ref{eq:mayerandw2} is to choose a pair 
 potential $V(r)$ and deconvolve the Mayer function $f(r)$ to solve for $w_2(r)$. 
 However, deconvolving the Mayer function for a realistic potential is 
 challenging. %which has limited the number of applications of this
@@ -261,7 +291,7 @@ several papers~\cite{schmidt1999density}, this assumption is not
 applicable to energetic interactions such as dominate the repulsion
 between molecules.
 
-Another way to satisfy Equation~\ref{eq:mayerandw2} is to 
+Another way to satisfy Eq.~\ref{eq:mayerandw2} is to 
 construct a $w_2(r)$ and solve for 
 the pair potential to which that weighting function corresponds.  
 %In this paper, we will 
@@ -292,10 +322,10 @@ potential:
   {\frac{\Xi}{\sqrt{2}}}\right) \right) \\
   f(r) &= \tfrac12 \left( \mathrm{erf}\left( \frac{r - \alpha}{\Xi} 
   \right) - 1 \right) \label{eq:mayer-approx} \\
-  \Verf(r) &= -kT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
+  \Verf(r) &= -k_BT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
-We then make the $\alpha$ and $\Xi$ parameters temperature-dependent 
+We make the $\alpha$ and $\Xi$ parameters temperature-dependent 
 to approximate the soft, repulsive potential of the WCA fluid,
 as will be described in the next section.
 % Analytical expressions for the Fourier transforms of each of the 
@@ -314,17 +344,6 @@ as will be described in the next section.
 %erf potential in the same way that the Barker-Henderson approach uses
 %the hard-sphere potential to model a soft repulsive fluid.)
 
-%\begin{figure}
-%\begin{center}
-%\includegraphics[width=\columnwidth]{figs/w2-comparison}
-%\end{center}
-%\caption{The derivative of the Mayer function $f(r)$ from the WCA
-  %potential, and the convolution of the fitted Gaussian $w_2$ with
-  %itself at two different temperatures.  According to
-  %Eq.~\ref{eq:mayerandw2} these should be identical in order to
-  %accurately reproduce the low-density behavior of the fluid.}
-%\label{fig:w2-comparison}
-%\end{figure}
 
 %As is evident
 %from Eq.~\ref{eq:Verf}, if the potential energy of interaction is
@@ -333,6 +352,7 @@ as will be described in the next section.
 %to an entirely different form for $f(r)$ and $w_2(r)$, which is not
 %analytically tractable.
 
+%KEEP!!!!!!!
 %Our approach is to 
 %We approximate the effect of a soft repulsive potential
 %(specifically the potential of the WCA fluid) by using the erf
@@ -357,22 +377,32 @@ analytically tractable.
 In order to approximate the temperature-independent potential of the WCA 
 fluid, we make the $\alpha$ and $\Xi$ parameters in the erf potential 
 temperature-dependent.
-\davidsays{Maybe worth making a comparison with Barker-Hendersen here?}
+The $\alpha$ parameter roughly measures the length-scale of the
+interaction and decreases with increasing temperature 
+like the Barker-Henderson diameter 
+%and other temperature-dependent diameters 
+discussed earlier. 
+The $\Xi$ parameter is a measure of the effective softness of the 
+interaction, and increases with the temperature, again reflecting the
+effect of collisions which pushes the particles
+closer together at higher temperatures.
 
-\davidsays{What things do we make true using our method?
-\begin{enumerate}
-\item We make our functional reproduce the exact second virial coefficient,
-  which makes it how accurate at low densities?
-\item We reproduce the exact width (variance) of the peak of df/dr, which
-  hopefully ensures that we have an equally ``soft'' interaction. ???
-\item Reproducing the variance of $r$ in df/dr should also reproduce the correct
-variance of $r$ in $w_2$.  Actually only if we reproduce it for a 1D integral.
-:(
-\end{enumerate}
-I'd like to see these points introduced early (about here in the section), and
-explained at the time on physical grounds.  Perhaps also compared with BH, which
-I think also reproduces $B_2$.
-}
+%\davidsays{Maybe worth making a comparison with Barker-Hendersen here?}
+
+%\davidsays{What things do we make true using our method?
+%\begin{enumerate}
+%\item We make our functional reproduce the exact second virial coefficient,
+  %which makes it how accurate at low densities?
+%\item We reproduce the exact width (variance) of the peak of df/dr, which
+  %hopefully ensures that we have an equally ``soft'' interaction. ???
+%\item Reproducing the variance of $r$ in df/dr should also reproduce the correct
+%variance of $r$ in $w_2$.  Actually only if we reproduce it for a 1D integral.
+%:(
+%\end{enumerate}
+%I'd like to see these points introduced early (about here in the section), and
+%explained at the time on physical grounds.  Perhaps also compared with BH, which
+%I think also reproduces $B_2$.
+%}
 
 %NEW Method in findxi.h  
 %\textcolor{red}{Xi is the variance of the derivative of the mayer function 
@@ -380,11 +410,12 @@ I think also reproduces $B_2$.
 %Alpha is found by setting the second virial coefficient computed with Vwca equal 
 %to the second virial coefficient computed with Verf.}
 We begin by relating the parameter $\Xi$ to the variance of the radius 
-about the peak of the derivative of the Mayer function of the WCA potential
+about the peak of the derivative of the Mayer function 
+of the WCA potential, $f'_{wca}(r)$,
 %about the peak at $r=\alpha$
 %found from integrating the radius times the deriviative of the mayer 
 %function with respect to the radius r 
-for a given temperature.
+at a given temperature.
 \begin{align}
     \frac{\Xi^2}{2}= \langle r^2\rangle-\left<r\right>^2
 \end{align}
@@ -392,10 +423,27 @@ where
 \begin{align}
     \langle r\rangle = \frac{\int f'_{wca}(r)~r~dr}{\int f'_{wca}(r)~dr}
 \end{align}
-and 
+%and 
+%\begin{align}
+    %f'_{wca}(r)= -\frac{1}{kT}e^{-V_{wca}(r)/kT}\frac{dV_{wca}(r)}{dr}
+%\end{align}
+In this way, we reproduce the exact width, or variance of the derivative 
+of the Mayer function of the WCA potential when our $w_2(r)$, given by 
+Eq.~\ref{eq:gaussianw2}, is used in     
+Eq.~\ref{eq:mayerandw2} 
+%resulting in a function with variance $\frac{\Xi^2}{2}$
+%so that the right side of Equation~\ref{eq:mayerandw2} gives
 \begin{align}
-    f'_{wca}(r)= -\frac{1}{kT}e^{-V_{wca}(r)/kT}\frac{dV_{wca}(r)}{dr}
+   \frac{df_{erf}(r)}{dr}=\frac{1}{\Xi\sqrt{\pi}}e^{-\big(\frac{r-\alpha}{\Xi}\big)^2}
 \end{align}
+The Mayer function changes from -1 to 0 as the distance between the centers
+of two spheres given by r increases and the potential drops from infinity to zero. 
+The wider the range of r over which the Mayer function changes rapidly, 
+the softer the potential and the greater the width of the curve of the 
+derivative of the Mayer function verses r. Thus, we acheive comparable 
+softness by matching the widths of the derivatives of the 
+Mayor functions of the WCA and erf potentials. 
+
 %%We begin by equating the values of the potentials $\Verf(r)$ and $\Vwca(r)$ 
 %%at distance $\alpha$ corresponding to
 %%the maximum slope of the Mayer function. This tells us that the $\alpha$ 
@@ -404,16 +452,15 @@ and
   %%\alpha = \sigma \left( \frac{2}{1 + \sqrt{\frac{k_BT}{\epsilon}
         %%\ln 2}} \right)^{\frac{1}{6}}.
 %%\end{align}
-The $\Xi$ parameter is a measure of the effective softness of the interaction, and
-increases with the temperature. 
 
-Next, we set the second virial 
-coeffecient, $B_2$, formed using the mayer function for the $\Vwca(r)$ potential 
+Next, we set the second virial coefficient, $B_2$, formed using the Mayer 
+function for the $\Vwca(r)$ potential 
 in Eq.~\ref{eq:Vwca} equal to the second virial coefficent formed using 
-the mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, 
+the Mayer function for the $\Verf(r)$ potential in Eq.~\ref{eq:Verf}, 
 and solve for the parameter $\alpha$ at a given temperature.
+%The second virial coefficient, $B_2$ is given by
 %\begin{displaymath}B_2=-\frac{1}{2}\int{f(r)~d{r}}\end{displaymath}
-\begin{equation}B_2=-\frac{1}{2}\int{(e^{-\beta V(r)} - 1)~d{\vec{r}}}\end{equation}
+\begin{equation}B_2=-\frac{1}{2}\int (e^{-\beta V(r)} - 1)~d\textbf{r}\end{equation}
 %\begin{displaymath}\int{(e^{-\beta V_{wca}(r)} - 1)~d{r}}=
 %\int{(e^{-\beta V_{erf}(r)} - 1)~d{r}}\end{displaymath}
 %Finally, equating the slope of both
@@ -422,19 +469,45 @@ and solve for the parameter $\alpha$ at a given temperature.
 %  \Xi = \frac{\alpha}{6\sqrt{\pi} \left( \sqrt{\frac{\epsilon}{k_BT} \ln
 %      2} + \ln 2 \right)},
 %\end{align}
-The $\alpha$ parameter roughly measures the length-scale of the
-interaction and, like the Barker-Henderson diameter discussed later, 
-decreases with increasing temperature. \davidsays{Maybe discuss it earlier?}
- 
+%\davidsays{Maybe discuss it earlier? - done}
+Matching the second virial coefficient to that of the WCA fluid 
+makes the first order correction to the pressure equal to that of a WCA fluid 
+in the low-density limit where it is not likely to find more than two
+particles in close proximity at any point in time. 
+
+%In the low density limit, where it is not likely to find more than two
+%particles in close proximity at any point in time, 
+%the excess free energy of an inhomogeneous fluid is given by
+%\begin{align}\label{eq:Fexcess_low-density_homogeneous}
+    %F_{ex} &\rightarrow k_BT\int d\textbf{r}'\int d\textbf{r}^{\prime\prime} n(\textbf{r}')
+    %n(\textbf{r}^{\prime\prime})\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) 
+%\end{align} 
+%which, for homogeneous fluids, becomes
+%\begin{align}\label{eq:Fexcess_low-density_inhomogeneous}
+    %F_{ex} &\rightarrow k_BTn^2\int d\textbf{r}'\int d\textbf{r}^{\prime\prime}\left(-\frac{1}{2}f(|\textbf{r}'-\textbf{r}^{\prime\prime}|)\right) \\
+           %&\rightarrow k_BTn^2\left(-\frac{1}{2}\int{f(r)}{d\textbf{r}}\right)V \\
+           %&\rightarrow k_BTn^2B_2V
+%\end{align} 
+%The equation of state  is given by a virial expansion 
+%\begin{equation}\frac{P}{k_BT}=\frac{N}{V}\left(1+\frac{N}{V}B_2(T)+\left(\frac{N}{V}\right)^2B_3(T)+ \cdot\cdot\cdot\right) \end{equation}
+%\begin{equation}\frac{P}{k_BTn}=1+nB_2+n^2B_3+ \cdot\cdot\cdot \end{equation}
+\begin{equation}\frac{P}{k_BTn}=1+nB_2+ \cdot\cdot\cdot \end{equation}  %So ideal pressure must be greater than excess pressure
+%\kirstiesays{still looking at this...}
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{figs/potential-plot}
 \end{center}
-\caption{The WCA potential, and approximations to this potential
-  constructed for two different temperatures.}
+\caption{The WCA potential, 
+   and approximations to this potential
+   at two different temperatures ($T^*=k_BT/\epsilon$) constructed using the erf potential 
+   with incorporated temperature-dependent parameters $\alpha$ and $\Xi$. 
+   The vertical dotted lines show the values of $\alpha$ at
+   which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical 
+   line represents the distance at which the WCA force goes to zero. }
 \label{fig:potential-plot}
 \end{figure}
+
 
 \begin{figure}
 \begin{center}
@@ -442,33 +515,50 @@ decreases with increasing temperature. \davidsays{Maybe discuss it earlier?}
 \end{center}
 \caption{The derivative of the Mayer function $f(r)$ from the WCA
   potential, and the convolution of the fitted Gaussian $w_2$ with
-  itself at two different temperatures.  According to
+  itself at three different temperatures. According to
   Eq.~\ref{eq:mayerandw2} these should be identical in order to
-  accurately reproduce the low-density behavior of the fluid.}
+  accurately reproduce the low-density behavior of the fluid.
+  The vertical dotted lines
+  show the value of $\alpha$ where the erf potential peaks and
+  the the solid vertical line shows where the WCA force and potential,
+  and thus $f'_{\mathrm{wca}}$, goes to zero. 
+  The erf result extends slightly past the cutoff at which 
+  $f'_{\mathrm{wca}}$ vanishes for
+  both temperatures, but does quickly go to zero. 
+  At lower temperatures $w_2$ and $f'_{\mathrm{wca}}$ are more 
+  peaked and approach the cutoff, as
+  the system approaches hard-sphere behavior in which these functions
+  are Dirac $\delta$ functions. }
 \label{fig:w2-comparison}
 \end{figure}
 
-Fig.~\ref{fig:potential-plot} shows the erf potential at two different 
-tempertures alongside the temperature independent WCA potential.  
+The temperature-dependent parameters $\alpha$ and $\Xi$ are incorporated 
+into the erf potential as shown in Eq.~\ref{eq:Verf} to make the 
+erf potential approximate the temperature-independent WCA for each temperature.
+Figure~\ref{fig:potential-plot} 
+shows plots of the erf potential at two different 
+temperatures alongside WCA potential. At both temperatures, the largest 
+deviations are seen at very small distances,
+and thus very high potential energies.
+The derivative of the Mayer function corresponding to the WCA pair potential 
+is shown in Figure~\ref{fig:w2-comparison} where it is compared to the 
+fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
+Ideally, the curves would match for each temperature provided 
+Eq.~\ref{eq:mayerandw2} is satisfied.
 %
 %We show the resulting approximation for the potential in 
 %%Fig.~\ref{fig:potential-plot} for two different temperatures.  
 %
-Vertical dotted lines show the values of $\alpha$ at
-which $\Verf$ and $\Vwca$ would ideally be matched, a solid black vertical line
-represents the distance at which the WCA force goes to zero, and the
-horizontal dotted lines \textcolor{red}{illustrate the two temperatures.} 
+%and the horizontal dotted lines \textcolor{red}{illustrate the two temperatures.} 
 % 
 %We see the temperature dependence of the approximation in comparison to  
 %the WCA potential, with the approximation at higher temperatures being 
 %more accurate for smaller differences. %Is this true anymore?? don't think so!
 %
-\textcolor{red}{We see the approximation is more accurate at higher 
-temperatures for smaller differences.} %Not so! - fix
+%\textcolor{red}{We see the approximation is more accurate at higher 
+%temperatures for smaller differences.} %Not so! - fix
 %
-At both temperatures, the largest deviations are seen at very small distances,
-and thus very high potential energies.
-
+%
 %The erf potential is shown in Fig.~\ref{fig:potential-plot}, and the
 %
 %The first derivatives of the Mayer $f$ function corresponding to the erf
@@ -478,23 +568,7 @@ and thus very high potential energies.
 %Fig.~\ref{fig:w2-comparison} compares the derivative of the Mayer
 %function 
 %corresponding to the WCA pair potential 
-The derivative of the Mayer function corresponding to the WCA pair potential 
-is shown in Fig.~\ref{fig:w2-comparison} where it is compared to the 
-fitted Gaussian $w_2$ given in Eq.~\ref{eq:gaussianw2} convolved with itself. 
-% as in Eq.~\ref{eq:mayerandw2}.  
-Ideally, the curves would match for each temperature provided 
-Eq.~\ref{eq:mayerandw2} is satisfied.
-The two vertical dotted lines
-show the value of $\alpha$ where the erf potential peaks and
-the the solid vertical line shows where the WCA force and potential,
-and thus $f'_{\mathrm{wca}}$, goes to zero. 
-%
-The erf result extends
-slightly past the cutoff at which $f'_{\mathrm{wca}}$ vanishes for
-both temperatures, but does quickly go to zero. At lower lower
-temperatures $w_2$ and $f'$ are more peaked and approach the cutoff, as
-the system approaches hard-sphere behavior in which these functions
-are Dirac $\delta$ functions.\color{black} 
+
 
 %In this step, we make one additional approximation beyond the erf
 %approximation, which is to approximate $w_0$ as a linear combination
@@ -506,16 +580,16 @@ are Dirac $\delta$ functions.\color{black}
 Freezing of a pure substance occurs when the free energy it would have 
 in its solid state is lower than what it would have its 
 fluid state at the same temperature, pressure, and chemical potential. 
-At freezing an abrupt phase transistion occurs and the particular %crystalline
+At freezing an abrupt phase transition occurs and the particular %crystalline
 %a WCA fluid forms a crystalline structure. The 
 structure and density that result are affected by the interatomic potential. 
 When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) 
-crystalline lattice structure is formed~\cite{reference!}.
+crystalline lattice structure is formed~%\cite{reference!}.
 % with a total of one atom in each parallelpiped-shaped primative cell. 
 
 %Holding the temperature and number density fixed, 
 The equilibrium Helmholtz free energy of the crystal, and its corresponding 
-equilibrium number density profile, $n(\vec{r})$, can be found for a given 
+equilibrium number density profile, $n(\textbf{r})$, can be found for a given 
 temperature and overall number density, $n$, simply by varying the number density profile spatially 
 %, the spatially varying number density, 
 %by changing %the spatial profile of the number density by varying 
@@ -526,24 +600,32 @@ is minimized.
 We use a sum of 
 %For the crystal the $n(\vec{r})$ used in the integral 
 %in Eq.\ref{eq:n-convolution} is given by 
-Gaussians, each centered at a lattice point specified by $\vec{R_i}$, to form 
+Gaussians, each centered at a lattice point specified by $\textbf{R}_i$, to form 
 the number density profile 
 \begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
-\int{e^{-\frac{|\vec{r}-\vec{R_i}|^2}{2\left(\sigma_g\right)^2}}d{\vec{r}}}  \end{equation}  
-We can vary the number density profile, $n(\vec{r})$, by changing the width of the gaussians
-and the size of the crystal cell. \color{black}As the gaussian width gets large, the number 
-density becomes homogeneous as would be expected for a fluid. A larger crystal cell models a larger fraction 
-of vacancies. Monte-Carlo integration is employed to more efficiently 
-compute the weighted densities used to calculate the excess free energy which is then 
+\int{e^{-\frac{|\textbf{r}-\textbf{R}_i|^2}{2\left(\sigma_g\right)^2}}d{\textbf{r}}}  \end{equation}  
+We can vary the number density profile, $n(\textbf{r})$, by changing the 
+width of the Gaussians, $\sigma_{g}$, 
+and the fraction of vacant lattice sites which effectively changes the size 
+of the crystal cell so that the overall number density remains the same.
+%the size of the crystal cell. 
+As the Gaussian width gets large, the number 
+density becomes homogeneous as would be expected for a fluid. 
+A very small fraction of vacancies helps to avoid computational 
+difficulties. 
+Monte-Carlo integration is employed to more efficiently 
+compute the weighted densities used to calculate the excess free energy
+which is then 
 added to the ideal free energy (computed analytically) to get the total free energy 
 which is minimized. 
+%to find the equilibrium free energy and number density profile. 
 
 Pressure is found from the negative of the slope of the Helmholtz 
 free energy per atom with respect to the inverse number density. 
 \begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} 
 = -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
 The pressure at the phase transition can be obtained from the point of intersection
-that occurs when the chemical potential, which is the Gibbs free energy per atom g,
+that occurs when the chemical potential, which is the Gibbs free energy per atom, $g$,
 is plotted against the pressure for both the fluid and the solid at fixed temperature. 
 \begin{equation}{g = \frac{1}{n}P + f}\end{equation}
 The number densities of both the solid and the liquid at the phase transition can then
@@ -556,13 +638,13 @@ be found from a plot of pressure verses the inverse density.
 %Another approach to account for the temperature dependence of
 %realistic fluids is Barker-Henderson's
 %approach~\cite{barker1967perturbation}. This theory takes any general
-The Barker-Henderson fluid is known to give good results, so we use it 
+The Barker-Henderson (BH) fluid is known to give good results, so we use it 
 as a reference to compare with our DFT results. 
 In the BH approach, any general
 repulsive pair potential, $V(r)$ is used to construct a corresponding hard
 sphere reference fluid with a temperature dependent diameter given by
 \begin{align}
-  d = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
+  d_{BH} = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
 \end{align}
 We utilize this variable diameter with the White Bear FMT free energy
@@ -571,16 +653,16 @@ comparison for the SFMT presented in this paper.
 
 The White Bear version of the Fundamental-Measure Theory~(FMT)
 functional~\cite{roth2002whitebear}, describes the excess free energy
-of an \emph{inhomogeneous} hard-sphere fluid.  This functional differs
+of an inhomogeneous hard-sphere fluid.  This functional differs
 from the equations of SFMT presented in
-Equations~\ref{eq:sfmt-excess-free}-\ref{eq:n-3} only in replacing
+Eqs.~\ref{eq:sfmt-excess-free}-~\ref{eq:n-vectors} and~\ref{eq:n-3} only in replacing
 Eq.~\ref{eq:sfmt-phi3} with the following equation:
 \begin{align}
 \Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
   n_3 + (1-n_3)^2 \ln(1-n_3)
 }{
   36\pi n_3^2\left( 1 - n_3 \right)^2
-} ,
+} , 
 \end{align}
 which causes the functional to reduce to the Carnahan-Starling free
 energy rather than scaled-particle theory for homogeneous systems. In
@@ -589,75 +671,141 @@ given by the Dirac $\delta$ function:
 \begin{align}
   w_2(r) = \delta(r - R),
 \end{align}
-where $R$ is the hard-sphere radius.  The remaining weighting
+where $R$ is the hard-sphere radius. The remaining weighting
 functions are derived from $w_2$ according to
-Eqs.~\ref{eq:n-0-1}-\ref{eq:n-3}, as in SFMT.
+Eqs.~\ref{eq:n-0-1},~\ref{eq:n-vectors} and~\ref{eq:n-3}, as in SFMT.
+%, \ref{eq:n-vectors} and 
+
+
+
 
 \section{Results}
 In this section the results of our SFMT method will be compared to the results of simulations for a reference fluid.
-For all of our reference simulations, we construct a Barker-Henderson hard
+For our reference simulations, we construct a Barker-Henderson hard
 sphere fluid with a diameter determined by Eq.~\ref{eq:bh-diameter}
 using a WCA potential as the pair potential. The excess free energy functional of the 
-BH fluid is constructed using White Bear FMT. %The BH fluid is known
+BH fluid is constructed using White Bear FMT. 
+We will also compare our results with Monte-Carlo (MC) simulations of the WCA fluid. %The BH fluid is known
 %to give good results, so we use it as a reference for our DFT.
 
-\subsection{Homogeneous limit}
-
 \begin{figure}
-\begin{center}
-\includegraphics[width=3.5in]{figs/p-vs-T}
-\end{center}
-\caption{Reduced pressure versus temperature.  The SFMT result is
-  plotted as solid lines, with simulation results as dashed lines.
-  The reduced pressure is defined in terms of the Lennard-Jones
-  parameters as $p^{*} \equiv p \sigma^3/\epsilon$.}
-\label{fig:p-vs-T}
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
+ \end{center}
+\caption{Plot of the reduced pressure ($P\sigma^3/\epsilon$) verses the reduced volume per atom ($1/n\sigma^3$). The gray region indicates coexistence.}
+\label{fig:p-vs-V_at_fixed_T}
 \end{figure}
-
-As a simple test for the equation of state, we compare the theory for
-a homogeneous soft-sphere fluid to Monte Carlo simulation. The results
-shown in Figure~\ref{fig:p-vs-T} display very good agreement for lower
-densities across all temperatures shown in Figure and at higher
-temperatures which are not shown. Differences between the DFT (solid
-lines) and MC results (dashed lines) become quite apparent at
-$n^*=0.6$ and above, even at temperatures above the melting
-transition. Our theory consistently predicts higher pressures than
-simulations show, which is surprising given that
-Fig.~\ref{fig:potential-plot} shows that the force should be
-\emph{underestimated} by our theory at high packing.
-
-For the remainder of our figures, we will focus on just two bulk
-reduced densities: 0.6 and 1.0.  We have examined a wide variety of
-densities, and found that the agreement with simulation consistently
-improves as the density is decreased, and so we decided to focus on
-just these two interesting cases.  At a reduced density of 0.6, our
-functional is right on the brink of its discrepancy with simulation,
-as is evident from Fig.~\ref{fig:p-vs-T}.  In contrast, the very high
-reduced density of 1.0 is well beyond the point where our SFMT has
-considerably broken down quantitatively, and can demonstrate how it
-fails.
-
-\subsection{Soft spheres near a hard wall}
 
 \begin{figure}
 \begin{center}
   \includegraphics[width=\columnwidth]{figs/hard-walls}
 \end{center}
-\caption{Density distribution of WCA fluid near a hard wall.}
+\caption{Density distribution of WCA fluid near a hard wall ($n^*(r)=n(r)\sigma^3$).}
 \label{fig:hard-walls}
 \end{figure}
 
-To begin with the simplest test for inhomogeneous one dimensional
-behavior, we will look at the density profile for the soft sphere
-fluid near a hard wall. We note that a hard wall, in this context, is
+\begin{figure}
+  \centering
+  \includegraphics[width=\columnwidth]{figs/soft-walls}
+  \caption{Density distribution of a WCA fluid near a soft wall.}
+  \label{fig:soft-walls}
+\end{figure}
+
+
+%\subsection{Homogeneous limit-\textcolor{red}{UPDATE}}
+\subsection{Soft spheres in bulk}
+%\begin{figure}
+%\begin{center}
+%\includegraphics[width=3.5in]{figs/p-vs-T}
+%\end{center}
+%\caption{Reduced pressure versus temperature.  The SFMT result is
+  %plotted as solid lines, with simulation results as dashed lines.
+  %The reduced pressure is defined in terms of the Lennard-Jones
+  %parameters as $p^{*} \equiv p \sigma^3/\epsilon$.}
+%\label{fig:p-vs-T}
+%\end{figure}
+
+
+As a simple test for the equation of state, we plot in 
+Figure~\ref{fig:p-vs-V_at_fixed_T} the 
+reduced pressure versus the reduced volume per atom 
+over a wide range of temperatures.
+%
+%we compare the theory for
+%a homogeneous soft-sphere fluid to Monte Carlo simulation and to 
+%simulations of the Barker-Henderson fluid with the white bear 
+%hard-sphere functional as described earlier. 
+%
+
+The results
+%shown in Figure~\ref{fig:p-vs-V_at_fixed_T} 
+display very good agreement with both BH and MC results
+for higher volumes at temperatures of 10 kT and under. 
+Differences between the DFT (solid lines) and MC results (dashed lines) 
+become quite apparent at lower volumes approaching the coexistence region,
+and also as the temperature increases. 
+Differences between the DFT (solid lines) and BH results (dotted lines) 
+for the homogeneous fluid become more apparent as the temperature increases.
+%and above, even at temperatures above the melting transition.
+%
+% ASK DR. ROUNDY!
+%%%\textcolor{red}{ASK-Our theory %consistently 
+%%%predicts higher pressures than
+%%%simulations show, which is surprising given that
+%%%Figure~\ref{fig:potential-plot} shows that the force should be
+%%%\emph{underestimated} by our theory at high packing.} 
+%
+%In the freezing region, we found that the pressure shows some 
+%agreement with the Monte-Carlo simulations in the freezing region 
+%at lower temperatures, but the pressure grows larger than what is 
+%predicted by the Monte-Carlo simulations and this
+%discrepancy grows as the volume gets smaller.
+The DFT results show the onset of freezing at distinctly larger 
+pressures than the BH fluid, but shows good aggreement with the MC results.
+However, the DFT results for the pressure departs from the MC results 
+once in the crystalline region where the DFT pressure grows larger than 
+that predicated by MC as the volume is gets smaller.
+
+For the remainder of our figures, we will focus on just two bulk
+reduced densities: 0.6 and 1.0.  
+We have examined a wide variety of
+densities, and found that the agreement with simulation consistently
+improves as the density is decreased, and so we decided to focus on
+just these two interesting cases.  
+At a reduced density of 0.6, our
+functional is right on the brink of its discrepancy with simulation,
+as is evident from Figure~\ref{fig:p-vs-V_at_fixed_T}.  
+In contrast, the very high
+reduced density of 1.0 is well beyond the point where our SFMT has
+considerably broken down quantitatively, and can demonstrate how it
+fails. 
+
+%\subsection{Freezing Region}
+
+
+\subsection{Soft spheres near a hard wall}
+
+As the simplest test for inhomogeneous one dimensional
+behavior, we plot the density profile for the WCA soft sphere
+fluid near a hard wall, as shown in Figure~\ref{fig:hard-walls}. 
+We note that a hard wall, in this context, is
 interpreted as a potential felt by our spheres that abruptly
-transitions from zero to infinity, in contrast to the hard wall felt
-by a rubber ball, which has a soft potential energy as the ball
-changes shape.  Figure~\ref{fig:hard-walls} shows the density profile
-for the WCA fluid near a hard wall.  The top plot shows density
-profiles for $n^*=0.6$ and the bottom for $n^*=1.0$. We see that lower
-densities and higher temperatures produce almost exact results, while
-lower temperatures and higher densities reveal disagreement.
+transitions from zero to infinity, 
+%
+%
+%%%%\textcolor{red}{ASK:in contrast to the hard wall felt
+%%%%by a rubber ball, which has a soft potential energy as the ball
+%%%%changes shape.}  
+%
+%
+%Figure~\ref{fig:hard-walls} shows the density profile
+%for the WCA fluid near a hard wall.  
+The top plot shows density
+profiles for $n^*=0.6$ and the bottom for $n^*=1.0$. We see that 
+overall there is very good aggreement between our results and that of both BH and MC
+with
+lower densities and higher temperatures producing almost exact results, while
+lower temperatures and higher densities reveal some disagreement.
 
 We find that the Barker-Henderson approach with the White Bear
 hard-sphere functional gives almost identical predictions to our
@@ -666,13 +814,6 @@ are consistently much smaller than the error of either method relative
 to the Monte Carlo simulations.
 
 \subsection{Soft spheres near a soft wall}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=\columnwidth]{figs/soft-walls}
-  \caption{Density distribution of a WCA fluid near a soft wall.}
-  \label{fig:soft-walls}
-\end{figure}
 
 As a second and more physical case, we construct a wall of made of a
 continuum of WCA spheres with density $\rho$.  The potential
@@ -697,13 +838,11 @@ and is infinite for $z\leq 0$.
 
 In Figure \ref{fig:soft-walls}, we compare our soft sphere DFT
 against MC simulation and a BH fluid near a soft wall
-with the potential given in Equation~\ref{eq:soft-wall-potential}. We
+with the potential given in Eq.~\ref{eq:soft-wall-potential}. We
 plot the reduced density versus reduced distance from the surface of
 the wall for $n^*=0.6$ at different temperatures. Again, the results
 of our soft sphere fluid is as good as the BH fluid
 overall.
-
-\subsection{Soft spheres radial distribution function}
 
 \begin{figure}
 \begin{center}
@@ -717,11 +856,23 @@ overall.
 \label{fig:radial-distribution}
 \end{figure}
 
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=7.0in]{figs/argon-plots}
+  \end{center}
+  \caption{Radial distribution functions of Argon. From left to right
+    the experimental data was taken at 85 K and vapor pressure, at 293
+    K and 1.1 GPa, and at 148 K and 9.92 MPa.}
+  \label{fig:argon-plots}
+\end{figure*}
+
+\subsection{Soft spheres radial distribution function - \textcolor{red}{UPDATE when plots finish!}}
+
 For three dimensional comparisons, we plot radial distribution
-functions computed using the test-particle approach.  Results for
-reduced densities below $n^* = 0.6$ have been
-omitted as they were exact over temperature ranges from $T^*=0.01$ to
-$T^*=10$. The top frame of Fig.~\ref{fig:radial-distribution} (top) shows
+functions computed using the test-particle approach.  
+%\textcolor{red}{delete?:Results for reduced densities below $n^* = 0.6$ have been
+%omitted as they were exact over temperature ranges from $T^*=1$ to $T^*=10$.} 
+The top frame of Figure~\ref{fig:radial-distribution} (top) shows
 the radial distribution for a range of temperatures at a reduced
 density of $n^* = 0.6$. We see very good agreement of our DFT with
 Monte-Carlo simulation at this reduced density. Our DFT's behavior at
@@ -732,27 +883,25 @@ amplitude of oscillation. Comparison with the Barker-Henderson results
 shows our DFT to have a similar magnitude of error relative the exact
 radial distribution function.
 
-In Fig.~\ref{fig:radial-distribution} (bottom), we plot the results
+In Figure~\ref{fig:radial-distribution} (bottom), we plot the results
 for a reduced density of $n^*=1.0$ for three different
 temperatures. While both Barker-Henderson hard spheres and our DFT
 both overestimate the density at contact, our theory differs more at
 the lowest temperature shown here. For the density oscillations, our
 DFT's error is comparable to that of the Barker-Henderson results.
+%\newline
 
-\begin{figure*}
-  \begin{center}
-    \includegraphics[width=7.0in]{figs/argon-plots}
-  \end{center}
-  \caption{Radial distribution functions of Argon. From left to right
-    the experimental data was taken at 85 K and vapor pressure, at 293
-    K and 1.1 GPa, and at 48 K and 9.92 MPa.}
-  \label{fig:argon-plots}
-\end{figure*}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{figure}
+ %\centering
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
+%\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
+%\label{fig:Phase_Diagram_of_T_vs_n}
+%\end{figure}
+
 \subsection{Argon}
 
-Finally, to connect with experiment, we model liquid the radial
+Finally, to connect with experiment, we generate the radial
 distribution function of Argon by computing the radial distribution of
 a WCA fluid surrounding a single Lennard-Jones particle.  We consider
 three density/temperature pairs for which experimental data is
@@ -760,11 +909,11 @@ available~\cite{mikolaj2004structure, eggert2002quantitative,
 yarnell1973structure}, and which roughly span the range of reduced
 densities from 0.6 to 1.0. The three experimental results were
 performed at vapor pressure, 9.92 MPa, and 1.1 GPa; and at
-temperatures of 85 K, 48 K, and 293 K respectively. For each system we
+temperatures of 85 K, 148 K, and 293 K respectively. For each system we
 compute the radial distribution function with Monte Carlo simulation,
 as well as SFMT and the Barker-Henderson approach.  For our WCA fluid
 and Lennard-Jones test particle, we used the Lennard-Jones parameters
-developed by Verlet: $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon =
+developed by Verlet: $\sigma = 3.405 ~\textrm{\AA}$ and $\epsilon/k_B =
 119.8$~K~\cite{verlet1967computer}.
 
 Figure~\ref{fig:argon-plots} shows the resulting radial distribution
@@ -779,32 +928,14 @@ the height of the first peak.
 
 
 
-\subsection{Freezing of the WCA fluid}
-
-Phase diagrams for the WCA fluid are shown below. In all cases $\sigma=1$ and $\epsilon=1$.
-
-\begin{figure}
- \centering
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_T_vs_n}
-\caption{Phase Diagram of the reduced termperature verses the reduced density. Green lines indicate the region of coexistence from Monte-Carlo simulations.}
-\label{fig:Phase_Diagram_of_T_vs_n}
-\end{figure}
-
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
- \end{center}
-\caption{Phase Diagram of the reduced pressure verses the reduced temperature. The green line marks the boundary from Monte-Carlo simulations.}
-\label{fig:Phase_Diagram_P_vs_T}
-\end{figure}
-
-
-
-%\[{}\]
-%\[{}\]
-%\[{}\]
-
-
+%\begin{figure}
+ %\begin{center}
+  %\includegraphics[width=\columnwidth]{figs/Phase_Diagram_of_P_vs_T}
+ %\end{center}
+%\caption{Phase Diagram of the reduced pressure verses the reduced 
+%temperature. The green line marks the boundary from Monte-Carlo simulations.}
+%\label{fig:Phase_Diagram_P_vs_T}
+%\end{figure}
 
 \section{Conclusion}
 
@@ -814,158 +945,129 @@ advantage of our theory is that we can use it \emph{as is} rather than
 needing to accommodate for discontinuities and delta functions of hard
 sphere fluids.
 
-%\begin{figure}
- %\begin{center}
-  %\includegraphics[width=\columnwidth]{figs/T-vs-n_at_fixed_P}
- %\end{center}
-%\caption{Phase Diagram of the reduced temperature verses the reduced density. The grey region indicates coexistence.}
-%\label{fig:T-vs-n_at_fixed_P}
-%\end{figure}
-
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/p-vs-T_at_fixed_n}
- \end{center}
-\caption{Plot of the reduced pressure verses the reduced temperature. The lines bending downward indicate freezing.}
-\label{fig:p-vs-T_at_fixed_density}
-\end{figure}
-
-\begin{figure}
- \begin{center}
-  \includegraphics[width=\columnwidth]{figs/p-vs-V_at_fixed_T}
- \end{center}
-\caption{Plot of the reduced pressure verses the reduced volume. The grey region indicates coexistence.}
-\label{fig:p-vs-V_at_fixed_T}
-\end{figure}
-
-%\begin{figure}
- %\begin{center}
-  %\includegraphics[width=\columnwidth]{figs/p-vs-n_at_fixed_T}
- %\end{center}
-%\caption{Phase Diagram of the reduced pressure verses the reduced density. The grey region indicates coexistence.}
-%\label{fig:p-vs-n_at_fixed_T}
-%\end{figure}
-
-
 \bibliography{paper}% Produces the bibliography via BibTeX.
  
-% \end{document}
-
 \appendix
 \begin{widetext}
   \section{Fourier transforms of weight functions}\label{sec:fourier}
 
 %\tiny
-\subsection{Fourier Transform of Weight Functions $w_0(r), w_1(r), w_2(r)$, and $w_3(r)$ }
-\noindent\textbf{Weight Function $w_0(r)$:}
-\begin{equation}{w_0(r)=\frac{w_2(r)}{4{\pi}r^2}}\end{equation}
-where
-\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-temporarily set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_0(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+%%\subsection{Fourier Transform of Weight Functions $w_0(r), w_1(r), w_2(r)$, and $w_3(r)$ }
+\subsection{Fourier Transform of Weight Functions}
+Fourier Transforms are expressed in general as
+\begin{equation}{\widetilde{w}_i(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_i(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+
+\noindent\textbf{Fourier Transform of Weight Function $w_0(r)$:}
+%%\begin{equation}{w_0(r)=\frac{w_2(r)}{4{\pi}r^2}}\end{equation}
+%%where
+%%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%temporarily set 
+%%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+%%\begin{equation}{w_0(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+%%%NOTE TO ME: \begin{equation}\frac{\sqrt{2}}{4{\pi}\sqrt{\pi}\Xi}= \frac{1}{\Xi(\sqrt{2\pi})^3}\end{equation}
+\begin{equation}{w_0(r)=\frac{1}{\Xi(\sqrt{2\pi})^3}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
 %\[{}\]
-\begin{equation}{\widetilde{w}_0(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_0(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}$
-\begin{equation}{\widetilde{w}_0(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_0(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-\[{}\]
-Calculate $\widetilde{w}_0(k)$ 
-\begin{equation}{\widetilde{w}_0(k)=\frac{1}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right]d{r}}\end{equation}
-\[{}\]
-\begin{equation}{\widetilde{w}_0(k)=\frac{2\pi}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
-\[{}\]
-Set the lower limit to $-\infty$ since the integrand is nearly zero by the time r is zero. 
-\begin{displaymath}{\widetilde{w}_0(k)=\frac{1}{\sqrt{\pi}ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}}\end{displaymath}
-\[{}\]
-\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation}
-\[{}\] %\color{red}
-Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ becomes
-\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+%\begin{equation}{\widetilde{w}_0(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_0(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%Set $\vec{k}$ in the direction of $\hat{z}$
+%%\begin{equation}{\widetilde{w}_0(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_0(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%\[{}\]
+%%Calculate $\widetilde{w}_0(k)$ 
+%%\begin{equation}{\widetilde{w}_0(k)=\frac{1}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right]d{r}}\end{equation}
+%%\[{}\]
+%%\begin{equation}{\widetilde{w}_0(k)=\frac{2\pi}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+%%\[{}\]
+%%Set the lower limit to $-\infty$ since the integrand is nearly zero by the time r is zero. 
+%%\begin{displaymath}{\widetilde{w}_0(k)=\frac{1}{\sqrt{\pi}ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}}\end{displaymath}
+%%\[{}\]
+%%\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation}
+%%\[{}\] %\color{red}
+%%Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ becomes
+\begin{equation}{\widetilde{w}_0(k)=\sqrt{\frac{\pi}{2}}\frac{1}{k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
 \color{black}
 
-\noindent\textbf{Weight Function $w_1(r)$:}
-\begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
-where
-\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-temporarily set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+\noindent\textbf{Fourier Transform of Weight Function $w_1(r)$:}
+%%\begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
+%%where
+%%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%temporarily set 
+%%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+%%\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+\begin{equation}{w_1(r)=\frac{1}{\Xi(\sqrt{2\pi})^3}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%Set $\vec{k}$ in the direction of $\hat{z}$ 
+%%\begin{equation}{\widetilde{w}_1(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 
-\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}$ 
-\begin{equation}{\widetilde{w}_1(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-
-\noindent Calculate $\widetilde{w}_1(k)$ 
-\begin{equation}{\widetilde{w}_1(k)=\frac{1}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right]d{r}}\end{equation}
-\[{}\]
-\begin{equation}{\widetilde{w}_1(k)=\frac{2\pi}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
-\[{}\]
-\begin{equation}{\widetilde{w}_1(k)=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\frac{2\sin(kr)}{kr}d{r}}\end{equation}
-Set the lower limit to $-\infty$ since the integrand is nearly zero by the time r is zero. 
-\begin{equation}{\widetilde{w}_1(k)=\frac{1}{\sqrt{\pi}ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}}\end{equation}
-After doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$ this becomes
-\begin{equation}{\widetilde{w}_1(k)=\frac{1}{k}\sin\left(\frac{k\alpha}{2}\right)e^{-\left(\frac{k^2a^2}{4}\right)}}\end{equation}
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_1(k)$ becomes
+%%\noindent Calculate $\widetilde{w}_1(k)$ 
+%%\begin{equation}{\widetilde{w}_1(k)=\frac{1}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right]d{r}}\end{equation}
+%%\[{}\]
+%%\begin{equation}{\widetilde{w}_1(k)=\frac{2\pi}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+%%\[{}\]
+%%\begin{equation}{\widetilde{w}_1(k)=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\frac{2\sin(kr)}{kr}d{r}}\end{equation}
+%%Set the lower limit to $-\infty$ since the integrand is nearly zero by the time r is zero. 
+%%\begin{equation}{\widetilde{w}_1(k)=\frac{1}{\sqrt{\pi}ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}}\end{equation}
+%%After doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$ this becomes
+%%\begin{equation}{\widetilde{w}_1(k)=\frac{1}{k}\sin\left(\frac{k\alpha}{2}\right)e^{-\left(\frac{k^2a^2}{4}\right)}}\end{equation}
+%%Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_1(k)$ becomes
 \begin{equation}
     \widetilde{w}_1(k)=\frac{1}{k}e^{-\frac{k^2\Xi^2}{8}}\sin\left(\frac{k\alpha}{2}\right)
 \end{equation}
 
-\noindent\textbf{Weight Function $w_2(r)$:}
+\noindent\textbf{Fourier Transform of Weight Function $w_2(r)$:}
 %\subsection{Fourier Transform of Weight Function $w_2(r)$}
-\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+%%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%set 
+%%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+%%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\sqrt{\pi}\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+\begin{equation}{w_2(r)=\sqrt{\frac{2}{\pi}}\frac{1}{\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%\begin{equation}{\widetilde{w}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%Set $\vec{k}$ in the direction of $\hat{z}$ 
+%%\begin{equation}{\widetilde{w}_2(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 
-\begin{equation}{\widetilde{w}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}$ 
-\begin{equation}{\widetilde{w}_2(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-
-\noindent Calculate $\widetilde{w}_2(k)$ 
-\begin{equation}{\widetilde{w}_2(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right)d{r}}\end{equation}
-\[{}\]
-\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
-\begin{equation}{\widetilde{w}_2(k)=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\frac{2\sin(kr)}{kr}d{r}}\end{equation}
-Set the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero.
-\begin{equation}{\widetilde{w}_2(k)=\frac{4\sqrt{\pi}}{ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}}\end{equation}
-After doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$ this becomes
-\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{k}e^{-\left(\frac{k^2a^2}{4}\right)}\left(ka^2\cos\left(\frac{k\alpha}{2}\right)+\alpha\sin\left(\frac{k\alpha}{2}\right)\right)}\end{equation}
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_2(k)$ becomes
+%%\noindent Calculate $\widetilde{w}_2(k)$ 
+%%\begin{equation}{\widetilde{w}_2(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right)d{r}}\end{equation}
+%%\[{}\]
+%%\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+%%\begin{equation}{\widetilde{w}_2(k)=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\frac{2\sin(kr)}{kr}d{r}}\end{equation}
+%%Set the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero.
+%%\begin{equation}{\widetilde{w}_2(k)=\frac{4\sqrt{\pi}}{ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}}\end{equation}
+%%After doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$ this becomes
+%%\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{k}e^{-\left(\frac{k^2a^2}{4}\right)}\left(ka^2\cos\left(\frac{k\alpha}{2}\right)+\alpha\sin\left(\frac{k\alpha}{2}\right)\right)}\end{equation}
+%%Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_2(k)$ becomes
 \begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{k}e^{-\frac{k^2\Xi^2}{8}}\left[\frac{k\Xi^2}{2}\cos\left(\frac{k\alpha}{2}\right)+\alpha\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
 
 \[{}\]
 
 %\subsection{Fourier Transform of Weight Function $w_3(r)$}
-\noindent\textbf{Weight Function $w_3(r)$:}
+\noindent\textbf{Fourier Transform of Weight Function $w_3(r)$:}
 \begin{equation}
     w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]
 \end{equation}
-temporarily set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]}\end{equation}
+%%temporarily set 
+%%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+%%\begin{equation}{w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]}\end{equation}
 
-\begin{equation}{\widetilde{w}_3(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_3(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}$ 
-\begin{equation}{\widetilde{w}_3(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_3(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%\begin{equation}{\widetilde{w}_3(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_3(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%Set $\vec{k}$ in the direction of $\hat{z}$ 
+%%\begin{equation}{\widetilde{w}_3(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_3(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
 
-\noindent Calculate $\widetilde{w}_3(k)$ 
-\begin{equation}{\widetilde{w}_3(k)=\frac{1}{2}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right)d{r}}\end{equation}
-\[{}\]
+%%\noindent Calculate $\widetilde{w}_3(k)$ 
+%%\begin{equation}{\widetilde{w}_3(k)=\frac{1}{2}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right)d{r}}\end{equation}
+%%\[{}\]
 
-\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{2}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+%%\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{2}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
 
-\begin{equation}{\widetilde{w}_3(k)=\pi\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\frac{2\sin(kr)}{kr}d{r}}\end{equation}
+%%\begin{equation}{\widetilde{w}_3(k)=\pi\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\frac{2\sin(kr)}{kr}d{r}}\end{equation}
 
-\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{k}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r\sin(kr)d{r}}\end{equation}
-Integrating by parts with 
-\begin{displaymath}{f=1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)}\end{displaymath}
-\begin{displaymath}{g=\frac{\sin(kr)-kr\cos(kr)}{k^2}}\end{displaymath}
+%%\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{k}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r\sin(kr)d{r}}\end{equation}
+%%Integrating by parts with 
+%%\begin{displaymath}{f=1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)}\end{displaymath}
+%%\begin{displaymath}{g=\frac{\sin(kr)-kr\cos(kr)}{k^2}}\end{displaymath}
 
-\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{k}\left[\left(1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right)\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\bigg|^{\infty}_0\color{white}\right]}\end{equation} \color{black}
-\begin{displaymath}{-\int_{0}^{\infty}\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\left(\frac{2}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\right)d{r}}\end{displaymath}
-Evaluating the integral by doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$, and setting the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero this becomes
-\begin{equation}{\widetilde{w}_3(k)=\frac{4\pi}{k^3}e^{-\frac{k^2a^2}{4}}\left[\left(1+\frac{k^2a^2}{2}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_3(k)$ becomes
+%%\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{k}\left[\left(1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right)\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\bigg|^{\infty}_0\color{white}\right]}\end{equation} \color{black}
+%%\begin{displaymath}{-\int_{0}^{\infty}\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\left(\frac{2}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\right)d{r}}\end{displaymath}
+%%Evaluating the integral by doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$, and setting the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero this becomes
+%%\begin{equation}{\widetilde{w}_3(k)=\frac{4\pi}{k^3}e^{-\frac{k^2a^2}{4}}\left[\left(1+\frac{k^2a^2}{2}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
+%%Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_3(k)$ becomes
 
 \begin{equation}
     \widetilde{w}_3(k)=\frac{4\pi}{k^3}
@@ -975,325 +1077,338 @@ Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_
 \end{equation}
 \[{}\]
 
-\subsection{Fourier Transform of Vector Weight Functions $\vec{w}_{1}(r)$}
-\noindent\textbf{Vector Weight Function $\vec{w}_1(r)$:}
-\begin{equation}{\vec{w}_1(\vec{r})=w_1(r)\frac{\vec{r}}{r}}\end{equation}
-where
-\begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
-\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-temporarily set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+%%\subsection{Fourier Transform of Vector Weight Functions $\vec{w}_{1}(r)$}
+\noindent\textbf{Fourier Transform of Vector Weight Function $\vec{w}_1(r)$:}
+%%\begin{equation}{\vec{w}_1(\vec{r})=w_1(r)\frac{\vec{r}}{r}}\end{equation}
+%%where
+%%\begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
+%%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%temporarily set 
+%%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+%%\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}\vec{w}_1(\vec{r})e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+\begin{equation}{\vec{w}_1(\vec{r})=\frac{1}{\Xi(\sqrt{2\pi})^3}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\frac{\vec{r}}{r}}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-where 
-\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
-\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
-\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
-The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}\vec{w}_1(\vec{r})e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%where 
+%%\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
+%%\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
+%%\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
+%%The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{1}{4\pi\sqrt{\pi}a}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos{\theta}'e^{-ikr\cos\theta'}d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{1}{4\pi\sqrt{\pi}a}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos{\theta}'e^{-ikr\cos\theta'}d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}+\frac{1}{k}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right]{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}+\frac{1}{k}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right]{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)+\frac{\pi}{2k}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]\right]{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)+\frac{\pi}{2k}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]\right]{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]-e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_1(k)$ becomes
-\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}{\sqrt{2}\Xi}\right)\right]-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]-e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
+%%Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_1(k)$ becomes
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\sqrt{\frac{\pi}{2}}\frac{1}{k\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+\frac{i\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-\frac{i\alpha}{\sqrt{2}\Xi}\right)\right]-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
 \[{}\]
 
 %\subsection{Fourier Transform of Vector Weight Function $\vec{w}_{2}(r)$}
 \noindent\textbf{Vector Weight Function $\vec{w}_2(r)$:}
-\begin{equation}{\vec{w}_2(\vec{r})=w_2(r)\frac{\vec{r}}{r}}\end{equation}
-where
-\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-temporarily set 
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-\begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+%%\begin{equation}{\vec{w}_2(\vec{r})=w_2(r)\frac{\vec{r}}{r}}\end{equation}
+%%where
+%%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%temporarily set 
+%%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+%%\begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
-Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
-\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-where 
-\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
-\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
-\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
-The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
-\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
+\begin{equation}{\vec{w}_2(\vec{r})=\sqrt{\frac{2}{\pi}}\frac{1}{\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\frac{\vec{r}}{r}}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+%%Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
+%%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%where 
+%%\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
+%%\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
+%%\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
+%%The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
+%%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(-\frac{2i}{kr}\cos(kr) + \frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{-4i\sqrt{\pi}}{ak}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos(kr)d{r} + \frac{4i\sqrt{\pi}}{ak^2}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}{~~}\hat{z}'}\end{equation}
+%%\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(-\frac{2i}{kr}\cos(kr) + \frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
 
-\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{-4\sqrt{\pi}i}{ak}\left[\frac{a\alpha\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation} 
-\begin{displaymath}{+{~~}\frac{4\sqrt{\pi}i}{ak^2}\left[a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]{~~}\hat{z}'}\end{displaymath}
-\[{}\]
-\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2a^2}{4}}\left[\left(\frac{a^2k}{2}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
-Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_2(k)$ becomes
+%%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{-4i\sqrt{\pi}}{ak}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos(kr)d{r} + \frac{4i\sqrt{\pi}}{ak^2}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}{~~}\hat{z}'}\end{equation}
+
+%%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{-4\sqrt{\pi}i}{ak}\left[\frac{a\alpha\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation} 
+%%\begin{displaymath}{+{~~}\frac{4\sqrt{\pi}i}{ak^2}\left[a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]{~~}\hat{z}'}\end{displaymath}
+%%\[{}\]
+%%\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2a^2}{4}}\left[\left(\frac{a^2k}{2}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
+%%Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_2(k)$ becomes
 \begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2\Xi^2}{8}}\left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
 \[{}\]
 
-\subsection{Fourier Transform of Tensor weight ${w}_{m2}(r)$} %$\overleftrightarrow{w}_{m2}(r)$
+%%\subsection{Fourier Transform of Tensor weight ${w}_{m2}(r)$} %$\overleftrightarrow{w}_{m2}(r)$
+\noindent\textbf{Fourier Transform of Tensor Weight Function $\overleftrightarrow{w}_{m2}(r)$:}
 %\textbf{Tensor Weight $\overleftrightarrow{w}_{m2}(r)$:}
 \begin{equation}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation}
-where
-\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
-Form the outer product
-\begin{equation}{\vec{r}\vec{r}=\left(\begin{array}{c} r_x \\ r_y \\ r_z \end{array} \right) \left(\begin{array}{rrr} r_x & r_y & r_z \end{array} \right)=\left(\begin{array}{ccc} {r^2}_x & r_xr_y & r_xr_z \\ r_yr_x & {r_y}^2 & r_yr_z \\ r_zr_x & r_zr_y & {r_z}^2 \end{array}\right)}\end{equation}
-and identity matrix
-\begin{equation}{I=\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{array}\right)}\end{equation}
-The tensor weight matrix elements are then given by
-\begin{equation}{w_{m2_{ij}}(\vec{r})=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
-with temporarily setting
-\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
-The fourier transform of the tensor weight matrix elements are given by
-\begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})=\int_{allspace}{w_{{m2}_{ij}}}(\vec{r})e^{-i\vec{k}\cdot\vec{r}}d{\vec{r}}}\end{equation}
-%\mbox{~%\scriptsize\textbullet~}
-Since the integration is over all space, the integral can be simplified by setting 
-\begin{equation}{\vec{k}=k\hat{z}}\end{equation}
-Instead of constraining vector $\vec{k}$ to be in the z direction, however, a rotated coordinate system $(x',y',z')$ is used which is rotated from the (x,y,z) coordinate system in such a way that $z'$ points in the direction of vector $\vec{k}$. After solving for the elements of the transformed weight function in coordinate system $(x',y',z')$, they will be expressed again in terms of vector $\vec{k}$ as it appears in coordinate system (x,y,z) to get the elements of the transformed weight function in coordinate system (x,y,z).
+%%where
+%%\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+%%Form the outer product
+%%\begin{equation}{\vec{r}\vec{r}=\left(\begin{array}{c} r_x \\ r_y \\ r_z \end{array} \right) \left(\begin{array}{rrr} r_x & r_y & r_z \end{array} \right)=\left(\begin{array}{ccc} {r^2}_x & r_xr_y & r_xr_z \\ r_yr_x & {r_y}^2 & r_yr_z \\ r_zr_x & r_zr_y & {r_z}^2 \end{array}\right)}\end{equation}
+%%and identity matrix
+%%\begin{equation}{I=\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{array}\right)}\end{equation}
+%%The tensor weight matrix elements are then given by
+%%\begin{equation}{w_{m2_{ij}}(\vec{r})=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
+\begin{equation}{w_{m2_{ij}}(\vec{r})=\sqrt{\frac{2}{\pi}}\frac{1}{\Xi}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
+%%with temporarily setting
+%%\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+%%The fourier transform of the tensor weight matrix elements are given by
+%%\begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})=\int_{allspace}{w_{{m2}_{ij}}}(\vec{r})e^{-i\vec{k}\cdot\vec{r}}d{\vec{r}}}\end{equation}
+%%%\mbox{~%\scriptsize\textbullet~}
+%%Since the integration is over all space, the integral can be simplified by setting 
+%%\begin{equation}{\vec{k}=k\hat{z}}\end{equation}
+%%Instead of constraining vector $\vec{k}$ to be in the z direction, however, a rotated coordinate system $(x',y',z')$ is used which is rotated from the (x,y,z) coordinate system in such a way that $z'$ points in the direction of vector $\vec{k}$. After solving for the elements of the transformed weight function in coordinate system $(x',y',z')$, they will be expressed again in terms of vector $\vec{k}$ as it appears in coordinate system (x,y,z) to get the elements of the transformed weight function in coordinate system (x,y,z).
 
-%The weight components of interest are those corresponding to the component of vector $\vec{r}$ parallel to vector $\vec{k}$ which will be called $r_{z'}$, and to the two components of $\vec{r}$ perpendicular to vector $\vec{k}$ (and to each other) which will be called $r_{x'}$ and $r_{y'}$. 
-\begin{equation}{\widetilde{w}_{m2_{ij}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-%\begin{displaymath}{r_x=r\sin(\theta)\cos(\phi) ~~~~~ r_y=r\sin(\theta)\sin(\phi)~~~~~ r_z=r\cos(\theta)}\end{displaymath}
-where $r=r'$ and
-\begin{displaymath}{r_{x'}=r\sin\theta\cos\phi}\end{displaymath}
-\begin{displaymath}{r_{y'}=r\sin\theta\sin\phi}\end{displaymath}
-\begin{displaymath}{r_{z'}=r\cos\theta}\end{displaymath} 
-with
-\begin{displaymath}{\delta_{ij}=\left\{ \begin{array}{rc} 1 & i = j \\ 0  & i\neq j \end{array}\right.}\end{displaymath}
-\[{}\]
+%%%The weight components of interest are those corresponding to the component of vector $\vec{r}$ parallel to vector $\vec{k}$ which will be called $r_{z'}$, and to the two components of $\vec{r}$ perpendicular to vector $\vec{k}$ (and to each other) which will be called $r_{x'}$ and $r_{y'}$. 
+%%\begin{equation}{\widetilde{w}_{m2_{ij}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%%\begin{displaymath}{r_x=r\sin(\theta)\cos(\phi) ~~~~~ r_y=r\sin(\theta)\sin(\phi)~~~~~ r_z=r\cos(\theta)}\end{displaymath}
+%%where $r=r'$ and
+%%\begin{displaymath}{r_{x'}=r\sin\theta\cos\phi}\end{displaymath}
+%%\begin{displaymath}{r_{y'}=r\sin\theta\sin\phi}\end{displaymath}
+%%\begin{displaymath}{r_{z'}=r\cos\theta}\end{displaymath} 
+%%with
+%%\begin{displaymath}{\delta_{ij}=\left\{ \begin{array}{rc} 1 & i = j \\ 0  & i\neq j \end{array}\right.}\end{displaymath}
+%%\[{}\]
 
-%\[{}\]
-%\[{}\]
-Calculate $\widetilde{w}_{{m2}_{x'y'}}(k)$ 
-%where \begin{displaymath}{r_x=r\sin(\theta)\cos(\phi)}\end{displaymath}
-%\begin{displaymath}{r_y=r\sin(\theta)\sin(\phi)}\end{displaymath}
-\begin{equation}{\widetilde{w}_{{m2}_{x'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{y'})}{r^2}-\frac{\delta_{x'y'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{x'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin^2\theta'\underbrace{\left(\int_{0}^{2\pi}\cos\phi'\sin{\phi'}~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
-$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
+%%%\[{}\]
+%%%\[{}\]
+%%Calculate $\widetilde{w}_{{m2}_{x'y'}}(k)$ 
+%%%where \begin{displaymath}{r_x=r\sin(\theta)\cos(\phi)}\end{displaymath}
+%%%\begin{displaymath}{r_y=r\sin(\theta)\sin(\phi)}\end{displaymath}
+%%\begin{equation}{\widetilde{w}_{{m2}_{x'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{y'})}{r^2}-\frac{\delta_{x'y'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{x'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin^2\theta'\underbrace{\left(\int_{0}^{2\pi}\cos\phi'\sin{\phi'}~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
+%%$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
 
-Calculate $\widetilde{w}_{{m2}_{x'z'}}(k)$ 
-\begin{equation}{\widetilde{w}_{{m2}_{x'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{z'})}{r^2}-\frac{\delta_{x'z'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{x'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin\theta'\cos\theta'\underbrace{\left(\int_{0}^{2\pi}\cos\phi'~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
-$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
-\[{}\]
-Calculate $\widetilde{w}_{{m2}_{y'z'}}(k)$ 
-\begin{equation}{\widetilde{w}_{{m2}_{y'z'}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{z'})}{r^2}-\frac{\delta_{yz}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{y'z'}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin\theta'\cos\theta'\underbrace{\left(\int_{0}^{2\pi}\sin\phi'~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
-$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
-\[{}\]
-Calculate $\widetilde{w}_{{m2}_{x'x'}}(k)$ 
-\begin{equation}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{x'})}{r^2}-\frac{\delta_{x'x'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\sin^2\theta'\cos^2\phi'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\[{}\]
-%\[{}\]
-%\begin{displaymath}{\widetilde{w}_{{m2}_{xx}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\sin^2(\theta)e^{-ikr\cos(\theta)}\left(\int_{0}^{2\pi}\cos^2(\phi)d{\phi}\right)d{\cos(\theta)}\right]d{r}}\end{displaymath} 
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta'\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\cos^2\phi'~d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
-\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
-\[{}\]
-\color{blue}
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
-\begin{equation}\label{compare_equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
-\color{black}
-\[{}\]
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}\right)d{r}}\end{displaymath} 
-\begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}\right)d{r}}\end{equation}
-%\[{}\]
-Set the lower limit to -infinity since the integrand is nearly zero by the time r is zero. 
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{4\sqrt{\pi}}{3ka}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}\right)}\end{displaymath} 
-\begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}\right)}\end{displaymath} 
-\begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right)}\end{equation} 
-\[{}\]
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{-4\sqrt{\pi}}{3ka}\left(\frac{ka^3}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{a\alpha}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})\right)}\end{displaymath} 
-\begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})\right)}\end{displaymath} 
-\begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\frac{\pi}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]\right)}\end{equation} 
-\[{}\]
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-2\pi{a}^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{ka}{2}\right)^2}   \cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{displaymath} 
-\begin{equation}{+\frac{2\pi\sqrt{\pi}}{k^3a}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
-\[{}\] 
-Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_{{m2}_{xx}}(k)$ becomes
-\color{green}
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
-\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
-\color{black}
-\[{}\]
+%%Calculate $\widetilde{w}_{{m2}_{x'z'}}(k)$ 
+%%\begin{equation}{\widetilde{w}_{{m2}_{x'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{z'})}{r^2}-\frac{\delta_{x'z'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{x'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin\theta'\cos\theta'\underbrace{\left(\int_{0}^{2\pi}\cos\phi'~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
+%%$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
+%%\[{}\]
+%%Calculate $\widetilde{w}_{{m2}_{y'z'}}(k)$ 
+%%\begin{equation}{\widetilde{w}_{{m2}_{y'z'}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{z'})}{r^2}-\frac{\delta_{yz}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{y'z'}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin\theta'\cos\theta'\underbrace{\left(\int_{0}^{2\pi}\sin\phi'~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
+%%$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
+%%\[{}\]
+%%Calculate $\widetilde{w}_{{m2}_{x'x'}}(k)$ 
+%%\begin{equation}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{x'})}{r^2}-\frac{\delta_{x'x'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\sin^2\theta'\cos^2\phi'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\[{}\]
+%%%\[{}\]
+%%%\begin{displaymath}{\widetilde{w}_{{m2}_{xx}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\sin^2(\theta)e^{-ikr\cos(\theta)}\left(\int_{0}^{2\pi}\cos^2(\phi)d{\phi}\right)d{\cos(\theta)}\right]d{r}}\end{displaymath} 
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta'\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\cos^2\phi'~d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
+%%\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
+%%\[{}\]
+%%\color{blue}
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
+%%\begin{equation}\label{compare_equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
+%%\color{black}
+%%\[{}\]
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}\right)d{r}}\end{displaymath} 
+%%\begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}\right)d{r}}\end{equation}
+%%%\[{}\]
+%%Set the lower limit to -infinity since the integrand is nearly zero by the time r is zero. 
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{4\sqrt{\pi}}{3ka}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}\right)}\end{displaymath} 
+%%\begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}\right)}\end{displaymath} 
+%%\begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right)}\end{equation} 
+%%\[{}\]
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{-4\sqrt{\pi}}{3ka}\left(\frac{ka^3}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{a\alpha}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})\right)}\end{displaymath} 
+%%\begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})\right)}\end{displaymath} 
+%%\begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\frac{\pi}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]\right)}\end{equation} 
+%%\[{}\]
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-2\pi{a}^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{ka}{2}\right)^2}   \cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{displaymath} 
+%%\begin{equation}{+\frac{2\pi\sqrt{\pi}}{k^3a}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
+%%\[{}\] 
+%%Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_{{m2}_{xx}}(k)$ becomes
+%%\color{green}
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
+%%\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
+%%\color{black}
+%%\[{}\]
  
-Calculate $\widetilde{w}_{{m2}_{y'y'}}(k)$ 
-\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{y'})}{r^2}-\frac{\delta_{y'y'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\sin^2\theta'\sin^2\phi'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\[{}\]
-\begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\sin^2\phi~d{\phi}\right)d{\cos\theta}\right]d{r}}\end{displaymath} 
-\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
+%%Calculate $\widetilde{w}_{{m2}_{y'y'}}(k)$ 
+%%\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{y'})}{r^2}-\frac{\delta_{y'y'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\sin^2\theta'\sin^2\phi'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\[{}\]
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\sin^2\phi~d{\phi}\right)d{\cos\theta}\right]d{r}}\end{displaymath} 
+%%\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
 
-\color{blue}
-\begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
-\begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
-\color{black} 
-\[{}\]
+%%\color{blue}
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
+%%\begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
+%%\color{black} 
+%%\[{}\]
 
-%HEREEEE!!!!
+%%%HEREEEE!!!!
 
-This is the same as equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
-Calculate $\widetilde{w}_{{m2}_{z'z'}}(k)$ 
-\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{y'})}{r^2}-\frac{\delta_{z'z'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\cos^2\theta'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
-\[{}\]
-\begin{displaymath}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
-\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
+%%This is the same as equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
+%%%\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
+%%Calculate $\widetilde{w}_{{m2}_{z'z'}}(k)$ 
+%%\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{y'})}{r^2}-\frac{\delta_{z'z'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\cos^2\theta'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%%\[{}\]
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
+%%\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
 
-\color{blue}
-\begin{displaymath}{\widetilde{w}_{{m2}_{z'z'}}(k)=2\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}d{\cos\theta'}\right]d{r}}\end{displaymath} 
-\begin{equation}{-2\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}d{\cos\theta'}\right]d{r}}\end{equation}
-\color{black} 
-
-
-%HEREEEE!!!!
+%%\color{blue}
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{z'z'}}(k)=2\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}d{\cos\theta'}\right]d{r}}\end{displaymath} 
+%%\begin{equation}{-2\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}d{\cos\theta'}\right]d{r}}\end{equation}
+%%\color{black} 
 
 
-This is the same as -2 times equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=-2\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
-\[{}\]
-%\subsection{The tensor weight components in the coordinate system (x,y,z)}
-\noindent The tensor weight components in the coordinate system $(x',y',z')$ are:
-\begin{equation}\label{tensorcomp}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
+%%%HEREEEE!!!!
 
-\begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{array}\right)'+ \widetilde{w}_{{m2}_{y'y'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{array}\right)' + \widetilde{w}_{{m2}_{z'z'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{array}\right)'}\end{displaymath}
 
-\begin{equation}{=\widetilde{w}_{{m2}_{x'x'}}\hat{x'}\hat{x'}+\widetilde{w}_{{m2}_{y'y'}}\hat{y'}\hat{y'}+\widetilde{w}_{{m2}_{z'z'}}\hat{z'}\hat{z'}}\end{equation}
-written in terms of the outer products
+%%This is the same as -2 times equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=-2\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
+%%%\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=-2\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
+%%\[{}\]
+%%%\subsection{The tensor weight components in the coordinate system (x,y,z)}
+%%\noindent The tensor weight components in the coordinate system $(x',y',z')$ are:
+%%\begin{equation}\label{tensorcomp}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
 
-\begin{displaymath}{\hat{x}'\hat{x}'= \left(\begin{array}{c} 1 \\ 0 \\ 0 \end{array}\right)'\left(\begin{array}{ccc} 1 & 0 & 0 \end{array}\right)'=\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{array}\right)'}\end{displaymath}
+%%\begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{array}\right)'+ \widetilde{w}_{{m2}_{y'y'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{array}\right)' + \widetilde{w}_{{m2}_{z'z'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{array}\right)'}\end{displaymath}
 
-\begin{displaymath}{\hat{y}'\hat{y}'= \left(\begin{array}{c} 0 \\ 1 \\ 0 \end{array}\right)'\left(\begin{array}{ccc} 0 & 1 & 0 \end{array}\right)'=\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{array}\right)'}\end{displaymath}
+%%\begin{equation}{=\widetilde{w}_{{m2}_{x'x'}}\hat{x'}\hat{x'}+\widetilde{w}_{{m2}_{y'y'}}\hat{y'}\hat{y'}+\widetilde{w}_{{m2}_{z'z'}}\hat{z'}\hat{z'}}\end{equation}
+%%written in terms of the outer products
 
-\begin{displaymath}{\hat{z}'\hat{z}'= \left(\begin{array}{c} 0 \\ 0 \\ 1 \end{array}\right)'\left(\begin{array}{ccc} 0 & 0 & 1 \end{array}\right)'=\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{array}\right)'}\end{displaymath}
+%%\begin{displaymath}{\hat{x}'\hat{x}'= \left(\begin{array}{c} 1 \\ 0 \\ 0 \end{array}\right)'\left(\begin{array}{ccc} 1 & 0 & 0 \end{array}\right)'=\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{array}\right)'}\end{displaymath}
 
-%\newline $k_{x'}= k_{x'_x} \hat{x} + k_{x'_y} \hat{y} + k_{x'_z} \hat{z}$
-%\newline $k_{y'}= k_{y'_x} \hat{x} + k_{y'_y} \hat{y} + k_{y'_z} \hat{z}$
-%\newline $k_{z'}= k_{z'_x} \hat{x} + k_{z'_y} \hat{y} + k_{z'_z} \hat{z}$
-%\newline \begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(\vec{k})=\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
-\noindent Using the relation
-%\begin{displaymath}{\hat{k_{x'}}\hat{k_{x'}} + \hat{k_{y'}}\hat{k_{y'}} + \hat{k_{z'}}\hat{k_{z'}} = 1}\end{displaymath} 
-\begin{displaymath}{\text{I} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'} + \hat{z'}\hat{z'}}\end{displaymath}
-\begin{displaymath}{\text{I} -\hat{z'}\hat{z'} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'}}\end{displaymath}
-and the results from earlier
-\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}=\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
-Equation \ref{tensorcomp} then becomes 
-\begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{z}'\hat{z}')\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
-\noindent In the $(x',y',z')$ coordinate system, vector $\vec{k}$ had been aligned with the $\hat{z}'$ direction so that 
-\begin{displaymath}{\hat{k}=\hat{z'}}\end{displaymath}
-Replacing $\hat{z}'$ with $\hat{k}$ gives
-\begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
-Now  $\vec{k}$ can be expressed in the $(x,y,z)$ coordinate system, $\vec{k}=k_x\hat{x} + k_y\hat{y} + k_z\hat{z}$. The components of the tensor weight in the $(x,y,z)$ coordinate system are then given by
-\begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
-\[{}\]
+%%\begin{displaymath}{\hat{y}'\hat{y}'= \left(\begin{array}{c} 0 \\ 1 \\ 0 \end{array}\right)'\left(\begin{array}{ccc} 0 & 1 & 0 \end{array}\right)'=\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{array}\right)'}\end{displaymath}
+
+%%\begin{displaymath}{\hat{z}'\hat{z}'= \left(\begin{array}{c} 0 \\ 0 \\ 1 \end{array}\right)'\left(\begin{array}{ccc} 0 & 0 & 1 \end{array}\right)'=\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{array}\right)'}\end{displaymath}
+
+%%%\newline $k_{x'}= k_{x'_x} \hat{x} + k_{x'_y} \hat{y} + k_{x'_z} \hat{z}$
+%%%\newline $k_{y'}= k_{y'_x} \hat{x} + k_{y'_y} \hat{y} + k_{y'_z} \hat{z}$
+%%%\newline $k_{z'}= k_{z'_x} \hat{x} + k_{z'_y} \hat{y} + k_{z'_z} \hat{z}$
+%%%\newline \begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(\vec{k})=\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+%%\noindent Using the relation
+%%%\begin{displaymath}{\hat{k_{x'}}\hat{k_{x'}} + \hat{k_{y'}}\hat{k_{y'}} + \hat{k_{z'}}\hat{k_{z'}} = 1}\end{displaymath} 
+%%\begin{displaymath}{\text{I} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'} + \hat{z'}\hat{z'}}\end{displaymath}
+%%\begin{displaymath}{\text{I} -\hat{z'}\hat{z'} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'}}\end{displaymath}
+%%and the results from earlier
+%%\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}=\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+%%Equation \ref{tensorcomp} then becomes 
+%%\begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{z}'\hat{z}')\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
+%%\noindent In the $(x',y',z')$ coordinate system, vector $\vec{k}$ had been aligned with the $\hat{z}'$ direction so that 
+%%\begin{displaymath}{\hat{k}=\hat{z'}}\end{displaymath}
+%%Replacing $\hat{z}'$ with $\hat{k}$ gives
+%%\begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
+%%Now  $\vec{k}$ can be expressed in the $(x,y,z)$ coordinate system, $\vec{k}=k_x\hat{x} + k_y\hat{y} + k_z\hat{z}$. The components of the tensor weight in the $(x,y,z)$ coordinate system are then given by
+%%\begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
+
+\begin{align}
+  \widetilde{w}_{m2_{ij}}(\vec{k})&= \bigg(\delta{ij}-3\frac{k_ik_j}{k^2}\bigg)\bigg[\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2}) \nonumber\\ 
+   &+ \frac{(\sqrt{2\pi})^3}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]\bigg]
+\end{align} 
+
+%%\[{}\]
 %GOOD TO HERE
 %\subsection{Transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero}
-\noindent Check that the transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero:
-\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
-\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
-Term 1: 
-%\color{green}
-\begin{equation}{\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})}\end{equation}
-\begin{displaymath}{\approx\left(-\frac{\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(1-\left(\frac{1}{2}\right)\frac{k^2\alpha^2}{4}\right)}\end{displaymath} 
-\begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}}\end{displaymath} 
-%\color{black}
-Term 2:
-%\color{blue}
-\begin{equation}{-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{equation} 
-\begin{displaymath}{\approx\left(-\frac{2\pi\alpha}{3k}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(\frac{k\alpha}{2}\right)}\end{displaymath} 
-\begin{displaymath}{\approx}-\frac{\pi\alpha^2}{3}\end{displaymath}
-%\color{black} 
-Term 3:
-%\color{red}
-\begin{equation}{\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
-\begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)\right)\right]}\end{displaymath} 
-\begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}\frac{2}{\sqrt{\pi}}   \left(\frac{k\Xi}{2\sqrt{2}}   -\frac{2\left(\frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}\right)^3\right)\right]}\end{displaymath}
-\begin{displaymath}{\approx\frac{4\pi}{k^2}-\frac{\pi}{6}\left(\alpha^2-\Xi^2\right)}\end{displaymath}  
-%\color{black}
-Adding the three terms gives:
-\begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}-\frac{\pi\alpha^2}{3}+\frac{4\pi}{k^2}-\frac{\pi\alpha^2}{6}-\frac{\pi\Xi^2}{6}}\end{displaymath} 
-\begin{displaymath}{\approx0}\end{displaymath} 
-\[{}\]
+%%\noindent Check that the transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero:
+%%\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
+%%\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+%%Term 1: 
+%%%\color{green}
+%%\begin{equation}{\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})}\end{equation}
+%%\begin{displaymath}{\approx\left(-\frac{\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(1-\left(\frac{1}{2}\right)\frac{k^2\alpha^2}{4}\right)}\end{displaymath} 
+%%\begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}}\end{displaymath} 
+%%%\color{black}
+%%Term 2:
+%%%\color{blue}
+%%\begin{equation}{-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{equation} 
+%%\begin{displaymath}{\approx\left(-\frac{2\pi\alpha}{3k}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(\frac{k\alpha}{2}\right)}\end{displaymath} 
+%%\begin{displaymath}{\approx}-\frac{\pi\alpha^2}{3}\end{displaymath}
+%%%\color{black} 
+%%Term 3:
+%%%\color{red}
+%%\begin{equation}{\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+%%\begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)\right)\right]}\end{displaymath} 
+%%\begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}\frac{2}{\sqrt{\pi}}   \left(\frac{k\Xi}{2\sqrt{2}}   -\frac{2\left(\frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}\right)^3\right)\right]}\end{displaymath}
+%%\begin{displaymath}{\approx\frac{4\pi}{k^2}-\frac{\pi}{6}\left(\alpha^2-\Xi^2\right)}\end{displaymath}  
+%%%\color{black}
+%%Adding the three terms gives:
+%%\begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}-\frac{\pi\alpha^2}{3}+\frac{4\pi}{k^2}-\frac{\pi\alpha^2}{6}-\frac{\pi\Xi^2}{6}}\end{displaymath} 
+%%\begin{displaymath}{\approx0}\end{displaymath} 
+%%\[{}\]
 
 
-\subsection{The tensor weight components in the coordinate system (x,y,z)}
-The tensor weight components in the coordinate system $(x',y',z')$ are:
-\begin{equation}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
-\begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\hat{x'}\hat{x'}+\widetilde{w}_{{m2}_{y'y'}}\hat{y'}\hat{y'}+\widetilde{w}_{{m2}_{z'z'}}\hat{z'}\hat{z'}}\end{displaymath}
-where vector had been aligned with the $\hat{z}$ direction so that 
-\begin{equation}{\hat{k}=\hat{z'}}\end{equation}
-%\newline $k_{x'}= k_{x'_x} \hat{x} + k_{x'_y} \hat{y} + k_{x'_z} \hat{z}$
-%\newline $k_{y'}= k_{y'_x} \hat{x} + k_{y'_y} \hat{y} + k_{y'_z} \hat{z}$
-%\newline $k_{z'}= k_{z'_x} \hat{x} + k_{z'_y} \hat{y} + k_{z'_z} \hat{z}$
-%\newline \begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(\vec{k})=\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
-Using the relation
-%\begin{displaymath}{\hat{k_{x'}}\hat{k_{x'}} + \hat{k_{y'}}\hat{k_{y'}} + \hat{k_{z'}}\hat{k_{z'}} = 1}\end{displaymath} 
-\begin{displaymath}{1 = \hat{x'}\hat{x'} + \hat{y'}\hat{y'} + \hat{z'}\hat{z'}}\end{displaymath}
-\begin{displaymath}{1 -\hat{z'}\hat{z'} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'}}\end{displaymath}
-and the results from earlier
-\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}=\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
-\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
-results in
-\begin{displaymath}{\widetilde{w}_{m2}(\vec{k})= (1-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
-and so 
-\begin{displaymath}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
-\[{}\]
+%%\subsection{The tensor weight components in the coordinate system (x,y,z)}
+%%The tensor weight components in the coordinate system $(x',y',z')$ are:
+%%\begin{equation}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
+%%\begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\hat{x'}\hat{x'}+\widetilde{w}_{{m2}_{y'y'}}\hat{y'}\hat{y'}+\widetilde{w}_{{m2}_{z'z'}}\hat{z'}\hat{z'}}\end{displaymath}
+%%where vector had been aligned with the $\hat{z}$ direction so that 
+%%\begin{equation}{\hat{k}=\hat{z'}}\end{equation}
+%%%\newline $k_{x'}= k_{x'_x} \hat{x} + k_{x'_y} \hat{y} + k_{x'_z} \hat{z}$
+%%%\newline $k_{y'}= k_{y'_x} \hat{x} + k_{y'_y} \hat{y} + k_{y'_z} \hat{z}$
+%%%\newline $k_{z'}= k_{z'_x} \hat{x} + k_{z'_y} \hat{y} + k_{z'_z} \hat{z}$
+%%%\newline \begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(\vec{k})=\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+%%Using the relation
+%%%\begin{displaymath}{\hat{k_{x'}}\hat{k_{x'}} + \hat{k_{y'}}\hat{k_{y'}} + \hat{k_{z'}}\hat{k_{z'}} = 1}\end{displaymath} 
+%%\begin{displaymath}{1 = \hat{x'}\hat{x'} + \hat{y'}\hat{y'} + \hat{z'}\hat{z'}}\end{displaymath}
+%%\begin{displaymath}{1 -\hat{z'}\hat{z'} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'}}\end{displaymath}
+%%and the results from earlier
+%%\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}=\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+%%\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+%%results in
+%%\begin{displaymath}{\widetilde{w}_{m2}(\vec{k})= (1-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+%%and so 
+%%\begin{displaymath}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+%%\[{}\]
 
-\subsection{Integrals used to compute tensor weights}
-%\textbf{Integrals used to compute tensor weights:}
-\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}}\end{equation} 
-\[{}\]
-\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}\cos{\theta}{~}d{\cos{\theta}}}=-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)}\end{equation} 
-\[{}\]
-\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}\cos^2(\theta)~d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}}\end{equation} 
-\[{}\]
-\[{}\]
-\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}}}\end{equation}
-\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}\left[\cos(kau)\cos(\frac{k\alpha}{2})-\sin(kau)\sin(\frac{k\alpha}{2})\right]d{u}}}\end{displaymath}  
-\begin{equation}{=a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})}\end{equation} 
-\[{}\]
-\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos(kr)d{r}}}\end{equation}
-\begin{equation}{=\frac{a\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\int_{-\infty}^{\infty}{e^{-u^2}\cos(kau)d{u}} -a^2\sin\left(\frac{k\alpha}{2}\right)\int_{-\infty}^{\infty}{e^{-u^2}u\sin(kau)d{u}}}\end{equation}
-\begin{equation}{=\frac{a\alpha\sqrt{\pi}}{2}e^{-\left(\frac{ka}{2}\right)^2}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\left(\frac{ka}{2}\right)^2}\sin\left(\frac{k\alpha}{2}\right)}\end{equation}
-\[{}\]
-\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}}}\end{equation} 
-\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}\left[\sin(kau)\cos(\frac{k\alpha}{2})+\cos(kau)\sin(\frac{k\alpha}{2})\right]d{u}}}\end{displaymath}  
-\begin{equation}{=a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{equation} 
-\[{}\]
-\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}}}\end{equation} 
-\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}(au+\frac{\alpha}{2})\sin(k(au+\frac{\alpha}{2}))d{u}}}\end{displaymath} 
-\begin{displaymath}{=a^2\cos(\frac{k\alpha}{2})\int_{-\infty}^{\infty}{e^{-u^2}u\sin(kau)d{u} +\frac{a\alpha}{2}\sin(\frac{k\alpha}{2})\int_{-\infty}^{\infty}e^{-u^2}\cos(kau)d{u}}}\end{displaymath} 
-\begin{equation}{=\frac{ka^3}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{a\alpha}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{equation} 
-%\[{}\]
-\[{}\]
-\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}}}\end{equation} 
-%Noting that \begin{equation}{\frac{\sin(kr)}{r}=\int_{0}^{k}{\cos(kr)d{k}}}\end{equation} 
-%this becomes
-\begin{displaymath}{=\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\int_{0}^{k}{\cos(kr)d{k}}\right)d{r}}}\end{displaymath} 
-\begin{displaymath}{=\int_{0}^{k}\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}{\cos(kr)d{r}}d{k}}}\end{displaymath} 
-\begin{displaymath}{=a\sqrt{\pi}\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2}\cos\left(\frac{k\alpha}{2}\right)d{k} }\end{displaymath} 
-%\begin{displaymath}{=a\sqrt{\pi}\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2}\left(\frac{e^{i\frac{k\alpha}{2}}+e^{-i\frac{k\alpha}{2}}}{2}\right)d{k} }\end{displaymath} 
-%\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}\left[\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2 + i\frac{k\alpha}{2}}d{k}+\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2-i\frac{k\alpha}{2}}d{k}\right]}\end{displaymath} 
-\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}\left[\int_{-k}^{k}e^{-\left(\frac{ka}{2}\right)^2 + i\frac{k\alpha}{2}}d{k}\right]}\end{displaymath} 
-%\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\int_{-k}^{k}e^{-\left(\frac{ka}{2} + i\frac{\alpha}{2a}\right)^2}d{k}\right]}\end{displaymath} 
-\begin{displaymath}{=\sqrt{\pi}e^{-\left(\frac{\alpha}{2a}\right)^2}\int_{-\frac{ka}{2}+i\frac{\alpha}{2a}}^{\frac{ka}{2}+i\frac{\alpha}{2a}}e^{-u^2}d{u}}\end{displaymath} 
-\begin{equation}{=\frac{\pi}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
-\[{}\]
-\[{}\]
+%%\subsection{Integrals used to compute tensor weights}
+%%%\textbf{Integrals used to compute tensor weights:}
+%%\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}}\end{equation} 
+%%\[{}\]
+%%\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}\cos{\theta}{~}d{\cos{\theta}}}=-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)}\end{equation} 
+%%\[{}\]
+%%\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}\cos^2(\theta)~d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}}\end{equation} 
+%%\[{}\]
+%%\[{}\]
+%%\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}}}\end{equation}
+%%\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}\left[\cos(kau)\cos(\frac{k\alpha}{2})-\sin(kau)\sin(\frac{k\alpha}{2})\right]d{u}}}\end{displaymath}  
+%%\begin{equation}{=a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})}\end{equation} 
+%%\[{}\]
+%%\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos(kr)d{r}}}\end{equation}
+%%\begin{equation}{=\frac{a\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\int_{-\infty}^{\infty}{e^{-u^2}\cos(kau)d{u}} -a^2\sin\left(\frac{k\alpha}{2}\right)\int_{-\infty}^{\infty}{e^{-u^2}u\sin(kau)d{u}}}\end{equation}
+%%\begin{equation}{=\frac{a\alpha\sqrt{\pi}}{2}e^{-\left(\frac{ka}{2}\right)^2}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\left(\frac{ka}{2}\right)^2}\sin\left(\frac{k\alpha}{2}\right)}\end{equation}
+%%\[{}\]
+%%\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}}}\end{equation} 
+%%\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}\left[\sin(kau)\cos(\frac{k\alpha}{2})+\cos(kau)\sin(\frac{k\alpha}{2})\right]d{u}}}\end{displaymath}  
+%%\begin{equation}{=a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{equation} 
+%%\[{}\]
+%%\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}}}\end{equation} 
+%%\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}(au+\frac{\alpha}{2})\sin(k(au+\frac{\alpha}{2}))d{u}}}\end{displaymath} 
+%%\begin{displaymath}{=a^2\cos(\frac{k\alpha}{2})\int_{-\infty}^{\infty}{e^{-u^2}u\sin(kau)d{u} +\frac{a\alpha}{2}\sin(\frac{k\alpha}{2})\int_{-\infty}^{\infty}e^{-u^2}\cos(kau)d{u}}}\end{displaymath} 
+%%\begin{equation}{=\frac{ka^3}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{a\alpha}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{equation} 
+%%%\[{}\]
+%%\[{}\]
+%%\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}}}\end{equation} 
+%%%Noting that \begin{equation}{\frac{\sin(kr)}{r}=\int_{0}^{k}{\cos(kr)d{k}}}\end{equation} 
+%%%this becomes
+%%\begin{displaymath}{=\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\int_{0}^{k}{\cos(kr)d{k}}\right)d{r}}}\end{displaymath} 
+%%\begin{displaymath}{=\int_{0}^{k}\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}{\cos(kr)d{r}}d{k}}}\end{displaymath} 
+%%\begin{displaymath}{=a\sqrt{\pi}\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2}\cos\left(\frac{k\alpha}{2}\right)d{k} }\end{displaymath} 
+%%%\begin{displaymath}{=a\sqrt{\pi}\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2}\left(\frac{e^{i\frac{k\alpha}{2}}+e^{-i\frac{k\alpha}{2}}}{2}\right)d{k} }\end{displaymath} 
+%%%\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}\left[\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2 + i\frac{k\alpha}{2}}d{k}+\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2-i\frac{k\alpha}{2}}d{k}\right]}\end{displaymath} 
+%%\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}\left[\int_{-k}^{k}e^{-\left(\frac{ka}{2}\right)^2 + i\frac{k\alpha}{2}}d{k}\right]}\end{displaymath} 
+%%%\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\int_{-k}^{k}e^{-\left(\frac{ka}{2} + i\frac{\alpha}{2a}\right)^2}d{k}\right]}\end{displaymath} 
+%%\begin{displaymath}{=\sqrt{\pi}e^{-\left(\frac{\alpha}{2a}\right)^2}\int_{-\frac{ka}{2}+i\frac{\alpha}{2a}}^{\frac{ka}{2}+i\frac{\alpha}{2a}}e^{-u^2}d{u}}\end{displaymath} 
+%%\begin{equation}{=\frac{\pi}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
+%%\[{}\]
+%%\[{}\]
 
 \subsection{Deriviation of Tensor Density} 
 %Work out how tensor weight in Fourier space relates to the tensor density:
@@ -1301,7 +1416,7 @@ and so
 \begin{equation}{\overleftrightarrow{n}_{m2}(\vec{r})=\int_{allspace}n(\vec{r'})\overleftrightarrow{w}_{m2}(|\vec{r}-\vec{r'}|)d{\vec{r'}}}\end{equation}
 %ERROR below?? Shoud it be:
 with tensor elements  
-\begin{displaymath}{n_{m2_{ij}}(\vec{r})=\int_{allspace}n(\vec{r'})w_{m2_{ij}}(|\vec{r}-\vec{r'}|)d{r'}}\end{displaymath} 
+\begin{equation}{n_{m2_{ij}}(\vec{r})=\int_{allspace}n(\vec{r'})w_{m2_{ij}}(|\vec{r}-\vec{r'}|)d{r'}}\end{equation} 
 where
 \begin{equation}{w_{m2ij}(\vec r)= \frac1{(2\pi)^3}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}}\end{equation} 
 Deriviation of tensor density elements $n_{m2ij}(\vec{r})$:
@@ -1326,9 +1441,9 @@ Deriviation of tensor density elements $n_{m2ij}(\vec{r})$:
 \begin{equation}{\Phi_3=\frac{12\pi^2R^6}{(1-\eta)^2}\left[\overrightarrow{\operatorname{V}}\cdot\overleftrightarrow{\operatorname{T}}\cdot\overrightarrow{\operatorname{V}}-n\overrightarrow{\operatorname{V}}\cdot\overrightarrow{\operatorname{V}}-\operatorname{Tr}\left(\overleftrightarrow{\operatorname{T}}^3\right)+n\operatorname{Tr}\left(\overleftrightarrow{\operatorname{T}}^2\right)\right]}\end{equation}
 \[{}\]
 \begin{equation}{\overleftrightarrow{\operatorname{T}}=\frac{{\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}}}{4\pi{R}^2}}\end{equation}
-\[{}\]
+
 \begin{equation}{\overrightarrow{\operatorname{V}}=\frac{\vec{n}_2}{4\pi{R}^2}}\end{equation}
-\[{}\]
+
 \begin{displaymath}{\Phi_3=\frac{12\pi^2R^6}{(1-\eta)^2}\left(\frac{1}{4\pi{R}^2}\right)^3\left[\vec{n}_{2v}\cdot\left({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}}\right)\cdot\vec{n}_{2v}-n_2|\vec{n}_{2v}|^2-\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^3\right)\color{white}\right]\color{black}}\end{displaymath}
 \begin{equation}{\color{white}\left[\color{black}+n_2\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^2\right)\right]}\end{equation}
 \[{}\]
@@ -1338,14 +1453,17 @@ Deriviation of tensor density elements $n_{m2ij}(\vec{r})$:
 -n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)\color{white}\right)\color{black}}\end{displaymath} \begin{equation}{\color{white}\left(\color{black}-\frac{1}{3}{n_2}^2\operatorname{Tr}(\overleftrightarrow{n}_{m2})-\frac{1}{9}{n_2}^3+n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)+\frac{1}{3}{n_2}^3+\frac{2}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
 \[{}\]
 \begin{equation}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left(\frac{2}{9}{n_2}^3-\frac{2}{3}n_2|\vec{n}_{v2}|^2+\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}_{m2}}^3)+\frac{1}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
-\[{}\]
+
 \begin{equation}{\operatorname{Tr}(\overleftrightarrow{n}_{m2})=0}\end{equation} 
-\[{}\]
+
 \begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2|\vec{n}_{v2}|^2+\frac{9}{2}(\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}})-\frac{9}{2}\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})}{24\pi(1-\eta)^2}}\end{equation} 
-\[{}\]
+
 \begin{equation}{\eta=n_3}\end{equation} 
-\[{}\]
+
 \begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}}\end{equation} 
+\[{}\]
+\[{}\]
+\[{}\]
 \end{widetext}
 
 \end{document}

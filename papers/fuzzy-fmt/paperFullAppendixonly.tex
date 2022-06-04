@@ -1,0 +1,538 @@
+
+\documentclass[letterpaper,twocolumn,amsmath,amssymb,prb]{revtex4-1}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{color}
+\usepackage{enumitem}
+
+\newcommand{\red}[1]{{\color{red} #1}}
+\newcommand{\blue}[1]{{\bf \color{blue} #1}}
+\newcommand{\green}[1]{{\bf \color{green} #1}}
+\newcommand{\rr}{\textbf{r}}
+\newcommand{\kk}{\textbf{k}}
+\newcommand{\refnote}{\red{[ref]}}
+
+\newcommand\davidsays[1]{{\bf \color{blue}D: #1}}
+\newcommand\kirstiesays[1]{{\bf \color{red}K: #1}}
+
+\newcommand{\fixme}[1]{\red{[#1]}}
+
+\begin{document}
+%\title{Soft Fundamental Measure Theory Functional for the
+  %Weeks-Chandler-Andersen Repulsive Potential}
+
+\maketitle
+
+\begin{widetext}
+  \section{Fourier transforms of weight functions}\label{sec:fourier}
+
+\subsection{Fourier Transform of Weight Functions $w_0(r), w_1(r), w_2(r)$, and $w_3(r)$ }
+\noindent\textbf{Weight Function $w_0(r)$:}
+\begin{equation}{w_0(r)=\frac{w_2(r)}{4{\pi}r^2}}\end{equation}
+where
+\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+temporarily set 
+\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+\begin{equation}{w_0(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+%\[{}\]
+\begin{equation}{\widetilde{w}_0(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_0(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+Set $\vec{k}$ in the direction of $\hat{z}$
+\begin{equation}{\widetilde{w}_0(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_0(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+\[{}\]
+Calculate $\widetilde{w}_0(k)$ 
+\begin{equation}{\widetilde{w}_0(k)=\frac{1}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}\left(\frac{1}{r^2}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right]d{r}}\end{equation}
+\[{}\]
+\begin{equation}{\widetilde{w}_0(k)=\frac{2\pi}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+\[{}\]
+Set the lower limit to $-\infty$ since the integrand is nearly zero by the time r is zero. 
+\begin{displaymath}{\widetilde{w}_0(k)=\frac{1}{\sqrt{\pi}ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}}\end{displaymath}
+\[{}\]
+\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation}
+\[{}\] %\color{red}
+Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_0(k)$ becomes
+\begin{equation}{\widetilde{w}_0(k)=\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+\color{black}
+
+\noindent\textbf{Weight Function $w_1(r)$:}
+\begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
+where
+\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+temporarily set 
+\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+
+\begin{equation}{\widetilde{w}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+Set $\vec{k}$ in the direction of $\hat{z}$ 
+\begin{equation}{\widetilde{w}_1(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+
+\noindent Calculate $\widetilde{w}_1(k)$ 
+\begin{equation}{\widetilde{w}_1(k)=\frac{1}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right]d{r}}\end{equation}
+\[{}\]
+\begin{equation}{\widetilde{w}_1(k)=\frac{2\pi}{4{\pi}\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+\[{}\]
+\begin{equation}{\widetilde{w}_1(k)=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\frac{2\sin(kr)}{kr}d{r}}\end{equation}
+Set the lower limit to $-\infty$ since the integrand is nearly zero by the time r is zero. 
+\begin{equation}{\widetilde{w}_1(k)=\frac{1}{\sqrt{\pi}ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}}\end{equation}
+After doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$ this becomes
+\begin{equation}{\widetilde{w}_1(k)=\frac{1}{k}\sin\left(\frac{k\alpha}{2}\right)e^{-\left(\frac{k^2a^2}{4}\right)}}\end{equation}
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_1(k)$ becomes
+\begin{equation}
+    \widetilde{w}_1(k)=\frac{1}{k}e^{-\frac{k^2\Xi^2}{8}}\sin\left(\frac{k\alpha}{2}\right)
+\end{equation}
+
+\noindent\textbf{Weight Function $w_2(r)$:}
+%\subsection{Fourier Transform of Weight Function $w_2(r)$}
+\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+set 
+\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+\begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+
+\begin{equation}{\widetilde{w}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+Set $\vec{k}$ in the direction of $\hat{z}$ 
+\begin{equation}{\widetilde{w}_2(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+
+\noindent Calculate $\widetilde{w}_2(k)$ 
+\begin{equation}{\widetilde{w}_2(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right)d{r}}\end{equation}
+\[{}\]
+\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+\begin{equation}{\widetilde{w}_2(k)=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\frac{2\sin(kr)}{kr}d{r}}\end{equation}
+Set the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero.
+\begin{equation}{\widetilde{w}_2(k)=\frac{4\sqrt{\pi}}{ka}\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}}\end{equation}
+After doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$ this becomes
+\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{k}e^{-\left(\frac{k^2a^2}{4}\right)}\left(ka^2\cos\left(\frac{k\alpha}{2}\right)+\alpha\sin\left(\frac{k\alpha}{2}\right)\right)}\end{equation}
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_2(k)$ becomes
+\begin{equation}{\widetilde{w}_2(k)=\frac{2\pi}{k}e^{-\frac{k^2\Xi^2}{8}}\left[\frac{k\Xi^2}{2}\cos\left(\frac{k\alpha}{2}\right)+\alpha\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
+
+\[{}\]
+
+%\subsection{Fourier Transform of Weight Function $w_3(r)$}
+\noindent\textbf{Weight Function $w_3(r)$:}
+\begin{equation}
+    w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)\right]
+\end{equation}
+temporarily set 
+\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+\begin{equation}{w_3(r)=\frac{1}{2}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]}\end{equation}
+
+\begin{equation}{\widetilde{w}_3(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_3(r)e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+Set $\vec{k}$ in the direction of $\hat{z}$ 
+\begin{equation}{\widetilde{w}_3(k)=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_3(r)e^{-ikr\cos\theta}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+
+\noindent Calculate $\widetilde{w}_3(k)$ 
+\begin{equation}{\widetilde{w}_3(k)=\frac{1}{2}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\left(\int_{0}^{2\pi}d{\phi}\right)\right)d{r}}\end{equation}
+\[{}\]
+
+\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{2}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta}d{\cos\theta}\right)d{r}}\end{equation}
+
+\begin{equation}{\widetilde{w}_3(k)=\pi\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r^2\frac{2\sin(kr)}{kr}d{r}}\end{equation}
+
+\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{k}\int_{0}^{\infty}\left[1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right]r\sin(kr)d{r}}\end{equation}
+Integrating by parts with 
+\begin{displaymath}{f=1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)}\end{displaymath}
+\begin{displaymath}{g=\frac{\sin(kr)-kr\cos(kr)}{k^2}}\end{displaymath}
+
+\begin{equation}{\widetilde{w}_3(k)=\frac{2\pi}{k}\left[\left(1-\operatorname{erf}\left(\frac{r-\frac{\alpha}{2}}{a}\right)\right)\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\bigg|^{\infty}_0\color{white}\right]}\end{equation} \color{black}
+\begin{displaymath}{-\int_{0}^{\infty}\left(\frac{\sin(kr)-kr\cos(kr)}{k^2}\right)\left(\frac{2}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\right)d{r}}\end{displaymath}
+Evaluating the integral by doing a u-substitution with $u=\frac{r-\frac{\alpha}{2}}{a}$, and setting the lower limit to $-\infty$  since the integrand is nearly zero by the time r is zero this becomes
+\begin{equation}{\widetilde{w}_3(k)=\frac{4\pi}{k^3}e^{-\frac{k^2a^2}{4}}\left[\left(1+\frac{k^2a^2}{2}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]}\end{equation}
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{w}_3(k)$ becomes
+
+\begin{equation}
+    \widetilde{w}_3(k)=\frac{4\pi}{k^3}
+    e^{-\frac{k^2\Xi^2}{8}}
+    \left[\left(1+\frac{k^2\Xi^2}{4}\right)\sin\left(\frac{k\alpha}{2}\right)
+      -\frac{k\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]
+\end{equation}
+\[{}\]
+
+\subsection{Fourier Transform of Vector Weight Functions $\vec{w}_{1}(r)$}
+\noindent\textbf{Vector Weight Function $\vec{w}_1(r)$:}
+\begin{equation}{\vec{w}_1(\vec{r})=w_1(r)\frac{\vec{r}}{r}}\end{equation}
+where
+\begin{equation}{w_1(r)=\frac{w_2(r)}{4{\pi}r}}\end{equation}
+\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+temporarily set 
+\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+\begin{equation}{w_1(r)=\frac{1}{4{\pi}\sqrt{\pi}a}\left(\frac{1}{r}\right)e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}\vec{w}_1(\vec{r})e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+where 
+\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
+\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
+\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
+The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_1(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{1}{4\pi\sqrt{\pi}a}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos{\theta}'e^{-ikr\cos\theta'}d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{2}{4\sqrt{\pi}a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\left(-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}+\frac{1}{k}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right]{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k\sqrt{\pi}a}\left[-a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)+\frac{\pi}{2k}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]\right]{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{2ka}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+\frac{i\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-\frac{i\alpha}{2a}\right)\right]-e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_1(k)$ becomes
+\begin{equation}{\widetilde{\vec{w}}_1(\vec{k})=\frac{i}{k^2}\left[\frac{\sqrt{\pi}}{\sqrt{2}k\Xi}e^{-\left(\frac{\alpha}{\sqrt{2}\Xi}\right)^2}\left[\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}+\frac{i\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{(\sqrt{2})^3}-\frac{i\alpha}{\sqrt{2}\Xi}\right)\right]-e^{-\frac{k^2\Xi^2}{8}}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation}
+\[{}\]
+
+%\subsection{Fourier Transform of Vector Weight Function $\vec{w}_{2}(r)$}
+\noindent\textbf{Vector Weight Function $\vec{w}_2(r)$:}
+\begin{equation}{\vec{w}_2(\vec{r})=w_2(r)\frac{\vec{r}}{r}}\end{equation}
+where
+\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+temporarily set 
+\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+\begin{equation}{w_2(r)=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r){~}\frac{\vec{r}}{r}{~}e^{-i\vec{k}\cdot{\vec{r}}}r^2d{r}d{\cos\theta}d{\phi}}\end{equation}
+Set $\vec{k}$ in the direction of $\hat{z}'$ of a rotated coordinate system $(x',y'z')$ 
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\frac{(r_{x'}\hat{x}'+r_{y'}\hat{y}'+r_{z'}\hat{z}')}{r}e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+where 
+\begin{displaymath}{r_{x'}=r\sin\theta'\cos\phi'}\end{displaymath}
+\begin{displaymath}{r_{y'}=r\sin\theta'\sin\phi'}\end{displaymath}
+\begin{displaymath}{r_{z'}=r\cos\theta'}\end{displaymath} 
+The components in the $x'$ and $y'$ directions vanish due to symmetry about $z'$. That leaves
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}w_2(r)\cos{\theta}'e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\int_{-1}^{1}e^{-ikr\cos\theta'}\cos{\theta}'d{\cos\theta'}\right)d{r}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{w}_2(\vec{k})=\frac{2\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(-\frac{2i}{kr}\cos(kr) + \frac{2i}{k^2r^2}\sin(kr)\right)d{r}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{-4i\sqrt{\pi}}{ak}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos(kr)d{r} + \frac{4i\sqrt{\pi}}{ak^2}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}{~~}\hat{z}'}\end{equation}
+
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{-4\sqrt{\pi}i}{ak}\left[\frac{a\alpha\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]}\end{equation} 
+\begin{displaymath}{+{~~}\frac{4\sqrt{\pi}i}{ak^2}\left[a\sqrt{\pi}e^{-\frac{k^2a^2}{4}}\sin\left(\frac{k\alpha}{2}\right)\right]{~~}\hat{z}'}\end{displaymath}
+\[{}\]
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2a^2}{4}}\left[\left(\frac{a^2k}{2}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
+Putting $a=\frac{\Xi}{\sqrt{2}}$ back in, the final equation for $\widetilde{\vec{w}}_2(k)$ becomes
+\begin{equation}{\widetilde{\vec{w}}_2(\vec{k})=\frac{4\pi{i}}{k^2}e^{-\frac{k^2\Xi^2}{8}}\left[\left(\frac{\Xi^2k}{4}+\frac{1}{k}\right)\sin\left(\frac{k\alpha}{2}\right)-\frac{\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\right]{~~}\vec{k}}\end{equation} 
+\[{}\]
+
+\subsection{Fourier Transform of Tensor weight ${w}_{m2}(r)$} %$\overleftrightarrow{w}_{m2}(r)$
+%\textbf{Tensor Weight $\overleftrightarrow{w}_{m2}(r)$:}
+\begin{equation}{\overleftrightarrow{w}_{m2}(\vec{r})=w_2(r)\left(\frac{\vec{r}\vec{r}}{r^2}-\frac{I}{3}\right)}\end{equation}
+where
+\begin{equation}{w_2(r)=\frac{\sqrt{2}}{\Xi\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{\frac{\Xi}{\sqrt{2}}}\right)^2}}\end{equation}
+Form the outer product
+\begin{equation}{\vec{r}\vec{r}=\left(\begin{array}{c} r_x \\ r_y \\ r_z \end{array} \right) \left(\begin{array}{rrr} r_x & r_y & r_z \end{array} \right)=\left(\begin{array}{ccc} {r^2}_x & r_xr_y & r_xr_z \\ r_yr_x & {r_y}^2 & r_yr_z \\ r_zr_x & r_zr_y & {r_z}^2 \end{array}\right)}\end{equation}
+and identity matrix
+\begin{equation}{I=\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{array}\right)}\end{equation}
+The tensor weight matrix elements are then given by
+\begin{equation}{w_{m2_{ij}}(\vec{r})=\frac{1}{a\sqrt{\pi}}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)}\end{equation}
+with temporarily setting
+\begin{equation}{a=\frac{\Xi}{\sqrt{2}}}\end{equation}
+The fourier transform of the tensor weight matrix elements are given by
+\begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})=\int_{allspace}{w_{{m2}_{ij}}}(\vec{r})e^{-i\vec{k}\cdot\vec{r}}d{\vec{r}}}\end{equation}
+%\mbox{~%\scriptsize\textbullet~}
+Since the integration is over all space, the integral can be simplified by setting 
+\begin{equation}{\vec{k}=k\hat{z}}\end{equation}
+Instead of constraining vector $\vec{k}$ to be in the z direction, however, a rotated coordinate system $(x',y',z')$ is used which is rotated from the (x,y,z) coordinate system in such a way that $z'$ points in the direction of vector $\vec{k}$. After solving for the elements of the transformed weight function in coordinate system $(x',y',z')$, they will be expressed again in terms of vector $\vec{k}$ as it appears in coordinate system (x,y,z) to get the elements of the transformed weight function in coordinate system (x,y,z).
+
+%The weight components of interest are those corresponding to the component of vector $\vec{r}$ parallel to vector $\vec{k}$ which will be called $r_{z'}$, and to the two components of $\vec{r}$ perpendicular to vector $\vec{k}$ (and to each other) which will be called $r_{x'}$ and $r_{y'}$. 
+\begin{equation}{\widetilde{w}_{m2_{ij}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{r_ir_j}{r^2}-\frac{\delta_{ij}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+%\begin{displaymath}{r_x=r\sin(\theta)\cos(\phi) ~~~~~ r_y=r\sin(\theta)\sin(\phi)~~~~~ r_z=r\cos(\theta)}\end{displaymath}
+where $r=r'$ and
+\begin{displaymath}{r_{x'}=r\sin\theta\cos\phi}\end{displaymath}
+\begin{displaymath}{r_{y'}=r\sin\theta\sin\phi}\end{displaymath}
+\begin{displaymath}{r_{z'}=r\cos\theta}\end{displaymath} 
+with
+\begin{displaymath}{\delta_{ij}=\left\{ \begin{array}{rc} 1 & i = j \\ 0  & i\neq j \end{array}\right.}\end{displaymath}
+\[{}\]
+
+%\[{}\]
+%\[{}\]
+Calculate $\widetilde{w}_{{m2}_{x'y'}}(k)$ 
+%where \begin{displaymath}{r_x=r\sin(\theta)\cos(\phi)}\end{displaymath}
+%\begin{displaymath}{r_y=r\sin(\theta)\sin(\phi)}\end{displaymath}
+\begin{equation}{\widetilde{w}_{{m2}_{x'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{y'})}{r^2}-\frac{\delta_{x'y'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{x'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin^2\theta'\underbrace{\left(\int_{0}^{2\pi}\cos\phi'\sin{\phi'}~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
+$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
+
+Calculate $\widetilde{w}_{{m2}_{x'z'}}(k)$ 
+\begin{equation}{\widetilde{w}_{{m2}_{x'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{z'})}{r^2}-\frac{\delta_{x'z'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{x'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin\theta'\cos\theta'\underbrace{\left(\int_{0}^{2\pi}\cos\phi'~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
+$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
+\[{}\]
+Calculate $\widetilde{w}_{{m2}_{y'z'}}(k)$ 
+\begin{equation}{\widetilde{w}_{{m2}_{y'z'}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{z'})}{r^2}-\frac{\delta_{yz}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{y'z'}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2e^{-ikr\cos\theta'}\sin\theta'\cos\theta'\underbrace{\left(\int_{0}^{2\pi}\sin\phi'~d{\phi'}\right)}d{r}d{\cos\theta'}=0}\end{equation}
+$~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~0$
+\[{}\]
+Calculate $\widetilde{w}_{{m2}_{x'x'}}(k)$ 
+\begin{equation}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{x'})(r_{x'})}{r^2}-\frac{\delta_{x'x'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\sin^2\theta'\cos^2\phi'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\[{}\]
+%\[{}\]
+%\begin{displaymath}{\widetilde{w}_{{m2}_{xx}}(\vec{k})=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\sin^2(\theta)e^{-ikr\cos(\theta)}\left(\int_{0}^{2\pi}\cos^2(\phi)d{\phi}\right)d{\cos(\theta)}\right]d{r}}\end{displaymath} 
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta'\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\cos^2\phi'~d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
+\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
+\[{}\]
+%\color{blue}
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
+\begin{equation}\label{compare_equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
+%\color{black}
+\[{}\]
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}\right)d{r}}\end{displaymath} 
+\begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left(\frac{2\sin(kr)}{kr}\right)d{r}}\end{equation}
+%\[{}\]
+Set the lower limit to -infinity since the integrand is nearly zero by the time r is zero. 
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=-\frac{4\sqrt{\pi}}{3ka}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}\right)}\end{displaymath} 
+\begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}\right)}\end{displaymath} 
+\begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\int_{-\infty}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}\right)}\end{equation} 
+\[{}\]
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\frac{-4\sqrt{\pi}}{3ka}\left(\frac{ka^3}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{a\alpha}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})\right)}\end{displaymath} 
+\begin{displaymath}{-\frac{4\sqrt{\pi}}{k^2a}\left(a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})\right)}\end{displaymath} 
+\begin{equation}{+\frac{4\sqrt{\pi}}{k^3a}\left(\frac{\pi}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]\right)}\end{equation} 
+\[{}\]
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-2\pi{a}^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{ka}{2}\right)^2}   \cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{displaymath} 
+\begin{equation}{+\frac{2\pi\sqrt{\pi}}{k^3a}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
+\[{}\] 
+Putting in $a=\frac{\Xi}{\sqrt{2}}$ the final equation for $\widetilde{w}_{{m2}_{xx}}(k)$ becomes
+%\color{green}
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
+\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation} 
+%\color{black}
+\[{}\]
+ 
+Calculate $\widetilde{w}_{{m2}_{y'y'}}(k)$ 
+\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{y'})}{r^2}-\frac{\delta_{y'y'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\sin^2\theta'\sin^2\phi'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\[{}\]
+\begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\left(1-\cos^2\theta\right)e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}\sin^2\phi~d{\phi}\right)d{\cos\theta}\right]d{r}}\end{displaymath} 
+\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
+
+%\color{blue}
+\begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(k)=-\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta~e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{displaymath} 
+\begin{equation}{+\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}~d{\cos\theta'}\right]d{r}}\end{equation}
+%\color{black} 
+\[{}\]
+
+This is the same as equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{y'y'}}(k)=\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
+Calculate $\widetilde{w}_{{m2}_{z'z'}}(k)$ 
+\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\frac{(r_{y'})(r_{y'})}{r^2}-\frac{\delta_{z'z'}}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}\int_{-1}^{1}\int_{0}^{2\pi}e^{\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\cos^2\theta'-\frac{1}{3}\right)e^{-ikr\cos\theta'}r^2d{r}d{\cos\theta'}d{\phi'}}\end{equation}
+\[{}\]
+\begin{displaymath}{\widetilde{w}_{{m2}_{z'z'}}(k)=\frac{1}{a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{displaymath} 
+\begin{equation}{-\frac{1}{3a\sqrt{\pi}}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}\left(\int_{0}^{2\pi}d{\phi'}\right)d{\cos\theta'}\right]d{r}}\end{equation}
+
+%\color{blue}
+\begin{displaymath}{\widetilde{w}_{{m2}_{z'z'}}(k)=2\frac{\sqrt{\pi}}{a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}\cos^2\theta'~e^{-ikr\cos\theta'}d{\cos\theta'}\right]d{r}}\end{displaymath} 
+\begin{equation}{-2\frac{\sqrt{\pi}}{3a}\int_{0}^{\infty}e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r^2\left[\int_{-1}^{1}e^{-ikr\cos\theta'}d{\cos\theta'}\right]d{r}}\end{equation}
+%\color{black} 
+
+
+This is the same as -2 times equation \ref{compare_equation}, and so \begin{equation}{\widetilde{w}_{{m2}_{z'z'}}(k)=-2\widetilde{w}_{{m2}_{x'x'}}(k)}\end{equation}
+\[{}\]
+%\subsection{The tensor weight components in the coordinate system (x,y,z)}
+\noindent The tensor weight components in the coordinate system $(x',y',z')$ are:
+\begin{equation}\label{tensorcomp}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
+
+\begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{array}\right)'+ \widetilde{w}_{{m2}_{y'y'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{array}\right)' + \widetilde{w}_{{m2}_{z'z'}}\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{array}\right)'}\end{displaymath}
+
+\begin{equation}{=\widetilde{w}_{{m2}_{x'x'}}\hat{x'}\hat{x'}+\widetilde{w}_{{m2}_{y'y'}}\hat{y'}\hat{y'}+\widetilde{w}_{{m2}_{z'z'}}\hat{z'}\hat{z'}}\end{equation}
+written in terms of the outer products
+
+\begin{displaymath}{\hat{x}'\hat{x}'= \left(\begin{array}{c} 1 \\ 0 \\ 0 \end{array}\right)'\left(\begin{array}{ccc} 1 & 0 & 0 \end{array}\right)'=\left(\begin{array}{ccc} 1 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{array}\right)'}\end{displaymath}
+
+\begin{displaymath}{\hat{y}'\hat{y}'= \left(\begin{array}{c} 0 \\ 1 \\ 0 \end{array}\right)'\left(\begin{array}{ccc} 0 & 1 & 0 \end{array}\right)'=\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{array}\right)'}\end{displaymath}
+
+\begin{displaymath}{\hat{z}'\hat{z}'= \left(\begin{array}{c} 0 \\ 0 \\ 1 \end{array}\right)'\left(\begin{array}{ccc} 0 & 0 & 1 \end{array}\right)'=\left(\begin{array}{ccc} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{array}\right)'}\end{displaymath}
+
+%\newline $k_{x'}= k_{x'_x} \hat{x} + k_{x'_y} \hat{y} + k_{x'_z} \hat{z}$
+%\newline $k_{y'}= k_{y'_x} \hat{x} + k_{y'_y} \hat{y} + k_{y'_z} \hat{z}$
+%\newline $k_{z'}= k_{z'_x} \hat{x} + k_{z'_y} \hat{y} + k_{z'_z} \hat{z}$
+%\newline \begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(\vec{k})=\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+\noindent Using the relation
+%\begin{displaymath}{\hat{k_{x'}}\hat{k_{x'}} + \hat{k_{y'}}\hat{k_{y'}} + \hat{k_{z'}}\hat{k_{z'}} = 1}\end{displaymath} 
+\begin{displaymath}{\text{I} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'} + \hat{z'}\hat{z'}}\end{displaymath}
+\begin{displaymath}{\text{I} -\hat{z'}\hat{z'} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'}}\end{displaymath}
+and the results from earlier
+\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}=\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+Equation \ref{tensorcomp} then becomes 
+\begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{z}'\hat{z}')\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
+\noindent In the $(x',y',z')$ coordinate system, vector $\vec{k}$ had been aligned with the $\hat{z}'$ direction so that 
+\begin{displaymath}{\hat{k}=\hat{z'}}\end{displaymath}
+Replacing $\hat{z}'$ with $\hat{k}$ gives
+\begin{equation}{\widetilde{w}_{m2}(\vec{k})= (\text{I}-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
+Now  $\vec{k}$ can be expressed in the $(x,y,z)$ coordinate system, $\vec{k}=k_x\hat{x} + k_y\hat{y} + k_z\hat{z}$. The components of the tensor weight in the $(x,y,z)$ coordinate system are then given by
+\begin{equation}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{equation}
+\[{}\]
+
+%\subsection{Transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero}
+\noindent Check that the transform of tensor weight ${w}_{m2}(r)$ goes to zero as k goes to zero:
+\begin{displaymath}{\widetilde{w}_{{m2}_{x'x'}}(k)=\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{displaymath} 
+\begin{equation}{+\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+Term 1: 
+%\color{green}
+\begin{equation}{\left(\frac{-\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)e^{-\left(\frac{k^2\Xi^2}{8}\right)}\cos(\frac{k\alpha}{2})}\end{equation}
+\begin{displaymath}{\approx\left(-\frac{\pi\Xi^2}{3}-\frac{4\pi}{k^2}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(1-\left(\frac{1}{2}\right)\frac{k^2\alpha^2}{4}\right)}\end{displaymath} 
+\begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}}\end{displaymath} 
+%\color{black}
+Term 2:
+%\color{blue}
+\begin{equation}{-\frac{2\pi\alpha}{3k}e^{-\left(\frac{k^2\Xi^2}{8}\right)}\sin(\frac{k\alpha}{2})}\end{equation} 
+\begin{displaymath}{\approx\left(-\frac{2\pi\alpha}{3k}\right)\left(1-\frac{k^2\Xi^2}{8}\right)\left(\frac{k\alpha}{2}\right)}\end{displaymath} 
+\begin{displaymath}{\approx}-\frac{\pi\alpha^2}{3}\end{displaymath}
+%\color{black} 
+Term 3:
+%\color{red}
+\begin{equation}{\frac{2\pi\sqrt{2\pi}}{k^3\Xi}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)+\operatorname{erf}\left(\frac{k\Xi}{2*\sqrt{2}}-i\frac{\alpha}{\sqrt{2}\Xi}\right)\right]}\end{equation}
+\begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2\operatorname{Re}\left(\operatorname{erf}\left(\frac{k\Xi}{2\sqrt{2}}+i\frac{\alpha}{\sqrt{2}\Xi}\right)\right)\right]}\end{displaymath} 
+\begin{displaymath}{\approx\frac{\left(2\pi\right)^\frac{2}{3}}{\Xi{k}^3}e^{-\left(\frac{\alpha^2}{2\Xi^2}\right)}\left[2e^{\left(\frac{\alpha^2}{2\Xi^2}\right)}\frac{2}{\sqrt{\pi}}   \left(\frac{k\Xi}{2\sqrt{2}}   -\frac{2\left(\frac{\alpha^2}{2\Xi^2}\right)+1}{3}\left(\frac{k\Xi}{2\sqrt{2}}\right)^3\right)\right]}\end{displaymath}
+\begin{displaymath}{\approx\frac{4\pi}{k^2}-\frac{\pi}{6}\left(\alpha^2-\Xi^2\right)}\end{displaymath}  
+%\color{black}
+Adding the three terms gives:
+\begin{displaymath}{\approx-\frac{4\pi}{k^2}+\frac{\pi\alpha^2}{2}+\frac{\pi\Xi^2}{6}-\frac{\pi\alpha^2}{3}+\frac{4\pi}{k^2}-\frac{\pi\alpha^2}{6}-\frac{\pi\Xi^2}{6}}\end{displaymath} 
+\begin{displaymath}{\approx0}\end{displaymath} 
+\[{}\]
+
+
+\subsection{The tensor weight components in the coordinate system (x,y,z)}
+The tensor weight components in the coordinate system $(x',y',z')$ are:
+\begin{equation}{\widetilde{w'}_{m2}=\left(\begin{array}{ccc} \widetilde{w}_{{m2}_{x'x'}} & 0 & 0 \\ 0 & \widetilde{w}_{{m2}_{y'y'}} & 0 \\ 0 & 0 & \widetilde{w}_{{m2}_{z'z'}} \end{array}\right)'}\end{equation}
+\begin{displaymath}{=\widetilde{w}_{{m2}_{x'x'}}\hat{x'}\hat{x'}+\widetilde{w}_{{m2}_{y'y'}}\hat{y'}\hat{y'}+\widetilde{w}_{{m2}_{z'z'}}\hat{z'}\hat{z'}}\end{displaymath}
+where vector had been aligned with the $\hat{z}$ direction so that 
+\begin{equation}{\hat{k}=\hat{z'}}\end{equation}
+%\newline $k_{x'}= k_{x'_x} \hat{x} + k_{x'_y} \hat{y} + k_{x'_z} \hat{z}$
+%\newline $k_{y'}= k_{y'_x} \hat{x} + k_{y'_y} \hat{y} + k_{y'_z} \hat{z}$
+%\newline $k_{z'}= k_{z'_x} \hat{x} + k_{z'_y} \hat{y} + k_{z'_z} \hat{z}$
+%\newline \begin{displaymath}{\widetilde{w}_{{m2}_{y'y'}}(\vec{k})=\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+Using the relation
+%\begin{displaymath}{\hat{k_{x'}}\hat{k_{x'}} + \hat{k_{y'}}\hat{k_{y'}} + \hat{k_{z'}}\hat{k_{z'}} = 1}\end{displaymath} 
+\begin{displaymath}{1 = \hat{x'}\hat{x'} + \hat{y'}\hat{y'} + \hat{z'}\hat{z'}}\end{displaymath}
+\begin{displaymath}{1 -\hat{z'}\hat{z'} = \hat{x'}\hat{x'} + \hat{y'}\hat{y'}}\end{displaymath}
+and the results from earlier
+\begin{equation}{\widetilde{w}_{{m2}_{y'y'}}=\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+\begin{equation}{\widetilde{w}_{{m2}_{z'z'}}=-2\widetilde{w}_{{m2}_{x'x'}}}\end{equation}
+results in
+\begin{displaymath}{\widetilde{w}_{m2}(\vec{k})= (1-3\hat{k}\hat{k})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+and so 
+\begin{displaymath}{\widetilde{w}_{m2_{ij}}(\vec{k})= (\delta{ij}-3\frac{k_ik_j}{k^2})\widetilde{w}_{{m2}_{x'x'}}(\vec{k})}\end{displaymath}
+\[{}\]
+
+\subsection{Integrals used to compute tensor weights}
+%\textbf{Integrals used to compute tensor weights:}
+\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}}\end{equation} 
+\[{}\]
+\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}\cos{\theta}{~}d{\cos{\theta}}}=-\frac{2i}{kr}\cos(kr)+\frac{2i}{k^2r^2}\sin(kr)}\end{equation} 
+\[{}\]
+\begin{equation}{\int_{-1}^{1}{e^{-ikr\cos{\theta}}\cos^2(\theta)~d{\cos{\theta}}}=\frac{2\sin(kr)}{kr}+\frac{4\cos(kr)}{k^2r^2}-\frac{4\sin(kr)}{k^3r^3}}\end{equation} 
+\[{}\]
+\[{}\]
+\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\cos(kr)d{r}}}\end{equation}
+\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}\left[\cos(kau)\cos(\frac{k\alpha}{2})-\sin(kau)\sin(\frac{k\alpha}{2})\right]d{u}}}\end{displaymath}  
+\begin{equation}{=a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})}\end{equation} 
+\[{}\]
+\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\cos(kr)d{r}}}\end{equation}
+\begin{equation}{=\frac{a\alpha}{2}\cos\left(\frac{k\alpha}{2}\right)\int_{-\infty}^{\infty}{e^{-u^2}\cos(kau)d{u}} -a^2\sin\left(\frac{k\alpha}{2}\right)\int_{-\infty}^{\infty}{e^{-u^2}u\sin(kau)d{u}}}\end{equation}
+\begin{equation}{=\frac{a\alpha\sqrt{\pi}}{2}e^{-\left(\frac{ka}{2}\right)^2}\cos\left(\frac{k\alpha}{2}\right)-\frac{a^3k\sqrt{\pi}}{2}e^{-\left(\frac{ka}{2}\right)^2}\sin\left(\frac{k\alpha}{2}\right)}\end{equation}
+\[{}\]
+\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\sin(kr)d{r}}}\end{equation} 
+\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}\left[\sin(kau)\cos(\frac{k\alpha}{2})+\cos(kau)\sin(\frac{k\alpha}{2})\right]d{u}}}\end{displaymath}  
+\begin{equation}{=a\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{equation} 
+\[{}\]
+\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}r\sin(kr)d{r}}}\end{equation} 
+\begin{displaymath}{=a\int_{-\infty}^{\infty}{e^{-u^2}(au+\frac{\alpha}{2})\sin(k(au+\frac{\alpha}{2}))d{u}}}\end{displaymath} 
+\begin{displaymath}{=a^2\cos(\frac{k\alpha}{2})\int_{-\infty}^{\infty}{e^{-u^2}u\sin(kau)d{u} +\frac{a\alpha}{2}\sin(\frac{k\alpha}{2})\int_{-\infty}^{\infty}e^{-u^2}\cos(kau)d{u}}}\end{displaymath} 
+\begin{equation}{=\frac{ka^3}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\cos(\frac{k\alpha}{2})+\frac{a\alpha}{2}\sqrt{\pi}e^{-\left(\frac{ka}{2}\right)^2}\sin(\frac{k\alpha}{2})}\end{equation} 
+%\[{}\]
+\[{}\]
+\begin{equation}{\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\frac{\sin(kr)}{r}d{r}}}\end{equation} 
+%Noting that \begin{equation}{\frac{\sin(kr)}{r}=\int_{0}^{k}{\cos(kr)d{k}}}\end{equation} 
+%this becomes
+\begin{displaymath}{=\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}\left(\int_{0}^{k}{\cos(kr)d{k}}\right)d{r}}}\end{displaymath} 
+\begin{displaymath}{=\int_{0}^{k}\int_{-\infty}^{\infty}{e^{-\left(\frac{r-\frac{\alpha}{2}}{a}\right)^2}{\cos(kr)d{r}}d{k}}}\end{displaymath} 
+\begin{displaymath}{=a\sqrt{\pi}\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2}\cos\left(\frac{k\alpha}{2}\right)d{k} }\end{displaymath} 
+%\begin{displaymath}{=a\sqrt{\pi}\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2}\left(\frac{e^{i\frac{k\alpha}{2}}+e^{-i\frac{k\alpha}{2}}}{2}\right)d{k} }\end{displaymath} 
+%\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}\left[\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2 + i\frac{k\alpha}{2}}d{k}+\int_{0}^{k}e^{-\left(\frac{ka}{2}\right)^2-i\frac{k\alpha}{2}}d{k}\right]}\end{displaymath} 
+\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}\left[\int_{-k}^{k}e^{-\left(\frac{ka}{2}\right)^2 + i\frac{k\alpha}{2}}d{k}\right]}\end{displaymath} 
+%\begin{displaymath}{=\frac{a\sqrt{\pi}}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\int_{-k}^{k}e^{-\left(\frac{ka}{2} + i\frac{\alpha}{2a}\right)^2}d{k}\right]}\end{displaymath} 
+\begin{displaymath}{=\sqrt{\pi}e^{-\left(\frac{\alpha}{2a}\right)^2}\int_{-\frac{ka}{2}+i\frac{\alpha}{2a}}^{\frac{ka}{2}+i\frac{\alpha}{2a}}e^{-u^2}d{u}}\end{displaymath} 
+\begin{equation}{=\frac{\pi}{2}e^{-\left(\frac{\alpha}{2a}\right)^2}\left[\operatorname{erf}\left(\frac{ka}{2}+i\frac{\alpha}{2a}\right)+\operatorname{erf}\left(\frac{ka}{2}-i\frac{\alpha}{2a}\right)\right]}\end{equation} 
+\[{}\]
+\[{}\]
+
+\subsection{Deriviation of Tensor Density} 
+%Work out how tensor weight in Fourier space relates to the tensor density:
+\noindent The tensor density is given by:
+\begin{equation}{\overleftrightarrow{n}_{m2}(\vec{r})=\int_{allspace}n(\vec{r'})\overleftrightarrow{w}_{m2}(|\vec{r}-\vec{r'}|)d{\vec{r'}}}\end{equation}
+%ERROR below?? Shoud it be:
+with tensor elements  
+\begin{displaymath}{n_{m2_{ij}}(\vec{r})=\int_{allspace}n(\vec{r'})w_{m2_{ij}}(|\vec{r}-\vec{r'}|)d{r'}}\end{displaymath} 
+where
+\begin{equation}{w_{m2ij}(\vec r)= \frac1{(2\pi)^3}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}}\end{equation} 
+Deriviation of tensor density elements $n_{m2ij}(\vec{r})$:
+\begin{align}
+%    n_{m2ij}(\vec r) &= \int_{allspace} n(\vec r') w_{m2ij}(\vec r- \vec r')d\vec r' \\
+%    w_{m2ij}(\vec r) &= \frac1{2\pi}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\\
+    n_{m2ij}(\vec r) &= \int n(\vec r') d\vec r' \frac1{(2\pi)^3}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')} \\
+    &= \int d\vec r' \left(\frac1{(2\pi)^3}\int d\vec k' n(\vec k')e^{i\vec k'\cdot \vec r'}\right) \left(\frac1{(2\pi)^3}\int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot (\vec r-\vec r')}\right) \\
+    &=  \frac1{(2\pi)^3}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)
+    e^{i\vec k\cdot \vec r}\left(\frac1{(2\pi)^3}\int d\vec r'e^{i(\vec k'-\vec k)\cdot \vec r'}\right)
+    \\
+    &= \frac1{(2\pi)^3}\int d\vec k' n(\vec k') \int d\vec k w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}\delta(\vec k'-\vec k)
+    \\
+    &= \frac1{(2\pi)^3}\int d\vec k\, n(\vec k) w_{m2ij}(\vec k)e^{i\vec k\cdot \vec r}
+  \end{align} 
+\[{}\]
+
+
+\subsection{Deriviation of Phi3}
+%\textbf{Deriviation of $\Phi_3$}
+
+\begin{equation}{\Phi_3=\frac{12\pi^2R^6}{(1-\eta)^2}\left[\overrightarrow{\operatorname{V}}\cdot\overleftrightarrow{\operatorname{T}}\cdot\overrightarrow{\operatorname{V}}-n\overrightarrow{\operatorname{V}}\cdot\overrightarrow{\operatorname{V}}-\operatorname{Tr}\left(\overleftrightarrow{\operatorname{T}}^3\right)+n\operatorname{Tr}\left(\overleftrightarrow{\operatorname{T}}^2\right)\right]}\end{equation}
+\[{}\]
+\begin{equation}{\overleftrightarrow{\operatorname{T}}=\frac{{\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}}}{4\pi{R}^2}}\end{equation}
+
+\begin{equation}{\overrightarrow{\operatorname{V}}=\frac{\vec{n}_2}{4\pi{R}^2}}\end{equation}
+
+\begin{displaymath}{\Phi_3=\frac{12\pi^2R^6}{(1-\eta)^2}\left(\frac{1}{4\pi{R}^2}\right)^3\left[\vec{n}_{2v}\cdot\left({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}}\right)\cdot\vec{n}_{2v}-n_2|\vec{n}_{2v}|^2-\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^3\right)\color{white}\right]\color{black}}\end{displaymath}
+\begin{equation}{\color{white}\left[\color{black}+n_2\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^2\right)\right]}\end{equation}
+\[{}\]
+\begin{displaymath}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\frac{2}{3}n_2\vec{n}_{v2}\cdot\vec{n}_{v2}-\operatorname{Tr}\left(({\overleftrightarrow{n}_{m2}}+\frac{n_2}{3}\hat{\operatorname{I}})^3\right)\color{white}\right]\color{black}}\end{displaymath}\begin{equation}{\color{white}\left[\color{black}+n_2\operatorname{Tr}\left((\overleftrightarrow{n}_{m2}+\frac{n_2}{3}\hat{\operatorname{I}})^2\right)\right]}\end{equation}
+\[{}\]
+\begin{displaymath}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left(\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\frac{2}{3}n_2|\vec{n}_{v2}|^2-\operatorname{Tr}({\overleftrightarrow{n}_{m2}^3})
+-n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)\color{white}\right)\color{black}}\end{displaymath} \begin{equation}{\color{white}\left(\color{black}-\frac{1}{3}{n_2}^2\operatorname{Tr}(\overleftrightarrow{n}_{m2})-\frac{1}{9}{n_2}^3+n_2\operatorname{Tr}(\overleftrightarrow{n}_{m2}^2)+\frac{1}{3}{n_2}^3+\frac{2}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
+\[{}\]
+\begin{equation}{\Phi_3=\frac{3}{16\pi(1-\eta)^2}\left(\frac{2}{9}{n_2}^3-\frac{2}{3}n_2|\vec{n}_{v2}|^2+\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}_{m2}}^3)+\frac{1}{3}n^2_2\operatorname{Tr}(\overleftrightarrow{n}_{m2})\right)}\end{equation} 
+
+\begin{equation}{\operatorname{Tr}(\overleftrightarrow{n}_{m2})=0}\end{equation} 
+
+\begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2|\vec{n}_{v2}|^2+\frac{9}{2}(\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}})-\frac{9}{2}\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})}{24\pi(1-\eta)^2}}\end{equation} 
+
+\begin{equation}{\eta=n_3}\end{equation} 
+
+\begin{equation}{\Phi_3=\frac{{n_2}^3-3n_2\vec{n}_{v2}\cdot\vec{n}_{v2}+\frac{9}{2}[\vec{n}_{v2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\vec{n}_{v2}}-\operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]}{24\pi(1-n_3)^2}}\end{equation} 
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+\[{}\]
+
+\end{widetext}
+
+\end{document}

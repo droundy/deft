@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from __future__ import division
 # We need the following two lines in order for matplotlib to work
@@ -13,6 +13,9 @@ import os
 import numpy
 
 import styles
+
+figscale=1
+plt.figure(figsize=(9*figscale, 14.5*figscale))
 
 def smooth(x, N):
     '''
@@ -90,10 +93,12 @@ def plot_soft_walls(reduced_density, temps):
 
     #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
 
-    title('Soft walls with bulk $n^* = %g$' % (reduced_density/100))
-    xlabel(r'$z/\sigma$')
-    ylabel('$n^*(r)$')
-    legend()
+    title('Soft walls with bulk $n^* = %g$' % (reduced_density/100), fontsize=20)
+    xlabel(r'$z/\sigma$', fontsize=18)
+    plt.xticks(fontsize=17)
+    ylabel('$n^*(r)$', fontsize=18)
+    plt.yticks(fontsize=17)
+    legend(fontsize=18)
     xlim(-0.3, zmax)
     outputname = 'figs/soft-walls-%02d.pdf' % (reduced_density)
     savefig(outputname, bbox_inches=0)
@@ -106,7 +111,7 @@ def plot_soft_walls(reduced_density, temps):
 # input: ['figs/mc-soft-wall-%04.4f-%.4f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
 # input: ['figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (1.0, temp) for temp in [10.0, 5.0, 2.5]]
-figure(figsize=(9, 14.5))
+
 subplot(2, 1, 1)
 plot_soft_walls(60, [10.0, 5.0, 2.5, 1.0])
 

@@ -24,10 +24,12 @@ import sys
 import styles
 
 from cycler import cycler
-
-matplotlib.rc('text', usetex=True)
-figscale = 1.5
-myfigsize = (4*figscale, 3*figscale)
+matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+#matplotlib.rc('font', **{'family': 'serif', 'serif':['Computer Modern'], 'weight':'bold', 'size': '32'} )
+#matplotlib.rc('text', usetex=True)
+figscale = 1.2
+#figscale = 1.5
+myfigsize = (4*figscale, 3.2*figscale)
 
 # pressure at freezing (at intersection of homogeneous and crystal plots)
 p_at_freezing = []
@@ -40,7 +42,7 @@ pressure_data = []  # index corresponds to kT
 #nm#density_data_nm = []  # index corresponds to kT
 #nm#pressure_data_nm = []  # index corresponds to kT
 
-our_kTs = (0.5, 1, 1.5, 2, 2.5, 3)
+our_kTs = (0.5, 1, 1.5, 2, 2.5, 3)   #paper!
 #our_kTs = (0.5, 2.8, 2.9, 3) #debug
 #our_kTs = (0.5,3) #debug
 #seeds#seed=1
@@ -52,7 +54,7 @@ homogeneous_density = homogeneous_data[1:, 0]
 homogeneous_pressures = homogeneous_data[1:, 1:]
 
 #for kT in (0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3):
-# for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3): #for paper
+# for kT in (0.6, 0.8, 1, 1.2, 1.4, 1.8, 2.2, 2.6, 3):
 
 for kT in our_kTs:
     n = []
@@ -65,7 +67,7 @@ for kT in our_kTs:
     #nm#actual_density_nm = []
 
     #f = ('figs/crystal-data/kT-%.3f.dat' % kT)
-    f = ('figs/crystal-data/kT-%.3f-fv1e-4-seed1.dat' % kT)
+    f = ('figs/crystal-data/kT-%.3f-fv1e-4-seed1.dat' % kT)  #paper!
     #seeds#f = ('figs/crystal-data/kT-%.3f-seed%g.dat' % (kT, seed))    #debug
     data = np.loadtxt(f)
 
@@ -278,8 +280,8 @@ plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing,
 for i in range(len(kT_data)):
     if kT_data[i] in temperatures_to_isotherm:
         plt.plot(1/density_data[i], pressure_data[i],
-                 color=styles.color_from_kT(kT_data[i]),
-                 label='kT=%g' % (kT_data[i]))
+                 color=styles.color_from_kT(kT_data[i]), linewidth=1,
+                 label=r'$T*$=%g' % (kT_data[i]))
         #seeds#plt.plot(1/density_data[i], pressure_data[i],
                  #seeds#color=styles.color_from_kT(kT_data[i]),
                  #seeds#label='kT=%g~~seed%g' % (kT_data[i], seed))
@@ -289,8 +291,8 @@ for i in range(99, len(homogeneous_temperature)):
         print(f'temp[{i}] = {homogeneous_temperature[i]}')
         
         plt.plot(1/homogeneous_density, homogeneous_pressures[:, i], '-',
-                 color=styles.color_from_kT(homogeneous_temperature[i]),
-                 label='kT=%g' % homogeneous_temperature[i])
+                 color=styles.color_from_kT(homogeneous_temperature[i]), linewidth=1,
+                 label=r'$T*$=%g' % homogeneous_temperature[i])
 
 
 def R_BH(kT):
@@ -374,9 +376,9 @@ for T in temperatures_to_isotherm:
                 if T_zeno[i] == T:
                     p_zeno_T.append(p_zeno[i])
                     V_zeno_T.append(V)
-    plt.plot(V_zeno_T, p_zeno_T, '.-.',
+    plt.plot(V_zeno_T, p_zeno_T, '--',
                 color=styles.color_from_kT(T),
-                linewidth=0.5,
+                linewidth=1,
                 )
 
 # TODO Items week after May 19 2021
@@ -414,15 +416,19 @@ for T in temperatures_to_isotherm:
 #                  )
 
 
-plt.plot([], [], 'k-', label='SFMT')
-plt.plot([], [], 'k.-.', linewidth=0.5, label='Monte Carlo - Zeno')
+plt.plot([], [], 'k-', linewidth=1, label='SFMT')
+plt.plot([], [], 'k--', linewidth=1, label='Monte Carlo - Zeno')
 # plt.plot([], [], 'kx', label='Monte Carlo - Chris')
-plt.plot([], [], 'k:', label='Barker Henderson')
-plt.legend(loc='upper right')
+plt.plot([], [], 'k:', linewidth=1, label='Barker Henderson')
+plt.legend(loc='upper right', fontsize=9.5)
+plt.title('Bulk soft sphere fluid', fontsize=11)
 plt.ylim(0, 60)
+plt.yticks(fontsize=9)
 plt.xlim(0.9, 2)
-plt.xlabel('Volume per atom')
-plt.ylabel('$p^*$')
+plt.xticks(fontsize=9)
+plt.xlabel('Reduced Volume per atom', fontsize=9.5)
+plt.ylabel('Reduced Pressure', fontsize=9.5)
+plt.tight_layout()
 plt.savefig('./figs/p-vs-V_at_fixed_T.pdf', transparent=True)
 
 plt.figure(figsize=myfigsize)
@@ -507,7 +513,8 @@ for i in range(9, len(bhn_reduced[:, 0]), 10)[:10]:
              styles.density_color(bhn_reduced[i, 0])+':')
 
 plt.plot([], [], 'k-', label='SFMT')
-plt.plot([], [], 'k.-.', linewidth=0.5, label='Monte Carlo - Zeno')
+plt.plot([], [], 'k-.', linewidth=0.5, label='Monte Carlo - Zeno 108 atoms')
+plt.plot([], [], 'k.--', linewidth=0.5, label='Monte Carlo - Zeno 256 atoms')
 plt.plot([], [], 'k:', label='Barker Henderson')
 plt.legend(loc='best')
 plt.ylabel('$p^*$')
@@ -537,16 +544,17 @@ plt.fill_betweenx(kT_data, n_homogeneous_at_freezing,
                   n_crystal_at_freezing, color='gray')
 #plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.6, color='blue')
 plt.fill_betweenx(kT_data, n_crystal_at_freezing, 1.8, color='blue')
-plt.xlabel('$n^*$')
-plt.ylabel('$T^*$')
+plt.xlabel('$n^*$', fontsize=8)  #Reduced Number Density = number density*sigma^3  (we set sigma=1 in nm)
+plt.ylabel('$T^*$', fontsize=8)  #Reduced Temperature = kT/epsilon  (we set epsilon=1 in nm)
 plt.plot([0.88, 0.90, 0.91, 0.92, 1.04, 1.12], [0.7, 0.8, 0.9,
          1.0, 2.0, 3], '-', label='$MC_f$', color='white')
 plt.plot([0.96, 0.98, 0.99, 1.00, 1.11, 1.19], [0.7, 0.8, 0.9,
          1.0, 2.0, 3], '-', label='$MC_s$', color='white')
 plt.legend()
 plt.xlim(0.2, 1.8)
+plt.xticks(fontsize=8)
 plt.ylim(0.5, 3)
-
+plt.yticks(fontsize=8)
 plt.tight_layout()
 plt.savefig('./figs/Phase_Diagram_of_T_vs_n.pdf', transparent=True)
 
