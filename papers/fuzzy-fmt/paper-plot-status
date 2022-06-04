@@ -13,7 +13,7 @@ rq run -J radial-6-2.5 --mem 88 -o new-data/radial-wca-0.6000-2.50.out ./new-rad
 rq run -J radial-6-1 --mem 88 -o new-data/radial-wca-0.6000-1.00.out ./new-radial-wca.mkdat 0.6 1       >>COMPLETE: Feb 26, 2022(6days)	Committed Apr 25,2022
 rq run -J radial-6-0.1 --mem 88 -o new-data/radial-wca-0.6000-0.10.out ./new-radial-wca.mkdat 0.6 0.1   >>Crashed?: Feb 26, 2022 
 
-rq run -J radial-1-10 --mem 88 -o new-data/radial-wca-1.0000-10.00.out ./new-radial-wca.mkdat 1 10.0  >> Ran for 6d ?h then got killed ("Z")
+rq run -J radial-1-10 --mem 88 -o new-data/radial-wca-1.0000-10.00.out ./new-radial-wca.mkdat 1 10.0  >> Running ... (Ran for 6d ?h then got killed ("Z"))
 rq run -J radial-1-5 --mem 88 -o new-data/radial-wca-1.0000-5.00.out ./new-radial-wca.mkdat 1 5.0     >> COMPLETE: Mar 19, 2022 Committed Apr 25,2022
 rq run -J radial-1-2.5 --mem 88 -o new-data/radial-wca-1.0000-2.50.out ./new-radial-wca.mkdat 1 2.5   >> COMPLETE: Apr 2, 2022  Committed Apr 25,2022
 
@@ -34,7 +34,7 @@ To make plot run from fuzzy-fmt: figs/radial-argon-plots.py
 view plot by opening: figs/argon-plots.pdf
 
 #Run new-radial-lj.cpp 
-rq run -J radiallj-0.83890-0.71 --mem 88 -o new-data/radial-lj-0.71-0.83890.out ./new-radial-lj.mkdat 0.83890 0.71  >> Running ... started 2nd time May 12, 2022 (First time "Z")  
+rq run -J radiallj-0.83890-0.71 --mem 88 -o new-data/radial-lj-0.71-0.83890.out ./new-radial-lj.mkdat 0.83890 0.71  >> COMPLETE: June 2, 2022 (21 days) Committed June 3,2022  
 rq run -J radiallj-0.5844-1.235 --mem 88 -o new-data/radial-lj-1.235-0.5844.out ./new-radial-lj.mkdat 0.5844 1.235  >> COMPLETE: Apr 17, 2022 (9 days) Committed Apr 25,2022
 rq run -J radiallj-1.095-2.48 --mem 88 -o new-data/radial-lj-2.48-1.095.out ./new-radial-lj.mkdat 1.095 2.48        >> Ran for 24 days then got killed ("Z") 
 
