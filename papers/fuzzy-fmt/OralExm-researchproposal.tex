@@ -1,0 +1,133 @@
+\documentclass[double,12pt]{revtex4-2}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{subcaption}
+
+\begin{document}
+%WORK ALL SECTIONS in Parallel!
+
+\title{RESEARCH PROPOSAL}
+\maketitle
+\large
+\begin{center}Toward completion of the Doctor of Philosophy degree in Physics 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~at Oregon State University for Kirstie Finster
+\end{center}
+
+\normalsize
+
+\section{Part 1: Overview}
+My research involves creating models for use in the study of liquids. 
+Although there are many approaches that can be taken, the simplest and 
+most useful approach is through the use of the perturbation theory first
+applied to the study of liquids by Zwanzig in 1954. 
+Zwanzig demonstrated that a real liquid can be modeled by using the well 
+known and highly developed hard sphere model as a reference fluid for the 
+repulsive portion of the particle interaction to which 
+a small attractive portion could be added as a perturbation. 
+In 1964, Rowlinson introduced the idea of making the diameter of the hard sphere 
+fluid temperature-dependent to better fit certain classes of soft interatomic potentials
+to the behavior that would be expected as the temperature changes and particles 
+come ever closer together during collisions at increasing temperatures.
+%SHOW FIGURE
+In 1967, Barker and Henderson made a monumental break-through 
+by generalizing 
+Rowlinson's use of the temperature-dependent hard sphere diameter and 
+developing a method by which \textit{any} soft repulsive can be modeled 
+by mapping it to a hard-sphere fluid with a temperature-dependent diameter. %\textcolor{red}{(cite paper)} 
+This highly successful model, known as the 
+Barker-Henderson fluid, has been in use now for around fifty years and
+is the standard used to model fluids today. %\textcolor{red}{(cite papers)}.
+But there is a problem.
+The hard-sphere fluid model around which the Barker-Henderson fluid is 
+constructed uses delta functions which makes the model difficult and 
+inconvenient to apply in computer simulations. 
+My research aims at constructing a model for fluids around a reference 
+fluid that has a smooth function instead of the sharply discontinuous 
+repulsive hard-sphere interatomic potential that is zero when the 
+particles are not in contact and infinity upon contact. 
+ 
+In selecting a soft interatomic potential to use as a reference fluid, 
+there is one choice to consider that stands out above others, and that is 
+the repulsive portion of the interatomic potential of the 
+Weeks-Chandler-Andersen (WCA) fluid.
+The WCA potential reproduces the repulsive force of the Lennard-Jones 
+interatomic potential that is used to model neutral atoms. 
+The thermodynamic properties of the fluid can be obtained from the 
+Helmholtz free energy which
+can be expressed as a functional of the average number 
+density profile $n(\vec r)$ 
+which gives the probability of finding a particle at each position $\vec r$. 
+The Helmholtz free energy, along with the corresponding equilibrium number density profile,
+can be found using density functional theory by 
+varying the number density profile until the free energy is minimized.
+For classical fluids, Rosenfeld formulated a highly successful 
+density functional theory called Fundamental Measure Theory (FMT)
+by noting that the Mayer function of the hard-sphere fluid is a step function
+that can be decomposed into a set of weight functions that can be used 
+to express the Helmholtz free energy functional in terms of a set of weighted densities. 
+Schmidt created Soft Fundamental Measure Theory (SFMT) for soft sphere 
+fluids which is based on FMT but reformulated for soft potentials by 
+meeting the limiting conditions for a 0-dimensional fluid (where a sphere 
+is confined to a cavity large enough for only one sphere) 
+and for low-density. 
+Emerging from his work is an "error-function" potential he formed to 
+demonstrate the application of SFMT to a soft-sphere fluid and which is
+similar to the repulsive potential of the WCA fluid. However, 
+Schmidt's error function potential can only be made similar to the WCA fluid 
+at one temperature -
+it will not work for a variety of temperatures. 
+Therefore, we use the error function potential but make
+its parameters temperature-dependent (similar to the way Barker-Henderson made the
+diameter of the hard sphere fluid temperature-dependent). 
+%One parameter makes the softness of the error function potential comparable 
+%with the softness (steepness) of the WCA potential, while the other parameter 
+%sets the length-scale of the particle interaction and is
+%derived by setting 
+%We design the parameters make
+Our parameters are derived in part by making 
+the second virial coefficient of our error function 
+potential equal to the second virial coefficient of a WCA fluid. 
+Our approach is easily extensible to other soft repulsive potentials.
+
+\section{Part 2: Research Done}
+We have a working model of a soft-sphere reference fluid that depends 
+on a smooth potential function instead of on the discontinuous hard-sphere potential 
+which has been the standard in use for the last fifty years. 
+In our paper prepared for publication we have: \\
+$\bullet$ Demonstrated good agreement between our WCA fluid and Barker-Henderson fluid \\
+$\bullet$ Demonstrated good agreement between our WCA fluid and Monte-Carlo simulations \\
+$\bullet$ Demonstrated good agreement between our WCA fluid and experiments with Argon under high pressure (so attractive forces can be ignored) \\
+
+\section{Part 3: Research To Do}
+\noindent %Toward a better model and a better understanding of our model, 
+I propose some possible paths for wrapping up my research: \\
+$\bullet$ Finish up the paper we have and graduate. \\
+$\bullet$ Write a follow-on paper and graduate. In a second paper, I would 
+like to look at finding the internal energy for our WCA fluid using 
+classical Density Functional Theory and our SFMT functional 
+for the Helmholtz free energy that we developed in our first paper 
+\begin{align}
+  U[n(\vec r), s(\vec r)] = F[n(\vec r)] + T\int s(\vec r) d\vec r
+\end{align}
+ Alternatively (or if more is needed, or time allows), I could: \\
+$\bullet$ Look at how to improve results at low temperature, high density 
+by adjusting our functional and/or potential and our pressure calculations.\\ %pressure calculations  \\
+%$\bullet$ Possibly derive temperature-dependent parameter with B3 and B2  \\
+%4- another functional for better pressure in freezing with improved pressure calculation\\
+%4- another function (instead of Verf) for better pressure in freezing \\
+$\bullet$ Examine and demonstrate the generality and usefulness of our 
+method by applying it to other soft repulsive fluid potentials (Dr. Roundy famous!) \\
+%$\bullet$ Apply our model  (ie. show by example) to demonstrate usefulness \\ %and market \\
+%better understand and meet the needs of those who would benefit from our approach and market \\
+
+\noindent Papers would be submitted to Physical Review E.
+
+\section{Part 4: Means/timeline/program}
+\noindent Requirements of the PhD program \\
+$\bullet$ One class left: PH575 Spring 2023 \\
+$\bullet$ Allowed time left: 4 years \\
+$\bullet$ Resources needed: Bingley computer in Dr. Roundy's lab \\
+$\bullet$ Funding: Currently I am a TA, but I'm going to apply for a grant from NSF \\
+
+\end{document}
