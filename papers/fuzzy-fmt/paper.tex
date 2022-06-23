@@ -35,14 +35,19 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-  We introduce an easy-to-implement variation on the Soft Fundamental
-  Measure Theory (SFMT) approach for the Weeks-Chandler-Andersen (WCA)
-  fluid. Our model incorporates temperature-dependent parameters associated
-  with both the length-scale and effective softness of the interaction,
+  We introduce a Soft Fundamental Measure Theory (SFMT) functional
+  for the purely repulsive Weeks-Chandler-Andersen (WCA) fluid.  This
+  classical density functional could serve as a reference fluid for
+  functionals created using thermodynamic perturbation theory, instead
+  of the hard-sphere fluid.
+  %
+  Our functional incorporates temperature-dependent parameters describing
+  the length-scale and effective softness of the interaction,
   and which reproduce the second virial coefficient of the WCA fluid.
-  This approach is readily extensible to other soft repulsive
-  potentials.  We demonstrate that this approach is comparable in
-  accuracy to the Barker-Henderson approach combined with the White
+  % This approach is readily extensible to other soft repulsive
+  % potentials.
+  We find that this approach is comparable in accuracy to the
+  Barker-Henderson approach combined with the White
   Bear density functional for the hard-sphere fluid.
 \end{abstract}
 
@@ -88,37 +93,14 @@ liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
   lafitte2013accurate} not only for the homogeneous
 fluid~\cite{carnahan1969equation}, but also in the more challenging
 case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997, 
-roth2002whitebear}.  However, the hard-sphere fluid remains a
+roth2002whitebear} FIXME LOOK UP A FEW DIFFERENT REFERNCES THESE DONT USE
+IT AS A REFERNCE FLUID.  However, the hard-sphere fluid remains a
 non-physical model, which can also be numerically inconvenient due to its
 discontinuous potential, and the requirement for delta functions in
 computing weighted densities.
 
-In this paper, we introduce a \textit{soft} sphere fluid 
-with temperature-dependent parameters to model the soft, repulsive 
-potential of a Weeks-Chandler-Andersen (WCA) fluid. 
-The WCA potential reproduces the repulsive force of a Lennard-Jones 
-interaction, which makes it an ideal model for interatomic repulsion. 
-The repulsive potential of the WCA fluid is given by 
-\newcommand\erf{\mathrm{erf}}
-\newcommand\Vwca{V_{\mathrm{wca}}}
-\newcommand\Verf{V_{\erf}}
-\begin{align}
-  \Vwca(r) =
-  \begin{cases}
-    4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
-    \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
-    0, & \textrm{otherwise}.
-  \end{cases}
-\label{eq:Vwca}
-\end{align}
-where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
-and $R$ is a single sphere radius which is related by $\sigma =
-2^{5/6} R$.
-%
-To obtain the free energy of the soft sphere fluid from which the
-thermodynamic properties of the fluid can be found, 
-we use Soft Fundamental Measure Theory
-(SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999.
+FIXME make this flow right.  FMT first?
+
 SFMT is a classical Density Functional 
 theory (cDFT) that directly treats soft repulsive potentials in a framework
 based on the highly successful Fundamental Measure Theory (FMT) developed
@@ -156,6 +138,33 @@ In his 2010 review of FMT, Roth states that the most important future
 developments in classical equilibrium Density Functional Theory 
 will involve treating soft repulsions
 and attractions~\cite{roth2010fundamental}.
+
+In this paper, we introduce a \textit{soft} sphere fluid 
+with temperature-dependent parameters to model the soft, repulsive 
+potential of a Weeks-Chandler-Andersen (WCA) fluid. 
+The WCA potential reproduces the repulsive force of a Lennard-Jones 
+interaction, which makes it an ideal model for interatomic repulsion. 
+The repulsive potential of the WCA fluid is given by 
+\newcommand\erf{\mathrm{erf}}
+\newcommand\Vwca{V_{\mathrm{wca}}}
+\newcommand\Verf{V_{\erf}}
+\begin{align}
+  \Vwca(r) =
+  \begin{cases}
+    4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} -
+    \left(\frac{\sigma}{r}\right)^{6} \right] + \epsilon, & 0 < r < 2R \\
+    0, & \textrm{otherwise}.
+  \end{cases}
+\label{eq:Vwca}
+\end{align}
+where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
+and $R$ is a single sphere radius which is related by $\sigma =
+2^{5/6} R$.
+%
+To obtain the free energy of the soft sphere fluid from which the
+thermodynamic properties of the fluid can be found, 
+we use Soft Fundamental Measure Theory
+(SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999.
 
 \section{Methods}
 
