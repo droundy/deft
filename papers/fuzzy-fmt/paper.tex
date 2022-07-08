@@ -77,74 +77,35 @@
 
 \section{Introduction}
 The idea of liquids as composed of hard spheres dates back over two
-millenia~\cite{lucretius}.  In the 20th century, we came to understand atoms as
-inherently soft with no abrupt border, but it was shown that their repulsion
-could still be accurately described using a hard-sphere model, provided the
-radius is chosen to be temperature dependent~\cite{rowlinson1964statistical,
+millenia~\cite{lucretius}. In the 20th century, 
+%we came to understand atoms as
+it came to be understood that atoms are
+inherently soft with no abrupt border, but that their repulsion
+could still be accurately described using a hard-sphere model provided the
+diameter is chosen to be temperature dependent~\cite{rowlinson1964statistical,
 barker1967perturbation, andersen1971relationship}. A temperature-dependent hard
-sphere radius reflects the effect of collisions during which the particles are
-pushed closer together at higher temperatures. In the widely used
-Barker-Henderson approach, an arbitrary potential function can be used to
-construct a corresponding hard sphere reference fluid with a temperature
-dependent diameter.
-The hard-sphere fluid is widely studied and well understood, and
-has served as the reference system of choice for the theory of
-liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate} not only for the homogeneous
-fluid~\cite{carnahan1969equation}, but also in the more challenging
-case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997, 
-roth2002whitebear} FIXME LOOK UP A FEW DIFFERENT REFERNCES THESE DONT USE
-IT AS A REFERNCE FLUID.  However, the hard-sphere fluid remains a
-non-physical model, which can also be numerically inconvenient due to its
-discontinuous potential, and the requirement for delta functions in
-computing weighted densities.
+sphere diameter reflects the effect of collisions during which the centers 
+of two spheres
+come closer together at higher temperatures. 
 
-FIXME make this flow right.  FMT first?
+%Rowlinson introduced temperature dependent hard spheres and Barker and Henderson 
+%generalized 
 
-SFMT is a classical Density Functional 
-theory (cDFT) that directly treats soft repulsive potentials in a framework
-based on the highly successful Fundamental Measure Theory (FMT) developed
-by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
-Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ 
-to express the free energy of the system
-as a functional of the number density profile.
-%\begin{align}
-    %A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
-%\end{align}
-Schmidt's SFMT free energy functional is constructed so as to yield results 
-consistent with the low-density limit of the virial expansion
-and with the limiting case of a zero-dimensional cavity which are known 
-exactly. 
-%There have been a few versions of Rosenfeld's FMT with improvements 
-%made for inhomogeneous situations like freezing.
-We use Schmidt's version of SFMT introduced in 2000 that
-has Tarazona's tensor weight~\cite{schmidt2000fluid,tarazona2000}
-which eliminates the problem of divergences 
-present in the earlier versions of FMT 
-for highly inhomogeneous situations like freezing.
-% that affected predictions of freezing.
-Due to its combination of computational efficiency with accuracy, 
-FMT has been used as the
-basis for a wide variety of classical density
-functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
-  marechal2013density, hughes2013classical, krebs2014improved}, and
-SFMT has been used to describe the behavior of a star polymer in
-solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
-  sweatman2002fundamental}, as well as repulsive potentials applicable
-to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
-%and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
-%the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
-In his 2010 review of FMT, Roth states that the most important future
-developments in classical equilibrium Density Functional Theory 
-will involve treating soft repulsions
-and attractions~\cite{roth2010fundamental}.
-
-In this paper, we introduce a \textit{soft} sphere fluid 
-with temperature-dependent parameters to model the soft, repulsive 
-potential of a Weeks-Chandler-Andersen (WCA) fluid. 
-The WCA potential reproduces the repulsive force of a Lennard-Jones 
-interaction, which makes it an ideal model for interatomic repulsion. 
-The repulsive potential of the WCA fluid is given by 
+In the widely used Barker-Henderson approach, 
+%an arbitrary potential function can be used to construct 
+any soft repulsive potential can be reproduced using 
+%mapped at different temperatures 
+a corresponding hard sphere fluid with 
+a temperature dependent diameter. 
+%a diameter sized ...
+Weeks, Chandler and Anderson (WCA) developed a different approach in which
+they used  a hard sphere fluid with a temperature and density dependent diameter 
+to recreate specifically the soft repulsive potential that reproduces 
+the repulsive force of a Lennard-Jones interaction. 
+%making it an ideal model for interatomic repulsion.
+The soft repulsive WCA potential
+%of the WCA fluid 
+is given by 
 \newcommand\erf{\mathrm{erf}}
 \newcommand\Vwca{V_{\mathrm{wca}}}
 \newcommand\Verf{V_{\erf}}
@@ -160,17 +121,93 @@ The repulsive potential of the WCA fluid is given by
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
-%
-To obtain the free energy of the soft sphere fluid from which the
-thermodynamic properties of the fluid can be found, 
-we use Soft Fundamental Measure Theory
-(SFMT) introduced by Schmidt~\cite{schmidt1999density} in 1999.
 
+Once a model fluid is described in terms of a hard sphere fluid, 
+its thermodynamic properties can then be found using 
+Fundamental Measure Theory (FMT) which is a powerful classical Density
+Functional Theory (DFT) developed by Rosenfeld for the hard sphere fluid. 
+Tarazona improved on the functional by introducing a tensor weight~\cite{tarazona2000}
+which eliminates 
+%the problem of 
+the divergences 
+%present in the earlier versions of FMT 
+that arise in highly inhomogeneous situations like freezing.
+Due to its combination of computational efficiency with accuracy, 
+FMT has been used as the
+basis for a wide variety of classical density
+functionals~\cite{cuesta1997dimensional, hansen2009fundamental, 
+marechal2013density, hughes2013classical, krebs2014improved}. 
+  
+The hard-sphere fluid is widely studied and well understood, and
+has served as the reference system of choice for the theory of
+liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
+  lafitte2013accurate} not only for the homogeneous
+fluid~\cite{carnahan1969equation}, but also in the more challenging
+case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997, 
+roth2002whitebear} FIXME LOOK UP A FEW DIFFERENT REFERNCES THESE DONT USE
+IT AS A REFERNCE FLUID.  MENTION WCA HERE??? However, the hard-sphere fluid remains a
+non-physical model, which can also be numerically inconvenient due to its
+discontinuous potential, and the requirement for delta functions in
+computing weighted densities.
+
+Soft Fundamental Measure Theory (SFMT) is a classical Density Functional 
+Theory that \textit{directly} treats model fluids with
+soft repulsive potentials in a framework
+based on the highly successful FMT developed for hard spheres.
+%by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
+Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ 
+to express the free energy of the system
+as a functional of the number density profile.
+%\begin{align}
+    %A[n(\vec r)]=k_BT\int{\Phi(\lbrace{ n_i(\vec r)\rbrace})~d{\vec{r}}}
+%\end{align}
+Schmidt's SFMT free energy functional is constructed so as to yield results 
+consistent with the low-density limit of the virial expansion
+and with the limiting case of a zero-dimensional cavity which are known 
+exactly. 
+%There have been a few versions of Rosenfeld's FMT with improvements 
+%made for inhomogeneous situations like freezing.
+%
+% that affected predictions of freezing.
+%
+%Due to its combination of computational efficiency with accuracy, 
+%FMT has been used as the
+%basis for a wide variety of classical density
+%functionals~\cite{cuesta1997dimensional, hansen2009fundamental,
+%  marechal2013density, hughes2013classical, krebs2014improved}, 
+%
+SFMT has been used to describe the behavior of a star polymer in
+solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
+  sweatman2002fundamental}, as well as repulsive potentials applicable
+to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
+%and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
+%the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
+%
+In his 2010 review of FMT, Roth point out that the most important future
+developments in classical equilibrium Density Functional Theory 
+will involve treating soft repulsions
+and attractions~\cite{roth2010fundamental}.
+
+
+In this paper, we introduce a \textit{soft} sphere fluid which can be 
+used with SFMT and which has
+temperature-dependent parameters to model the soft, repulsive 
+potential of a Weeks-Chandler-Andersen fluid. 
+Since the WCA potential reproduces the repulsive force of a Lennard-Jones 
+interaction, it is an ideal model for interatomic repulsion. 
+%
+To obtain the free energy of the fluid from which the other
+thermodynamic properties can be found, 
+%we use Soft Fundamental Measure Theory
+%introduced by Schmidt~\cite{schmidt1999density} in 1999.
+we use Schmidt's version of SFMT introduced in 2000~\cite{schmidt2000fluid}
+that incorporates Tarazona's tensor weight~\cite{tarazona2000}.
+ 
 \section{Methods}
 
 \subsection{Soft Fundamental Measure Theory}
 
-The excess free energy of SFMT is a functional of the number density 
+The excess Helmholtz free energy of SFMT is a functional of the number density 
 profile $n(\textbf{r})$ derived using dimensional crossover from the exact 
 free energy in the 
 zero-dimensional cavity limit~\cite{schmidt1999density}.
