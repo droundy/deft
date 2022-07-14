@@ -93,15 +93,21 @@ come closer together at higher temperatures.
 
 In the widely used Barker-Henderson approach, 
 %an arbitrary potential function can be used to construct 
-any soft repulsive potential can be reproduced using 
+any soft repulsive potential can be reproduced  
 %mapped at different temperatures 
-a corresponding hard sphere fluid with 
-a temperature dependent diameter. 
+%using a corresponding hard sphere fluid with 
+by mapping it at each temperature to a fluid composed of hard spheres 
+with a diameter that depends on the temperature.\cite{barker1967perturbation}
+%a temperature dependent diameter
+%s
 %a diameter sized ...
-Weeks, Chandler and Anderson (WCA) developed a different approach in which
-they used  a hard sphere fluid with a temperature and density dependent diameter 
-to recreate specifically the soft repulsive potential that reproduces 
-the repulsive force of a Lennard-Jones interaction. 
+%In reproducing the soft repulsive Lennard-Jones potential, 
+Weeks, Chandler and Anderson (WCA) 
+%developed a different approach in which they 
+split the Lennard-Jones potential differently than Barker and Henderson did
+%and used a hard sphere fluid with a temperature and density dependent diameter 
+to recreate the soft repulsive potential that reproduces 
+the repulsive force of a Lennard-Jones interaction~\cite{weeks1971splitpotential}. 
 %making it an ideal model for interatomic repulsion.
 The soft repulsive WCA potential
 %of the WCA fluid 
@@ -121,13 +127,22 @@ is given by
 where $\epsilon$ and $\sigma$ are the usual Lennard-Jones parameters
 and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
-
-Once a model fluid is described in terms of a hard sphere fluid, 
-its thermodynamic properties can then be found using 
-Fundamental Measure Theory (FMT) which is a powerful classical Density
-Functional Theory (DFT) developed by Rosenfeld for the hard sphere fluid. 
+%
+%FIXME While
+The WCA repulsive potential makes an excellent reference fluid for 
+the modeling of liquids, while the
+%Once a model fluid is described in terms of a hard sphere fluid, 
+%its thermodynamic properties can then be found using 
+%The 
+Barker-Henderson approach where the hard sphere diameter is dependent
+on temperature only lends itself for use with 
+Fundamental Measure Theory~\cite{rosenfeld1989, rosenfeld1997} (FMT) -  a powerful classical Density
+Functional Theory (DFT) developed by Rosenfeld for the hard sphere fluid
+%for the hard sphere fluid %~\cite{rosenfeld1989, rosenfeld1997}
+%.
+and from which the thermodynamic properties of the fluid can be found.
 Tarazona improved on the functional by introducing a tensor weight~\cite{tarazona2000}
-which eliminates 
+to eliminate 
 %the problem of 
 the divergences 
 %present in the earlier versions of FMT 
@@ -135,27 +150,32 @@ that arise in highly inhomogeneous situations like freezing.
 Due to its combination of computational efficiency with accuracy, 
 FMT has been used as the
 basis for a wide variety of classical density
-functionals~\cite{cuesta1997dimensional, hansen2009fundamental, 
-marechal2013density, hughes2013classical, krebs2014improved}. 
+functionals~\cite{cuesta1997dimensional, roth2002whitebear, hansen2009fundamental, 
+marechal2013density, hughes2013classical, krebs2014improved}.
+%from which the thermodynamic properties and structure of a fluid can be found. 
   
 The hard-sphere fluid is widely studied and well understood, and
 has served as the reference system of choice for the theory of
 liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
-  lafitte2013accurate} not only for the homogeneous
+  lafitte2013accurate, Nezbeda2022referencefluid} not only for the homogeneous
 fluid~\cite{carnahan1969equation}, but also in the more challenging
-case of the inhomogeneous fluid~\cite{rosenfeld1989, rosenfeld1997, 
-roth2002whitebear} FIXME LOOK UP A FEW DIFFERENT REFERNCES THESE DONT USE
-IT AS A REFERNCE FLUID.  MENTION WCA HERE??? However, the hard-sphere fluid remains a
+case of the inhomogeneous fluid
+%~\cite{rosenfeld1989, rosenfeld1997, roth2002whitebear}.
+~\cite{shen2020inhomogeneous, sermoud2021inhomogeneous, shen2022inhomogeneous, bultmann2022inhomogeneous}.
+%FIXME LOOK UP A FEW DIFFERENT REFERNCES THESE DONT USE IT AS A REFERNCE FLUID.  MENTION WCA HERE??? 
+However, the hard-sphere fluid remains a
 non-physical model, which can also be numerically inconvenient due to its
 discontinuous potential, and the requirement for delta functions in
 computing weighted densities.
 
-Soft Fundamental Measure Theory (SFMT) is a classical Density Functional 
+Advancing toward a more realistic model for liquids, Schmidt developed 
+Soft Fundamental Measure Theory~\cite{schmidt1999density, schmidt2000fluid} (SFMT) 
+which is a classical Density Functional 
 Theory that \textit{directly} treats model fluids with
 soft repulsive potentials in a framework
 based on the highly successful FMT developed for hard spheres.
 %by Rosenfeld~\cite{rosenfeld1989} for the free energy of the hard-sphere fluid.
-Like FMT, SMFT uses a set of weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ 
+Like FMT, SMFT uses a set of weighted densities 
 to express the free energy of the system
 as a functional of the number density profile.
 %\begin{align}
@@ -179,51 +199,51 @@ exactly.
 SFMT has been used to describe the behavior of a star polymer in
 solution~\cite{schmidt2000density, groh2001density, kim2001adsorption,
   sweatman2002fundamental}, as well as repulsive potentials applicable
-to atoms~\cite{schmidt2000fluid, sweatman2002fundamental}.
+to atoms.~\cite{sweatman2002fundamental, schmidt2000fluid}
 %and used by Schmidt~\cite{schmidt1999density} in 2000 in treating in 
 %the inverse-power, Asakura-Oosawa, and Lennard-Jones potentials.
 %
 In his 2010 review of FMT, Roth point out that the most important future
 developments in classical equilibrium Density Functional Theory 
-will involve treating soft repulsions
-and attractions~\cite{roth2010fundamental}.
+will involve treating soft repulsions and attractions~\cite{roth2010fundamental}.
 
 
 In this paper, we introduce a \textit{soft} sphere fluid which can be 
-used with SFMT and which has
-temperature-dependent parameters to model the soft, repulsive 
-potential of a Weeks-Chandler-Andersen fluid. 
+used with Schmidt's version of SFMT introduced in 2000~\cite{schmidt2000fluid}
+that incorporates Tarazona's tensor weight~\cite{tarazona2000}
+and which has temperature-dependent parameters to model the soft, 
+repulsive potential of a Weeks-Chandler-Andersen fluid. 
 Since the WCA potential reproduces the repulsive force of a Lennard-Jones 
 interaction, it is an ideal model for interatomic repulsion. 
+Our results are compared with those generated by a Barker-Henderson 
+hard sphere fluid.
+
 %
-To obtain the free energy of the fluid from which the other
-thermodynamic properties can be found, 
 %we use Soft Fundamental Measure Theory
 %introduced by Schmidt~\cite{schmidt1999density} in 1999.
-we use Schmidt's version of SFMT introduced in 2000~\cite{schmidt2000fluid}
-that incorporates Tarazona's tensor weight~\cite{tarazona2000}.
+
  
 \section{Methods}
 
 \subsection{Soft Fundamental Measure Theory}
 
-The excess Helmholtz free energy of SFMT is a functional of the number density 
-profile $n(\textbf{r})$ derived using dimensional crossover from the exact 
-free energy in the 
-zero-dimensional cavity limit~\cite{schmidt1999density}.
-It is written as an integral of free energy densities
+As in FMT, the excess Helmholtz free energy of SFMT is a functional of the number density 
+profile $n(\textbf{r})$ 
+%derived using dimensional crossover from the exact free energy in the zero-dimensional cavity limit~\cite{schmidt1999density}.
+%and is 
+written as an integral of free energy densities $\Phi_i(\text{r})$
 \begin{equation}
 F_\textit{ex}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \Phi_3(\rr)\right) d\rr \; \label{eq:sfmt-excess-free}
 \end{equation}
 %with integrands
 %of free energy densities 
-
+%
 %\davidsays{Probably want to spend more space on
 %``standard'' SFMT, and make the distinction more clear.  Did any previous SFMT
 %use tensor weights? If so we need to say.
 %}
-
+which are functions of a set weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ 
 \begin{align}
 \Phi_1 &= -n_0 \ln\left( 1 - n_3\right)\\
 \Phi_2 &= \frac{n_1 n_2 - \mathbf{n}_{V1}\cdot\mathbf{n}_{V2}}{1-n_3} \\
@@ -239,10 +259,10 @@ F_\textit{ex}[n] = k_B T \int \left(\Phi_1(\rr) + \Phi_2(\rr) +
 \begin{displaymath}\color{white}\left(\color{black}+\frac{9}{2}
 [\mathbf{n}_{V2}\cdot{\overleftrightarrow{n}_{m2}}\cdot{\mathbf{n}_{V2}}-
 \operatorname{Tr}({\overleftrightarrow{n}^3_{m2}})]\right)\end{displaymath}
-where we have used the tensor version of $\Phi_3$ formulated by 
-Tarazona~\cite{tarazona2000,santos2012phi3}, which produces excellent
+Here we have used the tensor version of $\Phi_3$ formulated by 
+Tarazona~\cite{tarazona2000,santos2012phi3} to give improved %, which produces excellent
 results for the crystallization of hard spheres.
-The free energy densities are functions of a set of weighted densities $n_{i}(\textbf{r})$ 
+The weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ are
 given by %known as \emph{fundamental measures}.
 %The integrand functions are functions of a set of weighted densities 
 %known as \emph{fundamental measures} derived using dimensional crossover 
@@ -258,10 +278,12 @@ given by %known as \emph{fundamental measures}.
   \label{eq:n-convolution}
 \end{equation}
 %where the weighted densities are 
-and defined as convolutions with weight 
+and are defined as convolutions with weight 
 functions similar to those of 
 Rosenfeld's hard-sphere FMT~\cite{rosenfeld1989}. 
-Like Rosenfeld's hard-sphere fundamental measures, the SFMT weight
+%Like Rosenfeld's hard-sphere fundamental measures, 
+As in FMT,
+the SFMT weight
 functions are constructed so as to deconvolve the Mayer function,
 \begin{equation}
   f(r) = e^{-\beta V(r)} - 1
@@ -269,7 +291,7 @@ functions are constructed so as to deconvolve the Mayer function,
 \end{equation}
 where $\beta = 1/k_BT$. %, which in the case of hard spheres is just a
 %step function.  
-The weighting functions are related by
+The weight functions are related by
 \begin{align}
   w_1 &= \frac{w_2}{4\pi r} &
   w_0 &= \frac{w_2}{4\pi r^2}
@@ -371,9 +393,12 @@ potential:
   \Verf(r) &= -k_BT\ln\left[\tfrac12 \left( \mathrm{erf}\left( \frac{r -
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
-We make the $\alpha$ and $\Xi$ parameters temperature-dependent 
-to approximate the soft, repulsive potential of the WCA fluid,
-as will be described in the next section.
+Here we see a dependence on temperature enter into the erf potential
+which is not exhibited by a WCA potential. In the next section, 
+we compensate for this deviation by making
+the $\alpha$ and $\Xi$ parameters temperature-dependent to reproduce 
+approximately the soft, repulsive potential of the WCA fluid at each temperature.
+
 % Analytical expressions for the Fourier transforms of each of the 
 % weighting functions is provided in \textcolor{red}{Appendix~\ref{sec:fourier}}.
 
@@ -688,7 +713,7 @@ The Barker-Henderson (BH) fluid is known to give good results, so we use it
 as a reference to compare with our DFT results. 
 In the BH approach, any general
 repulsive pair potential, $V(r)$ is used to construct a corresponding hard
-sphere reference fluid with a temperature dependent diameter given by
+sphere reference fluid with a temperature dependent diameter given by~\cite{barker1967perturbation}
 \begin{align}
   d_{BH} = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
@@ -702,7 +727,7 @@ functional~\cite{roth2002whitebear}, describes the excess free energy
 of an inhomogeneous hard-sphere fluid.  This functional differs
 from the equations of SFMT presented in
 Eqs.~\ref{eq:sfmt-excess-free}-~\ref{eq:n-vectors} and~\ref{eq:n-3} only in replacing
-Eq.~\ref{eq:sfmt-phi3} with the following equation:
+Eq.~\ref{eq:sfmt-phi3} with the following equation
 \begin{align}
 \Phi_3 &= (n_2^3 - 3 n_2 \mathbf{n}_{V2} \cdot \mathbf{n}_{V2}) \frac{
   n_3 + (1-n_3)^2 \ln(1-n_3)
@@ -713,7 +738,7 @@ Eq.~\ref{eq:sfmt-phi3} with the following equation:
 which causes the functional to reduce to the Carnahan-Starling free
 energy rather than scaled-particle theory for homogeneous systems. In
 addition, the weighting function $w_2$ for a hard-sphere system is
-given by the Dirac $\delta$ function:
+given by the Dirac $\delta$ function
 \begin{align}
   w_2(r) = \delta(r - R),
 \end{align}
@@ -990,6 +1015,8 @@ hard sphere fluid for a range of densities and temperatures. The
 advantage of our theory is that we can use it \emph{as is} rather than
 needing to accommodate for discontinuities and delta functions of hard
 sphere fluids.
+
+%TEST~\cite{bultmann2022inhomogeneous}
 
 \bibliography{paper}% Produces the bibliography via BibTeX.
  
