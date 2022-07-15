@@ -44,7 +44,7 @@ def plot_walls(reduced_density, temps):
             plot(z, nreduced_density, styles.new_dft_linestyle(), color = styles.color_from_kT(temp))
         else:
             plot(z, nreduced_density, styles.new_dft_linestyle(), color = styles.color_from_kT(temp),
-                 label = 'DFT $T^* = %g$' % temp)
+                 label = 'SFMT $T^* = %g$' % temp)
             have_labelled_dft = True
 
         fname = 'figs/new-data/bh-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)

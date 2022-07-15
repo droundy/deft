@@ -28,7 +28,7 @@ def plot_radial(reduced_density, temps):
         if have_labelled_dft:
             plot(r, g, styles.new_dft_linestyle(), color = styles.color_from_kT(temp))
         else:
-            plot(r, g, styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = 'DFT $T^* = %g$' % temp)
+            plot(r, g, styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = 'SFMT $T^* = %g$' % temp)
             have_labelled_dft = True
 
         fname = 'figs/new-data/radial-bh-wca-%06.4f-%04.2f.dat' % (temp, reduced_density/100.0)

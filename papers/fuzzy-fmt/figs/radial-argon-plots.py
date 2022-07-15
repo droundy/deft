@@ -33,7 +33,7 @@ data_mc1=loadtxt('figs/mc_testp_wca-0.8389-0.7100.dat.gradial')
 plot((1/sigma_over_R)*data_mc1[:, 0], data_mc1[:, 1], '--', label='MC')
 
 data_dft1 = loadtxt('figs/new-data/radial-lj-0.7100-0.84.dat')
-plot(data_dft1[:, 0], data_dft1[:, 1]/nsig_3, label='DFT')
+plot(data_dft1[:, 0], data_dft1[:, 1]/nsig_3, label='SFMT')
 
 data_bh1 = loadtxt('figs/new-data/radial-bh-lj-0.7100-0.84.dat')
 plot(data_bh1[:, 0], data_bh1[:, 1]/nsig_3, label='BH', ls = ':', color='k')
@@ -72,7 +72,7 @@ data_mc3 = loadtxt('figs/mc_testp_wca-1.0950-2.4800.dat.gradial')
 plot((1/sigma_over_R)*data_mc3[:, 0], data_mc3[:, 1], '--', label='MC')
 
 data_dft3 = loadtxt('figs/new-data/radial-lj-2.4800-1.09.dat')
-plot(data_dft3[:, 0], data_dft3[:, 1]/nsig_3, label='DFT')
+plot(data_dft3[:, 0], data_dft3[:, 1]/nsig_3, label='SFMT')
 
 data_bh3 = loadtxt('figs/new-data/radial-bh-lj-2.4800-1.09.dat')
 plot(data_bh3[:, 0], data_bh3[:, 1]/nsig_3, label='BH', ls = ':', color='k')
@@ -98,7 +98,7 @@ data_mc5 = loadtxt('figs/mcfcc-0.5844-1.2350.dat.gradial')
 plot((1/sigma_over_R)*data_mc5[:, 0], data_mc5[:, 1], '--', label='MC')
 
 data_dft4 = loadtxt('figs/new-data/radial-lj-1.2350-0.58.dat')
-plot(data_dft4[:, 0], data_dft4[:, 1]/0.5844, label='DFT')
+plot(data_dft4[:, 0], data_dft4[:, 1]/0.5844, label='SFMT')
 
 data_bh4 = loadtxt('figs/new-data/radial-bh-lj-1.2350-0.58.dat')
 plot(data_bh4[:, 0], data_bh4[:, 1]/0.5844, label='BH', ls = ':', color='k')

@@ -58,7 +58,7 @@ def plot_soft_walls(reduced_density, temps):
             plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp))
             # plot(z, Vext, 'r-')
         else:
-            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = 'DFT $T^* = %g$' % temp)
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = 'SFMT $T^* = %g$' % temp)
             have_labelled_dft = True
 
         fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
