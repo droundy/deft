@@ -262,8 +262,8 @@ which are functions of a set weighted densities $\lbrace{n_i(\textbf{r})\rbrace}
 Here we have used the tensor version of $\Phi_3$ formulated by 
 Tarazona~\cite{tarazona2000,santos2012phi3} to give improved %, which produces excellent
 results for the crystallization of hard spheres.
-The weighted densities $\lbrace{n_i(\textbf{r})\rbrace}$ are
-given by %known as \emph{fundamental measures}.
+The weighted densities %$\lbrace{n_i(\textbf{r})\rbrace}$
+are given by %known as \emph{fundamental measures}.
 %The integrand functions are functions of a set of weighted densities 
 %known as \emph{fundamental measures} derived using dimensional crossover 
 %from the exact free energy
@@ -289,9 +289,10 @@ functions are constructed so as to deconvolve the Mayer function,
   f(r) = e^{-\beta V(r)} - 1
   \label{eq:Mayerfunction}
 \end{equation}
-where $\beta = 1/k_BT$. %, which in the case of hard spheres is just a
+where $\beta = 1/k_BT$ %, which in the case of hard spheres is just a
 %step function.  
-The weight functions are related by
+%The weight functions 
+and are related by
 \begin{align}
   w_1 &= \frac{w_2}{4\pi r} &
   w_0 &= \frac{w_2}{4\pi r^2}
@@ -313,7 +314,7 @@ where we note that the integral in Eq.~\ref{eq:n-3} is a
 one-dimensional integral over radius. Schmidt proved that as in traditional 
 hard-sphere fundamental measure theory, 
 SFMT reproduces the exact functional in the low-density limit, provided the 
-weighting function that defines $n_2$ is related to the slope of the Mayer 
+weight function $w_2$ that defines $n_2$ is related to the slope of the Mayer 
 function by a convolution with itself
 \begin{equation}\label{eq:mayerandw2}
   \frac{d f(r)}{dr} = \int_{-\infty}^{\infty} dr' w_2(r') w_2 (r-r').
@@ -322,8 +323,8 @@ function by a convolution with itself
 %a complete set of weighting functions can be constructed by finding 
 %a weighting function $w_2(r)$ that satisfies Equation~\ref{eq:mayerandw2}.
 %All the weighting functions are related to $w_2(r)$ and so 
-By finding a weighting function $w_2(r)$ that satisfies 
-Eq.~\ref{eq:mayerandw2}, a complete set of weighting functions
+By finding a weight function $w_2(r)$ that satisfies 
+Eq.~\ref{eq:mayerandw2}, a complete set of weight functions
 can be constructed since they all relate to $w_2(r)$.
 %with the other weighting functions given by the equations above
 %~\cite{schmidt2000fluid}.  
@@ -361,10 +362,10 @@ between molecules.
 
 Another way to satisfy Eq.~\ref{eq:mayerandw2} is to 
 construct a $w_2(r)$ and solve for 
-the pair potential to which that weighting function corresponds.  
+the pair potential to which that weight function corresponds.  
 %In this paper, we will 
 %This is the approach we use in this paper.
-This is the approach we use in this paper. We use a weighting function 
+This is the approach we use in this paper. We use a weight function 
 for $w_2(r)$ which has a Gaussian form as introduced by Schmidt~\cite{schmidt2000fluid} 
 %which has the form of a Gaussian 
 %is formed using the analytically simple \emph{error function model} 
@@ -394,7 +395,7 @@ potential:
     \alpha}{\Xi} \right) + 1 \right) \right].\label{eq:Verf}
 \end{align}
 Here we see a dependence on temperature enter into the erf potential
-which is not exhibited by a WCA potential. In the next section, 
+which is not exhibited by the WCA potential. In the next section, 
 we compensate for this deviation by making
 the $\alpha$ and $\Xi$ parameters temperature-dependent to reproduce 
 approximately the soft, repulsive potential of the WCA fluid at each temperature.
