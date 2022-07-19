@@ -43,7 +43,7 @@ kT = 1
 r = np.arange(rmin, rmax, dr)
 alpha, Xi, diameter = wca_erf.parameters(kT)
 Verf = -kT*np.log(0.5*(erf ((r-alpha)/Xi)+1))
-plt.plot(r, Verf, color=styles.color_from_kT(kT), linewidth=1, label=r'$V_{erf}$  $T^* = %g$' % kT)
+plt.plot(r, Verf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'$V_{erf}$  $T^* = %g$' % kT)
 # plt.axhline(kT, color='b', ls=':')
 plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
 
