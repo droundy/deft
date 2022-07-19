@@ -104,8 +104,8 @@ an arbitrary soft repulsive potential can be reproduced
 by mapping it at each temperature to the potential exhibited between hard spheres
 %fluid composed of hard spheres 
 of a diameter that depends on the temperature\cite{barker1967perturbation}. 
-This method did not work well, however, when applied to the repulsive 
-portion of the Lennard-Jones potential~\cite{hendersonperturbation1970}.
+%This method did not work well, however, when applied to the repulsive 
+%portion of the Lennard-Jones potential~\cite{hendersonperturbation1970}.
 %a temperature dependent diameter
 %s
 %a diameter sized ...
@@ -235,8 +235,8 @@ can be used with SFMT to find the thermodynamic properties of the fluid.
 Since the WCA potential reproduces the repulsive force of a Lennard-Jones 
 interaction, it is an ideal model for interatomic repulsion. 
 Our results are compared with those generated for the WCA fluid by using 
-a Barker-Henderson hard sphere fluid and the White Bear denstity 
-functional which is based on FMT.
+a Barker-Henderson hard sphere fluid and the White Bear density 
+functional which is based on FMT\cite{roth2002whitebear}.
 
 %In this paper, we introduce a \textit{soft} sphere fluid which can be 
 %used with Schmidt's version of SFMT introduced in 2000~\cite{schmidt2000fluid}
@@ -258,7 +258,7 @@ functional which is based on FMT.
 \subsection{Soft Fundamental Measure Theory}
 
 As in FMT, the excess Helmholtz free energy of SFMT is a functional of the number density 
-profile $n(\textbf{r})$ 
+$n(\textbf{r})$ 
 %derived using dimensional crossover from the exact free energy in the zero-dimensional cavity limit~\cite{schmidt1999density}.
 %and is 
 written as an integral of free energy densities $\Phi_i(\text{r})$
@@ -429,6 +429,9 @@ which is not exhibited by the WCA potential. In the next section,
 we compensate for this deviation by making
 the $\alpha$ and $\Xi$ parameters temperature-dependent to reproduce 
 approximately the soft, repulsive potential of the WCA fluid at each temperature.
+This is analogous to how Barker and Hendersen introduced a temperature-dependent
+hard-sphere radius, in order use the entropically dominated hard-sphere fluid
+to approximate a soft repulsive potential.
 
 % Analytical expressions for the Fourier transforms of each of the 
 % weighting functions is provided in \textcolor{red}{Appendix~\ref{sec:fourier}}.
@@ -485,9 +488,7 @@ like the Barker-Henderson diameter
 %and other temperature-dependent diameters 
 discussed earlier. 
 The $\Xi$ parameter is a measure of the effective softness of the 
-interaction, and increases with the temperature, again reflecting the
-effect of collisions which pushes the particles
-closer together at higher temperatures.
+interaction, and increases with the temperature.
 
 %\davidsays{Maybe worth making a comparison with Barker-Hendersen here?}
 
@@ -679,20 +680,23 @@ Eq.~\ref{eq:mayerandw2} is satisfied.
 
 \subsection{Freezing of the WCA fluid}
 
-Freezing of a pure substance occurs when the free energy it would have 
-in its solid state is lower than what it would have its 
-fluid state at the same temperature, pressure, and chemical potential. 
+A pure substance is solid when the Helmholtz free energy it would have 
+in its solid state is lower than what it would have its
+fluid state at the same temperature and density.
 At freezing an abrupt phase transition occurs and the particular %crystalline
 %a WCA fluid forms a crystalline structure. The 
 structure and density that result are affected by the interatomic potential. 
 When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) 
-crystalline lattice structure is formed~%\cite{reference!}.
+crystalline lattice structure is formed.~%\cite{reference!}.
 % with a total of one atom in each parallelpiped-shaped primative cell. 
+\davidsays{FIXME this paragraph needs work.}
 
 %Holding the temperature and number density fixed, 
-The equilibrium Helmholtz free energy of the crystal, and its corresponding 
-equilibrium number density profile, $n(\textbf{r})$, can be found for a given 
-temperature and overall number density, $n$, simply by varying the number density profile spatially 
+In classical DFT, the equilibrium density $n(\textbf{r})$ is that which minimizes
+the Helmholtz free energy for a fixed $N$ and $V$.
+% The equilibrium Helmholtz free energy of the crystal, and its corresponding 
+% equilibrium number density profile, $n(\textbf{r})$, can be found for a given 
+% temperature and overall number density, $n$, simply by varying the number density profile spatially 
 %, the spatially varying number density, 
 %by changing %the spatial profile of the number density by varying 
 %the width of the gaussians centered at each lattice point, and the crystal cell size 
@@ -704,8 +708,11 @@ We use a sum of
 %in Eq.\ref{eq:n-convolution} is given by 
 Gaussians, each centered at a lattice point specified by $\textbf{R}_i$, to form 
 the number density profile 
-\begin{equation}n(\textbf{r})= \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
-\int{e^{-\frac{|\textbf{r}-\textbf{R}_i|^2}{2\left(\sigma_g\right)^2}}d{\textbf{r}}}  \end{equation}  
+\begin{equation}
+  n(\textbf{r})= \sum_i \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
+  e^{-\frac{|\textbf{r}-\textbf{R}_i|^2}{2\left(\sigma_g\right)^2}}
+\end{equation}
+\davidsays{missing the fraction in the math}
 We can vary the number density profile, $n(\textbf{r})$, by changing the 
 width of the Gaussians, $\sigma_{g}$, 
 and the fraction of vacant lattice sites which effectively changes the size 
@@ -718,20 +725,21 @@ difficulties.
 Monte-Carlo integration is employed to more efficiently 
 compute the weighted densities used to calculate the excess free energy
 which is then 
-added to the ideal free energy (computed analytically) to get the total free energy 
+added to the ideal gas free energy (computed analytically) to get the total free energy 
 which is minimized. 
 %to find the equilibrium free energy and number density profile. 
 
-Pressure is found from the negative of the slope of the Helmholtz 
-free energy per atom with respect to the inverse number density. 
-\begin{equation}{P=-\frac{\partial{\frac{F}{N}}}{\partial{\frac{V}{N}}}\bigg|_{T,N} 
-= -\frac{\partial{f}}{\partial{\frac{1}{n}}}\bigg|_{T,N}}\end{equation} 
-The pressure at the phase transition can be obtained from the point of intersection
-that occurs when the chemical potential, which is the Gibbs free energy per atom, $g$,
-is plotted against the pressure for both the fluid and the solid at fixed temperature. 
-\begin{equation}{g = \frac{1}{n}P + f}\end{equation}
-The number densities of both the solid and the liquid at the phase transition can then
-be found from a plot of pressure verses the inverse density. 
+We find the pressure from a finite difference approximation of
+the slope of the Helmholtz 
+free energy per atom with respect to volume per atom.
+% \begin{equation}
+%   P =-\frac{\partial F}{\partial V}\bigg|_{T,N}
+%     = -\frac{\partial f}{\partial v}\bigg|_{T,N}
+% \end{equation}
+% where $f$ is the Helmholtz free energy per atom, and $v$ is the volume per atom.
+The pressure of the phase transition can be obtained from the point of intersection
+that occurs when the Gibbs free energy per atom % $g = f+vP$
+is plotted against pressure. 
 %using Maxwell's double tangent construction which equates the pressure of the 
 %fluid and of the solid at the phase transition.
 
@@ -785,10 +793,7 @@ Eqs.~\ref{eq:n-0-1},~\ref{eq:n-vectors} and~\ref{eq:n-3}, as in SFMT.
 In this section the results of our SFMT method will be compared to those 
 %results of simulations for a reference fluid.
 %For our reference simulations, of a reference fluid construct 
-produced by a Barker-Henderson hard
-sphere fluid with a diameter determined by Eq.~\ref{eq:bh-diameter}
-using a WCA potential as the pair potential. The excess free energy functional of the 
-BH fluid is constructed using White Bear FMT. 
+produced by the Barker-Henderson approximation.
 We will also compare our results with Monte-Carlo (MC) simulations of the WCA fluid. %The BH fluid is known
 %to give good results, so we use it as a reference for our DFT.
 
