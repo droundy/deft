@@ -90,21 +90,30 @@ come closer together at higher temperatures.
 
 %Rowlinson introduced temperature dependent hard spheres and Barker and Henderson 
 %generalized 
-
+A hard sphere fluid can be used as a reference fluid %with a repulsive potential
+to which an atrractive potential can be added as a perturbation.~\cite{zwanzigperturbation}
+But a more realistic reference fluid would have a soft repulsive interatomic 
+potential like that of the Lennard-Jones potential between two neutral atoms.
 In the widely used Barker-Henderson approach, 
+%which combines the perturbation of Zwanzig with Rowlinson's 
+%temperature dependent hard-sphere radius
 %an arbitrary potential function can be used to construct 
-any soft repulsive potential can be reproduced  
+an arbitrary soft repulsive potential can be reproduced  
 %mapped at different temperatures 
 %using a corresponding hard sphere fluid with 
-by mapping it at each temperature to a fluid composed of hard spheres 
-with a diameter that depends on the temperature.\cite{barker1967perturbation}
+by mapping it at each temperature to the potential exhibited between hard spheres
+%fluid composed of hard spheres 
+of a diameter that depends on the temperature\cite{barker1967perturbation}. 
+This method did not work well, however, when applied to the repulsive 
+portion of the Lennard-Jones potential~\cite{hendersonperturbation1970}.
 %a temperature dependent diameter
 %s
 %a diameter sized ...
 %In reproducing the soft repulsive Lennard-Jones potential, 
 Weeks, Chandler and Anderson (WCA) 
 %developed a different approach in which they 
-split the Lennard-Jones potential differently than Barker and Henderson did
+separated the Lennard-Jones potential differently than Barker and Henderson did
+%in such a way as 
 %and used a hard sphere fluid with a temperature and density dependent diameter 
 to recreate the soft repulsive potential that reproduces 
 the repulsive force of a Lennard-Jones interaction~\cite{weeks1971splitpotential}. 
@@ -129,19 +138,21 @@ and $R$ is a single sphere radius which is related by $\sigma =
 2^{5/6} R$.
 %
 %FIXME While
-The WCA repulsive potential makes an excellent reference fluid for 
+The WCA repulsive potential make an excellent reference fluid for 
 the modeling of liquids, while the
 %Once a model fluid is described in terms of a hard sphere fluid, 
 %its thermodynamic properties can then be found using 
 %The 
-Barker-Henderson approach where the hard sphere diameter is dependent
-on temperature only lends itself for use with 
-Fundamental Measure Theory~\cite{rosenfeld1989, rosenfeld1997} (FMT) -  a powerful classical Density
+Barker-Henderson approach (where the hard sphere diameter is dependent
+on temperature only) lends itself for use with 
+Fundamental Measure Theory~\cite{rosenfeld1989, rosenfeld1997} (FMT) -  
+a powerful classical Density
 Functional Theory (DFT) developed by Rosenfeld for the hard sphere fluid
 %for the hard sphere fluid %~\cite{rosenfeld1989, rosenfeld1997}
 %.
 and from which the thermodynamic properties of the fluid can be found.
-Tarazona improved on the functional by introducing a tensor weight~\cite{tarazona2000}
+Tarazona improved on the functional by introducing a tensor 
+weight~\cite{tarazona2000}
 to eliminate 
 %the problem of 
 the divergences 
@@ -150,7 +161,8 @@ that arise in highly inhomogeneous situations like freezing.
 Due to its combination of computational efficiency with accuracy, 
 FMT has been used as the
 basis for a wide variety of classical density
-functionals~\cite{cuesta1997dimensional, roth2002whitebear, hansen2009fundamental, 
+functionals~\cite{cuesta1997dimensional, roth2002whitebear, 
+hansen2009fundamental, 
 marechal2013density, hughes2013classical, krebs2014improved}.
 %from which the thermodynamic properties and structure of a fluid can be found. 
   
@@ -161,7 +173,8 @@ liquids~\cite{gil-villegas-1997-SAFT-VR, clark2006developing,
 fluid~\cite{carnahan1969equation}, but also in the more challenging
 case of the inhomogeneous fluid
 %~\cite{rosenfeld1989, rosenfeld1997, roth2002whitebear}.
-~\cite{shen2020inhomogeneous, sermoud2021inhomogeneous, shen2022inhomogeneous, bultmann2022inhomogeneous}.
+~\cite{shen2020inhomogeneous, sermoud2021inhomogeneous, shen2022inhomogeneous, 
+bultmann2022inhomogeneous}.
 %FIXME LOOK UP A FEW DIFFERENT REFERNCES THESE DONT USE IT AS A REFERNCE FLUID.  MENTION WCA HERE??? 
 However, the hard-sphere fluid remains a
 non-physical model, which can also be numerically inconvenient due to its
@@ -208,15 +221,32 @@ developments in classical equilibrium Density Functional Theory
 will involve treating soft repulsions and attractions~\cite{roth2010fundamental}.
 
 
-In this paper, we introduce a \textit{soft} sphere fluid which can be 
-used with Schmidt's version of SFMT introduced in 2000~\cite{schmidt2000fluid}
-that incorporates Tarazona's tensor weight~\cite{tarazona2000}
-and which has temperature-dependent parameters to model the soft, 
-repulsive potential of a Weeks-Chandler-Andersen fluid. 
+In this paper, we introduce a \textit{soft} sphere fluid with 
+temperature-dependent parameters to recreate the 
+soft, repulsive potential of a Weeks-Chandler-Andersen fluid and which 
+can be used with SFMT to find the thermodynamic properties of the fluid.
+%To achieve this we have incorporated temperature-dependent parameters
+%into our potential.
+%We use Schmidt's version of SFMT he introduced in 2000~\cite{schmidt2000fluid}
+%that incorporates Tarazona's tensor weight~\cite{tarazona2000}.
+%
+%and which has temperature-dependent parameters to model the soft, 
+%repulsive potential of a Weeks-Chandler-Andersen fluid. 
 Since the WCA potential reproduces the repulsive force of a Lennard-Jones 
 interaction, it is an ideal model for interatomic repulsion. 
-Our results are compared with those generated by a Barker-Henderson 
-hard sphere fluid.
+Our results are compared with those generated for the WCA fluid by using 
+a Barker-Henderson hard sphere fluid and the White Bear denstity 
+functional which is based on FMT.
+
+%In this paper, we introduce a \textit{soft} sphere fluid which can be 
+%used with Schmidt's version of SFMT introduced in 2000~\cite{schmidt2000fluid}
+%that incorporates Tarazona's tensor weight~\cite{tarazona2000}
+%and which has temperature-dependent parameters to model the soft, 
+%repulsive potential of a Weeks-Chandler-Andersen fluid. 
+%Since the WCA potential reproduces the repulsive force of a Lennard-Jones 
+%interaction, it is an ideal model for interatomic repulsion. 
+%Our results are compared with those generated by a Barker-Henderson 
+%hard sphere fluid.
 
 %
 %we use Soft Fundamental Measure Theory
