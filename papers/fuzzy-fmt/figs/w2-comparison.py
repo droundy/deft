@@ -17,7 +17,7 @@ import wca_erf
 
 import styles
 
-kT = 2.5
+kT = 10
 sigma = 1
 
 rmin=0.7
@@ -35,48 +35,51 @@ plt.figure(figsize=(4*figscale, 3*figscale))
 plt.axvline(diameter, color='k', linestyle='-')
 
 fp_wca = np.exp(-wca_erf.V(r)/kT)*(-wca_erf.Vprime(r)/kT)
-plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{wca}$  $T^* = %g$" % kT)
+plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$T^* = %g$" % kT)
+#plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{wca}$  $T^* = %g$" % kT)
 
 r = np.linspace(rmin, rmax, int(rmax/dr))
 fp_erf = np.exp(-(r-alpha)**2/Xi**2)/Xi/np.sqrt(np.pi)
-plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$   $T^* = %g$" % kT)
+plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1)
+#plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$   $T^* = %g$" % kT)
 
 plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
 
 #kT=.1
+kT=2.5
+
+r = np.linspace(rmin, diameter, int(rmax/dr))
+fp_wca = np.exp(-wca_erf.V(r)/kT)*(-wca_erf.Vprime(r)/kT)
+plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$T^* = %g$" % kT)
+
+alpha, Xi, diameter = wca_erf.parameters(kT)
+r = np.linspace(rmin, rmax, int(rmax/dr))
+fp_erf = np.exp(-(r-alpha)**2/Xi**2)/Xi/np.sqrt(np.pi)
+plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1)
+#plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'approximation $kT/\epsilon = %g$' % kT)
+
+plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
+plt.ylim(0)
+
+
 kT=1
 
 r = np.linspace(rmin, diameter, int(rmax/dr))
 fp_wca = np.exp(-wca_erf.V(r)/kT)*(-wca_erf.Vprime(r)/kT)
-plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{wca}$  $T^* = %g$" % kT)
+plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$T^* = %g$" % kT)
 
 alpha, Xi, diameter = wca_erf.parameters(kT)
 r = np.linspace(rmin, rmax, int(rmax/dr))
 fp_erf = np.exp(-(r-alpha)**2/Xi**2)/Xi/np.sqrt(np.pi)
-plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$   $T^* = %g$" % kT)
+plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1)
 #plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'approximation $kT/\epsilon = %g$' % kT)
 
 plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
 plt.ylim(0)
 
 
-
-kT=10
-
-r = np.linspace(rmin, diameter, int(rmax/dr))
-fp_wca = np.exp(-wca_erf.V(r)/kT)*(-wca_erf.Vprime(r)/kT)
-plt.plot(r, fp_wca, '-', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{wca}$  $T^* = %g$" % kT)
-
-alpha, Xi, diameter = wca_erf.parameters(kT)
-r = np.linspace(rmin, rmax, int(rmax/dr))
-fp_erf = np.exp(-(r-alpha)**2/Xi**2)/Xi/np.sqrt(np.pi)
-plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r"$f'_{erf}$   $T^* = %g$" % kT)
-#plt.plot(r, fp_erf, '--', color=styles.color_from_kT(kT), linewidth=1, label=r'approximation $kT/\epsilon = %g$' % kT)
-
-plt.axvline(alpha, color=styles.color_from_kT(kT), linestyle=':')
-plt.ylim(0)
-
-
+plt.plot([], [], 'k-', linewidth=1, label=r"$f'_{wca}$")
+plt.plot([], [], 'k--', linewidth=1, label=r"$f'_{erf}$")
 
 plt.tight_layout()
 plt.xlim(rmin-0.1, rmax)

@@ -40,7 +40,7 @@ def find_z_with_V(z, Vext, V_desired):
     return np.interp(V_desired, Vext[z_center_index-2:z_center_index+2], z[z_center_index-2:z_center_index+2])
 
 def plot_soft_walls(reduced_density, temps):
-    have_labelled_bh = False
+    have_labelled_bh = True
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
     NUM = 1
@@ -58,8 +58,8 @@ def plot_soft_walls(reduced_density, temps):
             plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp))
             # plot(z, Vext, 'r-')
         else:
-            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = 'SFMT $T^* = %g$' % temp)
-            have_labelled_dft = True
+            plot(z[z<=zmax], nreduced_density[z<=zmax], styles.new_dft_linestyle(), color = styles.color_from_kT(temp), label = '$T^* = %g$' % temp)
+            #have_labelled_dft = True
 
         fname = 'figs/new-data/bh-soft-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
@@ -87,12 +87,15 @@ def plot_soft_walls(reduced_density, temps):
         smoothed_z = smooth(z-z_center, NUM)
         smoothed_n = smooth(data[:, 1], NUM)
         plot(smoothed_z[smoothed_z<=zmax], smoothed_n[smoothed_z<=zmax],
-             styles.mcwca_linestyle(), color = styles.color_from_kT(temp), label = 'WCA MC $T^*$ = %g' % temp)
+             styles.mcwca_linestyle(), color = styles.color_from_kT(temp))
         # plot(z-z_center, Vext, '.', label=f'Vext mc {temp}')
         # plt.ylim(0,5)
 
     #plot(data[:,0], data[:,2]*0.1, 'r:', label='$V_{wall}$ (arbitrary units)')
 
+    plt.plot([], [], 'k-', label='SFMT')
+    plt.plot([], [], 'k:', label='BH')
+    plt.plot([], [], 'k--', label='MC')
     title('Soft walls with bulk $n^* = %g$' % (reduced_density/100), fontsize=20)
     xlabel(r'$z/\sigma$', fontsize=18)
     plt.xticks(fontsize=17)

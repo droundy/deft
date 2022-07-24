@@ -680,14 +680,18 @@ Eq.~\ref{eq:mayerandw2} is satisfied.
 
 \subsection{Freezing of the WCA fluid}
 
-A pure substance is solid when the Helmholtz free energy it would have 
-in its solid state is lower than what it would have its
+Outside of a small coexistence region where both liquid and solid states 
+can exist together,
+a pure substance is solid when the Helmholtz free energy it would have 
+in its solid state is lower than what it would have in its
 fluid state at the same temperature and density.
 At freezing an abrupt phase transition occurs and the particular %crystalline
 %a WCA fluid forms a crystalline structure. The 
 structure and density that result are affected by the interatomic potential. 
-When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) 
-crystalline lattice structure is formed.~%\cite{reference!}.
+The Hard Sphere and soft sphere fluids that are not too soft will form
+a Face Centered Cubic (FCC) crystalline lattice~\cite{addref!}.
+%When the soft sphere WCA fluid freezes, a Face Centered Cubic (FCC) 
+%crystalline lattice structure is formed.~%\cite{reference!}.
 % with a total of one atom in each parallelpiped-shaped primative cell. 
 \davidsays{FIXME this paragraph needs work.}
 
@@ -709,10 +713,10 @@ We use a sum of
 Gaussians, each centered at a lattice point specified by $\textbf{R}_i$, to form 
 the number density profile 
 \begin{equation}
-  n(\textbf{r})= \sum_i \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
+  n(\textbf{r})= \frac{1}{1-f_v}\sum_i \frac{1}{\left(\sqrt{2\pi}\sigma_{g}\right)^3}
   e^{-\frac{|\textbf{r}-\textbf{R}_i|^2}{2\left(\sigma_g\right)^2}}
 \end{equation}
-\davidsays{missing the fraction in the math}
+%\davidsays{missing the fraction of vacancies in the math}
 We can vary the number density profile, $n(\textbf{r})$, by changing the 
 width of the Gaussians, $\sigma_{g}$, 
 and the fraction of vacant lattice sites which effectively changes the size 
@@ -720,7 +724,7 @@ of the crystal cell so that the overall number density remains the same.
 %the size of the crystal cell. 
 As the Gaussian width gets large, the number 
 density becomes homogeneous as would be expected for a fluid. 
-A very small fraction of vacancies helps to avoid computational 
+A very small fraction of vacancies $f_v$ helps to avoid computational 
 difficulties. 
 Monte-Carlo integration is employed to more efficiently 
 compute the weighted densities used to calculate the excess free energy
@@ -748,18 +752,19 @@ is plotted against pressure.
 %Another approach to account for the temperature dependence of
 %realistic fluids is Barker-Henderson's
 %approach~\cite{barker1967perturbation}. This theory takes any general
-The Barker-Henderson (BH) fluid is known to give good results, so we use it 
-as a reference to compare with our DFT results using SFMT. 
-In the BH approach, any general
-repulsive pair potential, $V(r)$ is used to construct a corresponding hard
-sphere reference fluid with a temperature dependent diameter given by~\cite{barker1967perturbation}
+The Barker-Henderson (BH) fluid is known to give good results, so we 
+use it as a reference to compare with our DFT results using SFMT. 
+In the BH approach, an arbitrary repulsive pair potential, $V(r)$ is 
+used to construct a corresponding hard sphere reference fluid with a 
+temperature dependent diameter given by~\cite{barker1967perturbation}
 \begin{align}
   d_{BH} = \int_0^{\infty}\left( 1 - e^{-\beta V(r)} \right)\mathrm{dr}.
   \label{eq:bh-diameter}
 \end{align}
-We utilize this variable diameter with the White Bear FMT free energy
-functional for the hard sphere fluid~\cite{roth2002whitebear} as a
-comparison for the SFMT presented in this paper.
+We utilize this variable diameter with the WCA repulsive potential and 
+the White Bear FMT free energy functional for the hard sphere 
+fluid~\cite{roth2002whitebear} as a comparison for the SFMT 
+presented in this paper.
 
 The White Bear version of the Fundamental-Measure Theory~(FMT)
 functional~\cite{roth2002whitebear}, describes the excess free energy

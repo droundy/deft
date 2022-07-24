@@ -272,27 +272,21 @@ plt.savefig('./figs/p-vs-n_at_fixed_T.pdf', transparent=True)
 plt.figure('p vs volume', figsize=myfigsize)
 
 temperatures_to_isotherm = [0.5, 1, 1.5, 2.0, 2.5, 3, 4, 5, 6, 8, 10, 15, 20]
-temperatures_to_isotherm = [0.5, 1, 2.0, 5, 10, 15, 20, 30]
+#temperatures_to_isotherm = [0.5, 1, 2.0, 5, 10, 15, 20, 30]
+temperatures_to_isotherm = [30, 20, 15, 10, 5, 2.0, 1, 0.5]
 
 # Plot P vs 1/n (or V) at constant kT
 plt.fill_betweenx(p_at_freezing, 1/n_homogeneous_at_freezing,
                   1/n_crystal_at_freezing, color='#eeeeee')
-for i in range(len(kT_data)):
-    if kT_data[i] in temperatures_to_isotherm:
-        plt.plot(1/density_data[i], pressure_data[i],
-                 color=styles.color_from_kT(kT_data[i]), linewidth=1,
-                 label=r'$T*$=%g' % (kT_data[i]))
-        #seeds#plt.plot(1/density_data[i], pressure_data[i],
-                 #seeds#color=styles.color_from_kT(kT_data[i]),
-                 #seeds#label='kT=%g~~seed%g' % (kT_data[i], seed))
 
-for i in range(99, len(homogeneous_temperature)):
+for j in range(99, len(homogeneous_temperature)):
+    i=len(homogeneous_temperature)-2901-j
     if homogeneous_temperature[i] in [T for T in temperatures_to_isotherm if T not in kT_data]:
         print(f'temp[{i}] = {homogeneous_temperature[i]}')
         
         plt.plot(1/homogeneous_density, homogeneous_pressures[:, i], '-',
                  color=styles.color_from_kT(homogeneous_temperature[i]), linewidth=1,
-                 label=r'$T*$=%g' % homogeneous_temperature[i])
+                 label=r'$T^*$=%g' % homogeneous_temperature[i])
 
 
 def R_BH(kT):
@@ -380,6 +374,16 @@ for T in temperatures_to_isotherm:
                 color=styles.color_from_kT(T),
                 linewidth=1,
                 )
+                
+for j in range(len(kT_data)):
+    i=len(kT_data)-1-j
+    if kT_data[i] in temperatures_to_isotherm:
+        plt.plot(1/density_data[i], pressure_data[i],
+                 color=styles.color_from_kT(kT_data[i]), linewidth=1,
+                 label=r'$T^*$=%g' % (kT_data[i]))
+        #seeds#plt.plot(1/density_data[i], pressure_data[i],
+                 #seeds#color=styles.color_from_kT(kT_data[i]),
+                 #seeds#label='kT=%g~~seed%g' % (kT_data[i], seed))
 
 # TODO Items week after May 19 2021
 #
@@ -417,9 +421,9 @@ for T in temperatures_to_isotherm:
 
 
 plt.plot([], [], 'k-', linewidth=1, label='SFMT')
-plt.plot([], [], 'k--', linewidth=1, label='Monte Carlo - Zeno')
+plt.plot([], [], 'k:', linewidth=1, label='BH')
+plt.plot([], [], 'k--', linewidth=1, label='MC') # Monte Carlo - Zeno
 # plt.plot([], [], 'kx', label='Monte Carlo - Chris')
-plt.plot([], [], 'k:', linewidth=1, label='Barker Henderson')
 plt.legend(loc='upper right', fontsize=9.5)
 plt.title('Bulk soft sphere fluid', fontsize=11)
 plt.ylim(0, 60)

@@ -32,7 +32,7 @@ def plot_walls(reduced_density, temps):
     num = 1
     sigma_over_R=2**(5/6)
     have_labelled_dft = False
-    have_labelled_bh = False
+    have_labelled_bh = True
     NUM=1
     for temp in temps:
         fname = 'figs/new-data/wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
@@ -44,8 +44,8 @@ def plot_walls(reduced_density, temps):
             plot(z, nreduced_density, styles.new_dft_linestyle(), color = styles.color_from_kT(temp))
         else:
             plot(z, nreduced_density, styles.new_dft_linestyle(), color = styles.color_from_kT(temp),
-                 label = 'SFMT $T^* = %g$' % temp)
-            have_labelled_dft = True
+                 label = '$T^* = %g$' % temp)
+            #have_labelled_dft = True
 
         fname = 'figs/new-data/bh-wall-%.2f-%.2f.dat' % (reduced_density/100.0, temp)
         data = loadtxt(fname)
@@ -66,8 +66,11 @@ def plot_walls(reduced_density, temps):
             smoothed = smooth(data[:, 1], NUM)
             print(reduced_density/100, temp, smoothed[len(smoothed)//2])
             plot(smooth(z, NUM)/sigma_over_R, smooth(data[:, 1], NUM)*sigma_over_R**3,
-                styles.mcwca_linestyle(), color = styles.color_from_kT(temp), label = 'WCA MC $T^*$ = %g' % temp)
+                styles.mcwca_linestyle(), color = styles.color_from_kT(temp))
 
+    plt.plot([], [], 'k-', label='SFMT')
+    plt.plot([], [], 'k:', label='BH')
+    plt.plot([], [], 'k--', label='MC')
     title('Hard walls with bulk $n^* = %g$' % (reduced_density/100), fontsize=20)
     xlabel(r'$z/\sigma$', fontsize=18)
     plt.xticks(fontsize=17)
